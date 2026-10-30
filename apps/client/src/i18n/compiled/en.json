@@ -13413,6 +13413,12 @@
       "value": "Create Fang Strike or Slither"
     }
   ],
+  "card.pen.shuriken.search.arena": [
+    {
+      "type": 0,
+      "value": "Choose a Shuriken item to put into the arena"
+    }
+  ],
   "card.pen.sigil.destroy": [
     {
       "type": 0,

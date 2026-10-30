@@ -54,7 +54,7 @@ import {
   removeFromArray,
 } from "./zoneQueries.js";
 
-import { controlledPermanents, hookSources, observingHookSources } from "./sourceQueries.js";
+import { contractObserverSources, controlledPermanents, hookSources } from "./sourceQueries.js";
 import { FROZEN_WHILE_SOURCE_IN_ARENA, isFrozen } from "./ruleQueries.js";
 import { arsenalCapacity, clearPrivateZonePlacement, clearTemporaryObjectEffects, hasCrank, resetActivatedAbilityUsage, stampEnteringLife } from "./cardLifecycle.js";
 import {
@@ -407,6 +407,10 @@ export function makeCtx(
   tokenCreationCause: TokenCreationContext = { kind: "effect", sourceCardId: self.cardId },
 ): ScriptCtx {
   const player = state.players[seat] as PlayerState;
+  const creationCause: TokenCreationContext = {
+    ...tokenCreationCause,
+    creatorSeat: tokenCreationCause.creatorSeat ?? seat,
+  };
   // Card scripts commonly build logs from `ctx.data.name` and
   // `ctx.cardData(id).name`. Remember those exact definitions so log-only
   // metadata can preserve pitch without making rule-facing names impure.
@@ -2166,7 +2170,7 @@ export function makeCtx(
         state,
         target,
         cardId,
-        tokenCreationCause,
+        creationCause,
         initialCounters,
         initialState,
       );
@@ -2174,7 +2178,7 @@ export function makeCtx(
     createTokenCopy(instanceId) {
       const source = findPermanent(state, instanceId);
       if (!source) return undefined;
-      const token = runtime.commands.createTokenFor(state, player, source.card.cardId, tokenCreationCause);
+      const token = runtime.commands.createTokenFor(state, player, source.card.cardId, creationCause);
       if (!token) return undefined;
       token.copyOriginalCardId = source.card.copyOriginalCardId ?? source.card.cardId;
       if (source.card.grantedTypes) token.grantedTypes = [...source.card.grantedTypes];
@@ -2191,7 +2195,7 @@ export function makeCtx(
     createTokenCopyOf(source, tokenSeat) {
       const target = state.players[tokenSeat] as PlayerState | undefined;
       if (!target) return undefined;
-      const token = runtime.commands.createTokenFor(state, target, source.cardId, tokenCreationCause);
+      const token = runtime.commands.createTokenFor(state, target, source.cardId, creationCause);
       if (!token) return undefined;
       token.copyOriginalCardId = source.copyOriginalCardId ?? source.cardId;
       if (source.grantedTypes) token.grantedTypes = [...source.grantedTypes];
@@ -2211,7 +2215,7 @@ export function makeCtx(
         target,
         cardId,
         count,
-        tokenCreationCause,
+        creationCause,
         initialCounters,
         initialState,
       );
@@ -2318,7 +2322,7 @@ export function makeCtx(
         const life = dataOf(state, cardId).life;
         if (life === undefined) delete permanent.life;
         else permanent.life = life;
-      } else permanent = runtime.commands.createTokenFor(state, player, cardId, tokenCreationCause);
+      } else permanent = runtime.commands.createTokenFor(state, player, cardId, creationCause);
       if (!permanent) return undefined;
       (permanent.subcards ??= []).push(...subcards);
       if (subcards.length > 0) {
@@ -3074,7 +3078,7 @@ export function makeCtx(
           ));
           return undefined;
         }
-        const token = runtime.commands.createTokenFor(state, target, cardId, tokenCreationCause);
+        const token = runtime.commands.createTokenFor(state, target, cardId, creationCause);
         if (!token) return undefined;
         removeFromArray(target.board, token.instanceId);
         target.weapons.push(token);
@@ -3097,7 +3101,7 @@ export function makeCtx(
           ));
           return undefined;
         }
-        const token = runtime.commands.createTokenFor(state, target, cardId, tokenCreationCause);
+        const token = runtime.commands.createTokenFor(state, target, cardId, creationCause);
         if (!token) return undefined;
         removeFromArray(target.board, token.instanceId);
         target.equipment[slot] = token;
@@ -3738,34 +3742,7 @@ function fireFriendlyBanishesOpponentCard(
   actingSeat: number,
   card: CardInstance,
 ): void {
-  const sources = new Map<number, CardInstance>();
-  for (const source of observingHookSources(state, actingSeat, {
-    board: true,
-    arsenal: true,
-    equipment: true,
-    weapons: true,
-  })) sources.set(source.instanceId, source);
-
-  // Face-up attack cards remain functional on every link of the open combat
-  // chain. Defense-reaction Contracts are functional while defending. These
-  // cards no longer occupy their owner's ordinary zones, so include their
-  // combat-chain instances explicitly as event observers.
-  for (const link of state.chain) {
-    if (
-      link.attacker === actingSeat &&
-      link.flags.attackGone !== true &&
-      !link.attackingCard.faceDown
-    ) sources.set(link.attackingCard.instanceId, link.attackingCard);
-    for (const reaction of [...link.defendingCards, ...link.reactions]) {
-      if (
-        reaction.owner === actingSeat &&
-        !reaction.faceDown &&
-        dataOf(state, reaction.cardId).cardType === "defense-reaction"
-      ) sources.set(reaction.instanceId, reaction);
-    }
-  }
-
-  for (const source of sources.values()) {
+  for (const source of contractObserverSources(state, actingSeat)) {
     scriptOf(state, source.cardId, source)?.onFriendlyBanishesOpponentCard?.(
       runtime.makeCtx(state, actingSeat, source, currentLink(state)),
       card,

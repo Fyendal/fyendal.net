@@ -41,6 +41,9 @@ function data(ctx: ScriptCtx, card: Card) {
 function has(ctx: ScriptCtx, card: Card, type: string): boolean {
   return ctx.cardTypes(card).some((candidate) => candidate.toLowerCase() === type.toLowerCase());
 }
+function isShurikenItem(ctx: ScriptCtx, card: Card): boolean {
+  return has(ctx, card, "shuriken") && has(ctx, card, "item");
+}
 function named(ctx: ScriptCtx, card: Card, name: string): boolean {
   return ctx.cardNames(card).some((candidate) => candidate.toLowerCase() === name.toLowerCase());
 }
@@ -252,10 +255,27 @@ export const penHighRarity: Record<string, CardScript> = {
       tap: true,
       canActivate: (ctx) => ctx.hitsThisCombatChain(ctx.seat) >= 2,
       onActivate(ctx) {
-        const item = ctx.player(ctx.seat).deck.find((card) => has(ctx, card, "shuriken") && has(ctx, card, "item"));
-        if (item) ctx.settleCard(item.instanceId);
+        const items = ctx.player(ctx.seat).deck.filter((card) => isShurikenItem(ctx, card));
+        // Identical printings are interchangeable, so only ask between distinct cards.
+        if (new Set(items.map((card) => card.cardId)).size > 1) {
+          ctx.requestCardChoice(
+            "wind-cutter-shuriken",
+            decisionPrompt("Choose a Shuriken item to put into the arena", "card.pen.shuriken.search.arena"),
+            items.map((card) => card.instanceId),
+          );
+          return;
+        }
+        if (items[0]) ctx.settleCard(items[0].instanceId);
         ctx.shuffleDeck();
       },
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "wind-cutter-shuriken") return;
+      const item = ctx
+        .player(ctx.seat)
+        .deck.find((card) => card.instanceId === Number(option) && isShurikenItem(ctx, card));
+      if (item) ctx.settleCard(item.instanceId);
+      ctx.shuffleDeck();
     },
   },
   "gentle breeze|1": {

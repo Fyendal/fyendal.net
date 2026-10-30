@@ -89,4 +89,6 @@ export interface DamageEventContext {
 export interface TokenCreationContext {
   readonly kind: "effect" | "wager";
   readonly sourceCardId?: string;
+  /** Seat whose effect creates the tokens, when they may land under another hero. */
+  readonly creatorSeat?: number;
 }

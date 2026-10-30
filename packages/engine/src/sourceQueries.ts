@@ -1,4 +1,4 @@
-import { scriptOf } from "./cardProperties.js";
+import { dataOf, scriptOf } from "./cardProperties.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardScript } from "./scripts.js";
@@ -111,6 +111,34 @@ export function observingHookSources(
   for (const card of hookSources(state, seat, opts)) sources.set(card.instanceId, card);
   for (const card of lingeringModifierSources(state, seat)) {
     if (!sources.has(card.instanceId)) sources.set(card.instanceId, card);
+  }
+  return [...sources.values()];
+}
+
+/** Sources that observe their controller's Contract events: active arena
+ * observers plus face-up attacks and defense reactions on the combat chain,
+ * which stay functional there outside their owner's ordinary zones. */
+export function contractObserverSources(state: GameStateInternal, seat: number): CardInstance[] {
+  const sources = new Map<number, CardInstance>();
+  for (const source of observingHookSources(state, seat, {
+    board: true,
+    arsenal: true,
+    equipment: true,
+    weapons: true,
+  })) sources.set(source.instanceId, source);
+  for (const link of state.chain) {
+    if (
+      link.attacker === seat &&
+      link.flags.attackGone !== true &&
+      !link.attackingCard.faceDown
+    ) sources.set(link.attackingCard.instanceId, link.attackingCard);
+    for (const reaction of [...link.defendingCards, ...link.reactions]) {
+      if (
+        reaction.owner === seat &&
+        !reaction.faceDown &&
+        dataOf(state, reaction.cardId).cardType === "defense-reaction"
+      ) sources.set(reaction.instanceId, reaction);
+    }
   }
   return [...sources.values()];
 }

@@ -125,6 +125,20 @@
     "set": "MPA"
   },
   {
+    "id": "MPA027",
+    "name": "Sick Intent",
+    "cardType": "action",
+    "text": "Contract - You are contracted to create disease tokens under opponents' control. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 6,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Contract"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA029",
     "name": "Tailored Targeting",
     "cardType": "action",

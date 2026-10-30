@@ -13920,6 +13920,12 @@
       "value": "Crie Fang Strike ou Slither"
     }
   ],
+  "card.pen.shuriken.search.arena": [
+    {
+      "type": 0,
+      "value": "Escolha um item Shuriken para colocar na arena"
+    }
+  ],
   "card.pen.sigil.destroy": [
     {
       "type": 0,

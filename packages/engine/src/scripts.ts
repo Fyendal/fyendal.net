@@ -1789,6 +1789,8 @@ export interface CardScript {
   onSelfBanished?(ctx: ScriptCtx, from: string): void;
   /** This source's controller banished a card owned by an opposing hero. */
   onFriendlyBanishesOpponentCard?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): void;
+  /** This source's controller created a token under an opposing hero's control. */
+  onFriendlyCreatesOpponentToken?(ctx: ScriptCtx, token: DeepReadonly<CardInstance>): void;
   /** A card owned by this source's controller left their graveyard. */
   onCardLeavesGraveyard?(
     ctx: ScriptCtx,

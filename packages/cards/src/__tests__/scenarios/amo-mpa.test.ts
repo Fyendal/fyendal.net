@@ -10,6 +10,7 @@ const DEMORALIZE = "demoralize the dracai|1";
 const PREY = "prey on insecurity|1";
 const FLIP = "flip the script|3";
 const BRIBE = "bribe the guards|3";
+const SICK_INTENT = "sick intent|1";
 const REMEMBER = "remember the mists|3";
 const PROLONGED = "prolonged illness|3";
 const VIRAL_DIFFUSION = "viral diffusion|1";
@@ -388,6 +389,61 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     expect(game.state.players[0]!.graveyard.map((card) => cardData[card.cardId]!.name))
       .toContain("Prey on Insecurity");
     expect(cardData[game.state.players[0]!.deck.at(-1)!.cardId]!.name).toBe("Raging Onslaught");
+  });
+
+  it("Sick Intent creates the chosen disease on hit and completes its contract", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [SICK_INTENT], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(SICK_INTENT).blockWith().settle().chooseOption(FRAILTY_TOKEN).settle();
+
+    game.expectLife(1, 14);
+    expect(boardNames(game, 1)).toEqual(["Frailty"]);
+    expect(boardNames(game, 0)).toEqual(["Silver"]);
+  });
+
+  it("Sick Intent completes its contract for each disease another effect creates under an opponent", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [SICK_INTENT, OUTBREAK], resources: 5, weapons: [], equipment: NO_EQUIPMENT },
+      {
+        hero: "dorinthea",
+        hand: ["raging onslaught|1", "raging onslaught|2", "raging onslaught|3"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    game.play(SICK_INTENT).blockWith("raging onslaught|1", "raging onslaught|2")
+      .react(OUTBREAK, { targetCard: SICK_INTENT }).settle()
+      .chooseOption(INERTIA_TOKEN).settle();
+
+    expect(boardNames(game, 1).sort()).toEqual(["Bloodrot Pox", "Frailty", "Inertia", "Inertia"]);
+    expect(boardNames(game, 0)).toEqual(["Silver", "Silver", "Silver", "Silver"]);
+  });
+
+  it("Sick Intent creates no disease or Silver when fully defended", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [SICK_INTENT],
+        resources: 2,
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        hand: ["raging onslaught|1", "raging onslaught|2", "raging onslaught|3"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    game.play(SICK_INTENT).blockWith("raging onslaught|1", "raging onslaught|2", "raging onslaught|3").settle();
+
+    expect(boardNames(game, 1)).toEqual([]);
+    expect(boardNames(game, 0)).toEqual([]);
   });
 
   it("Bribe the Guards destroys a Silver to give a card defending it -1 defense", () => {

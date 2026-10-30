@@ -506,8 +506,8 @@ function collectDefendEventLayers(
 
   if (defenders.length > 0) {
     for (const modifier of activeModifiers(state, link, ["chain-link"])) {
+      // Each defend event (defend step or a defense reaction) triggers it again.
       if (modifier.consumed || !modifier.onDefendedDealDamage) continue;
-      modifier.consumed = true;
       appendTriggerLayer(groups, link.attacker, {
         sourceInstanceId: modifier.sourceInstanceId,
         seat: link.attacker,

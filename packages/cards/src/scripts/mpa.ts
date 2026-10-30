@@ -10,6 +10,7 @@ import {
   ongoingLabel,
   opponentSeat,
   requestDiseaseTokenChoice,
+  tokenContractWithSilver,
 } from "./shared-helpers.js";
 
 const BLOODROT_POX = "OUT234";
@@ -382,6 +383,20 @@ export const mpa: Record<string, CardScript> = {
         },
       },
     ],
+  },
+
+  "sick intent|1": {
+    ...tokenContractWithSilver((ctx, token) => ctx.cardTypes(token).includes("disease")),
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    onHit(ctx) {
+      requestDiseaseTokenChoice(ctx, "mpa-sick-intent-disease", [FRAILTY, INERTIA, BLOODROT_POX]);
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "mpa-sick-intent-disease") return;
+      if (option === FRAILTY || option === INERTIA || option === BLOODROT_POX) {
+        ctx.createToken(option, opponentSeat(ctx));
+      }
+    },
   },
 
   "tailored targeting|1": {

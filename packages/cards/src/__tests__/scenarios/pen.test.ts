@@ -2147,3 +2147,40 @@ describe("PEN — Embody Greatness", () => {
     expect(cardData[g.state.players[0]!.heroCardId]?.name).toBe("Cindra, Dracai of Retribution");
   });
 });
+
+describe("PEN — Wind Cutter", () => {
+  function windCutterGame(deck: string[]) {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "ira, crimson haze|0",
+          weapons: [],
+          equipment: { arms: "wind cutter|0" },
+          hand: ["head jab|1", "head jab|1", "head jab|1", "crane dance|3"],
+          deck,
+        },
+        { hero: "dorinthea", weapons: [], hand: [] },
+      ],
+    });
+    g.play("head jab|1").blockWith().settle();
+    g.play("head jab|1").blockWith().settle();
+    g.play("head jab|1").blockWith();
+    return g;
+  }
+
+  it("lets the controller choose which Shuriken item to search for", () => {
+    const g = windCutterGame(["evasive nageboshi|3", "stun star|3", "raging onslaught|1"]);
+    g.activate("wind cutter|0", { pitch: ["crane dance|3"] });
+    expect(g.state.pendingDecision?.options).toHaveLength(2);
+    g.chooseCard("stun star|3")
+      .expectInZone(0, "stun star|3", "board")
+      .expectInZone(0, "evasive nageboshi|3", "deck");
+  });
+
+  it("puts the only Shuriken item into the arena without asking", () => {
+    const g = windCutterGame(["stun star|3", "stun star|3", "raging onslaught|1"]);
+    g.activate("wind cutter|0", { pitch: ["crane dance|3"] }).expectInZone(0, "stun star|3", "board");
+    expect(g.state.players[0]!.board.filter((card) => card.cardId === printingId("stun star|3"))).toHaveLength(1);
+  });
+});

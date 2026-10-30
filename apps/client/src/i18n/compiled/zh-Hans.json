@@ -12570,6 +12570,12 @@
       "value": "生成 Fang Strike 或 Slither"
     }
   ],
+  "card.pen.shuriken.search.arena": [
+    {
+      "type": 0,
+      "value": "选择一个 Shuriken 物品放入竞技场"
+    }
+  ],
   "card.pen.sigil.destroy": [
     {
       "type": 0,

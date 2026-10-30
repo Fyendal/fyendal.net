@@ -762,6 +762,20 @@ export function contractWithSilver(
   };
 }
 
+/** Token-creation counterpart of contractWithSilver, completed per token
+ * this source's controller creates under an opposing hero's control. */
+export function tokenContractWithSilver(
+  condition: (ctx: ScriptCtx, token: DeepReadonly<CardInstance>) => boolean,
+): CardScript {
+  return {
+    onFriendlyCreatesOpponentToken(ctx, token) {
+      if (!condition(ctx, token)) return;
+      markContractCompleted(ctx);
+      ctx.createToken("DYN245");
+    },
+  };
+}
+
 /** "While this is in your graveyard, at the start of your turn, you may
  * destroy N Silver you control. If you do, equip this." */
 export function equipWithSilver(amount: number): TriggerDef {

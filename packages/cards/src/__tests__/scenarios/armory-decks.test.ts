@@ -2130,6 +2130,24 @@ describe("Armory Decks — rules regression coverage", () => {
     expect(g.state.players[1]!.life).toBe(18); // 1 combat damage + 1 from the granted trigger
   });
 
+  it("Indefensibly Honed triggers again when a defense reaction defends", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["zenith blade|0"], hand: ["indefensibly honed|3"], resources: 2, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: ["raging onslaught|3", "sink below|1"], resources: 1, life: 20, equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.state.players[0]!.weapons[0]!.counters = { power: 2 };
+
+    g.play("indefensibly honed|3").attackWithWeapon("zenith blade|0")
+      .blockWith("raging onslaught|3").passPriority().passPriority().passPriority()
+      .react("sink below|1").chooseOption("pass").settle();
+
+    expect(g.state.log.filter((entry) =>
+      entry.publicText?.includes("Indefensibly Honed triggers")
+    )).toHaveLength(2);
+  });
+
   it("Indefensibly Honed is consumed by the targeted weapon's next attack", () => {
     const g = scenario({
       seats: [

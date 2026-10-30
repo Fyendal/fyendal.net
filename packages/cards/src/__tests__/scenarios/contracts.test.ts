@@ -21,14 +21,18 @@ const STANDARD_CONTRACT_CASES = [
 ] as const;
 
 describe("Contract", () => {
-  it("registers a banish observer for every Contract that creates Silver", () => {
+  it("registers a matching observer for every Contract that creates Silver", () => {
     const silverContracts = Object.values(cardData).filter((card) =>
       (card.keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract") &&
       /create a Silver token/i.test(card.text)
     );
 
     for (const card of silverContracts) {
-      expect(scripts[card.id]?.onFriendlyBanishesOpponentCard, card.id).toBeTypeOf("function");
+      const script = scripts[card.id];
+      const observer = /contracted to create/i.test(card.text)
+        ? script?.onFriendlyCreatesOpponentToken
+        : script?.onFriendlyBanishesOpponentCard;
+      expect(observer, card.id).toBeTypeOf("function");
     }
   });
 

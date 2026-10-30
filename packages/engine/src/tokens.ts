@@ -12,7 +12,7 @@ import {
 import type { TokenCreationContext } from "./scripts.js";
 import type { CardInstance, PlayerState, TokenCreationRequest, TokenCreationReplacementRef } from "./state.js";
 import { currentLink, findCardAnywhere } from "./zoneQueries.js";
-import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
+import { contractObserverSources, controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 
 import { offerCrankDecision, stampControlledName, stampEnteringLife } from "./cardLifecycle.js";
 
@@ -82,6 +82,22 @@ function createTokenRaw(
   return token;
 }
 
+function fireFriendlyCreatesOpponentTokens(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  creatorSeat: number,
+  tokens: readonly CardInstance[],
+): void {
+  for (const token of tokens) {
+    for (const source of contractObserverSources(state, creatorSeat)) {
+      scriptOf(state, source.cardId, source)?.onFriendlyCreatesOpponentToken?.(
+        runtime.makeCtx(state, creatorSeat, source, currentLink(state)),
+        token,
+      );
+    }
+  }
+}
+
 /** Complete one token event and then notify "one or more" observers once. */
 function createTokenBatchRaw(
   state: GameStateInternal,
@@ -89,6 +105,7 @@ function createTokenBatchRaw(
   player: PlayerState,
   cardId: string,
   count: number,
+  cause: TokenCreationContext,
   initialCounters?: Readonly<CardCounters>,
   initialState?: Readonly<Record<string, number>>,
 ): CardInstance[] {
@@ -104,6 +121,9 @@ function createTokenBatchRaw(
     () => createTokenRaw(state, runtime, player, cardId, initialCounters, initialState),
   );
   if (tokens.length === 0) return tokens;
+  if (cause.creatorSeat !== undefined && cause.creatorSeat !== player.seat) {
+    fireFriendlyCreatesOpponentTokens(state, runtime, cause.creatorSeat, tokens);
+  }
   runtime.events.queueTriggeredEvent(
     state,
     "token-created",
@@ -341,7 +361,7 @@ function continueTokenCreation(
     remainingReplacements,
   );
   if (applicable.length === 0) {
-    return createTokenBatchRaw(state, runtime, player, cardId, normalizedCount, initialCounters, initialState);
+    return createTokenBatchRaw(state, runtime, player, cardId, normalizedCount, cause, initialCounters, initialState);
   }
 
   let orderedControllers = controllerSeats?.filter((controllerSeat) =>
@@ -377,7 +397,7 @@ function continueTokenCreation(
 
   const currentController = orderedControllers[0];
   if (currentController === undefined) {
-    return createTokenBatchRaw(state, runtime, player, cardId, normalizedCount, initialCounters, initialState);
+    return createTokenBatchRaw(state, runtime, player, cardId, normalizedCount, cause, initialCounters, initialState);
   }
   const controlledApplicable = applicable.filter(
     (candidate) => candidate.controllerSeat === currentController,

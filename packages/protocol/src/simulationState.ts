@@ -230,10 +230,13 @@ function validateGameLogPayload(value: unknown, code: string, path: string): voi
 }
 
 function validateTokenCreationCause(value: unknown, code: string, path: string): void {
-  const cause = exact(value, code, path, ["kind"], ["sourceCardId"]);
+  const cause = exact(value, code, path, ["kind"], ["sourceCardId", "creatorSeat"]);
   oneOf(cause.kind, ["effect", "wager"] as const, code, `${path}.kind`);
   optional(cause, "sourceCardId", (entry, entryPath) => {
     string(entry, code, entryPath, 128);
+  }, path);
+  optional(cause, "creatorSeat", (entry, entryPath) => {
+    integer(entry, code, entryPath);
   }, path);
 }
 

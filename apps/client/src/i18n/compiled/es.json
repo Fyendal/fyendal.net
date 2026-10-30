@@ -13537,6 +13537,12 @@
       "value": "Crea Fang Strike o Slither"
     }
   ],
+  "card.pen.shuriken.search.arena": [
+    {
+      "type": 0,
+      "value": "Elige un item Shuriken para ponerlo en la arena"
+    }
+  ],
   "card.pen.sigil.destroy": [
     {
       "type": 0,
