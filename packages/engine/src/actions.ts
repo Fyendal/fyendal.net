@@ -652,7 +652,13 @@ export function activateAbility(
   const isBanishSource = !!permanent && player.banish.some(
     (candidate) => candidate.instanceId === permanent.instanceId,
   );
-  if (!permanent || (!isPermanentSource(player, permanent.instanceId) && !isBanishSource && !chainAttack && !sharedActionSource)) {
+  const isGraveyardSource = !!permanent && player.graveyard.some(
+    (candidate) => candidate.instanceId === permanent.instanceId,
+  );
+  if (!permanent || (
+    !isPermanentSource(player, permanent.instanceId) &&
+    !isBanishSource && !isGraveyardSource && !chainAttack && !sharedActionSource
+  )) {
     const result = activateFromHandAbility(state, runtime, {
       mode: "action",
       seat,
@@ -696,7 +702,7 @@ export function activateAbility(
   if (ability.isAttack && cardHasType(state, card, "weapon") && weaponAttacksProhibited(player)) {
     return "cannot attack with weapons this turn";
   }
-  if ((ability.fromBanish === true) !== isBanishSource || ability.fromGraveyard) {
+  if ((ability.fromBanish === true) !== isBanishSource || (ability.fromGraveyard === true) !== isGraveyardSource) {
     return "ability is not usable from this zone";
   }
   // Cloaked: a face-down permanent's abilities are non-functional EXCEPT

@@ -5752,6 +5752,24 @@
       "value": "：将一张展示的牌置于其拥有者的牌库底部？"
     }
   ],
+  "card.evr.scour.auras.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 个要摧毁的灵气 (Aura)"
+    }
+  ],
   "card.evr.seeing.hero.choose": [
     {
       "type": 0,
@@ -12446,6 +12464,12 @@
     {
       "type": 0,
       "value": "横置目标英雄或盟友"
+    }
+  ],
+  "card.pen.hyperdriver.search.arena": [
+    {
+      "type": 0,
+      "value": "从你的牌库中搜寻一个 Hyper Driver 并将其放入竞技场？"
     }
   ],
   "card.pen.instant.discard": [

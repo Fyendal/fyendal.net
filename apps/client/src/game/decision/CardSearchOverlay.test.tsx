@@ -47,6 +47,15 @@ describe("private card search overlay", () => {
     expect(model?.promptMessage).toEqual({ id: "card.sup.named.cards.choose" });
   });
 
+  it("shows a search that found no matching cards", () => {
+    const decision: PendingDecision = { ...searchDecision(), options: [], optionCards: [], maximumSelections: 0 };
+    const model = cardSearchOverlayModel(decision, { hand: 1, deck: 1, arsenal: 1 });
+
+    expect(isCardSearchOverlayDecision(decision)).toBe(true);
+    expect(model?.sections.map((section) => section.zone)).toEqual(["hand", "deck", "arsenal"]);
+    expect(model?.optionByCardId.size).toBe(0);
+  });
+
   it("renders all searched cards in a required zone-style dialog", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>

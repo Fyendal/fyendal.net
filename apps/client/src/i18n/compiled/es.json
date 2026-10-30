@@ -6180,6 +6180,50 @@
       "value": ": ¿poner una carta revelada en la parte inferior del mazo de su propietario?"
     }
   ],
+  "card.evr.scour.auras.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": elige "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " aura"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " auras"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " para destruir"
+    }
+  ],
   "card.evr.seeing.hero.choose": [
     {
       "type": 0,
@@ -13417,6 +13461,12 @@
     {
       "type": 0,
       "value": "Haz tap al héroe o ally objetivo"
+    }
+  ],
+  "card.pen.hyperdriver.search.arena": [
+    {
+      "type": 0,
+      "value": "¿Buscar un Hyper Driver en tu mazo y ponerlo en la arena?"
     }
   ],
   "card.pen.instant.discard": [

@@ -218,10 +218,11 @@ function requestHunterSearch(ctx: ScriptCtx): void {
   const target = opponentSeat(ctx);
   const searchedCards = hunterSearchedCards(ctx);
   const candidates = hunterSearchCandidates(ctx, searchedCards);
-  if (candidates.length === 0) {
+  if (searchedCards.length === 0) {
     ctx.shuffleDeck(target);
     return;
   }
+  // Searching shows the zones even when nothing matches.
   ctx.requestCardChoices(
     "hunter-search",
     decisionPrompt("Choose up to 3 more cards with the named card's name", "card.sup.named.cards.choose"),

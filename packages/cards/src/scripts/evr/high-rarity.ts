@@ -69,6 +69,21 @@ function elementalRevealOptionMessages(ctx: ScriptCtx): Record<string, ReturnTyp
   );
 }
 
+function scourCandidates(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
+  return ctx
+    .player(opponentSeat(ctx))
+    .board.filter(
+      (card) =>
+        hasType(ctx, card, "aura") &&
+        (ctx.cardData(card.cardId).cardType === "token" || ctx.cardData(card.cardId).cost === 0),
+    );
+}
+
+function scourDestroy(ctx: ScriptCtx, instanceIds: readonly number[]): void {
+  const destroyed = instanceIds.filter((id) => ctx.destroyPermanent(id)).length;
+  ctx.dealDamage(opponentSeat(ctx), destroyed, { arcane: true, sourceInstanceId: ctx.self.instanceId });
+}
+
 function duringActionPhase(ctx: ScriptCtx): boolean {
   if (ctx.state.phase === "action" || ctx.state.phase === "defend" || ctx.state.phase === "reaction") return true;
   return (
@@ -912,12 +927,26 @@ export const evrHighRarity: Record<string, CardScript> = {
     arcaneDamageEffectAmounts: [0],
     variablePlayCost: { base: 0, stateKey: "scourX", prompt: decisionPrompt("Choose X", "engine.decision.x.choose") },
     onPlay(ctx) {
-      const auras = ctx
-        .player(opponentSeat(ctx))
-        .board.filter((card) => hasType(ctx, card, "aura") && (ctx.cardData(card.cardId).cost ?? -1) === 0)
-        .slice(0, ctx.getState("scourX"));
-      for (const aura of auras) ctx.destroyPermanent(aura.instanceId);
-      ctx.dealDamage(opponentSeat(ctx), auras.length, { arcane: true, sourceInstanceId: ctx.self.instanceId });
+      const auras = scourCandidates(ctx);
+      const x = ctx.getState("scourX");
+      if (x > 0 && auras.length > x) {
+        ctx.requestCardChoices(
+          "scour-auras",
+          decisionPrompt(`${ctx.data.name}: choose ${x} aura(s) to destroy`, "card.evr.scour.auras.choose", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId }, count: x },
+          }),
+          auras.map((card) => card.instanceId),
+          x,
+          x,
+        );
+        return;
+      }
+      scourDestroy(ctx, auras.slice(0, x).map((card) => card.instanceId));
+    },
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "scour-auras") return;
+      const allowed = new Set(scourCandidates(ctx).map((card) => card.instanceId));
+      scourDestroy(ctx, options.map(Number).filter((id) => allowed.has(id)));
     },
   },
   "crown of reflection|0": {

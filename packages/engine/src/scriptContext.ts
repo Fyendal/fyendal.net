@@ -459,8 +459,9 @@ export function makeCtx(
         ? existing
         : undefined;
     // An empty option list would deadlock the game on an unanswerable
-    // decision — the effect simply finds no target and fizzles.
-    if (options.length === 0) {
+    // decision — the effect simply finds no target and fizzles. An optional
+    // search still shows the searched cards and is answered with no picks.
+    if (options.length === 0 && !(details.minimumSelections === 0 && details.lookedCardIds?.length)) {
       logPublic(state, gameLogMessage(
         `(fizzled, no options: ${presentation.fallback})`,
         "engine.log.decision.fizzles.no.options",

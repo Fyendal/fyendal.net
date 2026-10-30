@@ -6142,6 +6142,50 @@
       "value": ": put a revealed card on the bottom of its owner's deck?"
     }
   ],
+  "card.evr.scour.auras.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " aura"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " auras"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " to destroy"
+    }
+  ],
   "card.evr.seeing.hero.choose": [
     {
       "type": 0,
@@ -13293,6 +13337,12 @@
     {
       "type": 0,
       "value": "Tap target hero or ally"
+    }
+  ],
+  "card.pen.hyperdriver.search.arena": [
+    {
+      "type": 0,
+      "value": "Search your deck for a Hyper Driver and put it into the arena?"
     }
   ],
   "card.pen.instant.discard": [

@@ -402,6 +402,26 @@ describe("PEN — import and set mechanics", () => {
     expect(drivers.some((card) => card.counters?.steam === 2)).toBe(true);
   });
 
+  it("Assembly Module lets its controller choose or decline a Hyper Driver and has no go again", () => {
+    const setup = () =>
+      scenario({ seats: [
+        { hero: "rhinar", board: ["assembly module|3"], deck: ["hyper driver|1", "hyper driver|1"] },
+        { hero: "dorinthea" },
+      ] });
+
+    const g = setup().activate("assembly module|3").settle();
+    expect(g.state.pendingDecision?.prompt).toContain("Search your deck for a Hyper Driver");
+    g.chooseCard("hyper driver|1")
+      .expectAP(0, 0)
+      .expectZoneSize(0, "deck", 1);
+    expect(g.state.players[0]!.board.filter((card) => card.cardId === printingId("hyper driver|1")))
+      .toHaveLength(1);
+
+    setup().activate("assembly module|3").settle().chooseOption("no")
+      .expectAP(0, 0)
+      .expectZoneSize(0, "deck", 2);
+  });
+
   it("Serpent's Kiss labels its Fang Strike and Slither options with card names", () => {
     const g = scenario({ seats: [
       { hero: "rhinar", hand: ["serpent's kiss|3"], equipment: NO_EQUIPMENT },
@@ -1929,6 +1949,53 @@ describe("PEN — generalized rules interactions", () => {
     expect(g.state.players[0]!.board.filter((card) => functionalKeyOf(cardData[card.cardId]!) === "silver|0")).toHaveLength(0);
   });
 
+  it("Graven Call equips from graveyard in the main phase beside an off-hand", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          graveyard: ["graven call|0"],
+          board: ["silver|0", "silver|0"],
+          weapons: ["phial of calamity|0"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.activate("graven call|0", { ability: 1 })
+      .chooseCard("silver|0")
+      .chooseCard("silver|0")
+      .passPriority()
+      .passPriority();
+    const graven = g.state.players[0]!.weapons.find((card) => card.cardId === printingId("graven call|0"));
+    expect(graven?.counters?.power).toBe(1);
+    expect(g.state.players[0]!.board).toHaveLength(0);
+    expect(g.state.players[0]!.actionPoints).toBe(1);
+  });
+
+  it("Graven Gaslight equips from graveyard in the main phase beside a dagger", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          graveyard: ["graven gaslight|0"],
+          board: ["silver|0", "silver|0"],
+          weapons: ["graven call|0"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.activate("graven gaslight|0")
+      .chooseCard("silver|0")
+      .chooseCard("silver|0")
+      .passPriority()
+      .passPriority();
+    g.expectInZone(0, "graven gaslight|0", "weapons");
+    expect(g.state.players[0]!.board).toHaveLength(0);
+    expect(g.state.players[0]!.actionPoints).toBe(1);
+  });
+
   it("Seeker Kunai returns from graveyard only at the start of its controller's turn", () => {
     const g = scenario({
       active: 1,
@@ -2182,5 +2249,24 @@ describe("PEN — Wind Cutter", () => {
     const g = windCutterGame(["stun star|3", "stun star|3", "raging onslaught|1"]);
     g.activate("wind cutter|0", { pitch: ["crane dance|3"] }).expectInZone(0, "stun star|3", "board");
     expect(g.state.players[0]!.board.filter((card) => card.cardId === printingId("stun star|3"))).toHaveLength(1);
+  });
+});
+
+describe("PEN — conditional Spellvoid", () => {
+  it.each([
+    { pitch: [], offered: false },
+    { pitch: ["alpha rampage|1"], offered: true },
+  ])("Skera Strapping offers Spellvoid 3 only after a 6+ power pitch ($pitch)", ({ pitch, offered }) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["glyph power spell|1", "sigil of solace|3"], resources: 2, equipment: NO_EQUIPMENT },
+        { hero: "rhinar", pitch, life: 20, equipment: { ...NO_EQUIPMENT, arms: "skera strapping|0" } },
+      ],
+    });
+
+    g.play("glyph power spell|1").chooseOption("opponent");
+    expect(g.state.pendingDecision?.chooseHook).toBe(offered ? "spellvoid" : undefined);
+    if (offered) g.chooseOption("destroy").expectNoEquipment(1, "arms");
+    g.expectLife(1, offered ? 19 : 16);
   });
 });

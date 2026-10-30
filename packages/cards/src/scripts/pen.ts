@@ -941,13 +941,27 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     activated: {
       cost: 0,
       isAttack: false,
-      goAgain: true,
+      goAgain: false,
       tap: true,
       onActivate(ctx) {
-        const driver = ctx.player(ctx.seat).deck.find((card) => named(ctx, card, "Hyper Driver"));
-        if (driver) ctx.settleCard(driver.instanceId);
-        ctx.shuffleDeck();
+        const drivers = ctx.player(ctx.seat).deck.filter((card) => named(ctx, card, "Hyper Driver"));
+        if (drivers.length === 0) {
+          ctx.shuffleDeck();
+          return;
+        }
+        ctx.requestCardChoice(
+          "assembly-module-search",
+          decisionPrompt("Search your deck for a Hyper Driver and put it into the arena?", "card.pen.hyperdriver.search.arena", {
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", ...drivers.map((card) => card.instanceId)],
+        );
       },
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "assembly-module-search") return;
+      if (option !== "no") ctx.settleCard(Number(option));
+      ctx.shuffleDeck();
     },
   },
   "evo beta base head|3": evoBeta("head"),

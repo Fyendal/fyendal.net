@@ -668,6 +668,53 @@ describe("SUP — heroes and the crowd", () => {
     expect(g.state.stack).toHaveLength(0);
   });
 
+  it("Hunter or Hunted? shows the searched hand, deck, and arsenal when no other copy remains", () => {
+    const g = scenario({
+      seats: [
+        foe({
+          heroKey: "hala, bladesaint of the vow|0",
+          weapons: ["zenith blade|0"],
+          hand: ["head jab|1"],
+          deck: ["blunten|2", "head jab|1", "head jab|1"],
+          arsenalFaceDown: ["raging onslaught|3"],
+          resources: 1,
+        }),
+        hero("arakni, huntsman|0", {
+          arsenalFaceDown: ["hunter or hunted?|3"],
+          resources: 3,
+        }),
+      ],
+    });
+
+    g.attackWithWeapon("zenith blade|0")
+      .blockWith()
+      .passPriority()
+      .react("hunter or hunted?|3", { settle: false })
+      .passPriority()
+      .passPriority()
+      .chooseOption("yes")
+      .chooseOption("keep")
+      .doRaw({ kind: "choose", optionId: "Blunten" });
+
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "hunter-search",
+      options: [],
+      minimumSelections: 0,
+      maximumSelections: 0,
+    });
+    expect(projectStateFor(g.state, 1).pendingDecision?.lookedCards?.map((card) => cardData[card.cardId]?.name))
+      .toEqual(["Head Jab", "Head Jab", "Head Jab", "Raging Onslaught"]);
+    expect(projectStateFor(g.state, 0).pendingDecision?.lookedCards).toBeUndefined();
+    expect(legalIntents(g.state, 1)).toContainEqual({ kind: "choose-many", optionIds: [] });
+
+    g.chooseMany([]);
+
+    expect(g.state.players[1]!.board.filter(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "silver|0",
+    )).toHaveLength(1);
+    expect(g.state.pendingDecision).toMatchObject({ kind: "attack-reaction", player: 0 });
+  });
+
   it("Bait stops its controller playing cards they own but leaves its own abilities usable", () => {
     const g = scenario({
       seats: [

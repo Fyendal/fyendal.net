@@ -28,6 +28,7 @@ import {
   type ValueBreakdown,
 } from "./value.js";
 import { chooseUpkeepPayment } from "./upkeep.js";
+import { BLOCK_USE_RATE } from "./card-ev.js";
 
 export interface BotPolicyInput {
   seat: 0 | 1;
@@ -595,6 +596,8 @@ export function chooseSharedPolicyIntent(input: BotPolicyInput): GameIntent | un
   if (unneededBoost) return unneededBoost;
   const combatShrink = combatCardReduceIntent(input);
   if (combatShrink) return combatShrink;
+  const spellvoid = spellvoidIntent(input);
+  if (spellvoid) return spellvoid;
 
   const incoming = arcaneBarrierIncoming(decision);
   if (incoming === undefined) return undefined;
@@ -613,6 +616,40 @@ export function chooseSharedPolicyIntent(input: BotPolicyInput): GameIntent | un
   return survivable.reduce((best, candidate) =>
     candidate.amount < best.amount ? candidate : best
   ).intent;
+}
+
+/** Spellvoid: destroy the piece that prevents the most damage for the least
+ * blocking given up. Outside lethal, only equipment whose whole Spellvoid is
+ * used and outweighs its block is spent. */
+function spellvoidIntent(input: BotPolicyInput): GameIntent | undefined {
+  const decision = input.view.pendingDecision;
+  if (decision?.promptMessage?.id !== "engine.decision.damage.spellvoid") return undefined;
+  const incoming = decision.promptMessage.values?.amount;
+  if (typeof incoming !== "number" || incoming <= 0) return undefined;
+  const me = input.view.players[input.seat];
+  const equipped = new Set(Object.values(me.equipment).flatMap((card) => card ? [card.instanceId] : []));
+  const lethal = incoming >= me.life;
+  let best: { intent: GameIntent; survives: boolean; score: number } | undefined;
+  for (const intent of input.legal) {
+    if (intent.kind !== "choose" || !intent.optionId.startsWith("destroy ")) continue;
+    const card = optionCard(intent, input);
+    if (!card) continue;
+    const data = input.cards[card.cardId];
+    // Spellvoid X is offered only while X is at least 1.
+    const spellvoid = Math.max(1, ...(data?.keywords ?? [])
+      .flatMap((keyword) => /^spellvoid (\d+)$/i.exec(keyword)?.[1] ?? []).map(Number));
+    const prevented = Math.min(incoming, spellvoid);
+    const blockLoss = equipped.has(card.instanceId)
+      ? Math.max(0, card.defense ?? data?.defense ?? 0) * BLOCK_USE_RATE
+      : undefined;
+    const score = prevented - (blockLoss ?? 0);
+    if (!lethal && (blockLoss === undefined || prevented < spellvoid || score <= 0)) continue;
+    const survives = incoming - prevented < me.life;
+    if (!best || (survives && !best.survives) || (survives === best.survives && score > best.score)) {
+      best = { intent, survives, score };
+    }
+  }
+  return best?.intent;
 }
 
 /** No Hero Stands Alone: the clash winner shrinks the other side of the link. */

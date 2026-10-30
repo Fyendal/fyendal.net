@@ -1148,22 +1148,26 @@ function abilityIntents(
     ...player.banish.filter((card) =>
       abilityList(scriptOf(state, card.cardId, card)).some((ability) => ability.fromBanish === true)
     ),
+    ...player.graveyard.filter((card) =>
+      abilityList(scriptOf(state, card.cardId, card)).some((ability) => ability.fromGraveyard === true)
+    ),
   ];
   for (const card of sources) {
     if (activatedAbilitiesSuppressed(state, card)) continue;
     if (isFrozen(state, card)) continue;
     const script = scriptOf(state, card.cardId, card);
     const abilities = abilityList(script);
+    const fromBanish = player.banish.some((candidate) => candidate.instanceId === card.instanceId);
+    const fromGraveyard = player.graveyard.some((candidate) => candidate.instanceId === card.instanceId);
     for (let ai = 0; ai < abilities.length; ai++) {
       const ability = abilities[ai]!;
-      if (!controlledIds.has(card.instanceId) &&
-        !player.banish.some((source) => source.instanceId === card.instanceId) &&
+      if (!controlledIds.has(card.instanceId) && !fromBanish && !fromGraveyard &&
         (ability.anyHeroAction !== true || (ability.timing ?? "action") !== "action")) continue;
       if (ability.fromHand) continue;
       if (ability.isAttack && player.flags[`cannotAttackInstance:${card.instanceId}`] === true) continue;
       if (ability.isAttack && cardHasType(state, card, "weapon") && weaponAttacksProhibited(player)) continue;
-      const fromBanish = player.banish.some((candidate) => candidate.instanceId === card.instanceId);
-      if ((ability.fromBanish === true) !== fromBanish || ability.fromGraveyard) continue;
+      if ((ability.fromBanish === true) !== fromBanish) continue;
+      if ((ability.fromGraveyard === true) !== fromGraveyard) continue;
       // Cloaked: while face-down, only abilities that turn the card face up
       // as part of their cost function (CR 8.3.36)
       if (card.faceDown && !ability.turnsFaceUp && !ability.usableWhileFaceDown) continue;

@@ -742,8 +742,8 @@ function fireFriendlyDamageDealt(
  *  (8.3.15: "If you would be
  *  dealt arcane damage, you may destroy this to prevent N of that damage").
  *  Face-down (Cloaked) equipment's abilities are non-functional. Equipment
- *  whose value is not a fixed number ("Spellvoid X, where X is …") provides it
- *  via the spellvoidValue script hook. */
+ *  whose value is variable or conditional provides it via the spellvoidValue
+ *  script hook, which overrides the printed keyword. */
 function spellvoidPieces(state: GameStateInternal,
   runtime: EngineRuntime, player: PlayerState): { id: number; n: number }[] {
   const out: { id: number; n: number }[] = [];
@@ -753,6 +753,12 @@ function spellvoidPieces(state: GameStateInternal,
   ];
   for (const eq of sources) {
     if (eq.faceDown || cardAbilitiesSuppressed(state, eq)) continue;
+    const dynamic = scriptOf(state, eq.cardId, eq)?.spellvoidValue;
+    if (dynamic) {
+      const n = dynamic(runtime.makeCtx(state, player.seat, eq));
+      if (n > 0) out.push({ id: eq.instanceId, n });
+      continue;
+    }
     let matched = false;
     for (const value of instanceKeywordValues(state, eq, "spellvoid")) {
       if (value === "x") continue;
@@ -766,12 +772,6 @@ function spellvoidPieces(state: GameStateInternal,
         .some((source) => scriptOf(state, source.cardId, source)?.grantsSpellvoidToRunechants === true)
     ) {
       out.push({ id: eq.instanceId, n: 1 });
-      continue;
-    }
-    const dynamic = scriptOf(state, eq.cardId, eq)?.spellvoidValue;
-    if (dynamic) {
-      const n = dynamic(runtime.makeCtx(state, player.seat, eq));
-      if (n > 0) out.push({ id: eq.instanceId, n });
     }
   }
   return out;

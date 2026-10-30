@@ -1886,8 +1886,9 @@ export interface CardScript {
    *  other hero can't gain life (Reaping Blade-style static effect). */
   preventsLifeGainWhileAhead?: boolean;
   /** Dynamic Spellvoid value for equipment whose prevention amount is not a
-   *  fixed number ("Spellvoid X, where X is …"): consulted whenever the
-   *  equipment's Spellvoid is enumerated or applied — must be pure. */
+   *  fixed number ("Spellvoid X, where X is …") or conditional: consulted
+   *  instead of any printed Spellvoid keyword whenever the equipment's
+   *  Spellvoid is enumerated or applied — must be pure. */
   spellvoidValue?(ctx: ScriptCtx): number;
   /** Arcane Barrier X permits any positive payment up to the incoming damage. */
   arcaneBarrierX?: boolean;

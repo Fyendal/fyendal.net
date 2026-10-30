@@ -6330,6 +6330,58 @@
       "value": ": colocar uma carta revelada no fundo do deck do dono dela?"
     }
   ],
+  "card.evr.scour.auras.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": escolha "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "nenhuma aura"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " aura"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " auras"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " para destruir"
+    }
+  ],
   "card.evr.seeing.hero.choose": [
     {
       "type": 0,
@@ -13800,6 +13852,12 @@
     {
       "type": 0,
       "value": "Vire (tap) o herói ou ally alvo"
+    }
+  ],
+  "card.pen.hyperdriver.search.arena": [
+    {
+      "type": 0,
+      "value": "Procurar um Hyper Driver no seu deck e colocá-lo na arena?"
     }
   ],
   "card.pen.instant.discard": [
