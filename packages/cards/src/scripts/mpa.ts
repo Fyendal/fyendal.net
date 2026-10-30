@@ -87,6 +87,18 @@ function tailoredBanish(ctx: ScriptCtx): void {
   }
 }
 
+function leavesChainAsAttack(fallback: string, messageId: string, effect: (ctx: ScriptCtx) => void) {
+  return leavesArenaTrigger(
+    fallback,
+    decisionMessage(messageId),
+    (ctx) => {
+      // Leaving at chain close has no chain link left to affect.
+      if (ctx.link && ctx.link.flags.attackGone !== true) effect(ctx);
+    },
+    { condition: (_ctx, _card, event) => event?.combatRole === "attacking" },
+  );
+}
+
 export const mpa: Record<string, CardScript> = {
   "phial of calamity|0": {
     triggers: [equipWithSilver(2)],
@@ -302,17 +314,22 @@ export const mpa: Record<string, CardScript> = {
     },
   },
 
+  "continued coercion|2": {
+    triggers: [
+      leavesChainAsAttack(
+        "Attacks get go again this chain link",
+        "card.mpa.continuedcoercion.goagain",
+        (ctx) => ctx.grantChainLinkGoAgain(ctx.state.chain.length - 1),
+      ),
+    ],
+  },
+
   "flip the script|3": {
     triggers: [
-      leavesArenaTrigger(
+      leavesChainAsAttack(
         "Attacks get +1 power this chain link",
-        decisionMessage("card.mpa.flipscript.power"),
-        (ctx) => {
-          // Leaving at chain close has no chain link left to empower.
-          if (!ctx.link || ctx.link.flags.attackGone === true) return;
-          ctx.addModifier({ scope: "chain-link", attack: 1, appliesTo: "attack" });
-        },
-        { condition: (_ctx, _card, event) => event?.combatRole === "attacking" },
+        "card.mpa.flipscript.power",
+        (ctx) => ctx.addModifier({ scope: "chain-link", attack: 1, appliesTo: "attack" }),
       ),
     ],
   },

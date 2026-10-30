@@ -2215,7 +2215,7 @@ Object.assign(sup, {
     mandatoryAttackTarget: true,
     controllerCannotPlayOrActivateOwnedCards: true,
     activated: [
-      { cost: 0, isAttack: true, goAgain: false, oncePerTurn: false, destroySelfCost: true, label: "Attack" },
+      { cost: 0, isAttack: true, goAgain: false, oncePerTurn: false, label: "Attack" },
       {
         cost: 0,
         isAttack: false,
@@ -2229,6 +2229,9 @@ Object.assign(sup, {
         },
       },
     ],
+    onChainLinkResolved(ctx: ScriptCtx) {
+      if (ctx.link?.attackingCard.instanceId === ctx.self.instanceId) ctx.destroySelf();
+    },
   },
   "parched terrain|1": {
     replaceHeroLifeGain: () => 0,

@@ -11040,6 +11040,12 @@
       "value": " 张"
     }
   ],
+  "card.mpa.continuedcoercion.goagain": [
+    {
+      "type": 0,
+      "value": "本 chain link 中的攻击获得 go again"
+    }
+  ],
   "card.mpa.flipscript.power": [
     {
       "type": 0,

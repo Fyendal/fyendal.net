@@ -450,6 +450,7 @@
   "card.lss.ruudi.draw": "Ruu'di: draw a card?",
   "card.mpa.remember.hand.banish": "Choose a card to banish from the defending hero's hand",
   "card.mpa.sickeningrot.pay": "Sickening Rot: pay 3 resources or take 2 damage?",
+  "card.mpa.continuedcoercion.goagain": "Attacks get go again this chain link",
   "card.mpa.flipscript.power": "Attacks get +1 power this chain link",
   "card.mpa.prolonged.copy": "Create a copy of the first destroyed disease token of this name",
   "card.sda.dash.item.start": "Dash: start with a Mechanologist item with cost 2 or less in the arena?",

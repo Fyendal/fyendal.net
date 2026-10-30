@@ -12213,6 +12213,12 @@
       "value": "count"
     }
   ],
+  "card.mpa.continuedcoercion.goagain": [
+    {
+      "type": 0,
+      "value": "Ataques recebem go again neste chain link"
+    }
+  ],
   "card.mpa.flipscript.power": [
     {
       "type": 0,

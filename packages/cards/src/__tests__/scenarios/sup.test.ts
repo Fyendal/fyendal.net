@@ -699,6 +699,28 @@ describe("SUP — heroes and the crowd", () => {
     })).toEqual({ ok: false, error: "cannot play or activate a card you own" });
   });
 
+  it("Bait stays in the arena while attacking, then is destroyed when its link resolves", () => {
+    const g = scenario({
+      seats: [
+        hero("tuffnut|0", { hand: ["take the bait|1"], deck: ["head jab|2"] }),
+        foe({ hand: ["head jab|1"] }),
+      ],
+    });
+
+    g.play("take the bait|1")
+      .chooseCard("head jab|2")
+      .endTurn();
+    const life = g.state.players[0]!.life;
+
+    g.activate("bait|0", { ability: 0 })
+      .blockWith()
+      .activate("bait|0", { ability: 1 })
+      .expectLife(0, life - 1)
+      .expectNotInZone(1, "bait|0", "board")
+      .expectAP(1, 1)
+      .play("head jab|1");
+  });
+
   it("Tuffnut pitches a 6-power deck top and cheering creates Toughness", () => {
     const g = scenario({
       seats: [hero("tuffnut|0", { deck: ["old leather and vim|1"] }), foe()],

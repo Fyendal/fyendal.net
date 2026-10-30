@@ -26,6 +26,7 @@ import {
 import type { BotPrepOpponent } from "./sideboard.js";
 import type { BotPolicyInput } from "./policy.js";
 import { chooseUpkeepPayment, reserveLethalUpkeep } from "./upkeep.js";
+import { chooseBaitIntent } from "./bait.js";
 import {
   MAX_BOT_CONTINUATION_STEPS,
   type TurnPlanCheckpoint,
@@ -104,19 +105,20 @@ function botDecisionFromTrace(
   };
 }
 
-/** Cross-hero survival guard: pay end-phase upkeep, and withhold plays that
- * leave too little to pay one that would be lethal. */
+/** Cross-hero guard: pay end-phase upkeep, withhold plays that leave too
+ * little to pay one that would be lethal, and attack with an opponent's Bait. */
 function guardedDecisions(
   definition: Omit<BotDefinition, "arenaFor" | "deckFor">,
 ): Pick<BotDefinition, "chooseIntent" | "chooseDecision" | "chooseContinuationIntent"> {
+  const forced = (input: BotPolicyInput) => chooseUpkeepPayment(input) ?? chooseBaitIntent(input);
   const chooseIntent = (input: BotPolicyInput): GameIntent =>
-    chooseUpkeepPayment(input) ?? definition.chooseIntent(reserveLethalUpkeep(input));
+    forced(input) ?? definition.chooseIntent(reserveLethalUpkeep(input));
   const continuation = definition.chooseContinuationIntent;
   return {
     chooseIntent,
     chooseDecision(input) {
-      const upkeep = chooseUpkeepPayment(input);
-      return upkeep ? { intent: upkeep } : definition.chooseDecision(reserveLethalUpkeep(input));
+      const intent = forced(input);
+      return intent ? { intent } : definition.chooseDecision(reserveLethalUpkeep(input));
     },
     ...(continuation
       ? {

@@ -11827,6 +11827,12 @@
       "value": "count"
     }
   ],
+  "card.mpa.continuedcoercion.goagain": [
+    {
+      "type": 0,
+      "value": "Attacks get go again this chain link"
+    }
+  ],
   "card.mpa.flipscript.power": [
     {
       "type": 0,
