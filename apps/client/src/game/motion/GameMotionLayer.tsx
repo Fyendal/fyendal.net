@@ -249,8 +249,7 @@ function MotionFlightOverlay({
       className={`game-motion-flight game-motion-flight-${flight.mode}${
         flight.holdAtSource ? " game-motion-flight-hold-source" : ""
       }${flight.emergeY !== undefined ? " game-motion-flight-from-under" : ""
-      }${flight.stackDepth ? " game-motion-stacked" : ""}${morph?.flip ? " game-motion-flight-morph-flip" : ""}`}
-      data-stack-depth={flight.stackDepth}
+      }${flight.arena ? " game-motion-flight-arena" : ""}${morph?.flip ? " game-motion-flight-morph-flip" : ""}`}
       style={flightStyle(flight, squareCardsEnabled)}
       onAnimationStart={(event: AnimationEvent<HTMLDivElement>) => {
         if (event.target === event.currentTarget) {
@@ -326,8 +325,7 @@ function QueuedSource({ flight, squareCardsEnabled }: { flight: MotionFlight; sq
     <div
       className={`game-motion-queued-source${
         flight.mode === "reflow" ? " game-motion-queued-source-reflow" : ""
-      }${flight.stackDepth ? " game-motion-stacked" : ""}`}
-      data-stack-depth={flight.stackDepth}
+      }`}
       style={rectStyle(flight.start)}
     >
       <MotionCardVisual

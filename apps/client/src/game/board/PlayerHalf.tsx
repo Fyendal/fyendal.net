@@ -459,6 +459,8 @@ export function PlayerHalf({
                 : undefined);
               const canPay = paymentCardId !== undefined;
               const canActivate = mine && !interaction.defending && group.activatable;
+              // Tap the last copy so the stack keeps its slot and the used card peels off beside it.
+              const activationId = group.instanceIds.at(-1)!;
               return (
                 <div
                   key={group.card.instanceId}
@@ -493,7 +495,7 @@ export function PlayerHalf({
                       : undefined}
                     highlighted={canActivate || canBlock || canPay}
                     selected={(mine && interaction.selection.kind === "activate" &&
-                      interaction.selection.sourceInstanceId === group.card.instanceId) ||
+                      group.instanceIds.includes(interaction.selection.sourceInstanceId)) ||
                       selectedPaymentCardId !== undefined}
                     dimmed={blocking || (mine && interaction.defending && !canBlock)}
                     onClick={canBlock
@@ -501,7 +503,7 @@ export function PlayerHalf({
                       : canPay
                         ? () => interaction.onSelectPaymentCard(paymentCardId)
                         : canActivate
-                          ? activate(group.card.instanceId)
+                          ? activate(activationId)
                           : undefined}
                   />
                   {group.count > 1 ? (

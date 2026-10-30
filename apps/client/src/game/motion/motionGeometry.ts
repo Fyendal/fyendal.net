@@ -38,8 +38,6 @@ export interface MotionAnchorSnapshot {
   cardSizedZones?: ReadonlySet<string>;
   /** Local announcement geometry; never changes the card's actual zone. */
   focusSources?: ReadonlyMap<number, MotionRect>;
-  /** Visual depth (2 or 3) of arena stacks, keyed like `cards`. */
-  stackDepths?: ReadonlyMap<string, number>;
   /** Every presentation key merged into the same arena stack, keyed by each member. */
   stackMembers?: ReadonlyMap<string, readonly string[]>;
 }
@@ -91,10 +89,10 @@ export interface MotionFlight {
   /** Vertical slide that clears the covering card before the flight travels. */
   emergeY?: number;
   destinationLayer?: "chain" | "stack";
-  /** The moving copy is an arena stack; draw its stacking edges while it slides. */
-  stackDepth?: number;
   /** An arena stack's ×N count changes with this flight and animates beside it. */
   stackCountChange?: { from: number; to: number; rect: MotionRect };
+  /** A card created on, or leaving, an arena strip rather than another zone. */
+  arena?: true;
 }
 
 export function motionFlightDurationMs(
@@ -126,6 +124,9 @@ export interface GameMotionBatch {
   flights: MotionFlight[];
   connectors: MotionConnector[];
   durationMs: number;
+  /** When every card leaving an arena strip has gone, so the stacks that
+   * stay can close the gap. */
+  boardClearMs?: number;
   reducedMotion?: true;
 }
 
@@ -168,7 +169,6 @@ function stackCountChange(
 /** Read all geometry before the coordinator performs any masking/class writes. */
 export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
   const cards = new Map<string, MotionRect>();
-  const stackDepths = new Map<string, number>();
   const stackMembers = new Map<string, readonly string[]>();
   const zones = new Map<string, MotionRect>();
   const cardSizedZones = new Set<string>();
@@ -183,12 +183,10 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
       key,
       ...(element.dataset.motionCardAliases?.split(/\s+/).filter(Boolean) ?? []),
     ];
-    const stackDepth = Number(element.dataset.stackDepth);
     const stackCount = keys.length > 1 ? element.querySelector<HTMLElement>("[data-motion-stack-count]") : null;
     for (const presentationKey of keys) {
       if (cards.has(presentationKey)) continue;
       cards.set(presentationKey, rect);
-      if (stackDepth >= 2) stackDepths.set(presentationKey, stackDepth);
       if (keys.length > 1) stackMembers.set(presentationKey, keys);
       // An alias is a card merged into a multi-card arena stack. Masking the
       // whole stack would hide the cards already there, so an arrival masks
@@ -222,7 +220,7 @@ export function measureMotionAnchors(root: ParentNode): MeasuredMotionAnchors {
     const rect = motionRect(element);
     if (Number.isSafeInteger(instanceId) && instanceId >= 0 && rect) focusSources.set(instanceId, rect);
   }
-  return { snapshot: { cards, zones, cardSizedZones, focusSources, stackDepths, stackMembers }, cardElements };
+  return { snapshot: { cards, zones, cardSizedZones, focusSources, stackMembers }, cardElements };
 }
 
 function endpoint(
@@ -262,10 +260,6 @@ function phaseStaggerMs(phase: MotionTimelinePhase): number {
 function sameRect(left: MotionRect, right: MotionRect): boolean {
   return left.left === right.left && left.top === right.top
     && left.width === right.width && left.height === right.height;
-}
-
-function rectKey(rect: MotionRect): string {
-  return `${rect.left}:${rect.top}:${rect.width}:${rect.height}`;
 }
 
 /** Slide a card out past the edge of the card covering it, on the side it
@@ -407,8 +401,7 @@ export function resolveMotionBatch(
   const effectDiscards: Array<{ event: MoveMotionEvent; flight: MotionFlight }> = [];
   const handDepartures: Array<{ seat: number; flight: MotionFlight }> = [];
   const handReflows: Array<{ seat: number; flight: MotionFlight }> = [];
-  const boardDepartures: Array<{ seat: number; flight: MotionFlight }> = [];
-  const boardReflows = new Map<string, { seat: number; flight: MotionFlight }>();
+  const boardDepartures: MotionFlight[] = [];
 
   for (const event of events) {
     if (event.kind === "reflow" && event.instanceId !== undefined &&
@@ -469,13 +462,14 @@ export function resolveMotionBatch(
         delayMs: 0,
         // The live card is already gone; keep a copy while this batch is queued.
         queueHoldSource: true,
+        ...(event.source.kind === "board" ? { arena: true as const } : {}),
       };
       const countChange = event.source.kind === "board"
         ? stackCountChange(event.sourcePresentationKey, previous, current, rect, countedStacks)
         : undefined;
       if (countChange) flight.stackCountChange = countChange;
       flights.push(flight);
-      if (event.source.kind === "board") boardDepartures.push({ seat: event.source.seat, flight });
+      if (event.source.kind === "board") boardDepartures.push(flight);
       continue;
     }
     if (event.kind === "appear" || event.kind === "settle") {
@@ -521,6 +515,7 @@ export function resolveMotionBatch(
           ...(destinationLayer !== undefined
             ? { destinationLayer }
             : {}),
+          ...(event.kind === "appear" && event.destination.kind === "board" ? { arena: true as const } : {}),
         };
         const countChange = event.kind === "appear" && event.destination.kind === "board"
           && event.destinationPresentationKey
@@ -572,16 +567,6 @@ export function resolveMotionBatch(
           )
           : cardRectWithinZone(destination.rect, start);
     if (event.kind === "reflow" && sameRect(start, end)) continue;
-    // Cards stacked in one board group share a presentation; slide it once.
-    const boardReflow = event.kind === "reflow" && event.source.kind === "board"
-      ? { seat: event.source.seat, key: `${event.source.seat}:${rectKey(start)}:${rectKey(end)}` }
-      : undefined;
-    const stackedReflow = boardReflow ? boardReflows.get(boardReflow.key) : undefined;
-    if (stackedReflow) {
-      stackedReflow.flight.count += 1;
-      stackedReflow.flight.showCount = true;
-      continue;
-    }
     const mode = event.kind === "reflow"
       ? "reflow"
       : event.destination.kind === "arsenal"
@@ -595,14 +580,10 @@ export function resolveMotionBatch(
     const sourceRevealPresentationKey = event.kind === "move"
       ? exposedSourceTopKey(event, previous, current)
       : undefined;
-    const stackDepth = event.kind === "reflow" && event.destinationPresentationKey !== undefined
-      ? current.stackDepths?.get(event.destinationPresentationKey)
-      : undefined;
     const flight: MotionFlight = {
       id: `${batchId}:flight:${flights.length}`,
       phase,
       mode,
-      ...(stackDepth !== undefined ? { stackDepth } : {}),
       ...(event.kind === "reflow" && event.phase === "movement" ? { durationMs: MOTION_HAND_CLOSE_MS } : {}),
       start,
       end,
@@ -618,7 +599,6 @@ export function resolveMotionBatch(
         ? { holdAtSource: true as const }
         : {}),
       ...((sourceRevealPresentationKey !== undefined ||
-        boardReflow !== undefined ||
         (event.source.kind === "hand" && event.visual.kind === "back"
           && ((event.kind === "reflow" && event.destinationPresentationKey !== undefined)
             || (event.kind === "move"
@@ -654,11 +634,9 @@ export function resolveMotionBatch(
     } else if (event.kind === "reflow" && event.source.kind === "hand"
       && event.visual.kind === "back") {
       handReflows.push({ seat: event.source.seat, flight });
-    } else if (boardReflow) {
-      boardReflows.set(boardReflow.key, { seat: boardReflow.seat, flight });
     } else if (event.kind === "move" && event.source.kind === "board"
       && (event.destination.kind !== "board" || event.destination.seat !== event.source.seat)) {
-      boardDepartures.push({ seat: event.source.seat, flight });
+      boardDepartures.push(flight);
     }
     if (event.kind === "move" && event.timeline === "effect-draw") {
       effectDraws.push({ event, flight });
@@ -717,12 +695,8 @@ export function resolveMotionBatch(
   }
 
   if (flights.length === 0 && connectors.length === 0) return null;
-  // Board reflows are timed from their seat's departures below. Scheduling
-  // them as a movement phase would push a later disappearance back, leaving
-  // the departed card invisible until its delayed dissolve began.
-  const boardReflowIds = new Set([...boardReflows.values()].map(({ flight }) => flight.id));
   const delayById = scheduleMotionTimeline([
-    ...flights.filter((flight) => !boardReflowIds.has(flight.id)).map((flight) => ({
+    ...flights.map((flight) => ({
       id: flight.id,
       phase: flight.phase,
       durationMs: motionFlightDurationMs(flight),
@@ -749,18 +723,6 @@ export function resolveMotionBatch(
   for (const { seat, flight } of handReflows) {
     flight.delayMs = Math.max(flight.delayMs, handClearTimes.get(seat) ?? 0);
   }
-  // Arena cards hold their slots until every departure from that board has
-  // played, then close the gap.
-  const boardClearTimes = new Map<number, number>();
-  for (const { seat, flight } of boardDepartures) {
-    boardClearTimes.set(seat, Math.max(
-      boardClearTimes.get(seat) ?? 0,
-      flight.delayMs + motionFlightDurationMs(flight),
-    ));
-  }
-  for (const { seat, flight } of boardReflows.values()) {
-    flight.delayMs = Math.max(flight.delayMs, boardClearTimes.get(seat) ?? 0);
-  }
   for (const { draw, successor } of stagedDraws) {
     draw.lingerUntilMs = successor.delayMs;
   }
@@ -779,6 +741,9 @@ export function resolveMotionBatch(
     flights,
     connectors,
     durationMs,
+    ...(boardDepartures.length > 0
+      ? { boardClearMs: Math.max(...boardDepartures.map((flight) => flight.delayMs + motionFlightDurationMs(flight))) }
+      : {}),
   };
 }
 

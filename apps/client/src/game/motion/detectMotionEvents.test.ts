@@ -1308,16 +1308,6 @@ describe("game motion detection", () => {
 
     expect(events).toEqual([
       expect.objectContaining({ kind: "disappear", instanceId: exertion.instanceId }),
-      {
-        kind: "reflow",
-        source: { kind: "board", seat: 0 },
-        destination: { kind: "board", seat: 0 },
-        visual: { kind: "face", card: frailty },
-        instanceId: frailty.instanceId,
-        sourcePresentationKey: "0:board:92",
-        destinationPresentationKey: "0:board:92",
-        phase: "movement",
-      },
     ]);
     const batch = resolveMotionBatch(events, {
       cards: new Map([["0:board:91", { left: 0, top: 0, width: 100, height: 100 }],
@@ -1327,12 +1317,9 @@ describe("game motion detection", () => {
       cards: new Map([["0:board:92", { left: 0, top: 0, width: 100, height: 100 }]]),
       zones: new Map(),
     }, "token");
-    const [dissolve, slide] = batch!.flights;
+    const [dissolve] = batch!.flights;
     expect(dissolve).toEqual(expect.objectContaining({ mode: "disappear", delayMs: 0 }));
-    expect(slide).toEqual(expect.objectContaining({
-      mode: "reflow", holdAtSource: true, queueHoldSource: true,
-      delayMs: dissolve!.delayMs + motionFlightDurationMs(dissolve!),
-    }));
+    expect(batch!.boardClearMs).toBe(dissolve!.delayMs + motionFlightDurationMs(dissolve!));
   });
 
   it("keeps a pitched card face visible until its deck-bottom flip", () => {

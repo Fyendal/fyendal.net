@@ -7,7 +7,6 @@ import type {
 } from "@fyendal/shared";
 import { detectGameMotionEvents } from "./detectMotionEvents.js";
 import { extractGamePresentations } from "./extractPresentations.js";
-import { boardReflows } from "./boardReflow.js";
 import { handReflows } from "./handReflow.js";
 import {
   countedMotionLocation,
@@ -339,7 +338,6 @@ export function transitionMotionEvents(
   const events = [
     ...movesAndEffects,
     ...handReflows(source, destination, movesAndEffects),
-    ...boardReflows(source, destination),
   ];
   // End-phase cleanup and startTurn are committed as one authoritative edge.
   // A trigger already visible on the new turn's stack must nevertheless wait

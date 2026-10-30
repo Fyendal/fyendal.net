@@ -76,42 +76,36 @@ describe("motion geometry", () => {
     expect(motionFlightDurationMs(flight!)).toBe(560);
   });
 
-  it("slides a stacked board group once, after the departing card reaches the graveyard", () => {
+  it("reports when every card leaving an arena has gone", () => {
     const departure: GameMotionEvent = {
       kind: "move", source: { kind: "board", seat: 0 }, destination: { kind: "graveyard", seat: 0 },
       instanceId: 7, sourcePresentationKey: "0:board:7", destinationPresentationKey: "0:graveyard:7",
       visual: { kind: "face", card: { instanceId: 7, cardId: "SBA016", owner: 0 } }, count: 1, confidence: "exact",
     };
-    const reflows = [8, 9].map((instanceId): GameMotionEvent => ({
-      kind: "reflow", source: { kind: "board", seat: 0 }, destination: { kind: "board", seat: 0 },
-      instanceId, sourcePresentationKey: `0:board:${instanceId}`, destinationPresentationKey: `0:board:${instanceId}`,
-      visual: { kind: "face", card: { instanceId, cardId: "OUT235", owner: 0 } }, phase: "movement",
-    }));
-    // Instances 8 and 9 render as one stacked group (aliases share a rect).
-    const previous = anchors({ cards: [
-      ["0:board:7", rect(0, 0)], ["0:board:8", rect(110, 0)], ["0:board:9", rect(110, 0)],
-    ] });
-    const current = anchors({ cards: [
-      ["0:graveyard:7", rect(900, 0)], ["0:board:8", rect(0, 0)], ["0:board:9", rect(0, 0)],
-    ] });
-    const batch = resolveMotionBatch([departure, ...reflows], previous, current, "leave");
-    const [travel, ...slides] = batch!.flights;
-    expect(slides).toHaveLength(1);
-    expect(slides[0]).toEqual(expect.objectContaining({
-      mode: "reflow", count: 2, showCount: true, start: rect(110, 0), end: rect(0, 0),
-      delayMs: travel!.delayMs + 320,
-    }));
-    expect(batch!.durationMs).toBe(travel!.delayMs + 320 + 220);
+    const batch = resolveMotionBatch(
+      [departure],
+      anchors({ cards: [["0:board:7", rect(0, 0)]] }),
+      anchors({ cards: [["0:graveyard:7", rect(900, 0)]] }),
+      "leave",
+    );
+    expect(batch?.boardClearMs).toBe(batch!.flights[0]!.delayMs + 320);
 
-    // Giving the card to the opponent also vacates its slot first.
-    const given = resolveMotionBatch([
-      { ...departure, destination: { kind: "board", seat: 1 }, destinationPresentationKey: "1:board:7" },
-      ...reflows,
-    ], previous, anchors({ cards: [
-      ["1:board:7", rect(0, -400)], ["0:board:8", rect(0, 0)], ["0:board:9", rect(0, 0)],
-    ] }), "give");
-    const [handOver, slide] = given!.flights;
-    expect(slide!.delayMs).toBe(handOver!.delayMs + 320);
+    // Giving the card to the opponent also vacates its slot.
+    const given = resolveMotionBatch(
+      [{ ...departure, destination: { kind: "board", seat: 1 }, destinationPresentationKey: "1:board:7" }],
+      anchors({ cards: [["0:board:7", rect(0, 0)]] }),
+      anchors({ cards: [["1:board:7", rect(0, -400)]] }),
+      "give",
+    );
+    expect(given?.boardClearMs).toBe(given!.flights[0]!.delayMs + 320);
+
+    const stays = resolveMotionBatch(
+      [{ ...departure, source: { kind: "hand", seat: 0 }, sourcePresentationKey: "0:hand:7" }],
+      anchors({ cards: [["0:hand:7", rect(0, 600)]] }),
+      anchors({ cards: [["0:graveyard:7", rect(900, 0)]] }),
+      "discard",
+    );
+    expect(stays?.boardClearMs).toBeUndefined();
   });
 
   it.each(["stack-layer", "chain-attack"] as const)("flies a focused play to %s from its enlarged presentation", (kind) => {
@@ -1330,33 +1324,6 @@ describe("motion geometry", () => {
     expect(cardElements.get("0:board:7")).toBe(stackElement);
     expect(cardElements.get("0:board:8")).toBe(countElement);
     expect(cardElements.get("0:board:9")).toBe(countElement);
-  });
-
-  it("records the stack depth for a grouped board card and its aliases", () => {
-    const stackElement = {
-      dataset: {
-        motionCard: "0:board:7",
-        motionCardAliases: "0:board:8",
-        stackDepth: "3",
-      },
-      getBoundingClientRect: () => rect(10, 20),
-      querySelector: () => null,
-    } as unknown as HTMLElement;
-    const single = {
-      dataset: { motionCard: "0:board:9" },
-      getBoundingClientRect: () => rect(50, 20),
-    } as unknown as HTMLElement;
-    const root = {
-      querySelectorAll: (selector: string) => (
-        selector === "[data-motion-card]" ? [stackElement, single] : []
-      ),
-    } as unknown as ParentNode;
-
-    const { stackDepths } = measureMotionAnchors(root).snapshot;
-
-    expect(stackDepths?.get("0:board:7")).toBe(3);
-    expect(stackDepths?.get("0:board:8")).toBe(3);
-    expect(stackDepths?.has("0:board:9")).toBe(false);
   });
 
   it("prefers a card-sized zone anchor over a broad hidden-hand container", () => {

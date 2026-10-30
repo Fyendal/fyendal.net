@@ -37,6 +37,7 @@ import {
 } from "./motionGeometry.js";
 import { attackLayerPresentation } from "../attackLayerPresentation.js";
 import { useMotionPreference } from "./useMotionPreference.js";
+import { ArenaMotion } from "./arenaMotionDom.js";
 import { rememberHandFocusOrigins, rememberStackFocusOrigins } from "../pitchFocusMotion.js";
 import {
   activateMotionDestinationMasks,
@@ -100,6 +101,9 @@ export function useGameMotion({
   const batchQueueRef = useRef<MotionBatchQueue>(EMPTY_MOTION_BATCH_QUEUE);
   const mountedBatchIdRef = useRef<string | null>(null);
   const maskedElementsRef = useRef<MaskedElementsByBatch>(new Map());
+  const arenaMotionRef = useRef<ArenaMotion | null>(null);
+  arenaMotionRef.current ??= new ArenaMotion();
+  const arenaMotion = arenaMotionRef.current;
   const gameId = view?.gameId;
   const getStackFocusOrigin = useCallback((instanceId: number) => {
     if (previousViewRef.current?.gameId !== gameId) return undefined;
@@ -234,8 +238,13 @@ export function useGameMotion({
       previousViewUpdateSequenceRef.current = viewUpdate.sequence;
       previousViewPredictedSemanticTransitionRef.current = predictsSemanticTransition;
       cancelMotionQueue();
+      arenaMotion.reset();
       return;
     }
+
+    // Measure arena stacks at rest; a slide still drawn from the last step
+    // continues from where it is.
+    if (processedUpdateKeyRef.current !== updateKey) arenaMotion.begin();
 
     // Read every current rect first. Class writes happen only after the batch
     // has been completely resolved, avoiding read/write layout interleaving.
@@ -268,6 +277,7 @@ export function useGameMotion({
     if (processedUpdateKeyRef.current === updateKey && !isFocusLayoutUpdate) {
       previousViewRef.current = view;
       previousAnchorsRef.current = measured.snapshot;
+      arenaMotion.sync(root);
       return;
     }
 
@@ -358,6 +368,23 @@ export function useGameMotion({
         );
       }
     }
+    if (previousView && classification.kind === "animate" && !reduceMotion) {
+      // Hold arena stacks in their slots until this update's departures,
+      // queued behind any batch already playing, have left the board.
+      let startsAt = 0;
+      let holdMs = 0;
+      for (const queued of [batchQueueRef.current.active, ...batchQueueRef.current.pending]) {
+        if (!queued) continue;
+        if (nextBatches.includes(queued) && queued.boardClearMs !== undefined) {
+          holdMs = Math.max(holdMs, startsAt + queued.boardClearMs);
+        }
+        startsAt += queued.durationMs;
+      }
+      arenaMotion.play(root, holdMs);
+    } else {
+      arenaMotion.cancel();
+      arenaMotion.sync(root);
+    }
     previousViewRef.current = view;
     previousAnchorsRef.current = measured.snapshot;
     processedUpdateKeyRef.current = updateKey;
@@ -368,8 +395,10 @@ export function useGameMotion({
   useEffect(() => {
     const settleAfterResize = () => {
       cancelMotionQueue();
+      arenaMotion.cancel();
       const root = rootRef.current;
       if (root) {
+        arenaMotion.sync(root);
         const anchors = measureMotionAnchors(root).snapshot;
         previousAnchorsRef.current = anchors;
         if (previousViewRef.current) {
@@ -382,7 +411,7 @@ export function useGameMotion({
     return () => {
       window.removeEventListener("resize", settleAfterResize);
     };
-  }, [cancelMotionQueue, rootRef, refreshHandFocusOrigins, refreshStackFocusOrigins]);
+  }, [arenaMotion, cancelMotionQueue, rootRef, refreshHandFocusOrigins, refreshStackFocusOrigins]);
 
   return {
     batch: queue.active,

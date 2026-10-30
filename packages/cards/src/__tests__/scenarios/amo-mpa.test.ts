@@ -423,6 +423,23 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     expect(boardNames(game, 0)).toEqual(["Silver", "Silver", "Silver", "Silver"]);
   });
 
+  it("Sick Intent's contract ignores a Plague Hive pitched to play it", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [SICK_INTENT, "plague hive|2"], weapons: [], equipment: NO_EQUIPMENT },
+      {
+        hero: "dorinthea",
+        hand: ["raging onslaught|1", "raging onslaught|2", "raging onslaught|3"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    game.play(SICK_INTENT, { pitch: ["plague hive|2"] }).settle();
+
+    expect(game.state.players[1]!.board).toHaveLength(1);
+    expect(boardNames(game, 0)).toEqual([]);
+  });
+
   it("Sick Intent creates no disease or Silver when fully defended", () => {
     const game = scenario({ seats: [
       {

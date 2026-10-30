@@ -112,6 +112,18 @@
   animation-fill-mode: both;
 }
 
+/* Arena cards land on the strip and lift off it, so a card joining or leaving
+   a stack reads as the top of that pile rather than a fade over it. */
+.game-motion-flight-appear.game-motion-flight-arena {
+  transform-origin: center;
+  animation-name: game-motion-arena-land;
+  animation-timing-function: cubic-bezier(.25, .8, .3, 1);
+}
+
+.game-motion-flight-disappear.game-motion-flight-arena {
+  animation-name: game-motion-arena-lift-off;
+}
+
 .game-motion-stack-count {
   position: absolute;
   z-index: 3;
@@ -329,6 +341,42 @@
 @keyframes game-motion-appear {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes game-motion-arena-land {
+  0% {
+    opacity: 0;
+    filter: brightness(2.1);
+    transform: translateY(-18px) scale(1.14);
+  }
+  62% {
+    opacity: 1;
+    filter: brightness(1.15);
+    transform: translateY(2px) scale(.98);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+    transform: none;
+  }
+}
+
+@keyframes game-motion-arena-lift-off {
+  0% {
+    opacity: 1;
+    filter: brightness(1) saturate(1) blur(0);
+    transform: none;
+  }
+  32% {
+    opacity: 1;
+    filter: brightness(1.45) saturate(.8) blur(0);
+    transform: translateY(-12px) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    filter: brightness(2) saturate(.25) blur(4px);
+    transform: translateY(-26px) scale(.84);
+  }
 }
 
 /* Public tokens and ephemeral cards have no destination card to fly toward.
@@ -569,6 +617,10 @@
 
 .game-motion-layer-reduced .game-motion-flight-disappear {
   animation-name: game-motion-disappear-reduced;
+}
+
+.game-motion-layer-reduced .game-motion-flight-appear.game-motion-flight-arena {
+  animation-name: game-motion-appear;
 }
 
 .game-motion-layer-reduced .game-motion-stack-count-from {

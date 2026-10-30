@@ -117,7 +117,8 @@ export function observingHookSources(
 
 /** Sources that observe their controller's Contract events: active arena
  * observers plus face-up attacks and defense reactions on the combat chain,
- * which stay functional there outside their owner's ordinary zones. */
+ * which stay functional there outside their owner's ordinary zones. An attack
+ * still on the stack is outside the arena (CR 1.7.4, 3.0.5b). */
 export function contractObserverSources(state: GameStateInternal, seat: number): CardInstance[] {
   const sources = new Map<number, CardInstance>();
   for (const source of observingHookSources(state, seat, {
@@ -129,6 +130,7 @@ export function contractObserverSources(state: GameStateInternal, seat: number):
   for (const link of state.chain) {
     if (
       link.attacker === seat &&
+      link.flags.attackStepBegan === true &&
       link.flags.attackGone !== true &&
       !link.attackingCard.faceDown
     ) sources.set(link.attackingCard.instanceId, link.attackingCard);
