@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import type { DeckArt, DeckPool, EquipmentSlot, Format } from "@fyendal/shared";
+import type { CardData, DeckArt, DeckPool, EquipmentSlot, Format } from "@fyendal/shared";
 import {
   cardData,
   equipmentFitsSlot,
@@ -11,10 +11,16 @@ import {
   precon,
 } from "@fyendal/cards";
 import { normalizeDeckArt } from "@fyendal/cards/art";
-import { deckArt, type FabraryMatchup } from "@fyendal/protocol";
+import { deckArt, resolvedCardArt, type FabraryMatchup } from "@fyendal/protocol";
 export { validatePresentation } from "@fyendal/cards";
 import { withTransaction, type Queryable } from "./db.js";
-import { parseFabraryDeckUrl, type FabraryClient, type FabraryDeckResult } from "./fabrary.js";
+import {
+  parseFabraryDeckUrl,
+  type FabraryClient,
+  type FabraryDeck,
+  type FabraryDeckResult,
+  type FabraryPin,
+} from "./fabrary.js";
 
 /**
  * Saved user decks ("cc" / "silver-age" formats). Users import Fabrary export
@@ -35,11 +41,38 @@ export interface DeckRow {
   heroName: string;
   /** Cosmetic art choices, limited to cards still in the deck. */
   art: DeckArt;
+  /** Printings the linked Fabrary deck pins, as printing id -> image id. Kept
+   * apart from `art` so the player's own picks survive a pin being removed. */
+  fabraryArt: Record<string, string>;
   createdAt: number;
   updatedAt: number;
 }
 
 const DEFAULT_DECK_ART: DeckArt = { highestRarity: false, picks: {} };
+
+/** The art a deck shows in play: a Fabrary pin wins over the player's pick for that card. */
+export function playedDeckArt(deck: DeckRow): DeckArt {
+  return { ...deck.art, picks: { ...deck.art.picks, ...deck.fabraryArt } };
+}
+
+/** Resolve pins to the printing ids `validateDeck` stores, keeping only valid images of cards in the pool. */
+function fabraryDeckArt(pool: DeckPool, pins: FabraryPin[]): Record<string, string> {
+  const picks: Record<string, string> = {};
+  for (const pin of pins) {
+    const card = findPrinting(pin.name, pin.pitch);
+    if (card) picks[poolCardId(card)] = pin.image;
+  }
+  return normalizeDeckArt(pool, { highestRarity: false, picks }).picks;
+}
+
+/** A deck list the player typed or pasted, or one fetched from Fabrary, which brings its pins. */
+type DeckSource = { text: string; fabraryUrl?: string } | { fabrary: FabraryDeck };
+
+function deckSourceFields(source: DeckSource): { text: string; fabraryUrl?: string; pins?: FabraryPin[] } {
+  return "fabrary" in source
+    ? { text: source.fabrary.text, fabraryUrl: source.fabrary.canonicalUrl, pins: source.fabrary.pins }
+    : source;
+}
 
 // ── Parsing ─────────────────────────────────────────────────────────────────
 
@@ -140,6 +173,21 @@ const INVENTORY_FRONT_ID_BY_BACK_ID = new Map(
   Object.values(cardData).flatMap((card) => card.backId ? [[card.backId, card.id] as const] : []),
 );
 
+// Demi-heroes are registered inventory cards despite sharing the hero card
+// type. Fabrary lists Levia, Redeemed among arena cards alongside Levia's
+// starting hero, so it must not be mistaken for a second hero.
+function isInventoryHero(card: CardData): boolean {
+  return card.cardType === "hero" && /\bwhile this is in your inventory\b/i.test(card.text);
+}
+
+/** The printing id a deck stores for a card its list names. Fabrary may
+ * identify the back face of a double-faced inventory card; the deck stores its
+ * front so every deck holds the same physical printing (Blasmophet, Levia
+ * Consumed -> Levia, Redeemed). */
+function poolCardId(card: CardData): string {
+  return isInventoryHero(card) ? INVENTORY_FRONT_ID_BY_BACK_ID.get(card.id) ?? card.id : card.id;
+}
+
 export type ValidationResult =
   | { ok: true; decklist: DeckPool; heroName: string }
   | { ok: false; errors: string[]; missing: string[]; unimplemented: string[] };
@@ -176,15 +224,8 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
       continue;
     }
     if (card.cardType === "hero") {
-      // Demi-heroes are registered inventory cards despite sharing the hero
-      // card type. Fabrary lists Levia, Redeemed among arena cards alongside
-      // Levia's starting hero, so it must not be mistaken for a second hero.
-      if (/\bwhile this is in your inventory\b/i.test(card.text)) {
-        // Fabrary may identify the back face of a double-faced inventory card.
-        // Store its front face so every deck holds the same physical printing
-        // (Blasmophet, Levia Consumed -> Levia, Redeemed).
-        const inventoryId = INVENTORY_FRONT_ID_BY_BACK_ID.get(card.id) ?? card.id;
-        for (let i = 0; i < line.qty; i++) inventoryPool.push(inventoryId);
+      if (isInventoryHero(card)) {
+        for (let i = 0; i < line.qty; i++) inventoryPool.push(poolCardId(card));
         continue;
       }
       if (heroId) {
@@ -365,6 +406,8 @@ function toDeck(value: unknown): DeckRow {
   // pg-mem returns a JSONB column default as text.
   const art: unknown = typeof r.art === "string" ? parseDbJson(r.art) : r.art;
   if (!deckArt(art)) return corruptDeck("art", "expected deck art");
+  const fabraryArt: unknown = typeof r.fabrary_art === "string" ? parseDbJson(r.fabrary_art) : r.fabrary_art;
+  if (!resolvedCardArt(fabraryArt)) return corruptDeck("fabrary_art", "expected card art");
   const decklist = decodeDeckPool(r.decklist);
   return {
     id: dbString(r.id, "id"),
@@ -376,6 +419,7 @@ function toDeck(value: unknown): DeckRow {
     heroName: dbString(r.hero_name, "hero_name"),
     // Refreshes and replacement lists can drop cards; their picks stop applying.
     art: normalizeDeckArt(decklist, art),
+    fabraryArt: normalizeDeckArt(decklist, { highestRarity: false, picks: fabraryArt }).picks,
     createdAt: dbSafeInteger(r.created_at, "created_at"),
     updatedAt: dbSafeInteger(r.updated_at, "updated_at"),
   };
@@ -405,6 +449,7 @@ export async function resolveDeck(db: Queryable, id: string): Promise<DeckRow | 
       decklist: fixed.pool,
       heroName: cardData[fixed.pool.heroId]?.name ?? fixed.name,
       art: DEFAULT_DECK_ART,
+      fabraryArt: {},
       createdAt: 0,
       updatedAt: 0,
     };
@@ -484,11 +529,13 @@ export async function resolveFreshDeck(
     };
   }
 
+  const fabraryArt = fabraryDeckArt(validation.decklist, fetched.deck.pins);
   const refreshed: DeckRow = {
     ...existing,
     fabraryUrl: fetched.deck.canonicalUrl,
     decklist: validation.decklist,
     heroName: validation.heroName,
+    fabraryArt,
   };
   if (matchupId !== undefined) {
     return {
@@ -502,13 +549,14 @@ export async function resolveFreshDeck(
   const now = Date.now();
   await db.query(
     `UPDATE decks
-     SET fabrary_url=$2, decklist=$3, hero_name=$4, updated_at=$5
-     WHERE id=$1 AND user_id=$6`,
+     SET fabrary_url=$2, decklist=$3, hero_name=$4, fabrary_art=$5, updated_at=$6
+     WHERE id=$1 AND user_id=$7`,
     [
       existing.id,
       fetched.deck.canonicalUrl,
       JSON.stringify(validation.decklist),
       validation.heroName,
+      JSON.stringify(fabraryArt),
       now,
       userId,
     ],
@@ -594,10 +642,8 @@ export async function resolveFabraryPlayDeck(
     if (!account.rows.length) return { ok: false, status: 404, error: "account not found" };
     const existing = findLinkedDeck(await listDecks(tx, userId), format, source.canonicalUrl);
     const result = existing
-      ? await updateDeck(tx, userId, existing.id, { fabraryUrl: source.canonicalUrl, text: fetched.deck.text })
-      : await importDeck(tx, userId, {
-        name: fetched.deck.name, format, fabraryUrl: source.canonicalUrl, text: fetched.deck.text,
-      });
+      ? await updateDeck(tx, userId, existing.id, { fabrary: fetched.deck })
+      : await importDeck(tx, userId, { name: fetched.deck.name, format, fabrary: fetched.deck });
     if (!result.ok) {
       return { ok: false, status: 422, error: "invalid deck", errors: result.errors,
         missing: result.missing, unimplemented: result.unimplemented };
@@ -613,16 +659,20 @@ export type ImportResult =
 export async function importDeck(
   db: Queryable,
   userId: number,
-  input: { name: string; format: Format; fabraryUrl?: string; text: string },
+  input: { name: string; format: Format } & DeckSource,
 ): Promise<ImportResult> {
-  const v = validateDeck(parseDecklistText(input.text), input.format);
+  const { text, fabraryUrl, pins } = deckSourceFields(input);
+  const v = validateDeck(parseDecklistText(text), input.format);
   if (!v.ok) return { ok: false, code: "INVALID_DECK", errors: v.errors, missing: v.missing, unimplemented: v.unimplemented };
   const now = Date.now();
   const id = randomBytes(8).toString("hex");
+  const fabraryArt = fabraryDeckArt(v.decklist, pins ?? []);
   await db.query(
-    `INSERT INTO decks (id, user_id, name, format, fabrary_url, decklist, hero_name, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8)`,
-    [id, userId, input.name, input.format, input.fabraryUrl ?? null, JSON.stringify(v.decklist), v.heroName, now],
+    `INSERT INTO decks
+     (id, user_id, name, format, fabrary_url, decklist, hero_name, fabrary_art, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9)`,
+    [id, userId, input.name, input.format, fabraryUrl ?? null, JSON.stringify(v.decklist), v.heroName,
+     JSON.stringify(fabraryArt), now],
   );
   return { ok: true, deck: (await getDeck(db, id))! };
 }
@@ -631,24 +681,29 @@ export async function updateDeck(
   db: Queryable,
   userId: number,
   id: string,
-  input: { name?: string; fabraryUrl?: string; text?: string },
+  /** A Fabrary source replaces the deck's pins; anything else keeps them. */
+  input: { name?: string } & (Partial<{ text: string; fabraryUrl: string }> | { fabrary: FabraryDeck }),
 ): Promise<ImportResult> {
   const existing = await getDeck(db, id);
   if (!existing || existing.userId !== userId) {
     return { ok: false, code: "DECK_NOT_FOUND", errors: ["deck not found"], missing: [], unimplemented: [] };
   }
+  const fields: { text?: string; fabraryUrl?: string; pins?: FabraryPin[] } =
+    "fabrary" in input ? deckSourceFields(input) : input;
+  const { text, fabraryUrl, pins } = fields;
   let decklist = existing.decklist;
   let heroName = existing.heroName;
-  if (input.text !== undefined) {
-    const v = validateDeck(parseDecklistText(input.text), existing.format);
+  if (text !== undefined) {
+    const v = validateDeck(parseDecklistText(text), existing.format);
     if (!v.ok) return { ok: false, code: "INVALID_DECK", errors: v.errors, missing: v.missing, unimplemented: v.unimplemented };
     decklist = v.decklist;
     heroName = v.heroName;
   }
+  const fabraryArt = pins === undefined ? existing.fabraryArt : fabraryDeckArt(decklist, pins);
   await db.query(
-    "UPDATE decks SET name=$2, fabrary_url=$3, decklist=$4, hero_name=$5, updated_at=$6 WHERE id=$1",
-    [id, input.name ?? existing.name, input.fabraryUrl ?? existing.fabraryUrl,
-     JSON.stringify(decklist), heroName, Date.now()],
+    "UPDATE decks SET name=$2, fabrary_url=$3, decklist=$4, hero_name=$5, fabrary_art=$6, updated_at=$7 WHERE id=$1",
+    [id, input.name ?? existing.name, fabraryUrl ?? existing.fabraryUrl,
+     JSON.stringify(decklist), heroName, JSON.stringify(fabraryArt), Date.now()],
   );
   return { ok: true, deck: (await getDeck(db, id))! };
 }

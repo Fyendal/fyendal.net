@@ -31,6 +31,7 @@ describe("Fabrary response decoding", () => {
       canonicalUrl: DECK_URL,
       name: "Rhinar test",
       matchups: [],
+      pins: [],
       text: [
         "Name: Rhinar test",
         "Deck cards",
@@ -153,6 +154,22 @@ describe("Fabrary response decoding", () => {
       .toBeNull();
     expect(decodeFabraryDeck({ name: "Deck", cards: [{ identifier: "sink_below_red", total: 100 }] }, source))
       .toBeNull();
+  });
+
+  it("keeps each pinned printing under the name and pitch its line uses, dropping malformed pins", () => {
+    const source = parseFabraryDeckUrl(DECK_URL);
+    if (!source) throw new Error("test URL should parse");
+    expect(decodeFabraryDeck({
+      name: "Pinned",
+      cards: [
+        { identifier: "rhinar_reckless_rampage", total: 1, imageOverride: "WTR001-RF" },
+        { identifier: "sink_below_red", total: 3, sideboardTotal: 1, imageOverride: "WTR215-MV" },
+        { identifier: "future_card_blue", total: 2, imageOverride: "../not-an-image" },
+      ],
+    }, source)?.pins).toEqual([
+      { name: "Rhinar, Reckless Rampage", image: "WTR001-RF" },
+      { name: "Sink Below", pitch: 1, image: "WTR215-MV" },
+    ]);
   });
 });
 

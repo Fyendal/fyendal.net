@@ -3767,7 +3767,11 @@ describe("card art", () => {
   const deckImage = cardArtVariants(deckCard)[0]!.image;
 
   /** Starts a game for a saved deck with hero and deck-card picks. */
-  async function startArtGame(betaTester: boolean): Promise<RoomRow> {
+  async function startArtGame(
+    betaTester: boolean,
+    picks: Record<string, string> = { [pool.heroId]: heroImage!, [deckCard]: deckImage },
+    fabraryArt: Record<string, string> = {},
+  ): Promise<RoomRow> {
     const users = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
        VALUES ('ArtOwner','artowner','hash',1) RETURNING id`,
@@ -3775,12 +3779,10 @@ describe("card art", () => {
     const userId = Number(users.rows[0]!.id);
     if (betaTester) await db.query("INSERT INTO beta_testers (user_id, added_at) VALUES ($1, 1)", [userId]);
     await db.query(
-      `INSERT INTO decks (id, user_id, name, format, fabrary_url, decklist, hero_name, art, created_at, updated_at)
-       VALUES ('art-deck', $1, 'Art', 'cc', NULL, $2, 'Hero', $3, 1, 1)`,
-      [userId, JSON.stringify(pool), JSON.stringify({
-        highestRarity: false,
-        picks: { [pool.heroId]: heroImage, [deckCard]: deckImage },
-      })],
+      `INSERT INTO decks
+       (id, user_id, name, format, fabrary_url, decklist, hero_name, art, fabrary_art, created_at, updated_at)
+       VALUES ('art-deck', $1, 'Art', 'cc', NULL, $2, 'Hero', $3, $4, 1, 1)`,
+      [userId, JSON.stringify(pool), JSON.stringify({ highestRarity: false, picks }), JSON.stringify(fabraryArt)],
     );
     const host = await store.createRoom("cc", { deckId: "art-deck", userId });
     await markStoredSeatPresent(host.code, 0);
@@ -3822,6 +3824,13 @@ describe("card art", () => {
       expect(message.cardArt?.[0]).toEqual({ [pool.heroId]: heroImage });
       expect(decodeServerMessage(JSON.parse(JSON.stringify(message)))).not.toBeNull();
     }
+  });
+
+  it("shows a Fabrary pin over the player's own pick for that card", async () => {
+    const pinnedCard = pool.deck.find((id) => cardArtVariants(id).length > 1)!;
+    const [pick, pin] = cardArtVariants(pinnedCard).map((variant) => variant.image);
+    const started = await startArtGame(true, { [pinnedCard]: pick! }, { [pinnedCard]: pin! });
+    expect(started.seats[0]!.cardArt).toEqual({ [pinnedCard]: pin });
   });
 
   it("shows standard art for players outside the beta", async () => {

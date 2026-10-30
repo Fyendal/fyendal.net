@@ -1,13 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import { cardData, FUTURE_SET_CODES, isImplemented, precon } from "@fyendal/cards";
+import { cardData, findPrinting, FUTURE_SET_CODES, isImplemented, precon } from "@fyendal/cards";
+import { cardArtVariants } from "@fyendal/cards/art";
 import { decodeDeckResponse, decodeDeckInvalidResponse, decodeFabraryDeckPreviewResponse } from "@fyendal/protocol";
 import { createApiServer } from "../http.js";
 import { login, register } from "../auth.js";
 import { getDeck, listDecks, updateDeck } from "../decks.js";
 import type { Queryable } from "../db.js";
-import type { FabraryClient } from "../fabrary.js";
+import type { FabraryClient, FabraryPin } from "../fabrary.js";
 import { freshDb } from "./testdb.js";
 
 const source = "https://fabrary.net/decks/01M1WZTPC64GDCMN2GX752E3R7";
@@ -25,6 +26,7 @@ let base: string;
 let token: string;
 let userId: number;
 let latestText: string;
+let latestPins: FabraryPin[];
 let client: FabraryClient;
 
 beforeEach(async () => {
@@ -35,8 +37,9 @@ beforeEach(async () => {
   token = session.token;
   userId = (await db.query("SELECT id FROM users WHERE username_lc=$1", ["fabraryplayer"])).rows[0].id;
   latestText = text;
+  latestPins = [];
   client = { fetchDeck: vi.fn(async () => ({ ok: true as const, deck: {
-    canonicalUrl: source, name: "Fabrary deck", text: latestText, matchups: [],
+    canonicalUrl: source, name: "Fabrary deck", text: latestText, matchups: [], pins: latestPins,
   } })) };
   server = createApiServer({ db, fabraryClient: client });
   await new Promise<void>((done) => server.listen(0, done));
@@ -97,6 +100,20 @@ describe("Fabrary play deck resolution", () => {
       bannedCards: expect.arrayContaining(["Art of War"]) } });
     expect(await listDecks(db, userId)).toHaveLength(1);
     expect(client.fetchDeck).toHaveBeenLastCalledWith(source);
+  });
+
+  it("saves the deck's Fabrary pins on import and replaces them on refresh", async () => {
+    const card = pool.deck.find((id) => cardArtVariants(id).length > 0)!;
+    const { name, pitch } = cardData[card]!;
+    const image = cardArtVariants(card)[0]!.image;
+    const savedId = findPrinting(name, pitch)!.id;
+    latestPins = [{ name, ...(pitch ? { pitch } : {}), image }];
+    const id = await importedId();
+    expect((await getDeck(db, id))?.fabraryArt).toEqual({ [savedId]: image });
+
+    latestPins = [];
+    expect(await importedId()).toBe(id);
+    expect((await getDeck(db, id))?.fabraryArt).toEqual({});
   });
 
   it("imports banned and implemented future cards without stripping them", async () => {
