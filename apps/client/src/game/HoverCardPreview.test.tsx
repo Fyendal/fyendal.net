@@ -35,6 +35,16 @@ describe("HoverCardPreview", () => {
     expect(html).toContain("width:100px;height:140px");
   });
 
+  it("turns a Meld card sideways so both halves read upright", () => {
+    const html = renderToStaticMarkup(createElement(HoverCardPreview, {
+      preview: { id: "SEA258", x: 10, y: 20, size: { width: 100, height: 140 } },
+      owner: 0,
+    }));
+
+    expect(html).toContain("width:140px;height:100px");
+    expect(html).toContain('class="card-preview-sideways"');
+  });
+
   it("names each card bound to the hovered ally above the preview", () => {
     const badges = cardBadges(
       { instanceId: 7, cardId: "IAR090", owner: 0, life: 3 },

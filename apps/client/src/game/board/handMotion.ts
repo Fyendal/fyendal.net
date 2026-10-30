@@ -15,27 +15,32 @@ export type HandDragPreviewSide = "left" | "right" | "above";
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
-/** Hover-preview size for a drag. Wide screens keep it whole beside the card;
- * narrow ones, or an above preference, shrink it so it always fits stacked
- * above or below the card. */
+/** Hover-preview size for a drag: beside the card or stacked above/below it,
+ * whichever keeps it larger. A beside preview fits the roomier side wherever
+ * the card is dragged, so it never falls back onto the card. */
 export function handDragPreviewSize(
   preview: Size,
   card: Size,
   viewport: Size,
   preferredSide: HandDragPreviewSide = "right",
 ): Size & { stacked: boolean } {
-  const gutter = HAND_DRAG_PREVIEW_GAP + 2 * HAND_DRAG_PREVIEW_EDGE;
-  if (preferredSide !== "above" && viewport.width - card.width - gutter >= preview.width) {
-    return { ...preview, stacked: false };
-  }
-  const height = (viewport.height - card.height) / 2 - HAND_DRAG_PREVIEW_GAP - HAND_DRAG_PREVIEW_EDGE;
-  const width = viewport.width - 2 * HAND_DRAG_PREVIEW_EDGE;
-  const scale = Math.max(0, Math.min(1, height / preview.height, width / preview.width));
-  return {
+  const fit = (width: number, height: number) =>
+    Math.max(0, Math.min(1, width / preview.width, height / preview.height));
+  const scaled = (scale: number, stacked: boolean) => ({
     width: Math.round(preview.width * scale),
     height: Math.round(preview.height * scale),
-    stacked: true,
-  };
+    stacked,
+  });
+  const stackedScale = fit(
+    viewport.width - 2 * HAND_DRAG_PREVIEW_EDGE,
+    (viewport.height - card.height) / 2 - HAND_DRAG_PREVIEW_GAP - HAND_DRAG_PREVIEW_EDGE,
+  );
+  if (preferredSide === "above") return scaled(stackedScale, true);
+  const besideScale = fit(
+    (viewport.width - card.width) / 2 - HAND_DRAG_PREVIEW_GAP - HAND_DRAG_PREVIEW_EDGE,
+    viewport.height - 2 * HAND_DRAG_PREVIEW_EDGE,
+  );
+  return besideScale >= stackedScale ? scaled(besideScale, false) : scaled(stackedScale, true);
 }
 
 /** Preview offset from the dragged card's top-left: beside it when it fits,

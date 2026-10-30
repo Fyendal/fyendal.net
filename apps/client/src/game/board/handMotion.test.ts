@@ -127,6 +127,18 @@ describe("dragged card motion", () => {
       .toEqual({ width: 236, height: 329, stacked: true });
   });
 
+  it("keeps a landscape-phone Meld preview beside the card wherever it is dragged", () => {
+    const viewport = { width: 844, height: 390 };
+    const card = { width: 80, height: 112 };
+    const preview = handDragPreviewSize({ width: 374, height: 268 }, card, viewport, "left");
+    // (844 - 80) / 2 - 12 - 8 leaves 362px beside the card.
+    expect(preview).toEqual({ width: 362, height: 259, stacked: false });
+    for (let left = 0; left <= viewport.width - card.width; left += 10) {
+      const { x } = handDragPreviewOffset({ ...card, left, top: 270 }, preview, viewport, "left");
+      expect(x >= card.width || x + preview.width <= 0).toBe(true);
+    }
+  });
+
   it("places the drag preview beside the card on the roomier side", () => {
     const viewport = { width: 1440, height: 900 };
     const preview = { width: 296, height: 413 };

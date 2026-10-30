@@ -507,6 +507,12 @@
     margin-inline: auto;
     aspect-ratio: 300 / 413;
   }
+  .mobile-card-inspect-sheet .card-preview-sideways {
+    --sideways-height: min(330px, calc(100dvh - 110px));
+    width: calc(var(--sideways-height) * 413 / 300);
+    height: var(--sideways-height);
+    margin-inline: auto;
+  }
 }
 
 /* Narrow phones: a slimmer bar. */

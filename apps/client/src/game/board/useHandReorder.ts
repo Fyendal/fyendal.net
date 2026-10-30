@@ -28,6 +28,7 @@ import {
 } from "./handMotion.js";
 import { isTouchBoardViewport, MOBILE_FLOAT_QUERY } from "./viewportQueries.js";
 import { cardPreviewSize } from "../Card.js";
+import { cardPreviewFaceBox } from "../cardPreviewFaces.js";
 
 interface HandDrag {
   pointerId: number;
@@ -304,8 +305,10 @@ export function useHandReorder(
     drag.previewSide = window.matchMedia(MOBILE_FLOAT_QUERY).matches
       ? "above"
       : drag.touch ? "left" : "right";
+    const previewFace = cardPreviewSize(window.innerHeight);
+    const cardId = drag.element.dataset.cardid;
     drag.preview = handDragPreviewSize(
-      cardPreviewSize(window.innerHeight),
+      cardId ? cardPreviewFaceBox(cardId, previewFace) : previewFace,
       { width: drag.cardWidth, height: drag.cardHeight },
       { width: window.innerWidth, height: window.innerHeight },
       drag.previewSide,

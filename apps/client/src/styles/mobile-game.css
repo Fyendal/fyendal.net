@@ -540,6 +540,12 @@
     height: auto;
     aspect-ratio: 300 / 413;
   }
+  .mobile-card-inspect-sheet .card-preview-sideways {
+    flex: 0 0 auto;
+    width: min(460px, calc(100vw - 32px));
+    height: auto;
+    aspect-ratio: 413 / 300;
+  }
 
   /* Desktop floats become bounded, scrollable mobile sheets. Inline drag and
      docking coordinates are intentionally overridden. */

@@ -11,6 +11,7 @@ import type {
 } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { CardBack, CardFace } from "../Card.js";
+import { PreviewCardFace } from "../PreviewCardFace.js";
 import { cardLegalityExplanation } from "../causalExplanations.js";
 import {
   canAddPaymentCard,
@@ -280,7 +281,7 @@ export function PlayerHand({
               className="hand-drag-preview"
               style={{ width: floatingCard.previewWidth, height: floatingCard.previewHeight }}
             >
-              <CardFace card={draggedCard} size="preview" showOverlays={false} />
+              <PreviewCardFace card={draggedCard} showOverlays={false} />
             </div>
           ) : null}
         </div>,

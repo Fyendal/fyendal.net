@@ -24,13 +24,29 @@ export function cardPreviewFaceIds(cardId: string): readonly string[] {
   return frontId ? [frontId, cardId] : [cardId];
 }
 
+/** Meld cards print both halves sideways, so previews turn them to read. */
+export function isSidewaysCard(cardId: string): boolean {
+  return cardData[cardId]?.keywords?.some((keyword) => keyword.trim().toLowerCase() === "meld") === true;
+}
+
+/** The on-screen box of one preview face, landscape for sideways cards. */
+export function cardPreviewFaceBox(
+  cardId: string,
+  faceSize: { width: number; height: number },
+): { width: number; height: number } {
+  return isSidewaysCard(cardId)
+    ? { width: faceSize.height, height: faceSize.width }
+    : faceSize;
+}
+
 export function cardPreviewSurfaceSize(
   cardId: string,
   faceSize: { width: number; height: number },
 ): { width: number; height: number } {
-  const faceCount = Math.max(1, cardPreviewFaceIds(cardId).length);
+  const boxes = cardPreviewFaceIds(cardId).map((id) => cardPreviewFaceBox(id, faceSize));
+  if (boxes.length === 0) return faceSize;
   return {
-    width: faceSize.width * faceCount + CARD_PREVIEW_FACE_GAP * (faceCount - 1),
-    height: faceSize.height,
+    width: boxes.reduce((sum, box) => sum + box.width, 0) + CARD_PREVIEW_FACE_GAP * (boxes.length - 1),
+    height: Math.max(...boxes.map((box) => box.height)),
   };
 }

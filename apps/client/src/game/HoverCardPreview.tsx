@@ -3,13 +3,14 @@ import { useIntl } from "react-intl";
 import {
   CARD_PREVIEW_HEIGHT,
   CARD_PREVIEW_WIDTH,
-  CardFace,
   cardImageUrl,
 } from "./Card.js";
 import {
+  cardPreviewFaceBox,
   cardPreviewFaceIds,
   cardPreviewSurfaceSize,
 } from "./cardPreviewFaces.js";
+import { PreviewCardFace } from "./PreviewCardFace.js";
 import { MARKED_TOKEN_ID, type CardBadge } from "./cardBadges.js";
 import { EffectHintPanel } from "./effects/EffectHintPanel.js";
 import type { EffectHint } from "./effects/effectHint.js";
@@ -131,12 +132,9 @@ export function HoverCardPreview({
         <div
           className="card-preview-face"
           key={cardId}
-          style={{ width: faceSize.width, height: faceSize.height }}
+          style={cardPreviewFaceBox(cardId, faceSize)}
         >
-          <CardFace
-            card={{ instanceId: -999 - index, cardId, owner }}
-            size="preview"
-          />
+          <PreviewCardFace card={{ instanceId: -999 - index, cardId, owner }} />
         </div>
       ))}
     </div>

@@ -17,8 +17,9 @@ import {
   CARD_PREVIEW_WIDTH,
   CardArtwork,
   CardArtProvider,
-  CardFace,
 } from "../game/Card.js";
+import { cardPreviewFaceBox } from "../game/cardPreviewFaces.js";
+import { PreviewCardFace } from "../game/PreviewCardFace.js";
 import { MobileCardInspect } from "../game/MobileCardInspect.js";
 import { useMobileCardLongPress } from "../game/mobileCardLongPress.js";
 import { formatLabel } from "../lobby/FormatBadge.js";
@@ -351,19 +352,24 @@ export function PrepRoom() {
       setPreview(null);
       return;
     }
+    const cardId = el.getAttribute("data-cardid")!;
     const r = el.getBoundingClientRect();
+    const box = cardPreviewFaceBox(cardId, {
+      width: CARD_PREVIEW_WIDTH,
+      height: CARD_PREVIEW_HEIGHT,
+    });
     // A ledger row previews beside its own ledger rather than over its rows.
     const span = el.closest(".prep-deck-zone")?.getBoundingClientRect() ?? r;
     const gap = 12;
     let x = span.right + gap;
-    if (x + CARD_PREVIEW_WIDTH > window.innerWidth - 8) {
-      x = Math.max(8, span.left - CARD_PREVIEW_WIDTH - gap);
+    if (x + box.width > window.innerWidth - 8) {
+      x = Math.max(8, span.left - box.width - gap);
     }
     const y = Math.min(
-      Math.max(r.top + r.height / 2 - CARD_PREVIEW_HEIGHT / 2, 8),
-      window.innerHeight - CARD_PREVIEW_HEIGHT - 8,
+      Math.max(r.top + r.height / 2 - box.height / 2, 8),
+      window.innerHeight - box.height - 8,
     );
-    setPreview({ id: el.getAttribute("data-cardid")!, x, y });
+    setPreview({ id: cardId, x, y });
   };
 
   const toggleWeapon = (index: number) => {
@@ -864,11 +870,13 @@ export function PrepRoom() {
           style={{
             left: preview.x,
             top: preview.y,
-            width: CARD_PREVIEW_WIDTH,
-            height: CARD_PREVIEW_HEIGHT,
+            ...cardPreviewFaceBox(preview.id, {
+              width: CARD_PREVIEW_WIDTH,
+              height: CARD_PREVIEW_HEIGHT,
+            }),
           }}
         >
-          <CardFace card={{ instanceId: -999, cardId: preview.id, owner: yourSeat }} size="preview" />
+          <PreviewCardFace card={{ instanceId: -999, cardId: preview.id, owner: yourSeat }} />
         </div>
       )}
 
