@@ -4139,6 +4139,12 @@
       "value": "sempre que um token de doença for destruído, se for o primeiro com esse nome, crie uma cópia dele sob o controle do mesmo herói"
     }
   ],
+  "card.effect.mpa.sickeningweakness": [
+    {
+      "type": 0,
+      "value": "cartas em defesa recebem -1 de defesa neste chain link"
+    }
+  ],
   "card.effect.mpw.allin": [
     {
       "type": 0,
@@ -12223,6 +12229,12 @@
     {
       "type": 0,
       "value": "Escolha uma carta da mão do herói defensor para fazer banish"
+    }
+  ],
+  "card.mpa.sickeningrot.pay": [
+    {
+      "type": 0,
+      "value": "Sickening Rot: pagar 3 recursos ou receber 2 de dano?"
     }
   ],
   "card.mpg.arsenal.card.bottom": [

@@ -1298,9 +1298,11 @@ export interface CardScript {
    *  effects such as Herald of Triumph and checked by Phantasm). */
   modifyDefendingPower?(ctx: ScriptCtx, defending: DeepReadonly<CardInstance>): number;
   /** Adjustment to the defense property of cards defending this source's
-   * attack. Active friendly permanents may also supply this hook. */
+   * attack. Active friendly permanents and resolved cards with a live
+   * modifier may also supply this hook. */
   modifyDefendingDefense?(ctx: ScriptCtx, defending: DeepReadonly<CardInstance>): number;
-  /** Adjustment to an equipment card's defense while it defends this attack. */
+  /** Adjustment to an equipment card's defense while it defends this attack;
+   * supplied by the same sources as modifyDefendingDefense. */
   modifyDefendingEquipmentDefense?(ctx: ScriptCtx, defending: DeepReadonly<CardInstance>): number;
   /** Called immediately when equipment becomes a defender of this attack. */
   onDefendedByEquipment?(ctx: ScriptCtx, defending: DeepReadonly<CardInstance>): void;

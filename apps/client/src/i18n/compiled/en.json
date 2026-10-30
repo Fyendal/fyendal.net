@@ -4088,6 +4088,12 @@
       "value": "whenever a disease token is destroyed, if it's the first with that name, create a copy of it under the same hero's control"
     }
   ],
+  "card.effect.mpa.sickeningweakness": [
+    {
+      "type": 0,
+      "value": "defending cards get -1 defense this chain link"
+    }
+  ],
   "card.effect.mpw.allin": [
     {
       "type": 0,
@@ -11837,6 +11843,12 @@
     {
       "type": 0,
       "value": "Choose a card to banish from the defending hero's hand"
+    }
+  ],
+  "card.mpa.sickeningrot.pay": [
+    {
+      "type": 0,
+      "value": "Sickening Rot: pay 3 resources or take 2 damage?"
     }
   ],
   "card.mpg.arsenal.card.bottom": [

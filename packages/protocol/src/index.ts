@@ -541,6 +541,8 @@ const MAX_ID = 128;
 const MAX_SHORT_TEXT = 256;
 const MAX_TEXT = 4096;
 const MAX_CARDS = 256;
+// Repeated instant sources multiply pitch and target choices well past MAX_CARDS.
+const MAX_LEGAL_INTENTS = 4_096;
 const MAX_INPUT_CARDS = 100;
 const MAX_LOG = 200;
 const MAX_ROOMS = 10_000;
@@ -1002,6 +1004,17 @@ function botDecklists(value: unknown): boolean {
     && optional(lists.opponent, (v): v is string[] => shortStrings(v));
 }
 
+/** Routing fields of a bot task whose body this client cannot decode. */
+export function decodeBotTaskEnvelope(value: unknown): Extract<ServerMessage, { type: "bot-fallback-needed" }> | null {
+  const message = object(value);
+  if (message?.type !== "bot-task" || !roomCode(message.code) || !nonNegativeInteger(message.version)
+    || !runtimeId(message.runtimeId) || !nonNegativeInteger(message.delayMs) || message.delayMs > 10_000) return null;
+  return {
+    type: "bot-fallback-needed", code: message.code, version: message.version,
+    runtimeId: message.runtimeId, delayMs: message.delayMs,
+  };
+}
+
 export function decodeBotTask(value: unknown): ClientBotTask | null {
   const message = object(value);
   const required = ["type", "code", "version", "runtimeId", "botId", "seat", "view", "legal", "delayMs"];
@@ -1009,11 +1022,9 @@ export function decodeBotTask(value: unknown): ClientBotTask | null {
   try {
     if (new TextEncoder().encode(JSON.stringify(value)).byteLength > MAX_BOT_TASK_BYTES) return null;
     const view = decodeGameView(message.view);
-    if (message.type !== "bot-task" || !roomCode(message.code) || !nonNegativeInteger(message.version)
-      || !runtimeId(message.runtimeId) || typeof message.botId !== "string" || !BOT_OPPONENTS.has(message.botId)
+    if (!decodeBotTaskEnvelope(message) || typeof message.botId !== "string" || !BOT_OPPONENTS.has(message.botId)
       || !seat(message.seat) || !view || view.gameId !== message.code
-      || !array(message.legal, decodeGameIntentValue, MAX_CARDS)
-      || !nonNegativeInteger(message.delayMs) || message.delayMs > 10_000) return null;
+      || !array(message.legal, decodeGameIntentValue, MAX_LEGAL_INTENTS)) return null;
     if (message.decklists !== undefined && !botDecklists(message.decklists)) return null;
     if (message.simulation !== undefined) decodeSerializedStateEnvelope(message.simulation, message.code);
     return message as unknown as ClientBotTask;
@@ -1845,9 +1856,9 @@ function decodeStateMessage(value: unknown): StateMessage | null {
     && optional(message.transition, gameTransitionView)
     && Array.isArray(message.playerProfiles) && message.playerProfiles.length === 2
     && message.playerProfiles.every(playerProfile)
-    && array(message.legal, decodeGameIntentValue, MAX_CARDS)
+    && array(message.legal, decodeGameIntentValue, MAX_LEGAL_INTENTS)
     && optional(message.actionCandidates, (v): v is GameIntent[] =>
-      array(v, decodeGameIntentValue, MAX_CARDS))
+      array(v, decodeGameIntentValue, MAX_LEGAL_INTENTS))
     && optional(message.spectators, nonNegativeInteger)
     && optional(message.botGame, (v): v is boolean => typeof v === "boolean")
     && Array.isArray(message.lastActionAt) && message.lastActionAt.length === 2

@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   cardNamed,
+  commonOptionMessages,
   contractWithSilver,
   decisionMessage,
   decisionPrompt,
@@ -65,6 +66,17 @@ function activeAssassinAttack(ctx: ScriptCtx): number[] {
   if (!link || link.flags.attackGone === true || !ctx.cardTypes(link.attackingCard).includes("assassin")) return [];
   return [link.attackingCard.instanceId];
 }
+
+function sickening(effect: (ctx: ScriptCtx, defender: number) => void): CardScript {
+  return {
+    onPlay(ctx) {
+      const defender = opponentSeat(ctx);
+      if (isInfected(ctx, defender)) effect(ctx, defender);
+    },
+  };
+}
+
+const reactionCount = (ctx: ScriptCtx): number => Number(ctx.getFlag("link", "reactionCount"));
 
 function tailoredBanish(ctx: ScriptCtx): void {
   const named = ctx.self.chosenName;
@@ -422,5 +434,46 @@ export const mpa: Record<string, CardScript> = {
     onFriendlyEffectHitCondition: (ctx, _source, targetSeat) =>
       ctx.link?.attackingCard.instanceId === ctx.self.instanceId && targetSeat !== ctx.seat,
     onFriendlyEffectHit: tailoredBanish,
+  },
+
+  "sickening exhaustion|3": sickening((ctx, defender) => {
+    for (const card of [...ctx.player(defender).arsenal]) ctx.putOnDeckBottom(card.instanceId);
+  }),
+
+  "sickening rot|3": {
+    ...sickening((ctx, defender) => {
+      const paying = ctx.requestPayment(
+        "mpa-sickening-rot-pay",
+        decisionPrompt("Sickening Rot: pay {r}{r}{r} or take 2 damage?", "card.mpa.sickeningrot.pay", {
+          optionMessages: commonOptionMessages("no"),
+        }),
+        3,
+        defender,
+      );
+      if (!paying) ctx.dealDamage(defender, 2);
+    }),
+    onChoose(ctx, hook, option) {
+      if (hook === "mpa-sickening-rot-pay" && option !== "paid") ctx.dealDamage(opponentSeat(ctx), 2);
+    },
+  },
+
+  "sickening weakness|3": {
+    // A continuous effect, so cards that start defending later this link are weakened too.
+    ...sickening((ctx) => {
+      ctx.addModifier({
+        scope: "chain-link",
+        ...ongoingLabel("defending cards get -1 defense this chain link", "card.effect.mpa.sickeningweakness"),
+      });
+    }),
+    modifyDefendingDefense: () => -1,
+    modifyDefendingEquipmentDefense: () => -1,
+  },
+
+  "concoct agony|2": {
+    modifyAttack: (ctx) => (reactionCount(ctx) >= 3 ? 3 : 0),
+    canTriggerOnHit: (ctx) => reactionCount(ctx) >= 3 && ctx.link?.targetAllyId === undefined,
+    onHit(ctx) {
+      for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) ctx.banish(card.instanceId);
+    },
   },
 };

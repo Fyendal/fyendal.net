@@ -3957,6 +3957,12 @@
       "value": "每当一个疾病衍生物被摧毁时，若它是该名称第一个被摧毁的，在同一英雄的操控下生成它的一个复制"
     }
   ],
+  "card.effect.mpa.sickeningweakness": [
+    {
+      "type": 0,
+      "value": "本 chain link 中的防御牌 -1 防御"
+    }
+  ],
   "card.effect.mpw.allin": [
     {
       "type": 0,
@@ -11050,6 +11056,12 @@
     {
       "type": 0,
       "value": "选择一张防守方英雄的手牌并放逐"
+    }
+  ],
+  "card.mpa.sickeningrot.pay": [
+    {
+      "type": 0,
+      "value": "Sickening Rot：支付 3 点资源，否则承受 2 点伤害？"
     }
   ],
   "card.mpg.arsenal.card.bottom": [

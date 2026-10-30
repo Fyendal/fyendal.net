@@ -247,4 +247,12 @@ describe("BrowserBotController", () => {
     vi.advanceTimersByTime(0);
     expect(messages[0]).toMatchObject({ failure: "oversized" }); expect(workers).toEqual([]);
   });
+
+  it("falls back without a worker when a task cannot be decoded", () => {
+    const { controller, workers, messages } = fixture();
+    controller.reset(); controller.offer("ABC123", runtimeId);
+    controller.rejectTask({ type: "bot-fallback-needed", code: "ABC123", version: 2, runtimeId, delayMs: 0 });
+    vi.advanceTimersByTime(0);
+    expect(messages[0]).toMatchObject({ failure: "invalid-result", expectedVersion: 2 }); expect(workers).toEqual([]);
+  });
 });

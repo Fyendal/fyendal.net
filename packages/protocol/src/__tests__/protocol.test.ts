@@ -6,6 +6,7 @@ import {
   decodeAccountCosmeticsResponse,
   decodeAccountEmailResponse,
   decodeAchievementsResponse,
+  decodeBotTaskEnvelope,
   decodeBugReportNotificationsResponse,
   decodeBugReportResponse,
   decodePlayerReportResponse,
@@ -1276,6 +1277,19 @@ describe("GameView and server messages", () => {
     expect(decodeServerMessage({ type: "state", version: 2, view: gameView(), transition: { fromVersion: 1, kind: "forward", restoreVersion: 0, events: [] }, playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 0] })).toBeNull();
     expect(decodeServerMessage({ type: "state", version: 2, view: gameView(), transition: { fromVersion: 1, kind: "replace", restoreVersion: -1, events: [] }, playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 0] })).toBeNull();
     expect(decodeServerMessage({ type: "state", version: 1, view: gameView(), transition: { fromVersion: 0, kind: "forward", events: [{ kind: "move", from: { kind: "hand", seat: 0, position: "bottom" }, to: { kind: "deck", seat: 0, position: "bottom" }, count: 1 }] }, playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 0] })).toBeNull();
+  });
+
+  it("accepts legal lists longer than a card zone and routes undecodable bot tasks to fallback", () => {
+    // Four Gates, each with four pitches and 22 targets.
+    const legal = Array.from({ length: 353 }, (_, index) => ({
+      kind: "activate-ability", sourceInstanceId: 1, pitchInstanceIds: [2], pitchRequired: 1, targetCardInstanceId: index,
+    }));
+    const task = { type: "bot-task", code: "ABC123", version: 7, runtimeId: "a".repeat(64), botId: "levia", seat: 1, view: { ...gameView(), gameId: "ABC123" }, legal, delayMs: 1_000 };
+    expect(decodeServerMessage({ type: "state", version: 1, view: gameView(), playerProfiles, yourSeat: 0, legal, actionCandidates: legal, lastActionAt: [0, 0] })).not.toBeNull();
+    expect(decodeServerMessage(task)).not.toBeNull();
+    expect(decodeServerMessage({ ...task, view: null })).toBeNull();
+    expect(decodeBotTaskEnvelope({ ...task, view: null })).toEqual({ type: "bot-fallback-needed", code: "ABC123", version: 7, runtimeId: "a".repeat(64), delayMs: 1_000 });
+    expect(decodeBotTaskEnvelope({ ...task, code: "abc" })).toBeNull();
   });
 });
 

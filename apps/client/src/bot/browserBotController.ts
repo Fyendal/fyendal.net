@@ -9,7 +9,8 @@ const DECISION_TIMEOUT_MS = 5_000;
 const RESYNC_TIMEOUT_MS = 10_000;
 const MAX_FAILURES = 3;
 
-type Task = ClientBotTask | Extract<ServerMessage, { type: "bot-fallback-needed" }>;
+type FallbackTask = Extract<ServerMessage, { type: "bot-fallback-needed" }>;
+type Task = ClientBotTask | FallbackTask;
 export interface BotWorkerPort {
   postMessage(value: unknown): void;
   terminate(): void;
@@ -102,7 +103,12 @@ export class BrowserBotController {
     }
   }
 
-  receive(task: Task): void {
+  receive(task: Task): void { this.accept(task, false); }
+
+  /** An undecodable task still gets the server's conservative move instead of stalling. */
+  rejectTask(task: FallbackTask): void { this.accept(task, true); }
+
+  private accept(task: Task, undecodable: boolean): void {
     if (!this.compatible || task.code !== this.code || task.runtimeId !== this.deps.runtimeId
       || task.version < this.latestVersion) return;
     if (this.active?.code === task.code && this.active.version === task.version) return;
@@ -111,6 +117,7 @@ export class BrowserBotController {
     this.active = task;
     this.command = null;
     this.taskStartedAt = Date.now();
+    if (undecodable) { this.fail("invalid-result", "task-decode"); return; }
     if (task.type === "bot-fallback-needed") { this.fail("oversized", "server-task-limit"); return; }
     if (this.failures >= MAX_FAILURES) { this.fail("circuit-open", "repeated-failures"); return; }
     this.start(task);

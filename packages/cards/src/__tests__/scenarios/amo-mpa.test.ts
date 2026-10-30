@@ -26,6 +26,10 @@ const KUNAI = "kunai of retribution|0";
 const KISS_OF_DEATH = "kiss of death|1";
 const FRAILTY_TOKEN = "OUT235";
 const INERTIA_TOKEN = "OUT236";
+const EXHAUSTION = "sickening exhaustion|3";
+const ROT = "sickening rot|3";
+const WEAKNESS = "sickening weakness|3";
+const CONCOCT = "concoct agony|2";
 
 function boardNames(game: ReturnType<typeof scenario>, seat: number): string[] {
   return game.state.players[seat]!.board.map((card) => cardData[card.cardId]!.name);
@@ -927,5 +931,143 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       "Wounding Blow", "Wounding Blow",
     ]);
   });
-});
 
+  it("Sickening Exhaustion puts an infected defender's arsenal on the bottom of their deck", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [KISS_OF_DEATH, EXHAUSTION], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+      {
+        hero: "dorinthea",
+        arsenalFaceDown: [WOUNDING_BLOW],
+        deck: ["raging onslaught|1"],
+        board: [FRAILTY_TOKEN],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    game.play(KISS_OF_DEATH).blockWith().react(EXHAUSTION);
+
+    game.expectZoneSize(1, "arsenal", 0).expectDeckBottom(1, WOUNDING_BLOW);
+  });
+
+  it("Sickening Exhaustion leaves an uninfected defender's arsenal alone", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [KISS_OF_DEATH, EXHAUSTION], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", arsenalFaceDown: [WOUNDING_BLOW], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(KISS_OF_DEATH).blockWith().react(EXHAUSTION);
+
+    game.expectInZone(1, WOUNDING_BLOW, "arsenal");
+  });
+
+  it("Sickening Rot deals 2 to an infected defender who can't pay", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [KISS_OF_DEATH, ROT], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", hand: [], board: [FRAILTY_TOKEN], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(KISS_OF_DEATH).blockWith().react(ROT, { settle: false }).passPriority().passPriority();
+
+    expect(game.state.players[1]!.life).toBe(18);
+  });
+
+  it("Sickening Rot can be paid off with {r}{r}{r}", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [KISS_OF_DEATH, ROT], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", hand: ["raging onslaught|3"], board: [FRAILTY_TOKEN], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(KISS_OF_DEATH).blockWith().react(ROT, { settle: false }).passPriority().passPriority();
+    expect(game.state.pendingDecision?.player).toBe(1);
+    game.chooseOption("pay 3");
+
+    // Only Kiss of Death's 3 damage and 1 life loss land.
+    expect(game.state.players[1]!.life).toBe(16);
+    game.expectInZone(1, "raging onslaught|3", "pitch");
+  });
+
+  it("Sickening Rot does nothing to an uninfected defender", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [KISS_OF_DEATH, ROT], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", hand: [], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(KISS_OF_DEATH).blockWith().react(ROT, { settle: false }).passPriority().passPriority();
+
+    expect(game.state.players[1]!.life).toBe(20);
+  });
+
+  it("Sickening Weakness gives cards defending against an infected hero -1 defense", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [KISS_OF_DEATH, WEAKNESS], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+      {
+        hero: "dorinthea",
+        hand: [WOUNDING_BLOW],
+        board: [FRAILTY_TOKEN],
+        weapons: [],
+        equipment: { ...NO_EQUIPMENT, head: IRONROT_HELM },
+      },
+    ] });
+
+    game.play(KISS_OF_DEATH).blockWith(WOUNDING_BLOW, IRONROT_HELM).react(WEAKNESS).settle();
+
+    // 3 power into 2 defense, plus Kiss of Death's life loss on hit.
+    game.expectLife(1, 18);
+  });
+
+  it("Sickening Weakness also weakens a defense reaction that defends after it resolves", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: ["raging onslaught|1", WEAKNESS], resources: 4, weapons: [], equipment: NO_EQUIPMENT },
+      {
+        hero: "dorinthea",
+        hand: ["unmovable|3"],
+        resources: 3,
+        board: [FRAILTY_TOKEN],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    game.play("raging onslaught|1").blockWith()
+      .react(WEAKNESS, { settle: false })
+      .passPriority()
+      .passPriority()
+      .passPriority()
+      .react("unmovable|3");
+
+    // 7 power into Unmovable's 5 defense, less Sickening Weakness's 1.
+    game.expectLife(1, 17);
+  });
+
+  it("Concoct Agony gets +3 and banishes the arsenal on hit after 3 attack reactions", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [CONCOCT, WEAKNESS, WEAKNESS, WEAKNESS],
+        resources: 3,
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", arsenalFaceDown: [WOUNDING_BLOW], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(CONCOCT).blockWith().react(WEAKNESS, { settle: false })
+      .react(WEAKNESS, { settle: false })
+      .react(WEAKNESS)
+      .settle();
+
+    game.expectLife(1, 15).expectInZone(1, WOUNDING_BLOW, "banish");
+  });
+
+  it("Concoct Agony stays a 2-power attack with only 2 attack reactions", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [CONCOCT, WEAKNESS, WEAKNESS], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", arsenalFaceDown: [WOUNDING_BLOW], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(CONCOCT).blockWith().react(WEAKNESS, { settle: false }).react(WEAKNESS).settle();
+
+    game.expectLife(1, 18).expectInZone(1, WOUNDING_BLOW, "arsenal");
+  });
+});

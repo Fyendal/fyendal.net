@@ -505,15 +505,18 @@ export function attackValueModifiers(
   return out;
 }
 
+// Resolved cards with a live modifier keep their hooks for that modifier's duration.
 function attackingDefenseModifierSources(
   state: GameStateInternal,
   link: ChainLinkState,
 ): CardInstance[] {
   return [
     link.attackingCard,
-    ...hookSources(state, link.attacker, { board: true, equipment: true, weapons: true })
-      .filter((source) => source.instanceId !== link.attackingCard.instanceId),
-  ];
+    ...hookSources(state, link.attacker, { board: true, equipment: true, weapons: true }),
+    ...lingeringModifierSources(state, link.attacker),
+  ].filter((source, index, sources) =>
+    sources.findIndex((candidate) => candidate.instanceId === source.instanceId) === index,
+  );
 }
 
 function defendingCardModifiers(
@@ -651,18 +654,19 @@ export function defenseValueModifiers(
         ) ?? 0,
       ),
     );
-    valueModifier(
-      out,
-      link.attackingCard,
-      defendingCardDefenseAdjustment(
-        link,
-        scriptOf(state, link.attackingCard.cardId, link.attackingCard)
-          ?.modifyDefendingEquipmentDefense?.(
-            runtime.makeCtx(state, link.attacker, link.attackingCard, link),
+    for (const source of attackingDefenseModifierSources(state, link)) {
+      valueModifier(
+        out,
+        source,
+        defendingCardDefenseAdjustment(
+          link,
+          scriptOf(state, source.cardId, source)?.modifyDefendingEquipmentDefense?.(
+            runtime.makeCtx(state, link.attacker, source, link),
             card,
           ) ?? 0,
-      ),
-    );
+        ),
+      );
+    }
     for (const modifier of defendingEquipmentModifiers(state, card)) {
       valueModifier(
         out,
@@ -1084,11 +1088,13 @@ export function equipmentDefense(
   if (scriptOf(state, c.cardId, c)?.unmodifiableCharacteristics?.includes("defense")) {
     return Math.max(0, printed);
   }
-  const attackScript = scriptOf(state, link.attackingCard.cardId, link.attackingCard);
-  const attackAdjustment = attackScript?.modifyDefendingEquipmentDefense?.(
-    runtime.makeCtx(state, link.attacker, link.attackingCard, link),
-    c,
-  ) ?? 0;
+  let attackAdjustment = 0;
+  for (const source of attackingDefenseModifierSources(state, link)) {
+    attackAdjustment += scriptOf(state, source.cardId, source)?.modifyDefendingEquipmentDefense?.(
+      runtime.makeCtx(state, link.attacker, source, link),
+      c,
+    ) ?? 0;
+  }
   let friendlyAdjustment = 0;
   for (const source of hookSources(state, c.owner, {
     board: true,

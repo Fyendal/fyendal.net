@@ -56,6 +56,20 @@
     "set": "MPA"
   },
   {
+    "id": "MPA018",
+    "name": "Concoct Agony",
+    "cardType": "action",
+    "text": "Stealth\nIf you've played or activated 3 or more attack reactions this chain link, this gets +3{p} and \"When this hits a hero, banish all cards in their arsenal.\"",
+    "pitch": 2,
+    "cost": 0,
+    "attack": 2,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA020",
     "name": "Demoralize the Dracai",
     "cardType": "action",
@@ -170,6 +184,39 @@
     "text": "Until end of turn, whenever a disease token is destroyed, if it's the first disease token with that name that's been destroyed this turn, create a token copy of it under the same hero's control.",
     "pitch": 3,
     "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA057",
+    "name": "Sickening Exhaustion",
+    "cardType": "attack-reaction",
+    "text": "If the defending hero is infected, put all cards in their arsenal on the bottom of their deck. (A hero is infected if they control a disease.)",
+    "pitch": 3,
+    "cost": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA058",
+    "name": "Sickening Rot",
+    "cardType": "attack-reaction",
+    "text": "If the defending hero is infected, deal 2 damage to them unless they pay {r}{r}{r}. (A hero is infected if they control a disease.)",
+    "pitch": 3,
+    "cost": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA059",
+    "name": "Sickening Weakness",
+    "cardType": "attack-reaction",
+    "text": "If the defending hero is infected, defending cards get -1{d} this chain link. (A hero is infected if they control a disease.)",
+    "pitch": 3,
+    "cost": 1,
     "defense": 3,
     "classes": ["assassin"],
     "set": "MPA"

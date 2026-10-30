@@ -20,6 +20,7 @@ import { fabraryPlayRoute } from "./play/route.js";
 import { RoomVersionGate } from "./versionGate.js";
 import { emptyQueueCounts } from "./matchmaking/pairableSearchers.js";
 import {
+  decodeBotTaskEnvelope,
   IncompatibleStateFrameError,
   LiveServerMessageDecoder,
   StateStreamError,
@@ -515,10 +516,13 @@ export const useStore = create<StoreState>((set, get) => {
     socket.onmessage = (ev) => {
       if (ws !== socket || connectionEpoch !== epoch || streamFailed) return;
       try {
-        const message = decoder.decode(JSON.parse(String(ev.data)));
+        const raw: unknown = JSON.parse(String(ev.data));
+        const message = decoder.decode(raw);
         if (message?.type === "state") incompatibleStateFrames = 0;
-        if (message) handleMessage(message);
-        else failPendingRoomEntry("room state could not be loaded");
+        if (message) { handleMessage(message); return; }
+        const botTask = decodeBotTaskEnvelope(raw);
+        if (!botTask) failPendingRoomEntry("room state could not be loaded");
+        else if (canComputeBot(botTask.code)) browserBot.rejectTask(botTask);
       } catch (error) {
         // A fresh socket repairs one bad state; a repeat means a newer server protocol.
         if (error instanceof IncompatibleStateFrameError && ++incompatibleStateFrames > 1) {
