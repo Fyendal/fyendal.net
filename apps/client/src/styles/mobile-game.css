@@ -1161,9 +1161,13 @@
   .settings-header { top: -14px; }
   .settings-close { width: 42px; height: 42px; }
   .settings-priority-row,
-  .settings-choice-row { align-items: stretch; flex-direction: column; gap: 7px; }
+  .settings-choice-row { align-items: stretch; flex-direction: column; gap: 8px; }
+  .settings-choice-row,
+  .settings-motion-row,
+  .settings-playmat-row { padding-block: 10px; }
+  .settings-playmat-head { align-items: stretch; flex-direction: column; gap: 8px; }
   .settings-segmented { width: 100%; }
-  .settings-segmented button { min-width: 0; min-height: 40px; }
+  .settings-segmented button { min-width: 0; min-height: 36px; }
   .settings-volume-slider { width: min(42vw, 150px); }
   .settings-options { flex-wrap: wrap; }
   .settings-info-tooltip::after { display: none; }
