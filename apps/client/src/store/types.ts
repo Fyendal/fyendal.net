@@ -18,6 +18,7 @@ import type {
   PresentedArena,
   PrepView,
   PriorityWindowMode,
+  PassUntilMode,
   TokenSkipKind,
   PlayerReportReason,
   RoomInvite,
@@ -241,6 +242,8 @@ export interface StoreState {
    * Presentation only; null means render the authoritative staged cards. */
   pendingDefenderStageIds: number[] | null;
   lastActionAt: [number, number] | null;
+  /** This seat's armed pass shortcut, optimistic until the server's next state. */
+  passUntil: PassUntilMode | null;
   opponentConnected: boolean;
   latestEmote: EmoteEvent | null;
   rooms: RoomSummary[];
@@ -293,6 +296,8 @@ export interface StoreState {
   sendPriorityMode: (mode: PriorityWindowMode) => void;
   sendStandingOrders: (orders: SeatStandingOrders) => void;
   sendTokenSkip: (kind: TokenSkipKind, enabled: boolean) => void;
+  /** Arm a pass shortcut, or cancel it with null. */
+  sendPassUntil: (mode: PassUntilMode | null) => void;
   sendEmote: (message: EmoteMessage) => void;
   kickSpectator: (username: string) => void;
   undo: (target?: UndoTarget) => void;

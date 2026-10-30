@@ -32,6 +32,7 @@ export function initialStoreProjection(
     pendingInteraction: null,
     pendingDefenderStageIds: null,
     lastActionAt: null,
+    passUntil: null,
     replayFrames: 0,
     replayViews: null,
     replayTransitions: null,
@@ -109,6 +110,7 @@ export function clearedRoomProjection(): Pick<
   | "pendingInteraction"
   | "pendingDefenderStageIds"
   | "lastActionAt"
+  | "passUntil"
   | "opponentConnected"
   | "latestEmote"
   | "replayFrames"
@@ -152,6 +154,7 @@ export function clearedRoomProjection(): Pick<
     pendingInteraction: null,
     pendingDefenderStageIds: null,
     lastActionAt: null,
+    passUntil: null,
     opponentConnected: true,
     latestEmote: null,
     replayFrames: 0,

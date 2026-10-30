@@ -7,6 +7,7 @@ import type {
   CardPoolMode,
   ClientMessage,
   EmoteMessage,
+  PassUntilMode,
   ReplayFile,
   ServerMessage,
   Format,
@@ -622,6 +623,10 @@ export const useStore = create<StoreState>((set, get) => {
     return true;
   }
 
+  /** Arming can be version-neutral, so this room's states at or before the
+   * request's version cannot yet reflect it. */
+  let passUntilRequest: { code: string; mode: PassUntilMode | null; afterVersion: number } | null = null;
+
   function roomCommand(): { commandId: string; expectedVersion: number } {
     const expectedVersion = roomVersions.current();
     const commandId = globalThis.crypto?.randomUUID?.()
@@ -1139,6 +1144,9 @@ export const useStore = create<StoreState>((set, get) => {
           botGame: msg.botGame === true,
           botMatchTransition: null,
           lastActionAt: msg.lastActionAt,
+          passUntil: passUntilRequest?.code === code && msg.version <= passUntilRequest.afterVersion
+            ? passUntilRequest.mode
+            : msg.passUntil ?? null,
           screen: "game",
           replayFrames: frames,
           replayNotes,
@@ -1855,6 +1863,13 @@ export const useStore = create<StoreState>((set, get) => {
       // Full set, last write wins; no expected version, so a concurrent
       // commit cannot reject it and leave the old orders in force.
       send({ type: "standing-orders", orders });
+    },
+    sendPassUntil: (mode) => {
+      const code = get().roomCode;
+      const command = roomCommand();
+      if (!code || !send({ type: "pass-until", mode, ...command })) return;
+      passUntilRequest = { code, mode, afterVersion: command.expectedVersion };
+      set({ passUntil: mode });
     },
     sendTokenSkip: (kind, enabled) => {
       send({ type: kind === "runechant" ? "runechant-skip" : "seismic-surge-skip", enabled, ...roomCommand() });
