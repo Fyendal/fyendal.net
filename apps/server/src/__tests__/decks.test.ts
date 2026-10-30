@@ -894,6 +894,7 @@ describe("deck storage", () => {
             name: "Provider name",
             text: matchupId ? variantText : defaultText,
             matchups,
+            pins: [],
           },
         };
       },

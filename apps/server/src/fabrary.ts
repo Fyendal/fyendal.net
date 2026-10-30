@@ -26,8 +26,8 @@ export interface FabraryDeck {
   /** Fabrary data translated to the same text format as Copy decklist. */
   text: string;
   matchups: FabraryMatchup[];
-  /** Present only when the deck pins a card; Fabrary sends pins for supporters' decks. */
-  pins?: FabraryPin[];
+  /** Fabrary sends pins only for supporters' decks. */
+  pins: FabraryPin[];
 }
 
 export type FabraryDeckResult =
@@ -222,7 +222,7 @@ export function decodeFabraryDeck(value: unknown, source: ParsedFabraryUrl): Fab
     canonicalUrl: source.canonicalUrl,
     name,
     matchups,
-    ...(pins.length > 0 ? { pins } : {}),
+    pins,
     text: [
       `Name: ${name}`,
       "Deck cards",

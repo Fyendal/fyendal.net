@@ -31,6 +31,7 @@ describe("Fabrary response decoding", () => {
       canonicalUrl: DECK_URL,
       name: "Rhinar test",
       matchups: [],
+      pins: [],
       text: [
         "Name: Rhinar test",
         "Deck cards",

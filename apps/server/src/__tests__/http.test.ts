@@ -3,10 +3,11 @@ import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { gzipSync } from "node:zlib";
 import { decodeAccountBetaResponse, decodeAchievementsResponse, decodeMatchRecordsResponse, decodeMatchesResponse } from "@fyendal/protocol";
-import { cardData, precon } from "@fyendal/cards";
+import { cardData, findPrinting, precon } from "@fyendal/cards";
+import { cardArtVariants } from "@fyendal/cards/art";
 import { createApiServer, createRateLimiter, type ApiDeps } from "../http.js";
 import { login, register, sessionForToken } from "../auth.js";
-import { recordDeckPlay } from "../decks.js";
+import { getDeck, recordDeckPlay } from "../decks.js";
 import type { Queryable } from "../db.js";
 import { recordMatch } from "../matches.js";
 import { finalizeReplay } from "../replays.js";
@@ -284,6 +285,7 @@ describe("Fabrary URL imports", () => {
         canonicalUrl: "https://fabrary.net/decks/01G76G1DP5VVB050BT3YV9TQ7K",
         text,
         matchups,
+        pins: [],
       },
     }));
     const url = await startApi({ fabraryClient: { fetchDeck } });
@@ -360,7 +362,7 @@ describe("Fabrary URL imports", () => {
     });
   });
 
-  it("reimports a changed Fabrary source and recomputes ban-list issues", async () => {
+  it("reimports a changed Fabrary source with its pins and recomputes ban-list issues", async () => {
     await register(db, "FabraryUpdate", "password1");
     const session = await login(db, "fabraryupdate", "password1");
     if (!session.ok) throw new Error("login failed");
@@ -384,6 +386,11 @@ describe("Fabrary URL imports", () => {
     const changedText = originalText.replace(replacedLine, "1x Art of War (Yellow)");
     expect(changedText).not.toBe(originalText);
 
+    const pinnedCard = pool.deck.slice(1).find((id) => cardArtVariants(id).length > 0)!;
+    const { name: pinnedName, pitch: pinnedPitch } = cardData[pinnedCard]!;
+    const pinnedImage = cardArtVariants(pinnedCard)[0]!.image;
+    const pin = { name: pinnedName, ...(pinnedPitch ? { pitch: pinnedPitch } : {}), image: pinnedImage };
+
     const originalUrl = "https://fabrary.net/decks/01G76G1DP5VVB050BT3YV9TQ7K";
     const changedUrl = "https://fabrary.net/decks/01H76G1DP5VVB050BT3YV9TQ7K";
     const fetchDeck = vi.fn(async (requestedUrl: string) => ({
@@ -393,6 +400,7 @@ describe("Fabrary URL imports", () => {
         canonicalUrl: requestedUrl.includes("01H76") ? changedUrl : originalUrl,
         text: requestedUrl.includes("01H76") ? changedText : originalText,
         matchups: [],
+        pins: requestedUrl.includes("01H76") ? [] : [pin],
       },
     }));
     const url = await startApi({ fabraryClient: { fetchDeck } });
@@ -404,6 +412,8 @@ describe("Fabrary URL imports", () => {
     });
     const imported = await importedResponse.json() as { deck: { id: string } };
     expect(importedResponse.status).toBe(200);
+    expect((await getDeck(db, imported.deck.id))?.fabraryArt)
+      .toEqual({ [findPrinting(pinnedName, pinnedPitch)!.id]: pinnedImage });
 
     const updatedResponse = await fetch(`${url}/api/decks/update`, {
       method: "POST",
@@ -423,6 +433,8 @@ describe("Fabrary URL imports", () => {
       },
     });
     expect(updated.deck.bannedCards).toContain("Art of War");
+    // The changed source's pins replace the original source's.
+    expect((await getDeck(db, imported.deck.id))?.fabraryArt).toEqual({});
     expect(fetchDeck).toHaveBeenNthCalledWith(1, originalUrl);
     expect(fetchDeck).toHaveBeenNthCalledWith(2, changedUrl);
 
@@ -478,6 +490,7 @@ describe("Fabrary URL imports", () => {
         canonicalUrl: requestedUrl.includes("01K76") ? changedUrl : originalUrl,
         text: requestedUrl.includes("01K76") ? "3x Does Not Exist" : originalText,
         matchups: [],
+        pins: [],
       },
     }));
     const url = await startApi({ fabraryClient: { fetchDeck } });

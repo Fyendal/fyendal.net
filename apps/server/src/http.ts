@@ -68,7 +68,7 @@ import {
   waitForReplayPayloadForRoom,
 } from "./replays.js";
 import { readSharedReplay, removeReplayShare, resetReplayShare, setReplayShare } from "./replayShares.js";
-import { createFabraryClient, parseFabraryDeckUrl, type FabraryClient } from "./fabrary.js";
+import { createFabraryClient, parseFabraryDeckUrl, type FabraryClient, type FabraryDeck } from "./fabrary.js";
 import {
   configuredEmailSender,
   emailChangedNotice,
@@ -618,17 +618,17 @@ export function createApiServer(deps: ApiDeps): http.Server {
       if (!DECK_FORMATS.includes(format)) {
         return { status: 400, body: { ok: false, error: "format must be cc or silver-age" } };
       }
-      let text = field(body, "text");
+      const text = field(body, "text");
       let fabraryUrl = field(body, "url").trim() || undefined;
       let name = requestedName || "Imported deck";
+      let fabrary: FabraryDeck | undefined;
       if (!text.trim()) {
         if (!fabraryUrl) {
           return { status: 400, body: { ok: false, error: "enter a Fabrary URL or paste your decklist export" } };
         }
         const fetched = await fabraryClient.fetchDeck(fabraryUrl);
         if (!fetched.ok) return { status: fetched.status, body: { ok: false, error: fetched.error } };
-        text = fetched.deck.text;
-        fabraryUrl = fetched.deck.canonicalUrl;
+        fabrary = fetched.deck;
         name = requestedName || fetched.deck.name;
       } else if (fabraryUrl) {
         const source = parseFabraryDeckUrl(fabraryUrl);
@@ -637,12 +637,9 @@ export function createApiServer(deps: ApiDeps): http.Server {
         }
         fabraryUrl = source.canonicalUrl;
       }
-      const r = await importDeck(deps.db, user.id, {
-        name,
-        format,
-        fabraryUrl,
-        text,
-      });
+      const r = await importDeck(deps.db, user.id, fabrary
+        ? { name, format, fabrary }
+        : { name, format, fabraryUrl, text });
       if (!r.ok) {
         return { status: 422, body: { ok: false, errors: r.errors, missing: r.missing, unimplemented: r.unimplemented } };
       }
@@ -656,8 +653,9 @@ export function createApiServer(deps: ApiDeps): http.Server {
         return { status: 404, body: { ok: false, errors: ["deck not found"], missing: [], unimplemented: [] } };
       }
 
-      let text = field(body, "text") || undefined;
+      const text = field(body, "text") || undefined;
       let fabraryUrl = field(body, "url").trim() || undefined;
+      let fabrary: FabraryDeck | undefined;
       if (fabraryUrl) {
         const requestedSource = parseFabraryDeckUrl(fabraryUrl);
         if (!requestedSource) {
@@ -671,21 +669,17 @@ export function createApiServer(deps: ApiDeps): http.Server {
           if (!fetched.ok) {
             return { status: fetched.status, body: { ok: false, error: fetched.error } };
           }
-          // A changed provider source owns the replacement list. updateDeck
-          // resolves and validates it; deckOut then recomputes current ban-list
-          // and release-legality flags from the newly saved pool.
-          text = fetched.deck.text;
-          fabraryUrl = fetched.deck.canonicalUrl;
+          // A changed provider source owns the replacement list and its pins.
+          // updateDeck resolves and validates it; deckOut then recomputes current
+          // ban-list and release-legality flags from the newly saved pool.
+          fabrary = fetched.deck;
         } else {
           fabraryUrl = requestedSource.canonicalUrl;
         }
       }
 
-      const r = await updateDeck(deps.db, user.id, id, {
-        name: field(body, "name").trim() || undefined,
-        fabraryUrl,
-        text,
-      });
+      const name = field(body, "name").trim() || undefined;
+      const r = await updateDeck(deps.db, user.id, id, fabrary ? { name, fabrary } : { name, fabraryUrl, text });
       if (!r.ok) {
         const status = r.code === "DECK_NOT_FOUND" ? 404 : 422;
         return { status, body: { ok: false, errors: r.errors, missing: r.missing, unimplemented: r.unimplemented } };

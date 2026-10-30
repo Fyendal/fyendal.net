@@ -26,7 +26,7 @@ let base: string;
 let token: string;
 let userId: number;
 let latestText: string;
-let latestPins: FabraryPin[] | undefined;
+let latestPins: FabraryPin[];
 let client: FabraryClient;
 
 beforeEach(async () => {
@@ -37,10 +37,9 @@ beforeEach(async () => {
   token = session.token;
   userId = (await db.query("SELECT id FROM users WHERE username_lc=$1", ["fabraryplayer"])).rows[0].id;
   latestText = text;
-  latestPins = undefined;
+  latestPins = [];
   client = { fetchDeck: vi.fn(async () => ({ ok: true as const, deck: {
-    canonicalUrl: source, name: "Fabrary deck", text: latestText, matchups: [],
-    ...(latestPins ? { pins: latestPins } : {}),
+    canonicalUrl: source, name: "Fabrary deck", text: latestText, matchups: [], pins: latestPins,
   } })) };
   server = createApiServer({ db, fabraryClient: client });
   await new Promise<void>((done) => server.listen(0, done));
@@ -112,7 +111,7 @@ describe("Fabrary play deck resolution", () => {
     const id = await importedId();
     expect((await getDeck(db, id))?.fabraryArt).toEqual({ [savedId]: image });
 
-    latestPins = undefined;
+    latestPins = [];
     expect(await importedId()).toBe(id);
     expect((await getDeck(db, id))?.fabraryArt).toEqual({});
   });
