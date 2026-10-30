@@ -29,6 +29,7 @@ import {
   type ServerMessage,
   type SeatStandingOrders,
   type TokenSkipKind,
+  type PassUntilMode,
   type UndoTarget,
 } from "@fyendal/shared";
 import {
@@ -96,6 +97,7 @@ import {
 } from "./replays.js";
 import { hashToken } from "./tokenHash.js";
 import { standingOrderIntent } from "./standingOrders.js";
+import { armPassUntil, decodeStoredPassUntil, passUntilIntent, refreshPassUntil, type SeatPassUntil } from "./passUntil.js";
 
 /**
  * Postgres-backed room storage. Room membership and full game state live in
@@ -142,6 +144,8 @@ export interface SeatRow {
   priorityMode?: PriorityWindowMode;
   /** One-shot shortcut for the current consecutive run of this token. */
   tokenSkip?: TokenSkipKind;
+  /** Temporary pass shortcut, expired by the server once its turn or link ends. */
+  passUntil?: SeatPassUntil;
   /** Answers the server applies to the seat's repeating questions. */
   standingOrders?: SeatStandingOrders;
   /** presence: last heartbeat/attach (epoch ms); 0 = absent */
@@ -790,6 +794,12 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
     if (!(row.playmat == null || playmatRef(row.playmat))) {
       throw new CorruptRoomError(code, `seats[${index}].playmat`, "expected a playmat ref or null");
     }
+    const passUntil = row.pass_until == null
+      ? undefined
+      : decodeStoredPassUntil(typeof row.pass_until === "string" ? parseJson(row.pass_until) : row.pass_until);
+    if (passUntil === null) {
+      throw new CorruptRoomError(code, `seats[${index}].pass_until`, "expected a pass shortcut");
+    }
     const standingOrders = row.standing_orders == null
       ? undefined
       : decodeStoredStandingOrders(parseJson(row.standing_orders));
@@ -822,6 +832,7 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
       ...(row.queue_card_pool_mode == null ? {} : { queueCardPoolMode: row.queue_card_pool_mode }),
       priorityMode: row.priority_mode,
       ...(row.token_skip == null ? {} : { tokenSkip: row.token_skip }),
+      ...(passUntil ? { passUntil } : {}),
       ...(standingOrders && Object.keys(standingOrders).length > 0 ? { standingOrders } : {}),
       lastSeenAt: 0,
       ...(row.last_action_at == null ? {} : { lastActionAt: Number(row.last_action_at) }),
@@ -1167,6 +1178,7 @@ export class PgRoomStore {
       member.queueCardPoolMode ?? null,
       encodeStandingOrders(member.standingOrders),
       member.cardArt ? JSON.stringify(member.cardArt) : null,
+      member.passUntil ? JSON.stringify(member.passUntil) : null,
     ];
   }
 
@@ -1207,8 +1219,8 @@ export class PgRoomStore {
             `INSERT INTO room_seats
               (room_code, seat, user_id, token_hash, username, hero_id, deck_id, deck_name,
                from_queue, ready, presented, last_action_at, controller, priority_mode, token_skip, accepted,
-               queue_card_pool_mode, standing_orders, card_art)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
+               queue_card_pool_mode, standing_orders, card_art, pass_until)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,
             values,
           )
         : await db.query(
@@ -1229,7 +1241,8 @@ export class PgRoomStore {
                accepted = $16,
                queue_card_pool_mode = $17,
                standing_orders = $18,
-               card_art = $19
+               card_art = $19,
+               pass_until = $20
              WHERE room_code = $1 AND seat = $2`,
             values,
           );
@@ -1246,7 +1259,7 @@ export class PgRoomStore {
       const member = room.seats[seat];
       if (!member) continue;
       const { rowCount } = await db.query(
-        `UPDATE room_seats SET priority_mode = $3, token_skip = $4, standing_orders = $5
+        `UPDATE room_seats SET priority_mode = $3, token_skip = $4, standing_orders = $5, pass_until = $6
          WHERE room_code = $1 AND seat = $2`,
         [
           room.code,
@@ -1254,6 +1267,7 @@ export class PgRoomStore {
           member.priorityMode ?? "always-pause",
           member.tokenSkip ?? null,
           encodeStandingOrders(member.standingOrders),
+          member.passUntil ? JSON.stringify(member.passUntil) : null,
         ],
       );
       if (rowCount !== 1) throw VERSION_CONFLICT;
@@ -1480,6 +1494,7 @@ export class PgRoomStore {
               seat.priorityMode ?? "always-pause",
               seat.tokenSkip ?? null,
               seat.standingOrders,
+              JSON.stringify(seat.passUntil ?? null),
             ] as const
           : null);
         const wasGameOver = room.state?.phase === "game-over";
@@ -1496,7 +1511,8 @@ export class PgRoomStore {
           return before != null && after !== null && !fullSeatWrites.has(seat)
             && (before[0] !== (after.priorityMode ?? "always-pause")
               || before[1] !== (after.tokenSkip ?? null)
-              || before[2] !== after.standingOrders);
+              || before[2] !== after.standingOrders
+              || before[3] !== JSON.stringify(after.passUntil ?? null));
         });
         await this.persistSeatPreferences(db, out.room, preferenceSeats);
         if (out.versionNeutral) {
@@ -3943,8 +3959,9 @@ export class PgRoomStore {
    *  first because a Runechant skip can deliberately decline optional
    *  prevention; each token shortcut is expired before auto-pass is
    *  considered at any boundary outside its own run. Bot seats always
-   *  auto-pass empty windows; standing orders never pass. Automatic steps
-   *  write no undo snapshots. */
+   *  auto-pass empty windows; standing orders never pass. A pass-until latch
+   *  is refreshed at every boundary so it expires even while the opponent
+   *  acts. Automatic steps write no undo snapshots. */
   private applyServerShortcuts(
     room: RoomRow,
     transitionEvents?: EngineTransitionMove[],
@@ -3953,18 +3970,27 @@ export class PgRoomStore {
       room.seats[seat]?.controller === "bot" || room.seats[seat]?.priorityMode === "auto-pass";
     const hasOrders = (seat: number): boolean => room.seats[seat]?.standingOrders !== undefined;
     if (!autoPasses(0) && !autoPasses(1) && !hasOrders(0) && !hasOrders(1)
-      && !room.seats.some((seat) => seat?.tokenSkip)) return;
+      && !room.seats.some((seat) => seat?.tokenSkip || seat?.passUntil)) return;
     // Each shortcut strictly advances the game; the bound is insurance only.
     for (let guard = 0; guard < 64; guard++) {
       const state = room.state;
       if (!state || state.phase === "game-over") {
-        for (const member of room.seats) if (member) delete member.tokenSkip;
+        for (const member of room.seats) {
+          if (!member) continue;
+          delete member.tokenSkip;
+          delete member.passUntil;
+        }
         return;
       }
       // This must happen before auto-pass can traverse another layer: a later
       // run of the same token is a new sequence and requires a new click.
-      for (const member of room.seats) {
+      for (const [index, member] of room.seats.entries()) {
         if (member?.tokenSkip && !tokenSkipSequenceActive(state, member.tokenSkip)) delete member.tokenSkip;
+        if (member?.passUntil) {
+          const refreshed = refreshPassUntil(state, index, member.passUntil);
+          if (refreshed) member.passUntil = refreshed;
+          else delete member.passUntil;
+        }
       }
       const seat = state.pendingDecision?.player ??
         (state.phase === "action" ? state.priorityPlayer : undefined);
@@ -3980,9 +4006,8 @@ export class PgRoomStore {
         : autoPasses(seat) && (autoPassSkipsWindow(state, seat, member?.controller) ||
           (member?.controller === "bot" && isEmptyBotActionWindow(state, seat)))
           ? { kind: "pass" }
-          : member?.standingOrders
-            ? standingOrderIntent(state, seat, member.standingOrders)
-            : null;
+          : (member?.passUntil ? passUntilIntent(state, seat, member.passUntil) : null)
+            ?? (member?.standingOrders ? standingOrderIntent(state, seat, member.standingOrders) : null);
       if (!intent) return;
       const res = engineApplyIntent(state, seat, intent);
       if (!res.ok) return;
@@ -4092,6 +4117,49 @@ export class PgRoomStore {
       meta: command,
       credentials,
       type: TOKEN_SKIP_COMMANDS[kind],
+      duplicateResult: () => ({ advanced: false }),
+    } : undefined);
+    return r.ok
+      ? { ok: true, version: r.version, advanced: r.result.advanced, ...(r.replayFinalizationId ? { replayFinalizationId: r.replayFinalizationId } : {}) }
+      : { ok: false, error: r.error };
+  }
+
+  /** Arm or cancel the seat's pass-until latch. Arming in a window the latch
+   *  answers passes it in the same commit, undoable like a manual pass. */
+  async setPassUntil(
+    code: string,
+    credentials: SeatCredentials,
+    mode: PassUntilMode | null,
+    command?: RoomCommand,
+  ): Promise<{ ok: true; version: number; advanced: boolean; replayFinalizationId?: string } | { ok: false; error: string }> {
+    const upper = code.toUpperCase();
+    const r = await this.withRetry<{ advanced: boolean }>(upper, (room) => {
+      const seat = seatForCredentials(room, credentials);
+      if (seat === null) return { error: "not a player in this room" };
+      const member = room.seats[seat]!;
+      const state = room.state;
+      if (mode === null || !state || state.phase === "game-over") {
+        delete member.passUntil;
+        return { room, result: { advanced: false }, versionNeutral: true };
+      }
+      member.passUntil = armPassUntil(state, seat, mode);
+      if (passUntilIntent(state, seat, member.passUntil) === null) {
+        return { room, result: { advanced: false }, versionNeutral: true };
+      }
+      const events: EngineTransitionMove[] = [];
+      this.applyServerShortcuts(room, events);
+      room.lastTransition = { fromVersion: room.version, kind: "forward", events };
+      return {
+        room,
+        result: { advanced: true },
+        snapshot: state,
+        replay: { kind: "frame" },
+        seatWrites: stampActivity(room),
+      };
+    }, command ? {
+      meta: command,
+      credentials,
+      type: "pass-until",
       duplicateResult: () => ({ advanced: false }),
     } : undefined);
     return r.ok
@@ -4297,8 +4365,13 @@ export class PgRoomStore {
         // A token-skip latch belongs to the run it was armed in. Undo can
         // land back inside that run, where a surviving latch would skip
         // straight past the choice the player just asked to revisit.
-        const latchedSeats = ([0, 1] as const).filter((seat) => room.seats[seat]?.tokenSkip);
-        for (const seat of latchedSeats) delete room.seats[seat]!.tokenSkip;
+        // Pass-until latches are cleared too: the player is revisiting a choice.
+        const latchedSeats = ([0, 1] as const).filter((seat) =>
+          room.seats[seat]?.tokenSkip || room.seats[seat]?.passUntil);
+        for (const seat of latchedSeats) {
+          delete room.seats[seat]!.tokenSkip;
+          delete room.seats[seat]!.passUntil;
+        }
         await this.persistSeatPreferences(db, room, latchedSeats);
         // The restored snapshot can hold an empty window for a seat that
         // opted into auto-pass after the snapshot was written; pass it out
@@ -4907,6 +4980,7 @@ export function stateMessage(room: RoomRow, seat: number | null): ServerMessage 
     spectators: spectatorCount(room),
     lastActionAt: [room.seats[0]?.lastActionAt ?? 0, room.seats[1]?.lastActionAt ?? 0],
     ...(room.seats.some((member) => member?.controller === "bot") ? { botGame: true } : {}),
+    ...(seat !== null && room.seats[seat]?.passUntil ? { passUntil: room.seats[seat].passUntil.mode } : {}),
     ...visibleCardArt(room, view, seat),
   };
 }

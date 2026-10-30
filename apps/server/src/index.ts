@@ -1395,6 +1395,27 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         }
         return;
       }
+      case "pass-until": {
+        const player = requirePlayer(ws, ctx);
+        if (!player) return;
+        const r = await rooms.setPassUntil(
+          player.code,
+          player.credentials,
+          msg.mode,
+          msg.commandId !== undefined && msg.expectedVersion !== undefined
+            ? { id: msg.commandId, expectedVersion: msg.expectedVersion }
+            : undefined,
+        );
+        if (!r.ok) {
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        // A version-neutral arm reaches the client with the next state.
+        if (r.advanced) {
+          await afterStateCommit(player.code, r.version, r.replayFinalizationId);
+        }
+        return;
+      }
       case "standing-orders": {
         const player = requirePlayer(ws, ctx);
         if (!player) return;

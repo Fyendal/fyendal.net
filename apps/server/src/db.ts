@@ -1163,6 +1163,11 @@ export const MIGRATIONS: Migration[] = [
     // Cosmetic arena mat shown on this player's half of the table.
     sql: "ALTER TABLE users ADD COLUMN playmat TEXT;",
   },
+  {
+    version: 62,
+    // A seat's temporary pass shortcut and the turn or chain link it covers.
+    sql: "ALTER TABLE room_seats ADD COLUMN pass_until JSONB;",
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {
