@@ -79,7 +79,7 @@ import {
   resolveLeagueRoomGame,
   startLeagueRoomGame,
 } from "./league/leagueMatches.js";
-import { decodeDeckPool, resolveDeck, validatePresentation } from "./decks.js";
+import { decodeDeckPool, playedDeckArt, resolveDeck, validatePresentation } from "./decks.js";
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
 import { assertActiveRuleset } from "./rulesetFence.js";
 import { withTransaction, type Queryable } from "./db.js";
@@ -3363,7 +3363,7 @@ export class PgRoomStore {
       seat.ready = true;
       // Art locks at ready, so later deck edits apply from the next game.
       const artEnabled = seat.userId !== undefined && await isBetaTester(this.db, seat.userId);
-      const cardArt = artEnabled ? resolveDeckArt(pool, deck.art) : {};
+      const cardArt = artEnabled ? resolveDeckArt(pool, playedDeckArt(deck)) : {};
       if (Object.keys(cardArt).length > 0) seat.cardArt = cardArt;
       else delete seat.cardArt;
       const fullSeats = new Set<SeatIndex>([seatIdx]);

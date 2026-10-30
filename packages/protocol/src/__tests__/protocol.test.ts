@@ -1486,6 +1486,7 @@ describe("replays and HTTP responses", () => {
           fabraryUrl: summary.fabraryUrl,
           decklist: pool,
           art: summary.art,
+          fabraryArt: { WTR001: "WTR001-RF" },
           heroName: summary.heroName,
           createdAt: 1,
           updatedAt: summary.updatedAt,

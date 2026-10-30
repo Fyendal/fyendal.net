@@ -11,10 +11,15 @@ import {
   precon,
 } from "@fyendal/cards";
 import { normalizeDeckArt } from "@fyendal/cards/art";
-import { deckArt, type FabraryMatchup } from "@fyendal/protocol";
+import { deckArt, resolvedCardArt, type FabraryMatchup } from "@fyendal/protocol";
 export { validatePresentation } from "@fyendal/cards";
 import { withTransaction, type Queryable } from "./db.js";
-import { parseFabraryDeckUrl, type FabraryClient, type FabraryDeckResult } from "./fabrary.js";
+import {
+  parseFabraryDeckUrl,
+  type FabraryClient,
+  type FabraryDeckResult,
+  type FabraryPin,
+} from "./fabrary.js";
 
 /**
  * Saved user decks ("cc" / "silver-age" formats). Users import Fabrary export
@@ -35,11 +40,29 @@ export interface DeckRow {
   heroName: string;
   /** Cosmetic art choices, limited to cards still in the deck. */
   art: DeckArt;
+  /** Printings the linked Fabrary deck pins, as printing id -> image id. Kept
+   * apart from `art` so the player's own picks survive a pin being removed. */
+  fabraryArt: Record<string, string>;
   createdAt: number;
   updatedAt: number;
 }
 
 const DEFAULT_DECK_ART: DeckArt = { highestRarity: false, picks: {} };
+
+/** The art a deck shows in play: a Fabrary pin wins over the player's pick for that card. */
+export function playedDeckArt(deck: DeckRow): DeckArt {
+  return { ...deck.art, picks: { ...deck.art.picks, ...deck.fabraryArt } };
+}
+
+/** Resolve pins to the printing ids `validateDeck` stored, keeping only valid images of cards in the pool. */
+function fabraryDeckArt(pool: DeckPool, pins: FabraryPin[]): Record<string, string> {
+  const picks: Record<string, string> = {};
+  for (const pin of pins) {
+    const card = findPrinting(pin.name, pin.pitch);
+    if (card) picks[INVENTORY_FRONT_ID_BY_BACK_ID.get(card.id) ?? card.id] = pin.image;
+  }
+  return normalizeDeckArt(pool, { highestRarity: false, picks }).picks;
+}
 
 // ── Parsing ─────────────────────────────────────────────────────────────────
 
@@ -365,6 +388,8 @@ function toDeck(value: unknown): DeckRow {
   // pg-mem returns a JSONB column default as text.
   const art: unknown = typeof r.art === "string" ? parseDbJson(r.art) : r.art;
   if (!deckArt(art)) return corruptDeck("art", "expected deck art");
+  const fabraryArt: unknown = typeof r.fabrary_art === "string" ? parseDbJson(r.fabrary_art) : r.fabrary_art;
+  if (!resolvedCardArt(fabraryArt)) return corruptDeck("fabrary_art", "expected card art");
   const decklist = decodeDeckPool(r.decklist);
   return {
     id: dbString(r.id, "id"),
@@ -376,6 +401,7 @@ function toDeck(value: unknown): DeckRow {
     heroName: dbString(r.hero_name, "hero_name"),
     // Refreshes and replacement lists can drop cards; their picks stop applying.
     art: normalizeDeckArt(decklist, art),
+    fabraryArt: normalizeDeckArt(decklist, { highestRarity: false, picks: fabraryArt }).picks,
     createdAt: dbSafeInteger(r.created_at, "created_at"),
     updatedAt: dbSafeInteger(r.updated_at, "updated_at"),
   };
@@ -405,6 +431,7 @@ export async function resolveDeck(db: Queryable, id: string): Promise<DeckRow | 
       decklist: fixed.pool,
       heroName: cardData[fixed.pool.heroId]?.name ?? fixed.name,
       art: DEFAULT_DECK_ART,
+      fabraryArt: {},
       createdAt: 0,
       updatedAt: 0,
     };
@@ -484,11 +511,13 @@ export async function resolveFreshDeck(
     };
   }
 
+  const fabraryArt = fabraryDeckArt(validation.decklist, fetched.deck.pins ?? []);
   const refreshed: DeckRow = {
     ...existing,
     fabraryUrl: fetched.deck.canonicalUrl,
     decklist: validation.decklist,
     heroName: validation.heroName,
+    fabraryArt,
   };
   if (matchupId !== undefined) {
     return {
@@ -502,13 +531,14 @@ export async function resolveFreshDeck(
   const now = Date.now();
   await db.query(
     `UPDATE decks
-     SET fabrary_url=$2, decklist=$3, hero_name=$4, updated_at=$5
-     WHERE id=$1 AND user_id=$6`,
+     SET fabrary_url=$2, decklist=$3, hero_name=$4, fabrary_art=$5, updated_at=$6
+     WHERE id=$1 AND user_id=$7`,
     [
       existing.id,
       fetched.deck.canonicalUrl,
       JSON.stringify(validation.decklist),
       validation.heroName,
+      JSON.stringify(fabraryArt),
       now,
       userId,
     ],
@@ -593,10 +623,13 @@ export async function resolveFabraryPlayDeck(
     const account = await tx.query("SELECT id FROM users WHERE id=$1 FOR UPDATE", [userId]);
     if (!account.rows.length) return { ok: false, status: 404, error: "account not found" };
     const existing = findLinkedDeck(await listDecks(tx, userId), format, source.canonicalUrl);
+    const fabraryPins = fetched.deck.pins ?? [];
     const result = existing
-      ? await updateDeck(tx, userId, existing.id, { fabraryUrl: source.canonicalUrl, text: fetched.deck.text })
+      ? await updateDeck(tx, userId, existing.id, {
+        fabraryUrl: source.canonicalUrl, text: fetched.deck.text, fabraryPins,
+      })
       : await importDeck(tx, userId, {
-        name: fetched.deck.name, format, fabraryUrl: source.canonicalUrl, text: fetched.deck.text,
+        name: fetched.deck.name, format, fabraryUrl: source.canonicalUrl, text: fetched.deck.text, fabraryPins,
       });
     if (!result.ok) {
       return { ok: false, status: 422, error: "invalid deck", errors: result.errors,
@@ -613,16 +646,19 @@ export type ImportResult =
 export async function importDeck(
   db: Queryable,
   userId: number,
-  input: { name: string; format: Format; fabraryUrl?: string; text: string },
+  input: { name: string; format: Format; fabraryUrl?: string; text: string; fabraryPins?: FabraryPin[] },
 ): Promise<ImportResult> {
   const v = validateDeck(parseDecklistText(input.text), input.format);
   if (!v.ok) return { ok: false, code: "INVALID_DECK", errors: v.errors, missing: v.missing, unimplemented: v.unimplemented };
   const now = Date.now();
   const id = randomBytes(8).toString("hex");
+  const fabraryArt = fabraryDeckArt(v.decklist, input.fabraryPins ?? []);
   await db.query(
-    `INSERT INTO decks (id, user_id, name, format, fabrary_url, decklist, hero_name, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8)`,
-    [id, userId, input.name, input.format, input.fabraryUrl ?? null, JSON.stringify(v.decklist), v.heroName, now],
+    `INSERT INTO decks
+     (id, user_id, name, format, fabrary_url, decklist, hero_name, fabrary_art, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9)`,
+    [id, userId, input.name, input.format, input.fabraryUrl ?? null, JSON.stringify(v.decklist), v.heroName,
+     JSON.stringify(fabraryArt), now],
   );
   return { ok: true, deck: (await getDeck(db, id))! };
 }
@@ -631,7 +667,8 @@ export async function updateDeck(
   db: Queryable,
   userId: number,
   id: string,
-  input: { name?: string; fabraryUrl?: string; text?: string },
+  /** `fabraryPins` replaces the deck's pins; leaving it out keeps them. */
+  input: { name?: string; fabraryUrl?: string; text?: string; fabraryPins?: FabraryPin[] },
 ): Promise<ImportResult> {
   const existing = await getDeck(db, id);
   if (!existing || existing.userId !== userId) {
@@ -645,10 +682,13 @@ export async function updateDeck(
     decklist = v.decklist;
     heroName = v.heroName;
   }
+  const fabraryArt = input.fabraryPins === undefined
+    ? existing.fabraryArt
+    : fabraryDeckArt(decklist, input.fabraryPins);
   await db.query(
-    "UPDATE decks SET name=$2, fabrary_url=$3, decklist=$4, hero_name=$5, updated_at=$6 WHERE id=$1",
+    "UPDATE decks SET name=$2, fabrary_url=$3, decklist=$4, hero_name=$5, fabrary_art=$6, updated_at=$7 WHERE id=$1",
     [id, input.name ?? existing.name, input.fabraryUrl ?? existing.fabraryUrl,
-     JSON.stringify(decklist), heroName, Date.now()],
+     JSON.stringify(decklist), heroName, JSON.stringify(fabraryArt), Date.now()],
   );
   return { ok: true, deck: (await getDeck(db, id))! };
 }

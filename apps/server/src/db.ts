@@ -1168,6 +1168,11 @@ export const MIGRATIONS: Migration[] = [
     // A seat's temporary pass shortcut and the turn or chain link it covers.
     sql: "ALTER TABLE room_seats ADD COLUMN pass_until JSONB;",
   },
+  {
+    version: 63,
+    // Printings a linked Fabrary deck pins, refreshed on every Fabrary fetch.
+    sql: "ALTER TABLE decks ADD COLUMN fabrary_art JSONB NOT NULL DEFAULT '{}';",
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

@@ -3,10 +3,12 @@ import type { CardData } from "@fyendal/shared";
 import { cardData, findPrinting, formatLegalityIssues } from "@fyendal/cards";
 import {
   deleteDeck,
+  getDeck,
   importDeck,
   listDeckPlays,
   listDecks,
   parseDecklistText,
+  playedDeckArt,
   recordDeckPlay,
   resolveFreshDeck,
   setDeckArt,
@@ -17,6 +19,7 @@ import {
 import { register } from "../auth.js";
 import { freshDb } from "./testdb.js";
 import { cardArtVariants } from "@fyendal/cards/art";
+import type { FabraryPin } from "../fabrary.js";
 import { STANDARD_CARD_ART } from "@fyendal/shared";
 
 const printings = Object.values(cardData) as CardData[];
@@ -908,6 +911,56 @@ describe("deck storage", () => {
     const stored = (await listDecks(db, userId))[0]!;
     expect(stored.name).toBe("My custom name");
     expect(stored.decklist.sideboard ?? []).toHaveLength(0);
+  });
+
+  it("saves the linked deck's Fabrary pins apart from the player's art, and lets a pin win in play", async () => {
+    const { db, userId } = await freshUser();
+    const sourceUrl = "https://fabrary.net/decks/01G76G1DP5VVB050BT3YV9TQ7K";
+    const text = ccExportText();
+    const imported = await importDeck(db, userId, { name: "Pinned", format: "cc", fabraryUrl: sourceUrl, text });
+    if (!imported.ok) throw new Error("import failed");
+    const deckIds = new Set([...imported.deck.decklist.deck, imported.deck.decklist.heroId]);
+    const [pinnedCard, pickedCard] = [...new Set(imported.deck.decklist.deck)]
+      .filter((id) => cardArtVariants(id).length > 1);
+    if (!pinnedCard || !pickedCard) throw new Error("test deck needs two cards with alternate art");
+    const deckNames = new Set([...deckIds].map((id) => cardData[id]!.name));
+    const outside = Object.keys(cardData).find((id) =>
+      !deckNames.has(cardData[id]!.name) && cardArtVariants(id).length > 0)!;
+    const [pick, pin] = cardArtVariants(pinnedCard).map((variant) => variant.image);
+    const otherPick = cardArtVariants(pickedCard)[0]!.image;
+    const playerArt = { highestRarity: false, picks: { [pinnedCard]: pick!, [pickedCard]: otherPick } };
+    expect(await setDeckArt(db, userId, imported.deck.id, playerArt)).toMatchObject({ ok: true });
+
+    const pinFor = (id: string, image: string): FabraryPin => {
+      const { name, pitch } = cardData[id]!;
+      return { name, ...(pitch ? { pitch } : {}), image };
+    };
+    let pins: FabraryPin[] = [
+      pinFor(pinnedCard, pin!),
+      // Neither a card in the deck nor a catalog image of the card: both dropped.
+      pinFor(outside, cardArtVariants(outside)[0]!.image),
+      pinFor(pickedCard, "ZZZ999-CF"),
+    ];
+    const fabraryClient = {
+      fetchDeck: async () => ({
+        ok: true as const,
+        deck: { canonicalUrl: sourceUrl, name: "Provider name", text, matchups: [], pins },
+      }),
+    };
+
+    const pinned = await resolveFreshDeck(db, userId, imported.deck.id, fabraryClient);
+    if (!pinned.ok) throw new Error(pinned.error);
+    expect(pinned.deck.fabraryArt).toEqual({ [pinnedCard]: pin });
+    expect(pinned.deck.art).toEqual(playerArt);
+    expect(playedDeckArt(pinned.deck).picks).toEqual({ [pinnedCard]: pin, [pickedCard]: otherPick });
+    expect((await getDeck(db, imported.deck.id))?.fabraryArt).toEqual({ [pinnedCard]: pin });
+
+    // Removing the pin in Fabrary brings back the player's own pick.
+    pins = [];
+    const unpinned = await resolveFreshDeck(db, userId, imported.deck.id, fabraryClient);
+    if (!unpinned.ok) throw new Error(unpinned.error);
+    expect(unpinned.deck.fabraryArt).toEqual({});
+    expect(playedDeckArt(unpinned.deck)).toEqual(playerArt);
   });
 
   it("falls back to the saved default list when Fabrary is unavailable", async () => {
