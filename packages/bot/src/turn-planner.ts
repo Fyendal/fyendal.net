@@ -500,7 +500,10 @@ function opponentRolloutIntent(state: GameState): GameIntent | undefined {
   if (close) return close;
   const order = legal.find((intent) => intent.kind === "order-triggers");
   if (order) return order;
-  return legal.find((intent) => intent.kind === "skip-runechant" || intent.kind === "skip-seismic-surge");
+  const skip = legal.find((intent) => intent.kind === "skip-runechant" || intent.kind === "skip-seismic-surge");
+  if (skip) return skip;
+  // Other mandatory choices (e.g. Oaken Old's card order) resolve in stable option order.
+  return legal.find((intent) => intent.kind === "choose");
 }
 
 /** A card left the deck for hand through a simulated draw rather than as the

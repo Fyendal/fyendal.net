@@ -71,6 +71,18 @@ function apply(
   return result.state;
 }
 
+/** Lets Jarl answer Oaken Old's fusion prompts; returns the revealed ids. */
+function revealOakenFusion(state: ReturnType<typeof createGame>): number[] {
+  const revealed: number[] = [];
+  while (state.pendingDecision?.prompt.includes("fuse Oaken Old")) {
+    const chosen = chooseJarlIntent(inputFor(state));
+    if (chosen.kind !== "choose") throw new Error(`expected a fusion choice, got ${chosen.kind}`);
+    revealed.push(Number(chosen.optionId));
+    state = apply(state, chosen);
+  }
+  return revealed;
+}
+
 function reachEnlightenedStrikeMode(
   state: ReturnType<typeof createGame>,
   bottomInstanceId: number,
@@ -1013,6 +1025,49 @@ describe("Jarl policy", () => {
     expect(chosen.kind === "play-card" ? chosen.pitchInstanceIds : []).not.toContain(
       state.players[0]!.hand[2]!.instanceId,
     );
+  });
+
+  it("reveals Ice then Earth to fuse Oaken Old", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_206, startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.resources = 3;
+    replaceHand(state, ["ELE005", "ELE146", "AJV014"]);
+    const [oaken, ice, earth] = state.players[0]!.hand as [CardView, CardView, CardView];
+    const played = apply(state, { kind: "play-card", instanceId: oaken.instanceId, pitchInstanceIds: [] });
+    expect(revealOakenFusion(played)).toEqual([ice.instanceId, earth.instanceId]);
+  });
+
+  it("pitches a plain blue to keep Oaken Old's Ice and Earth pieces", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_207, startPlayer: 0,
+    });
+    state.turn = 3;
+    replaceHand(state, ["ELE005", "ELE146", "AJV014", "EVR022"]);
+    const [oaken, , , visage] = state.players[0]!.hand as [CardView, CardView, CardView, CardView];
+    const chosen = chooseJarlIntent(inputFor(state));
+    expect(legalIntents(state, 0)).toContainEqual(chosen);
+    expect(chosen).toMatchObject({
+      kind: "play-card",
+      instanceId: oaken.instanceId,
+      pitchInstanceIds: [visage.instanceId],
+    });
+  });
+
+  it("fuses Oaken Old with one card that is both Ice and Earth", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_208, startPlayer: 0,
+    });
+    state.turn = 3;
+    replaceHand(state, ["ELE005", "AJV018", "EVR022", "PEN319"]);
+    const crumble = state.players[0]!.hand[1]!;
+    const play = chooseJarlIntent(inputFor(state));
+    expect(play.kind === "play-card" ? play.pitchInstanceIds : []).not.toContain(crumble.instanceId);
+    expect(revealOakenFusion(apply(state, play))).toEqual([crumble.instanceId, crumble.instanceId]);
   });
 
   it("keeps Sprout Strength in arsenal when no attack can follow it", () => {

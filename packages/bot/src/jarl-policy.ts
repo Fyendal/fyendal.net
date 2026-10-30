@@ -27,7 +27,7 @@ import {
 } from "./policy.js";
 import { threatenedAttackDamage } from "./public-threat.js";
 import type { HeroSolverRules } from "./card-model.js";
-import { guardianPatch } from "./guardian-rules.js";
+import { cardsCanFuse, guardianPatch } from "./guardian-rules.js";
 import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
 import { adjustValueBreakdown } from "./value.js";
 import {
@@ -63,6 +63,21 @@ function earthBanished(input: BotPolicyInput): number {
   return input.view.players[input.seat].banish.filter((card) =>
     hasSubtype(input.cards[card.cardId], "earth")
   ).length;
+}
+
+/** Play bonus for an Oaken Old that can still fuse, and the cost of a play
+ * that strips a held Oaken of its last Ice or Earth piece. */
+const OAKEN_FUSION_PLAY_VALUE = 40;
+/** Damage-equivalent of blocking away a held Oaken's last fusion piece. */
+const OAKEN_FUSION_BLOCK_COST = 4;
+const OAKEN_ELEMENTS = ["ice", "earth"] as const;
+
+/** A held Oaken could fuse now but not after `spent` leaves hand. */
+function breaksOakenFusion(input: BotPolicyInput, spent: ReadonlySet<number>): boolean {
+  const me = input.view.players[input.seat];
+  const remaining = me.hand.filter((card) => !spent.has(card.instanceId));
+  return [...remaining, ...me.arsenal].some((card) => key(input.cards[card.cardId]) === "oaken old|1") &&
+    cardsCanFuse(me.hand, input, OAKEN_ELEMENTS) && !cardsCanFuse(remaining, input, OAKEN_ELEMENTS);
 }
 
 function attackCost(data: CardData): number {
@@ -160,6 +175,10 @@ function scoreDefend(
       if (earlyBarkskin) {
         adjustment -= candidate.onHit.value > 0 || candidate.lethal ? 2 : 9;
       }
+      if (!candidate.lethal &&
+        breaksOakenFusion(candidate.input, new Set(candidate.chosen.map((card) => card.instanceId)))) {
+        adjustment -= OAKEN_FUSION_BLOCK_COST;
+      }
       if (currentLink(candidate.input)?.goAgain === true && candidate.chosen.some((card) =>
         key(candidate.input.cards[card.cardId]) === "crown of frozen thoughts|0"
       )) adjustment += 8;
@@ -228,7 +247,8 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   if (prompt.includes("fuse")) {
     if (intent.optionId.startsWith("both:")) return 100;
     if (intent.optionId.startsWith("ice:") || intent.optionId.startsWith("earth:")) return 50;
-    return -20;
+    // Single-element reveals (Oaken Old asks Ice then Earth) offer bare card ids.
+    return card ? 50 : -20;
   }
   if (prompt.includes("decompose")) {
     const fellingTooEarly = prompt.includes("felling of the crown") && earthBanished(input) < 4;
@@ -602,6 +622,14 @@ function scorePlay(
   }
 
   const pitched = pitchIds(intent).flatMap((id) => own.get(id) ?? []);
+  const spentIds = new Set([card.instanceId, ...pitchIds(intent)]);
+  if (functional === "oaken old|1") {
+    if (cardsCanFuse(me.hand.filter((held) => !spentIds.has(held.instanceId)), input, OAKEN_ELEMENTS)) {
+      score += OAKEN_FUSION_PLAY_VALUE;
+    }
+  } else if (input.view.activePlayer === input.seat && breaksOakenFusion(input, spentIds)) {
+    score -= OAKEN_FUSION_PLAY_VALUE;
+  }
   if (functional === "ancient earth oak|1" && pitched.some((spent) =>
     hasSubtype(input.cards[spent.cardId], "earth")
   )) score += 12;

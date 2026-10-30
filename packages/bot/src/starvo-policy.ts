@@ -431,7 +431,8 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   if (prompt.includes("fuse")) {
     if (intent.optionId.startsWith("both:")) return 110;
     if (intent.optionId.startsWith("ice:") || intent.optionId.startsWith("earth:")) return 60;
-    return -20;
+    // Single-element reveals (Oaken Old asks Ice then Earth) offer bare card ids.
+    return card ? 60 : -20;
   }
   if (prompt.includes("decompose")) {
     const tooEarly = prompt.includes("felling of the crown") && earthBanished(input) < 4;

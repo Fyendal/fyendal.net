@@ -36,10 +36,19 @@ function canFuse(view: SolverView, self: number, elements: readonly string[]): b
   return elements.every((element) => others.some((card) => view.hasTrait(card, element)));
 }
 
+/** Fusion from `cards`; one dual-element card (Crumble to Eternity) covers both. */
+export function cardsCanFuse(
+  cards: readonly CardView[],
+  input: BotPolicyInput,
+  elements: readonly string[],
+): boolean {
+  return elements.every((element) => cards.some((card) => hasSubtype(input.cards[card.cardId], element)));
+}
+
 /** Fusion from the current hand, for static card uses. */
 function handCanFuse(input: BotPolicyInput, self: number, elements: readonly string[]): boolean {
   const others = input.view.players[input.seat].hand.filter((card) => card.instanceId !== self);
-  return elements.every((element) => others.some((card) => hasSubtype(input.cards[card.cardId], element)));
+  return cardsCanFuse(others, input, elements);
 }
 
 /** Pummel's attack-action mode adds "When this hits a hero, they discard a card." */
