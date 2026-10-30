@@ -52,6 +52,7 @@ import type {
   FriendSummary,
   OnHitEffectView,
   OnHitImpactView,
+  PassUntilMode,
   PendingDecision,
   PlayerBadge,
   PlayerReportReason,
@@ -1172,6 +1173,11 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
         && decodeSeatStandingOrders(message.orders) !== null
         && commandFields(message);
       break;
+    case "pass-until":
+      valid = exactKeys(message, ["type", "mode", "commandId", "expectedVersion"], ["type", "mode"])
+        && (message.mode === null || passUntilMode(message.mode))
+        && commandFields(message);
+      break;
     case "runechant-skip":
     case "seismic-surge-skip":
       valid = exactKeys(message, ["type", "enabled", "commandId", "expectedVersion"], ["type", "enabled"])
@@ -1848,7 +1854,7 @@ function decodeStateMessage(value: unknown): StateMessage | null {
   if (!message || message.type !== "state") return null;
   const valid = exactKeys(message, [
     "type", "version", "view", "transition", "playerProfiles", "yourSeat", "legal", "actionCandidates",
-    "spectators", "lastActionAt", "botGame", "cardArt",
+    "spectators", "lastActionAt", "botGame", "cardArt", "passUntil",
   ], ["type", "version", "view", "playerProfiles", "yourSeat", "legal", "lastActionAt"])
     && optional(message.cardArt, (v): v is [Record<string, string>, Record<string, string>] =>
       Array.isArray(v) && v.length === 2 && v.every((map) => cardArtMap(map, false, MAX_CARDS)))
@@ -1861,9 +1867,14 @@ function decodeStateMessage(value: unknown): StateMessage | null {
       array(v, decodeGameIntentValue, MAX_LEGAL_INTENTS))
     && optional(message.spectators, nonNegativeInteger)
     && optional(message.botGame, (v): v is boolean => typeof v === "boolean")
+    && optional(message.passUntil, passUntilMode)
     && Array.isArray(message.lastActionAt) && message.lastActionAt.length === 2
     && message.lastActionAt.every(nonNegativeInteger);
   return valid ? value as StateMessage : null;
+}
+
+function passUntilMode(value: unknown): value is PassUntilMode {
+  return value === "chain-link" || value === "turn" || value === "opponent";
 }
 
 /** Queued pool → deck pool → searchers; every cell present and non-negative. */

@@ -1119,6 +1119,11 @@ export interface FriendGameInvite {
 /** How a seat wants empty priority/reaction windows handled. */
 export type PriorityWindowMode = "auto-pass" | "always-pause";
 
+/** How far a seat's temporary pass shortcut reaches: through the current (or
+ *  next) chain link, to the end of the current turn, or until the opponent
+ *  plays or activates something. */
+export type PassUntilMode = "chain-link" | "turn" | "opponent";
+
 /** `chooseHook` → option value; "ask" is absence. */
 export type SeatStandingOrder = Record<string, string>;
 
@@ -1185,6 +1190,10 @@ export type ClientMessage =
   /** Temporary per-seat shortcut for only the current consecutive Runechant
    *  resolution. The server expires it at the first non-Runechant boundary. */
   | { type: "runechant-skip"; enabled: boolean; commandId?: string; expectedVersion?: number }
+  /** Arm (or with null, cancel) the seat's temporary pass shortcut. The server
+   *  passes its windows and declares no blocks until the mode expires, pausing
+   *  for other choices and before an attack that could defeat the seat. */
+  | { type: "pass-until"; mode: PassUntilMode | null; commandId?: string; expectedVersion?: number }
   /** The same one-shot shortcut for a consecutive Seismic Surge resolution. */
   | { type: "seismic-surge-skip"; enabled: boolean; commandId?: string; expectedVersion?: number }
   | { type: "undo"; target?: UndoTarget; commandId?: string; expectedVersion?: number }
@@ -1214,7 +1223,7 @@ export type ServerMessage =
   | { type: "joined"; code: string; seat: number | null; token: string; spectator?: boolean; resumed?: true; version: number }
   | { type: "room-info"; room: RoomInvite }
   | { type: "game-started"; version: number }
-  | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; botGame?: boolean; /** Per-seat printing id -> image id, limited to cards this viewer can see. */ cardArt?: [Record<string, string>, Record<string, string>] }
+  | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; botGame?: boolean; /** The recipient seat's armed pass shortcut; never sent to anyone else. */ passUntil?: PassUntilMode; /** Per-seat printing id -> image id, limited to cards this viewer can see. */ cardArt?: [Record<string, string>, Record<string, string>] }
   | { type: "spectators"; count: number; version: number }
   /** Additive companion to the legacy count message; null identifies a guest. */
   | { type: "spectator-list"; usernames: Array<string | null>; version: number }

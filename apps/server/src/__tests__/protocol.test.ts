@@ -66,6 +66,9 @@ describe("decodeClientMessage", () => {
       autoPass: true,
     })).not.toBeNull();
     expect(decodeClientMessage({ type: "runechant-skip", enabled: true })).not.toBeNull();
+    expect(decodeClientMessage({ type: "pass-until", mode: "chain-link" })).not.toBeNull();
+    expect(decodeClientMessage({ type: "pass-until", mode: "turn", commandId: "3f1c2e9a-6b1d-4c3e-9a51-0d2b7c8e4f10", expectedVersion: 3 })).not.toBeNull();
+    expect(decodeClientMessage({ type: "pass-until", mode: null })).not.toBeNull();
     expect(decodeClientMessage({ type: "undo", target: "current-turn" })).not.toBeNull();
     expect(decodeClientMessage({ type: "undo", target: "previous-turn" })).not.toBeNull();
   });
@@ -123,6 +126,8 @@ describe("decodeClientMessage", () => {
     expect(decodeClientMessage({ type: "intent", intent: { kind: "pass", seat: 0 } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "pass" }, autoPass: false })).toBeNull();
     expect(decodeClientMessage({ type: "runechant-skip", enabled: "yes" })).toBeNull();
+    expect(decodeClientMessage({ type: "pass-until", mode: "phase" })).toBeNull();
+    expect(decodeClientMessage({ type: "pass-until" })).toBeNull();
     expect(decodeClientMessage({ type: "undo", target: "all" })).toBeNull();
     expect(decodeClientMessage({ type: "delete-everything" })).toBeNull();
   });
