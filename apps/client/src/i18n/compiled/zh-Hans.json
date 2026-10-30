@@ -28363,6 +28363,106 @@
       "value": "你的"
     }
   ],
+  "game.passUntil.armed.chainLink": [
+    {
+      "type": 0,
+      "value": "正在让过此 chain link"
+    }
+  ],
+  "game.passUntil.armed.nextChainLink": [
+    {
+      "type": 0,
+      "value": "正在让过下一个 chain link"
+    }
+  ],
+  "game.passUntil.armed.opponent": [
+    {
+      "type": 0,
+      "value": "正在让过，直到对手行动"
+    }
+  ],
+  "game.passUntil.armed.turn": [
+    {
+      "type": 0,
+      "value": "正在让过至回合结束"
+    }
+  ],
+  "game.passUntil.armedPaused": [
+    {
+      "type": 1,
+      "value": "mode"
+    },
+    {
+      "type": 0,
+      "value": "（已暂停，等待你的选择）"
+    }
+  ],
+  "game.passUntil.chainLink": [
+    {
+      "type": 0,
+      "value": "此 chain link 结束"
+    }
+  ],
+  "game.passUntil.chainLink.detail": [
+    {
+      "type": 0,
+      "value": "让过且不防御，直到该 chain link 结算完毕。遇到其他选择或可能致命的攻击时仍会停下。"
+    }
+  ],
+  "game.passUntil.heading": [
+    {
+      "type": 0,
+      "value": "持续让过，直到"
+    }
+  ],
+  "game.passUntil.nextChainLink": [
+    {
+      "type": 0,
+      "value": "下一个 chain link 结束"
+    }
+  ],
+  "game.passUntil.open": [
+    {
+      "type": 0,
+      "value": "持续让过"
+    }
+  ],
+  "game.passUntil.opponent": [
+    {
+      "type": 0,
+      "value": "对手行动"
+    }
+  ],
+  "game.passUntil.opponent.detail": [
+    {
+      "type": 0,
+      "value": "让过，直到对手下一次打出牌、启动能力或攻击，或你的回合开始。不会替你防御。"
+    }
+  ],
+  "game.passUntil.paused": [
+    {
+      "type": 0,
+      "value": "已暂停，等待你的选择"
+    }
+  ],
+  "game.passUntil.stop.label": [
+    {
+      "type": 0,
+      "value": "停止让过"
+    }
+  ],
+  "game.passUntil.turn": [
+    {
+      "type": 0,
+      "value": "回合结束"
+    }
+  ],
+  "game.passUntil.turn.detail": [
+    {
+      "type": 0,
+      "value": "让过每个时机且不防御，直到回合结束。遇到其他选择或可能致命的攻击时仍会停下。"
+    }
+  ],
   "game.playerNumber": [
     {
       "type": 0,

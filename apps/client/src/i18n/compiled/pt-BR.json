@@ -31109,6 +31109,106 @@
       "value": "você"
     }
   ],
+  "game.passUntil.armed.chainLink": [
+    {
+      "type": 0,
+      "value": "Passando este chain link"
+    }
+  ],
+  "game.passUntil.armed.nextChainLink": [
+    {
+      "type": 0,
+      "value": "Passando o próximo chain link"
+    }
+  ],
+  "game.passUntil.armed.opponent": [
+    {
+      "type": 0,
+      "value": "Passando até o oponente agir"
+    }
+  ],
+  "game.passUntil.armed.turn": [
+    {
+      "type": 0,
+      "value": "Passando até o fim do turno"
+    }
+  ],
+  "game.passUntil.armedPaused": [
+    {
+      "type": 1,
+      "value": "mode"
+    },
+    {
+      "type": 0,
+      "value": " (em pausa para sua escolha)"
+    }
+  ],
+  "game.passUntil.chainLink": [
+    {
+      "type": 0,
+      "value": "Este chain link acabar"
+    }
+  ],
+  "game.passUntil.chainLink.detail": [
+    {
+      "type": 0,
+      "value": "Passa e não bloqueia até o chain link resolver. Ainda para em outras escolhas e antes de um ataque letal."
+    }
+  ],
+  "game.passUntil.heading": [
+    {
+      "type": 0,
+      "value": "Continuar passando até"
+    }
+  ],
+  "game.passUntil.nextChainLink": [
+    {
+      "type": 0,
+      "value": "O próximo chain link acabar"
+    }
+  ],
+  "game.passUntil.open": [
+    {
+      "type": 0,
+      "value": "Continuar passando"
+    }
+  ],
+  "game.passUntil.opponent": [
+    {
+      "type": 0,
+      "value": "O oponente agir"
+    }
+  ],
+  "game.passUntil.opponent.detail": [
+    {
+      "type": 0,
+      "value": "Passa até a próxima carta, habilidade ou ataque dele, ou até seu turno começar. Nunca bloqueia por você."
+    }
+  ],
+  "game.passUntil.paused": [
+    {
+      "type": 0,
+      "value": "Em pausa para sua escolha"
+    }
+  ],
+  "game.passUntil.stop.label": [
+    {
+      "type": 0,
+      "value": "Parar de passar"
+    }
+  ],
+  "game.passUntil.turn": [
+    {
+      "type": 0,
+      "value": "O turno acabar"
+    }
+  ],
+  "game.passUntil.turn.detail": [
+    {
+      "type": 0,
+      "value": "Passa em todas as janelas e não bloqueia até o turno acabar. Ainda para em outras escolhas e antes de um ataque letal."
+    }
+  ],
   "game.playerNumber": [
     {
       "type": 0,
