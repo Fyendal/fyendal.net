@@ -92,6 +92,55 @@ describe("lethal Arcane Barrier", () => {
   });
 });
 
+describe("No Hero Stands Alone clash winner", () => {
+  function reduceInput(botSeat: 0 | 1, attackerSeat: 0 | 1): BotPolicyInput {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 94_151,
+      startPlayer: attackerSeat,
+    });
+    const view = projectStateFor(state, botSeat);
+    const defenderSeat = attackerSeat === 0 ? 1 : 0;
+    view.chain = [{
+      attackingCard: { instanceId: 300_000, cardId: "DTD052", owner: attackerSeat, attack: 3 },
+      defendingCards: [
+        { instanceId: 300_001, cardId: "WTR159", owner: defenderSeat, defense: 1 },
+        { instanceId: 300_002, cardId: "SUP020", owner: defenderSeat, defense: 3 },
+      ],
+      attackValue: 3,
+      defenseValue: 4,
+      damage: 0,
+      resolved: false,
+      reactions: [],
+    }];
+    view.pendingDecision = {
+      player: botSeat,
+      kind: "choose-target",
+      prompt: "Give a combat card -3 power and defense",
+      promptMessage: { id: "card.sup.combat.card.reduce", values: { amount: 3 } },
+      options: ["300000", "300001", "300002"],
+    };
+    return {
+      seat: botSeat,
+      view,
+      legal: ["300000", "300001", "300002"].map((optionId) => ({ kind: "choose" as const, optionId })),
+      cards: cardData,
+    };
+  }
+
+  for (const bot of botDefinitions) {
+    it(`${bot.id} shrinks the strongest defender when attacking`, () => {
+      expect(bot.chooseIntent(reduceInput(0, 0))).toEqual({ kind: "choose", optionId: "300002" });
+    });
+
+    it(`${bot.id} shrinks the attacker when defending`, () => {
+      expect(bot.chooseIntent(reduceInput(0, 1))).toEqual({ kind: "choose", optionId: "300000" });
+    });
+  }
+});
+
 describe("non-lethal Arcane Barrier", () => {
   function barrierInput(hand: readonly string[], resources = 0) {
     const state = createGame({

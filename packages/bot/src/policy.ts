@@ -593,6 +593,8 @@ export function chooseSharedPolicyIntent(input: BotPolicyInput): GameIntent | un
   if (upkeep) return upkeep;
   const unneededBoost = unneededDefenseBoostIntent(input);
   if (unneededBoost) return unneededBoost;
+  const combatShrink = combatCardReduceIntent(input);
+  if (combatShrink) return combatShrink;
 
   const incoming = arcaneBarrierIncoming(decision);
   if (incoming === undefined) return undefined;
@@ -611,6 +613,19 @@ export function chooseSharedPolicyIntent(input: BotPolicyInput): GameIntent | un
   return survivable.reduce((best, candidate) =>
     candidate.amount < best.amount ? candidate : best
   ).intent;
+}
+
+/** No Hero Stands Alone: the clash winner shrinks the other side of the link. */
+function combatCardReduceIntent(input: BotPolicyInput): GameIntent | undefined {
+  if (input.view.pendingDecision?.promptMessage?.id !== "card.sup.combat.card.reduce") return undefined;
+  const link = currentLink(input);
+  if (!link) return undefined;
+  const targets = link.attackingCard.owner === input.seat
+    ? [...link.defendingCards].sort((left, right) => (right.defense ?? 0) - (left.defense ?? 0))
+    : [link.attackingCard];
+  return targets.flatMap((card) =>
+    input.legal.filter((intent) => intent.kind === "choose" && intent.optionId === String(card.instanceId))
+  )[0];
 }
 
 function arcaneBarrierIncoming(decision: NonNullable<GameView["pendingDecision"]>): number | undefined {
