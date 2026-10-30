@@ -243,6 +243,7 @@ function affordableAttackInReserve(
   input: BotPolicyInput,
   own: ReadonlyMap<number, CardView>,
   extraResources = 0,
+  accepts: (data: CardData | undefined) => boolean = () => true,
 ): boolean {
   const used = intentCard(intent, own);
   const consumed = new Set([used?.instanceId, ...pitchIds(intent)]);
@@ -251,7 +252,7 @@ function affordableAttackInReserve(
   const floating = me.resources + (me.chi ?? 0) + extraResources;
   return reserveCards(input).some((card) => {
     const data = input.cards[card.cardId];
-    if (consumed.has(card.instanceId) || !isAttack(data)) return false;
+    if (consumed.has(card.instanceId) || !isAttack(data) || !accepts(data)) return false;
     const pitch = pitchable.reduce((total, candidate) =>
       candidate.instanceId === card.instanceId
         ? total
@@ -266,6 +267,7 @@ const cardOpportunity = opportunityValuer(iraSolverRules);
 /** Damage equivalents of Ira's non-damage on-hit riders. */
 const DESTROY_ARSENAL_VALUE = 4;
 const DRAW_TWO_VALUE = 6;
+const DRAW_ONE_VALUE = DRAW_TWO_VALUE / 2;
 /** Blessing of Qi's next-turn Crouching Tiger: +3{p} with go again. */
 const BLESSING_OF_QI_VALUE = 3;
 
@@ -283,9 +285,9 @@ function nextTigerPump(source: string, power: number, uses = 1): PendingEffect {
 
 /** Hand-value rules: the second-attack bonus, on-hit go again (assumed to
  * connect, as the planner's public rollout does), Edge of Autumn combos,
- * Flying Kick, Bittering Thorns, Whirling Mist Blossom, Razor Reflex, and the
- * Crouching Tiger package. Tigers made mid-line are one reusable source gated
- * by the `tigers` flag. */
+ * Flying Kick, Bittering Thorns, Whirling Mist Blossom, Razor Reflex, Legacy
+ * of Ikaru, and the Crouching Tiger package. Tigers made mid-line are one
+ * reusable source gated by the `tigers` flag. */
 function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
   const me = input.view.players[input.seat];
   const opponent = input.view.players[1 - input.seat]!;
@@ -296,9 +298,11 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
     tigers: view.flag("tigers") + count,
     [tigerUses]: view.flag(tigerUses) + count,
   });
-  const comboFlags = (data: CardData): SolverFlags => {
+  // `previousEdge` lets a reaction on this attack read the attack before it.
+  const comboFlags = (data: CardData, view?: SolverView): SolverFlags => {
     const functional = key(data);
     return {
+      previousEdge: view?.flag("lastEdge") ?? 0,
       lastEdge: functional === EDGE_KEY ? 1 : 0,
       lastTiger: functional === TIGER_KEY ? 1 : 0,
       lastRedAction: isRedAttackAction(data) ? 1 : 0,
@@ -332,7 +336,7 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
         traits: ["ninja"],
         canPlay: (view) => view.flag("tigers") > 0,
         after: (view) => ({
-          flags: { ...comboFlags(tiger), tigers: view.flag("tigers") - 1 },
+          flags: { ...comboFlags(tiger, view), tigers: view.flag("tigers") - 1 },
         }),
       })];
     },
@@ -365,7 +369,7 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
       const patch: SolverCardPatch = {};
       if (isAttack(data) || functional === EDGE_KEY) {
         // Combo cards read the previous attack.
-        patch.after = () => ({ flags: comboFlags(data) });
+        patch.after = (view) => ({ flags: comboFlags(data, view) });
       }
       if (functional.startsWith("soulbead strike|") || functional.startsWith("torrent of tempo|")) {
         patch.goAgainIn = () => true;
@@ -385,8 +389,8 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
         // Draw two when it is the second or later chain link in a row to hit.
         patch.onHitIn = (view) => view.links >= 1 ? DRAW_TWO_VALUE : 0;
       } else if (functional.startsWith("bittering thorns|")) {
-        patch.after = () => ({
-          flags: comboFlags(data),
+        patch.after = (view) => ({
+          flags: comboFlags(data, view),
           pending: [{ key: `thorns#${card.instanceId}`, uses: 1, power: 1 }],
         });
       } else if (functional.startsWith("pouncing qi|")) {
@@ -397,14 +401,16 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
       } else if (functional === "aspect of tiger: body|1") {
         patch.goAgainIn = (view) => view.flag("lastRedAction") > 0;
         patch.after = (view) => ({
-          flags: { ...comboFlags(data), ...(view.flag("lastRedAction") > 0 ? makeTigers(view, 1) : {}) },
+          flags: { ...comboFlags(data, view), ...(view.flag("lastRedAction") > 0 ? makeTigers(view, 1) : {}) },
         });
       } else if (functional === "growl|1" || functional === "untamed|1") {
         patch.replaceAfter = true;
-        patch.after = () => ({
-          flags: comboFlags(data),
+        patch.after = (view) => ({
+          flags: comboFlags(data, view),
           pending: [nextTigerPump(`growl#${card.instanceId}`, 1)],
         });
+      } else if (functional === "legacy of ikaru|3") {
+        patch.onHitIn = (view) => view.flag("previousEdge") > 0 ? DRAW_ONE_VALUE : 0;
       } else if (functional === "blessing of qi|1") {
         patch.bonusIn = () => BLESSING_OF_QI_VALUE;
       } else if (functional === "bluster buff|1") {
@@ -481,6 +487,13 @@ function canPlayActionNow(input: BotPolicyInput): boolean {
   if (input.view.activePlayer !== input.seat) return false;
   if (input.view.players[input.seat].actionPoints > 0) return true;
   return currentAttackIsOurs(input) && currentAttackHasOrWillGetGoAgain(input);
+}
+
+/** An open action decision: the chain link resolved and nothing is on the stack. */
+function atActionDecision(input: BotPolicyInput): boolean {
+  return input.view.activePlayer === input.seat && input.view.phase === "action" &&
+    input.view.stack.length === 0 && currentLink(input) === undefined &&
+    input.view.players[input.seat].actionPoints > 0;
 }
 
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
@@ -567,10 +580,10 @@ function scorePlay(
     } else if (functional === "energy potion|3") {
       score = me.resources < 2 ? 18 : -5;
     } else if (functional === "pouncing paws|0") {
-      // The new tiger needs an action point and pays off through a Qi combo.
-      score = canPlayActionNow(input) && comboInReserve(input) ? 20 : -100;
+      // Destroy only right before playing the tiger, which pays off through a Qi combo.
+      score = atActionDecision(input) && comboInReserve(input) ? 20 : -100;
     } else if (functional === "tearing shuko|0") {
-      score = canPlayActionNow(input) && tigerInReserve(input) ? 6 : -100;
+      score = atActionDecision(input) && tigerInReserve(input) ? 6 : -100;
     } else if (functional === "blood scent|0" || functional === "double cross strap|0") {
       // Only worth destroying when the resource pays for a reserved attack.
       score = !affordableAttackInReserve(intent, input, own) && affordableAttackInReserve(intent, input, own, 1)
@@ -624,7 +637,13 @@ function scorePlay(
         ? -100
         : 32 + (currentLink(input)?.goAgain === true || !reservedAttack ? 0 : 6);
     } else if (functional === "legacy of ikaru|3") {
-      score = previous === "edge of autumn|0" ? 18 : 10;
+      // Its draw needs Edge of Autumn as the previous attack, so save it for the follow-up.
+      const onEdge = key(input.cards[currentLink(input)?.attackingCard.cardId ?? ""]) === EDGE_KEY;
+      score = previous === EDGE_KEY
+        ? 18
+        : onEdge && affordableAttackInReserve(intent, input, own, 0, (data) => !!data?.classes?.includes("ninja"))
+        ? -5
+        : 10;
     } else {
       score = 8;
     }

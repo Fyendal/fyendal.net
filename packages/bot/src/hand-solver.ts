@@ -106,6 +106,7 @@ export interface SolverCard {
   costIn?(view: SolverView): number;
   powerIn?(view: SolverView): number;
   goAgainIn?(view: SolverView): boolean;
+  /** On an attack reaction, the on-hit rider it grants the current attack. */
   onHitIn?(view: SolverView): number;
   traitsIn?(view: SolverView): readonly string[];
   /** Attack reactions: whether this reaction can target the current attack. */
@@ -589,6 +590,8 @@ export class HandSolver {
       this.count(counters, "links:", traits);
     } else if (kind === "react") {
       damage = card.reactionPower ?? 0;
+      // A granted on-hit rider pays off only if the current attack connects.
+      onHit = (card.onHitIn?.(before) ?? 0) * this.hitChance;
     } else {
       goAgain = card.goAgainIn ? card.goAgainIn(before) : card.goAgain;
       // An action-speed play happens after the previous link resolved, so

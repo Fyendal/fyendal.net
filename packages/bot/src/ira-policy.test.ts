@@ -468,6 +468,41 @@ describe("Ira policy", () => {
     expect(decision.plan?.candidateTrace.rootPrepared).toBeLessThanOrEqual(1);
   });
 
+  it("swings Edge of Autumn before Untamed so Legacy of Ikaru draws", () => {
+    let state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9104,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["MST185", "ASR026", "ASR021", "ASR021"]);
+    state.players[1]!.hand = [];
+    const attacks: string[] = [];
+    let legacyTarget: string | undefined;
+    for (let step = 0; step < 60 && state.turn === 2; step++) {
+      const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      const legal = legalIntents(state, actor);
+      const intent = actor === 0
+        ? chooseIraIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state })
+        : legal.find((candidate) => candidate.kind === "defend" && candidate.instanceIds.length === 0) ??
+          legal.find((candidate) => candidate.kind === "pass")!;
+      if (actor === 0 && intent.kind === "activate-ability" &&
+        state.players[0]!.weapons.some((weapon) => weapon.instanceId === intent.sourceInstanceId)) {
+        attacks.push("Edge of Autumn");
+      }
+      if (actor === 0 && intent.kind === "play-card") {
+        const name = cardData[state.players[0]!.hand.find((card) => card.instanceId === intent.instanceId)!.cardId]!.name;
+        if (name === "Legacy of Ikaru") legacyTarget = cardData[state.chain.at(-1)!.attackingCard.cardId]!.name;
+        else attacks.push(name);
+      }
+      state = apply(state, actor, intent);
+    }
+    expect(attacks.slice(0, 2)).toEqual(["Edge of Autumn", "Untamed"]);
+    expect(legacyTarget).toBe("Untamed");
+  });
+
   it("turns an Edge opener into a red Seek Vengeance combo link", () => {
     let state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],
@@ -1211,6 +1246,13 @@ describe("SAGE Ira policy", () => {
           legal.find((candidate) => candidate.kind === "pass")!;
       if (actor === 0 && intent.kind === "activate-ability") {
         expect(intent.pitchInstanceIds).not.toContain(qi);
+        const source = Object.values(state.players[0]!.equipment)
+          .find((card) => card?.instanceId === intent.sourceInstanceId);
+        if (source && /^(Pouncing Paws|Tearing Shuko)$/.test(cardData[source.cardId]!.name)) {
+          // Destroyed only at the action decision right before Crouching Tiger.
+          expect(state.phase).toBe("action");
+          expect(state.chain.every((link) => link.resolved)).toBe(true);
+        }
       }
       if (actor === 0 && (intent.kind === "play-card" || intent.kind === "play-from-zone")) {
         const card = [...state.players[0]!.hand, ...state.players[0]!.banish]
