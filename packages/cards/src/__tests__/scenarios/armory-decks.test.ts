@@ -2089,6 +2089,34 @@ describe("Armory Decks — rules regression coverage", () => {
     expect(g.state.players[0]!.actionPoints).toBe(1);
   });
 
+  it("Polished Blade's additional attack stacks with Flurry", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["zenith blade|0"],
+          board: ["flurry|0"],
+          hand: ["polished blade|1"],
+          resources: 3,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.state.players[0]!.actionPoints = 2;
+    const weaponId = g.state.players[0]!.weapons[0]!.instanceId;
+
+    g.attackWithWeapon("zenith blade|0").blockWith().settle();
+    g.state.players[0]!.weapons[0]!.counters = { power: 2 };
+    g.attackWithWeapon("zenith blade|0").blockWith().react("polished blade|1")
+      .chooseOption("remove 2").chooseOption("go again").chooseOption("additional attack")
+      .chooseOption("activation discount").settle();
+
+    expect(legalIntents(g.state, 0).some((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === weaponId
+    )).toBe(true);
+  });
+
   it("Indefensibly Honed damages the hero when the sharpened sword is defended", () => {
     const g = scenario({
       seats: [

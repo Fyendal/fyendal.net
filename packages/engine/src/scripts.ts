@@ -847,6 +847,7 @@ export interface ActivatedAbility {
    *  own: auto-pass skips a window that offers nothing else unless this many
    *  resources would make another play affordable. An upper bound is safe for
    *  a variable gain, since it can only make auto-pass stop more often.
+   *  Reaction-timed sources always stop, since their window doesn't recur.
    *  `onActivate` still performs the gain. */
   resourceSource?: number;
   /** Remove named counters from this source as part of the activation cost. */

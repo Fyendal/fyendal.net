@@ -133,6 +133,20 @@ describe("resource-only activations and auto-pass", () => {
     expect(idle(strapping([]))).toBe(true);
   });
 
+  it("stops for Paragon Plate's attack-reaction gain, which can't be taken later", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["zenith blade|0"], resources: 1, equipment: { chest: "paragon plate|0" } },
+        { hero: "dorinthea", equipment: { chest: null } },
+      ],
+    });
+    g.state.players[0]!.weapons[0]!.counters = { power: 1 };
+    g.attackWithWeapon("zenith blade|0").blockWith();
+    expect(g.state.pendingDecision?.kind).toBe("attack-reaction");
+    expect(legalIntents(g.state, 0).some(isActivationOf(g, "paragon plate|0"))).toBe(true);
+    expect(idle(g)).toBe(false);
+  });
+
   it("still performs the gain for an ability built with resourceAbility", () => {
     const g = withChargedTunic({ weapons: [] });
     g.activate("fyendal's spring tunic|0").expectResources(0, 1);

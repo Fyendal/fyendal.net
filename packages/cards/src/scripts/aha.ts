@@ -226,7 +226,7 @@ export const aha: Record<string, CardScript> = {
       const sword = ctx.getState("polishedSword");
       const modes = ctx.getState("polishedModes");
       if (modes & 1) ctx.grantGoAgain();
-      if (modes & 2) ctx.setAttackActivationLimit(sword, 2);
+      if (modes & 2) ctx.grantAdditionalActivation(sword);
       if (modes & 4) buffNextAttack(ctx, { attackActivationCostReduction: 1, appliesToInstanceId: sword });
     },
     onChoose(ctx, hook, option) {

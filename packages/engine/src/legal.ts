@@ -1643,6 +1643,8 @@ function resourceSourceAmount(
   const found = findCardAnywhere(state, intent.sourceInstanceId);
   if (!found) return 0;
   const ability = effectiveAbilityList(state, seat, found.card)[intent.abilityIndex ?? 0];
+  // A reaction-timed source is gone once its window closes, so skipping it forfeits the gain.
+  if (ability?.timing === "attack-reaction" || ability?.timing === "defense-reaction") return 0;
   return ability?.resourceSource ?? 0;
 }
 
