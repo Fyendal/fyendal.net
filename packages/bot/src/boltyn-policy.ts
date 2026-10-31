@@ -580,16 +580,19 @@ function resourcesWanted(input: BotPolicyInput): number {
   return Math.max(0, needed - player.resources);
 }
 
-/** The ability is offered again while its go-again layer is still pending. */
-function heroAbilityPending(input: BotPolicyInput): boolean {
+/** Go-again sources are offered again while one of their layers is still pending. */
+function goAgainLayerPending(input: BotPolicyInput): boolean {
   const heroId = me(input).heroInstanceId;
-  return input.view.stack.some((layer) => layer.seat === input.seat && layer.card?.instanceId === heroId);
+  return input.view.stack.some((layer) =>
+    layer.seat === input.seat && !!layer.card &&
+    (layer.card.instanceId === heroId || key(input.cards[layer.card.cardId]) === SNAPDRAGON_SCALERS)
+  );
 }
 
 function scoreHeroAbility(input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
   const link = currentLink(input);
   if (!link || link.resolved || !currentAttackIsOurs(input) || !canGainGoAgain(link)) return -100;
-  if (input.view.pendingDecision?.kind !== "attack-reaction" || heroAbilityPending(input)) return -100;
+  if (input.view.pendingDecision?.kind !== "attack-reaction" || goAgainLayerPending(input)) return -100;
   const pass: GameIntent = { kind: "pass" };
   const sword = raydn(input);
   const swordWorthSwinging = raydnAvailable(input) &&
@@ -723,7 +726,8 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     } else if (functional === SNAPDRAGON_SCALERS) {
       const link = currentLink(input);
       score = currentAttackIsOurs(input) && !!link && canGainGoAgain(link) &&
-          input.view.pendingDecision?.kind === "attack-reaction" && further
+          input.view.pendingDecision?.kind === "attack-reaction" && further &&
+          !goAgainLayerPending(input)
         ? 28
         : -100;
     } else if (functional === ENERGY_POTION) {

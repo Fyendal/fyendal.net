@@ -279,6 +279,21 @@ describe("Boltyn policy", () => {
     }
   });
 
+  it("does not activate Snapdragon Scalers on a link the hero ability already gives go again", () => {
+    const state = game();
+    state.players[0]!.equipment.legs = cards(state, ["BOL008"])[0];
+    hand(state, ["ASB021", "PEN183", "ASB007"]);
+    soul(state, 0);
+    const { intents } = play(settled(state), turnOver);
+    expect(intents).toContain(HERO);
+    const actions = intents.filter((name) => !name.startsWith("choose:") && name !== "order-triggers");
+    for (let index = 1; index < actions.length; index++) {
+      const pair = [actions[index - 1], actions[index]];
+      expect(pair, "two go-again sources on one attack").not.toEqual([HERO, "Snapdragon Scalers"]);
+      expect(pair, "two go-again sources on one attack").not.toEqual(["Snapdragon Scalers", HERO]);
+    }
+  });
+
   it("sequences a charge, Lumina Ascension, and two Raydn swings", () => {
     const state = game();
     hand(state, ["ASB007", "ASB026", "ASB021"]);
