@@ -176,6 +176,13 @@ function defenders(state: GameState): readonly number[] {
   return intent.instanceIds;
 }
 
+/** Pitch left in Boltyn's hand once the defenders leave it. */
+function pitchKept(state: GameState, defenderIds: readonly number[]): number {
+  return state.players[0]!.hand
+    .filter((card) => !defenderIds.includes(card.instanceId))
+    .reduce((total, card) => total + Number(cardData[card.cardId]?.pitch ?? 0), 0);
+}
+
 function currentLinkPower(state: GameState): number | undefined {
   return projectStateFor(state, 0).chain.at(-1)?.attackValue;
 }
@@ -735,6 +742,35 @@ describe("Boltyn policy", () => {
     const defending = underAttack(state, "ELE128");
     const spirit = defending.players[0]!.hand.find((card) => card.cardId === "DTD052")!;
     expect(defenders(defending)).not.toContain(spirit.instanceId);
+  });
+
+  it("does not throw its whole hand at an attack when Flick Knives alone is lethal", () => {
+    const state = settled(game());
+    // As reported: 1 life under Bloodrot Pox, and a dagger can deal the last point past any block.
+    hand(state, ["IAR254", "MON033", "PEN178", "IAR253"]);
+    state.players[0]!.life = 1;
+    state.players[0]!.board = cards(state, ["SAZ034"]);
+    state.players[1]!.weapons = cards(state, ["DYN115"], 1);
+    state.players[1]!.equipment.arms = cards(state, ["FAB124"], 1)[0];
+    state.players[1]!.resources = 3;
+    const defending = underAttack(state, "MST114");
+    const chosen = defenders(defending);
+    expect(chosen.length).toBe(1);
+    expect(pitchKept(defending, chosen)).toBeGreaterThanOrEqual(3);
+  });
+
+  it("keeps the pitch for a lethal Bloodrot Pox when it blocks", () => {
+    const state = settled(game());
+    hand(state, ["IAR254", "DTD052", "MON033", "PEN178"]);
+    state.players[0]!.life = 3;
+    state.players[0]!.board = cards(state, ["SAZ034"]);
+    state.players[0]!.equipment = {};
+    state.players[1]!.resources = 3;
+    // Two blocks leave 2 life, where the Pox kills unless 3 pitch stays in hand.
+    const defending = underAttack(state, "ELE128");
+    const chosen = defenders(defending);
+    expect(chosen.length).toBe(2);
+    expect(pitchKept(defending, chosen)).toBeGreaterThanOrEqual(3);
   });
 
   it("keeps Beaming Bravado and its yellow charge when they unlock Duty Bound Blitz", () => {

@@ -27,7 +27,7 @@ import {
   type LifeThreshold,
   type ValueBreakdown,
 } from "./value.js";
-import { chooseUpkeepPayment } from "./upkeep.js";
+import { chooseUpkeepPayment, strandsLethalUpkeep } from "./upkeep.js";
 import { BLOCK_USE_RATE } from "./card-ev.js";
 
 export interface BotPolicyInput {
@@ -1470,6 +1470,9 @@ interface HandLossScenario {
 const NO_HAND_LOSS: readonly HandLossScenario[] = [{ lostIds: new Set(), weight: 1 }];
 /** Bounds the hand subsets examined for one landed on-hit hand loss. */
 const MAX_HAND_LOSS_SUBSETS = 35;
+/** A block that survives now but strands a lethal end-phase upkeep beats dying
+ * now and loses to every block that survives both. */
+const STRANDED_UPKEEP_PENALTY = 50_000;
 
 function combinations<T>(items: readonly T[], size: number, limit: number): T[][] {
   const result: T[][] = [];
@@ -1588,9 +1591,11 @@ export function scoreDefenseIntentWithTrace(
   const incoming = Math.max(0, Math.max(0, link.damage) + pump);
   // Survival is planned against every public pump the attacker can still
   // spend after blocks. Direct damage ignores blocks, so it lowers the life
-  // the combat damage must stay under instead.
+  // the combat damage must stay under instead; when it alone is lethal no
+  // block matters, so plan for the attacker not using it.
   const threatenedCombat = Math.max(incoming, threatenedCombatDamage(input, chosen.length > 0) + pump, 0);
-  const survivableLife = me.life - publicCombatThreat(input).directDamage;
+  const directDamage = publicCombatThreat(input).directDamage;
+  const survivableLife = directDamage >= me.life ? me.life : me.life - directDamage;
   const lethal = threatenedCombat >= survivableLife;
   if (model.canUseDefender && chosen.some((card) => !model.canUseDefender!(card, input))) {
     return {
@@ -1833,6 +1838,7 @@ export function scoreDefenseIntentWithTrace(
   );
   const unprevented = destroysAttack ? 0 : Math.max(0, incoming - defense - plannedPrevention.amount);
   const lifeAfterDamage = me.life - unprevented;
+  const strandsUpkeep = strandsLethalUpkeep(input, plannedSpentIds, lifeAfterDamage);
   const thresholdRisk = lifeThresholdRisk(lifeAfterDamage, model.lifeThresholds);
   const continueProbability = 1 - stopProbability;
   let value = valueBreakdown({
@@ -1906,7 +1912,7 @@ export function scoreDefenseIntentWithTrace(
     }
     // Staying alive is mandatory; among surviving plans the full value still
     // prices the life kept against the offense held.
-    const score = 100_000 + value.total;
+    const score = 100_000 + value.total - (strandsUpkeep ? STRANDED_UPKEEP_PENALTY : 0);
     return { score, value, eligible: true, lethal, survives, stopsHit, ...cycleTrace };
   }
 
@@ -1924,7 +1930,7 @@ export function scoreDefenseIntentWithTrace(
 
   const requiredBonus = permission === "require" ? 100_000 : 0;
   return {
-    score: value.total + requiredBonus,
+    score: value.total + requiredBonus - (strandsUpkeep ? STRANDED_UPKEEP_PENALTY : 0),
     value,
     eligible: true,
     lethal,

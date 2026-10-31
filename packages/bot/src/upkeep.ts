@@ -25,12 +25,15 @@ function cardPitch(card: CardView, input: BotPolicyInput): number {
 }
 
 /** Resources the bot must still hold when its end phase begins so unpaid
- * upkeep damage leaves it alive; 0 when no upkeep can kill it this turn. */
-export function lethalUpkeepReserve(input: BotPolicyInput): number {
+ * upkeep damage leaves it alive at `life`; 0 when no upkeep can kill it. */
+export function lethalUpkeepReserve(
+  input: BotPolicyInput,
+  life = input.view.players[input.seat].life,
+): number {
   const me = input.view.players[input.seat];
-  if (input.view.activePlayer !== input.seat || input.view.winner != null) return 0;
+  if (input.view.winner != null || life <= 0) return 0;
   const upkeeps = me.board.flatMap((card) => upkeepOf(input.cards[card.cardId]) ?? []);
-  if (upkeeps.reduce((total, upkeep) => total + upkeep.damage, 0) < me.life) return 0;
+  if (upkeeps.reduce((total, upkeep) => total + upkeep.damage, 0) < life) return 0;
   // Pay the most damage per resource first until the unpaid rest is survivable.
   const ordered = [...upkeeps].sort((left, right) =>
     right.damage / Math.max(1, right.cost) - left.damage / Math.max(1, left.cost)
@@ -38,7 +41,7 @@ export function lethalUpkeepReserve(input: BotPolicyInput): number {
   let unpaid = ordered.reduce((total, upkeep) => total + upkeep.damage, 0);
   let reserve = 0;
   for (const upkeep of ordered) {
-    if (unpaid < me.life) break;
+    if (unpaid < life) break;
     unpaid -= upkeep.damage;
     reserve += upkeep.cost;
   }
@@ -89,12 +92,26 @@ function resourcesAfter(intent: GameIntent, input: BotPolicyInput): number {
  * end-phase upkeep (Bloodrot Pox at 2 life or less). When the bot cannot cover
  * the reserve anyway, every legal intent stays available. */
 export function reserveLethalUpkeep(input: BotPolicyInput): BotPolicyInput {
+  if (input.view.activePlayer !== input.seat) return input;
   const reserve = lethalUpkeepReserve(input);
   if (reserve <= 0) return input;
   const me = input.view.players[input.seat];
   if (me.resources + availableResources(input) < reserve) return input;
   const legal = input.legal.filter((intent) => resourcesAfter(intent, input) >= reserve);
   return legal.length === 0 || legal.length === input.legal.length ? input : { ...input, legal };
+}
+
+/** Whether spending `spentIds` on the opponent's turn leaves the hand too
+ * little pitch for an upkeep that kills the bot at `life` in its next end
+ * phase, which the full hand could have paid. No draw comes before it. */
+export function strandsLethalUpkeep(
+  input: BotPolicyInput,
+  spentIds: ReadonlySet<number>,
+  life: number,
+): boolean {
+  if (input.view.activePlayer === input.seat) return false;
+  const reserve = lethalUpkeepReserve(input, life);
+  return reserve > 0 && availableResources(input) >= reserve && availableResources(input, spentIds) < reserve;
 }
 
 /** Pay an end-phase upkeep whenever possible. Its trigger resolves before the
