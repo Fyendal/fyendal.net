@@ -855,7 +855,11 @@ function projectedStackLayers(
   revealAll: boolean,
 ): StackLayerView[] {
   const parked = state.pendingDecision?.triggerOrder?.baseStack ?? [];
-  return [...state.stack, ...parked].filter((layer) => !isInlineTurnLayer(state, layer)).map((layer) => {
+  return [...state.stack, ...parked].filter((layer) => (
+    !isInlineTurnLayer(state, layer) &&
+    // A resolving card that moved itself (returned to hand) has left the stack.
+    !(layer.fromHand !== undefined && !layer.card)
+  )).map((layer) => {
     // Card layers carry their card; trigger layers point at a source in a zone.
     // A face-down source remains secret to an opposing viewer.
     const card = layer.card ??

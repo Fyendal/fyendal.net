@@ -1530,7 +1530,8 @@ export function resolveTopStackCard(state: GameStateInternal, runtime: EngineRun
     // Resolution paused on a choice. The source may be a permanent created by
     // this card rather than the resolving card itself.
     pd.resume = { kind: "stack-card", seat, card };
-    state.resolving.push(card);
+    // A card that already moved itself (returned to hand) is no longer resolving.
+    if (layer.card === card) state.resolving.push(card);
     return;
   }
   finishStackCardResolution(state, runtime, seat);

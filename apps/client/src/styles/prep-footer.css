@@ -534,7 +534,7 @@
 }
 /* Printed images carry a 28px black rim at 600px wide and full-bleed Marvels
    none; draw it so every tile shows one card size. */
-.prep-tile-art .card-artwork-full-bleed {
+:is(.prep-card, .prep-tile-art) .card-artwork-full-bleed {
   box-sizing: border-box;
   padding: 4.67%;
   border-radius: 4.3% / 3.1%;

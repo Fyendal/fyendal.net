@@ -9,6 +9,7 @@
  * driven with settle:false + passPriority like any reaction-window play.
  */
 import { describe, expect, it } from "vitest";
+import { projectStateFor } from "@fyendal/engine";
 import { printingId, scenario } from "../harness.js";
 
 const BOLTYN = "boltyn|0";
@@ -240,6 +241,26 @@ describe("SBL — soul payoffs", () => {
     s.play("duty bound blitz|1");
     s.blockWith().settle();
     s.expectFinalAttack(6); // 5 base +1 from the Courage created by Roaring Beam
+  });
+
+  it("Roaring Beam leaves the projected stack once it returns to hand", () => {
+    const s = scenario({
+      seats: [
+        boltynSeat({ hand: ["take flight|1", "snatch|1", "roaring beam|2"] }),
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("take flight|1", { pitch: ["snatch|1"], settle: false });
+    s.chooseOption("pass");
+    s.blockWith();
+    s.react("roaring beam|2", { settle: false });
+    s.passPriority().passPriority();
+    const beam = Number(handId(s, "roaring beam|2"));
+    expect(s.state.resolving.map((card) => card.instanceId)).not.toContain(beam);
+    const view = projectStateFor(s.state, 0);
+    expect(view.stack.map((layer) => layer.card?.instanceId)).not.toContain(beam);
+    s.chooseCard("roaring beam|2");
+    s.expectInZone(0, "roaring beam|2", "soul");
   });
 
   it("Valiant Thrust gets +3{p} when you've charged this turn", () => {
