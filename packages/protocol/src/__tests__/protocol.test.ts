@@ -21,7 +21,9 @@ import {
   decodeGameView,
   decodeGameLogViewEntry,
   decodeGameMessage,
+  decodeGameClockSummary,
   decodeLoginResponse,
+  decodeRoomClock,
   decodeOkResponse,
   decodeReplayFile,
   decodeReplayNoteInput,
@@ -1290,6 +1292,48 @@ describe("GameView and server messages", () => {
     expect(decodeServerMessage({ ...task, view: null })).toBeNull();
     expect(decodeBotTaskEnvelope({ ...task, view: null })).toEqual({ type: "bot-fallback-needed", code: "ABC123", version: 7, runtimeId: "a".repeat(64), delayMs: 1_000 });
     expect(decodeBotTaskEnvelope({ ...task, code: "abc" })).toBeNull();
+  });
+});
+
+describe("game clock decoding", () => {
+  const summary = { seatMs: [9_000, 6_000] };
+
+  it("decodes the persisted room clock exhaustively", () => {
+    const clock = { awaiting: 1, since: 1_700_000_000_000, seatMs: [9_000, 6_000] };
+    expect(decodeRoomClock(clock)).toEqual(clock);
+    expect(decodeRoomClock({ ...clock, awaiting: null })).not.toBeNull();
+    expect(decodeRoomClock({ ...clock, awaiting: 2 })).toBeNull();
+    expect(decodeRoomClock({ ...clock, since: -1 })).toBeNull();
+    expect(decodeRoomClock({ ...clock, seatMs: [1.5, 0] })).toBeNull();
+    expect(decodeRoomClock({ ...clock, extra: true })).toBeNull();
+    const { since: _since, ...withoutSince } = clock;
+    expect(decodeRoomClock(withoutSince)).toBeNull();
+  });
+
+  it("decodes the final clock summary", () => {
+    expect(decodeGameClockSummary(summary)).toEqual(summary);
+    expect(decodeGameClockSummary({ ...summary, awaiting: null })).toBeNull();
+    expect(decodeGameClockSummary({ seatMs: [0] })).toBeNull();
+  });
+
+  it("accepts an optional clock on state messages", () => {
+    const base = { type: "state", version: 1, view: gameView(), playerProfiles, yourSeat: null, legal: [], lastActionAt: [0, 0] };
+    const live = { awaiting: 0, seatMs: [1_000, 0] };
+    expect(decodeServerMessage(base)).not.toBeNull();
+    expect(decodeServerMessage({ ...base, clock: live })).not.toBeNull();
+    expect(decodeServerMessage({ ...base, clock: { ...live, awaiting: null } })).not.toBeNull();
+    expect(decodeServerMessage({ ...base, clock: { seatMs: [0, 0] } })).toBeNull();
+    expect(decodeServerMessage({ ...base, clock: { ...live, since: 1 } })).toBeNull();
+    expect(decodeServerMessage({ ...base, clock: { ...live, seatMs: [-1, 0] } })).toBeNull();
+  });
+
+  it("keeps a replay's final clock and accepts replays without one", () => {
+    const frames = [{ view: gameView(), transition: null }];
+    expect(decodeReplayFile({ version: 2, seat: 0, clock: summary, frames })).toMatchObject({ clock: summary });
+    expect(decodeReplayFile({ version: 3, seat: 0, clock: summary, frames, notes: [] })).toMatchObject({ clock: summary });
+    expect(decodeReplayFile({ version: 2, seat: 0, frames })).not.toHaveProperty("clock");
+    expect(decodeReplayFile({ version: 2, seat: 0, clock: { seatMs: null }, frames })).toBeNull();
+    expect(decodeReplayFile({ version: 1, seat: 0, clock: summary, views: [gameView()] })).toBeNull();
   });
 });
 

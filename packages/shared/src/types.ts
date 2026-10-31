@@ -897,6 +897,26 @@ export type GameIntent =
   | { kind: "decline-draw" }
   | { kind: "withdraw-draw" };
 
+// ── Game clock ─────────────────────────────────────────────────────────────
+
+/** Count-up clock persisted beside a room. The seat the game awaits is charged
+ * from `since` (epoch ms) at the next commit; null while nothing is awaited. */
+export interface RoomClock {
+  awaiting: 0 | 1 | null;
+  since: number;
+  seatMs: [number, number];
+}
+
+/** Each seat's total thinking time (ms), kept with a finished replay. */
+export interface GameClockSummary {
+  seatMs: [number, number];
+}
+
+/** Clock in a state message, with the running interval included up to the send time. */
+export interface GameClockView extends GameClockSummary {
+  awaiting: 0 | 1 | null;
+}
+
 // ── Replays ────────────────────────────────────────────────────────────────
 
 /**
@@ -922,6 +942,8 @@ export interface ReplayFileV2 {
   version: 2;
   /** Board orientation seat, or null for a spectator recording. */
   seat: number | null;
+  /** Final game clock; absent on replays recorded before the clock existed. */
+  clock?: GameClockSummary;
   frames: ReplayFrameV2[];
 }
 
@@ -937,6 +959,7 @@ export interface ReplayFileV3 {
   version: 3;
   /** Board orientation seat, or null for a spectator recording. */
   seat: number | null;
+  clock?: GameClockSummary;
   frames: ReplayFrameV2[];
   notes: ReplayNote[];
 }
@@ -1223,7 +1246,7 @@ export type ServerMessage =
   | { type: "joined"; code: string; seat: number | null; token: string; spectator?: boolean; resumed?: true; version: number }
   | { type: "room-info"; room: RoomInvite }
   | { type: "game-started"; version: number }
-  | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; botGame?: boolean; /** The recipient seat's armed pass shortcut; never sent to anyone else. */ passUntil?: PassUntilMode; /** Per-seat printing id -> image id, limited to cards this viewer can see. */ cardArt?: [Record<string, string>, Record<string, string>] }
+  | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; /** Absent for rooms started before the clock existed. */ clock?: GameClockView; botGame?: boolean; /** The recipient seat's armed pass shortcut; never sent to anyone else. */ passUntil?: PassUntilMode; /** Per-seat printing id -> image id, limited to cards this viewer can see. */ cardArt?: [Record<string, string>, Record<string, string>] }
   | { type: "spectators"; count: number; version: number }
   /** Additive companion to the legacy count message; null identifies a guest. */
   | { type: "spectator-list"; usernames: Array<string | null>; version: number }

@@ -23,6 +23,9 @@ import type {
   GameMessage,
   GameMessageValue,
   GameStatsView,
+  GameClockSummary,
+  GameClockView,
+  RoomClock,
   GameTransitionMove,
   GameTransitionView,
   GameTurnStatsView,
@@ -1520,6 +1523,31 @@ function gameStats(value: unknown): value is GameStatsView {
     && array(stats.turns, gameTurnStats, MAX_REPLAY_VIEWS);
 }
 
+function gameClockSummary(value: unknown): value is GameClockSummary {
+  const clock = object(value);
+  return !!clock && exactKeys(clock, ["seatMs"]) && seatCounters(clock.seatMs);
+}
+
+function gameClockView(value: unknown): value is GameClockView {
+  const clock = object(value);
+  return !!clock && exactKeys(clock, ["awaiting", "seatMs"])
+    && nullableSeat(clock.awaiting) && seatCounters(clock.seatMs);
+}
+
+/** Decode the `rooms.clock` database column. */
+export function decodeRoomClock(value: unknown): RoomClock | null {
+  const clock = object(value);
+  return clock && exactKeys(clock, ["awaiting", "since", "seatMs"])
+    && nullableSeat(clock.awaiting) && nonNegativeInteger(clock.since) && seatCounters(clock.seatMs)
+    ? value as RoomClock
+    : null;
+}
+
+/** Decode the final clock stored with a finishing replay. */
+export function decodeGameClockSummary(value: unknown): GameClockSummary | null {
+  return gameClockSummary(value) ? value : null;
+}
+
 const historyAchievementId = (value: unknown): value is HistoryAchievementId =>
   typeof value === "string" && (HISTORY_ACHIEVEMENT_IDS as readonly string[]).includes(value);
 
@@ -1854,8 +1882,9 @@ function decodeStateMessage(value: unknown): StateMessage | null {
   if (!message || message.type !== "state") return null;
   const valid = exactKeys(message, [
     "type", "version", "view", "transition", "playerProfiles", "yourSeat", "legal", "actionCandidates",
-    "spectators", "lastActionAt", "botGame", "cardArt", "passUntil",
+    "spectators", "lastActionAt", "clock", "botGame", "cardArt", "passUntil",
   ], ["type", "version", "view", "playerProfiles", "yourSeat", "legal", "lastActionAt"])
+    && optional(message.clock, gameClockView)
     && optional(message.cardArt, (v): v is [Record<string, string>, Record<string, string>] =>
       Array.isArray(v) && v.length === 2 && v.every((map) => cardArtMap(map, false, MAX_CARDS)))
     && nonNegativeInteger(message.version) && decodeGameView(message.view) !== null && nullableSeat(message.yourSeat)
@@ -2012,9 +2041,13 @@ export function decodeReplayFile(value: unknown): ReplayFile | null {
   }
   if ((replay.version !== 2 && replay.version !== 3)
     || !exactKeys(replay, replay.version === 3
+      ? ["version", "seat", "clock", "frames", "notes"]
+      : ["version", "seat", "clock", "frames"], replay.version === 3
       ? ["version", "seat", "frames", "notes"]
       : ["version", "seat", "frames"])
+    || !optional(replay.clock, gameClockSummary)
     || !Array.isArray(replay.frames) || replay.frames.length > MAX_REPLAY_VIEWS) return null;
+  const clock = replay.clock === undefined ? {} : { clock: replay.clock };
   const frames = replay.frames.map((value, index) => {
     const frame = object(value);
     if (!frame || !exactKeys(frame, ["view", "transition"]) || !("transition" in frame)) return null;
@@ -2024,10 +2057,10 @@ export function decodeReplayFile(value: unknown): ReplayFile | null {
     return { view, transition };
   });
   if (!frames.every((frame): frame is NonNullable<typeof frame> => frame !== null)) return null;
-  if (replay.version === 2) return { version: 2, seat: replay.seat, frames };
+  if (replay.version === 2) return { version: 2, seat: replay.seat, ...clock, frames };
   const notes = decodeReplayNotes(replay.notes, frames.length);
   return notes
-    ? { version: 3, seat: replay.seat, frames, notes }
+    ? { version: 3, seat: replay.seat, ...clock, frames, notes }
     : null;
 }
 
@@ -2072,6 +2105,10 @@ export function replayFileTransitions(
 
 export function replayFileNotes(file: ReplayFile): ReplayNote[] {
   return file.version === 3 ? file.notes : [];
+}
+
+export function replayFileClock(file: ReplayFile): GameClockSummary | null {
+  return file.version === 1 ? null : file.clock ?? null;
 }
 
 export const decodeApiError: Decoder<ApiError> = (value) => {
