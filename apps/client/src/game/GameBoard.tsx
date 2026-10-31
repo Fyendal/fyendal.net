@@ -1143,12 +1143,15 @@ export function GameBoard() {
     }
     sendPassUntil(mode);
   };
+  // The server's turn latch also stops where the end-turn warning would ask.
+  const passUntilWaiting = passUntilPaused(view, seat, passUntil) || (passUntil === "turn" && warnBeforeEndTurn);
   const passUntilControl = (placement: "hud" | "toolbar") => passUntilAvailable ? (
     <PassUntilControl
       mode={passUntil}
       linkOpen={chainLinkOpen(view)}
-      paused={passUntilPaused(view, seat, passUntil)}
+      paused={passUntilWaiting}
       hotkeys={placement === "hud"}
+      spacePasses={hotkeyIntent !== null}
       placement={placement}
       onArm={armPassUntil}
       onCancel={() => sendPassUntil(null)}

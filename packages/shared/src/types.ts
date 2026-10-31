@@ -1143,9 +1143,9 @@ export interface FriendGameInvite {
 export type PriorityWindowMode = "auto-pass" | "always-pause";
 
 /** How far a seat's temporary pass shortcut reaches: through the current (or
- *  next) chain link, to the end of the current turn, or until the opponent
- *  plays or activates something. */
-export type PassUntilMode = "chain-link" | "turn" | "opponent";
+ *  next) chain link, or to the end of the current turn. Either pauses when the
+ *  opponent plays or activates something. */
+export type PassUntilMode = "chain-link" | "turn";
 
 /** `chooseHook` → option value; "ask" is absence. */
 export type SeatStandingOrder = Record<string, string>;

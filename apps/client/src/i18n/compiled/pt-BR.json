@@ -31211,12 +31211,6 @@
       "value": "Passando o próximo chain link"
     }
   ],
-  "game.passUntil.armed.opponent": [
-    {
-      "type": 0,
-      "value": "Passando até o oponente agir"
-    }
-  ],
   "game.passUntil.armed.turn": [
     {
       "type": 0,
@@ -31242,13 +31236,19 @@
   "game.passUntil.chainLink.detail": [
     {
       "type": 0,
-      "value": "Passa e não bloqueia até o chain link resolver. Ainda para em outras escolhas e antes de um ataque letal."
+      "value": "Passa e não bloqueia até o chain link resolver. Para quando o oponente joga ou ativa algo e antes de um ataque letal."
     }
   ],
   "game.passUntil.heading": [
     {
       "type": 0,
       "value": "Continuar passando até"
+    }
+  ],
+  "game.passUntil.hold": [
+    {
+      "type": 0,
+      "value": "Segure"
     }
   ],
   "game.passUntil.nextChainLink": [
@@ -31261,18 +31261,6 @@
     {
       "type": 0,
       "value": "Continuar passando"
-    }
-  ],
-  "game.passUntil.opponent": [
-    {
-      "type": 0,
-      "value": "O oponente agir"
-    }
-  ],
-  "game.passUntil.opponent.detail": [
-    {
-      "type": 0,
-      "value": "Passa até a próxima carta, habilidade ou ataque dele, ou até seu turno começar. Nunca bloqueia por você."
     }
   ],
   "game.passUntil.paused": [
@@ -31296,7 +31284,7 @@
   "game.passUntil.turn.detail": [
     {
       "type": 0,
-      "value": "Passa em todas as janelas e não bloqueia até o turno acabar. Ainda para em outras escolhas e antes de um ataque letal."
+      "value": "Passa em todas as janelas e não bloqueia até o turno acabar. Para quando o oponente joga ou ativa algo e antes de um ataque letal."
     }
   ],
   "game.playerNumber": [

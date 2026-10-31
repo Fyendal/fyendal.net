@@ -1903,7 +1903,7 @@ function decodeStateMessage(value: unknown): StateMessage | null {
 }
 
 function passUntilMode(value: unknown): value is PassUntilMode {
-  return value === "chain-link" || value === "turn" || value === "opponent";
+  return value === "chain-link" || value === "turn";
 }
 
 /** Queued pool → deck pool → searchers; every cell present and non-negative. */

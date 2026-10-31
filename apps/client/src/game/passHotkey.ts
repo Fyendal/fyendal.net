@@ -84,19 +84,34 @@ export function shouldPassOnSpace(
   );
 }
 
-/** Shift+Space passes until the opponent acts, F4 the chain link, and F6
- *  the turn, outside text entry. */
+/** Shift+Space passes the chain link and F6 (unlisted, kept for habit) the
+ *  turn, outside text entry. Holding Space also passes the turn. */
 export function passUntilHotkey(
   event: Pick<KeyboardEvent, "code" | "key" | "repeat" | "altKey" | "ctrlKey" | "metaKey" | "shiftKey" | "target">,
 ): PassUntilMode | null {
   if (event.repeat || event.altKey || event.ctrlKey || event.metaKey) return null;
   const target = event.target as KeyboardTarget | null;
   if (target?.closest?.("input, textarea, select, [contenteditable='true']")) return null;
-  if (event.code === "Space" && event.shiftKey) return "opponent";
-  if (event.key === "F4" && !event.shiftKey) return "chain-link";
+  if (event.code === "Space" && event.shiftKey) return "chain-link";
   if (event.key === "F6" && !event.shiftKey) return "turn";
   return null;
 }
+
+/** Escape, or Space when it has no window to pass, stops an armed shortcut,
+ *  outside text entry. */
+export function passUntilStopHotkey(
+  event: Pick<KeyboardEvent, "code" | "key" | "repeat" | "altKey" | "ctrlKey" | "metaKey" | "shiftKey" | "target">,
+  spacePasses: boolean,
+): boolean {
+  if (event.key === "Escape") {
+    const target = event.target as KeyboardTarget | null;
+    return !event.repeat && !target?.closest?.("input, textarea, select, [contenteditable='true']");
+  }
+  return !spacePasses && shouldPassOnSpace(event);
+}
+
+/** How long Space must be held, after its tap passed, to pass the turn. */
+export const PASS_HOLD_MS = 500;
 
 /** Resolve Space to the primary action in a local card announcement. */
 export function actionConfirmationHotkey(

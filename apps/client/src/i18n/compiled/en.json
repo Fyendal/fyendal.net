@@ -29604,12 +29604,6 @@
       "value": "Passing the next chain link"
     }
   ],
-  "game.passUntil.armed.opponent": [
-    {
-      "type": 0,
-      "value": "Passing until the opponent acts"
-    }
-  ],
   "game.passUntil.armed.turn": [
     {
       "type": 0,
@@ -29635,13 +29629,19 @@
   "game.passUntil.chainLink.detail": [
     {
       "type": 0,
-      "value": "Passes and blocks nothing until the chain link resolves. Still stops for other choices and before a lethal attack."
+      "value": "Passes and blocks nothing until the chain link resolves. Stops when the opponent plays or activates something, and before a lethal attack."
     }
   ],
   "game.passUntil.heading": [
     {
       "type": 0,
       "value": "Keep passing until"
+    }
+  ],
+  "game.passUntil.hold": [
+    {
+      "type": 0,
+      "value": "Hold"
     }
   ],
   "game.passUntil.nextChainLink": [
@@ -29654,18 +29654,6 @@
     {
       "type": 0,
       "value": "Keep passing"
-    }
-  ],
-  "game.passUntil.opponent": [
-    {
-      "type": 0,
-      "value": "Opponent acts"
-    }
-  ],
-  "game.passUntil.opponent.detail": [
-    {
-      "type": 0,
-      "value": "Passes until their next card, ability, or attack, or until your turn begins. Never blocks for you."
     }
   ],
   "game.passUntil.paused": [
@@ -29689,7 +29677,7 @@
   "game.passUntil.turn.detail": [
     {
       "type": 0,
-      "value": "Passes every window and blocks nothing until the turn ends. Still stops for other choices and before a lethal attack."
+      "value": "Passes every window and blocks nothing until the turn ends. Stops when the opponent plays or activates something, and before a lethal attack."
     }
   ],
   "game.playerNumber": [

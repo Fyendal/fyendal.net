@@ -12,20 +12,27 @@ import { useIntl } from "react-intl";
 import type { PassUntilMode } from "@fyendal/shared";
 import { TooltipButton } from "../components/TooltipButton.js";
 import { UiIcon } from "../components/UiIcon.js";
-import { passUntilHotkey } from "./passHotkey.js";
+import { PASS_HOLD_MS, passUntilHotkey, passUntilStopHotkey, shouldPassOnSpace } from "./passHotkey.js";
 import { passUntilChoice } from "./passUntil.js";
 
-const MODES = ["opponent", "chain-link", "turn"] as const satisfies readonly PassUntilMode[];
+const MODES = ["chain-link", "turn"] as const satisfies readonly PassUntilMode[];
 
-const ICONS = { "chain-link": "effect-chain", turn: "effect-turn", opponent: "watch" } as const;
+const ICONS = { "chain-link": "effect-chain", turn: "effect-turn" } as const;
 
-const SHORTCUTS = { opponent: "Shift+Space", "chain-link": "F4", turn: "F6" } as const;
+const SHORTCUTS = { "chain-link": ["Shift", "Space"], turn: ["Space"] } as const;
+
+/** Held Space rather than a chord. */
+const HOLD_MODE: PassUntilMode = "turn";
 
 /** Keycaps for a shortcut; Space reuses the board's Space keycap glyph. */
 function ShortcutKeys({ mode }: { mode: PassUntilMode }) {
+  const intl = useIntl();
   return (
     <span className="pass-until-keys" aria-hidden="true">
-      {SHORTCUTS[mode].split("+").map((key) =>
+      {mode === HOLD_MODE
+        ? <span className="pass-until-hold">{intl.formatMessage({ id: "game.passUntil.hold" })}</span>
+        : null}
+      {SHORTCUTS[mode].map((key) =>
         key === "Space"
           ? <kbd key={key} className="shortcut-key" />
           : <kbd key={key} className="pass-until-keycap">{key === "Shift" ? "\u21e7" : key}</kbd>)}
@@ -63,8 +70,8 @@ function menuPosition(toggle: DOMRect, menu: DOMRect): { style: CSSProperties; a
   };
 }
 
-/** Fast-forward segment beside Pass. Its menu keeps passing until the
- *  opponent acts, the chain link resolves, or the turn ends; while armed, the
+/** Fast-forward segment beside Pass. Its menu keeps passing until the chain
+ *  link resolves or the turn ends, pausing on opposing plays; while armed, the
  *  segment itself shows it. */
 export function PassUntilControl({
   mode,
@@ -72,6 +79,7 @@ export function PassUntilControl({
   paused,
   disabled = false,
   hotkeys = false,
+  spacePasses = false,
   placement = "hud",
   onArm,
   onCancel,
@@ -84,6 +92,8 @@ export function PassUntilControl({
   disabled?: boolean;
   /** Only one mounted control listens for the shortcuts. */
   hotkeys?: boolean;
+  /** Space has a window to pass; otherwise, while armed, it stops passing. */
+  spacePasses?: boolean;
   placement?: "hud" | "toolbar";
   onArm: (mode: PassUntilMode) => void;
   onCancel: () => void;
@@ -130,7 +140,7 @@ export function PassUntilControl({
   modeRef.current = mode;
   useEffect(() => {
     if (!open) return;
-    itemRefs.current[Math.max(0, MODES.indexOf(modeRef.current ?? "opponent"))]?.focus();
+    itemRefs.current[Math.max(0, MODES.indexOf(modeRef.current ?? "chain-link"))]?.focus();
     const close = (event: PointerEvent) => {
       const target = event.target as Node;
       if (!rootRef.current?.contains(target) && !menuRef.current?.contains(target)) setOpen(false);
@@ -145,16 +155,49 @@ export function PassUntilControl({
 
   const choiceRef = useRef(choose);
   choiceRef.current = choose;
+  const cancelRef = useRef(onCancel);
+  cancelRef.current = onCancel;
+  const spacePassesRef = useRef(spacePasses);
+  spacePassesRef.current = spacePasses;
   useEffect(() => {
     if (!hotkeys || disabled) return;
+    let hold: ReturnType<typeof setTimeout> | undefined;
+    const release = () => {
+      clearTimeout(hold);
+      hold = undefined;
+    };
     const onKeyDown = (event: KeyboardEvent) => {
+      if (modeRef.current && passUntilStopHotkey(event, spacePassesRef.current)) {
+        event.preventDefault();
+        setOpen(false);
+        cancelRef.current();
+        return;
+      }
       const next = passUntilHotkey(event);
-      if (!next) return;
-      event.preventDefault();
-      choiceRef.current(next);
+      if (next) {
+        event.preventDefault();
+        choiceRef.current(next);
+        return;
+      }
+      // The tap already passed; a hold arms the turn so passing continues.
+      if (!shouldPassOnSpace(event)) return;
+      release();
+      hold = setTimeout(() => {
+        if (modeRef.current !== HOLD_MODE) choiceRef.current(HOLD_MODE);
+      }, PASS_HOLD_MS);
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (event.code === "Space") release();
     };
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", release);
+    return () => {
+      release();
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", release);
+    };
   }, [disabled, hotkeys]);
 
   // The board passes on Space at the window; inside the menu, Space and the
@@ -232,7 +275,7 @@ export function PassUntilControl({
                 role="menuitemradio"
                 aria-label={name}
                 aria-checked={mode === option}
-                aria-keyshortcuts={SHORTCUTS[option]}
+                aria-keyshortcuts={option === HOLD_MODE ? undefined : SHORTCUTS[option].join("+")}
                 className="pass-until-option"
                 tooltip={intl.formatMessage({ id: `game.passUntil.${modeKey(option, true)}.detail` })}
                 tooltipClassName="lobby-tooltip pass-until-tooltip"
@@ -249,13 +292,17 @@ export function PassUntilControl({
               ref={(element) => { itemRefs.current[MODES.length] = element; }}
               type="button"
               role="menuitem"
+              aria-keyshortcuts="Escape"
               className="pass-until-option pass-until-option-stop"
               onClick={() => {
                 setOpen(false);
                 onCancel();
               }}
             >
-              {intl.formatMessage({ id: "game.passUntil.stop.label" })}
+              <span>{intl.formatMessage({ id: "game.passUntil.stop.label" })}</span>
+              <span className="pass-until-keys" aria-hidden="true">
+                <kbd className="pass-until-keycap">Esc</kbd>
+              </span>
             </button>
           ) : null}
         </div>,

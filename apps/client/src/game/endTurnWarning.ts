@@ -3,7 +3,8 @@ import { cardData } from "@fyendal/cards/client";
 
 /** True when passing would give up an unused action point on the player's own
  * action-phase turn while an action card or weapon could still be used. The
- * game's opening turn (engine turn 1, "turn 0" in play) never warns. */
+ * game's opening turn (engine turn 1, "turn 0" in play) never warns. The
+ * server's pass-until latch pauses on the same rule (`forfeitsActionPoint`). */
 export function shouldWarnBeforeEndTurn(
   view: GameView | null,
   seat: number | null,

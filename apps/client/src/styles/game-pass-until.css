@@ -165,8 +165,15 @@
   color: #cfc3adcc;
   font: 700 10px/1 var(--font-lobby-ui);
 }
+.pass-until-hold {
+  color: #cfc3adcc;
+  font: 600 10px/1 var(--font-lobby-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
 .pass-until-option-stop {
-  display: block;
+  display: flex;
+  justify-content: space-between;
   margin-top: 4px;
   color: #ff9a8f;
   font-size: 13px;

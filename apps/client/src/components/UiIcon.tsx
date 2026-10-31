@@ -45,8 +45,7 @@ export type UiIconName =
   | "star-outline"
   | "trash"
   | "user-add"
-  | "user-pending"
-  | "watch";
+  | "user-pending";
 
 export function UiIcon({ name, className }: { name: UiIconName; className?: string }) {
   return (

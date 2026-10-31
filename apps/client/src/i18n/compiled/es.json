@@ -30510,12 +30510,6 @@
       "value": "Pasando el próximo chain link"
     }
   ],
-  "game.passUntil.armed.opponent": [
-    {
-      "type": 0,
-      "value": "Pasando hasta que el oponente actúe"
-    }
-  ],
   "game.passUntil.armed.turn": [
     {
       "type": 0,
@@ -30541,13 +30535,19 @@
   "game.passUntil.chainLink.detail": [
     {
       "type": 0,
-      "value": "Pasa y no bloquea hasta que se resuelva el chain link. Aún se detiene en otras decisiones y antes de un ataque letal."
+      "value": "Pasa y no bloquea hasta que se resuelva el chain link. Se detiene cuando el oponente juega o activa algo y antes de un ataque letal."
     }
   ],
   "game.passUntil.heading": [
     {
       "type": 0,
       "value": "Seguir pasando hasta que"
+    }
+  ],
+  "game.passUntil.hold": [
+    {
+      "type": 0,
+      "value": "Mantén"
     }
   ],
   "game.passUntil.nextChainLink": [
@@ -30560,18 +30560,6 @@
     {
       "type": 0,
       "value": "Seguir pasando"
-    }
-  ],
-  "game.passUntil.opponent": [
-    {
-      "type": 0,
-      "value": "El oponente actúe"
-    }
-  ],
-  "game.passUntil.opponent.detail": [
-    {
-      "type": 0,
-      "value": "Pasa hasta su próxima carta, habilidad o ataque, o hasta que empiece tu turno. Nunca bloquea por ti."
     }
   ],
   "game.passUntil.paused": [
@@ -30595,7 +30583,7 @@
   "game.passUntil.turn.detail": [
     {
       "type": 0,
-      "value": "Pasa en todas las ventanas y no bloquea hasta que termine el turno. Aún se detiene en otras decisiones y antes de un ataque letal."
+      "value": "Pasa en todas las ventanas y no bloquea hasta que termine el turno. Se detiene cuando el oponente juega o activa algo y antes de un ataque letal."
     }
   ],
   "game.playerNumber": [

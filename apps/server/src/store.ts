@@ -100,7 +100,7 @@ import {
 import { hashToken } from "./tokenHash.js";
 import { advanceClock, clockSummary, clockView, startClock } from "./clock.js";
 import { standingOrderIntent } from "./standingOrders.js";
-import { armPassUntil, decodeStoredPassUntil, passUntilIntent, refreshPassUntil, type SeatPassUntil } from "./passUntil.js";
+import { acknowledgePassUntil, armPassUntil, decodeStoredPassUntil, passUntilIntent, refreshPassUntil, type SeatPassUntil } from "./passUntil.js";
 
 /**
  * Postgres-backed room storage. Room membership and full game state live in
@@ -4220,6 +4220,8 @@ export class PgRoomStore {
       if (!res.ok) {
         return { error: res.error };
       }
+      const armed = room.seats[seat]?.passUntil;
+      if (armed) room.seats[seat]!.passUntil = acknowledgePassUntil(room.state, seat, armed);
       // The engine never mutates in place, so undo is just the last snapshot.
       // Staged defenders are cosmetic. Verified automatic passes are part of
       // the preceding meaningful action, so undo rewinds that action and all

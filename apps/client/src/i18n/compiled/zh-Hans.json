@@ -28431,12 +28431,6 @@
       "value": "正在让过下一个 chain link"
     }
   ],
-  "game.passUntil.armed.opponent": [
-    {
-      "type": 0,
-      "value": "正在让过，直到对手行动"
-    }
-  ],
   "game.passUntil.armed.turn": [
     {
       "type": 0,
@@ -28462,13 +28456,19 @@
   "game.passUntil.chainLink.detail": [
     {
       "type": 0,
-      "value": "让过且不防御，直到该 chain link 结算完毕。遇到其他选择或可能致命的攻击时仍会停下。"
+      "value": "让过且不防御，直到该 chain link 结算完毕。对手打出牌或启动能力时，以及可能致命的攻击前会停下。"
     }
   ],
   "game.passUntil.heading": [
     {
       "type": 0,
       "value": "持续让过，直到"
+    }
+  ],
+  "game.passUntil.hold": [
+    {
+      "type": 0,
+      "value": "按住"
     }
   ],
   "game.passUntil.nextChainLink": [
@@ -28481,18 +28481,6 @@
     {
       "type": 0,
       "value": "持续让过"
-    }
-  ],
-  "game.passUntil.opponent": [
-    {
-      "type": 0,
-      "value": "对手行动"
-    }
-  ],
-  "game.passUntil.opponent.detail": [
-    {
-      "type": 0,
-      "value": "让过，直到对手下一次打出牌、启动能力或攻击，或你的回合开始。不会替你防御。"
     }
   ],
   "game.passUntil.paused": [
@@ -28516,7 +28504,7 @@
   "game.passUntil.turn.detail": [
     {
       "type": 0,
-      "value": "让过每个时机且不防御，直到回合结束。遇到其他选择或可能致命的攻击时仍会停下。"
+      "value": "让过每个时机且不防御，直到回合结束。对手打出牌或启动能力时，以及可能致命的攻击前会停下。"
     }
   ],
   "game.playerNumber": [
