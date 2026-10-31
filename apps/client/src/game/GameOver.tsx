@@ -10,6 +10,7 @@ import {
   preventedDamage,
   totalPrevented,
 } from "../replay/stats.js";
+import { TooltipButton } from "../components/TooltipButton.js";
 import { TooltipLabel } from "../components/TooltipLabel.js";
 import { UiIcon } from "../components/UiIcon.js";
 import { formatDuration } from "./gameClock.js";
@@ -50,6 +51,7 @@ export function GameOver({
 }) {
   const intl = useIntl();
   const openingTooltipId = useId();
+  const retentionId = useId();
   const winner = view.winner;
   const initialSeat = (spectating ? winner ?? 0 : seat) === 1 ? 1 : 0;
   const [selectedSeat, setSelectedSeat] = useState<0 | 1>(initialSeat);
@@ -72,6 +74,18 @@ export function GameOver({
   ];
   const totalValue = stats.rows.reduce((sum, row) => sum + cycleValue(row, selectedSeat), 0);
   const gameTime = clock ? formatDuration(clock.seatMs[0] + clock.seatMs[1]) : "";
+  const retention = !spectating && !replaying ? intl.formatMessage({ id: "game.over.retention" }) : null;
+  const replayButton = (label: string, onClick: () => void, mark = "") => retention ? (
+    <TooltipButton
+      tooltip={retention}
+      tooltipSide="above"
+      aria-label={label}
+      aria-describedby={retentionId}
+      onClick={onClick}
+    >
+      {mark}{label}
+    </TooltipButton>
+  ) : <button onClick={onClick}>{mark}{label}</button>;
   const fmt = (n: number) => intl.formatNumber(n, { maximumFractionDigits: 1 });
 
   return (
@@ -116,12 +130,13 @@ export function GameOver({
           </div>
           <div className="rail-actions gameover-actions">
             {friendAction}
-            {onDownloadReplay ? (
-              <button onClick={onDownloadReplay}>{intl.formatMessage({ id: "replay.controls.export" })}</button>
-            ) : null}
-            {onWatchReplay ? (
-              <button onClick={onWatchReplay}>▶ {intl.formatMessage({ id: "game.over.watchReplay" })}</button>
-            ) : null}
+            {onDownloadReplay
+              ? replayButton(intl.formatMessage({ id: "replay.controls.export" }), onDownloadReplay)
+              : null}
+            {onWatchReplay
+              ? replayButton(intl.formatMessage({ id: "game.over.watchReplay" }), onWatchReplay, "▶ ")
+              : null}
+            {retention ? <span id={retentionId} hidden>{retention}</span> : null}
             <button onClick={onClose}>{intl.formatMessage({ id: "game.over.backToBoard" })}</button>
             <button className={onPlayAgain ? undefined : "btn-primary"} onClick={onBackToLobby}>
               {intl.formatMessage({ id: replaying ? "replay.controls.exit" : "game.over.backToLobby" })}
@@ -133,12 +148,6 @@ export function GameOver({
             ) : null}
           </div>
         </header>
-
-        {!spectating && !replaying ? (
-          <p className="gameover-replay-retention">
-            {intl.formatMessage({ id: "game.over.retention" })}
-          </p>
-        ) : null}
 
         <div className="gameover-switcher">
           <span className="gameover-switcher-label">{intl.formatMessage({ id: "game.over.playerStats" })}</span>

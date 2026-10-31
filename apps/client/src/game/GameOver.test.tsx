@@ -54,6 +54,33 @@ describe("GameOver player statistics", () => {
     expect(html).not.toContain("<th>Time</th>");
   });
 
+  it("describes replay retention on the replay buttons instead of in the body", () => {
+    const view = finishedView();
+    const render = (replaying: boolean) => renderToStaticMarkup(
+      <TestI18nProvider>
+        <GameOver
+          view={view}
+          seat={0}
+          spectating={false}
+          replaying={replaying}
+          recordedViews={[view]}
+          onWatchReplay={replaying ? null : () => undefined}
+          onDownloadReplay={() => undefined}
+          onBackToLobby={() => undefined}
+          onClose={() => undefined}
+        />
+      </TestI18nProvider>,
+    );
+    const live = render(false);
+    const retention = /<span id="([^"]+)" hidden="">This replay will be available/.exec(live);
+    expect(retention).not.toBeNull();
+    expect(live.match(new RegExp(`aria-describedby="${retention![1]}"`, "g"))).toHaveLength(2);
+    expect(live).toContain('aria-label="Export replay"');
+    expect(live).toContain('aria-label="Watch replay"');
+    expect(live).not.toContain("<p");
+    expect(render(true)).not.toContain("This replay will be available");
+  });
+
   it("omits time without a clock", () => {
     const view = finishedView();
     const html = renderToStaticMarkup(
