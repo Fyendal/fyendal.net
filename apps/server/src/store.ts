@@ -31,6 +31,7 @@ import {
   type TokenSkipKind,
   type PassUntilMode,
   type UndoTarget,
+  type RoomClock,
 } from "@fyendal/shared";
 import {
   botDefinition,
@@ -60,6 +61,7 @@ import {
 import { resolveDeckArt } from "@fyendal/cards/art";
 import {
   decodePresentedArena,
+  decodeRoomClock,
   resolvedCardArt,
   MAX_MATCHMAKING_AVOID_HEROES,
   MAX_MATCHMAKING_AVOID_ROOM_CODES,
@@ -96,6 +98,7 @@ import {
   startReplay,
 } from "./replays.js";
 import { hashToken } from "./tokenHash.js";
+import { advanceClock, clockSummary, clockView, startClock } from "./clock.js";
 import { standingOrderIntent } from "./standingOrders.js";
 import { armPassUntil, decodeStoredPassUntil, passUntilIntent, refreshPassUntil, type SeatPassUntil } from "./passUntil.js";
 
@@ -240,6 +243,8 @@ export interface RoomRow {
   /** Latest committed semantic edge. Its fromVersion fences reconnects and
    * coalesced multi-instance refreshes from replaying a partial path. */
   lastTransition: StoredRoomTransition | null;
+  /** Count-up game clock; null before the game starts and in legacy rooms. */
+  clock: RoomClock | null;
 }
 
 export interface StoredRoomTransition {
@@ -480,6 +485,7 @@ type RawRoomRow = {
   is_private: boolean;
   card_pool_mode: CardPoolMode;
   last_transition: unknown;
+  clock: RoomClock | null;
 };
 
 function dbObject(value: unknown, code: string, path: string): Record<string, unknown> {
@@ -719,6 +725,8 @@ function decodeRawRoomRow(value: unknown): RawRoomRow {
   if (!(row.card_pool_mode === "legal" || row.card_pool_mode === "future" || row.card_pool_mode === "open")) {
     throw new CorruptRoomError(code, "row.card_pool_mode", "expected a card-pool mode");
   }
+  const clock = row.clock == null ? null : decodeRoomClock(row.clock);
+  if (row.clock != null && !clock) throw new CorruptRoomError(code, "row.clock", "invalid game clock");
   let decodedPrep: PrepState | null = null;
   if (row.prep !== null) {
     const prep = dbObject(row.prep, code, "row.prep");
@@ -762,6 +770,7 @@ function decodeRawRoomRow(value: unknown): RawRoomRow {
     is_private: row.is_private,
     card_pool_mode: row.card_pool_mode,
     last_transition: row.last_transition,
+    clock,
   };
 }
 
@@ -892,6 +901,7 @@ function toRoom(value: unknown): RoomRow {
     isPrivate: r.is_private,
     cardPoolMode: r.card_pool_mode,
     lastTransition: decodeStoredTransition(r.last_transition, r.code, "row.last_transition"),
+    clock: r.clock,
   };
 }
 
@@ -1060,8 +1070,19 @@ function stampActivity(room: RoomRow): SeatWrite[] {
 }
 
 export class PgRoomStore {
-  constructor(private db: Queryable, private rulesetVersion: string) {
+  constructor(
+    private db: Queryable,
+    private rulesetVersion: string,
+    private now: () => number = Date.now,
+  ) {
     if (!rulesetVersion) throw new Error("rulesetVersion is required");
+  }
+
+  /** Charge the interval since the previous commit; a newly started game starts a fresh clock. */
+  private tickClock(room: RoomRow, hadGame: boolean): void {
+    const now = this.now();
+    if (!hadGame && room.state) room.clock = startClock(room.state, now);
+    else if (room.clock) room.clock = advanceClock(room.clock, room.state, now);
   }
 
   private async loadRoom(db: Queryable, code: string): Promise<RoomRow | null> {
@@ -1089,7 +1110,7 @@ export class PgRoomStore {
        )
        SELECT r.code, r.format, r.spectators, r.state, r.prep, r.ruleset_version,
               r.version, r.created_at, r.gc_at, r.prep_deadline_at, r.is_private, r.card_pool_mode,
-              r.last_transition,
+              r.last_transition, r.clock,
               COALESCE(seat_data.seat_rows, '[]'::json) AS seat_rows,
               COALESCE(presence_data.presence_rows, '[]'::json) AS presence_rows
        FROM rooms AS r
@@ -1137,7 +1158,7 @@ export class PgRoomStore {
     const { status, winner } = lifecycle(room);
     const { rowCount } = await db.query(
       `UPDATE rooms SET spectators=$2, state=$3, gc_at=$4, prep=$5,
-         status=$6, winner=$7, prep_deadline_at=$8, last_transition=$9, version=version+1
+         status=$6, winner=$7, prep_deadline_at=$8, last_transition=$9, clock=$11, version=version+1
        WHERE code=$1 AND version=$10`,
       [
         room.code,
@@ -1150,6 +1171,7 @@ export class PgRoomStore {
         room.prepDeadlineAt,
         room.lastTransition ? JSON.stringify(room.lastTransition) : null,
         room.version,
+        room.clock ? JSON.stringify(room.clock) : null,
       ],
     );
     return rowCount === 1;
@@ -1498,6 +1520,7 @@ export class PgRoomStore {
             ] as const
           : null);
         const wasGameOver = room.state?.phase === "game-over";
+        const hadGame = room.state !== null;
         const out = await fn(room, db);
         if ("error" in out) return { ok: false as const, error: out.error };
         const fullSeatWrites = new Set(
@@ -1523,6 +1546,7 @@ export class PgRoomStore {
           return { ok: true as const, result: out.result, version: room.version };
         }
         updateGc(out.room);
+        this.tickClock(out.room, hadGame);
         if (!(await this.save(out.room, db))) throw VERSION_CONFLICT;
         await this.applySeatWrites(db, out.room, out.seatWrites ?? []);
         const gameJustEnded = !wasGameOver && out.room.state?.phase === "game-over";
@@ -1578,6 +1602,7 @@ export class PgRoomStore {
               : null,
             replayFrameAt,
             pendingAchievements,
+            out.room.clock ? clockSummary(out.room.clock) : null,
           )) ?? undefined;
           if (replayFinalizationId) {
             await recordGameCompletion(db, {
@@ -1739,7 +1764,7 @@ export class PgRoomStore {
     const room: RoomRow = {
       code, format, cardPoolMode, version: 0, createdAt: now, gcAt: now + GC_DELAY_MS,
       rulesetVersion: this.rulesetVersion, isPrivate: true, spectators: [], state: null,
-      prep: rollDice(), prepDeadlineAt: null, lastTransition: null,
+      prep: rollDice(), prepDeadlineAt: null, lastTransition: null, clock: null,
       seats: [
         { ...seat, heroId: humanDeck.decklist.heroId, tokenHash: hashReconnectToken(token), lastSeenAt: 0 },
         {
@@ -2125,6 +2150,7 @@ export class PgRoomStore {
           isPrivate: false,
           cardPoolMode: choice.cardPoolMode,
           lastTransition: null,
+          clock: null,
         };
         await db.query(
           `INSERT INTO rooms
@@ -2307,6 +2333,7 @@ export class PgRoomStore {
           isPrivate: false,
           cardPoolMode: pairPool,
           lastTransition: null,
+          clock: null,
         };
         await db.query(
           `INSERT INTO rooms
@@ -4386,6 +4413,7 @@ export class PgRoomStore {
           events: [],
         };
         updateGc(room);
+        this.tickClock(room, true);
         if (!(await this.save(room, db))) throw VERSION_CONFLICT;
         await db.query(
           "DELETE FROM room_history WHERE room_code = $1 AND version >= $2",
@@ -4948,7 +4976,7 @@ export function spectatorListMessage(room: RoomRow): ServerMessage {
   };
 }
 
-export function stateMessage(room: RoomRow, seat: number | null): ServerMessage | null {
+export function stateMessage(room: RoomRow, seat: number | null, now = Date.now()): ServerMessage | null {
   if (!room.state) return null;
   const view = projectStateFor(room.state, seat, room.code);
   const profile = (member: SeatRow | null) => ({
@@ -4979,6 +5007,7 @@ export function stateMessage(room: RoomRow, seat: number | null): ServerMessage 
     actionCandidates: seat === null ? [] : actionCandidates(room.state, seat),
     spectators: spectatorCount(room),
     lastActionAt: [room.seats[0]?.lastActionAt ?? 0, room.seats[1]?.lastActionAt ?? 0],
+    ...(room.clock ? { clock: clockView(room.clock, now) } : {}),
     ...(room.seats.some((member) => member?.controller === "bot") ? { botGame: true } : {}),
     ...(seat !== null && room.seats[seat]?.passUntil ? { passUntil: room.seats[seat].passUntil.mode } : {}),
     ...visibleCardArt(room, view, seat),

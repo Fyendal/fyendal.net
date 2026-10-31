@@ -1168,6 +1168,12 @@ export const MIGRATIONS: Migration[] = [
     // A seat's temporary pass shortcut and the turn or chain link it covers.
     sql: "ALTER TABLE room_seats ADD COLUMN pass_until JSONB;",
   },
+  {
+    version: 63,
+    // Count-up game clock; a finishing replay keeps the final clock until its payload is built.
+    sql: `ALTER TABLE rooms ADD COLUMN clock JSONB;
+    ALTER TABLE replay_games ADD COLUMN clock JSONB;`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

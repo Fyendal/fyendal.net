@@ -8,6 +8,7 @@ import {
   type GameState,
 } from "@fyendal/engine";
 import {
+  decodeGameClockSummary,
   decodeReplayPendingAchievements,
   type ReplayPendingAchievements,
   decodeReplayResponse,
@@ -19,7 +20,7 @@ import {
   type ReplayServerNote,
   type ReplaySummary,
 } from "@fyendal/protocol";
-import type { Format, ReplayFile } from "@fyendal/shared";
+import type { Format, GameClockSummary, ReplayFile } from "@fyendal/shared";
 import { awardHistoryAchievements } from "./achievements.js";
 import { type Queryable, withTransaction } from "./db.js";
 import { tryAcquireLease } from "./leases.js";
@@ -125,6 +126,7 @@ export async function appendReplayView(
   } | null,
   now = Date.now(),
   pendingAchievements: ReplayPendingAchievements | null = null,
+  clock: GameClockSummary | null = null,
 ): Promise<string | null> {
   let view: string;
   let projectedTransition: string | null;
@@ -171,9 +173,14 @@ export async function appendReplayView(
   if (state.phase === "game-over") {
     const finalized = await db.query(
       `UPDATE replay_games
-       SET winner=$2, status='finalizing', finished_at=$3, expires_at=$4, pending_achievements=$5::jsonb
+       SET winner=$2, status='finalizing', finished_at=$3, expires_at=$4, pending_achievements=$5::jsonb,
+           clock=$6::jsonb
        WHERE id=$1 AND status='recording' RETURNING id`,
-      [id, winner, now, now + REPLAY_TTL_MS, pendingAchievements ? JSON.stringify(pendingAchievements) : null],
+      [
+        id, winner, now, now + REPLAY_TTL_MS,
+        pendingAchievements ? JSON.stringify(pendingAchievements) : null,
+        clock ? JSON.stringify(clock) : null,
+      ],
     );
     return finalized.rows.length ? id : null;
   }
@@ -338,14 +345,16 @@ export async function encodeReplayPayloads(
   frames: ReplayFrames,
   participants: readonly ReplayParticipantSeat[],
   yieldControl: () => Promise<void> = yieldToEventLoop,
+  clock: GameClockSummary | null = null,
 ): Promise<ReplayParticipantPayload[]> {
   const framesJson = Buffer.from(JSON.stringify(frames));
+  const clockJson = clock ? `"clock":${JSON.stringify(clock)},` : "";
   const payloads: ReplayParticipantPayload[] = [];
   for (const participant of participants) {
     if (payloads.length > 0) await yieldControl();
-    // Byte-identical to JSON.stringify({ ok: true, replay: { version: 2, seat, frames } }).
+    // Byte-identical to JSON.stringify({ ok: true, replay: { version: 2, seat, clock?, frames } }).
     const response = Buffer.concat([
-      Buffer.from(`{"ok":true,"replay":{"version":2,"seat":${participant.seat},"frames":`),
+      Buffer.from(`{"ok":true,"replay":{"version":2,"seat":${participant.seat},${clockJson}"frames":`),
       framesJson,
       REPLAY_RESPONSE_SUFFIX,
     ]);
@@ -362,7 +371,7 @@ export async function finalizeReplay(
 ): Promise<boolean> {
   await waitForCapacity();
   const { rows } = await db.query(
-    `SELECT id, winner, room_code, pending_achievements
+    `SELECT id, winner, room_code, pending_achievements, clock
      FROM replay_games WHERE id = $1 AND status = 'finalizing'`,
     [replayIdValue],
   );
@@ -377,6 +386,8 @@ export async function finalizeReplay(
   if (replay.pending_achievements != null && !pendingAchievements) {
     throw new Error(`replay ${String(replay.id)} has invalid pending achievements`);
   }
+  const clock = replay.clock == null ? null : decodeGameClockSummary(replay.clock);
+  if (replay.clock != null && !clock) throw new Error(`replay ${String(replay.id)} has an invalid clock`);
   await waitForCapacity();
   const participants = await db.query(
     "SELECT user_id, seat FROM replay_participants WHERE replay_id = $1 ORDER BY seat",
@@ -399,7 +410,7 @@ export async function finalizeReplay(
   if (!finalView || finalView.winner !== replay.winner) {
     throw new Error(`replay ${String(replay.id)} winner mismatch`);
   }
-  const payloads = await encodeReplayPayloads(built.frames, decodedParticipants, yieldControl);
+  const payloads = await encodeReplayPayloads(built.frames, decodedParticipants, yieldControl, clock);
   await yieldControl();
   await waitForCapacity();
   await withTransaction(db, async (tx) => {
@@ -413,7 +424,7 @@ export async function finalizeReplay(
     await tx.query(
       `UPDATE replay_games
        SET status='ready', frame_count=$2,
-           finalization_attempts=0, finalization_retry_at=NULL, pending_achievements=NULL
+           finalization_attempts=0, finalization_retry_at=NULL, pending_achievements=NULL, clock=NULL
        WHERE id=$1 AND status='finalizing'`,
       [replay.id, payloads[0]?.frames ?? 0],
     );
@@ -958,6 +969,7 @@ export function attachReplayNotes(file: ReplayFile, notes: readonly ReplayServer
   return {
     version: 3,
     seat: file.seat,
+    ...(file.version !== 1 && file.clock ? { clock: file.clock } : {}),
     frames: file.version === 1
       ? file.views.map((view) => ({ view, transition: null }))
       : file.frames,
