@@ -13502,7 +13502,7 @@
       "value": "Devolva um ally"
     }
   ],
-  "card.pen.arcane.hero.choose": [
+  "card.pen.arcane.target.choose": [
     {
       "type": 1,
       "value": "card"
@@ -13517,7 +13517,7 @@
     },
     {
       "type": 0,
-      "value": " de dano arcane a qual herói?"
+      "value": " de dano arcane a qual alvo?"
     }
   ],
   "card.pen.arrow.arsenal": [

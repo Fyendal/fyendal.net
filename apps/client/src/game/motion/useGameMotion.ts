@@ -213,7 +213,7 @@ export function useGameMotion({
     if (batchQueueRef.current.active?.id !== batchId) return;
     // Only float-bound flights affect React presentation. Other departures
     // reveal their source pile directly without rerendering the board.
-    if (flight.destinationLayer) {
+    if (flight.destinationLayer || flight.sourceMaskPresentationKey) {
       setStartedFlightIds((current) => (
         current.has(flight.id) ? current : new Set([...current, flight.id])
       ));

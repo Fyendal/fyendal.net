@@ -48,7 +48,9 @@ export interface MeasuredMotionAnchors {
 }
 
 /** What a departing overlay reports: a flight, or a trigger connector. */
-export type MotionDeparture = Pick<MotionFlight, "id" | "destinationLayer" | "sourceRevealPresentationKey">;
+export type MotionDeparture = Pick<
+  MotionFlight, "id" | "destinationLayer" | "sourceMaskPresentationKey" | "sourceRevealPresentationKey"
+>;
 
 export interface MotionFlight {
   id: string;

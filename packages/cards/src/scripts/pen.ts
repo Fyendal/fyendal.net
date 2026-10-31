@@ -225,23 +225,26 @@ function arcaneSpell(
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: replacement ? [amount, replacement.amount] : [amount],
     onPlay(ctx) {
-      const spellDamage = damage(ctx);
+      const preview = ctx.previewArcaneDamage(damage(ctx));
+      const allies = ctx.state.players.flatMap((player) =>
+        player.board.filter((card) => ctx.cardTypes(card).includes("ally")).map((card) => ({ player, card })),
+      );
       ctx.requestChoice(
         "pen-arcane",
         decisionPrompt(
-          `${ctx.data.name}: deal ${ctx.previewArcaneDamage(spellDamage)} arcane damage to which hero?`,
-          "card.pen.arcane.hero.choose",
+          `${ctx.data.name}: deal ${preview} arcane damage to which target?`,
+          "card.pen.arcane.target.choose",
           {
-            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(spellDamage) },
+            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: preview },
             optionMessages: {
               opponent: decisionMessage("common.option.opponent"),
               you: decisionMessage("card.pen.option.you"),
             },
           },
         ),
-        ["opponent", "you"],
-        undefined,
-        undefined,
+        ["opponent", "you", ...allies.map(({ player, card }) => `ally:${player.seat}:${card.instanceId}`)],
+        ctx.seat,
+        [null, null, ...allies.map(({ card }) => card.instanceId)],
         "opponent",
       );
     },
@@ -249,7 +252,10 @@ function arcaneSpell(
       if (createSigil && arcane && dealt > 0) create(ctx, SIGIL_OF_FATE);
     },
     onChoose(ctx, hook, option) {
-      if (hook === "pen-arcane") dealArcane(ctx, option === "you" ? ctx.seat : opponentSeat(ctx), damage(ctx));
+      if (hook !== "pen-arcane") return;
+      const ally = /^ally:(\d+):(\d+)$/.exec(option);
+      if (ally) dealArcane(ctx, Number(ally[1]), damage(ctx), Number(ally[2]));
+      else dealArcane(ctx, option === "you" ? ctx.seat : opponentSeat(ctx), damage(ctx));
     },
   };
 }
@@ -1918,13 +1924,12 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
   },
   "shapeless form|3": {
-    onPlay(ctx) {
-      ctx.addModifier({ scope: "combat-chain" });
-    },
+    onAttackDeclared: (ctx) => ctx.addModifier({ scope: "combat-chain" }),
     triggers: [
       {
         event: "card-played",
         label: "Choose a name for the ephemeral attack",
+        labelMessage: decisionMessage("card.pen.ephemeral.name"),
         condition: (ctx, played) =>
           !!played &&
           played.instanceId !== ctx.self.instanceId &&

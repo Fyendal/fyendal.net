@@ -13021,7 +13021,7 @@
       "value": "Return an ally"
     }
   ],
-  "card.pen.arcane.hero.choose": [
+  "card.pen.arcane.target.choose": [
     {
       "type": 1,
       "value": "card"
@@ -13036,7 +13036,7 @@
     },
     {
       "type": 0,
-      "value": " arcane damage to which hero?"
+      "value": " arcane damage to which target?"
     }
   ],
   "card.pen.arrow.arsenal": [

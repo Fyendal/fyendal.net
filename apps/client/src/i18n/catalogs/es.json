@@ -900,7 +900,7 @@
   "card.pen.ally.return": "Devuelve un ally",
   "card.pen.bonepuppetry.ally.return": "¿Devolver un ally de tu cementerio?",
   "card.pen.hyperdriver.search.arena": "¿Buscar un Hyper Driver en tu mazo y ponerlo en la arena?",
-  "card.pen.arcane.hero.choose": "{card}: ¿a qué héroe aplicar {amount} de daño arcane?",
+  "card.pen.arcane.target.choose": "{card}: ¿a qué objetivo aplicar {amount} de daño arcane?",
   "card.pen.arrow.arsenal": "Pon una carta arrow en tu arsenal",
   "card.pen.arsenal.action.defend": "Añade una carta de action de tu arsenal como defensora",
   "card.pen.attackinghero.card.discard": "Elige una carta para que el héroe atacante la descarte",

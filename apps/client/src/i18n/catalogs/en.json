@@ -900,7 +900,7 @@
   "card.pen.ally.return": "Return an ally",
   "card.pen.bonepuppetry.ally.return": "Return an ally from your graveyard?",
   "card.pen.hyperdriver.search.arena": "Search your deck for a Hyper Driver and put it into the arena?",
-  "card.pen.arcane.hero.choose": "{card}: deal {amount} arcane damage to which hero?",
+  "card.pen.arcane.target.choose": "{card}: deal {amount} arcane damage to which target?",
   "card.pen.arrow.arsenal": "Put an arrow into arsenal",
   "card.pen.arsenal.action.defend": "Add an action from arsenal as a defender",
   "card.pen.attackinghero.card.discard": "Choose a card for the attacking hero to discard",

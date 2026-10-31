@@ -12144,14 +12144,14 @@
       "value": "将一名盟友返回手牌"
     }
   ],
-  "card.pen.arcane.hero.choose": [
+  "card.pen.arcane.target.choose": [
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": "：选择一名英雄承受 "
+      "value": "：选择一个目标承受 "
     },
     {
       "type": 1,

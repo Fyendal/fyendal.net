@@ -32,6 +32,7 @@ import {
 } from "./decision/DecisionShared.js";
 import {
   cardNameEnterAction,
+  cardNameSuggestionPlacement,
   cardNameSuggestions,
   NameChoiceAutocomplete,
 } from "./decision/NameChoiceAutocomplete.js";
@@ -244,6 +245,12 @@ describe("card-name autocomplete", () => {
       name: "Hundred Winds",
     });
     expect(cardNameEnterAction(false, ["Hundred Winds"], 0)).toEqual({ kind: "submit" });
+  });
+
+  it("opens name suggestions toward the roomier side and fits them in the viewport", () => {
+    expect(cardNameSuggestionPlacement({ top: 100, bottom: 140 }, 900)).toEqual({ above: false, maxHeight: 320 });
+    expect(cardNameSuggestionPlacement({ top: 500, bottom: 540 }, 700)).toEqual({ above: true, maxHeight: 320 });
+    expect(cardNameSuggestionPlacement({ top: 120, bottom: 160 }, 400)).toEqual({ above: false, maxHeight: 232 });
   });
 });
 

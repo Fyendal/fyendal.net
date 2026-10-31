@@ -900,7 +900,7 @@
   "card.pen.ally.return": "将一名盟友返回手牌",
   "card.pen.bonepuppetry.ally.return": "将一名盟友从你的坟场返回 arena？",
   "card.pen.hyperdriver.search.arena": "从你的牌库中搜寻一个 Hyper Driver 并将其放入竞技场？",
-  "card.pen.arcane.hero.choose": "{card}：选择一名英雄承受 {amount} 点奥术伤害",
+  "card.pen.arcane.target.choose": "{card}：选择一个目标承受 {amount} 点奥术伤害",
   "card.pen.arrow.arsenal": "将一张箭放入 arsenal",
   "card.pen.arsenal.action.defend": "将 arsenal 中的一张行动牌加入防守",
   "card.pen.attackinghero.card.discard": "选择一张牌让进攻英雄弃置",

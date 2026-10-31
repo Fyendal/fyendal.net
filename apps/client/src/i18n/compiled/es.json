@@ -13119,14 +13119,14 @@
       "value": "Devuelve un ally"
     }
   ],
-  "card.pen.arcane.hero.choose": [
+  "card.pen.arcane.target.choose": [
     {
       "type": 1,
       "value": "card"
     },
     {
       "type": 0,
-      "value": ": ¿a qué héroe aplicar "
+      "value": ": ¿a qué objetivo aplicar "
     },
     {
       "type": 1,

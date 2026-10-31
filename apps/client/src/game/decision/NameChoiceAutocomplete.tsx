@@ -1,8 +1,10 @@
-import { useId, useMemo, useState } from "react";
+import { useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { cardData } from "@fyendal/cards/client";
 
 const MAX_SUGGESTIONS = 8;
+const SUGGESTIONS_MAX_HEIGHT = 320;
+const VIEWPORT_MARGIN = 8;
 const registeredCardNames = [...new Set(
   Object.values(cardData).map((card) => card.name.trim()).filter(Boolean),
 )].sort((left, right) => left.localeCompare(right));
@@ -36,6 +38,17 @@ export function cardNameEnterAction(
   return name ? { kind: "accept-suggestion", name } : { kind: "submit" };
 }
 
+/** Open toward the roomier side of the viewport and fit within it. */
+export function cardNameSuggestionPlacement(
+  anchor: { top: number; bottom: number },
+  viewportHeight: number,
+): { above: boolean; maxHeight: number } {
+  const spaceBelow = viewportHeight - anchor.bottom - VIEWPORT_MARGIN;
+  const spaceAbove = anchor.top - VIEWPORT_MARGIN;
+  const above = spaceBelow < SUGGESTIONS_MAX_HEIGHT && spaceAbove > spaceBelow;
+  return { above, maxHeight: Math.max(0, Math.min(SUGGESTIONS_MAX_HEIGHT, above ? spaceAbove : spaceBelow)) };
+}
+
 export function NameChoiceAutocomplete({ onChoose }: { onChoose: (name: string) => void }) {
   const intl = useIntl();
   const listboxId = useId();
@@ -44,6 +57,17 @@ export function NameChoiceAutocomplete({ onChoose }: { onChoose: (name: string) 
   const [activeIndex, setActiveIndex] = useState(0);
   const suggestions = useMemo(() => cardNameSuggestions(chosenName), [chosenName]);
   const showSuggestions = open && suggestions.length > 0;
+  const comboboxRef = useRef<HTMLDivElement>(null);
+  const [placement, setPlacement] = useState<ReturnType<typeof cardNameSuggestionPlacement>>();
+
+  useLayoutEffect(() => {
+    const combobox = comboboxRef.current;
+    if (!showSuggestions || !combobox) return;
+    const update = () => setPlacement(cardNameSuggestionPlacement(combobox.getBoundingClientRect(), window.innerHeight));
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [showSuggestions]);
 
   const acceptSuggestion = (name: string) => {
     setChosenName(name);
@@ -68,7 +92,7 @@ export function NameChoiceAutocomplete({ onChoose }: { onChoose: (name: string) 
         choose(chosenName);
       }}
     >
-      <div className="decision-name-combobox">
+      <div className="decision-name-combobox" ref={comboboxRef}>
         <input
           aria-activedescendant={showSuggestions ? `${listboxId}-${activeIndex}` : undefined}
           aria-autocomplete="list"
@@ -110,10 +134,11 @@ export function NameChoiceAutocomplete({ onChoose }: { onChoose: (name: string) 
           }}
         />
         <div
-          className="decision-name-suggestions"
+          className={`decision-name-suggestions${placement?.above ? " decision-name-suggestions-above" : ""}`}
           id={listboxId}
           role="listbox"
           hidden={!showSuggestions}
+          style={placement ? { maxHeight: placement.maxHeight } : undefined}
         >
           {suggestions.map((name, index) => (
             <button

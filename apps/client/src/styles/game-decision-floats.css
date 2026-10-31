@@ -311,6 +311,10 @@
   background: #120c06;
   box-shadow: 0 12px 24px #000b;
 }
+.decision-name-suggestions-above {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
 .decision-name-suggestions[hidden] { display: none; }
 .decision-name-suggestions button {
   display: block;

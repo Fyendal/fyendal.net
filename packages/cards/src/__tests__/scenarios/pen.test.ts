@@ -64,6 +64,20 @@ describe("PEN — import and set mechanics", () => {
       .expectLife(1, 13);
   });
 
+  it("Strike Twice can target an ally", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["strike twice|1"], resources: 1, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", board: ["barnacle|2"], life: 20, equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("strike twice|1")
+      .chooseOption("ally:1:")
+      .expectLife(1, 20)
+      .expectInZone(1, "barnacle|2", "graveyard");
+  });
+
   it("Reach Beyond the Grave still discards when no ally can be returned", () => {
     const g = scenario({ seats: [
       {
@@ -2268,5 +2282,20 @@ describe("PEN — conditional Spellvoid", () => {
     expect(g.state.pendingDecision?.chooseHook).toBe(offered ? "spellvoid" : undefined);
     if (offered) g.chooseOption("destroy").expectNoEquipment(1, "arms");
     g.expectLife(1, offered ? 19 : 16);
+  });
+});
+
+describe("PEN — Shapeless Form", () => {
+  it("names an ephemeral attack played after it on the combat chain", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["shapeless form|3", "crouching tiger|0"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("shapeless form|3").blockWith().settle().play("crouching tiger|0");
+    expect(g.state.pendingDecision?.kind).toBe("choose-name");
+    g.chooseName("Pouncing Qi").expectLog("Crouching Tiger gains the name Pouncing Qi");
   });
 });
