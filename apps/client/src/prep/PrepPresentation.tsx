@@ -176,7 +176,6 @@ function PrepViewToggle({
 function CardTile({
   id,
   count,
-  changed,
   fixed = false,
   locked,
   label,
@@ -185,7 +184,6 @@ function CardTile({
 }: {
   id: string;
   count: number;
-  changed: boolean;
   /** Registered to inventory only; shown locked, never moved. */
   fixed?: boolean;
   locked: boolean;
@@ -204,7 +202,7 @@ function CardTile({
   );
   return (
     <li
-      className={`prep-tile${changed ? " changed" : ""}${fixed ? " fixed" : ""}`}
+      className={`prep-tile${fixed ? " fixed" : ""}`}
       data-cardid={id}
     >
       {fixed ? (
@@ -254,14 +252,12 @@ export interface PrepCardArt {
 
 function LedgerRow({
   id,
-  changed,
   fixed = false,
   onInspect,
   cardArt,
   children,
 }: {
   id: string;
-  changed: boolean;
   /** Registered to inventory only; it never joins the main deck. */
   fixed?: boolean;
   onInspect: (id: string) => void;
@@ -280,7 +276,7 @@ function LedgerRow({
   );
   return (
     <li
-      className={`prep-row${changed ? " changed" : ""}${fixed ? " fixed" : ""}`}
+      className={`prep-row${fixed ? " fixed" : ""}`}
       data-cardid={id}
     >
       <button
@@ -423,7 +419,6 @@ export const PrepPresentation = memo(function PrepPresentation({
 
   const registered = countCopies(pool.deck);
   const mainOf = (id: string) => selection.main.get(id) ?? 0;
-  const changed = (id: string) => mainOf(id) !== (registered.get(id) ?? 0);
   const sortedMainEntries = sortCards(poolMainEntries, sortOrder, ([cardId]) => ({ cardId }));
   const spareCopies = new Map(poolMainEntries.map(([id, total]) => [id, total - mainOf(id)]));
   const mainGroups = groupLedger(
@@ -448,7 +443,7 @@ export const PrepPresentation = memo(function PrepPresentation({
   }
   const pitchLabel = (pitch: 1 | 2 | 3) =>
     intl.formatMessage({ id: PITCH_MESSAGES[pitch] }, { count: pitchTotals[pitch] });
-  const dirty = poolMainEntries.some(([id]) => changed(id));
+  const dirty = poolMainEntries.some(([id]) => mainOf(id) !== (registered.get(id) ?? 0));
   const moveLabel = (id: string, destination: "main" | "inventory") =>
     intl.formatMessage(
       { id: "prep.presentation.moveCopy" },
@@ -472,7 +467,7 @@ export const PrepPresentation = memo(function PrepPresentation({
       </li>
     ));
   const mainRow = ({ id, count }: LedgerEntry) => (
-    <LedgerRow key={id} id={id} changed={changed(id)} onInspect={onInspectCard} cardArt={cardArt}>
+    <LedgerRow key={id} id={id} onInspect={onInspectCard} cardArt={cardArt}>
       <TooltipButton
         className="prep-step"
         tooltip={moveLabel(id, "inventory")}
@@ -497,7 +492,6 @@ export const PrepPresentation = memo(function PrepPresentation({
       key={id}
       id={id}
       count={count}
-      changed={changed(id)}
       locked={locked}
       label={moveLabel(id, "inventory")}
       cardArt={cardArt}
@@ -509,7 +503,6 @@ export const PrepPresentation = memo(function PrepPresentation({
       key={fixed ? `fixed-${id}` : id}
       id={id}
       count={count}
-      changed={!fixed && changed(id)}
       fixed={fixed}
       locked={locked}
       label={fixed ? cardData[id]?.name ?? id : moveLabel(id, "main")}
@@ -521,7 +514,6 @@ export const PrepPresentation = memo(function PrepPresentation({
     <LedgerRow
       key={fixed ? `fixed-${id}` : id}
       id={id}
-      changed={!fixed && changed(id)}
       fixed={fixed}
       onInspect={onInspectCard}
       cardArt={cardArt}

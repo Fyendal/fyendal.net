@@ -106,7 +106,6 @@ describe("PrepPresentation equipment controls", () => {
     // Every copy is already in: the add stepper waits, disabled.
     expect(full).toMatch(/Move one copy of Up the Ante to Main deck" class="prep-step" disabled=""/);
     expect(full).not.toContain("Reset deck");
-    expect(full).not.toContain(" changed\"");
     expect(full).toContain("3 blue");
     // The bar shows shares; the figures beside it carry the counts, zeros muted.
     expect(full).toContain('class="prep-pitch-3" style="flex-grow:3"></span>');
@@ -115,7 +114,6 @@ describe("PrepPresentation equipment controls", () => {
 
     const trimmed = render(new Map([["HVY103", 2]]), 2);
     expect(trimmed).toContain("Reset deck");
-    expect(trimmed.match(/class="prep-row changed"/g)).toHaveLength(2);
     expect(trimmed).not.toMatch(/to Main deck" class="prep-step" disabled=""/);
     // The inventory row steps the same card from its own side.
     expect(trimmed.match(/aria-label="Move one copy of Up the Ante to Main deck"/g)).toHaveLength(2);
@@ -272,7 +270,7 @@ describe("PrepPresentation equipment controls", () => {
       expect(html).not.toContain("prep-step");
       expect(html).not.toContain("prep-ledger-head");
       const [main, inventory] = html.split("prep-inventory-zone");
-      expect(main).toContain('class="prep-tile changed" data-cardid="WTR219"');
+      expect(main).toContain('class="prep-tile" data-cardid="WTR219"');
       expect(main).toContain('aria-label="Move one copy of Nimblism to Inventory"');
       expect(main).toContain('aria-hidden="true">×1</span><span class="prep-sr-only">1 copy</span>');
       expect(inventory).toContain('aria-label="Move one copy of Nimblism to Main deck"');

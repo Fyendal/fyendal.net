@@ -471,7 +471,6 @@
   font: 600 14px var(--font-lobby-ui);
   font-variant-numeric: tabular-nums;
 }
-.prep-row.changed .prep-copies { color: var(--gold); box-shadow: inset 0 0 0 1px #ffd47966; }
 .prep-step {
   display: grid;
   place-items: center;
@@ -542,7 +541,6 @@
 }
 .prep-tile-face:hover:not(:disabled) .prep-tile-art { transform: translateY(-2px); }
 .prep-tile-face:active:not(:disabled) .prep-tile-art { transform: scale(.96); }
-.prep-tile.changed .prep-tile-art { box-shadow: 0 0 0 2px var(--gold); }
 /* Bottom center covers only the type line; the name, cost, power and
    defense printed on the card stay readable. */
 .prep-tile-count {
@@ -561,7 +559,6 @@
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
-.prep-tile.changed .prep-tile-count { color: var(--gold); box-shadow: 0 0 0 1px #ffd47999; }
 .prep-tile-lock {
   position: absolute;
   top: 6px;
@@ -640,8 +637,7 @@
 .prep-tray-strip {
   display: flex;
   gap: 8px;
-  margin: 0 -4px;
-  padding: 8px 4px 4px;
+  padding: 8px 0 4px;
   list-style: none;
   overflow-x: auto;
   scrollbar-width: none;
@@ -649,7 +645,6 @@
 .prep-tray-strip::-webkit-scrollbar { display: none; }
 .prep-tray-strip .prep-tile { flex: none; width: 58px; }
 .prep-tray-strip .prep-tile-art { border-radius: 4px; }
-.prep-tray-strip .prep-tile.changed .prep-tile-art { box-shadow: 0 0 0 1px #ffd479b3; }
 .prep-tray-strip .prep-tile-count {
   bottom: 3px;
   min-width: 22px;
@@ -659,12 +654,10 @@
   line-height: 18px;
 }
 .prep-tray-strip .prep-tile-lock { top: 3px; right: 3px; width: 18px; height: 18px; font-size: 10px; }
-/* Side padding keeps the changed ring clear of the scroll box's edges. */
 .prep-tray-body {
   flex: 1 1 auto;
   min-height: 0;
-  margin: 0 -4px;
-  padding: 6px 4px 4px;
+  padding: 6px 0 4px;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
