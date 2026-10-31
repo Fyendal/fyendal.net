@@ -1,6 +1,6 @@
 import { useId, useMemo, useState, type ReactNode } from "react";
 import { useIntl } from "react-intl";
-import type { GameView } from "@fyendal/shared";
+import type { GameClockSummary, GameView } from "@fyendal/shared";
 import { heroImageUrl } from "../lobby/heroImage.js";
 import {
   averagePerRound,
@@ -10,6 +10,9 @@ import {
   preventedDamage,
   totalPrevented,
 } from "../replay/stats.js";
+import { TooltipLabel } from "../components/TooltipLabel.js";
+import { UiIcon } from "../components/UiIcon.js";
+import { formatDuration } from "./gameClock.js";
 
 /** Talishar-style end-game summary: one selected player's key match totals,
  * averages, and a compact round-by-round breakdown. All values come from
@@ -27,6 +30,8 @@ export function GameOver({
   onClose,
   replaying = false,
   friendAction = null,
+  clock = null,
+  botSeat = null,
 }: {
   view: GameView;
   seat: number;
@@ -39,6 +44,9 @@ export function GameOver({
   onClose: () => void;
   replaying?: boolean;
   friendAction?: ReactNode;
+  /** Final game clock; null for rooms and replays recorded before it existed. */
+  clock?: GameClockSummary | null;
+  botSeat?: 0 | 1 | null;
 }) {
   const intl = useIntl();
   const openingTooltipId = useId();
@@ -63,6 +71,7 @@ export function GameOver({
     view.players[1]?.heroName ?? intl.formatMessage({ id: "game.playerNumber" }, { number: 2 }),
   ];
   const totalValue = stats.rows.reduce((sum, row) => sum + cycleValue(row, selectedSeat), 0);
+  const gameTime = clock ? formatDuration(clock.seatMs[0] + clock.seatMs[1]) : "";
   const fmt = (n: number) => intl.formatNumber(n, { maximumFractionDigits: 1 });
 
   return (
@@ -74,6 +83,35 @@ export function GameOver({
             <div className="gameover-result-copy">
               <span className="gameover-eyebrow">{resultLabel}</span>
               <h2 className="gameover-headline">{headline}</h2>
+              {clock ? (
+                <div className="gameover-clock" role="group" aria-label={intl.formatMessage({ id: "game.time.title" })}>
+                  <TooltipLabel
+                    className="gameover-clock-stat"
+                    label={intl.formatMessage({ id: "game.time.gameLength" }, { time: gameTime })}
+                  >
+                    <UiIcon name="clock" />
+                    <strong aria-hidden="true">{gameTime}</strong>
+                  </TooltipLabel>
+                  <span className="gameover-clock-seats">
+                    {([0, 1] as const).map((playerSeat) => {
+                      const time = formatDuration(clock.seatMs[playerSeat]);
+                      return (
+                        <TooltipLabel
+                          key={playerSeat}
+                          className="gameover-clock-stat"
+                          label={intl.formatMessage(
+                            { id: "game.time.playerUsed" },
+                            { player: names[playerSeat], time },
+                          )}
+                        >
+                          <HeroPortrait name={names[playerSeat]} className="gameover-clock-portrait" />
+                          <strong aria-hidden="true">{time}</strong>
+                        </TooltipLabel>
+                      );
+                    })}
+                  </span>
+                </div>
+              ) : null}
             </div>
           </div>
           <div className="rail-actions gameover-actions">
@@ -119,7 +157,9 @@ export function GameOver({
                 onClick={() => setSelectedSeat(playerSeat)}
               >
                 <HeroPortrait name={names[playerSeat]} className="gameover-tab-portrait" />
-                <span className="gameover-player-name">{names[playerSeat]}</span>
+                <span className="gameover-player-name">{playerSeat === botSeat
+                  ? intl.formatMessage({ id: "game.over.botName" }, { name: names[playerSeat] })
+                  : names[playerSeat]}</span>
               </button>
             ))}
           </div>

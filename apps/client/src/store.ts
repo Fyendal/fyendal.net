@@ -1952,13 +1952,14 @@ export const useStore = create<StoreState>((set, get) => {
       const views = get().replayViews;
       const transitions = get().replayTransitions;
       const notes = get().replayNotes;
+      const replayClock = get().replayClock;
       const frames = views?.map((view, index) => ({
         view,
         transition: transitions?.[index] ?? null,
       }));
       const baseFile: ReplayFile | null =
         get().screen === "replay" && frames
-          ? { version: 2, seat: get().yourSeat, frames }
+          ? { version: 2, seat: get().yourSeat, ...(replayClock ? { clock: replayClock } : {}), frames }
           : replayRuntime.getFile();
       const file = baseFile ? withReplayNotes(baseFile, notes) : null;
       if (!file) return;
@@ -2075,6 +2076,7 @@ export const useStore = create<StoreState>((set, get) => {
         replayViews: null,
         replayTransitions: null,
         replayStep: 0,
+        replayClock: null,
         replayNotes: [],
         activeSavedReplayId: null,
         activeSharedReplay: null,

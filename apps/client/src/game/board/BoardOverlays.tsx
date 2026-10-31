@@ -1,4 +1,4 @@
-import type { GameView } from "@fyendal/shared";
+import type { GameClockSummary, GameView } from "@fyendal/shared";
 import { useIntl } from "react-intl";
 import { DeckCardToast, type useDeckCardFeedback } from "../DeckCardToast.js";
 import { GameOver } from "../GameOver.js";
@@ -41,6 +41,8 @@ export function BoardOverlays({
   onInspectCard,
   opponentUsername,
   botGame,
+  gameOverClock,
+  botSeat,
   drawOfferSeat,
   onAcceptDraw,
   onDeclineDraw,
@@ -75,6 +77,8 @@ export function BoardOverlays({
   onInspectCard: (cardId: string | null) => void;
   opponentUsername: string | null;
   botGame: boolean;
+  gameOverClock: GameClockSummary | null;
+  botSeat: 0 | 1 | null;
   drawOfferSeat: number | undefined;
   onAcceptDraw: (() => void) | null;
   onDeclineDraw: (() => void) | null;
@@ -144,6 +148,8 @@ export function BoardOverlays({
           onBackToLobby={replaying ? onCloseReplay : onLeave}
           onPlayAgain={replaying ? null : onPlayAgain}
           replaying={replaying}
+          clock={gameOverClock}
+          botSeat={botSeat}
           onClose={onDismissGameOver}
           friendAction={!replaying && !botGame && !spectating && opponentUsername
             ? <PostGameFriendAction username={opponentUsername} />

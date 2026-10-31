@@ -129,7 +129,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, sendPassUntil, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, clock, clockReceivedAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, sendPassUntil, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, clock, clockReceivedAt, replayClock, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -177,6 +177,7 @@ export function GameBoard() {
       lastActionAt: state.lastActionAt,
       clock: state.clock,
       clockReceivedAt: state.clockReceivedAt,
+      replayClock: state.replayClock,
       claimVictory: state.claimVictory,
       reportBug: state.reportBug,
       reportOpponent: state.reportOpponent,
@@ -1919,6 +1920,8 @@ export function GameBoard() {
         onInspectCard={setInspectedCardId}
         opponentUsername={playerProfiles?.[1 - seat]?.username ?? null}
         botGame={botGame}
+        gameOverClock={replaying ? replayClock : clock}
+        botSeat={botGame && !replaying && yourSeat !== null ? (yourSeat === 0 ? 1 : 0) : null}
         drawOfferSeat={view.drawOfferSeat}
         onAcceptDraw={!spectating && !replaying && !botGame && view.phase !== "game-over"
           ? () => send({ kind: "accept-draw" }) : null}

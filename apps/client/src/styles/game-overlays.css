@@ -631,6 +631,37 @@
 }
 .gameover-result { display: flex; flex: 1 1 320px; min-width: 0; align-items: center; gap: 16px; }
 .gameover-result-copy { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.gameover-clock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 28px;
+  margin-top: 6px;
+}
+.gameover-clock-seats { display: inline-flex; flex-wrap: wrap; gap: 6px 18px; }
+.gameover-clock-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 3px;
+  outline: none;
+  cursor: default;
+}
+.gameover-clock-stat:focus-visible { box-shadow: 0 0 0 2px #c9a627; }
+.gameover-clock-stat .ui-icon { width: 18px; height: 18px; color: #a89878; }
+.gameover-clock-stat strong {
+  color: #e9ddc6;
+  font: 600 16px/1 var(--font-lobby-ui);
+  font-variant-numeric: tabular-nums;
+}
+.gameover-hero-portrait.gameover-clock-portrait {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  border-color: #786043;
+  border-radius: 50%;
+  font-size: 10px;
+}
 .gameover-header .gameover-result-portrait {
   flex-basis: 76px;
   width: 76px;

@@ -25,6 +25,54 @@ function finishedView(): GameView {
 }
 
 describe("GameOver player statistics", () => {
+  it("shows game length and both players' time in the header", () => {
+    const view = finishedView();
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <GameOver
+          view={view}
+          seat={0}
+          spectating={false}
+          recordedViews={[view]}
+          onWatchReplay={null}
+          onDownloadReplay={null}
+          onBackToLobby={() => undefined}
+          onClose={() => undefined}
+          botSeat={1}
+          clock={{ seatMs: [90_000, 30_000] }}
+        />
+      </TestI18nProvider>,
+    );
+    expect(html).toContain("Gravy Bones (bot)</span>");
+    expect(html).toContain('aria-label="Game length 2:00"');
+    expect(html).toContain('<strong aria-hidden="true">2:00</strong>');
+    expect(html).toContain('aria-label="Dash I/O used 1:30"');
+    expect(html).toContain('<strong aria-hidden="true">1:30</strong>');
+    expect(html).toContain('aria-label="Gravy Bones used 0:30"');
+    expect(html).toContain('<strong aria-hidden="true">0:30</strong>');
+    expect(html.match(/gameover-clock-portrait/g)).toHaveLength(2);
+    expect(html).not.toContain("<th>Time</th>");
+  });
+
+  it("omits time without a clock", () => {
+    const view = finishedView();
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <GameOver
+          view={view}
+          seat={0}
+          spectating={false}
+          recordedViews={[view]}
+          onWatchReplay={null}
+          onDownloadReplay={null}
+          onBackToLobby={() => undefined}
+          onClose={() => undefined}
+        />
+      </TestI18nProvider>,
+    );
+    expect(html).not.toContain("gameover-clock");
+  });
+
   it("shows a draw without naming a winner", () => {
     const view = { ...finishedView(), winner: null };
     const html = renderToStaticMarkup(

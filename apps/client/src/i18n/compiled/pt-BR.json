@@ -31119,6 +31119,16 @@
       "value": "Voltar ao lobby"
     }
   ],
+  "game.over.botName": [
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": " (bot)"
+    }
+  ],
   "game.over.matchComplete": [
     {
       "type": 0,
@@ -32250,6 +32260,16 @@
       "value": "Resumo do jogo"
     }
   ],
+  "game.time.gameLength": [
+    {
+      "type": 0,
+      "value": "Duração da partida "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
   "game.time.playerUsed": [
     {
       "type": 1,
@@ -32262,6 +32282,12 @@
     {
       "type": 1,
       "value": "time"
+    }
+  ],
+  "game.time.title": [
+    {
+      "type": 0,
+      "value": "Tempo"
     }
   ],
   "game.timing.actionPhase": [

@@ -27,6 +27,7 @@ import type {
   EmoteMessage,
   SeatStandingOrders,
   LeagueMembership,
+  GameClockSummary,
   GameClockView,
 } from "@fyendal/shared";
 import type {
@@ -312,6 +313,8 @@ export interface StoreState {
   replayViews: GameView[] | null;
   replayTransitions: Array<Omit<GameTransitionView, "fromVersion"> | null> | null;
   replayStep: number;
+  /** Final clock of the replay being watched; null for legacy replays. */
+  replayClock: GameClockSummary | null;
   replayNotes: ReplayServerNote[];
   activeSavedReplayId: string | null;
   /** Set while watching someone's replay through a share link. */

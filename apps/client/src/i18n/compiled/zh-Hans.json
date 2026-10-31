@@ -28339,6 +28339,16 @@
       "value": "返回大厅"
     }
   ],
+  "game.over.botName": [
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": "（机器人）"
+    }
+  ],
   "game.over.matchComplete": [
     {
       "type": 0,
@@ -29325,6 +29335,16 @@
       "value": "对局总结"
     }
   ],
+  "game.time.gameLength": [
+    {
+      "type": 0,
+      "value": "对局时长 "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
   "game.time.playerUsed": [
     {
       "type": 1,
@@ -29337,6 +29357,12 @@
     {
       "type": 1,
       "value": "time"
+    }
+  ],
+  "game.time.title": [
+    {
+      "type": 0,
+      "value": "用时"
     }
   ],
   "game.timing.actionPhase": [
