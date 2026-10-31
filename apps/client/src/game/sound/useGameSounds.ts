@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { GameView } from "@fyendal/shared";
+import type { PriorityAlertMode } from "../../storage.js";
 import type { ViewUpdate } from "../../store/types.js";
 import { detectDeckCardEvents } from "../deckCardEvents.js";
 import { classifyViewUpdate } from "../motion/classifyViewUpdate.js";
@@ -8,6 +9,7 @@ import { GameAudioPlayer } from "./gameAudioPlayer.js";
 import {
   damageSoundCuesForViews,
   gameSoundCuesForEvents,
+  priorityAlertNeeded,
   prioritySoundCueForViews,
 } from "./gameSoundCues.js";
 
@@ -17,6 +19,8 @@ export function useGameSounds({
   enabled,
   volume,
   seat,
+  priorityAlertMode,
+  botGame,
   achievementToastVisible,
 }: {
   view: GameView | null;
@@ -24,6 +28,8 @@ export function useGameSounds({
   enabled: boolean;
   volume: number;
   seat: number | null;
+  priorityAlertMode: PriorityAlertMode;
+  botGame: boolean;
   achievementToastVisible: boolean;
 }): void {
   const playerRef = useRef<GameAudioPlayer | null>(null);
@@ -62,7 +68,11 @@ export function useGameSounds({
     if (!enabled || !previous || !view) return;
     const classification = classifyViewUpdate(previous, view, viewUpdate);
     if (classification.kind !== "animate" || classification.direction !== "forward") return;
-    const attentionNeeded = document.visibilityState !== "visible" || !document.hasFocus();
+    const attentionNeeded = priorityAlertNeeded(
+      priorityAlertMode,
+      botGame,
+      document.visibilityState !== "visible" || !document.hasFocus(),
+    );
     const cues = [
       ...gameSoundCuesForEvents(
         detectGameMotionEvents(previous, view),
@@ -72,7 +82,7 @@ export function useGameSounds({
       ...prioritySoundCueForViews(previous, view, seat, attentionNeeded),
     ];
     playerRef.current?.play(cues);
-  }, [enabled, seat, view, viewUpdate]);
+  }, [botGame, enabled, priorityAlertMode, seat, view, viewUpdate]);
 
   useEffect(() => {
     const wasVisible = previousAchievementToastVisibleRef.current;

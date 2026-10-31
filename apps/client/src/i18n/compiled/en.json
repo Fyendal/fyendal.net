@@ -36677,18 +36677,6 @@
       "value": "Animation preference"
     }
   ],
-  "settings.animations.tooltip": [
-    {
-      "type": 0,
-      "value": "Default follows your operating system's reduced-motion setting."
-    }
-  ],
-  "settings.audioVisuals": [
-    {
-      "type": 0,
-      "value": "Audio & visuals"
-    }
-  ],
   "settings.cardDisplay": [
     {
       "type": 0,
@@ -36701,16 +36689,22 @@
       "value": "Full card"
     }
   ],
+  "settings.cardDisplay.fullDescription": [
+    {
+      "type": 0,
+      "value": "Cards on the table show their whole face."
+    }
+  ],
   "settings.cardDisplay.square": [
     {
       "type": 0,
       "value": "Square"
     }
   ],
-  "settings.close": [
+  "settings.cardDisplay.squareDescription": [
     {
       "type": 0,
-      "value": "Close settings"
+      "value": "Cards on the table are cropped to square art with their name and stats."
     }
   ],
   "settings.concede.action": [
@@ -36725,6 +36719,18 @@
       "value": "Concede the game?"
     }
   ],
+  "settings.concede.description": [
+    {
+      "type": 0,
+      "value": "Ends the game as a loss for you."
+    }
+  ],
+  "settings.concede.title": [
+    {
+      "type": 0,
+      "value": "Concede"
+    }
+  ],
   "settings.concede.yes": [
     {
       "type": 0,
@@ -36737,22 +36743,10 @@
       "value": "Confirm actions"
     }
   ],
-  "settings.confirmActions.aria": [
+  "settings.confirmActions.description": [
     {
       "type": 0,
-      "value": "Confirm actions when playing cards or activating abilities"
-    }
-  ],
-  "settings.confirmActions.tooltip": [
-    {
-      "type": 0,
-      "value": "Requires confirmation when playing cards or activating abilities."
-    }
-  ],
-  "settings.danger": [
-    {
-      "type": 0,
-      "value": "Danger zone"
+      "value": "Asks for confirmation before playing a card or activating an ability."
     }
   ],
   "settings.draw.accept": [
@@ -36827,12 +36821,6 @@
       "value": "Uncheck Show guidance in Settings, or select Disable now."
     }
   ],
-  "settings.history": [
-    {
-      "type": 0,
-      "value": "Game history"
-    }
-  ],
   "settings.history.previousTurnStart": [
     {
       "type": 0,
@@ -36875,6 +36863,18 @@
       "value": "Undo last action"
     }
   ],
+  "settings.interface": [
+    {
+      "type": 0,
+      "value": "Interface"
+    }
+  ],
+  "settings.match": [
+    {
+      "type": 0,
+      "value": "Match"
+    }
+  ],
   "settings.motion.default": [
     {
       "type": 0,
@@ -36884,7 +36884,7 @@
   "settings.motion.defaultDescription": [
     {
       "type": 0,
-      "value": "Default: follow your operating system's reduced-motion setting"
+      "value": "Follows your operating system's reduced-motion setting."
     }
   ],
   "settings.motion.full": [
@@ -36896,7 +36896,7 @@
   "settings.motion.fullDescription": [
     {
       "type": 0,
-      "value": "Full: show card travel and connection animations"
+      "value": "Shows card travel and connection animations."
     }
   ],
   "settings.motion.reduced": [
@@ -36908,7 +36908,7 @@
   "settings.motion.reducedDescription": [
     {
       "type": 0,
-      "value": "Reduced: hide card travel and connections; keep local card fades"
+      "value": "Hides card travel and connections, keeping only local card fades."
     }
   ],
   "settings.optionHotkeys": [
@@ -36917,13 +36917,7 @@
       "value": "Option hotkeys"
     }
   ],
-  "settings.optionHotkeys.aria": [
-    {
-      "type": 0,
-      "value": "Choose prompt options with Q W E R A S D F"
-    }
-  ],
-  "settings.optionHotkeys.tooltip": [
+  "settings.optionHotkeys.description": [
     {
       "type": 0,
       "value": "Press Q W E R A S D F to choose options in prompts."
@@ -36947,16 +36941,22 @@
       "value": "Glow"
     }
   ],
+  "settings.playableCards.glowDescription": [
+    {
+      "type": 0,
+      "value": "A soft green halo marks the cards you can play right now."
+    }
+  ],
   "settings.playableCards.highContrast": [
     {
       "type": 0,
       "value": "High contrast"
     }
   ],
-  "settings.playableCards.tooltip": [
+  "settings.playableCards.highContrastDescription": [
     {
       "type": 0,
-      "value": "Glow adds a restrained green halo. High contrast uses a crisp outline."
+      "value": "A crisp outline marks the cards you can play right now."
     }
   ],
   "settings.playmat": [
@@ -37076,7 +37076,7 @@
   "settings.playmat.side": [
     {
       "type": 0,
-      "value": "Which side"
+      "value": "Side"
     }
   ],
   "settings.playmat.yours": [
@@ -37103,6 +37103,12 @@
       "value": "Always pause"
     }
   ],
+  "settings.priority.alwaysPauseDescription": [
+    {
+      "type": 0,
+      "value": "Stops at every priority and reaction window, even when nothing can be played."
+    }
+  ],
   "settings.priority.autoPass": [
     {
       "type": 0,
@@ -37112,7 +37118,7 @@
   "settings.priority.autoPassDescription": [
     {
       "type": 0,
-      "value": "Auto-pass: immediately pass priority when no instant, reaction, or board ability can be played"
+      "value": "Passes priority for you whenever no instant, reaction, or board ability can be played."
     }
   ],
   "settings.priority.behavior": [
@@ -37121,13 +37127,55 @@
       "value": "Priority behavior"
     }
   ],
+  "settings.priorityAlert": [
+    {
+      "type": 0,
+      "value": "Priority alert"
+    }
+  ],
+  "settings.priorityAlert.always": [
+    {
+      "type": 0,
+      "value": "Always"
+    }
+  ],
+  "settings.priorityAlert.alwaysDescription": [
+    {
+      "type": 0,
+      "value": "Chimes against any opponent, even while the game is in focus."
+    }
+  ],
+  "settings.priorityAlert.alwaysVsPlayers": [
+    {
+      "type": 0,
+      "value": "Vs players"
+    }
+  ],
+  "settings.priorityAlert.alwaysVsPlayersDescription": [
+    {
+      "type": 0,
+      "value": "Always chimes against human opponents. Against bots, only while the game is out of focus."
+    }
+  ],
+  "settings.priorityAlert.unfocused": [
+    {
+      "type": 0,
+      "value": "Unfocused"
+    }
+  ],
+  "settings.priorityAlert.unfocusedDescription": [
+    {
+      "type": 0,
+      "value": "Chimes when priority returns to you while the game is out of focus."
+    }
+  ],
   "settings.showGameClock": [
     {
       "type": 0,
       "value": "Show game clock"
     }
   ],
-  "settings.showGameClock.tooltip": [
+  "settings.showGameClock.description": [
     {
       "type": 0,
       "value": "Counts up the game time and each player's time so you can practice tournament pace."
@@ -37139,7 +37187,7 @@
       "value": "Show guidance"
     }
   ],
-  "settings.showGuidance.tooltip": [
+  "settings.showGuidance.description": [
     {
       "type": 0,
       "value": "Shows priority and reaction window prompts."
@@ -37151,16 +37199,16 @@
       "value": "Instant bot moves"
     }
   ],
-  "settings.skipBotDelay.aria": [
-    {
-      "type": 0,
-      "value": "Skip the practice bot's one-second pause"
-    }
-  ],
-  "settings.skipBotDelay.tooltip": [
+  "settings.skipBotDelay.description": [
     {
       "type": 0,
       "value": "Beta: the practice bot acts as soon as it decides, without the one-second pause."
+    }
+  ],
+  "settings.sound": [
+    {
+      "type": 0,
+      "value": "Sound"
     }
   ],
   "settings.soundEffects": [
@@ -37169,16 +37217,22 @@
       "value": "Sound effects"
     }
   ],
-  "settings.soundEffects.tooltip": [
+  "settings.soundEffects.description": [
     {
       "type": 0,
-      "value": "Plays subtle card sounds and alerts you when priority returns while the game is out of focus."
+      "value": "Plays subtle card sounds and the priority alert."
     }
   ],
   "settings.title": [
     {
       "type": 0,
       "value": "Settings"
+    }
+  ],
+  "settings.undo": [
+    {
+      "type": 0,
+      "value": "Undo"
     }
   ],
   "settings.volume": [

@@ -228,7 +228,7 @@ describe("locale catalogs", () => {
     expect(intl.formatMessage({ id: "format.classicConstructed" })).toBe("Classic Constructed");
     expect(intl.formatMessage({ id: "format.silverAge" })).toBe("Silver Age");
     expect(intl.formatMessage({ id: "settings.priority.autoPassDescription" }))
-      .toBe("Passar automaticamente: passa a prioridade imediatamente quando nenhum instant, reaction ou habilidade do tabuleiro puder ser usado");
+      .toBe("Passa a prioridade por você sempre que nenhum instant, reaction ou habilidade do tabuleiro puder ser usado.");
     expect(intl.formatMessage(
       { id: "lobby.deck.heroAndCount" },
       { hero: "Bravo", count: 0 },

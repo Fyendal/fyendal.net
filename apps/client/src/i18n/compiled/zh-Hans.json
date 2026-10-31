@@ -34789,18 +34789,6 @@
       "value": "动画偏好"
     }
   ],
-  "settings.animations.tooltip": [
-    {
-      "type": 0,
-      "value": "默认跟随操作系统的减少动态效果设置。"
-    }
-  ],
-  "settings.audioVisuals": [
-    {
-      "type": 0,
-      "value": "音频与视觉"
-    }
-  ],
   "settings.cardDisplay": [
     {
       "type": 0,
@@ -34813,16 +34801,22 @@
       "value": "完整卡牌"
     }
   ],
+  "settings.cardDisplay.fullDescription": [
+    {
+      "type": 0,
+      "value": "桌面上的卡牌显示完整牌面。"
+    }
+  ],
   "settings.cardDisplay.square": [
     {
       "type": 0,
       "value": "方形"
     }
   ],
-  "settings.close": [
+  "settings.cardDisplay.squareDescription": [
     {
       "type": 0,
-      "value": "关闭设置"
+      "value": "桌面上的卡牌裁切为方形美术，并显示名称和数值。"
     }
   ],
   "settings.concede.action": [
@@ -34837,6 +34831,18 @@
       "value": "要认输吗？"
     }
   ],
+  "settings.concede.description": [
+    {
+      "type": 0,
+      "value": "结束对局，判你落败。"
+    }
+  ],
+  "settings.concede.title": [
+    {
+      "type": 0,
+      "value": "认输"
+    }
+  ],
   "settings.concede.yes": [
     {
       "type": 0,
@@ -34849,22 +34855,10 @@
       "value": "确认操作"
     }
   ],
-  "settings.confirmActions.aria": [
+  "settings.confirmActions.description": [
     {
       "type": 0,
-      "value": "打出卡牌或启动能力时确认操作"
-    }
-  ],
-  "settings.confirmActions.tooltip": [
-    {
-      "type": 0,
-      "value": "打出卡牌或启动能力时要求确认。"
-    }
-  ],
-  "settings.danger": [
-    {
-      "type": 0,
-      "value": "危险操作"
+      "value": "打出卡牌或启动能力前要求确认。"
     }
   ],
   "settings.draw.accept": [
@@ -34939,12 +34933,6 @@
       "value": "在设置中关闭“显示引导”，或选择“立即关闭”。"
     }
   ],
-  "settings.history": [
-    {
-      "type": 0,
-      "value": "对局历史"
-    }
-  ],
   "settings.history.previousTurnStart": [
     {
       "type": 0,
@@ -34991,6 +34979,18 @@
       "value": "撤销上一步操作"
     }
   ],
+  "settings.interface": [
+    {
+      "type": 0,
+      "value": "界面"
+    }
+  ],
+  "settings.match": [
+    {
+      "type": 0,
+      "value": "对局"
+    }
+  ],
   "settings.motion.default": [
     {
       "type": 0,
@@ -35000,7 +35000,7 @@
   "settings.motion.defaultDescription": [
     {
       "type": 0,
-      "value": "默认：跟随操作系统的减少动态效果设置"
+      "value": "跟随操作系统的减少动态效果设置。"
     }
   ],
   "settings.motion.full": [
@@ -35012,7 +35012,7 @@
   "settings.motion.fullDescription": [
     {
       "type": 0,
-      "value": "完整：显示卡牌移动和连线动画"
+      "value": "显示卡牌移动和连线动画。"
     }
   ],
   "settings.motion.reduced": [
@@ -35024,7 +35024,7 @@
   "settings.motion.reducedDescription": [
     {
       "type": 0,
-      "value": "减少：隐藏卡牌移动和连线，仅保留局部淡入淡出"
+      "value": "隐藏卡牌移动和连线，仅保留局部淡入淡出。"
     }
   ],
   "settings.optionHotkeys": [
@@ -35033,13 +35033,7 @@
       "value": "选项快捷键"
     }
   ],
-  "settings.optionHotkeys.aria": [
-    {
-      "type": 0,
-      "value": "使用 Q W E R A S D F 选择提示选项"
-    }
-  ],
-  "settings.optionHotkeys.tooltip": [
+  "settings.optionHotkeys.description": [
     {
       "type": 0,
       "value": "按 Q W E R A S D F 选择提示中的选项。"
@@ -35063,16 +35057,22 @@
       "value": "发光"
     }
   ],
+  "settings.playableCards.glowDescription": [
+    {
+      "type": 0,
+      "value": "用柔和的绿色光晕标出当前可打出的卡牌。"
+    }
+  ],
   "settings.playableCards.highContrast": [
     {
       "type": 0,
       "value": "高对比度"
     }
   ],
-  "settings.playableCards.tooltip": [
+  "settings.playableCards.highContrastDescription": [
     {
       "type": 0,
-      "value": "发光会添加柔和的绿色光晕；高对比度会使用清晰轮廓。"
+      "value": "用清晰轮廓标出当前可打出的卡牌。"
     }
   ],
   "settings.playmat": [
@@ -35192,7 +35192,7 @@
   "settings.playmat.side": [
     {
       "type": 0,
-      "value": "选择哪一侧"
+      "value": "哪一侧"
     }
   ],
   "settings.playmat.yours": [
@@ -35219,6 +35219,12 @@
       "value": "始终暂停"
     }
   ],
+  "settings.priority.alwaysPauseDescription": [
+    {
+      "type": 0,
+      "value": "在每个优先权和响应窗口都停下，即使没有可打出的牌。"
+    }
+  ],
   "settings.priority.autoPass": [
     {
       "type": 0,
@@ -35228,7 +35234,7 @@
   "settings.priority.autoPassDescription": [
     {
       "type": 0,
-      "value": "自动跳过：没有可使用的瞬间牌、反应牌或场上能力时立即让过优先权"
+      "value": "没有可使用的瞬间牌、反应牌或场上能力时，自动让过优先权。"
     }
   ],
   "settings.priority.behavior": [
@@ -35237,13 +35243,55 @@
       "value": "优先权行为"
     }
   ],
+  "settings.priorityAlert": [
+    {
+      "type": 0,
+      "value": "优先权提醒"
+    }
+  ],
+  "settings.priorityAlert.always": [
+    {
+      "type": 0,
+      "value": "始终"
+    }
+  ],
+  "settings.priorityAlert.alwaysDescription": [
+    {
+      "type": 0,
+      "value": "对战任何对手时都提醒，即使游戏处于焦点。"
+    }
+  ],
+  "settings.priorityAlert.alwaysVsPlayers": [
+    {
+      "type": 0,
+      "value": "对战玩家"
+    }
+  ],
+  "settings.priorityAlert.alwaysVsPlayersDescription": [
+    {
+      "type": 0,
+      "value": "对战真人时始终提醒；对战机器人时仅在游戏未获焦点时提醒。"
+    }
+  ],
+  "settings.priorityAlert.unfocused": [
+    {
+      "type": 0,
+      "value": "未聚焦时"
+    }
+  ],
+  "settings.priorityAlert.unfocusedDescription": [
+    {
+      "type": 0,
+      "value": "游戏未获焦点时，优先权回到你这里会响铃提醒。"
+    }
+  ],
   "settings.showGameClock": [
     {
       "type": 0,
       "value": "显示对局计时"
     }
   ],
-  "settings.showGameClock.tooltip": [
+  "settings.showGameClock.description": [
     {
       "type": 0,
       "value": "累计显示对局用时和双方用时，帮助你练习比赛节奏。"
@@ -35255,7 +35303,7 @@
       "value": "显示引导"
     }
   ],
-  "settings.showGuidance.tooltip": [
+  "settings.showGuidance.description": [
     {
       "type": 0,
       "value": "显示优先权窗口和响应窗口提示。"
@@ -35267,16 +35315,16 @@
       "value": "机器人即时行动"
     }
   ],
-  "settings.skipBotDelay.aria": [
-    {
-      "type": 0,
-      "value": "跳过练习机器人的一秒停顿"
-    }
-  ],
-  "settings.skipBotDelay.tooltip": [
+  "settings.skipBotDelay.description": [
     {
       "type": 0,
       "value": "测试版：练习机器人决定后立即行动，不再等待一秒。"
+    }
+  ],
+  "settings.sound": [
+    {
+      "type": 0,
+      "value": "声音"
     }
   ],
   "settings.soundEffects": [
@@ -35285,16 +35333,22 @@
       "value": "音效"
     }
   ],
-  "settings.soundEffects.tooltip": [
+  "settings.soundEffects.description": [
     {
       "type": 0,
-      "value": "播放轻微的卡牌音效；当游戏未获焦点且优先权回到你时发出提醒。"
+      "value": "播放轻微的卡牌音效和优先权提醒。"
     }
   ],
   "settings.title": [
     {
       "type": 0,
       "value": "设置"
+    }
+  ],
+  "settings.undo": [
+    {
+      "type": 0,
+      "value": "撤销"
     }
   ],
   "settings.volume": [

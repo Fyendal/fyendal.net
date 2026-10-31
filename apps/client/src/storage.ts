@@ -454,6 +454,7 @@ export function saveLobbySettings(
 export type { PriorityWindowMode };
 export type CardDisplayPreference = "square" | "full";
 export type MotionPreference = "system" | "full" | "reduced";
+export type PriorityAlertMode = "unfocused" | "always-vs-players" | "always";
 export type PlayabilityCuePreference = "glow" | "high-contrast";
 
 /** Functional card key → `chooseHook` → engine option id; asking is absence. */
@@ -530,6 +531,7 @@ export interface GameSettings {
   playabilityCuePreference: PlayabilityCuePreference;
   soundEffectsEnabled: boolean;
   soundEffectsVolume: number;
+  priorityAlertMode: PriorityAlertMode;
   optionHotkeys: boolean;
   skipBotDelay: boolean;
   showGameClock: boolean;
@@ -548,6 +550,7 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   playabilityCuePreference: "glow",
   soundEffectsEnabled: true,
   soundEffectsVolume: 35,
+  priorityAlertMode: "always",
   optionHotkeys: false,
   skipBotDelay: false,
   showGameClock: true,
@@ -657,6 +660,9 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       soundEffectsVolume: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10 || record.version === 11
         ? record.soundEffectsVolume as number
         : 35,
+      priorityAlertMode: record.priorityAlertMode === "unfocused" || record.priorityAlertMode === "always-vs-players"
+        ? record.priorityAlertMode
+        : "always",
       optionHotkeys: typeof record.optionHotkeys === "boolean" ? record.optionHotkeys : false,
       skipBotDelay: typeof record.skipBotDelay === "boolean" ? record.skipBotDelay : false,
       showGameClock: typeof record.showGameClock === "boolean" ? record.showGameClock : true,

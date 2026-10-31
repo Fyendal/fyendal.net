@@ -151,6 +151,7 @@ describe("client storage keys", () => {
       optionHotkeys: false,
       skipBotDelay: false,
       showGameClock: true,
+      priorityAlertMode: "always",
       standingOrders: {},
     });
     saveGameSettings(storage, {
@@ -168,6 +169,7 @@ describe("client storage keys", () => {
       optionHotkeys: true,
       skipBotDelay: true,
       showGameClock: false,
+      priorityAlertMode: "always-vs-players",
       standingOrders: {},
     });
     expect(loadGameSettings(storage)).toEqual({
@@ -185,6 +187,7 @@ describe("client storage keys", () => {
       optionHotkeys: true,
       skipBotDelay: true,
       showGameClock: false,
+      priorityAlertMode: "always-vs-players",
       standingOrders: {},
     });
   });
@@ -212,6 +215,7 @@ describe("client storage keys", () => {
       optionHotkeys: false,
       skipBotDelay: false,
       showGameClock: true,
+      priorityAlertMode: "always",
       standingOrders: {},
     });
   });
@@ -240,6 +244,7 @@ describe("client storage keys", () => {
       optionHotkeys: false,
       skipBotDelay: false,
       showGameClock: true,
+      priorityAlertMode: "always",
       standingOrders: {},
     });
   });
@@ -270,6 +275,7 @@ describe("client storage keys", () => {
       optionHotkeys: false,
       skipBotDelay: false,
       showGameClock: true,
+      priorityAlertMode: "always",
       standingOrders: {},
     });
   });
@@ -359,6 +365,7 @@ describe("client storage keys", () => {
       optionHotkeys: false,
       skipBotDelay: false,
       showGameClock: true,
+      priorityAlertMode: "always",
       standingOrders: {},
     });
   });

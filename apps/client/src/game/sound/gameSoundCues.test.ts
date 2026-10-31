@@ -4,6 +4,7 @@ import type { GameMotionEvent } from "../motion/motionTypes.js";
 import {
   damageSoundCuesForViews,
   gameSoundCuesForEvents,
+  priorityAlertNeeded,
   prioritySoundCueForViews,
 } from "./gameSoundCues.js";
 
@@ -77,6 +78,15 @@ describe("game sound cues", () => {
     expect(prioritySoundCueForViews(blocking, blocking, 0, true)).toEqual([]);
     expect(prioritySoundCueForViews(view({ priorityPlayer: 1 }), blocking, 1, true)).toEqual([]);
     expect(prioritySoundCueForViews(view({ priorityPlayer: 1 }), blocking, 0, false)).toEqual([]);
+  });
+
+  it("alerts in focus only for the opponents the priority alert mode covers", () => {
+    expect(priorityAlertNeeded("unfocused", false, false)).toBe(false);
+    expect(priorityAlertNeeded("unfocused", true, true)).toBe(true);
+    expect(priorityAlertNeeded("always-vs-players", false, false)).toBe(true);
+    expect(priorityAlertNeeded("always-vs-players", true, false)).toBe(false);
+    expect(priorityAlertNeeded("always-vs-players", true, true)).toBe(true);
+    expect(priorityAlertNeeded("always", true, false)).toBe(true);
   });
 
   it("keeps foreground, repeated, spectator, and effect-choice priority quiet", () => {

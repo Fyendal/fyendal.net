@@ -1,6 +1,7 @@
 import type { GameView } from "@fyendal/shared";
 import type { DeckCardEvent } from "../deckCardEvents.js";
 import { gameHasPriority } from "../causalExplanations.js";
+import type { PriorityAlertMode } from "../../storage.js";
 import {
   MOTION_CONNECT_MS,
   MOTION_DISAPPEAR_MS,
@@ -30,6 +31,14 @@ export interface GameSoundCue {
 }
 
 const MAX_REPEATED_DRAW_SOUNDS = 6;
+
+export function priorityAlertNeeded(
+  mode: PriorityAlertMode,
+  botGame: boolean,
+  unfocused: boolean,
+): boolean {
+  return unfocused || mode === "always" || (mode === "always-vs-players" && !botGame);
+}
 
 /** Alert when a live transition gives this player priority or the blocking
  * choice. Initial snapshots and other mandatory decisions remain silent. */

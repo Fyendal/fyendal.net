@@ -61,9 +61,13 @@ function LanguageSettingsRow() {
   const label = intl.formatMessage({ id: "language.label" });
 
   return (
-    <label className="settings-control-row settings-language-row">
-      <span className="settings-control-name">{label}</span>
-      <LanguageSelect label={label} />
+    <label className="settings-row settings-language-row">
+      <span className="settings-row-text">
+        <span className="settings-row-name">{label}</span>
+      </span>
+      <span className="settings-row-control">
+        <LanguageSelect label={label} />
+      </span>
     </label>
   );
 }

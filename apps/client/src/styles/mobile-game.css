@@ -1040,7 +1040,7 @@
     border-left: 0;
     background: #0d0805f8;
   }
-  .rail-right:has(> .settings-overlay) {
+  .rail-right:has(> .settings-backdrop) {
     z-index: 80;
   }
   .rail-right > :not(.mobile-gamebar):not(.mobile-game-alerts):not(.overlay):not(.modal-surface-backdrop) { display: none; }
@@ -1153,24 +1153,6 @@
   .zone-viewer-close { width: 40px; height: 40px; min-height: 40px; }
   .zone-viewer-header .card-sort button { flex: 1; justify-content: center; min-height: 34px; }
   .zone-viewer > .zone-viewer-cards { padding: 12px 8px; }
-  .settings-panel {
-    width: calc(100vw - 20px);
-    max-height: calc(100dvh - 24px);
-    overflow-y: auto;
-  }
-  .settings-header { top: -14px; }
-  .settings-close { width: 42px; height: 42px; }
-  .settings-priority-row,
-  .settings-choice-row { align-items: stretch; flex-direction: column; gap: 8px; }
-  .settings-choice-row,
-  .settings-motion-row,
-  .settings-playmat-row { padding-block: 10px; }
-  .settings-playmat-head { align-items: stretch; flex-direction: column; gap: 8px; }
-  .settings-segmented { width: 100%; }
-  .settings-segmented button { min-width: 0; min-height: 36px; }
-  .settings-volume-slider { width: min(42vw, 150px); }
-  .settings-options { flex-wrap: wrap; }
-  .settings-info-tooltip::after { display: none; }
 
   .gameover-panel { width: calc(100vw - 16px); height: calc(100dvh - 24px); padding: 16px; }
   .gameover-headline { font-size: clamp(29px, 7vw, 38px); }
@@ -1338,7 +1320,6 @@
   .playmat-art-own::after {
     --playmat-scrim: linear-gradient(180deg, #0d070330 0%, #0d070352 60%, #0d070370 100%);
   }
-  .playmat-picker { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .playmat-hint {
     top: calc(62px + env(safe-area-inset-top));
     right: 10px;

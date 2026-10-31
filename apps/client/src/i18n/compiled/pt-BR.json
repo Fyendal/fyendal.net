@@ -38506,18 +38506,6 @@
       "value": "Preferência de animação"
     }
   ],
-  "settings.animations.tooltip": [
-    {
-      "type": 0,
-      "value": "O padrão segue a configuração de movimento reduzido do seu sistema operacional."
-    }
-  ],
-  "settings.audioVisuals": [
-    {
-      "type": 0,
-      "value": "Áudio e visual"
-    }
-  ],
   "settings.cardDisplay": [
     {
       "type": 0,
@@ -38530,16 +38518,22 @@
       "value": "Carta inteira"
     }
   ],
+  "settings.cardDisplay.fullDescription": [
+    {
+      "type": 0,
+      "value": "As cartas na mesa mostram a face inteira."
+    }
+  ],
   "settings.cardDisplay.square": [
     {
       "type": 0,
       "value": "Quadrada"
     }
   ],
-  "settings.close": [
+  "settings.cardDisplay.squareDescription": [
     {
       "type": 0,
-      "value": "Fechar configurações"
+      "value": "As cartas na mesa são recortadas em arte quadrada com nome e valores."
     }
   ],
   "settings.concede.action": [
@@ -38554,6 +38548,18 @@
       "value": "Desistir do jogo?"
     }
   ],
+  "settings.concede.description": [
+    {
+      "type": 0,
+      "value": "Encerra a partida como derrota para você."
+    }
+  ],
+  "settings.concede.title": [
+    {
+      "type": 0,
+      "value": "Desistir"
+    }
+  ],
   "settings.concede.yes": [
     {
       "type": 0,
@@ -38566,22 +38572,10 @@
       "value": "Confirmar ações"
     }
   ],
-  "settings.confirmActions.aria": [
+  "settings.confirmActions.description": [
     {
       "type": 0,
-      "value": "Confirmar ações ao jogar cartas ou ativar habilidades"
-    }
-  ],
-  "settings.confirmActions.tooltip": [
-    {
-      "type": 0,
-      "value": "Pede confirmação ao jogar cartas ou ativar habilidades."
-    }
-  ],
-  "settings.danger": [
-    {
-      "type": 0,
-      "value": "Zona de perigo"
+      "value": "Pede confirmação antes de jogar uma carta ou ativar uma habilidade."
     }
   ],
   "settings.draw.accept": [
@@ -38656,12 +38650,6 @@
       "value": "Desmarque Mostrar orientações nas Configurações ou selecione Desativar agora."
     }
   ],
-  "settings.history": [
-    {
-      "type": 0,
-      "value": "Histórico do jogo"
-    }
-  ],
   "settings.history.previousTurnStart": [
     {
       "type": 0,
@@ -38704,6 +38692,18 @@
       "value": "Desfazer última ação"
     }
   ],
+  "settings.interface": [
+    {
+      "type": 0,
+      "value": "Interface"
+    }
+  ],
+  "settings.match": [
+    {
+      "type": 0,
+      "value": "Partida"
+    }
+  ],
   "settings.motion.default": [
     {
       "type": 0,
@@ -38713,7 +38713,7 @@
   "settings.motion.defaultDescription": [
     {
       "type": 0,
-      "value": "Padrão: segue a configuração de movimento reduzido do seu sistema operacional"
+      "value": "Segue a configuração de movimento reduzido do seu sistema operacional."
     }
   ],
   "settings.motion.full": [
@@ -38725,7 +38725,7 @@
   "settings.motion.fullDescription": [
     {
       "type": 0,
-      "value": "Completa: mostra o deslocamento das cartas e as animações de conexão"
+      "value": "Mostra o deslocamento das cartas e as animações de conexão."
     }
   ],
   "settings.motion.reduced": [
@@ -38737,7 +38737,7 @@
   "settings.motion.reducedDescription": [
     {
       "type": 0,
-      "value": "Reduzida: oculta o deslocamento das cartas e as conexões; mantém os esmaecimentos locais das cartas"
+      "value": "Oculta o deslocamento das cartas e as conexões, mantendo só os esmaecimentos locais."
     }
   ],
   "settings.optionHotkeys": [
@@ -38746,13 +38746,7 @@
       "value": "Atalhos de opções"
     }
   ],
-  "settings.optionHotkeys.aria": [
-    {
-      "type": 0,
-      "value": "Escolher opções dos avisos com Q W E R A S D F"
-    }
-  ],
-  "settings.optionHotkeys.tooltip": [
+  "settings.optionHotkeys.description": [
     {
       "type": 0,
       "value": "Pressione Q W E R A S D F para escolher opções nos avisos."
@@ -38776,16 +38770,22 @@
       "value": "Brilho"
     }
   ],
+  "settings.playableCards.glowDescription": [
+    {
+      "type": 0,
+      "value": "Um halo verde suave marca as cartas que você pode jogar agora."
+    }
+  ],
   "settings.playableCards.highContrast": [
     {
       "type": 0,
       "value": "Alto contraste"
     }
   ],
-  "settings.playableCards.tooltip": [
+  "settings.playableCards.highContrastDescription": [
     {
       "type": 0,
-      "value": "Brilho adiciona um halo verde discreto. Alto contraste usa um contorno nítido."
+      "value": "Um contorno nítido marca as cartas que você pode jogar agora."
     }
   ],
   "settings.playmat": [
@@ -38905,7 +38905,7 @@
   "settings.playmat.side": [
     {
       "type": 0,
-      "value": "Qual lado"
+      "value": "Lado"
     }
   ],
   "settings.playmat.yours": [
@@ -38932,6 +38932,12 @@
       "value": "Sempre pausar"
     }
   ],
+  "settings.priority.alwaysPauseDescription": [
+    {
+      "type": 0,
+      "value": "Para em toda janela de prioridade e de reaction, mesmo quando nada puder ser jogado."
+    }
+  ],
   "settings.priority.autoPass": [
     {
       "type": 0,
@@ -38941,7 +38947,7 @@
   "settings.priority.autoPassDescription": [
     {
       "type": 0,
-      "value": "Passar automaticamente: passa a prioridade imediatamente quando nenhum instant, reaction ou habilidade do tabuleiro puder ser usado"
+      "value": "Passa a prioridade por você sempre que nenhum instant, reaction ou habilidade do tabuleiro puder ser usado."
     }
   ],
   "settings.priority.behavior": [
@@ -38950,13 +38956,55 @@
       "value": "Comportamento de prioridade"
     }
   ],
+  "settings.priorityAlert": [
+    {
+      "type": 0,
+      "value": "Alerta de prioridade"
+    }
+  ],
+  "settings.priorityAlert.always": [
+    {
+      "type": 0,
+      "value": "Sempre"
+    }
+  ],
+  "settings.priorityAlert.alwaysDescription": [
+    {
+      "type": 0,
+      "value": "Toca contra qualquer oponente, mesmo com o jogo em foco."
+    }
+  ],
+  "settings.priorityAlert.alwaysVsPlayers": [
+    {
+      "type": 0,
+      "value": "Contra pessoas"
+    }
+  ],
+  "settings.priorityAlert.alwaysVsPlayersDescription": [
+    {
+      "type": 0,
+      "value": "Sempre toca contra oponentes humanos. Contra bots, só com o jogo fora de foco."
+    }
+  ],
+  "settings.priorityAlert.unfocused": [
+    {
+      "type": 0,
+      "value": "Fora de foco"
+    }
+  ],
+  "settings.priorityAlert.unfocusedDescription": [
+    {
+      "type": 0,
+      "value": "Toca quando a prioridade volta para você com o jogo fora de foco."
+    }
+  ],
   "settings.showGameClock": [
     {
       "type": 0,
       "value": "Mostrar relógio da partida"
     }
   ],
-  "settings.showGameClock.tooltip": [
+  "settings.showGameClock.description": [
     {
       "type": 0,
       "value": "Conta o tempo da partida e de cada jogador para você treinar o ritmo de torneio."
@@ -38968,7 +39016,7 @@
       "value": "Mostrar orientações"
     }
   ],
-  "settings.showGuidance.tooltip": [
+  "settings.showGuidance.description": [
     {
       "type": 0,
       "value": "Mostra avisos das janelas de prioridade e de reaction."
@@ -38980,16 +39028,16 @@
       "value": "Jogadas instantâneas do bot"
     }
   ],
-  "settings.skipBotDelay.aria": [
-    {
-      "type": 0,
-      "value": "Pular a pausa de um segundo do bot de treino"
-    }
-  ],
-  "settings.skipBotDelay.tooltip": [
+  "settings.skipBotDelay.description": [
     {
       "type": 0,
       "value": "Beta: o bot de treino age assim que decide, sem a pausa de um segundo."
+    }
+  ],
+  "settings.sound": [
+    {
+      "type": 0,
+      "value": "Som"
     }
   ],
   "settings.soundEffects": [
@@ -38998,16 +39046,22 @@
       "value": "Efeitos sonoros"
     }
   ],
-  "settings.soundEffects.tooltip": [
+  "settings.soundEffects.description": [
     {
       "type": 0,
-      "value": "Toca sons sutis das cartas e avisa quando a prioridade voltar para você enquanto o jogo estiver fora de foco."
+      "value": "Toca sons sutis das cartas e o alerta de prioridade."
     }
   ],
   "settings.title": [
     {
       "type": 0,
       "value": "Configurações"
+    }
+  ],
+  "settings.undo": [
+    {
+      "type": 0,
+      "value": "Desfazer"
     }
   ],
   "settings.volume": [

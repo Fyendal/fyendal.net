@@ -7,6 +7,7 @@ import {
   type CardDisplayPreference,
   type MotionPreference,
   type PlayabilityCuePreference,
+  type PriorityAlertMode,
   type PriorityWindowMode,
   type StandingOrderUpdate,
 } from "../../storage.js";
@@ -112,6 +113,13 @@ export function useGameSettings({
       return next;
     });
   };
+  const updatePriorityAlertMode = (priorityAlertMode: PriorityAlertMode) => {
+    setSettings((current) => {
+      const next = { ...current, priorityAlertMode };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
 
   const updatePlaymat = (playmat: PlaymatId) => {
     setSettings((current) => {
@@ -152,6 +160,7 @@ export function useGameSettings({
     updatePlayabilityCuePreference,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
+    updatePriorityAlertMode,
     updatePlaymat,
     updateBotPlaymat,
     updateStandingOrder,

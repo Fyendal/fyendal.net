@@ -16,6 +16,7 @@ export function ModalSurface({
   onClose,
   children,
   className = "",
+  backdropClassName = "",
   description,
   eyebrow,
   showCloseButton = true,
@@ -25,6 +26,7 @@ export function ModalSurface({
   onClose: () => void;
   children?: ReactNode;
   className?: string;
+  backdropClassName?: string;
   description?: ReactNode;
   eyebrow?: string;
   showCloseButton?: boolean;
@@ -96,7 +98,7 @@ export function ModalSurface({
   return (
     <div
       ref={backdropRef}
-      className="modal-backdrop modal-surface-backdrop"
+      className={`modal-backdrop modal-surface-backdrop${backdropClassName ? ` ${backdropClassName}` : ""}`}
       onClick={onClose}
     >
       <section

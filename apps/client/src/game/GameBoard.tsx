@@ -284,6 +284,7 @@ export function GameBoard() {
     showGameClock,
     soundEffectsEnabled,
     soundEffectsVolume,
+    priorityAlertMode,
     playmat,
     botPlaymat,
     updatePriorityWindowMode,
@@ -297,6 +298,7 @@ export function GameBoard() {
     updateShowGameClock,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
+    updatePriorityAlertMode,
     updatePlaymat,
     updateBotPlaymat,
     standingOrders: standingOrderSettings,
@@ -383,6 +385,8 @@ export function GameBoard() {
     enabled: soundEffectsEnabled && screen !== "replay",
     volume: soundEffectsVolume,
     seat: spectating ? null : yourSeat,
+    priorityAlertMode,
+    botGame,
     achievementToastVisible: matchAchievements.toast.length > 0,
   });
   const arsenalDecisionKey =
@@ -1825,12 +1829,15 @@ export function GameBoard() {
         botPlaymat={botPlaymat}
         onBotPlaymatChange={updateBotPlaymat}
         openSettingsSignal={openSettingsSignal}
+        openSettingsTab="playmat"
         playabilityCuePreference={playabilityCuePreference}
         onPlayabilityCuePreferenceChange={updatePlayabilityCuePreference}
         soundEffectsEnabled={soundEffectsEnabled}
         onSoundEffectsEnabledChange={updateSoundEffectsEnabled}
         soundEffectsVolume={soundEffectsVolume}
         onSoundEffectsVolumeChange={updateSoundEffectsVolume}
+        priorityAlertMode={priorityAlertMode}
+        onPriorityAlertModeChange={updatePriorityAlertMode}
         log={view.log}
         logEntries={view.logEntries}
         friendlyHeroName={me.heroName}

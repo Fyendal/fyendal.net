@@ -67,6 +67,8 @@ function sideRailProps(
     onSoundEffectsEnabledChange: vi.fn(),
     soundEffectsVolume: 35,
     onSoundEffectsVolumeChange: vi.fn(),
+    priorityAlertMode: "unfocused",
+    onPriorityAlertModeChange: vi.fn(),
     log: [],
     viewerSeat: 0,
     friendlyHeroName: "Dash",

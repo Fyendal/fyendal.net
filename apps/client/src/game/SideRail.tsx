@@ -6,6 +6,7 @@ import type {
   CardDisplayPreference,
   MotionPreference,
   PlayabilityCuePreference,
+  PriorityAlertMode,
   PriorityWindowMode,
 } from "../storage.js";
 import type { PlaymatId } from "../playmats.js";
@@ -17,7 +18,8 @@ import {
 } from "./logCardRefs.js";
 import { ControlIcon, undoWithoutFocus } from "./gameControls.js";
 import { HeroEmote } from "./HeroEmote.js";
-import { BugReportDialog, GameSettingsDialog } from "./SideRailDialogs.js";
+import { BugReportDialog } from "./SideRailDialogs.js";
+import { GameSettingsDialog, type SettingsTab } from "./GameSettingsDialog.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { TooltipButton } from "../components/TooltipButton.js";
 import { UiIcon } from "../components/UiIcon.js";
@@ -187,6 +189,7 @@ export function SideRail({
   botPlaymat,
   onBotPlaymatChange,
   openSettingsSignal = 0,
+  openSettingsTab = "gameplay",
   motionPreference,
   onMotionPreferenceChange,
   playabilityCuePreference,
@@ -195,6 +198,8 @@ export function SideRail({
   onSoundEffectsEnabledChange,
   soundEffectsVolume,
   onSoundEffectsVolumeChange,
+  priorityAlertMode,
+  onPriorityAlertModeChange,
   log,
   logEntries,
   friendlyHeroName,
@@ -270,6 +275,8 @@ export function SideRail({
   onBotPlaymatChange: (playmat: PlaymatId) => void;
   /** Bumped by the board to open the settings dialog from outside the rail. */
   openSettingsSignal?: number;
+  /** Tab the signal opens on. */
+  openSettingsTab?: SettingsTab;
   motionPreference: MotionPreference;
   onMotionPreferenceChange: (preference: MotionPreference) => void;
   playabilityCuePreference: PlayabilityCuePreference;
@@ -278,6 +285,8 @@ export function SideRail({
   onSoundEffectsEnabledChange: (enabled: boolean) => void;
   soundEffectsVolume: number;
   onSoundEffectsVolumeChange: (volume: number) => void;
+  priorityAlertMode: PriorityAlertMode;
+  onPriorityAlertModeChange: (mode: PriorityAlertMode) => void;
   log: string[];
   logEntries?: GameLogViewEntry[];
   friendlyHeroName: string;
@@ -295,15 +304,15 @@ export function SideRail({
   onOpenSocial?: () => void;
 }) {
   const intl = useIntl();
-  const [showSettings, setShowSettings] = useState(false);
+  const [showSettings, setShowSettings] = useState<SettingsTab | null>(null);
   const [showBugReport, setShowBugReport] = useState(false);
   const [showMobileLog, setShowMobileLog] = useState(false);
   const [showUtilities, setShowUtilities] = useState(false);
   useEffect(() => {
     if (!openSettingsSignal) return;
     setShowUtilities(false);
-    setShowSettings(true);
-  }, [openSettingsSignal]);
+    setShowSettings(openSettingsTab);
+  }, [openSettingsSignal, openSettingsTab]);
   const [editingNote, setEditingNote] = useState<{
     roomVersion: number;
     frame: number;
@@ -527,7 +536,7 @@ export function SideRail({
             className="rail-icon"
             aria-label={intl.formatMessage({ id: "settings.title" })}
             title={intl.formatMessage({ id: "settings.title" })}
-            onClick={() => setShowSettings(true)}
+            onClick={() => setShowSettings("gameplay")}
           >
             <ControlIcon kind="settings" />
           </button>
@@ -681,7 +690,10 @@ export function SideRail({
           onSoundEffectsEnabledChange={onSoundEffectsEnabledChange}
           soundEffectsVolume={soundEffectsVolume}
           onSoundEffectsVolumeChange={onSoundEffectsVolumeChange}
-          onClose={() => setShowSettings(false)}
+          priorityAlertMode={priorityAlertMode}
+          onPriorityAlertModeChange={onPriorityAlertModeChange}
+          initialTab={showSettings}
+          onClose={() => setShowSettings(null)}
         />
       ) : null}
 
@@ -802,7 +814,7 @@ export function SideRail({
               <button
                 onClick={() => {
                   setShowUtilities(false);
-                  setShowSettings(true);
+                  setShowSettings("gameplay");
                 }}
               >
                 {intl.formatMessage({ id: "settings.title" })}
