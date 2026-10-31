@@ -1,16 +1,11 @@
+import { cardData } from "@fyendal/cards";
 import type { CardView, GameIntent, GameView } from "@fyendal/shared";
-import { cardData } from "@fyendal/cards/client";
 
-/** True when passing would give up an unused action point on the player's own
- * action-phase turn while an action card or weapon could still be used. The
- * game's opening turn (engine turn 1, "turn 0" in play) never warns. The
- * server's pass-until latch pauses on the same rule (`forfeitsActionPoint`). */
-export function shouldWarnBeforeEndTurn(
-  view: GameView | null,
-  seat: number | null,
-  candidates: readonly GameIntent[],
-): boolean {
-  if (!view || seat === null) return false;
+/** True when passing would give up an unused action point on the seat's own
+ *  action-phase turn while an action card or weapon could still be used. The
+ *  game's opening turn (engine turn 1, "turn 0" in play) never warns. The
+ *  client asks before passing it, and the pass-until latch stops for it. */
+export function forfeitsActionPoint(view: GameView, seat: number, candidates: readonly GameIntent[]): boolean {
   if (view.turn <= 1 || view.phase !== "action" || view.activePlayer !== seat) return false;
   if (view.pendingDecision || view.stack.length > 0) return false;
   const player = view.players[seat];

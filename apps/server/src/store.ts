@@ -100,6 +100,7 @@ import {
 import { hashToken } from "./tokenHash.js";
 import { advanceClock, clockSummary, clockView, startClock } from "./clock.js";
 import { standingOrderIntent } from "./standingOrders.js";
+import { forfeitsActionPoint } from "./endTurnWarning.js";
 import { acknowledgePassUntil, armPassUntil, decodeStoredPassUntil, passUntilIntent, refreshPassUntil, type SeatPassUntil } from "./passUntil.js";
 
 /**
@@ -4981,6 +4982,7 @@ export function spectatorListMessage(room: RoomRow): ServerMessage {
 export function stateMessage(room: RoomRow, seat: number | null, now = Date.now()): ServerMessage | null {
   if (!room.state) return null;
   const view = projectStateFor(room.state, seat, room.code);
+  const candidates = seat === null ? [] : actionCandidates(room.state, seat);
   const profile = (member: SeatRow | null) => ({
     username: member?.username ?? "Unknown player",
     badge: member?.badge ?? null,
@@ -5006,12 +5008,13 @@ export function stateMessage(room: RoomRow, seat: number | null, now = Date.now(
     playerProfiles: [profile(room.seats[0]), profile(room.seats[1])],
     yourSeat: seat,
     legal: seat === null ? [] : legalIntents(room.state, seat),
-    actionCandidates: seat === null ? [] : actionCandidates(room.state, seat),
+    actionCandidates: candidates,
     spectators: spectatorCount(room),
     lastActionAt: [room.seats[0]?.lastActionAt ?? 0, room.seats[1]?.lastActionAt ?? 0],
     ...(room.clock ? { clock: clockView(room.clock, now) } : {}),
     ...(room.seats.some((member) => member?.controller === "bot") ? { botGame: true } : {}),
     ...(seat !== null && room.seats[seat]?.passUntil ? { passUntil: room.seats[seat].passUntil.mode } : {}),
+    ...(seat !== null && forfeitsActionPoint(view, seat, candidates) ? { endTurnWarning: true as const } : {}),
     ...visibleCardArt(room, view, seat),
   };
 }

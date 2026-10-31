@@ -249,6 +249,8 @@ export interface StoreState {
   clockReceivedAt: number | null;
   /** This seat's armed pass shortcut, optimistic until the server's next state. */
   passUntil: PassUntilMode | null;
+  /** Passing now would end this seat's turn with a usable action point. */
+  endTurnWarning: boolean;
   opponentConnected: boolean;
   latestEmote: EmoteEvent | null;
   rooms: RoomSummary[];
@@ -360,6 +362,7 @@ export interface PreReplaySnapshot {
   view: GameView | null;
   legal: GameIntent[];
   actionCandidates: GameIntent[];
+  endTurnWarning: boolean;
   yourSeat: number | null;
   spectating: boolean;
   spectatorCount: number;

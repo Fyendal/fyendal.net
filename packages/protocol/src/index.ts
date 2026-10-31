@@ -1882,7 +1882,7 @@ function decodeStateMessage(value: unknown): StateMessage | null {
   if (!message || message.type !== "state") return null;
   const valid = exactKeys(message, [
     "type", "version", "view", "transition", "playerProfiles", "yourSeat", "legal", "actionCandidates",
-    "spectators", "lastActionAt", "clock", "botGame", "cardArt", "passUntil",
+    "spectators", "lastActionAt", "clock", "botGame", "cardArt", "passUntil", "endTurnWarning",
   ], ["type", "version", "view", "playerProfiles", "yourSeat", "legal", "lastActionAt"])
     && optional(message.clock, gameClockView)
     && optional(message.cardArt, (v): v is [Record<string, string>, Record<string, string>] =>
@@ -1897,6 +1897,7 @@ function decodeStateMessage(value: unknown): StateMessage | null {
     && optional(message.spectators, nonNegativeInteger)
     && optional(message.botGame, (v): v is boolean => typeof v === "boolean")
     && optional(message.passUntil, passUntilMode)
+    && optional(message.endTurnWarning, (v): v is true => v === true)
     && Array.isArray(message.lastActionAt) && message.lastActionAt.length === 2
     && message.lastActionAt.every(nonNegativeInteger);
   return valid ? value as StateMessage : null;

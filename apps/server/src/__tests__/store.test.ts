@@ -1904,7 +1904,12 @@ describe("PgRoomStore storage", () => {
     }
     expect(state).toMatchObject({ turn: 3, phase: "action", priorityPlayer: attacker, pendingDecision: null, stack: [] });
     expect(state.players[attacker]!.actionPoints).toBe(1);
-    expect((await store.getRoom(code))!.seats[attacker]!.passUntil).toMatchObject({ mode: "turn" });
+    const room = (await store.getRoom(code))!;
+    expect(room.seats[attacker]!.passUntil).toMatchObject({ mode: "turn" });
+    expect(stateMessage(room, attacker)).toMatchObject({ endTurnWarning: true });
+    expect(stateMessage(room, defender)).not.toHaveProperty("endTurnWarning");
+    expect(stateMessage(room, null)).not.toHaveProperty("endTurnWarning");
+    expect(decodeServerMessage(stateMessage(room, attacker))).not.toBeNull();
   });
 
   it("decodes retired and pre-pause latches", () => {

@@ -35,6 +35,7 @@ export function initialStoreProjection(
     clock: null,
     clockReceivedAt: null,
     passUntil: null,
+    endTurnWarning: false,
     replayFrames: 0,
     replayViews: null,
     replayTransitions: null,
@@ -116,6 +117,7 @@ export function clearedRoomProjection(): Pick<
   | "clock"
   | "clockReceivedAt"
   | "passUntil"
+  | "endTurnWarning"
   | "opponentConnected"
   | "latestEmote"
   | "replayFrames"
@@ -163,6 +165,7 @@ export function clearedRoomProjection(): Pick<
     clock: null,
     clockReceivedAt: null,
     passUntil: null,
+    endTurnWarning: false,
     opponentConnected: true,
     latestEmote: null,
     replayFrames: 0,

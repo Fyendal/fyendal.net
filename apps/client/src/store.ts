@@ -1150,6 +1150,7 @@ export const useStore = create<StoreState>((set, get) => {
           passUntil: passUntilRequest?.code === code && msg.version <= passUntilRequest.afterVersion
             ? passUntilRequest.mode
             : msg.passUntil ?? null,
+          endTurnWarning: msg.endTurnWarning === true,
           screen: "game",
           replayFrames: frames,
           replayNotes,
@@ -2105,6 +2106,7 @@ export const useStore = create<StoreState>((set, get) => {
           viewUpdate: nextViewUpdate({ source: "restore", transition: "replace" }),
           legal: [],
           actionCandidates: [],
+          endTurnWarning: false,
           yourSeat: null,
           spectating: false,
         });

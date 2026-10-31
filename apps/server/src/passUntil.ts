@@ -1,6 +1,6 @@
-import { cardData } from "@fyendal/cards";
 import { actionCandidates, legalIntents, projectStateFor, type GameState } from "@fyendal/engine";
-import type { CardView, GameIntent, PassUntilMode, PendingDecision } from "@fyendal/shared";
+import type { GameIntent, PassUntilMode, PendingDecision } from "@fyendal/shared";
+import { forfeitsActionPoint } from "./endTurnWarning.js";
 
 /** A chain link by its place on the open chain and its attacking object. */
 export interface PassUntilLink {
@@ -115,31 +115,6 @@ function threatensLethal(state: GameState, seat: number): boolean {
   return link.attackValue - (link.damageToPrevent ?? 0) >= life;
 }
 
-/** Mirrors the client's `shouldWarnBeforeEndTurn`: passing would give up an
- *  action point the seat could still spend on an action card or weapon, so
- *  the client asks first instead. */
-function forfeitsActionPoint(state: GameState, seat: number): boolean {
-  if (state.turn <= 1 || state.phase !== "action" || state.activePlayer !== seat) return false;
-  if (state.pendingDecision || state.stack.length > 0) return false;
-  const player = projectStateFor(state, seat).players[seat];
-  if (!player || player.actionPoints <= 0) return false;
-  const weaponIds = new Set(player.weapons.map((card) => card.instanceId));
-  const cards = new Map<number, CardView>();
-  for (const card of [
-    ...player.hand, ...player.arsenal, ...player.graveyard, ...player.banish,
-    ...(player.visibleDeckTop ? [player.visibleDeckTop] : []),
-  ]) cards.set(card.instanceId, card);
-  return actionCandidates(state, seat).some((intent) => {
-    if (intent.kind === "activate-ability") return weaponIds.has(intent.sourceInstanceId);
-    if (intent.kind !== "play-card" && intent.kind !== "play-from-arsenal" && intent.kind !== "play-from-zone") {
-      return false;
-    }
-    if (intent.asInstant) return false;
-    const card = cards.get(intent.instanceId);
-    return card !== undefined && cardData[card.cardId]?.cardType === "action";
-  });
-}
-
 /** What the latch answers for `seat` in `state`: pass its priority and
  *  reaction windows and declare no blocks. Any other choice, a chain-link
  *  latch before its link opens, a new opposing play, a lethal attack, and
@@ -159,6 +134,7 @@ export function passUntilIntent(state: GameState, seat: number, armed: SeatPassU
   }
   const passWindow = decision
     ? PASS_WINDOW_KINDS.has(decision.kind)
-    : state.phase === "action" && state.priorityPlayer === seat && !forfeitsActionPoint(state, seat);
+    : state.phase === "action" && state.priorityPlayer === seat
+      && !forfeitsActionPoint(projectStateFor(state, seat), seat, actionCandidates(state, seat));
   return passWindow ? legal.find((intent) => intent.kind === "pass") ?? null : null;
 }
