@@ -59,7 +59,7 @@ describe("BotOpponentModal", () => {
     expect(html.match(/aria-hidden="true"/g)).toHaveLength(1);
   });
 
-  it("offers Kayo, Briar, and Bravo for Silver Age", () => {
+  it("offers Kayo, Briar, Bravo, and SAGE Ira for Silver Age", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="silver-age" onSelect={vi.fn()} onClose={vi.fn()} />
@@ -73,21 +73,9 @@ describe("BotOpponentModal", () => {
     expect(html).toContain("Bravo");
     expect(html).toContain("Flattering Showman");
     expect(html).toContain("Defensive");
-    expect(html).not.toContain("Crimson Haze");
-    expect(html).not.toContain("Scarlet Revenger");
-  });
-
-  it("offers the beta-only SAGE Ira bot to beta testers", () => {
-    botModalStore.state = { betaTester: true } as StoreState;
-    const html = renderToStaticMarkup(
-      <TestI18nProvider>
-        <BotOpponentModal format="silver-age" onSelect={vi.fn()} onClose={vi.fn()} />
-      </TestI18nProvider>,
-    );
-
-    expect(html).toContain("Kayo");
     expect(html).toContain("Crimson Haze");
     expect(html).toContain("Midrange");
+    expect(html).not.toContain("Scarlet Revenger");
   });
 
   it("shows benched Briar with an accessible custom tooltip for restricted cards", () => {

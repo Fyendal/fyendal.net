@@ -446,6 +446,11 @@
   color: #e9ddc6;
 }
 .game-clock-total .ui-icon { width: 15px; height: 15px; color: #a89878; }
+/* h:mm:ss times need the row's slack to fit three of them. */
+.game-clock-long { gap: 8px; padding-inline: 8px; font-size: 13px; }
+.game-clock-long .game-clock-total { gap: 4px; }
+.game-clock-long .game-clock-seat { gap: 5px; }
+.game-clock-long .game-clock-portrait { flex-basis: 20px; width: 20px; height: 20px; }
 .game-clock-total,
 .game-clock-seat { border-radius: 3px; outline: none; }
 .game-clock-total:focus-visible,
@@ -453,6 +458,7 @@
 .game-clock-seat {
   --seat-color: #91c84a;
   display: inline-flex;
+  white-space: nowrap;
   align-items: center;
   gap: 7px;
   color: #8a7f6d;

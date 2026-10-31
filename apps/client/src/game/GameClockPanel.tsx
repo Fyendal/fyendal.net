@@ -6,6 +6,8 @@ import { UiIcon } from "../components/UiIcon.js";
 import { LifeHeroPortrait } from "./LifeHeroPortrait.js";
 import { formatDuration, liveClock } from "./gameClock.js";
 
+const HOUR_MS = 3_600_000;
+
 export interface ClockSeat {
   heroName: string;
   heroCardId: string;
@@ -34,7 +36,9 @@ export function GameClockPanel({
   const live = liveClock(clock, receivedAt, now);
   const order = [viewerSeat, viewerSeat === 0 ? 1 : 0] as const;
   return (
-    <section className="game-clock" aria-label={intl.formatMessage({ id: "game.clock.title" })}>
+    <section
+      className={`game-clock${live.totalMs >= HOUR_MS ? " game-clock-long" : ""}`}
+      aria-label={intl.formatMessage({ id: "game.clock.title" })}>
       <TooltipLabel
         className="game-clock-total"
         label={intl.formatMessage({ id: "game.clock.total" }, { time: formatDuration(live.totalMs) })}
