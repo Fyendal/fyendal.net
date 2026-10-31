@@ -37180,6 +37180,24 @@
       "pluralType": "cardinal"
     }
   ],
+  "prep.pitch.blue": [
+    {
+      "type": 0,
+      "value": "Azuis"
+    }
+  ],
+  "prep.pitch.red": [
+    {
+      "type": 0,
+      "value": "Vermelhas"
+    }
+  ],
+  "prep.pitch.yellow": [
+    {
+      "type": 0,
+      "value": "Amarelas"
+    }
+  ],
   "prep.practiceChooseFirst": [
     {
       "type": 0,
@@ -37224,6 +37242,46 @@
     {
       "type": 0,
       "value": "Poder"
+    }
+  ],
+  "prep.presentation.copyCount": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Nenhuma cópia"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cópia"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cópias"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "prep.presentation.emptyInventory": [
@@ -37411,7 +37469,7 @@
   "prep.presentation.restore": [
     {
       "type": 0,
-      "value": "Restaurar o deck registrado"
+      "value": "Redefinir deck"
     }
   ],
   "prep.presentation.selectCard": [
@@ -37621,6 +37679,24 @@
       "value": " — Preparação"
     }
   ],
+  "prep.tray.done": [
+    {
+      "type": 0,
+      "value": "Concluído"
+    }
+  ],
+  "prep.tray.hint": [
+    {
+      "type": 0,
+      "value": "Toque em uma carta para separá-la."
+    }
+  ],
+  "prep.tray.showAll": [
+    {
+      "type": 0,
+      "value": "Mostrar tudo"
+    }
+  ],
   "prep.turnOrder.first": [
     {
       "type": 0,
@@ -37669,6 +37745,24 @@
     {
       "type": 0,
       "value": "Herói desconhecido"
+    }
+  ],
+  "prep.view.cards": [
+    {
+      "type": 0,
+      "value": "Cartas"
+    }
+  ],
+  "prep.view.label": [
+    {
+      "type": 0,
+      "value": "Exibição"
+    }
+  ],
+  "prep.view.list": [
+    {
+      "type": 0,
+      "value": "Lista"
     }
   ],
   "prep.waitingOpponent": [

@@ -35364,6 +35364,24 @@
       "pluralType": "cardinal"
     }
   ],
+  "prep.pitch.blue": [
+    {
+      "type": 0,
+      "value": "Blue"
+    }
+  ],
+  "prep.pitch.red": [
+    {
+      "type": 0,
+      "value": "Red"
+    }
+  ],
+  "prep.pitch.yellow": [
+    {
+      "type": 0,
+      "value": "Yellow"
+    }
+  ],
   "prep.practiceChooseFirst": [
     {
       "type": 0,
@@ -35408,6 +35426,38 @@
     {
       "type": 0,
       "value": "Power"
+    }
+  ],
+  "prep.presentation.copyCount": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " copy"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " copies"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "prep.presentation.emptyInventory": [
@@ -35595,7 +35645,7 @@
   "prep.presentation.restore": [
     {
       "type": 0,
-      "value": "Restore registered deck"
+      "value": "Reset deck"
     }
   ],
   "prep.presentation.selectCard": [
@@ -35805,6 +35855,24 @@
       "value": " — Prepare"
     }
   ],
+  "prep.tray.done": [
+    {
+      "type": 0,
+      "value": "Done"
+    }
+  ],
+  "prep.tray.hint": [
+    {
+      "type": 0,
+      "value": "Tap a card to set it aside."
+    }
+  ],
+  "prep.tray.showAll": [
+    {
+      "type": 0,
+      "value": "Show all"
+    }
+  ],
   "prep.turnOrder.first": [
     {
       "type": 0,
@@ -35853,6 +35921,24 @@
     {
       "type": 0,
       "value": "Unknown hero"
+    }
+  ],
+  "prep.view.cards": [
+    {
+      "type": 0,
+      "value": "Cards"
+    }
+  ],
+  "prep.view.label": [
+    {
+      "type": 0,
+      "value": "View"
+    }
+  ],
+  "prep.view.list": [
+    {
+      "type": 0,
+      "value": "List"
     }
   ],
   "prep.waitingOpponent": [

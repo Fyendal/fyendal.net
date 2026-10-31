@@ -8,6 +8,7 @@ export const REPLAY_STORAGE_PREFIX = "fyendal-replay-";
 export const GAME_SETTINGS_STORAGE_KEY = "fyendal-game-settings";
 export const BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY = "fyendal-bot-matchmaking-preference";
 const PREP_SORT_STORAGE_KEY = "fyendal-prep-sort";
+const PREP_VIEW_STORAGE_KEY = "fyendal-prep-view";
 const HOME_GAME_MODE_STORAGE_PREFIX = "fyendal-home-game-mode-";
 const HOME_FORMAT_STORAGE_PREFIX = "fyendal-home-format-";
 export type HomeGameMode = "find-match" | "invite-friend" | "bot";
@@ -141,6 +142,31 @@ export function savePrepSortOrder(
     storage.setItem(PREP_SORT_STORAGE_KEY, order);
   } catch {
     // A blocked/full localStorage must not prevent re-sorting.
+  }
+}
+
+export type PrepViewMode = "cards" | "list";
+
+export function loadPrepViewMode(
+  storage: Pick<Storage, "getItem">,
+  fallback: PrepViewMode,
+): PrepViewMode {
+  try {
+    const mode = storage.getItem(PREP_VIEW_STORAGE_KEY);
+    return mode === "cards" || mode === "list" ? mode : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export function savePrepViewMode(
+  storage: Pick<Storage, "setItem">,
+  mode: PrepViewMode,
+): void {
+  try {
+    storage.setItem(PREP_VIEW_STORAGE_KEY, mode);
+  } catch {
+    // A blocked/full localStorage must not prevent switching views.
   }
 }
 

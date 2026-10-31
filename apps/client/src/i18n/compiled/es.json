@@ -36266,6 +36266,24 @@
       "pluralType": "cardinal"
     }
   ],
+  "prep.pitch.blue": [
+    {
+      "type": 0,
+      "value": "Azules"
+    }
+  ],
+  "prep.pitch.red": [
+    {
+      "type": 0,
+      "value": "Rojas"
+    }
+  ],
+  "prep.pitch.yellow": [
+    {
+      "type": 0,
+      "value": "Amarillas"
+    }
+  ],
   "prep.practiceChooseFirst": [
     {
       "type": 0,
@@ -36310,6 +36328,38 @@
     {
       "type": 0,
       "value": "Poder"
+    }
+  ],
+  "prep.presentation.copyCount": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " copia"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " copias"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "prep.presentation.emptyInventory": [
@@ -36497,7 +36547,7 @@
   "prep.presentation.restore": [
     {
       "type": 0,
-      "value": "Restaurar el mazo registrado"
+      "value": "Restablecer mazo"
     }
   ],
   "prep.presentation.selectCard": [
@@ -36707,6 +36757,24 @@
       "value": " — Preparación"
     }
   ],
+  "prep.tray.done": [
+    {
+      "type": 0,
+      "value": "Listo"
+    }
+  ],
+  "prep.tray.hint": [
+    {
+      "type": 0,
+      "value": "Toca una carta para apartarla."
+    }
+  ],
+  "prep.tray.showAll": [
+    {
+      "type": 0,
+      "value": "Mostrar todo"
+    }
+  ],
   "prep.turnOrder.first": [
     {
       "type": 0,
@@ -36755,6 +36823,24 @@
     {
       "type": 0,
       "value": "Héroe desconocido"
+    }
+  ],
+  "prep.view.cards": [
+    {
+      "type": 0,
+      "value": "Cartas"
+    }
+  ],
+  "prep.view.label": [
+    {
+      "type": 0,
+      "value": "Vista"
+    }
+  ],
+  "prep.view.list": [
+    {
+      "type": 0,
+      "value": "Lista"
     }
   ],
   "prep.waitingOpponent": [

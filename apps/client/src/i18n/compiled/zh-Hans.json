@@ -33542,6 +33542,24 @@
       "value": " 人"
     }
   ],
+  "prep.pitch.blue": [
+    {
+      "type": 0,
+      "value": "蓝色"
+    }
+  ],
+  "prep.pitch.red": [
+    {
+      "type": 0,
+      "value": "红色"
+    }
+  ],
+  "prep.pitch.yellow": [
+    {
+      "type": 0,
+      "value": "黄色"
+    }
+  ],
   "prep.practiceChooseFirst": [
     {
       "type": 0,
@@ -33586,6 +33604,16 @@
     {
       "type": 0,
       "value": "力量"
+    }
+  ],
+  "prep.presentation.copyCount": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张"
     }
   ],
   "prep.presentation.emptyInventory": [
@@ -33789,7 +33817,7 @@
   "prep.presentation.restore": [
     {
       "type": 0,
-      "value": "恢复已登记的牌组"
+      "value": "重置牌组"
     }
   ],
   "prep.presentation.selectCard": [
@@ -34003,6 +34031,24 @@
       "value": " — 赛前准备"
     }
   ],
+  "prep.tray.done": [
+    {
+      "type": 0,
+      "value": "完成"
+    }
+  ],
+  "prep.tray.hint": [
+    {
+      "type": 0,
+      "value": "点按卡牌即可移入备牌区。"
+    }
+  ],
+  "prep.tray.showAll": [
+    {
+      "type": 0,
+      "value": "全部显示"
+    }
+  ],
   "prep.turnOrder.first": [
     {
       "type": 0,
@@ -34051,6 +34097,24 @@
     {
       "type": 0,
       "value": "未知英雄"
+    }
+  ],
+  "prep.view.cards": [
+    {
+      "type": 0,
+      "value": "卡图"
+    }
+  ],
+  "prep.view.label": [
+    {
+      "type": 0,
+      "value": "显示方式"
+    }
+  ],
+  "prep.view.list": [
+    {
+      "type": 0,
+      "value": "列表"
     }
   ],
   "prep.waitingOpponent": [

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { DeckArt, DeckPool, EquipmentSlot, RevealedArena } from "@fyendal/shared";
@@ -161,6 +161,21 @@ export function PrepRoom() {
   const [mobilePrepLayout, setMobilePrepLayout] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 700px)").matches,
   );
+  // The inventory tray docks on top of the Ready bar, so it needs the bar's height.
+  const readyFloatObserver = useRef<ResizeObserver | null>(null);
+  const readyFloatRef = useCallback((bar: HTMLDivElement | null) => {
+    const root = document.documentElement;
+    readyFloatObserver.current?.disconnect();
+    readyFloatObserver.current = null;
+    if (!bar) {
+      root.style.removeProperty("--prep-float-height");
+      return;
+    }
+    const sync = () => root.style.setProperty("--prep-float-height", `${bar.offsetHeight}px`);
+    sync();
+    readyFloatObserver.current = new ResizeObserver(sync);
+    readyFloatObserver.current.observe(bar);
+  }, []);
   const [botNudgeVisibleFor, setBotNudgeVisibleFor] = useState<string | null>(null);
   const [botNudgeDismissedFor, setBotNudgeDismissedFor] = useState<string | null>(null);
   const [botNudgeBusyFor, setBotNudgeBusyFor] = useState<string | null>(null);
@@ -508,6 +523,7 @@ export function PrepRoom() {
       onRestoreMain={restoreMain}
       onInspectCard={setInspectedCardId}
       cardArt={prepArt?.cardArt}
+      compact={mobilePrepLayout}
     />
   );
   const arenaLockButton = (
@@ -789,7 +805,7 @@ export function PrepRoom() {
       ) : null}
 
       {floatingFooter ? (
-        <div className="prep-ready-float">
+        <div className="prep-ready-float" ref={readyFloatRef}>
           <div className="prep-bar-row">
             {opp ? (
               <CardArtwork

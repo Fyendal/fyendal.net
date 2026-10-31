@@ -691,6 +691,12 @@
   #root:has(.prep-page) .social-dock {
     bottom: var(--prep-ready-float-offset, calc(190px + env(safe-area-inset-bottom)));
   }
+  /* The sideboarding tray docks on the Ready bar; sit above both, and step
+     aside while the tray is open as a sheet. */
+  #root:has(.prep-tray) .social-dock {
+    bottom: calc(var(--prep-ready-float-offset, calc(190px + env(safe-area-inset-bottom))) + var(--prep-tray-height, 0px));
+  }
+  #root:has(.prep-tray.open) .social-dock { display: none; }
   .social-mobile-backdrop {
     position: fixed;
     z-index: 0;

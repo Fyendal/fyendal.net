@@ -1,4 +1,4 @@
-import { memo, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { memo, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useIntl } from "react-intl";
 import type { CardData, DeckPool, EquipmentSlot } from "@fyendal/shared";
 import { cardData, equipmentFitsSlot } from "@fyendal/cards/client";
@@ -11,7 +11,14 @@ import { CardSortToggle, sortCards } from "../game/CardSort.js";
 import { TooltipButton } from "../components/TooltipButton.js";
 import { UiIcon } from "../components/UiIcon.js";
 import { EQUIPMENT_SLOTS } from "../domain.js";
-import { loadPrepSortOrder, savePrepSortOrder, type PrepSortOrder } from "../storage.js";
+import {
+  loadPrepSortOrder,
+  loadPrepViewMode,
+  savePrepSortOrder,
+  savePrepViewMode,
+  type PrepSortOrder,
+  type PrepViewMode,
+} from "../storage.js";
 import type { PrepSelection } from "./selection.js";
 
 const PREP_CARD_WIDTH = 105;
@@ -22,11 +29,21 @@ const PREP_CARD_HEIGHT = Math.round(
 const ANCHOR_MAX_AGE_MS = 1000;
 
 const PREP_SORT_OPTIONS: readonly PrepSortOrder[] = ["name", "pitch"];
+const PREP_VIEW_OPTIONS: readonly PrepViewMode[] = ["cards", "list"];
+const VIEW_MESSAGES: Record<PrepViewMode, string> = {
+  cards: "prep.view.cards",
+  list: "prep.view.list",
+};
 
 const PITCH_MESSAGES: Record<1 | 2 | 3, string> = {
   1: "prep.presentation.pitch.red",
   2: "prep.presentation.pitch.yellow",
   3: "prep.presentation.pitch.blue",
+};
+const PITCH_NAME_MESSAGES: Record<1 | 2 | 3, string> = {
+  1: "prep.pitch.red",
+  2: "prep.pitch.yellow",
+  3: "prep.pitch.blue",
 };
 
 const CARD_TYPE_MESSAGES: Partial<Record<CardData["cardType"], string>> = {
@@ -48,6 +65,13 @@ function cardTypeMessage(data: CardData | undefined): string | null {
   return CARD_TYPE_MESSAGES[data.cardType] ?? null;
 }
 
+/** Touch screens get whole-card targets; a fine pointer gets the denser ledger. */
+function defaultViewMode(): PrepViewMode {
+  return typeof window !== "undefined" && window.matchMedia?.("(pointer: coarse)")?.matches
+    ? "cards"
+    : "list";
+}
+
 function pitchGroup(id: string): 0 | 1 | 2 | 3 {
   const pitch = cardData[id]?.pitch;
   return pitch === 1 || pitch === 2 || pitch === 3 ? pitch : 0;
@@ -67,25 +91,20 @@ interface LedgerEntry {
 
 interface LedgerGroup {
   pitch: 0 | 1 | 2 | 3;
-  total: number;
   rows: LedgerEntry[];
 }
 
 /** Under the pitch sort each color becomes a titled run of rows. */
 function groupLedger(rows: readonly LedgerEntry[], sortOrder: PrepSortOrder): LedgerGroup[] {
   if (sortOrder !== "pitch") {
-    return rows.length ? [{ pitch: 0, total: 0, rows: [...rows] }] : [];
+    return rows.length ? [{ pitch: 0, rows: [...rows] }] : [];
   }
   const groups: LedgerGroup[] = [];
   for (const row of rows) {
     const pitch = pitchGroup(row.id);
     const group = groups.at(-1);
-    if (group && group.pitch === pitch) {
-      group.rows.push(row);
-      group.total += row.count;
-    } else {
-      groups.push({ pitch, total: row.count, rows: [row] });
-    }
+    if (group && group.pitch === pitch) group.rows.push(row);
+    else groups.push({ pitch, rows: [row] });
   }
   return groups;
 }
@@ -125,6 +144,89 @@ function scrollParent(el: HTMLElement): HTMLElement {
   return (document.scrollingElement ?? document.documentElement) as HTMLElement;
 }
 
+function PrepViewToggle({
+  value,
+  onChange,
+}: {
+  value: PrepViewMode;
+  onChange: (mode: PrepViewMode) => void;
+}) {
+  const intl = useIntl();
+  return (
+    <div
+      className="card-sort prep-view-toggle"
+      role="group"
+      aria-label={intl.formatMessage({ id: "prep.view.label" })}
+    >
+      {PREP_VIEW_OPTIONS.map((option) => (
+        <button
+          key={option}
+          type="button"
+          aria-pressed={value === option}
+          onClick={() => onChange(option)}
+        >
+          {intl.formatMessage({ id: VIEW_MESSAGES[option] })}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Cards view: the whole card is the control that moves one copy. */
+function CardTile({
+  id,
+  count,
+  changed,
+  fixed = false,
+  locked,
+  label,
+  onMove,
+  cardArt,
+}: {
+  id: string;
+  count: number;
+  changed: boolean;
+  /** Registered to inventory only; shown locked, never moved. */
+  fixed?: boolean;
+  locked: boolean;
+  label: string;
+  onMove: (button: HTMLElement) => void;
+  cardArt?: PrepCardArt;
+}) {
+  const intl = useIntl();
+  const countLabel = intl.formatMessage({ id: "prep.presentation.copyCount" }, { count });
+  const face = (
+    <>
+      <CardArtwork className="prep-tile-art" cardId={id} artImage={cardArt?.imageFor(id)} alt="" />
+      <span className="prep-tile-count" aria-hidden="true">×{count}</span>
+      <span className="prep-sr-only">{countLabel}</span>
+    </>
+  );
+  return (
+    <li
+      className={`prep-tile${changed ? " changed" : ""}${fixed ? " fixed" : ""}`}
+      data-cardid={id}
+    >
+      {fixed ? (
+        <span className="prep-tile-face" role="img" aria-label={label}>
+          {face}
+          <span className="prep-tile-lock" aria-hidden="true"><UiIcon name="lock" /></span>
+        </span>
+      ) : (
+        <button
+          type="button"
+          className="prep-tile-face"
+          disabled={locked}
+          aria-label={label}
+          onClick={(event) => onMove(event.currentTarget)}
+        >
+          {face}
+        </button>
+      )}
+    </li>
+  );
+}
+
 function LedgerHead() {
   const intl = useIntl();
   return (
@@ -153,14 +255,15 @@ export interface PrepCardArt {
 function LedgerRow({
   id,
   changed,
-  fixed,
+  fixed = false,
   onInspect,
   cardArt,
   children,
 }: {
   id: string;
   changed: boolean;
-  fixed: boolean;
+  /** Registered to inventory only; it never joins the main deck. */
+  fixed?: boolean;
   onInspect: (id: string) => void;
   cardArt?: PrepCardArt;
   children: ReactNode;
@@ -232,6 +335,7 @@ export const PrepPresentation = memo(function PrepPresentation({
   onRestoreMain,
   onInspectCard,
   cardArt,
+  compact = false,
 }: {
   pool: DeckPool;
   selection: PrepSelection;
@@ -254,6 +358,8 @@ export const PrepPresentation = memo(function PrepPresentation({
   /** Opens the full card from a ledger row's art. */
   onInspectCard: (id: string) => void;
   cardArt?: PrepCardArt;
+  /** Phone layout: inventory docks as a tray above the Ready bar. */
+  compact?: boolean;
 }) {
   const intl = useIntl();
   const mainRequirement = exactMainCount === undefined
@@ -283,6 +389,37 @@ export const PrepPresentation = memo(function PrepPresentation({
     setSortOrder(order);
     savePrepSortOrder(globalThis.localStorage, order);
   };
+  const [viewMode, setViewMode] = useState(
+    () => loadPrepViewMode(globalThis.localStorage, defaultViewMode()),
+  );
+  const changeViewMode = (mode: PrepViewMode) => {
+    setViewMode(mode);
+    savePrepViewMode(globalThis.localStorage, mode);
+  };
+  const gridView = viewMode === "cards";
+  const showTray = compact && sections === "deck";
+  const [trayOpen, setTrayOpen] = useState(false);
+  useEffect(() => {
+    if (!showTray || inventoryCount === 0) setTrayOpen(false);
+  }, [showTray, inventoryCount]);
+  // The page pads for the tray so the last rows can scroll clear of it.
+  const trayRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const tray = trayRef.current;
+    const root = document.documentElement;
+    if (!tray) {
+      root.style.removeProperty("--prep-tray-height");
+      return;
+    }
+    const sync = () => root.style.setProperty("--prep-tray-height", `${tray.offsetHeight}px`);
+    sync();
+    const observer = new ResizeObserver(sync);
+    observer.observe(tray);
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty("--prep-tray-height");
+    };
+  }, [showTray]);
 
   const registered = countCopies(pool.deck);
   const mainOf = (id: string) => selection.main.get(id) ?? 0;
@@ -322,18 +459,104 @@ export const PrepPresentation = memo(function PrepPresentation({
     );
   const Container = sections === "arena" ? "div" : "section";
 
-  const renderGroups = (groups: LedgerGroup[], render: (entry: LedgerEntry) => ReactNode) =>
+  const renderGroups = (groups: LedgerGroup[], grid: boolean, render: (entry: LedgerEntry) => ReactNode) =>
     groups.map((group) => (
       <li key={group.pitch} className="prep-ledger-group">
         {sortOrder === "pitch" && group.pitch !== 0 ? (
           <span className="prep-group-title">
             <i className={`prep-pitch prep-pitch-${group.pitch}`} aria-hidden="true" />
-            {intl.formatMessage({ id: PITCH_MESSAGES[group.pitch] }, { count: group.total })}
+            {intl.formatMessage({ id: PITCH_NAME_MESSAGES[group.pitch] })}
           </span>
         ) : null}
-        <ul className="prep-ledger-rows">{group.rows.map(render)}</ul>
+        <ul className={grid ? "prep-card-grid" : "prep-ledger-rows"}>{group.rows.map(render)}</ul>
       </li>
     ));
+  const mainRow = ({ id, count }: LedgerEntry) => (
+    <LedgerRow key={id} id={id} changed={changed(id)} onInspect={onInspectCard} cardArt={cardArt}>
+      <TooltipButton
+        className="prep-step"
+        tooltip={moveLabel(id, "inventory")}
+        disabled={locked}
+        onClick={(event) => moveCopy(event.currentTarget, id, -1)}
+      >
+        <UiIcon name="minus" />
+      </TooltipButton>
+      <span className="prep-copies">{count}</span>
+      <TooltipButton
+        className="prep-step"
+        tooltip={moveLabel(id, "main")}
+        disabled={locked || (spareCopies.get(id) ?? 0) === 0}
+        onClick={(event) => moveCopy(event.currentTarget, id, 1)}
+      >
+        <UiIcon name="plus" />
+      </TooltipButton>
+    </LedgerRow>
+  );
+  const mainTile = ({ id, count }: LedgerEntry) => (
+    <CardTile
+      key={id}
+      id={id}
+      count={count}
+      changed={changed(id)}
+      locked={locked}
+      label={moveLabel(id, "inventory")}
+      cardArt={cardArt}
+      onMove={(button) => moveCopy(button, id, -1)}
+    />
+  );
+  const inventoryTile = ({ id, count, fixed }: LedgerEntry) => (
+    <CardTile
+      key={fixed ? `fixed-${id}` : id}
+      id={id}
+      count={count}
+      changed={!fixed && changed(id)}
+      fixed={fixed}
+      locked={locked}
+      label={fixed ? cardData[id]?.name ?? id : moveLabel(id, "main")}
+      cardArt={cardArt}
+      onMove={(button) => moveCopy(button, id, 1)}
+    />
+  );
+  const inventoryRow = ({ id, count, fixed }: LedgerEntry) => (
+    <LedgerRow
+      key={fixed ? `fixed-${id}` : id}
+      id={id}
+      changed={!fixed && changed(id)}
+      fixed={fixed}
+      onInspect={onInspectCard}
+      cardArt={cardArt}
+    >
+      <span className="prep-copies">{count}</span>
+      {fixed ? (
+        <span className="prep-row-fixed"><UiIcon name="lock" /></span>
+      ) : (
+        <TooltipButton
+          className="prep-step"
+          tooltip={moveLabel(id, "main")}
+          disabled={locked}
+          onClick={(event) => moveCopy(event.currentTarget, id, 1)}
+        >
+          <UiIcon name="plus" />
+        </TooltipButton>
+      )}
+    </LedgerRow>
+  );
+  // The phone tray always shows cards; the desktop column follows the chosen view.
+  const inventoryGrid = showTray || gridView;
+  const inventoryList = (
+    <ul className="prep-ledger">
+      {renderGroups(inventoryGroups, inventoryGrid, inventoryGrid ? inventoryTile : inventoryRow)}
+    </ul>
+  );
+  const inventoryHeading = (
+    <h4 aria-label={intl.formatMessage(
+      { id: "prep.presentation.inventoryCount" },
+      { count: inventoryCount },
+    )}>
+      <span aria-hidden="true">{intl.formatMessage({ id: "prep.zone.inventory" })}</span>
+      <span className="prep-zone-count" aria-hidden="true"><strong>{inventoryCount}</strong></span>
+    </h4>
+  );
 
   return (
     <Container className={sections === "arena" ? "prep-arena-selection" : "panel prep-pool"}>
@@ -351,7 +574,10 @@ export const PrepPresentation = memo(function PrepPresentation({
               <span>{intl.formatMessage({ id: "prep.art.highestRarity" })}</span>
             </label>
           ) : null}
-          <CardSortToggle options={PREP_SORT_OPTIONS} value={sortOrder} onChange={changeSortOrder} />
+          <div className="prep-pool-controls">
+            <PrepViewToggle value={viewMode} onChange={changeViewMode} />
+            <CardSortToggle options={PREP_SORT_OPTIONS} value={sortOrder} onChange={changeSortOrder} />
+          </div>
         </div>
       ) : null}
       {sections !== "deck" && showHero ? <div className="prep-section">
@@ -477,102 +703,87 @@ export const PrepPresentation = memo(function PrepPresentation({
               ) : null}
             </div>
             {mainCount > 0 ? (
-              <div
-                className="prep-pitch-bar"
-                role="img"
-                aria-label={intl.formatMessage(
-                  { id: "prep.presentation.pitchSplit" },
-                  { red: pitchLabel(1), yellow: pitchLabel(2), blue: pitchLabel(3) },
-                )}
-              >
-                {([1, 2, 3] as const).map((pitch) => (
-                  <span
-                    key={pitch}
-                    className={`prep-pitch-${pitch}`}
-                    style={{ flexGrow: pitchTotals[pitch] }}
-                  />
-                ))}
+              <div className="prep-pitch-row">
+                <div
+                  className="prep-pitch-bar"
+                  role="img"
+                  aria-label={intl.formatMessage(
+                    { id: "prep.presentation.pitchSplit" },
+                    { red: pitchLabel(1), yellow: pitchLabel(2), blue: pitchLabel(3) },
+                  )}
+                >
+                  {([1, 2, 3] as const).map((pitch) => (
+                    <span
+                      key={pitch}
+                      className={`prep-pitch-${pitch}`}
+                      style={{ flexGrow: pitchTotals[pitch] }}
+                    />
+                  ))}
+                </div>
+                <div className="prep-pitch-legend" aria-hidden="true">
+                  {([1, 2, 3] as const).map((pitch) => (
+                    <span key={pitch} className={pitchTotals[pitch] === 0 ? "empty" : undefined}>
+                      <i className={`prep-pitch prep-pitch-${pitch}`} />
+                      {pitchTotals[pitch]}
+                    </span>
+                  ))}
+                </div>
               </div>
             ) : null}
-            <div className="prep-pitch-legend" aria-hidden="true">
-              {([1, 2, 3] as const).map((pitch) => (
-                <span key={pitch}>
-                  <i className={`prep-pitch prep-pitch-${pitch}`} />
-                  {pitchLabel(pitch)}
-                </span>
-              ))}
-            </div>
-            <LedgerHead />
+            {gridView ? null : <LedgerHead />}
           </div>
           <ul className="prep-ledger">
-            {renderGroups(mainGroups, ({ id, count }) => (
-              <LedgerRow key={id} id={id} changed={changed(id)} fixed={false} onInspect={onInspectCard} cardArt={cardArt}>
-                <TooltipButton
-                  className="prep-step"
-                  tooltip={moveLabel(id, "inventory")}
-                  disabled={locked}
-                  onClick={(event) => moveCopy(event.currentTarget, id, -1)}
-                >
-                  <UiIcon name="minus" />
-                </TooltipButton>
-                <span className="prep-copies">{count}</span>
-                <TooltipButton
-                  className="prep-step"
-                  tooltip={moveLabel(id, "main")}
-                  disabled={locked || (spareCopies.get(id) ?? 0) === 0}
-                  onClick={(event) => moveCopy(event.currentTarget, id, 1)}
-                >
-                  <UiIcon name="plus" />
-                </TooltipButton>
-              </LedgerRow>
-            ))}
+            {renderGroups(mainGroups, gridView, gridView ? mainTile : mainRow)}
           </ul>
         </div>
-        <div className="prep-deck-zone prep-inventory-zone">
-          <div className="prep-zone-head">
-            <div className="prep-zone-heading">
-              <h4 aria-label={intl.formatMessage(
-                { id: "prep.presentation.inventoryCount" },
-                { count: inventoryCount },
-              )}>
-                <span aria-hidden="true">{intl.formatMessage({ id: "prep.zone.inventory" })}</span>
-                <span className="prep-zone-count" aria-hidden="true"><strong>{inventoryCount}</strong></span>
-              </h4>
-            </div>
-            {inventoryCount > 0 ? <LedgerHead /> : null}
-          </div>
-          <ul className="prep-ledger">
-            {renderGroups(inventoryGroups, ({ id, count, fixed }) => (
-              <LedgerRow
-                key={fixed ? `fixed-${id}` : id}
-                id={id}
-                changed={!fixed && changed(id)}
-                fixed={fixed}
-                onInspect={onInspectCard}
-                cardArt={cardArt}
-              >
-                <span className="prep-copies">{count}</span>
-                {fixed ? (
-                  <span className="prep-row-fixed"><UiIcon name="lock" /></span>
-                ) : (
-                  <TooltipButton
-                    className="prep-step"
-                    tooltip={moveLabel(id, "main")}
-                    disabled={locked}
-                    onClick={(event) => moveCopy(event.currentTarget, id, 1)}
+        {showTray ? (
+          <>
+            {trayOpen ? <div className="prep-tray-scrim" aria-hidden="true" onClick={() => setTrayOpen(false)} /> : null}
+            <div
+              ref={trayRef}
+              className={`prep-tray${trayOpen ? " open" : ""}`}
+              role={trayOpen ? "dialog" : undefined}
+              aria-label={trayOpen ? intl.formatMessage({ id: "prep.zone.inventory" }) : undefined}
+            >
+              <div className="prep-tray-head">
+                {inventoryHeading}
+                {inventoryCount > 0 ? (
+                  <button
+                    type="button"
+                    className="prep-tray-toggle"
+                    aria-label={intl.formatMessage({ id: trayOpen ? "prep.tray.done" : "prep.tray.showAll" })}
+                    aria-expanded={trayOpen}
+                    onClick={() => setTrayOpen((open) => !open)}
                   >
-                    <UiIcon name="plus" />
-                  </TooltipButton>
-                )}
-              </LedgerRow>
-            ))}
-          </ul>
-          {inventoryCount === 0 ? (
-            <p className="prep-empty-zone muted">
-              {intl.formatMessage({ id: "prep.presentation.emptyInventory" })}
-            </p>
-          ) : null}
-        </div>
+                    <UiIcon name={trayOpen ? "chevron-down" : "chevron-up"} />
+                  </button>
+                ) : null}
+              </div>
+              {inventoryCount === 0 ? (
+                <p className="prep-tray-hint">{intl.formatMessage({ id: "prep.tray.hint" })}</p>
+              ) : trayOpen ? (
+                <div className="prep-tray-body">{inventoryList}</div>
+              ) : (
+                <ul className="prep-tray-strip">
+                  {inventoryGroups.flatMap((group) => group.rows).map(inventoryTile)}
+                </ul>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="prep-deck-zone prep-inventory-zone">
+            <div className="prep-zone-head">
+              <div className="prep-zone-heading">{inventoryHeading}</div>
+              {inventoryCount > 0 && !gridView ? <LedgerHead /> : null}
+            </div>
+            {inventoryList}
+            {inventoryCount === 0 ? (
+              <p className="prep-empty-zone muted">
+                {intl.formatMessage({ id: "prep.presentation.emptyInventory" })}
+              </p>
+            ) : null}
+          </div>
+        )}
       </div> : null}
     </Container>
   );
