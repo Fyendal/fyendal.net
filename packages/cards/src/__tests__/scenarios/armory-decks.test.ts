@@ -489,6 +489,19 @@ describe("Armory Decks — AMX, AGB, and ASR", () => {
     expect(driver?.counters?.steam).toBe(4);
   });
 
+  it("Cranking a blue Hyper Driver's only steam counter destroys it", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "maxx 'the hype' nitro|0", hand: ["hyper driver|3"], resources: 1, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("hyper driver|3").chooseOption("yes");
+    const player = g.state.players[0]!;
+    expect(player.board.some((card) => functionalKeyOf(cardData[card.cardId]!) === "hyper driver|3")).toBe(false);
+    expect(player.graveyard.some((card) => functionalKeyOf(cardData[card.cardId]!) === "hyper driver|3")).toBe(true);
+  });
+
   it("Clamp Press gives a Heart Wrencher attack +2 power", () => {
     const g = scenario({
       seats: [

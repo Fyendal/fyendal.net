@@ -505,6 +505,7 @@ export interface PersistedPendingDecisionV1 {
     remaining: PersistedStackLayerV1[];
     later: { seat: number; layers: PersistedStackLayerV1[] }[];
     baseStack?: PersistedStackLayerV1[];
+    prioritySeat?: number;
   };
   deckBottomOrder?: {
     ordered: number[];

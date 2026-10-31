@@ -783,6 +783,7 @@ export function finishWindowInstantPlay(
     state.pendingDecision.resume = { kind: "continue-stack", seat };
     return;
   }
+  if (flushPendingTriggersAboveStack(state, runtime, seat)) return;
   if (declarePlayedTriggerTargets(state, runtime, seat)) return;
   // the priority holder keeps priority and may play more instants;
   // priority only passes when they pass
@@ -1768,7 +1769,7 @@ export function continueStack(state: GameStateInternal,
   const pendingTriggerGroups = takePendingTriggerGroups(state);
   if (pendingTriggerGroups.length > 0) {
     const baseStack = state.stack.splice(0);
-    placeTriggers(state, runtime, pendingTriggerGroups, baseStack);
+    placeTriggers(state, runtime, pendingTriggerGroups, baseStack, prioritySeat);
     return;
   }
   // Layers added outside trigger placement (card-played and reaction
@@ -2000,10 +2001,10 @@ function coalesceInterchangeableLayers(
  * but resolve as if all players continuously pass priority (CR 4.2.1–4.2.2
  * and 4.4.1–4.4.3). Ordering simultaneous layers or declaring their targets
  * does not make an automatic phase interactive. */
-function openPlacedTriggers(state: GameStateInternal, runtime: EngineRuntime): void {
+function openPlacedTriggers(state: GameStateInternal, runtime: EngineRuntime, prioritySeat?: number): void {
   const top = state.stack[0];
-  if (top && phaseAllowsPriority(state) && !isInlineTurnLayer(state, top)) openWindow(state);
-  else continueStack(state, runtime);
+  if (top && phaseAllowsPriority(state) && !isInlineTurnLayer(state, top)) openWindow(state, prioritySeat);
+  else continueStack(state, runtime, prioritySeat);
 }
 
 /**
@@ -2017,18 +2018,20 @@ function placeTriggers(
   runtime: EngineRuntime,
   groups: { seat: number; layers: StackLayer[] }[],
   baseStack: StackLayer[] = [],
+  prioritySeat?: number,
 ): void {
   const [head, ...rest] = groups;
   if (!head) {
     state.stack.push(...baseStack);
-    if (!declareTriggerTargets(state, runtime)) openPlacedTriggers(state, runtime);
+    if (!declareTriggerTargets(state, runtime)) openPlacedTriggers(state, runtime, prioritySeat);
+    else if (prioritySeat !== undefined) state.pendingDecision!.resume = { kind: "continue-stack", seat: prioritySeat };
     return;
   }
   const layers = coalesceInterchangeableLayers(state, head.layers);
   const distinct = new Set(layers.map((layer) => layerKey(state, layer)));
   if (layers.length <= 1 || distinct.size <= 1) {
     state.stack.push(...layers);
-    placeTriggers(state, runtime, rest, baseStack);
+    placeTriggers(state, runtime, rest, baseStack, prioritySeat);
     return;
   }
   const optionCounts = layers.map((layer) => layer.triggerCount ?? null);
@@ -2048,6 +2051,7 @@ function placeTriggers(
       remaining: layers,
       later: rest,
       ...(baseStack.length > 0 ? { baseStack } : {}),
+      ...(prioritySeat === undefined ? {} : { prioritySeat }),
     },
   };
 }
@@ -2067,12 +2071,17 @@ function takePendingTriggerGroups(
 }
 
 /** Place triggers generated while announcing a card or ability above its new
- * stack layer before the announcement's first priority point. */
-export function flushPendingTriggersAboveStack(state: GameStateInternal, runtime: EngineRuntime): boolean {
+ * stack layer before the announcement's first priority point. The announcing
+ * player regains priority afterwards (CR 1.11.5). */
+export function flushPendingTriggersAboveStack(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  prioritySeat?: number,
+): boolean {
   const groups = takePendingTriggerGroups(state);
   if (groups.length === 0) return false;
   const baseStack = state.stack.splice(0);
-  placeTriggers(state, runtime, groups, baseStack);
+  placeTriggers(state, runtime, groups, baseStack, prioritySeat);
   return true;
 }
 
@@ -2113,13 +2122,13 @@ export function answerTriggerOrder(
   if (!pd || pd.chooseHook !== "trigger-order" || pd.player !== seat || !pd.triggerOrder) {
     return "not your decision";
   }
-  const { remaining, later, baseStack = [] } = pd.triggerOrder;
+  const { remaining, later, baseStack = [], prioritySeat } = pd.triggerOrder;
   const idx = remaining.findIndex((l) => `${l.sourceInstanceId}:${l.triggerIndex}` === optionId);
   if (idx < 0) return "invalid option";
   const [chosen] = remaining.splice(idx, 1);
   state.stack.push(chosen!);
   state.pendingDecision = null;
-  placeTriggers(state, runtime, [{ seat, layers: remaining }, ...later], baseStack);
+  placeTriggers(state, runtime, [{ seat, layers: remaining }, ...later], baseStack, prioritySeat);
   return undefined;
 }
 
@@ -2134,7 +2143,7 @@ export function answerTriggerOrderList(
   if (!pd || pd.chooseHook !== "trigger-order" || pd.player !== seat || !pd.triggerOrder) {
     return "not your decision";
   }
-  const { remaining, later, baseStack = [] } = pd.triggerOrder;
+  const { remaining, later, baseStack = [], prioritySeat } = pd.triggerOrder;
   if (optionIds.length !== remaining.length) return "invalid trigger order";
   const pool = [...remaining];
   const ordered: StackLayer[] = [];
@@ -2146,7 +2155,7 @@ export function answerTriggerOrderList(
   }
   state.stack.push(...ordered);
   state.pendingDecision = null;
-  placeTriggers(state, runtime, later, baseStack);
+  placeTriggers(state, runtime, later, baseStack, prioritySeat);
   return undefined;
 }
 

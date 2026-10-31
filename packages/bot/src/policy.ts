@@ -596,6 +596,8 @@ export function chooseSharedPolicyIntent(input: BotPolicyInput): GameIntent | un
   if (unneededBoost) return unneededBoost;
   const combatShrink = combatCardReduceIntent(input);
   if (combatShrink) return combatShrink;
+  const graveyardEquip = graveyardEquipIntent(input);
+  if (graveyardEquip) return graveyardEquip;
   const spellvoid = spellvoidIntent(input);
   if (spellvoid) return spellvoid;
 
@@ -663,6 +665,25 @@ function combatCardReduceIntent(input: BotPolicyInput): GameIntent | undefined {
   return targets.flatMap((card) =>
     input.legal.filter((intent) => intent.kind === "choose" && intent.optionId === String(card.instanceId))
   )[0];
+}
+
+/** Rake Back: a free equipment from the graveyard is always taken, sturdiest first. */
+function graveyardEquipIntent(input: BotPolicyInput): GameIntent | undefined {
+  if (input.view.pendingDecision?.promptMessage?.id !== "card.aol.graveyard.equipment.equip") return undefined;
+  const equipment = input.view.players[input.seat].equipment;
+  let best: { intent: GameIntent; defense: number } | undefined;
+  for (const intent of input.legal) {
+    if (intent.kind !== "choose") continue;
+    const card = optionCard(intent, input);
+    const data = card ? input.cards[card.cardId] : undefined;
+    if (!data) continue;
+    const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
+      (data.subtypes ?? []).includes(candidate));
+    if (slot && equipment[slot]) continue;
+    const defense = data.defense ?? 0;
+    if (!best || defense > best.defense) best = { intent, defense };
+  }
+  return best?.intent;
 }
 
 function arcaneBarrierIncoming(decision: NonNullable<GameView["pendingDecision"]>): number | undefined {

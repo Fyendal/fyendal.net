@@ -249,7 +249,7 @@ export function activateWindowAbility(
       else state.pendingDecision.resume = { kind: "continue-stack", seat };
       return undefined;
     }
-    if (runtime.dispatchFlow("flushPendingTriggersAboveStack", state)) return undefined;
+    if (runtime.dispatchFlow("flushPendingTriggersAboveStack", state, seat)) return undefined;
     if (inReaction) holdPriorityWindow(state, seat, reactionWindow(runtime));
     else {
       runtime.dispatchFlow("cancelEndActionPass", state);
@@ -513,7 +513,7 @@ export function activateWindowAbility(
     }
     return undefined;
   }
-  if (runtime.dispatchFlow("flushPendingTriggersAboveStack", state)) return undefined;
+  if (runtime.dispatchFlow("flushPendingTriggersAboveStack", state, seat)) return undefined;
   // the priority holder keeps priority and may play more; priority only
   // passes when they pass
   if (inReaction) holdPriorityWindow(state, seat, reactionWindow(runtime));
@@ -877,6 +877,8 @@ export function finishReactionPlay(
   if (dataOf(state, removed.cardId).cardType === "attack-reaction") {
     runtime.dispatchFlow("queueReactionEventTriggers", state, seat);
   }
+  // Triggers from paying its cost (e.g. a pitch trigger) go above the reaction (CR 6.6.6).
+  if (runtime.dispatchFlow("flushPendingTriggersAboveStack", state, seat)) return;
   if (runtime.dispatchFlow("declarePlayedTriggerTargets", state, seat)) return;
   // the priority holder keeps priority and may play more reactions/instants;
   // priority only passes when they pass
@@ -945,6 +947,6 @@ export function activateDefenseAbility(
   }
   player.flags[`defAbility:${card.instanceId}`] = true;
   script?.onDefendAbility?.(runtime.makeCtx(state, seat, card, link));
-  runtime.dispatchFlow("flushPendingTriggersAboveStack", state);
+  runtime.dispatchFlow("flushPendingTriggersAboveStack", state, seat);
   return undefined;
 }

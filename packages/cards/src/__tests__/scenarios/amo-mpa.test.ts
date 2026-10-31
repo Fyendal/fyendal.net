@@ -31,6 +31,7 @@ const EXHAUSTION = "sickening exhaustion|3";
 const ROT = "sickening rot|3";
 const WEAKNESS = "sickening weakness|3";
 const CONCOCT = "concoct agony|2";
+const PLAGUE_HIVE = "plague hive|2";
 
 function boardNames(game: ReturnType<typeof scenario>, seat: number): string[] {
   return game.state.players[seat]!.board.map((card) => cardData[card.cardId]!.name);
@@ -430,7 +431,7 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
 
   it("Sick Intent's contract ignores a Plague Hive pitched to play it", () => {
     const game = scenario({ seats: [
-      { hero: "rhinar", hand: [SICK_INTENT, "plague hive|2"], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "rhinar", hand: [SICK_INTENT, PLAGUE_HIVE], weapons: [], equipment: NO_EQUIPMENT },
       {
         hero: "dorinthea",
         hand: ["raging onslaught|1", "raging onslaught|2", "raging onslaught|3"],
@@ -439,7 +440,7 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       },
     ] });
 
-    game.play(SICK_INTENT, { pitch: ["plague hive|2"] }).settle();
+    game.play(SICK_INTENT, { pitch: [PLAGUE_HIVE] }).settle();
 
     expect(game.state.players[1]!.board).toHaveLength(1);
     expect(boardNames(game, 0)).toEqual([]);
@@ -989,6 +990,43 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     game.play(KISS_OF_DEATH).blockWith().react(EXHAUSTION);
 
     game.expectInZone(1, WOUNDING_BLOW, "arsenal");
+  });
+
+  it("Sickening Exhaustion sees a disease created by pitching Plague Hive to pay for it", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [KISS_OF_DEATH, EXHAUSTION, PLAGUE_HIVE], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", arsenalFaceDown: [WOUNDING_BLOW], deck: ["raging onslaught|1"], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(KISS_OF_DEATH).blockWith().react(EXHAUSTION, { pitch: [PLAGUE_HIVE] });
+
+    game.expectZoneSize(1, "arsenal", 0).expectDeckBottom(1, WOUNDING_BLOW);
+  });
+
+  it("A pitch trigger from paying for a defense reaction goes above it, and the defender keeps priority", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [KISS_OF_DEATH], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", hand: ["stormwind sheath|1", PLAGUE_HIVE], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(KISS_OF_DEATH).blockWith().passPriority()
+      .react("stormwind sheath|1", { pitch: [PLAGUE_HIVE], settle: false });
+
+    expect(game.stackLabels()).toEqual(["Create a random adverse aura", "Stormwind Sheath"]);
+    expect(game.state.priorityPlayer).toBe(1);
+  });
+
+  it("A pitch trigger from paying for an instant in a layer window goes above it, and its player keeps priority", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: ["humble entrance|3"], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", hand: ["oasis respite|1", PLAGUE_HIVE], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play("humble entrance|3").passPriority()
+      .react("oasis respite|1", { pitch: [PLAGUE_HIVE], settle: false });
+
+    expect(game.stackLabels()).toEqual(["Create a random adverse aura", "Oasis Respite"]);
+    expect(game.state.priorityPlayer).toBe(1);
   });
 
   it("Sickening Rot deals 2 to an infected defender who can't pay", () => {

@@ -1006,6 +1006,8 @@ export interface PendingDecisionState extends PendingDecision {
     later: { seat: number; layers: StackLayer[] }[];
     /** Existing lower stack retained while newly pending triggers are ordered. */
     baseStack?: StackLayer[];
+    /** Player who regains priority once these triggers are placed (CR 1.11.5). */
+    prioritySeat?: number;
   };
   /** Engine-owned private ordering decision (chooseHook
    *  "engine-deck-bottom-order"). Cards remain in their original zones until

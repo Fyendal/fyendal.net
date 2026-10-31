@@ -1271,8 +1271,10 @@ export function answerChoice(
     if (optionId === "yes" && found) {
       const steam = found?.card.counters?.steam ?? 0;
       if (found && steam > 0) {
-        if (steam === 1) delete found.card.counters?.steam;
-        else (found.card.counters ??= {}).steam = steam - 1;
+        // Keep an explicit 0 for the destroy-at-zero marker so state-based actions destroy it.
+        if (steam === 1 && scriptOf(state, found.card.cardId, found.card)?.destroyAtZeroCounter !== "steam") {
+          delete found.card.counters?.steam;
+        } else (found.card.counters ??= {}).steam = steam - 1;
         logPublic(state, gameLogMessage(
           `${nameOf(state, found.card.cardId)} is cranked: remove a steam counter`,
           "engine.log.card.cranked",

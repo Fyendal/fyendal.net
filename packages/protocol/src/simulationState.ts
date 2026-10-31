@@ -992,8 +992,9 @@ function validateDecision(value: unknown, code: string, path: string, depth = 0)
   }, path);
   optional(decision, "arcane", (v, p) => validateArcane(v, code, p, 0), path);
   optional(decision, "triggerOrder", (v, p) => {
-    const order = exact(v, code, p, ["remaining", "later"], ["baseStack"]);
+    const order = exact(v, code, p, ["remaining", "later"], ["baseStack", "prioritySeat"]);
     validateStack(order.remaining, code, `${p}.remaining`);
+    optional(order, "prioritySeat", (entry, entryPath) => { integer(entry, code, entryPath); }, p);
     optional(order, "baseStack", (entry, entryPath) => {
       validateStack(entry, code, entryPath);
     }, p);

@@ -141,6 +141,46 @@ describe("No Hero Stands Alone clash winner", () => {
   }
 });
 
+describe("Rake Back graveyard equip prize", () => {
+  function equipInput(): BotPolicyInput {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 94_152,
+      startPlayer: 1,
+    });
+    const view = projectStateFor(state, 0);
+    view.players[0].equipment = {
+      arms: { instanceId: 300_010, cardId: "AJV006", owner: 0 },
+    };
+    view.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Equip an equipment from your graveyard?",
+      promptMessage: { id: "card.aol.graveyard.equipment.equip" },
+      options: ["no", "300011", "300012"],
+      optionCards: [
+        null,
+        { instanceId: 300_011, cardId: "AJV006", owner: 0 },
+        { instanceId: 300_012, cardId: "FAB088", owner: 0 },
+      ],
+    };
+    return {
+      seat: 0,
+      view,
+      legal: ["no", "300011", "300012"].map((optionId) => ({ kind: "choose" as const, optionId })),
+      cards: cardData,
+    };
+  }
+
+  for (const bot of botDefinitions) {
+    it(`${bot.id} equips into an empty slot`, () => {
+      expect(bot.chooseIntent(equipInput())).toEqual({ kind: "choose", optionId: "300012" });
+    });
+  }
+});
+
 describe("non-lethal Arcane Barrier", () => {
   function barrierInput(hand: readonly string[], resources = 0) {
     const state = createGame({
