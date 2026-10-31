@@ -92,6 +92,13 @@ describe("internal Marvel artwork selection", () => {
     expect(preview).not.toContain("TNP031-MV.webp");
   });
 
+  it("marks chosen full-bleed Marvel artwork for its drawn rim", () => {
+    const artwork = (artImage?: string) =>
+      renderToStaticMarkup(createElement(CardArtwork, { cardId: "WTR159", artImage, alt: "" }));
+    expect(artwork("ANQ000-MV")).toContain('class="card-artwork-image card-artwork-full-bleed"');
+    expect(artwork()).toContain('class="card-artwork-image"');
+  });
+
   it("falls back to ordinary Malice artwork after her GEM Marvel", () => {
     expect(resolveCardImageUrls("IAR053", undefined, true).slice(0, 2)).toEqual([
       "https://content.fabrary.net/cards/GEM184-MV.webp",

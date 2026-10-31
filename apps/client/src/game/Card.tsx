@@ -152,7 +152,8 @@ export function CardArtwork({
   const name = data?.name ?? cardId;
   const imageUrls = resolveCardImageUrls(cardId, data, false, artImage);
   const failedAttempts = imageFailure?.cardId === cardId ? imageFailure.attempts : 0;
-  const showImg = cardId !== "" && failedAttempts < imageUrls.length;
+  const imageUrl = cardId !== "" ? imageUrls[failedAttempts] : undefined;
+  const showImg = imageUrl !== undefined;
 
   return (
     <span
@@ -176,8 +177,10 @@ export function CardArtwork({
       </span>
       {showImg ? (
         <img
-          className="card-artwork-image"
-          src={imageUrls[failedAttempts]}
+          className={isMarvelCardImageUrl(imageUrl)
+            ? "card-artwork-image card-artwork-full-bleed"
+            : "card-artwork-image"}
+          src={imageUrl}
           alt=""
           draggable={false}
           loading="eager"

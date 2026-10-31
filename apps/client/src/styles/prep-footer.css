@@ -532,6 +532,14 @@
   border-radius: 6px;
   transition: transform 120ms ease-out, box-shadow 120ms ease-out;
 }
+/* Printed images carry a 28px black rim at 600px wide and full-bleed Marvels
+   none; draw it so every tile shows one card size. */
+.prep-tile-art .card-artwork-full-bleed {
+  box-sizing: border-box;
+  padding: 4.67%;
+  border-radius: 4.3% / 3.1%;
+  background: #000;
+}
 .prep-tile-face:hover:not(:disabled) .prep-tile-art { transform: translateY(-2px); }
 .prep-tile-face:active:not(:disabled) .prep-tile-art { transform: scale(.96); }
 .prep-tile.changed .prep-tile-art { box-shadow: 0 0 0 2px var(--gold); }
