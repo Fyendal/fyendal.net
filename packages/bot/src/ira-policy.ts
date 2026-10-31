@@ -38,7 +38,14 @@ import {
 import { BLOCK_USE_RATE } from "./card-ev.js";
 import { abilitySource, weaponCost, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
 import type { PendingEffect, SolverCard, SolverFlags, SolverStep, SolverView } from "./hand-solver.js";
-import { arsenalValuer, handDamage, handResponse, opportunityValuer, solveHand } from "./hand-value.js";
+import {
+  arsenalValuer,
+  defenseReactionWorthSpending,
+  handDamage,
+  handResponse,
+  opportunityValuer,
+  solveHand,
+} from "./hand-value.js";
 import { iraPresentation } from "./sideboard.js";
 
 const BLOSSOM_KEY = "whirling mist blossom|2";
@@ -648,7 +655,9 @@ function scorePlay(
       score = 8;
     }
   } else if (data.cardType === "defense-reaction") {
-    score = scoreDefenseReaction(data, input);
+    score = defenseReactionWorthSpending(card, input, iraSolverRules, pitchIds(intent))
+      ? scoreDefenseReaction(data, input)
+      : -100;
   } else if (functional === "energy potion|3") {
     score = furtherAttack ? -15 : 3;
   } else if (functional === "blessing of qi|1") {
@@ -663,7 +672,9 @@ function scorePlay(
       return defender.owner === input.seat && defending?.cardType === "action" && isAttack(defending);
     }) === true;
     score = !currentAttackIsOurs(input) && target
-      ? scoreDefenseReaction({ ...data, defense: 4 }, input)
+      ? defenseReactionWorthSpending(card, input, iraSolverRules, pitchIds(intent), 4)
+        ? scoreDefenseReaction({ ...data, defense: 4 }, input)
+        : -100
       : -100;
   }
 

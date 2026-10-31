@@ -2287,6 +2287,7 @@ export function makeCtx(
 
       const subcards: CardInstance[] = [];
       const transformEvents: { seat: number; from: CardInstance }[] = [];
+      const transformedNames: string[] = [];
       for (const found of transformed) {
         const entry = found!;
         if (entry.card.instanceId === existingPermanentInstanceId) {
@@ -2298,6 +2299,7 @@ export function makeCtx(
           // CR 3.0.14c: its sub-cards go under the permanent beside it.
           subcards.push(...(entry.card.subcards ?? []), subcard);
           transformEvents.push({ seat: entry.seat, from: subcard });
+          transformedNames.push(nameOf(state, subcard.cardId));
           continue;
         }
         const equipmentSlot = Object.entries(entry.controller.equipment)
@@ -2315,6 +2317,7 @@ export function makeCtx(
         };
         subcards.push(...(removed.subcards ?? []), subcard);
         transformEvents.push({ seat: entry.seat, from: subcard });
+        transformedNames.push(nameOf(state, subcard.cardId));
       }
 
       if (permanent) {
@@ -2340,12 +2343,12 @@ export function makeCtx(
       } else permanent = runtime.commands.createTokenFor(state, player, cardId, creationCause);
       if (!permanent) return undefined;
       (permanent.subcards ??= []).push(...subcards);
-      if (subcards.length > 0) {
+      if (transformedNames.length > 0) {
         logPublic(state, gameLogMessage(
-          `${subcards.map((card) => nameOf(state, card.cardId)).join(" and ")} transforms into ${nameOf(state, cardId)}`,
+          `${transformedNames.join(" and ")} transforms into ${nameOf(state, cardId)}`,
           "engine.log.cards.transform.into",
           {
-            cards: subcards.map((card) => nameOf(state, card.cardId)).join(" and "),
+            cards: transformedNames.join(" and "),
             result: logCardValue(cardId),
           },
         ));

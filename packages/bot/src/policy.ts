@@ -918,7 +918,7 @@ export function plannedDefenseReactionValue(
 }
 
 /** Printed defense already committed by this bot's unresolved reaction cards. */
-function pendingDefenseReactionValue(input: BotPolicyInput): number {
+export function pendingDefenseReactionValue(input: BotPolicyInput): number {
   return input.view.stack.reduce((total, layer) => {
     if (layer.seat !== input.seat || !layer.card) return total;
     const data = input.cards[layer.card.cardId];
@@ -1780,6 +1780,19 @@ export function scoreDefenseIntentWithTrace(
   const handOpportunityCost = chosen
     .filter((card) => !equipmentIds.has(card.instanceId))
     .reduce((total, card) => total + model.cardOpportunity(card, input) * 0.1, 0);
+  // Defense from hand cards a landed hit would take anyway is not wasted on overblock.
+  const chosenHandDefense = chosen
+    .filter((card) => handIds.has(card.instanceId))
+    .map((card) => defenderDefense(card, input))
+    .sort((left, right) => right - left);
+  const handLeft = me.hand.filter((card) => !plannedSpentIds.has(card.instanceId)).length;
+  const doomedBlockers = stopsHit && onHit.handLossSelector
+    ? Math.min(chosenHandDefense.length, Math.max(0, onHit.handCardsLost - handLeft))
+    : 0;
+  const chargedOverblock = Math.max(
+    0,
+    overblock - chosenHandDefense.slice(0, doomedBlockers).reduce((total, value) => total + value, 0),
+  );
   const fullResponse = model.evaluateResponse(offensiveCards, input);
   const lossScenarios = stopsHit || incoming <= 0
     ? NO_HAND_LOSS
@@ -1853,7 +1866,7 @@ export function scoreDefenseIntentWithTrace(
     cardOpportunityCost: handOpportunityCost
       + plannedOpportunityCost * 0.1
       + continuation.opportunityCost * continueProbability,
-    overblockCost: overblock * 1.5 + continuation.overblock * 1.5 * continueProbability,
+    overblockCost: chargedOverblock * 1.5 + continuation.overblock * 1.5 * continueProbability,
     lifeThresholdRisk: thresholdRisk,
   });
   if (model.adjustCycleValue) value = model.adjustCycleValue(value, candidate);
@@ -1869,7 +1882,7 @@ export function scoreDefenseIntentWithTrace(
     cardOpportunityCost: handOpportunityCost
       + plannedOpportunityCost * 0.1
       + continuation.opportunityCost * continueProbability,
-    overblockCost: overblock * 1.5 + continuation.overblock * 1.5 * continueProbability,
+    overblockCost: chargedOverblock * 1.5 + continuation.overblock * 1.5 * continueProbability,
     lifeThresholdRisk: thresholdRisk,
   }).total;
   const cycleTrace = {
@@ -1921,7 +1934,7 @@ export function scoreDefenseIntentWithTrace(
   if (isOpeningTurnDefense(input)) {
     const score = prevented * 100
       + stopHitValue
-      - overblock * 1.5
+      - chargedOverblock * 1.5
       - equipmentCost
       - chosen.length * 0.01
       + strategicDelta;

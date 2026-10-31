@@ -16,7 +16,14 @@ import {
   type ModelContext,
 } from "./card-model.js";
 import type { HandSolver, SolverResult } from "./hand-solver.js";
-import { responseEvaluation, type BotPolicyInput, type ResponseEvaluation } from "./policy.js";
+import {
+  currentLink,
+  pendingDefenseReactionValue,
+  responseEvaluation,
+  type BotPolicyInput,
+  type ResponseEvaluation,
+} from "./policy.js";
+import { threatenedAttackDamage } from "./public-threat.js";
 
 /**
  * The one place policies read hand value. Every number is a damage
@@ -183,6 +190,44 @@ export function cardOpportunity(card: CardView, input: BotPolicyInput, factory: 
 /** `cardOpportunity` bound to one hero's rules. */
 export function opportunityValuer(factory: HeroRulesFactory): (card: CardView, input: BotPolicyInput) => number {
   return (card, input) => cardOpportunity(card, input, factory);
+}
+
+/** Next turn's hand damage lost by spending these hand or arsenal cards now,
+ * beside a card already gone from them. */
+export function reserveDamageLost(
+  input: BotPolicyInput,
+  factory: HeroRulesFactory,
+  spent: ReadonlySet<number>,
+  gone?: number,
+): number {
+  const me = input.view.players[input.seat];
+  const kept = [...me.hand, ...me.arsenal].filter((card) => card.instanceId !== gone);
+  return handDamage(kept, input, factory) -
+    handDamage(kept.filter((card) => !spent.has(card.instanceId)), input, factory);
+}
+
+/** Damage incoming on the current link, and whether the attack threatens lethal. */
+export function defenseReactionThreat(input: BotPolicyInput): { incoming: number; lethal: boolean } {
+  const link = currentLink(input);
+  if (!link) return { incoming: 0, lethal: false };
+  const pending = pendingDefenseReactionValue(input);
+  const incoming = Math.max(0, link.damage - pending);
+  const threatened = Math.max(incoming, threatenedAttackDamage(input) - pending);
+  return { incoming, lethal: threatened >= input.view.players[input.seat].life };
+}
+
+/** Short of lethal, a defense reaction (with its pitch) must stop more damage
+ * than it takes from next turn's hand. */
+export function defenseReactionWorthSpending(
+  card: CardView,
+  input: BotPolicyInput,
+  factory: HeroRulesFactory,
+  pitched: Iterable<number>,
+  defense = Math.max(0, card.defense ?? input.cards[card.cardId]?.defense ?? 0),
+): boolean {
+  const { incoming, lethal } = defenseReactionThreat(input);
+  if (lethal) return true;
+  return Math.min(incoming, defense) > reserveDamageLost(input, factory, new Set([card.instanceId, ...pitched]));
 }
 
 /** Blocking value an equipment piece gives up when it is spent. */

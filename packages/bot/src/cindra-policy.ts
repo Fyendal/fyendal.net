@@ -35,7 +35,13 @@ import {
   type TacticalTurnPlan,
 } from "./tactical-turn-planner.js";
 import { cindraSolverRules } from "./cindra-rules.js";
-import { arsenalValuer, handResponse, opportunityValuer, solveHand } from "./hand-value.js";
+import {
+  arsenalValuer,
+  defenseReactionWorthSpending,
+  handResponse,
+  opportunityValuer,
+  solveHand,
+} from "./hand-value.js";
 
 const CARD = {
   ancestralEmpowerment: "ancestral empowerment|1",
@@ -1430,7 +1436,9 @@ function scoreNonAttackCard(
     return 100;
   }
   if (data.cardType === "defense-reaction") {
-    const reactionScore = scoreDefenseReaction(data, input);
+    const reactionScore = defenseReactionWorthSpending(context.card, input, cindraSolverRules, excludedIds)
+      ? scoreDefenseReaction(data, input)
+      : -100;
     return reactionScore < 0 ? reactionScore : 500 + reactionScore;
   }
   if (functional === CARD.dracoFire) {

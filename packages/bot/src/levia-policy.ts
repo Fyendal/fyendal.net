@@ -34,7 +34,8 @@ import { probabilityAtLeastOne, totalCount, unseenCounts } from "./deck-knowledg
 import { cardUses, solverCard, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
 import type { PendingEffect, SolverCard, SolverView } from "./hand-solver.js";
 import {
-  arsenalCardValue, arsenalValuer, handResponse, heldCardValue, opportunityValuer, solveHand,
+  arsenalCardValue, arsenalValuer, defenseReactionWorthSpending, handResponse, heldCardValue, opportunityValuer,
+  solveHand,
 } from "./hand-value.js";
 import { planTacticalTurn, type TacticalTurnPlan } from "./tactical-turn-planner.js";
 import { POINTS_PER_DAMAGE } from "./turn-planner.js";
@@ -799,7 +800,9 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   } else if (named === "embraforged gauntlet") {
     score = followups() > 0 ? 35 : -35;
   } else if (data.cardType === "defense-reaction") {
-    score = scoreDefenseReaction(data, input);
+    score = defenseReactionWorthSpending(card, input, leviaSolverRules, pitchIds(intent))
+      ? scoreDefenseReaction(data, input)
+      : -100;
   } else if (named === "diabolic offering" &&
     input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn !== true) {
     // Zero power until a six is banished this turn.

@@ -49,7 +49,7 @@ import {
 import { threatenedAttackDamage } from "./public-threat.js";
 import { BLOCK_USE_RATE, type CardUses } from "./card-ev.js";
 import type { HeroSolverRules } from "./card-model.js";
-import { arsenalValuer, opportunityValuer } from "./hand-value.js";
+import { arsenalValuer, defenseReactionWorthSpending, opportunityValuer } from "./hand-value.js";
 import { adjustValueBreakdown } from "./value.js";
 import {
   evaluateOpponentResponse,
@@ -1995,7 +1995,9 @@ function scorePlay(
       if (continuationResources < 1) score = -100;
     }
   } else if (data.cardType === "defense-reaction") {
-    score = scoreDefenseReaction(data, input);
+    score = defenseReactionWorthSpending(card, input, halaSolverRules, pitchIds(intent))
+      ? scoreDefenseReaction(data, input)
+      : -100;
   } else if (functional === "toe the line|1") {
     score = shouldPlayToeTheLine(input) ? (hasFlurry(input) ? 35 : 60) : -100;
   } else if (isAttack(data)) {

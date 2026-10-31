@@ -120,6 +120,25 @@ function passOrNoBlock(state: GameState): GameIntent {
     ?? legal.find((intent) => intent.kind !== "concede")!;
 }
 
+/** Resolve the open chain link, with Boltyn's policy choosing unless `noBlock` declines the block. */
+function resolveIncoming(state: GameState, noBlock = false): { state: GameState; played: string[] } {
+  const played: string[] = [];
+  let current = state;
+  for (let step = 0; step < 24 && current.chain.some((link) => !link.resolved); step++) {
+    const actor = (current.pendingDecision?.player ?? current.priorityPlayer) as 0 | 1;
+    const intent: GameIntent = actor === 1
+      ? passOrNoBlock(current)
+      : noBlock && current.pendingDecision?.kind === "defend"
+      ? { kind: "defend", instanceIds: [] }
+      : chooseBoltynIntent(input(current));
+    if (actor === 0) played.push(name(current, intent));
+    const result = applyIntent(current, actor, intent);
+    if (!result.ok) throw new Error(result.error);
+    current = result.state;
+  }
+  return { state: current, played };
+}
+
 function turnOver(state: GameState): boolean {
   return state.activePlayer !== 0 || state.turn !== 3;
 }
@@ -675,6 +694,20 @@ describe("Boltyn policy", () => {
     expect(after.players[0]!.arsenal).toHaveLength(1);
   });
 
+  it("keeps its soul when the opening turn's last card is reserved for arsenal", () => {
+    const state = createGame({
+      decklists: [boltynDeck("AMO001"), decklists.dorinthea], cards: cardData, scripts, seed: 303, startPlayer: 0,
+    });
+    hand(state, ["PEN181", "IAR254", "PEN184", "PEN184"]);
+    state.players[1]!.hand = [];
+    const openingOver = (current: GameState) => current.activePlayer !== 0 || current.turn !== 1;
+    const { state: after, intents } = play(settled(state), openingOver);
+    expect(intents).toContain(RAYDN);
+    expect(intents).not.toContain("Ser Boltyn, Breaker of Dawn");
+    expect(after.players[0]!.arsenal.map((card) => cardData[card.cardId]?.name)).toEqual(["Duty Bound Blitz"]);
+    expect(after.players[0]!.soul).toHaveLength(1);
+  });
+
   it("keeps Lumina Ascension for its own turn even when Spirit of Eirina makes it an instant", () => {
     const state = settled(game());
     hand(state, ["ASB026", "ASB016"]);
@@ -864,6 +897,55 @@ describe("Boltyn policy", () => {
     const legal: GameIntent[] = view.pendingDecision.options!.map((optionId) => ({ kind: "choose", optionId }));
     expect(chooseBoltynIntent({ seat: 0, view, legal, cards: cardData }))
       .toEqual({ kind: "choose", optionId: String(grace!.instanceId) });
+  });
+
+  it("takes a 1-power attack rather than spending Saving Grace on it", () => {
+    const state = settled(game());
+    hand(state, ["ASB025", "PEN183", "ASB007", "ASB021"]);
+    state.players[0]!.board = cards(state, ["PEN181"]);
+    const { state: current, played } = resolveIncoming(underAttack(state, "BEN024"));
+    expect(played).not.toContain("Saving Grace");
+    expect(current.players[0]!.hand.map((card) => card.cardId)).toContain("ASB025");
+  });
+
+  it("still spends Saving Grace on an unblocked 4-power attack", () => {
+    const state = settled(game());
+    hand(state, ["ASB025", "ASB021", "ASB021", "ASB009"]);
+    const { played } = resolveIncoming(underAttack(state, PLAIN_ATTACK), true);
+    expect(played).toContain("Saving Grace");
+  });
+
+  it("plays Saving Grace without charging when the -2 has nothing left to stop", () => {
+    const state = settled(game());
+    hand(state, ["ASB025", "IAR254", "ASB021", "ASB007"]);
+    const { state: current, played } = resolveIncoming(underAttack(state, "BEN017"), true);
+    expect(played).toContain("Saving Grace");
+    expect(current.players[0]!.soul).toHaveLength(0);
+    expect(current.players[0]!.life).toBe(40);
+    expect(current.players[0]!.hand).toHaveLength(3);
+  });
+
+  it("fully blocks Surgical Extraction rather than leave a card for its hit to banish", () => {
+    // As reported: Edict of Steel alone let the hit through to banish Beacon of Victory.
+    const state = settled(createGame({
+      decklists: [boltynDeck("AMO001"), decklists.dorinthea], cards: cardData, scripts, seed: 4040, startPlayer: 0,
+    }));
+    state.turn = 2;
+    hand(state, ["SBL020", "MON033"]);
+    state.players[0]!.arsenal = cards(state, ["PEN184"]);
+    state.players[0]!.soul = cards(state, ["PEN183"]);
+    state.players[0]!.board = cards(state, ["PEN181", "ASB027"]);
+    state.players[0]!.flags.chargedThisTurn = true;
+    state.players[1]!.hero.cardId = "AMO001";
+    state.players[1]!.resources = 3;
+    const blocked = underAttack(state, "DYN122");
+    blocked.players[1]!.hand = cards(blocked, ["WTR203"], 1);
+    const ids = defenders(blocked);
+    const player = blocked.players[0]!;
+    const all = [...player.hand, ...Object.values(player.equipment).flatMap((card) => card ? [card] : [])];
+    const defense = ids.reduce((total, id) =>
+      total + (cardData[all.find((card) => card.instanceId === id)?.cardId ?? ""]?.defense ?? 0), 0);
+    expect(defense).toBeGreaterThanOrEqual(4);
   });
 
   it("blocks when the Soulbond stance faces lethal pressure and plays its defense reactions", () => {

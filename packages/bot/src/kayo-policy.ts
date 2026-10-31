@@ -20,7 +20,7 @@ import {
   type HeroCycleModel,
   type ResponseModel,
 } from "./policy.js";
-import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
+import { arsenalValuer, defenseReactionWorthSpending, handResponse, opportunityValuer } from "./hand-value.js";
 import { kayoSolverRules } from "./kayo-rules.js";
 import { planTacticalTurn, type TacticalIntentDecision } from "./tactical-turn-planner.js";
 
@@ -113,7 +113,11 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     if (named(data, "knucklehead")) return -100;
     if (data.cardType !== "weapon") return -100;
   }
-  if (data.cardType === "defense-reaction") return scoreDefenseReaction(data, input);
+  if (data.cardType === "defense-reaction") {
+    return defenseReactionWorthSpending(card, input, kayoSolverRules, pitchIds(intent))
+      ? scoreDefenseReaction(data, input)
+      : -100;
+  }
   if (!isAttack(data) && data.cardType !== "weapon") return -100;
   if (isOpeningTurn(input) && !/briar|kayo|fai/i.test(input.view.players[1 - input.seat]!.heroName)) return -100;
   // Once the boots are gone, reserve the high attack for next turn's Agility.

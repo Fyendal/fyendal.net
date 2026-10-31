@@ -27,7 +27,7 @@ import {
 } from "./policy.js";
 import { abilitySource, type HeroSolverRules } from "./card-model.js";
 import { guardianPatch } from "./guardian-rules.js";
-import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
+import { arsenalValuer, defenseReactionWorthSpending, handResponse, opportunityValuer } from "./hand-value.js";
 import {
   chooseTacticalIntentWithTrace,
   type TacticalTurnPlan,
@@ -277,7 +277,9 @@ function scorePlay(
       score = 8;
     }
   } else if (data.cardType === "defense-reaction") {
-    score = scoreDefenseReaction(data, input);
+    score = defenseReactionWorthSpending(card, input, bravoSolverRules, pitchIds(intent))
+      ? scoreDefenseReaction(data, input)
+      : -100;
   } else if (functional === "oasis respite|1") {
     score = oasisDamage > 0 ? 60 + Math.min(oasisDamage, 4) * 10 : -100;
   } else if (functional === "arcane polarity|1") {

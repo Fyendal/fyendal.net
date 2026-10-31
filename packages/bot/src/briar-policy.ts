@@ -2,7 +2,7 @@ import type { CardData, CardView, GameIntent, GameView } from "@fyendal/shared";
 import { planBriarTurn, type BriarTurnPlan } from "./briar-turn-planner.js";
 import { briarSolverRules } from "./briar-rules.js";
 import { briarMatchupForHeroName } from "./briar-strategy.js";
-import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
+import { arsenalValuer, defenseReactionWorthSpending, handResponse, opportunityValuer } from "./hand-value.js";
 import {
   chooseScoredIntent,
   committedEffectAmount,
@@ -541,7 +541,9 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       score += intent.meldSide === "both" ? 8 : intent.meldSide === "left" ? 3 : 2;
     }
   } else if (data.cardType === "defense-reaction") {
-    score = scoreDefenseReaction(data, input);
+    score = card && defenseReactionWorthSpending(card, input, briarSolverRules, pitchIds(intent))
+      ? scoreDefenseReaction(data, input)
+      : -100;
   }
 
   for (const id of pitchIds(intent)) {

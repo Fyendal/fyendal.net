@@ -28,7 +28,7 @@ import {
 import { threatenedAttackDamage } from "./public-threat.js";
 import type { HeroSolverRules } from "./card-model.js";
 import { cardsCanFuse, guardianPatch } from "./guardian-rules.js";
-import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
+import { arsenalValuer, defenseReactionWorthSpending, handResponse, opportunityValuer } from "./hand-value.js";
 import { adjustValueBreakdown } from "./value.js";
 import {
   chooseTacticalIntentWithTrace,
@@ -607,7 +607,9 @@ function scorePlay(
   } else if (functional === "fruits of the forest|3") {
     score = 5;
   } else if (data.cardType === "defense-reaction") {
-    score = scoreDefenseReaction(data, input);
+    score = defenseReactionWorthSpending(card, input, jarlSolverRules, pitchIds(intent))
+      ? scoreDefenseReaction(data, input)
+      : -100;
   } else if (isAttack(data)) {
     score = gravy && functional === "mangle|1" && compassIsMarked
       ? 275

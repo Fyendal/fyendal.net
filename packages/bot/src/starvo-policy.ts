@@ -41,7 +41,7 @@ import { PITCH_FUNDING_RATE, standaloneValue } from "./card-ev.js";
 import { unseenCounts } from "./deck-knowledge.js";
 import { guardianPatch } from "./guardian-rules.js";
 import type { PendingEffect, SolverCard, SolverView } from "./hand-solver.js";
-import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
+import { arsenalValuer, defenseReactionWorthSpending, handResponse, opportunityValuer } from "./hand-value.js";
 import { evaluateOnHit } from "./on-hit.js";
 import { adjustValueBreakdown } from "./value.js";
 
@@ -573,7 +573,9 @@ function scorePlay(
   } else if (functional === CHANNEL_LAKE) {
     score = aggressiveOpponent(input) ? 58 : 18;
   } else if (data.cardType === "defense-reaction") {
-    score = scoreDefenseReaction(data, input);
+    score = defenseReactionWorthSpending(card, input, starvoSolverRules, pitchIds(intent))
+      ? scoreDefenseReaction(data, input)
+      : -100;
   } else if (isElectromagneticSomersault(intent, input)) {
     score = hasFriendlySomersaultTarget(input, intent) ? 48 : -100;
   } else if (isAttack(data)) {
