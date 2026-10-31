@@ -29455,6 +29455,22 @@
       "value": "Desfazer todos os bloqueios"
     }
   ],
+  "game.clock.title": [
+    {
+      "type": 0,
+      "value": "Relógio da partida"
+    }
+  ],
+  "game.clock.total": [
+    {
+      "type": 0,
+      "value": "Tempo de partida "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
   "game.concede": [
     {
       "type": 0,
@@ -32232,6 +32248,20 @@
     {
       "type": 0,
       "value": "Resumo do jogo"
+    }
+  ],
+  "game.time.playerUsed": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " usou "
+    },
+    {
+      "type": 1,
+      "value": "time"
     }
   ],
   "game.timing.actionPhase": [
@@ -38904,6 +38934,18 @@
     {
       "type": 0,
       "value": "Comportamento de prioridade"
+    }
+  ],
+  "settings.showGameClock": [
+    {
+      "type": 0,
+      "value": "Mostrar relógio da partida"
+    }
+  ],
+  "settings.showGameClock.tooltip": [
+    {
+      "type": 0,
+      "value": "Conta o tempo da partida e de cada jogador para você treinar o ritmo de torneio."
     }
   ],
   "settings.showGuidance": [

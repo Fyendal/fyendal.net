@@ -68,6 +68,13 @@ export function useGameSettings({
       return next;
     });
   };
+  const updateShowGameClock = (showGameClock: boolean) => {
+    setSettings((current) => {
+      const next = { ...current, showGameClock };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
   const updateCardDisplayPreference = (cardDisplayPreference: CardDisplayPreference) => {
     setSettings((current) => {
       const next = { ...current, cardDisplayPreference };
@@ -139,6 +146,7 @@ export function useGameSettings({
     updateSkipPlayConfirmation,
     updateOptionHotkeys,
     updateSkipBotDelay,
+    updateShowGameClock,
     updateCardDisplayPreference,
     updateMotionPreference,
     updatePlayabilityCuePreference,

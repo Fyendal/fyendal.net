@@ -532,6 +532,7 @@ export interface GameSettings {
   soundEffectsVolume: number;
   optionHotkeys: boolean;
   skipBotDelay: boolean;
+  showGameClock: boolean;
   standingOrders: StandingOrders;
   playmat: PlaymatId;
   botPlaymat: PlaymatId;
@@ -549,6 +550,7 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   soundEffectsVolume: 35,
   optionHotkeys: false,
   skipBotDelay: false,
+  showGameClock: true,
   standingOrders: {},
   playmat: DEFAULT_PLAYMAT,
   botPlaymat: DEFAULT_PLAYMAT,
@@ -657,6 +659,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         : 35,
       optionHotkeys: typeof record.optionHotkeys === "boolean" ? record.optionHotkeys : false,
       skipBotDelay: typeof record.skipBotDelay === "boolean" ? record.skipBotDelay : false,
+      showGameClock: typeof record.showGameClock === "boolean" ? record.showGameClock : true,
       standingOrders,
       // A mat retired from the catalog falls back alone instead of resetting everything.
       playmat: isPlaymatId(record.playmat) ? record.playmat : DEFAULT_PLAYMAT,

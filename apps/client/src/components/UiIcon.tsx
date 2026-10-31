@@ -9,6 +9,7 @@ export type UiIconName =
   | "chevron-left"
   | "chevron-right"
   | "chevron-up"
+  | "clock"
   | "close"
   | "download"
   | "edit"

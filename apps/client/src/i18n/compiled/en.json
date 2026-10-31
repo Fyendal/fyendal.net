@@ -27897,6 +27897,22 @@
       "value": "Unblock all"
     }
   ],
+  "game.clock.title": [
+    {
+      "type": 0,
+      "value": "Game clock"
+    }
+  ],
+  "game.clock.total": [
+    {
+      "type": 0,
+      "value": "Game time "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
   "game.concede": [
     {
       "type": 0,
@@ -30580,6 +30596,20 @@
     {
       "type": 0,
       "value": "Game summary"
+    }
+  ],
+  "game.time.playerUsed": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " used "
+    },
+    {
+      "type": 1,
+      "value": "time"
     }
   ],
   "game.timing.actionPhase": [
@@ -37075,6 +37105,18 @@
     {
       "type": 0,
       "value": "Priority behavior"
+    }
+  ],
+  "settings.showGameClock": [
+    {
+      "type": 0,
+      "value": "Show game clock"
+    }
+  ],
+  "settings.showGameClock.tooltip": [
+    {
+      "type": 0,
+      "value": "Counts up the game time and each player's time so you can practice tournament pace."
     }
   ],
   "settings.showGuidance": [

@@ -50,6 +50,8 @@ function sideRailProps(
     skipPlayConfirmation: false,
     optionHotkeys: false,
     onOptionHotkeysChange: vi.fn(),
+    showGameClock: true,
+    onShowGameClockChange: vi.fn(),
     onSkipPlayConfirmationChange: vi.fn(),
     motionPreference: "system",
     onMotionPreferenceChange: vi.fn(),

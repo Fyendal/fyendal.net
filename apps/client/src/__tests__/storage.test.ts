@@ -150,6 +150,7 @@ describe("client storage keys", () => {
       soundEffectsVolume: 35,
       optionHotkeys: false,
       skipBotDelay: false,
+      showGameClock: true,
       standingOrders: {},
     });
     saveGameSettings(storage, {
@@ -166,6 +167,7 @@ describe("client storage keys", () => {
       soundEffectsVolume: 60,
       optionHotkeys: true,
       skipBotDelay: true,
+      showGameClock: false,
       standingOrders: {},
     });
     expect(loadGameSettings(storage)).toEqual({
@@ -182,6 +184,7 @@ describe("client storage keys", () => {
       soundEffectsVolume: 60,
       optionHotkeys: true,
       skipBotDelay: true,
+      showGameClock: false,
       standingOrders: {},
     });
   });
@@ -208,6 +211,7 @@ describe("client storage keys", () => {
       soundEffectsVolume: 35,
       optionHotkeys: false,
       skipBotDelay: false,
+      showGameClock: true,
       standingOrders: {},
     });
   });
@@ -235,6 +239,7 @@ describe("client storage keys", () => {
       soundEffectsVolume: 35,
       optionHotkeys: false,
       skipBotDelay: false,
+      showGameClock: true,
       standingOrders: {},
     });
   });
@@ -264,6 +269,7 @@ describe("client storage keys", () => {
       soundEffectsVolume: 60,
       optionHotkeys: false,
       skipBotDelay: false,
+      showGameClock: true,
       standingOrders: {},
     });
   });
@@ -352,6 +358,7 @@ describe("client storage keys", () => {
       botPlaymat: "leather",
       optionHotkeys: false,
       skipBotDelay: false,
+      showGameClock: true,
       standingOrders: {},
     });
   });

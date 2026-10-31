@@ -96,6 +96,7 @@ import { PlayerHand } from "./board/PlayerHand.js";
 import { handFanSlotStyle } from "./board/handFan.js";
 import { handPlayWindow } from "./board/handOrder.js";
 import { BoardOverlays, type BoardPreview } from "./board/BoardOverlays.js";
+import { GameClockPanel } from "./GameClockPanel.js";
 import { optimisticInteractionHiddenIds } from "./pendingInteraction.js";
 import { optimisticDefenderView } from "./optimisticDefenderStaging.js";
 import { optimisticInteractionView } from "./optimisticInteraction.js";
@@ -128,7 +129,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, sendPassUntil, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, sendPassUntil, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, clock, clockReceivedAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -174,6 +175,8 @@ export function GameBoard() {
       closeReplay: state.closeReplay,
       getRecordedViews: state.getRecordedViews,
       lastActionAt: state.lastActionAt,
+      clock: state.clock,
+      clockReceivedAt: state.clockReceivedAt,
       claimVictory: state.claimVictory,
       reportBug: state.reportBug,
       reportOpponent: state.reportOpponent,
@@ -277,6 +280,7 @@ export function GameBoard() {
     skipPlayConfirmation,
     optionHotkeys,
     skipBotDelay,
+    showGameClock,
     soundEffectsEnabled,
     soundEffectsVolume,
     playmat,
@@ -289,6 +293,7 @@ export function GameBoard() {
     updateSkipPlayConfirmation,
     updateOptionHotkeys,
     updateSkipBotDelay,
+    updateShowGameClock,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
     updatePlaymat,
@@ -1800,6 +1805,16 @@ export function GameBoard() {
         optionHotkeys={optionHotkeys}
         onOptionHotkeysChange={updateOptionHotkeys}
         skipBotDelay={skipBotDelay}
+        showGameClock={showGameClock}
+        onShowGameClockChange={updateShowGameClock}
+        gameClock={clock && clockReceivedAt !== null && !replaying ? (
+          <GameClockPanel
+            clock={clock}
+            receivedAt={clockReceivedAt}
+            seats={seat === 0 ? [me, opp] : [opp, me]}
+            viewerSeat={seat}
+          />
+        ) : null}
         onSkipBotDelayChange={betaTester && botGame && !spectating ? updateSkipBotDelay : null}
         motionPreference={motionPreference}
         onMotionPreferenceChange={updateMotionPreference}

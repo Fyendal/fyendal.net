@@ -27,6 +27,7 @@ import type {
   EmoteMessage,
   SeatStandingOrders,
   LeagueMembership,
+  GameClockView,
 } from "@fyendal/shared";
 import type {
   AccountExport,
@@ -242,6 +243,9 @@ export interface StoreState {
    * Presentation only; null means render the authoritative staged cards. */
   pendingDefenderStageIds: number[] | null;
   lastActionAt: [number, number] | null;
+  /** Server game clock and the `performance.now()` at which it arrived. */
+  clock: GameClockView | null;
+  clockReceivedAt: number | null;
   /** This seat's armed pass shortcut, optimistic until the server's next state. */
   passUntil: PassUntilMode | null;
   opponentConnected: boolean;

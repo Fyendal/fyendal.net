@@ -177,6 +177,9 @@ export function SideRail({
   onOptionHotkeysChange,
   skipBotDelay = false,
   onSkipBotDelayChange = null,
+  showGameClock,
+  onShowGameClockChange,
+  gameClock = null,
   cardDisplayPreference,
   onCardDisplayPreferenceChange,
   playmat,
@@ -255,6 +258,10 @@ export function SideRail({
   onOptionHotkeysChange: (enabled: boolean) => void;
   skipBotDelay?: boolean;
   onSkipBotDelayChange?: ((enabled: boolean) => void) | null;
+  showGameClock: boolean;
+  onShowGameClockChange: (enabled: boolean) => void;
+  /** Rendered only while the viewer has the clock enabled. */
+  gameClock?: ReactNode;
   cardDisplayPreference: CardDisplayPreference;
   onCardDisplayPreferenceChange: (preference: CardDisplayPreference) => void;
   playmat: PlaymatId;
@@ -585,6 +592,7 @@ export function SideRail({
         </div>
       )}
 
+      {showGameClock ? gameClock : null}
       {!replaying && connectionIssueVisible && (
         <div className="toast">{intl.formatMessage({ id: "game.connection.lost" })}</div>
       )}
@@ -657,6 +665,8 @@ export function SideRail({
           onOptionHotkeysChange={onOptionHotkeysChange}
           skipBotDelay={skipBotDelay}
           onSkipBotDelayChange={onSkipBotDelayChange}
+          showGameClock={showGameClock}
+          onShowGameClockChange={onShowGameClockChange}
           cardDisplayPreference={cardDisplayPreference}
           onCardDisplayPreferenceChange={onCardDisplayPreferenceChange}
           playmat={playmat}

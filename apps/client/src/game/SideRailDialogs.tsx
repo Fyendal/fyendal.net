@@ -41,6 +41,8 @@ export function GameSettingsDialog({
   onOptionHotkeysChange,
   skipBotDelay = false,
   onSkipBotDelayChange = null,
+  showGameClock,
+  onShowGameClockChange,
   cardDisplayPreference,
   onCardDisplayPreferenceChange,
   playmat,
@@ -74,6 +76,8 @@ export function GameSettingsDialog({
   onOptionHotkeysChange: (enabled: boolean) => void;
   skipBotDelay?: boolean;
   onSkipBotDelayChange?: ((enabled: boolean) => void) | null;
+  showGameClock: boolean;
+  onShowGameClockChange: (enabled: boolean) => void;
   cardDisplayPreference: CardDisplayPreference;
   onCardDisplayPreferenceChange: (preference: CardDisplayPreference) => void;
   playmat: PlaymatId;
@@ -174,6 +178,25 @@ export function GameSettingsDialog({
                   aria-label={intl.formatMessage({ id: "settings.confirmActions.aria" })}
                   checked={!skipPlayConfirmation}
                   onChange={(event) => onSkipPlayConfirmationChange(!event.target.checked)}
+                />
+                <span className="switch-track" aria-hidden="true" />
+              </label>
+              <label className="toggle-switch settings-control-row">
+                <span className="settings-control-name">
+                  {intl.formatMessage({ id: "settings.showGameClock" })}
+                  <span
+                    className="settings-info-tooltip"
+                    data-tooltip={intl.formatMessage({ id: "settings.showGameClock.tooltip" })}
+                    aria-hidden="true"
+                  >
+                    i
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={showGameClock}
+                  onChange={(event) => onShowGameClockChange(event.target.checked)}
                 />
                 <span className="switch-track" aria-hidden="true" />
               </label>

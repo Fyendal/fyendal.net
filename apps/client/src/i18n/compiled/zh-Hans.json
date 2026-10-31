@@ -26762,6 +26762,22 @@
       "value": "取消全部防御"
     }
   ],
+  "game.clock.title": [
+    {
+      "type": 0,
+      "value": "对局计时"
+    }
+  ],
+  "game.clock.total": [
+    {
+      "type": 0,
+      "value": "对局用时 "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
   "game.concede": [
     {
       "type": 0,
@@ -29307,6 +29323,20 @@
     {
       "type": 0,
       "value": "对局总结"
+    }
+  ],
+  "game.time.playerUsed": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 用时 "
+    },
+    {
+      "type": 1,
+      "value": "time"
     }
   ],
   "game.timing.actionPhase": [
@@ -35191,6 +35221,18 @@
     {
       "type": 0,
       "value": "优先权行为"
+    }
+  ],
+  "settings.showGameClock": [
+    {
+      "type": 0,
+      "value": "显示对局计时"
+    }
+  ],
+  "settings.showGameClock.tooltip": [
+    {
+      "type": 0,
+      "value": "累计显示对局用时和双方用时，帮助你练习比赛节奏。"
     }
   ],
   "settings.showGuidance": [

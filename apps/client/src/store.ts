@@ -1079,7 +1079,9 @@ export const useStore = create<StoreState>((set, get) => {
           ? replayRuntime.recordFrame(code, msg.version, msg.view, msg.yourSeat, msg.transition)
           : get().replayFrames;
         const commandState = acceptRoomCommandState(msg.version, msg);
+        const clock = { clock: msg.clock ?? null, clockReceivedAt: performance.now() };
         if (get().screen === "replay") {
+          set(clock);
           if (commandState.acknowledged) {
             set({
               roomCommandPending: false,
@@ -1144,6 +1146,7 @@ export const useStore = create<StoreState>((set, get) => {
           botGame: msg.botGame === true,
           botMatchTransition: null,
           lastActionAt: msg.lastActionAt,
+          ...clock,
           passUntil: passUntilRequest?.code === code && msg.version <= passUntilRequest.afterVersion
             ? passUntilRequest.mode
             : msg.passUntil ?? null,
