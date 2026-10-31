@@ -106,6 +106,23 @@ describe("SocialDock", () => {
     expect(html.indexOf("Unread")).toBeLessThan(html.indexOf("Online"));
   });
 
+  it("tucks the add-friend field behind the header once the player has friends", () => {
+    Object.assign(mocks.state, {
+      socialOpen: true,
+      friends: [],
+      friendRequests: [],
+      friendGameInvites: [],
+    });
+    expect(render()).toContain("social-add-form");
+
+    Object.assign(mocks.state, {
+      friends: [{ username: "Online", presence: "online", friendsSince: 1, unreadCount: 0 }],
+    });
+    const html = render();
+    expect(html).not.toContain("social-add-form");
+    expect(html).toContain("1 online");
+  });
+
   it("offers game invitations only from a free lobby", () => {
     Object.assign(mocks.state, {
       screen: "lobby",

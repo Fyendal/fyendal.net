@@ -279,7 +279,7 @@
     left: auto;
   }
   #root:has(.table) .social-bubble { min-width: 0; min-height: 0; border-radius: 4px; box-shadow: none; }
-  #root:has(.table) .social-bubble svg { width: 17px; height: 17px; }
+  #root:has(.table) .social-bubble .ui-icon { width: 17px; height: 17px; }
   #root:has(.table) .social-panel {
     top: calc(100% + 8px);
     right: 0;

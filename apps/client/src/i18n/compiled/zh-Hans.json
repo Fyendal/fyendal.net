@@ -35375,6 +35375,12 @@
       "value": "接受好友请求"
     }
   ],
+  "social.addByUsername": [
+    {
+      "type": 0,
+      "value": "按用户名添加"
+    }
+  ],
   "social.addFriend": [
     {
       "type": 0,
@@ -35479,16 +35485,6 @@
       "value": "找不到该用户名。"
     }
   ],
-  "social.friendCount": [
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": " 位好友"
-    }
-  ],
   "social.friends": [
     {
       "type": 0,
@@ -35575,6 +35571,17 @@
       "value": "在线"
     }
   ],
+  "social.onlineCount": [
+    {
+      "type": 2,
+      "value": "count",
+      "style": null
+    },
+    {
+      "type": 0,
+      "value": " 人在线"
+    }
+  ],
   "social.open": [
     {
       "type": 0,
@@ -35637,12 +35644,6 @@
     {
       "type": 0,
       "value": " 条未读消息"
-    }
-  ],
-  "social.username": [
-    {
-      "type": 0,
-      "value": "用户名"
     }
   ],
   "versionUpdate.dismiss": [

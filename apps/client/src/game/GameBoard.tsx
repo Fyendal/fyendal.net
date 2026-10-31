@@ -68,6 +68,7 @@ import { useStandingOrders } from "./useStandingOrders.js";
 import { standingOrderKey } from "./standingOrders.js";
 import { PlayerNameplate } from "./PlayerNameplate.js";
 import { OpponentActions } from "../social/OpponentActions.js";
+import { setSocialAnchor } from "../social/socialAnchor.js";
 import { shouldShowIdleVictoryClaim } from "./idleVictory.js";
 import { MobileHandToggle } from "./MobileHandToggle.js";
 import { useMobileCardLongPress } from "./mobileCardLongPress.js";
@@ -1309,7 +1310,13 @@ export function GameBoard() {
     />
   ) : null;
   const selfNameplate = playerProfiles ? (
-    <PlayerNameplate placement="self" profile={playerProfiles[seat]!} />
+    <PlayerNameplate
+      placement="self"
+      profile={playerProfiles[seat]!}
+      actions={authUser && !spectating && !replaying && !mobileFloatViewport && !mobileLandscapeViewport ? (
+        <span ref={setSocialAnchor} className="nameplate-social-slot" />
+      ) : null}
+    />
   ) : null;
   const oppHandRevealed = view.phase === "game-over" || replaying;
   const oppHand = (

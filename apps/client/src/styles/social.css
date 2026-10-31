@@ -10,7 +10,7 @@
 .social-mobile-backdrop { display: none; }
 
 @media (min-width: 701px) {
-  #root:has(.table) .social-message-toast {
+  #root:has(.table) .social-dock .social-message-toast {
     right: 0;
     left: auto;
   }
@@ -62,9 +62,8 @@
 .social-dock[data-dragging="true"] .social-bubble { cursor: grabbing; }
 .social-bubble:hover,
 .social-bubble[aria-expanded="true"] { background: radial-gradient(circle at 35% 25%, #604521, #2b1b0a 68%); }
-.social-bubble svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
-.social-bubble > span,
-.social-row-badge {
+.social-bubble .ui-icon { width: 23px; height: 23px; }
+.social-bubble > span:not(.ui-icon) {
   display: grid;
   min-width: 20px;
   height: 20px;
@@ -77,7 +76,7 @@
   font-size: 10px;
   font-weight: 800;
 }
-.social-bubble > span { position: absolute; top: -5px; right: -5px; }
+.social-bubble > span:not(.ui-icon) { position: absolute; top: -5px; right: -5px; }
 
 .social-unread-badge {
   display: grid;
@@ -187,62 +186,97 @@
   .social-message-toast { animation: none; }
 }
 
+/* Shares the in-game nameplate's plaque so the panel reads as part of the HUD. */
 .social-panel {
   position: absolute;
-  bottom: calc(var(--social-bubble-size) + 12px);
+  bottom: calc(var(--social-bubble-size) + 10px);
   left: 0;
   display: flex;
-  width: 320px;
-  height: min(460px, calc(100dvh - 96px));
+  width: 264px;
+  max-height: min(420px, calc(100dvh - 96px));
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  background: linear-gradient(180deg, #1d140bfa, #120b06fc);
-  box-shadow: 0 18px 50px #000e, inset 0 1px #ffd4791a;
+  border: 1px solid #73582f;
+  border-radius: 4px;
+  background: #140d07f7;
+  box-shadow: var(--shadow-raised), inset 0 1px #ffd4790f;
+  color: var(--text-primary);
+  font-family: var(--font-lobby-ui);
+  font-size: 13px;
+  letter-spacing: normal;
+  line-height: 1.3;
+  cursor: auto;
+  animation: social-panel-in 140ms ease-out;
+}
+@keyframes social-panel-in {
+  from { opacity: 0; transform: translateY(4px); }
 }
 @media (min-width: 701px) {
-  #root:has(.table) .social-panel {
+  #root:has(.table) .social-dock .social-panel {
     right: 0;
     left: auto;
   }
 }
 .social-panel-header {
   display: flex;
+  min-height: 38px;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 15px;
-  border-bottom: 1px solid var(--border-subtle);
+  gap: 8px;
+  padding: 4px 4px 4px 12px;
+  border-bottom: 1px solid #73582f66;
+  background: linear-gradient(180deg, #24180c, #1a1109);
 }
-.social-panel-header > div { display: grid; gap: 2px; }
-.social-panel-header strong { color: var(--gold); font-size: 18px; }
-.social-panel-header span { color: var(--text-muted); font-size: 12px; }
-.social-close,
-.social-error button,
-.social-remove {
-  width: 32px;
-  min-width: 32px;
-  min-height: 32px;
-  padding: 0;
-  clip-path: none;
-  border: 0;
-  background: transparent;
+.social-panel-header h2 {
+  margin: 0;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: .6px;
+}
+.social-online-count {
+  flex: 1 1 auto;
+  overflow: hidden;
   color: var(--text-muted);
-  font-size: 22px;
+  font-size: 11.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.social-add-form { display: grid; gap: 7px; padding: 11px 14px 12px; border-bottom: 1px solid #45331f88; }
-.social-add-form label { color: #ad9e84; font-size: 11px; font-weight: 700; }
-.social-add-form > div { position: relative; }
+.social-panel .social-header-action,
+.social-panel .social-error button {
+  display: grid;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px;
+  place-items: center;
+  padding: 0;
+  border-color: transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: #d9b866;
+}
+.social-panel .social-header-action:hover,
+.social-panel .social-header-action[aria-expanded="true"] { border-color: transparent; background: #ffd47914; color: var(--gold); }
+.social-panel .social-close { color: var(--text-muted); }
+.social-header-action .ui-icon,
+.social-error .ui-icon { width: 16px; height: 16px; }
+.social-add-form {
+  display: flex;
+  gap: 5px;
+  padding: 8px 8px 8px 10px;
+  border-bottom: 1px solid #73582f40;
+}
 .social-add-form input {
   width: 100%;
   min-width: 0;
-  height: 40px;
-  min-height: 40px;
-  padding: 8px 46px 8px 11px;
+  height: 30px;
+  min-height: 30px;
+  flex: 1 1 auto;
+  padding: 4px 9px;
   border-color: #4f3c25;
-  border-radius: 9px;
-  background: #100a06;
+  border-radius: 3px;
+  background: #0d0805;
   font: 13px var(--font-lobby-ui);
 }
 .social-add-form input::placeholder {
@@ -252,10 +286,7 @@
   text-transform: none;
 }
 .social-add-form input:focus { outline: none; border-color: #9c773d; box-shadow: 0 0 0 2px #b8933f20; }
-.social-add-form button {
-  position: absolute;
-  top: 5px;
-  right: 5px;
+.social-panel .social-add-form button {
   display: grid;
   width: 30px;
   min-width: 30px;
@@ -263,92 +294,117 @@
   min-height: 30px;
   place-items: center;
   padding: 0;
-  border-radius: 7px;
-  clip-path: none;
+  border-radius: 3px;
 }
-.social-add-form button svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
-.social-error { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; background: #61231f55; color: #ffaaa2; font-size: 12px; }
-.social-panel-scroll { min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 4px 10px 12px; }
-.social-section { margin-top: 11px; }
-.social-section h3 { margin: 0 4px 7px; color: #a99778; font-size: 12px; font-weight: 600; }
+.social-add-form .ui-icon { width: 16px; height: 16px; }
+.social-error { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 4px 10px; background: #61231f55; color: #ffaaa2; font-size: 12px; }
+.social-panel .social-error button { color: #ffaaa2; }
+.social-panel-scroll { min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 2px 0 6px; }
+.social-section + .social-section { border-top: 1px solid #73582f33; }
+.social-section h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+  padding: 8px 12px 3px;
+  color: #a99778;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.social-section h3 span { color: #756a59; font-weight: 500; }
 .social-request-card,
 .social-friend {
-  margin-bottom: 6px;
-  border: 1px solid #493721;
-  border-radius: 5px;
-  background: #1b120a;
+  display: flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 6px 2px 12px;
 }
-.social-request-card { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px; }
-.social-request-card > div:first-child { display: grid; gap: 2px; }
-.social-request-card strong { color: var(--text-primary); font-size: 13px; }
+.social-request-card { justify-content: space-between; min-height: 36px; }
+.social-request-card > div:first-child { display: grid; min-width: 0; gap: 1px; }
+.social-request-card strong { overflow: hidden; color: var(--text-primary); font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .social-request-card span { color: var(--text-muted); font-size: 11px; }
-.social-compact-actions { display: flex; gap: 5px; }
-.social-compact-actions button,
-.social-request-card > button { min-height: 32px; padding: 5px 10px; font-size: 13px; }
-.social-friend { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 7px 8px; }
-.social-avatar { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid #7b5f32; border-radius: 50%; background: #2e200e; color: #f1cf84; font-size: 13px; font-weight: 800; }
-.social-friend-copy { display: flex; min-width: 0; align-items: center; gap: 7px; }
-.social-friend-copy strong { overflow: hidden; color: var(--text-primary); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.social-game-invite { background: #ffd4790a; box-shadow: inset 2px 0 var(--gold); }
+.social-compact-actions { display: flex; flex: 0 0 auto; gap: 4px; }
+.social-panel .social-compact-actions button { min-height: 26px; padding: 2px 9px; border-radius: 3px; font-size: 12px; }
+.social-friend:hover,
+.social-friend:focus-within { background: #ffd4790a; }
+.social-friend strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.social-friend[data-presence="offline"] strong { color: #a39784; font-weight: 500; }
+.social-friend .social-unread-badge { min-width: 16px; height: 16px; font-size: 9.5px; }
 .social-presence { display: inline-flex; flex: 0 0 auto; align-items: center; color: var(--text-muted); }
-.social-presence i { width: 7px; height: 7px; border-radius: 50%; background: #655c4d; }
+.social-presence i { width: 7px; height: 7px; border-radius: 50%; background: #5a5144; }
 .social-presence.online { color: #9bcf9c; }
-.social-presence.online i { background: #61b978; box-shadow: 0 0 7px #61b97877; }
-.social-row-badge { min-width: 18px; height: 18px; border-width: 0; }
-.social-friend-actions { display: flex; align-items: center; gap: 3px; }
-.social-friend-actions button {
-  position: relative;
+.social-presence.online i { background: #61b978; box-shadow: 0 0 6px #61b97877; }
+.social-friend-actions { display: flex; align-items: center; gap: 1px; margin-left: auto; }
+.social-panel .social-friend-actions button {
   display: grid;
-  width: 32px;
-  min-width: 32px;
-  height: 32px;
-  min-height: 32px;
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  min-height: 26px;
   place-items: center;
   padding: 0;
   border-color: transparent;
-  border-radius: 8px;
+  border-radius: 3px;
   background: transparent;
-  clip-path: none;
   color: #bfae90;
 }
-.social-friend-actions button:hover:not(:disabled) { border-color: #5f4828; background: #2a1c0f; color: var(--gold); }
-.social-friend-actions button[data-tooltip]::after {
+.social-panel .social-friend-actions button:hover:not(:disabled) { border-color: transparent; background: #ffd47914; color: var(--gold); }
+.social-panel .social-friend-actions button:disabled { opacity: .35; }
+/* Invite and remove stay findable but recede behind message until hovered. */
+.social-panel .social-friend-actions .social-secondary-action { color: #7d705c; }
+.social-friend-actions .ui-icon { width: 16px; height: 16px; }
+@media (pointer: coarse) {
+  .social-panel .social-friend-actions button,
+  .social-panel .social-header-action { width: 34px; min-width: 34px; height: 34px; min-height: 34px; }
+  .social-friend { min-height: 38px; }
+}
+.social-panel .social-friend-actions .social-remove:hover:not(:disabled) { background: #ff7b7214; color: var(--danger); }
+.social-empty { margin: 6px 12px 8px; color: var(--text-muted); font-size: 12.5px; line-height: 1.4; }
+
+/* ── in game: a stud on the player's own nameplate ── */
+.nameplate-social-slot { display: contents; }
+/* Panels anchor to the plaque itself, so they line up with its left edge. */
+.player-nameplate .nameplate-social { position: static; }
+.nameplate-action-social > span:not(.ui-icon) {
   position: absolute;
-  z-index: 4;
+  top: 1px;
   right: 0;
-  opacity: 0;
-  transform: translateY(3px);
-  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms;
-  visibility: hidden;
-  pointer-events: none;
-}
-.social-friend-actions button[data-tooltip]::after {
-  bottom: calc(100% + 9px);
-  width: max-content;
-  max-width: 190px;
-  padding: 6px 8px;
-  border: 1px solid #806334;
-  border-radius: 6px;
-  background: #120c06f7;
-  box-shadow: 0 6px 18px #000b;
-  color: #eee2cd;
-  content: attr(data-tooltip);
-  font: 600 11px/1.25 var(--font-lobby-ui);
+  display: grid;
+  min-width: 14px;
+  height: 14px;
+  place-items: center;
+  padding: 0 3px;
+  border: 1.5px solid #140d07;
+  border-radius: 999px;
+  background: var(--blood-hi);
+  color: #fff7e8;
+  font: 800 8.5px/1 var(--font-lobby-ui);
   letter-spacing: 0;
-  text-align: left;
-  text-transform: none;
-  white-space: normal;
 }
-.social-friend-actions button[data-tooltip]:hover::after,
-.social-friend-actions button[data-tooltip]:focus-visible::after {
-  opacity: 1;
-  transform: translateY(0);
-  visibility: visible;
+.nameplate-action-social[aria-expanded="true"] { background: #ffd47914; color: var(--gold); }
+.nameplate-social .social-panel {
+  bottom: calc(100% + 8px);
+  left: -1px;
+  max-height: min(420px, calc(100dvh - 80px));
 }
-.social-friend-actions .ui-icon { width: 18px; height: 18px; }
-.social-message-button .social-row-badge { position: absolute; top: -5px; right: -5px; min-width: 16px; height: 16px; padding-inline: 4px; font-size: 9px; }
-.social-friend-actions .social-remove { color: #d7857e; }
-.social-friend-actions .social-remove:hover:not(:disabled) { border-color: #6b3a32; background: #ff7b7212; color: var(--danger); }
-.social-empty { margin: 14px 5px; color: var(--text-muted); font-size: 13px; line-height: 1.4; }
+.nameplate-social .social-message-toast {
+  bottom: calc(100% + 8px);
+  left: -1px;
+}
+.table[data-motion-preference="reduced"] .social-panel { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .social-panel { animation: none; }
+}
 
 .post-game-friend-add {
   border-color: #bd9147;
@@ -721,11 +777,8 @@
     right: auto;
     bottom: calc(var(--social-bubble-size) + 12px);
     left: 0;
-    width: min(320px, calc(100vw - 32px));
-    height: auto;
+    width: min(300px, calc(100vw - 32px));
     max-height: min(460px, calc(100dvh - 180px));
-    padding-bottom: 0;
-    border-radius: 12px;
   }
   #root:has(.table) .social-panel,
   #root:has(.prep-page) .social-panel {

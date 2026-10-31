@@ -39088,6 +39088,12 @@
       "value": "Aceitar amizade"
     }
   ],
+  "social.addByUsername": [
+    {
+      "type": 0,
+      "value": "Adicionar por nome de usuário"
+    }
+  ],
   "social.addFriend": [
     {
       "type": 0,
@@ -39196,49 +39202,6 @@
       "value": "Nenhum jogador tem esse nome de usuário."
     }
   ],
-  "social.friendCount": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "=0": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " amigos"
-            }
-          ]
-        },
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " amigo"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " amigos"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
   "social.friends": [
     {
       "type": 0,
@@ -39319,6 +39282,17 @@
     {
       "type": 0,
       "value": "Online"
+    }
+  ],
+  "social.onlineCount": [
+    {
+      "type": 2,
+      "value": "count",
+      "style": null
+    },
+    {
+      "type": 0,
+      "value": " online"
     }
   ],
   "social.open": [
@@ -39416,12 +39390,6 @@
       },
       "offset": 0,
       "pluralType": "cardinal"
-    }
-  ],
-  "social.username": [
-    {
-      "type": 0,
-      "value": "Nome de usuário"
     }
   ],
   "versionUpdate.dismiss": [

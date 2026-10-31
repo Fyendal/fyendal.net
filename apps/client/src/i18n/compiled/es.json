@@ -38163,6 +38163,12 @@
       "value": "Aceptar amigo"
     }
   ],
+  "social.addByUsername": [
+    {
+      "type": 0,
+      "value": "Añadir por nombre de usuario"
+    }
+  ],
   "social.addFriend": [
     {
       "type": 0,
@@ -38271,38 +38277,6 @@
       "value": "Ningún jugador tiene ese nombre de usuario."
     }
   ],
-  "social.friendCount": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " amigo"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " amigos"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
   "social.friends": [
     {
       "type": 0,
@@ -38383,6 +38357,17 @@
     {
       "type": 0,
       "value": "En línea"
+    }
+  ],
+  "social.onlineCount": [
+    {
+      "type": 2,
+      "value": "count",
+      "style": null
+    },
+    {
+      "type": 0,
+      "value": " en línea"
     }
   ],
   "social.open": [
@@ -38469,12 +38454,6 @@
       },
       "offset": 0,
       "pluralType": "cardinal"
-    }
-  ],
-  "social.username": [
-    {
-      "type": 0,
-      "value": "Nombre de usuario"
     }
   ],
   "versionUpdate.dismiss": [

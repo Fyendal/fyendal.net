@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import { ModalSurface } from "../components/ModalSurface.js";
@@ -8,7 +9,9 @@ import { UiIcon } from "../components/UiIcon.js";
 import { formatLabel } from "../lobby/FormatBadge.js";
 import { useStore } from "../store.js";
 import { FriendRoomModal } from "./FriendRoomModal.js";
-import { ReportForm, useSentReport } from "./ReportForm.js";
+import { UnreadMessageBadge } from "./MobileSocialControls.js";
+import { keepSpaceLocal, ReportForm, useSentReport } from "./ReportForm.js";
+import { useSocialAnchor } from "./socialAnchor.js";
 
 const SOCIAL_DOCK_MARGIN = 8;
 const SOCIAL_DOCK_DRAG_THRESHOLD = 5;
@@ -107,6 +110,9 @@ export function SocialDock() {
     dismissInvite: state.dismissFriendGameInvite,
     acceptInvite: state.acceptFriendGameInvite,
   })));
+  const anchor = useSocialAnchor();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [adding, setAdding] = useState(false);
   const [username, setUsername] = useState("");
   const [dockPosition, setDockPosition] = useState<DockPosition | null>(null);
   const incoming = requests.filter((request) => request.direction === "incoming");
@@ -180,6 +186,10 @@ export function SocialDock() {
     };
   }, [screen]);
 
+  useEffect(() => {
+    if (!open) setAdding(false);
+  }, [open]);
+
   if (!authUser) return null;
 
   const panelHorizontal = dockPosition
@@ -243,6 +253,240 @@ export function SocialDock() {
     setUsername("");
   };
 
+  const onlineCount = friends.filter((friend) => friend.presence === "online").length;
+  const showAddForm = adding || friends.length === 0;
+  const badge = notificationCount > 0 ? <span>{formatUnreadCount(notificationCount)}</span> : null;
+  const toggleOpen = () => {
+    if (!open) dismissIncomingChatToast();
+    setOpen(!open);
+  };
+  const onRootKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    keepSpaceLocal(event);
+    if (event.key === "Escape" && open) {
+      event.stopPropagation();
+      setOpen(false);
+      triggerRef.current?.focus();
+    }
+  };
+  const onRootBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    if (!open) return;
+    const nextFocus = event.relatedTarget;
+    if (nextFocus instanceof Node && event.currentTarget.contains(nextFocus)) return;
+    if (nextFocus !== null) setOpen(false);
+  };
+
+  const panel = open ? (
+    <aside className="social-panel" aria-label={intl.formatMessage({ id: "social.friends" })}>
+      <header className="social-panel-header">
+        <h2>{intl.formatMessage({ id: "social.friends" })}</h2>
+        <span className="social-online-count">
+          {intl.formatMessage({ id: "social.onlineCount" }, { count: onlineCount })}
+        </span>
+        {friends.length > 0 ? (
+          <button
+            type="button"
+            className="social-header-action"
+            aria-label={intl.formatMessage({ id: "social.addFriend" })}
+            aria-expanded={adding}
+            onClick={() => setAdding(!adding)}
+          >
+            <UiIcon name="user-add" />
+          </button>
+        ) : null}
+        <button
+          type="button"
+          className="social-header-action social-close"
+          aria-label={intl.formatMessage({ id: "common.close" })}
+          onClick={() => setOpen(false)}
+        >
+          <UiIcon name="close" />
+        </button>
+      </header>
+      {showAddForm ? (
+        <form className="social-add-form" onSubmit={submitRequest}>
+          <input
+            autoFocus={adding}
+            id="social-add-username"
+            value={username}
+            minLength={3}
+            maxLength={20}
+            pattern="[A-Za-z0-9_]{3,20}"
+            aria-label={intl.formatMessage({ id: "social.addFriend" })}
+            placeholder={intl.formatMessage({ id: "social.addByUsername" })}
+            onChange={(event) => setUsername(event.target.value)}
+          />
+          <button
+            type="submit"
+            className="btn-primary"
+            aria-label={intl.formatMessage({ id: "social.addFriend" })}
+            title={intl.formatMessage({ id: "social.addFriend" })}
+          >
+            <UiIcon name="plus" />
+          </button>
+        </form>
+      ) : null}
+      {socialError ? (
+        <div className="social-error" role="alert">
+          <span>{intl.formatMessage({ id: SOCIAL_ERROR_IDS[socialError as keyof typeof SOCIAL_ERROR_IDS] ?? "social.error.conflict" })}</span>
+          <button type="button" aria-label={intl.formatMessage({ id: "common.dismiss" })} onClick={clearSocialError}>
+            <UiIcon name="close" />
+          </button>
+        </div>
+      ) : null}
+      <div className="social-panel-scroll">
+        {invites.length > 0 ? (
+          <SocialSection title={intl.formatMessage({ id: "social.gameInvites" })} count={invites.length}>
+            {invites.map((invite) => (
+              <div className="social-request-card social-game-invite" key={invite.inviteId}>
+                <div>
+                  <strong translate="no">{invite.fromUsername}</strong>
+                  <span>{formatLabel(intl, invite.room.format)}</span>
+                </div>
+                <div className="social-compact-actions">
+                  <button type="button" className="btn-primary" onClick={() => acceptInvite(invite.inviteId)}>{intl.formatMessage({ id: "social.accept" })}</button>
+                  <button type="button" onClick={() => dismissInvite(invite.inviteId)}>{intl.formatMessage({ id: "social.decline" })}</button>
+                </div>
+              </div>
+            ))}
+          </SocialSection>
+        ) : null}
+        {incoming.length > 0 ? (
+          <SocialSection title={intl.formatMessage({ id: "social.requests.incoming" })} count={incoming.length}>
+            {incoming.map((request) => (
+              <div className="social-request-card" key={request.username}>
+                <div><strong translate="no">{request.username}</strong></div>
+                <div className="social-compact-actions">
+                  <button type="button" className="btn-primary" onClick={() => respondRequest(request.username, true)}>{intl.formatMessage({ id: "social.accept" })}</button>
+                  <button type="button" onClick={() => respondRequest(request.username, false)}>{intl.formatMessage({ id: "social.decline" })}</button>
+                </div>
+              </div>
+            ))}
+          </SocialSection>
+        ) : null}
+        {outgoing.length > 0 ? (
+          <SocialSection title={intl.formatMessage({ id: "social.requests.outgoing" })} count={outgoing.length}>
+            {outgoing.map((request) => (
+              <div className="social-request-card" key={request.username}>
+                <div><strong translate="no">{request.username}</strong><span>{intl.formatMessage({ id: "social.pending" })}</span></div>
+                <div className="social-compact-actions">
+                  <button type="button" onClick={() => cancelRequest(request.username)}>{intl.formatMessage({ id: "social.cancelRequest" })}</button>
+                </div>
+              </div>
+            ))}
+          </SocialSection>
+        ) : null}
+        <SocialSection title={intl.formatMessage({ id: "social.friends" })} count={friends.length}>
+          {sortedFriends.length === 0 ? (
+            <p className="social-empty">{intl.formatMessage({ id: "social.empty" })}</p>
+          ) : sortedFriends.map((friend) => (
+            <div className="social-friend" data-presence={friend.presence} key={friend.username}>
+              <span
+                className={`social-presence ${friend.presence}`}
+                role="img"
+                aria-label={intl.formatMessage({ id: `social.${friend.presence}` })}
+                title={intl.formatMessage({ id: `social.${friend.presence}` })}
+              >
+                <i aria-hidden="true" />
+              </span>
+              <strong translate="no">{friend.username}</strong>
+              <UnreadMessageBadge count={friend.unreadCount} />
+              <div className="social-friend-actions">
+                <TooltipButton
+                  tooltip={intl.formatMessage({ id: "social.messageNamed" }, { username: friend.username })}
+                  tooltipSide="above"
+                  onClick={() => openChat(friend.username)}
+                >
+                  <UiIcon name="message" />
+                </TooltipButton>
+                {canInviteFriends ? (
+                  <TooltipButton
+                    className="social-secondary-action"
+                    tooltip={intl.formatMessage({ id: "social.invite.title" }, { username: friend.username })}
+                    tooltipSide="above"
+                    disabled={friend.presence === "offline"}
+                    onClick={() => beginInvite(friend.username)}
+                  >
+                    <UiIcon name="invite-game" />
+                  </TooltipButton>
+                ) : null}
+                <TooltipButton
+                  className="social-remove social-secondary-action"
+                  tooltip={intl.formatMessage({ id: "social.removeNamed" }, { username: friend.username })}
+                  tooltipSide="above"
+                  onClick={() => {
+                    if (window.confirm(intl.formatMessage({ id: "social.removeConfirm" }, { username: friend.username }))) removeFriend(friend.username);
+                  }}
+                >
+                  <UiIcon name="trash" />
+                </TooltipButton>
+              </div>
+            </div>
+          ))}
+        </SocialSection>
+      </div>
+    </aside>
+  ) : null;
+
+  const toast = !open && incomingChatToast ? (
+    <div className="social-message-toast" role="status" aria-live="polite">
+      <button
+        type="button"
+        aria-label={intl.formatMessage(
+          { id: "social.chat.newMessageFrom" },
+          { username: incomingChatToast.friendUsername, message: incomingChatToast.text },
+        )}
+        onClick={() => {
+          dismissIncomingChatToast();
+          openChat(incomingChatToast.friendUsername);
+        }}
+      >
+        <span className="social-message-toast-avatar" aria-hidden="true">
+          {incomingChatToast.friendUsername.charAt(0).toUpperCase()}
+        </span>
+        <span className="social-message-toast-copy">
+          <strong>{incomingChatToast.friendUsername}</strong>
+          <span>{incomingChatToast.text}</span>
+        </span>
+      </button>
+    </div>
+  ) : null;
+
+  const modals = <><ChatModal /><FriendRoomModal /></>;
+
+  // In a game the control sits on the player's own nameplate instead of floating over the board.
+  if (anchor) {
+    return (
+      <>
+        {createPortal(
+          <div
+            ref={dockRef}
+            className="nameplate-actions nameplate-social"
+            data-open={open}
+            onKeyDown={onRootKeyDown}
+            onBlur={onRootBlur}
+          >
+            <TooltipButton
+              ref={triggerRef}
+              className="nameplate-action nameplate-action-social"
+              tooltip={intl.formatMessage({ id: "social.friends" })}
+              tooltipSide="above"
+              aria-haspopup="dialog"
+              aria-expanded={open}
+              onClick={toggleOpen}
+            >
+              <UiIcon name="friends" />
+              {badge}
+            </TooltipButton>
+            {panel}
+            {toast}
+          </div>,
+          anchor,
+        )}
+        {modals}
+      </>
+    );
+  }
+
   return (
     <>
       <div
@@ -252,12 +496,8 @@ export function SocialDock() {
         data-panel-horizontal={panelHorizontal}
         data-panel-vertical={panelVertical}
         style={dockStyle}
-        onBlur={(event) => {
-          if (!open) return;
-          const nextFocus = event.relatedTarget;
-          if (nextFocus instanceof Node && event.currentTarget.contains(nextFocus)) return;
-          if (nextFocus !== null) setOpen(false);
-        }}
+        onKeyDown={onRootKeyDown}
+        onBlur={onRootBlur}
       >
         {open ? (
           <button
@@ -271,165 +511,10 @@ export function SocialDock() {
             onClick={() => setOpen(false)}
           />
         ) : null}
-        {open ? (
-          <aside className="social-panel" aria-label={intl.formatMessage({ id: "social.friends" })}>
-            <header className="social-panel-header">
-              <div>
-                <strong>{intl.formatMessage({ id: "social.friends" })}</strong>
-                <span>{intl.formatMessage({ id: "social.friendCount" }, { count: friends.length })}</span>
-              </div>
-              <button type="button" className="social-close" aria-label={intl.formatMessage({ id: "common.close" })} onClick={() => setOpen(false)}>×</button>
-            </header>
-            <form className="social-add-form" onSubmit={submitRequest}>
-              <label htmlFor="social-add-username">{intl.formatMessage({ id: "social.addFriend" })}</label>
-              <div>
-                <input
-                  id="social-add-username"
-                  value={username}
-                  minLength={3}
-                  maxLength={20}
-                  pattern="[A-Za-z0-9_]{3,20}"
-                  placeholder={intl.formatMessage({ id: "social.username" })}
-                  onChange={(event) => setUsername(event.target.value)}
-                />
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  aria-label={intl.formatMessage({ id: "social.addFriend" })}
-                  title={intl.formatMessage({ id: "social.addFriend" })}
-                >
-                  <svg viewBox="0 0 20 20" aria-hidden="true">
-                    <circle cx="7.5" cy="6.5" r="3" />
-                    <path d="M2.5 17v-1.5a5 5 0 0 1 10 0V17M15.5 6v6M12.5 9h6" />
-                  </svg>
-                </button>
-              </div>
-            </form>
-            {socialError ? (
-              <div className="social-error" role="alert">
-                <span>{intl.formatMessage({ id: SOCIAL_ERROR_IDS[socialError as keyof typeof SOCIAL_ERROR_IDS] ?? "social.error.conflict" })}</span>
-                <button type="button" aria-label={intl.formatMessage({ id: "common.dismiss" })} onClick={clearSocialError}>×</button>
-              </div>
-            ) : null}
-            <div className="social-panel-scroll">
-              {invites.length > 0 ? (
-                <SocialSection title={intl.formatMessage({ id: "social.gameInvites" })}>
-                  {invites.map((invite) => (
-                    <div className="social-request-card social-game-invite" key={invite.inviteId}>
-                      <div>
-                        <strong>{invite.fromUsername}</strong>
-                        <span>{formatLabel(intl, invite.room.format)}</span>
-                      </div>
-                      <div className="social-compact-actions">
-                        <button type="button" className="btn-primary" onClick={() => acceptInvite(invite.inviteId)}>{intl.formatMessage({ id: "social.accept" })}</button>
-                        <button type="button" onClick={() => dismissInvite(invite.inviteId)}>{intl.formatMessage({ id: "social.decline" })}</button>
-                      </div>
-                    </div>
-                  ))}
-                </SocialSection>
-              ) : null}
-              {incoming.length > 0 ? (
-                <SocialSection title={intl.formatMessage({ id: "social.requests.incoming" })}>
-                  {incoming.map((request) => (
-                    <div className="social-request-card" key={request.username}>
-                      <strong>{request.username}</strong>
-                      <div className="social-compact-actions">
-                        <button type="button" className="btn-primary" onClick={() => respondRequest(request.username, true)}>{intl.formatMessage({ id: "social.accept" })}</button>
-                        <button type="button" onClick={() => respondRequest(request.username, false)}>{intl.formatMessage({ id: "social.decline" })}</button>
-                      </div>
-                    </div>
-                  ))}
-                </SocialSection>
-              ) : null}
-              {outgoing.length > 0 ? (
-                <SocialSection title={intl.formatMessage({ id: "social.requests.outgoing" })}>
-                  {outgoing.map((request) => (
-                    <div className="social-request-card" key={request.username}>
-                      <div><strong>{request.username}</strong><span>{intl.formatMessage({ id: "social.pending" })}</span></div>
-                      <button type="button" onClick={() => cancelRequest(request.username)}>{intl.formatMessage({ id: "social.cancelRequest" })}</button>
-                    </div>
-                  ))}
-                </SocialSection>
-              ) : null}
-              <SocialSection title={intl.formatMessage({ id: "social.friends" })}>
-                {sortedFriends.length === 0 ? (
-                  <p className="social-empty">{intl.formatMessage({ id: "social.empty" })}</p>
-                ) : sortedFriends.map((friend) => (
-                  <div className="social-friend" key={friend.username}>
-                    <div className="social-avatar" aria-hidden="true">{friend.username.charAt(0).toUpperCase()}</div>
-                    <div className="social-friend-copy">
-                      <strong>{friend.username}</strong>
-                      <span
-                        className={`social-presence ${friend.presence}`}
-                        role="img"
-                        aria-label={intl.formatMessage({ id: `social.${friend.presence}` })}
-                        title={intl.formatMessage({ id: `social.${friend.presence}` })}
-                      >
-                        <i aria-hidden="true" />
-                      </span>
-                    </div>
-                    <div className="social-friend-actions">
-                      <button
-                        type="button"
-                        className="social-message-button"
-                        aria-label={intl.formatMessage({ id: "social.messageNamed" }, { username: friend.username })}
-                        onClick={() => openChat(friend.username)}
-                      >
-                        <UiIcon name="message" />
-                        {friend.unreadCount > 0 ? <span className="social-row-badge">{formatUnreadCount(friend.unreadCount)}</span> : null}
-                      </button>
-                      {canInviteFriends ? (
-                        <button
-                          type="button"
-                          aria-label={intl.formatMessage({ id: "social.invite.title" }, { username: friend.username })}
-                          data-tooltip={intl.formatMessage({ id: "social.invite.title" }, { username: friend.username })}
-                          disabled={friend.presence === "offline"}
-                          onClick={() => beginInvite(friend.username)}
-                        >
-                          <UiIcon name="invite-game" />
-                        </button>
-                      ) : null}
-                      <button
-                        type="button"
-                        className="social-remove"
-                        aria-label={intl.formatMessage({ id: "social.removeNamed" }, { username: friend.username })}
-                        onClick={() => {
-                          if (window.confirm(intl.formatMessage({ id: "social.removeConfirm" }, { username: friend.username }))) removeFriend(friend.username);
-                        }}
-                      >
-                        <UiIcon name="close" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </SocialSection>
-            </div>
-          </aside>
-        ) : null}
-        {!open && incomingChatToast ? (
-          <div className="social-message-toast" role="status" aria-live="polite">
-            <button
-              type="button"
-              aria-label={intl.formatMessage(
-                { id: "social.chat.newMessageFrom" },
-                { username: incomingChatToast.friendUsername, message: incomingChatToast.text },
-              )}
-              onClick={() => {
-                dismissIncomingChatToast();
-                openChat(incomingChatToast.friendUsername);
-              }}
-            >
-              <span className="social-message-toast-avatar" aria-hidden="true">
-                {incomingChatToast.friendUsername.charAt(0).toUpperCase()}
-              </span>
-              <span className="social-message-toast-copy">
-                <strong>{incomingChatToast.friendUsername}</strong>
-                <span>{incomingChatToast.text}</span>
-              </span>
-            </button>
-          </div>
-        ) : null}
+        {panel}
+        {toast}
         <button
+          ref={triggerRef}
           type="button"
           className="social-bubble"
           aria-label={intl.formatMessage({ id: "social.friends" })}
@@ -459,16 +544,14 @@ export function SocialDock() {
               suppressBubbleClickRef.current = false;
               return;
             }
-            if (!open) dismissIncomingChatToast();
-            setOpen(!open);
+            toggleOpen();
           }}
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 20v-2a5.5 5.5 0 0 1 11 0v2M14 15a4.5 4.5 0 0 1 6.5 4v1"/></svg>
-          {notificationCount > 0 ? <span>{notificationCount > 99 ? "99+" : notificationCount}</span> : null}
+          <UiIcon name="friends" />
+          {badge}
         </button>
       </div>
-      <ChatModal />
-      <FriendRoomModal />
+      {modals}
     </>
   );
 }
@@ -477,8 +560,8 @@ function formatUnreadCount(count: number) {
   return count > 99 ? "99+" : String(count);
 }
 
-function SocialSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="social-section"><h3>{title}</h3>{children}</section>;
+function SocialSection({ title, count, children }: { title: string; count: number; children: React.ReactNode }) {
+  return <section className="social-section"><h3>{title}<span>{count}</span></h3>{children}</section>;
 }
 
 function ChatModal() {
