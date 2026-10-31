@@ -2,6 +2,7 @@ import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal
 import {
   armGrantedHitRider,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
@@ -229,8 +230,9 @@ function infectiousHost(): CardScript {
     onAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId !== undefined) return;
       const owned = ctx.player(ctx.seat).board;
-      for (const token of [FRAILTY, INERTIA, BLOODROT])
-        if (owned.some((card) => card.cardId === token)) ctx.createToken(token, opponentSeat(ctx));
+      // Created tokens use the canonical printing, so match by name.
+      for (const [token, name] of [[FRAILTY, "Frailty"], [INERTIA, "Inertia"], [BLOODROT, "Bloodrot Pox"]] as const)
+        if (owned.some((card) => cardNamed(ctx, card, name))) ctx.createToken(token, opponentSeat(ctx));
     },
   };
 }

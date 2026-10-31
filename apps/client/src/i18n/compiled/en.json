@@ -11901,6 +11901,20 @@
       "value": "Sickening Rot: pay 3 resources or take 2 damage?"
     }
   ],
+  "card.mpa.spikeslasher.discount": [
+    {
+      "type": 0,
+      "value": "Attack reaction cards cost "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " less to play this chain link"
+    }
+  ],
   "card.mpg.arsenal.card.bottom": [
     {
       "type": 0,

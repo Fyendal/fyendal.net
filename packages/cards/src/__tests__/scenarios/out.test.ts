@@ -650,6 +650,22 @@ describe("OUT — registration and core mechanics", () => {
 });
 
 describe("OUT — rules regression coverage", () => {
+  it("Infectious Host copies disease tokens that another card created", () => {
+    const noEquipment = { head: null, chest: null, arms: null, legs: null } as const;
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, hand: ["bloodrot courier|1", "infectious host|1"], weapons: [], equipment: noEquipment },
+        { hero: "dorinthea", hand: [], weapons: [], equipment: noEquipment },
+      ],
+    });
+    const boardNames = (seat: number) => s.state.players[seat]!.board.map((card) => cardData[card.cardId]!.name);
+
+    s.play("bloodrot courier|1").blockWith().settle();
+    expect(boardNames(1)).toEqual(["Bloodrot Pox"]);
+    s.play("infectious host|1");
+    expect(boardNames(1)).toEqual(["Bloodrot Pox", "Bloodrot Pox"]);
+  });
+
   it("Quiver of Abyssal Depths shuffles in up to 3 chosen arrows with different names", () => {
     const s = scenario({
       seats: [

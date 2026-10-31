@@ -18,6 +18,7 @@ const VIRAL_DIFFUSION = "viral diffusion|1";
 const WIDESPREAD_RUIN = "widespread ruin|1";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 const OUTBREAK = "outbreak|3";
+const SPIKE_SLASHER = "spike slasher|1";
 const TAILORED = "tailored targeting|1";
 const PHIAL = "phial of calamity|0";
 const CADAVER = "cadaver handlers|0";
@@ -154,6 +155,33 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       "Frailty", "Inertia", "Bloodrot Pox",
     ]));
     expect(boardNames(game, 0)).not.toContain("Frailty");
+  });
+
+  it("Spike Slasher makes attack reactions cost 1 less this chain link", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [SPIKE_SLASHER, OUTBREAK], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(SPIKE_SLASHER).blockWith().react(OUTBREAK, { targetCard: SPIKE_SLASHER });
+
+    game.expectLife(1, 14);
+    expect(game.state.players[0]!.resources).toBe(0);
+  });
+
+  it("Spike Slasher reduces attack reaction costs by only 1", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [SPIKE_SLASHER, OUTBREAK], resources: 1, weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(SPIKE_SLASHER).blockWith();
+
+    const outbreak = game.state.players[0]!.hand.find((card) => cardData[card.cardId]?.name === "Outbreak")!;
+    expect(legalIntents(game.state, 0)).not.toContainEqual(expect.objectContaining({
+      kind: "play-card",
+      instanceId: outbreak.instanceId,
+    }));
   });
 
   it("Outbreak's disease rider does not trigger when the attack is fully defended", () => {

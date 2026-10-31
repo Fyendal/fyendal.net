@@ -11931,6 +11931,20 @@
       "value": "Sickening Rot: ¿pagar 3 recursos o recibir 2 de daño?"
     }
   ],
+  "card.mpa.spikeslasher.discount": [
+    {
+      "type": 0,
+      "value": "Las cartas attack reaction cuestan "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " menos de jugar en este chain link"
+    }
+  ],
   "card.mpg.arsenal.card.bottom": [
     {
       "type": 0,

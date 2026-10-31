@@ -428,6 +428,20 @@ export const mpa: Record<string, CardScript> = {
     },
   },
 
+  "spike slasher|1": {
+    triggers: [
+      {
+        event: "attack-declared",
+        sourceZone: "self",
+        label: "Attack reaction cards cost 1 less to play this chain link",
+        labelMessage: decisionMessage("card.mpa.spikeslasher.discount", { amount: 1 }),
+        effect(ctx) {
+          ctx.addModifier({ scope: "chain-link", playCostReduction: 1, appliesToCardType: "attack-reaction" });
+        },
+      },
+    ],
+  },
+
   "tailored targeting|1": {
     ...contractWithSilver((ctx, card) =>
       card.owner === opponentSeat(ctx) && !!ctx.self.chosenName && cardNamed(ctx, card, ctx.self.chosenName),
