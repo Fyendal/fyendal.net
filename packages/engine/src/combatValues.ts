@@ -62,7 +62,8 @@ function matchingOneShotDefenseCards(
 }
 
 /** Consume delayed "the next time they defend" effects at the defend event
- * boundary and attach their adjustment to exactly the matching cards. */
+ * boundary and attach their adjustment to exactly the matching cards. The
+ * attachment lasts while the card defends, through close-of-chain Temper. */
 export function applyOneShotDefenseModifiers(
   state: GameStateInternal,
   link: ChainLinkState,
@@ -85,7 +86,7 @@ export function applyOneShotDefenseModifiers(
         sourceInstanceId: modifier.sourceInstanceId,
         ...(modifier.sourceCardId ? { sourceCardId: modifier.sourceCardId } : {}),
         seat: card.owner,
-        scope: "chain-link",
+        scope: "combat-chain",
         defense: modifier.defense,
         appliesToInstanceId: card.instanceId,
         ...(modifier.appliesToEquipment ? { appliesToEquipment: true } : {}),
@@ -536,7 +537,10 @@ function defendingCardModifiers(
     if (
       modifier.scope !== "until-end-of-turn" &&
       modifier.scope !== "static" &&
-      !(modifier.scope === "chain-link" && modifier.appliesToInstanceId !== undefined)
+      !(
+        (modifier.scope === "chain-link" || modifier.scope === "combat-chain") &&
+        modifier.appliesToInstanceId !== undefined
+      )
     ) return false;
     if (
       modifier.seat !== card.owner ||
@@ -572,7 +576,8 @@ function defendingEquipmentModifiers(
     (
       modifier.scope === "static" ||
       modifier.scope === "until-end-of-turn" ||
-      modifier.scope === "chain-link"
+      modifier.scope === "chain-link" ||
+      (modifier.scope === "combat-chain" && modifier.appliesToInstanceId !== undefined)
     )
   );
 }
@@ -1179,7 +1184,7 @@ export function stagedDefenseTotal(
         sourceInstanceId: modifier.sourceInstanceId,
         ...(modifier.sourceCardId ? { sourceCardId: modifier.sourceCardId } : {}),
         seat: card.owner,
-        scope: "chain-link",
+        scope: "combat-chain",
         defense: modifier.defense,
         appliesToInstanceId: card.instanceId,
         ...(modifier.appliesToEquipment ? { appliesToEquipment: true } : {}),

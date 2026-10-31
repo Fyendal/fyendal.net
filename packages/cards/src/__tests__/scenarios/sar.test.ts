@@ -475,6 +475,22 @@ describe("SAR — reaction pumps", () => {
       .expectFinalDefense(0) // 2 − 2
       .expectLife(1, 17); // the full 3 through
   });
+
+  it("Shred's -2{d} still applies when Temper checks at chain close", () => {
+    const s = scenario({
+      seats: [
+        arakniSeat({ hand: ["mark the prey|1", "shred|3"] }),
+        { hero: "rhinar", hand: [], equipment: { ...NO_EQUIPMENT, arms: "steelbraid buckler|0" } },
+      ],
+    });
+    s.play("mark the prey|1")
+      .blockWith("steelbraid buckler|0")
+      .react("shred|3")
+      .chooseCard("steelbraid buckler|0")
+      .expectFinalDefense(0)
+      .endTurn()
+      .expectNoEquipment(1, "arms");
+  });
 });
 
 describe("SAR — chaos actions", () => {

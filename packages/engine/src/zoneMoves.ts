@@ -304,6 +304,16 @@ export function fireLeaveCombatChain(
   ] as const;
   const to = zones.find(([, cards]) => cards.some((candidate) => candidate.instanceId === card.instanceId))?.[0]
     ?? "cease-to-exist";
+  // "While defending" penalties end with the object; a replayed card is new.
+  if (combatRole === "defending") {
+    state.modifiers = state.modifiers.filter((modifier) =>
+      !(
+        modifier.scope === "combat-chain" &&
+        modifier.defense &&
+        modifier.appliesToInstanceId === card.instanceId
+      )
+    );
+  }
   fireLeaveArena(state, runtime, seat, card, to, false, destroyed, combatRole);
 }
 

@@ -47,9 +47,7 @@ import { checkWin } from "./win.js";
 function expireLinkModifiers(state: GameStateInternal,
   runtime: EngineRuntime, link: ChainLinkState): void {
   link.finalAttack = computeAttack(state, runtime, link);
-  link.finalDefense = computeDefense(state, runtime, link);
   link.finalAttackModifiers = attackValueModifiers(state, runtime, link);
-  link.finalDefenseModifiers = defenseValueModifiers(state, runtime, link);
   // Snapshot keyword presence too: granted keywords disappear with the modifiers.
   link.flags.dominateAtResolution = attackHasDominate(state, runtime, link);
   link.flags.overpowerAtResolution = attackHasOverpower(state, runtime, link);
@@ -130,6 +128,9 @@ export function finishLinkResolution(state: GameStateInternal,
       }
     }
   }
+  // Before resolution hooks, which may remove defenders (Shimmering Mirage).
+  link.finalDefense = computeDefense(state, runtime, link);
+  link.finalDefenseModifiers = defenseValueModifiers(state, runtime, link);
   const resolvedSources = [
     link.attackingCard,
     ...controlledPermanents(state, link.attacker, { faceDownEquipment: false }),

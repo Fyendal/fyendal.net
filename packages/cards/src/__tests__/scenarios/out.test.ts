@@ -459,6 +459,121 @@ describe("OUT — registration and core mechanics", () => {
       .expectFinalDefense(expectedDefense);
   });
 
+  it("Scale Peeler's -1{d} still applies when Temper checks at chain close", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "arakni, solitary confinement|0",
+          hand: ["infect|1", "infect|1"],
+          weapons: ["scale peeler|0"],
+          equipment: { arms: "flick knives|0" },
+        },
+        { hero: "dorinthea", hand: [BLUE], equipment: { arms: "steelbraid buckler|0" } },
+      ],
+    });
+
+    s.play("infect|1").blockWith(BLUE)
+      .activate("flick knives|0")
+      .chooseCard("scale peeler|0")
+      .play("infect|1")
+      .blockWith("steelbraid buckler|0")
+      .settle()
+      .expectFinalDefense(1)
+      .endTurn()
+      .expectNoEquipment(1, "arms");
+  });
+
+  it("Nerve Scalpel's -1{d} ends when Shimmering Mirage leaves the chain and is replayed", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["head jab|1", "head jab|1", "head jab|1"],
+          weapons: ["nerve scalpel|0"],
+          equipment: { arms: "flick knives|0" },
+        },
+        { hero: "dorinthea", hand: [BLUE, "shimmering mirage|3"] },
+      ],
+    });
+
+    s.play("head jab|1").blockWith(BLUE)
+      .activate("flick knives|0")
+      .chooseCard("nerve scalpel|0")
+      .play("head jab|1").blockWith()
+      .passPriority()
+      .react("shimmering mirage|3")
+      .settle()
+      .expectFinalDefense(1)
+      .expectLife(1, 17) // Flick Knives 1, then 3 - (2 - 1)
+      .expectInZone(1, "shimmering mirage|3", "banish")
+      .play("head jab|1").blockWith()
+      .passPriority()
+      .react("shimmering mirage|3")
+      .settle()
+      .expectFinalDefense(2)
+      .expectLife(1, 16); // 3 - 2: the replayed Mirage is a new object
+  });
+
+  it("Nerve Scalpel's -1{d} ends when Rout returns the defending card to hand", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 6,
+          hand: ["rout|1"],
+          weapons: ["nerve scalpel|0", "spider's bite|0"],
+        },
+        { hero: "dorinthea", hand: [BLUE, "shimmering mirage|3"] },
+      ],
+    });
+
+    s.attackWithWeapon("nerve scalpel|0").blockWith().settle()
+      .attackWithWeapon("spider's bite|0").blockWith(BLUE)
+      .passPriority()
+      .react("shimmering mirage|3", { settle: false })
+      .passPriority().passPriority()
+      .react("rout|1", { settle: false })
+      .passPriority().passPriority();
+    const mirage = s.state.chain[1]!.defendingCards.find(
+      (card) => card.cardId === printingId("shimmering mirage|3"),
+    )!;
+    s.doRaw({ kind: "choose", optionId: String(mirage.instanceId) })
+      .expectInZone(1, "shimmering mirage|3", "hand")
+      .passPriority()
+      .react("shimmering mirage|3")
+      .settle()
+      .expectFinalDefense(5); // Wrecker Romp 3 + a fresh Mirage 2
+  });
+
+  it("Scale Peeler's -1{d} follows Quickdodge Flexors when it moves to a new link", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["head jab|1", "head jab|1", "head jab|1"],
+          weapons: ["scale peeler|0"],
+          equipment: { arms: "flick knives|0" },
+        },
+        { hero: "dorinthea", resources: 2, hand: [BLUE], equipment: { legs: "quickdodge flexors|0" } },
+      ],
+    });
+
+    s.play("head jab|1").blockWith(BLUE)
+      .activate("flick knives|0")
+      .chooseCard("scale peeler|0")
+      .play("head jab|1").blockWith()
+      .passPriority()
+      .activate("quickdodge flexors|0")
+      .settle()
+      .expectFinalDefense(1)
+      .play("head jab|1").blockWith()
+      .passPriority()
+      .activate("quickdodge flexors|0")
+      .settle()
+      .expectFinalDefense(1);
+  });
+
   it("Flick Knives keeps a fully defended link in Mask of Momentum's hit streak", () => {
     const s = scenario({
       seats: [
