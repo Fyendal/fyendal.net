@@ -2755,14 +2755,17 @@ export const decodeAchievementsResponse: Decoder<AchievementsResponse> = (value)
 const CARD_ART_IMAGE_RE = /^(?:[A-Z]{2}_)?[A-Z0-9]{6}(?:[-_][A-Z0-9_]+)*$/;
 const MAX_DECK_ART_PICKS = 100;
 
+export function cardArtImage(value: unknown): value is string {
+  return typeof value === "string" && value.length <= MAX_ID && CARD_ART_IMAGE_RE.test(value);
+}
+
 /** printing id -> Fabrary image id. */
 function cardArtMap(value: unknown, allowStandard: boolean, max: number): value is Record<string, string> {
   const map = object(value);
   if (!map) return false;
   const entries = Object.entries(map);
   return entries.length <= max && entries.every(([cardId, image]) => string(cardId, MAX_ID, false)
-    && typeof image === "string" && image.length <= MAX_ID
-    && (CARD_ART_IMAGE_RE.test(image) || allowStandard && image === STANDARD_CARD_ART));
+    && (cardArtImage(image) || allowStandard && image === STANDARD_CARD_ART));
 }
 
 /** A seat's resolved images; picks never resolve to the standard sentinel. */

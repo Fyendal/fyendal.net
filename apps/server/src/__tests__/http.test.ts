@@ -284,6 +284,7 @@ describe("Fabrary URL imports", () => {
         canonicalUrl: "https://fabrary.net/decks/01G76G1DP5VVB050BT3YV9TQ7K",
         text,
         matchups,
+        pins: [],
       },
     }));
     const url = await startApi({ fabraryClient: { fetchDeck } });
@@ -393,6 +394,7 @@ describe("Fabrary URL imports", () => {
         canonicalUrl: requestedUrl.includes("01H76") ? changedUrl : originalUrl,
         text: requestedUrl.includes("01H76") ? changedText : originalText,
         matchups: [],
+        pins: [],
       },
     }));
     const url = await startApi({ fabraryClient: { fetchDeck } });
@@ -478,6 +480,7 @@ describe("Fabrary URL imports", () => {
         canonicalUrl: requestedUrl.includes("01K76") ? changedUrl : originalUrl,
         text: requestedUrl.includes("01K76") ? "3x Does Not Exist" : originalText,
         matchups: [],
+        pins: [],
       },
     }));
     const url = await startApi({ fabraryClient: { fetchDeck } });

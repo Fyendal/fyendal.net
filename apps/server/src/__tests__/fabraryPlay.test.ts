@@ -36,7 +36,7 @@ beforeEach(async () => {
   userId = (await db.query("SELECT id FROM users WHERE username_lc=$1", ["fabraryplayer"])).rows[0].id;
   latestText = text;
   client = { fetchDeck: vi.fn(async () => ({ ok: true as const, deck: {
-    canonicalUrl: source, name: "Fabrary deck", text: latestText, matchups: [],
+    canonicalUrl: source, name: "Fabrary deck", text: latestText, matchups: [], pins: [],
   } })) };
   server = createApiServer({ db, fabraryClient: client });
   await new Promise<void>((done) => server.listen(0, done));
