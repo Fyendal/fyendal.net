@@ -190,6 +190,8 @@ export function PlayerHalf({
   const squareBoard = cardDisplayPreference === "square"
     && !landscapeBoard && !mobileFloatViewport && !compactBoard;
   const outlinedEmptyPiles = squareBoard || landscapeBoard;
+  // chi points pay resource costs, so the pitch zone shows both pools
+  const floatingResources = player.resources + (player.chi ?? 0);
   const deckTopPlayable =
     presentedDeckTop !== undefined && interaction.legal.playableZones.get(presentedDeckTop.instanceId) === "deck";
   // Arena costs stay until the server removes them so their exit animates in place.
@@ -585,14 +587,14 @@ export function PlayerHalf({
           ? () => onOpenOverlay({ title: ownedZoneTitle("pitch"), cards: player.pitch })
           : undefined}
       >
-        {outlinedEmptyPiles && player.pitch.length === 0 && player.resources === 0 ? (
+        {outlinedEmptyPiles && player.pitch.length === 0 && floatingResources === 0 ? (
           <span className="card-zone equipment-zone-empty zone-pile-empty" role="img" aria-label={zoneLabel("pitch")}>
             <span className="mat-zone-label">{zoneLabel("pitch")}</span>
           </span>
         ) : (
           <PitchStack
             cards={player.pitch}
-            resources={player.resources}
+            resources={floatingResources}
             motionSeat={player.seat}
             squareArt={squareBoard}
           />

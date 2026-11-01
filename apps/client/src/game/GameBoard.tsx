@@ -1582,7 +1582,7 @@ export function GameBoard() {
         logEntries={view.logEntries}
         activeHeroName={activeHeroName}
         actionPoints={view.players[view.activePlayer]!.actionPoints}
-        myResources={me.resources}
+        myResources={me.resources + (me.chi ?? 0)}
         primaryAction={primaryAction}
         passDisabled={primaryActionDisabled}
         onPass={triggerPrimaryAction}
