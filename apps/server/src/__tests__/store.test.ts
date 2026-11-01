@@ -3799,7 +3799,11 @@ describe("card art", () => {
   const deckImage = cardArtVariants(deckCard)[0]!.image;
 
   /** Starts a game for a saved deck with hero and deck-card picks. */
-  async function startArtGame(betaTester: boolean): Promise<RoomRow> {
+  async function startArtGame(
+    betaTester: boolean,
+    picks: Record<string, string> = { [pool.heroId]: heroImage!, [deckCard]: deckImage },
+    fabraryArt: Record<string, string> = {},
+  ): Promise<RoomRow> {
     const users = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
        VALUES ('ArtOwner','artowner','hash',1) RETURNING id`,
@@ -3809,10 +3813,7 @@ describe("card art", () => {
     await db.query(
       `INSERT INTO decks (id, user_id, name, format, fabrary_url, decklist, hero_name, art, created_at, updated_at)
        VALUES ('art-deck', $1, 'Art', 'cc', NULL, $2, 'Hero', $3, 1, 1)`,
-      [userId, JSON.stringify(pool), JSON.stringify({
-        highestRarity: false,
-        picks: { [pool.heroId]: heroImage, [deckCard]: deckImage },
-      })],
+      [userId, JSON.stringify(pool), JSON.stringify({ highestRarity: false, picks })],
     );
     const host = await store.createRoom("cc", { deckId: "art-deck", userId });
     await markStoredSeatPresent(host.code, 0);
@@ -3831,7 +3832,7 @@ describe("card art", () => {
     for (const seat of [0, 1] as const) {
       const ready = await store.presentDeck(host.code, credentials[seat], {
         weaponIds: pools[seat]!.weaponIds, equipment: {}, deck: pools[seat]!.deck,
-      });
+      }, seat === 0 ? fabraryArt : {});
       if (!ready.ok) throw new Error(ready.error);
     }
     const started = (await store.getRoom(host.code))!;
@@ -3854,6 +3855,17 @@ describe("card art", () => {
       expect(message.cardArt?.[0]).toEqual({ [pool.heroId]: heroImage });
       expect(decodeServerMessage(JSON.parse(JSON.stringify(message)))).not.toBeNull();
     }
+  });
+
+  it("shows Fabrary pins as the default art under the player's own picks", async () => {
+    const [pinnedCard, pickedCard] = [...new Set(pool.deck)].filter((id) => cardArtVariants(id).length > 1);
+    if (!pinnedCard || !pickedCard) throw new Error("test deck needs two cards with alternate art");
+    const [pick, pin] = cardArtVariants(pickedCard).map((variant) => variant.image);
+    const pinnedImage = cardArtVariants(pinnedCard)[1]!.image;
+    const started = await startArtGame(true, { [pickedCard]: pick! }, {
+      [pinnedCard]: pinnedImage, [pickedCard]: pin!,
+    });
+    expect(started.seats[0]!.cardArt).toEqual({ [pinnedCard]: pinnedImage, [pickedCard]: pick });
   });
 
   it("shows standard art for players outside the beta", async () => {

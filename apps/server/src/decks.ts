@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import type { DeckArt, DeckPool, EquipmentSlot, Format } from "@fyendal/shared";
+import type { CardData, DeckArt, DeckPool, EquipmentSlot, Format } from "@fyendal/shared";
 import {
   cardData,
   equipmentFitsSlot,
@@ -14,7 +14,7 @@ import { normalizeDeckArt } from "@fyendal/cards/art";
 import { deckArt, type FabraryMatchup } from "@fyendal/protocol";
 export { validatePresentation } from "@fyendal/cards";
 import { withTransaction, type Queryable } from "./db.js";
-import { parseFabraryDeckUrl, type FabraryClient, type FabraryDeckResult } from "./fabrary.js";
+import { parseFabraryDeckUrl, type FabraryClient, type FabraryDeckResult, type FabraryPin } from "./fabrary.js";
 
 /**
  * Saved user decks ("cc" / "silver-age" formats). Users import Fabrary export
@@ -140,6 +140,31 @@ const INVENTORY_FRONT_ID_BY_BACK_ID = new Map(
   Object.values(cardData).flatMap((card) => card.backId ? [[card.backId, card.id] as const] : []),
 );
 
+// Demi-heroes are registered inventory cards despite sharing the hero card
+// type. Fabrary lists Levia, Redeemed among arena cards alongside Levia's
+// starting hero, so it must not be mistaken for a second hero.
+function isInventoryHero(card: CardData): boolean {
+  return card.cardType === "hero" && /\bwhile this is in your inventory\b/i.test(card.text);
+}
+
+/** The printing id a deck stores for a card its list names. Fabrary may
+ * identify the back face of a double-faced inventory card; the deck stores its
+ * front so every deck holds the same physical printing (Blasmophet, Levia
+ * Consumed -> Levia, Redeemed). */
+function poolCardId(card: CardData): string {
+  return isInventoryHero(card) ? INVENTORY_FRONT_ID_BY_BACK_ID.get(card.id) ?? card.id : card.id;
+}
+
+/** Fabrary pins as printing id -> image id, kept only for valid images of cards in the pool. */
+function fabraryDeckArt(pool: DeckPool, pins: FabraryPin[]): Record<string, string> {
+  const picks: Record<string, string> = {};
+  for (const pin of pins) {
+    const card = findPrinting(pin.name, pin.pitch);
+    if (card) picks[poolCardId(card)] = pin.image;
+  }
+  return normalizeDeckArt(pool, { highestRarity: false, picks }).picks;
+}
+
 export type ValidationResult =
   | { ok: true; decklist: DeckPool; heroName: string }
   | { ok: false; errors: string[]; missing: string[]; unimplemented: string[] };
@@ -176,15 +201,8 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
       continue;
     }
     if (card.cardType === "hero") {
-      // Demi-heroes are registered inventory cards despite sharing the hero
-      // card type. Fabrary lists Levia, Redeemed among arena cards alongside
-      // Levia's starting hero, so it must not be mistaken for a second hero.
-      if (/\bwhile this is in your inventory\b/i.test(card.text)) {
-        // Fabrary may identify the back face of a double-faced inventory card.
-        // Store its front face so every deck holds the same physical printing
-        // (Blasmophet, Levia Consumed -> Levia, Redeemed).
-        const inventoryId = INVENTORY_FRONT_ID_BY_BACK_ID.get(card.id) ?? card.id;
-        for (let i = 0; i < line.qty; i++) inventoryPool.push(inventoryId);
+      if (isInventoryHero(card)) {
+        for (let i = 0; i < line.qty; i++) inventoryPool.push(poolCardId(card));
         continue;
       }
       if (heroId) {
@@ -418,6 +436,7 @@ export type FreshDeckResult =
     deck: DeckRow;
     matchups: FabraryMatchup[];
     selectedMatchupId?: string;
+    fabraryArt: Record<string, string>;
   }
   | {
     ok: false;
@@ -459,7 +478,7 @@ export async function resolveFreshDeck(
     if (matchupId !== undefined) {
       return { ok: false, status: 400, error: "this deck has no Fabrary matchups" };
     }
-    return { ok: true, deck: existing, matchups: [] };
+    return { ok: true, deck: existing, matchups: [], fabraryArt: {} };
   }
 
   const fetched = await fabraryClient.fetchDeck(existing.fabraryUrl, matchupId);
@@ -468,7 +487,7 @@ export async function resolveFreshDeck(
     // list falls back to the last successfully saved pool. Matchup variants
     // have no saved copy, and a 404 means the source deck is gone or private.
     if (matchupId === undefined && STALE_FALLBACK_STATUSES.has(fetched.status)) {
-      return { ok: true, deck: existing, matchups: [] };
+      return { ok: true, deck: existing, matchups: [], fabraryArt: {} };
     }
     return fabraryFailure(fetched);
   }
@@ -490,12 +509,14 @@ export async function resolveFreshDeck(
     decklist: validation.decklist,
     heroName: validation.heroName,
   };
+  const fabraryArt = fabraryDeckArt(validation.decklist, fetched.deck.pins);
   if (matchupId !== undefined) {
     return {
       ok: true,
       deck: refreshed,
       matchups: fetched.deck.matchups,
       selectedMatchupId: matchupId,
+      fabraryArt,
     };
   }
 
@@ -515,7 +536,7 @@ export async function resolveFreshDeck(
   );
   const saved = await getDeck(db, existing.id);
   if (!saved) return { ok: false, status: 404, error: "deck not found" };
-  return { ok: true, deck: saved, matchups: fetched.deck.matchups };
+  return { ok: true, deck: saved, matchups: fetched.deck.matchups, fabraryArt };
 }
 
 export async function listDecks(db: Queryable, userId: number): Promise<DeckRow[]> {
@@ -580,7 +601,7 @@ export async function resolveFabraryPlayDeck(
     const saved = STALE_FALLBACK_STATUSES.has(fetched.status)
       ? findLinkedDeck(await listDecks(db, userId), format, source.canonicalUrl)
       : undefined;
-    return saved ? { ok: true, deck: saved, matchups: [] } : fabraryFailure(fetched);
+    return saved ? { ok: true, deck: saved, matchups: [], fabraryArt: {} } : fabraryFailure(fetched);
   }
   const validation = validateDeck(parseDecklistText(fetched.deck.text), format);
   if (!validation.ok) {
@@ -602,7 +623,10 @@ export async function resolveFabraryPlayDeck(
       return { ok: false, status: 422, error: "invalid deck", errors: result.errors,
         missing: result.missing, unimplemented: result.unimplemented };
     }
-    return { ok: true, deck: result.deck, matchups: fetched.deck.matchups };
+    return {
+      ok: true, deck: result.deck, matchups: fetched.deck.matchups,
+      fabraryArt: fabraryDeckArt(result.deck.decklist, fetched.deck.pins),
+    };
   });
 }
 

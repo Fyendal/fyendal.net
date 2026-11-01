@@ -17,6 +17,7 @@ import {
 import { register } from "../auth.js";
 import { freshDb } from "./testdb.js";
 import { cardArtVariants } from "@fyendal/cards/art";
+import type { FabraryPin } from "../fabrary.js";
 import { STANDARD_CARD_ART } from "@fyendal/shared";
 
 const printings = Object.values(cardData) as CardData[];
@@ -911,6 +912,42 @@ describe("deck storage", () => {
     expect(stored.decklist.sideboard ?? []).toHaveLength(0);
   });
 
+  it("returns the fetched deck's Fabrary pins for cards in the pool without storing them", async () => {
+    const { db, userId } = await freshUser();
+    const sourceUrl = "https://fabrary.net/decks/01G76G1DP5VVB050BT3YV9TQ7K";
+    const text = ccExportText();
+    const imported = await importDeck(db, userId, { name: "Pinned", format: "cc", fabraryUrl: sourceUrl, text });
+    if (!imported.ok) throw new Error("import failed");
+    const [pinnedCard, otherCard] = [...new Set(imported.deck.decklist.deck)]
+      .filter((id) => cardArtVariants(id).length > 0);
+    if (!pinnedCard || !otherCard) throw new Error("test deck needs two cards with alternate art");
+    const deckNames = new Set(imported.deck.decklist.deck.map((id) => cardData[id]!.name));
+    const outside = Object.keys(cardData).find((id) =>
+      !deckNames.has(cardData[id]!.name) && cardArtVariants(id).length > 0)!;
+    const pin = cardArtVariants(pinnedCard)[0]!.image;
+    const pinFor = (id: string, image: string): FabraryPin => {
+      const { name, pitch } = cardData[id]!;
+      return { name, ...(pitch ? { pitch } : {}), image };
+    };
+    const fabraryClient = {
+      fetchDeck: async () => ({
+        ok: true as const,
+        deck: {
+          canonicalUrl: sourceUrl, name: "Provider name", text, matchups: [],
+          // Neither a card in the deck nor a catalog image of the card: both dropped.
+          pins: [pinFor(pinnedCard, pin), pinFor(outside, cardArtVariants(outside)[0]!.image),
+            pinFor(otherCard, "ZZZ999-CF")],
+        },
+      }),
+    };
+
+    const fresh = await resolveFreshDeck(db, userId, imported.deck.id, fabraryClient);
+    if (!fresh.ok) throw new Error(fresh.error);
+    expect(fresh.fabraryArt).toEqual({ [pinnedCard]: pin });
+    expect(fresh.deck.art).toEqual(imported.deck.art);
+    expect((await listDecks(db, userId))[0]!.art).toEqual(imported.deck.art);
+  });
+
   it("falls back to the saved default list when Fabrary is unavailable", async () => {
     const { db, userId } = await freshUser();
     const imported = await importDeck(db, userId, {
@@ -927,7 +964,7 @@ describe("deck storage", () => {
 
     for (status of [429, 502, 503] as const) {
       expect(await resolveFreshDeck(db, userId, imported.deck.id, fabraryClient))
-        .toEqual({ ok: true, deck: imported.deck, matchups: [] });
+        .toEqual({ ok: true, deck: imported.deck, matchups: [], fabraryArt: {} });
       expect(await resolveFreshDeck(db, userId, imported.deck.id, fabraryClient, "bravo-plan"))
         .toEqual({ ok: false, status, error: "Fabrary is down" });
     }

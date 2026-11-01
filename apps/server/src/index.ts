@@ -1189,14 +1189,16 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         if (!player) return;
         const room = await rooms.getRoom(player.code);
         const seat = ctx.seat === null ? null : room?.seats[ctx.seat];
+        let fabraryArt: Record<string, string> = {};
         if (seat?.deckId && ctx.user) {
           const refreshed = await resolveFreshDeck(deps.db, ctx.user.id, seat.deckId, fabraryClient);
           if (!refreshed.ok) {
             send(ws, { type: "error", message: refreshed.error });
             return;
           }
+          fabraryArt = refreshed.fabraryArt;
         }
-        const r = await rooms.presentDeck(player.code, player.credentials, msg.deck);
+        const r = await rooms.presentDeck(player.code, player.credentials, msg.deck, fabraryArt);
         if (!r.ok) {
           send(ws, { type: "error", message: r.error });
           return;

@@ -3351,6 +3351,8 @@ export class PgRoomStore {
     code: string,
     credentials: SeatCredentials,
     presented: PresentedDeck,
+    /** The linked Fabrary deck's printing pins from the refresh before ready. */
+    fabraryArt: Readonly<Record<string, string>> = {},
   ): Promise<{ ok: true; started: boolean; version: number } | { ok: false; error: string }> {
     const r = await this.withRetry<{ started: boolean }>(code.toUpperCase(), async (room) => {
       if (room.state) return { error: "game has already started" };
@@ -3391,7 +3393,7 @@ export class PgRoomStore {
       seat.ready = true;
       // Art locks at ready, so later deck edits apply from the next game.
       const artEnabled = seat.userId !== undefined && await isBetaTester(this.db, seat.userId);
-      const cardArt = artEnabled ? resolveDeckArt(pool, deck.art) : {};
+      const cardArt = artEnabled ? resolveDeckArt(pool, deck.art, fabraryArt) : {};
       if (Object.keys(cardArt).length > 0) seat.cardArt = cardArt;
       else delete seat.cardArt;
       const fullSeats = new Set<SeatIndex>([seatIdx]);
