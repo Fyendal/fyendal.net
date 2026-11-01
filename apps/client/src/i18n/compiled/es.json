@@ -35920,6 +35920,38 @@
       "value": "Equipo boca abajo"
     }
   ],
+  "prep.arena.gaps.back": [
+    {
+      "type": 0,
+      "value": "Volver"
+    }
+  ],
+  "prep.arena.gaps.confirm": [
+    {
+      "type": 0,
+      "value": "Bloquear igualmente"
+    }
+  ],
+  "prep.arena.gaps.description": [
+    {
+      "type": 0,
+      "value": "No seleccionaste nada para "
+    },
+    {
+      "type": 1,
+      "value": "zones"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "prep.arena.gaps.title": [
+    {
+      "type": 0,
+      "value": "¿Bloquear cartas de arena?"
+    }
+  ],
   "prep.arena.lock": [
     {
       "type": 0,
@@ -36864,7 +36896,7 @@
   "prep.tray.hint": [
     {
       "type": 0,
-      "value": "Toca una carta para apartarla."
+      "value": "Aquí van las cartas que apartes."
     }
   ],
   "prep.tray.showAll": [

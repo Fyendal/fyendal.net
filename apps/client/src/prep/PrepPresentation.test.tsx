@@ -280,14 +280,16 @@ describe("PrepPresentation equipment controls", () => {
       expect(inventory).toContain("prep-tile-lock");
     });
 
-    it("docks inventory as a tray on phones in either view", () => {
+    it("docks inventory on phones as a collapsed bar in either view", () => {
       vi.stubGlobal("localStorage", { getItem: () => "list", setItem: vi.fn() });
       const html = renderDeck(true);
       expect(html).not.toContain("prep-inventory-zone");
       expect(html).toContain('class="prep-tray"');
       expect(html).toContain('aria-label="Inventory (3)"');
       expect(html).toContain('aria-label="Show all" aria-expanded="false"');
-      expect(html.split("prep-tray-strip")[1]).toContain('aria-label="Move one copy of Nimblism to Main deck"');
+      const tray = html.split('class="prep-tray"')[1];
+      expect(tray).not.toContain("prep-tile");
+      expect(tray).not.toContain("prep-row");
       // The main deck still lists rows in list view.
       expect(html.split("prep-tray")[0]).toContain('class="prep-copies">1<');
     });
@@ -295,9 +297,8 @@ describe("PrepPresentation equipment controls", () => {
     it("explains the empty tray instead of offering to expand it", () => {
       vi.stubGlobal("localStorage", { getItem: () => "cards", setItem: vi.fn() });
       const html = renderDeck(true, 0);
-      expect(html).toContain("Tap a card to set it aside.");
+      expect(html).toContain("Cards you set aside go here.");
       expect(html).not.toContain("Show all");
-      expect(html).not.toContain("prep-tray-strip");
     });
   });
 

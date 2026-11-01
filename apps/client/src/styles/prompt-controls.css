@@ -19,7 +19,7 @@
   .deck-pick-modal,
   .match-accept-panel,
   .prep-match-accept-prompt,
-  .prep-bot-nudge,
+  .prep-dialog,
   .background-match-offer,
   .account-panel,
   .social-panel
@@ -45,7 +45,7 @@
   .deck-pick-modal,
   .match-accept-panel,
   .prep-match-accept-prompt,
-  .prep-bot-nudge,
+  .prep-dialog,
   .background-match-offer,
   .account-panel,
   .social-panel
@@ -63,7 +63,7 @@
   .deck-pick-modal,
   .match-accept-panel,
   .prep-match-accept-prompt,
-  .prep-bot-nudge,
+  .prep-dialog,
   .background-match-offer,
   .account-panel,
   .social-panel
@@ -83,7 +83,7 @@
   .deck-pick-modal,
   .match-accept-panel,
   .prep-match-accept-prompt,
-  .prep-bot-nudge,
+  .prep-dialog,
   .background-match-offer,
   .account-panel,
   .social-panel
@@ -101,7 +101,7 @@
   .deck-pick-modal,
   .match-accept-panel,
   .prep-match-accept-prompt,
-  .prep-bot-nudge,
+  .prep-dialog,
   .background-match-offer,
   .account-panel,
   .social-panel
@@ -122,7 +122,7 @@
   .deck-pick-modal,
   .match-accept-panel,
   .prep-match-accept-prompt,
-  .prep-bot-nudge,
+  .prep-dialog,
   .background-match-offer,
   .account-panel,
   .social-panel
@@ -131,7 +131,7 @@
   background: #5c4118;
   color: #fff0c5;
 }
-:where(.deck-pick-modal, .match-accept-panel, .prep-match-accept-prompt, .prep-bot-nudge) .panel-title {
+:where(.deck-pick-modal, .match-accept-panel, .prep-match-accept-prompt, .prep-dialog) .panel-title {
   font-family: var(--font-lobby-title);
   letter-spacing: normal;
   text-transform: none;

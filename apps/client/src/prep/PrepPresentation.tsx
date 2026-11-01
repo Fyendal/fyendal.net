@@ -533,11 +533,9 @@ export const PrepPresentation = memo(function PrepPresentation({
       )}
     </LedgerRow>
   );
-  // The phone tray always shows cards; the desktop column follows the chosen view.
-  const inventoryGrid = showTray || gridView;
   const inventoryList = (
     <ul className="prep-ledger">
-      {renderGroups(inventoryGroups, inventoryGrid, inventoryGrid ? inventoryTile : inventoryRow)}
+      {renderGroups(inventoryGroups, gridView, gridView ? inventoryTile : inventoryRow)}
     </ul>
   );
   const inventoryHeading = (
@@ -749,17 +747,16 @@ export const PrepPresentation = memo(function PrepPresentation({
                   >
                     <UiIcon name={trayOpen ? "chevron-down" : "chevron-up"} />
                   </button>
-                ) : null}
+                ) : (
+                  <p className="prep-tray-hint">{intl.formatMessage({ id: "prep.tray.hint" })}</p>
+                )}
               </div>
-              {inventoryCount === 0 ? (
-                <p className="prep-tray-hint">{intl.formatMessage({ id: "prep.tray.hint" })}</p>
-              ) : trayOpen ? (
-                <div className="prep-tray-body">{inventoryList}</div>
-              ) : (
-                <ul className="prep-tray-strip">
-                  {inventoryGroups.flatMap((group) => group.rows).map(inventoryTile)}
-                </ul>
-              )}
+              {trayOpen ? (
+                <div className="prep-tray-body">
+                  {gridView ? null : <LedgerHead />}
+                  {inventoryList}
+                </div>
+              ) : null}
             </div>
           </>
         ) : (

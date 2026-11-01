@@ -56,6 +56,19 @@ export function defaultSelection(pool: DeckPool, forDeck: string): PrepSelection
   };
 }
 
+export type ArenaGap = "weapon" | EquipmentSlot;
+
+/** Arena zones left bare although the pool registers cards that fit them. */
+export function arenaGaps(pool: DeckPool, selection: PrepSelection): ArenaGap[] {
+  const gaps: ArenaGap[] = pool.weaponIds.length > 0 && selection.weaponIndexes.length === 0 ? ["weapon"] : [];
+  for (const slot of EQUIPMENT_SLOTS) {
+    if (!selection.equipment[slot] && pool.equipmentPool.some((id) => equipmentFitsSlot(cardData[id], slot))) {
+      gaps.push(slot);
+    }
+  }
+  return gaps;
+}
+
 /** Copies available per cardId across the registered deck and sideboard. */
 export function poolCounts(pool: DeckPool): Map<string, number> {
   const counts = new Map<string, number>();

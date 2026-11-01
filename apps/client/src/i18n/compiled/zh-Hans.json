@@ -33258,6 +33258,34 @@
       "value": "牌面朝下的装备"
     }
   ],
+  "prep.arena.gaps.back": [
+    {
+      "type": 0,
+      "value": "返回"
+    }
+  ],
+  "prep.arena.gaps.confirm": [
+    {
+      "type": 0,
+      "value": "仍然锁定"
+    }
+  ],
+  "prep.arena.gaps.description": [
+    {
+      "type": 1,
+      "value": "zones"
+    },
+    {
+      "type": 0,
+      "value": "未选择任何卡牌。"
+    }
+  ],
+  "prep.arena.gaps.title": [
+    {
+      "type": 0,
+      "value": "锁定场上卡牌？"
+    }
+  ],
   "prep.arena.lock": [
     {
       "type": 0,
@@ -34138,7 +34166,7 @@
   "prep.tray.hint": [
     {
       "type": 0,
-      "value": "点按卡牌即可移入备牌区。"
+      "value": "移出主牌组的卡牌会放在这里。"
     }
   ],
   "prep.tray.showAll": [

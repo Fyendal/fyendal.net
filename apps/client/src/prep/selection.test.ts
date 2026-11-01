@@ -2,6 +2,7 @@ import type { DeckPool } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import {
   adjustMainCount,
+  arenaGaps,
   defaultSelection,
   defaultWeapons,
   poolCounts,
@@ -67,6 +68,16 @@ describe("prep deck selection", () => {
     );
 
     expect(selection.equipment).toEqual({ head: "EVO014", chest: "EVO013" });
+  });
+
+  it("flags only arena zones that registered cards could fill", () => {
+    const armed = { ...pool, weaponIds: ["WTR003"], equipmentPool: ["EVO014", "EVO013"] };
+    const selection = defaultSelection(armed, "deck-1");
+    const gaps = arenaGaps(armed, { ...selection, weaponIndexes: [], equipment: { head: "EVO014" } });
+    expect(gaps[0]).toBe("weapon");
+    expect(gaps).toContain("chest");
+    expect(gaps).not.toContain("head");
+    expect(arenaGaps(pool, defaultSelection(pool, "deck-1"))).toEqual([]);
   });
 
   it("defaults to the first two one-hand weapons", () => {

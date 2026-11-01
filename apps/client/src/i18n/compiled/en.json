@@ -35018,6 +35018,38 @@
       "value": "Face-down equipment"
     }
   ],
+  "prep.arena.gaps.back": [
+    {
+      "type": 0,
+      "value": "Go back"
+    }
+  ],
+  "prep.arena.gaps.confirm": [
+    {
+      "type": 0,
+      "value": "Lock anyway"
+    }
+  ],
+  "prep.arena.gaps.description": [
+    {
+      "type": 0,
+      "value": "Nothing selected for "
+    },
+    {
+      "type": 1,
+      "value": "zones"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "prep.arena.gaps.title": [
+    {
+      "type": 0,
+      "value": "Lock arena cards?"
+    }
+  ],
   "prep.arena.lock": [
     {
       "type": 0,
@@ -35962,7 +35994,7 @@
   "prep.tray.hint": [
     {
       "type": 0,
-      "value": "Tap a card to set it aside."
+      "value": "Cards you set aside go here."
     }
   ],
   "prep.tray.showAll": [

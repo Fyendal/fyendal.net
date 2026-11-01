@@ -25,12 +25,15 @@ import { useMobileCardLongPress } from "../game/mobileCardLongPress.js";
 import { formatLabel } from "../lobby/FormatBadge.js";
 import {
   adjustMainCount,
+  arenaGaps,
   defaultSelection,
   presentedDeckFromSelection,
   restoreMainDeck,
   poolCounts,
+  type ArenaGap,
   type PrepSelection,
 } from "./selection.js";
+import { ArenaGapsConfirm } from "./ArenaGapsConfirm.js";
 import { canChooseFirst, firstPlayerStatus } from "./firstPlayerStatus.js";
 import { derivePrepReadiness } from "./readiness.js";
 import { DeadlineCountdown } from "./DeadlineCountdown.js";
@@ -155,6 +158,7 @@ export function PrepRoom() {
   const [inspectedCardId, setInspectedCardId] = useState<string | null>(null);
   const cardLongPressHandlers = useMobileCardLongPress((cardId) => setInspectedCardId(cardId));
   const [errors, setErrors] = useState<string[]>([]);
+  const [confirmingGaps, setConfirmingGaps] = useState<ArenaGap[] | null>(null);
   const [weaponToast, setWeaponToast] = useState<{ message: string; shownAt: number } | null>(null);
   const [inviteCopied, setInviteCopied] = useState(false);
   const [matchupBusy, setMatchupBusy] = useState(false);
@@ -436,7 +440,7 @@ export function PrepRoom() {
     setSel({ ...selection, main: adjustMainCount(selection.main, poolMain, id, delta) });
   };
 
-  const onLockArena = () => {
+  const onLockArena = (confirmedGaps = false) => {
     if (!arenaStage || arenaLocked) return;
     const arena = {
       weaponIds: selection.weaponIndexes.map((index) => pool.weaponIds[index]!),
@@ -447,6 +451,13 @@ export function PrepRoom() {
       setErrors([validation.error]);
       return;
     }
+    // Usually a stray tap emptied the zone; confirm rather than block a deliberate choice.
+    const gaps = arenaGaps(pool, selection);
+    if (!confirmedGaps && gaps.length > 0) {
+      setConfirmingGaps(gaps);
+      return;
+    }
+    setConfirmingGaps(null);
     presentArena(arena);
   };
 
@@ -530,7 +541,7 @@ export function PrepRoom() {
     />
   );
   const arenaLockButton = (
-    <button type="button" className="btn-primary" onClick={onLockArena} disabled={!arenaStage || arenaLocked}>
+    <button type="button" className="btn-primary" onClick={() => onLockArena()} disabled={!arenaStage || arenaLocked}>
       {intl.formatMessage({ id: me?.arenaLocked ? "prep.arena.locked" : "prep.arena.lock" })}
       {prep?.deadlineAt && arenaStage ? <> · <DeadlineCountdown deadlineAt={prep.deadlineAt} /></> : null}
     </button>
@@ -771,6 +782,13 @@ export function PrepRoom() {
         </div>
       </div>
 
+      {confirmingGaps && arenaStage && !arenaLocked ? (
+        <ArenaGapsConfirm
+          gaps={confirmingGaps}
+          onConfirm={() => onLockArena(true)}
+          onCancel={() => setConfirmingGaps(null)}
+        />
+      ) : null}
       {botNudgeKey
         && botNudgeVisibleFor === botNudgeKey
         && botNudgeDismissedFor !== botNudgeKey
