@@ -56,6 +56,16 @@ describe("card art catalog", () => {
     expect(resolved).not.toHaveProperty("WTR159");
   });
 
+  it("shows default pins under the player's picks and over highest rarity", () => {
+    const defaults = { ARC159: "DYN000-CF", WTR159: "PEN320" };
+    const art = { highestRarity: true, picks: { ARC159: "HNT260" } };
+    expect(deckCardArt("ARC159", art, defaults)).toBe("HNT260");
+    expect(deckCardArt("WTR159", art, defaults)).toBe("PEN320");
+    expect(deckCardArt("WTR159", { highestRarity: false, picks: { WTR159: STANDARD_CARD_ART } }, defaults))
+      .toBeUndefined();
+    expect(resolveDeckArt(pool, { highestRarity: false, picks: {} }, defaults)).toEqual(defaults);
+  });
+
   it("drops picks for cards outside the deck and images of other cards", () => {
     expect(normalizeDeckArt(pool, {
       highestRarity: false,

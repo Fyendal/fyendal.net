@@ -53,11 +53,18 @@ export function highestRarityArt(cardId: string): string | undefined {
   return variants.length ? variants.reduce((best, next) => compareCardArt(next, best) > 0 ? next : best).image : undefined;
 }
 
-/** The image a deck shows for one printing; undefined keeps the standard art. */
-export function deckCardArt(cardId: string, art: DeckArt): string | undefined {
+/** The image a deck shows for one printing; undefined keeps the standard art.
+ * `defaults` (a linked Fabrary deck's pins) sit under the player's picks. */
+export function deckCardArt(
+  cardId: string,
+  art: DeckArt,
+  defaults: Readonly<Record<string, string>> = {},
+): string | undefined {
   const pick = art.picks[cardId];
   if (pick === STANDARD_CARD_ART) return undefined;
   if (pick !== undefined && isValidCardArt(cardId, pick)) return pick;
+  const fallback = defaults[cardId];
+  if (fallback !== undefined && isValidCardArt(cardId, fallback)) return fallback;
   return art.highestRarity ? highestRarityArt(cardId) : undefined;
 }
 
@@ -73,10 +80,14 @@ export function deckPoolCardIds(pool: DeckPool): string[] {
 }
 
 /** Every non-standard image the deck shows, keyed by printing id. */
-export function resolveDeckArt(pool: DeckPool, art: DeckArt): Record<string, string> {
+export function resolveDeckArt(
+  pool: DeckPool,
+  art: DeckArt,
+  defaults: Readonly<Record<string, string>> = {},
+): Record<string, string> {
   const resolved: Record<string, string> = {};
   for (const cardId of deckPoolCardIds(pool)) {
-    const image = deckCardArt(cardId, art);
+    const image = deckCardArt(cardId, art, defaults);
     if (image !== undefined) resolved[cardId] = image;
   }
   return resolved;
