@@ -529,16 +529,24 @@
 }
 .table:not([data-playability-cue="high-contrast"])
   .card-board-square.card-highlight:not(.card-selected):not(.card-chain-source) {
-  --board-square-glow:
-    drop-shadow(0 0 2px #adffca)
-    drop-shadow(0 0 6px #46e991e6)
-    drop-shadow(0 0 12px #20a960b3);
   box-shadow: none;
-  filter: var(--board-square-glow);
 }
+/* A rasterized shadow on the silhouette box: a drop-shadow filter re-blurs on
+   the GPU every frame, which stalls hand animations over a board of allies. */
 .table:not([data-playability-cue="high-contrast"])
-  .card-board-square.card-highlight.card-tapped:not(.card-selected):not(.card-chain-source) {
-  filter: brightness(.75) var(--board-square-glow);
+  .card-board-square.card-highlight:not(.card-selected):not(.card-chain-source)::after {
+  content: "";
+  position: absolute;
+  inset: var(--board-glow-top, calc(var(--board-art-top) - var(--board-name-height) / 2)) 0 var(--board-art-bottom);
+  border-radius: inherit;
+  /* A dark keyline separates the ring from the art; the deep green falloff
+     keeps it distinct on gold mats. */
+  box-shadow:
+    0 0 0 1px #031109,
+    0 0 0 3px #3fd57f,
+    0 0 6px 3px #17b85cb3,
+    0 0 14px 5px #0b7a3a73;
+  pointer-events: none;
 }
 .table[data-playability-cue="glow"]
   .card-board-square.card-highlight:not(.card-selected)::before {
@@ -576,6 +584,8 @@
    plate is cropped at the zoom that keeps it legible; the art beneath it uses a
    wider crop so the square shows the painting, not a detail of it. */
 .card-zone.card-board-square-marvel {
+  /* No drawn name bar for the playable glow to wrap. */
+  --board-glow-top: 0px;
   --board-art-top: 0cqi;
   --board-art-bottom: 0cqi;
   /* The plate stays opaque past the nameplate in both crops (16% of the card). */

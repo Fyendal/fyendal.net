@@ -34,18 +34,33 @@
    (arsenal), so that row counts as half a square; short windows shrink the
    arena rather than hiding more of it. */
 .table:has(.mat-square-board) {
-  --arena-square-pad: clamp(14px, 2.1vh, 22px);
-  --arena-square-gap: clamp(14px, 1.9vh, 20px);
+  /* Rows clear the next name bar's overhang and glow ring; nothing more. */
+  --arena-square-gap: clamp(12px, 1.4vh, 16px);
+  --arena-column-gap: clamp(6px, .8vh, 9px);
   --arena-band-clearance: 6px;
+  /* Half the status float centered on the seam, plus the playable glow. The
+     float may wrap to two lines until the seam fits every locale on one. */
+  --arena-seam-pad: 32px;
   --arena-square-fit: calc(
     (
-      var(--table-height) - 7px - 2 * var(--arena-square-pad) - 4 * var(--arena-square-gap)
+      var(--table-height) - 7px - 2 * var(--arena-seam-pad) - 4 * var(--arena-square-gap)
       - var(--opp-hand-band) - (var(--hand-card-height) - var(--hand-rest-offset))
       - var(--arena-band-clearance)
     ) / 5.5
   );
-  --arena-square-cap: min(12vh, 165px);
+  /* Seven square tracks, eight gaps, and the first spacer must fit the mat,
+     which sits beside the rail and keeps at most a 16:9 footprint. */
+  --arena-square-cap: min(165px, calc(
+    (
+      min(100vw - var(--rail-w) - 36px, var(--table-height) * 16 / 9)
+      - 8 * var(--arena-column-gap) - clamp(6px, .8vw, 16px)
+    ) / 7
+  ));
   --arena-square-size: max(48px, min(var(--arena-square-cap), var(--arena-square-fit)));
+}
+
+@media (min-width: 1360px) {
+  .table:has(.mat-square-board) { --arena-seam-pad: 24px; }
 }
 
 /* leather playmat */
@@ -426,7 +441,7 @@
    the equipment/hero cluster together and reserve the flexible runway for
    board permanents and piles. */
 .mat-half.mat-square-board {
-  --mat-column-gap: clamp(10px, 1.35vh, 15px);
+  --mat-column-gap: var(--arena-column-gap);
   --mat-zone-col: var(--arena-square-size);
   --mat-outer-col: var(--arena-square-size);
   --mat-arms-col: var(--arena-square-size);
@@ -517,13 +532,13 @@
     padding-bottom: clamp(10px, 1.8vh, 22px);
   }
 }
-.mat-half.mat-square-board { padding-top: var(--arena-square-pad); padding-bottom: 0; }
+.mat-half.mat-square-board { padding-top: var(--arena-seam-pad); padding-bottom: 0; }
 /* The opponent half takes only its rows plus the hand-back band above them;
    our half receives the remaining height, which includes the resting hand. */
 .mat-half.mat-square-board.mat-opp {
   flex: none;
   padding-top: calc(var(--opp-hand-band) + var(--arena-band-clearance));
-  padding-bottom: var(--arena-square-pad);
+  padding-bottom: var(--arena-seam-pad);
 }
 
 /* center divider between the two mat halves: a brass-inlay strip — hard
@@ -579,12 +594,48 @@
   white-space: normal;
   transform: none;
 }
+/* Shrink is shared in proportion, so an outsized factor keeps the float's
+   share below a layout unit until the leading spacer is spent. */
+.table:has(.mat-square-board) .mat-divider-center::before { flex-shrink: 1000000; }
+/* Desktop arenas set turn and timing on one line, wrapping only when the seam
+   is too narrow, so the float stays clear of the rows beside it. */
+.table:has(.mat-square-board) .mat-divider-center > .priority-float {
+  flex-shrink: 1;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 14px;
+  row-gap: 5px;
+}
+/* From here the seam is padded for one line, so beside minimized windows the
+   turn label gives way before the timing does. */
+@media (min-width: 1360px) {
+  .table:has(.mat-square-board) .mat-divider-center > .priority-float {
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+  .table:has(.mat-square-board) .mat-divider-center > .priority-float > * {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .table:has(.mat-square-board) .mat-divider-center .priority-turn { flex-shrink: 100; }
+}
 .mat-divider-mini-dock {
   display: flex;
   align-items: center;
   gap: 7px;
   width: max-content;
   pointer-events: none;
+}
+/* Minimized windows match the one-line status float; it wraps before they do. */
+.table:has(.mat-square-board) .mat-divider-mini-dock { flex: 0 0 auto; }
+.table:has(.mat-square-board) .mat-divider-mini-dock > :is(.chain-mini, .stack-mini) {
+  min-height: 0;
+  padding-block: 5px;
+  white-space: nowrap;
 }
 .mat-divider-mini-dock:empty { display: none; }
 .mat-divider-mini-dock > button { pointer-events: auto; }
@@ -717,14 +768,15 @@
 }
 .mat-square-board .board-cards { padding-left: 20px; }
 /* Expanded material stacks may cross the center seam. Lift their zone above
-   the neighboring mat half and relax the strip clip only for the preview. */
+   the neighboring mat half and relax the strip clip only for the preview.
+   A lone card has nothing to fan, so it stays below the status float. */
 @media (hover: hover) and (pointer: fine) {
-  .zone-board:has(.equipment-stack:hover),
-  .zone-board:has(.equipment-stack:focus-within) {
+  .zone-board:has(.equipment-stack:hover > .equipment-stack-card + .equipment-stack-card),
+  .zone-board:has(.equipment-stack:focus-within > .equipment-stack-card + .equipment-stack-card) {
     z-index: 6;
   }
-  .board-cards:has(.equipment-stack:hover),
-  .board-cards:has(.equipment-stack:focus-within) {
+  .board-cards:has(.equipment-stack:hover > .equipment-stack-card + .equipment-stack-card),
+  .board-cards:has(.equipment-stack:focus-within > .equipment-stack-card + .equipment-stack-card) {
     overflow: visible;
   }
 }
@@ -1353,9 +1405,6 @@
     --mat-weapon-1-col: var(--large-zone-card-width);
     --mat-tapped-col: var(--large-zone-card-height);
     grid-template-rows: repeat(3, var(--large-zone-card-height));
-  }
-  .table:has(.mat-square-board) {
-    --arena-square-cap: min(12vh, 10.05vw);
   }
   .mat-half .card-zone {
     width: var(--large-zone-card-width);
