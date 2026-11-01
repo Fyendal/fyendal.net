@@ -1,6 +1,7 @@
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import {
   chooseScoredIntent,
+  currentAllyAttackIsAlreadyLethal,
   currentLink,
   effectIsCommitted,
   enforceAllyTargetPolicy,
@@ -598,7 +599,8 @@ function scorePlay(
   } else if (functional === "pummel|1") {
     const link = currentLink(input);
     const deficit = link ? link.defenseValue - link.attackValue : Number.POSITIVE_INFINITY;
-    score = link?.attackingCard.owner === input.seat && deficit < 4
+    score = link?.attackingCard.owner === input.seat && deficit < 4 &&
+        !currentAllyAttackIsAlreadyLethal(input)
       ? 62 + Math.max(0, input.view.players[1 - input.seat]!.handCount) * 2
       : -100;
   } else if (functional === "sprout strength|1") {

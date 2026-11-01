@@ -1340,6 +1340,15 @@ describe("Levia Gates policy", () => {
       }));
     });
 
+    it("attacks with Fallen Herald on the opening turn to stock a six in the graveyard", () => {
+      const state = game();
+      state.turn = 1;
+      hand(state, ["IAR165", "CRU007", "MON140"]);
+      const herald = state.players[0]!.hand[0]!;
+      expect(state.players[1]!.hand.length).toBeGreaterThan(2);
+      expect(choice(state)).toMatchObject({ kind: "play-card", instanceId: herald.instanceId });
+    });
+
     it.each([
       ["a redundant second copy", ["IAR165", "IAR165", "MON140"], 40],
       ["lethal damage", ["IAR165", "MON140", "IAR026"], 4],

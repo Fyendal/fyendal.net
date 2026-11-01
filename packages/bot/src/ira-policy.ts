@@ -1,8 +1,8 @@
 import type { GameState } from "@fyendal/engine";
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import {
-  allyLethalThreshold,
   chooseScoredIntent,
+  currentAllyAttackIsAlreadyLethal,
   currentAttackIsOurs,
   currentLink,
   enforceAllyTargetPolicy,
@@ -135,11 +135,6 @@ function currentAttackHasOrWillGetGoAgain(input: BotPolicyInput): boolean {
   })) return true;
   if (link.defenseValue >= link.attackValue) return false;
   return link.onHitEffects?.some((effect) => /\bgo again\b/i.test(effect.text)) === true;
-}
-
-function currentAllyAttackIsAlreadyLethal(input: BotPolicyInput): boolean {
-  const link = currentLink(input);
-  return !!link?.targetAlly && link.attackValue >= allyLethalThreshold(link.targetAlly, input);
 }
 
 function likelyGoAgain(functional: string, data: CardData, previous: string, input: BotPolicyInput): boolean {

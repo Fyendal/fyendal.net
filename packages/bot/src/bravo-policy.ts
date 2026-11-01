@@ -2,6 +2,7 @@ import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import {
   chooseScoredIntent,
   committedEffectAmount,
+  currentAllyAttackIsAlreadyLethal,
   currentAttackIsOurs,
   currentLink,
   enforceSpectraPolicy,
@@ -272,7 +273,9 @@ function scorePlay(
       score = -100;
     } else if (functional === "pummel|1" && link) {
       const damageAfterPummel = link.attackValue + 4 - link.defenseValue;
-      score = damageAfterPummel >= 4 ? 48 : damageAfterPummel > 0 ? 34 : -20;
+      score = currentAllyAttackIsAlreadyLethal(input)
+        ? -100
+        : damageAfterPummel >= 4 ? 48 : damageAfterPummel > 0 ? 34 : -20;
     } else {
       score = 8;
     }

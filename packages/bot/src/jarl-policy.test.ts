@@ -1140,6 +1140,34 @@ describe("Jarl policy", () => {
       .toEqual({ kind: "pass" });
   });
 
+  it("does not Pummel an attack that already destroys its ally target", () => {
+    const opponent = gravyDeck();
+    const state = createGame({
+      decklists: [jarlDeck(opponent), opponent], cards: cardData, scripts,
+      seed: 12_205, startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, ["SBR020", "AJV014"]);
+    const ally = { instanceId: state.nextInstanceId++, cardId: "SEA077", owner: 1, life: 1 };
+    state.players[1]!.board.push(ally);
+    const view = projectStateFor(state, 0);
+    const [pummel, blue] = view.players[0].hand;
+    view.phase = "reaction";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "attack-reaction", prompt: "Attack reactions" };
+    view.chain = [{
+      attackingCard: { instanceId: 90_205, cardId: "SUP262", owner: 0 },
+      targetAlly: view.players[1].board.find((card) => card.instanceId === ally.instanceId),
+      defendingCards: [], attackValue: 2, defenseValue: 0, damage: 0,
+      resolved: false, reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "pass" },
+      { kind: "play-card", instanceId: pummel!.instanceId, pitchInstanceIds: [blue!.instanceId] },
+    ];
+    expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData })).toEqual({ kind: "pass" });
+  });
+
   it("defends with Canopy Shelter to preserve life and create Might", () => {
     const state = createGame({
       decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,

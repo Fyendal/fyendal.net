@@ -2068,6 +2068,12 @@ export function allyLethalThreshold(ally: CardView, input: BotPolicyInput): numb
     : life;
 }
 
+/** The current attack already destroys the ally it targets. */
+export function currentAllyAttackIsAlreadyLethal(input: BotPolicyInput): boolean {
+  const link = currentLink(input);
+  return !!link?.targetAlly && link.attackValue >= allyLethalThreshold(link.targetAlly, input);
+}
+
 interface AllyTargetPolicyOptions {
   damage?(card: CardView, input: BotPolicyInput): number;
   preserveHeroTarget?(card: CardView, input: BotPolicyInput): boolean;
