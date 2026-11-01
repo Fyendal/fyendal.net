@@ -2868,6 +2868,8 @@
   "game.decision.endTurn.action": "仍然结束回合",
   "game.decision.opt.instructions": "最后放到顶部的牌位于最上方；最后放到底部的牌位于最下方。",
   "game.decision.opt.top": "顶部",
+  "game.decision.sheet.hide": "隐藏选择",
+  "game.decision.sheet.show": "显示选择",
   "game.decision.opt.bottom": "底部",
   "game.decision.playAs.action": "作为行动打出",
   "game.decision.playAs.attackReaction": "作为攻击反应打出",

@@ -30191,6 +30191,18 @@
       "value": "maximum"
     }
   ],
+  "game.decision.sheet.hide": [
+    {
+      "type": 0,
+      "value": "Ocultar escolha"
+    }
+  ],
+  "game.decision.sheet.show": [
+    {
+      "type": 0,
+      "value": "Mostrar escolha"
+    }
+  ],
   "game.decision.target.opponent": [
     {
       "type": 0,

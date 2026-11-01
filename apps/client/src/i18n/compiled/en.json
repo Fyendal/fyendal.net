@@ -28633,6 +28633,18 @@
       "value": " selected"
     }
   ],
+  "game.decision.sheet.hide": [
+    {
+      "type": 0,
+      "value": "Hide choice"
+    }
+  ],
+  "game.decision.sheet.show": [
+    {
+      "type": 0,
+      "value": "Show choice"
+    }
+  ],
   "game.decision.target.opponent": [
     {
       "type": 0,

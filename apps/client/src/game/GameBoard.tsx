@@ -722,6 +722,7 @@ export function GameBoard() {
     me.heroInstanceId,
     opp.heroInstanceId,
     me.weapons.map((weapon) => weapon.instanceId),
+    me.arsenal.map((card) => card.instanceId),
     {
       yourHero: intl.formatMessage(
         { id: "game.zone.mine" },
@@ -733,6 +734,10 @@ export function GameBoard() {
       ),
       leftWeapon: intl.formatMessage({ id: "game.zone.weapon.left" }),
       rightWeapon: intl.formatMessage({ id: "game.zone.weapon.right" }),
+      yourArsenal: intl.formatMessage(
+        { id: "game.zone.mine" },
+        { zone: intl.formatMessage({ id: "game.zone.arsenal" }) },
+      ),
     },
   );
   const showPriorityFloat = !spectating && !replaying && presentedPriority.priorityPlayer !== null;
@@ -1143,6 +1148,10 @@ export function GameBoard() {
     awaitingHandoff ||
     !connected ||
     (defending ? defendIntent === null : !derived.canPass);
+  // Keep a disabled Pass while a choice carries its own answers, so the HUD
+  // and phone bar don't reflow.
+  const shownPrimaryAction: PrimaryAction | null = primaryAction ??
+    (spectating || replaying || view.phase === "game-over" ? null : "pass");
   const passUntilAvailable = connected && !spectating && !replaying && view.phase !== "game-over";
   const armPassUntil = (mode: PassUntilMode) => {
     if (mode !== "chain-link" && endTurnWarning) {
@@ -1590,8 +1599,8 @@ export function GameBoard() {
         activeHeroName={activeHeroName}
         actionPoints={view.players[view.activePlayer]!.actionPoints}
         myResources={me.resources + (me.chi ?? 0)}
-        primaryAction={primaryAction}
-        passDisabled={primaryActionDisabled}
+        primaryAction={shownPrimaryAction}
+        passDisabled={primaryAction === null || primaryActionDisabled}
         onPass={triggerPrimaryAction}
         passUntil={passUntilControl("hud")}
         onUndo={mobileLandscapeViewport && canUndo ? () => undoAndDismissAnnouncement("last-action") : null}
@@ -1860,8 +1869,8 @@ export function GameBoard() {
         viewerSeat={seat}
         roomCode={roomCode}
         onInspectCard={setInspectedCardId}
-        mobilePrimaryAction={primaryAction}
-        mobilePrimaryActionDisabled={primaryActionDisabled}
+        mobilePrimaryAction={shownPrimaryAction}
+        mobilePrimaryActionDisabled={primaryAction === null || primaryActionDisabled}
         onMobilePrimaryAction={triggerPrimaryAction}
         mobilePassUntil={passUntilControl("toolbar")}
         backgroundSearching={backgroundSearching}

@@ -1,4 +1,5 @@
 import type { PendingDecision } from "@fyendal/shared";
+import { useState } from "react";
 import { useFloatDrag } from "./useFloatDrag.js";
 import { bloodModeAllocation } from "./decisionPresentation.js";
 import type { Sel } from "./useActionAnnouncement.js";
@@ -10,6 +11,7 @@ import type {
 import { PendingDecisionPanel, pendingDecisionPanelShown } from "./decision/PendingDecisionPanel.js";
 import { ChoiceHotkeysEnabled } from "./decision/choiceHotkeys.js";
 import { EndTurnConfirmation } from "./decision/ActionConfirmations.js";
+import { DecisionSheetMinimize, DecisionSheetRestore } from "./decision/DecisionSheet.js";
 
 export type { ActionAnnouncementModel, PendingDecisionModel } from "./decision/DecisionModels.js";
 
@@ -60,15 +62,16 @@ export function DecisionFloat({
   /** Present while the player confirms ending the turn with an unused action point. */
   endTurnConfirmation?: { onConfirm: () => void; onCancel: () => void } | null;
 }) {
-  const decisionFloat = useFloatDrag({
-    resetKey: endTurnConfirmation
-      ? "end-turn-confirmation"
-      : decisionFloatDragKey(
-          pending.decision,
-          action.sel,
-          action.autoCommitPending,
-        ),
-  });
+  const resetKey = endTurnConfirmation
+    ? "end-turn-confirmation"
+    : decisionFloatDragKey(
+        pending.decision,
+        action.sel,
+        action.autoCommitPending,
+      );
+  const decisionFloat = useFloatDrag({ resetKey });
+  const [minimizedKey, setMinimizedKey] = useState<string | null>(null);
+  const minimized = minimizedKey === resetKey;
   if (
     !endTurnConfirmation &&
     !pendingDecisionPanelShown(pending) &&
@@ -79,25 +82,30 @@ export function DecisionFloat({
 
   return (
     <div
-      className={`float decision-float${pitchFocused ? " decision-float-pitch" : ""}`}
+      className={`float decision-float${pitchFocused ? " decision-float-pitch" : ""}${
+        minimized ? " decision-float-minimized" : ""
+      }`}
       style={pitchFocused ? undefined : decisionFloat.style}
       {...(pitchFocused ? {} : decisionFloat.dragProps)}
     >
-      <ChoiceHotkeysEnabled.Provider value={optionHotkeys}>
-        {endTurnConfirmation ? (
-          <div className="decision decision-options decision-choice">
-            <EndTurnConfirmation
-              onConfirm={endTurnConfirmation.onConfirm}
-              onCancel={endTurnConfirmation.onCancel}
-            />
-          </div>
-        ) : (
-          <>
-            <PendingDecisionPanel model={pending} viewerSeat={viewerSeat} />
-            <ActionAnnouncementPanel model={action} viewerSeat={viewerSeat} />
-          </>
-        )}
-      </ChoiceHotkeysEnabled.Provider>
+      {minimized ? <DecisionSheetRestore onRestore={() => setMinimizedKey(null)} /> : null}
+      <DecisionSheetMinimize.Provider value={() => setMinimizedKey(resetKey)}>
+        <ChoiceHotkeysEnabled.Provider value={optionHotkeys}>
+          {endTurnConfirmation ? (
+            <div className="decision decision-options decision-choice">
+              <EndTurnConfirmation
+                onConfirm={endTurnConfirmation.onConfirm}
+                onCancel={endTurnConfirmation.onCancel}
+              />
+            </div>
+          ) : (
+            <>
+              <PendingDecisionPanel model={pending} viewerSeat={viewerSeat} />
+              <ActionAnnouncementPanel model={action} viewerSeat={viewerSeat} />
+            </>
+          )}
+        </ChoiceHotkeysEnabled.Provider>
+      </DecisionSheetMinimize.Provider>
     </div>
   );
 }

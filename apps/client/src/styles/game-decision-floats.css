@@ -1432,3 +1432,52 @@
   grid-template-columns: 46px minmax(0, 1fr) auto;
   cursor: default;
 }
+
+/* Phone choice sheets can be hidden to look at the board; phone layouts show
+   the control (mobile-game.css) and the float swaps the sheet for a pill. */
+.decision-sheet-minimize {
+  display: none;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  width: 44px;
+  min-width: 0;
+  height: 44px;
+  min-height: 0;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-secondary);
+  font-size: 20px;
+}
+.decision-sheet-minimize:hover {
+  background: #ffffff12;
+  color: var(--text-primary);
+}
+.decision-sheet-minimize:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+.decision-sheet-restore {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 18px 8px 14px;
+  border: 1px solid #b8933f99;
+  border-radius: 999px;
+  background: #1e1812f5;
+  box-shadow: 0 8px 24px #000a, 0 0 0 3px #c9a62733;
+  clip-path: none;
+  color: var(--text-primary);
+  font: 600 15px/1 var(--font-lobby-ui);
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+.decision-sheet-restore:hover { border-color: var(--gold); }
+.decision-sheet-restore .ui-icon { font-size: 18px; color: var(--gold); }

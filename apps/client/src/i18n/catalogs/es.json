@@ -2868,6 +2868,8 @@
   "game.decision.endTurn.action": "Terminar turno igualmente",
   "game.decision.opt.instructions": "La última carta en Arriba queda encima de todo; la última en Abajo, debajo de todo.",
   "game.decision.opt.top": "Arriba",
+  "game.decision.sheet.hide": "Ocultar elección",
+  "game.decision.sheet.show": "Mostrar elección",
   "game.decision.opt.bottom": "Abajo",
   "game.decision.playAs.action": "Jugar como action",
   "game.decision.playAs.attackReaction": "Jugar como attack reaction",

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { createTestIntl, TestI18nProvider } from "../i18n/TestI18nProvider.js";
 import { SquareCardPresentation } from "./Card.js";
 import { decisionFloatDragKey } from "./DecisionFloat.js";
+import { DecisionSheetMinimize } from "./decision/DecisionSheet.js";
 import { BloodModeDecision } from "./decision/BloodModeDecision.js";
 import { ActionTargetCards, RevealedChoiceCards, targetPlayPermissionNote } from "./decision/CardChoices.js";
 import type { PendingDecisionModel } from "./decision/DecisionModels.js";
@@ -405,7 +406,7 @@ describe("priority guidance help", () => {
     };
     const html = renderLocalized(createElement(PendingDecisionPanel, { model, viewerSeat: 0 }));
 
-    expect(html).toContain('class="decision decision-options decision-choice"');
+    expect(html).toContain('class="decision decision-options decision-choice decision-sheet"');
     expect(html.match(/class="decision-choice-option"/g)).toHaveLength(3);
     expect(html).toContain(">Pass</span>");
     expect(html).not.toContain('class="decision-buttons"');
@@ -721,16 +722,23 @@ describe("scripted card-choice presentation", () => {
     expect(duplicateCardsHtml).toContain('aria-hidden="true">Discard Duty Bound Blitz</span>');
   });
 
+  const LOCATION_TEXT = {
+    yourHero: "Your Hero",
+    opponentHero: "Opponent's Hero",
+    leftWeapon: "Left weapon",
+    rightWeapon: "Right weapon",
+    yourArsenal: "Your Arsenal",
+  };
+
   it("labels hero choices relative to the deciding player", () => {
-    expect(cardChoiceLocationLabels(11, 22, [], {
-      yourHero: "Your Hero",
-      opponentHero: "Opponent's Hero",
-      leftWeapon: "Left weapon",
-      rightWeapon: "Right weapon",
-    })).toEqual(new Map([
+    expect(cardChoiceLocationLabels(11, 22, [], [], LOCATION_TEXT)).toEqual(new Map([
       [11, "Your Hero"],
       [22, "Opponent's Hero"],
     ]));
+  });
+
+  it("labels arsenal choices so a duplicate in hand stays distinguishable", () => {
+    expect(cardChoiceLocationLabels(11, 22, [], [33], LOCATION_TEXT).get(33)).toBe("Your Arsenal");
   });
 
   it("labels matching weapon choices by their table position", () => {
@@ -773,6 +781,52 @@ describe("scripted card-choice presentation", () => {
     expect(html).toContain('aria-label="TST-DAGGER — Right weapon"');
     expect(html).toContain('aria-hidden="true">Left weapon</span>');
     expect(html).toContain('aria-hidden="true">Right weapon</span>');
+  });
+
+  it("opens card choices as a sheet that the float can hide", () => {
+    const card = { instanceId: 41, cardId: "TST-DAGGER", owner: 0 };
+    const model: PendingDecisionModel = {
+      decision: {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Choose a dagger",
+        options: ["no", "41"],
+        optionCards: [null, card],
+      },
+      isMine: true,
+      canPass: false,
+      defendPitchIds: new Set(),
+      hand: [],
+      defendSel: [],
+      selectedPitchIds: [],
+      onTogglePitch: () => undefined,
+      resourcePaymentSelected: 0,
+      resourcePaymentRequired: 0,
+      confirmSkipArsenal: false,
+      onRequestPass: () => undefined,
+      onDisableGuidance: () => undefined,
+      onConfirmSkipArsenal: () => undefined,
+      onCancelSkipArsenal: () => undefined,
+      onSend: () => undefined,
+    };
+
+    const html = renderLocalized(
+      <DecisionSheetMinimize.Provider value={() => undefined}>
+        <PendingDecisionPanel model={model} viewerSeat={0} />
+      </DecisionSheetMinimize.Provider>,
+    );
+    expect(html).toContain("decision-sheet");
+    expect(html).toContain('aria-label="Hide choice"');
+
+    const handPick = renderLocalized(
+      <DecisionSheetMinimize.Provider value={() => undefined}>
+        <PendingDecisionPanel
+          model={{ ...model, decision: { ...model.decision!, options: ["pass", "41"] }, hand: [card] }}
+          viewerSeat={0}
+        />
+      </DecisionSheetMinimize.Provider>,
+    );
+    expect(handPick).not.toContain("decision-sheet");
   });
 
   it("marks the scripted Space default among card choices", () => {

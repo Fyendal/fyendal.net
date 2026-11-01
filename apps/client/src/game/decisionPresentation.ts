@@ -5,15 +5,18 @@ export interface CardChoiceLocationLabelText {
   opponentHero: string;
   leftWeapon: string;
   rightWeapon: string;
+  yourArsenal: string;
 }
 
 /** Viewer-relative labels for public permanents whose artwork alone can make
  * a scripted card choice ambiguous. Hero labels are always included so an
- * effect such as Oasis Respite cannot silently be assigned to the wrong hero. */
+ * effect such as Oasis Respite cannot silently be assigned to the wrong hero.
+ * Arsenal cards are labeled so a copy in arsenal is distinct from one in hand. */
 export function cardChoiceLocationLabels(
   yourHeroInstanceId: number,
   opponentHeroInstanceId: number,
   yourWeaponInstanceIds: readonly number[],
+  yourArsenalInstanceIds: readonly number[],
   text: CardChoiceLocationLabelText,
 ): ReadonlyMap<number, string> {
   const labels = new Map<number, string>([
@@ -24,6 +27,7 @@ export function cardChoiceLocationLabels(
     labels.set(yourWeaponInstanceIds[0]!, text.leftWeapon);
     labels.set(yourWeaponInstanceIds[1]!, text.rightWeapon);
   }
+  for (const instanceId of yourArsenalInstanceIds) labels.set(instanceId, text.yourArsenal);
   return labels;
 }
 

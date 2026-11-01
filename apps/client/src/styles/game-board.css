@@ -1191,8 +1191,10 @@
 /* Touch keeps :hover on the last tapped card, which would leave it raised. */
 @media (hover: hover) {
   .hand .card-hand:hover { z-index: 1; transform: none; }
-  /* A raised card reaches the prompt float, so lift it above; pitch focus stays on top. */
-  .table:not(:has(.pitch-focus)) .hand:has(.card-hand:hover) {
+  /* A raised card reaches the prompt float, so lift it above; pitch focus and
+     open choice sheets stay on top. */
+  .table:not(:has(.pitch-focus, .decision-float:not(.decision-float-minimized) > .decision-sheet))
+    .hand:has(.card-hand:hover) {
     z-index: calc(var(--game-z-prompt) + 1);
   }
 }

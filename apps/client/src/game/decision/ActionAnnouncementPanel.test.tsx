@@ -340,7 +340,7 @@ describe("Boost choices", () => {
       />,
     );
 
-    expect(html).toContain('class="decision decision-options decision-post-payment decision-choice"');
+    expect(html).toContain('class="decision decision-options decision-post-payment decision-choice decision-sheet"');
     expect(html.indexOf(">Boost</span>")).toBeLessThan(
       html.indexOf(">Don&#x27;t boost</span>"),
     );

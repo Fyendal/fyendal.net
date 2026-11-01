@@ -2868,6 +2868,8 @@
   "game.decision.endTurn.action": "Encerrar turno mesmo assim",
   "game.decision.opt.instructions": "O último Topo fica mais acima; o último Fundo fica mais abaixo.",
   "game.decision.opt.top": "Topo",
+  "game.decision.sheet.hide": "Ocultar escolha",
+  "game.decision.sheet.show": "Mostrar escolha",
   "game.decision.opt.bottom": "Fundo",
   "game.decision.playAs.action": "Jogar como action",
   "game.decision.playAs.attackReaction": "Jogar como attack reaction",

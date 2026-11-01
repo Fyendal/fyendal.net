@@ -2868,6 +2868,8 @@
   "game.decision.endTurn.action": "End turn anyway",
   "game.decision.opt.instructions": "Last Top is topmost; last Bottom is bottommost.",
   "game.decision.opt.top": "Top",
+  "game.decision.sheet.hide": "Hide choice",
+  "game.decision.sheet.show": "Show choice",
   "game.decision.opt.bottom": "Bottom",
   "game.decision.playAs.action": "Play as action",
   "game.decision.playAs.attackReaction": "Play as attack reaction",

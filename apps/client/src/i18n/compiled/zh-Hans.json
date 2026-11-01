@@ -27514,6 +27514,18 @@
       "value": "maximum"
     }
   ],
+  "game.decision.sheet.hide": [
+    {
+      "type": 0,
+      "value": "隐藏选择"
+    }
+  ],
+  "game.decision.sheet.show": [
+    {
+      "type": 0,
+      "value": "显示选择"
+    }
+  ],
   "game.decision.target.opponent": [
     {
       "type": 0,

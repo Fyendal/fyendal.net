@@ -35,6 +35,7 @@ import type { PendingDecisionModel } from "./DecisionModels.js";
 import { NameChoiceAutocomplete } from "./NameChoiceAutocomplete.js";
 import { EffectChoiceDecision } from "./EffectChoiceDecision.js";
 import { TriggerOrderDecision } from "./TriggerOrderDecision.js";
+import { DecisionSheetMinimizeButton } from "./DecisionSheet.js";
 
 /** Legacy literal option values that render through shared catalog labels. */
 const LITERAL_OPTION_MESSAGES = {
@@ -505,6 +506,10 @@ export function PendingDecisionPanel({
     onConfirmBoundedChoice !== undefined &&
     !onToggleBoundedChoice;
   const boundedFloat = boundedCardChoice && !boundedInHand ? boundedCardChoice : null;
+  // Prompts that carry their own options open as a sheet on phones; ones
+  // answered from the hand or board stay small floats.
+  const sheet = choiceModal || showChoiceGrid || optDecision || bloodAllocation !== null ||
+    revealedChoice || effectList || pd.kind === "order-triggers" || boundedFloat !== null;
 
   return (
     <div className={`decision decision-options${
@@ -513,11 +518,12 @@ export function PendingDecisionPanel({
       pd.kind === "order-triggers" || effectList ? " decision-trigger-order" : ""
     }${effectList ? " decision-effect-list" : ""}${
       boundedFloat ? " decision-bounded" : ""
-    }`}
+    }${sheet ? " decision-sheet" : ""}`}
     style={boundedFloat
       ? { "--bounded-choice-columns": boundedChoiceColumns(boundedFloat.choices.length) } as CSSProperties
       : undefined}
     >
+      {sheet ? <DecisionSheetMinimizeButton /> : null}
       <DecisionPrompt
         prompt={pd.kind === "arsenal"
           ? intl.formatMessage({ id: "game.decision.arsenal.choosePrompt" })

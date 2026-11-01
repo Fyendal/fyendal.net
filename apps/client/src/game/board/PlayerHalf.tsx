@@ -700,6 +700,8 @@ export function PlayerHalf({
             const canBlock = mine && card !== undefined && interaction.defending && !blocking &&
               interaction.legal.stageableDefenders.has(card.instanceId);
             const playable = card !== undefined && interaction.legal.playableArsenal.has(card.instanceId);
+            const canActivate = mine && card !== undefined && !interaction.defending &&
+              interaction.legal.activatable.has(card.instanceId);
 
             return (
               <div
@@ -720,18 +722,22 @@ export function PlayerHalf({
                       { kind: "arsenal", seat: player.seat },
                       card.instanceId,
                     )}
-                    dimmed={mine && (blocking || (card.faceDown && !playable && !canBlock))}
-                    highlighted={playable || canBlock}
+                    dimmed={mine && (blocking || (card.faceDown && !playable && !canActivate && !canBlock))}
+                    highlighted={playable || canActivate || canBlock}
                     selected={
                       (interaction.selection.kind === "play-arsenal" &&
                         interaction.selection.instanceId === card.instanceId) ||
+                      (interaction.selection.kind === "activate" &&
+                        interaction.selection.sourceInstanceId === card.instanceId) ||
                       interaction.preStackSelectedInstanceId === card.instanceId
                     }
                     onClick={canBlock
                       ? () => interaction.onStage([...interaction.stagedIds, card.instanceId])
                       : playable
                         ? () => interaction.onSelect({ kind: "play-arsenal", instanceId: card.instanceId })
-                        : undefined}
+                        : canActivate
+                          ? activate(card.instanceId)
+                          : undefined}
                     showFaceUp={!card.faceDown}
                   />
                 ) : slot.hidden ? (

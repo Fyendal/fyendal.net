@@ -94,11 +94,12 @@ function renderPlayerHalf(
 
 function renderArenaInteraction(
   overrides: Partial<ComponentProps<typeof PlayerHalf>["interaction"]>,
+  playerView: PlayerView = player,
 ): string {
   return renderToStaticMarkup(
     <TestI18nProvider locale="en">
       <PlayerHalf
-        player={player}
+        player={playerView}
         mine
         mirrored={false}
         ongoing={[]}
@@ -564,6 +565,28 @@ describe("PlayerHalf", () => {
 
     expect(html).toMatch(
       /class="card card-zone [^"]*card-highlight[^"]*card-clickable"[^>]*data-cardid="TST-AMBUSH"/,
+    );
+  });
+
+  it("makes a face-down arsenal card with an activatable ability highlighted and clickable", () => {
+    const html = renderArenaInteraction({
+      legal: {
+        playableHand: new Set(),
+        playableArsenal: new Set(),
+        playableZones: new Map(),
+        activatable: new Set([30]),
+        stageableDefenders: new Set(),
+        canPass: true,
+        canCloseChain: false,
+      },
+    }, {
+      ...player,
+      arsenal: [{ instanceId: 30, cardId: "TST-MENTOR", owner: 0, faceDown: true }],
+      arsenalCount: 1,
+    });
+
+    expect(html).toMatch(
+      /class="card card-zone [^"]*card-highlight[^"]*card-clickable"[^>]*data-cardid="TST-MENTOR"/,
     );
   });
 

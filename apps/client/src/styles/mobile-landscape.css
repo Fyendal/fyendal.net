@@ -199,6 +199,22 @@
   .decision-cards { gap: 10px; padding: 8px; }
   .decision-cards .card-selected::before { top: 4px; right: 4px; width: 18px; height: 18px; font-size: 11px; }
   .decision-optcard button { min-width: 72px; }
+  /* Choice sheets center over the board, clear of the rail, and may grow to
+     the full height so the prompt never runs off the top. */
+  .decision.decision-sheet {
+    --sheet-card-w: 76px;
+    --sheet-max-height: calc(100dvh - 16px);
+    inset: auto calc(var(--rail-w) + 12px) max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    width: auto;
+    max-width: 600px;
+    margin-inline: auto;
+    border-radius: 12px;
+  }
+  /* Cost groups sit side by side: the sheet is wide but short, so stacking
+     them hides the second group below the fold. */
+  .decision-sheet > .decision-additional-cost-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 
   /* ── control bar ── */
   /* Collapsed, the rail is a toolbar over the two player plates. */
