@@ -2854,6 +2854,7 @@
   "game.decision.closeChain.prompt": "Fechar a combat chain?",
   "game.decision.closeChain.context": "Jogar {card} vai fechar a combat chain atual.",
   "game.decision.closeChain.action": "Fechar chain e jogar",
+  "game.decision.equipFails.warning": "Atenção: não é possível equipar {card} porque {equipped} é um equipamento que não é base nesse espaço. A carta vai para o seu cemitério.",
   "game.decision.action.confirm": "{verb} {target}?",
   "game.decision.arsenal.prompt": "Pular o arsenal?",
   "game.decision.arsenal.context": "Encerrar o turno sem colocar uma carta no seu arsenal?",

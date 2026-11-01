@@ -2183,13 +2183,13 @@ Object.assign(sea, {
   },
   "give no quarter|3": {
     onPlay(ctx: ScriptCtx) {
-      for (let i = 0; i < 2; i++)
-        ctx.addModifier({
-          scope: "until-end-of-turn",
-          playCostReduction: 3,
-          appliesToSubtype: "ally",
-          appliesToKeyword: "watery grave",
-        });
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        playCostReduction: 3,
+        appliesToSubtype: "ally",
+        appliesToKeyword: "watery grave",
+        remainingCostUses: 2,
+      });
     },
   },
   "chum, friendly first mate|2": {

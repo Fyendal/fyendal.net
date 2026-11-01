@@ -19,6 +19,7 @@ function paymentModel(
     sel: { kind: "play-hand", instanceId: 1 },
     selCardId: undefined,
     step: "payment",
+    equipBlockedBy: undefined,
     autoCommitPending: false,
     abilityChoices: [],
     onSelectAbility: noop,

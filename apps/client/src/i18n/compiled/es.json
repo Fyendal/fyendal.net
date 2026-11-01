@@ -29307,6 +29307,28 @@
       "value": "Aún te queda un Action Point. ¿Seguro que quieres terminar tu turno?"
     }
   ],
+  "game.decision.equipFails.warning": [
+    {
+      "type": 0,
+      "value": "Atención: "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " no se puede equipar porque "
+    },
+    {
+      "type": 1,
+      "value": "equipped"
+    },
+    {
+      "type": 0,
+      "value": " es un equipo que no es base en esa ranura. Irá a tu cementerio."
+    }
+  ],
   "game.decision.name.choose": [
     {
       "type": 0,

@@ -2854,6 +2854,7 @@
   "game.decision.closeChain.prompt": "关闭战斗链？",
   "game.decision.closeChain.context": "打出 {card} 将关闭当前战斗链。",
   "game.decision.closeChain.action": "关闭战斗链并打出",
+  "game.decision.equipFails.warning": "警告：该部位的 {equipped} 不是基础装备，{card} 无法装备，将被置入你的墓地。",
   "game.decision.action.confirm": "{verb}{target}？",
   "game.decision.arsenal.prompt": "跳过Arsenal？",
   "game.decision.arsenal.context": "结束回合且不将卡牌放入Arsenal？",

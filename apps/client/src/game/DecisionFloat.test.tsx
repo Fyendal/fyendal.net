@@ -1147,6 +1147,21 @@ describe("action confirmation", () => {
     expect(html).toContain("Play (Space)");
     expect(html).toContain('aria-keyshortcuts="Space"');
     expect(html).toContain("Cancel");
+    expect(html).not.toContain("graveyard");
+  });
+
+  it("warns when the played equipment will go to the graveyard", () => {
+    const html = renderLocalized(createElement(ActionConfirmation, {
+      cardId: "TEST-CARD",
+      activation: false,
+      equipBlockedBy: "MST228",
+      onConfirm: () => undefined,
+      onCancel: () => undefined,
+    }));
+
+    expect(html).toContain("can&#x27;t be equipped");
+    expect(html).toContain("graveyard");
+    expect(html).toContain("Evo Recall");
   });
 });
 

@@ -27278,6 +27278,28 @@
       "value": "你还有行动点，确定要结束回合吗？"
     }
   ],
+  "game.decision.equipFails.warning": [
+    {
+      "type": 0,
+      "value": "警告：该部位的 "
+    },
+    {
+      "type": 1,
+      "value": "equipped"
+    },
+    {
+      "type": 0,
+      "value": " 不是基础装备，"
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 无法装备，将被置入你的墓地。"
+    }
+  ],
   "game.decision.name.choose": [
     {
       "type": 0,

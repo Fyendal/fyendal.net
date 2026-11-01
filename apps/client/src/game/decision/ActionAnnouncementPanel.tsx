@@ -30,6 +30,7 @@ export function ActionAnnouncementPanel({
     sel,
     selCardId,
     step,
+    equipBlockedBy,
     abilityChoices,
     onSelectAbility,
     onChooseHandPlay,
@@ -391,6 +392,7 @@ export function ActionAnnouncementPanel({
       {step === "close-chain" ? (
         <ChainCloseConfirmation
           cardId={selCardId}
+          equipBlockedBy={equipBlockedBy}
           onConfirm={onConfirmChainClose}
           onCancel={onCancel}
         />
@@ -399,6 +401,7 @@ export function ActionAnnouncementPanel({
         <ActionConfirmation
           cardId={selCardId}
           activation={sel.kind === "activate"}
+          equipBlockedBy={equipBlockedBy}
           onConfirm={onConfirmAction}
           onCancel={onCancel}
         />

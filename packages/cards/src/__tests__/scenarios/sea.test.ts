@@ -1779,4 +1779,23 @@ describe("SEA — rules regression coverage", () => {
       .expectHandSize(0, handSize)
       .expectZoneSize(0, "deck", deckSize);
   });
+
+  it("Give No Quarter discounts only the next 2 watery grave allies by 3 each", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 12,
+          hand: ["give no quarter|3", "wailer humperdinck|2", "wailer humperdinck|2", "wailer humperdinck|2"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("give no quarter|3").play("wailer humperdinck|2").expectResources(0, 9);
+    g.state.players[0]!.actionPoints = 1;
+    g.play("wailer humperdinck|2").expectResources(0, 6);
+    g.state.players[0]!.actionPoints = 1;
+    g.play("wailer humperdinck|2").expectResources(0, 0);
+  });
 });

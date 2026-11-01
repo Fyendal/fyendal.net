@@ -3,6 +3,7 @@ import type { GameIntent } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import {
   actionAnnouncementReducer,
+  blockingEquipmentByPlay,
   committedActionIntent,
   handCardSelection,
   INITIAL_ANNOUNCEMENT,
@@ -409,5 +410,18 @@ describe("combat-chain close confirmation", () => {
       { instanceId: 22, cardId: attack!.id, owner: 0 },
     ]);
     expect([...ids]).toEqual([21]);
+  });
+});
+
+describe("blocked equipment plays", () => {
+  it("flags an Evo head only while a non-base head is equipped", () => {
+    const id = (name: string) => Object.values(cardData).find((data) => data.name === name)!.id;
+    const memory = { instanceId: 31, cardId: id("Evo Steel Soul Memory"), owner: 0 };
+    const recall = { instanceId: 32, cardId: id("Evo Recall"), owner: 0 };
+    const baseHead = { instanceId: 33, cardId: id("Cogwerx Base Head"), owner: 0 };
+
+    expect([...blockingEquipmentByPlay([memory], { head: recall })]).toEqual([[31, recall.cardId]]);
+    expect([...blockingEquipmentByPlay([memory], { head: baseHead })]).toEqual([]);
+    expect([...blockingEquipmentByPlay([memory], {})]).toEqual([]);
   });
 });

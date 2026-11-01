@@ -36,6 +36,8 @@ export interface ActionAnnouncementModel {
   sel: Sel;
   selCardId: string | undefined;
   step: ActionStep;
+  /** Non-base equipment that sends the selected equipment play to the graveyard. */
+  equipBlockedBy: string | undefined;
   autoCommitPending: boolean;
   abilityChoices: { index: number; label: string }[];
   onSelectAbility: (index: number) => void;

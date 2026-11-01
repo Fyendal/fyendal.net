@@ -44,6 +44,7 @@ import { causalStatus, gameHasPriority, gameTimingLabel } from "./causalExplanat
 import { visibleDeckTop } from "./visibleDeckTop.js";
 import {
   abilityIndexes,
+  blockingEquipmentByPlay,
   handCardSelection,
   nonAttackActionPlayIds,
   useActionAnnouncement,
@@ -425,20 +426,25 @@ export function GameBoard() {
 
   const playerView = view !== null && yourSeat !== null ? view.players[yourSeat] : undefined;
   const playerHand = playerView?.hand ?? [];
-  const chainClosingPlayIds = derived.canCloseChain && playerView
-    ? nonAttackActionPlayIds([
+  const playableCards = playerView
+    ? [
       ...playerView.hand,
       ...playerView.arsenal,
       ...playerView.graveyard,
       ...playerView.banish,
       ...(playerView.visibleDeckTop ? [playerView.visibleDeckTop] : []),
-    ])
+    ]
+    : [];
+  const chainClosingPlayIds = derived.canCloseChain
+    ? nonAttackActionPlayIds(playableCards)
     : new Set<number>();
+  const blockingEquipment = blockingEquipmentByPlay(playableCards, playerView?.equipment ?? {});
   const announcement = useActionAnnouncement({
     actionCandidates,
     legalIntents: legal,
     hand: playerHand,
     chainClosingPlayIds,
+    blockingEquipment,
     skipPlayConfirmation,
     sendIntent,
   });
@@ -452,6 +458,7 @@ export function GameBoard() {
     alternativeCostCardInstanceIds,
     additionalCostConfirmed,
     actionStep,
+    equipBlockedBy,
     alternativeCostSets,
     stagedAdditionalCost: stagedAdditionalCostDefinition,
     stagedAdditionalCostCandidateIds,
@@ -1699,6 +1706,7 @@ export function GameBoard() {
           sel,
           selCardId,
           step: actionStep,
+          equipBlockedBy,
           autoCommitPending,
           abilityChoices: sel.kind === "activate"
             ? selectedAbilityIndexes.map((index) => ({

@@ -26,12 +26,29 @@ export function orderedBoostOptions(options: readonly number[]): number[] {
   });
 }
 
+function EquipFailWarning({ cardId, blockerId }: { cardId: string | undefined; blockerId: string }) {
+  const intl = useIntl();
+  return (
+    <span className="decision-context">
+      {intl.formatMessage(
+        { id: "game.decision.equipFails.warning" },
+        {
+          card: cardId ? <CardRef id={cardId} /> : intl.formatMessage({ id: "game.card" }),
+          equipped: <CardRef id={blockerId} />,
+        },
+      )}
+    </span>
+  );
+}
+
 export function ChainCloseConfirmation({
   cardId,
+  equipBlockedBy,
   onConfirm,
   onCancel,
 }: {
   cardId: string | undefined;
+  equipBlockedBy?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -45,6 +62,7 @@ export function ChainCloseConfirmation({
           { card: cardId ? <CardRef id={cardId} /> : intl.formatMessage({ id: "game.card.nonAttack" }) },
         )}
       </span>
+      {equipBlockedBy ? <EquipFailWarning cardId={cardId} blockerId={equipBlockedBy} /> : null}
       <ChoiceList
         options={[{
           key: "close-chain",
@@ -61,11 +79,13 @@ export function ChainCloseConfirmation({
 export function ActionConfirmation({
   cardId,
   activation,
+  equipBlockedBy,
   onConfirm,
   onCancel,
 }: {
   cardId: string | undefined;
   activation: boolean;
+  equipBlockedBy?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -84,6 +104,7 @@ export function ActionConfirmation({
           },
         )}
       </span>
+      {equipBlockedBy ? <EquipFailWarning cardId={cardId} blockerId={equipBlockedBy} /> : null}
       <ChoiceList
         options={[{ key: "confirm", label: verb, spaceDefault: true, onChoose: onConfirm }]}
       />

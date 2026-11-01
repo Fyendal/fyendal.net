@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer } from "react";
-import type { CardView, GameIntent, MeldSide, PlayableZone } from "@fyendal/shared";
+import type { CardView, EquipmentSlot, GameIntent, MeldSide, PlayableZone } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import {
   actionSelectionVariants,
@@ -228,16 +228,40 @@ export function actionAnnouncementReducer(
   }
 }
 
+function isPlayIntent(intent: GameIntent): intent is Extract<
+  GameIntent,
+  { kind: "play-card" | "play-from-arsenal" | "play-from-zone" }
+> {
+  return intent.kind === "play-card" || intent.kind === "play-from-arsenal" ||
+    intent.kind === "play-from-zone";
+}
+
 export function requiresChainCloseConfirmation(
   intent: GameIntent,
   chainClosingPlayIds: ReadonlySet<number>,
 ): boolean {
-  if (
-    intent.kind !== "play-card" &&
-    intent.kind !== "play-from-arsenal" &&
-    intent.kind !== "play-from-zone"
-  ) return false;
+  if (!isPlayIntent(intent)) return false;
   return intent.asInstant !== true && chainClosingPlayIds.has(intent.instanceId);
+}
+
+const EQUIPMENT_SLOTS: readonly EquipmentSlot[] = ["head", "chest", "arms", "legs"];
+
+/** CR 8.5.41c: equipment played over a non-base piece goes to the graveyard. */
+export function blockingEquipmentByPlay(
+  cards: readonly CardView[],
+  equipment: Partial<Record<EquipmentSlot, CardView>>,
+): ReadonlyMap<number, string> {
+  const blockers = new Map<number, string>();
+  for (const card of cards) {
+    const data = cardData[card.cardId];
+    if (data?.cardType !== "equipment") continue;
+    const slot = EQUIPMENT_SLOTS.find((candidate) => (data.subtypes ?? []).includes(candidate));
+    const occupant = slot ? equipment[slot] : undefined;
+    if (occupant && !(cardData[occupant.cardId]?.subtypes ?? []).includes("base")) {
+      blockers.set(card.instanceId, occupant.cardId);
+    }
+  }
+  return blockers;
 }
 
 export function nonAttackActionPlayIds(cards: readonly CardView[]): ReadonlySet<number> {
@@ -337,6 +361,7 @@ export function useActionAnnouncement({
   legalIntents,
   hand,
   chainClosingPlayIds,
+  blockingEquipment,
   skipPlayConfirmation,
   sendIntent,
 }: {
@@ -346,6 +371,7 @@ export function useActionAnnouncement({
   legalIntents: readonly GameIntent[];
   hand: readonly CardView[];
   chainClosingPlayIds: ReadonlySet<number>;
+  blockingEquipment: ReadonlyMap<number, string>;
   skipPlayConfirmation: boolean;
   sendIntent: (intent: GameIntent) => boolean;
 }) {
@@ -480,7 +506,11 @@ export function useActionAnnouncement({
         : chainCloseConfirmationRequired && !chainCloseConfirmed
           ? "close-chain"
           : "confirm";
+  const equipBlockedBy = chosenActionIntent !== null && isPlayIntent(chosenActionIntent)
+    ? blockingEquipment.get(chosenActionIntent.instanceId)
+    : undefined;
   const autoCommitPending =
+    equipBlockedBy === undefined &&
     chosenActionIntent !== null &&
     paymentReady &&
     targetReady &&
@@ -502,6 +532,7 @@ export function useActionAnnouncement({
   return {
     ...state,
     actionStep,
+    equipBlockedBy,
     alternativeCostSets,
     stagedAdditionalCost,
     stagedAdditionalCostCandidateIds,

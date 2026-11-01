@@ -2854,6 +2854,7 @@
   "game.decision.closeChain.prompt": "Close the combat chain?",
   "game.decision.closeChain.context": "Playing {card} will close the current combat chain.",
   "game.decision.closeChain.action": "Close chain and play",
+  "game.decision.equipFails.warning": "Warning: {card} can't be equipped because {equipped} is a non-base equipment in that slot. It will go to your graveyard.",
   "game.decision.action.confirm": "{verb} {target}?",
   "game.decision.arsenal.prompt": "Skip arsenal?",
   "game.decision.arsenal.context": "End the turn without putting a card into your arsenal?",
