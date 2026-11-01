@@ -126,6 +126,20 @@
     "set": "MPA"
   },
   {
+    "id": "MPA023",
+    "name": "Painful Choice",
+    "cardType": "action",
+    "text": "Stealth\nWhen this attacks, you may put a card from your hand on the bottom of your deck. If you do, this gets +4{p} unless the defending hero chooses a card in their hand. Banish the chosen card.",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA024",
     "name": "Prey on Insecurity",
     "cardType": "action",

@@ -11913,6 +11913,54 @@
       "value": "Los ataques obtienen +1 de poder en este chain link"
     }
   ],
+  "card.mpa.painfulchoice.banish": [
+    {
+      "type": 0,
+      "value": "Elige una carta de tu mano de la que hacer banish, o "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " obtiene +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de poder"
+    }
+  ],
+  "card.mpa.painfulchoice.bottom": [
+    {
+      "type": 0,
+      "value": "Painful Choice: ¿poner una carta de tu mano en la parte inferior de tu mazo?"
+    }
+  ],
+  "card.mpa.painfulchoice.option.power": [
+    {
+      "type": 0,
+      "value": "Darle +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de poder"
+    }
+  ],
+  "card.mpa.painfulchoice.trigger": [
+    {
+      "type": 0,
+      "value": "Puedes poner una carta de tu mano en la parte inferior de tu mazo"
+    }
+  ],
   "card.mpa.prolonged.copy": [
     {
       "type": 0,

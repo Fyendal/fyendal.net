@@ -18,6 +18,7 @@ const VIRAL_DIFFUSION = "viral diffusion|1";
 const WIDESPREAD_RUIN = "widespread ruin|1";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 const OUTBREAK = "outbreak|3";
+const PAINFUL_CHOICE = "painful choice|1";
 const SPIKE_SLASHER = "spike slasher|1";
 const TAILORED = "tailored targeting|1";
 const PHIAL = "phial of calamity|0";
@@ -155,6 +156,56 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       "Frailty", "Inertia", "Bloodrot Pox",
     ]));
     expect(boardNames(game, 0)).not.toContain("Frailty");
+  });
+
+  it("Painful Choice gets +4 power when the defending hero declines to banish", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [PAINFUL_CHOICE, FLIP], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", hand: [OUTBREAK], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(PAINFUL_CHOICE).chooseCard(FLIP).chooseOption("power");
+
+    expect(cardData[game.state.players[0]!.deck.at(-1)!.cardId]!.name).toBe("Flip the Script");
+    expect(game.state.players[1]!.hand).toHaveLength(1);
+    game.expectAttackValue(7);
+  });
+
+  it("Painful Choice stays at base power when the defending hero banishes a card", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [PAINFUL_CHOICE, FLIP], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", hand: [OUTBREAK], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(PAINFUL_CHOICE).chooseCard(FLIP).chooseCard(OUTBREAK);
+
+    expect(game.state.players[1]!.hand).toHaveLength(0);
+    expect(cardData[game.state.players[1]!.banish.at(-1)!.cardId]!.name).toBe("Outbreak");
+    game.expectAttackValue(3);
+  });
+
+  it("Painful Choice gets +4 power against an empty hand", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [PAINFUL_CHOICE, FLIP], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(PAINFUL_CHOICE).chooseCard(FLIP);
+
+    game.expectAttackValue(7);
+  });
+
+  it("Painful Choice does nothing when its controller passes", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [PAINFUL_CHOICE, FLIP], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", hand: [OUTBREAK], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    game.play(PAINFUL_CHOICE).chooseOption("pass");
+
+    expect(game.state.players[0]!.hand).toHaveLength(1);
+    expect(game.state.players[1]!.hand).toHaveLength(1);
+    game.expectAttackValue(3);
   });
 
   it("Spike Slasher makes attack reactions cost 1 less this chain link", () => {

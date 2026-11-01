@@ -11070,6 +11070,54 @@
       "value": "本 chain link 中的攻击 +1 力量"
     }
   ],
+  "card.mpa.painfulchoice.banish": [
+    {
+      "type": 0,
+      "value": "选择一张你的手牌并放逐，否则 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.mpa.painfulchoice.bottom": [
+    {
+      "type": 0,
+      "value": "Painful Choice：将一张手牌置于你的牌库底？"
+    }
+  ],
+  "card.mpa.painfulchoice.option.power": [
+    {
+      "type": 0,
+      "value": "让其获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
+  "card.mpa.painfulchoice.trigger": [
+    {
+      "type": 0,
+      "value": "你可以将一张手牌置于你的牌库底"
+    }
+  ],
   "card.mpa.prolonged.copy": [
     {
       "type": 0,

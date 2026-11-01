@@ -99,6 +99,31 @@ function leavesChainAsAttack(fallback: string, messageId: string, effect: (ctx: 
   );
 }
 
+const painfulChoicePower = (ctx: ScriptCtx): void =>
+  ctx.addModifier({ scope: "chain-link", attack: 4, appliesToInstanceId: ctx.self.instanceId });
+
+function offerPainfulChoice(ctx: ScriptCtx): void {
+  const defender = opponentSeat(ctx);
+  const hand = ctx.player(defender).hand;
+  if (!hand.length) {
+    painfulChoicePower(ctx);
+    return;
+  }
+  ctx.requestCardChoice(
+    "mpa-painful-banish",
+    decisionPrompt(
+      "Choose a card in your hand to banish, or Painful Choice gets +4 power",
+      "card.mpa.painfulchoice.banish",
+      {
+        values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 4 },
+        optionMessages: { power: decisionMessage("card.mpa.painfulchoice.option.power", { amount: 4 }) },
+      },
+    ),
+    ["power", ...hand.map((card) => card.instanceId)],
+    defender,
+  );
+}
+
 export const mpa: Record<string, CardScript> = {
   "phial of calamity|0": {
     triggers: [equipWithSilver(2)],
@@ -245,6 +270,37 @@ export const mpa: Record<string, CardScript> = {
         },
       },
     ],
+  },
+
+  "painful choice|1": {
+    triggers: [
+      {
+        event: "attack-declared",
+        sourceZone: "self",
+        label: "You may put a card from your hand on the bottom of your deck",
+        labelMessage: decisionMessage("card.mpa.painfulchoice.trigger"),
+        condition: (ctx) => ctx.player(ctx.seat).hand.length > 0,
+        effect(ctx) {
+          ctx.requestCardChoice(
+            "mpa-painful-bottom",
+            decisionPrompt(
+              "Painful Choice: put a card from your hand on the bottom of your deck?",
+              "card.mpa.painfulchoice.bottom",
+              { optionMessages: commonOptionMessages("pass") },
+            ),
+            ["pass", ...ctx.player(ctx.seat).hand.map((card) => card.instanceId)],
+          );
+        },
+      },
+    ],
+    onChoose(ctx, hook, option) {
+      if (hook === "mpa-painful-bottom") {
+        if (option !== "pass" && ctx.putOnDeckBottom(Number(option))) offerPainfulChoice(ctx);
+      } else if (hook === "mpa-painful-banish") {
+        if (option === "power") painfulChoicePower(ctx);
+        else ctx.banish(Number(option));
+      }
+    },
   },
 
   "prey on insecurity|1": {

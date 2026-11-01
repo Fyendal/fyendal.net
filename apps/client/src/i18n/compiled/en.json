@@ -11883,6 +11883,54 @@
       "value": "Attacks get +1 power this chain link"
     }
   ],
+  "card.mpa.painfulchoice.banish": [
+    {
+      "type": 0,
+      "value": "Choose a card in your hand to banish, or "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " gets +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power"
+    }
+  ],
+  "card.mpa.painfulchoice.bottom": [
+    {
+      "type": 0,
+      "value": "Painful Choice: put a card from your hand on the bottom of your deck?"
+    }
+  ],
+  "card.mpa.painfulchoice.option.power": [
+    {
+      "type": 0,
+      "value": "Give it +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power"
+    }
+  ],
+  "card.mpa.painfulchoice.trigger": [
+    {
+      "type": 0,
+      "value": "You may put a card from your hand on the bottom of your deck"
+    }
+  ],
   "card.mpa.prolonged.copy": [
     {
       "type": 0,

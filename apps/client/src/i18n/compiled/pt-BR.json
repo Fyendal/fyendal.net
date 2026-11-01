@@ -12277,6 +12277,54 @@
       "value": "Ataques recebem +1 de poder neste chain link"
     }
   ],
+  "card.mpa.painfulchoice.banish": [
+    {
+      "type": 0,
+      "value": "Escolha uma carta da sua mão para fazer banish, ou "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " recebe +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de poder"
+    }
+  ],
+  "card.mpa.painfulchoice.bottom": [
+    {
+      "type": 0,
+      "value": "Painful Choice: colocar uma carta da sua mão no fundo do seu deck?"
+    }
+  ],
+  "card.mpa.painfulchoice.option.power": [
+    {
+      "type": 0,
+      "value": "Dar +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de poder"
+    }
+  ],
+  "card.mpa.painfulchoice.trigger": [
+    {
+      "type": 0,
+      "value": "Você pode colocar uma carta da sua mão no fundo do seu deck"
+    }
+  ],
   "card.mpa.prolonged.copy": [
     {
       "type": 0,
