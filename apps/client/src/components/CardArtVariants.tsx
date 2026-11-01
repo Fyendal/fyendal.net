@@ -4,6 +4,7 @@ import { cardData } from "@fyendal/cards/client";
 import type { CardArtVariant } from "@fyendal/cards/art";
 import { STANDARD_CARD_ART, type DeckArt } from "@fyendal/shared";
 import { CardArtwork, cardImageUrl } from "../game/Card.js";
+import { TooltipLabel } from "./TooltipLabel.js";
 import type { CardArtCatalog } from "../game/cardArtCatalog.js";
 
 interface ArtOption {
@@ -76,6 +77,9 @@ export function CardArtVariants({
   const current = shownCardArt(catalog, cardId, art, defaults);
   const auto = shownCardArt(catalog, cardId, { highestRarity: art.highestRarity, picks: {} }, defaults);
   const picked = art.picks[cardId] !== undefined;
+  const pin = defaults?.[cardId];
+  const autoSource = pin !== undefined && catalog.isValidCardArt(cardId, pin) ? "fabrary"
+    : art.highestRarity && catalog.highestRarityArt(cardId) !== undefined ? "rarest" : "standard";
 
   const label = (option: ArtOption) => {
     const variant = option.variant;
@@ -152,7 +156,13 @@ export function CardArtVariants({
               <span className="card-art-variant-label">
                 {label(option)}
                 {option.image === auto ? (
-                  <span className="card-art-tag">{intl.formatMessage({ id: "lobby.deck.art.auto" })}</span>
+                  <TooltipLabel
+                    className="card-art-tag"
+                    label={intl.formatMessage({ id: `lobby.deck.art.autoHint.${autoSource}` })}
+                    tabIndex={-1}
+                  >
+                    {intl.formatMessage({ id: "lobby.deck.art.auto" })}
+                  </TooltipLabel>
                 ) : null}
               </span>
               <span className="card-art-variant-set">{setCode(option)}</span>

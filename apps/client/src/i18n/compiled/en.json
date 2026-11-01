@@ -33270,6 +33270,24 @@
       "value": "Auto"
     }
   ],
+  "lobby.deck.art.autoHint.fabrary": [
+    {
+      "type": 0,
+      "value": "Auto: the printing your Fabrary deck uses. Pick another to override it."
+    }
+  ],
+  "lobby.deck.art.autoHint.rarest": [
+    {
+      "type": 0,
+      "value": "Auto: the highest-rarity printing, since highest-rarity art is on. Pick another to override it."
+    }
+  ],
+  "lobby.deck.art.autoHint.standard": [
+    {
+      "type": 0,
+      "value": "Auto: the standard printing. Pick another to override it."
+    }
+  ],
   "lobby.deck.art.chooseFor": [
     {
       "type": 0,

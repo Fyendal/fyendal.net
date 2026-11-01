@@ -52,6 +52,15 @@ describe("card art choices", () => {
     expect(html.match(/aria-checked="true"/g)).toHaveLength(1);
     expect(html).toContain("Use auto");
     expect(html).toContain("Fabled, Cold Foil");
+    expect(html).toContain("Auto: the highest-rarity printing");
+  });
+
+  it("explains that the automatic printing comes from the Fabrary deck", () => {
+    const html = renderToStaticMarkup(createElement(TestI18nProvider, null,
+      createElement(CardArtVariants, {
+        catalog, cardId: "ARC159", art: on, defaults: { ARC159: "HNT260" }, onChange: () => {},
+      })));
+    expect(html).toContain("Auto: the printing your Fabrary deck uses");
   });
 });
 

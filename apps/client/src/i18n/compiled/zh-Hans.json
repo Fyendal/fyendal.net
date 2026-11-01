@@ -31695,6 +31695,24 @@
       "value": "自动"
     }
   ],
+  "lobby.deck.art.autoHint.fabrary": [
+    {
+      "type": 0,
+      "value": "自动：你的 Fabrary 卡组使用的版本。选择其他版本即可替换。"
+    }
+  ],
+  "lobby.deck.art.autoHint.rarest": [
+    {
+      "type": 0,
+      "value": "自动：最高稀有度的版本，因为已开启最高稀有度卡图。选择其他版本即可替换。"
+    }
+  ],
+  "lobby.deck.art.autoHint.standard": [
+    {
+      "type": 0,
+      "value": "自动：标准版本。选择其他版本即可替换。"
+    }
+  ],
   "lobby.deck.art.chooseFor": [
     {
       "type": 0,

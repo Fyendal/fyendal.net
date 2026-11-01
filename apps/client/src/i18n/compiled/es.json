@@ -34176,6 +34176,24 @@
       "value": "Auto"
     }
   ],
+  "lobby.deck.art.autoHint.fabrary": [
+    {
+      "type": 0,
+      "value": "Auto: la impresión que usa tu mazo de Fabrary. Elige otra para cambiarla."
+    }
+  ],
+  "lobby.deck.art.autoHint.rarest": [
+    {
+      "type": 0,
+      "value": "Auto: la impresión de mayor rareza, porque el arte de mayor rareza está activado. Elige otra para cambiarla."
+    }
+  ],
+  "lobby.deck.art.autoHint.standard": [
+    {
+      "type": 0,
+      "value": "Auto: la impresión estándar. Elige otra para cambiarla."
+    }
+  ],
   "lobby.deck.art.chooseFor": [
     {
       "type": 0,

@@ -35018,6 +35018,24 @@
       "value": "Auto"
     }
   ],
+  "lobby.deck.art.autoHint.fabrary": [
+    {
+      "type": 0,
+      "value": "Auto: a impressão que o seu deck do Fabrary usa. Escolha outra para trocá-la."
+    }
+  ],
+  "lobby.deck.art.autoHint.rarest": [
+    {
+      "type": 0,
+      "value": "Auto: a impressão de maior raridade, porque a arte de maior raridade está ativada. Escolha outra para trocá-la."
+    }
+  ],
+  "lobby.deck.art.autoHint.standard": [
+    {
+      "type": 0,
+      "value": "Auto: a impressão padrão. Escolha outra para trocá-la."
+    }
+  ],
   "lobby.deck.art.chooseFor": [
     {
       "type": 0,
