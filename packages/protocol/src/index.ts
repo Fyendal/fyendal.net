@@ -193,6 +193,8 @@ export interface DeckDetailResponse {
     decklist: DeckPool;
     matchups?: FabraryMatchup[];
     selectedMatchupId?: string;
+    /** The fetched Fabrary deck's printing pins, shown under the player's picks. */
+    fabraryArt?: Record<string, string>;
   };
 }
 export interface DeckInvalidResponse {
@@ -2846,10 +2848,13 @@ export const decodeDeckDetailResponse: Decoder<DeckDetailResponse> = (value) => 
   if (!data || !exactKeys(data, ["ok", "deck"]) || !rawDeck
     || !exactKeys(
       rawDeck,
-      ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "bannedCards", "futureCards", "art", "decklist", "matchups", "selectedMatchupId"],
+      [
+        "id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "bannedCards", "futureCards", "art",
+        "decklist", "matchups", "selectedMatchupId", "fabraryArt",
+      ],
       ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "art", "decklist"],
     )) return null;
-  const { decklist: rawPool, matchups: rawMatchups, selectedMatchupId, ...summaryValue } = rawDeck;
+  const { decklist: rawPool, matchups: rawMatchups, selectedMatchupId, fabraryArt, ...summaryValue } = rawDeck;
   const summary = decodeDeckSummary(summaryValue);
   const matchup = (item: unknown): item is FabraryMatchup => {
     const data = object(item);
@@ -2862,6 +2867,7 @@ export const decodeDeckDetailResponse: Decoder<DeckDetailResponse> = (value) => 
   const matchupsValid = rawMatchups === undefined || array(rawMatchups, matchup, 128);
   return summary && decodeDeckPoolValue(rawPool) && matchupsValid
     && (selectedMatchupId === undefined || id(selectedMatchupId))
+    && (fabraryArt === undefined || resolvedCardArt(fabraryArt))
     ? {
       ok: true,
       deck: {
@@ -2869,6 +2875,7 @@ export const decodeDeckDetailResponse: Decoder<DeckDetailResponse> = (value) => 
         decklist: rawPool,
         ...(rawMatchups === undefined ? {} : { matchups: rawMatchups }),
         ...(selectedMatchupId === undefined ? {} : { selectedMatchupId }),
+        ...(fabraryArt === undefined ? {} : { fabraryArt }),
       },
     }
     : null;

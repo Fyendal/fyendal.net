@@ -258,6 +258,7 @@ export function PrepRoom() {
   const artDeckId = prepDeck?.id;
   const artDeckName = prepDeck?.name ?? "";
   const artPool = prepDeck?.decklist;
+  const artDefaults = prepDeck?.fabraryArt;
   const artLocked = prep ? prep.seats[prep.yourSeat]?.ready === true : false;
   const artSeat = prep?.yourSeat ?? 0;
   const prepArt = useMemo(() => {
@@ -274,17 +275,19 @@ export function PrepRoom() {
       });
     };
     const cardArt: PrepCardArt = {
-      imageFor: (id) => shownCardArt(artCatalog, id, deckArt),
+      imageFor: (id) => shownCardArt(artCatalog, id, deckArt, artDefaults),
       hasChoices: (id) => hasCardArtChoices(artCatalog, id),
       onChoose: (cardId, anchor) => setArtTarget((current) => current?.cardId === cardId ? null : { cardId, anchor }),
       highestRarity: deckArt.highestRarity,
       locked: artLocked,
       onHighestRarityChange: (checked) => void save({ ...deckArt, highestRarity: checked }),
     };
-    const own = artCatalog.resolveDeckArt(artPool, deckArt);
+    const own = artCatalog.resolveDeckArt(artPool, deckArt, artDefaults);
     const preview: [Record<string, string>, Record<string, string>] = artSeat === 0 ? [own, {}] : [{}, own];
-    return { art: deckArt, cardArt, save, preview };
-  }, [artEnabled, artCatalog, deckArt, artDeckId, artDeckName, artPool, artLocked, artSeat, setDeckArt, intl]);
+    return { art: deckArt, defaults: artDefaults, cardArt, save, preview };
+  }, [
+    artEnabled, artCatalog, deckArt, artDeckId, artDeckName, artPool, artDefaults, artLocked, artSeat, setDeckArt, intl,
+  ]);
 
   if (!prepDeck) return <PrepDeckLoading onCancel={leave} />;
   // The match-accept dialog lives in this room, so never hide it behind loading.
@@ -869,6 +872,7 @@ export function PrepRoom() {
           catalog={artCatalog}
           cardId={artTarget.cardId}
           art={prepArt.art}
+          defaults={prepArt.defaults}
           anchor={artTarget.anchor}
           onChange={(art) => void prepArt.save(art)}
           onInspect={(cardId) => {

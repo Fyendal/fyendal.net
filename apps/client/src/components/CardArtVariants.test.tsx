@@ -26,6 +26,15 @@ describe("card art choices", () => {
       .toEqual({ highestRarity: true, picks: { ARC159: STANDARD_CARD_ART } });
   });
 
+  it("treats a Fabrary pin as the automatic choice under the player's picks", () => {
+    const pins = { ARC159: "HNT260" };
+    expect(shownCardArt(catalog, "ARC159", on, pins)).toBe("HNT260");
+    expect(shownCardArt(catalog, "ARC159", { ...off, picks: { ARC159: "DYN000-CF" } }, pins)).toBe("DYN000-CF");
+    expect(chooseCardArt(catalog, { ...off, picks: { ARC159: "DYN000-CF" } }, "ARC159", "HNT260", pins)).toEqual(off);
+    expect(chooseCardArt(catalog, off, "ARC159", undefined, pins))
+      .toEqual({ highestRarity: false, picks: { ARC159: STANDARD_CARD_ART } });
+  });
+
   it("reports the card's own printing as standard art", () => {
     expect(shownCardArt(catalog, "ARC159", { ...off, picks: { ARC159: "ARC159" } })).toBeUndefined();
     expect(shownCardArt(catalog, "ARC159", on)).toBe("DYN000-CF");

@@ -24,17 +24,18 @@ const NO_ART: CardImageArt = {};
 
 /** The deck's chosen art for preloading, or null while the art catalog loads. */
 export function useDeckImageArt(
-  deck: { id: string; decklist: DeckPool; art?: DeckArt } | null,
+  deck: { id: string; decklist: DeckPool; art?: DeckArt; fabraryArt?: Record<string, string> } | null,
   enabled: boolean,
 ): CardImageArt | null {
-  const custom = enabled && !!deck && !deck.id.startsWith("precon-") && deckArtIsCustom(deck.art);
+  const custom = enabled && !!deck && !deck.id.startsWith("precon-") && deckArtIsCustom(deck.art, deck.fabraryArt);
   const catalog = useCardArtCatalog(custom);
   const pool = deck?.decklist;
   const art = deck?.art;
+  const defaults = deck?.fabraryArt;
   return useMemo(() => {
     if (!custom || !pool || !art) return NO_ART;
-    return catalog ? catalog.resolveDeckArt(pool, art) : null;
-  }, [custom, catalog, pool, art]);
+    return catalog ? catalog.resolveDeckArt(pool, art, defaults) : null;
+  }, [custom, catalog, pool, art, defaults]);
 }
 
 export function PrepDeckLoading({ onCancel }: { onCancel: () => void }) {

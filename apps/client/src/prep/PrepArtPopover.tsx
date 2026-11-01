@@ -12,6 +12,7 @@ export function PrepArtPopover(props: {
   catalog: CardArtCatalog;
   cardId: string;
   art: DeckArt;
+  defaults?: Readonly<Record<string, string>>;
   anchor: HTMLElement;
   onChange: (art: DeckArt) => void;
   onInspect: (cardId: string) => void;
@@ -70,7 +71,14 @@ export function PrepArtPopover(props: {
       aria-label={intl.formatMessage({ id: "prep.art.dialog" })}
       style={position ? { left: position.left, top: position.top } : { visibility: "hidden" }}
     >
-      <CardArtVariants catalog={props.catalog} cardId={props.cardId} art={props.art} compact onChange={props.onChange} />
+      <CardArtVariants
+        catalog={props.catalog}
+        cardId={props.cardId}
+        art={props.art}
+        defaults={props.defaults}
+        compact
+        onChange={props.onChange}
+      />
       <button type="button" className="prep-art-view" onClick={() => props.onInspect(props.cardId)}>
         {intl.formatMessage({ id: "prep.art.viewCard" })}
       </button>

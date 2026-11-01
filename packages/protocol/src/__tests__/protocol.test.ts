@@ -1459,6 +1459,10 @@ describe("replays and HTTP responses", () => {
         selectedMatchupId: "bravo-plan",
       },
     })).not.toBeNull();
+    const withPins = (fabraryArt: unknown) =>
+      decodeDeckDetailResponse({ ok: true, deck: { ...summary, decklist: pool, fabraryArt } });
+    expect(withPins({ HNT215: "FAB294-MV" })).toMatchObject({ deck: { fabraryArt: { HNT215: "FAB294-MV" } } });
+    expect(withPins({ HNT215: "../evil" })).toBeNull();
     expect(decodeDeckInvalidResponse({ ok: false, errors: ["bad"], missing: [], unimplemented: [] })).not.toBeNull();
     expect(decodeAccountCosmeticsResponse({
       ok: true,

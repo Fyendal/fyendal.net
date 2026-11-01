@@ -1127,7 +1127,7 @@ export function createApiServer(deps: ApiDeps): http.Server {
               error: detail.length > 0 ? `${refreshed.error}: ${detail.join("; ")}` : refreshed.error,
             });
           }
-          const { deck, matchups, selectedMatchupId } = refreshed;
+          const { deck, matchups, selectedMatchupId, fabraryArt } = refreshed;
           sendJson(res, 200, {
             ok: true,
             deck: {
@@ -1135,6 +1135,7 @@ export function createApiServer(deps: ApiDeps): http.Server {
               decklist: deck.decklist,
               ...(matchups.length > 0 ? { matchups } : {}),
               ...(selectedMatchupId ? { selectedMatchupId } : {}),
+              ...(Object.keys(fabraryArt).length > 0 ? { fabraryArt } : {}),
             },
           });
         })

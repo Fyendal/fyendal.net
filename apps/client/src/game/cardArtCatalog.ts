@@ -29,6 +29,6 @@ export function useCardArtCatalog(enabled = true): CardArtCatalog | null {
   return enabled ? catalog : null;
 }
 
-export function deckArtIsCustom(art: DeckArt | undefined): boolean {
-  return !!art && (art.highestRarity || Object.keys(art.picks).length > 0);
+export function deckArtIsCustom(art: DeckArt | undefined, defaults?: Readonly<Record<string, string>>): boolean {
+  return !!art && (art.highestRarity || Object.keys(art.picks).length > 0 || Object.keys(defaults ?? {}).length > 0);
 }

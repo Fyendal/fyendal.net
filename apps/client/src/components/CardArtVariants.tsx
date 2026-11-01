@@ -16,9 +16,15 @@ function imageIdOf(url: string): string {
   return /\/cards\/([^/]+)\.webp$/.exec(url)?.[1] ?? url;
 }
 
-/** The deck's image for a card, with its standard image reported as undefined. */
-export function shownCardArt(catalog: CardArtCatalog, cardId: string, art: DeckArt): string | undefined {
-  const image = catalog.deckCardArt(cardId, art);
+/** The deck's image for a card, with its standard image reported as undefined.
+ * `defaults` are the linked Fabrary deck's pins, under the player's picks. */
+export function shownCardArt(
+  catalog: CardArtCatalog,
+  cardId: string,
+  art: DeckArt,
+  defaults?: Readonly<Record<string, string>>,
+): string | undefined {
+  const image = catalog.deckCardArt(cardId, art, defaults);
   return image === imageIdOf(cardImageUrl(cardId)) ? undefined : image;
 }
 
@@ -36,8 +42,14 @@ export function hasCardArtChoices(catalog: CardArtCatalog, cardId: string): bool
 }
 
 /** Returns the deck art after choosing `image` for one card. */
-export function chooseCardArt(catalog: CardArtCatalog, art: DeckArt, cardId: string, image: string | undefined): DeckArt {
-  const auto = shownCardArt(catalog, cardId, { highestRarity: art.highestRarity, picks: {} });
+export function chooseCardArt(
+  catalog: CardArtCatalog,
+  art: DeckArt,
+  cardId: string,
+  image: string | undefined,
+  defaults?: Readonly<Record<string, string>>,
+): DeckArt {
+  const auto = shownCardArt(catalog, cardId, { highestRarity: art.highestRarity, picks: {} }, defaults);
   const { [cardId]: _previous, ...picks } = art.picks;
   return image === auto ? { ...art, picks } : { ...art, picks: { ...picks, [cardId]: image ?? STANDARD_CARD_ART } };
 }
@@ -46,12 +58,14 @@ export function CardArtVariants({
   catalog,
   cardId,
   art,
+  defaults,
   compact = false,
   onChange,
 }: {
   catalog: CardArtCatalog;
   cardId: string;
   art: DeckArt;
+  defaults?: Readonly<Record<string, string>>;
   compact?: boolean;
   onChange: (art: DeckArt) => void;
 }) {
@@ -59,8 +73,8 @@ export function CardArtVariants({
   const groupRef = useRef<HTMLDivElement>(null);
   const name = cardData[cardId]?.name ?? cardId;
   const options = cardArtOptions(catalog, cardId);
-  const current = shownCardArt(catalog, cardId, art);
-  const auto = shownCardArt(catalog, cardId, { highestRarity: art.highestRarity, picks: {} });
+  const current = shownCardArt(catalog, cardId, art, defaults);
+  const auto = shownCardArt(catalog, cardId, { highestRarity: art.highestRarity, picks: {} }, defaults);
   const picked = art.picks[cardId] !== undefined;
 
   const label = (option: ArtOption) => {
@@ -103,7 +117,11 @@ export function CardArtVariants({
           {intl.formatMessage({ id: "lobby.deck.art.printings" }, { count: options.length })}
         </span>
         {picked ? (
-          <button type="button" className="card-art-reset" onClick={() => onChange(chooseCardArt(catalog, art, cardId, auto))}>
+          <button
+            type="button"
+            className="card-art-reset"
+            onClick={() => onChange(chooseCardArt(catalog, art, cardId, auto, defaults))}
+          >
             {intl.formatMessage({ id: "lobby.deck.art.useAuto" })}
           </button>
         ) : null}
@@ -125,7 +143,7 @@ export function CardArtVariants({
               tabIndex={checked ? 0 : -1}
               className="card-art-variant"
               onKeyDown={onKeyDown}
-              onClick={() => { if (!checked) onChange(chooseCardArt(catalog, art, cardId, option.image)); }}
+              onClick={() => { if (!checked) onChange(chooseCardArt(catalog, art, cardId, option.image, defaults)); }}
             >
               <span className="card-art-variant-frame">
                 <CardArtwork cardId={cardId} artImage={option.image} alt="" />
