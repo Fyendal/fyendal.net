@@ -62,7 +62,7 @@ function paymentModel(
 }
 
 describe("post-payment mode focus", () => {
-  it("keeps the boost choice in the pitch focus prompt", () => {
+  it("keeps the confirmation in the pitch focus prompt", () => {
     const pending: PendingDecisionModel = {
       decision: null,
       isMine: false,
@@ -84,14 +84,31 @@ describe("post-payment mode focus", () => {
     const html = renderLocalized(
       <DecisionFloat
         pending={pending}
-        action={{ ...paymentModel(false), step: "boost", boostCount: null, boostOptions: [0, 1], pitchSel: [2] }}
+        action={{ ...paymentModel(false), step: "confirm", pitchSel: [2] }}
         viewerSeat={0}
         pitchFocused
       />,
     );
 
     expect(html).toContain('class="float decision-float decision-float-pitch"');
-    expect(html).toContain("Boost");
+    expect(html).toContain("decision-post-payment");
+  });
+
+  it("declares targets before payment, outside the post-payment layout", () => {
+    const html = renderLocalized(
+      <ActionAnnouncementPanel
+        model={{
+          ...paymentModel(false),
+          step: "target",
+          targetChoices: [{ id: 5, label: "Ally", card: { instanceId: 5, cardId: "IAR084", owner: 1 } }],
+        }}
+        viewerSeat={0}
+      />,
+    );
+
+    expect(html).toContain("decision-target-choice");
+    expect(html).not.toContain("decision-post-payment");
+    expect(html).not.toContain("decision-pitch-payment");
   });
 });
 
@@ -340,7 +357,7 @@ describe("Boost choices", () => {
       />,
     );
 
-    expect(html).toContain('class="decision decision-options decision-post-payment decision-choice decision-sheet"');
+    expect(html).toContain('class="decision decision-options decision-choice decision-sheet"');
     expect(html.indexOf(">Boost</span>")).toBeLessThan(
       html.indexOf(">Don&#x27;t boost</span>"),
     );

@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { GameIntent } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
+import { canAddPaymentCard } from "./legalSelection.js";
 import {
   actionAnnouncementReducer,
   blockingEquipmentByPlay,
   committedActionIntent,
+  deriveAnnouncement,
   handCardSelection,
   INITIAL_ANNOUNCEMENT,
   isAnnouncementPaymentReady,
@@ -29,12 +31,12 @@ describe("announcement payment readiness", () => {
 });
 
 describe("action announcement reducer", () => {
-  it("remembers an arena drop through payment and boost, and clears it on a new click selection", () => {
+  it("remembers an arena drop through boost and payment, and clears it on a new click selection", () => {
     const dropped = actionAnnouncementReducer(INITIAL_ANNOUNCEMENT, {
       type: "play-hand-from-drop", instanceId: 1,
     });
-    const pitched = actionAnnouncementReducer(dropped, { type: "toggle-pitch", instanceId: 2 });
-    const boosted = actionAnnouncementReducer(pitched, { type: "select-boost", boostCount: 1 });
+    const boostDeclared = actionAnnouncementReducer(dropped, { type: "select-boost", boostCount: 1 });
+    const boosted = actionAnnouncementReducer(boostDeclared, { type: "toggle-pitch", instanceId: 2 });
     expect(boosted).toMatchObject({
       sel: { kind: "play-hand", instanceId: 1 },
       pitchSel: [2],
@@ -59,7 +61,25 @@ describe("action announcement reducer", () => {
       type: "play-hand-from-drop", instanceId: 1,
     })).toEqual({ ...selected, playConfirmedByDrop: true });
   });
-  it("clears payment-dependent choices when the payment method changes", () => {
+  it("restarts payment when Boost or a target is redeclared", () => {
+    const paid = {
+      ...INITIAL_ANNOUNCEMENT,
+      sel: { kind: "play-hand" as const, instanceId: 1 },
+      boostCount: 0,
+      targetAllyId: 3,
+      pitchSel: [2],
+      alternativeCostCardInstanceIds: null,
+    };
+    const unpaid = { pitchSel: [], alternativeCostCardInstanceIds: undefined };
+    expect(actionAnnouncementReducer(paid, { type: "select-ally-target", targetAllyId: 4 }))
+      .toMatchObject({ ...unpaid, boostCount: 0, targetAllyId: 4 });
+    expect(actionAnnouncementReducer(paid, { type: "select-card-target", targetCardInstanceId: 5 }))
+      .toMatchObject({ ...unpaid, targetAllyId: 3, targetCardInstanceId: 5 });
+    expect(actionAnnouncementReducer(paid, { type: "select-boost", boostCount: 1 }))
+      .toMatchObject({ ...unpaid, boostCount: 1, targetAllyId: undefined });
+  });
+
+  it("keeps declared Boost and targets when the payment method changes", () => {
     const selected = {
       ...INITIAL_ANNOUNCEMENT,
       sel: { kind: "play-hand" as const, instanceId: 1 },
@@ -75,9 +95,6 @@ describe("action announcement reducer", () => {
     })).toEqual({
       ...selected,
       pitchSel: [],
-      boostCount: null,
-      targetAllyId: undefined,
-      targetCardInstanceId: null,
       alternativeCostCardInstanceIds: [5],
       additionalCostConfirmed: true,
     });
@@ -423,5 +440,108 @@ describe("blocked equipment plays", () => {
     expect([...blockingEquipmentByPlay([memory], { head: recall })]).toEqual([[31, recall.cardId]]);
     expect([...blockingEquipmentByPlay([memory], { head: baseHead })]).toEqual([]);
     expect([...blockingEquipmentByPlay([memory], {})]).toEqual([]);
+  });
+});
+
+describe("announcement order", () => {
+  const sel = { kind: "play-hand" as const, instanceId: 10 };
+  const inputs = (actionCandidates: GameIntent[]) => ({
+    actionCandidates,
+    legalIntents: [],
+    hand: [],
+    chainClosingPlayIds: new Set<number>(),
+    blockingEquipment: new Map<number, string>(),
+    skipPlayConfirmation: false,
+  });
+  const apply = (...actions: Parameters<typeof actionAnnouncementReducer>[1][]) =>
+    actions.reduce(actionAnnouncementReducer, { ...INITIAL_ANNOUNCEMENT, sel });
+
+  it("declares a target before paying", () => {
+    const legal: GameIntent[] = [
+      { kind: "play-card", instanceId: 10, pitchInstanceIds: [31], targetAllyId: 50 },
+      { kind: "play-card", instanceId: 10, pitchInstanceIds: [31], targetAllyId: 51 },
+    ];
+    expect(deriveAnnouncement(apply(), inputs(legal)).actionStep).toBe("target");
+    expect(deriveAnnouncement(apply({ type: "toggle-pitch", instanceId: 31 }), inputs(legal)).actionStep)
+      .toBe("target");
+
+    const targeted = apply({ type: "select-ally-target", targetAllyId: 51 });
+    expect(deriveAnnouncement(targeted, inputs(legal)).actionStep).toBe("payment");
+    const paid = deriveAnnouncement(
+      actionAnnouncementReducer(targeted, { type: "toggle-pitch", instanceId: 31 }),
+      inputs(legal),
+    );
+    expect(paid.actionStep).toBe("confirm");
+    expect(paid.chosenActionIntent).toMatchObject({ targetAllyId: 51, pitchInstanceIds: [31] });
+  });
+
+  it("declares Boost before paying", () => {
+    const legal: GameIntent[] = [
+      { kind: "play-card", instanceId: 10, pitchInstanceIds: [31] },
+      { kind: "play-card", instanceId: 10, pitchInstanceIds: [31], boost: true },
+    ];
+    const initial = deriveAnnouncement(apply(), inputs(legal));
+    expect(initial.actionStep).toBe("boost");
+    expect(initial.boostOptions).toEqual([0, 1]);
+
+    const boosted = apply({ type: "select-boost", boostCount: 1 });
+    expect(deriveAnnouncement(boosted, inputs(legal)).actionStep).toBe("payment");
+    const paid = deriveAnnouncement(
+      actionAnnouncementReducer(boosted, { type: "toggle-pitch", instanceId: 31 }),
+      inputs(legal),
+    );
+    expect(paid.actionStep).toBe("confirm");
+    expect(paid.chosenActionIntent).toMatchObject({ boost: true });
+  });
+
+  it("offers only payments compatible with the declared target", () => {
+    const legal: GameIntent[] = [
+      { kind: "play-card", instanceId: 10, pitchInstanceIds: [31], targetCardInstanceId: 32 },
+      { kind: "play-card", instanceId: 10, pitchInstanceIds: [32], targetCardInstanceId: 31 },
+    ];
+    const targeted = apply({ type: "select-card-target", targetCardInstanceId: 32 });
+    const declared = deriveAnnouncement(targeted, inputs(legal));
+    expect(declared.actionStep).toBe("payment");
+    expect(declared.selectedPaymentVariants.map((intent) => intent.pitchInstanceIds)).toEqual([[31]]);
+    expect(canAddPaymentCard(declared.selectedPaymentVariants, [], 31)).toBe(true);
+    expect(canAddPaymentCard(declared.selectedPaymentVariants, [], 32)).toBe(false);
+    expect(deriveAnnouncement(
+      actionAnnouncementReducer(targeted, { type: "toggle-pitch", instanceId: 32 }),
+      inputs(legal),
+    ).actionStep).toBe("payment");
+  });
+
+  it("keeps the declared target through an alternative cost", () => {
+    const legal: GameIntent[] = [
+      { kind: "play-card", instanceId: 10, pitchInstanceIds: [31], targetAllyId: 50 },
+      {
+        kind: "play-card", instanceId: 10, pitchInstanceIds: [], targetAllyId: 50,
+        alternativeCostCardInstanceIds: [40],
+      },
+    ];
+    const targeted = apply({ type: "select-ally-target", targetAllyId: 50 });
+    expect(deriveAnnouncement(targeted, inputs(legal)).alternativeCostSets.size).toBe(1);
+    const paid = deriveAnnouncement(
+      actionAnnouncementReducer(targeted, { type: "select-alternative-cost", instanceIds: [40] }),
+      inputs(legal),
+    );
+    expect(paid.actionStep).toBe("confirm");
+    expect(paid.chosenActionIntent).toMatchObject({
+      targetAllyId: 50, alternativeCostCardInstanceIds: [40],
+    });
+  });
+
+  it("goes straight to payment and auto-commits a dropped play without targets or Boost", () => {
+    const legal: GameIntent[] = [{ kind: "play-card", instanceId: 10, pitchInstanceIds: [31] }];
+    const dropped = actionAnnouncementReducer(INITIAL_ANNOUNCEMENT, {
+      type: "play-hand-from-drop", instanceId: 10,
+    });
+    expect(deriveAnnouncement(dropped, inputs(legal)).actionStep).toBe("payment");
+    const paid = deriveAnnouncement(
+      actionAnnouncementReducer(dropped, { type: "toggle-pitch", instanceId: 31 }),
+      inputs(legal),
+    );
+    expect(paid.actionStep).toBe("confirm");
+    expect(paid.autoCommitPending).toBe(true);
   });
 });

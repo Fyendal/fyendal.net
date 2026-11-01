@@ -9,19 +9,19 @@ interface FocusedAnnouncement {
   source: PitchFocusSource;
 }
 
-/** A paid play remains in the pitch focus while its remaining local choices
- * are made. Discard costs use the same selection array but are not pitching. */
+/** A paid play remains in the pitch focus while it is confirmed. Discard costs
+ * use the same selection array but are not pitching. */
 export function postPaymentPitchFocus(
   step: ActionStep,
   selectedPitchCount: number,
   paymentKind: "resource" | "discard",
 ): boolean {
   return selectedPitchCount > 0 && paymentKind === "resource" && (
-    step === "boost" || step === "target" || step === "close-chain" || step === "confirm"
+    step === "close-chain" || step === "confirm"
   );
 }
 
-/** Keep the focus through mode, target, and confirmation steps, until the announcement
+/** Keep the focus through the confirmation steps, until the announcement
  * is cancelled or the submitted play changes the presented game view. */
 export function retainedPitchFocus(
   view: GameView | null,

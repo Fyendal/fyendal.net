@@ -104,7 +104,7 @@ function sameOptionalIds(
 }
 
 /** Server-offered variants for the selected source, play mode, and Meld side.
- * Target and Boost stay unresolved so the client can stage payment first. */
+ * Target and Boost stay unresolved so the client can declare them first. */
 export function actionSelectionVariants(
   legal: readonly GameIntent[],
   sel: Sel,

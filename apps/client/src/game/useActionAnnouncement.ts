@@ -3,6 +3,7 @@ import type { CardView, EquipmentSlot, GameIntent, MeldSide, PlayableZone } from
 import { cardData } from "@fyendal/cards/client";
 import {
   actionSelectionVariants,
+  intentBoostCount,
   paidActionCandidates,
   actionPaymentProgress,
   selectedActionIntent,
@@ -118,6 +119,22 @@ function clearChoices(state: AnnouncementState): AnnouncementState {
   };
 }
 
+/** Payment follows the declared Boost and targets, so redeclaring them restarts it. */
+function clearPayment(state: AnnouncementState): AnnouncementState {
+  return {
+    ...state,
+    pitchSel: [],
+    alternativeCostCardInstanceIds: undefined,
+    additionalCostConfirmed: false,
+    chainCloseConfirmed: false,
+    commitConfirmed: false,
+  };
+}
+
+function clearCommit(state: AnnouncementState): AnnouncementState {
+  return { ...state, chainCloseConfirmed: false, commitConfirmed: false };
+}
+
 export function actionAnnouncementReducer(
   state: AnnouncementState,
   action: AnnouncementAction,
@@ -177,24 +194,22 @@ export function actionAnnouncementReducer(
         alternativeCostCardInstanceIds: undefined,
       });
     case "select-ally-target":
-      return { ...state, targetAllyId: action.targetAllyId, commitConfirmed: false };
+      return clearPayment({ ...state, targetAllyId: action.targetAllyId });
     case "select-card-target":
-      return { ...state, targetCardInstanceId: action.targetCardInstanceId, commitConfirmed: false };
+      return clearPayment({ ...state, targetCardInstanceId: action.targetCardInstanceId });
     case "select-boost":
-      return {
+      return clearPayment({
         ...state,
         boostCount: action.boostCount,
-        commitConfirmed: false,
-        chainCloseConfirmed: false,
         targetAllyId: undefined,
         targetCardInstanceId: null,
-      };
+      });
     case "confirm-chain-close":
       return { ...state, chainCloseConfirmed: true, commitConfirmed: true };
     case "confirm-action":
       return { ...state, commitConfirmed: true };
     case "select-alternative-cost":
-      return clearChoices({
+      return clearCommit({
         ...state,
         pitchSel: [],
         alternativeCostCardInstanceIds: action.instanceIds,
@@ -202,7 +217,7 @@ export function actionAnnouncementReducer(
       });
     case "toggle-additional-cost-card": {
       if (action.selectionSource === "payment") {
-        return clearChoices({
+        return clearCommit({
           ...state,
           pitchSel: state.pitchSel.includes(action.instanceId)
             ? state.pitchSel.filter((id) => id !== action.instanceId)
@@ -216,7 +231,7 @@ export function actionAnnouncementReducer(
       const next = selected.includes(action.instanceId)
         ? selected.filter((id) => id !== action.instanceId)
         : [...selected, action.instanceId];
-      return clearChoices({
+      return clearCommit({
         ...state,
         pitchSel: [],
         alternativeCostCardInstanceIds: next.length > 0 ? next : undefined,
@@ -321,7 +336,7 @@ export function handCardSelection(
 }
 
 /** The opt-in fast-play setting applies to card plays and activated abilities.
- * Payment, method, ability, Boost, and target choices still happen first. */
+ * Method, ability, Boost, target, and payment choices still happen first. */
 export function shouldSkipPlayConfirmation(sel: Sel, enabled: boolean): boolean {
   return enabled && (
     sel.kind === "play-hand" ||
@@ -356,15 +371,7 @@ export function resolvePlayMethod(
   };
 }
 
-export function useActionAnnouncement({
-  actionCandidates,
-  legalIntents,
-  hand,
-  chainClosingPlayIds,
-  blockingEquipment,
-  skipPlayConfirmation,
-  sendIntent,
-}: {
+export interface AnnouncementInputs {
   actionCandidates: readonly GameIntent[];
   /** Executable server-enumerated intents. Exact pitch sequences here take
    * precedence over locally calculated values from the bundled card catalog. */
@@ -373,13 +380,23 @@ export function useActionAnnouncement({
   chainClosingPlayIds: ReadonlySet<number>;
   blockingEquipment: ReadonlyMap<number, string>;
   skipPlayConfirmation: boolean;
-  sendIntent: (intent: GameIntent) => boolean;
-}) {
-  const [state, dispatch] = useReducer(actionAnnouncementReducer, INITIAL_ANNOUNCEMENT);
-  const { sel, pitchSel, meldSide, targetAllyId, targetCardInstanceId, boostCount, playMethod,
-    chainCloseConfirmed, commitConfirmed, alternativeCostCardInstanceIds,
-    additionalCostConfirmed } = state;
+}
 
+/** CR 5.1: modes, Boost, and targets are declared before the cost is paid, so
+ * payment only considers variants matching those declarations. */
+export function deriveAnnouncement(
+  state: AnnouncementState,
+  {
+    actionCandidates,
+    legalIntents,
+    hand,
+    chainClosingPlayIds,
+    blockingEquipment,
+    skipPlayConfirmation,
+  }: AnnouncementInputs,
+) {
+  const { sel, pitchSel, meldSide, targetAllyId, targetCardInstanceId, boostCount, playMethod,
+    chainCloseConfirmed, alternativeCostCardInstanceIds, additionalCostConfirmed } = state;
   const pitchValue = (instanceId: number) => {
     const card = hand.find((candidate) => candidate.instanceId === instanceId);
     return card ? (cardData[card.cardId]?.pitch ?? 0) : 0;
@@ -396,7 +413,28 @@ export function useActionAnnouncement({
   const actionChoiceVariants = playMethodChoiceRequired || abilityChoiceRequired
     ? []
     : effectiveAsInstant ? instantMethodVariants : normalMethodVariants;
-  const normalCostVariants = actionChoiceVariants.filter(
+  const boostOptions = [...new Set(actionChoiceVariants.map(intentBoostCount))]
+    .sort((a, b) => a - b);
+  const boostOffered = boostOptions.some((count) => count > 0);
+  const selectedBoostCount = boostOffered ? boostCount : 0;
+  const targetVariants = actionChoiceVariants.filter(
+    (intent) => intentBoostCount(intent) === selectedBoostCount,
+  );
+  const allyTargetOffered = targetVariants.some((intent) => intent.targetAllyId !== undefined);
+  const cardTargetOffered = targetVariants.some(
+    (intent) => intent.targetCardInstanceId !== undefined,
+  );
+  const targetReady =
+    (!allyTargetOffered || targetAllyId !== undefined) &&
+    (!cardTargetOffered || targetCardInstanceId !== null);
+  const targetOffered = allyTargetOffered || cardTargetOffered;
+  const declaredVariants = targetReady
+    ? targetVariants.filter((intent) =>
+        (intent.targetAllyId ?? null) === (targetAllyId ?? null) &&
+        (intent.targetCardInstanceId ?? null) === targetCardInstanceId
+      )
+    : [];
+  const normalCostVariants = declaredVariants.filter(
     (intent) => intent.alternativeCostCardInstanceIds === undefined,
   );
   const normalCostPayableWithoutPitch = paidActionCandidates(
@@ -405,12 +443,12 @@ export function useActionAnnouncement({
     pitchValue,
   ).length > 0;
   const alternativeCostSets = new Map<string, number[]>();
-  for (const intent of actionChoiceVariants) {
+  for (const intent of declaredVariants) {
     if (intent.alternativeCostCardInstanceIds === undefined) continue;
     const key = [...intent.alternativeCostCardInstanceIds].sort((a, b) => a - b).join(":");
     alternativeCostSets.set(key, intent.alternativeCostCardInstanceIds);
   }
-  const stagedAdditionalCostIntent = actionChoiceVariants.find(
+  const stagedAdditionalCostIntent = declaredVariants.find(
     (intent) => intent.cardCostSelection !== undefined,
   );
   const stagedAdditionalCost = stagedAdditionalCostIntent?.cardCostSelection;
@@ -421,7 +459,7 @@ export function useActionAnnouncement({
     : undefined;
   const stagedAdditionalCostCandidateIds = new Set(
     stagedAdditionalCostSelectionSource === "payment"
-      ? actionChoiceVariants.flatMap((intent) =>
+      ? declaredVariants.flatMap((intent) =>
           intent.cardCostSelection ? intent.pitchInstanceIds : []
         )
       : [...alternativeCostSets.values()].flat(),
@@ -431,7 +469,7 @@ export function useActionAnnouncement({
     : Array.isArray(alternativeCostCardInstanceIds)
       ? alternativeCostCardInstanceIds
       : [];
-  const selectedPaymentVariants = actionChoiceVariants.filter(
+  const selectedPaymentVariants = declaredVariants.filter(
     (intent) =>
       sameOptionalInstanceIds(
         intent.alternativeCostCardInstanceIds,
@@ -455,28 +493,6 @@ export function useActionAnnouncement({
     pitchSel,
     pitchValue,
   ) ?? { kind: "resource" as const, selected: 0, required: 0 };
-  const boostOptions = [...new Set(paidVariants.map((intent) =>
-    intent.kind !== "activate-ability" && intent.boost === true
-      ? (intent.boostCount ?? 1)
-      : 0,
-  ))].sort((a, b) => a - b);
-  const boostOffered = boostOptions.some((count) => count > 0);
-  const selectedBoostCount = boostOffered ? boostCount : 0;
-  const targetVariants = paidVariants.filter(
-    (intent) => {
-      const count = intent.kind !== "activate-ability" && intent.boost === true
-        ? (intent.boostCount ?? 1)
-        : 0;
-      return count === selectedBoostCount;
-    },
-  );
-  const allyTargetOffered = targetVariants.some((intent) => intent.targetAllyId !== undefined);
-  const cardTargetOffered = targetVariants.some(
-    (intent) => intent.targetCardInstanceId !== undefined,
-  );
-  const targetReady =
-    (!allyTargetOffered || targetAllyId !== undefined) &&
-    (!cardTargetOffered || targetCardInstanceId !== null);
   const chosenActionIntent =
     targetReady
       ? selectedActionIntent(
@@ -492,20 +508,17 @@ export function useActionAnnouncement({
           pitchValue,
         )
       : null;
-  const targetOffered = allyTargetOffered || cardTargetOffered;
   const chainCloseConfirmationRequired = chosenActionIntent !== null &&
     requiresChainCloseConfirmation(chosenActionIntent, chainClosingPlayIds);
   const actionStep: ActionStep = playMethodChoiceRequired
     ? "method"
     : abilityChoiceRequired ? "ability"
+    : boostOffered && boostCount === null ? "boost"
+    : targetOffered && !targetReady ? "target"
     : !paymentReady ? "payment"
-    : boostOffered && boostCount === null
-      ? "boost"
-      : targetOffered && !targetReady
-        ? "target"
-        : chainCloseConfirmationRequired && !chainCloseConfirmed
-          ? "close-chain"
-          : "confirm";
+    : chainCloseConfirmationRequired && !chainCloseConfirmed
+      ? "close-chain"
+      : "confirm";
   const equipBlockedBy = chosenActionIntent !== null && isPlayIntent(chosenActionIntent)
     ? blockingEquipment.get(chosenActionIntent.instanceId)
     : undefined;
@@ -513,25 +526,13 @@ export function useActionAnnouncement({
     equipBlockedBy === undefined &&
     chosenActionIntent !== null &&
     paymentReady &&
-    targetReady &&
     shouldAutoCommitAnnouncement(sel, actionStep, skipPlayConfirmation, state.playConfirmedByDrop);
 
-  const reset = useCallback(() => dispatch({ type: "reset" }), []);
-  const intentToSend = committedActionIntent(
+  return {
+    actionStep,
     chosenActionIntent,
     paymentReady,
-    commitConfirmed || autoCommitPending,
     chainCloseConfirmationRequired,
-    chainCloseConfirmed || autoCommitPending,
-  );
-  useEffect(() => {
-    if (sel.kind === "none" || !intentToSend) return;
-    if (sendIntent(intentToSend)) reset();
-  }, [intentToSend, reset, sel.kind, sendIntent]);
-
-  return {
-    ...state,
-    actionStep,
     equipBlockedBy,
     alternativeCostSets,
     stagedAdditionalCost,
@@ -556,6 +557,40 @@ export function useActionAnnouncement({
     selectedPaymentVariants,
     targetVariants,
     autoCommitPending,
+  };
+}
+
+export function useActionAnnouncement(inputs: AnnouncementInputs & {
+  sendIntent: (intent: GameIntent) => boolean;
+}) {
+  const { sendIntent } = inputs;
+  const [state, dispatch] = useReducer(actionAnnouncementReducer, INITIAL_ANNOUNCEMENT);
+  const { sel, commitConfirmed, chainCloseConfirmed } = state;
+  const derived = deriveAnnouncement(state, inputs);
+  const {
+    chosenActionIntent,
+    paymentReady,
+    chainCloseConfirmationRequired,
+    autoCommitPending,
+    stagedAdditionalCostSelectionSource,
+  } = derived;
+
+  const reset = useCallback(() => dispatch({ type: "reset" }), []);
+  const intentToSend = committedActionIntent(
+    chosenActionIntent,
+    paymentReady,
+    commitConfirmed || autoCommitPending,
+    chainCloseConfirmationRequired,
+    chainCloseConfirmed || autoCommitPending,
+  );
+  useEffect(() => {
+    if (sel.kind === "none" || !intentToSend) return;
+    if (sendIntent(intentToSend)) reset();
+  }, [intentToSend, reset, sel.kind, sendIntent]);
+
+  return {
+    ...state,
+    ...derived,
     reset,
     select: (sel: Sel) => dispatch({ type: "select", sel }),
     playHandFromDrop: (instanceId: number) => dispatch({ type: "play-hand-from-drop", instanceId }),
