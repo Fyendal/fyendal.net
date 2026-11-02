@@ -925,6 +925,21 @@ describe("Boltyn policy", () => {
     expect(current.players[0]!.hand).toHaveLength(3);
   });
 
+  it("keeps the Saving Grace it needs to survive out of Warpath's charge", () => {
+    const state = settled(game());
+    hand(state, ["ASB025", "ASB021"]);
+    const [grace] = state.players[0]!.hand;
+    const { equipment } = state.players[0]!;
+    for (const slot of Object.keys(equipment)) delete (equipment as Record<string, unknown>)[slot];
+    equipment.legs = cards(state, ["ASB006"])[0]!;
+    state.players[0]!.life = 2;
+    state.players[1]!.resources = 2;
+    const { state: after, played } = resolveIncoming(underAttack(state, "DRO024"));
+    expect(played).toContain("Saving Grace");
+    expect(after.players[0]!.life).toBeGreaterThan(0);
+    expect(after.players[0]!.soul.map((card) => card.instanceId)).not.toContain(grace!.instanceId);
+  });
+
   it("fully blocks Surgical Extraction rather than leave a card for its hit to banish", () => {
     // As reported: Edict of Steel alone let the hit through to banish Beacon of Victory.
     const state = settled(createGame({

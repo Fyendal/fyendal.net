@@ -521,31 +521,6 @@
   }
 
   .card-preview { display: none; }
-  .mobile-card-inspect-sheet {
-    display: flex;
-    width: 100%;
-    max-height: 90dvh;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    overflow-y: auto;
-    padding: 18px 16px max(18px, env(safe-area-inset-bottom));
-    border-top: 1px solid #6b5326;
-    border-radius: 16px 16px 0 0;
-    background: #160e07;
-  }
-  .mobile-card-inspect-sheet .modal-surface-header { width: calc(100% + 32px); }
-  .mobile-card-inspect-sheet .card-preview-frame {
-    width: min(300px, 78vw);
-    height: auto;
-    aspect-ratio: 300 / 413;
-  }
-  .mobile-card-inspect-sheet .card-preview-sideways {
-    flex: 0 0 auto;
-    width: min(460px, calc(100vw - 32px));
-    height: auto;
-    aspect-ratio: 413 / 300;
-  }
 
   /* Desktop floats become bounded, scrollable mobile sheets. Inline drag and
      docking coordinates are intentionally overridden. */
@@ -865,6 +840,10 @@
   .decision.decision-passive { width: auto; max-width: calc(100vw - 24px); padding-inline: 13px; }
   .decision-trigger-order { width: 100%; max-width: none; max-height: 43dvh; padding: 12px; gap: 10px; }
   .decision-name-form { width: 100%; }
+  /* The dropdown hangs past this float, which must not clip it or sit under board controls. */
+  .decision-float:has(> .decision-name-choice) { z-index: 30; max-height: none; overflow: visible; }
+  /* Three and a half rows stop the dropdown short of the game bar. */
+  .decision-name-suggestions { max-height: 147px; }
   .decision-buttons button,
   .decision-optcard button { min-height: 42px; }
   .decision-cards { max-width: 100%; max-height: 30dvh; gap: 12px; padding: 8px; }

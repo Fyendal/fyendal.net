@@ -14,6 +14,7 @@ import {
   ownCards,
   pitchIds,
   pitchValue,
+  plannedDefenseReactionPlan,
   resourcePaymentPitchIds,
   scoreArsenalChoice,
   scoreBinaryChoice,
@@ -334,8 +335,10 @@ function scoreDefend(intent: DefendIntent, input: BotPolicyInput, own: ReadonlyM
       const chosenIds = new Set(candidate.chosen.map((card) => card.instanceId));
       const chosenKeys = candidate.chosen.map((card) => key(observed.cards[card.cardId]));
       const handLeft = me(observed).hand.filter((card) => !chosenIds.has(card.instanceId));
-      const yellowLeft = handLeft.some((card) => isYellow(observed.cards[card.cardId]));
-      const anyLeft = handLeft.length > 0;
+      // Cards the block's planned defense reactions spend cannot also be charged.
+      const chargeable = handLeft.filter((card) => !candidate.consumedIds.has(card.instanceId));
+      const yellowLeft = chargeable.some((card) => isYellow(observed.cards[card.cardId]));
+      const anyLeft = chargeable.length > 0;
       let adjustment = 0;
       // A grace-equipment block becomes soul, and a yellow charge a draw or a Quicken.
       if (chosenKeys.includes(HELM_OF_HALOS_GRACE) && anyLeft) {
@@ -381,6 +384,17 @@ function scoreDefend(intent: DefendIntent, input: BotPolicyInput, own: ReadonlyM
         : adjustValueBreakdown(value, { strategicAdjustment: value.strategicAdjustment + adjustment });
     },
   });
+}
+
+/** Damage a charged card would have stopped through the planned defense reactions; Infinity when it costs survival. */
+function defenseLostToCharge(card: CardView, input: BotPolicyInput): number {
+  const planned = (pitchInstanceIds: number[]) =>
+    plannedDefenseReactionPlan(input, { kind: "defend", instanceIds: [], pitchInstanceIds }).amount;
+  const kept = planned([]);
+  const without = planned([card.instanceId]);
+  if (without >= kept) return 0;
+  const { incoming, lethal } = defenseReactionThreat(input);
+  return lethal ? Infinity : Math.min(incoming, kept) - Math.min(incoming, without);
 }
 
 /** Value of the turn's first charge: Raydn's +3, Lumina's extra swing, the card's riders. */
@@ -443,8 +457,10 @@ function scoreChargeOption(intent: ChooseIntent, input: BotPolicyInput): number 
   const data = input.cards[card.cardId];
   const sourceKey = promptSourceKey(input);
   const ourTurn = input.view.activePlayer === input.seat;
-  if (!ourTurn && sourceKey === SAVING_GRACE) return savingGraceChargeGain(card, input);
-  let gain = SOUL_VALUE - cardChargeCost(card, input, cardOpportunity);
+  const defenseLost = ourTurn ? 0 : defenseLostToCharge(card, input);
+  if (defenseLost === Infinity) return -50;
+  if (!ourTurn && sourceKey === SAVING_GRACE) return savingGraceChargeGain(card, input) - defenseLost;
+  let gain = SOUL_VALUE - cardChargeCost(card, input, cardOpportunity) - defenseLost;
   // Spirit of Eirina enters the arena instead of the soul: a free setup.
   if (key(data) === SPIRIT_OF_EIRINA && boardCount(input, "spirit of eirina") === 0) gain += SPIRIT_OF_EIRINA_VALUE;
   if (boardCount(input, "blessing of bellona") > 0) gain += COURAGE_TOKEN_VALUE;

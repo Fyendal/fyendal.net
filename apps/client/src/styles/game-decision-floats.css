@@ -379,22 +379,21 @@
   width: 100%;
 }
 .decision-name-combobox > input { width: 100%; }
+/* Four and a half rows, so the cut-off row shows there is more to scroll. */
 .decision-name-suggestions {
   position: absolute;
   z-index: 20;
   top: calc(100% + 4px);
   left: 0;
+  box-sizing: border-box;
   width: 100%;
-  max-height: min(320px, 42vh);
+  max-height: min(191px, 26dvh);
   overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid #806334;
   border-radius: 3px;
   background: #120c06;
   box-shadow: 0 12px 24px #000b;
-}
-.decision-name-suggestions-above {
-  top: auto;
-  bottom: calc(100% + 4px);
 }
 .decision-name-suggestions[hidden] { display: none; }
 .decision-name-suggestions button {
@@ -413,8 +412,12 @@
   letter-spacing: normal;
 }
 .decision-name-suggestions button:last-child { border-bottom: 0; }
-.decision-name-suggestions button:hover,
-.decision-name-suggestion-active { background: #3a2812 !important; color: #ffd479; }
+/* Hover stays quieter than the highlight because only the highlight answers Enter. */
+@media (hover: hover) {
+  .decision-name-suggestions button:hover { background: #241809; }
+}
+.decision-name-suggestions button.decision-name-suggestion-active { background: #3a2812; color: #ffd479; }
+.decision-name-match { color: var(--text-muted); font-weight: 400; }
 .trigger-order-list {
   display: flex;
   flex-direction: column;

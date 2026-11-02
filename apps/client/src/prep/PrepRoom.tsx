@@ -24,6 +24,7 @@ import { MobileCardInspect } from "../game/MobileCardInspect.js";
 import { useMobileCardLongPress } from "../game/mobileCardLongPress.js";
 import { formatLabel } from "../lobby/FormatBadge.js";
 import {
+  addWeaponIndex,
   adjustMainCount,
   arenaGaps,
   defaultSelection,
@@ -397,9 +398,11 @@ export function PrepRoom() {
   const toggleWeapon = (index: number) => {
     if (arenaLocked) return;
     const has = selection.weaponIndexes.includes(index);
+    const next = has
+      ? selection.weaponIndexes.filter((candidate) => candidate !== index)
+      : addWeaponIndex(pool.weaponIds, selection.weaponIndexes, index);
     if (!has) {
-      const candidate = [...selection.weaponIndexes, index].map((i) => pool.weaponIds[i]!);
-      const issue = arenaWeaponIssue(cardData, pool.heroId, candidate);
+      const issue = arenaWeaponIssue(cardData, pool.heroId, next.map((i) => pool.weaponIds[i]!));
       if (issue) {
         setWeaponToast({
           message: intl.formatMessage(
@@ -413,12 +416,7 @@ export function PrepRoom() {
     }
     setWeaponToast(null);
     setErrors([]);
-    setSel({
-      ...selection,
-      weaponIndexes: has
-        ? selection.weaponIndexes.filter((candidate) => candidate !== index)
-        : [...selection.weaponIndexes, index],
-    });
+    setSel({ ...selection, weaponIndexes: next });
   };
 
   const toggleEquipment = (slot: EquipmentSlot, id: string) => {

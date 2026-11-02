@@ -1,6 +1,8 @@
+import { arenaWeaponIssue, cardData } from "@fyendal/cards/client";
 import type { DeckPool } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import {
+  addWeaponIndex,
   adjustMainCount,
   arenaGaps,
   defaultSelection,
@@ -19,6 +21,21 @@ const pool: DeckPool = {
 };
 
 describe("prep deck selection", () => {
+  it("swaps the selected off-hand or quiver for a newly picked one", () => {
+    const weaponIds = ["WTR003", "AJV003", "BET003", "AAZ003", "FAB126"];
+    expect(addWeaponIndex(weaponIds, [0, 1], 2)).toEqual([0, 2]);
+    expect(addWeaponIndex(weaponIds, [3, 1], 4)).toEqual([4, 1]);
+    expect(addWeaponIndex(weaponIds, [1], 0)).toEqual([1, 0]);
+    expect(addWeaponIndex(weaponIds, [1], 3)).toEqual([1, 3]);
+  });
+
+  it("still rejects an off-hand swap that a two-hander can't share with", () => {
+    const weaponIds = ["1HP090", "SEA003", "AJV003"];
+    const next = addWeaponIndex(weaponIds, [0, 1], 2);
+    expect(next).toEqual([0, 2]);
+    expect(arenaWeaponIssue(cardData, "HERO", next.map((i) => weaponIds[i]!))?.code).toBe("two-hander-pairing");
+  });
+
   it("preserves committed arena cards when a preset has different weapons and equipment", () => {
     const draft = defaultSelection({ ...pool, weaponIds: ["WTR003"] }, "preset");
     const arena = { weaponIds: ["GEM003", "GEM003"], equipment: { head: "LOCKED" } };

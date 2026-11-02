@@ -46,14 +46,15 @@ function CardInspect({ cardId, owner, onClose, standingOrders }: {
       title={cardData[visibleCardId]?.name ?? intl.formatMessage({ id: "game.cardDetails" })}
       nameTitle
       className="mobile-card-inspect-sheet"
+      backdropClassName="mobile-card-inspect-backdrop"
       onClose={onClose}
     >
+      <PreviewCardFace card={{ instanceId: -1000, cardId: visibleCardId, owner }} />
       {otherFaceId ? (
-        <button type="button" onClick={() => setVisibleCardId(otherFaceId)}>
+        <button className="mobile-card-inspect-flip" type="button" onClick={() => setVisibleCardId(otherFaceId)}>
           {intl.formatMessage({ id: "game.flipCard" })}
         </button>
       ) : null}
-      <PreviewCardFace card={{ instanceId: -1000, cardId: visibleCardId, owner }} />
       {standingOrders ? (
         <section
           className="standing-order-sheet"

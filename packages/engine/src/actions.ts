@@ -1212,6 +1212,11 @@ export function answerChoice(
     );
     if (!registered) return "not a registered card name";
     resolvedOption = registered.name;
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, (state.players[seat] as PlayerState).heroCardId)} names ${resolvedOption}`,
+      "engine.log.player.named.card",
+      { player: logPlayerValue(seat), name: resolvedOption },
+    ));
   }
   const srcId = pd.sourceInstanceId;
   const hook = pd.chooseHook;

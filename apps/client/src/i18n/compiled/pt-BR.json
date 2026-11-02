@@ -27578,6 +27578,20 @@
       "value": " de vida"
     }
   ],
+  "engine.log.player.named.card": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " nomeia "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
   "engine.log.player.shuffles.deck": [
     {
       "type": 1,

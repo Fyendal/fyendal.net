@@ -966,6 +966,27 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     expect(boardNames(game, 0).filter((name) => name === "Silver")).toHaveLength(2);
   });
 
+  it("Tailored Targeting announces the named card publicly and stops when the top card differs", () => {
+    const game = scenario({ seats: [
+      { hero: "rhinar", hand: [TAILORED], weapons: [], equipment: NO_EQUIPMENT },
+      {
+        hero: "dorinthea",
+        deck: ["raging onslaught|1", "raging onslaught|3", "wounding blow|3"],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    game.play(TAILORED).chooseName("wounding blow").blockWith().settle();
+
+    expect(game.state.log.map((entry) => entry.publicPayload?.message)).toContainEqual({
+      id: "engine.log.player.named.card",
+      values: { player: { kind: "player", seat: 0 }, name: "Wounding Blow" },
+    });
+    expect(game.state.players[1]!.banish).toHaveLength(1);
+    expect(boardNames(game, 0)).not.toContain("Silver");
+  });
+
   it("Tailored Targeting banishes nothing when its attack does not hit", () => {
     const game = scenario({ seats: [
       { hero: "rhinar", hand: [TAILORED], weapons: [], equipment: NO_EQUIPMENT },

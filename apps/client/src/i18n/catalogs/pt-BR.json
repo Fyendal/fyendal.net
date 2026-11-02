@@ -2421,6 +2421,7 @@
   "engine.log.player.draws": "{player} compra {count, plural, =0 {# cartas} one {# carta} other {# cartas}}",
   "engine.log.player.gains.action.point": "{player} ganha um Action Point",
   "engine.log.player.gains.life": "{player} ganha {amount} de vida ({life} de vida)",
+  "engine.log.player.named.card": "{player} nomeia {name}",
   "engine.log.player.shuffles.deck": "{player} embaralha o próprio deck",
   "engine.log.player.untaps.permanents": "{hero} desvira {count, plural, =0 {# permanentes} one {# permanente} other {# permanentes}}",
   "engine.log.token.creation.reduced": "{source} reduz a criação de {card} de {player} de {from, number} para {to, number}",

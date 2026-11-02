@@ -1,0 +1,139 @@
+/* Phone card inspection: the printed card alone, held up over the blurred board. */
+@media (max-width: 700px), (orientation: landscape) and (max-height: 520px) {
+  #root:has(.mobile-card-inspect-sheet) .social-dock { display: none; }
+
+  .mobile-card-inspect-backdrop {
+    align-items: center;
+    background: #00000038;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    animation: card-inspect-fade 160ms ease-out;
+  }
+  .mobile-card-inspect-sheet {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    outline: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .mobile-card-inspect-sheet .modal-surface-header {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  .mobile-card-inspect-sheet .modal-surface-header > div {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .mobile-card-inspect-sheet .modal-surface-close,
+  .mobile-card-inspect-flip {
+    border: 1px solid #ffffff2e;
+    background: #00000073;
+    clip-path: none;
+    color: #f7f1e3;
+  }
+  .mobile-card-inspect-sheet .modal-surface-close { border-radius: 50%; }
+  .mobile-card-inspect-flip {
+    flex: 0 0 auto;
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: 999px;
+    font: 500 15px/1 var(--font-lobby-ui);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  /* Radii in percent of the width and height match a 63 x 88 mm card's 3 mm corner. */
+  .mobile-card-inspect-sheet .card-preview-frame.card-hasimg {
+    border: 0;
+    border-radius: 4.76% / 3.41%;
+    background: #000;
+    outline: 1px solid #ffffff24;
+    outline-offset: -1px;
+  }
+  .mobile-card-inspect-sheet .card-preview-frame.card-hasimg .c-img { border-radius: inherit; }
+  .mobile-card-inspect-sheet .card-preview-frame {
+    flex: 0 0 auto;
+    aspect-ratio: 600 / 838;
+    animation: card-inspect-lift 220ms cubic-bezier(.2, .8, .2, 1);
+  }
+  .mobile-card-inspect-sheet .card-preview-sideways {
+    flex: 0 0 auto;
+    aspect-ratio: 838 / 600;
+  }
+}
+
+/* Upright: the card fills the width and close sits under the thumb. */
+@media (max-width: 700px) and (orientation: portrait) {
+  .mobile-card-inspect-sheet {
+    width: 100%;
+    padding-bottom: 60px;
+  }
+  .mobile-card-inspect-sheet .modal-surface-header {
+    position: fixed;
+    top: auto;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  /* 160px leaves room for the close button and the largest safe-area insets. */
+  .mobile-card-inspect-sheet .card-preview-frame {
+    width: min(100%, calc((100dvh - 160px) * 600 / 838));
+    height: auto;
+  }
+  .mobile-card-inspect-sheet .card-preview-sideways {
+    width: 100%;
+    height: auto;
+  }
+}
+
+/* Sideways: height is the constraint, so close moves into the gutter beside the card. */
+@media (orientation: landscape) and (max-height: 520px), (orientation: landscape) and (max-width: 700px) {
+  .mobile-card-inspect-backdrop { padding: 12px; }
+  .mobile-card-inspect-sheet {
+    --inspect-card-height: calc(100dvh - 24px);
+    position: relative;
+    width: fit-content;
+    padding: 0 56px;
+  }
+  .mobile-card-inspect-sheet:has(.mobile-card-inspect-flip) { --inspect-card-height: calc(100dvh - 76px); }
+  .mobile-card-inspect-sheet .modal-surface-header {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+  .mobile-card-inspect-sheet .card-preview-frame {
+    width: auto;
+    height: var(--inspect-card-height);
+  }
+  .mobile-card-inspect-sheet .card-preview-sideways {
+    width: calc(var(--inspect-card-height) * 838 / 600);
+    height: var(--inspect-card-height);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-card-inspect-backdrop,
+  .mobile-card-inspect-sheet .card-preview-frame { animation: none; }
+}
+
+@keyframes card-inspect-fade {
+  from { opacity: 0; }
+}
+@keyframes card-inspect-lift {
+  from {
+    opacity: 0;
+    transform: scale(.96);
+  }
+}

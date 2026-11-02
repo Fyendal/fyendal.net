@@ -1,10 +1,8 @@
-import { useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { cardData } from "@fyendal/cards/client";
 
 const MAX_SUGGESTIONS = 8;
-const SUGGESTIONS_MAX_HEIGHT = 320;
-const VIEWPORT_MARGIN = 8;
 const registeredCardNames = [...new Set(
   Object.values(cardData).map((card) => card.name.trim()).filter(Boolean),
 )].sort((left, right) => left.localeCompare(right));
@@ -25,6 +23,12 @@ export function cardNameSuggestions(query: string, limit = MAX_SUGGESTIONS): str
   return [...prefixes, ...containing].slice(0, limit);
 }
 
+/** The registered spelling of a fully typed name; partial text never matches. */
+export function registeredCardName(query: string): string | undefined {
+  const normalized = query.trim().toLowerCase();
+  return registeredCardNames.find((name) => name.toLowerCase() === normalized);
+}
+
 export type CardNameEnterAction =
   | { kind: "accept-suggestion"; name: string }
   | { kind: "submit" };
@@ -38,15 +42,13 @@ export function cardNameEnterAction(
   return name ? { kind: "accept-suggestion", name } : { kind: "submit" };
 }
 
-/** Open toward the roomier side of the viewport and fit within it. */
-export function cardNameSuggestionPlacement(
-  anchor: { top: number; bottom: number },
-  viewportHeight: number,
-): { above: boolean; maxHeight: number } {
-  const spaceBelow = viewportHeight - anchor.bottom - VIEWPORT_MARGIN;
-  const spaceAbove = anchor.top - VIEWPORT_MARGIN;
-  const above = spaceBelow < SUGGESTIONS_MAX_HEIGHT && spaceAbove > spaceBelow;
-  return { above, maxHeight: Math.max(0, Math.min(SUGGESTIONS_MAX_HEIGHT, above ? spaceAbove : spaceBelow)) };
+/** Split a suggestion around the typed text so look-alike names read by what differs. */
+export function cardNameSuggestionParts(name: string, query: string): [before: string, match: string, after: string] {
+  const normalized = query.trim().toLowerCase();
+  const start = normalized ? name.toLowerCase().indexOf(normalized) : -1;
+  if (start < 0) return ["", "", name];
+  const end = start + normalized.length;
+  return [name.slice(0, start), name.slice(start, end), name.slice(end)];
 }
 
 export function NameChoiceAutocomplete({ onChoose }: { onChoose: (name: string) => void }) {
@@ -54,34 +56,31 @@ export function NameChoiceAutocomplete({ onChoose }: { onChoose: (name: string) 
   const listboxId = useId();
   const [chosenName, setChosenName] = useState("");
   const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
+  // Nothing is highlighted until the player arrows to it, so Enter can't pick a look-alike.
+  const [activeIndex, setActiveIndex] = useState(-1);
   const suggestions = useMemo(() => cardNameSuggestions(chosenName), [chosenName]);
-  const showSuggestions = open && suggestions.length > 0;
-  const comboboxRef = useRef<HTMLDivElement>(null);
-  const [placement, setPlacement] = useState<ReturnType<typeof cardNameSuggestionPlacement>>();
+  const registeredName = registeredCardName(chosenName);
+  // A complete name closes the list, so it never covers an enabled Choose button.
+  const showSuggestions = open && suggestions.length > 0 && !registeredName;
+  const listboxRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
-    const combobox = comboboxRef.current;
-    if (!showSuggestions || !combobox) return;
-    const update = () => setPlacement(cardNameSuggestionPlacement(combobox.getBoundingClientRect(), window.innerHeight));
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, [showSuggestions]);
+  useEffect(() => {
+    if (!showSuggestions || activeIndex < 0) return;
+    listboxRef.current?.children[activeIndex]?.scrollIntoView({ block: "nearest" });
+  }, [showSuggestions, activeIndex]);
 
   const acceptSuggestion = (name: string) => {
     setChosenName(name);
     setOpen(false);
-    setActiveIndex(0);
+    setActiveIndex(-1);
   };
 
-  const choose = (name: string) => {
-    const normalized = name.trim();
-    if (!normalized) return;
-    onChoose(normalized);
+  const choose = () => {
+    if (!registeredName) return;
+    onChoose(registeredName);
     setChosenName("");
     setOpen(false);
-    setActiveIndex(0);
+    setActiveIndex(-1);
   };
 
   return (
@@ -89,12 +88,12 @@ export function NameChoiceAutocomplete({ onChoose }: { onChoose: (name: string) 
       className="decision-buttons decision-name-form"
       onSubmit={(event) => {
         event.preventDefault();
-        choose(chosenName);
+        choose();
       }}
     >
-      <div className="decision-name-combobox" ref={comboboxRef}>
+      <div className="decision-name-combobox">
         <input
-          aria-activedescendant={showSuggestions ? `${listboxId}-${activeIndex}` : undefined}
+          aria-activedescendant={showSuggestions && activeIndex >= 0 ? `${listboxId}-${activeIndex}` : undefined}
           aria-autocomplete="list"
           aria-controls={listboxId}
           aria-expanded={showSuggestions}
@@ -107,7 +106,7 @@ export function NameChoiceAutocomplete({ onChoose }: { onChoose: (name: string) 
           onChange={(event) => {
             setChosenName(event.target.value);
             setOpen(true);
-            setActiveIndex(0);
+            setActiveIndex(-1);
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={(event) => {
@@ -123,7 +122,7 @@ export function NameChoiceAutocomplete({ onChoose }: { onChoose: (name: string) 
             } else if (event.key === "ArrowUp") {
               event.preventDefault();
               setOpen(true);
-              setActiveIndex((current) => (current - 1 + suggestions.length) % suggestions.length);
+              setActiveIndex((current) => (current <= 0 ? suggestions.length : current) - 1);
             } else if (event.key === "Enter") {
               const action = cardNameEnterAction(showSuggestions, suggestions, activeIndex);
               if (action.kind === "accept-suggestion") {
@@ -134,31 +133,33 @@ export function NameChoiceAutocomplete({ onChoose }: { onChoose: (name: string) 
           }}
         />
         <div
-          className={`decision-name-suggestions${placement?.above ? " decision-name-suggestions-above" : ""}`}
+          className="decision-name-suggestions"
           id={listboxId}
+          ref={listboxRef}
           role="listbox"
           hidden={!showSuggestions}
-          style={placement ? { maxHeight: placement.maxHeight } : undefined}
         >
-          {suggestions.map((name, index) => (
-            <button
-              aria-selected={index === activeIndex}
-              className={index === activeIndex ? "decision-name-suggestion-active" : undefined}
-              id={`${listboxId}-${index}`}
-              key={name}
-              role="option"
-              tabIndex={-1}
-              type="button"
-              onClick={() => acceptSuggestion(name)}
-              onMouseDown={(event) => event.preventDefault()}
-              onMouseEnter={() => setActiveIndex(index)}
-            >
-              {name}
-            </button>
-          ))}
+          {suggestions.map((name, index) => {
+            const [before, match, after] = cardNameSuggestionParts(name, chosenName);
+            return (
+              <button
+                aria-selected={index === activeIndex}
+                className={index === activeIndex ? "decision-name-suggestion-active" : undefined}
+                id={`${listboxId}-${index}`}
+                key={name}
+                role="option"
+                tabIndex={-1}
+                type="button"
+                onClick={() => acceptSuggestion(name)}
+                onMouseDown={(event) => event.preventDefault()}
+              >
+                {before}<span className="decision-name-match">{match}</span>{after}
+              </button>
+            );
+          })}
         </div>
       </div>
-      <button className="btn-primary" disabled={!chosenName.trim()} type="submit">
+      <button className="btn-primary" disabled={!registeredName} type="submit">
         {intl.formatMessage({ id: "game.decision.name.choose" })}
       </button>
     </form>

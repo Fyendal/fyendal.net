@@ -2421,6 +2421,7 @@
   "engine.log.player.draws": "{player} 抽 {count} 张牌",
   "engine.log.player.gains.action.point": "{player} 获得 1 个行动点",
   "engine.log.player.gains.life": "{player} 恢复 {amount} 点生命（当前 {life} 点生命）",
+  "engine.log.player.named.card": "{player} 指定名称 {name}",
   "engine.log.player.shuffles.deck": "{player} 洗切牌库",
   "engine.log.player.untaps.permanents": "{hero} 重置 {count} 个永久物",
   "engine.log.token.creation.reduced": "{source} 将 {player} 生成 {card} 的数量从 {from, number} 减少为 {to, number}",

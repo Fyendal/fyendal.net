@@ -33,9 +33,10 @@ import {
 } from "./decision/DecisionShared.js";
 import {
   cardNameEnterAction,
-  cardNameSuggestionPlacement,
+  cardNameSuggestionParts,
   cardNameSuggestions,
   NameChoiceAutocomplete,
+  registeredCardName,
 } from "./decision/NameChoiceAutocomplete.js";
 import { steppedNumberChoice } from "./decision/NumberChoiceInput.js";
 import {
@@ -310,10 +311,20 @@ describe("card-name autocomplete", () => {
     expect(cardNameEnterAction(false, ["Hundred Winds"], 0)).toEqual({ kind: "submit" });
   });
 
-  it("opens name suggestions toward the roomier side and fits them in the viewport", () => {
-    expect(cardNameSuggestionPlacement({ top: 100, bottom: 140 }, 900)).toEqual({ above: false, maxHeight: 320 });
-    expect(cardNameSuggestionPlacement({ top: 500, bottom: 540 }, 700)).toEqual({ above: true, maxHeight: 320 });
-    expect(cardNameSuggestionPlacement({ top: 120, bottom: 160 }, 400)).toEqual({ above: false, maxHeight: 232 });
+  it("does not pick a suggestion on Enter until one is highlighted", () => {
+    expect(cardNameSuggestions("shadowrealm h")[0]).toBe("Shadowrealm Harrower");
+    expect(cardNameEnterAction(true, cardNameSuggestions("shadowrealm h"), -1)).toEqual({ kind: "submit" });
+  });
+
+  it("only treats a complete registered name as submittable", () => {
+    expect(registeredCardName("shadowrealm h")).toBeUndefined();
+    expect(registeredCardName("  shadowrealm horror ")).toBe("Shadowrealm Horror");
+  });
+
+  it("splits a suggestion around the typed text", () => {
+    expect(cardNameSuggestionParts("Shadowrealm Horror", " shadowrealm ")).toEqual(["", "Shadowrealm", " Horror"]);
+    expect(cardNameSuggestionParts("Shadowrealm Horror", "horr")).toEqual(["Shadowrealm ", "Horr", "or"]);
+    expect(cardNameSuggestionParts("Shadowrealm Horror", "")).toEqual(["", "", "Shadowrealm Horror"]);
   });
 });
 

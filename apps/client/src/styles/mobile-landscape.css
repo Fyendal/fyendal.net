@@ -509,26 +509,6 @@
   .stack-mini-count { min-width: 20px; height: 20px; font-size: 12px; }
   .table:has(.chain-float) .mat-divider-center > .priority-float { display: none; }
   .waiting { top: 6px; padding: 4px 12px; font-size: 12px; letter-spacing: 1.5px; }
-
-  /* Card inspection keeps the whole card on screen. */
-  .mobile-card-inspect-sheet {
-    max-height: calc(100dvh - 20px);
-    padding: 10px 16px 14px;
-  }
-  .mobile-card-inspect-sheet .modal-surface-header { margin: -10px -16px 10px; padding: 8px 12px; }
-  .mobile-card-inspect-sheet .modal-surface-header h2 { font-size: 18px; }
-  .mobile-card-inspect-sheet .card-preview-frame {
-    width: auto;
-    height: min(413px, calc(100dvh - 110px));
-    margin-inline: auto;
-    aspect-ratio: 300 / 413;
-  }
-  .mobile-card-inspect-sheet .card-preview-sideways {
-    --sideways-height: min(330px, calc(100dvh - 110px));
-    width: calc(var(--sideways-height) * 413 / 300);
-    height: var(--sideways-height);
-    margin-inline: auto;
-  }
 }
 
 /* Narrow phones: a slimmer bar. */

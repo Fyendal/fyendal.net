@@ -25268,6 +25268,20 @@
       "value": " 点生命"
     }
   ],
+  "engine.log.player.named.card": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 指定名称 "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
   "engine.log.player.shuffles.deck": [
     {
       "type": 1,

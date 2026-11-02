@@ -35,6 +35,24 @@ export function defaultWeaponIndexes(weaponIds: readonly string[], heroId: strin
   return selectedIndexes;
 }
 
+const ONE_PER_ARENA_SUBTYPES = ["off-hand", "quiver"];
+
+/** Add a weapon in place of the selected off-hand or quiver it would duplicate. */
+export function addWeaponIndex(
+  weaponIds: readonly string[],
+  selected: readonly number[],
+  index: number,
+): number[] {
+  const subtypes = cardData[weaponIds[index]!]?.subtypes ?? [];
+  const subtype = ONE_PER_ARENA_SUBTYPES.find((candidate) => subtypes.includes(candidate));
+  const replaced = subtype === undefined ? undefined : selected.find(
+    (candidate) => cardData[weaponIds[candidate]!]?.subtypes?.includes(subtype),
+  );
+  return replaced === undefined
+    ? [...selected, index]
+    : selected.map((candidate) => (candidate === replaced ? index : candidate));
+}
+
 /** Start from the deck/sideboard split the player registered. */
 export function defaultSelection(pool: DeckPool, forDeck: string): PrepSelection {
   const equipment: Partial<Record<EquipmentSlot, string>> = {};

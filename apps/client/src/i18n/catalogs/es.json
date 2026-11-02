@@ -2421,6 +2421,7 @@
   "engine.log.player.draws": "{player} roba {count, plural, one {# carta} other {# cartas}}",
   "engine.log.player.gains.action.point": "{player} obtiene un Action Point",
   "engine.log.player.gains.life": "{player} gana {amount} de vida ({life} de vida)",
+  "engine.log.player.named.card": "{player} nombra {name}",
   "engine.log.player.shuffles.deck": "{player} baraja su mazo",
   "engine.log.player.untaps.permanents": "{hero} hace untap a {count, plural, one {# permanente} other {# permanentes}}",
   "engine.log.token.creation.reduced": "{source} reduce la creación de {card} de {player} de {from, number} a {to, number}",
