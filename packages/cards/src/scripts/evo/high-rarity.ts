@@ -316,7 +316,7 @@ export const evoHighRarity: Record<string, CardScript> = {
         effect(ctx) {
           const items = ctx
             .player(ctx.seat)
-            .board.filter((card) => isItem(ctx, card) && data(ctx, card).text.includes("Crank"));
+            .board.filter((card) => isItem(ctx, card) && ctx.hasCrank(card));
           if (items.length)
             ctx.requestCardChoice(
               "master-cog",

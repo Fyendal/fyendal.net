@@ -538,6 +538,26 @@ describe("Armory Decks — AMX, AGB, and ASR", () => {
     g.attackWithWeapon("banksy|0").expectAttackValue(5);
   });
 
+  it("Banksy's hit adds steam to a Hyper Driver only while Maxx grants it Crank", () => {
+    const setup = (heroKey?: string) => {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", heroKey, weapons: ["banksy|0"], board: ["hyper driver|0"], resources: 1, equipment: NO_EQUIPMENT },
+          { hero: "dorinthea", equipment: NO_EQUIPMENT },
+        ],
+      });
+      g.state.players[0]!.flags.crankedThisTurn = true;
+      g.attackWithWeapon("banksy|0").blockWith().settle();
+      return g;
+    };
+
+    const granted = setup("maxx 'the hype' nitro|0");
+    granted.chooseCard("hyper driver|0");
+    expect(granted.state.players[0]!.board[0]!.counters?.steam).toBe(1);
+
+    expect(setup().state.pendingDecision?.chooseHook).not.toBe("banksy-steam");
+  });
+
   it("Construct Bank Breaker transforms a wrench and three Hyper Drivers into the equipped back face", () => {
     const g = scenario({
       seats: [

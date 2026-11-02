@@ -3290,6 +3290,26 @@ describe("September 3 IAR spoilers", () => {
     expect(boardNames(g, 0)).toContain("Flurry");
   });
 
+  it("Cogwerx Prong Bot recognizes Crank granted to Hyper Driver by Maxx", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "maxx nitro|0",
+        hand: ["cogwerx prong bot|2"],
+        board: ["hyper driver|0"],
+        resources: 3,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("cogwerx prong bot|2")
+      .blockWith()
+      .settle()
+      .chooseCard("hyper driver|0");
+    expect(g.state.players[0]!.board[0]!.counters?.steam).toBe(1);
+  });
+
   it("Cogwerx Prong Bot discards itself as an instant to create a Golden Cog", () => {
     const g = scenario({ seats: [
       {

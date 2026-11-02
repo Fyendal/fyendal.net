@@ -601,6 +601,48 @@ describe("Ira policy", () => {
     },
   );
 
+  it.each([
+    { name: "nothing left to fund", hand: [], floating: 1, expected: "no" },
+    { name: "an attack already paid for", hand: ["ASR010"], floating: 2, expected: "no" },
+    { name: "an attack only the resource can pay for", hand: ["ASR010"], floating: 1, expected: "yes" },
+  ])("answers $expected to Robe of Autumn's Fall with $name", ({ hand, floating, expected }) => {
+    let state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9105,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, hand);
+    replaceHand(state, 1, []);
+    state.players[0]!.arsenal = [];
+    state.players[0]!.resources = floating;
+    state.players[0]!.equipment.chest = {
+      instanceId: state.nextInstanceId++,
+      cardId: "ASR004",
+      owner: 0,
+    };
+    state.players[1]!.equipment = {};
+    state = apply(state, 0, {
+      kind: "activate-ability",
+      sourceInstanceId: state.players[0]!.weapons.find((weapon) => weapon.cardId === "ASR002")!.instanceId,
+      abilityIndex: 0,
+      pitchInstanceIds: [],
+    });
+    state = advanceUntil(state, (candidate) =>
+      /destroy robe of autumn's fall/i.test(candidate.pendingDecision?.prompt ?? "")
+    );
+
+    const intent = chooseIraIntent({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal: legalIntents(state, 0),
+      cards: cardData,
+    });
+    expect(intent).toMatchObject({ kind: "choose", optionId: expected });
+  });
+
   it("uses Razor Reflex in its attack-reaction window", () => {
     let state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],

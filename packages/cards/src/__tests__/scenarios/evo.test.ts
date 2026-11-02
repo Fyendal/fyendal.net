@@ -1089,6 +1089,27 @@ describe("EVO — registration and core mechanics", () => {
     expect(s.state.players[0]!.board[0]!.counters?.steam).toBe(1);
   });
 
+  it("Master Cog recognizes Crank granted to Hyper Driver by Maxx", () => {
+    const setup = (heroKey?: string) => scenario({
+      seats: [
+        { hero: "rhinar", heroKey, resources: 1, hand: ["big bertha|2", "master cog|2"], board: ["hyper driver|0"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    const granted = setup("maxx nitro|0");
+    granted.play("big bertha|2", { pitch: ["master cog|2"], settle: false });
+    granted.passPriority().passPriority();
+    expect(granted.state.pendingDecision?.chooseHook).toBe("master-cog");
+    granted.chooseCard("hyper driver|0");
+    expect(granted.state.players[0]!.board[0]!.counters?.steam).toBe(1);
+
+    const ungranted = setup();
+    ungranted.play("big bertha|2", { pitch: ["master cog|2"], settle: false });
+    ungranted.passPriority().passPriority();
+    expect(ungranted.state.pendingDecision?.chooseHook).not.toBe("master-cog");
+  });
+
   it("Twin Drive offers zero, one, or two Boost payments and applies the chosen count", () => {
     const setup = () => scenario({
       seats: [

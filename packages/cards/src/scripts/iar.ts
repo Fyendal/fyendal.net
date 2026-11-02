@@ -823,11 +823,7 @@ function cogwerxProngBot(): CardScript {
     onHit(ctx) {
       const items = ctx
         .player(ctx.seat)
-        .board.filter(
-          (card) =>
-            hasType(ctx, card, "item") &&
-            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "crank"),
-        );
+        .board.filter((card) => hasType(ctx, card, "item") && ctx.hasCrank(card));
       if (items.length > 0) {
         ctx.requestCardChoice(
           "iar-prong-bot-steam",

@@ -35,7 +35,7 @@ import {
   type TurnPlan,
   type TurnPlannerRoot,
 } from "./turn-planner.js";
-import { BLOCK_USE_RATE } from "./card-ev.js";
+import { BLOCK_USE_RATE, PITCH_FUNDING_RATE } from "./card-ev.js";
 import { abilitySource, weaponCost, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
 import type { PendingEffect, SolverCard, SolverFlags, SolverStep, SolverView } from "./hand-solver.js";
 import {
@@ -498,6 +498,21 @@ function atActionDecision(input: BotPolicyInput): boolean {
     input.view.players[input.seat].actionPoints > 0;
 }
 
+/** Hand value one more floating resource adds this turn; it is lost at end of
+ * turn. Solved as if the hitting link had resolved, for its go again and combos. */
+function extraResourceValue(input: BotPolicyInput): number {
+  const me = input.view.players[input.seat];
+  const actionPoints = me.actionPoints + (currentLink(input)?.goAgain ? 1 : 0);
+  const chain = input.view.chain.map((link) => ({ ...link, resolved: true }));
+  const valueWith = (resources: number) => {
+    const players: typeof input.view.players = [...input.view.players];
+    players[input.seat] = { ...me, resources, actionPoints };
+    const view = { ...input.view, chain, players };
+    return solveHand(reserveCards(input), { ...input, view }, iraSolverRules).value;
+  };
+  return valueWith(me.resources + 1) - valueWith(me.resources);
+}
+
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
   const decision = input.view.pendingDecision;
   if (!decision) return 0;
@@ -522,6 +537,11 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   }
   if (/equip an edge of autumn/i.test(decision.prompt)) {
     return intent.optionId === "pass" ? -20 : 100;
+  }
+  if (/destroy robe of autumn's fall/i.test(decision.prompt)) {
+    // A kept Robe funds a later Edge hit instead.
+    if (intent.optionId !== "yes") return 0;
+    return extraResourceValue(input) > PITCH_FUNDING_RATE ? 10 : -2;
   }
   if (/discard/i.test(decision.prompt)) {
     return scoreSpendCardChoice(intent, input, cardOpportunity, 20, -5);

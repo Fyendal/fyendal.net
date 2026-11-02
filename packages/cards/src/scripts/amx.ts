@@ -99,12 +99,7 @@ export const amx: Record<string, CardScript> = {
     onHit(ctx) {
       const items = ctx
         .player(ctx.seat)
-        .board.filter(
-          (card) =>
-            hasSubtype(ctx, card, "item") &&
-            (cardNamed(ctx, card, "Hyper Driver") ||
-              (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "crank")),
-        );
+        .board.filter((card) => hasSubtype(ctx, card, "item") && ctx.hasCrank(card));
       if (items.length)
         ctx.requestCardChoice(
           "banksy-steam",
