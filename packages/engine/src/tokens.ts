@@ -545,6 +545,19 @@ function beginTokenCreation(
     ));
     return [];
   }
+  if (state.modifiers.some((modifier) =>
+    !modifier.consumed &&
+    modifier.seat === player.seat &&
+    modifier.prohibitsTokenCreationOfType !== undefined &&
+    (tokenData.subtypes ?? []).includes(modifier.prohibitsTokenCreationOfType)
+  )) {
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, cardId)} can't be created under ${nameOf(state, player.heroCardId)}'s control this turn`,
+      "engine.log.token.creation.prohibited",
+      { card: logCardValue(cardId), hero: logCardValue(player.heroCardId) },
+    ));
+    return [];
+  }
   return continueTokenCreation(
     state, runtime,
     player,

@@ -774,6 +774,8 @@ export interface ActivatedEffectCardCost {
   /** `under` selects from the source permanent's public sub-cards;
    * `hand-or-arsenal` lets each selected card come from either zone. */
   zone: "hand" | "graveyard" | "arsenal" | "hand-or-arsenal" | "arena" | "under";
+  /** With zone `arena`, select from opponents' boards instead of your own permanents. */
+  opponentControlled?: boolean;
   move: "banish" | "discard" | "destroy" | "put-on-deck-bottom" | "tap" | "untap" | "remove-counter" | "turn-face-up";
   count: number;
   /** Banish the selected card face down, keeping its identity private. */

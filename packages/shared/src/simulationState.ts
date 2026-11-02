@@ -328,6 +328,8 @@ export interface PersistedModifierV1 {
   appliesToInstanceId?: number;
   appliesToTargetType?: string;
   appliesToTargetNamePrefix?: string;
+  appliesToTargetControllingType?: string;
+  prohibitsTokenCreationOfType?: string;
   appliesToMarkedHero?: boolean;
   excludesSubtype?: string;
   appliesToCardType?: string;

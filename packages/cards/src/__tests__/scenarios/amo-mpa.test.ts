@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { legalIntents } from "@fyendal/engine";
-import { cardData } from "../../index.js";
+import { cardData, findPrinting, isImplemented, precon } from "../../index.js";
 import { scenario } from "../harness.js";
 
 const DR_MORTIMER = "dr. mortimer, blight of the pits|0";
@@ -1237,5 +1237,296 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     game.play(CONCOCT).blockWith().react(WEAKNESS, { settle: false }).react(WEAKNESS).settle();
 
     game.expectLife(1, 18).expectInZone(1, WOUNDING_BLOW, "arsenal");
+  });
+
+  describe("Armory Deck decklist cards", () => {
+    const VICTIM = { hero: "dorinthea" as const, weapons: [] as string[], equipment: NO_EQUIPMENT };
+
+    it("registers the full decklist as an implemented precon of 60 cards", () => {
+      const deck = precon("precon-amo");
+      expect(deck?.pool.deck).toHaveLength(60);
+      expect(deck?.pool.weaponIds).toEqual(["AMO002", "AMO002"]);
+      expect(deck?.pool.equipmentPool.map((id) => cardData[id]!.name)).toEqual([
+        "Plague Mask", "Isolation Vestment", "Surgical Gloves", "Second Salvos",
+      ]);
+      for (const id of deck!.pool.deck) expect(isImplemented(cardData[id]!), id).toBe(true);
+    });
+
+    it("resolves deck imports to released printings over unreleased AMO reprints", () => {
+      expect(findPrinting("Excessive Bloodloss", 1)?.id).toBe("PEN144");
+      expect(findPrinting("Seeker Kunai", 1)?.id).toBe("PEN142");
+      expect(findPrinting("Escaped Subject", 1)?.id).toBe("AMO008");
+    });
+
+    it("Plague Mask stops disease tokens under its controller only for the turn", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: ["seed inertia|3"], weapons: [], equipment: { ...NO_EQUIPMENT, head: "plague mask|0" } },
+        { hero: "dorinthea", hand: ["seed frailty|3"], weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.activate("plague mask|0").settle();
+      game.play("seed inertia|3").settle();
+
+      game.expectInZone(0, "plague mask|0", "graveyard");
+      expect(boardNames(game, 0)).toEqual([]);
+      expect(boardNames(game, 1)).toEqual(["Inertia"]);
+      game.expectLog("can't be created");
+
+      game.endTurn();
+      game.play("seed frailty|3").settle();
+      expect(boardNames(game, 0)).toEqual(["Frailty"]);
+    });
+
+    it("Isolation Vestment discounts every Assassin attack at an infected hero this turn", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar",
+          hand: ["wound extraction|1", "wound extraction|1"],
+          weapons: [],
+          equipment: { ...NO_EQUIPMENT, chest: "isolation vestment|0" },
+        },
+        { hero: "dorinthea", board: ["frailty|0"], weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.activate("isolation vestment|0").settle().expectAP(0, 1);
+      game.play("wound extraction|1").blockWith().settle();
+
+      game.expectResources(0, 0).expectInZone(0, "isolation vestment|0", "graveyard");
+    });
+
+    it("Isolation Vestment gives no discount against an uninfected hero", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar",
+          hand: ["wound extraction|1"],
+          weapons: [],
+          equipment: { ...NO_EQUIPMENT, chest: "isolation vestment|0" },
+        },
+        VICTIM,
+      ] });
+
+      game.activate("isolation vestment|0").settle();
+      game.expectNoLegalPlay("wound extraction|1");
+    });
+
+    it("Surgical Gloves cures as a cost, shrinks the attack, and leaves at the end phase", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: ["wounding blow|3"], resources: 1, weapons: [], board: ["frailty|0"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: { ...NO_EQUIPMENT, arms: "surgical gloves|0" } },
+      ] });
+
+      game.play("wounding blow|3").blockWith().passPriority();
+      game.activate("surgical gloves|0", { targetCard: "wounding blow|3" }).chooseCard("frailty|0").settle();
+
+      expect(boardNames(game, 0)).toEqual([]);
+      game.expectLife(1, 19);
+      game.expectEquipped(1, "arms", "surgical gloves|0");
+      game.endTurn();
+      game.expectInZone(1, "surgical gloves|0", "graveyard");
+    });
+
+    it("Surgical Gloves can't be activated without an opposing disease", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: ["wounding blow|3"], resources: 1, weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", board: ["frailty|0"], weapons: [], equipment: { ...NO_EQUIPMENT, arms: "surgical gloves|0" } },
+      ] });
+
+      game.play("wounding blow|3").blockWith().passPriority();
+      expect(legalIntents(game.state, 1).some((intent) => intent.kind === "activate-ability")).toBe(false);
+    });
+
+    it("Second Salvos untaps its hero and comes back for 2 Silver", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar",
+          heroKey: DR_MORTIMER,
+          weapons: [],
+          equipment: { ...NO_EQUIPMENT, legs: "second salvos|0" },
+          board: ["silver|0", "silver|0"],
+        },
+        { ...VICTIM, board: ["frailty|0"] },
+      ] });
+
+      game.activate(DR_MORTIMER, { ability: 0 }).chooseCard("frailty|0").settle();
+      expect(game.state.players[0]!.hero.tapped).toBe(true);
+      game.activate("second salvos|0").settle();
+      expect(game.state.players[0]!.hero.tapped).toBeFalsy();
+      game.expectInZone(0, "second salvos|0", "graveyard");
+      game.endTurn().endTurn().chooseOption("yes");
+      game.expectEquipped(0, "legs", "second salvos|0");
+    });
+
+    it("Escaped Subject has go again only against an infected hero", () => {
+      const infected = scenario({ seats: [
+        { hero: "rhinar", hand: ["escaped subject|1"], weapons: [], equipment: NO_EQUIPMENT },
+        { ...VICTIM, board: ["frailty|0"] },
+      ] });
+      infected.play("escaped subject|1").blockWith().settle().expectAP(0, 1);
+
+      const clean = scenario({ seats: [
+        { hero: "rhinar", hand: ["escaped subject|1"], weapons: [], equipment: NO_EQUIPMENT },
+        VICTIM,
+      ] });
+      clean.play("escaped subject|1").blockWith().settle();
+      clean.expectAP(0, 0);
+    });
+
+    it("Eviscerate the Enervated pays Silver only for banishing an infected hero's card", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: ["eviscerate the enervated|1"], resources: 1, weapons: [], equipment: NO_EQUIPMENT },
+        { ...VICTIM, board: ["frailty|0"], deck: ["wounding blow|3"] },
+      ] });
+      game.play("eviscerate the enervated|1").blockWith().settle();
+      game.expectZoneSize(1, "banish", 1);
+      expect(boardNames(game, 0)).toEqual(["Silver"]);
+
+      const clean = scenario({ seats: [
+        { hero: "rhinar", hand: ["eviscerate the enervated|1"], resources: 1, weapons: [], equipment: NO_EQUIPMENT },
+        { ...VICTIM, deck: ["wounding blow|3"] },
+      ] });
+      clean.play("eviscerate the enervated|1").blockWith().settle();
+      clean.expectZoneSize(1, "banish", 1);
+      expect(boardNames(clean, 0)).toEqual([]);
+    });
+
+    it("Sneaking Rot poxes the hit hero only after its controller's attack reaction", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: ["sneaking rot|1", "shred|3"], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+        { ...VICTIM, hand: ["wounding blow|3"] },
+      ] });
+      game.play("sneaking rot|1").blockWith("wounding blow|3");
+      game.react("shred|3").chooseCard("wounding blow|3");
+      game.settle();
+      expect(boardNames(game, 1)).toEqual(["Bloodrot Pox"]);
+
+      const quiet = scenario({ seats: [
+        { hero: "rhinar", hand: ["sneaking rot|1"], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+        VICTIM,
+      ] });
+      quiet.play("sneaking rot|1").blockWith().settle();
+      expect(boardNames(quiet, 1)).toEqual([]);
+    });
+
+    it("Wound Extraction offers a disease only after a dagger hit this chain", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: ["wound extraction|1"], resources: 3, weapons: [HUMOUR_PLUNGE], equipment: NO_EQUIPMENT },
+        VICTIM,
+      ] });
+      game.attackWithWeapon(HUMOUR_PLUNGE).blockWith().settle();
+      game.play("wound extraction|1").blockWith().settle();
+      game.chooseOption(INERTIA_TOKEN).settle();
+      expect(boardNames(game, 1)).toEqual(["Inertia"]);
+
+      const clean = scenario({ seats: [
+        { hero: "rhinar", hand: ["wound extraction|1"], resources: 1, weapons: [], equipment: NO_EQUIPMENT },
+        VICTIM,
+      ] });
+      clean.play("wound extraction|1").blockWith().settle();
+      expect(boardNames(clean, 1)).toEqual([]);
+    });
+
+    it("Act on Intel only targets contract attacks and makes the hit hero banish from hand", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: ["eviscerate the enervated|1", "act on intel: whereabouts|1"], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+        { ...VICTIM, board: ["frailty|0"], hand: ["wounding blow|3"], deck: ["wounding blow|1"] },
+      ] });
+      game.play("eviscerate the enervated|1").blockWith();
+      game.react("act on intel: whereabouts|1").settle();
+      game.chooseCard("wounding blow|3").settle();
+      game.expectFinalAttack(6);
+      game.expectInZone(1, "wounding blow|3", "banish");
+      // Two banishes against an infected hero: top of deck and the chosen card.
+      expect(boardNames(game, 0)).toEqual(["Silver", "Silver"]);
+
+      const noContract = scenario({ seats: [
+        { hero: "rhinar", hand: ["escaped subject|1", "act on intel: whereabouts|1"], resources: 1, weapons: [], equipment: NO_EQUIPMENT },
+        VICTIM,
+      ] });
+      noContract.play("escaped subject|1").blockWith();
+      noContract.expectNoLegalPlay("act on intel: whereabouts|1");
+    });
+
+    it("Pick Your Poison leaves the opponent with the two tokens they did not choose", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: ["pick your poison|2"], weapons: [], equipment: NO_EQUIPMENT },
+        VICTIM,
+      ] });
+      game.play("pick your poison|2", { settle: false }).passPriority().passPriority();
+      game.chooseOption(FRAILTY_TOKEN).settle();
+      expect(boardNames(game, 0)).toEqual([]);
+      expect(boardNames(game, 1).sort()).toEqual(["Bloodrot Pox", "Inertia"]);
+      game.expectAP(0, 1);
+    });
+
+    it("Pick Your Poison never offers or creates Exertion", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: ["pick your poison|2"], weapons: [], equipment: NO_EQUIPMENT },
+        VICTIM,
+      ] });
+      game.play("pick your poison|2", { settle: false }).passPriority().passPriority();
+
+      expect(game.state.pendingDecision?.options).toEqual([FRAILTY_TOKEN, INERTIA_TOKEN, "OUT234"]);
+      game.chooseOption("OUT234").settle();
+      expect(boardNames(game, 1).sort()).toEqual(["Frailty", "Inertia"]);
+    });
+
+    it("treats Exertion as a disease for infection, curing, and Plague Mask", () => {
+      const infected = scenario({ seats: [
+        { hero: "rhinar", hand: ["escaped subject|1"], weapons: [], equipment: NO_EQUIPMENT },
+        { ...VICTIM, board: ["exertion|0"] },
+      ] });
+      infected.play("escaped subject|1").blockWith().settle().expectAP(0, 1);
+
+      const cured = scenario({ seats: [
+        { hero: "rhinar", hand: ["wounding blow|3"], resources: 1, weapons: [], board: ["exertion|0"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: { ...NO_EQUIPMENT, arms: "surgical gloves|0" } },
+      ] });
+      cured.play("wounding blow|3").blockWith().passPriority();
+      cured.activate("surgical gloves|0", { targetCard: "wounding blow|3" }).chooseCard("exertion|0").settle();
+      expect(boardNames(cured, 0)).toEqual([]);
+
+      const masked = scenario({ seats: [
+        { hero: "rhinar", hand: ["exertion bloom|2"], resources: 0, weapons: [], equipment: { ...NO_EQUIPMENT, head: "plague mask|0" } },
+        VICTIM,
+      ] });
+      masked.activate("plague mask|0").settle();
+      masked.play("exertion bloom|2").settle();
+      expect(boardNames(masked, 0)).toEqual([]);
+      expect(boardNames(masked, 1)).toEqual(["Exertion"]);
+    });
+
+    it("Languid Pace infects each hero when it attacks and when it defends", () => {
+      const attacking = scenario({ seats: [
+        { hero: "rhinar", hand: ["languid pace|3"], resources: 1, weapons: [], equipment: NO_EQUIPMENT },
+        VICTIM,
+      ] });
+      attacking.play("languid pace|3").blockWith().settle();
+      expect(boardNames(attacking, 0)).toEqual(["Inertia"]);
+      expect(boardNames(attacking, 1)).toEqual(["Inertia"]);
+
+      const defending = scenario({ seats: [
+        { hero: "rhinar", hand: ["wounding blow|3"], resources: 1, weapons: [], equipment: NO_EQUIPMENT },
+        { ...VICTIM, hand: ["languid pace|3"] },
+      ] });
+      defending.play("wounding blow|3").blockWith("languid pace|3").settle();
+      expect(boardNames(defending, 0)).toEqual(["Inertia"]);
+      expect(boardNames(defending, 1)).toEqual(["Inertia"]);
+    });
+
+    it("Viral Sampling completes its contract by hitting an infected hero", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: ["viral sampling|3"], weapons: [], equipment: NO_EQUIPMENT },
+        { ...VICTIM, board: ["frailty|0"] },
+      ] });
+      game.play("viral sampling|3").blockWith().settle();
+      expect(boardNames(game, 0)).toEqual(["Silver"]);
+
+      const clean = scenario({ seats: [
+        { hero: "rhinar", hand: ["viral sampling|3"], weapons: [], equipment: NO_EQUIPMENT },
+        VICTIM,
+      ] });
+      clean.play("viral sampling|3").blockWith().settle();
+      expect(boardNames(clean, 0)).toEqual([]);
+    });
   });
 });

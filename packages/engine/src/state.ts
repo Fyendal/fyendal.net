@@ -738,6 +738,11 @@ export interface Modifier {
   /** Restrict an attack modifier to a hero whose name starts with this value;
    * attacks targeting allies do not match. */
   appliesToTargetNamePrefix?: string;
+  /** Restrict a play-cost reduction to attacks targeting a hero who controls a
+   *  permanent with this class/subtype; attacks targeting allies do not match. */
+  appliesToTargetControllingType?: string;
+  /** Tokens with this subtype can't be created under this modifier's seat. */
+  prohibitsTokenCreationOfType?: string;
   /** Restrict an attack modifier to attacks targeting a currently marked hero. */
   appliesToMarkedHero?: boolean;
   /** negative subtype filter (e.g. "attack" for "'non-attack' action cards") */

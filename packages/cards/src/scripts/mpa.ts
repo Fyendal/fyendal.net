@@ -1,22 +1,27 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  BLOODROT_POX,
+  FRAILTY,
+  INERTIA,
+  NAMED_DISEASE_TOKENS,
   cardNamed,
   commonOptionMessages,
   contractWithSilver,
+  createChosenDisease,
   decisionMessage,
   decisionPrompt,
   equipWithSilver,
   hitHookLabel,
+  isDisease,
+  isDiseaseToken,
+  isInfected,
   leavesArenaTrigger,
   ongoingLabel,
   opponentSeat,
   requestDiseaseTokenChoice,
+  targetsHero,
   tokenContractWithSilver,
 } from "./shared-helpers.js";
-
-const BLOODROT_POX = "OUT234";
-const FRAILTY = "OUT235";
-const INERTIA = "OUT236";
 
 function seedDisease(tokenId: string): CardScript {
   return {
@@ -45,20 +50,6 @@ function daggerTargets(ctx: ScriptCtx): number[] {
     .filter((card) => isDagger(ctx, card))
     .map((card) => card.instanceId)
     .filter((instanceId, index, ids) => ids.indexOf(instanceId) === index);
-}
-
-const DISEASES: readonly string[] = [FRAILTY, INERTIA, BLOODROT_POX];
-
-function chooseDisease(ctx: ScriptCtx, hook: string): void {
-  requestDiseaseTokenChoice(ctx, hook, DISEASES);
-}
-
-function createChosenDisease(ctx: ScriptCtx, option: string): void {
-  if (DISEASES.includes(option)) ctx.createToken(option, opponentSeat(ctx));
-}
-
-function isInfected(ctx: ScriptCtx, seat: number): boolean {
-  return ctx.player(seat).board.some((card) => ctx.cardTypes(card).includes("disease"));
 }
 
 function activeAssassinAttack(ctx: ScriptCtx): number[] {
@@ -152,7 +143,7 @@ export const mpa: Record<string, CardScript> = {
       },
     },
     onGrantedHit(ctx, hook) {
-      if (hook === "mpa-phial-hit") chooseDisease(ctx, "mpa-phial-disease");
+      if (hook === "mpa-phial-hit") requestDiseaseTokenChoice(ctx, "mpa-phial-disease");
     },
     // A thrown dagger hits through effect damage, which never reaches the
     // combat on-hit hook, so its live grant is matched here instead.
@@ -168,7 +159,7 @@ export const mpa: Record<string, CardScript> = {
       );
     },
     onFriendlyEffectHit(ctx) {
-      chooseDisease(ctx, "mpa-phial-disease");
+      requestDiseaseTokenChoice(ctx, "mpa-phial-disease");
     },
     onChoose(ctx, hook, option) {
       if (hook === "mpa-phial-disease") createChosenDisease(ctx, option);
@@ -229,7 +220,7 @@ export const mpa: Record<string, CardScript> = {
     },
     onGrantedHit(ctx, hook) {
       if (hook !== "mpa-outbreak-hit") return;
-      for (const tokenId of DISEASES) {
+      for (const tokenId of NAMED_DISEASE_TOKENS) {
         ctx.createToken(tokenId, opponentSeat(ctx));
       }
     },
@@ -254,7 +245,7 @@ export const mpa: Record<string, CardScript> = {
         labelMessage: { id: "card.mpa.prolonged.copy" },
         condition(ctx, left, event) {
           if (!left || event?.destroyed !== true || event.controllerSeat === undefined) return false;
-          if (!ctx.cardTypes(left).includes("disease") || !ctx.hasCardType(left, "token")) return false;
+          if (!isDiseaseToken(ctx, left)) return false;
           const name = ctx.cardData(left.cardId).name.trim().toLowerCase().replace(/\s+/g, " ");
           return ctx.state.players.every(
             (player) => Number(player.flags[`destroyedNameCount:${name}`] ?? 0) === 0,
@@ -394,7 +385,7 @@ export const mpa: Record<string, CardScript> = {
     modifyAttack(ctx) {
       return ctx.getFlag("link", "fromOutsideHandOrArsenal") === true ? 2 : 0;
     },
-    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    canTriggerOnHit: targetsHero,
     onHit(ctx) {
       const hand = ctx.player(opponentSeat(ctx)).hand;
       for (const card of hand) ctx.lookAt(card.instanceId);
@@ -474,10 +465,10 @@ export const mpa: Record<string, CardScript> = {
   },
 
   "sick intent|1": {
-    ...tokenContractWithSilver((ctx, token) => ctx.cardTypes(token).includes("disease")),
-    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    ...tokenContractWithSilver(isDisease),
+    canTriggerOnHit: targetsHero,
     onHit(ctx) {
-      chooseDisease(ctx, "mpa-sick-intent-disease");
+      requestDiseaseTokenChoice(ctx, "mpa-sick-intent-disease");
     },
     onChoose(ctx, hook, option) {
       if (hook === "mpa-sick-intent-disease") createChosenDisease(ctx, option);
@@ -516,7 +507,7 @@ export const mpa: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook === "mpa-tailored-name") ctx.setChosenName(option);
     },
-    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    canTriggerOnHit: targetsHero,
     onHit: tailoredBanish,
     onFriendlyEffectHitCondition: (ctx, _source, targetSeat) =>
       ctx.link?.attackingCard.instanceId === ctx.self.instanceId && targetSeat !== ctx.seat,
@@ -558,7 +549,7 @@ export const mpa: Record<string, CardScript> = {
 
   "concoct agony|2": {
     modifyAttack: (ctx) => (reactionCount(ctx) >= 3 ? 3 : 0),
-    canTriggerOnHit: (ctx) => reactionCount(ctx) >= 3 && ctx.link?.targetAllyId === undefined,
+    canTriggerOnHit: (ctx) => reactionCount(ctx) >= 3 && targetsHero(ctx),
     onHit(ctx) {
       for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) ctx.banish(card.instanceId);
     },

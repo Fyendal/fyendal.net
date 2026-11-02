@@ -611,6 +611,25 @@
             "sideboard": []
         }
     },
+    "precon-amo": {
+        "name": "Armory Deck: Dr. Mortimer",
+        "format": "cc",
+        "pool": {
+            "heroId": "AMO001",
+            "weaponIds": ["AMO002", "AMO002"],
+            "equipmentPool": ["AMO003", "AMO004", "AMO005", "AMO006"],
+            "deck": [
+                "AMO014", "AMO014", "AMO014", "AMO007", "AMO007", "AMO007", "AMO016", "AMO016", "AMO015",
+                "AMO015", "AMO015", "AMO008", "AMO008", "AMO008", "AMO009", "AMO009", "AMO009", "AMO010",
+                "AMO010", "AMO010", "AMO017", "AMO017", "AMO018", "AMO018", "AMO011", "AMO011", "AMO011",
+                "AMO020", "AMO012", "AMO012", "AMO012", "AMO019", "AMO019", "AMO019", "AMO013", "AMO013",
+                "AMO013", "AMO022", "AMO022", "AMO023", "AMO023", "AMO023", "AMO021", "AMO024", "AMO024",
+                "AMO024", "AMO025", "AMO025", "AMO025", "AMO029", "AMO029", "AMO029", "AMO028", "AMO028",
+                "AMO028", "AMO026", "AMO026", "AMO027", "AMO027", "AMO027"
+            ],
+            "sideboard": []
+        }
+    },
     "_comment_bot_briar": "Source: https://fabrary.net/decks/01KSQ4VJB4J94KJYYWCPMY996H. The source SAT009 Blade Beckoner Boots printing is represented by the functionally identical SBA009 printing because SAT is not in the local card catalog.",
     "bot-briar-broccoli": {
         "name": "🥦 Broccoli Deck in Format",

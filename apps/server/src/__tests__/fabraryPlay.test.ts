@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import { cardData, FUTURE_SET_CODES, isImplemented, precon } from "@fyendal/cards";
+import { cardData, findPrinting, FUTURE_SET_CODES, isImplemented, precon } from "@fyendal/cards";
 import { decodeDeckResponse, decodeDeckInvalidResponse, decodeFabraryDeckPreviewResponse } from "@fyendal/protocol";
 import { createApiServer } from "../http.js";
 import { login, register } from "../auth.js";
@@ -101,7 +101,8 @@ describe("Fabrary play deck resolution", () => {
 
   it("imports banned and implemented future cards without stripping them", async () => {
     const future = Object.values(cardData).find((card) => card.set && FUTURE_SET_CODES.has(card.set)
-      && isImplemented(card) && !["hero", "weapon", "equipment", "token"].includes(card.cardType))!;
+      && isImplemented(card) && !["hero", "weapon", "equipment", "token"].includes(card.cardType)
+      && findPrinting(card.name, card.pitch)?.id === card.id)!;
     expect(future).toBeDefined();
     latestText = text.replace(line(pool.deck[0]!), "1x Art of War (2)")
       .replace(line(pool.deck[1]!), line(future.id));

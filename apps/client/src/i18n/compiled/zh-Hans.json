@@ -1471,6 +1471,12 @@
       "value": "选择一个要治愈的疾病"
     }
   ],
+  "card.amo.pickyourpoison.choose": [
+    {
+      "type": 0,
+      "value": "选择一个疾病衍生物。另外两个将在你的操控下生成"
+    }
+  ],
   "card.amx.banisheditem.arena": [
     {
       "type": 0,
@@ -3357,6 +3363,24 @@
     {
       "type": 0,
       "value": "命中时摧毁该进行攻击的 zombie"
+    }
+  ],
+  "card.effect.amo.actonintel": [
+    {
+      "type": 0,
+      "value": "被命中的英雄从其手牌中放逐一张牌"
+    }
+  ],
+  "card.effect.amo.isolationvestment": [
+    {
+      "type": 0,
+      "value": "以被感染英雄为目标的刺客攻击行动牌的使用费用减少 1 点"
+    }
+  ],
+  "card.effect.amo.plaguemask": [
+    {
+      "type": 0,
+      "value": "无法在你的操控下生成疾病衍生物"
     }
   ],
   "card.effect.aol.bellybuster": [
@@ -25542,6 +25566,24 @@
     {
       "type": 0,
       "value": " 生成 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "engine.log.token.creation.prohibited": [
+    {
+      "type": 0,
+      "value": "本回合无法在 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 的操控下生成 "
     },
     {
       "type": 1,

@@ -461,17 +461,55 @@ export function yesNoPrompt(fallback: string, id: string, values?: GameMessage["
   });
 }
 
+export const BLOODROT_POX = "OUT234";
+export const FRAILTY = "OUT235";
+export const INERTIA = "OUT236";
+export const NAMED_DISEASE_TOKENS: readonly string[] = [FRAILTY, INERTIA, BLOODROT_POX];
+
+export function isDisease(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return ctx.cardTypes(card).includes("disease");
+}
+
+export function isDiseaseToken(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return ctx.hasCardType(card, "token") && isDisease(ctx, card);
+}
+
+export function controlledDiseases(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
+  return ctx.player(seat).board.filter((card) => isDisease(ctx, card));
+}
+
+export function isInfected(ctx: ScriptCtx, seat: number): boolean {
+  return controlledDiseases(ctx, seat).length > 0;
+}
+
+export function targetsHero(ctx: ScriptCtx): boolean {
+  return ctx.link?.targetAllyId === undefined;
+}
+
+/** Create the disease chosen through `requestDiseaseTokenChoice` under the opponent's control. */
+export function createChosenDisease(ctx: ScriptCtx, option: string): void {
+  if (NAMED_DISEASE_TOKENS.includes(option)) ctx.createToken(option, opponentSeat(ctx));
+}
+
 /** Ask the controller which of the given disease token printings to create.
  * The chosen token id is delivered to `onChoose` under `hook`. */
-export function requestDiseaseTokenChoice(ctx: ScriptCtx, hook: string, tokenIds: readonly string[]): void {
+export function requestDiseaseTokenChoice(
+  ctx: ScriptCtx,
+  hook: string,
+  tokenIds: readonly string[] = NAMED_DISEASE_TOKENS,
+): void {
   ctx.requestChoice(
     hook,
     decisionPrompt("Choose a disease token", "card.common.disease.token.choose", {
-      optionMessages: Object.fromEntries(
-        tokenIds.map((cardId) => [cardId, decisionMessage("card.common.target.card", { card: { kind: "card", cardId } })]),
-      ),
+      optionMessages: diseaseTokenOptionMessages(tokenIds),
     }),
     [...tokenIds],
+  );
+}
+
+export function diseaseTokenOptionMessages(tokenIds: readonly string[]): Record<string, GameMessage> {
+  return Object.fromEntries(
+    tokenIds.map((cardId) => [cardId, decisionMessage("card.common.target.card", { card: { kind: "card", cardId } })]),
   );
 }
 
@@ -734,6 +772,15 @@ export function suspenseAura(
       },
     ],
   };
+}
+
+export function hitWithDaggerThisChain(ctx: ScriptCtx): boolean {
+  return ctx.state.chain.some(
+    (link) =>
+      link.attacker === ctx.seat &&
+      ((link.damage > 0 && ctx.cardTypes(link.attackingCard).includes("dagger")) ||
+        Number(link.flags["effectDamageBySubtype:dagger"]) > 0),
+  );
 }
 
 /** Record a Contract completion for turn-wide checks such as Pay Day. */

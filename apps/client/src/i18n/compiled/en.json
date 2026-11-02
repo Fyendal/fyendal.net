@@ -1493,6 +1493,12 @@
       "value": "Choose a disease to cure"
     }
   ],
+  "card.amo.pickyourpoison.choose": [
+    {
+      "type": 0,
+      "value": "Choose a disease token. The other two are created under your control"
+    }
+  ],
   "card.amx.banisheditem.arena": [
     {
       "type": 0,
@@ -3447,6 +3453,24 @@
     {
       "type": 0,
       "value": "destroy the attacking zombie when it hits"
+    }
+  ],
+  "card.effect.amo.actonintel": [
+    {
+      "type": 0,
+      "value": "the hit hero banishes a card from their hand"
+    }
+  ],
+  "card.effect.amo.isolationvestment": [
+    {
+      "type": 0,
+      "value": "Assassin attack action cards that target an infected hero cost 1 less to play"
+    }
+  ],
+  "card.effect.amo.plaguemask": [
+    {
+      "type": 0,
+      "value": "disease tokens can't be created under your control"
     }
   ],
   "card.effect.aol.bellybuster": [
@@ -26479,6 +26503,24 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "engine.log.token.creation.prohibited": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " can't be created under "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": "'s control this turn"
     }
   ],
   "engine.log.token.creation.reduced": [

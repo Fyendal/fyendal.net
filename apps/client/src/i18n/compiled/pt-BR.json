@@ -1501,6 +1501,12 @@
       "value": "Escolha uma doença para curar"
     }
   ],
+  "card.amo.pickyourpoison.choose": [
+    {
+      "type": 0,
+      "value": "Escolha um token de doença. Os outros dois são criados sob o seu controle"
+    }
+  ],
   "card.amx.banisheditem.arena": [
     {
       "type": 0,
@@ -3475,6 +3481,24 @@
     {
       "type": 0,
       "value": "destrua o zombie atacante quando ele acertar"
+    }
+  ],
+  "card.effect.amo.actonintel": [
+    {
+      "type": 0,
+      "value": "o herói atingido faz banish de uma carta da própria mão"
+    }
+  ],
+  "card.effect.amo.isolationvestment": [
+    {
+      "type": 0,
+      "value": "Cartas Assassin attack action que têm como alvo um herói infectado custam 1 a menos para jogar"
+    }
+  ],
+  "card.effect.amo.plaguemask": [
+    {
+      "type": 0,
+      "value": "tokens de doença não podem ser criados sob o seu controle"
     }
   ],
   "card.effect.aol.bellybuster": [
@@ -27889,6 +27913,24 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "engine.log.token.creation.prohibited": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " não pode ser criado sob o controle de "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " neste turno"
     }
   ],
   "engine.log.token.creation.reduced": [

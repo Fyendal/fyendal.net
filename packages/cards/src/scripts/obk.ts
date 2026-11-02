@@ -1,23 +1,27 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  BLOODROT_POX,
+  INERTIA,
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
+  controlledDiseases,
   decisionMessage,
   decisionPrompt,
   effectPutSelfFaceUpFromDeck,
   entersArenaTrigger,
   heroChoiceSeat,
+  isDisease,
+  isDiseaseToken,
   localizedCardLog,
   opponentSeat,
   requestHeroChoice,
+  targetsHero,
 } from "./shared-helpers.js";
 
 // Disease token names offered when an effect names a disease token.
 const DISEASE_TOKEN_NAMES: readonly string[] = ["Bloodrot Pox", "Exertion", "Frailty", "Inertia"];
 const EXERTION = "SLV035";
-const BLOODROT_POX = "SAZ034";
-const INERTIA = "SAZ036";
 const EXTINCTION_WIN_THRESHOLD = 33;
 
 function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: string): boolean {
@@ -29,14 +33,6 @@ function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: s
 
 function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.cardTypes(card).includes("arrow");
-}
-
-function isDisease(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("disease");
-}
-
-function isDiseaseToken(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "token") && isDisease(ctx, card);
 }
 
 /** Each hero, in turn order, puts their deck top face-up into their arsenal;
@@ -401,7 +397,7 @@ const exertion: CardScript = {
 const PATIENT_ZERO_HOOK = "obk-patient-zero-give";
 
 const patientZero: CardScript = {
-  canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+  canTriggerOnHit: targetsHero,
   onHit(ctx) {
     const diseases = ctx.player(ctx.seat).board.filter((card) => isDiseaseToken(ctx, card));
     if (diseases.length === 1) {
@@ -434,10 +430,6 @@ const ceremonyModeKey = (mode: CeremonyMode) => `ceremonyMode:${mode}`;
 
 function ceremonyHeroes(ctx: ScriptCtx): number[] {
   return [ctx.seat, opponentSeat(ctx)];
-}
-
-function controlledDiseases(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
-  return ctx.player(seat).board.filter((card) => isDisease(ctx, card));
 }
 
 function cureForCeremony(ctx: ScriptCtx, seat: number, instanceId: number): void {
@@ -614,7 +606,7 @@ const CURE_ALL_HOOK = "obk-cure-all";
 const cureAllElixir: CardScript = {
   onPlay(ctx) {
     buffNextAttack(ctx, { attack: 3 });
-    const diseases = ctx.player(ctx.seat).board.filter((card) => isDisease(ctx, card));
+    const diseases = controlledDiseases(ctx, ctx.seat);
     if (diseases.length) {
       ctx.requestCardChoice(
         CURE_ALL_HOOK,
@@ -632,7 +624,7 @@ const cureAllElixir: CardScript = {
 
 function courier(tokenId: string): CardScript {
   return {
-    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    canTriggerOnHit: targetsHero,
     onHit(ctx) {
       for (const seat of [ctx.seat, opponentSeat(ctx)]) ctx.createToken(tokenId, seat);
     },
@@ -680,11 +672,11 @@ const incubatorImplanter: CardScript = {
   // "When this attacks a hero, if …" grants the hit ability only when the
   // defending hero is infected as the attack is declared.
   onAttackDeclared(ctx) {
-    if (ctx.link?.targetAllyId === undefined && infectedWithBloodrotPox(ctx, opponentSeat(ctx))) {
+    if (targetsHero(ctx) && infectedWithBloodrotPox(ctx, opponentSeat(ctx))) {
       ctx.setFlag("link", INCUBATOR_INFECTED, true);
     }
   },
-  canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined && ctx.getFlag("link", INCUBATOR_INFECTED) === true,
+  canTriggerOnHit: (ctx) => targetsHero(ctx) && ctx.getFlag("link", INCUBATOR_INFECTED) === true,
   onHit(ctx) {
     const seat = opponentSeat(ctx);
     ctx.scheduleRecurringEndOfTurnTrigger(

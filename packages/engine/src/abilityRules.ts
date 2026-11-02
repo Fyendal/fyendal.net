@@ -380,7 +380,9 @@ function effectCardCostCandidates(
     : cost.zone === "arsenal" ? player.arsenal
     : cost.zone === "hand-or-arsenal" ? [...player.hand, ...player.arsenal]
     : cost.zone === "under" ? (cost.move === "banish" ? source.subcards ?? [] : [])
-    : controlledCostCards(state, player).filter((card) => !card.faceDown);
+    : (cost.opponentControlled
+      ? state.players.filter((candidate) => candidate.seat !== player.seat).flatMap((opponent) => opponent.board)
+      : controlledCostCards(state, player)).filter((card) => !card.faceDown);
   return cards.filter((card) => {
     const data = dataOf(state, card.cardId);
     const types = cardTypesOf(state, card);

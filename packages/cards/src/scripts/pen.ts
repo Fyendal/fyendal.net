@@ -16,6 +16,7 @@ import {
   heroDamage,
   heroTarget,
   hitHookLabel,
+  hitWithDaggerThisChain,
   isSixPlus,
   leavesArenaTrigger,
   mergeSetScripts,
@@ -89,15 +90,6 @@ function haboobPower(ctx: ScriptCtx, card: Card): number {
 
 function haboobAsh(ctx: ScriptCtx) {
   return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Ash"));
-}
-
-function hitWithDaggerThisChain(ctx: ScriptCtx): boolean {
-  return ctx.state.chain.some(
-    (link) =>
-      link.attacker === ctx.seat &&
-      ((link.damage > 0 && hasTag(ctx, link.attackingCard, "dagger")) ||
-        Number(link.flags["effectDamageBySubtype:dagger"]) > 0),
-  );
 }
 
 function requestDeepRecessesBanish(ctx: ScriptCtx, startSeat = 0): void {

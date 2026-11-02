@@ -857,6 +857,12 @@ function modifierMatchesAttackTarget(
       return false;
     }
   }
+  if (modifier.appliesToTargetControllingType) {
+    if (targetAllyId !== undefined) return false;
+    const wanted = modifier.appliesToTargetControllingType.toLowerCase();
+    const defender = state.players.find((player) => player.hero.instanceId === target.instanceId);
+    if (!defender?.board.some((permanent) => cardTypesOf(state, permanent).includes(wanted))) return false;
+  }
   return true;
 }
 
@@ -1076,7 +1082,9 @@ export function cardPlayCost(
       modifier.consumed ||
       modifier.seat !== seat ||
       !modifier.playCostReduction ||
-      !modifierMatchesPlayedCard(state, modifier, card)
+      !modifierMatchesPlayedCard(state, modifier, card) ||
+      (modifier.appliesToTargetControllingType !== undefined &&
+        !modifierMatchesAttackTarget(state, modifier, seat, opts?.targetAllyId))
     ) continue;
     cost -= modifier.playCostReduction;
   }

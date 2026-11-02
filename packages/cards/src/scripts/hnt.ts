@@ -11,6 +11,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  hitWithDaggerThisChain,
   markedStealthHeroScript,
   markContractCompleted,
   localizedCardLog,
@@ -48,15 +49,6 @@ function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance
 
 function isDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return dataTags(ctx, card).includes("dagger");
-}
-
-function hitWithDaggerThisChain(ctx: ScriptCtx): boolean {
-  return ctx.state.chain.some(
-    (link) =>
-      link.attacker === ctx.seat &&
-      ((link.damage > 0 && isDagger(ctx, link.attackingCard)) ||
-        Number(link.flags["effectDamageBySubtype:dagger"]) > 0),
-  );
 }
 
 function isDraconic(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {

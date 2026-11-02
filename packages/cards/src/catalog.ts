@@ -127,7 +127,7 @@ import rawPreconsJson from "./data/precons.json" with { type: "json" };
 import { validateArenaAgainstCards, validatePresentationAgainstCards } from "./presentation.js";
 export { equipmentFitsSlot, isWeaponZoneCard } from "./equipment.js";
 export { functionalKey, functionalKeyOf } from "./functional.js";
-import { formatLegalityIssues } from "./formatLegality.js";
+import { FUTURE_SET_CODES, formatLegalityIssues } from "./formatLegality.js";
 export {
   CLASSIC_CONSTRUCTED_LEGALITY_CHECKED_ON,
   FUTURE_SET_CODES,
@@ -929,7 +929,9 @@ export function normalizeCardName(name: string): string {
 
 const byFunctionalKey = new Map<string, CardData>();
 const byName = new Map<string, CardData[]>();
-for (const c of cardList) {
+const isUnreleased = (card: CardData) => !!card.set && FUTURE_SET_CODES.has(card.set);
+// An unreleased reprint must not make imported decks resolve to a future printing.
+for (const c of [...cardList.filter((card) => !isUnreleased(card)), ...cardList.filter(isUnreleased)]) {
   const n = normalizeCardName(c.name);
   const key = functionalKey(n, c.pitch);
   if (!byFunctionalKey.has(key)) byFunctionalKey.set(key, c);
