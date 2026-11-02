@@ -1479,7 +1479,10 @@ export function makeCtx(
       return runtime.commands.defendingDefenseOf(state, observed, link);
     },
     currentAttackPower() {
-      return link ? runtime.commands.computeAttack(state, link) : 0;
+      if (!link) return 0;
+      // chain-link modifiers expire at resolution; the snapshot keeps their power
+      if (link.resolved && link.finalAttack !== undefined) return link.finalAttack;
+      return runtime.commands.computeAttack(state, link);
     },
     currentAttackHasDominate() {
       return link ? runtime.commands.attackHasDominate(state, link) : false;

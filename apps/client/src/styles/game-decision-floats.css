@@ -293,6 +293,87 @@
   flex-wrap: nowrap;
 }
 .decision-name-form > .btn-primary { align-self: center; flex: 0 0 auto; }
+.decision-choice:has(> .decision-number-form) {
+  width: min(340px, calc(100vw - var(--rail-w) - 32px));
+}
+.decision-choice:has(> .decision-number-form) > .decision-prompt { text-align: center; }
+.decision-number-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.number-dial {
+  --dial-step-h: 34px;
+  display: grid;
+  width: 116px;
+  border: 1px solid #6a5639;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #0f0b08, #19130e);
+  box-shadow: inset 0 2px 8px #000c, 0 1px 0 #e1d5be14;
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.number-dial:focus-within { border-color: var(--gold); }
+.number-dial-invalid,
+.number-dial-invalid:focus-within { border-color: #c4483b; }
+.number-dial-step {
+  display: grid;
+  place-items: center;
+  height: var(--dial-step-h);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  clip-path: none;
+  background: transparent;
+  color: var(--gold);
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color 100ms ease, color 100ms ease;
+}
+.number-dial-step:first-child { border-bottom: 1px solid #6a563955; }
+.number-dial-step:last-child { border-top: 1px solid #6a563955; }
+.number-dial-step:hover:not(:disabled) { background: #b8933f1f; color: #f0d48c; }
+.number-dial-step:active:not(:disabled) { background: #b8933f38; }
+.number-dial-step:disabled { color: #5b4b38; cursor: default; }
+.number-dial-step:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -3px;
+}
+.number-dial-value {
+  display: grid;
+  justify-items: center;
+  padding: 6px 0 7px;
+  cursor: text;
+}
+.number-dial-value > input {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #f3e6c8;
+  caret-color: var(--gold);
+  font: 500 44px/1 var(--font-card-name);
+  font-variant-numeric: lining-nums tabular-nums;
+  text-align: center;
+  text-shadow: 0 1px 0 #000, 0 0 18px #b8933f2e;
+}
+.number-dial-range {
+  margin-top: 3px;
+  color: var(--text-muted);
+  font: 500 11px/1 var(--font-lobby-ui);
+  font-variant-numeric: tabular-nums;
+}
+.number-dial-confirm {
+  min-width: 156px;
+  min-height: 42px;
+  padding: 0 20px;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
 .decision-name-combobox {
   position: relative;
   width: 100%;

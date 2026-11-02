@@ -16,7 +16,6 @@ import {
   opponentSeat,
   payForDefenseBoost,
   previousAttackHasName,
-  queueIntimidate,
   requestDiscardChoice,
   resolveDiscardChoice,
   suspenseAura as suspenseLifecycle,
@@ -1607,17 +1606,25 @@ Object.assign(sup, {
     },
   },
   "bully tactics|1": {
-    onAttackDeclared(ctx: ScriptCtx) {
-      if (ctx.link?.targetAllyId !== undefined) return;
-      ctx.requestXPayment(
-        "bully-x",
-        decisionPrompt("Pay up to 3 to intimidate", "card.sup.intimidate.pay", { values: { amount: 3 } }),
-        undefined,
-        3,
-      );
-    },
+    triggers: [
+      {
+        event: "attack-declared",
+        sourceZone: "self",
+        label: "Intimidate",
+        labelMessage: decisionMessage("card.trigger.common.intimidate"),
+        condition: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined,
+        effect(ctx: ScriptCtx) {
+          ctx.requestXPayment(
+            "bully-x",
+            decisionPrompt("Pay up to 3 to intimidate", "card.sup.intimidate.pay", { values: { amount: 3 } }),
+            undefined,
+            3,
+          );
+        },
+      },
+    ],
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook === "bully-x") for (let i = 0; i < Number(option.slice(2)); i++) queueIntimidate(ctx);
+      if (hook === "bully-x") ctx.intimidate(undefined, Number(option.slice(2)));
     },
   },
   "fix the match|2": {

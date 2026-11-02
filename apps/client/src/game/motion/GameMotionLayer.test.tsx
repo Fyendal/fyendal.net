@@ -150,6 +150,27 @@ describe("motion card presentation", () => {
     }, true)).toBeNull();
   });
 
+  it("opens a square arena card out into the full card it becomes on the chain", () => {
+    const flight = {
+      visual: { kind: "face", card },
+      start: { left: 100, top: 50, width: 120, height: 106 },
+      end: { left: 400, top: 200, width: 140, height: 195 },
+      destinationLayer: "chain",
+    } as MotionFlight;
+    const morph = motionFlightMorph(flight, true);
+
+    expect(morph?.expand).toBe(true);
+    expect(morph!.scale).toBeCloseTo(120 / 140);
+    expect(morph!.crop).toBeCloseTo((195 - 106 / (120 / 140)) / 2);
+    const html = renderToStaticMarkup(createElement(MotionCardVisual, {
+      visual: flight.visual, count: 1, square: squareMotionFlight(flight, true), morph,
+    }));
+    expect(html).toContain("game-motion-visual-expand");
+    expect(html).toContain("game-motion-expand-square");
+    expect(motionFlightMorph(flight, false)).toBeNull();
+    expect(motionFlightMorph({ ...flight, visual: { kind: "back" } } as MotionFlight, true)).toBeNull();
+  });
+
   it("flips a face-up arsenal card at full size before it morphs to the deck bottom", () => {
     const flight = {
       mode: "deck-bottom",

@@ -38,6 +38,17 @@ describe("motion timeline", () => {
     })).toBe("stack-entry");
   });
 
+  it("moves an attacked ally to the chain only after its attack arrives", () => {
+    expect(motionTimelinePhase({
+      kind: "move",
+      source: { kind: "board", seat: 1 },
+      destination: { kind: "chain-target", link: 0 },
+      visual: { kind: "back" },
+      count: 1,
+      confidence: "exact",
+    })).toBe("resolution");
+  });
+
   it("starts payment immediately when no played-card movement is present", () => {
     const delays = scheduleMotionTimeline([
       { id: "pitch", phase: "payment", durationMs: 320, staggerMs: 45 },

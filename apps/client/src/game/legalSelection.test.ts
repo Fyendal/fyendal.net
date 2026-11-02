@@ -429,6 +429,16 @@ describe("authoritative legal-intent selection", () => {
     expect(selectedResourcePaymentOption(payment, [31, 32])).toEqual(payment.options[0]);
   });
 
+  it("lets any copy of a card stand in for the copy a capped payment order lists", () => {
+    const payment = { cost: 6, options: [{ optionId: "baubles", pitchInstanceIds: [31, 32] }] };
+    const cardIdOf = (instanceId: number) => (instanceId === 40 ? "OTHER" : "BAUBLE");
+
+    expect(canAddResourcePaymentPitch(payment, [], 35)).toBe(false);
+    expect(canAddResourcePaymentPitch(payment, [], 35, cardIdOf)).toBe(true);
+    expect(canAddResourcePaymentPitch(payment, [], 40, cardIdOf)).toBe(false);
+    expect(selectedResourcePaymentOption(payment, [35, 33], cardIdOf)).toEqual(payment.options[0]);
+  });
+
   it("matches defender cards as a set but preserves their pitch order", () => {
     const offered: GameIntent = { kind: "defend", instanceIds: [1, 2], pitchInstanceIds: [4, 3] };
     expect(selectedDefendIntent([offered], [2, 1], [4, 3])).toBe(offered);

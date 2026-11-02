@@ -14,6 +14,7 @@ import {
   bloodModeAllocation,
   handCardChoiceOptions,
   heroTargetSide,
+  numberChoice,
   optDecisionCards,
   boundedCardChoiceKey,
   boundedCardChoiceSelectable,
@@ -33,6 +34,7 @@ import { RevealedChoiceCards } from "./CardChoices.js";
 import { CardRef, cardAffiliation, DecisionPrompt, PitchPaymentProgress } from "./DecisionShared.js";
 import type { PendingDecisionModel } from "./DecisionModels.js";
 import { NameChoiceAutocomplete } from "./NameChoiceAutocomplete.js";
+import { NumberChoiceInput } from "./NumberChoiceInput.js";
 import { EffectChoiceDecision } from "./EffectChoiceDecision.js";
 import { TriggerOrderDecision } from "./TriggerOrderDecision.js";
 import { DecisionSheetMinimizeButton } from "./DecisionSheet.js";
@@ -365,6 +367,8 @@ export function PendingDecisionPanel({
     });
   }
   const effectList = pd.optionLayout === "effect-list" && pd.kind === "choose-target";
+  const numericChoice = numberChoice(pd);
+  const numericOptionIds = new Set(numericChoice?.optionByValue.values());
   const showChoiceGrid =
     !effectList &&
     !optDecision &&
@@ -414,6 +418,7 @@ export function PendingDecisionPanel({
   ) {
     (pd.options ?? []).forEach((option, index) => {
       if (pd.optionCards?.[index]) return;
+      if (numericOptionIds.has(option)) return;
       if (pd.resourcePayment?.options.some((candidate) => candidate.optionId === option)) return;
       const onChoose = () => onSend({ kind: "choose", optionId: option });
       const spaceDefault = option === defaultSpaceOption;
@@ -485,7 +490,7 @@ export function PendingDecisionPanel({
   // Pure text choices use the shared choice modal; card-driven and payment
   // decisions keep their wider layouts and list any text options beneath.
   const choiceModal =
-    textOptions.length > 0 &&
+    (textOptions.length > 0 || numericChoice !== null) &&
     !priorityGuidanceDecision &&
     !optDecision &&
     !bloodAllocation &&
@@ -690,6 +695,13 @@ export function PendingDecisionPanel({
             );
           })}
         </div>
+      ) : null}
+      {numericChoice ? (
+        <NumberChoiceInput
+          key={`${pd.player}:${pd.prompt}`}
+          choice={numericChoice}
+          onChoose={(optionId) => onSend({ kind: "choose", optionId })}
+        />
       ) : null}
       {pd.kind === "choose-name" ? (
         <NameChoiceAutocomplete

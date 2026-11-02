@@ -328,6 +328,7 @@ export function PlayerHand({
                 interaction.resourcePayment,
                 interaction.pitchSelection,
                 card.instanceId,
+                (instanceId) => handCards.get(instanceId)?.cardId,
               )
             );
             const pitchable = interaction.selection.kind !== "none" && !selected && (

@@ -26332,6 +26332,18 @@
       "value": " 点奥术伤害"
     }
   ],
+  "game.card.badge.attackTarget": [
+    {
+      "type": 0,
+      "value": "攻击目标"
+    }
+  ],
+  "game.card.badge.attackTarget.detail": [
+    {
+      "type": 0,
+      "value": "当前攻击以此盟友为目标"
+    }
+  ],
   "game.card.badge.attacked": [
     {
       "type": 0,
@@ -27358,6 +27370,60 @@
     {
       "type": 0,
       "value": "输入卡牌名称"
+    }
+  ],
+  "game.decision.number.choose": [
+    {
+      "type": 0,
+      "value": "选择 "
+    },
+    {
+      "type": 1,
+      "value": "value"
+    }
+  ],
+  "game.decision.number.decrease": [
+    {
+      "type": 0,
+      "value": "减少"
+    }
+  ],
+  "game.decision.number.increase": [
+    {
+      "type": 0,
+      "value": "增加"
+    }
+  ],
+  "game.decision.number.label": [
+    {
+      "type": 1,
+      "value": "minimum"
+    },
+    {
+      "type": 0,
+      "value": " 到 "
+    },
+    {
+      "type": 1,
+      "value": "maximum"
+    },
+    {
+      "type": 0,
+      "value": " 之间的数字"
+    }
+  ],
+  "game.decision.number.range": [
+    {
+      "type": 1,
+      "value": "minimum"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "maximum"
     }
   ],
   "game.decision.opt.bottom": [

@@ -27315,6 +27315,18 @@
       "value": " arcane damage"
     }
   ],
+  "game.card.badge.attackTarget": [
+    {
+      "type": 0,
+      "value": "Attack target"
+    }
+  ],
+  "game.card.badge.attackTarget.detail": [
+    {
+      "type": 0,
+      "value": "The current attack targets this ally"
+    }
+  ],
   "game.card.badge.attacked": [
     {
       "type": 0,
@@ -28485,6 +28497,60 @@
     {
       "type": 0,
       "value": "Start typing a card name"
+    }
+  ],
+  "game.decision.number.choose": [
+    {
+      "type": 0,
+      "value": "Choose "
+    },
+    {
+      "type": 1,
+      "value": "value"
+    }
+  ],
+  "game.decision.number.decrease": [
+    {
+      "type": 0,
+      "value": "Decrease"
+    }
+  ],
+  "game.decision.number.increase": [
+    {
+      "type": 0,
+      "value": "Increase"
+    }
+  ],
+  "game.decision.number.label": [
+    {
+      "type": 0,
+      "value": "Number from "
+    },
+    {
+      "type": 1,
+      "value": "minimum"
+    },
+    {
+      "type": 0,
+      "value": " to "
+    },
+    {
+      "type": 1,
+      "value": "maximum"
+    }
+  ],
+  "game.decision.number.range": [
+    {
+      "type": 1,
+      "value": "minimum"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "maximum"
     }
   ],
   "game.decision.opt.bottom": [

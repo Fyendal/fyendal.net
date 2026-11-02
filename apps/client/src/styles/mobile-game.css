@@ -1448,6 +1448,12 @@
   .decision-sheet > .bounded-choice-tally { justify-content: center; padding: 0 16px 4px; }
   .decision-sheet > .decision-resource-progress { align-self: center; padding-bottom: 6px; }
   .decision-sheet > :is(.decision-choice-list, .decision-buttons) { width: 100%; padding: 8px 16px 0; }
+  .decision-sheet > .decision-number-form { width: 100%; padding: 10px 16px 0; gap: 16px; }
+  .decision-sheet .number-dial { --dial-step-h: 52px; width: 152px; }
+  .decision-sheet .number-dial-step { font-size: 28px; }
+  /* Beats the 16px focus-zoom guard; anything at or above 16px is safe. */
+  .decision-sheet .number-dial-value > input { font-size: 58px !important; }
+  .decision-sheet .number-dial-confirm { width: 100%; min-height: 48px; font-size: 16px; }
   /* The card or weapon well scrolls; a text list scrolls only when it is the
      whole body, so a "No" under cards stays pinned. */
   .decision-sheet > :is(.decision-cards, .blood-mode-weapons, .trigger-order-list, .decision-target-cards, .decision-additional-cost-groups),

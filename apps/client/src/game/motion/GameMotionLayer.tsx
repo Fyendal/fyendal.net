@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type AnimationEvent, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import type { CardView } from "@fyendal/shared";
 import { CARD_BACK_IMAGE_URL, CardBack, CardFace, cardImageUrl, useCardArt } from "../Card.js";
 import {
   MOTION_CONNECT_MS,
@@ -99,13 +100,30 @@ export interface MotionMorph {
   crop: number;
   /** A face-up card going to the deck bottom flips at full size before morphing. */
   flip: boolean;
+  /** A square arena card opens out into the full card, reversing the crop. */
+  expand: boolean;
 }
 
 export function motionFlightMorph(flight: MotionFlight, squareCardsEnabled: boolean): MotionMorph | null {
   const flip = flight.visual.kind === "face-conceal" && flight.mode === "deck-bottom";
-  if ((flight.visual.kind !== "face" && !flip) || !squareMotionFlight(flight, squareCardsEnabled)) return null;
   const { start, end } = flight;
-  if (start.width / start.height >= .9) return null;
+  const sourceIsSquare = start.width / start.height >= .9;
+  if (
+    squareCardsEnabled && flight.visual.kind === "face" && sourceIsSquare && end.width / end.height < .9
+  ) {
+    // The flight box already has the full shape; the full card starts shrunk and cropped to the square.
+    const scale = start.width / end.width;
+    return {
+      fromWidth: start.width,
+      fromHeight: start.height,
+      scale,
+      crop: Math.max(0, (end.height - start.height / scale) / 2),
+      flip: false,
+      expand: true,
+    };
+  }
+  if ((flight.visual.kind !== "face" && !flip) || !squareMotionFlight(flight, squareCardsEnabled)) return null;
+  if (sourceIsSquare) return null;
   const scale = end.width / start.width;
   return {
     fromWidth: start.width,
@@ -113,6 +131,7 @@ export function motionFlightMorph(flight: MotionFlight, squareCardsEnabled: bool
     scale,
     crop: Math.max(0, (start.height - end.height / scale) / 2),
     flip,
+    expand: false,
   };
 }
 
@@ -138,13 +157,19 @@ export function MotionCardVisual({
 }) {
   const cardArt = useCardArt();
   const faceUrl = visualFaceUrl(visual, "card" in visual ? cardArt(visual.card.owner, visual.card.cardId) : undefined);
-  const morphing = square && morph !== null && faceUrl !== null;
+  const expanding = !square && morph?.expand === true && faceUrl !== null && visual.kind === "face";
+  const morphing = square && morph !== null && !morph.expand && faceUrl !== null;
   const flipping = morphing && morph.flip;
   return (
     <div
-      className={`game-motion-visual game-motion-visual-${visual.kind}${square ? " game-motion-visual-square" : ""}${morphing ? " game-motion-visual-morph" : ""}${flipping ? " game-motion-visual-morph-flip" : ""}`}
-      style={morphing ? morphStyle(morph) : undefined}
+      className={`game-motion-visual game-motion-visual-${visual.kind}${square ? " game-motion-visual-square" : ""}${morphing ? " game-motion-visual-morph" : ""}${flipping ? " game-motion-visual-morph-flip" : ""}${expanding ? " game-motion-visual-expand" : ""}`}
+      style={morph && (morphing || expanding) ? morphStyle(morph) : undefined}
     >
+      {expanding ? (
+        <span className="game-motion-card-side game-motion-expand-square">
+          <CardFace card={visual.card} size="zone" squareArt showOverlays={false} showTapped={false} />
+        </span>
+      ) : null}
       {flipping ? (
         <span className="game-motion-morph-full game-motion-morph-flip">
           <img className="game-motion-image game-motion-morph-face" src={faceUrl} alt="" />
@@ -245,44 +270,59 @@ function MotionFlightOverlay({
   }, []);
   const morph = motionFlightMorph(flight, squareCardsEnabled);
   return (
-    <div
-      className={`game-motion-flight game-motion-flight-${flight.mode}${
-        flight.holdAtSource ? " game-motion-flight-hold-source" : ""
-      }${flight.emergeY !== undefined ? " game-motion-flight-from-under" : ""
-      }${flight.arena ? " game-motion-flight-arena" : ""}${morph?.flip ? " game-motion-flight-morph-flip" : ""}`}
-      style={flightStyle(flight, squareCardsEnabled)}
-      onAnimationStart={(event: AnimationEvent<HTMLDivElement>) => {
-        if (event.target === event.currentTarget) {
+    <>
+      <div
+        className={`game-motion-flight game-motion-flight-${flight.mode}${
+          flight.holdAtSource ? " game-motion-flight-hold-source" : ""
+        }${flight.emergeY !== undefined ? " game-motion-flight-from-under" : ""
+        }${flight.arena ? " game-motion-flight-arena" : ""}${morph?.flip ? " game-motion-flight-morph-flip" : ""}`}
+        style={flightStyle(flight, squareCardsEnabled)}
+        onAnimationStart={(event: AnimationEvent<HTMLDivElement>) => {
+          if (event.target === event.currentTarget) {
+            onFlightDepart(batchId, flight);
+          }
+        }}
+        onAnimationEnd={(event: AnimationEvent<HTMLDivElement>) => {
+          // Ignore the nested back/face reveal animations. The wrapper's
+          // completion is the exact point at which the real card takes over.
+          if (event.target !== event.currentTarget) return;
           onFlightDepart(batchId, flight);
-        }
-      }}
-      onAnimationEnd={(event: AnimationEvent<HTMLDivElement>) => {
-        // Ignore the nested back/face reveal animations. The wrapper's
-        // completion is the exact point at which the real card takes over.
-        if (event.target !== event.currentTarget) return;
-        onFlightDepart(batchId, flight);
-        const destinationVisible = onFlightArrive(batchId, flight.destinationPresentationKey);
-        const element = event.currentTarget;
-        const lingerMs = Math.max(0,
-          (flight.lingerUntilMs ?? 0) - flight.delayMs - motionFlightDurationMs(flight),
-        );
-        if (lingerMs > 0) {
-          lingerTimerRef.current = window.setTimeout(() => {
+          const destinationVisible = onFlightArrive(batchId, flight.destinationPresentationKey);
+          const element = event.currentTarget;
+          const lingerMs = Math.max(0,
+            (flight.lingerUntilMs ?? 0) - flight.delayMs - motionFlightDurationMs(flight),
+          );
+          if (lingerMs > 0) {
+            lingerTimerRef.current = window.setTimeout(() => {
+              element.style.visibility = "hidden";
+              lingerTimerRef.current = null;
+            }, lingerMs);
+          } else if (motionFlightHandsOff(flight, destinationVisible)) {
             element.style.visibility = "hidden";
-            lingerTimerRef.current = null;
-          }, lingerMs);
-        } else if (motionFlightHandsOff(flight, destinationVisible)) {
-          element.style.visibility = "hidden";
-        }
-        onCueComplete(flight.id);
-      }}
-    >
-      <MotionCardVisual
-        visual={flight.visual}
-        count={flight.showCount ? flight.count : 1}
-        square={squareMotionFlight(flight, squareCardsEnabled)}
-        morph={morph}
-      />
+          }
+          onCueComplete(flight.id);
+        }}
+      >
+        <MotionCardVisual
+          visual={flight.visual}
+          count={flight.showCount ? flight.count : 1}
+          square={squareMotionFlight(flight, squareCardsEnabled)}
+          morph={morph}
+        />
+      </div>
+      {morph?.expand && flight.visual.kind === "face" ? (
+        <MotionExpandCounters card={flight.visual.card} rect={flight.start} />
+      ) : null}
+    </>
+  );
+}
+
+/** The arena card stays put while its body opens out, so its counters and
+ * stats hold their place above the morph instead of riding along with it. */
+function MotionExpandCounters({ card, rect }: { card: CardView; rect: MotionRect }) {
+  return (
+    <div className="game-motion-expand-counters" style={rectStyle(rect)}>
+      <CardFace card={card} size="zone" squareArt showTapped={false} />
     </div>
   );
 }

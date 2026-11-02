@@ -1235,6 +1235,33 @@ describe("SUP — intimidating attacks", () => {
     g.play("bully tactics|1").chooseOption("X = 0").expectPendingReturn(1, 0);
   });
 
+  it("Bully Tactics intimidates once per resource paid", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["bully tactics|1"], resources: 3 },
+        foe({ hand: ["head jab|1", "head jab|1", "head jab|1"] }),
+      ],
+    });
+
+    g.play("bully tactics|1").chooseOption("X = 3").expectPendingReturn(1, 3);
+  });
+
+  it("Bully Tactics banishes before the attack's layer-step priority window", () => {
+    const g = scenario({
+      seats: [
+        hero("lyath goldmane, vile savant|0", { hand: ["bully tactics|1", "titanium bauble|3", "titanium bauble|3"] }),
+        foe({ hand: ["head jab|1", "head jab|1", "head jab|1"] }),
+      ],
+    });
+
+    g.play("bully tactics|1").chooseOption("X = 3");
+    g.doRaw({ kind: "choose", optionId: g.state.pendingDecision!.options![0]! });
+    expect(g.state.phase).toBe("layer");
+    expect(g.state.pendingDecision?.kind).toBe("priority-window");
+    expect(g.state.players[1]!.hand).toHaveLength(0);
+  });
+
+
   it("Battered, Beaten, and Broken destroys an intimidated card on hit with 3 auras", () => {
     const g = scenario({
       seats: [

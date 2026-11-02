@@ -23,6 +23,8 @@ const GOLD = "HVY243";
 const MIGHT = "HVY241";
 const PONDER = "DYN244";
 const VIGOR = "HVY242";
+// Options must stay enumerable for legalIntents; no single hit realistically reaches 100.
+const TALK_A_BIG_GAME_MAX_NUMBER = 99;
 
 const DOUBLE_DOWN_ATTACK = "card.effect.hvy.doubledown.attack";
 const isDoubleDownAttack = (modifier: DeepReadonly<Modifier>) =>
@@ -483,14 +485,11 @@ export const hvyHighRarity: Record<string, CardScript> = {
   },
   "talk a big game|3": {
     onPlay(ctx) {
-      ctx.requestChoice("big-number", decisionPrompt("Choose a number", "card.hvy.number.choose"), [
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-      ]);
+      ctx.requestChoice(
+        "big-number",
+        decisionPrompt("Choose a number", "card.hvy.number.choose"),
+        Array.from({ length: TALK_A_BIG_GAME_MAX_NUMBER }, (_, index) => String(index + 1)),
+      );
     },
     onChoose(ctx, hook, option) {
       if (hook !== "big-number") return;

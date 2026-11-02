@@ -121,6 +121,7 @@ export function PlayerHalf({
   compactBoard = false,
   cardDisplayPreference = "square",
   activeChainAttackerInstanceId,
+  activeChainTargetInstanceIds,
   onSendEmote,
   onOpenOverlay,
   onOpenEffects,
@@ -146,6 +147,8 @@ export function PlayerHalf({
   compactBoard?: boolean;
   cardDisplayPreference?: CardDisplayPreference;
   activeChainAttackerInstanceId: number | null;
+  /** Allies the current chain link attacks, which leave their shared stack. */
+  activeChainTargetInstanceIds: ReadonlySet<number>;
   onSendEmote: (message: EmoteMessage) => void;
   onOpenOverlay: (overlay: BoardOverlay) => void;
   onOpenEffects: (target: EffectLedgerTarget) => void;
@@ -197,6 +200,12 @@ export function PlayerHalf({
   // Arena costs stay until the server removes them so their exit animates in place.
   const arenaBoard = boardCardsOutsideEquipmentZones(player.board, player.equipment);
   const arrangedBoard = arrangeBoundBoardCards(arenaBoard);
+  // Chain participants peel off identical copies so the board shows which one is involved.
+  const individuallyRenderedIds = new Set([
+    ...arrangedBoard.boundAllyIds,
+    ...activeChainTargetInstanceIds,
+    ...(activeChainAttackerInstanceId === null ? [] : [activeChainAttackerInstanceId]),
+  ]);
 
   const activate = (instanceId: number) => () => interaction.onActivate(instanceId);
   const equipmentZone = (slot: "head" | "chest" | "arms" | "legs", area: string) => {
@@ -435,7 +444,7 @@ export function PlayerHalf({
             {groupBoardCards(
               arrangedBoard.cards,
               mine ? interaction.legal.activatable : undefined,
-              arrangedBoard.boundAllyIds,
+              individuallyRenderedIds,
             ).map((group) => {
               const boundCards = arrangedBoard.boundCardsByAlly.get(group.card.instanceId) ?? [];
               const underCardCount = equipmentStackCards(group.card).length - 1;
@@ -480,6 +489,12 @@ export function PlayerHalf({
                   <EquipmentStack
                     card={group.card}
                     squareArt={squareBoard}
+                    chainSourceLabel={group.card.instanceId === activeChainAttackerInstanceId
+                      ? intl.formatMessage({ id: "game.card.onchain" })
+                      : undefined}
+                    attackTargetLabel={activeChainTargetInstanceIds.has(group.card.instanceId)
+                      ? intl.formatMessage({ id: "game.card.badge.attackTarget" })
+                      : undefined}
                     underCards={boundCards}
                     underCardMotionLocation={{ kind: "board", seat: player.seat }}
                     boundCount={boundCards.length || undefined}

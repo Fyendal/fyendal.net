@@ -408,6 +408,25 @@ describe("UPR — rules regression coverage", () => {
       .expectZoneSize(1, "deck", 0);
   });
 
+  it("That All You Got? does not draw when a reaction pumped the attack above 2", () => {
+    const s = scenario({
+      seats: [
+        { hero: "dorinthea", hand: ["razor reflex|1", "en garde|1", "raging onslaught|2"] },
+        { hero: "rhinar", hand: ["that all you got?|2"], deck: [BLUE] },
+      ],
+    });
+
+    s.attackWithWeapon()
+      .blockWith()
+      .react("razor reflex|1", { pitch: ["raging onslaught|2"], settle: false })
+      .passPriority()
+      .react("that all you got?|2")
+      .expectFinalAttack(5)
+      .doRaw({ kind: "close-chain" })
+      .expectHandSize(1, 0)
+      .expectZoneSize(1, "deck", 1);
+  });
+
   it("Spreading Flames buffs every eligible Draconic attack on the combat chain", () => {
     const s = scenario({
       seats: [

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { CardView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
+import { UiIcon } from "../components/UiIcon.js";
 import { ViewportTooltip } from "../components/ViewportTooltip.js";
 import {
   hasLegacySquareCardFrame,
@@ -219,6 +220,7 @@ export function CardFace({
   label,
   accessibleLabel,
   chainSourceLabel,
+  attackTargetLabel,
   explanation,
   motionKey,
   motionZoneAnchor,
@@ -269,6 +271,8 @@ export function CardFace({
   accessibleLabel?: string;
   /** Marks the arena card that supplied the current combat-chain attack. */
   chainSourceLabel?: string;
+  /** Marks an ally the current combat-chain attack targets. */
+  attackTargetLabel?: string;
   /** Availability context shown on hover or keyboard focus. */
   explanation?: string;
   /** Stable viewer-safe presentation key used only for board motion geometry. */
@@ -290,6 +294,7 @@ export function CardFace({
   const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
   const badges = cardBadges(card, {
     goAgain, dominate, overpower, veil, undefendable, showFaceUp, wagered, wagerRewards, boundCardNames,
+    attackTarget: attackTargetLabel !== undefined,
   });
   const marked = badges.some((badge) => badge.placement === "token");
   const overlays = badges.flatMap((badge) => badge.placement === "overlay" ? [badge] : []);
@@ -527,6 +532,11 @@ export function CardFace({
       {chainSourceLabel ? (
         <div className="card-chain-source-badge" title={chainSourceLabel}>
           {chainSourceLabel}
+        </div>
+      ) : null}
+      {attackTargetLabel ? (
+        <div className="card-attack-target-badge" role="img" aria-label={attackTargetLabel} title={attackTargetLabel}>
+          <UiIcon name="target" />
         </div>
       ) : null}
       {marked ? (

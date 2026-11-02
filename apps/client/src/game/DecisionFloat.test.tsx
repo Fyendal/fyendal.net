@@ -37,6 +37,7 @@ import {
   cardNameSuggestions,
   NameChoiceAutocomplete,
 } from "./decision/NameChoiceAutocomplete.js";
+import { steppedNumberChoice } from "./decision/NumberChoiceInput.js";
 import {
   confirmTriggerOrderOnSpace,
   moveTriggerOrder,
@@ -49,6 +50,7 @@ import {
   cardChoiceLocationLabels,
   handCardChoiceOptions,
   heroTargetSide,
+  numberChoice,
   optDecisionCards,
   boundedCardChoiceSelectable,
   toggleBoundedCardChoice,
@@ -238,6 +240,66 @@ describe("card-name autocomplete", () => {
     expect(html).toContain(
       'class="decision decision-options decision-name-choice"',
     );
+  });
+
+  it("renders long consecutive number choices as a number input", () => {
+    const options = Array.from({ length: 99 }, (_, index) => String(index + 1));
+    const decision = { player: 0, kind: "choose-target", prompt: "Choose a number", options } as const;
+    expect(numberChoice(decision)).toMatchObject({ minimum: 1, maximum: 99 });
+    expect(numberChoice({ ...decision, options: options.slice(0, 6) })).toBeNull();
+
+    const html = renderLocalized(
+      <PendingDecisionPanel
+        model={{
+          decision,
+          isMine: true,
+          canPass: false,
+          defendPitchIds: new Set(),
+          hand: [],
+          defendSel: [],
+          selectedPitchIds: [],
+          onTogglePitch: () => undefined,
+          resourcePaymentSelected: 0,
+          resourcePaymentRequired: 0,
+          confirmSkipArsenal: false,
+          onRequestPass: () => undefined,
+          onDisableGuidance: () => undefined,
+          onConfirmSkipArsenal: () => undefined,
+          onCancelSkipArsenal: () => undefined,
+          onSend: () => undefined,
+        }}
+        viewerSeat={0}
+      />,
+    );
+    expect(html).toContain('class="number-dial"');
+    expect(html).toContain('value="1"');
+    expect(html).toContain("1–99");
+    expect(html).toContain("Choose 1");
+    expect(html).not.toContain(">42<");
+  });
+
+  it("routes declared-X options through the number input and keeps other options", () => {
+    const choice = numberChoice({
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose X",
+      options: ["X = 0", "X = 2", "X = 5", "no"],
+      defaultOption: "X = 2",
+    });
+
+    expect(choice).toMatchObject({ minimum: 0, maximum: 5, defaultValue: 2 });
+    expect(choice?.optionByValue.get(5)).toBe("X = 5");
+    expect(choice?.optionByValue.has(1)).toBe(false);
+    expect(numberChoice({ player: 0, kind: "choose-target", prompt: "Choose X", options: ["X = 0", "X = 1", "X = 2", "X = 3", "X = 4"] })).toBeNull();
+    expect(numberChoice({ player: 0, kind: "choose-target", prompt: "Choose X", options: ["X = 0"] })).toBeNull();
+  });
+
+  it("steps the number dial across gaps and stops at the ends", () => {
+    const values = [0, 2, 3, 7];
+    expect(steppedNumberChoice(values, 0, 1)).toBe(2);
+    expect(steppedNumberChoice(values, 3, -1)).toBe(2);
+    expect(steppedNumberChoice(values, 3, 10)).toBe(7);
+    expect(steppedNumberChoice(values, 2, -10)).toBe(0);
   });
 
   it("accepts the highlighted suggestion on Enter without submitting it", () => {

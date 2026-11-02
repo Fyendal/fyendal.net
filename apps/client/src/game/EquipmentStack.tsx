@@ -36,6 +36,7 @@ export function EquipmentStack({
   underCardMotionLocation,
   showActivationDots = false,
   chainSourceLabel,
+  attackTargetLabel,
   soulCount,
   soulCountLabel,
   boundCount,
@@ -56,6 +57,8 @@ export function EquipmentStack({
   showActivationDots?: boolean;
   /** Present only on the permanent supplying the current chain-link attack. */
   chainSourceLabel?: string;
+  /** Present on an ally the current chain-link attack targets. */
+  attackTargetLabel?: string;
   /** Hero-only soul count. Defined even at zero so the icon stays visible. */
   soulCount?: number;
   soulCountLabel?: string;
@@ -126,6 +129,7 @@ export function EquipmentStack({
               selected={isTop ? selected : undefined}
               dimmed={isTop ? dimmed : undefined}
               chainSourceLabel={isTop ? chainSourceLabel : undefined}
+              attackTargetLabel={isTop ? attackTargetLabel : undefined}
               onClick={isTop ? onClick : undefined}
             />
           </div>

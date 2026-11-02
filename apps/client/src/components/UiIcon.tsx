@@ -44,6 +44,7 @@ export type UiIconName =
   | "skip-forward"
   | "star"
   | "star-outline"
+  | "target"
   | "trash"
   | "user-add"
   | "user-pending";

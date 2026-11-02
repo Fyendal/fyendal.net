@@ -44,6 +44,8 @@ export interface CardBadgeContext {
   wagerRewards?: readonly string[];
   /** Names of the cards bound to this ally, which the board stacks beneath it. */
   boundCardNames?: readonly string[];
+  /** An ally the current chain-link attack targets; the board draws its own marker. */
+  attackTarget?: boolean;
 }
 
 /** Rules counters drawn over `/icons/<key>.png`. Other counter keys are
@@ -245,6 +247,16 @@ export function cardBadges(card: CardView, context: CardBadgeContext = {}): Card
   }
   if (Object.entries(counters).some(([key, value]) => isFuseCounter(key) && value > 0)) {
     flag("fusec", "/icons/fuse.png", "Fused", "game.card.badge.fused");
+  }
+  if (context.attackTarget) {
+    badges.push({
+      kind: "attack-target",
+      placement: "preview",
+      icon: "/icons/ui/target.svg",
+      text: "Attack target",
+      title: { id: "game.card.badge.attackTarget" },
+      detail: { id: "game.card.badge.attackTarget.detail" },
+    });
   }
   for (const name of context.boundCardNames ?? []) {
     badges.push({

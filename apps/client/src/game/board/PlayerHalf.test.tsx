@@ -42,6 +42,7 @@ function renderPlayerHalf(
   mobileLandscapeViewport = false,
   compactBoard = false,
   standingOrders?: ComponentProps<typeof PlayerHalf>["standingOrders"],
+  activeChainTargetInstanceIds: ReadonlySet<number> = new Set(),
 ): string {
   return renderToStaticMarkup(
     <TestI18nProvider locale={locale}>
@@ -83,6 +84,7 @@ function renderPlayerHalf(
       mobileLandscapeViewport={mobileLandscapeViewport}
       compactBoard={compactBoard}
       activeChainAttackerInstanceId={activeChainAttackerInstanceId}
+      activeChainTargetInstanceIds={activeChainTargetInstanceIds}
       onSendEmote={() => undefined}
       onOpenOverlay={() => undefined}
       onOpenEffects={() => undefined}
@@ -135,6 +137,7 @@ function renderArenaInteraction(
         mobileFloatViewport={false}
         mobileLandscapeViewport={false}
         activeChainAttackerInstanceId={null}
+        activeChainTargetInstanceIds={new Set()}
         onSendEmote={() => undefined}
         onOpenOverlay={() => undefined}
         onOpenEffects={() => undefined}
@@ -413,6 +416,35 @@ describe("PlayerHalf", () => {
       /class="board-card-stack board-card-stack-multiple" data-stack-depth="2"[^>]*data-motion-card="0:board:2"[^>]*data-motion-card-aliases="0:board:4"[^>]*>.*board-card-count" data-motion-stack-count="" aria-label="2 stacked cards">×2</,
     );
     expect(html.match(/data-motion-card="0:board:/g)).toHaveLength(1);
+  });
+
+  it("pulls the attacked copy out of a stack of identical allies and marks it", () => {
+    const html = renderPlayerHalf(
+      {
+        ...player,
+        board: [
+          { instanceId: 2, cardId: "TST-UPRIGHT", owner: 0 },
+          { instanceId: 4, cardId: "TST-UPRIGHT", owner: 0 },
+          { instanceId: 5, cardId: "TST-UPRIGHT", owner: 0 },
+        ],
+      },
+      true,
+      undefined,
+      undefined,
+      "en",
+      null,
+      false,
+      false,
+      false,
+      undefined,
+      new Set([4]),
+    );
+
+    expect(html).toMatch(/data-motion-card="0:board:2"[^>]*data-motion-card-aliases="0:board:5"/);
+    expect(html).toMatch(
+      /data-motion-card="0:board:4">.*card-attack-target-badge" role="img" aria-label="Attack target"/,
+    );
+    expect(html.match(/data-motion-card="0:board:/g)).toHaveLength(2);
   });
 
   it("renders a card back from the public count for any non-owned hidden arsenal", () => {

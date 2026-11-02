@@ -266,3 +266,46 @@ export function heroTargetSide(option: string, viewerSeat: number): HeroTargetSi
   if (seat === undefined) return null;
   return Number(seat) === viewerSeat ? "self" : "opponent";
 }
+
+/** Bare number choices list as buttons until there are this many. */
+const NUMBER_INPUT_MIN_OPTIONS = 10;
+/** Declared-X choices list as buttons while X can be at most this. */
+const X_BUTTONS_MAX = 4;
+
+export type NumberChoice = {
+  minimum: number;
+  maximum: number;
+  optionByValue: ReadonlyMap<number, string>;
+  defaultValue?: number;
+};
+
+/** Number options ("choose a number", "X = n") rendered as one number input;
+ * any other options in the decision stay buttons. */
+export function numberChoice(decision: PendingDecision | null): NumberChoice | null {
+  if (
+    decision?.kind !== "choose-target" ||
+    !decision.options ||
+    decision.optionCards?.some(Boolean) ||
+    decision.optionMessages?.some(Boolean)
+  ) return null;
+  const parse = (pattern: RegExp) => new Map(decision.options!.flatMap((option) => {
+    const digits = pattern.exec(option)?.[1];
+    return digits === undefined ? [] : [[Number(digits), option] as const];
+  }));
+  const declaredX = parse(/^X = (\d+)$/);
+  const bare = parse(/^(\d+)$/);
+  const optionByValue = declaredX.size > 1 && Math.max(...declaredX.keys()) > X_BUTTONS_MAX
+    ? declaredX
+    : bare.size >= NUMBER_INPUT_MIN_OPTIONS && bare.size === decision.options.length
+      ? bare
+      : null;
+  if (!optionByValue) return null;
+  const values = [...optionByValue.keys()];
+  const defaultValue = values.find((value) => optionByValue.get(value) === decision.defaultOption);
+  return {
+    minimum: Math.min(...values),
+    maximum: Math.max(...values),
+    optionByValue,
+    ...(defaultValue === undefined ? {} : { defaultValue }),
+  };
+}

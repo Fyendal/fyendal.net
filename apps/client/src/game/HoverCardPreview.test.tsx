@@ -65,6 +65,25 @@ describe("HoverCardPreview", () => {
     expect(html).toContain("/icons/bound.png");
   });
 
+  it("names an attacked ally as the attack target above the preview", () => {
+    const badges = cardBadges(
+      { instanceId: 7, cardId: "SEA075", owner: 0, life: 3 },
+      { attackTarget: true },
+    );
+    expect(badges.find((badge) => badge.kind === "attack-target")?.placement).toBe("preview");
+    const html = renderToStaticMarkup(createElement(
+      IntlProvider,
+      { locale: "en", messages: en },
+      createElement(HoverCardPreview, {
+        preview: { id: "SEA075", x: 10, y: 20, size: { width: 100, height: 140 }, badges },
+        owner: 0,
+      }),
+    ));
+
+    expect(html).toContain('<span class="card-badge-title">Attack target</span>');
+    expect(html).toContain("The current attack targets this ally");
+  });
+
   it("spells out the hovered card's counters and statuses above the preview", () => {
     const badges = cardBadges(
       { instanceId: 7, cardId: "ARC069", owner: 0, counters: { aim: 1, rust: 2, harpoonX: 3 } },

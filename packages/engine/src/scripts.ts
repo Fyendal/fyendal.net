@@ -207,7 +207,8 @@ export interface ScriptCtx {
    * counters and continuous modifiers; 0 when it is not defending. */
   currentDefense(card: number | DeepReadonly<CardInstance>): number;
   /** Full current power of the active attack, including base changes,
-   * counters, continuous modifiers, and opposing effects. */
+   * counters, continuous modifiers, and opposing effects; a resolved link
+   * reports its power at resolution. */
   currentAttackPower(): number;
   /** Whether the active attack currently has dominate from any rules source. */
   currentAttackHasDominate(): boolean;

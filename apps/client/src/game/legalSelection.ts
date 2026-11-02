@@ -76,12 +76,30 @@ export function intentBoostCount(intent: PaidIntent): number {
     : 0;
 }
 
-/** Exact server-owned payment option matching the hand cards selected so far. */
+/** Copies of a card are interchangeable: the server caps its enumerated pitch
+ * orders, so later copies may never appear in them. */
+function resourcePaymentPrefix(
+  option: readonly number[],
+  selected: readonly number[],
+  cardIdOf: (instanceId: number) => string | undefined = () => undefined,
+): boolean {
+  return selected.length <= option.length && selected.every((id, index) =>
+    id === option[index] || (cardIdOf(id) !== undefined && cardIdOf(id) === cardIdOf(option[index]!))
+  );
+}
+
+/** Server-owned payment option matching the hand cards selected so far. */
 export function selectedResourcePaymentOption(
   payment: ResourcePayment,
   selected: readonly number[],
+  cardIdOf?: (instanceId: number) => string | undefined,
 ): ResourcePayment["options"][number] | null {
-  return payment.options.find((option) => sameOrderedIds(option.pitchInstanceIds, selected)) ?? null;
+  return payment.options.find((option) => sameOrderedIds(option.pitchInstanceIds, selected)) ??
+    payment.options.find((option) =>
+      option.pitchInstanceIds.length === selected.length &&
+      resourcePaymentPrefix(option.pitchInstanceIds, selected, cardIdOf)
+    ) ??
+    null;
 }
 
 /** A hand card is pitchable while at least one authoritative payment option
@@ -90,9 +108,10 @@ export function canAddResourcePaymentPitch(
   payment: ResourcePayment,
   selected: readonly number[],
   instanceId: number,
+  cardIdOf?: (instanceId: number) => string | undefined,
 ): boolean {
   const next = [...selected, instanceId];
-  return payment.options.some((option) => startsWithIds(option.pitchInstanceIds, next));
+  return payment.options.some((option) => resourcePaymentPrefix(option.pitchInstanceIds, next, cardIdOf));
 }
 
 function sameOptionalIds(

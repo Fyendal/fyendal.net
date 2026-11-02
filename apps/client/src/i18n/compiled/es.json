@@ -28217,6 +28217,18 @@
       "value": " de daño arcane"
     }
   ],
+  "game.card.badge.attackTarget": [
+    {
+      "type": 0,
+      "value": "Objetivo de ataque"
+    }
+  ],
+  "game.card.badge.attackTarget.detail": [
+    {
+      "type": 0,
+      "value": "El ataque actual tiene este ally como objetivo"
+    }
+  ],
   "game.card.badge.attacked": [
     {
       "type": 0,
@@ -29387,6 +29399,60 @@
     {
       "type": 0,
       "value": "Empieza a escribir el nombre de una carta"
+    }
+  ],
+  "game.decision.number.choose": [
+    {
+      "type": 0,
+      "value": "Elegir "
+    },
+    {
+      "type": 1,
+      "value": "value"
+    }
+  ],
+  "game.decision.number.decrease": [
+    {
+      "type": 0,
+      "value": "Disminuir"
+    }
+  ],
+  "game.decision.number.increase": [
+    {
+      "type": 0,
+      "value": "Aumentar"
+    }
+  ],
+  "game.decision.number.label": [
+    {
+      "type": 0,
+      "value": "Número de "
+    },
+    {
+      "type": 1,
+      "value": "minimum"
+    },
+    {
+      "type": 0,
+      "value": " a "
+    },
+    {
+      "type": 1,
+      "value": "maximum"
+    }
+  ],
+  "game.decision.number.range": [
+    {
+      "type": 1,
+      "value": "minimum"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "maximum"
     }
   ],
   "game.decision.opt.bottom": [

@@ -235,6 +235,58 @@
   animation: game-motion-morph-out var(--motion-duration) cubic-bezier(.3, 0, .15, 1) var(--motion-delay) both;
 }
 
+/* Square arena → full-card float: the full card grows out of the square's art window. */
+.game-motion-visual-expand {
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.game-motion-visual-expand .game-motion-face {
+  border-radius: 6px;
+  box-shadow: 0 9px 25px #000c;
+  transform-origin: center;
+  will-change: transform, clip-path, opacity;
+  animation: game-motion-expand-full var(--motion-duration) cubic-bezier(.3, 0, .15, 1) var(--motion-delay) both;
+}
+
+.game-motion-card-side.game-motion-expand-square {
+  z-index: 1;
+  inset: auto;
+  left: calc(50% - var(--motion-from-width) / 2);
+  top: calc(50% - var(--motion-from-height) / 2);
+  width: var(--motion-from-width);
+  height: var(--motion-from-height);
+  animation: game-motion-expand-square var(--motion-duration) ease-out var(--motion-delay) both;
+}
+
+.game-motion-expand-square > .card {
+  width: 100%;
+  height: 100%;
+}
+
+.game-motion-expand-square .board-square-stats {
+  display: none;
+}
+
+/* The arena card's own stats and counters stay above its morphing body. */
+.game-motion-expand-counters {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.game-motion-expand-counters > .card {
+  width: 100%;
+  height: 100%;
+  visibility: hidden;
+}
+
+.game-motion-expand-counters > .card > :is(.board-square-stats, .c-ovls) {
+  visibility: visible;
+}
+
 .game-motion-image {
   position: absolute;
   inset: 0;
@@ -540,6 +592,29 @@
   }
 }
 
+@keyframes game-motion-expand-full {
+  0%, 8% {
+    opacity: 0;
+    transform: scale(var(--motion-morph-scale));
+    clip-path: inset(var(--motion-morph-crop) 0 round 5px);
+  }
+  22% {
+    opacity: 1;
+    transform: scale(var(--motion-morph-scale));
+    clip-path: inset(var(--motion-morph-crop) 0 round 5px);
+  }
+  55%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    clip-path: inset(0 round 6px);
+  }
+}
+
+@keyframes game-motion-expand-square {
+  0%, 12% { opacity: 1; }
+  28%, 100% { opacity: 0; }
+}
+
 @keyframes game-motion-morph-in {
   0%, 6% { opacity: 0; transform: scale(1.08); }
   30%, 100% { opacity: 1; transform: scale(1); }
@@ -607,8 +682,13 @@
   }
 }
 
-.game-motion-layer-reduced .game-motion-morph-full {
+.game-motion-layer-reduced .game-motion-morph-full,
+.game-motion-layer-reduced .game-motion-expand-square {
   display: none;
+}
+
+.game-motion-layer-reduced .game-motion-visual-expand .game-motion-face {
+  animation: none;
 }
 
 .game-motion-layer-reduced .game-motion-visual-morph .game-motion-card-side {

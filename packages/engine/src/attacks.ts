@@ -850,6 +850,9 @@ function replaceAttackFromPlayerZone(
 
 /** Tail of the attack event: attack-declared triggers, then Attack Step priority. */
 export function declareTail(state: GameStateInternal, runtime: EngineRuntime): void {
+  // An intimidate from an attack-declared effect happens as it resolves, before the layer-step priority window.
+  const link = currentLink(state);
+  if (link) runtime.dispatchFlow("consumeQueuedIntimidate", state, link.attacker);
   runtime.dispatchFlow("enterAttackWindow", state);
 }
 

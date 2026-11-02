@@ -715,9 +715,12 @@ export function GameBoard() {
       ? intl.formatMessage({ id: "game.turn.yours" })
       : intl.formatMessage({ id: "game.turn.opponent" });
   const hasActiveCombatChain = presentedView.chain.length > 0;
-  const activeChainAttackerInstanceId = hasActiveCombatChain
-    ? presentedView.chain[presentedView.chain.length - 1]!.attackingCard.instanceId
-    : null;
+  const activeChainLink = presentedView.chain.at(-1);
+  const activeChainAttackerInstanceId = activeChainLink?.attackingCard.instanceId ?? null;
+  const activeChainTargetInstanceIds: ReadonlySet<number> = new Set([
+    ...(activeChainLink?.targetAlly ? [activeChainLink.targetAlly.instanceId] : []),
+    ...(activeChainLink?.additionalTargets ?? []).map((target) => target.ally.instanceId),
+  ]);
   const optionCardLabels = cardChoiceLocationLabels(
     me.heroInstanceId,
     opp.heroInstanceId,
@@ -886,9 +889,11 @@ export function GameBoard() {
         togglePitch(c.instanceId);
         return;
       }
-      if (!canAddResourcePaymentPitch(resourcePayment, pitchSel, c.instanceId)) return;
+      const handCardId = (instanceId: number) =>
+        me.hand.find((card) => card.instanceId === instanceId)?.cardId;
+      if (!canAddResourcePaymentPitch(resourcePayment, pitchSel, c.instanceId, handCardId)) return;
       const nextPitch = [...pitchSel, c.instanceId];
-      const paymentOption = selectedResourcePaymentOption(resourcePayment, nextPitch);
+      const paymentOption = selectedResourcePaymentOption(resourcePayment, nextPitch, handCardId);
       if (paymentOption) send({ kind: "choose", optionId: paymentOption.optionId });
       else togglePitch(c.instanceId);
       return;
@@ -1450,6 +1455,7 @@ export function GameBoard() {
           compactBoard={compactBoard}
           cardDisplayPreference={cardDisplayPreference}
           activeChainAttackerInstanceId={activeChainAttackerInstanceId}
+          activeChainTargetInstanceIds={activeChainTargetInstanceIds}
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
           onOpenEffects={openEffectLedger}
@@ -1495,6 +1501,7 @@ export function GameBoard() {
           compactBoard={compactBoard}
           cardDisplayPreference={cardDisplayPreference}
           activeChainAttackerInstanceId={activeChainAttackerInstanceId}
+          activeChainTargetInstanceIds={activeChainTargetInstanceIds}
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
           onOpenEffects={openEffectLedger}
