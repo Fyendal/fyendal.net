@@ -26341,7 +26341,7 @@
   "game.card.badge.attackTarget.detail": [
     {
       "type": 0,
-      "value": "当前攻击以此盟友为目标"
+      "value": "当前攻击以此牌为目标"
     }
   ],
   "game.card.badge.attacked": [

@@ -28811,7 +28811,7 @@
   "game.card.badge.attackTarget.detail": [
     {
       "type": 0,
-      "value": "O ataque atual tem este ally como alvo"
+      "value": "O ataque atual tem esta carta como alvo"
     }
   ],
   "game.card.badge.attacked": [

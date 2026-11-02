@@ -57,7 +57,7 @@ export function EquipmentStack({
   showActivationDots?: boolean;
   /** Present only on the permanent supplying the current chain-link attack. */
   chainSourceLabel?: string;
-  /** Present on an ally the current chain-link attack targets. */
+  /** Present on an ally or Spectra permanent the current chain-link attack targets. */
   attackTargetLabel?: string;
   /** Hero-only soul count. Defined even at zero so the icon stays visible. */
   soulCount?: number;

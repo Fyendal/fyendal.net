@@ -621,8 +621,9 @@ export interface PendingDecision {
    *  they defend" effects applied at the defend event (Spider's Bite). */
   defenderDefense?: DefenderDefenseView[];
   /** A declared resource cost waiting for ordinary hand-card pitching. Only
-   *  projected to the paying player. Option ids remain engine-owned; clients
-   *  select cards and submit the matching option unchanged. */
+   *  projected to the paying player. Options are a capped sample of pitch
+   *  orders; clients may answer any option with their own order in
+   *  `choose.pitchInstanceIds`, which the engine validates. */
   resourcePayment?: {
     cost: number;
     options: { optionId: string; pitchInstanceIds: number[] }[];
@@ -885,7 +886,8 @@ export type GameIntent =
   | { kind: "pass" }
   | { kind: "defend"; instanceIds: number[]; pitchInstanceIds?: number[] }
   | { kind: "stage-defenders"; instanceIds: number[] }
-  | { kind: "choose"; optionId: string }
+  /** `pitchInstanceIds` pays a `resourcePayment` option with the player's own pitch order. */
+  | { kind: "choose"; optionId: string; pitchInstanceIds?: number[] }
   | { kind: "choose-many"; optionIds: string[] }
   | { kind: "order-triggers"; optionIds: string[] }
   | { kind: "skip-runechant" }

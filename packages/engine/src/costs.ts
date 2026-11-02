@@ -5,7 +5,7 @@ import type { CardInstance, PlayerState } from "./state.js";
 import { isChiCard } from "./cardProperties.js";
 import { nameOf } from "./gameLog.js";
 import { removeFromArray } from "./zoneQueries.js";
-import { notePitch, payFromPools, pitchIntoPool, pitchProhibitedByEffect, pitchValueOfInstance, scriptedPaymentOptions } from "./resources.js";
+import { canPayFromHand, notePitch, payFromPools, pitchIntoPool, pitchProhibitedByEffect, pitchValueOfInstance } from "./resources.js";
 
 interface VariableResourceCost {
   base: number;
@@ -87,8 +87,7 @@ export function variableResourceChoices(
   for (let x = minimum; x <= maximum; x++) {
     if (variableCost.canDeclareX && !variableCost.canDeclareX(x)) continue;
     const cost = costForBase(variableResourceCost(variableCost, x));
-    const payments = scriptedPaymentOptions(state, player, cost, `x:${x}`, [sourceInstanceId]);
-    if (Object.keys(payments).length === 0) break;
+    if (!canPayFromHand(state, player, cost, [sourceInstanceId])) break;
     choices[`X = ${x}`] = { x, cost };
   }
   return choices;

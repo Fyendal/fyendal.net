@@ -2587,13 +2587,7 @@ export function makeCtx(
       return true;
     },
     canPayResources(cost, excludeInstanceIds = []) {
-      return Object.keys(runtime.commands.scriptedPaymentOptions(
-        state,
-        state.players[seat] as PlayerState,
-        cost,
-        "paid",
-        excludeInstanceIds,
-      )).length > 0;
+      return runtime.commands.canPayFromHand(state, state.players[seat] as PlayerState, cost, excludeInstanceIds);
     },
     requestPaymentFrom(sourceInstanceId, hook, prompt, cost, choiceSeat) {
       const found = findCardAnywhere(state, sourceInstanceId);

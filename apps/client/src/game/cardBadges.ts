@@ -44,7 +44,7 @@ export interface CardBadgeContext {
   wagerRewards?: readonly string[];
   /** Names of the cards bound to this ally, which the board stacks beneath it. */
   boundCardNames?: readonly string[];
-  /** An ally the current chain-link attack targets; the board draws its own marker. */
+  /** Attacked by the current chain link (an ally or Spectra permanent); the board draws its own marker. */
   attackTarget?: boolean;
 }
 

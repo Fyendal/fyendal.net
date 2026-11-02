@@ -914,7 +914,9 @@ function decodeGameIntentValue(value: unknown): value is GameIntent {
     case "stage-defenders":
       return exactKeys(intent, ["kind", "instanceIds"]) && instanceIds(intent.instanceIds);
     case "choose":
-      return exactKeys(intent, ["kind", "optionId"]) && string(intent.optionId, MAX_SHORT_TEXT, false);
+      return exactKeys(intent, ["kind", "optionId", "pitchInstanceIds"], ["kind", "optionId"])
+        && string(intent.optionId, MAX_SHORT_TEXT, false)
+        && optional(intent.pitchInstanceIds, instanceIds);
     case "choose-many":
       return exactKeys(intent, ["kind", "optionIds"])
         && array(intent.optionIds, (v): v is string => string(v, MAX_SHORT_TEXT, false), MAX_CARDS);

@@ -417,6 +417,32 @@ describe("EVR — auras, items, and utility", () => {
     });
   });
 
+  it("Imposing Visage accepts any non-overpitching pitch order for its declared X", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["imposing visage|3", BLUE, BLUE, RED_SIX] },
+        { hero: "dorinthea" },
+      ],
+    });
+    const pitchCards = s.state.players[0]!.hand.filter((card) => cardData[card.cardId]?.name === "Wrecker Romp");
+    const [blue, otherBlue] = pitchCards.filter((card) => cardData[card.cardId]?.pitch === 3);
+    const red = pitchCards.find((card) => cardData[card.cardId]?.pitch === 1)!;
+
+    s.play("imposing visage|3", { settle: false }).chooseOption("X = 2");
+    const optionId = s.state.pendingDecision!.resourcePayment!.options[0]!.optionId;
+    expect(() => s.doRaw({
+      kind: "choose",
+      optionId,
+      pitchInstanceIds: [blue!.instanceId, otherBlue!.instanceId, red.instanceId],
+    })).toThrow(/overpitch/);
+
+    s.doRaw({
+      kind: "choose",
+      optionId,
+      pitchInstanceIds: [red.instanceId, blue!.instanceId, otherBlue!.instanceId],
+    }).expectResources(0, 2).expectZoneSize(0, "pitch", 3);
+  });
+
   it("Imposing Visage counts its declared X cost for What Happens Next?", () => {
     const s = scenario({
       seats: [

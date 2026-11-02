@@ -265,6 +265,34 @@ function declineOption(options: readonly string[] | undefined): string {
   return DECLINE_OPTIONS.find((option) => options?.includes(option)) ?? "no";
 }
 
+/** Pay a listed resource payment with the player's own pitch order. Listed
+ * orders are a capped sample; payCost still rejects overpitch, unpitchable
+ * cards, and short payments. */
+function answerResourcePayment(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  optionId: string,
+  pitchInstanceIds: readonly number[],
+): string | undefined | null {
+  const pd = state.pendingDecision;
+  if (!pd || pd.player !== seat) return null;
+  if (!pd.resourcePayment?.options.some((option) => option.optionId === optionId)) {
+    return "not a resource payment option";
+  }
+  const pitchIds = [...pitchInstanceIds];
+  if (pd.variablePlayCost?.paymentOptions?.[optionId]) {
+    pd.variablePlayCost.paymentOptions[optionId] = { pitchInstanceIds: pitchIds };
+  } else if (pd.variableActivationCost?.paymentOptions?.[optionId]) {
+    pd.variableActivationCost.paymentOptions[optionId] = { pitchInstanceIds: pitchIds };
+  } else if (pd.payment?.pitchOptions[optionId]) {
+    pd.payment.pitchOptions[optionId] = { ...pd.payment.pitchOptions[optionId], pitchIds };
+  } else {
+    return "not a resource payment option";
+  }
+  return answerScriptedDecision(state, runtime, seat, optionId);
+}
+
 /**
  * Answer a pending scripted decision (trigger choice, arsenal, or a
  * choose-target/optional-effect choice). Returns null when the pending
@@ -731,7 +759,9 @@ export function applyIntent(
       break;
     }
     case "choose": {
-      const res = answerScriptedDecision(next, runtime, seat, intent.optionId);
+      const res = intent.pitchInstanceIds
+        ? answerResourcePayment(next, runtime, seat, intent.optionId, intent.pitchInstanceIds)
+        : answerScriptedDecision(next, runtime, seat, intent.optionId);
       err =
         res === null
           ? next.pendingDecision && next.pendingDecision.player === seat

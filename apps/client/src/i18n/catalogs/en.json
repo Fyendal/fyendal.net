@@ -2267,7 +2267,7 @@
   "game.zone.weapon.right": "Right weapon",
   "game.card.onchain": "On chain",
   "game.card.badge.attackTarget": "Attack target",
-  "game.card.badge.attackTarget.detail": "The current attack targets this ally",
+  "game.card.badge.attackTarget.detail": "The current attack targets this card",
   "game.card.badge.panel": "Counters and statuses",
   "game.card.badge.counter": "{count, plural, one {# {name} counter} other {# {name} counters}}",
   "game.card.badge.marked": "Marked",

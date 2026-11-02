@@ -18,6 +18,7 @@ export type ScriptCommandName =
   | "basePowerOf"
   | "bindPermanent"
   | "boundArcaneCardBonus"
+  | "canPayFromHand"
   | "chainLinkNumber"
   | "chainLinksControlled"
   | "compareLife"

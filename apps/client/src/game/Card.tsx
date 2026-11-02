@@ -271,7 +271,7 @@ export function CardFace({
   accessibleLabel?: string;
   /** Marks the arena card that supplied the current combat-chain attack. */
   chainSourceLabel?: string;
-  /** Marks an ally the current combat-chain attack targets. */
+  /** Marks an ally or Spectra permanent the current combat-chain attack targets. */
   attackTargetLabel?: string;
   /** Availability context shown on hover or keyboard focus. */
   explanation?: string;

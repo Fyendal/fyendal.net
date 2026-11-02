@@ -2267,7 +2267,7 @@
   "game.zone.weapon.right": "右侧武器",
   "game.card.onchain": "位于 Chain 上",
   "game.card.badge.attackTarget": "攻击目标",
-  "game.card.badge.attackTarget.detail": "当前攻击以此盟友为目标",
+  "game.card.badge.attackTarget.detail": "当前攻击以此牌为目标",
   "game.card.badge.panel": "指示物与状态",
   "game.card.badge.counter": "{count} 个 {name} 指示物",
   "game.card.badge.marked": "被标记 (marked)",

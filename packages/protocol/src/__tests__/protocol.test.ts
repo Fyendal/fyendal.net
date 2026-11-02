@@ -483,6 +483,7 @@ describe("client messages", () => {
     { kind: "defend", instanceIds: [1], pitchInstanceIds: [2] },
     { kind: "stage-defenders", instanceIds: [1] },
     { kind: "choose", optionId: "yes" },
+    { kind: "choose", optionId: "pay 3", pitchInstanceIds: [4, 5] },
     { kind: "choose-many", optionIds: ["11", "12", "13"] },
     { kind: "order-triggers", optionIds: ["41:0", "42:0"] },
     { kind: "skip-runechant" },
@@ -548,6 +549,7 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "chat-read", username: "Alice", throughId: "1.5" })).toBeNull();
     expect(decodeClientMessage({ type: "create-friend-room", username: "Alice", format: "classic-battles", deckId: "deck" })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "choose", optionId: "x".repeat(257) } })).toBeNull();
+    expect(decodeClientMessage({ type: "intent", intent: { kind: "choose", optionId: "pay 3", pitchInstanceIds: [-1] } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: Number.MAX_SAFE_INTEGER + 1, pitchInstanceIds: [] } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: 1, pitchInstanceIds: [], pitchRequired: -1 } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: 1, pitchInstanceIds: [], deferPlayPresentation: false } })).toBeNull();

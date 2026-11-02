@@ -12,7 +12,7 @@ import {
   actionPaymentProgress,
   selectedActionIntent,
   selectedDefendIntent,
-  selectedResourcePaymentOption,
+  resourcePaymentIntent,
 } from "./legalSelection.js";
 
 describe("authoritative legal-intent selection", () => {
@@ -413,30 +413,25 @@ describe("authoritative legal-intent selection", () => {
     });
   });
 
-  it("stages a declared resource payment from authoritative pitch options", () => {
+  it("stages a declared resource payment in any order without overpitching", () => {
     const payment = {
       cost: 4,
-      options: [
-        { optionId: "first", pitchInstanceIds: [31, 32] },
-        { optionId: "second", pitchInstanceIds: [33, 34] },
-      ],
+      options: [{ optionId: "first", pitchInstanceIds: [31, 32] }],
     };
+    const pitch = new Map([[31, 3], [32, 1], [33, 3], [34, 0]]);
+    const pitchValue = (instanceId: number) => pitch.get(instanceId) ?? 0;
 
-    expect(canAddResourcePaymentPitch(payment, [], 31)).toBe(true);
-    expect(canAddResourcePaymentPitch(payment, [31], 34)).toBe(false);
-    expect(canAddResourcePaymentPitch(payment, [31], 32)).toBe(true);
-    expect(selectedResourcePaymentOption(payment, [32, 31])).toBeNull();
-    expect(selectedResourcePaymentOption(payment, [31, 32])).toEqual(payment.options[0]);
-  });
-
-  it("lets any copy of a card stand in for the copy a capped payment order lists", () => {
-    const payment = { cost: 6, options: [{ optionId: "baubles", pitchInstanceIds: [31, 32] }] };
-    const cardIdOf = (instanceId: number) => (instanceId === 40 ? "OTHER" : "BAUBLE");
-
-    expect(canAddResourcePaymentPitch(payment, [], 35)).toBe(false);
-    expect(canAddResourcePaymentPitch(payment, [], 35, cardIdOf)).toBe(true);
-    expect(canAddResourcePaymentPitch(payment, [], 40, cardIdOf)).toBe(false);
-    expect(selectedResourcePaymentOption(payment, [35, 33], cardIdOf)).toEqual(payment.options[0]);
+    expect(canAddResourcePaymentPitch(payment, 0, [], 33, pitchValue)).toBe(true);
+    expect(canAddResourcePaymentPitch(payment, 0, [], 34, pitchValue)).toBe(false);
+    expect(canAddResourcePaymentPitch(payment, 0, [33], 33, pitchValue)).toBe(false);
+    expect(canAddResourcePaymentPitch(payment, 0, [33, 32], 31, pitchValue)).toBe(false);
+    expect(canAddResourcePaymentPitch(payment, 1, [33], 32, pitchValue)).toBe(false);
+    expect(resourcePaymentIntent(payment, 0, [33], pitchValue)).toBeNull();
+    expect(resourcePaymentIntent(payment, 0, [33, 32], pitchValue)).toEqual({
+      kind: "choose",
+      optionId: "first",
+      pitchInstanceIds: [33, 32],
+    });
   });
 
   it("matches defender cards as a set but preserves their pitch order", () => {

@@ -27324,7 +27324,7 @@
   "game.card.badge.attackTarget.detail": [
     {
       "type": 0,
-      "value": "The current attack targets this ally"
+      "value": "The current attack targets this card"
     }
   ],
   "game.card.badge.attacked": [

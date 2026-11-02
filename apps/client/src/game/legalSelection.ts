@@ -76,42 +76,31 @@ export function intentBoostCount(intent: PaidIntent): number {
     : 0;
 }
 
-/** Copies of a card are interchangeable: the server caps its enumerated pitch
- * orders, so later copies may never appear in them. */
-function resourcePaymentPrefix(
-  option: readonly number[],
-  selected: readonly number[],
-  cardIdOf: (instanceId: number) => string | undefined = () => undefined,
-): boolean {
-  return selected.length <= option.length && selected.every((id, index) =>
-    id === option[index] || (cardIdOf(id) !== undefined && cardIdOf(id) === cardIdOf(option[index]!))
-  );
-}
-
-/** Server-owned payment option matching the hand cards selected so far. */
-export function selectedResourcePaymentOption(
-  payment: ResourcePayment,
-  selected: readonly number[],
-  cardIdOf?: (instanceId: number) => string | undefined,
-): ResourcePayment["options"][number] | null {
-  return payment.options.find((option) => sameOrderedIds(option.pitchInstanceIds, selected)) ??
-    payment.options.find((option) =>
-      option.pitchInstanceIds.length === selected.length &&
-      resourcePaymentPrefix(option.pitchInstanceIds, selected, cardIdOf)
-    ) ??
-    null;
-}
-
-/** A hand card is pitchable while at least one authoritative payment option
- * contains the resulting selection. */
+/** A pitchable hand card may join a resource payment while the selection is
+ * short: stopping once covered never overpitches, whatever the order. */
 export function canAddResourcePaymentPitch(
   payment: ResourcePayment,
+  floating: number,
   selected: readonly number[],
   instanceId: number,
-  cardIdOf?: (instanceId: number) => string | undefined,
+  pitchValue: (instanceId: number) => number,
 ): boolean {
-  const next = [...selected, instanceId];
-  return payment.options.some((option) => resourcePaymentPrefix(option.pitchInstanceIds, next, cardIdOf));
+  return !selected.includes(instanceId) &&
+    pitchValue(instanceId) > 0 &&
+    floating + pitchTotal(selected, pitchValue) < payment.cost;
+}
+
+/** Answer the payment with the selected order once it covers the cost; the
+ * engine validates the order against the overpitch rule. */
+export function resourcePaymentIntent(
+  payment: ResourcePayment,
+  floating: number,
+  selected: readonly number[],
+  pitchValue: (instanceId: number) => number,
+): Extract<GameIntent, { kind: "choose" }> | null {
+  const option = payment.options[0];
+  if (!option || floating + pitchTotal(selected, pitchValue) < payment.cost) return null;
+  return { kind: "choose", optionId: option.optionId, pitchInstanceIds: [...selected] };
 }
 
 function sameOptionalIds(

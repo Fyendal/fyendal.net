@@ -32,7 +32,7 @@ import {
   canAddResourcePaymentPitch,
   offeredMeldSides,
   selectedDefendIntent,
-  selectedResourcePaymentOption,
+  resourcePaymentIntent,
 } from "./legalSelection.js";
 import { arrangeBoundBoardCards, equipmentStackCards } from "./boardGroups.js";
 import { chainDefenderIds, presentedHandCount as presentedDefenderHandCount } from "./defenderState.js";
@@ -671,11 +671,12 @@ export function GameBoard() {
   const preStackSelectedInstanceId = pendingPreStackPlayId
     ?? (myDecision ? (pd.preStackSource?.card.instanceId ?? null) : null);
   const resourcePayment = myDecision ? pd.resourcePayment : undefined;
+  const handPitchValue = (instanceId: number) => {
+    const card = me.hand.find((candidate) => candidate.instanceId === instanceId);
+    return card ? (cardData[card.cardId]?.pitch ?? 0) : 0;
+  };
   const resourcePaymentSelected = resourcePayment
-    ? pitchSel.reduce((total, instanceId) => {
-        const card = me.hand.find((candidate) => candidate.instanceId === instanceId);
-        return total + (card ? (cardData[card.cardId]?.pitch ?? 0) : 0);
-      }, 0)
+    ? pitchSel.reduce((total, instanceId) => total + handPitchValue(instanceId), 0)
     : 0;
   const resourcePaymentRequired = resourcePayment
     ? Math.max(0, resourcePayment.cost - me.resources - (me.chi ?? 0))
@@ -889,12 +890,10 @@ export function GameBoard() {
         togglePitch(c.instanceId);
         return;
       }
-      const handCardId = (instanceId: number) =>
-        me.hand.find((card) => card.instanceId === instanceId)?.cardId;
-      if (!canAddResourcePaymentPitch(resourcePayment, pitchSel, c.instanceId, handCardId)) return;
-      const nextPitch = [...pitchSel, c.instanceId];
-      const paymentOption = selectedResourcePaymentOption(resourcePayment, nextPitch, handCardId);
-      if (paymentOption) send({ kind: "choose", optionId: paymentOption.optionId });
+      const floating = me.resources + (me.chi ?? 0);
+      if (!canAddResourcePaymentPitch(resourcePayment, floating, pitchSel, c.instanceId, handPitchValue)) return;
+      const payment = resourcePaymentIntent(resourcePayment, floating, [...pitchSel, c.instanceId], handPitchValue);
+      if (payment) send(payment);
       else togglePitch(c.instanceId);
       return;
     }

@@ -2267,7 +2267,7 @@
   "game.zone.weapon.right": "Arma direita",
   "game.card.onchain": "Na combat chain",
   "game.card.badge.attackTarget": "Alvo do ataque",
-  "game.card.badge.attackTarget.detail": "O ataque atual tem este ally como alvo",
+  "game.card.badge.attackTarget.detail": "O ataque atual tem esta carta como alvo",
   "game.card.badge.panel": "Marcadores e status",
   "game.card.badge.counter": "{count, plural, =0 {# marcadores de {name}} one {# marcador de {name}} other {# marcadores de {name}}}",
   "game.card.badge.marked": "Marked",

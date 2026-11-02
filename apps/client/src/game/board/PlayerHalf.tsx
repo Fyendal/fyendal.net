@@ -147,7 +147,7 @@ export function PlayerHalf({
   compactBoard?: boolean;
   cardDisplayPreference?: CardDisplayPreference;
   activeChainAttackerInstanceId: number | null;
-  /** Allies the current chain link attacks, which leave their shared stack. */
+  /** Permanents the current chain link attacks, which leave their shared stack. */
   activeChainTargetInstanceIds: ReadonlySet<number>;
   onSendEmote: (message: EmoteMessage) => void;
   onOpenOverlay: (overlay: BoardOverlay) => void;

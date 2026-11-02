@@ -2267,7 +2267,7 @@
   "game.zone.weapon.right": "Arma derecha",
   "game.card.onchain": "En la cadena",
   "game.card.badge.attackTarget": "Objetivo de ataque",
-  "game.card.badge.attackTarget.detail": "El ataque actual tiene este ally como objetivo",
+  "game.card.badge.attackTarget.detail": "El ataque actual tiene esta carta como objetivo",
   "game.card.badge.panel": "Contadores y estados",
   "game.card.badge.counter": "{count, plural, one {# contador de {name}} other {# contadores de {name}}}",
   "game.card.badge.marked": "Marked",

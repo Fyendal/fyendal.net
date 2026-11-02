@@ -81,7 +81,7 @@ describe("HoverCardPreview", () => {
     ));
 
     expect(html).toContain('<span class="card-badge-title">Attack target</span>');
-    expect(html).toContain("The current attack targets this ally");
+    expect(html).toContain("The current attack targets this card");
   });
 
   it("spells out the hovered card's counters and statuses above the preview", () => {
