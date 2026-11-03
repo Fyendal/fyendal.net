@@ -1,5 +1,6 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import { scriptOf } from "./cardProperties.js";
+import { queueMirageStateTriggers } from "./defense.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import { enforceUnique } from "./unique.js";
 import { destroyPermanent } from "./zoneMoves.js";
@@ -8,7 +9,7 @@ import { destroyPermanent } from "./zoneMoves.js";
  * State-based actions, checked at intent boundaries (alongside checkWin):
  * destroy board permanents whose destroyAtZeroCounter-named counter was
  * explicitly reduced to 0 (Suspense's "when this has no suspense counters"),
- * then clear Unique conflicts.
+ * clear Unique conflicts, then queue state-triggered Mirage layers.
  */
 export function checkStateBased(state: GameStateInternal, runtime: EngineRuntime): void {
   // A leave-arena choice from a destroyed permanent replaces an open layer priority
@@ -31,5 +32,12 @@ export function checkStateBased(state: GameStateInternal, runtime: EngineRuntime
     // Leave-arena triggers of a permanent destroyed here go on the stack
     // before anyone receives priority again (CR 6.6.6).
     runtime.dispatchFlow("flushPendingTriggersAboveStack", state, priorityWindow.player);
+  }
+  const holder = state.pendingDecision;
+  if (
+    (holder?.kind === "priority-window" || holder?.kind === "attack-reaction" || holder?.kind === "defense-reaction") &&
+    queueMirageStateTriggers(state, runtime)
+  ) {
+    runtime.dispatchFlow("flushPendingTriggersAboveStack", state, holder.player);
   }
 }

@@ -794,7 +794,8 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
         (leviaAttackPair(input, reserve, { grantGoAgain: true }) || weaponSwingPair(input, reserve))
         ? (bloodrushActive ? 85 : 53)
         : -55;  } else if (named === "fyendal's spring tunic") {
-    score = followups() > 0 ? 32 : -30;
+    // Unspent resources drain at end of turn, so gain only where an action can use it.
+    score = input.view.activePlayer === input.seat && !midTurnSetupBlocked && followups() > 0 ? 32 : -30;
   } else if (named === "hex gauntlet") {
     score = hexGauntletValue(input, card);
   } else if (named === "embraforged gauntlet") {
@@ -848,6 +849,18 @@ function opponentHero(input: BotPolicyInput): string {
   return name(input.cards[input.view.players[1 - input.seat]!.heroCardId]);
 }
 
+/** Whether Back Alley Breakline's action point funds a second attack that Call
+ * to the Grave's go again would not: two attacks fit the resources and the
+ * first is terminal. */
+function breaklineEnablesAttack(input: BotPolicyInput): boolean {
+  if (input.view.players[input.seat].actionPoints > 0) return false;
+  const access = leviaBanishAccess(input, false);
+  const gated = new Set(access.filter(({ viaGate }) => viaGate).map(({ card }) => card.instanceId));
+  const me = input.view.players[input.seat];
+  const cards = [...me.hand, ...me.arsenal, ...access.map(({ card }) => card)];
+  return leviaAttackPair(input, cards, { grantGoAgain: true, gated }) && !leviaAttackPair(input, cards, { gated });
+}
+
 /** Call to the Grave: prefer Beast Within, or Back Alley Breakline for a second attack. */
 function scoreCallChoice(card: CardView | null | undefined, input: BotPolicyInput): number {
   if (!card) return 0;
@@ -856,7 +869,7 @@ function scoreCallChoice(card: CardView | null | undefined, input: BotPolicyInpu
   const suppressed = input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true;
   const attacks = attackReserve(input, new Set()).filter((held) => leviaAttackPlayable(held, input)).length;
   if (named === "beast within") return me.life <= 3 ? 10 : suppressed && attacks >= 2 ? 60 : 90;
-  if (named === "back alley breakline") return attacks >= 2 ? 75 : 20;
+  if (named === "back alley breakline") return breaklineEnablesAttack(input) ? 75 : 20;
   return cardOpportunity(card, input);
 }
 

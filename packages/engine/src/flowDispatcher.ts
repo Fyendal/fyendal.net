@@ -5,7 +5,7 @@ import { attackTargetIsLegal, auraAttackGoAgain, beginAttackStep, clearAttackQue
 import { closeChain, finishLinkResolution } from "./combatChain.js";
 import { resolveLink, resumeCombatDamage } from "./damage.js";
 import { beginHeroDamage, dealAllyDamage, gainHeroLife } from "./damageResolution.js";
-import { attackAllowsDefender, consumeQueuedIntimidate, proceedWithAttack, queueDefendEventLayersAfterCurrent, resolveDefendEventLayer, resolvePhantasmLayer, resolveSpectraLayer } from "./defense.js";
+import { attackAllowsDefender, consumeQueuedIntimidate, proceedWithAttack, queueDefendEventLayersAfterCurrent, resolveDefendEventLayer, resolveMirageLayer, resolvePhantasmLayer, resolveSpectraLayer } from "./defense.js";
 import { queueHitTriggers, resolveOnHitLayer } from "./hits.js";
 import { beginReactionStep, reopenReactionWindow } from "./reactions.js";
 import { announceCardPlayed, cancelEndActionPass, collectEventTriggerLayers, continueStack, declarePlayedTriggerTargets, deferEventTriggers, enterAttackLayerWindow, enterAttackWindow, finishDamageStep, finishStackCardResolution, flushPendingTriggersAboveStack, holdLayerWindow, queueEventTriggers, queueReactionEventTriggers, queueTriggeredLayers, resolveAbilityLayer, resolveTopStackCard, resolveTopStackLayer } from "./triggers.js";
@@ -52,6 +52,7 @@ const handlers: Readonly<Record<FlowStepName, { fn: FlowHandler; injectRuntime: 
   resolveAbilityLayer: { fn: resolveAbilityLayer, injectRuntime: true },
   resolveDefendEventLayer: { fn: resolveDefendEventLayer, injectRuntime: true },
   resolveLink: { fn: resolveLink, injectRuntime: true },
+  resolveMirageLayer: { fn: resolveMirageLayer, injectRuntime: true },
   resolveOnHitLayer: { fn: resolveOnHitLayer, injectRuntime: true },
   resolvePhantasmLayer: { fn: resolvePhantasmLayer, injectRuntime: true },
   resolveSpectraLayer: { fn: resolveSpectraLayer, injectRuntime: true },

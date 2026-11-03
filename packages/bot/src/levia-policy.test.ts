@@ -114,6 +114,20 @@ function magisterAttack(cardIds: readonly string[]) {
   throw new Error("Restless Magister did not reach defense");
 }
 
+/** The reaction window after Levia leaves the attack unblocked. */
+function afterNoBlock(state: ReturnType<typeof game>) {
+  state = defending(state);
+  let applied = applyIntent(state, 0, { kind: "defend", instanceIds: [] });
+  if (!applied.ok) throw new Error(JSON.stringify(applied));
+  state = applied.state;
+  for (let step = 0; step < 6 && state.priorityPlayer !== 0; step++) {
+    applied = applyIntent(state, state.priorityPlayer, { kind: "pass" });
+    if (!applied.ok) throw new Error(JSON.stringify(applied));
+    state = applied.state;
+  }
+  return state;
+}
+
 const DIG_FOR_SOULS = "When this hits, destroy this zombie.\"";
 const COMMAND_AND_CONQUER = "When this hits a hero, destroy all cards in their arsenal.";
 
@@ -206,15 +220,7 @@ describe("Levia Gates policy", () => {
     hand(state, ["IAR165", "PEN322", "DTD107", "IAR005"]);
     const herald = state.players[0]!.hand[0]!;
     state.players[0]!.arsenal = [];
-    state = defending(state);
-    let applied = applyIntent(state, 0, { kind: "defend", instanceIds: [] });
-    if (!applied.ok) throw new Error(JSON.stringify(applied));
-    state = applied.state;
-    for (let step = 0; step < 6 && state.priorityPlayer !== 0; step++) {
-      applied = applyIntent(state, state.priorityPlayer, { kind: "pass" });
-      if (!applied.ok) throw new Error(JSON.stringify(applied));
-      state = applied.state;
-    }
+    state = afterNoBlock(state);
     const intent = chooseLeviaIntent({
       seat: 0, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state,
     });
@@ -551,6 +557,108 @@ describe("Levia Gates policy", () => {
     }
     const selected = choice(state);
     expect(selected).toMatchObject({ kind: "play-from-zone", instanceId: feedingFrenzy.instanceId });
+  });
+
+  it("keeps Fallen Herald when the attack targets an ally, not Levia", () => {
+    let state = game();
+    state.turn = 1;
+    hand(state, ["IAR165", "PEN322", "DTD107", "IAR005"]);
+    state.players[0]!.arsenal = [];
+    state = afterNoBlock(state);
+    const view = projectStateFor(state, 0);
+    const link = { ...view.chain.at(-1)!, targetAllyName: "Blasmophet, the Insatiable Hunger" };
+    const intent = chooseLeviaIntent({
+      seat: 0, view: { ...view, chain: [...view.chain.slice(0, -1), link] },
+      legal: legalIntents(state, 0), cards: cardData,
+    });
+    expect(intent).toEqual({ kind: "pass" });
+  });
+
+  it("holds the Spring Tunic's energy through the opponent's turn", () => {
+    let state = game();
+    hand(state, ["MON140", "MON140", "PEN322"]);
+    state.players[0]!.arsenal = [];
+    const tunic = { instanceId: state.nextInstanceId++, cardId: "WTR150", owner: 0, counters: { energy: 3 } };
+    state.players[0]!.equipment = { chest: tunic };
+    state = afterNoBlock(state);
+    const legal = legalIntents(state, 0);
+    expect(legal.some((intent) => intent.kind === "activate-ability" && intent.sourceInstanceId === tunic.instanceId)).toBe(true);
+    expect(chooseLeviaIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData })).toEqual({ kind: "pass" });
+  });
+
+  it("does not block with zero-defense armor just because Piercing raises the attack", () => {
+    let state = game();
+    hand(state, ["IAR020"]);
+    const blocker = state.players[0]!.hand[0]!;
+    const leathers = { instanceId: state.nextInstanceId++, cardId: "WTR004", owner: 0, defCounters: 3 };
+    state.players[0]!.equipment = { legs: leathers };
+    state.players[0]!.arsenal = [];
+    state.players[0]!.life = 1;
+    state = defending(state);
+    const view = projectStateFor(state, 0);
+    const decision = view.pendingDecision!;
+    const intent = chooseLeviaIntent({
+      seat: 0,
+      view: {
+        ...view,
+        chain: [...view.chain.slice(0, -1), { ...view.chain.at(-1)!, attackValue: 1, damage: 1 }],
+        pendingDecision: {
+          ...decision,
+          defenderDefense: [
+            { instanceId: blocker.instanceId, defense: 2, attack: 1 },
+            { instanceId: leathers.instanceId, defense: 0, attack: 2 },
+          ],
+        },
+      },
+      legal: legalIntents(state, 0),
+      cards: cardData,
+    });
+    expect(intent).toEqual({ kind: "stage-defenders", instanceIds: [blocker.instanceId] });
+  });
+
+  describe("Call to the Grave", () => {
+    function callChoice(handIds: readonly string[], banishCleave = false) {
+      const state = game();
+      hand(state, handIds);
+      state.players[0]!.arsenal = [];
+      state.players[0]!.actionPoints = 0;
+      if (banishCleave) {
+        state.players[0]!.banish = cards(state, ["IAR020"]);
+        state.players[0]!.board.push({ instanceId: state.nextInstanceId++, cardId: "IAR222", owner: 0 });
+      }
+      const optionCards = cards(state, ["ARC178", "CRU007"]);
+      const view = projectStateFor(state, 0);
+      const ids = optionCards.map((card) => String(card.instanceId));
+      const intent = chooseLeviaIntent({
+        seat: 0,
+        view: {
+          ...view,
+          pendingDecision: {
+            player: 0,
+            kind: "choose-target",
+            prompt: "Choose a card to put into your graveyard",
+            promptMessage: { id: "card.agb.deck.card.graveyard" },
+            options: ids,
+            optionCards,
+          },
+          turnFacts: {
+            ...view.turnFacts!,
+            players: [{ ...view.turnFacts!.players[0], banishedSixPlusThisTurn: true }, view.turnFacts!.players[1]],
+          },
+        },
+        legal: ids.map((optionId) => ({ kind: "choose" as const, optionId })),
+        cards: cardData,
+      });
+      return intent.kind === "choose" ? cardData[optionCards[ids.indexOf(intent.optionId)]!.cardId]?.name : undefined;
+    }
+
+    it("skips Back Alley Breakline when the second attack cannot be paid", () => {
+      expect(callChoice(["PEN322", "MON140"], true)).toBe("Beast Within");
+    });
+
+    it("takes Back Alley Breakline when it funds a second attack", () => {
+      expect(callChoice(["MON140", "IAR022", "ROS218", "ROS218"])).toBe("Back Alley Breakline");
+    });
   });
 
   it("opens a Gate on the stronger of two banished attacks without go again", () => {

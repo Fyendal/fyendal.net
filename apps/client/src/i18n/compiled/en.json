@@ -25975,6 +25975,12 @@
       "value": " can't gain life while ahead on life"
     }
   ],
+  "engine.log.mirage.fizzles.condition.failed": [
+    {
+      "type": 0,
+      "value": "Mirage resolves without effect because its condition is no longer met"
+    }
+  ],
   "engine.log.payment.paid": [
     {
       "type": 1,
@@ -26847,6 +26853,16 @@
       "pluralType": "cardinal"
     }
   ],
+  "engine.log.trigger.mirage": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " triggers Mirage"
+    }
+  ],
   "engine.log.trigger.on.friendly.hit": [
     {
       "type": 1,
@@ -27043,6 +27059,12 @@
     {
       "type": 0,
       "value": "When put face up into arsenal"
+    }
+  ],
+  "engine.term.mirage.destroy": [
+    {
+      "type": 0,
+      "value": "Mirage — destroy this"
     }
   ],
   "engine.term.triggered.ability": [

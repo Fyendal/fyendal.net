@@ -25170,6 +25170,12 @@
       "value": " 的生命领先时无法恢复生命"
     }
   ],
+  "engine.log.mirage.fizzles.condition.failed": [
+    {
+      "type": 0,
+      "value": "因条件不再满足，Mirage 结算时不产生效果"
+    }
+  ],
   "engine.log.payment.paid": [
     {
       "type": 1,
@@ -25892,6 +25898,16 @@
       "pluralType": "cardinal"
     }
   ],
+  "engine.log.trigger.mirage": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 触发 Mirage"
+    }
+  ],
   "engine.log.trigger.on.friendly.hit": [
     {
       "type": 1,
@@ -26096,6 +26112,12 @@
     {
       "type": 0,
       "value": "正面朝上放入 arsenal 时"
+    }
+  ],
+  "engine.term.mirage.destroy": [
+    {
+      "type": 0,
+      "value": "Mirage — 摧毁此牌"
     }
   ],
   "engine.term.triggered.ability": [

@@ -280,6 +280,7 @@ export interface StackLayer {
     | { kind: "gain-action-points"; amount: number }
     | { kind: "lose-life"; amount: number }
     | { kind: "phantasm-destroy" }
+    | { kind: "mirage-destroy" }
     | { kind: "spectra-destroy" }
     | { kind: "watery-grave" }
     /** A wager delayed until the current chain link resolves. */

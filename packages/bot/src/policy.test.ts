@@ -15,6 +15,7 @@ import {
   ownCards,
   plannedDefenseReactionPlan,
   responseEvaluation,
+  scoreDefenseReaction,
   scoreDefenseIntent,
   scoreDefenseIntentWithTrace,
   spendsOpeningArsenalReserve,
@@ -1245,6 +1246,58 @@ describe("projected defender defense", () => {
 });
 
 describe("planned prevention", () => {
+  it("gives a Mirage defense reaction no value against a 6-power non-Illusionist attack", () => {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 9412,
+      startPlayer: 1,
+    });
+    const view = projectStateFor(state, 0);
+    const reaction = { instanceId: 94_121, cardId: "TEST_MIRAGE", owner: 0 };
+    view.players[0].hand = [reaction];
+    view.players[0].handCount = 1;
+    view.phase = "reaction";
+    view.pendingDecision = { player: 0, kind: "defense-reaction", prompt: "Defense reaction" };
+    const cards = {
+      ...cardData,
+      TEST_MIRAGE: {
+        id: "TEST_MIRAGE",
+        name: "Test Mirage",
+        cardType: "defense-reaction" as const,
+        keywords: ["Mirage"],
+        text: "Mirage",
+        cost: 0,
+        defense: 4,
+      },
+      TEST_ATTACK: { id: "TEST_ATTACK", name: "Test Attack", cardType: "action" as const, subtypes: ["attack"], text: "", classes: [] },
+      TEST_ILLUSION: { id: "TEST_ILLUSION", name: "Test Illusion", cardType: "action" as const, subtypes: ["attack"], text: "", classes: ["illusionist"] },
+    } as BotPolicyInput["cards"];
+    const evaluate = (cardId: string, attackValue: number) => {
+      view.chain = [{
+        attackingCard: { instanceId: 94_122, cardId, owner: 1 },
+        defendingCards: [],
+        attackValue,
+        defenseValue: 0,
+        damage: attackValue,
+        resolved: false,
+        reactions: [],
+      }];
+      const input: BotPolicyInput = { seat: 0, view, legal: [], cards };
+      return {
+        planned: plannedDefenseReactionPlan(input, { kind: "defend", instanceIds: [] }).amount,
+        score: scoreDefenseReaction(cards.TEST_MIRAGE!, input),
+      };
+    };
+
+    expect(evaluate("TEST_ATTACK", 6)).toEqual({ planned: 0, score: -100 });
+    expect(evaluate("TEST_ATTACK", 5).planned).toBe(4);
+    expect(evaluate("TEST_ATTACK", 5).score).toBeGreaterThan(0);
+    expect(evaluate("TEST_ILLUSION", 6).planned).toBe(4);
+    expect(evaluate("TEST_ILLUSION", 6).score).toBeGreaterThan(0);
+  });
+
   it("accounts for pitching a hand card to play a defense reaction", () => {
     const state = createGame({
       decklists: [decklists.dorinthea, decklists.rhinar],

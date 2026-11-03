@@ -36,6 +36,7 @@ export type FlowStepName =
   | "resolveAbilityLayer"
   | "resolveDefendEventLayer"
   | "resolveLink"
+  | "resolveMirageLayer"
   | "resolveOnHitLayer"
   | "resolvePhantasmLayer"
   | "resolveSpectraLayer"

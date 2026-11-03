@@ -47,7 +47,7 @@ export function publicCombatThreat(input: BotPolicyInput, defended = false): Pub
 /** Combat damage the current opposing attack deals before new blocks once the
  * attacker spends every public pump. */
 export function threatenedCombatDamage(input: BotPolicyInput, defended = false): number {
-  const link = opposingLink(input);
+  const link = opposingHeroLink(input);
   return link ? pumpedDamage(link, publicCombatThreat(input, defended).attackBonus) : 0;
 }
 
@@ -63,9 +63,10 @@ function pumpedDamage(link: ChainLinkView, bonus: number): number {
   return Math.max(0, link.damage, link.attackValue + bonus - link.defenseValue);
 }
 
-function opposingLink(input: BotPolicyInput): ChainLinkView | undefined {
+/** The unresolved opposing attack aimed at this hero, not at one of their allies. */
+export function opposingHeroLink(input: BotPolicyInput): ChainLinkView | undefined {
   const link = [...input.view.chain].reverse().find((candidate) => !candidate.resolved);
-  return link && link.attackingCard.owner !== input.seat ? link : undefined;
+  return link && link.attackingCard.owner !== input.seat && link.targetAllyName === undefined ? link : undefined;
 }
 
 interface Unit {
@@ -296,8 +297,8 @@ function poolSizes(context: Context): Map<string, number> {
 }
 
 function computeThreat(input: BotPolicyInput, defended: boolean): PublicCombatThreat {
-  const link = opposingLink(input);
-  if (!link || link.targetAlly || link.targetAllyName) return NO_THREAT;
+  const link = opposingHeroLink(input);
+  if (!link) return NO_THREAT;
   const attacker = input.view.players[1 - input.seat]!;
   const attackingCard = link.attackingCard;
   const permanents = [

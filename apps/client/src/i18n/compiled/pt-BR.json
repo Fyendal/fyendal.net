@@ -27319,6 +27319,12 @@
       "value": " não pode ganhar vida enquanto estiver à frente na vida"
     }
   ],
+  "engine.log.mirage.fizzles.condition.failed": [
+    {
+      "type": 0,
+      "value": "Mirage resolve sem efeito porque sua condição não é mais atendida"
+    }
+  ],
   "engine.log.payment.paid": [
     {
       "type": 1,
@@ -28292,6 +28298,16 @@
       "pluralType": "cardinal"
     }
   ],
+  "engine.log.trigger.mirage": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " ativa o trigger de Mirage"
+    }
+  ],
   "engine.log.trigger.on.friendly.hit": [
     {
       "type": 0,
@@ -28512,6 +28528,12 @@
     {
       "type": 0,
       "value": "Quando colocada virada para cima no arsenal"
+    }
+  ],
+  "engine.term.mirage.destroy": [
+    {
+      "type": 0,
+      "value": "Mirage — destrua esta carta"
     }
   ],
   "engine.term.triggered.ability": [

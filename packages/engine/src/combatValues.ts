@@ -1153,6 +1153,20 @@ export function linkWithStagedDefenders(
   };
 }
 
+/** Mirage (8.3.25): is this defender on a non-Illusionist attack with 6 or more
+ *  {p}? Re-evaluated when the triggered layer resolves (CR 5.3.2a). */
+export function mirageConditionMet(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  link: ChainLinkState,
+  card: CardInstance,
+): boolean {
+  return !link.resolved && link.flags.attackGone !== true &&
+    instanceHasKeyword(state, card, "mirage") &&
+    !cardTypesOf(state, link.attackingCard).includes("illusionist") &&
+    computeAttack(state, runtime, link) >= 6;
+}
+
 /** Defense contributed by an uncommitted staged set if those cards became
  * defenders on `link`. This mirrors the committed per-card calculation
  * without moving cards, firing defend hooks, or adding link-wide defense a
@@ -1163,9 +1177,12 @@ export function stagedDefenseTotal(
   link: ChainLinkState,
   staged: CardInstance[],
 ): number {
-  const cards = staged.filter((card) => !cardHasType(state, card, "equipment"));
   const equipment = staged.filter((card) => cardHasType(state, card, "equipment"));
   const stagedLink = linkWithStagedDefenders(state, link, staged);
+  // A Mirage defender is destroyed before damage, so it adds no defense.
+  const cards = staged.filter((card) =>
+    !cardHasType(state, card, "equipment") && !mirageConditionMet(state, runtime, stagedLink, card)
+  );
   // Preview the attachments that applyOneShotDefenseModifiers would create
   // if this staged set became the next defend event, without consuming the
   // live delayed modifiers or advancing the state's modifier id.

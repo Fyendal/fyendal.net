@@ -796,6 +796,9 @@ export interface DefenderDefenseView {
    *  defends, so defenders that change the attack's power are priced before
    *  the commit */
   attack: number;
+  /** Defending with this card would trigger the attack's current Phantasm,
+   *  after every effect on the attack and on this card's power. */
+  triggersPhantasm?: true;
 }
 
 export interface OngoingEffectView {

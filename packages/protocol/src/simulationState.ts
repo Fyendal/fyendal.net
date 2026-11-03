@@ -448,7 +448,7 @@ function validateStackLayer(value: unknown, code: string, path: string): void {
     const effect = object(v, code, p);
     const kind = oneOf(
       effect.kind,
-      ["gain-action-points", "lose-life", "phantasm-destroy", "spectra-destroy", "watery-grave", "wager-result", "on-hit-hook", "on-effect-hit-hook", "on-friendly-effect-hit-hook", "on-defend-hook", "on-friendly-defended-hook", "on-defended-modifier", "fragment", "on-fragment-hook", "on-enter-arsenal-hook", "delayed-trigger", "on-hit-modifier"] as const,
+      ["gain-action-points", "lose-life", "phantasm-destroy", "mirage-destroy", "spectra-destroy", "watery-grave", "wager-result", "on-hit-hook", "on-effect-hit-hook", "on-friendly-effect-hit-hook", "on-defend-hook", "on-friendly-defended-hook", "on-defended-modifier", "fragment", "on-fragment-hook", "on-enter-arsenal-hook", "delayed-trigger", "on-hit-modifier"] as const,
       code,
       `${p}.kind`,
     );

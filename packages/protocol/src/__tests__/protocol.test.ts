@@ -354,6 +354,7 @@ const gameView = () => ({
     stagedDefense: 3,
     stagedAttack: 5,
     stagedAttackModifiers: [{ sourceCardId: "WTR001", amount: 1 }],
+    defenderDefense: [{ instanceId: 1, defense: 3, attack: 5, triggersPhantasm: true }],
   },
   winner: null,
   log: ["started"],

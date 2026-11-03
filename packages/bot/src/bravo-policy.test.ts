@@ -276,7 +276,14 @@ describe("Bravo policy", () => {
       .filter((card): card is CardView => card !== undefined && (card.defense ?? 0) > 0);
     view.phase = "defend";
     view.priorityPlayer = 0;
-    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+    view.pendingDecision = {
+      player: 0,
+      kind: "defend",
+      prompt: "Choose defenders",
+      defenderDefense: [{
+        instanceId: phantasmBlocker.instanceId, defense: phantasmBlocker.defense ?? 0, attack: 8, triggersPhantasm: true,
+      }],
+    };
     view.chain = [{
       attackingCard: { instanceId: 96_032, cardId: "MON098", owner: 1 },
       defendingCards: [],
@@ -294,6 +301,57 @@ describe("Bravo policy", () => {
     ];
 
     expect(chooseBravoIntent({ seat: 0, view, legal, cards: cardData })).toEqual(legal[0]);
+  });
+
+  it("does not count on Phantasm when the engine says the defender no longer triggers it", () => {
+    const state = createGame({
+      decklists: [bravoDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9603,
+      startPlayer: 1,
+    });
+    replaceHand(state, 0, ["SBR030", "SBR023", "SBR022", "MPG047"]);
+    const view = projectStateFor(state, 0);
+    view.players[0].arsenal = [];
+    view.players[0].arsenalCount = 0;
+    const [flatten, blocker] = view.players[0].hand as [CardView, CardView, CardView, CardView];
+    view.phase = "defend";
+    view.priorityPlayer = 0;
+    view.pendingDecision = {
+      player: 0,
+      kind: "defend",
+      prompt: "Choose defenders",
+      defenderDefense: [{ instanceId: flatten.instanceId, defense: 3, attack: 7 }],
+    };
+    view.chain = [{
+      attackingCard: { instanceId: 96_033, cardId: "MON008", owner: 1 },
+      defendingCards: [],
+      attackValue: 7,
+      defenseValue: 0,
+      damage: 7,
+      resolved: false,
+      reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [flatten.instanceId] },
+      { kind: "defend", instanceIds: [flatten.instanceId, blocker.instanceId] },
+    ];
+    const destroyed = chooseBravoIntent({
+      seat: 0,
+      view: {
+        ...view,
+        pendingDecision: {
+          ...view.pendingDecision,
+          defenderDefense: [{ instanceId: flatten.instanceId, defense: 3, attack: 7, triggersPhantasm: true }],
+        },
+      },
+      legal,
+      cards: cardData,
+    });
+
+    expect(destroyed).toEqual(legal[0]);
+    expect(chooseBravoIntent({ seat: 0, view, legal, cards: cardData })).toEqual(legal[1]);
   });
 
   it("blocks Static Shock for three instead of saving that card to pitch for AB1", () => {

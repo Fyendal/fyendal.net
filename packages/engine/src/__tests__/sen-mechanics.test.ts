@@ -27,6 +27,8 @@ const cards: Record<string, CardData> = {
   COST4: { id: "COST4", name: "Big Trick", cardType: "action", subtypes: [], classes: ["generic"], pitch: 1, cost: 4, attack: 0, defense: 2, text: "" },
   ATK5: { id: "ATK5", name: "Attack Five", cardType: "action", subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 5, defense: 3, text: "" },
   ATK2: { id: "ATK2", name: "Attack Two", cardType: "action", subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 2, defense: 3, text: "" },
+  MIRG: { id: "MIRG", name: "Mirage Blocker", cardType: "action", subtypes: ["attack"], classes: ["illusionist"], pitch: 3, cost: 0, attack: 1, defense: 3, keywords: ["Mirage"], text: "Mirage" },
+  SHRINK: { id: "SHRINK", name: "Shrink", cardType: "instant", classes: ["generic"], pitch: 3, cost: 0, text: "The attack gets -1 power" },
   BIG6: { id: "BIG6", name: "Big Six", cardType: "action", subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 6, defense: 2, text: "" },
   ILL6: { id: "ILL6", name: "Illusion Six", cardType: "action", subtypes: ["attack"], classes: ["illusionist"], pitch: 1, cost: 0, attack: 6, defense: 2, text: "" },
   PHANT: { id: "PHANT", name: "Phantasm Attack", cardType: "action", subtypes: ["attack"], classes: ["illusionist"], pitch: 3, cost: 0, attack: 5, defense: 3, keywords: ["Phantasm"], text: "Phantasm" },
@@ -154,6 +156,11 @@ const scripts: Record<string, CardScript> = {
       const opp = ctx.state.players[ctx.seat === 0 ? 1 : 0]!;
       const ally = opp.board.find((c) => c.cardId === "ALLY");
       if (ally) ctx.dealDamage(opp.seat, 2, { targetAllyId: ally.instanceId, arcane: true });
+    },
+  },
+  SHRINK: {
+    onPlay(ctx) {
+      if (ctx.link) ctx.addCardTempPower(ctx.link.attackingCard.instanceId, -1);
     },
   },
   DIM: {
@@ -507,6 +514,27 @@ describe("ward", () => {
 });
 
 // ── phantasm ─────────────────────────────────────────────────────────────────
+
+describe("mirage", () => {
+  it("rechecks its condition when the layer resolves, so a response can save the defender", () => {
+    let s = makeGame();
+    s = declareAttack(s, 0, "BIG6");
+    const shrink = giveCard(s, 0, "SHRINK");
+    const mirage = giveCard(s, 1, "MIRG");
+    s = apply(s, 1, { kind: "defend", instanceIds: [mirage] });
+    expect(s.stack[0]?.engineEffect).toEqual({ kind: "mirage-destroy" });
+
+    s = apply(s, 0, { kind: "play-card", instanceId: shrink, pitchInstanceIds: [] });
+    s = apply(s, 0, { kind: "pass" });
+    s = apply(s, 1, { kind: "pass" });
+    expect(s.stack[0]?.engineEffect).toEqual({ kind: "mirage-destroy" });
+    s = apply(s, 0, { kind: "pass" });
+    s = apply(s, 1, { kind: "pass" });
+    expect(s.stack).toHaveLength(0);
+    expect(s.chain[0]?.defendingCards.map((card) => card.instanceId)).toEqual([mirage]);
+    expect(s.log.some((entry) => entry.publicPayload?.message.id === "engine.log.mirage.fizzles.condition.failed")).toBe(true);
+  });
+});
 
 describe("phantasm", () => {
   it("Phantasm destruction is a respondable triggered layer", () => {

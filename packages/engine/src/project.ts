@@ -55,7 +55,7 @@ import { queuedAttackObjects } from "./attackQueue.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { activatedAbilityUsage } from "./abilityRules.js";
 import { defenseReactionRestriction, weaponAttacksProhibited } from "./combatRestrictions.js";
-import { legalDefenderCards } from "./defense.js";
+import { cardTriggersPhantasm, legalDefenderCards } from "./defense.js";
 import { wardPieces } from "./damageResolution.js";
 import { playFromSourceCardId } from "./playRules.js";
 import { isInlineTurnLayer, windowPrompt, windowPromptMessage } from "./triggers.js";
@@ -1395,8 +1395,9 @@ function projectState(
 
 /** Marginal defense of each legal defender relative to the staged set (for a
  * staged card, the defense unstaging it removes), measured exactly as the
- * staged total so delayed one-shot defense effects are included, and the
- * attack value the link takes once that card defends beside the staged set. */
+ * staged total so delayed one-shot defense effects are included, the attack
+ * value the link takes once that card defends beside the staged set, and
+ * whether that defense would trigger the attack's Phantasm. */
 function projectedDefenderDefense(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -1412,11 +1413,17 @@ function projectedDefenderDefense(
   const base = total([...staged]);
   const stagedIds = new Set(staged.map((card) => card.instanceId));
   const { hand, arsenal, equipment } = legalDefenderCards(state, runtime, defenderSeat);
-  return [...hand, ...arsenal, ...equipment].map((card) => ({
-    instanceId: card.instanceId,
-    defense: Math.max(0, stagedIds.has(card.instanceId)
-      ? base - total(staged.filter((other) => other.instanceId !== card.instanceId))
-      : total([...staged, card]) - base),
-    attack: attack(stagedIds.has(card.instanceId) ? staged : [...staged, card]),
-  }));
+  return [...hand, ...arsenal, ...equipment].map((card) => {
+    const defenders = stagedIds.has(card.instanceId) ? staged : [...staged, card];
+    return {
+      instanceId: card.instanceId,
+      defense: Math.max(0, stagedIds.has(card.instanceId)
+        ? base - total(staged.filter((other) => other.instanceId !== card.instanceId))
+        : total([...staged, card]) - base),
+      attack: attack(defenders),
+      ...(cardTriggersPhantasm(state, runtime, linkWithStagedDefenders(state, link, defenders), card)
+        ? { triggersPhantasm: true as const }
+        : {}),
+    };
+  });
 }

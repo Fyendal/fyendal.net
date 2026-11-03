@@ -105,6 +105,7 @@ export interface PersistedStackLayerV1 {
     | { kind: "gain-action-points"; amount: number }
     | { kind: "lose-life"; amount: number }
     | { kind: "phantasm-destroy" }
+    | { kind: "mirage-destroy" }
     | { kind: "spectra-destroy" }
     | { kind: "watery-grave" }
     | { kind: "wager-result"; wagerIndex: number }

@@ -26829,6 +26829,12 @@
       "value": " no puede ganar vida mientras tenga más vida que su oponente"
     }
   ],
+  "engine.log.mirage.fizzles.condition.failed": [
+    {
+      "type": 0,
+      "value": "Mirage se resuelve sin efecto porque su condición ya no se cumple"
+    }
+  ],
   "engine.log.payment.paid": [
     {
       "type": 1,
@@ -27725,6 +27731,16 @@
       "pluralType": "cardinal"
     }
   ],
+  "engine.log.trigger.mirage": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " dispara Mirage"
+    }
+  ],
   "engine.log.trigger.on.friendly.hit": [
     {
       "type": 0,
@@ -27941,6 +27957,12 @@
     {
       "type": 0,
       "value": "Cuando se coloca boca arriba en el arsenal"
+    }
+  ],
+  "engine.term.mirage.destroy": [
+    {
+      "type": 0,
+      "value": "Mirage — destruye esta carta"
     }
   ],
   "engine.term.triggered.ability": [

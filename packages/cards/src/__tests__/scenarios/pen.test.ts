@@ -1896,6 +1896,100 @@ describe("PEN — generalized rules interactions", () => {
     )).toBe(true);
   });
 
+  describe("Mirage", () => {
+    const seats = (attackerHand: string[], defenderHand: string[], heroKey?: string) => scenario({
+      seats: [
+        { hero: "rhinar", ...(heroKey ? { heroKey } : {}), hand: attackerHand, resources: 5, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: defenderHand, equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    it("destroys a card blocking a non-Illusionist attack with 6 or more power", () => {
+      seats(["savage swing|1", "head jab|1"], ["power of make believe|3"])
+        .play("savage swing|1")
+        .blockWith("power of make believe|3")
+        .settle()
+        .expectInZone(1, "power of make believe|3", "graveyard")
+        .expectFinalDefense(0)
+        .expectLife(1, 13);
+    });
+
+    it("destroys a defense reaction played against such an attack before damage", () => {
+      const g = seats(["savage swing|1", "head jab|1"], ["shimmering mirage|3"])
+        .play("savage swing|1")
+        .blockWith()
+        .passPriority()
+        .react("shimmering mirage|3")
+        .settle()
+        .expectInZone(1, "shimmering mirage|3", "graveyard")
+        .expectFinalDefense(0)
+        .expectLife(1, 13);
+      expect(g.state.log.some((entry) => entry.publicText?.includes("triggers Mirage"))).toBe(true);
+    });
+
+    it("destroys a defender when an attack reaction raises the attack to 6 power", () => {
+      seats(["head jab|1", "razor reflex|1"], ["power of make believe|3"])
+        .play("head jab|1")
+        .blockWith("power of make believe|3")
+        .react("razor reflex|1")
+        .settle()
+        .expectInZone(1, "power of make believe|3", "graveyard")
+        .expectFinalDefense(0)
+        .expectLife(1, 14);
+    });
+
+    it("spares a defender of an attack below 6 power", () => {
+      seats(["head jab|1"], ["power of make believe|3"])
+        .play("head jab|1")
+        .blockWith("power of make believe|3")
+        .settle()
+        .expectFinalDefense(3)
+        .expectLife(1, 20);
+    });
+
+    it("spares a defender of an Illusionist attack", () => {
+      seats(["herald of triumph|1"], ["power of make believe|3"], "prism|0")
+        .play("herald of triumph|1")
+        .blockWith("power of make believe|3")
+        .settle()
+        .expectFinalDefense(3);
+    });
+
+    it("returns priority to the turn player between two Mirage layers", () => {
+      const g = seats(["savage swing|1", "head jab|1"], ["power of make believe|3", "power of make believe|3"])
+        .play("savage swing|1")
+        .blockWith("power of make believe|3", "power of make believe|3");
+      expect(g.state.stack).toHaveLength(2);
+      expect(g.state.priorityPlayer).toBe(0);
+      g.passPriority().passPriority();
+      expect(g.state.stack).toHaveLength(1);
+      expect(g.state.priorityPlayer).toBe(0);
+    });
+
+    it("previews no defense from a staged Mirage card the attack would destroy", () => {
+      const preview = (attack: string) => {
+        const g = seats([attack, "head jab|1"], ["power of make believe|3"]).play(attack);
+        const blocker = g.state.players[1]!.hand[0]!.instanceId;
+        const entry = () => projectStateFor(g.state, 1).pendingDecision?.defenderDefense
+          ?.find((candidate) => candidate.instanceId === blocker)?.defense;
+        const unstaged = entry();
+        g.doRaw({ kind: "stage-defenders", instanceIds: [blocker] });
+        return [unstaged, projectStateFor(g.state, 1).pendingDecision?.stagedDefense];
+      };
+      expect(preview("savage swing|1")).toEqual([0, 0]);
+      expect(preview("head jab|1")).toEqual([3, 3]);
+    });
+
+    it("fires Shimmering Specter's leave trigger when it destroys the defender", () => {
+      seats(["savage swing|1", "head jab|1"], ["shimmering specter|1"])
+        .play("savage swing|1")
+        .blockWith("shimmering specter|1")
+        .settle()
+        .expectInZone(1, "shimmering specter|1", "graveyard")
+        .expectInZone(1, "spectral shield|0", "board");
+    });
+  });
+
   it("Haboob reduces only attack action cards, including its controller's", () => {
     const seats = (hand: string[]) =>
       scenario({

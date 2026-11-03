@@ -1283,6 +1283,17 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
     continueStack(state, runtime, layer.seat);
     return;
   }
+  if (layer.engineEffect?.kind === "mirage-destroy") {
+    state.stack.shift();
+    runtime.dispatchFlow("resolveMirageLayer", state, layer.sourceInstanceId);
+    // The defender controls this layer, but the turn player regains priority (CR 1.11.3).
+    if (state.pendingDecision?.chooseHook) {
+      state.pendingDecision.resume ??= { kind: "continue-stack", seat: state.activePlayer };
+      return;
+    }
+    continueStack(state, runtime, state.activePlayer);
+    return;
+  }
   if (layer.engineEffect?.kind === "spectra-destroy") {
     state.stack.shift();
     const clearedAttack = runtime.dispatchFlow("resolveSpectraLayer", state, layer.sourceInstanceId);

@@ -11,6 +11,7 @@ import type {
 import type { GameState } from "@fyendal/engine";
 import { requiredEquipmentStageIntent, unneededDefenseBoostIntent } from "./defense.js";
 import {
+  opposingHeroLink,
   publicCombatThreat,
   threatenedAttackDamage,
   threatenedCombatDamage,
@@ -476,10 +477,7 @@ export function currentAttackIsOpponents(input: BotPolicyInput): boolean {
 }
 
 export function incomingAttackDamage(input: BotPolicyInput): number {
-  const link = currentLink(input);
-  return link && link.attackingCard.owner !== input.seat
-    ? Math.max(0, link.damage)
-    : 0;
+  return Math.max(0, opposingHeroLink(input)?.damage ?? 0);
 }
 
 /** Incoming attack damage that prevention effects can still reduce. */
@@ -861,7 +859,10 @@ export function plannedDefenseReactionPlan(
   const candidates = [
     ...((link.dominate && blockedFromHand) || link.defenseReactionsBlockedFromHand ? [] : me.hand),
     ...(link.defenseReactionsBlockedFromArsenal ? [] : me.arsenal),
-  ].filter((card) => !spent.has(card.instanceId) && input.cards[card.cardId]?.cardType === "defense-reaction");
+  ].filter((card) =>
+    !spent.has(card.instanceId) && input.cards[card.cardId]?.cardType === "defense-reaction" &&
+    !mirageNullifiesDefense(input.cards[card.cardId], input)
+  );
 
   const options: PlannedPrevention[] = [{
     amount: 0,
@@ -922,7 +923,7 @@ export function pendingDefenseReactionValue(input: BotPolicyInput): number {
   return input.view.stack.reduce((total, layer) => {
     if (layer.seat !== input.seat || !layer.card) return total;
     const data = input.cards[layer.card.cardId];
-    if (data?.cardType !== "defense-reaction") return total;
+    if (data?.cardType !== "defense-reaction" || mirageNullifiesDefense(data, input)) return total;
     return total + Math.max(0, layer.card.defense ?? data.defense ?? 0);
   }, 0);
 }
@@ -933,6 +934,7 @@ export function scoreDefenseReaction(data: CardData, input: BotPolicyInput): num
     ? Math.max(0, link.damage - pendingDefenseReactionValue(input))
     : 0;
   if (input.view.pendingDecision?.kind !== "defense-reaction" || incoming === 0) return -100;
+  if (mirageNullifiesDefense(data, input)) return -100;
   const defense = Math.max(0, data.defense ?? 0);
   const me = input.view.players[input.seat];
   const threatened = Math.max(incoming, threatenedAttackDamage(input) - pendingDefenseReactionValue(input));
@@ -1113,25 +1115,26 @@ export function defenderDefense(card: CardView, input: BotPolicyInput): number {
     // looks like it still blocks for one.
     return Math.max(0, (data?.defense ?? card.defense ?? 0) - (card.defCounters ?? 0) + 1);
   }
+  if (mirageNullifiesDefense(data, input)) return 0;
   return Math.max(0, card.defense ?? data?.defense ?? 0);
 }
 
-/** Phantasm (8.3.13): a non-Illusionist attack action defender with 6 or more
- * power destroys the attack. Returns that defender's defense, the only block
- * the destruction needs, or undefined when no chosen defender qualifies. */
-function phantasmDefenderDefense(
-  input: BotPolicyInput,
-  link: NonNullable<ReturnType<typeof currentLink>>,
-  chosen: readonly CardView[],
-): number | undefined {
-  const attack = input.cards[link.attackingCard.cardId];
-  if (!attack?.keywords?.some((keyword) => keyword.toLowerCase() === "phantasm")) return undefined;
-  const qualifying = chosen.filter((card) => {
-    const data = input.cards[card.cardId];
-    return data?.cardType === "action" && (data.subtypes ?? []).includes("attack") &&
-      !(data.classes ?? []).includes("illusionist") &&
-      (card.attack ?? data.attack ?? 0) >= 6;
-  });
+/** Mirage (8.3.25) destroys this defender before damage, so it blocks nothing. */
+function mirageNullifiesDefense(data: CardData | undefined, input: BotPolicyInput): boolean {
+  const link = currentLink(input);
+  return !!link && link.attackValue >= 6 &&
+    !!data?.keywords?.some((keyword) => keyword.toLowerCase() === "mirage") &&
+    !(input.cards[link.attackingCard.cardId]?.classes ?? []).includes("illusionist");
+}
+
+/** Defense of the chosen defender the engine says triggers Phantasm, the only
+ * block the destruction needs, or undefined when none does. */
+function phantasmDefenderDefense(input: BotPolicyInput, chosen: readonly CardView[]): number | undefined {
+  const decision = input.view.pendingDecision;
+  if (decision?.kind !== "defend") return undefined;
+  const qualifying = chosen.filter((card) =>
+    decision.defenderDefense?.some((entry) => entry.instanceId === card.instanceId && entry.triggersPhantasm)
+  );
   return qualifying.length > 0
     ? Math.max(...qualifying.map((card) => defenderDefense(card, input)))
     : undefined;
@@ -1635,14 +1638,16 @@ export function scoreDefenseIntentWithTrace(
   // supplied by the current defender choice; otherwise merely holding a
   // reaction can dominate an established efficient block before it is played.
   // A Phantasm-destroyed attack deals nothing, so every other defender is overblock.
-  const phantasmDefense = phantasmDefenderDefense(input, link, chosen);
+  const phantasmDefense = phantasmDefenderDefense(input, chosen);
   const destroysAttack = phantasmDefense !== undefined;
+  // Power the block itself adds (Piercing) is not damage it prevents.
+  const incomingWithoutBlock = Math.max(0, incomingAfterPlannedPrevention - Math.max(0, pump));
   const prevented = destroysAttack
-    ? incomingAfterPlannedPrevention
-    : Math.min(incomingAfterPlannedPrevention, defense);
+    ? incomingWithoutBlock
+    : incomingWithoutBlock - Math.max(0, incomingAfterPlannedPrevention - defense);
   const overblock = destroysAttack
     ? defense - phantasmDefense
-    : Math.max(0, defense - incomingAfterPlannedPrevention);
+    : Math.max(0, defense - incomingWithoutBlock);
   const attackText = input.cards[link.attackingCard.cardId]?.text ?? "";
   const attacker = input.view.players[1 - input.seat]!;
   const onHit = evaluateOnHit({

@@ -48,13 +48,21 @@ export function leviaAttackContinues(card: CardView, input: BotPolicyInput, futu
 export function leviaAttackPair(
   input: BotPolicyInput,
   cards: readonly CardView[],
-  options: { sash?: boolean; resources?: number; grantGoAgain?: boolean; future?: boolean } = {},
+  options: {
+    sash?: boolean;
+    resources?: number;
+    grantGoAgain?: boolean;
+    future?: boolean;
+    /** Attacks that also cost a Gate activation. */
+    gated?: ReadonlySet<number>;
+  } = {},
 ): boolean {
   const me = input.view.players[input.seat];
   const attacks = cards.filter((card) => leviaAttackPlayable(card, input));
   const sash = options.sash || (!options.future && leviaEffectActive(input, "savage sash"));
   const grantedGoAgain = options.grantGoAgain || (!options.future && leviaEffectActive(input, "consuming lash"));
-  const cost = (card: CardView) => leviaAttackCost(input.cards[card.cardId], sash);
+  const cost = (card: CardView) => leviaAttackCost(input.cards[card.cardId], sash) +
+    (options.gated?.has(card.instanceId) ? LEVIA_GATE_COST : 0);
   for (const first of attacks) {
     if (!grantedGoAgain && !leviaAttackContinues(first, input, options.future) &&
       (options.future || me.actionPoints < 2)) continue;
