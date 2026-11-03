@@ -609,6 +609,14 @@ describe("GameView and server messages", () => {
     Object.assign(malformed.turnFacts.players[0]!, { banishedSixPlusThisTurn: "yes" });
     expect(decodeGameView(malformed)).toBeNull();
   });
+
+  it("accepts defender defense entries without the optional phantasm flag", () => {
+    const view = gameView();
+    view.pendingDecision.defenderDefense = [{ instanceId: 1, defense: 3, attack: 5 }] as never;
+    expect(decodeGameView(view)).not.toBeNull();
+    view.pendingDecision.defenderDefense = [{ instanceId: 1, defense: 3, attack: 5, triggersPhantasm: false }] as never;
+    expect(decodeGameView(view)).toBeNull();
+  });
   it("accepts the public soul turn facts and rejects malformed values", () => {
     const current = gameView();
     Object.assign(current.turnFacts.players[0]!, {

@@ -1641,7 +1641,7 @@ function pendingDecision(value: unknown): boolean {
     && optional(decision.defenderDefense, (value): value is DefenderDefenseView[] =>
       array(value, (entry): entry is DefenderDefenseView => {
         const item = object(entry);
-        return !!item && exactKeys(item, ["instanceId", "defense", "attack", "triggersPhantasm"])
+        return !!item && exactKeys(item, ["instanceId", "defense", "attack", "triggersPhantasm"], ["instanceId", "defense", "attack"])
           && instanceId(item.instanceId) && nonNegativeInteger(item.defense)
           && nonNegativeInteger(item.attack)
           && optional(item.triggersPhantasm, (v): v is true => v === true);
