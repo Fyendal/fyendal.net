@@ -60,11 +60,11 @@ does not consult ambient configuration.
   own abilities that resolve afterwards (`ctx.lastKnownCounter`).
   `scriptState` holds script bookkeeping and engine statuses
   (`ctx.getState`/`setState`). It survives zone moves except arena-only
-  statuses and is cleared when the card is next played, as a new object; state
-  that must reach a play belongs in a flag. `project.ts` exposes only its named
-  public statuses, inside `CardView.counters` for arena cards. Never store
-  bookkeeping as a counter, and add a new rules counter to `CounterKind` and
-  the protocol decoder.
+  statuses and is cleared when the card is next played, as a new object, except
+  `OBJECT_EFFECT_KEYS`, which end on any other zone move instead. `project.ts`
+  exposes only its named public statuses, inside `CardView.counters` for arena
+  cards. Never store bookkeeping as a counter, and add a new rules counter to
+  `CounterKind` and the protocol decoder.
 - `PlayerState` holds the hero, life, resources, action points, flags, and all
   zones: hand, deck, arsenal, pitch, graveyard, banish, soul, equipment,
   weapons, and board. Face-down banished cards are inert — no properties, not
@@ -159,6 +159,12 @@ owns target lookup and the resolution recheck. Card-played triggers that join th
 stack directly above a played instant or reaction declare their targets before
 that player keeps priority. Effects that trigger while a layer
 resolves stay above it, so the resolving trigger is removed by identity.
+
+Attack reactions and instants flagged `targetsAttackingCard` or
+`abilityTargetsAttackingCard` record the active attack as they go on the stack.
+If it stops attacking, only the effect on it fails and the layer's other effects
+still happen (CR 1.8.9, 5.3.4b): the script context reads the attack's last known
+information and aims its link effects at the departed object.
 
 Boost remains an optional play announcement represented by `boost?: true`.
 When paid, its seeded top-deck banish and any Boost-dependent effects occur

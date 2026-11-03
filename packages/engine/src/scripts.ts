@@ -1224,6 +1224,13 @@ export interface CardScript {
   onGameStart?(ctx: ScriptCtx): void;
   /** Extra legality for playing this card from any zone (beyond type/cost/AP). */
   canPlay?(ctx: ScriptCtx): boolean;
+  /** Set by the card registry from card text, for an attack reaction or instant
+   * that targets an attack without declaring it through `playTargetOptions`: it
+   * records the active attack on the stack, and only that effect fails if the
+   * attack stops attacking. */
+  targetsAttackingCard?: boolean;
+  /** `targetsAttackingCard` for activated abilities without `targetCardOptions`. */
+  abilityTargetsAttackingCard?: boolean;
   /** Card instances this play may target. A script with this hook requires one
    * of the returned targets to be announced in the play intent. Must be pure. */
   playTargetOptions?(ctx: ScriptCtx): readonly number[];
@@ -1257,6 +1264,8 @@ export interface CardScript {
   onResolved?(ctx: ScriptCtx): void;
   /** This object was declared as the current attack. */
   onAttackDeclared?(ctx: ScriptCtx): void;
+  /** This object replaced the attacking card without being declared. */
+  onBecameAttackingCard?(ctx: ScriptCtx): void;
   /** Deferred attack-source work after attack-declared triggered layers have
    * resolved, immediately before the defend step begins. */
   onAttackDeclaredTriggersResolved?(ctx: ScriptCtx): void;

@@ -2495,6 +2495,7 @@
   "engine.log.card.put.under": "La carta {card} se coloca debajo de {parent}",
   "engine.log.card.resolve.failed.cannot.defend": "{card} se resuelve sin efecto porque no puede defender este ataque",
   "engine.log.card.resolve.failed.dominate": "{card} se resuelve sin efecto (dominate)",
+  "engine.log.card.target.illegal": "El efecto con objetivo de {card} falla (su objetivo ya no es válido)",
   "engine.log.card.returns.to.hero.control": "{card} vuelve al control de {hero}",
   "engine.log.card.returns.to.hero.hand": "{card} vuelve a la mano de {hero}",
   "engine.log.card.returns.to.owner.hand": "{card} vuelve a la mano de su propietario",

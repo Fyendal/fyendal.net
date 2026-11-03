@@ -24497,6 +24497,16 @@
       "value": " taps"
     }
   ],
+  "engine.log.card.target.illegal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "'s targeted effect fails (its target is no longer legal)"
+    }
+  ],
   "engine.log.card.transcends.to.hand": [
     {
       "type": 1,

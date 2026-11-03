@@ -730,11 +730,7 @@ export const monHighRarity: Record<string, CardScript> = {
     },
   },
   "nourishing emptiness|1": {
-    onAttackDeclared(ctx) {
-      if (ctx.player(ctx.seat).graveyard.some((card) => isAttack(ctx, card))) {
-        ctx.suppressCardKeyword(ctx.self.instanceId, "dominate");
-      }
-    },
+    hasConditionalDominate: (ctx) => !ctx.player(ctx.seat).graveyard.some((card) => isAttack(ctx, card)),
     onHit(ctx) {
       if (!ctx.player(ctx.seat).graveyard.some((card) => isAttack(ctx, card))) {
         ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1);

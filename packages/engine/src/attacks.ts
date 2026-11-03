@@ -801,12 +801,21 @@ function replaceAttackFromPlayerZone(
     player.board.some((card) => card.instanceId === previous.instanceId);
   if (!previousIsInArena) return false;
   source.splice(index, 1);
+  // Effects on the previous attack end with it; cost and defense effects concern the link.
+  state.modifiers = state.modifiers.filter((modifier) =>
+    modifier.scope !== "chain-link" ||
+    modifier.playCostReduction !== undefined ||
+    (modifier.defense !== undefined && modifier.attack === undefined) ||
+    !modifierApplies(state, modifier, link)
+  );
   link.attackingCard = replacement;
   link.attackCardType = "action";
   // The replacement was never played, so the previous card's play origin no longer applies.
   delete link.flags.fromArsenal;
   delete link.flags.fromBanish;
   link.flags.fromOutsideHandOrArsenal = true;
+  // Go again belonged to the previous card; link-wide grants arrive with its leave triggers.
+  link.goAgain = false;
   if (previousCardType === "action") {
     const previousOwner = state.players[previous.owner] as PlayerState;
     clearTemporaryObjectEffects(previous);
@@ -845,6 +854,7 @@ function replaceAttackFromPlayerZone(
       ),
     );
   }
+  runtime.events.runHook(state, seat, replacement, "onBecameAttackingCard", link);
   return true;
 }
 

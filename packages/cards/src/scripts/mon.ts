@@ -1820,15 +1820,15 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
   },
   "zealous belting|2": {
-    onAttackDeclared(ctx) {
+    hasConditionalGoAgain: (ctx) => {
       const base = ctx.data.attack ?? 0;
-      if (ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > base)) ctx.grantGoAgain();
+      return ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > base);
     },
   },
   "zealous belting|3": {
-    onAttackDeclared(ctx) {
+    hasConditionalGoAgain: (ctx) => {
       const base = ctx.data.attack ?? 0;
-      if (ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > base)) ctx.grantGoAgain();
+      return ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > base);
     },
   },
   "minnowism|1": minnowism(3),

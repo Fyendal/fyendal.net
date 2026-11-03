@@ -67,9 +67,18 @@ export function clearPrivateZonePlacement(card: CardInstance): void {
  * a resolving layer and its lingering effects can still read it. */
 const ARENA_STATUS_KEYS = ["attacked", "frozenUntilTurn", "marked"];
 
+/** Effects on this object that it keeps when played from its zone, like
+ * temporary grants, and loses on any other zone move. */
+const OBJECT_EFFECT_KEYS = ["faceUpLoadedTurn"];
+
 /** A played card is a new object. Call before `canPlay`, which may record cost state. */
 export function startPlayScriptState(card: CardInstance): void {
-  delete card.scriptState;
+  const values = card.scriptState;
+  if (!values) return;
+  for (const key of Object.keys(values)) {
+    if (!OBJECT_EFFECT_KEYS.includes(key)) delete values[key];
+  }
+  if (Object.keys(values).length === 0) delete card.scriptState;
 }
 
 /** A card-scoped play permission ends when the card is played or changes zones
@@ -122,7 +131,7 @@ export function clearTemporaryObjectEffects(card: CardInstance): void {
   const values = card.scriptState;
   if (!values) return;
   for (const key of Object.keys(values)) {
-    if (key.startsWith(FROZEN_WHILE_SOURCE_IN_ARENA) || ARENA_STATUS_KEYS.includes(key)) delete values[key];
+    if (key.startsWith(FROZEN_WHILE_SOURCE_IN_ARENA) || ARENA_STATUS_KEYS.includes(key) || OBJECT_EFFECT_KEYS.includes(key)) delete values[key];
   }
   if (Object.keys(values).length === 0) delete card.scriptState;
 }

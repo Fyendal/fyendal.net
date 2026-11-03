@@ -415,6 +415,7 @@ export const mpa: Record<string, CardScript> = {
       // Keeps its hit trigger observable for later links while it stays on the chain.
       ctx.addModifier({ scope: "combat-chain" });
     },
+    onBecameAttackingCard: (ctx) => ctx.addModifier({ scope: "combat-chain" }),
     canTriggerOnHit(ctx) {
       const link = ctx.link;
       return (
@@ -435,6 +436,7 @@ export const mpa: Record<string, CardScript> = {
 
   "mutually assured destruction|1": {
     ...contractWithSilver((ctx, card) => card.owner === opponentSeat(ctx) && isInfected(ctx, card.owner)),
+    onBecameAttackingCard: (ctx) => ctx.addModifier({ scope: "combat-chain" }),
     onAttackDeclared(ctx) {
       // Its reaction-play trigger must remain functional for every link while
       // this Contract attack stays face up on the combat chain.

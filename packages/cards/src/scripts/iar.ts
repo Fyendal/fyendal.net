@@ -2813,11 +2813,7 @@ export const iar: Record<string, CardScript> = {
     hasConditionalGoAgain: (ctx) => Number(ctx.getFlag("player", "banishedThisTurn")) > 0,
   },
   "rumbling of i'arathael|1": {
-    onAttackDeclared(ctx) {
-      if (Number(ctx.getFlag("player", "banishedThisTurn")) > 0) {
-        ctx.setFlag("link", "overpower", true);
-      }
-    },
+    hasConditionalOverpower: (ctx) => Number(ctx.getFlag("player", "banishedThisTurn")) > 0,
   },
   "whispers within|1": {
     onDefend(ctx) {

@@ -192,11 +192,9 @@ export const sbr: Record<string, CardScript> = {
   },
 
   "zealous belting|1": {
-    onAttackDeclared(ctx) {
+    hasConditionalGoAgain: (ctx) => {
       const basePower = ctx.data.attack ?? 0;
-      if (ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > basePower)) {
-        ctx.grantGoAgain();
-      }
+      return ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > basePower);
     },
   },
 

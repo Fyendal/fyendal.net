@@ -765,7 +765,7 @@ function projectedAllyPrevention(
   damage: number,
   spentShields: Set<Modifier>,
 ): { amount: number; modifiers: CombatValueModifier[] } | undefined {
-  if (damage <= 0 || link.flags.unpreventable === true) return undefined;
+  if (damage <= 0 || combatDamageUnpreventable(state, link, damage)) return undefined;
   const recipientTypes = cardTypesOf(state, ally);
   let total = 0;
   const modifiers: CombatValueModifier[] = [];

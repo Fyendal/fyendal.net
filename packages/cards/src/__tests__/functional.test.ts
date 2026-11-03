@@ -98,7 +98,29 @@ describe("script expansion", () => {
     for (const [printingId, script] of Object.entries(scripts)) {
       const key = functionalKeyOf(cardData[printingId]!);
       expect(registry[key], `registry has ${key}`).toBeDefined();
-      expect(script).toBe(registry[key]);
+      const { targetsAttackingCard: _card, abilityTargetsAttackingCard: _ability, ...registered } = script;
+      expect(registered).toEqual(registry[key]);
+    }
+  });
+
+  it("flags only effects that target an attack", () => {
+    const flagged = (name: string) =>
+      Object.entries(cardData).find(([id, card]) => card.name === name && scripts[id])![0];
+    for (const name of ["Razor's Edge", "Angelic Descent", "A Drop in the Ocean", "Path Well Traveled"]) {
+      expect(scripts[flagged(name)]!.targetsAttackingCard, name).toBe(true);
+    }
+    for (const name of ["Stalker's Steps", "Prey on Insecurity", "Concealed Object", "Kayo, Strong-arm"]) {
+      expect(scripts[flagged(name)]!.abilityTargetsAttackingCard, name).toBe(true);
+    }
+    for (const name of [
+      "Shred", "Spreading Plague", "Uzuri, Switchblade", "Memorial Ground", "Crackle from Afar",
+      "Celestial Resolve", "Temporal Wobble", "Rewind", "Concealed Object", "Reinforce the Line",
+      "Lightning Press", "Blizzard",
+    ]) {
+      expect(scripts[flagged(name)]!.targetsAttackingCard, name).toBeUndefined();
+    }
+    for (const name of ["Helm of Hindsight", "Surgical Gloves", "Cadaver Handlers"]) {
+      expect(scripts[flagged(name)]!.abilityTargetsAttackingCard, name).toBeUndefined();
     }
   });
 

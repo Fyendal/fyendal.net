@@ -437,6 +437,7 @@ export function runHook<K extends
   | "onPlay"
   | "onResolved"
   | "onAttackDeclared"
+  | "onBecameAttackingCard"
   | "onAttackDeclaredTriggersResolved"
   | "onFriendlyAttackDeclared"
   | "onGainGoAgain"

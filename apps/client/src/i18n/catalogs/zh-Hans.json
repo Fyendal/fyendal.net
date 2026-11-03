@@ -2495,6 +2495,7 @@
   "engine.log.card.put.under": "{card} 被置于 {parent} 下方",
   "engine.log.card.resolve.failed.cannot.defend": "因无法防守此次攻击，{card} 结算时不产生效果",
   "engine.log.card.resolve.failed.dominate": "{card} 因压制 (dominate) 结算时不产生效果",
+  "engine.log.card.target.illegal": "{card} 的目标效果失效（其目标已不合法）",
   "engine.log.card.returns.to.hero.control": "{card} 返回 {hero} 的控制",
   "engine.log.card.returns.to.hero.hand": "{card} 返回 {hero} 的手牌",
   "engine.log.card.returns.to.owner.hand": "{card} 返回其拥有者手牌",

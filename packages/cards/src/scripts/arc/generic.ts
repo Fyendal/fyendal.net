@@ -252,9 +252,7 @@ function rifting(): CardScript {
 
 function vigorRush(): CardScript {
   return {
-    onAttackDeclared(ctx) {
-      if (ctx.getFlag("player", "playedNonAttackAction") === true) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: (ctx) => ctx.getFlag("player", "playedNonAttackAction") === true,
   };
 }
 

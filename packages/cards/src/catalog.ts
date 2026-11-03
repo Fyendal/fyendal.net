@@ -496,6 +496,8 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "sic 'em shot|1": [],
   "sic 'em shot|2": [],
   "sic 'em shot|3": [],
+  // Nourishing Emptiness only has dominate while no attack action is in its controller's graveyard.
+  "nourishing emptiness|1": [],
   // CRU conditional keywords are granted by scripts only after their printed
   // conditions are satisfied.
   "barraging big horn|1": [],

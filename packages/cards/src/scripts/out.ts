@@ -651,19 +651,13 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "infect|2": stealthToken(BLOODROT),
   "infect|3": stealthToken(BLOODROT),
   "malign|1": {
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "unpreventable", true);
-    },
+    combatDamageUnpreventableAtLeast: 1,
   },
   "malign|2": {
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "unpreventable", true);
-    },
+    combatDamageUnpreventableAtLeast: 1,
   },
   "malign|3": {
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "unpreventable", true);
-    },
+    combatDamageUnpreventableAtLeast: 1,
   },
   "prowl|1": nextStealth(1),
   "prowl|2": nextStealth(1),

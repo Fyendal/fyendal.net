@@ -2495,6 +2495,7 @@
   "engine.log.card.put.under": "{card} is put under {parent}",
   "engine.log.card.resolve.failed.cannot.defend": "{card} resolves without effect because it cannot defend this attack",
   "engine.log.card.resolve.failed.dominate": "{card} resolves without effect (dominate)",
+  "engine.log.card.target.illegal": "{card}'s targeted effect fails (its target is no longer legal)",
   "engine.log.card.returns.to.hero.control": "{card} returns to {hero}'s control",
   "engine.log.card.returns.to.hero.hand": "{card} returns to {hero}'s hand",
   "engine.log.card.returns.to.owner.hand": "{card} returns to its owner's hand",

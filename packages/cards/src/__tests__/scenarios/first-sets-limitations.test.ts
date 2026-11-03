@@ -171,7 +171,7 @@ describe("first-set rules regression coverage", () => {
   });
 
   it("Remorseless stops arsenal defense reactions only when put face up this turn", () => {
-    const remorselessGame = (arsenal: { arsenal?: string[]; arsenalFaceDown?: string[] }, deck: string[] = []) => scenario({ seats: [
+    const remorselessGame = (arsenal: { arsenal?: string[]; arsenalFaceDown?: string[] }, deck: string[] = [], head?: string) => scenario({ seats: [
       {
         hero: "dorinthea",
         heroKey: "azalea|0",
@@ -179,14 +179,18 @@ describe("first-set rules regression coverage", () => {
         ...arsenal,
         deck: [...deck, "head jab|1", "head jab|2", "head jab|3", "head jab|1", "head jab|2", "head jab|3"],
         resources: 20,
-        equipment: { ...NO_EQUIPMENT, chest: "skullbone crosswrap|0" },
+        equipment: { ...NO_EQUIPMENT, chest: "skullbone crosswrap|0", ...(head ? { head } : {}) },
       },
       { hero: "rhinar", arsenalFaceDown: ["sink below|1"], equipment: NO_EQUIPMENT },
     ] });
-    const canDefenseReactFromArsenal = (g: ReturnType<typeof remorselessGame>) => {
-      g.play("remorseless|1", { fromArsenal: true }).blockWith().passPriority();
+    const defenderCanReactFromArsenal = (g: ReturnType<typeof remorselessGame>) => {
+      g.blockWith().passPriority();
       expect(g.state.pendingDecision?.kind).toBe("defense-reaction");
       return legalIntents(g.state, 1).some((intent) => intent.kind === "play-from-arsenal");
+    };
+    const canDefenseReactFromArsenal = (g: ReturnType<typeof remorselessGame>) => {
+      g.play("remorseless|1", { fromArsenal: true });
+      return defenderCanReactFromArsenal(g);
     };
 
     const putFaceUp = remorselessGame({ arsenal: ["head jab|1"] }, ["remorseless|1"]);
@@ -202,6 +206,30 @@ describe("first-set rules regression coverage", () => {
     const putFaceUpEarlier = remorselessGame({ arsenal: ["head jab|1"] }, ["remorseless|1"]);
     putFaceUpEarlier.activate("azalea|0").endTurn().endTurn();
     expect(canDefenseReactFromArsenal(putFaceUpEarlier)).toBe(true);
+
+    const returnedFaceDown = remorselessGame({ arsenal: ["head jab|1"] }, ["remorseless|1"], "honing hood|0");
+    returnedFaceDown.activate("azalea|0").activate("honing hood|0").chooseCard("remorseless|1")
+      .expectInZone(0, "remorseless|1", "arsenal").expectFaceDown(0, "remorseless|1", true);
+    expect(canDefenseReactFromArsenal(returnedFaceDown)).toBe(true);
+
+    // An arrow can't be played from hand, so only the effect's end is observable.
+    const bounced = remorselessGame({ arsenal: ["head jab|1"] }, ["remorseless|1"], "patch the hole|0");
+    bounced.activate("azalea|0").activate("patch the hole|0").expectInZone(0, "remorseless|1", "hand");
+    expect(bounced.state.players[0]!.hand[0]!.scriptState?.faceUpLoadedTurn).toBeUndefined();
+
+    const bouncedInResponse = remorselessGame({ arsenal: ["head jab|1"] }, ["remorseless|1"], "patch the hole|0");
+    bouncedInResponse.activate("azalea|0", { settle: false }).passUntilLayer("When put face up into arsenal")
+      .activate("patch the hole|0").settle().expectInZone(0, "remorseless|1", "hand");
+    expect(bouncedInResponse.state.players[0]!.hand[0]!.scriptState?.faceUpLoadedTurn).toBeUndefined();
+
+    for (const [copy, canReact] of [[0, false], [1, true]] as const) {
+      const twoCopies = remorselessGame({ arsenal: ["remorseless|1", "remorseless|1"] });
+      const arsenal = twoCopies.state.players[0]!.arsenal;
+      arsenal[0]!.scriptState = { faceUpLoadedTurn: twoCopies.state.turn };
+      arsenal[1]!.faceDown = true;
+      twoCopies.doRaw({ kind: "play-from-arsenal", instanceId: arsenal[copy]!.instanceId, pitchInstanceIds: [] }).settle();
+      expect(defenderCanReactFromArsenal(twoCopies)).toBe(canReact);
+    }
   });
 
   it("Absorption Dome spends steam to replace damage", () => {

@@ -57,7 +57,7 @@ import { canPayRequiredHandCardsForAdditionalCost } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { defendingHeroCannotRespondBelowPower, defenseReactionRestriction } from "./combatRestrictions.js";
-import { pushAbilityLayer, pushAttackCardLayer, recordAnnouncedAttackTarget } from "./stackCore.js";
+import { pushAbilityLayer, pushAttackCardLayer, recordAnnouncedAttackTarget, recordAttackTarget } from "./stackCore.js";
 
 import {
   holdPriorityWindow,
@@ -863,6 +863,7 @@ export function finishReactionPlay(
     pushAttackCardLayer(state, seat, removed, origin);
     runtime.dispatchFlow("triggerPlayedAttackSpectra", state, seat, removed);
   } else {
+    recordAttackTarget(state, removed);
     state.stack.unshift({
       sourceInstanceId: removed.instanceId,
       seat,

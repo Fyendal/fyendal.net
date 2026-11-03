@@ -25767,6 +25767,20 @@
       "value": " é virada (tap)"
     }
   ],
+  "engine.log.card.target.illegal": [
+    {
+      "type": 0,
+      "value": "O efeito com alvo de "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " falha (seu alvo não é mais válido)"
+    }
+  ],
   "engine.log.card.transcends.to.hand": [
     {
       "type": 1,

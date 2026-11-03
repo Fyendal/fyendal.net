@@ -25299,6 +25299,20 @@
       "value": " hace tap"
     }
   ],
+  "engine.log.card.target.illegal": [
+    {
+      "type": 0,
+      "value": "El efecto con objetivo de "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " falla (su objetivo ya no es válido)"
+    }
+  ],
   "engine.log.card.transcends.to.hand": [
     {
       "type": 1,

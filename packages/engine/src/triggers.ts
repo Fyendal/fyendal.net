@@ -56,7 +56,7 @@ import { opposingActionsProhibited } from "./restrictions.js";
 import { defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
 import { pushAttackCardLayer, pushCardLayer, recordAnnouncedAttackTarget, takeAttackLayerOrigin } from "./stackCore.js";
 import { DESTROY_AT_END_PHASE_HOOK, logTriggerAnnouncement, triggerAnnouncement, triggerLabelMessage } from "./triggerPresentation.js";
-import { declaredLayerTargetLegal, layerTargetOptions, layerTargetSpec, triggerLayerEventContext } from "./layerTargets.js";
+import { declaredLayerTargetLegal, departedAttackTarget, layerTargetOptions, logPlayTargetIllegal, layerTargetSpec, triggerLayerEventContext } from "./layerTargets.js";
 
 import {
   holdPriorityWindow,
@@ -1116,6 +1116,7 @@ export function resolveAbilityLayer(state: GameStateInternal,
   } else {
     delete found.card.playTargetInstanceId;
   }
+  if (departedAttackTarget(state, found.card, link) !== undefined) logPlayTargetIllegal(state, found.card);
   ability?.onActivate?.(
     runtime.makeCtx(state, layer.seat, found.card, link, undefined, layer.targetCardInstanceId),
   );
@@ -1517,6 +1518,7 @@ export function resolveTopStackCard(state: GameStateInternal, runtime: EngineRun
     !script?.playTargetOptions ||
     playTargetOptions(state, runtime, seat, card, link, !layer.fromHand)
       .includes(card.playTargetInstanceId);
+  if (!targetStillLegal || departedAttackTarget(state, card, link) !== undefined) logPlayTargetIllegal(state, card);
   if (targetStillLegal) {
     runtime.events.runHook(state, seat, card, "onPlay", link, !layer.fromHand);
   }
@@ -1559,6 +1561,12 @@ export function finishStackCardResolution(
     layer.card.meldSide = "left";
     continueStack(state, runtime, state.activePlayer);
     return;
+  }
+  // A recorded attack target only matters while its layer resolves.
+  const resolvedSource = layer?.card ?? (layer?.ability ? findCardAnywhere(state, layer.sourceInstanceId)?.card : undefined);
+  const resolvedScript = resolvedSource && scriptOf(state, resolvedSource.cardId, resolvedSource);
+  if (layer?.ability ? resolvedScript?.abilityTargetsAttackingCard : resolvedScript?.targetsAttackingCard) {
+    delete resolvedSource!.playTargetInstanceId;
   }
   // Stage 2 narrowed the side for onPlay; the object itself had both sides.
   if (layer?.meldStage === 2 && layer.card) layer.card.meldSide = "both";

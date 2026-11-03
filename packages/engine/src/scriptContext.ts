@@ -29,6 +29,7 @@ import {
   veilBlocksDefender,
 } from "./cardProperties.js";
 
+import { departedAttackTarget } from "./layerTargets.js";
 import {
   cardCeasesToExistLogMessage,
   cardDestroyedLogMessage,
@@ -417,6 +418,16 @@ export function makeCtx(
   tokenCreationCause: TokenCreationContext = { kind: "effect", sourceCardId: self.cardId },
 ): ScriptCtx {
   const player = state.players[seat] as PlayerState;
+  // CR 5.3.4b: only the effect on a departed target attack fails. Its last
+  // known information answers the card's conditions (CR 1.2.3).
+  const goneAttackId = departedAttackTarget(state, self, link);
+  if (link && goneAttackId !== undefined) {
+    link = {
+      ...link,
+      attackingCard: findCardAnywhere(state, goneAttackId)?.card ?? { ...link.attackingCard, instanceId: goneAttackId },
+      flags: { ...link.flags },
+    };
+  }
   const creationCause: TokenCreationContext = {
     ...tokenCreationCause,
     creatorSeat: tokenCreationCause.creatorSeat ?? seat,
@@ -611,7 +622,13 @@ export function makeCtx(
     ...((playTargetInstanceId ?? self.playTargetInstanceId) !== undefined
       ? { playTargetInstanceId: playTargetInstanceId ?? self.playTargetInstanceId }
       : {}),
-    addModifier(m, source) {
+    addModifier(modifier, source) {
+      const m = goneAttackId !== undefined &&
+        modifier.scope === "chain-link" &&
+        modifier.appliesToInstanceId === undefined &&
+        modifier.playCostReduction === undefined
+        ? { ...modifier, appliesToInstanceId: goneAttackId }
+        : modifier;
       const observed = observeAttackPower(state, runtime);
       const active = currentLink(state);
       const origin = source ?? self;
@@ -1215,7 +1232,7 @@ export function makeCtx(
     },
     addCardTempPower(instanceId, delta) {
       const found = findCardAnywhere(state, instanceId);
-      if (!found) return false;
+      if (!found || instanceId === goneAttackId) return false;
       const observed = observeAttackPower(state, runtime);
       const active = currentLink(state);
       const targetLink = chainLinkForAttack(state, instanceId);
@@ -1410,7 +1427,7 @@ export function makeCtx(
     },
     grantCardKeyword(instanceId, keyword) {
       const found = findCardAnywhere(state, instanceId);
-      if (!found) return false;
+      if (!found || instanceId === goneAttackId) return false;
       const active = currentLink(state);
       if (active?.flags.attackAbilitiesSuppressed === true && active.attackingCard.instanceId === instanceId) {
         return false;
@@ -1648,6 +1665,7 @@ export function makeCtx(
     },
     grantGoAgain(targetAttackInstanceId) {
       if (targetAttackInstanceId === undefined && grantPlayedCardGoAgain()) return;
+      if (targetAttackInstanceId === undefined && goneAttackId !== undefined) return;
       const target = targetAttackInstanceId === undefined
         ? link
         : chainLinkForAttack(state, targetAttackInstanceId);
@@ -1669,7 +1687,7 @@ export function makeCtx(
     },
     wager(withSeat, rewardCardIds, rewardLabel) {
       const activeLink = currentLink(state);
-      if (!activeLink || activeLink.attacker !== seat || !state.players[withSeat]) return;
+      if (!activeLink || activeLink.attacker !== seat || !state.players[withSeat] || goneAttackId !== undefined) return;
       activeLink.flags.wagered = true;
       activeLink.flags.wagerCount = Number(activeLink.flags.wagerCount ?? 0) + 1;
       const tokenNames = rewardCardIds.map((cardId) => nameOf(state, cardId));

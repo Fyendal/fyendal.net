@@ -23704,6 +23704,16 @@
       "value": " 横置"
     }
   ],
+  "engine.log.card.target.illegal": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 的目标效果失效（其目标已不合法）"
+    }
+  ],
   "engine.log.card.transcends.to.hand": [
     {
       "type": 1,
