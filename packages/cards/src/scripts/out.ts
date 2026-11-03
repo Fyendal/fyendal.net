@@ -125,10 +125,12 @@ function stealthReaction(pump: number, token?: string): CardScript {
   };
 }
 function nextStealth(pump: number): CardScript {
+  const buffNextStealth = (ctx: ScriptCtx) =>
+    buffNextAttack(ctx, { attack: pump, appliesToKeyword: "stealth", expiresOnChainClose: true });
   return {
-    onAttackDeclared(ctx) {
-      buffNextAttack(ctx, { attack: pump, appliesToKeyword: "stealth", expiresOnChainClose: true });
-    },
+    nextAttackEffectIsStatic: true,
+    onAttackDeclared: buffNextStealth,
+    onBecameAttackingCard: buffNextStealth,
   };
 }
 function comboPower(name: string, power: number, reduction = 0): CardScript {

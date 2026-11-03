@@ -124,8 +124,12 @@ function attachNextAttackModifiers(
       attach(mod);
     }
   }
-  // combat-chain grants ("your attacks are Draconic this combat chain") stamp
-  // every matching attack declared while they are active
+  stampCombatChainGrantedTypes(state, link);
+}
+
+/** Combat-chain grants ("your attacks are Draconic this combat chain") stamp
+ * every matching attack that comes onto the chain while they are active. */
+function stampCombatChainGrantedTypes(state: GameStateInternal, link: ChainLinkState): void {
   for (const mod of state.modifiers) {
     if (mod.scope === "combat-chain" && mod.grantType && modifierApplies(state, mod, link)) {
       link.flags[`grantedType:${mod.grantType.toLowerCase()}`] = true;
@@ -801,19 +805,26 @@ function replaceAttackFromPlayerZone(
     player.board.some((card) => card.instanceId === previous.instanceId);
   if (!previousIsInArena) return false;
   source.splice(index, 1);
+  const staticNextAttack = scriptOf(state, previous.cardId, previous)?.nextAttackEffectIsStatic === true;
   // Effects on the previous attack end with it; cost and defense effects concern the link.
-  state.modifiers = state.modifiers.filter((modifier) =>
-    modifier.scope !== "chain-link" ||
-    modifier.playCostReduction !== undefined ||
-    (modifier.defense !== undefined && modifier.attack === undefined) ||
-    !modifierApplies(state, modifier, link)
-  );
+  const endsWithPreviousAttack = (modifier: Modifier): boolean =>
+    modifier.scope === "next-attack"
+      ? staticNextAttack && modifier.sourceInstanceId === previous.instanceId
+      : modifier.scope === "chain-link" &&
+        modifier.playCostReduction === undefined &&
+        (modifier.defense === undefined || modifier.attack !== undefined) &&
+        modifierApplies(state, modifier, link);
+  state.modifiers = state.modifiers.filter((modifier) => !endsWithPreviousAttack(modifier));
+  for (const flag of Object.keys(link.flags)) {
+    if (flag.startsWith("grantedType:")) delete link.flags[flag];
+  }
   link.attackingCard = replacement;
   link.attackCardType = "action";
   // The replacement was never played, so the previous card's play origin no longer applies.
   delete link.flags.fromArsenal;
   delete link.flags.fromBanish;
   link.flags.fromOutsideHandOrArsenal = true;
+  stampCombatChainGrantedTypes(state, link);
   // Go again belonged to the previous card; link-wide grants arrive with its leave triggers.
   link.goAgain = false;
   if (previousCardType === "action") {

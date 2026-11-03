@@ -22,7 +22,12 @@ import { STANDARD_CARD_ART } from "@fyendal/shared";
 
 const printings = Object.values(cardData) as CardData[];
 const hero = printings.find((c) => c.cardType === "hero" && c.name.includes("Rhinar"))!;
-const weapon = printings.find((c) => c.cardType === "weapon")!;
+const legalCcWeapons = printings.filter((c) => c.cardType === "weapon" && formatLegalityIssues(
+  cardData,
+  { heroId: hero.id, weaponIds: [c.id], equipmentPool: [], deck: [], sideboard: [] },
+  "cc",
+).length === 0);
+const weapon = legalCcWeapons[0]!;
 const chest = printings.find((c) => c.cardType === "equipment" && c.subtypes?.includes("chest"))!;
 const deckCards = printings.filter(
   (c) => !["hero", "weapon", "equipment", "token"].includes(c.cardType),
@@ -661,7 +666,7 @@ describe("validatePresentation", () => {
   });
 
   it("rejects more than 2 presented weapons", () => {
-    const oneHander = printings.find((c) => c.cardType === "weapon" && !c.subtypes?.includes("2h"))!;
+    const oneHander = legalCcWeapons.find((c) => !c.subtypes?.includes("2h"))!;
     const pool = ccPool();
     pool.weaponIds.push(oneHander.id, oneHander.id, oneHander.id); // registered duplicates are fine
     const r = validatePresentation(

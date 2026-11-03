@@ -1266,6 +1266,9 @@ export interface CardScript {
   onAttackDeclared?(ctx: ScriptCtx): void;
   /** This object replaced the attacking card without being declared. */
   onBecameAttackingCard?(ctx: ScriptCtx): void;
+  /** The next-attack effects this attack creates are static (CR 5.4.1): they end
+   * if it stops being the attacking card (CR 6.2.3a). */
+  nextAttackEffectIsStatic?: boolean;
   /** Deferred attack-source work after attack-declared triggered layers have
    * resolved, immediately before the defend step begins. */
   onAttackDeclaredTriggersResolved?(ctx: ScriptCtx): void;

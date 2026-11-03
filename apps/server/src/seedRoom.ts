@@ -121,7 +121,7 @@ try {
     for (const [seatNumber, seat] of fixture.seats.entries()) {
       let userId: number | null = null;
       let username: string;
-      let deckId: string | null = null;
+      let deckId: string | null;
       let deckName = `${MANUAL_DECK_PREFIX}${fixture.title}`;
       if (seat.controller === "human") {
         const { rows } = await tx.query("SELECT id, username FROM users WHERE username_lc = $1", [seat.username.toLowerCase()]);

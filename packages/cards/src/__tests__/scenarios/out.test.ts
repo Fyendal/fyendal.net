@@ -1416,6 +1416,75 @@ describe("OUT — rules regression coverage", () => {
     expect(s.state.players[1]!.board.map((card) => cardData[card.cardId]!.name)).not.toContain("Frailty");
   });
 
+  it("A departed attack doesn't take effects from other commands", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "nourishing emptiness|1"] },
+        { hero: "dorinthea", hand: [], equipment: { legs: "unflinching foothold|0" } },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    s.passPriority();
+    s.activate("unflinching foothold|0", { settle: false }).passPriority();
+    swapToLastHandCard(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.dominate).toBe(true);
+    expect(s.state.players[0]!.deck.at(-1)!.suppressedKeywords).toBeUndefined();
+    s.expectLog("Unflinching Foothold's targeted effect fails");
+  });
+
+  it("Uzuri's replacement Prowl buffs the next attack with stealth", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["continued coercion|2", "infect|1", "prowl|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("continued coercion|2").blockWith();
+    swapToLastHandCard(s);
+    s.settle();
+    s.play("infect|1");
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.attackValue).toBe(cardData[printingId("infect|1")]!.attack! + 1);
+  });
+
+  it("Uzuri replacing Prowl ends its buff on the next attack", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["prowl|1", "infect|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("prowl|1").blockWith();
+    expect(s.state.modifiers.some((modifier) => modifier.scope === "next-attack")).toBe(true);
+    swapToLastHandCard(s);
+    expect(s.state.modifiers.some((modifier) => modifier.scope === "next-attack")).toBe(false);
+  });
+
+  it("Uzuri replacing Creep keeps the go again its attack trigger already created", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["creep|1", "infect|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("creep|1").blockWith();
+    swapToLastHandCard(s);
+    expect(s.state.modifiers.some((modifier) => modifier.scope === "next-attack" && modifier.goAgain)).toBe(true);
+  });
+
+  it("A granted type on the replaced attack doesn't reach the replacement", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["brand with cinderclaw|1", "infect|1", "sneak attack|1"], resources: 3 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("brand with cinderclaw|1").blockWith().settle();
+    s.play("infect|1").blockWith();
+    expect(s.state.chain.at(-1)!.flags["grantedType:draconic"]).toBe(true);
+    swapToLastHandCard(s);
+    expect(s.state.chain.at(-1)!.flags["grantedType:draconic"]).toBeUndefined();
+  });
+
   it("A resolved reaction doesn't keep its recorded attack target", () => {
     const s = scenario({
       seats: [

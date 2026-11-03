@@ -721,7 +721,7 @@ export function makeCtx(
     },
     grantAdditionalActivation(instanceId, count = 1) {
       const found = findCardAnywhere(state, instanceId);
-      if (!found || count <= 0) return;
+      if (!found || count <= 0 || instanceId === goneAttackId) return;
       const abilities = abilityList(scriptOf(state, found.card.cardId, found.card));
       const target = state.players[found.seat] as PlayerState;
       for (let index = 0; index < abilities.length; index++) {
@@ -1371,7 +1371,7 @@ export function makeCtx(
     },
     becomeCardCopy(instanceId, sourceCardId) {
       const found = findCardAnywhere(state, instanceId);
-      if (!found || !state.cardsRef[sourceCardId]) return false;
+      if (!found || !state.cardsRef[sourceCardId] || instanceId === goneAttackId) return false;
       found.card.copyOriginalCardId ??= found.card.cardId;
       found.card.cardId = sourceCardId;
       delete found.card.grantedBaseAbilitiesCardId;
@@ -1447,7 +1447,7 @@ export function makeCtx(
     },
     suppressCardKeyword(instanceId, keyword) {
       const found = findCardAnywhere(state, instanceId);
-      if (!found) return false;
+      if (!found || instanceId === goneAttackId) return false;
       const normalized = keyword.toLowerCase();
       const keywords = (found.card.suppressedKeywords ??= []);
       if (!keywords.includes(normalized)) keywords.push(normalized);
@@ -2094,6 +2094,7 @@ export function makeCtx(
       return true;
     },
     addCounter(instanceId, kind, delta) {
+      if (instanceId === goneAttackId) return;
       updateCardCopies(state, runtime, self, instanceId, (card) => {
         const counters = (card.counters ??= {});
         counters[kind] = (counters[kind] ?? 0) + delta;
@@ -2105,6 +2106,7 @@ export function makeCtx(
       });
     },
     setCardCounter(instanceId, kind, value) {
+      if (instanceId === goneAttackId) return;
       updateCardCopies(state, runtime, self, instanceId, (card) => {
         (card.counters ??= {})[kind] = value;
       });
@@ -2118,6 +2120,7 @@ export function makeCtx(
       });
     },
     setCardBasePower(instanceId, power) {
+      if (instanceId === goneAttackId) return;
       updateCardCopies(state, runtime, self, instanceId, (card) => {
         card.basePowerOverride = { power, sourceInstanceId: self.instanceId, sourceCardId: self.cardId };
       });

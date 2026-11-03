@@ -340,7 +340,7 @@ describe("Cindra Fabrary matchup presentation", () => {
       opponent({ heroId: "AIO001" }),
       opponent({ heroId: "ASB001" }),
     ]) {
-      expect(validatePresentation(pool, cindraPresentationFor(matchup), "cc"))
+      expect(validatePresentation(pool, cindraPresentationFor(matchup), "cc", { cardPoolMode: "open" }))
         .toMatchObject({ ok: true });
     }
   });

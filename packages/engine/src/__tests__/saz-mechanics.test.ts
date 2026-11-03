@@ -1,10 +1,11 @@
 import { engineRuntime } from "../engineRuntime.js";
 import { describe, expect, it } from "vitest";
 import type { CardData, Decklist, EquipmentSlot, GameIntent } from "@fyendal/shared";
+import { replaceAttackFromHand } from "../attacks.js";
 import { applyIntent, legalIntents, projectStateFor } from "../index.js";
 import type { CardScript } from "../scripts.js";
 import { createGame as createGameState, type GameStateInternal } from "../runtimeState.js";
-import type { CardInstance, PlayerState } from "../state.js";
+import type { CardInstance, Modifier, PlayerState } from "../state.js";
 import { drawUpTo, startTurn } from "../turn.js";
 
 // ── SAZ mechanics: arrows & bows, putIntoArsenal/onEnterArsenal, per-instance
@@ -354,6 +355,34 @@ describe("unpreventable", () => {
 });
 
 // ── defense-reaction restrictions ──────────────────────────────────────────
+
+describe("attacking card replacement", () => {
+  const grantDraconic = (s: GameStateInternal, extra: Partial<Modifier> = {}) => {
+    s.modifiers.push({
+      id: s.nextModifierId++,
+      scope: "combat-chain",
+      seat: 0,
+      sourceInstanceId: player(s, 0).hero.instanceId,
+      grantType: "draconic",
+      ...extra,
+    } as Modifier);
+  };
+
+  it("stamps a combat-chain type grant on the replacement", () => {
+    const s = declareAttackFromHand(makeGame(), 0, "ATK4");
+    grantDraconic(s);
+    expect(replaceAttackFromHand(s, engineRuntime, 0, giveCard(s, 0, "ATK4"), 2)).toBe(true);
+    expect(s.chain.at(-1)!.flags["grantedType:draconic"]).toBe(true);
+  });
+
+  it("checks that grant against the replacement, not the previous play origin", () => {
+    const s = makeGame();
+    const next = declareAttackFromArsenal(s, 0, giveArsenal(s, 0, "ATK4"));
+    grantDraconic(next, { appliesToFromArsenal: true });
+    expect(replaceAttackFromHand(next, engineRuntime, 0, giveCard(next, 0, "ATK4"), 2)).toBe(true);
+    expect(next.chain.at(-1)!.flags["grantedType:draconic"]).toBeUndefined();
+  });
+});
 
 describe("defense-reaction restrictions", () => {
   it("noDefenseReactions blocks all defense reactions on the link", () => {
