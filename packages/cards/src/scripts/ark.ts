@@ -58,6 +58,7 @@ export const ark: Record<string, CardScript> = {
         event: "end-of-turn",
         whose: "subject",
         label: "Destroy a Silver or put this on the bottom and draw",
+        condition: (ctx) => ctx.self.faceDown !== true,
         effect(ctx) {
           const silver = ctx.player(ctx.seat).board.find((card) => cardNamed(ctx, card, "Silver"));
           if (silver) ctx.destroyPermanent(silver.instanceId);

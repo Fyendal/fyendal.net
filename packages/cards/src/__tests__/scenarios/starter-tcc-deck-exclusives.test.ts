@@ -153,4 +153,75 @@ describe("deck-exclusive mentors", () => {
       .expectFinalAttack(6)
       .expectAP(0, 1);
   });
+
+  it("The Hand's end-phase ability is inert while face down", () => {
+    const withSilver = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: [],
+          deck: ["crackling|1"],
+          arsenalFaceDown: ["the hand that pulls the strings|0"],
+          board: ["silver|0"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    withSilver
+      .endTurn()
+      .expectInZone(0, "the hand that pulls the strings|0", "arsenal")
+      .expectFaceDown(0, "the hand that pulls the strings|0", true)
+      .expectInZone(0, "silver|0", "board");
+
+    const withoutSilver = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: [],
+          deck: ["crackling|1"],
+          arsenalFaceDown: ["the hand that pulls the strings|0"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    withoutSilver
+      .endTurn()
+      .expectInZone(0, "the hand that pulls the strings|0", "arsenal")
+      .expectFaceDown(0, "the hand that pulls the strings|0", true);
+  });
+
+  it("The Hand destroys a Silver at the end phase while face up", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: [],
+          deck: ["crackling|1"],
+          arsenal: ["the hand that pulls the strings|0"],
+          board: ["silver|0"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.endTurn()
+      .expectInZone(0, "the hand that pulls the strings|0", "arsenal")
+      .expectNotInZone(0, "silver|0", "board");
+  });
+
+  it("The Hand goes to the deck bottom while face up with no Silver", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: [],
+          deck: Array(8).fill("crackling|1"),
+          arsenal: ["the hand that pulls the strings|0"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.endTurn()
+      .expectNotInZone(0, "the hand that pulls the strings|0", "arsenal")
+      .expectDeckBottom(0, "the hand that pulls the strings|0");
+  });
 });
