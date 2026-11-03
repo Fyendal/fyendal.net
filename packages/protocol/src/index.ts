@@ -1278,7 +1278,7 @@ function cardView(value: unknown, depth = 0): value is CardView {
     }, 16))
     && optional(card.attackAbilityIndexes, abilityIndexes)
     && optional(card.tapAbilityIndexes, abilityIndexes)
-    && optional(card.subcards, (v): v is CardView[] => array(v, (entry) => cardView(entry, depth + 1), 16))
+    && optional(card.subcards, (v): v is CardView[] => array(v, (entry) => cardView(entry, depth + 1), MAX_CARDS))
     && optional(card.grantedNames, (v): v is string[] => array(v, (entry): entry is string => string(entry, MAX_ID), 16))
     && optional(card.chosenName, (v): v is string => string(v, MAX_SHORT_TEXT, false))
     && optional(card.boundToInstanceId, instanceId)

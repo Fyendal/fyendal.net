@@ -14,6 +14,7 @@ import {
   prepViewFor,
   stateMessage,
 } from "../store.js";
+import { MAX_PERSISTED_STATE_BYTES } from "../persistedState.js";
 import { freshDb } from "./testdb.js";
 import { decodeStoredPassUntil } from "../passUntil.js";
 import { getAchievements } from "../achievements.js";
@@ -165,6 +166,29 @@ async function pendingBotOffer(): Promise<{
     userIds,
     pendingToken: joined.token,
   };
+}
+
+type PaddableState = {
+  state: { players: { deck: { scriptState?: Record<string, number> }[] }[] };
+};
+
+/** Grow a valid persisted state to exactly `size` serialized characters, within the 256 keys of 128 characters a card's flags allow. */
+function padToSize(stored: PaddableState, size: number): void {
+  const cards = stored.state.players.flatMap((player) => player.deck);
+  const remaining = () => size - JSON.stringify(stored).length;
+  for (const card of cards) {
+    if (remaining() < 30_000) {
+      const flags: Record<string, number> = { first: 1 };
+      card.scriptState = flags;
+      for (let i = 0; remaining() > 133; i += 1) flags[String(i).padEnd(Math.min(128, remaining() - 11), "x")] = 1;
+      flags["z".repeat(remaining() - 5)] = 1;
+      break;
+    }
+    card.scriptState = Object.fromEntries(
+      Array.from({ length: 200 }, (_, i) => [String(i).padEnd(128, "x"), 1]),
+    );
+  }
+  expect(remaining()).toBe(0);
 }
 
 async function startGame(code: string, tokens: [string, string]): Promise<void> {
@@ -2496,6 +2520,22 @@ describe("PgRoomStore storage", () => {
         name: "CorruptRoomError",
         path: "presence[0]",
       });
+  });
+
+  it("rejects a mutation whose state would not hydrate and leaves the room loadable", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    const { rows } = await db.query("SELECT state, version FROM rooms WHERE code = $1", [code]);
+    const stored = rows[0]!.state as PaddableState;
+    padToSize(stored, MAX_PERSISTED_STATE_BYTES - 5);
+    await db.query("UPDATE rooms SET state = $2 WHERE code = $1", [code, JSON.stringify(stored)]);
+
+    await expect(store.applyIntent(code, { token: tokens[0] }, { kind: "offer-draw" }))
+      .rejects.toMatchObject({ name: "CorruptRoomError", path: "envelope" });
+
+    const room = await store.getRoom(code);
+    expect(room?.version).toBe(Number(rows[0]!.version));
+    expect(room?.state?.drawOfferSeat).toBeUndefined();
   });
 
   it("validates stored spectator JSON before presence membership checks", async () => {

@@ -269,6 +269,24 @@ export function resumeWagerLossReplacements(
   }
 }
 
+/** Wagers resolve in the Damage Step, before go again pays out (CR 8.5.46). */
+export function queueWagerResults(state: GameStateInternal,
+  runtime: EngineRuntime, link: ChainLinkState): boolean {
+  if (!link.wagers?.length || link.flags.wagerResultsQueued === true) return false;
+  link.flags.wagerResultsQueued = true;
+  const layers: StackLayer[] = link.wagers.map((wager, wagerIndex) => ({
+    sourceInstanceId: wager.source.instanceId,
+    seat: wager.controllerSeat,
+    triggerIndex: -2000 - wagerIndex,
+    label: `Resolve wager: ${wager.rewardLabel}`,
+    optional: false,
+    engineEffect: { kind: "wager-result", wagerIndex },
+  }));
+  state.phase = "layer";
+  runtime.dispatchFlow("queueTriggeredLayers", state, [{ seat: link.attacker, layers }], "finish-link-resolution");
+  return true;
+}
+
 /** Resolve one wager after the chain link's hit result is known (CR 8.5.46). */
 export function resolveWagerLayer(state: GameStateInternal,
   runtime: EngineRuntime, layer: StackLayer): void {

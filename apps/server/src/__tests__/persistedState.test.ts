@@ -23,6 +23,24 @@ function jsonCopy<T>(value: T): T {
 }
 
 describe("PersistedStateV1", () => {
+  it("round-trips the sub-card stacks a large transform leaves", () => {
+    const source = game();
+    const subcards = () => Array.from({ length: 30 }, () => ({
+      instanceId: source.nextInstanceId++,
+      cardId: "UPR043",
+      owner: 0,
+    }));
+    source.players[0]!.hero.subcards = subcards();
+    source.players[0]!.equipment.arms!.subcards = subcards();
+
+    const decoded = decodePersistedState(
+      jsonCopy(encodePersistedState(source)), "ABCDEF", cardData, scripts,
+    );
+
+    expect(decoded.players[0]!.hero.subcards).toHaveLength(30);
+    expect(decodeGameView(jsonCopy(projectStateFor(decoded, 0)))).not.toBeNull();
+  });
+
   it.each(["own", "opponent", "both"] as const)(
     "round trips %s-zone play permissions with a base-cost override",
     (ownerScope) => {

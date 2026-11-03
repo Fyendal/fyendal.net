@@ -299,7 +299,7 @@ export interface ScriptCtx {
   requestClash(withSeat: number, resultHook: string): void;
   /** Wager with another hero on the current attack (CR 8.5.46). This marks
    *  the attack as having wagered immediately; its hit/miss result determines
-   *  the winner and awards the listed reward tokens when the link resolves.
+   *  the winner and awards the listed reward tokens in the Damage Step.
    *  Non-token rewards supply their public tooltip description explicitly. */
   wager(withSeat: number, rewardCardIds: readonly string[], rewardLabel?: string): void;
   /** Compare two heroes' life: 1 = a has more, -1 = a has less, 0 = tied.

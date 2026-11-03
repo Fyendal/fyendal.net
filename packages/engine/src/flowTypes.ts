@@ -32,6 +32,7 @@ export type FlowStepName =
   | "queueHitTriggers"
   | "queueReactionEventTriggers"
   | "queueTriggeredLayers"
+  | "queueWagerResults"
   | "reopenReactionWindow"
   | "resolveAbilityLayer"
   | "resolveDefendEventLayer"

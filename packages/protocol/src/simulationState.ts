@@ -346,7 +346,7 @@ function validateCard(value: unknown, code: string, path: string, depth = 0): vo
   optional(card, "playableFromSourceCardId", (v, p) => { string(v, code, p, 128); }, path);
   optional(card, "playableFromSingleUseGroup", (v, p) => { string(v, code, p, 128); }, path);
   optional(card, "temporaryGraveyardReplacement", (v, p) => { oneOf(v, ["banish"] as const, code, p); }, path);
-  optional(card, "subcards", (v, p) => array(v, code, p, 16).forEach(
+  optional(card, "subcards", (v, p) => array(v, code, p).forEach(
     (subcard, index) => validateCard(subcard, code, `${p}[${index}]`, depth + 1),
   ), path);
   optional(card, "playableFrom", (v, p) => array(v, code, p, 3).forEach((z, i) => oneOf(z, ["banish", "graveyard", "deck"] as const, code, `${p}[${i}]`)), path);

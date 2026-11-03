@@ -283,7 +283,7 @@ export interface StackLayer {
     | { kind: "mirage-destroy" }
     | { kind: "spectra-destroy" }
     | { kind: "watery-grave" }
-    /** A wager delayed until the current chain link resolves. */
+    /** A wager result delayed until the Damage Step. */
     | { kind: "wager-result"; wagerIndex: number }
     /** A hit-triggered script hook. The source is snapshotted when the hit
      * event occurs so the triggered layer remains independent if its source
@@ -433,7 +433,7 @@ export interface ChainLinkState {
   /** Public reward description for each wager completed on this link. */
   wagerRewards?: string[];
   /** Wagers generated on this link. Their winners and prizes are resolved
-   * after hit/miss is known at chain-link resolution (CR 8.5.46). */
+   * after hit/miss is known in the Damage Step (CR 8.5.46). */
   wagers?: PendingWager[];
   flags: Record<string, number | boolean>;
 }

@@ -10,7 +10,7 @@ import { queueHitTriggers, resolveOnHitLayer } from "./hits.js";
 import { beginReactionStep, reopenReactionWindow } from "./reactions.js";
 import { announceCardPlayed, cancelEndActionPass, collectEventTriggerLayers, continueStack, declarePlayedTriggerTargets, deferEventTriggers, enterAttackLayerWindow, enterAttackWindow, finishDamageStep, finishStackCardResolution, flushPendingTriggersAboveStack, holdLayerWindow, queueEventTriggers, queueReactionEventTriggers, queueTriggeredLayers, resolveAbilityLayer, resolveTopStackCard, resolveTopStackLayer } from "./triggers.js";
 import { continueEndPhase, endTurn } from "./turn.js";
-import { resolveWagerLayer } from "./wagers.js";
+import { queueWagerResults, resolveWagerLayer } from "./wagers.js";
 
 type FlowHandler = (...args: any[]) => any;
 
@@ -48,6 +48,7 @@ const handlers: Readonly<Record<FlowStepName, { fn: FlowHandler; injectRuntime: 
   queueHitTriggers: { fn: queueHitTriggers, injectRuntime: true },
   queueReactionEventTriggers: { fn: queueReactionEventTriggers, injectRuntime: true },
   queueTriggeredLayers: { fn: queueTriggeredLayers, injectRuntime: true },
+  queueWagerResults: { fn: queueWagerResults, injectRuntime: true },
   reopenReactionWindow: { fn: reopenReactionWindow, injectRuntime: true },
   resolveAbilityLayer: { fn: resolveAbilityLayer, injectRuntime: true },
   resolveDefendEventLayer: { fn: resolveDefendEventLayer, injectRuntime: true },

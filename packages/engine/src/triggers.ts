@@ -457,6 +457,7 @@ export function finishDamageStep(state: GameStateInternal, runtime: EngineRuntim
     continueStack(state, runtime);
     return;
   }
+  if (runtime.dispatchFlow("queueWagerResults", state, link)) return;
   if (link.flags.damageStepPriorityOpened !== true) {
     link.flags.damageStepPriorityOpened = true;
     state.stackResume = "finish-link-resolution";

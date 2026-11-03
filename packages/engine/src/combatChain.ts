@@ -24,7 +24,7 @@ import {
   logPublic,
   nameOf,
 } from "./gameLog.js";
-import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./state.js";
+import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
 
 import { findCardAnywhere, severDefendingEquipment } from "./zoneQueries.js";
 import {
@@ -91,24 +91,8 @@ function beginLinkResolutionStep(state: GameStateInternal,
  * return to the action phase. */
 export function finishLinkResolution(state: GameStateInternal,
   runtime: EngineRuntime, link: ChainLinkState): void {
+  if (runtime.dispatchFlow("queueWagerResults", state, link)) return;
   beginLinkResolutionStep(state, runtime, link);
-  if (
-    link.wagers?.length &&
-    link.flags.wagerResultsQueued !== true
-  ) {
-    link.flags.wagerResultsQueued = true;
-    const layers: StackLayer[] = link.wagers.map((wager, wagerIndex) => ({
-      sourceInstanceId: wager.source.instanceId,
-      seat: wager.controllerSeat,
-      triggerIndex: -2000 - wagerIndex,
-      label: `Resolve wager: ${wager.rewardLabel}`,
-      optional: false,
-      engineEffect: { kind: "wager-result", wagerIndex },
-    }));
-    state.phase = "layer";
-    runtime.dispatchFlow("queueTriggeredLayers", state, [{ seat: link.attacker, layers }], "finish-link-resolution");
-    return;
-  }
   const defendedByAttackAction = link.defendingCards.some((card) => {
     const data = dataOf(state, card.cardId);
     return data.cardType === "action" && (data.subtypes ?? []).includes("attack");

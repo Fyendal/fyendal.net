@@ -356,6 +356,22 @@ describe("DTD — registration and core mechanics", () => {
     expect(projected(nimblism!.instanceId)).toBe(link.attackValue);
   });
 
+  it("does not count a non-attack action that causes an attack as an attack action defender", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "ser boltyn, breaker of dawn|0", hand: ["beaming bravado|3", "banneret of vigor|2"] },
+        { hero: "dorinthea", hand: ["and again...|3"] },
+      ],
+    });
+    s.play("beaming bravado|3").chooseCard("banneret of vigor|2");
+    const attack = projectStateFor(s.state, 1).chain.at(-1)!.attackValue;
+    const [andAgain] = s.state.players[1]!.hand;
+    const projected = projectStateFor(s.state, 1).pendingDecision?.defenderDefense?.find(
+      (entry) => entry.instanceId === andAgain!.instanceId,
+    );
+    expect(projected?.attack).toBe(attack);
+  });
+
   it("prices a staged hand attack defender into Boltyn's power only for the defender", () => {
     const s = scenario({
       seats: [

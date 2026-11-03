@@ -467,6 +467,13 @@ function dehydrateSpectators(spectators: SpectatorRow[]): Array<{ tokenHash: str
   return spectators.map(({ tokenHash }) => ({ tokenHash }));
 }
 
+/** A state hydration would reject must never commit: it would brick the room. */
+function serializeRoomState(state: GameState, code: string, rulesetVersion: string): string {
+  const serialized = JSON.stringify(dehydrateState(state, rulesetVersion));
+  decodePersistedState(JSON.parse(serialized), code, cardData, scripts, rulesetVersion);
+  return serialized;
+}
+
 function hydrateState(s: unknown, code: string, rulesetVersion?: string): GameState | null {
   if (!s) return null;
   return decodePersistedState(s, code, cardData, scripts, rulesetVersion);
@@ -1164,7 +1171,7 @@ export class PgRoomStore {
       [
         room.code,
         JSON.stringify(dehydrateSpectators(room.spectators)),
-        room.state ? JSON.stringify(dehydrateState(room.state, room.rulesetVersion)) : null,
+        room.state ? serializeRoomState(room.state, room.code, room.rulesetVersion) : null,
         room.gcAt,
         room.prep ? JSON.stringify(room.prep) : null,
         status,

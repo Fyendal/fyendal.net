@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { cardData, scripts } from "@fyendal/cards";
 import { withTransaction, type Queryable } from "./db.js";
-import { decodePersistedState, encodePersistedState } from "./persistedState.js";
+import { CorruptRoomError, decodePersistedState, encodePersistedState } from "./persistedState.js";
 import { asRecord } from "./validation.js";
 import type { FixedBugReportNotification } from "@fyendal/protocol";
 
@@ -20,6 +20,25 @@ function requiredInteger(value: unknown, field: string): number {
   const number = Number(value);
   if (!Number.isSafeInteger(number)) throw new Error(`invalid bug-report ${field}`);
   return number;
+}
+
+/** A corrupt room is what most needs reporting, so keep its raw state and the decode error. */
+function captureState(
+  value: unknown,
+  code: string,
+  rulesetVersion: string,
+): { state: unknown; stateError?: string } {
+  try {
+    return {
+      state: encodePersistedState(
+        decodePersistedState(value, code, cardData, scripts, rulesetVersion),
+        rulesetVersion,
+      ),
+    };
+  } catch (error) {
+    if (!(error instanceof CorruptRoomError)) throw error;
+    return { state: value, stateError: error.message };
+  }
 }
 
 /** Persist an operator-only trace of the room at report time. The trace is
@@ -58,12 +77,9 @@ export async function createBugReport(
     const status = requiredString(room.status, "room status");
     const reporterSeat = requiredInteger(room.seat, "reporter seat");
     const winner = room.winner == null ? null : requiredInteger(room.winner, "winner");
-    const state = room.state == null
-      ? null
-      : encodePersistedState(
-          decodePersistedState(room.state, persistedCode, cardData, scripts, rulesetVersion),
-          rulesetVersion,
-        );
+    const captured = room.state == null
+      ? { state: null }
+      : captureState(room.state, persistedCode, rulesetVersion);
 
     const { rows: historyRows } = await tx.query(
       `SELECT version, state FROM room_history
@@ -75,10 +91,7 @@ export async function createBugReport(
       if (!row) throw new Error("invalid bug-report history row");
       return {
         version: requiredInteger(row.version, "history version"),
-        state: encodePersistedState(
-          decodePersistedState(row.state, persistedCode, cardData, scripts, rulesetVersion),
-          rulesetVersion,
-        ),
+        ...captureState(row.state, persistedCode, rulesetVersion),
       };
     });
     const capturedAt = Date.now();
@@ -94,7 +107,7 @@ export async function createBugReport(
         status,
         winner,
         reporterSeat,
-        state,
+        ...captured,
       },
       history,
     };
