@@ -70,7 +70,8 @@ export function defendingHeroCannotRespondBelowPower(
 }
 
 /** Defense-reaction restrictions on the link: "defense reactions can't be
- *  played to this chain link" (link flag noDefenseReactions) and "defense
+ *  played to this chain link" (the attacking card's script or link flag
+ *  noDefenseReactions) and "defense
  *  reactions can't be played from arsenal this chain link" (a modifier riding
  *  the link). Consulted in enumeration AND validation. */
 export function defenseReactionRestriction(
@@ -80,6 +81,7 @@ export function defenseReactionRestriction(
   return {
     all:
       link.flags.noDefenseReactions === true ||
+      scriptOf(state, link.attackingCard.cardId, link.attackingCard)?.defenseReactionsProhibited === true ||
       (state.players[link.attacker] as PlayerState).flags.noDefenseReactionsThisTurn === true,
     fromArsenal: activeModifiers(state, link, ["chain-link"]).some(
       (m) => m.noDefenseReactionsFromArsenal === true,

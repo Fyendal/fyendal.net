@@ -14771,7 +14771,7 @@
   "card.trigger.common.adverseaura.random": [
     {
       "type": 0,
-      "value": "随机生成一个负面灵气 (Aura)"
+      "value": "随机生成一个疾病衍生物"
     }
   ],
   "card.trigger.common.agentofchaos.random": [

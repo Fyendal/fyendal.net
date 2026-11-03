@@ -1477,7 +1477,7 @@
   "card.trigger.common.wager.dominate": "若该攻击进行过 wager，则获得压制 (dominate)",
   "card.trigger.common.wager.mightvigor": "与防守英雄以 Might 和 Vigor 进行 wager",
   "card.trigger.common.zenstate.maintain": "移除一个 balance 指示物，或摧毁 Zen State",
-  "card.trigger.common.adverseaura.random": "随机生成一个负面灵气 (Aura)",
+  "card.trigger.common.adverseaura.random": "随机生成一个疾病衍生物",
   "card.trigger.common.agentofchaos.random": "变为一个随机的 Agent of Chaos",
   "card.trigger.common.agility.destroy": "摧毁 Agility；下一次攻击获得 go again",
   "card.trigger.common.amp": "增幅 (amp) {amount}",

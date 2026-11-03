@@ -1526,6 +1526,9 @@ export interface CardScript {
   /** While this card attacks, the defending hero cannot play/activate
    * instants or defense reactions unless a defender has at least its power. */
   defendingHeroCannotRespondBelowPower?: boolean;
+  /** While this card is the attacking card, defense reactions can't be played
+   * to its chain link, even if it became the attacking card without attacking. */
+  defenseReactionsProhibited?: boolean;
   /** While its controller has a face-up arsenal card, this active permanent
    * provides one additional arsenal zone. */
   additionalArsenalZoneWhileFaceUp?: boolean;

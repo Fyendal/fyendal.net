@@ -112,7 +112,7 @@ const triggerMessagesByLabel: Readonly<Record<string, GameMessage>> = {
   "Create a Frostbite in an exposed equipment zone": { id: "card.trigger.common.frostbite.exposed.create" },
   "Create a Goldkiss Rum token": { id: "card.trigger.common.goldkissrum.create" },
   "Create a Lightning Flow token": { id: "card.trigger.common.lightningflow.create" },
-  "Create a random adverse aura": { id: "card.trigger.common.adverseaura.random" },
+  "Create a random disease token": { id: "card.trigger.common.adverseaura.random" },
   "Create a Seismic Surge token": { id: "card.trigger.common.seismicsurge.create" },
   "Create Agility, Might, and Vigor tokens": { id: "card.trigger.common.wagertokens.create.three" },
   "Create an Embodiment of Lightning or Lightning Flow": { id: "card.trigger.common.lightningembodiment.or.flow" },

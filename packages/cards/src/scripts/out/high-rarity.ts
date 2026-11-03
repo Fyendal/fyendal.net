@@ -177,7 +177,7 @@ export const outHighRarity: Record<string, CardScript> = {
       {
         event: "card-pitched",
         sourceZone: "pitch",
-        label: "Create a random adverse aura",
+        label: "Create a random disease token",
         condition: (ctx, pitched) => pitched?.instanceId === ctx.self.instanceId,
         effect(ctx) {
           const tokens = [BLOODROT, FRAILTY, INERTIA];

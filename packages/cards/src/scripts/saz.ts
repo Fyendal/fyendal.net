@@ -35,7 +35,7 @@ import {
 // - "Damage … can't be prevented" (Murkmire Grapnel) is the unpreventable
 //   link flag: resolveLink skips prevention shields and the Ward decision.
 // - "Defense reactions can't be played … this chain link": the
-//   noDefenseReactions link flag (Widowmaker) and the
+//   defenseReactionsProhibited script field (Widowmaker) and the
 //   Modifier.noDefenseReactionsFromArsenal field (Release the Tension),
 //   enforced in enumeration and validation via defenseReactionRestriction.
 // - Piercing 1 (Drill Shot) is scripted per CR 8.3.23 ("if this is defended
@@ -435,10 +435,7 @@ export const saz: Record<string, CardScript> = {
   "spire sniping|2": spireSnipingScript(),
 
   "widowmaker|2": {
-    // "Defense reactions can't be played to Widowmaker's chain link."
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "noDefenseReactions", true);
-    },
+    defenseReactionsProhibited: true,
     // "If Widowmaker is defended by fewer than 2 cards, it has +3{p}."
     modifyAttack(ctx) {
       const link = ctx.link;

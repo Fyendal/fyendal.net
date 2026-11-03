@@ -17,7 +17,7 @@ import {
 //   counters (computeAttack) and an end-of-turn trigger; the hit count itself
 //   is a per-turn flag (auto-wiped).
 // - Wreck Havoc's "defense reactions can't be played to this chain link" is
-//   the noDefenseReactions link flag (SAZ). Its arsenal reveal destroys the
+//   the defenseReactionsProhibited script field. Its arsenal reveal destroys the
 //   revealed card if it is a defense reaction (arsenal cards are public in
 //   this engine except face-down mentors — "turn face up" clears faceDown).
 // - Granted piercing (Puncture) rides the generic static Piercing modifier.
@@ -111,10 +111,7 @@ export const sdo: Record<string, CardScript> = {
   // ── Attacks ───────────────────────────────────────────────────────────────
 
   "wreck havoc|1": {
-    // "Defense reactions can't be played to this chain link."
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "noDefenseReactions", true);
-    },
+    defenseReactionsProhibited: true,
     // "When this hits a hero, you may turn a card in their arsenal face up,
     //  then destroy a defense reaction in their arsenal."
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,

@@ -1477,7 +1477,7 @@
   "card.trigger.common.wager.dominate": "If it wagered, it gains dominate",
   "card.trigger.common.wager.mightvigor": "Wager Might and Vigor with the defending hero",
   "card.trigger.common.zenstate.maintain": "Remove a balance counter, or destroy Zen State",
-  "card.trigger.common.adverseaura.random": "Create a random adverse Aura",
+  "card.trigger.common.adverseaura.random": "Create a random disease token",
   "card.trigger.common.agentofchaos.random": "Become a random Agent of Chaos",
   "card.trigger.common.agility.destroy": "Destroy Agility; the next attack gains go again",
   "card.trigger.common.amp": "Amp {amount}",

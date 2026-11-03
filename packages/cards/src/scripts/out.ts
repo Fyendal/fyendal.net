@@ -96,9 +96,7 @@ function stealthToken(tokenId: string): CardScript {
 }
 function noDefenseReactions(): CardScript {
   return {
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "noDefenseReactions", true);
-    },
+    defenseReactionsProhibited: true,
   };
 }
 function stealthReaction(pump: number, token?: string): CardScript {
@@ -158,9 +156,7 @@ function aimOnly(): CardScript {
 }
 function widowmaker(): CardScript {
   return {
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "noDefenseReactions", true);
-    },
+    defenseReactionsProhibited: true,
     modifyAttack(ctx) {
       return (ctx.link?.defendingCards.length ?? 0) + (ctx.link?.defendingEquipment.length ?? 0) < 2 ? 3 : 0;
     },

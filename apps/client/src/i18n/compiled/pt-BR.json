@@ -16316,7 +16316,7 @@
   "card.trigger.common.adverseaura.random": [
     {
       "type": 0,
-      "value": "Crie uma Aura adversa aleatória"
+      "value": "Crie um token de doença aleatório"
     }
   ],
   "card.trigger.common.agentofchaos.random": [

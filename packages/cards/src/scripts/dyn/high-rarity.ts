@@ -718,7 +718,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       ),
     onHit(ctx) {
       const top = ctx.player(opponentSeat(ctx)).deck[0];
-      if (top) ctx.banish(top.instanceId);
+      if (top) ctx.banish(top.instanceId, { asAttackingCard: true });
     },
   }),
   "eradicate|2": {

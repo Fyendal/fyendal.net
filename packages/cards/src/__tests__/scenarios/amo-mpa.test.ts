@@ -419,6 +419,50 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     expect(boardNames(game, 0).filter((name) => name === "Silver")).toHaveLength(2);
   });
 
+  it("Mutually Assured Destruction triggers again when the same card attacks after returning from the graveyard", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [MAD, "lunging press|3"],
+        deck: [
+          "head jab|1",
+          "codex of frailty|2",
+          "lunging press|3",
+          "wounding blow|3",
+          "snatch|1",
+          "head jab|1",
+          "snatch|1",
+          "head jab|1",
+          "snatch|1",
+        ],
+        resources: 2,
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      {
+        hero: "dorinthea",
+        deck: Array.from({ length: 12 }, () => "raging onslaught|1"),
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    game.play(MAD).blockWith().react("lunging press|3").endTurn();
+    game.passActionPhase().settle().chooseOption("no").expectTurn(3);
+    const banishedBefore = game.state.players[0]!.banish.length;
+
+    game.play("codex of frailty|2")
+      .chooseCard(MAD)
+      .chooseCard("snatch|1")
+      .play(MAD, { fromArsenal: true, pitch: ["wounding blow|3"] })
+      .blockWith()
+      .react("lunging press|3");
+
+    expect(game.state.players[0]!.banish).toHaveLength(banishedBefore + 1);
+    expect(boardNames(game, 0).filter((name) => name === "Bloodrot Pox")).toHaveLength(1);
+    expect(boardNames(game, 1).filter((name) => name === "Bloodrot Pox")).toHaveLength(1);
+  });
+
   it("Demoralize the Dracai banishes after friendly attack action hits and completes its contract on red cards", () => {
     const game = scenario({ seats: [
       {
@@ -1112,7 +1156,7 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     game.play(KISS_OF_DEATH).blockWith().passPriority()
       .react("stormwind sheath|1", { pitch: [PLAGUE_HIVE], settle: false });
 
-    expect(game.stackLabels()).toEqual(["Create a random adverse aura", "Stormwind Sheath"]);
+    expect(game.stackLabels()).toEqual(["Create a random disease token", "Stormwind Sheath"]);
     expect(game.state.priorityPlayer).toBe(1);
   });
 
@@ -1125,7 +1169,7 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     game.play("humble entrance|3").passPriority()
       .react("oasis respite|1", { pitch: [PLAGUE_HIVE], settle: false });
 
-    expect(game.stackLabels()).toEqual(["Create a random adverse aura", "Oasis Respite"]);
+    expect(game.stackLabels()).toEqual(["Create a random disease token", "Oasis Respite"]);
     expect(game.state.priorityPlayer).toBe(1);
   });
 

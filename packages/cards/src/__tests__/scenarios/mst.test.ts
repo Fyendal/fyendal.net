@@ -650,6 +650,60 @@ describe("MST — Assassin", () => {
       .expectLife(0, 22);
   });
 
+  it("Mask of Perdition's granted banish counts as Bonds of Attraction banishing a matching card", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["bonds of attraction|3", "just a nick|1"],
+          equipment: { head: "mask of perdition|0" },
+        },
+        {
+          hero: "dorinthea",
+          deck: ["wounding blow|3", "wounding blow|2", "wounding blow|2"],
+          graveyard: ["raging onslaught|3"],
+        },
+      ],
+    });
+
+    g.play("bonds of attraction|3")
+      .blockWith()
+      .activate("mask of perdition|0", { settle: false })
+      .passPriority()
+      .passPriority()
+      .react("just a nick|1")
+      .chooseOption("both")
+      .chooseCard("raging onslaught|3")
+      .settle()
+      .expectZoneSize(1, "banish", 4)
+      .expectLife(0, 22);
+  });
+
+  it("Arakni, Funnel Web's granted banish counts as Bonds of Attraction banishing a matching card", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "arakni, funnel web|0",
+          hand: ["bonds of attraction|3", "bonds of attraction|2"],
+        },
+        {
+          hero: "dorinthea",
+          deck: ["wounding blow|1"],
+          arsenal: ["raging onslaught|1"],
+        },
+      ],
+    });
+
+    g.play("bonds of attraction|3")
+      .blockWith()
+      .activate("arakni, funnel web|0", { settle: false })
+      .chooseCard("bonds of attraction|2")
+      .settle()
+      .expectZoneSize(1, "banish", 2)
+      .expectLife(0, 21);
+  });
+
   it("Just a Nick's banish does not add a hand color for Persuasive Prognosis", () => {
     const g = scenario({
       seats: [

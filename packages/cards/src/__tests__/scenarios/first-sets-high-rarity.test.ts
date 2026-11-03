@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { projectStateFor } from "@fyendal/engine";
 import { functionalKeyOf } from "../../functional.js";
 import { cardData } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
@@ -77,7 +78,7 @@ describe("WTR, ARC, and CRU high-rarity cards", () => {
       { hero: "dorinthea", arsenalFaceDown: ["sink below|1"], equipment: NO_EQUIPMENT },
     ] });
     g.play("command and conquer|1", { settle: false });
-    expect(g.state.chain.at(-1)!.flags.noDefenseReactions).toBe(true);
+    expect(projectStateFor(g.state, 1).chain.at(-1)!.defenseReactionsBlockedFromArsenal).toBe(true);
     g.blockWith().settle().expectZoneSize(1, "arsenal", 0).expectInZone(1, "sink below|1", "graveyard");
   });
 

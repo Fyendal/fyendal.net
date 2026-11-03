@@ -558,9 +558,7 @@ export const arcHighRarity: Record<string, CardScript> = {
     arcaneBarrierValue: (ctx) => (ctx.player(ctx.seat).life < ctx.player(opponentSeat(ctx)).life ? 3 : 0),
   },
   "command and conquer|1": {
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "noDefenseReactions", true);
-    },
+    defenseReactionsProhibited: true,
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
       for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) {

@@ -707,7 +707,7 @@ export const sar: Record<string, CardScript> = {
       const card = opp.arsenal[0];
       if (!card) return;
       ctx.setCardFaceDown(card.instanceId, false);
-      ctx.banish(card.instanceId);
+      ctx.banish(card.instanceId, { asAttackingCard: true });
     },
     triggers: [returnToBrood()],
   },

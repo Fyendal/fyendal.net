@@ -7,6 +7,14 @@ const BLUE = "wrecker romp|3";
 const NON_ATTACK = "nimblism|3";
 const GRAPHENE = "graphene chelicera|0";
 
+// Swaps in the attacker's last hand card, then stops at the defender's reaction priority.
+function reactionPlayableAfterSwap(s: ReturnType<typeof scenario>, reaction: number): boolean {
+  s.activate("uzuri|0");
+  s.doRaw({ kind: "choose", optionId: String(s.state.players[0]!.hand.at(-1)!.instanceId) });
+  while (s.state.stack.length > 0 || s.state.priorityPlayer !== 1) s.passPriority();
+  return legalIntents(s.state, 1).some((intent) => intent.kind === "play-card" && intent.instanceId === reaction);
+}
+
 describe("OUT — registration and core mechanics", () => {
   it("registers every printing and all heroes", () => {
     expect(Object.keys(cardData).filter((id) => id.startsWith("OUT"))).toHaveLength(239);
@@ -1027,6 +1035,32 @@ describe("OUT — rules regression coverage", () => {
       .chooseCard("remember the mists|3");
     expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Remember the Mists");
     expect(s.state.chain.at(-1)!.damage).toBe(6);
+  });
+
+  it("Uzuri's replacement attack applies its defense-reaction prohibition", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "command and conquer|1"] },
+        { hero: "dorinthea", hand: ["sink below|1"] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    const reaction = s.state.players[1]!.hand[0]!.instanceId;
+    expect(reactionPlayableAfterSwap(s, reaction)).toBe(false);
+    expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Command and Conquer");
+  });
+
+  it("Uzuri replacing Back Stab removes its defense-reaction prohibition", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["back stab|1", "infect|1"] },
+        { hero: "dorinthea", hand: ["sink below|1"] },
+      ],
+    });
+    s.play("back stab|1").blockWith();
+    const reaction = s.state.players[1]!.hand[0]!.instanceId;
+    expect(reactionPlayableAfterSwap(s, reaction)).toBe(true);
+    expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Infect");
   });
 
   it("Uzuri turns an ineligible cost card face up without replacing the attack", () => {
