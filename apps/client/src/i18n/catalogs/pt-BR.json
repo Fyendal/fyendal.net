@@ -1288,7 +1288,7 @@
   "card.sfa.flame.discard.draw": "Fire that Burns Within: descartar um Phoenix Flame para comprar uma carta e receber +2 de poder?",
   "card.sfa.flame.return": "Rise from the Ashes: devolver um Phoenix Flame do seu cemitério para a sua mão?",
   "card.sfa.flame.search": "Flamecall Awakening: procurar um Phoenix Flame no seu deck?",
-  "card.sly.damage.source.choose": "Prevenir os próximos {amount} de dano de qual fonte?",
+  "card.sly.damage.source.choose": "{target, select, self {Prevenir os próximos {amount} de dano ao seu herói de qual fonte?} other {Prevenir os próximos {amount} de dano ao herói oponente de qual fonte?}}",
   "card.sly.oasis.hero.choose": "Oasis Respite: escolher qual herói como alvo?",
   "card.sly.oasis.life.gain": "Oasis Respite: ganhar {amount} de vida?",
   "card.sly.shortshrift.card.discard": "Short Shrift crush: escolha uma carta para descartar",

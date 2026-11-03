@@ -60,9 +60,11 @@ does not consult ambient configuration.
   own abilities that resolve afterwards (`ctx.lastKnownCounter`).
   `scriptState` holds script bookkeeping and engine statuses
   (`ctx.getState`/`setState`). It survives zone moves except arena-only
-  statuses, and `project.ts` exposes only its named public statuses, inside
-  `CardView.counters` for arena cards. Never store bookkeeping as a counter,
-  and add a new rules counter to `CounterKind` and the protocol decoder.
+  statuses and is cleared when the card is next played, as a new object; state
+  that must reach a play belongs in a flag. `project.ts` exposes only its named
+  public statuses, inside `CardView.counters` for arena cards. Never store
+  bookkeeping as a counter, and add a new rules counter to `CounterKind` and
+  the protocol decoder.
 - `PlayerState` holds the hero, life, resources, action points, flags, and all
   zones: hand, deck, arsenal, pitch, graveyard, banish, soul, equipment,
   weapons, and board. Face-down banished cards are inert — no properties, not

@@ -77,7 +77,7 @@ import { lingeringModifierSources } from "./sourceQueries.js";
 import { continueFollowUpDecisions } from "./decisionQueue.js";
 
 import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts, prepareDestroySubcardCost } from "./abilityRules.js";
-import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
+import { consumeNextActionGoAgain, noteActionPlayedOrActivated, startPlayScriptState } from "./cardLifecycle.js";
 import { answerArcaneBarrier } from "./damageResolution.js";
 import { answerAttackTargetDamageOrder } from "./damage.js";
 import { answerDieRollReplacement } from "./dieRoll.js";
@@ -209,6 +209,7 @@ export function playCard(
   if (player.deck.length < declaredBoostCount) {
     return `cannot boost ${declaredBoostCount} times with only ${player.deck.length} card(s) in deck`;
   }
+  if (!additionalCostDeclared) startPlayScriptState(card);
   if (script?.canPlay && !script.canPlay(runtime.makeCtx(state, seat, card, undefined, from === "arsenal"))) {
     return `${nameOf(state, card.cardId)} cannot be played now`;
   }

@@ -7,6 +7,9 @@ export const PHONE_LANDSCAPE_QUERY =
 export const TOUCH_LANDSCAPE_QUERY =
   "(min-width: 701px) and (orientation: landscape) and (pointer: coarse)";
 
+/** A device whose main pointer can hover, so cards preview without a tap. */
+export const FINE_HOVER_QUERY = "(hover: hover) and (pointer: fine)";
+
 const matches = (query: string) =>
   typeof window !== "undefined" && window.matchMedia(query).matches;
 
@@ -14,4 +17,9 @@ const matches = (query: string) =>
 export function isTouchBoardViewport(): boolean {
   return matches(MOBILE_FLOAT_QUERY)
     || (matches(PHONE_LANDSCAPE_QUERY) && matches("(pointer: coarse)"));
+}
+
+/** Without hover a tap inspects inert cards, even on layouts too large for phones. */
+export function tapInspectsCards(): boolean {
+  return isTouchBoardViewport() || !matches(FINE_HOVER_QUERY);
 }

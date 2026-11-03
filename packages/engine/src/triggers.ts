@@ -47,7 +47,7 @@ import {
 } from "./combatValues.js";
 
 import { abilityResourceCost, activatedAbilityAvailable, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
-import { clearPlayFromZoneGrant, settlesInArena, settlePlayedCard } from "./cardLifecycle.js";
+import { clearPlayFromZoneGrant, settlesInArena, settlePlayedCard, startPlayScriptState } from "./cardLifecycle.js";
 import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, consumeSingleUsePlayFromGroup, mayPlayFromArsenal, mayPlayFromZone, modifierMatchesPlayedCard, noteCardPlayed, notePlayPermissionSource, payAlternativePlayCost, playFromZoneOwnerMatches, playTargetOptions, preparePlayTarget, spendFriendlyPlayPermission } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchValueOfInstance } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
@@ -608,6 +608,7 @@ export function playWindowInstant(
   if (cardPlayRestrictedByModifier(state, seat, card)) {
     return `${nameOf(state, card.cardId)} cannot be played due to a card-type restriction`;
   }
+  startPlayScriptState(card);
   if (script?.canPlay && !script.canPlay(runtime.makeCtx(state, seat, card, link, fromArsenal))) {
     return `${nameOf(state, card.cardId)} cannot be played now`;
   }

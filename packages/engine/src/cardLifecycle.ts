@@ -67,6 +67,11 @@ export function clearPrivateZonePlacement(card: CardInstance): void {
  * a resolving layer and its lingering effects can still read it. */
 const ARENA_STATUS_KEYS = ["attacked", "frozenUntilTurn", "marked"];
 
+/** A played card is a new object. Call before `canPlay`, which may record cost state. */
+export function startPlayScriptState(card: CardInstance): void {
+  delete card.scriptState;
+}
+
 /** A card-scoped play permission ends when the card is played or changes zones
  * (CR 3.0.9); effects that grant one to the new object do so after moving it. */
 export function clearPlayFromZoneGrant(card: CardInstance): void {

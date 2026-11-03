@@ -1288,7 +1288,7 @@
   "card.sfa.flame.discard.draw": "Fire that Burns Within: discard a Phoenix Flame to draw a card and get +2 power?",
   "card.sfa.flame.return": "Rise from the Ashes: return a Phoenix Flame from your graveyard to your hand?",
   "card.sfa.flame.search": "Flamecall Awakening: search your deck for a Phoenix Flame?",
-  "card.sly.damage.source.choose": "Prevent the next {amount} damage from which source?",
+  "card.sly.damage.source.choose": "{target, select, self {Prevent the next {amount} damage to your hero from which source?} other {Prevent the next {amount} damage to the opposing hero from which source?}}",
   "card.sly.oasis.hero.choose": "Oasis Respite: target which hero?",
   "card.sly.oasis.life.gain": "Oasis Respite: gain {amount} life?",
   "card.sly.shortshrift.card.discard": "Short Shrift crush: choose a card to discard",

@@ -291,10 +291,11 @@ const plasmaPurifier: CardScript = {
 
 const remorseless: CardScript = {
   onEnterArsenal(ctx) {
-    if (!ctx.self.faceDown) ctx.setState("faceUpLoadedTurn", ctx.state.turn);
+    // A player flag, because the card's script state resets when it is played.
+    if (!ctx.self.faceDown) ctx.setFlag("player", `faceUpLoadedTurn:${ctx.self.instanceId}`, ctx.state.turn);
   },
   onAttackDeclared(ctx) {
-    if (ctx.getState("faceUpLoadedTurn") === ctx.state.turn) ctx.addModifier({ scope: "chain-link", noDefenseReactionsFromArsenal: true });
+    if (ctx.getFlag("player", `faceUpLoadedTurn:${ctx.self.instanceId}`) === ctx.state.turn) ctx.addModifier({ scope: "chain-link", noDefenseReactionsFromArsenal: true });
   },
   onHit(ctx) {
     const target = ctx.player(opponentSeat(ctx));

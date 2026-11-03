@@ -51,7 +51,7 @@ import {
   removeFromArray,
 } from "./zoneQueries.js";
 import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts, prepareDestroySubcardCost } from "./abilityRules.js";
-import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
+import { consumeNextActionGoAgain, noteActionPlayedOrActivated, startPlayScriptState } from "./cardLifecycle.js";
 import { canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, mayPlayFromArsenal, mayPlayFromZone, notePlayPermissionSource, payAlternativePlayCost, preparePlayTarget } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
@@ -641,6 +641,7 @@ export function playReaction(
       return `${nameOf(state, card.cardId)} cannot defend this attack`;
     }
   }
+  if (!additionalCostDeclared) startPlayScriptState(card);
   if (script?.canPlay && !script.canPlay(runtime.makeCtx(state, seat, card, link, fromArsenal))) {
     return `${nameOf(state, card.cardId)} cannot be played now`;
   }

@@ -1,5 +1,5 @@
-/* Phone card inspection: the printed card alone, held up over the blurred board. */
-@media (max-width: 700px), (orientation: landscape) and (max-height: 520px) {
+/* Touch card inspection: the printed card alone, held up over the blurred board. */
+@media (max-width: 700px), (orientation: landscape) and (max-height: 520px), (hover: none), (pointer: coarse) {
   #root:has(.mobile-card-inspect-sheet) .social-dock { display: none; }
 
   .mobile-card-inspect-backdrop {
@@ -75,7 +75,7 @@
 }
 
 /* Upright: the card fills the width and close sits under the thumb. */
-@media (max-width: 700px) and (orientation: portrait) {
+@media (max-width: 700px) and (orientation: portrait), (orientation: portrait) and (hover: none), (orientation: portrait) and (pointer: coarse) {
   .mobile-card-inspect-sheet {
     width: 100%;
     padding-bottom: 60px;
@@ -99,7 +99,7 @@
 }
 
 /* Sideways: height is the constraint, so close moves into the gutter beside the card. */
-@media (orientation: landscape) and (max-height: 520px), (orientation: landscape) and (max-width: 700px) {
+@media (orientation: landscape) and (max-height: 520px), (orientation: landscape) and (max-width: 700px), (orientation: landscape) and (hover: none), (orientation: landscape) and (pointer: coarse) {
   .mobile-card-inspect-backdrop { padding: 12px; }
   .mobile-card-inspect-sheet {
     --inspect-card-height: calc(100dvh - 24px);

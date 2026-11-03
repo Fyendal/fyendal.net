@@ -15147,16 +15147,42 @@
   ],
   "card.sly.damage.source.choose": [
     {
-      "type": 0,
-      "value": "¿De qué fuente evitar los próximos "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de daño?"
+      "type": 5,
+      "value": "target",
+      "options": {
+        "self": {
+          "value": [
+            {
+              "type": 0,
+              "value": "¿De qué fuente evitar los próximos "
+            },
+            {
+              "type": 1,
+              "value": "amount"
+            },
+            {
+              "type": 0,
+              "value": " de daño a tu héroe?"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "¿De qué fuente evitar los próximos "
+            },
+            {
+              "type": 1,
+              "value": "amount"
+            },
+            {
+              "type": 0,
+              "value": " de daño al héroe oponente?"
+            }
+          ]
+        }
+      }
     }
   ],
   "card.sly.oasis.hero.choose": [

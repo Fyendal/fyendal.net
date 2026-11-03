@@ -1288,7 +1288,7 @@
   "card.sfa.flame.discard.draw": "Fire that Burns Within：弃置一张凤凰烈焰以抽一张牌，并使力量 +2？",
   "card.sfa.flame.return": "Rise from the Ashes：将墓地中的一张凤凰烈焰返回手牌？",
   "card.sfa.flame.search": "Flamecall Awakening：从牌库中搜寻一张凤凰烈焰？",
-  "card.sly.damage.source.choose": "选择防止接下来由哪个来源造成的 {amount} 点伤害",
+  "card.sly.damage.source.choose": "{target, select, self {选择防止接下来由哪个来源对你的英雄造成的 {amount} 点伤害} other {选择防止接下来由哪个来源对对方英雄造成的 {amount} 点伤害}}",
   "card.sly.oasis.hero.choose": "Oasis Respite：选择目标英雄",
   "card.sly.oasis.life.gain": "Oasis Respite：获得 {amount} 点生命？",
   "card.sly.shortshrift.card.discard": "Short Shrift 的 crush：选择一张牌弃置",

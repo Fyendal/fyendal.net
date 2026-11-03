@@ -92,11 +92,14 @@ function oasisRespite(amount: number): CardScript {
         const target = heroChoiceSeat(ctx, option);
         if (target === undefined) return;
         ctx.setState("oasisTarget", target);
+        const ownHero = target === ctx.seat;
         ctx.requestCardChoice(
           "source",
-          decisionPrompt(`Prevent the next ${amount} damage from which source?`, "card.sly.damage.source.choose", {
-            values: { amount },
-          }),
+          decisionPrompt(
+            `Prevent the next ${amount} damage to ${ownHero ? "your hero" : "the opposing hero"} from which source?`,
+            "card.sly.damage.source.choose",
+            { values: { amount, target: ownHero ? "self" : "opposing" } },
+          ),
           damageSourceCandidates(ctx),
         );
         return;

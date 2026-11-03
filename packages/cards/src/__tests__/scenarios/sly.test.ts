@@ -668,6 +668,27 @@ describe("SLY — attacks and defense", () => {
       .expectLife(0, 9);
   });
 
+  it("Oasis Respite's source prompt names the chosen hero", () => {
+    for (const [option, target] of [["your hero", "self"], ["opposing hero", "opposing"]] as const) {
+      const g = scenario({
+        seats: [
+          lyath({ hand: ["oasis respite|1", "goon beatdown|3"] }),
+          foe({ hand: ["buckling blow|3"], resources: 4 }),
+        ],
+        active: 1,
+      });
+      g.play("buckling blow|3");
+      g.blockWith();
+      g.passPriority();
+      g.react("oasis respite|1", { pitch: ["goon beatdown|3"] });
+      g.chooseOption(option);
+      expect(g.state.pendingDecision?.promptMessage).toEqual({
+        id: "card.sly.damage.source.choose",
+        values: { amount: 4, target },
+      });
+    }
+  });
+
   it("Oasis Respite prevents damage from Buckling Blow", () => {
     const g = scenario({
       seats: [

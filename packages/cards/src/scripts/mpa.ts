@@ -439,8 +439,6 @@ export const mpa: Record<string, CardScript> = {
       // Its reaction-play trigger must remain functional for every link while
       // this Contract attack stays face up on the combat chain.
       ctx.addModifier({ scope: "combat-chain" });
-      // scriptState survives zone moves, so a replayed copy would stay spent.
-      for (const player of ctx.state.players) ctx.setState(`reaction:${player.seat}`, 0);
     },
     triggers: [
       {

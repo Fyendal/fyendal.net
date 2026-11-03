@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef } from "react";
-import { isTouchBoardViewport } from "./board/viewportQueries.js";
 
 export const CARD_LONG_PRESS_MS = 425;
 export const CARD_LONG_PRESS_MOVE_PX = 10;
@@ -67,11 +66,7 @@ export function useMobileCardLongPress(
   }, []);
 
   const onPointerDown = useCallback((event: React.PointerEvent) => {
-    if (
-      event.pointerType !== "touch"
-      || !event.isPrimary
-      || !isTouchBoardViewport()
-    ) return;
+    if (event.pointerType !== "touch" || !event.isPrimary) return;
     const target = event.target as HTMLElement;
     const cardId = mobileCardLongPressCardId(target);
     if (!cardId) return;
@@ -116,8 +111,9 @@ export function useMobileCardLongPress(
   }, []);
 
   const onContextMenu = useCallback((event: React.MouseEvent) => {
+    // Only a touch hold; a mouse right-click keeps the browser's menu.
     if (
-      isTouchBoardViewport()
+      touchPressTargetRef.current
       && (event.target as HTMLElement).closest("[data-cardid]")
     ) event.preventDefault();
   }, []);

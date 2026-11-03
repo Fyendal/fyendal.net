@@ -26,7 +26,7 @@ import {
   HAND_DROP_SETTLE_MS,
   HAND_TOUCH_HOLD_MS,
 } from "./handMotion.js";
-import { isTouchBoardViewport, MOBILE_FLOAT_QUERY } from "./viewportQueries.js";
+import { MOBILE_FLOAT_QUERY } from "./viewportQueries.js";
 import { cardPreviewSize } from "../Card.js";
 import { cardPreviewFaceBox } from "../cardPreviewFaces.js";
 
@@ -422,7 +422,7 @@ export function useHandReorder(
           lastFrameTime: 0,
           previousX: event.clientX,
           tilt: 0,
-          touch: event.pointerType === "touch" && isTouchBoardViewport(),
+          touch: event.pointerType === "touch",
           holdTimer: 0,
           preview: { width: 0, height: 0, stacked: false },
           previewSide: "right",

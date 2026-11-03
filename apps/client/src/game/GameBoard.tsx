@@ -84,7 +84,7 @@ import { useMatSeam } from "./board/useMatSeam.js";
 import { resolvePlaymat, type PlaymatId } from "../playmats.js";
 import { PriorityArrivalFlash } from "./board/priorityArrival.js";
 import { useGameViewport } from "./board/useGameViewport.js";
-import { isTouchBoardViewport } from "./board/viewportQueries.js";
+import { FINE_HOVER_QUERY, tapInspectsCards } from "./board/viewportQueries.js";
 import { useHudReserve } from "./board/useHudReserve.js";
 import { useFullscreen } from "../components/useFullscreen.js";
 import { FullscreenNudge } from "./FullscreenNudge.js";
@@ -1187,7 +1187,7 @@ export function GameBoard() {
   // Require mouse movement: animations can fire mouseover when a card moves
   // under a stationary pointer, including Dash I/O's changing deck top.
   const onHoverCard = (e: React.MouseEvent) => {
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (!window.matchMedia(FINE_HOVER_QUERY).matches) return;
     const target = e.target as HTMLElement;
     // Counter icons have their own focused tooltip. Suppress the large card
     // preview while the pointer is on one so the two surfaces never collide.
@@ -1259,7 +1259,7 @@ export function GameBoard() {
   // Touch screens have no hover preview. Tapping an inert card or holding any
   // card opens the full-size sheet; a short tap on an actionable card acts.
   const onTableClick = (e: React.MouseEvent) => {
-    if (!isTouchBoardViewport()) return;
+    if (!tapInspectsCards()) return;
     const target = e.target as HTMLElement;
     if (target.closest("button, .card-clickable, .overlay")) return;
     const card = target.closest<HTMLElement>("[data-cardid]");
