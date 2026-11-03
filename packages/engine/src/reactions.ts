@@ -244,6 +244,7 @@ export function activateWindowAbility(
     });
     if (result.status === "error") return result.error;
     if (result.status === "pending") return undefined;
+    if (!inReaction) runtime.dispatchFlow("cancelEndActionPass", state);
     if (state.pendingDecision?.chooseHook) {
       if (inReaction) state.pendingDecision.resume = { kind: "reopen-reaction", seat };
       else state.pendingDecision.resume = { kind: "continue-stack", seat };
@@ -251,10 +252,7 @@ export function activateWindowAbility(
     }
     if (runtime.dispatchFlow("flushPendingTriggersAboveStack", state, seat)) return undefined;
     if (inReaction) holdPriorityWindow(state, seat, reactionWindow(runtime));
-    else {
-      runtime.dispatchFlow("cancelEndActionPass", state);
-      runtime.dispatchFlow("holdLayerWindow", state, seat);
-    }
+    else runtime.dispatchFlow("holdLayerWindow", state, seat);
     return undefined;
   }
   if (card.instanceId === player.hero.instanceId && heroAbilitiesDisabled(state, seat)) {
@@ -503,24 +501,20 @@ export function activateWindowAbility(
     targetCardInstanceId: declaredCardTarget,
   });
   if (timing === "attack-reaction") runtime.dispatchFlow("queueReactionEventTriggers", state, seat);
+  // Before the early returns: a trigger from paying the cost must not leave the end-of-action pass standing.
+  if (!inReaction) runtime.dispatchFlow("cancelEndActionPass", state);
   // A leave-arena trigger opened while paying this activation cost must be
   // answered before priority resumes; do not overwrite it with the window.
   if (state.pendingDecision?.chooseHook) {
     if (inReaction) state.pendingDecision.resume = { kind: "reopen-reaction", seat };
-    else {
-      runtime.dispatchFlow("cancelEndActionPass", state);
-      state.pendingDecision.resume = { kind: "continue-stack", seat };
-    }
+    else state.pendingDecision.resume = { kind: "continue-stack", seat };
     return undefined;
   }
   if (runtime.dispatchFlow("flushPendingTriggersAboveStack", state, seat)) return undefined;
   // the priority holder keeps priority and may play more; priority only
   // passes when they pass
   if (inReaction) holdPriorityWindow(state, seat, reactionWindow(runtime));
-  else {
-    runtime.dispatchFlow("cancelEndActionPass", state);
-    runtime.dispatchFlow("holdLayerWindow", state, seat);
-  }
+  else runtime.dispatchFlow("holdLayerWindow", state, seat);
   return undefined;
 }
 

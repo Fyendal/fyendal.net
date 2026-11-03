@@ -133,6 +133,44 @@ describe("CRU — Runeblade", () => {
 });
 
 describe("CRU — Wizard", () => {
+  it("Kano activated off a pitched Eye of Ophidia in the end-of-action window keeps the action phase open", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "kano, dracai of aether|0",
+          hand: ["eye of ophidia|3", "raging onslaught|3"],
+          deck: ["snapback|3", "raging onslaught|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    const passWindows = () => {
+      while (s.state.pendingDecision?.kind === "priority-window") s.passPriority();
+    };
+    s.passPriority().activate("kano, dracai of aether|0", { pitch: ["eye of ophidia|3"] });
+    passWindows();
+    s.chooseOption("pass");
+    passWindows();
+    s.chooseCard("snapback|3").expectInZone(0, "snapback|3", "banish");
+
+    expect(s.state.phase).toBe("action");
+    expect(s.state.turn).toBe(1);
+    expect(s.state.activePlayer).toBe(1);
+    s.passPriority();
+    const card = s.state.players[0]!.banish[0]!;
+    expect(
+      legalIntents(s.state, 0).some(
+        (intent) =>
+          intent.kind === "play-from-zone" &&
+          intent.zone === "banish" &&
+          intent.instanceId === card.instanceId,
+      ),
+    ).toBe(true);
+  });
+
   it("Kano banishes the top non-attack action and permits it as an instant", () => {
     const s = scenario({
       seats: [
