@@ -1,4 +1,4 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, Modifier, ScriptCtx } from "@fyendal/engine";
 import {
   BLOODROT_POX,
   FRAILTY,
@@ -15,9 +15,11 @@ import {
   createChosenDisease,
   decisionMessage,
   decisionPrompt,
+  defenderInfected,
   equipWithSilver,
   heroHasMoniker,
   hitHookLabel,
+  hitsHeroAfterDaggerHit,
   isDisease,
   isDiseaseToken,
   isInfected,
@@ -107,6 +109,38 @@ function assassinAttackActionTargets(ctx: ScriptCtx): number[] {
     )
     .map((link) => link.attackingCard.instanceId);
 }
+
+function festering(tokenId: string, label: Pick<Modifier, "ongoingLabel" | "ongoingLabelMessage">): CardScript {
+  return {
+    playTargetOptions: assassinAttackActionTargets,
+    onPlay(ctx) {
+      const target = ctx.playTargetInstanceId;
+      if (target === undefined) return;
+      ctx.grantGoAgain(target);
+      armGrantedHitRider(ctx, label, target);
+    },
+    ...chainHitRider((ctx, seat) => ctx.createToken(tokenId, seat)),
+  };
+}
+
+function hitsAssassinHero(ctx: ScriptCtx): boolean {
+  return targetsHero(ctx) && ctx.cardTypes(ctx.player(opponentSeat(ctx)).hero).includes("assassin");
+}
+
+function spawnDisease(tokenId: string): CardScript {
+  return {
+    canTriggerOnHit: hitsAssassinHero,
+    onHit(ctx) {
+      ctx.createToken(tokenId, opponentSeat(ctx));
+    },
+  };
+}
+
+const LAB_RAT: CardScript = {
+  modifyAttack(ctx) {
+    return defenderInfected(ctx) ? 1 : 0;
+  },
+};
 
 /** "As an additional cost to play this, destroy N Silver you control." */
 function silverAdditionalCost(amount: number): Pick<CardScript, "canPlay" | "additionalCost"> {
@@ -389,22 +423,56 @@ export const mpa: Record<string, CardScript> = {
     },
   },
 
-  "festering rot|2": {
-    playTargetOptions: assassinAttackActionTargets,
-    onPlay(ctx) {
-      const target = ctx.playTargetInstanceId;
-      if (target === undefined) return;
-      ctx.grantGoAgain(target);
-      armGrantedHitRider(
-        ctx,
-        ongoingLabel(
-          "when it hits a hero, create a Bloodrot Pox token under their control",
-          "card.effect.common.bloodrot.create.hit.hero",
-        ),
-        target,
-      );
+  "festering exhaustion|2": festering(
+    INERTIA,
+    ongoingLabel(
+      "when it hits a hero, create an Inertia token under their control",
+      "card.effect.common.inertia.create.hit.hero",
+    ),
+  ),
+  "festering rot|2": festering(
+    BLOODROT_POX,
+    ongoingLabel(
+      "when it hits a hero, create a Bloodrot Pox token under their control",
+      "card.effect.common.bloodrot.create.hit.hero",
+    ),
+  ),
+  "festering weakness|2": festering(
+    FRAILTY,
+    ongoingLabel(
+      "when it hits a hero, create a Frailty token under their control",
+      "card.effect.common.frailty.create.hit.hero",
+    ),
+  ),
+
+  "lab rat|1": LAB_RAT,
+  "lab rat|2": LAB_RAT,
+  "lab rat|3": LAB_RAT,
+
+  "wound excavation|1": {
+    canTriggerOnHit: hitsHeroAfterDaggerHit,
+    onHit(ctx) {
+      ctx.loseLife(opponentSeat(ctx), 1);
     },
-    ...chainHitRider((ctx, seat) => ctx.createToken(BLOODROT_POX, seat)),
+  },
+
+  "wound excision|1": {
+    canTriggerOnHit: hitsHeroAfterDaggerHit,
+    onHit(ctx) {
+      for (const card of ctx.player(opponentSeat(ctx)).deck.slice(0, 2)) ctx.banish(card.instanceId);
+    },
+  },
+
+  "spawn bloodrot|1": spawnDisease(BLOODROT_POX),
+  "spawn frailty|1": spawnDisease(FRAILTY),
+  "spawn inertia|1": spawnDisease(INERTIA),
+
+  "professional rivalry|3": {
+    canTriggerOnHit: hitsAssassinHero,
+    onHit(ctx) {
+      ctx.completeContract();
+      ctx.createToken(SILVER);
+    },
   },
 
   "act on intel: haunts|3": {

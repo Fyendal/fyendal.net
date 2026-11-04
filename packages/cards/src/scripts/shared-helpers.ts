@@ -506,6 +506,10 @@ export function targetsHero(ctx: ScriptCtx): boolean {
   return ctx.link?.targetAllyId === undefined;
 }
 
+export function defenderInfected(ctx: ScriptCtx): boolean {
+  return targetsHero(ctx) && isInfected(ctx, opponentSeat(ctx));
+}
+
 /** Create the disease chosen through `requestDiseaseTokenChoice` under the opponent's control. */
 export function createChosenDisease(ctx: ScriptCtx, option: string): void {
   if (NAMED_DISEASE_TOKENS.includes(option)) ctx.createToken(option, opponentSeat(ctx));
@@ -810,6 +814,10 @@ export function hitWithDaggerThisChain(ctx: ScriptCtx): boolean {
       ((link.damage > 0 && ctx.cardTypes(link.attackingCard).includes("dagger")) ||
         Number(link.flags["effectDamageBySubtype:dagger"]) > 0),
   );
+}
+
+export function hitsHeroAfterDaggerHit(ctx: ScriptCtx): boolean {
+  return targetsHero(ctx) && hitWithDaggerThisChain(ctx);
 }
 
 /** Number of Contracts this player has completed during the current turn. */

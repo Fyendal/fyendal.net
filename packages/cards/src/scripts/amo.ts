@@ -10,10 +10,11 @@ import {
   controlledDiseases,
   createChosenDisease,
   decisionPrompt,
+  defenderInfected,
   diseaseTokenOptionMessages,
   equipWithSilver,
   hitHookLabel,
-  hitWithDaggerThisChain,
+  hitsHeroAfterDaggerHit,
   isInfected,
   ongoingLabel,
   opponentSeat,
@@ -25,10 +26,6 @@ const SILVER = "DYN245";
 
 function opposingDiseases(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
   return controlledDiseases(ctx, opponentSeat(ctx));
-}
-
-function defenderInfected(ctx: ScriptCtx): boolean {
-  return targetsHero(ctx) && isInfected(ctx, opponentSeat(ctx));
 }
 
 function createInertiaForEachHero(ctx: ScriptCtx): void {
@@ -85,6 +82,36 @@ const mortimer: CardScript = {
     if (disease && ctx.destroyPermanent(disease.instanceId)) ctx.createToken(SILVER);
   },
 };
+
+const ESCAPED_SUBJECT: CardScript = {
+  hasConditionalGoAgain: defenderInfected,
+};
+
+const EVISCERATE_THE_ENERVATED: CardScript = {
+  ...contractWithSilver((ctx, card) => card.owner === opponentSeat(ctx) && isInfected(ctx, card.owner)),
+  canTriggerOnHit: targetsHero,
+  onHit(ctx) {
+    const top = ctx.player(opponentSeat(ctx)).deck[0];
+    if (top) ctx.banish(top.instanceId);
+  },
+};
+
+const VIRAL_SAMPLING: CardScript = {
+  canTriggerOnHit: defenderInfected,
+  onHit(ctx) {
+    ctx.completeContract();
+    ctx.createToken(SILVER);
+  },
+};
+
+function sneaking(tokenId: string): CardScript {
+  return {
+    canTriggerOnHit: (ctx) => targetsHero(ctx) && ctx.link?.flags[`reactionBySeat:${ctx.seat}`] === true,
+    onHit(ctx) {
+      ctx.createToken(tokenId, opponentSeat(ctx));
+    },
+  };
+}
 
 export const amo: Record<string, CardScript> = {
   "humour plunge|0": {
@@ -202,28 +229,20 @@ export const amo: Record<string, CardScript> = {
     },
   },
 
-  "escaped subject|1": {
-    hasConditionalGoAgain: defenderInfected,
-  },
+  "escaped subject|1": ESCAPED_SUBJECT,
+  "escaped subject|2": ESCAPED_SUBJECT,
+  "escaped subject|3": ESCAPED_SUBJECT,
 
-  "eviscerate the enervated|1": {
-    ...contractWithSilver((ctx, card) => card.owner === opponentSeat(ctx) && isInfected(ctx, card.owner)),
-    canTriggerOnHit: targetsHero,
-    onHit(ctx) {
-      const top = ctx.player(opponentSeat(ctx)).deck[0];
-      if (top) ctx.banish(top.instanceId);
-    },
-  },
+  "eviscerate the enervated|1": EVISCERATE_THE_ENERVATED,
+  "eviscerate the enervated|2": EVISCERATE_THE_ENERVATED,
+  "eviscerate the enervated|3": EVISCERATE_THE_ENERVATED,
 
-  "sneaking rot|1": {
-    canTriggerOnHit: (ctx) => targetsHero(ctx) && ctx.link?.flags[`reactionBySeat:${ctx.seat}`] === true,
-    onHit(ctx) {
-      ctx.createToken(BLOODROT_POX, opponentSeat(ctx));
-    },
-  },
+  "sneaking exhaustion|1": sneaking(INERTIA),
+  "sneaking rot|1": sneaking(BLOODROT_POX),
+  "sneaking weakness|1": sneaking(FRAILTY),
 
   "wound extraction|1": {
-    canTriggerOnHit: (ctx) => targetsHero(ctx) && hitWithDaggerThisChain(ctx),
+    canTriggerOnHit: hitsHeroAfterDaggerHit,
     onHit(ctx) {
       requestDiseaseTokenChoice(ctx, "amo-wound-extraction");
     },
@@ -292,11 +311,7 @@ export const amo: Record<string, CardScript> = {
     onDefend: createInertiaForEachHero,
   },
 
-  "viral sampling|3": {
-    canTriggerOnHit: defenderInfected,
-    onHit(ctx) {
-      ctx.completeContract();
-      ctx.createToken(SILVER);
-    },
-  },
+  "viral sampling|1": VIRAL_SAMPLING,
+  "viral sampling|2": VIRAL_SAMPLING,
+  "viral sampling|3": VIRAL_SAMPLING,
 };

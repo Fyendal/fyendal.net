@@ -2868,4 +2868,164 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       });
     });
   });
+
+  describe("Mastery Pack Assassin variants", () => {
+    const VICTIM = { hero: "dorinthea" as const, weapons: [] as string[], equipment: NO_EQUIPMENT };
+    const INFECTED = { ...VICTIM, board: ["frailty|0"] };
+    const ASSASSIN_VICTIM = { ...VICTIM, heroKey: DR_MORTIMER };
+    const attacker = (spec: Partial<SeatSpec>) => assassinSeat({ resources: 3, ...spec });
+
+    it("resolves the new printings with their pitch, power, type and keywords", () => {
+      expect(findPrinting("Escaped Subject", 3)?.id).toBe("MPA078");
+      expect(findPrinting("Viral Sampling", 1)?.id).toBe("MPA106");
+      expect(findPrinting("Lab Rat", 2)?.attack).toBe(5);
+      expect(findPrinting("Festering Weakness", 2)?.cardType).toBe("attack-reaction");
+      expect(findPrinting("Professional Rivalry", 3)?.keywords).toEqual(["Stealth", "Contract"]);
+    });
+
+    it("Lab Rat gets +1 only against an infected hero", () => {
+      const infected = scenario({ seats: [attacker({ hand: ["lab rat|1"] }), INFECTED] });
+      infected.play("lab rat|1").blockWith().settle();
+      infected.expectLife(1, 13);
+
+      const clean = scenario({ seats: [attacker({ hand: ["lab rat|3"] }), VICTIM] });
+      clean.play("lab rat|3").blockWith().settle();
+      clean.expectLife(1, 16);
+    });
+
+    it("Escaped Subject's other pitches keep its infected go again", () => {
+      const infected = scenario({ seats: [attacker({ hand: ["escaped subject|3"] }), INFECTED] });
+      infected.play("escaped subject|3").blockWith().settle().expectAP(0, 1);
+
+      const clean = scenario({ seats: [attacker({ hand: ["escaped subject|2"] }), VICTIM] });
+      clean.play("escaped subject|2").blockWith().settle().expectAP(0, 0);
+    });
+
+    it("Eviscerate the Enervated's other pitches pay Silver only for an infected hero's card", () => {
+      const infected = scenario({ seats: [
+        attacker({ hand: ["eviscerate the enervated|2"] }),
+        { ...INFECTED, deck: ["wounding blow|3"] },
+      ] });
+      infected.play("eviscerate the enervated|2").blockWith().settle();
+      infected.expectZoneSize(1, "banish", 1);
+      expect(silverCount(infected)).toBe(1);
+
+      const clean = scenario({ seats: [
+        attacker({ hand: ["eviscerate the enervated|3"] }),
+        { ...VICTIM, deck: ["wounding blow|3"] },
+      ] });
+      clean.play("eviscerate the enervated|3").blockWith().settle();
+      clean.expectZoneSize(1, "banish", 1);
+      expect(silverCount(clean)).toBe(0);
+    });
+
+    it("Viral Sampling's other pitches complete their contract only on an infected hero", () => {
+      const infected = scenario({ seats: [attacker({ hand: ["viral sampling|1"] }), INFECTED] });
+      infected.play("viral sampling|1").blockWith().settle();
+      expect(silverCount(infected)).toBe(1);
+      expect(infected.state.players[0]!.flags.contractCompletionsThisTurn).toBe(1);
+
+      const clean = scenario({ seats: [attacker({ hand: ["viral sampling|2"] }), VICTIM] });
+      clean.play("viral sampling|2").blockWith().settle();
+      expect(silverCount(clean)).toBe(0);
+    });
+
+    it.each([
+      ["sneaking exhaustion|1", "Inertia"],
+      ["sneaking weakness|1", "Frailty"],
+    ])("%s creates %s on hit only after its controller's attack reaction", (key, token) => {
+      const game = scenario({ seats: [
+        attacker({ hand: [key, "shred|3"] }),
+        { ...VICTIM, hand: ["wounding blow|3"] },
+      ] });
+      game.play(key).blockWith("wounding blow|3");
+      game.react("shred|3").chooseCard("wounding blow|3");
+      game.settle();
+      expect(boardNames(game, 1)).toEqual([token]);
+
+      const quiet = scenario({ seats: [attacker({ hand: [key] }), VICTIM] });
+      quiet.play(key).blockWith().settle();
+      expect(boardNames(quiet, 1)).toEqual([]);
+    });
+
+    it("Wound Excavation drains 1 life on hit only after a dagger hit this chain", () => {
+      const game = scenario({ seats: [
+        attacker({ hand: ["wound excavation|1"], weapons: [HUMOUR_PLUNGE] }),
+        VICTIM,
+      ] });
+      game.attackWithWeapon(HUMOUR_PLUNGE).blockWith().settle();
+      game.expectLife(1, 19);
+      game.play("wound excavation|1").blockWith().settle();
+      game.expectLife(1, 13);
+
+      const clean = scenario({ seats: [attacker({ hand: ["wound excavation|1"] }), VICTIM] });
+      clean.play("wound excavation|1").blockWith().settle();
+      clean.expectLife(1, 15);
+    });
+
+    it("Wound Excision banishes 2 from the deck on hit only after a dagger hit this chain", () => {
+      const deck = ["wounding blow|1", "wounding blow|2", "wounding blow|3"];
+      const game = scenario({ seats: [
+        attacker({ hand: ["wound excision|1"], weapons: [HUMOUR_PLUNGE] }),
+        { ...VICTIM, deck },
+      ] });
+      game.attackWithWeapon(HUMOUR_PLUNGE).blockWith().settle();
+      game.play("wound excision|1").blockWith().settle();
+      game.expectInZone(1, "wounding blow|1", "banish");
+      game.expectInZone(1, "wounding blow|2", "banish");
+      game.expectDeckTop(1, "wounding blow|3");
+
+      const clean = scenario({ seats: [
+        attacker({ hand: ["wound excision|1"] }),
+        { ...VICTIM, deck },
+      ] });
+      clean.play("wound excision|1").blockWith().settle();
+      clean.expectZoneSize(1, "banish", 0);
+    });
+
+    it.each([
+      ["festering exhaustion|2", "Inertia"],
+      ["festering weakness|2", "Frailty"],
+    ])("%s gives go again and creates %s when the target hits", (key, token) => {
+      const game = scenario({ seats: [attacker({ hand: [PREY, key] }), VICTIM] });
+      game.play(PREY).blockWith().react(key, { targetCard: PREY }).settle();
+      game.expectAP(0, 1);
+      expect(boardNames(game, 1)).toEqual([token]);
+    });
+
+    it("Festering's rider stays quiet when the target is fully defended", () => {
+      const game = scenario({ seats: [
+        attacker({ hand: [PREY, "festering weakness|2"] }),
+        { ...VICTIM, hand: ["raging onslaught|1", "raging onslaught|2"] },
+      ] });
+      game.play(PREY).blockWith("raging onslaught|1", "raging onslaught|2")
+        .react("festering weakness|2", { targetCard: PREY }).settle();
+      expect(boardNames(game, 1)).toEqual([]);
+    });
+
+    it.each([
+      ["spawn bloodrot|1", "Bloodrot Pox"],
+      ["spawn frailty|1", "Frailty"],
+      ["spawn inertia|1", "Inertia"],
+    ])("%s creates %s only when it hits an Assassin hero", (key, token) => {
+      const assassin = scenario({ seats: [attacker({ hand: [key] }), ASSASSIN_VICTIM] });
+      assassin.play(key).blockWith().settle();
+      expect(boardNames(assassin, 1)).toEqual([token]);
+
+      const other = scenario({ seats: [attacker({ hand: [key] }), VICTIM] });
+      other.play(key).blockWith().settle();
+      expect(boardNames(other, 1)).toEqual([]);
+    });
+
+    it("Professional Rivalry completes its contract for Silver only on an Assassin hero", () => {
+      const assassin = scenario({ seats: [attacker({ hand: ["professional rivalry|3"] }), ASSASSIN_VICTIM] });
+      assassin.play("professional rivalry|3").blockWith().settle();
+      expect(silverCount(assassin)).toBe(1);
+      expect(assassin.state.players[0]!.flags.contractCompletionsThisTurn).toBe(1);
+
+      const other = scenario({ seats: [attacker({ hand: ["professional rivalry|3"] }), VICTIM] });
+      other.play("professional rivalry|3").blockWith().settle();
+      expect(silverCount(other)).toBe(0);
+    });
+  });
 });
