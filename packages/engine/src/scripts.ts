@@ -511,6 +511,8 @@ export interface ScriptCtx {
   hasCardType(card: DeepReadonly<CardInstance>, cardType: CardType): boolean;
   /** Effective classes and subtypes, including all-zone and granted types. */
   cardTypes(card: DeepReadonly<CardInstance>): readonly string[];
+  /** Whether this object currently has any class or talent supertype. */
+  hasClassOrTalent(card: DeepReadonly<CardInstance>): boolean;
   /** Whether this permanent currently counts as a Runechant. */
   isRunechant(card: DeepReadonly<CardInstance>): boolean;
   /** Whether an item currently has Crank, including continuous grants from
@@ -1297,8 +1299,8 @@ export interface CardScript {
    * observer effects belong on explicit friendly-attack/modifier hooks. */
   modifyAttack?(ctx: ScriptCtx): number;
   /** Whether this attack currently has go again from its own conditional
-   * static ability. Re-evaluated when the attack is declared, projected, and
-   * at the beginning of the Resolution Step. */
+   * static ability. Read live until the beginning of the Resolution Step, where
+   * it is locked in, so losing the condition first loses the go again. */
   hasConditionalGoAgain?(ctx: ScriptCtx): boolean;
   /** Whether this attack currently has dominate from its own conditional
    * static ability. Evaluated live wherever dominate is checked, so a power

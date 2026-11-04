@@ -25,6 +25,7 @@ import {
   cardTypesOf,
   dataOf,
   hasWardKeyword,
+  isClassOrTalentSupertype,
   scriptOf,
   veilBlocksDefender,
 } from "./cardProperties.js";
@@ -2441,6 +2442,10 @@ export function makeCtx(
     cardTypes(card) {
       const found = findCardAnywhere(state, card.instanceId)?.card;
       return cardTypesOf(state, found ?? card as CardInstance);
+    },
+    hasClassOrTalent(card) {
+      const found = findCardAnywhere(state, card.instanceId)?.card;
+      return cardTypesOf(state, found ?? card as CardInstance).some(isClassOrTalentSupertype);
     },
     isRunechant(card) {
       const found = findCardAnywhere(state, card.instanceId)?.card;

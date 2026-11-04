@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { legalIntents } from "@fyendal/engine";
 import { cardData, findPrinting, isImplemented, precon } from "../../index.js";
-import { scenario } from "../harness.js";
+import { scenario, type SeatSpec } from "../harness.js";
 
 const DR_MORTIMER = "dr. mortimer, blight of the pits|0";
 const HUMOUR_PLUNGE = "humour plunge|0";
@@ -1348,6 +1348,133 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     game.play(CONCOCT).blockWith().react(WEAKNESS, { settle: false }).react(WEAKNESS).settle();
 
     game.expectLife(1, 18).expectInZone(1, WOUNDING_BLOW, "arsenal");
+  });
+
+  describe("Mastery Pack Assassin infection and contract attacks", () => {
+    const BLOODROT = "bloodrot pox|0";
+    const FEVERISH = "feverish strike|1";
+    const DESPERATE = "desperate drive|1";
+    const HOT_ZONE = "in the hot zone|1";
+    const SLICE = "slice the sickly|1";
+    const DECAPITATE = "decapitate the disloyal|1";
+    const VICTIM_SEAT: SeatSpec = { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT };
+    const seat = (spec: Partial<SeatSpec>): SeatSpec => ({
+      hero: "rhinar",
+      weapons: [],
+      equipment: NO_EQUIPMENT,
+      ...spec,
+    });
+    const silverCount = (game: ReturnType<typeof scenario>) =>
+      boardNames(game, 0).filter((name) => name === "Silver").length;
+
+    it.each([
+      ["infected", [BLOODROT], 13],
+      ["not infected", [], 14],
+    ])("Feverish Strike when its controller is %s", (_label, board, life) => {
+      const game = scenario({ seats: [
+        seat({ hand: [FEVERISH], resources: 2, board }),
+        VICTIM_SEAT,
+      ] });
+
+      game.play(FEVERISH).blockWith().settle();
+
+      game.expectLife(1, life);
+    });
+
+    it("Desperate Drive has go again only while its controller is infected", () => {
+      const infected = scenario({ seats: [seat({ hand: [DESPERATE], board: [BLOODROT] }), VICTIM_SEAT] });
+      infected.play(DESPERATE).blockWith().settle();
+      infected.expectAP(0, 1);
+
+      const clean = scenario({ seats: [seat({ hand: [DESPERATE] }), VICTIM_SEAT] });
+      clean.play(DESPERATE).blockWith().settle();
+      clean.expectAP(0, 0);
+    });
+
+    it("Desperate Drive loses go again when cured before the Resolution Step", () => {
+      const game = scenario({ seats: [
+        seat({ hand: [DESPERATE], board: [BLOODROT] }),
+        { ...VICTIM_SEAT, heroKey: DR_MORTIMER },
+      ] });
+
+      game.play(DESPERATE).blockWith().passPriority();
+      game.activate(DR_MORTIMER, { ability: 0 }).chooseCard(BLOODROT).settle();
+
+      expect(boardNames(game, 0)).not.toContain("Bloodrot Pox");
+      game.expectAP(0, 0);
+    });
+
+    it("Desperate Drive gains go again when infected after it attacks", () => {
+      const game = scenario({ seats: [
+        seat({ hand: [DESPERATE] }),
+        { ...VICTIM_SEAT, hand: [VIRAL_DIFFUSION], resources: 3 },
+      ] });
+
+      game.play(DESPERATE).blockWith().passPriority().react(VIRAL_DIFFUSION).settle();
+
+      game.expectAP(0, 1);
+    });
+
+    it("In the Hot Zone infects its controller, which later attacks can see", () => {
+      const game = scenario({ seats: [
+        seat({ hand: [HOT_ZONE, FEVERISH], resources: 3 }),
+        VICTIM_SEAT,
+      ] });
+      game.state.players[0]!.actionPoints = 2;
+
+      game.play(HOT_ZONE);
+      expect(boardNames(game, 0)).toEqual(["Bloodrot Pox"]);
+      expect(boardNames(game, 1)).toEqual([]);
+      game.blockWith().settle();
+      game.expectLife(1, 14);
+
+      game.play(FEVERISH).blockWith().settle();
+      game.expectLife(1, 7);
+    });
+
+    it.each([
+      ["infected", [BLOODROT], 1],
+      ["not infected", [], 0],
+    ])("Slice the Sickly banishes on hit and pays Silver when the hit hero is %s", (_label, board, silver) => {
+      const game = scenario({ seats: [
+        seat({ hand: [SLICE] }),
+        { ...VICTIM_SEAT, board, deck: ["head jab|1", "snatch|1"] },
+      ] });
+
+      game.play(SLICE).blockWith().settle();
+
+      game.expectLife(1, 16);
+      expect(game.state.players[1]!.banish.map((card) => cardData[card.cardId]!.name)).toEqual(["Head Jab"]);
+      expect(silverCount(game)).toBe(silver);
+    });
+
+    it("Slice the Sickly doesn't banish when it doesn't hit", () => {
+      const game = scenario({ seats: [
+        seat({ hand: [SLICE] }),
+        { ...VICTIM_SEAT, hand: [WOUNDING_BLOW, WOUNDING_BLOW], deck: ["head jab|1"] },
+      ] });
+
+      game.play(SLICE).blockWith(WOUNDING_BLOW, WOUNDING_BLOW).settle();
+
+      game.expectLife(1, 20).expectZoneSize(1, "banish", 0);
+    });
+
+    it.each([
+      ["a generic card", "wounding blow|3", 1],
+      ["a class card", "head jab|1", 0],
+      ["a talent card with no class", "polar blast|3", 0],
+    ])("Decapitate the Disloyal's contract on %s", (_label, top, silver) => {
+      const game = scenario({ seats: [
+        seat({ hand: [DECAPITATE], resources: 2 }),
+        { ...VICTIM_SEAT, deck: [top, "snatch|1"] },
+      ] });
+
+      game.play(DECAPITATE).blockWith().settle();
+
+      game.expectLife(1, 14);
+      game.expectZoneSize(1, "banish", 1);
+      expect(silverCount(game)).toBe(silver);
+    });
   });
 
   describe("Armory Deck decklist cards", () => {

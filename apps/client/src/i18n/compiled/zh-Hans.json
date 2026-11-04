@@ -11106,6 +11106,12 @@
       "value": "本 chain link 中的攻击 +1 力量"
     }
   ],
+  "card.mpa.hotzone.bloodrot": [
+    {
+      "type": 0,
+      "value": "在你的操控下生成一个 Bloodrot Pox 衍生物"
+    }
+  ],
   "card.mpa.painfulchoice.banish": [
     {
       "type": 0,

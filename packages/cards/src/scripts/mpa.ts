@@ -115,6 +115,23 @@ function offerPainfulChoice(ctx: ScriptCtx): void {
   );
 }
 
+function eachPitch(name: string, script: CardScript): Record<string, CardScript> {
+  return { [`${name}|1`]: script, [`${name}|2`]: script, [`${name}|3`]: script };
+}
+
+function banishTopOnHitContract(
+  condition: (ctx: ScriptCtx, card: DeepReadonly<CardInstance>) => boolean,
+): CardScript {
+  return {
+    ...contractWithSilver(condition),
+    canTriggerOnHit: targetsHero,
+    onHit(ctx) {
+      const top = ctx.player(opponentSeat(ctx)).deck[0];
+      if (top) ctx.banish(top.instanceId);
+    },
+  };
+}
+
 export const mpa: Record<string, CardScript> = {
   "phial of calamity|0": {
     triggers: [equipWithSilver(2)],
@@ -564,4 +581,36 @@ export const mpa: Record<string, CardScript> = {
       for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) ctx.banish(card.instanceId);
     },
   },
+
+  ...eachPitch("feverish strike", {
+    modifyAttack: (ctx) => (isInfected(ctx, ctx.seat) ? 1 : 0),
+  }),
+
+  ...eachPitch("desperate drive", {
+    hasConditionalGoAgain: (ctx) => isInfected(ctx, ctx.seat),
+  }),
+
+  ...eachPitch("in the hot zone", {
+    triggers: [
+      {
+        event: "attack-declared",
+        sourceZone: "self",
+        label: "Create a Bloodrot Pox token under your control",
+        labelMessage: decisionMessage("card.mpa.hotzone.bloodrot"),
+        effect(ctx) {
+          ctx.createToken(BLOODROT_POX, ctx.seat);
+        },
+      },
+    ],
+  }),
+
+  ...eachPitch(
+    "slice the sickly",
+    banishTopOnHitContract((ctx, card) => card.owner === opponentSeat(ctx) && isInfected(ctx, card.owner)),
+  ),
+
+  ...eachPitch(
+    "decapitate the disloyal",
+    banishTopOnHitContract((ctx, card) => card.owner === opponentSeat(ctx) && !ctx.hasClassOrTalent(card)),
+  ),
 };

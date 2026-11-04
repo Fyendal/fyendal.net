@@ -409,6 +409,7 @@ export interface PersistedPendingDecisionV1 {
   kind: "defend" | "attack-reaction" | "defense-reaction" | "priority-window" | "arsenal" | "choose-target" | "choose-name" | "order-triggers" | "optional-effect";
   prompt: string;
   promptMessage?: GameMessage;
+  warningMessage?: GameMessage;
   options?: string[];
   minimumSelections?: number;
   maximumSelections?: number;

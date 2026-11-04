@@ -1500,12 +1500,15 @@ describe("game setup & turn structure", () => {
         suppressesOwnedClassTalentTypes: true,
       });
 
+      const ctx = makeCtx(s, engineRuntime, 0, player(s, 0).hero);
       expect(cardTypesOf(s, owned)).not.toContain("guardian");
       expect(cardTypesOf(s, owned)).not.toContain(talent);
       expect(cardTypesOf(s, owned)).toContain("attack");
+      expect(ctx.hasClassOrTalent(owned)).toBe(false);
 
       owned.grantedTypes = [talent];
       expect(cardTypesOf(s, owned)).toContain(talent);
+      expect(ctx.hasClassOrTalent(owned)).toBe(true);
     },
   );
 

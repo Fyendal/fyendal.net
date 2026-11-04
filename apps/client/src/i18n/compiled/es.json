@@ -11949,6 +11949,12 @@
       "value": "Los ataques obtienen +1 de poder en este chain link"
     }
   ],
+  "card.mpa.hotzone.bloodrot": [
+    {
+      "type": 0,
+      "value": "Crea un token Bloodrot Pox bajo tu control"
+    }
+  ],
   "card.mpa.painfulchoice.banish": [
     {
       "type": 0,

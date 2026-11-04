@@ -459,6 +459,7 @@
   "card.mpa.painfulchoice.bottom": "Painful Choice: ¿poner una carta de tu mano en la parte inferior de tu mazo?",
   "card.mpa.painfulchoice.banish": "Elige una carta de tu mano de la que hacer banish, o {card} obtiene +{amount} de poder",
   "card.mpa.painfulchoice.option.power": "Darle +{amount} de poder",
+  "card.mpa.hotzone.bloodrot": "Crea un token Bloodrot Pox bajo tu control",
   "card.sda.dash.item.start": "Dash: ¿empezar con un item Mechanologist de coste 2 o menos en la arena?",
   "card.sdo.option.turn": "Poner boca arriba",
   "card.sdo.wreck.arsenal.turn": "Wreck Havoc: ¿poner boca arriba una carta de su arsenal? (Si es una defense reaction, se destruye).",

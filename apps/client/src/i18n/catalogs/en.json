@@ -459,6 +459,7 @@
   "card.mpa.painfulchoice.bottom": "Painful Choice: put a card from your hand on the bottom of your deck?",
   "card.mpa.painfulchoice.banish": "Choose a card in your hand to banish, or {card} gets +{amount} power",
   "card.mpa.painfulchoice.option.power": "Give it +{amount} power",
+  "card.mpa.hotzone.bloodrot": "Create a Bloodrot Pox token under your control",
   "card.sda.dash.item.start": "Dash: start with a Mechanologist item with cost 2 or less in the arena?",
   "card.sdo.option.turn": "Turn face up",
   "card.sdo.wreck.arsenal.turn": "Wreck Havoc: turn a card in their arsenal face up? (A defense reaction is destroyed.)",
