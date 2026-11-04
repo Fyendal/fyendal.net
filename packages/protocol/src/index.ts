@@ -1608,12 +1608,13 @@ function turnFacts(value: unknown): value is TurnFactsView {
 function pendingDecision(value: unknown): boolean {
   const decision = object(value);
   return !!decision && exactKeys(decision, [
-    "player", "kind", "prompt", "promptMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "stagedAttack", "stagedAttackModifiers", "defenderDefense",
+    "player", "kind", "prompt", "promptMessage", "warningMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "stagedAttack", "stagedAttackModifiers", "defenderDefense",
     "resourcePayment", "preStackSource", "optionLayout", "sourceInstanceId",
   ], ["player", "kind", "prompt"])
     && seat(decision.player) && DECISION_KINDS.has(String(decision.kind))
     && string(decision.prompt, MAX_TEXT)
     && optional(decision.promptMessage, (value): value is GameMessage => decodeGameMessage(value) !== null)
+    && optional(decision.warningMessage, (value): value is GameMessage => decodeGameMessage(value) !== null)
     && optional(decision.options, (v): v is string[] => shortStrings(v))
     && optional(decision.minimumSelections, nonNegativeInteger)
     && optional(decision.maximumSelections, nonNegativeInteger)

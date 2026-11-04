@@ -18019,6 +18019,20 @@
       "value": " Silver to equip this"
     }
   ],
+  "card.trigger.common.silver.equip.blocked": [
+    {
+      "type": 0,
+      "value": "Warning: "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " can't be equipped because its zone isn't empty. It will stay in your graveyard, and the Silver will still be destroyed."
+    }
+  ],
   "card.trigger.common.silver.equip.optional": [
     {
       "type": 0,

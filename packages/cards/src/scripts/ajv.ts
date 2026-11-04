@@ -25,10 +25,7 @@ function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string)
 }
 
 function exposed(ctx: ScriptCtx, seat: number): string[] {
-  const player = ctx.player(seat);
-  return SLOTS.filter(
-    (slot) => !player.equipment[slot] && !player.board.some((card) => card.scriptState?.[`frostZone:${slot}`]),
-  );
+  return SLOTS.filter((slot) => ctx.equipmentZoneEmpty(seat, slot));
 }
 
 function offerExposedFrostbite(ctx: ScriptCtx, hook: string, seat: number, optional = false): void {

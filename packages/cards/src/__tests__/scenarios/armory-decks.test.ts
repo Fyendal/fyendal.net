@@ -1506,6 +1506,131 @@ describe("Armory Decks — rules regression coverage", () => {
     expect(g.state.pendingDecision?.prompt).toContain("Arc Lightning");
   });
 
+  it("Arc Lightning triggers when Sun Kiss gains go again as an instant", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["arc lightning|2", "moon wish|1", "sun kiss|1"],
+          resources: 9,
+          equipment: { ...NO_EQUIPMENT, legs: "spellbound creepers|0" },
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2").declareTarget(1);
+    g.play("moon wish|1");
+    g.blockWith().activate("spellbound creepers|0", { settle: false }).passPriority().passPriority();
+    const lifeBefore = g.state.players[1]!.life;
+    g.react("sun kiss|1", { settle: false }).passPriority().passPriority();
+    g.expectAP(0, 1);
+    expect(g.state.chain).toHaveLength(1);
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+    g.declareTarget(1).expectLife(1, lifeBefore - 6);
+  });
+
+  it("Sun Kiss does not gain go again without Moon Wish", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["sun kiss|1"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("sun kiss|1").expectAP(0, 0);
+  });
+
+  it("Arc Lightning triggers when Succumb to Temptation resolves go again as an instant", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["arc lightning|2", "ravenous rabble|1", "succumb to temptation|2"],
+          resources: 9,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2").declareTarget(1);
+    g.play("ravenous rabble|1");
+    g.blockWith().react("succumb to temptation|2", { settle: false }).passPriority().passPriority();
+    g.expectAP(0, 1);
+    expect(g.state.chain).toHaveLength(1);
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+  });
+
+  it.each<[string, string[], (g: ReturnType<typeof scenario>) => void]>([
+    ["arc ramp|1", ["lightning flow|0"], (g) => g.settle().chooseCard("lightning flow|0")],
+    ["aethersling|1", [], (g) => g.settle().chooseOption("hero").chooseOption("yes")],
+    ["sonata galaxia|1", [], (g) => g.chooseOption("X = 2").chooseCard("malefic incantation|1")],
+  ])("Arc Lightning triggers when %s gets go again from its own effect", (key, board, resolve) => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["arc lightning|2", "nimblism|1", key],
+          board,
+          deck: ["malefic incantation|1"],
+          resources: 9,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2").declareTarget(1);
+    g.play("nimblism|1").declareTarget(1);
+    g.play(key, { settle: false });
+    resolve(g);
+    g.expectAP(0, 1);
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+  });
+
+  it("Compass of Sunken Depths gives only the first watery grave card go again, which triggers Arc Lightning", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "gravy bones|0",
+          weapons: ["compass of sunken depths|0"],
+          hand: ["arc lightning|2", "nimblism|3"],
+          graveyard: ["barnacle|2", "barnacle|2"],
+          resources: 9,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2").declareTarget(1);
+    g.play("nimblism|3").declareTarget(1);
+    g.play("barnacle|2", { fromZone: "graveyard" });
+    g.expectAP(0, 1);
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+    g.declareTarget(1);
+    g.play("barnacle|2", { fromZone: "graveyard" }).expectAP(0, 0);
+    expect(g.stackLabels()).toEqual([]);
+  });
+
+  it.each([false, true])("Arc Lightning triggers when Crazy Brew rolls go again (die replacement: %s)", (gloves) => {
+    const g = scenario({
+      seed: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["arc lightning|2"],
+          board: ["crazy brew|3"],
+          resources: 1,
+          equipment: gloves ? { ...NO_EQUIPMENT, arms: "gambler's gloves|0" } : NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2").declareTarget(1);
+    g.activate("crazy brew|3");
+    if (gloves) g.chooseOption("keep").settle();
+    g.expectLog("Crazy Brew: rolled").expectAP(0, 1);
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+  });
+
   it("Hidden Agenda turns its arsenal arrow face up as an activation cost", () => {
     const g = scenario({
       seats: [

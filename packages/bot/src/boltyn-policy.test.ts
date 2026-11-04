@@ -629,6 +629,17 @@ describe("Boltyn policy", () => {
     expect(intent.kind === "activate-ability" && intent.sourceInstanceId === raydn).toBe(false);
   });
 
+  it("does not swing a 0-power Raydn for a Roaring Beam that cannot charge through a full soul", () => {
+    const state = settled(game());
+    // As reported: at 1 life, Raydn swung for 0 and spent Roaring Beam's block on a Courage.
+    state.players[0]!.life = 1;
+    hand(state, ["ASB014", "PEN178"]);
+    soul(state, 6);
+    const raydn = state.players[0]!.weapons[0]!.instanceId;
+    const intent = chooseBoltynIntent(input(state));
+    expect(intent.kind === "activate-ability" && intent.sourceInstanceId === raydn).toBe(false);
+  });
+
   it("charges Lumina Ascension into Warband of Bellona to unlock Duty Bound Blitz behind a charged Raydn", () => {
     const state = settled(game());
     hand(state, ["ASB026", "PEN183"]);

@@ -409,8 +409,7 @@ export const siy: Record<string, CardScript> = {
       const options: string[] = [];
       for (const player of ctx.state.players) {
         for (const slot of slots) {
-          const occupiedByToken = player.board.some((card) => card.scriptState?.[`frostZone:${slot}`]);
-          if (!player.equipment[slot] && !occupiedByToken) options.push(`${player.seat}:${slot}`);
+          if (ctx.equipmentZoneEmpty(player.seat, slot)) options.push(`${player.seat}:${slot}`);
         }
       }
       if (options.length === 0) {

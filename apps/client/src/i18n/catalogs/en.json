@@ -1657,6 +1657,7 @@
   "card.trigger.common.sigilprotection.destroy": "Destroy Sigil of Protection",
   "card.trigger.common.sigilsolitude.destroy": "Destroy Sigil of Solitude",
   "card.trigger.common.silver.equip": "Destroy {amount} Silver to equip this",
+  "card.trigger.common.silver.equip.blocked": "Warning: {card} can't be equipped because its zone isn't empty. It will stay in your graveyard, and the Silver will still be destroyed.",
   "card.trigger.common.silver.equip.optional": "Destroy {amount} Silver to equip this?",
   "card.trigger.common.soul.chainclose": "Put this into your hero's soul when the combat chain closes",
   "card.trigger.common.steam.remove.destroy": "Remove a steam counter or destroy this",

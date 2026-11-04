@@ -348,7 +348,7 @@ function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" 
     },
     onDamageDealt(ctx, target, dealt, arcane) {
       if (!arcane || dealt <= amount || surge === null) return;
-      if (surge === "go-again") ctx.gainActionPoint();
+      if (surge === "go-again") ctx.grantGoAgain();
       else if (surge === "opt") optN(ctx, 1);
       else if (surge === "hand") {
         const hand = [...ctx.player(target).hand];

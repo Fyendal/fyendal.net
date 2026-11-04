@@ -437,7 +437,7 @@ export const sbz: Record<string, CardScript> = {
     onPlay: (ctx) => requestHeroTarget(ctx, 2),
     onDamageDealt(ctx, _target, amount, arcane) {
       if (!arcane || amount <= 2) return;
-      ctx.gainActionPoint();
+      ctx.grantGoAgain();
       ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: Surge — gains go again`, "card.log.sbz.surge.goagain"));
     },
     onChoose(ctx, hook, option) {

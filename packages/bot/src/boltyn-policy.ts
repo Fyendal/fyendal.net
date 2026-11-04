@@ -669,11 +669,16 @@ function raydnSwingPower(card: CardView, input: BotPolicyInput): number {
     (boardCount(input, "courage") > 0 ? 1 : 0);
 }
 
-/** A 0-power swing that opens no reaction window for Roaring Beam, a lethal Beacon or a Warband charge. */
+/** Roaring Beam charges only from an empty soul, which Beacon of Victory can make. */
+function roaringBeamCanCharge(input: BotPolicyInput): boolean {
+  return holds(input, ROARING_BEAM) && (soulCount(input) === 0 || holds(input, BEACON_OF_VICTORY));
+}
+
+/** A 0-power swing that opens no reaction window for a charging Roaring Beam, a lethal Beacon or a Warband charge. */
 function emptyRaydnSwing(input: BotPolicyInput): boolean {
   const sword = raydn(input);
   if (!sword || raydnSwingPower(sword, input) > 0) return false;
-  return !holds(input, ROARING_BEAM) && !ongoingFrom(input, WARBAND_OF_BELLONA) &&
+  return !roaringBeamCanCharge(input) && !ongoingFrom(input, WARBAND_OF_BELLONA) &&
     !(holds(input, BEACON_OF_VICTORY) && soulCount(input) >= input.view.players[1 - input.seat]!.life);
 }
 

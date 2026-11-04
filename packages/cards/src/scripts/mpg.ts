@@ -76,7 +76,7 @@ function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance
 function canEquip(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   const controller = ctx.player(ctx.seat);
   const ordinarySlot = (["head", "chest", "arms", "legs"] as const).find((slot) => hasType(ctx, card, slot));
-  if (ordinarySlot) return controller.equipment[ordinarySlot] === undefined;
+  if (ordinarySlot) return ctx.equipmentZoneEmpty(ctx.seat, ordinarySlot);
   const occupiedHands = controller.weapons.reduce((total, weapon) => total + (hasType(ctx, weapon, "2h") ? 2 : 1), 0);
   const requiredHands = hasType(ctx, card, "2h") ? 2 : 1;
   return occupiedHands + requiredHands <= 2;

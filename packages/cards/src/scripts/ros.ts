@@ -1042,7 +1042,7 @@ for (const pitch of [1, 2, 3]) {
     graveyardReplacement: (ctx) => (ctx.getState("surged") ? "bottom-of-deck" : undefined),
   };
   ros[`overflow the aetherwell|${pitch}`] = arcaneHero(4 - pitch, (ctx) => ctx.changeResources(ctx.seat, 2));
-  ros[`trailblazing aether|${pitch}`] = arcaneHero(4 - pitch, (ctx) => ctx.gainActionPoint());
+  ros[`trailblazing aether|${pitch}`] = arcaneHero(4 - pitch, (ctx) => ctx.grantGoAgain());
   ros[`count your blessings|${pitch}`] = {
     onPlay(ctx) {
       const copies = ctx

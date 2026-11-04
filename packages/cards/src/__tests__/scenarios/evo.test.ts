@@ -4,6 +4,7 @@ import { cardData, scripts } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 
 const BLUE = "wrecker romp|3";
+const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 
 describe("EVO — registration and core mechanics", () => {
   it("registers the complete set", () => {
@@ -81,6 +82,53 @@ describe("EVO — registration and core mechanics", () => {
     const evo = s.state.players[0]!.equipment.head!;
     expect(evo.subcards).toHaveLength(1);
     expect(evo.subcards![0]!.cardId).toBe(printingId("teklo base head|0"));
+  });
+
+  it("an Evo played into a Frostbite's zone equips because playing it destroys the Frostbite first", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "teklovossen|0",
+          hand: ["evo smoothbore|2", BLUE, BLUE],
+          weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+        {
+          hero: "dorinthea",
+          heroKey: "jarl vetreiði|0",
+          hand: ["colors of aria|1"],
+          resources: 3,
+          weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+    s.play("colors of aria|1").chooseOption("arms").blockWith().settle();
+    s.endTurn();
+
+    s.play("evo smoothbore|2", { pitch: [BLUE, BLUE] }).expectEquipped(0, "arms", "evo smoothbore|2");
+    expect(s.state.players[0]!.board).toEqual([]);
+  });
+
+  it("an Evo goes to the graveyard when a Frostbite enters its zone in response", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "teklovossen|0", hand: ["evo smoothbore|2", BLUE], weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: ["frost spike|3"] },
+      ],
+    });
+    s.play("evo smoothbore|2", { pitch: [BLUE], settle: false });
+    s.passPriority();
+    s.react("frost spike|3", { settle: false });
+    s.passPriority().passPriority();
+    s.chooseOption("0:arms");
+    s.settle();
+
+    expect(s.state.players[0]!.equipment.arms).toBeUndefined();
+    s.expectInZone(0, "evo smoothbore|2", "graveyard");
+    s.expectInZone(0, "frostbite|0", "board");
   });
 
   it("an Evo over a transformed base keeps every card under it destroyable", () => {

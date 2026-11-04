@@ -558,6 +558,8 @@ export interface PendingDecision {
   /** Semantic prompt used by localized clients. `prompt` remains during the
    * card-script migration and is the deterministic legacy fallback. */
   promptMessage?: GameMessage;
+  /** Caveat shown beside the prompt, projected only to the deciding player. */
+  warningMessage?: GameMessage;
   /** For choose-target / optional-effect: engine-defined option ids */
   options?: string[];
   /** Bounded multi-choice decisions submit a unique subset of `options` in

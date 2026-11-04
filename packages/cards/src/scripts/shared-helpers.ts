@@ -834,8 +834,14 @@ export function equipWithSilver(amount: number): TriggerDef {
     optional: true,
     label: `Destroy ${amount} Silver to equip this`,
     labelMessage: decisionMessage("card.trigger.common.silver.equip", { amount }),
+    warningMessage: (ctx) =>
+      canEquipFromGraveyard(ctx)
+        ? undefined
+        : decisionMessage("card.trigger.common.silver.equip.blocked", {
+            card: { kind: "card", cardId: ctx.self.cardId },
+          }),
     condition(ctx) {
-      return canEquipFromGraveyard(ctx) && silverControlled(ctx).length >= amount;
+      return silverControlled(ctx).length >= amount;
     },
     effect(ctx) {
       const silver = silverControlled(ctx).slice(0, amount);
@@ -850,7 +856,7 @@ function canEquipFromGraveyard(ctx: ScriptCtx): boolean {
   const subtypes = ctx.cardTypes(ctx.self);
   const player = ctx.player(ctx.seat);
   const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) => subtypes.includes(candidate));
-  if (slot) return !player.equipment[slot];
+  if (slot) return ctx.equipmentZoneEmpty(ctx.seat, slot);
   const hands = subtypes.includes("2h") ? 2 : 1;
   const occupied = player.weapons.reduce((total, card) => total + (ctx.cardTypes(card).includes("2h") ? 2 : 1), 0);
   return occupied + hands <= 2;

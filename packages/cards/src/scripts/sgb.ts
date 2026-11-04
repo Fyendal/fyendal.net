@@ -265,14 +265,11 @@ export const sgb: Record<string, CardScript> = {
         );
       },
     },
-    // "The first card with watery grave you play from your graveyard each
-    // turn gets go again" — fired from finishPlayCard at declaration, so the
-    // refunded action point nets out the play's AP cost.
     onFriendlyPlay(ctx, card, from) {
       if (from !== "graveyard" || !hasWateryGrave(ctx, card.cardId)) return;
       if (ctx.getFlag("player", "compassGoAgain")) return;
       ctx.setFlag("player", "compassGoAgain", true);
-      ctx.gainActionPoint();
+      ctx.grantCardKeyword(card.instanceId, "go again");
       ctx.logPublic(
         localizedCardLog(
           ctx,

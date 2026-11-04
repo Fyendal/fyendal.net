@@ -1657,6 +1657,7 @@
   "card.trigger.common.sigilprotection.destroy": "Destruye Sigil of Protection",
   "card.trigger.common.sigilsolitude.destroy": "Destruye Sigil of Solitude",
   "card.trigger.common.silver.equip": "Destruye {amount} Silver para equipar esta carta",
+  "card.trigger.common.silver.equip.blocked": "Atención: {card} no se puede equipar porque su zona no está vacía. Seguirá en tu cementerio, y el Silver se destruirá igualmente.",
   "card.trigger.common.silver.equip.optional": "¿Destruir {amount} Silver para equipar esta carta?",
   "card.trigger.common.soul.chainclose": "Pon esta carta en el soul de tu héroe cuando se cierre la combat chain",
   "card.trigger.common.steam.remove.destroy": "Retira un contador de steam o destruye esta carta",

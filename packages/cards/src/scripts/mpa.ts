@@ -180,9 +180,17 @@ export const mpa: Record<string, CardScript> = {
         const target = ctx.playTargetInstanceId;
         const link = ctx.state.chain.find((candidate) => candidate.attackingCard.instanceId === target);
         if (!link) return;
-        for (const card of [...link.defendingCards, ...link.defendingEquipment]) {
-          ctx.addCardTempDefense(card.instanceId, -1);
-        }
+        // Link-scoped, so the -1 is gone when Temper checks at chain close.
+        const reduce = (card: DeepReadonly<CardInstance>, appliesToEquipment: boolean) =>
+          ctx.addModifier({
+            scope: "chain-link",
+            defense: -1,
+            seat: card.owner,
+            appliesToInstanceId: card.instanceId,
+            ...(appliesToEquipment ? { appliesToEquipment } : {}),
+          });
+        for (const card of link.defendingCards) reduce(card, false);
+        for (const card of link.defendingEquipment) reduce(card, true);
       },
     },
   },

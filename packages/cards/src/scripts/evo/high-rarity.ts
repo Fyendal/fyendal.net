@@ -426,10 +426,10 @@ export const evoHighRarity: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       canActivate: (ctx: ScriptCtx) =>
-        (["head", "chest", "arms", "legs"] as const).some((slot) => !ctx.player(ctx.seat).equipment[slot]),
+        (["head", "chest", "arms", "legs"] as const).some((slot) => ctx.equipmentZoneEmpty(ctx.seat, slot)),
       onActivate(ctx: ScriptCtx) {
         const slots = (["head", "chest", "arms", "legs"] as const).filter(
-          (slot) => !ctx.player(ctx.seat).equipment[slot],
+          (slot) => ctx.equipmentZoneEmpty(ctx.seat, slot),
         );
         ctx.requestChoice(
           "adaptive-plating-zone",

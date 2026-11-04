@@ -539,6 +539,11 @@ export function PendingDecisionPanel({
           <GuidanceSettingsInfo onDisableGuidance={onDisableGuidance} />
         ) : undefined}
       />
+      {pd.warningMessage ? (
+        <span className="decision-context decision-warning">
+          <GameMessageText message={pd.warningMessage} resolvers={{ card: (cardId) => <CardRef id={cardId} /> }} />
+        </span>
+      ) : null}
       {lookedCards.length > 0 && !showChoiceGrid ? (
         <div className="decision-cards">
           {lookedCards.map((card) => (

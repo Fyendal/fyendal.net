@@ -70,10 +70,7 @@ function selfHitsHero(ctx: ScriptCtx): boolean {
 }
 
 function exposedEquipmentSlots(ctx: ScriptCtx, seat: number): readonly string[] {
-  const player = ctx.player(seat);
-  return EQUIPMENT_SLOTS.filter(
-    (slot) => !player.equipment[slot] && !player.board.some((card) => card.scriptState?.[`frostZone:${slot}`]),
-  );
+  return EQUIPMENT_SLOTS.filter((slot) => ctx.equipmentZoneEmpty(seat, slot));
 }
 
 function createFrostbitesInExposedZones(ctx: ScriptCtx, seat: number): void {

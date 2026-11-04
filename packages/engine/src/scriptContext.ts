@@ -15,7 +15,7 @@ import { queueDecisionBehindCrank } from "./decisionQueue.js";
 import { queuedAttackObjects } from "./attackQueue.js";
 import { rngInt } from "./rng.js";
 import { arcaneDamageCardsPlayedThisTurn, pitchedThisTurn, playedThisTurn } from "./turnRecords.js";
-import { heroAbilitiesDisabled } from "./stateQueries.js";
+import { equipmentZoneEmpty, heroAbilitiesDisabled } from "./stateQueries.js";
 import {
   cardColorOf,
   cardCostOf,
@@ -691,6 +691,9 @@ export function makeCtx(
         }
       }
       publishAttackPowerChange(state, runtime, observed, origin);
+    },
+    equipmentZoneEmpty(targetSeat, slot) {
+      return equipmentZoneEmpty(state.players[targetSeat] as PlayerState, slot);
     },
     player(targetSeat) {
       return state.players[targetSeat] as PlayerState;
@@ -1670,6 +1673,12 @@ export function makeCtx(
         ? link
         : chainLinkForAttack(state, targetAttackInstanceId);
       if (target && target.flags.attackGone !== true) runtime.events.grantLinkGoAgain(state, target);
+    },
+    grantAbilityGoAgain() {
+      const layer = state.stack.find(
+        (candidate) => candidate.ability === true && candidate.sourceInstanceId === self.instanceId,
+      );
+      if (layer) layer.goAgain = true;
     },
     grantChainLinkGoAgain(chainLinkIndex) {
       if (!Number.isSafeInteger(chainLinkIndex) || chainLinkIndex < 0) return;
@@ -3130,7 +3139,7 @@ export function makeCtx(
         const slot = (["head", "chest", "arms", "legs"] as const).find((s) =>
           (d.subtypes ?? []).includes(s),
         );
-        if (!slot || target.equipment[slot]) {
+        if (!slot || !equipmentZoneEmpty(target, slot)) {
           logPublic(state, gameLogMessage(
             `${d.name} can't be equipped (no free equipment zone)`,
             "engine.log.card.equip.failed.no.equipment.zone",
@@ -3186,7 +3195,7 @@ export function makeCtx(
         const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
           (d.subtypes ?? []).includes(candidate),
         );
-        if (!slot || owner.equipment[slot]) return false;
+        if (!slot || !equipmentZoneEmpty(owner, slot)) return false;
         removeFromArray(owner.graveyard, instanceId);
         owner.equipment[slot] = card;
         resetActivatedAbilityUsage(owner, card.instanceId);
@@ -3217,7 +3226,7 @@ export function makeCtx(
         const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
           (d.subtypes ?? []).includes(candidate),
         );
-        if (!slot || player.equipment[slot]) return false;
+        if (!slot || !equipmentZoneEmpty(player, slot)) return false;
         removeFromArray(player.banish, instanceId);
         player.equipment[slot] = card;
       } else return false;
@@ -3248,7 +3257,7 @@ export function makeCtx(
         const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
           (d.subtypes ?? []).includes(candidate),
         );
-        if (!slot || player.equipment[slot]) return false;
+        if (!slot || !equipmentZoneEmpty(player, slot)) return false;
         removeFromArray(inventory, instanceId);
         player.equipment[slot] = card;
       } else return false;
@@ -3267,7 +3276,7 @@ export function makeCtx(
         (slot) => opposing.equipment[slot]?.instanceId === instanceId,
       );
       if (ordinarySlot) {
-        if (player.equipment[ordinarySlot]) return false;
+        if (!equipmentZoneEmpty(player, ordinarySlot)) return false;
         const card = opposing.equipment[ordinarySlot];
         if (!card) return false;
         delete opposing.equipment[ordinarySlot];
@@ -3317,7 +3326,7 @@ export function makeCtx(
       const owner = state.players.find((candidate) =>
         Object.values(candidate.equipment).some((card) => card?.instanceId === instanceId),
       ) as PlayerState | undefined;
-      if (!owner || owner.equipment[slot]) return false;
+      if (!owner || !equipmentZoneEmpty(owner, slot)) return false;
       const current = (Object.keys(owner.equipment) as EquipmentSlot[]).find(
         (candidate) => owner.equipment[candidate]?.instanceId === instanceId,
       );

@@ -16960,6 +16960,20 @@
       "value": " 个 Silver 以装备此牌"
     }
   ],
+  "card.trigger.common.silver.equip.blocked": [
+    {
+      "type": 0,
+      "value": "警告："
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 所属的区域不为空，无法装备，将留在你的墓地，Silver 仍会被摧毁。"
+    }
+  ],
   "card.trigger.common.silver.equip.optional": [
     {
       "type": 0,

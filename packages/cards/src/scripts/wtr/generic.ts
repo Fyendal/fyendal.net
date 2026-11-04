@@ -127,10 +127,10 @@ const crazyBrewScript = (): CardScript => ({
     );
     if (roll <= 2) {
       ctx.loseLife(ctx.seat, 2);
-      ctx.gainActionPoint();
+      ctx.grantAbilityGoAgain();
     } else if (roll <= 4) {
       ctx.gainLife(ctx.seat, 2);
-      ctx.gainActionPoint();
+      ctx.grantAbilityGoAgain();
     } else {
       ctx.changeResources(ctx.seat, 2);
       ctx.changeActionPoints(ctx.seat, 2);

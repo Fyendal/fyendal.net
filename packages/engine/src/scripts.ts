@@ -77,6 +77,8 @@ export interface ScriptCtx {
   ): void;
   /** Read one player's state. The result is deeply readonly. */
   player(targetSeat: number): DeepReadonly<PlayerState>;
+  /** CR 3.0.1a: whether this equipment zone holds neither equipment nor a token placed in it. */
+  equipmentZoneEmpty(targetSeat: number, slot: EquipmentSlot): boolean;
   /** Attacks waiting in a player's attack queue, first attack first. CR
    * 3.15.7f treats them as on the stack when choosing targets. */
   queuedAttacks(targetSeat: number): readonly DeepReadonly<CardInstance>[];
@@ -283,6 +285,8 @@ export interface ScriptCtx {
    * already-resolved link does not resolve that link again or retroactively
    * grant an action point. */
   grantGoAgain(targetAttackInstanceId?: number): void;
+  /** Give this source's resolving activated ability go again. */
+  grantAbilityGoAgain(): void;
   /** Give the attack on an exact combat-chain link go again. Use this for
    * targeted effects because a weapon or ally may attack on multiple links
    * with the same permanent instance id. */
@@ -1023,6 +1027,8 @@ export interface TriggerDef {
   /** Locale-independent counterpart to `label`. It is derived from the script
    * during decision/view projection and never persisted in room state. */
   labelMessage?: GameMessage;
+  /** Optional triggers: caveat shown beside the yes/no when accepting won't do what the label says. */
+  warningMessage?(ctx: ScriptCtx): GameMessage | undefined;
   /** Exact public trigger announcement. Defaults to "<source> triggers: <label>". */
   publicLog?: string;
   /** Locale-independent counterpart to `publicLog`. The engine adds

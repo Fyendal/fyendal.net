@@ -1035,7 +1035,7 @@ function offerHiddenTrigger(state: GameStateInternal, runtime: EngineRuntime, la
     continueStack(state, runtime, layer.seat);
     return;
   }
-  askTriggerChoice(state, layer, "hidden-trigger");
+  askTriggerChoice(state, runtime, layer, "hidden-trigger");
 }
 
 /** Answer a "hidden-trigger" offer. Accepting makes the source public until
@@ -1141,12 +1141,18 @@ export function resolveAbilityLayer(state: GameStateInternal,
 /** Ask the controller whether an optional or hidden trigger fires (trigger resolution). */
 function askTriggerChoice(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   layer: StackLayer,
   chooseHook: "trigger-choice" | "hidden-trigger" = "trigger-choice",
 ): void {
   const found = findCardAnywhere(state, layer.sourceInstanceId);
   const name = found ? nameOf(state, found.card.cardId) : "Triggered ability";
   const labelMessage = triggerLabelMessage(state, layer);
+  const definitionSource = layer.triggerSource ?? found?.card;
+  const warningMessage = found && definitionSource
+    ? scriptOf(state, definitionSource.cardId, definitionSource)?.triggers?.[layer.triggerIndex]
+      ?.warningMessage?.(runtime.makeCtx(state, layer.seat, found.card, currentLink(state)))
+    : undefined;
   state.pendingDecision = {
     player: layer.seat,
     kind: "optional-effect",
@@ -1166,6 +1172,7 @@ function askTriggerChoice(
             values: { card: logCardValue(found.card.cardId) },
           }
         : { id: "engine.decision.trigger.optional" }),
+    ...(warningMessage ? { warningMessage } : {}),
     options: ["yes", "no"],
     optionMessages: [
       { id: "common.option.yes" },
@@ -1421,7 +1428,7 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
       continueStack(state, runtime, layer.seat);
       return;
     }
-    askTriggerChoice(state, layer);
+    askTriggerChoice(state, runtime, layer);
     return;
   }
   runTriggerEffect(state, runtime, layer);

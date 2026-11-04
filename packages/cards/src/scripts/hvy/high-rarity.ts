@@ -831,7 +831,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
         return;
       }
       ctx.shuffleDeck();
-      if (x >= 2) ctx.gainActionPoint();
+      if (x >= 2) ctx.grantGoAgain();
     },
     onChoose(ctx, hook, option) {
       if (hook !== "galaxia-aura") return;
@@ -844,7 +844,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
       )
         ctx.settleCard(card.instanceId);
       ctx.shuffleDeck();
-      if (ctx.getState("galaxiaX") >= 2) ctx.gainActionPoint();
+      if (ctx.getState("galaxiaX") >= 2) ctx.grantGoAgain();
     },
   },
   "aether arc|3": {

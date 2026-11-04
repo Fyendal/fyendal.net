@@ -29,7 +29,7 @@ export function orderedBoostOptions(options: readonly number[]): number[] {
 function EquipFailWarning({ cardId, blockerId }: { cardId: string | undefined; blockerId: string }) {
   const intl = useIntl();
   return (
-    <span className="decision-context">
+    <span className="decision-context decision-warning">
       {intl.formatMessage(
         { id: "game.decision.equipFails.warning" },
         {

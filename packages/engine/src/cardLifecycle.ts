@@ -3,6 +3,7 @@ import { cardAbilitiesSuppressed, cardNameKeysOf, dataOf, scriptOf } from "./car
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 import { queueDecisionBehindCrank } from "./decisionQueue.js";
 import { FROZEN_WHILE_SOURCE_IN_ARENA } from "./ruleQueries.js";
+import { equipmentZoneEmpty } from "./stateQueries.js";
 
 import {
   cardEntersArenaLogMessage,
@@ -417,8 +418,11 @@ export function settlePlayedCard(
       (data.subtypes ?? []).includes(candidate),
     );
     const base = slot ? player.equipment[slot] : undefined;
-    // CR 8.5.41c: equipping into a zone it cannot transform the occupant of fails.
-    if (!slot || (base && !script.transformsEquipment?.(runtime.makeCtx(state, player.seat, card), base))) {
+    // CR 8.5.41c: equipping fails unless the zone is empty or it transforms the occupant.
+    const canEquip = base
+      ? script.transformsEquipment?.(runtime.makeCtx(state, player.seat, card), base)
+      : slot && equipmentZoneEmpty(player, slot);
+    if (!slot || !canEquip) {
       runtime.commands.moveToGraveyard(state, card, "stack");
       return;
     }

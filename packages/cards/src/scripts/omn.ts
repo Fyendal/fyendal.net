@@ -769,7 +769,7 @@ function arcRamp(amount: number): CardScript {
       );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "arc-ramp-flow" && option !== "no" && ctx.destroyPermanent(Number(option))) ctx.gainActionPoint();
+      if (hook === "arc-ramp-flow" && option !== "no" && ctx.destroyPermanent(Number(option))) ctx.grantGoAgain();
     },
   };
 }
@@ -1199,7 +1199,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       }
     },
   },
-  "aethersling|1": damageThenTap(4, (ctx) => ctx.gainActionPoint()),
+  "aethersling|1": damageThenTap(4, (ctx) => ctx.grantGoAgain()),
   "nucleus aetherbolt|1": {
     ...damageThenTap(3, (ctx) => {
       const sourceInstanceId = ctx.player(ctx.seat).hero.instanceId;

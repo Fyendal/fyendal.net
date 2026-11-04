@@ -795,14 +795,16 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       ],
     });
 
-    game.endTurn().chooseOption("yes");
+    game.endTurn();
+    expect(game.state.pendingDecision?.warningMessage).toBeUndefined();
+    game.chooseOption("yes");
 
     expect(game.state.players[0]!.equipment.arms?.cardId).toBe("MPA007");
     game.expectNotInZone(0, CADAVER, "graveyard");
     expect(boardNames(game, 0)).toEqual(["Silver"]);
   });
 
-  it("Cadaver Handlers stays in the graveyard while its controller has arms equipped", () => {
+  it("Cadaver Handlers still destroys Silver but stays in the graveyard while its controller has arms equipped", () => {
     const game = scenario({
       active: 1,
       seats: [
@@ -817,10 +819,44 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       ],
     });
 
-    game.endTurn();
+    game.endTurn().chooseOption("yes");
 
     game.expectInZone(0, CADAVER, "graveyard");
-    expect(boardNames(game, 0)).toEqual(["Silver", "Silver"]);
+    expect(boardNames(game, 0)).toEqual([]);
+  });
+
+  it("Cadaver Handlers can't equip into an arms zone holding a Frostbite, which stays in that zone", () => {
+    const game = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          graveyard: [CADAVER],
+          board: ["silver|0", "silver|0"],
+          weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+        {
+          hero: "dorinthea",
+          heroKey: "jarl vetreiði|0",
+          hand: ["colors of aria|1"],
+          resources: 3,
+          weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+
+    game.play("colors of aria|1").chooseOption("arms").blockWith().settle();
+    game.endTurn();
+    expect(game.state.pendingDecision?.warningMessage?.id).toBe("card.trigger.common.silver.equip.blocked");
+    game.chooseOption("yes");
+
+    game.expectInZone(0, CADAVER, "graveyard");
+    const seat = game.state.players[0]!;
+    expect(seat.equipment.arms).toBeUndefined();
+    expect(boardNames(game, 0)).toEqual(["Frostbite"]);
+    expect(seat.board[0]!.scriptState?.["frostZone:arms"]).toBe(1);
   });
 
   it("Cadaver Handlers gives every card defending an Assassin attack -1 defense against an infected hero", () => {
@@ -848,6 +884,37 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
 
     // 3 power into 2 defense, plus Kiss of Death's life loss on hit.
     game.expectLife(1, 18);
+  });
+
+  it("Cadaver Handlers' -1{d} ends with the chain link, before Temper checks at chain close", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: [KISS_OF_DEATH],
+        resources: 1,
+        equipment: { ...NO_EQUIPMENT, arms: CADAVER },
+      },
+      {
+        hero: "dorinthea",
+        life: 20,
+        board: [FRAILTY_TOKEN],
+        weapons: [],
+        equipment: { ...NO_EQUIPMENT, arms: "ironsong versus|0" },
+      },
+    ] });
+
+    game.play(KISS_OF_DEATH).blockWith("ironsong versus|0")
+      .activate(CADAVER, { targetCard: KISS_OF_DEATH })
+      .passPriority();
+
+    // 3 power into Ironsong's reduced 1 defense, plus Kiss of Death's life loss on hit.
+    game.expectLife(1, 17);
+
+    game.endTurn();
+
+    const ironsong = game.state.players[1]!.equipment.arms;
+    expect(ironsong?.cardId).toBe("DTD207");
+    expect(ironsong?.defCounters).toBe(1);
   });
 
   it("Cadaver Handlers can't be activated unless the defending hero is infected", () => {

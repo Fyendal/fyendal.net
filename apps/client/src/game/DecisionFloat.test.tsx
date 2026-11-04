@@ -441,6 +441,25 @@ describe("priority guidance help", () => {
     expect(html).not.toContain("decision-guidance-info");
   });
 
+  it("shows a trigger's warning beside its yes/no prompt", () => {
+    const model = pendingModel("optional-effect");
+    model.decision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Cadaver Handlers: Destroy 2 Silver to equip this",
+      warningMessage: {
+        id: "card.trigger.common.silver.equip.blocked",
+        values: { card: { kind: "card", cardId: "MPA007" } },
+      },
+      options: ["yes", "no"],
+      optionMessages: [{ id: "common.option.yes" }, { id: "common.option.no" }],
+    };
+    const html = renderLocalized(<PendingDecisionPanel model={model} viewerSeat={0} />);
+
+    expect(html).toContain("can&#x27;t be equipped");
+    expect(html).toContain('data-cardid="MPA007"');
+  });
+
   it("renders semantic prompts and unchanged yes/no option ids in Chinese", () => {
     const model = pendingModel("optional-effect");
     model.decision = {

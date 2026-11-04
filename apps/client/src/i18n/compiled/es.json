@@ -18177,6 +18177,20 @@
       "value": " Silver para equipar esta carta"
     }
   ],
+  "card.trigger.common.silver.equip.blocked": [
+    {
+      "type": 0,
+      "value": "Atención: "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " no se puede equipar porque su zona no está vacía. Seguirá en tu cementerio, y el Silver se destruirá igualmente."
+    }
+  ],
   "card.trigger.common.silver.equip.optional": [
     {
       "type": 0,

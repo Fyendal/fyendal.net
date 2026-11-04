@@ -286,7 +286,7 @@ function sunKiss(life: number): CardScript {
       ctx.gainLife(ctx.seat, life);
       if (ctx.getFlag("player", "playedName:moon wish") !== true) return;
       ctx.drawCards(ctx.seat, 1);
-      ctx.gainActionPoint();
+      ctx.grantGoAgain();
     },
   };
 }

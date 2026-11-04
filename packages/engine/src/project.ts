@@ -1315,6 +1315,7 @@ function projectState(
             ...(privateDecision && promptMessage
               ? { promptMessage }
               : {}),
+            ...(privateDecision && pd.warningMessage ? { warningMessage: pd.warningMessage } : {}),
             ...((revealAll || pd.player === seat) && pd.options ? { options: pd.options } : {}),
             ...((revealAll || pd.player === seat) && pd.minimumSelections !== undefined
               ? {

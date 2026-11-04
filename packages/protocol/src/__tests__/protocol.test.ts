@@ -929,6 +929,7 @@ describe("GameView and server messages", () => {
           id: "engine.decision.crank",
           values: { card: { kind: "card", cardId: "SEA123" } },
         },
+        warningMessage: { id: "card.trigger.common.silver.equip.blocked" },
         options: ["yes", "no"],
         optionMessages: [{ id: "common.option.yes" }, { id: "common.option.no" }],
       },

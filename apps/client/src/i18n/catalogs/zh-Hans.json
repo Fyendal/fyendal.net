@@ -1657,6 +1657,7 @@
   "card.trigger.common.sigilprotection.destroy": "摧毁 Sigil of Protection",
   "card.trigger.common.sigilsolitude.destroy": "摧毁 Sigil of Solitude",
   "card.trigger.common.silver.equip": "摧毁 {amount} 个 Silver 以装备此牌",
+  "card.trigger.common.silver.equip.blocked": "警告：{card} 所属的区域不为空，无法装备，将留在你的墓地，Silver 仍会被摧毁。",
   "card.trigger.common.silver.equip.optional": "摧毁 {amount} 个 Silver 以装备此牌？",
   "card.trigger.common.soul.chainclose": "combat chain 关闭时，将此牌置入你英雄的 soul",
   "card.trigger.common.steam.remove.destroy": "移除一个 steam 指示物，或摧毁此牌",
