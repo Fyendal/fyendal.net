@@ -635,7 +635,7 @@ export function playReaction(
       return `${nameOf(state, card.cardId)} cannot defend this attack`;
     }
   }
-  if (!additionalCostDeclared) startPlayScriptState(card);
+  if (!additionalCostDeclared) startPlayScriptState(player, card);
   if (script?.canPlay && !script.canPlay(runtime.makeCtx(state, seat, card, link, fromArsenal))) {
     return `${nameOf(state, card.cardId)} cannot be played now`;
   }

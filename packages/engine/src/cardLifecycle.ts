@@ -35,8 +35,8 @@ export function consumeNextActionGoAgain(player: PlayerState): boolean {
   return true;
 }
 
-/** Clear per-turn activated-ability usage when a card enters the arena as a
- * new game object while retaining its stable physical-card instance id. */
+/** Clear per-turn activated-ability usage when a card becomes a new game
+ * object while retaining its stable physical-card instance id. */
 export function resetActivatedAbilityUsage(player: PlayerState, instanceId: number): void {
   const exactKeys = new Set([
     `activated:${instanceId}`,
@@ -72,8 +72,9 @@ const ARENA_STATUS_KEYS = ["attacked", "frozenUntilTurn", "marked"];
  * temporary grants, and loses on any other zone move. */
 const OBJECT_EFFECT_KEYS = ["faceUpLoadedTurn"];
 
-/** A played card is a new object. Call before `canPlay`, which may record cost state. */
-export function startPlayScriptState(card: CardInstance): void {
+/** A played card is a new object (CR 3.0.9). Call before `canPlay`, which may record cost state. */
+export function startPlayScriptState(player: PlayerState, card: CardInstance): void {
+  resetActivatedAbilityUsage(player, card.instanceId);
   const values = card.scriptState;
   if (!values) return;
   for (const key of Object.keys(values)) {

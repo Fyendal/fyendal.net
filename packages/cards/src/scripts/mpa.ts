@@ -23,6 +23,7 @@ import {
   leavesArenaTrigger,
   ongoingLabel,
   opponentSeat,
+  pendingDelayedEffect,
   requestDiseaseTokenChoice,
   targetsHero,
   tokenContractWithSilver,
@@ -38,11 +39,11 @@ function seedDisease(tokenId: string): CardScript {
   };
 }
 
-// A resolved link's card stays on the chain but is no longer the attack.
-function isActiveAttack(ctx: ScriptCtx): boolean {
-  const link = ctx.state.chain.at(-1);
-  return !!link && !link.resolved && link.flags.attackGone !== true &&
-    link.attackingCard.instanceId === ctx.self.instanceId;
+// An attack stays functional on the chain after its link resolves (CR 1.7.4, 7.2.2).
+function isAttackingOnChain(ctx: ScriptCtx): boolean {
+  return ctx.state.chain.some(
+    (link) => link.attackingCard.instanceId === ctx.self.instanceId && link.flags.attackGone !== true,
+  );
 }
 
 const FREE_OF_BURDENS: CardScript = {
@@ -62,9 +63,9 @@ const FREE_OF_BURDENS: CardScript = {
         prompt: decisionPrompt("Destroy an aura token", "card.common.cost.auratoken.destroy"),
       },
     ],
-    canActivate: isActiveAttack,
+    canActivate: isAttackingOnChain,
     onActivate(ctx) {
-      if (isActiveAttack(ctx)) ctx.addCardTempPower(ctx.self.instanceId, 1);
+      if (isAttackingOnChain(ctx)) ctx.addCardTempPower(ctx.self.instanceId, 1);
     },
   },
 };
@@ -116,6 +117,8 @@ function silverAdditionalCost(amount: number): Pick<CardScript, "canPlay" | "add
     },
   };
 }
+
+const cadaverDefense = (ctx: ScriptCtx): number => (pendingDelayedEffect(ctx, { scope: "chain-link" }) ? -1 : 0);
 
 function sickening(effect: (ctx: ScriptCtx, defender: number) => void): CardScript {
   return {
@@ -307,21 +310,17 @@ export const mpa: Record<string, CardScript> = {
       canActivate: (ctx) => isInfected(ctx, opponentSeat(ctx)),
       onActivate(ctx) {
         const target = ctx.playTargetInstanceId;
-        const link = ctx.state.chain.find((candidate) => candidate.attackingCard.instanceId === target);
-        if (!link) return;
+        if (!ctx.state.chain.some((link) => link.attackingCard.instanceId === target)) return;
         // Link-scoped, so the -1 is gone when Temper checks at chain close.
-        const reduce = (card: DeepReadonly<CardInstance>, appliesToEquipment: boolean) =>
-          ctx.addModifier({
-            scope: "chain-link",
-            defense: -1,
-            seat: card.owner,
-            appliesToInstanceId: card.instanceId,
-            ...(appliesToEquipment ? { appliesToEquipment } : {}),
-          });
-        for (const card of link.defendingCards) reduce(card, false);
-        for (const card of link.defendingEquipment) reduce(card, true);
+        ctx.addModifier({
+          scope: "chain-link",
+          ...ongoingLabel("defending cards get -1 defense this chain link", "card.effect.mpa.sickeningweakness"),
+        });
       },
     },
+    // Also read while equipped, so only the activated effect weakens defenders.
+    modifyDefendingDefense: cadaverDefense,
+    modifyDefendingEquipmentDefense: cadaverDefense,
   },
 
   "mask of one million eyes|0": {

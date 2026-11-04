@@ -898,6 +898,56 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     game.expectLife(1, 18);
   });
 
+  it("Cadaver Handlers also weakens a defense reaction played after it resolves", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["sick intent|1"],
+        resources: 2,
+        weapons: [],
+        equipment: { ...NO_EQUIPMENT, arms: CADAVER },
+      },
+      {
+        hero: "dorinthea",
+        hand: ["unmovable|3"],
+        resources: 3,
+        board: [FRAILTY_TOKEN],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    game.play("sick intent|1").blockWith().activate(CADAVER, { targetCard: "sick intent|1", settle: false });
+    game.passPriority().passPriority().passPriority().react("unmovable|3");
+
+    // 6 power into Unmovable's 5 defense, less Cadaver Handlers' 1.
+    game.expectLife(1, 18);
+  });
+
+  it("Cadaver Handlers doesn't weaken defenders until it is activated", () => {
+    const game = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["sick intent|1"],
+        resources: 2,
+        weapons: [],
+        equipment: { ...NO_EQUIPMENT, arms: CADAVER },
+      },
+      {
+        hero: "dorinthea",
+        hand: [WOUNDING_BLOW],
+        board: [FRAILTY_TOKEN],
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+    ] });
+
+    game.play("sick intent|1").blockWith(WOUNDING_BLOW).settle();
+
+    // 6 power into Wounding Blow's unmodified 3 defense.
+    game.expectLife(1, 17);
+  });
+
   it("Cadaver Handlers' -1{d} ends with the chain link, before Temper checks at chain close", () => {
     const game = scenario({ seats: [
       {
@@ -2534,11 +2584,46 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
         game.expectLife(1, 13);
 
         game.play(BLUE).blockWith();
-        // The first copy is still on the chain but is no longer the attack.
+        // The first copy stays attacking on the chain but has used its activation.
         expect(() => game.activate(RED)).toThrow(/no legal intent/);
         game.activate(BLUE).chooseCard("frailty|0").settle();
         game.expectLife(1, 8);
         expect(boardNames(game, 0)).toEqual(["Frailty"]);
+      });
+
+      it("can still be activated on the chain after its link resolves", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: [RED, BLUE], board: ["frailty|0"], resources: 4 }),
+          { ...VICTIM, deck: ["snatch|1", "snatch|2", "snatch|3"] },
+        ] });
+        game.state.players[0]!.actionPoints = 2;
+
+        game.play(RED).blockWith().settle();
+        game.expectLife(1, 14);
+
+        game.play(BLUE).blockWith().activate(RED).chooseCard("frailty|0").settle();
+
+        expect(boardNames(game, 0)).toEqual([]);
+        // The +1 is on the earlier attack, not on the blue copy's 4 damage.
+        game.expectLife(1, 10);
+      });
+
+      it("gets a new once-per-turn activation when played again as a new object", () => {
+        const SOMERSAULT = "electromagnetic somersault|1";
+        const game = scenario({ seats: [
+          attacker({ hand: [RED, SOMERSAULT], board: ["frailty|0", "frailty|0"], resources: 8 }),
+          { ...VICTIM, deck: ["snatch|1", "snatch|2", "snatch|3"] },
+        ] });
+        game.state.players[0]!.actionPoints = 2;
+
+        game.play(RED).blockWith().react(SOMERSAULT);
+        game.chooseMany([String(game.state.chain.at(-1)!.attackingCard.instanceId)]);
+        game.activate(RED).chooseCard("frailty|0").settle();
+        game.expectInZone(0, RED, "hand");
+
+        game.play(RED).blockWith().activate(RED).chooseCard("frailty|0").settle();
+
+        expect(boardNames(game, 0)).toEqual([]);
       });
 
       it("can destroy Bloodrot Pox and fires Prolonged Illness", () => {

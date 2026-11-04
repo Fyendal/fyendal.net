@@ -209,7 +209,7 @@ export function playCard(
   if (player.deck.length < declaredBoostCount) {
     return `cannot boost ${declaredBoostCount} times with only ${player.deck.length} card(s) in deck`;
   }
-  if (!additionalCostDeclared) startPlayScriptState(card);
+  if (!additionalCostDeclared) startPlayScriptState(player, card);
   if (script?.canPlay && !script.canPlay(runtime.makeCtx(state, seat, card, undefined, from === "arsenal"))) {
     return `${nameOf(state, card.cardId)} cannot be played now`;
   }
