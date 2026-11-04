@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { legalIntents } from "@fyendal/engine";
+import { legalIntents, type ScriptCtx } from "@fyendal/engine";
 import { cardData, findPrinting, isImplemented, precon } from "../../index.js";
+import { heroHasMoniker } from "../../scripts/shared-helpers.js";
 import { scenario, type SeatSpec } from "../harness.js";
 
 const DR_MORTIMER = "dr. mortimer, blight of the pits|0";
@@ -2062,6 +2063,390 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
 
       game.expectInZone(0, MASK, "graveyard");
       expect(silverCount(game)).toBe(1);
+    });
+  });
+
+  describe("Mastery Pack Assassin batch 3", () => {
+    const ARAKNI = "arakni|0";
+    const UZURI = "uzuri|0";
+    const MORTIMER = "dr. mortimer|0";
+    const BREAK_DOWN = "break down the bloodline|1";
+    const RECON = "repeat reconnaissance|1";
+    const TRIPLE_BLIND = "triple blind|1";
+    const WRISTCUFF = "wristcuff injectors|0";
+    const FEVERISH = "feverish strike|1";
+    const FESTERING = "festering rot|2";
+    const PINPOINT = "pinpoint elimination|3";
+    const NON_ATTACK_COST_2 = "villainous pose|1";
+    const GO_AGAIN_ATTACK = "head jab|1";
+    const VICTIM: SeatSpec = { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT };
+    const hook = (game: ReturnType<typeof scenario>) => game.state.pendingDecision?.chooseHook;
+
+    describe("heroHasMoniker", () => {
+      const heroNamed = (name: string) =>
+        ({
+          player: () => ({ heroCardId: "hero" }),
+          cardData: () => ({ name }),
+        }) as unknown as ScriptCtx;
+
+      it.each([
+        ["Mortimer", "Dr. Mortimer"],
+        ["Mortimer", "Dr. Mortimer, Blight of the Pits"],
+        ["Arakni", "Arakni"],
+        ["Arakni", "Arakni, Marionette"],
+        ["Arakni", "Arakni, Black Widow"],
+        ["Arakni", "Arakni, 5L!p3d 7hRu 7h3 cR4X"],
+        ["Uzuri", "Uzuri"],
+        ["Uzuri", "Uzuri, Switchblade"],
+      ])("%s matches %s", (moniker, name) => {
+        expect(heroHasMoniker(heroNamed(name), 0, moniker)).toBe(true);
+      });
+
+      it.each([
+        ["Mortimer", "Nuu, Alluring Desire"],
+        ["Arakni", "Uzuri, Switchblade"],
+        ["Uzuri", "Dr. Mortimer"],
+        // A suffix is not part of the moniker.
+        ["Arakni", "Nuu, Slayer of Arakni"],
+        ["Mort", "Dr. Mortimer"],
+      ])("%s does not match %s", (moniker, name) => {
+        expect(heroHasMoniker(heroNamed(name), 0, moniker)).toBe(false);
+      });
+    });
+
+    describe("Break Down the Bloodline", () => {
+      it("as Arakni, banishes on hit and gives Silver for an Assassin card", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: ARAKNI, hand: [BREAK_DOWN], resources: 2 }),
+          { ...VICTIM, deck: [FEVERISH, "snatch|1"] },
+        ] });
+
+        game.play(BREAK_DOWN).chooseOption("no").blockWith().settle();
+
+        game.expectLife(1, 14).expectInZone(1, FEVERISH, "banish");
+        expect(silverCount(game)).toBe(1);
+      });
+
+      it("as Arakni, banishes a non-Assassin card without completing the contract", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: ARAKNI, hand: [BREAK_DOWN], resources: 2 }),
+          { ...VICTIM, deck: ["snatch|1", FEVERISH] },
+        ] });
+
+        game.play(BREAK_DOWN).chooseOption("no").blockWith().settle();
+
+        game.expectInZone(1, "snatch|1", "banish");
+        expect(silverCount(game)).toBe(0);
+      });
+
+      it("as a non-Arakni hero, neither banishes on hit nor completes the contract", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: UZURI, hand: [BREAK_DOWN, PINPOINT], resources: 2 }),
+          { ...VICTIM, deck: [FEVERISH, "snatch|1"] },
+        ] });
+
+        game.play(BREAK_DOWN).blockWith().react(PINPOINT).chooseName("Feverish Strike").settle();
+
+        // Pinpoint's own Silver is the only one; the banish does not complete the contract.
+        game.expectLife(1, 14).expectZoneSize(1, "banish", 1).expectDeckTop(1, "snatch|1");
+        expect(silverCount(game)).toBe(1);
+      });
+
+      it("keeps the Contract keyword, so Arakni's hero ability triggers when it is played", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: ARAKNI, hand: [BREAK_DOWN], resources: 2 }),
+          { ...VICTIM, deck: ["snatch|1", FEVERISH] },
+        ] });
+
+        game.play(BREAK_DOWN);
+        expect(game.stackLabels().join()).toContain("Look at the opponent's top card");
+      });
+    });
+
+    describe("Repeat Reconnaissance", () => {
+      const blockers = { ...VICTIM, hand: [WOUNDING_BLOW, WOUNDING_BLOW] };
+
+      it("as Uzuri defended by 2 cards, may bottom a cost-2 attack action card", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: UZURI, hand: [RECON], graveyard: [BREAK_DOWN], deck: ["snatch|1"] }),
+          blockers,
+        ] });
+
+        game.play(RECON).blockWith(WOUNDING_BLOW, WOUNDING_BLOW).settle();
+        expect(hook(game)).toBe("mpa-repeat-recon-bottom");
+        expect(game.state.pendingDecision?.options).toContain("pass");
+        game.chooseCard(BREAK_DOWN).settle();
+
+        game.expectDeckBottom(0, BREAK_DOWN).expectNotInZone(0, BREAK_DOWN, "graveyard");
+      });
+
+      it("can be declined", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: UZURI, hand: [RECON], graveyard: [BREAK_DOWN] }),
+          blockers,
+        ] });
+
+        game.play(RECON).blockWith(WOUNDING_BLOW, WOUNDING_BLOW).settle().chooseOption("pass").settle();
+
+        game.expectInZone(0, BREAK_DOWN, "graveyard");
+      });
+
+      it("counts a defending equipment as a card", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: UZURI, hand: [RECON], graveyard: [BREAK_DOWN] }),
+          {
+            ...VICTIM,
+            hand: [WOUNDING_BLOW],
+            equipment: { ...NO_EQUIPMENT, head: IRONROT_HELM },
+          },
+        ] });
+
+        game.play(RECON).blockWith(WOUNDING_BLOW, IRONROT_HELM).settle();
+
+        expect(hook(game)).toBe("mpa-repeat-recon-bottom");
+      });
+
+      it("offers nothing with 1 defender", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: UZURI, hand: [RECON], graveyard: [BREAK_DOWN] }),
+          blockers,
+        ] });
+
+        game.play(RECON).blockWith(WOUNDING_BLOW).settle();
+
+        expect(hook(game)).toBeUndefined();
+        game.expectInZone(0, BREAK_DOWN, "graveyard");
+      });
+
+      it("offers nothing to a non-Uzuri hero", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: MORTIMER, hand: [RECON], graveyard: [BREAK_DOWN] }),
+          blockers,
+        ] });
+
+        game.play(RECON).blockWith(WOUNDING_BLOW, WOUNDING_BLOW).settle();
+
+        expect(hook(game)).toBeUndefined();
+        game.expectInZone(0, BREAK_DOWN, "graveyard");
+      });
+
+      it.each([
+        ["an empty graveyard", []],
+        ["a cost-1 attack", [TRIPLE_BLIND]],
+        ["a cost-2 non-attack action", [NON_ATTACK_COST_2]],
+      ])("offers nothing with %s", (_label, graveyard) => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: UZURI, hand: [RECON], graveyard }),
+          blockers,
+        ] });
+
+        game.play(RECON).blockWith(WOUNDING_BLOW, WOUNDING_BLOW).settle();
+
+        expect(hook(game)).toBeUndefined();
+        game.expectZoneSize(0, "graveyard", graveyard.length);
+      });
+
+      it("fires when a defense reaction brings the defenders to 2", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: UZURI, hand: [RECON], graveyard: [BREAK_DOWN] }),
+          { ...VICTIM, hand: [WOUNDING_BLOW, "smoke out|1"], resources: 3 },
+        ] });
+        game.play(RECON).blockWith(WOUNDING_BLOW);
+        expect(hook(game)).toBeUndefined();
+
+        game.passPriority().react("smoke out|1");
+
+        expect(hook(game)).toBe("mpa-repeat-recon-bottom");
+      });
+
+      it("fires once when a defense reaction adds a third defender", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: UZURI, hand: [RECON], graveyard: [BREAK_DOWN, BREAK_DOWN] }),
+          { ...VICTIM, hand: [WOUNDING_BLOW, WOUNDING_BLOW, "smoke out|1"], resources: 3 },
+        ] });
+
+        game.play(RECON).blockWith(WOUNDING_BLOW, WOUNDING_BLOW);
+        game.passPriority().passPriority();
+        expect(hook(game)).toBe("mpa-repeat-recon-bottom");
+        // chooseOption would settle past the reaction window.
+        game.doRaw({ kind: "choose", optionId: "pass" });
+        game.passPriority().react("smoke out|1");
+
+        expect(hook(game)).toBeUndefined();
+        game.expectZoneSize(0, "graveyard", 2);
+      });
+    });
+
+    describe("Triple Blind", () => {
+      it.each([MORTIMER, DR_MORTIMER])("as %s, the defender chooses the token created under their control", (heroKey) => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey, hand: [TRIPLE_BLIND], resources: 1 }),
+          VICTIM,
+        ] });
+
+        game.play(TRIPLE_BLIND).blockWith().settle();
+        expect(game.state.pendingDecision?.player).toBe(1);
+        expect(hook(game)).toBe("mpa-triple-blind-disease");
+        game.chooseOption(INERTIA_TOKEN).settle();
+
+        expect(boardNames(game, 1)).toEqual(["Inertia"]);
+        expect(boardNames(game, 0)).toEqual([]);
+      });
+
+      it("as a non-Mortimer hero, does nothing on hit", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: UZURI, hand: [TRIPLE_BLIND], resources: 1 }),
+          VICTIM,
+        ] });
+
+        game.play(TRIPLE_BLIND).blockWith().settle();
+
+        game.expectLife(1, 15);
+        expect(boardNames(game, 1)).toEqual([]);
+      });
+
+      it("completes Sick Intent's token contract, since you create the token", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: MORTIMER, hand: [SICK_INTENT, FESTERING, TRIPLE_BLIND], resources: 6 }),
+          { ...VICTIM, hand: [WOUNDING_BLOW, WOUNDING_BLOW, WOUNDING_BLOW] },
+        ] });
+
+        game.play(SICK_INTENT).blockWith(WOUNDING_BLOW, WOUNDING_BLOW, WOUNDING_BLOW)
+          .react(FESTERING, { targetCard: SICK_INTENT }).settle();
+        expect(silverCount(game)).toBe(0);
+
+        game.play(TRIPLE_BLIND).blockWith().settle().chooseOption(FRAILTY_TOKEN).settle();
+
+        expect(boardNames(game, 1)).toEqual(["Frailty"]);
+        expect(silverCount(game)).toBe(1);
+      });
+    });
+
+    describe("Wristcuff Injectors", () => {
+      const wristcuffSeat = (spec: Partial<SeatSpec>) =>
+        assassinSeat({ heroKey: MORTIMER, equipment: { ...NO_EQUIPMENT, arms: WRISTCUFF }, ...spec });
+
+      it("is not activatable as a non-Mortimer hero", () => {
+        const game = scenario({ seats: [wristcuffSeat({ heroKey: UZURI }), VICTIM] });
+
+        expect(() => game.activate(WRISTCUFF)).toThrow(/no legal/);
+        game.expectEquipped(0, "arms", WRISTCUFF);
+      });
+
+      it("destroys itself with go again, and the next Assassin attack creates the attacker's chosen token", () => {
+        const game = scenario({ seats: [wristcuffSeat({ hand: [FEVERISH], resources: 2 }), VICTIM] });
+
+        game.activate(WRISTCUFF).settle();
+        game.expectInZone(0, WRISTCUFF, "graveyard").expectAP(0, 1);
+
+        game.play(FEVERISH).blockWith().settle();
+        expect(game.state.pendingDecision?.player).toBe(0);
+        expect(hook(game)).toBe("mpa-wristcuff-disease");
+        game.chooseOption(FRAILTY_TOKEN).settle();
+
+        expect(boardNames(game, 1)).toEqual(["Frailty"]);
+      });
+
+      it("waits past a non-Assassin attack for the next Assassin attack action card", () => {
+        const game = scenario({ seats: [
+          wristcuffSeat({ hand: [GO_AGAIN_ATTACK, FEVERISH], resources: 4 }),
+          VICTIM,
+        ] });
+
+        game.activate(WRISTCUFF).settle();
+        game.play(GO_AGAIN_ATTACK).blockWith().settle();
+        expect(hook(game)).toBeUndefined();
+        expect(boardNames(game, 1)).toEqual([]);
+
+        game.play(FEVERISH).blockWith().settle().chooseOption(INERTIA_TOKEN).settle();
+
+        expect(boardNames(game, 1)).toEqual(["Inertia"]);
+      });
+
+      it("applies only to the next Assassin attack action card", () => {
+        const game = scenario({ seats: [
+          wristcuffSeat({ hand: [KISS_OF_DEATH, FESTERING, FEVERISH], resources: 6 }),
+          { ...VICTIM, hand: [WOUNDING_BLOW, WOUNDING_BLOW] },
+        ] });
+
+        game.activate(WRISTCUFF).settle();
+        // Blocked first attack still used the effect; Festering Rot gives it go again.
+        game.play(KISS_OF_DEATH).blockWith(WOUNDING_BLOW, WOUNDING_BLOW)
+          .react(FESTERING, { targetCard: KISS_OF_DEATH }).settle();
+        expect(boardNames(game, 1)).toEqual([]);
+
+        game.play(FEVERISH).blockWith().settle();
+
+        expect(hook(game)).toBeUndefined();
+        expect(boardNames(game, 1)).toEqual([]);
+      });
+
+      it("fires when Flick Knives hits with the attack from an earlier link", () => {
+        const game = scenario({ seats: [
+          // Both are arms; the harness only needs each one equipped.
+          wristcuffSeat({
+            hand: [KISS_OF_DEATH, FESTERING, WOUNDING_BLOW],
+            resources: 6,
+            equipment: { ...NO_EQUIPMENT, head: WRISTCUFF, arms: "flick knives|0" },
+          }),
+          { ...VICTIM, hand: [WOUNDING_BLOW, WOUNDING_BLOW] },
+        ] });
+
+        game.activate(WRISTCUFF).settle();
+        game.play(KISS_OF_DEATH).blockWith(WOUNDING_BLOW, WOUNDING_BLOW)
+          .react(FESTERING, { targetCard: KISS_OF_DEATH }).settle();
+        expect(boardNames(game, 1)).toEqual([]);
+
+        game.play(WOUNDING_BLOW).blockWith().activate("flick knives|0").chooseCard(KISS_OF_DEATH).settle();
+        expect(hook(game)).toBe("mpa-wristcuff-disease");
+        game.chooseOption(FRAILTY_TOKEN).settle();
+
+        expect(boardNames(game, 1)).toContain("Frailty");
+      });
+
+      it("completes Sick Intent's token contract when it is the granted attack", () => {
+        const game = scenario({ seats: [wristcuffSeat({ hand: [SICK_INTENT], resources: 2 }), VICTIM] });
+
+        game.activate(WRISTCUFF).settle();
+        game.play(SICK_INTENT).blockWith().settle();
+        // Sick Intent's own hit and the rider each create a token and complete the contract.
+        while (game.state.pendingDecision?.options?.includes(FRAILTY_TOKEN)) {
+          game.chooseOption(FRAILTY_TOKEN).settle();
+        }
+
+        expect(boardNames(game, 1)).toEqual(["Frailty", "Frailty"]);
+        expect(silverCount(game)).toBe(2);
+      });
+
+      it("expires at end of turn", () => {
+        const game = scenario({ seats: [
+          wristcuffSeat({ hand: [FEVERISH], deck: ["snatch|3", "snatch|3", "snatch|3", "snatch|3"] }),
+          { ...VICTIM, deck: ["snatch|1", "snatch|2", "snatch|3"] },
+        ] });
+
+        game.activate(WRISTCUFF).settle();
+        game.endTurn().endTurn().settle();
+        game.expectTurn(3);
+
+        game.play(FEVERISH).blockWith().settle();
+
+        expect(hook(game)).toBeUndefined();
+        expect(boardNames(game, 1)).toEqual([]);
+      });
+
+      it("is destroyed by Blade Break after defending", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ hand: [FEVERISH], resources: 2 }),
+          { ...VICTIM, equipment: { ...NO_EQUIPMENT, arms: WRISTCUFF } },
+        ] });
+
+        game.play(FEVERISH).blockWith(WRISTCUFF).settle();
+        game.expectEquipped(1, "arms", WRISTCUFF);
+
+        game.endTurn();
+
+        game.expectInZone(1, WRISTCUFF, "graveyard");
+      });
     });
   });
 });

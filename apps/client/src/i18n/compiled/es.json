@@ -4128,6 +4128,12 @@
       "value": "las cartas que defienden obtienen -1 de defensa en este chain link"
     }
   ],
+  "card.effect.mpa.wristcuff": [
+    {
+      "type": 0,
+      "value": "la siguiente carta de attack action Assassin que juegues obtiene \"cuando esta impacte a un héroe, crea un token Frailty, Inertia o Bloodrot Pox bajo su control\""
+    }
+  ],
   "card.effect.mpw.allin": [
     {
       "type": 0,
@@ -12013,6 +12019,18 @@
     {
       "type": 0,
       "value": "Elige una carta de la mano del héroe defensor de la que hacer banish"
+    }
+  ],
+  "card.mpa.repeatrecon.bottom": [
+    {
+      "type": 0,
+      "value": "¿Poner una carta de attack action con coste 2 de tu cementerio en la parte inferior de tu mazo?"
+    }
+  ],
+  "card.mpa.repeatrecon.trigger": [
+    {
+      "type": 0,
+      "value": "Puedes poner una carta de attack action con coste 2 de tu cementerio en la parte inferior de tu mazo"
     }
   ],
   "card.mpa.sickeningrot.pay": [

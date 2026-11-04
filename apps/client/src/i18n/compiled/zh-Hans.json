@@ -3993,6 +3993,12 @@
       "value": "本 chain link 中的防御牌 -1 防御"
     }
   ],
+  "card.effect.mpa.wristcuff": [
+    {
+      "type": 0,
+      "value": "你打出的下一张 Assassin 攻击行动牌获得“命中英雄时，在其操控下生成一个 Frailty、Inertia 或 Bloodrot Pox 衍生物”"
+    }
+  ],
   "card.effect.mpw.allin": [
     {
       "type": 0,
@@ -11170,6 +11176,18 @@
     {
       "type": 0,
       "value": "选择一张防守方英雄的手牌并放逐"
+    }
+  ],
+  "card.mpa.repeatrecon.bottom": [
+    {
+      "type": 0,
+      "value": "将墓地中一张费用为 2 的攻击行动牌置于牌库底部？"
+    }
+  ],
+  "card.mpa.repeatrecon.trigger": [
+    {
+      "type": 0,
+      "value": "你可以将墓地中一张费用为 2 的攻击行动牌置于牌库底部"
     }
   ],
   "card.mpa.sickeningrot.pay": [

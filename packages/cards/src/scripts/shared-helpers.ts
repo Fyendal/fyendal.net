@@ -517,6 +517,7 @@ export function requestDiseaseTokenChoice(
   ctx: ScriptCtx,
   hook: string,
   tokenIds: readonly string[] = NAMED_DISEASE_TOKENS,
+  chooser?: number,
 ): void {
   ctx.requestChoice(
     hook,
@@ -524,6 +525,7 @@ export function requestDiseaseTokenChoice(
       optionMessages: diseaseTokenOptionMessages(tokenIds),
     }),
     [...tokenIds],
+    chooser,
   );
 }
 
@@ -560,6 +562,13 @@ export function mergeSetScripts(
 }
 
 // ── seat / state accessors ──────────────────────────────────────────────────
+
+/** "If you are X": whether the seat's current hero has that moniker. A suffix
+ * after the comma is not part of the moniker (CR 2.7.3). */
+export function heroHasMoniker(ctx: ScriptCtx, seat: number, moniker: string): boolean {
+  const personalName = ctx.cardData(ctx.player(seat).heroCardId).name.split(",")[0]!;
+  return personalName.toLowerCase().split(/\s+/).includes(moniker.toLowerCase());
+}
 
 export function opponentSeat(ctx: ScriptCtx): number {
   return ctx.seat === 0 ? 1 : 0;

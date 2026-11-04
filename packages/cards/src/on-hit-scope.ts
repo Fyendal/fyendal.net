@@ -138,6 +138,7 @@ export const friendlyHitSourceKeys: ReadonlySet<string> = new Set([
   "two sides to the blade|1",
   "undead grasp|0",
   "vest of the first fist|0",
+  "wristcuff injectors|0",
   "yo ho ho!|3",
 ]);
 
@@ -237,6 +238,7 @@ export const modifierHitSourceKeys: ReadonlySet<string> = new Set([
   "toxic tips|0",
   "two sides to the blade|1",
   "undead grasp|0",
+  "wristcuff injectors|0",
   "yo ho ho!|3",
 ]);
 

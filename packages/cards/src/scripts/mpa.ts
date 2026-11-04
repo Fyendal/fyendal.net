@@ -4,15 +4,18 @@ import {
   FRAILTY,
   INERTIA,
   NAMED_DISEASE_TOKENS,
+  armDelayedEffect,
   armGrantedHitRider,
   cardNamed,
   chainHitRider,
   commonOptionMessages,
+  consumeDelayedEffect,
   contractWithSilver,
   createChosenDisease,
   decisionMessage,
   decisionPrompt,
   equipWithSilver,
+  heroHasMoniker,
   hitHookLabel,
   isDisease,
   isDiseaseToken,
@@ -146,15 +149,31 @@ function eachPitch(name: string, script: CardScript): Record<string, CardScript>
 
 function banishTopOnHitContract(
   condition: (ctx: ScriptCtx, card: DeepReadonly<CardInstance>) => boolean,
+  hitCondition: (ctx: ScriptCtx) => boolean = () => true,
 ): CardScript {
   return {
     ...contractWithSilver(condition),
-    canTriggerOnHit: targetsHero,
+    canTriggerOnHit: (ctx) => targetsHero(ctx) && hitCondition(ctx),
     onHit(ctx) {
       const top = ctx.player(opponentSeat(ctx)).deck[0];
       if (top) ctx.banish(top.instanceId);
     },
   };
+}
+
+const youAre = (moniker: string) => (ctx: ScriptCtx): boolean => heroHasMoniker(ctx, ctx.seat, moniker);
+const youAreArakni = youAre("Arakni");
+const youAreUzuri = youAre("Uzuri");
+const youAreMortimer = youAre("Mortimer");
+
+function isAttackActionCard(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
+}
+
+function repeatReconOptions(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
+  return ctx.player(ctx.seat).graveyard.filter(
+    (card) => isAttackActionCard(ctx, card) && ctx.cardData(card.cardId).cost === 2,
+  );
 }
 
 export const mpa: Record<string, CardScript> = {
@@ -205,6 +224,43 @@ export const mpa: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook === "mpa-phial-disease") createChosenDisease(ctx, option);
+    },
+  },
+
+  "wristcuff injectors|0": {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: true,
+      destroySelfCost: true,
+      canActivate: youAreMortimer,
+      onActivate(ctx) {
+        armDelayedEffect(
+          ctx,
+          ongoingLabel(
+            "the next Assassin attack action card you play gets \"when this hits a hero, " +
+              "create a Frailty, Inertia, or Bloodrot Pox token under their control\"",
+            "card.effect.mpa.wristcuff",
+          ),
+        );
+      },
+    },
+    onFriendlyPlay(ctx, played) {
+      if (!isAttackActionCard(ctx, played) || !ctx.cardTypes(played).includes("assassin")) return;
+      // The granted rider is the card's other modifier; only the waiting effect is consumed.
+      if (!consumeDelayedEffect(ctx, { match: (modifier) => !modifier.expiresOnChainClose })) return;
+      armGrantedHitRider(
+        ctx,
+        ongoingLabel(
+          "create a Frailty, Inertia, or Bloodrot Pox token under their control when it hits a hero",
+          "card.effect.out.toxictips",
+        ),
+        played.instanceId,
+      );
+    },
+    ...chainHitRider((ctx) => requestDiseaseTokenChoice(ctx, "mpa-wristcuff-disease")),
+    onChoose(ctx, hook, option) {
+      if (hook === "mpa-wristcuff-disease") createChosenDisease(ctx, option);
     },
   },
 
@@ -705,4 +761,60 @@ export const mpa: Record<string, CardScript> = {
     "decapitate the disloyal",
     banishTopOnHitContract((ctx, card) => card.owner === opponentSeat(ctx) && !ctx.hasClassOrTalent(card)),
   ),
+
+  ...eachPitch(
+    "break down the bloodline",
+    banishTopOnHitContract(
+      (ctx, card) =>
+        youAreArakni(ctx) &&
+        card.owner === opponentSeat(ctx) &&
+        !card.faceDown &&
+        ctx.cardTypes(card).includes("assassin"),
+      youAreArakni,
+    ),
+  ),
+
+  ...eachPitch("repeat reconnaissance", {
+    friendlyDefendedTrigger: {
+      label: "You may put an attack action card with cost 2 from your graveyard on the bottom of your deck",
+      labelMessage: decisionMessage("card.mpa.repeatrecon.trigger"),
+      condition(ctx, defenders) {
+        const link = ctx.link;
+        if (link?.attackingCard.instanceId !== ctx.self.instanceId) return false;
+        const total = link.defendingCards.length + link.defendingEquipment.length;
+        return (
+          youAreUzuri(ctx) &&
+          total >= 2 &&
+          total - defenders.length < 2 &&
+          repeatReconOptions(ctx).length > 0
+        );
+      },
+    },
+    onFriendlyDefended(ctx) {
+      const options = repeatReconOptions(ctx);
+      if (!options.length) return;
+      ctx.requestCardChoice(
+        "mpa-repeat-recon-bottom",
+        decisionPrompt(
+          "Put an attack action card with cost 2 from your graveyard on the bottom of your deck?",
+          "card.mpa.repeatrecon.bottom",
+          { optionMessages: commonOptionMessages("pass") },
+        ),
+        ["pass", ...options.map((card) => card.instanceId)],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "mpa-repeat-recon-bottom" && option !== "pass") ctx.putOnDeckBottom(Number(option));
+    },
+  }),
+
+  ...eachPitch("triple blind", {
+    canTriggerOnHit: (ctx) => targetsHero(ctx) && youAreMortimer(ctx),
+    onHit(ctx) {
+      requestDiseaseTokenChoice(ctx, "mpa-triple-blind-disease", NAMED_DISEASE_TOKENS, opponentSeat(ctx));
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "mpa-triple-blind-disease") createChosenDisease(ctx, option);
+    },
+  }),
 };

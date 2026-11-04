@@ -13,6 +13,7 @@ import {
   entersArenaTrigger,
   hitWithDaggerThisChain,
   markedStealthHeroScript,
+  heroHasMoniker,
   markContractCompleted,
   localizedCardLog,
   offerRetrieveDagger,
@@ -115,7 +116,7 @@ function heroIs(ctx: ScriptCtx, seat: number, name: string): boolean {
 }
 
 function heroIsArakni(ctx: ScriptCtx, seat: number): boolean {
-  return ctx.cardData(ctx.player(seat).heroCardId).name.toLowerCase().startsWith("arakni");
+  return heroHasMoniker(ctx, seat, "Arakni");
 }
 
 function currentDaggerAttack(ctx: ScriptCtx): boolean {

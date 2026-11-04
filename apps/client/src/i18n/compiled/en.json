@@ -4124,6 +4124,12 @@
       "value": "defending cards get -1 defense this chain link"
     }
   ],
+  "card.effect.mpa.wristcuff": [
+    {
+      "type": 0,
+      "value": "the next Assassin attack action card you play gets \"when this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control\""
+    }
+  ],
   "card.effect.mpw.allin": [
     {
       "type": 0,
@@ -11983,6 +11989,18 @@
     {
       "type": 0,
       "value": "Choose a card to banish from the defending hero's hand"
+    }
+  ],
+  "card.mpa.repeatrecon.bottom": [
+    {
+      "type": 0,
+      "value": "Put an attack action card with cost 2 from your graveyard on the bottom of your deck?"
+    }
+  ],
+  "card.mpa.repeatrecon.trigger": [
+    {
+      "type": 0,
+      "value": "You may put an attack action card with cost 2 from your graveyard on the bottom of your deck"
     }
   ],
   "card.mpa.sickeningrot.pay": [

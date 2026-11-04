@@ -83,6 +83,17 @@
     "set": "MPA"
   },
   {
+    "id": "MPA015",
+    "name": "Wristcuff Injectors",
+    "cardType": "equipment",
+    "text": "Action - Destroy this: The next Assassin attack action card you play this turn gets \"When this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.\" Activate this only if you are Mortimer. Go again\nBlade Break",
+    "defense": 1,
+    "classes": ["assassin"],
+    "subtypes": ["arms"],
+    "keywords": ["Blade Break"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA017",
     "name": "Bribe the Guards",
     "cardType": "action",
@@ -447,6 +458,48 @@
     "set": "MPA"
   },
   {
+    "id": "MPA070",
+    "name": "Break Down the Bloodline",
+    "cardType": "action",
+    "text": "Contract - If you are Arakni, you are contracted to banish opponents' Assassin cards. Whenever you complete this contract, create a Silver token.\nIf you are Arakni, this gets \"When this hits a hero, banish the top card of their deck.\"",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 6,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Contract"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA071",
+    "name": "Break Down the Bloodline",
+    "cardType": "action",
+    "text": "Contract - If you are Arakni, you are contracted to banish opponents' Assassin cards. Whenever you complete this contract, create a Silver token.\nIf you are Arakni, this gets \"When this hits a hero, banish the top card of their deck.\"",
+    "pitch": 2,
+    "cost": 2,
+    "attack": 5,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Contract"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA072",
+    "name": "Break Down the Bloodline",
+    "cardType": "action",
+    "text": "Contract - If you are Arakni, you are contracted to banish opponents' Assassin cards. Whenever you complete this contract, create a Silver token.\nIf you are Arakni, this gets \"When this hits a hero, banish the top card of their deck.\"",
+    "pitch": 3,
+    "cost": 2,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Contract"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA073",
     "name": "Desperate Drive",
     "cardType": "action",
@@ -528,6 +581,48 @@
     "set": "MPA"
   },
   {
+    "id": "MPA090",
+    "name": "Repeat Reconnaissance",
+    "cardType": "action",
+    "text": "Stealth\nIf you are Uzuri, this gets \"When this is defended by 2 or more cards, you may put an attack action card with cost 2 from your graveyard on the bottom of your deck.\"",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA091",
+    "name": "Repeat Reconnaissance",
+    "cardType": "action",
+    "text": "Stealth\nIf you are Uzuri, this gets \"When this is defended by 2 or more cards, you may put an attack action card with cost 2 from your graveyard on the bottom of your deck.\"",
+    "pitch": 2,
+    "cost": 0,
+    "attack": 2,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA092",
+    "name": "Repeat Reconnaissance",
+    "cardType": "action",
+    "text": "Stealth\nIf you are Uzuri, this gets \"When this is defended by 2 or more cards, you may put an attack action card with cost 2 from your graveyard on the bottom of your deck.\"",
+    "pitch": 3,
+    "cost": 0,
+    "attack": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA096",
     "name": "Slice the Sickly",
     "cardType": "action",
@@ -567,6 +662,45 @@
     "classes": ["assassin"],
     "subtypes": ["attack"],
     "keywords": ["Contract"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA103",
+    "name": "Triple Blind",
+    "cardType": "action",
+    "text": "If you are Mortimer, this gets \"When this hits a hero, they choose Frailty, Inertia, or Bloodrot Pox. Create that token under their control.\"",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 5,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA104",
+    "name": "Triple Blind",
+    "cardType": "action",
+    "text": "If you are Mortimer, this gets \"When this hits a hero, they choose Frailty, Inertia, or Bloodrot Pox. Create that token under their control.\"",
+    "pitch": 2,
+    "cost": 1,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA105",
+    "name": "Triple Blind",
+    "cardType": "action",
+    "text": "If you are Mortimer, this gets \"When this hits a hero, they choose Frailty, Inertia, or Bloodrot Pox. Create that token under their control.\"",
+    "pitch": 3,
+    "cost": 1,
+    "attack": 3,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
     "set": "MPA"
   },
   {
