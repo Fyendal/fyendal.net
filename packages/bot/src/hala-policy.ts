@@ -12,6 +12,7 @@ import {
   chooseScoredIntent,
   committedEffectAmount,
   currentLink,
+  defendersAttackChange,
   defenderDefense,
   effectIsCommitted,
   enforceSpectraPolicy,
@@ -42,6 +43,7 @@ import {
   targetableAttackIntent,
   visibleOpponentDamageAmount,
   type BotPolicyInput,
+  type DefenseCandidateContext,
   type PlannedPrevention,
   type TargetableAttackIntent,
   type ResponseModel,
@@ -268,6 +270,14 @@ function shouldPlayToeTheLine(input: BotPolicyInput): boolean {
   if (committed === 0) return true;
   const damage = visibleOpponentDamageAmount(input);
   return damage !== undefined && damage > committed;
+}
+
+/** More defense would only waste committed Toe the Line and its Flurry. */
+function toeTheLineCoversAttack(input: BotPolicyInput): boolean {
+  const committed = toeTheLinePreventionCommitted(input);
+  const preventable = preventableAttackDamage(input);
+  return committed > 0 && preventable > 0 && committed >= preventable &&
+    threatenedAttackDamage(input) - committed < input.view.players[input.seat].life;
 }
 
 function resourcesAfter(
@@ -1531,6 +1541,17 @@ const halaResponse: ResponseModel = {
   },
 };
 
+/** Piercing can raise the attack by all Dynamo defends, so it would wear for nothing. */
+function piercingCancelsDynamo(
+  dynamo: CardView,
+  { chosen, input, stagedIds }: DefenseCandidateContext,
+): boolean {
+  if (stagedIds.has(dynamo.instanceId)) return false;
+  const attackChange = defendersAttackChange(input, chosen) -
+    defendersAttackChange(input, chosen.filter((card) => card !== dynamo));
+  return defenderDefense(dynamo, input) <= attackChange;
+}
+
 function scoreDefend(
   intent: Extract<GameIntent, { kind: "defend" }>,
   input: BotPolicyInput,
@@ -1581,10 +1602,12 @@ function scoreDefend(
         rerebraceWillBeSpentNextTurn(policyInput);
     },
     defensePermission(candidate) {
-      const selectedDynamo = candidate.chosen.some((card) =>
+      const dynamo = candidate.chosen.find((card) =>
         key(candidate.input.cards[card.cardId]) === "valiant dynamo|0"
       );
-      return selectedDynamo && openingHandCoversIncomingDamage(candidate.input, candidate.plannedPrevention)
+      if (!dynamo) return "allow";
+      return piercingCancelsDynamo(dynamo, candidate) ||
+          openingHandCoversIncomingDamage(candidate.input, candidate.plannedPrevention)
         ? "forbid"
         : "allow";
     },
@@ -1995,7 +2018,8 @@ function scorePlay(
       if (continuationResources < 1) score = -100;
     }
   } else if (data.cardType === "defense-reaction") {
-    score = defenseReactionWorthSpending(card, input, halaSolverRules, pitchIds(intent))
+    score = !toeTheLineCoversAttack(input) &&
+        defenseReactionWorthSpending(card, input, halaSolverRules, pitchIds(intent))
       ? scoreDefenseReaction(data, input)
       : -100;
   } else if (functional === "toe the line|1") {

@@ -4157,6 +4157,12 @@
       "value": "olhe a carta do topo do seu deck e você pode fazer banish dela"
     }
   ],
+  "card.effect.mpa.actonintelhaunts": [
+    {
+      "type": 0,
+      "value": "faça banish da carta do topo do deck do herói atingido"
+    }
+  ],
   "card.effect.mpa.outbreak": [
     {
       "type": 0,

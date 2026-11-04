@@ -4,6 +4,7 @@ import {
   FRAILTY,
   INERTIA,
   NAMED_DISEASE_TOKENS,
+  assassinContractAttackTargets,
   attackAbility,
   contractWithSilver,
   controlledDiseases,
@@ -232,16 +233,7 @@ export const amo: Record<string, CardScript> = {
   },
 
   "act on intel: whereabouts|1": {
-    playTargetOptions(ctx) {
-      return ctx.state.chain
-        .filter((link) =>
-          link.flags.attackGone !== true &&
-          link.attackCardType === "action" &&
-          ctx.cardTypes(link.attackingCard).includes("assassin") &&
-          (ctx.cardData(link.attackingCard.cardId).keywords ?? []).includes("Contract")
-        )
-        .map((link) => link.attackingCard.instanceId);
-    },
+    playTargetOptions: assassinContractAttackTargets,
     onPlay(ctx) {
       if (ctx.playTargetInstanceId === undefined) return;
       ctx.addModifier({

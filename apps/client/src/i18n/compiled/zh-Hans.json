@@ -3975,6 +3975,12 @@
       "value": "查看你的牌库顶牌，你可以将其放逐"
     }
   ],
+  "card.effect.mpa.actonintelhaunts": [
+    {
+      "type": 0,
+      "value": "放逐被命中英雄的牌库顶牌"
+    }
+  ],
   "card.effect.mpa.outbreak": [
     {
       "type": 0,

@@ -2997,6 +2997,87 @@ describe("Hala policy", () => {
     expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }).kind).toBe(expectedKind);
   });
 
+  it("room 66F097: does not wear Valiant Dynamo when Piercing raises the attack by its defense", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9317,
+      startPlayer: 1,
+    });
+    state.turn = 4;
+    replaceHand(state, 0, ["MPW046", "ASB016", "MPW025", "HVY209"]);
+    const view = projectStateFor(state, 0);
+    const dynamo = view.players[0].equipment.legs!;
+    expect(cardData[dynamo.cardId]?.name).toBe("Valiant Dynamo");
+    view.phase = "defend";
+    view.priorityPlayer = 0;
+    view.pendingDecision = {
+      player: 0,
+      kind: "defend",
+      prompt: "Choose defenders",
+      defenderDefense: [{ instanceId: dynamo.instanceId, defense: 1, attack: 2 }],
+    };
+    view.chain = [{
+      attackingCard: { instanceId: 90_519, cardId: "OUT009", owner: 1 },
+      defendingCards: [],
+      attackValue: 1,
+      defenseValue: 0,
+      damage: 1,
+      resolved: false,
+      reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "stage-defenders", instanceIds: [dynamo.instanceId] },
+      { kind: "defend", instanceIds: [] },
+    ];
+
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData })).toEqual({ kind: "defend", instanceIds: [] });
+  });
+
+  it.each([
+    ["adds no defense once Toe the Line covers the attack", 2, 40, false, "pass"],
+    ["still blocks damage Toe the Line leaves uncovered", 3, 40, false, "play-card"],
+    ["still blocks when a public pump beats Toe the Line at lethal", 2, 1, true, "play-card"],
+  ] as const)("room 66F097: %s", (_label, damage, life, publicPump, expectedKind) => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9326,
+      startPlayer: 1,
+    });
+    state.turn = 4;
+    replaceHand(state, 0, ["ASB016", "MPW074"]);
+    const [sink, toe] = state.players[0]!.hand;
+    const view = projectStateFor(state, 0);
+    view.players[0].life = life;
+    if (publicPump) {
+      view.players[1].arsenal = [{ instanceId: 90_521, cardId: "ZEN028", owner: 1 }];
+      view.players[1].arsenalCount = 1;
+      view.players[1].resources = 3;
+    }
+    view.phase = "reaction";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defense-reaction", prompt: "Play a defense reaction or pass" };
+    view.chain = [{
+      attackingCard: { instanceId: 90_520, cardId: "OUT009", owner: 1 },
+      defendingCards: [],
+      attackValue: damage,
+      defenseValue: 0,
+      damage,
+      resolved: false,
+      reactions: [],
+    }];
+    view.stack = [{ card: toe!, seat: 0, label: "Toe the Line", optional: false }];
+    const legal: GameIntent[] = [
+      { kind: "play-card", instanceId: sink!.instanceId, pitchInstanceIds: [] },
+      { kind: "pass" },
+    ];
+
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }).kind).toBe(expectedKind);
+  });
+
   it.each([
     ["room 40E071: activates Zenith for the Flurry swing instead of spending And Again...", 3,
       ["MPW030", "PEN056", "MPW103", "MPW028"], "plays And Again"],

@@ -939,6 +939,18 @@ export function cardNamed(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name
   return ctx.cardNames(card).includes(name.trim().toLowerCase());
 }
 
+/** Live Assassin attack action cards with contract on the chain. */
+export function assassinContractAttackTargets(ctx: ScriptCtx): number[] {
+  return ctx.state.chain
+    .filter((link) =>
+      link.flags.attackGone !== true &&
+      link.attackCardType === "action" &&
+      ctx.cardTypes(link.attackingCard).includes("assassin") &&
+      (ctx.cardData(link.attackingCard.cardId).keywords ?? []).includes("Contract")
+    )
+    .map((link) => link.attackingCard.instanceId);
+}
+
 /** Whether two cards share at least one effective name. */
 export function sharesName(
   ctx: ScriptCtx,

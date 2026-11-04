@@ -4106,6 +4106,12 @@
       "value": "look at the top card of your deck and you may banish it"
     }
   ],
+  "card.effect.mpa.actonintelhaunts": [
+    {
+      "type": 0,
+      "value": "banish the top card of the hit hero's deck"
+    }
+  ],
   "card.effect.mpa.outbreak": [
     {
       "type": 0,

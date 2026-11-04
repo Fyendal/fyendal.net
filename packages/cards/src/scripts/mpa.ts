@@ -6,6 +6,7 @@ import {
   NAMED_DISEASE_TOKENS,
   armDelayedEffect,
   armGrantedHitRider,
+  assassinContractAttackTargets,
   cardNamed,
   chainHitRider,
   commonOptionMessages,
@@ -404,6 +405,62 @@ export const mpa: Record<string, CardScript> = {
       );
     },
     ...chainHitRider((ctx, seat) => ctx.createToken(BLOODROT_POX, seat)),
+  },
+
+  "act on intel: haunts|3": {
+    playTargetOptions: assassinContractAttackTargets,
+    onPlay(ctx) {
+      if (ctx.playTargetInstanceId === undefined) return;
+      ctx.addModifier({
+        scope: "chain-link",
+        attack: 1,
+        appliesTo: "attack-action",
+        appliesToInstanceId: ctx.playTargetInstanceId,
+        onHitScriptHook: {
+          hook: "mpa-act-on-intel-haunts-hit",
+          ...hitHookLabel("banish the top card of the hit hero's deck", "card.effect.mpa.actonintelhaunts"),
+          heroOnly: true,
+        },
+      });
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook !== "mpa-act-on-intel-haunts-hit") return;
+      const top = ctx.player(opponentSeat(ctx)).deck[0];
+      if (top) ctx.banish(top.instanceId);
+    },
+  },
+
+  "just my type|1": {
+    onDefendResolvesWithoutChainLink: true,
+    onDefend(ctx) {
+      ctx.requestNameChoice("mpa-just-my-type-name", decisionPrompt("Name a card", "card.common.card.name"));
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "mpa-just-my-type-name") return;
+      const attacker = opponentSeat(ctx);
+      const top = ctx.player(attacker).deck[0];
+      if (!top || !ctx.revealCards([top.instanceId], attacker) || !cardNamed(ctx, top, option)) return;
+      ctx.banish(top.instanceId);
+      ctx.createToken(SILVER);
+    },
+  },
+
+  "banger!|3": {
+    modifyAttack(ctx) {
+      const link = ctx.link;
+      if (!link) return 0;
+      return link.defendingCards.length + link.defendingEquipment.length > 0 ? 6 : 0;
+    },
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      fromHand: true,
+      onActivate(ctx) {
+        ctx.createToken(SILVER);
+      },
+    },
   },
 
   "pinpoint elimination|3": {

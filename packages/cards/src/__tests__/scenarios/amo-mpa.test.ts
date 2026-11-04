@@ -1738,6 +1738,70 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       noContract.expectNoLegalPlay("act on intel: whereabouts|1");
     });
 
+    it("Act on Intel: Haunts targets contract attacks and banishes the top of the hit hero's deck", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: ["eviscerate the enervated|1", "act on intel: haunts|3"], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+        { ...VICTIM, board: ["frailty|0"], deck: ["wounding blow|1", "wounding blow|2"] },
+      ] });
+      game.play("eviscerate the enervated|1").blockWith();
+      game.react("act on intel: haunts|3").settle();
+      game.expectFinalAttack(6);
+      game.expectInZone(1, "wounding blow|1", "banish");
+      game.expectInZone(1, "wounding blow|2", "banish");
+      // Two banishes against an infected hero: Eviscerate's and Haunts'.
+      expect(boardNames(game, 0)).toEqual(["Silver", "Silver"]);
+
+      const noContract = scenario({ seats: [
+        { hero: "rhinar", hand: ["escaped subject|1", "act on intel: haunts|3"], resources: 1, weapons: [], equipment: NO_EQUIPMENT },
+        VICTIM,
+      ] });
+      noContract.play("escaped subject|1").blockWith();
+      noContract.expectNoLegalPlay("act on intel: haunts|3");
+    });
+
+    it("Just My Type banishes the attacker's named top card for a Silver and leaves a miss on top", () => {
+      const defend = (named: string) => {
+        const game = scenario({ seats: [
+          { hero: "rhinar", hand: ["escaped subject|1"], deck: ["wounding blow|1"], resources: 1, weapons: [], equipment: NO_EQUIPMENT },
+          { ...VICTIM, hand: ["just my type|1"] },
+        ] });
+        game.play("escaped subject|1").blockWith().passPriority();
+        game.react("just my type|1").chooseName(named);
+        return game;
+      };
+
+      const hit = defend("Wounding Blow");
+      hit.expectInZone(0, "wounding blow|1", "banish");
+      expect(boardNames(hit, 1)).toEqual(["Silver"]);
+
+      const miss = defend("Escaped Subject");
+      miss.expectDeckTop(0, "wounding blow|1");
+      expect(boardNames(miss, 1)).toEqual([]);
+    });
+
+    it("Banger! gets +6 once defended, including by equipment, and discards for a Silver", () => {
+      const attack = (defender: SeatSpec, ...blockers: string[]) => {
+        const game = scenario({ seats: [
+          { hero: "rhinar", hand: ["banger!|3"], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+          defender,
+        ] });
+        game.play("banger!|3").blockWith(...blockers).settle();
+        return game;
+      };
+
+      attack(VICTIM).expectFinalAttack(1);
+      attack({ ...VICTIM, hand: ["wounding blow|3"] }, "wounding blow|3").expectFinalAttack(7);
+      attack({ ...VICTIM, equipment: { ...NO_EQUIPMENT, head: "ironrot helm|0" } }, "ironrot helm|0").expectFinalAttack(7);
+
+      const discard = scenario({ seats: [
+        { hero: "rhinar", hand: ["banger!|3"], weapons: [], equipment: NO_EQUIPMENT },
+        VICTIM,
+      ] });
+      discard.activate("banger!|3");
+      discard.expectInZone(0, "banger!|3", "graveyard");
+      expect(boardNames(discard, 0)).toEqual(["Silver"]);
+    });
+
     it("Pick Your Poison leaves the opponent with the two tokens they did not choose", () => {
       const game = scenario({ seats: [
         { hero: "rhinar", hand: ["pick your poison|2"], weapons: [], equipment: NO_EQUIPMENT },

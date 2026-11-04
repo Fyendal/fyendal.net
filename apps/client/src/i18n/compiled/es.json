@@ -4110,6 +4110,12 @@
       "value": "mira la carta superior de tu mazo y puedes hacer banish de esa carta"
     }
   ],
+  "card.effect.mpa.actonintelhaunts": [
+    {
+      "type": 0,
+      "value": "haz banish de la carta superior del mazo del héroe impactado"
+    }
+  ],
   "card.effect.mpa.outbreak": [
     {
       "type": 0,

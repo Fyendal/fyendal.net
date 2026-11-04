@@ -414,6 +414,17 @@
     "set": "MPA"
   },
   {
+    "id": "MPA052",
+    "name": "Act on Intel: Haunts",
+    "cardType": "attack-reaction",
+    "text": "Target Assassin attack action card with contract gets +1{p} and \"When this hits a hero, banish the top card of their deck.\"",
+    "pitch": 3,
+    "cost": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA055",
     "name": "Pinpoint Elimination",
     "cardType": "attack-reaction",
@@ -453,6 +464,17 @@
     "text": "If the defending hero is infected, defending cards get -1{d} this chain link. (A hero is infected if they control a disease.)",
     "pitch": 3,
     "cost": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA064",
+    "name": "Just My Type",
+    "cardType": "defense-reaction",
+    "text": "When this defends, name a card, then the attacking hero reveals the top card of their deck. If it's the named card, banish it and create a Silver token.",
+    "pitch": 1,
+    "cost": 0,
     "defense": 3,
     "classes": ["assassin"],
     "set": "MPA"
@@ -767,6 +789,19 @@
     "pitch": 3,
     "cost": 0,
     "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA141",
+    "name": "Banger!",
+    "cardType": "action",
+    "text": "If this is defended, it gets +6{p}.\nInstant - Discard this: Create a Silver token.",
+    "pitch": 3,
+    "cost": 2,
+    "attack": 1,
+    "defense": 3,
+    "classes": ["generic"],
+    "subtypes": ["attack"],
     "set": "MPA"
   },
   {

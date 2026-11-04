@@ -1885,6 +1885,7 @@
   "card.effect.mon.shadowpuppetry": "olhe a carta do topo do seu deck e você pode fazer banish dela",
   "card.effect.mon.seedsofagony": "sua próxima carta de attack action com custo {cost} ou menos causa 1 de dano arcane ao herói alvo quando atacar",
   "card.effect.mon.eclipseexistence": "sempre que um ataque acertar um herói Light, você pode fazer banish de uma carta da soul dele, e ele perde 1 de vida",
+  "card.effect.mpa.actonintelhaunts": "faça banish da carta do topo do deck do herói atingido",
   "card.effect.mpa.outbreak": "quando acertar um herói, crie um token Frailty, um Inertia e um Bloodrot Pox sob o controle desse jogador",
   "card.effect.mpa.phial": "crie um token Frailty, Inertia ou Bloodrot Pox sob o controle do herói atingido",
   "card.effect.mpa.prolongedillness": "sempre que um token de doença for destruído, se for o primeiro com esse nome, crie uma cópia dele sob o controle do mesmo herói",
