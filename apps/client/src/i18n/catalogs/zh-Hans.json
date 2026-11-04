@@ -994,6 +994,7 @@
   "card.evo.equipment.mustdefend": "选择一件必须防守的装备",
   "card.evo.equipment.offer.many": "选择 {count} 件装备交出",
   "card.evo.equipment.zone.choose": "选择一个装备区域",
+  "card.evo.fabricate.hand.banish": "从手牌放逐一张 Evo 并抽一张牌？",
   "card.evo.fabricate.mode.first": "选择 Fabricate 的第一项模式",
   "card.evo.fabricate.mode.next": "选择 Fabricate 的第二项模式",
   "card.evo.fabricate.option.defense": "你操控的 Evo 永久物 +1 防御",

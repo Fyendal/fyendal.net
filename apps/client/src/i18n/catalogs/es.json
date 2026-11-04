@@ -994,6 +994,7 @@
   "card.evo.equipment.mustdefend": "Elige un equipo que deba defender",
   "card.evo.equipment.offer.many": "Elige {count, plural, one {# equipo} other {# equipos}} para ofrecer",
   "card.evo.equipment.zone.choose": "Elige una zona de equipo",
+  "card.evo.fabricate.hand.banish": "¿Hacer banish de un Evo de tu mano para robar una carta?",
   "card.evo.fabricate.mode.first": "Elige el primer modo de Fabricate",
   "card.evo.fabricate.mode.next": "Elige el segundo modo de Fabricate",
   "card.evo.fabricate.option.defense": "Tus permanentes Evo obtienen +1 de defensa",

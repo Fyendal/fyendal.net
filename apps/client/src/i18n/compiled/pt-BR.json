@@ -5417,6 +5417,12 @@
       "value": "Escolha uma zona de equipamento"
     }
   ],
+  "card.evo.fabricate.hand.banish": [
+    {
+      "type": 0,
+      "value": "Fazer banish de um Evo da mão para comprar uma carta?"
+    }
+  ],
   "card.evo.fabricate.mode.first": [
     {
       "type": 0,

@@ -642,6 +642,8 @@ describe("WTR generic — reactions", () => {
       .expectFinalAttack(10) // 6 + 4
       .expectHandSize(1, 1) // discarded one card on hit
       .expectLife(1, 10);
+    const effects = projectStateFor(g.state, 0).ongoing;
+    expect(effects.filter((effect) => effect.cardId === printingId("pummel|1"))).toEqual([]);
   });
 
   it("Razor Reflex buffs a sword weapon attack", () => {

@@ -229,7 +229,15 @@ function flightStyle(flight: MotionFlight, squareCardsEnabled: boolean): MotionS
     "--motion-delay": `${flight.delayMs}ms`,
     "--motion-duration": `${motionFlightDurationMs(flight)}ms`,
     ...(flight.emergeY !== undefined ? { "--motion-emerge-y": `${flight.emergeY}px` } : {}),
+    ...(flightTilted(flight) ? {
+      "--motion-tilt-from": `${flight.start.rotation ?? 0}deg`,
+      "--motion-tilt-to": `${flight.end.rotation ?? 0}deg`,
+    } : {}),
   };
+}
+
+function flightTilted(flight: MotionFlight): boolean {
+  return (flight.start.rotation ?? 0) !== 0 || (flight.end.rotation ?? 0) !== 0;
 }
 
 function connectorStyle(connector: MotionConnector): MotionStyle {
@@ -269,6 +277,14 @@ function MotionFlightOverlay({
     if (lingerTimerRef.current !== null) window.clearTimeout(lingerTimerRef.current);
   }, []);
   const morph = motionFlightMorph(flight, squareCardsEnabled);
+  const visual = (
+    <MotionCardVisual
+      visual={flight.visual}
+      count={flight.showCount ? flight.count : 1}
+      square={squareMotionFlight(flight, squareCardsEnabled)}
+      morph={morph}
+    />
+  );
   return (
     <>
       <div
@@ -303,12 +319,7 @@ function MotionFlightOverlay({
           onCueComplete(flight.id);
         }}
       >
-        <MotionCardVisual
-          visual={flight.visual}
-          count={flight.showCount ? flight.count : 1}
-          square={squareMotionFlight(flight, squareCardsEnabled)}
-          morph={morph}
-        />
+        {flightTilted(flight) ? <div className="game-motion-tilt">{visual}</div> : visual}
       </div>
       {morph?.expand && flight.visual.kind === "face" ? (
         <MotionExpandCounters card={flight.visual.card} rect={flight.start} />
@@ -366,7 +377,10 @@ function QueuedSource({ flight, squareCardsEnabled }: { flight: MotionFlight; sq
       className={`game-motion-queued-source${
         flight.mode === "reflow" ? " game-motion-queued-source-reflow" : ""
       }`}
-      style={rectStyle(flight.start)}
+      style={{
+        ...rectStyle(flight.start),
+        ...(flight.start.rotation ? { transform: `rotate(${flight.start.rotation}deg)` } : {}),
+      }}
     >
       <MotionCardVisual
         visual={flight.visual}

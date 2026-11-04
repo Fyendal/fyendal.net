@@ -76,10 +76,17 @@ function recordFabricateMode(ctx: ScriptCtx, mode: string) {
     );
   }
 }
-function applyFabricateHandMode(ctx: ScriptCtx): void {
+function requestFabricateHandBanish(ctx: ScriptCtx): void {
   if (ctx.getState("fabricate-mode:hand") <= 0) return;
-  const evo = ctx.player(ctx.seat).hand.find((card) => has(ctx, card, "evo"));
-  if (evo && ctx.banish(evo.instanceId)) ctx.drawCards(ctx.seat, 1);
+  const evos = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "evo"));
+  if (evos.length === 0) return;
+  ctx.requestCardChoice(
+    "fabricate-hand",
+    decisionPrompt("Banish an Evo from hand to draw a card?", "card.evo.fabricate.hand.banish", {
+      optionMessages: commonOptionMessages("no"),
+    }),
+    ["no", ...evos.map((card) => card.instanceId)],
+  );
 }
 function evoEquipment(extra: CardScript = {}): CardScript {
   return {
@@ -952,7 +959,6 @@ export const evoHighRarity: Record<string, CardScript> = {
           (card): card is DeepReadonly<CardInstance> => !!card && has(ctx, card, "evo"),
         );
         if (evos.length) {
-          if (ctx.getState("fabricate-mode:hand") > 0) ctx.setState("fabricate-hand-pending", 1);
           ctx.requestCardChoice(
             "fabricate-under",
             decisionPrompt("Choose an Evo equipment to put Fabricate under", "card.evo.fabricate.under.choose"),
@@ -961,12 +967,16 @@ export const evoHighRarity: Record<string, CardScript> = {
           return;
         }
       }
-      applyFabricateHandMode(ctx);
+      requestFabricateHandBanish(ctx);
     },
     onChoose(ctx, hook, option) {
       if (hook === "fabricate-under") {
         ctx.putSelfUnder(Number(option));
-        if (ctx.getState("fabricate-hand-pending") > 0) applyFabricateHandMode(ctx);
+        requestFabricateHandBanish(ctx);
+        return;
+      }
+      if (hook === "fabricate-hand") {
+        if (option !== "no" && ctx.banish(Number(option))) ctx.drawCards(ctx.seat, 1);
         return;
       }
       if (hook !== "fabricate-mode") return;

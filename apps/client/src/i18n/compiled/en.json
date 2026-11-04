@@ -5281,6 +5281,12 @@
       "value": "Choose an equipment zone"
     }
   ],
+  "card.evo.fabricate.hand.banish": [
+    {
+      "type": 0,
+      "value": "Banish an Evo from hand to draw a card?"
+    }
+  ],
   "card.evo.fabricate.mode.first": [
     {
       "type": 0,

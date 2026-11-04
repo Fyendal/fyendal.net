@@ -29,6 +29,7 @@ export interface MotionRect {
   top: number;
   width: number;
   height: number;
+  rotation?: number;
 }
 
 export interface MotionAnchorSnapshot {
@@ -132,6 +133,36 @@ export interface GameMotionBatch {
   reducedMotion?: true;
 }
 
+const FAN_CARD_SELECTOR = ".hand .card-hand, .opp-hand > .card";
+
+/** A rotated card's client rect is its inflated bounding box; recover the real
+ * card around the same centre so an overlay can match it exactly. */
+export function unrotatedMotionRect(
+  bounds: MotionRect,
+  transform: string,
+  layoutWidth: number,
+  layoutHeight: number,
+): MotionRect {
+  const match = /^matrix\(([^,]+),\s*([^,]+),/.exec(transform);
+  if (!match || layoutWidth <= 0 || layoutHeight <= 0) return bounds;
+  const a = Number(match[1]);
+  const b = Number(match[2]);
+  const degrees = Math.atan2(b, a) * 180 / Math.PI;
+  if (!Number.isFinite(degrees) || Math.abs(degrees) < .01) return bounds;
+  const scale = Math.hypot(a, b);
+  const width = layoutWidth * scale;
+  const height = layoutHeight * scale;
+  // A revealed opposing hand is flipped 180deg, but overlays always draw upright.
+  const rotation = Math.abs(degrees) > 90 ? degrees - Math.sign(degrees) * 180 : degrees;
+  return {
+    left: bounds.left + (bounds.width - width) / 2,
+    top: bounds.top + (bounds.height - height) / 2,
+    width,
+    height,
+    rotation,
+  };
+}
+
 function motionRect(element: Element): MotionRect | null {
   const rect = element.getBoundingClientRect();
   if (
@@ -142,7 +173,10 @@ function motionRect(element: Element): MotionRect | null {
     || rect.width <= 0
     || rect.height <= 0
   ) return null;
-  return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+  const bounds = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+  if (!element.matches?.(FAN_CARD_SELECTOR)) return bounds;
+  const { offsetWidth, offsetHeight } = element as HTMLElement;
+  return unrotatedMotionRect(bounds, getComputedStyle(element).transform, offsetWidth, offsetHeight);
 }
 
 /** The ×N change of the arena stack an arriving or departing `key` belongs
@@ -261,7 +295,8 @@ function phaseStaggerMs(phase: MotionTimelinePhase): number {
 
 function sameRect(left: MotionRect, right: MotionRect): boolean {
   return left.left === right.left && left.top === right.top
-    && left.width === right.width && left.height === right.height;
+    && left.width === right.width && left.height === right.height
+    && (left.rotation ?? 0) === (right.rotation ?? 0);
 }
 
 /** Slide a card out past the edge of the card covering it, on the side it

@@ -330,6 +330,77 @@ describe("EVO — registration and core mechanics", () => {
     ]));
   });
 
+  it("Fabricate lets its controller choose which Evo to banish from hand", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["fabricate|1", "evo beta base legs|3", "evo beta base arms|3"],
+          deck: ["head jab|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("fabricate|1").chooseOption("defense").chooseOption("hand").chooseCard("evo beta base arms|3");
+
+    const me = s.state.players[0]!;
+    expect(me.banish.map((card) => card.cardId)).toEqual([printingId("evo beta base arms|3")]);
+    expect(me.hand.map((card) => card.cardId)).toEqual([
+      printingId("evo beta base legs|3"),
+      printingId("head jab|1"),
+    ]);
+  });
+
+  it("Fabricate may decline to banish an Evo from hand", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["fabricate|1", "evo beta base legs|3"],
+          deck: ["head jab|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("fabricate|1").chooseOption("defense").chooseOption("hand").chooseOption("no");
+
+    const me = s.state.players[0]!;
+    expect(me.banish).toEqual([]);
+    expect(me.hand.map((card) => card.cardId)).toEqual([printingId("evo beta base legs|3")]);
+  });
+
+  it("Fabricate goes under an Evo before choosing the Evo to banish", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["fabricate|1", "evo beta base legs|3", "evo beta base arms|3"],
+          deck: ["head jab|1"],
+          equipment: { head: "evo sentry base head|1" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("fabricate|1")
+      .chooseOption("hand")
+      .chooseOption("under")
+      .chooseCard("evo sentry base head|1")
+      .chooseCard("evo beta base arms|3");
+
+    const me = s.state.players[0]!;
+    expect(me.equipment.head?.subcards).toEqual([
+      expect.objectContaining({ cardId: printingId("fabricate|1") }),
+    ]);
+    expect(me.banish.map((card) => card.cardId)).toEqual([printingId("evo beta base arms|3")]);
+    expect(me.hand.map((card) => card.cardId)).toEqual([
+      printingId("evo beta base legs|3"),
+      printingId("head jab|1"),
+    ]);
+  });
+
   it("Fabricate adds defense to Evo equipment, including Evo bases, but not ordinary bases", () => {
     const s = scenario({
       active: 1,

@@ -82,6 +82,13 @@
   animation-fill-mode: both;
 }
 
+/* The wrapper scales from its corner; a hand card turns about its centre. */
+.game-motion-tilt {
+  width: 100%;
+  height: 100%;
+  animation: game-motion-tilt var(--motion-duration) cubic-bezier(.2, .82, .2, 1) var(--motion-delay) both;
+}
+
 .game-motion-flight-reflow {
   z-index: 1;
   animation-name: game-motion-travel;
@@ -373,6 +380,11 @@
     transform: translate3d(var(--motion-x), var(--motion-y), 0)
       scale(var(--motion-scale-x), var(--motion-scale-y));
   }
+}
+
+@keyframes game-motion-tilt {
+  from { transform: rotate(var(--motion-tilt-from)); }
+  to { transform: rotate(var(--motion-tilt-to)); }
 }
 
 @keyframes game-motion-hold {

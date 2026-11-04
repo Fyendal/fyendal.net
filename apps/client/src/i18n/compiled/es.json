@@ -5315,6 +5315,12 @@
       "value": "Elige una zona de equipo"
     }
   ],
+  "card.evo.fabricate.hand.banish": [
+    {
+      "type": 0,
+      "value": "¿Hacer banish de un Evo de tu mano para robar una carta?"
+    }
+  ],
   "card.evo.fabricate.mode.first": [
     {
       "type": 0,

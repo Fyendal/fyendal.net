@@ -994,6 +994,7 @@
   "card.evo.equipment.mustdefend": "Choose equipment that must defend",
   "card.evo.equipment.offer.many": "Choose {count} equipment to offer",
   "card.evo.equipment.zone.choose": "Choose an equipment zone",
+  "card.evo.fabricate.hand.banish": "Banish an Evo from hand to draw a card?",
   "card.evo.fabricate.mode.first": "Choose the first Fabricate mode",
   "card.evo.fabricate.mode.next": "Choose the second Fabricate mode",
   "card.evo.fabricate.option.defense": "Your Evo permanents get +1 defense",

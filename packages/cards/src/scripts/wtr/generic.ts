@@ -432,10 +432,6 @@ function applyPummelClubHammer(ctx: ScriptCtx, buff: number): void {
 
 function applyPummelDiscard(ctx: ScriptCtx, buff: number): void {
   ctx.addModifier({ scope: "chain-link", attack: buff });
-  // The until-end-of-turn marker is needed so the engine calls this reaction
-  // card's onHit hook when the attack resolves. The link flag keeps the effect
-  // tied to the attack Pummel was actually played on.
-  ctx.addModifier({ scope: "until-end-of-turn", appliesTo: "attack-action" });
   ctx.setFlag("link", "pummelDiscardMode", true);
   ctx.logPublic(
     localizedLog(
