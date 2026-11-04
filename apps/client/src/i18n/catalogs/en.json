@@ -785,6 +785,7 @@
   "card.ele.thump.discard": "Thump: choose a card to discard",
   "card.mon.action.search": "Search for an action card",
   "card.mon.actionpoint.pay": "Pay 1 to gain an action point?",
+  "card.common.actionpoint.nogain": "Warning: you won't gain an action point because it isn't your action phase.",
   "card.mon.attack.reveal.three": "{card}: reveal an attack action with 3 or less base power?",
   "card.mon.attack.top.maxcost": "{card}: put an attack action with cost {amount} or less on top of your deck",
   "card.mon.banished.attack.choose": "{card}: choose a banished attack action",

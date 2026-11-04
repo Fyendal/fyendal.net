@@ -7,6 +7,7 @@ import {
   leavesArenaTrigger,
   localizedCardLog,
   opponentSeat,
+  warnIfNoActionPoint,
 } from "./shared-helpers.js";
 
 // ── SEN (Silver Age: Enigma precon) ─────────────────────────────────────────
@@ -184,10 +185,10 @@ export const sen: Record<string, CardScript> = {
     onFriendlyAttackLost(ctx) {
       ctx.requestPayment(
         "stilettos-pay",
-        decisionPrompt(
+        warnIfNoActionPoint(ctx, decisionPrompt(
           "Silent Stilettos: pay {r}{r}{r} to destroy it and gain 1 action point?",
           "card.sen.stilettos.pay.actionpoint",
-        ),
+        )),
         3,
       );
     },

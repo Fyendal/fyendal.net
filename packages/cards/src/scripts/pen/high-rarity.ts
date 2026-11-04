@@ -532,8 +532,10 @@ export const penHighRarity: Record<string, CardScript> = {
         .map((card) => card.instanceId);
     },
     onPlay(ctx) {
-      if (ctx.playTargetInstanceId !== undefined && ctx.negateStackCard(ctx.playTargetInstanceId))
-        ctx.changeActionPoints(opponentSeat(ctx), 1);
+      const target = ctx.playTargetInstanceId;
+      if (target === undefined) return;
+      const controller = ctx.state.stack.find((layer) => layer.card?.instanceId === target)?.seat;
+      if (controller !== undefined && ctx.negateStackCard(target)) ctx.changeActionPoints(controller, 1);
     },
   },
   "touch of reality|0": {

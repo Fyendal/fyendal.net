@@ -2184,6 +2184,12 @@
       "value": "Miraging Metamorph: escolha uma aura para copiar"
     }
   ],
+  "card.common.actionpoint.nogain": [
+    {
+      "type": 0,
+      "value": "Atenção: você não vai ganhar um Action Point porque não é a sua action phase."
+    }
+  ],
   "card.common.arrow.arsenal": [
     {
       "type": 0,

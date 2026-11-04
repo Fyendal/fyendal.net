@@ -461,6 +461,13 @@ export function yesNoPrompt(fallback: string, id: string, values?: GameMessage["
   });
 }
 
+/** Warn the deciding player when a prompt's action point can't be gained now. */
+export function warnIfNoActionPoint(ctx: ScriptCtx, prompt: ScriptDecisionPrompt): ScriptDecisionPrompt {
+  return ctx.canGainActionPoint()
+    ? prompt
+    : { ...prompt, warningMessage: decisionMessage("card.common.actionpoint.nogain") };
+}
+
 export const BLOODROT_POX = "OUT234";
 export const FRAILTY = "OUT235";
 export const INERTIA = "OUT236";
@@ -603,7 +610,7 @@ export function effectPutSelfFaceUpFromDeck(
   card: DeepReadonly<CardInstance> | undefined,
   event: TriggerEventContext | undefined,
 ): boolean {
-  return card?.instanceId === ctx.self.instanceId &&
+  return card?.instanceId === ctx.self.instanceId && event?.to !== "hand" &&
     (event?.effectSource === "action-card" || event?.effectSource === "activated-ability");
 }
 

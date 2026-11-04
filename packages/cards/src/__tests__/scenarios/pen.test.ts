@@ -259,6 +259,26 @@ describe("PEN — import and set mechanics", () => {
     g.play("energy of the audience|2").expectAttackValue(expected);
   });
 
+  it("Comeback Kicks warns that no action point will be gained off-turn", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "tuffnut|0",
+          life: 10,
+          deck: ["old leather and vim|1"],
+          equipment: { ...NO_EQUIPMENT, legs: "comeback kicks|0" },
+        },
+        { hero: "dorinthea", life: 20, hand: ["come to fight|1"], resources: 1, equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("come to fight|1", { settle: false }).passPriority().activate("tuffnut|0");
+    expect(g.state.pendingDecision?.warningMessage?.id).toBe("card.common.actionpoint.nogain");
+    g.chooseOption("yes").expectAP(0, 0);
+  });
+
   it("Comeback Kicks offers its action point when the crowd cheers its lower-life hero", () => {
     const g = scenario({
       seats: [

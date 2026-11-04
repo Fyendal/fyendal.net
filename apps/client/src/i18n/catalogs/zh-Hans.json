@@ -785,6 +785,7 @@
   "card.ele.thump.discard": "Thump：选择一张牌弃置",
   "card.mon.action.search": "搜寻一张行动牌",
   "card.mon.actionpoint.pay": "支付 1 点资源以获得 1 个行动点？",
+  "card.common.actionpoint.nogain": "警告：现在不是你的行动阶段，你不会获得行动点。",
   "card.mon.attack.reveal.three": "{card}：展示一张基础力量不超过 3 的攻击行动牌？",
   "card.mon.attack.top.maxcost": "{card}：将一张费用不超过 {amount} 的攻击行动牌置于牌库顶部",
   "card.mon.banished.attack.choose": "{card}：选择一张已放逐的攻击行动牌",

@@ -9,6 +9,7 @@ import {
   opponentSeat,
   resourceAbility,
   yesNoPrompt,
+  warnIfNoActionPoint,
 } from "./shared-helpers.js";
 
 // ── SKA (Silver Age Chapter 1: Kayo precon) ────────────────────────────────
@@ -235,7 +236,10 @@ export const ska: Record<string, CardScript> = {
         effect: (ctx) =>
           ctx.requestChoice(
             "beaten-trackers",
-            yesNoPrompt("Destroy Beaten Trackers to gain 1 action point?", "card.ska.beaten.trackers.destroy"),
+            warnIfNoActionPoint(
+              ctx,
+              yesNoPrompt("Destroy Beaten Trackers to gain 1 action point?", "card.ska.beaten.trackers.destroy"),
+            ),
             ["yes", "no"],
           ),
       },

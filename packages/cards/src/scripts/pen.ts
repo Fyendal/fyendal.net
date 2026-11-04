@@ -29,6 +29,7 @@ import {
   requestHeroChoice,
   resolveDiscardChoice,
   yesNoPrompt,
+  warnIfNoActionPoint,
 } from "./shared-helpers.js";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 import { penHighRarity } from "./pen/high-rarity.js";
@@ -2063,7 +2064,10 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       if (lowerLife(ctx))
         ctx.requestChoice(
           "pen-comeback",
-          yesNoPrompt("Destroy Comeback Kicks to gain an action point?", "card.pen.comeback.destroy"),
+          warnIfNoActionPoint(
+            ctx,
+            yesNoPrompt("Destroy Comeback Kicks to gain an action point?", "card.pen.comeback.destroy"),
+          ),
           ["yes", "no"],
         );
     },

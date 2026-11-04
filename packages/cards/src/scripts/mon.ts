@@ -28,6 +28,7 @@ import {
   ongoingLabel,
   optionalChargeOptions,
   resourceAbility,
+  warnIfNoActionPoint,
 } from "./shared-helpers.js";
 import { monHighRarity } from "./mon/high-rarity.js";
 
@@ -1024,7 +1025,10 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       if (pending === 1) {
         ctx.requestChoice(
           "hooves-shadowbeast",
-          yesNoPrompt("Destroy Hooves of the Shadowbeast to gain 1 action point?", "card.mon.hooves.destroy"),
+          warnIfNoActionPoint(
+            ctx,
+            yesNoPrompt("Destroy Hooves of the Shadowbeast to gain 1 action point?", "card.mon.hooves.destroy"),
+          ),
           ["yes", "no"],
         );
       }
@@ -1039,7 +1043,10 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       } else if (remaining > 0) {
         ctx.requestChoice(
           "hooves-shadowbeast",
-          yesNoPrompt("Destroy Hooves of the Shadowbeast to gain 1 action point?", "card.mon.hooves.destroy"),
+          warnIfNoActionPoint(
+            ctx,
+            yesNoPrompt("Destroy Hooves of the Shadowbeast to gain 1 action point?", "card.mon.hooves.destroy"),
+          ),
           ["yes", "no"],
         );
       }

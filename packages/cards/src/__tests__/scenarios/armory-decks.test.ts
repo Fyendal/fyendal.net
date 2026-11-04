@@ -1656,6 +1656,116 @@ describe("Armory Decks — rules regression coverage", () => {
     expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
   });
 
+  it("Back Alley Breakline gains no action point when an effect puts it into hand", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["sand sketched plan|3"],
+          deck: ["back alley breakline|3", "back alley breakline|3"],
+          resources: 9,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("sand sketched plan|3").chooseCard("back alley breakline|3").settle();
+    g.expectAP(0, 0).expectNoLog("Back Alley Breakline triggers");
+  });
+
+  describe("Phantasmal Footsteps", () => {
+    const FOOTSTEPS = { ...NO_EQUIPMENT, legs: "phantasmal footsteps|0" };
+
+    it("offers an action point when phantasm destroys an Illusionist attack", () => {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", resources: 3, hand: ["enigma chimera|3"], equipment: FOOTSTEPS },
+          { hero: "dorinthea", hand: ["wrecker romp|1"], equipment: NO_EQUIPMENT },
+        ],
+      });
+      g.play("enigma chimera|3").blockWith("wrecker romp|1").settle();
+      expect(g.state.pendingDecision?.warningMessage).toBeUndefined();
+      g.chooseOption("pay 1").expectAP(0, 1);
+    });
+
+    it("warns that no action point will be gained outside its controller's action phase", () => {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", hand: ["raging onslaught|1", "apex buster|2"], resources: 9, equipment: NO_EQUIPMENT },
+          { hero: "dorinthea", hand: ["enigma chimera|3"], resources: 1, equipment: FOOTSTEPS },
+        ],
+      });
+      g.play("raging onslaught|1").blockWith("enigma chimera|3");
+      g.activate("apex buster|2").chooseCard("enigma chimera|3").settle();
+      expect(g.state.pendingDecision?.player).toBe(1);
+      expect(g.state.pendingDecision?.warningMessage?.id).toBe("card.common.actionpoint.nogain");
+      g.chooseOption("pay 1").expectAP(1, 0);
+    });
+
+    it("offers an action point when an effect other than phantasm destroys the attack", () => {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", resources: 3, hand: ["enigma chimera|3"], equipment: FOOTSTEPS },
+          { hero: "dorinthea", hand: ["burn bare|0"], equipment: NO_EQUIPMENT },
+        ],
+      });
+      g.play("enigma chimera|3").blockWith().passPriority().activate("burn bare|0").settle();
+      g.chooseOption("pay 1").expectAP(0, 1);
+    });
+
+    it("uses its once-per-turn limit even when the payment is declined", () => {
+      const g = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            resources: 9,
+            hand: ["enigma chimera|3", "enigma chimera|3"],
+            board: ["timesnap potion|3"],
+            equipment: FOOTSTEPS,
+          },
+          { hero: "dorinthea", hand: ["wrecker romp|1", "wrecker romp|1"], equipment: NO_EQUIPMENT },
+        ],
+      });
+      g.activate("timesnap potion|3").expectAP(0, 2);
+      g.play("enigma chimera|3").blockWith("wrecker romp|1").settle();
+      g.chooseOption("no");
+      g.play("enigma chimera|3").blockWith("wrecker romp|1").settle();
+      expect(g.state.pendingDecision?.chooseHook).toBeUndefined();
+      g.expectAP(0, 0);
+    });
+  });
+
+  it("Temporal Wobble gives the action point to the negated card's controller", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["come to fight|1", "temporal wobble|1"],
+          board: ["sigil of lightning|3", "sigil of lightning|3"],
+          resources: 9,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("come to fight|1", { settle: false }).react("temporal wobble|1", { targetCard: "come to fight|1" });
+    g.expectInZone(0, "come to fight|1", "graveyard").expectAP(0, 1);
+    expect(g.state.players[1]!.actionPoints).toBe(0);
+  });
+
+  it("gains no action point outside the player's action phase", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", board: ["diamond amulet|3"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: ["come to fight|1"], resources: 9, equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("come to fight|1", { settle: false }).passPriority();
+    g.activate("diamond amulet|3");
+    expect(g.state.players[0]!.actionPoints).toBe(0);
+  });
+
   it("Hidden Agenda turns its arsenal arrow face up as an activation cost", () => {
     const g = scenario({
       seats: [

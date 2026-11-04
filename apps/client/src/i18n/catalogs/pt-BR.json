@@ -785,6 +785,7 @@
   "card.ele.thump.discard": "Thump: escolha uma carta para descartar",
   "card.mon.action.search": "Procure uma carta de action",
   "card.mon.actionpoint.pay": "Pagar 1 para ganhar um Action Point?",
+  "card.common.actionpoint.nogain": "Atenção: você não vai ganhar um Action Point porque não é a sua action phase.",
   "card.mon.attack.reveal.three": "{card}: revelar uma carta de attack action com 3 ou menos de poder base?",
   "card.mon.attack.top.maxcost": "{card}: coloque uma carta de attack action com custo {amount} ou menos no topo do seu deck",
   "card.mon.banished.attack.choose": "{card}: escolha uma carta de attack action na zona banished",

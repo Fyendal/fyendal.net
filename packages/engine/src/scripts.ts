@@ -44,6 +44,8 @@ export interface ScriptDecisionPrompt {
    * the player beside the remaining options. Labels come from
    * `optionMessagesByValue`. */
   chosenOptions?: readonly string[];
+  /** Caveat shown beside the prompt. Honored by `requestChoice` and `requestPayment`. */
+  warningMessage?: GameMessage;
 }
 
 export type ScriptPrompt = string | ScriptDecisionPrompt;
@@ -82,7 +84,8 @@ export interface ScriptCtx {
   /** Attacks waiting in a player's attack queue, first attack first. CR
    * 3.15.7f treats them as on the stack when choosing targets. */
   queuedAttacks(targetSeat: number): readonly DeepReadonly<CardInstance>[];
-  /** Add or spend floating resources/chi or action points through bounded commands. */
+  /** Add or spend floating resources/chi or action points through bounded
+   * commands. Gaining action points fails outside that seat's action phase. */
   changeResources(targetSeat: number, delta: number): void;
   changeChi(targetSeat: number, delta: number): void;
   changeActionPoints(targetSeat: number, delta: number): void;
@@ -261,9 +264,11 @@ export interface ScriptCtx {
   gainLife(targetSeat: number, n: number): void;
   /** Lose life without creating a damage event. */
   loseLife(targetSeat: number, n: number): void;
-  /** Grant the controller 1 action point (go again on a resolving layer).
-   *  Fails for the non-turn player (CR 8.5.7b). */
+  /** Grant the controller 1 action point, for text that says so; "go again"
+   *  uses `grantGoAgain`. Fails outside their action phase (CR 1.13.2b). */
   gainActionPoint(): void;
+  /** Whether `gainActionPoint` would currently grant the controller a point. */
+  canGainActionPoint(): boolean;
   drawCards(targetSeat: number, n: number): void;
   /** Seeded random discard from hand; returns the discarded cards */
   discardRandom(targetSeat: number, n: number): DeepReadonly<CardInstance>[];

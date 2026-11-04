@@ -590,6 +590,28 @@ describe("MON — Shadow Brute and Blood Debt", () => {
       .expectLife(1, 13);
   });
 
+  it("Hooves of the Shadowbeast warns that no action point will be gained off-turn", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        leviaSeat({
+          resources: 1,
+          equipment: { arms: "ebon fold|0", legs: "hooves of the shadowbeast|0" },
+          hand: ["consuming aftermath|1"],
+          deck: [BLUE],
+        }),
+        { hero: "dorinthea", hand: ["come to fight|1"], resources: 1 },
+      ],
+    });
+
+    s.play("come to fight|1", { settle: false })
+      .passPriority()
+      .activate("ebon fold|0")
+      .chooseCard("consuming aftermath|1");
+    expect(s.state.pendingDecision?.warningMessage?.id).toBe("card.common.actionpoint.nogain");
+    s.chooseOption("yes").expectAP(0, 0);
+  });
+
   it("Hooves of the Shadowbeast can destroy itself after a 6-power card is banished", () => {
     const s = scenario({
       seats: [

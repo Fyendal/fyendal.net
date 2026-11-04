@@ -56,7 +56,7 @@ import {
 } from "./zoneQueries.js";
 
 import { contractObserverSources, controlledPermanents, hookSources } from "./sourceQueries.js";
-import { FROZEN_WHILE_SOURCE_IN_ARENA, isFrozen } from "./ruleQueries.js";
+import { FROZEN_WHILE_SOURCE_IN_ARENA, inActionPhase, isFrozen } from "./ruleQueries.js";
 import { arsenalCapacity, clearMovedCardPlayPermissions, clearPrivateZonePlacement, clearTemporaryObjectEffects, hasCrank, resetActivatedAbilityUsage, stampEnteringLife } from "./cardLifecycle.js";
 import {
   transitionZone,
@@ -487,6 +487,7 @@ export function makeCtx(
         : "choose-target",
       prompt: presentation.fallback,
       ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
+      ...(presentation.warningMessage ? { warningMessage: presentation.warningMessage } : {}),
       ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
       ...(presentation.chosenOptions ? { chosenOptions: presentation.chosenOptions } : {}),
       ...(presentation.chosenOptionMessages
@@ -719,6 +720,7 @@ export function makeCtx(
       target.chi = Math.max(0, target.chi + delta);
     },
     changeActionPoints(targetSeat, delta) {
+      if (delta > 0 && !inActionPhase(state, targetSeat)) return;
       const target = state.players[targetSeat] as PlayerState;
       target.actionPoints = Math.max(0, target.actionPoints + delta);
     },
@@ -1600,9 +1602,11 @@ export function makeCtx(
       recordLifeLost(state, targetSeat, lost);
       if (requested > 0) target.flags.lostLifeThisTurn = true;
     },
+    canGainActionPoint() {
+      return inActionPhase(state, seat);
+    },
     gainActionPoint() {
-      // CR 8.5.7b: a non-turn-player cannot gain action points
-      if (seat !== state.activePlayer) return;
+      if (!inActionPhase(state, seat)) return;
       player.actionPoints += 1;
       logPublic(state, gameLogMessage(
         `${nameOf(state, player.heroCardId)} gains an action point`,

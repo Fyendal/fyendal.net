@@ -13,6 +13,7 @@ import {
   opponentSeat,
   targetHeroSeat,
   weaponAttackCount,
+  warnIfNoActionPoint,
 } from "../shared-helpers.js";
 
 const SPECTRAL_SHIELD = "MON104";
@@ -388,22 +389,32 @@ export const monHighRarity: Record<string, CardScript> = {
         ctx.setFlag("link", `destroyOnClose:${ctx.self.instanceId}`, true);
       }
     },
-    onFriendlyAttackLost(ctx, card, cause) {
-      if (cause !== "phantasm" || !ctx.cardTypes(card).includes("illusionist")) return;
-      if (ctx.getState("actionPointTurn") === ctx.state.turn) return;
-      ctx.requestPayment(
-        "footsteps-action",
-        decisionPrompt("Pay 1 to gain an action point?", "card.mon.actionpoint.pay"),
-        1,
-      );
-    },
+    triggers: [
+      {
+        event: "card-destroyed",
+        label: "Gain 1 action point",
+        labelMessage: decisionMessage("card.trigger.common.actionpoint.gain", { amount: 1 }),
+        condition(ctx, card) {
+          if (!card || ctx.getState("actionPointTurn") === ctx.state.turn) return false;
+          const types = ctx.cardTypes(card);
+          return ctx.hasCardType(card, "action") && types.includes("illusionist") && types.includes("attack");
+        },
+        onTrigger: (ctx) => ctx.setState("actionPointTurn", ctx.state.turn),
+        effect: (ctx) =>
+          ctx.requestPayment(
+            "footsteps-action",
+            warnIfNoActionPoint(
+              ctx,
+              decisionPrompt("Pay 1 to gain an action point?", "card.mon.actionpoint.pay"),
+            ),
+            1,
+          ),
+      },
+    ],
     onChoose(ctx, hook, option) {
       if (option !== "paid") return;
       if (hook === "footsteps-defense") ctx.addCardTempDefense(ctx.self.instanceId, 1);
-      if (hook === "footsteps-action") {
-        ctx.setState("actionPointTurn", ctx.state.turn);
-        ctx.gainActionPoint();
-      }
+      if (hook === "footsteps-action") ctx.gainActionPoint();
     },
   },
   "phantasmaclasm|1": {

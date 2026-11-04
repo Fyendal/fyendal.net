@@ -51,7 +51,7 @@ import { clearPlayFromZoneGrant, settlesInArena, settlePlayedCard, startPlayScri
 import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, consumeSingleUsePlayFromGroup, mayPlayFromArsenal, mayPlayFromZone, modifierMatchesPlayedCard, noteCardPlayed, notePlayPermissionSource, payAlternativePlayCost, playFromZoneOwnerMatches, playTargetOptions, preparePlayTarget, spendFriendlyPlayPermission } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchValueOfInstance } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
-import { consumeFirstActionExtraCost, firstActionExtraCost, goAgainSuppressed, isFrozen, opposingInstantsProhibited, snapshotSerializable } from "./ruleQueries.js";
+import { consumeFirstActionExtraCost, firstActionExtraCost, goAgainSuppressed, inActionPhase, isFrozen, opposingInstantsProhibited, snapshotSerializable } from "./ruleQueries.js";
 import { opposingActionsProhibited } from "./restrictions.js";
 import { defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
 import { pushAttackCardLayer, pushCardLayer, recordAnnouncedAttackTarget, takeAttackLayerOrigin } from "./stackCore.js";
@@ -1203,7 +1203,7 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
     return;
   }
   if (layer.engineEffect?.kind === "gain-action-points") {
-    if (layer.seat === state.activePlayer) {
+    if (inActionPhase(state, layer.seat)) {
       (state.players[layer.seat] as PlayerState).actionPoints += layer.engineEffect.amount;
       const player = state.players[layer.seat] as PlayerState;
       logPublic(state, gameLogMessage(
@@ -1591,7 +1591,7 @@ export function finishStackCardResolution(
   if (layer?.meldStage === 2 && layer.card) layer.card.meldSide = "both";
   // A non-attack action card or ability with go again refunds its action point
   // only now that its layer resolves.
-  const gainedGoAgain = layer?.goAgain === true && layer.seat === state.activePlayer &&
+  const gainedGoAgain = layer?.goAgain === true && inActionPhase(state, layer.seat) &&
     !goAgainSuppressed(state, layer.seat);
   if (gainedGoAgain) {
     (state.players[layer.seat] as PlayerState).actionPoints += 1;

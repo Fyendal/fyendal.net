@@ -55,6 +55,13 @@ export function goAgainSuppressed(state: GameStateInternal, seat: number): boole
     Number(player.hero.scriptState?.goAgainSuppressedTurn ?? 0) === state.turn;
 }
 
+/** CR 1.13.2b: a player gains action points only during their own action phase. */
+export function inActionPhase(state: GameStateInternal, seat: number): boolean {
+  return state.activePlayer === seat &&
+    state.phase !== "start" && state.phase !== "end" && state.phase !== "game-over" &&
+    state.stackResume !== "begin-action-phase" && state.stackResume !== "end-phase";
+}
+
 /** Attacks this seat controls can't gain go again; inherent go again still applies. */
 export function attacksCannotGainGoAgain(state: GameStateInternal, seat: number): boolean {
   return controlledPermanents(state, seat, { faceDownEquipment: false })

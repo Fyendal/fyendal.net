@@ -32,6 +32,7 @@ export function scriptPromptParts(
   promptMessage?: ScriptDecisionPrompt["message"];
   optionMessages?: (ScriptDecisionPrompt["message"] | null)[];
   chosenOptions?: string[];
+  warningMessage?: ScriptDecisionPrompt["message"];
   chosenOptionMessages?: (ScriptDecisionPrompt["message"] | null)[];
 } {
   if (typeof prompt === "string") return { fallback: prompt };
@@ -50,6 +51,7 @@ export function scriptPromptParts(
   return {
     fallback: prompt.fallback,
     promptMessage: prompt.message,
+    ...(prompt.warningMessage ? { warningMessage: prompt.warningMessage } : {}),
     ...(optionMessages?.some((message) => message !== null)
       ? { optionMessages }
       : {}),

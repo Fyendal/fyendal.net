@@ -2127,6 +2127,12 @@
       "value": "Miraging Metamorph：选择一个要复制的灵气 (Aura)"
     }
   ],
+  "card.common.actionpoint.nogain": [
+    {
+      "type": 0,
+      "value": "警告：现在不是你的行动阶段，你不会获得行动点。"
+    }
+  ],
   "card.common.arrow.arsenal": [
     {
       "type": 0,
