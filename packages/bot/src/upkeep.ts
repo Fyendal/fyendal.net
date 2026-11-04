@@ -101,6 +101,16 @@ export function reserveLethalUpkeep(input: BotPolicyInput): BotPolicyInput {
   return legal.length === 0 || legal.length === input.legal.length ? input : { ...input, legal };
 }
 
+/** Whether `reserveLethalUpkeep` would still allow spending these hand cards this turn. */
+export function keepsLethalUpkeepReserve(input: BotPolicyInput, spentIds: readonly number[]): boolean {
+  if (input.view.activePlayer !== input.seat) return true;
+  const reserve = lethalUpkeepReserve(input);
+  if (reserve <= 0) return true;
+  const floating = input.view.players[input.seat].resources;
+  return floating + availableResources(input) < reserve ||
+    floating + availableResources(input, new Set(spentIds)) >= reserve;
+}
+
 /** Whether spending `spentIds` on the opponent's turn leaves the hand too
  * little pitch for an upkeep that kills the bot at `life` in its next end
  * phase, which the full hand could have paid. No draw comes before it. */

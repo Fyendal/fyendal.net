@@ -39,6 +39,7 @@ import {
 } from "./hand-value.js";
 import { planTacticalTurn, type TacticalTurnPlan } from "./tactical-turn-planner.js";
 import { futureOffenseRate, POINTS_PER_DAMAGE } from "./turn-planner.js";
+import { keepsLethalUpkeepReserve } from "./upkeep.js";
 import { adjustValueBreakdown } from "./value.js";
 import {
   BANNERET_OF_SWORDSMANSHIP,
@@ -665,13 +666,21 @@ function raydnSwingSecured(intent: GameIntent, input: BotPolicyInput, own: Reado
 }
 
 function raydnSwingPower(card: CardView, input: BotPolicyInput): number {
-  return (card.attack ?? 0) + (charged(input) ? 3 : 0) + (luminaActive(input) ? 1 : 0) +
-    (boardCount(input, "courage") > 0 ? 1 : 0);
+  return Math.max(0, (card.attack ?? 0) + (charged(input) ? 3 : 0) + (luminaActive(input) ? 1 : 0) +
+    (boardCount(input, "courage") > 0 ? 1 : 0) - boardCount(input, "frailty"));
+}
+
+/** Holds every named card, and a lethal upkeep's reserve lets them all be played. */
+function canSpend(input: BotPolicyInput, ...functionals: readonly string[]): boolean {
+  const held = functionals.flatMap((functional) =>
+    reserve(input).find((card) => key(input.cards[card.cardId]) === functional)?.instanceId ?? []
+  );
+  return held.length === functionals.length && keepsLethalUpkeepReserve(input, held);
 }
 
 /** Roaring Beam charges only from an empty soul, which Beacon of Victory can make. */
 function roaringBeamCanCharge(input: BotPolicyInput): boolean {
-  return holds(input, ROARING_BEAM) && (soulCount(input) === 0 || holds(input, BEACON_OF_VICTORY));
+  return soulCount(input) === 0 ? canSpend(input, ROARING_BEAM) : canSpend(input, ROARING_BEAM, BEACON_OF_VICTORY);
 }
 
 /** A 0-power swing that opens no reaction window for a charging Roaring Beam, a lethal Beacon or a Warband charge. */
@@ -679,7 +688,7 @@ function emptyRaydnSwing(input: BotPolicyInput): boolean {
   const sword = raydn(input);
   if (!sword || raydnSwingPower(sword, input) > 0) return false;
   return !roaringBeamCanCharge(input) && !ongoingFrom(input, WARBAND_OF_BELLONA) &&
-    !(holds(input, BEACON_OF_VICTORY) && soulCount(input) >= input.view.players[1 - input.seat]!.life);
+    !(canSpend(input, BEACON_OF_VICTORY) && soulCount(input) >= input.view.players[1 - input.seat]!.life);
 }
 
 function scoreRaydn(

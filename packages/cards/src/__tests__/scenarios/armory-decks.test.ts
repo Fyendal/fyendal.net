@@ -1585,6 +1585,31 @@ describe("Armory Decks — rules regression coverage", () => {
     expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
   });
 
+  it.each([
+    "aether quickening|1",
+    "aether quickening|3",
+    "trailblazing aether|1",
+  ])("Arc Lightning triggers when %s gets go again from Surge", (key) => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["crucible of aetherweave|0"],
+          hand: ["arc lightning|2", "nimblism|1", key],
+          resources: 9,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2").declareTarget(1);
+    g.play("nimblism|1").declareTarget(1);
+    g.activate("crucible of aetherweave|0");
+    g.play(key).chooseOption("opposing hero");
+    g.expectAP(0, 1);
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+  });
+
   it("Compass of Sunken Depths gives only the first watery grave card go again, which triggers Arc Lightning", () => {
     const g = scenario({
       seats: [

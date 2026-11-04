@@ -4047,6 +4047,12 @@
       "value": "放逐防御英雄的牌库顶牌"
     }
   ],
+  "card.effect.mst.maul": [
+    {
+      "type": 0,
+      "value": "在你的放逐区生成 2 张 Crouching Tiger；本回合你可以打出它们"
+    }
+  ],
   "card.effect.mst.nuu": [
     {
       "type": 0,
@@ -11530,6 +11536,24 @@
     {
       "type": 0,
       "value": "放逐一张颜色相同的牌"
+    }
+  ],
+  "card.mst.maul.mode": [
+    {
+      "type": 0,
+      "value": "Maul：选择一项或两项"
+    }
+  ],
+  "card.mst.maul.option.power": [
+    {
+      "type": 0,
+      "value": "该攻击行动牌的攻击力 +3"
+    }
+  ],
+  "card.mst.maul.option.tigers": [
+    {
+      "type": 0,
+      "value": "该 Crouching Tiger 获得“当此攻击命中时，在你的放逐区生成 2 张 Crouching Tiger。本回合你可以打出它们”"
     }
   ],
   "card.mst.mechanologist.action.top": [

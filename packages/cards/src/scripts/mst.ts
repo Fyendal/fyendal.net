@@ -600,6 +600,14 @@ function breedAnger(): CardScript {
   };
 }
 
+function maulPowerMode(ctx: ScriptCtx): boolean {
+  return !!ctx.link && ctx.link.attackCardType === "action" && ctx.basePower(ctx.link.attackingCard) <= 1;
+}
+
+function maulTigerMode(ctx: ScriptCtx): boolean {
+  return !!ctx.link && cardNamed(ctx, ctx.link.attackingCard, "Crouching Tiger");
+}
+
 function tigerOnHit(): CardScript {
   return {
     onHit(ctx) {
@@ -1769,10 +1777,52 @@ Object.assign(mst, {
     },
   },
   "maul|2": {
-    canPlay: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat,
+    canPlay(ctx) {
+      if (!ctx.link || ctx.link.attacker !== ctx.seat) return false;
+      return maulPowerMode(ctx) || maulTigerMode(ctx);
+    },
+    additionalCost(ctx) {
+      if (!maulPowerMode(ctx) || !maulTigerMode(ctx)) return;
+      ctx.requestChoice(
+        "maul-mode",
+        decisionPrompt("Maul: choose 1 or both", "card.mst.maul.mode", {
+          optionMessages: {
+            power: decisionMessage("card.mst.maul.option.power"),
+            tigers: decisionMessage("card.mst.maul.option.tigers"),
+            both: decisionMessage("common.option.both"),
+          },
+        }),
+        ["power", "tigers", "both"],
+      );
+    },
     onPlay(ctx) {
-      if (!ctx.link) return;
-      if (ctx.basePower(ctx.link.attackingCard) <= 1) ctx.addModifier({ scope: "chain-link", attack: 3 });
+      const powerMode = maulPowerMode(ctx);
+      const tigerMode = maulTigerMode(ctx);
+      const selectedMode = ctx.getState("maulMode");
+      if (powerMode && (!tigerMode || selectedMode === 1 || selectedMode === 3)) {
+        ctx.addModifier({ scope: "chain-link", attack: 3 });
+      }
+      if (tigerMode && (!powerMode || selectedMode === 2 || selectedMode === 3)) {
+        ctx.addModifier({
+          scope: "chain-link",
+          onHitScriptHook: {
+            hook: "maul-hit",
+            ...hitHookLabel(
+              "create 2 Crouching Tigers in your banished zone; you may play them this turn",
+              "card.effect.mst.maul",
+            ),
+          },
+        });
+      }
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "maul-mode") return;
+      ctx.setState("maulMode", option === "power" ? 1 : option === "tigers" ? 2 : 3);
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook !== "maul-hit") return;
+      createTigerInBanish(ctx);
+      createTigerInBanish(ctx);
     },
   },
   "territorial domain|3": {

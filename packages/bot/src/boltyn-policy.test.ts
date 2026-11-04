@@ -640,6 +640,27 @@ describe("Boltyn policy", () => {
     expect(intent.kind === "activate-ability" && intent.sourceInstanceId === raydn).toBe(false);
   });
 
+  it("does not swing a 0-power Raydn for reactions the lethal upkeep reserve withholds", () => {
+    const state = settled(game());
+    // As reported: at 2 life under Bloodrot Pox, both yellows must pitch for the upkeep.
+    state.players[0]!.life = 2;
+    hand(state, ["MON033", "PEN178"]);
+    state.players[0]!.board = cards(state, ["AAC030"]);
+    const raydn = state.players[0]!.weapons[0]!.instanceId;
+    const intent = chooseBoltynIntent(input(state));
+    expect(intent.kind === "activate-ability" && intent.sourceInstanceId === raydn).toBe(false);
+  });
+
+  it("does not swing Raydn when Frailty cancels Courage's +1", () => {
+    const state = settled(game());
+    hand(state, []);
+    state.players[0]!.board = cards(state, ["ASB027", "AAZ031"]);
+    const raydn = state.players[0]!.weapons[0]!.instanceId;
+    // Without a simulation only the swing-power estimate can see this.
+    const intent = chooseBoltynIntent({ ...input(state), state: undefined });
+    expect(intent.kind === "activate-ability" && intent.sourceInstanceId === raydn).toBe(false);
+  });
+
   it("charges Lumina Ascension into Warband of Bellona to unlock Duty Bound Blitz behind a charged Raydn", () => {
     const state = settled(game());
     hand(state, ["ASB026", "PEN183"]);

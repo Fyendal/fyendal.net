@@ -247,6 +247,8 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
         courage: board("courage") + (nextTurn ? board("blessing of bellona") : 0),
         quicken: board("quicken"),
         flurry: board("flurry"),
+        // Destroyed in its controller's end phase, so it only reaches next turn from the opponent's turn.
+        frailty: nextTurn && observed.view.activePlayer === observed.seat ? 0 : board("frailty"),
         spirit: board("spirit of eirina") > 0 ? 1 : 0,
         bellona: nextTurn ? 0 : board("blessing of bellona") > 0 ? 1 : 0,
         suraya: nextTurn ? 0 : board("blessing of suraya") > 0 ? 1 : 0,
@@ -285,8 +287,8 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
       const self = card.instanceId;
 
       if (functional === RAYDN) {
-        patch.powerIn = (view) => power + (charged(view) ? 3 : 0) + (view.flag("lumina") > 0 ? 1 : 0) +
-          (view.flag("courage") > 0 ? 1 : 0);
+        patch.powerIn = (view) => Math.max(0, power + (charged(view) ? 3 : 0) + (view.flag("lumina") > 0 ? 1 : 0) +
+          (view.flag("courage") > 0 ? 1 : 0) - view.flag("frailty"));
         patch.goAgainIn = (view) => view.flag("quicken") > 0;
         patch.onHitIn = (view) => (view.flag("lumina") > 0 ? LIGHT_SHARE * (SOUL_VALUE + 1) : 0) +
           (view.flag("ironsong") > 0 ? COURAGE_TOKEN_VALUE : 0);

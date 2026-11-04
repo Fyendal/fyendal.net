@@ -4229,6 +4229,12 @@
       "value": "faça banish da carta do topo do deck do herói defensor"
     }
   ],
+  "card.effect.mst.maul": [
+    {
+      "type": 0,
+      "value": "crie 2 Crouching Tigers na sua zona banished; você pode jogá-los neste turno"
+    }
+  ],
   "card.effect.mst.nuu": [
     {
       "type": 0,
@@ -12737,6 +12743,24 @@
     {
       "type": 0,
       "value": "Faça banish de uma carta da mesma cor"
+    }
+  ],
+  "card.mst.maul.mode": [
+    {
+      "type": 0,
+      "value": "Maul: escolha 1 ou ambos"
+    }
+  ],
+  "card.mst.maul.option.power": [
+    {
+      "type": 0,
+      "value": "A carta de attack action recebe +3 de poder"
+    }
+  ],
+  "card.mst.maul.option.tigers": [
+    {
+      "type": 0,
+      "value": "O Crouching Tiger ganha \"Quando isto acertar, crie 2 Crouching Tigers na sua zona banished. Você pode jogá-los neste turno\""
     }
   ],
   "card.mst.mechanologist.action.top": [

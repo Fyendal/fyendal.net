@@ -1120,3 +1120,88 @@ describe("MST — Chi pitched to play", () => {
       .expectHandSize(0, draws);
   });
 });
+
+describe("Maul", () => {
+  const onTiger = () =>
+    scenario({
+      seats: [
+        { hero: "rhinar", hand: ["tiger form incantation|3", "crouching tiger|0", "maul|2"], resources: 3 },
+        { hero: "dorinthea" },
+      ],
+    })
+      .play("tiger form incantation|3")
+      .play("crouching tiger|0")
+      .blockWith()
+      .react("maul|2");
+
+  it("applies both modes on a Crouching Tiger and makes the new tigers playable", () => {
+    const g = onTiger().chooseOption("both").expectFinalAttack(4).settle();
+
+    g.expectLife(1, 16).expectZoneSize(0, "banish", 2);
+    for (const tiger of g.state.players[0]!.banish) {
+      expect(legalIntents(g.state, 0)).toContainEqual(
+        expect.objectContaining({ kind: "play-from-zone", zone: "banish", instanceId: tiger.instanceId }),
+      );
+    }
+  });
+
+  it("gives only +3 when the power mode is chosen", () => {
+    onTiger().chooseOption("power").expectFinalAttack(4).settle().expectZoneSize(0, "banish", 0);
+  });
+
+  it("gives only the tigers when the tiger mode is chosen", () => {
+    onTiger().chooseOption("tigers").expectFinalAttack(1).settle().expectZoneSize(0, "banish", 2);
+  });
+
+  it("creates no tigers when the Crouching Tiger does not hit", () => {
+    scenario({
+      seats: [
+        { hero: "rhinar", hand: ["crouching tiger|0", "maul|2"] },
+        { hero: "dorinthea" },
+      ],
+    })
+      .play("crouching tiger|0")
+      .blockWith()
+      .react("maul|2")
+      .chooseOption("tigers")
+      .settle()
+      .expectZoneSize(0, "banish", 0);
+  });
+
+  it("gives another low-power attack action card +3 without a mode choice", () => {
+    scenario({
+      seats: [
+        { hero: "rhinar", hand: ["head jab|3", "maul|2"] },
+        { hero: "dorinthea" },
+      ],
+    })
+      .play("head jab|3")
+      .blockWith()
+      .react("maul|2")
+      .expectFinalAttack(4)
+      .settle()
+      .expectZoneSize(0, "banish", 0);
+  });
+
+  it("cannot be played on a weapon or a high-power attack action card", () => {
+    scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["harmonized kodachi|0"], hand: ["maul|2"] },
+        { hero: "dorinthea" },
+      ],
+    })
+      .attackWithWeapon()
+      .blockWith()
+      .expectNoLegalPlay("maul|2");
+
+    scenario({
+      seats: [
+        { hero: "rhinar", hand: ["wounding blow|1", "maul|2"] },
+        { hero: "dorinthea" },
+      ],
+    })
+      .play("wounding blow|1")
+      .blockWith()
+      .expectNoLegalPlay("maul|2");
+  });
+});
