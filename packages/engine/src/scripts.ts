@@ -381,6 +381,8 @@ export interface ScriptCtx {
   transcend(): void;
   /** Destroy self (permanent or face-up attack); moves to graveyard and fires onDestroyed. */
   destroySelf(): void;
+  /** Record that this seat completed a contract and raise "contract-completed". */
+  completeContract(): void;
   /** Charge the controller's hero's soul: move the chosen card from their hand
    *  toward the soul zone, set the per-turn charge flags (`chargedThisTurn`,
    *  `chargedCountThisTurn`, `chargedPitch:<n>`), and raise the
@@ -792,6 +794,7 @@ export interface ActivatedEffectCardCost {
   /** Banish the selected card face down, keeping its identity private. */
   faceDown?: boolean;
   pitch?: number;
+  tokenOnly?: boolean;
   class?: string;
   subtype?: string;
   keyword?: string;

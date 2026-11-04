@@ -393,6 +393,7 @@ function effectCardCostCandidates(
         !!cost.counter && (card.counters?.[cost.counter.key] ?? 0) >= cost.counter.amount
       )) &&
       (cost.pitch === undefined || cardColorOf(state, card) === cost.pitch) &&
+      (cost.tokenOnly !== true || data.cardType === "token") &&
       (cost.class === undefined || types.includes(cost.class.toLowerCase())) &&
       (cost.subtype === undefined || (data.subtypes ?? []).some(
         (subtype) => subtype.toLowerCase() === cost.subtype!.toLowerCase(),

@@ -812,12 +812,6 @@ export function hitWithDaggerThisChain(ctx: ScriptCtx): boolean {
   );
 }
 
-/** Record a Contract completion for turn-wide checks such as Pay Day. */
-export function markContractCompleted(ctx: ScriptCtx): void {
-  ctx.setFlag("player", "completedContractThisTurn", true);
-  ctx.setFlag("player", "contractCompletionsThisTurn", contractCompletionCount(ctx) + 1);
-}
-
 /** Number of Contracts this player has completed during the current turn. */
 export function contractCompletionCount(ctx: ScriptCtx): number {
   return Number(ctx.getFlag("player", "contractCompletionsThisTurn"));
@@ -832,7 +826,7 @@ export function contractWithSilver(
   return {
     onFriendlyBanishesOpponentCard(ctx, card) {
       if (!condition(ctx, card)) return;
-      markContractCompleted(ctx);
+      ctx.completeContract();
       ctx.createToken("DYN245");
     },
   };
@@ -846,7 +840,7 @@ export function tokenContractWithSilver(
   return {
     onFriendlyCreatesOpponentToken(ctx, token) {
       if (!condition(ctx, token)) return;
-      markContractCompleted(ctx);
+      ctx.completeContract();
       ctx.createToken("DYN245");
     },
   };

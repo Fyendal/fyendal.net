@@ -14,7 +14,6 @@ import {
   hitWithDaggerThisChain,
   markedStealthHeroScript,
   heroHasMoniker,
-  markContractCompleted,
   localizedCardLog,
   offerRetrieveDagger,
   opponentSeat,
@@ -467,7 +466,7 @@ export const hnt: Record<string, CardScript> = {
       return hitMarkedHero(ctx) && heroIs(ctx, opponentSeat(ctx), "Fang");
     },
     onHit(ctx) {
-      markContractCompleted(ctx);
+      ctx.completeContract();
       ctx.drawCards(ctx.seat, 1);
     },
   },
@@ -476,7 +475,7 @@ export const hnt: Record<string, CardScript> = {
       return hitMarkedHero(ctx) && heroIs(ctx, opponentSeat(ctx), "Cindra");
     },
     onHit(ctx) {
-      markContractCompleted(ctx);
+      ctx.completeContract();
       ctx.drawCards(ctx.seat, 1);
     },
   },

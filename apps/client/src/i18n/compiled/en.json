@@ -2226,6 +2226,12 @@
       "value": "Choose an aura to remove a suspense counter from"
     }
   ],
+  "card.common.cost.auratoken.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy an aura token"
+    }
+  ],
   "card.common.cost.bluearrow.faceup": [
     {
       "type": 0,
@@ -11977,6 +11983,12 @@
     {
       "type": 0,
       "value": "You may put a card from your hand on the bottom of your deck"
+    }
+  ],
+  "card.mpa.patronslockbox.valuables": [
+    {
+      "type": 0,
+      "value": "Destroy this. If you do, create 2 Silver tokens"
     }
   ],
   "card.mpa.prolonged.copy": [

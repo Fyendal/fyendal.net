@@ -2230,6 +2230,12 @@
       "value": "Elige un aura de la que quitar un contador de suspense"
     }
   ],
+  "card.common.cost.auratoken.destroy": [
+    {
+      "type": 0,
+      "value": "Destruye un token de aura"
+    }
+  ],
   "card.common.cost.bluearrow.faceup": [
     {
       "type": 0,
@@ -12007,6 +12013,12 @@
     {
       "type": 0,
       "value": "Puedes poner una carta de tu mano en la parte inferior de tu mazo"
+    }
+  ],
+  "card.mpa.patronslockbox.valuables": [
+    {
+      "type": 0,
+      "value": "Destruye esta carta. Si lo haces, crea 2 tokens Silver"
     }
   ],
   "card.mpa.prolonged.copy": [

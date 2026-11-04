@@ -2449,4 +2449,274 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       });
     });
   });
+
+  describe("Mastery Pack Assassin batch 4", () => {
+    const VICTIM: SeatSpec = { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT };
+    const attacker = (spec: Partial<SeatSpec>): SeatSpec => ({
+      hero: "rhinar", weapons: [], equipment: NO_EQUIPMENT, ...spec,
+    });
+    const graveyardCount = (game: ReturnType<typeof scenario>, seat: number, name: string) =>
+      game.state.players[seat]!.graveyard.filter((card) => cardData[card.cardId]!.name === name).length;
+
+    describe("Free of Burdens", () => {
+      const RED = "free of burdens|1";
+      const BLUE = "free of burdens|3";
+
+      it.each([[RED, 7], ["free of burdens|2", 6], [BLUE, 5]] as const)(
+        "%s destroys an aura token to get +1 power",
+        (card, damage) => {
+          const game = scenario({ seats: [
+            attacker({ hand: [card], board: ["frailty|0", "silver|0"], resources: 2 }),
+            VICTIM,
+          ] });
+
+          game.play(card).blockWith().activate(card).chooseCard("frailty|0").settle();
+
+          expect(boardNames(game, 0)).toEqual(["Silver"]);
+          game.expectLife(1, 20 - damage);
+        },
+      );
+
+      it("can't be paid with a non-token aura, a non-aura token, or an opponent's aura token", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: [RED], board: ["forged for war|2", "silver|0"], resources: 2 }),
+          { ...VICTIM, board: ["frailty|0"] },
+        ] });
+
+        game.play(RED).blockWith();
+
+        expect(() => game.activate(RED)).toThrow(/no legal intent/);
+      });
+
+      it("only offers aura tokens when choosing what to destroy", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: [RED], board: ["forged for war|2", "silver|0", "inertia|0"], resources: 2 }),
+          { ...VICTIM, board: ["frailty|0"] },
+        ] });
+
+        game.play(RED).blockWith().activate(RED);
+
+        const inertia = game.state.players[0]!.board.find((card) => cardData[card.cardId]!.name === "Inertia")!;
+        expect(game.state.pendingDecision?.options).toEqual([String(inertia.instanceId)]);
+        game.chooseCard("inertia|0").settle();
+        expect(boardNames(game, 0).sort()).toEqual(["Forged for War", "Silver"]);
+      });
+
+      it("works only while it is the attack, not from hand", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: [RED], board: ["frailty|0"], resources: 2 }),
+          VICTIM,
+        ] });
+
+        expect(() => game.activate(RED)).toThrow(/no legal intent/);
+      });
+
+      it("doesn't work while defending", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: [WOUNDING_BLOW] }),
+          { ...VICTIM, hand: [RED], board: ["frailty|0"] },
+        ] });
+
+        game.play(WOUNDING_BLOW).blockWith(RED);
+
+        expect(legalIntents(game.state, 1).some((intent) => intent.kind === "activate-ability")).toBe(false);
+      });
+
+      it("is once per turn per card, its +1 stays on this attack, and it ends when the link resolves", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: [RED, BLUE], board: ["frailty|0", "frailty|0", "frailty|0"], resources: 4 }),
+          { ...VICTIM, deck: ["snatch|1", "snatch|2", "snatch|3"] },
+        ] });
+        game.state.players[0]!.actionPoints = 2;
+
+        game.play(RED).blockWith().activate(RED).chooseCard("frailty|0").settle();
+        expect(() => game.activate(RED)).toThrow(/no legal intent/);
+        game.expectLife(1, 13);
+
+        game.play(BLUE).blockWith();
+        // The first copy is still on the chain but is no longer the attack.
+        expect(() => game.activate(RED)).toThrow(/no legal intent/);
+        game.activate(BLUE).chooseCard("frailty|0").settle();
+        game.expectLife(1, 8);
+        expect(boardNames(game, 0)).toEqual(["Frailty"]);
+      });
+
+      it("can destroy Bloodrot Pox and fires Prolonged Illness", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: [PROLONGED, RED], board: ["bloodrot pox|0"], resources: 2 }),
+          VICTIM,
+        ] });
+
+        game.play(PROLONGED).settle();
+        game.play(RED).blockWith().activate(RED).chooseCard("bloodrot pox|0").settle();
+
+        expect(boardNames(game, 0)).toEqual(["Bloodrot Pox"]);
+        game.expectLife(1, 13);
+      });
+    });
+
+    describe("Patron's Lockbox: Valuables", () => {
+      const LOCKBOX = "patron's lockbox: valuables|3";
+      const LOCKBOX_NAME = "Patron's Lockbox: Valuables";
+      const CONTRACT = "plunder the poor|1";
+      const TARGET_DECK = { ...VICTIM, deck: ["head jab|1"] };
+
+      it("has its own go again", () => {
+        const game = scenario({ seats: [attacker({ hand: [LOCKBOX] }), VICTIM] });
+
+        game.play(LOCKBOX).settle().expectAP(0, 1);
+
+        expect(boardNames(game, 0)).toEqual([LOCKBOX_NAME]);
+      });
+
+      it("adds its reward to the contract's Silver, destroying itself", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: [CONTRACT], board: [LOCKBOX], resources: 3 }),
+          TARGET_DECK,
+        ] });
+
+        game.play(CONTRACT).blockWith().settle();
+
+        expect(boardNames(game, 0)).toEqual(["Silver", "Silver", "Silver"]);
+        expect(graveyardCount(game, 0, LOCKBOX_NAME)).toBe(1);
+      });
+
+      it("goes on the stack with priority after the contract's Silver has arrived", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: [CONTRACT], board: [LOCKBOX], resources: 3 }),
+          TARGET_DECK,
+        ] });
+
+        game.play(CONTRACT).blockWith();
+        for (let i = 0; i < 12 && !game.state.stack.some((layer) => layer.label.startsWith("Destroy this")); i++) {
+          game.passPriority();
+        }
+
+        expect(game.state.stack[0]?.label).toBe("Destroy this. If you do, create 2 Silver tokens");
+        expect(boardNames(game, 0).sort()).toEqual([LOCKBOX_NAME, "Silver"].sort());
+      });
+
+      it("rewards once when two contracts complete from one banish", () => {
+        const game = scenario({ seats: [
+          {
+            hero: "rhinar",
+            hand: ["leave no witnesses|1", "excessive bloodloss|1"],
+            arsenalFaceDown: ["the hand that pulls the strings|0"],
+            board: [LOCKBOX],
+            resources: 1,
+          },
+          { hero: "dorinthea", deck: ["wrecker romp|3", "head jab|1", "flex claws|1"] },
+        ] });
+
+        game.play("leave no witnesses|1")
+          .blockWith()
+          .activate("the hand that pulls the strings|0")
+          .settle()
+          .play("excessive bloodloss|1")
+          .blockWith()
+          .settle();
+
+        expect(boardNames(game, 0).filter((name) => name === "Silver")).toHaveLength(6);
+        expect(boardNames(game, 0)).not.toContain(LOCKBOX_NAME);
+        expect(graveyardCount(game, 0, LOCKBOX_NAME)).toBe(1);
+      });
+
+      it("a later layer fails after the first destroys it when one contract completes three times", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: ["eradicate|2"], board: [LOCKBOX], resources: 1 }),
+          { ...VICTIM, deck: ["head jab|2", "flex claws|2", "wrecker romp|2", "head jab|1"] },
+        ] });
+
+        game.play("eradicate|2").blockWith().settle();
+
+        // Three completions give three Silver; the Lockbox adds two only once.
+        expect(boardNames(game, 0)).toEqual(Array(5).fill("Silver"));
+        expect(graveyardCount(game, 0, LOCKBOX_NAME)).toBe(1);
+      });
+
+      it("each of two Lockboxes rewards once", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: [CONTRACT], board: [LOCKBOX, LOCKBOX], resources: 3 }),
+          TARGET_DECK,
+        ] });
+
+        game.play(CONTRACT).blockWith().settle();
+
+        expect(boardNames(game, 0)).toEqual(Array(5).fill("Silver"));
+        expect(graveyardCount(game, 0, LOCKBOX_NAME)).toBe(2);
+      });
+
+      it("ignores an opponent's contract", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: [CONTRACT], resources: 3 }),
+          { ...TARGET_DECK, board: [LOCKBOX] },
+        ] });
+
+        game.play(CONTRACT).blockWith().settle();
+
+        expect(boardNames(game, 1)).toEqual([LOCKBOX_NAME]);
+        expect(boardNames(game, 0)).toEqual(["Silver"]);
+      });
+
+      it("doesn't react from hand, graveyard or banish", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: [CONTRACT, LOCKBOX], graveyard: [LOCKBOX], banish: [LOCKBOX], resources: 3 }),
+          TARGET_DECK,
+        ] });
+
+        game.play(CONTRACT).blockWith().settle();
+
+        expect(boardNames(game, 0)).toEqual(["Silver"]);
+        game.expectInZone(0, LOCKBOX, "hand");
+        expect(graveyardCount(game, 0, LOCKBOX_NAME)).toBe(1);
+      });
+
+      it("doesn't react when the contract isn't completed", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: [CONTRACT], board: [LOCKBOX], resources: 3 }),
+          { ...VICTIM, deck: ["raging onslaught|1"] },
+        ] });
+
+        game.play(CONTRACT).blockWith().settle();
+
+        expect(boardNames(game, 0)).toEqual([LOCKBOX_NAME]);
+      });
+
+      it("reacts to the token contract path", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: [SICK_INTENT], board: [LOCKBOX], resources: 2 }),
+          VICTIM,
+        ] });
+
+        game.play(SICK_INTENT).blockWith().settle();
+        game.chooseOption(FRAILTY_TOKEN).settle();
+
+        expect(boardNames(game, 0)).toEqual(Array(3).fill("Silver"));
+      });
+
+      it("reacts to the direct Viral Sampling completion", () => {
+        const game = scenario({ seats: [
+          attacker({ hand: ["viral sampling|3"], board: [LOCKBOX] }),
+          { ...VICTIM, board: ["frailty|0"] },
+        ] });
+
+        game.play("viral sampling|3").blockWith().settle();
+
+        expect(boardNames(game, 0)).toEqual(Array(3).fill("Silver"));
+      });
+
+      it("reacts to a contract with no Silver reward", () => {
+        const game = scenario({ seats: [
+          { hero: "rhinar", hand: ["defang the dragon|1"], deck: ["wrecker romp|3"], board: [LOCKBOX] },
+          { hero: "dorinthea", heroKey: "fang|0" },
+        ] });
+        game.state.players[1]!.hero.scriptState = { marked: 1 };
+
+        game.play("defang the dragon|1").blockWith().settle();
+
+        expect(boardNames(game, 0)).toEqual(["Silver", "Silver"]);
+        expect(game.state.players[0]!.flags.contractCompletionsThisTurn).toBe(1);
+      });
+    });
+  });
 });

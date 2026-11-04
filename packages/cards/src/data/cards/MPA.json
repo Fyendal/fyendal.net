@@ -458,6 +458,19 @@
     "set": "MPA"
   },
   {
+    "id": "MPA067",
+    "name": "Patron's Lockbox: Valuables",
+    "cardType": "action",
+    "text": "Go again\nWhen you complete a contract, destroy this. If you do, create 2 Silver tokens.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["item"],
+    "keywords": ["Go again"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA070",
     "name": "Break Down the Bloodline",
     "cardType": "action",
@@ -754,6 +767,45 @@
     "pitch": 3,
     "cost": 0,
     "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA147",
+    "name": "Free of Burdens",
+    "cardType": "action",
+    "text": "Once per Turn Instant - Destroy an aura token you control: This gets +1{p}.",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 6,
+    "defense": 2,
+    "classes": ["generic"],
+    "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA148",
+    "name": "Free of Burdens",
+    "cardType": "action",
+    "text": "Once per Turn Instant - Destroy an aura token you control: This gets +1{p}.",
+    "pitch": 2,
+    "cost": 2,
+    "attack": 5,
+    "defense": 2,
+    "classes": ["generic"],
+    "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA149",
+    "name": "Free of Burdens",
+    "cardType": "action",
+    "text": "Once per Turn Instant - Destroy an aura token you control: This gets +1{p}.",
+    "pitch": 3,
+    "cost": 2,
+    "attack": 4,
+    "defense": 2,
+    "classes": ["generic"],
+    "subtypes": ["attack"],
     "set": "MPA"
   }
 ]

@@ -2185,6 +2185,12 @@
       "value": "选择一个灵气 (Aura)，移除其一个 suspense 指示物"
     }
   ],
+  "card.common.cost.auratoken.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁一个灵气 (Aura)衍生物"
+    }
+  ],
   "card.common.cost.bluearrow.faceup": [
     {
       "type": 0,
@@ -11164,6 +11170,12 @@
     {
       "type": 0,
       "value": "你可以将一张手牌置于你的牌库底"
+    }
+  ],
+  "card.mpa.patronslockbox.valuables": [
+    {
+      "type": 0,
+      "value": "摧毁此牌。若你这样做，生成 2 个 Silver 衍生物"
     }
   ],
   "card.mpa.prolonged.copy": [

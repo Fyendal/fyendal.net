@@ -14,7 +14,6 @@ import {
   hitHookLabel,
   hitWithDaggerThisChain,
   isInfected,
-  markContractCompleted,
   ongoingLabel,
   opponentSeat,
   requestDiseaseTokenChoice,
@@ -304,7 +303,7 @@ export const amo: Record<string, CardScript> = {
   "viral sampling|3": {
     canTriggerOnHit: defenderInfected,
     onHit(ctx) {
-      markContractCompleted(ctx);
+      ctx.completeContract();
       ctx.createToken(SILVER);
     },
   },

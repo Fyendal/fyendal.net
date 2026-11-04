@@ -1964,6 +1964,11 @@ export function makeCtx(
         },
       ));
     },
+    completeContract() {
+      player.flags.completedContractThisTurn = true;
+      player.flags.contractCompletionsThisTurn = (Number(player.flags.contractCompletionsThisTurn) || 0) + 1;
+      runtime.events.queueTriggeredEvent(state, "contract-completed", seat);
+    },
     transcend() {
       // the resolving card leaves the stack-resolution flow into its owner's
       // hand, flipped (back face active) — returnSelfToHand precedent

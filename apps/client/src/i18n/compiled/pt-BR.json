@@ -2242,6 +2242,12 @@
       "value": "Escolha uma aura da qual remover um marcador de suspense"
     }
   ],
+  "card.common.cost.auratoken.destroy": [
+    {
+      "type": 0,
+      "value": "Destrua um token de aura"
+    }
+  ],
   "card.common.cost.bluearrow.faceup": [
     {
       "type": 0,
@@ -12371,6 +12377,12 @@
     {
       "type": 0,
       "value": "Você pode colocar uma carta da sua mão no fundo do seu deck"
+    }
+  ],
+  "card.mpa.patronslockbox.valuables": [
+    {
+      "type": 0,
+      "value": "Destrua esta carta. Se fizer isso, crie 2 tokens Silver"
     }
   ],
   "card.mpa.prolonged.copy": [

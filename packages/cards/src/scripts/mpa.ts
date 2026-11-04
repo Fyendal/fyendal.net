@@ -38,6 +38,37 @@ function seedDisease(tokenId: string): CardScript {
   };
 }
 
+// A resolved link's card stays on the chain but is no longer the attack.
+function isActiveAttack(ctx: ScriptCtx): boolean {
+  const link = ctx.state.chain.at(-1);
+  return !!link && !link.resolved && link.flags.attackGone !== true &&
+    link.attackingCard.instanceId === ctx.self.instanceId;
+}
+
+const FREE_OF_BURDENS: CardScript = {
+  activated: {
+    cost: 0,
+    isAttack: false,
+    goAgain: false,
+    timing: "instant",
+    oncePerTurn: true,
+    effectCardCosts: [
+      {
+        zone: "arena",
+        move: "destroy",
+        count: 1,
+        tokenOnly: true,
+        types: ["aura"],
+        prompt: decisionPrompt("Destroy an aura token", "card.common.cost.auratoken.destroy"),
+      },
+    ],
+    canActivate: isActiveAttack,
+    onActivate(ctx) {
+      if (isActiveAttack(ctx)) ctx.addCardTempPower(ctx.self.instanceId, 1);
+    },
+  },
+};
+
 function isReaction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "attack-reaction") || ctx.hasCardType(card, "defense-reaction");
 }
@@ -498,6 +529,24 @@ export const mpa: Record<string, CardScript> = {
         });
       },
     },
+  },
+
+  "free of burdens|1": FREE_OF_BURDENS,
+  "free of burdens|2": FREE_OF_BURDENS,
+  "free of burdens|3": FREE_OF_BURDENS,
+
+  "patron's lockbox: valuables|3": {
+    triggers: [
+      {
+        event: "contract-completed",
+        sourceZone: "arena",
+        label: "Destroy this. If you do, create 2 Silver tokens",
+        labelMessage: { id: "card.mpa.patronslockbox.valuables" },
+        effect(ctx) {
+          if (ctx.destroyPermanent(ctx.self.instanceId)) ctx.createTokens(SILVER, 2);
+        },
+      },
+    ],
   },
 
   "bribe the guards|3": {

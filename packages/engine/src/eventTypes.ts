@@ -35,7 +35,9 @@ export type TriggerEvent =
   /** The subject removed a steam counter from an item they control for Crank. */
   | "card-cranked"
   /** The subject gained control of an opposing permanent by stealing it. */
-  | "card-stolen";
+  | "card-stolen"
+  /** The subject completed a contract (CR 8.5.39a). */
+  | "contract-completed";
 
 /** Event-specific facts captured when a triggered ability is generated. */
 export interface TriggerEventContext {
