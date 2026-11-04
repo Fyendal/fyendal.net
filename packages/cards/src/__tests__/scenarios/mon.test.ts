@@ -584,6 +584,87 @@ describe("MON — Shadow Brute and Blood Debt", () => {
     expect(legalIntents(faceDown.state, 0).filter((i) => i.kind === "play-card")).toEqual([]);
   });
 
+  it("Blasmophet, the Soul Harvester offers only Shadow hand cards and resolves soul banish before Hooves", () => {
+    const s = scenario({
+      seats: [
+        leviaSeat({
+          hand: ["consuming aftermath|1", BLUE],
+          board: ["blasmophet, the soul harvester|0"],
+          equipment: { legs: "hooves of the shadowbeast|0" },
+        }),
+        prismSeat({ soul: ["herald of erudition|2"] }),
+      ],
+    });
+    const aftermathId = String(s.state.players[0]!.hand[0]!.instanceId);
+
+    s.activate("blasmophet, the soul harvester|0");
+    expect(s.state.pendingDecision?.options).toEqual(["no", aftermathId]);
+
+    s.chooseCard("consuming aftermath|1");
+    expect(s.state.pendingDecision?.chooseHook).toBe("blasmophet-soul");
+
+    s.chooseCard("herald of erudition|2")
+      .chooseOption("yes")
+      .expectInZone(0, "consuming aftermath|1", "banish")
+      .expectInZone(0, BLUE, "hand")
+      .expectInZone(1, "herald of erudition|2", "banish")
+      .expectZoneSize(1, "soul", 0)
+      .expectAP(0, 1);
+  });
+
+  it("Blasmophet, the Soul Harvester handles optional declines, non-Shadow hands, and non-hero targets", () => {
+    const declineHand = scenario({
+      seats: [
+        leviaSeat({ hand: ["ghostly visit|1"], board: ["blasmophet, the soul harvester|0"] }),
+        prismSeat({ soul: ["herald of erudition|2"] }),
+      ],
+    });
+    declineHand
+      .activate("blasmophet, the soul harvester|0")
+      .chooseOption("no")
+      .expectInZone(0, "ghostly visit|1", "hand")
+      .expectZoneSize(1, "soul", 1);
+    expect(declineHand.state.phase).toBe("defend");
+
+    const declineSoul = scenario({
+      seats: [
+        leviaSeat({ hand: ["ghostly visit|1"], board: ["blasmophet, the soul harvester|0"] }),
+        prismSeat({ soul: ["herald of erudition|2"] }),
+      ],
+    });
+    declineSoul
+      .activate("blasmophet, the soul harvester|0")
+      .chooseCard("ghostly visit|1")
+      .chooseOption("no")
+      .expectInZone(0, "ghostly visit|1", "banish")
+      .expectZoneSize(1, "soul", 1);
+    expect(declineSoul.state.phase).toBe("defend");
+
+    const vsTargetPermanent = scenario({
+      seats: [
+        leviaSeat({ hand: ["ghostly visit|1", BLUE], board: ["blasmophet, the soul harvester|0"] }),
+        prismSeat({ board: ["ursur, the soul reaper|0"], soul: ["herald of erudition|2"] }),
+      ],
+    });
+    vsTargetPermanent
+      .activate("blasmophet, the soul harvester|0", { targetAlly: "ursur, the soul reaper|0" })
+      .chooseCard("ghostly visit|1")
+      .expectInZone(0, "ghostly visit|1", "banish")
+      .expectZoneSize(1, "board", 0)
+      .expectZoneSize(1, "soul", 1);
+
+    const noShadowInHand = scenario({
+      seats: [
+        leviaSeat({ hand: [BLUE], board: ["blasmophet, the soul harvester|0"] }),
+        prismSeat({ soul: ["herald of erudition|2"] }),
+      ],
+    });
+    noShadowInHand
+      .activate("blasmophet, the soul harvester|0")
+      .expectZoneSize(1, "soul", 1);
+    expect(noShadowInHand.state.phase).toBe("defend");
+  });
+
   it.each([
     [false, true],
     [true, false],
