@@ -4,10 +4,10 @@ import {
   attackAbility,
   buffNextAttack,
   cardNamed,
+  chainHitRider,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
-  grantedHitRiderOn,
   localizedCardLog,
   markedStealthHeroScript,
   ongoingLabel,
@@ -166,7 +166,7 @@ function pumpWithRider(
   target: (ctx: ScriptCtx) => boolean,
   pump: number,
   label: ReturnType<typeof ongoingLabel>,
-  rider: (ctx: ScriptCtx) => void,
+  rider: (ctx: ScriptCtx, hitSeat: number) => void,
 ): CardScript {
   return {
     canPlay: (ctx) => myAttack(ctx) && target(ctx),
@@ -174,16 +174,7 @@ function pumpWithRider(
       ctx.addModifier({ scope: "chain-link", attack: pump });
       armGrantedHitRider(ctx, label);
     },
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && grantedHitRiderOn(ctx, ctx.link?.attackingCard);
-    },
-    onHit(ctx) {
-      rider(ctx);
-    },
-    onFriendlyEffectHitCondition: grantedHitRiderOn,
-    onFriendlyEffectHit(ctx) {
-      rider(ctx);
-    },
+    ...chainHitRider(rider),
   };
 }
 
@@ -479,7 +470,7 @@ export const sar: Record<string, CardScript> = {
     (ctx) => isDagger(ctx, ctx.link!.attackingCard),
     3,
     markOnHitLabel,
-    (ctx) => markHero(ctx, opponentSeat(ctx)),
+    markHero,
   ),
 
   "spike with bloodrot|1": pumpWithRider(
@@ -489,7 +480,7 @@ export const sar: Record<string, CardScript> = {
       "when the attack hits a hero, create a Bloodrot Pox token under their control",
       "card.effect.sar.spikewithbloodrot",
     ),
-    (ctx) => ctx.createToken(BLOODROT_POX, opponentSeat(ctx)),
+    (ctx, seat) => ctx.createToken(BLOODROT_POX, seat),
   ),
 
   "stains of the redback|1": {
@@ -538,16 +529,7 @@ export const sar: Record<string, CardScript> = {
         armGrantedHitRider(ctx, markOnHitLabel);
       }
     },
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && grantedHitRiderOn(ctx, ctx.link?.attackingCard);
-    },
-    onHit(ctx) {
-      markHero(ctx, opponentSeat(ctx));
-    },
-    onFriendlyEffectHitCondition: grantedHitRiderOn,
-    onFriendlyEffectHit(ctx) {
-      markHero(ctx, opponentSeat(ctx));
-    },
+    ...chainHitRider(markHero),
     onChoose(ctx, hook, option) {
       if (hook !== "two-sides") return;
       ctx.setState("twoSidesMode", option.startsWith("Stealth") ? 2 : 1);

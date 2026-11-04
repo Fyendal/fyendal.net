@@ -39,6 +39,17 @@ function boardNames(game: ReturnType<typeof scenario>, seat: number): string[] {
   return game.state.players[seat]!.board.map((card) => cardData[card.cardId]!.name);
 }
 
+const assassinSeat = (spec: Partial<SeatSpec>): SeatSpec => ({
+  hero: "rhinar",
+  weapons: [],
+  equipment: NO_EQUIPMENT,
+  ...spec,
+});
+
+function silverCount(game: ReturnType<typeof scenario>): number {
+  return boardNames(game, 0).filter((name) => name === "Silver").length;
+}
+
 describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
   it("applies the Disease Aura errata to every affected token printing", () => {
     const diseaseNames = new Set(["Bloodrot Pox", "Frailty", "Inertia"]);
@@ -1358,21 +1369,13 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     const SLICE = "slice the sickly|1";
     const DECAPITATE = "decapitate the disloyal|1";
     const VICTIM_SEAT: SeatSpec = { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT };
-    const seat = (spec: Partial<SeatSpec>): SeatSpec => ({
-      hero: "rhinar",
-      weapons: [],
-      equipment: NO_EQUIPMENT,
-      ...spec,
-    });
-    const silverCount = (game: ReturnType<typeof scenario>) =>
-      boardNames(game, 0).filter((name) => name === "Silver").length;
 
     it.each([
       ["infected", [BLOODROT], 13],
       ["not infected", [], 14],
     ])("Feverish Strike when its controller is %s", (_label, board, life) => {
       const game = scenario({ seats: [
-        seat({ hand: [FEVERISH], resources: 2, board }),
+        assassinSeat({ hand: [FEVERISH], resources: 2, board }),
         VICTIM_SEAT,
       ] });
 
@@ -1382,18 +1385,18 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     });
 
     it("Desperate Drive has go again only while its controller is infected", () => {
-      const infected = scenario({ seats: [seat({ hand: [DESPERATE], board: [BLOODROT] }), VICTIM_SEAT] });
+      const infected = scenario({ seats: [assassinSeat({ hand: [DESPERATE], board: [BLOODROT] }), VICTIM_SEAT] });
       infected.play(DESPERATE).blockWith().settle();
       infected.expectAP(0, 1);
 
-      const clean = scenario({ seats: [seat({ hand: [DESPERATE] }), VICTIM_SEAT] });
+      const clean = scenario({ seats: [assassinSeat({ hand: [DESPERATE] }), VICTIM_SEAT] });
       clean.play(DESPERATE).blockWith().settle();
       clean.expectAP(0, 0);
     });
 
     it("Desperate Drive loses go again when cured before the Resolution Step", () => {
       const game = scenario({ seats: [
-        seat({ hand: [DESPERATE], board: [BLOODROT] }),
+        assassinSeat({ hand: [DESPERATE], board: [BLOODROT] }),
         { ...VICTIM_SEAT, heroKey: DR_MORTIMER },
       ] });
 
@@ -1406,7 +1409,7 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
 
     it("Desperate Drive gains go again when infected after it attacks", () => {
       const game = scenario({ seats: [
-        seat({ hand: [DESPERATE] }),
+        assassinSeat({ hand: [DESPERATE] }),
         { ...VICTIM_SEAT, hand: [VIRAL_DIFFUSION], resources: 3 },
       ] });
 
@@ -1417,7 +1420,7 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
 
     it("In the Hot Zone infects its controller, which later attacks can see", () => {
       const game = scenario({ seats: [
-        seat({ hand: [HOT_ZONE, FEVERISH], resources: 3 }),
+        assassinSeat({ hand: [HOT_ZONE, FEVERISH], resources: 3 }),
         VICTIM_SEAT,
       ] });
       game.state.players[0]!.actionPoints = 2;
@@ -1437,7 +1440,7 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       ["not infected", [], 0],
     ])("Slice the Sickly banishes on hit and pays Silver when the hit hero is %s", (_label, board, silver) => {
       const game = scenario({ seats: [
-        seat({ hand: [SLICE] }),
+        assassinSeat({ hand: [SLICE] }),
         { ...VICTIM_SEAT, board, deck: ["head jab|1", "snatch|1"] },
       ] });
 
@@ -1450,7 +1453,7 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
 
     it("Slice the Sickly doesn't banish when it doesn't hit", () => {
       const game = scenario({ seats: [
-        seat({ hand: [SLICE] }),
+        assassinSeat({ hand: [SLICE] }),
         { ...VICTIM_SEAT, hand: [WOUNDING_BLOW, WOUNDING_BLOW], deck: ["head jab|1"] },
       ] });
 
@@ -1465,7 +1468,7 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       ["a talent card with no class", "polar blast|3", 0],
     ])("Decapitate the Disloyal's contract on %s", (_label, top, silver) => {
       const game = scenario({ seats: [
-        seat({ hand: [DECAPITATE], resources: 2 }),
+        assassinSeat({ hand: [DECAPITATE], resources: 2 }),
         { ...VICTIM_SEAT, deck: [top, "snatch|1"] },
       ] });
 
@@ -1765,6 +1768,300 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       ] });
       clean.play("viral sampling|3").blockWith().settle();
       expect(boardNames(clean, 0)).toEqual([]);
+    });
+  });
+
+  describe("Mastery Pack Assassin batch 2", () => {
+    const SPIDERS_CUT = "the spider's cut|1";
+    const EXPENSE = "expense not spared|2";
+    const FESTERING = "festering rot|2";
+    const PINPOINT = "pinpoint elimination|3";
+    const MASK = "mask of one million eyes|0";
+    const FEVERISH = "feverish strike|1";
+    const SILVER = "silver|0";
+    const VICTIM: SeatSpec = { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT };
+    const publicLog = (game: ReturnType<typeof scenario>) =>
+      game.state.log.map((entry) => entry.publicText ?? "").join("\n");
+
+    it("The Spider's Cut is not legal without a Silver", () => {
+      const game = scenario({ seats: [assassinSeat({ hand: [SPIDERS_CUT], resources: 1 }), VICTIM] });
+
+      expect(() => game.play(SPIDERS_CUT)).toThrow(/no legal intent/);
+      game.expectInZone(0, SPIDERS_CUT, "hand").expectResources(0, 1);
+    });
+
+    it("The Spider's Cut destroys exactly 1 Silver and creates 2 on hit", () => {
+      const game = scenario({ seats: [
+        assassinSeat({ hand: [SPIDERS_CUT], resources: 1, board: [SILVER, SILVER] }),
+        VICTIM,
+      ] });
+
+      game.play(SPIDERS_CUT);
+      expect(silverCount(game)).toBe(1);
+
+      game.blockWith().settle();
+      game.expectLife(1, 14);
+      expect(silverCount(game)).toBe(3);
+    });
+
+    it("The Spider's Cut does not create Silver when it is fully defended", () => {
+      const BLUE_CUT = "the spider's cut|3";
+      const game = scenario({ seats: [
+        assassinSeat({ hand: [BLUE_CUT], resources: 1, board: [SILVER] }),
+        { ...VICTIM, hand: [WOUNDING_BLOW, WOUNDING_BLOW] },
+      ] });
+
+      game.play(BLUE_CUT).blockWith(WOUNDING_BLOW, WOUNDING_BLOW).settle();
+
+      game.expectLife(1, 20);
+      expect(silverCount(game)).toBe(0);
+    });
+
+    it("The Spider's Cut's Silver pays for the next copy, not the one that created it", () => {
+      const game = scenario({ seats: [
+        assassinSeat({ hand: [SPIDERS_CUT, SPIDERS_CUT, FESTERING], resources: 3, board: ["EVR195"] }),
+        VICTIM,
+      ] });
+
+      game.play(SPIDERS_CUT);
+      expect(silverCount(game)).toBe(0);
+      game.blockWith().react(FESTERING, { targetCard: SPIDERS_CUT }).settle();
+      expect(silverCount(game)).toBe(2);
+
+      game.play(SPIDERS_CUT);
+      expect(silverCount(game)).toBe(1);
+    });
+
+    it("Expense Not Spared is not legal with 1 Silver", () => {
+      const game = scenario({ seats: [
+        assassinSeat({ hand: [FEVERISH, EXPENSE], resources: 2, board: [SILVER] }),
+        VICTIM,
+      ] });
+
+      game.play(FEVERISH).blockWith();
+
+      expect(() => game.react(EXPENSE, { targetCard: FEVERISH })).toThrow();
+      game.expectInZone(0, EXPENSE, "hand");
+      expect(silverCount(game)).toBe(1);
+    });
+
+    it("Expense Not Spared has no legal target on a non-Assassin attack and keeps the Silver", () => {
+      const game = scenario({ seats: [
+        assassinSeat({ hand: [WOUNDING_BLOW, EXPENSE], resources: 2, board: [SILVER, SILVER] }),
+        VICTIM,
+      ] });
+
+      game.play(WOUNDING_BLOW).blockWith();
+
+      expect(() => game.react(EXPENSE, { targetCard: WOUNDING_BLOW })).toThrow();
+      expect(() => game.react(EXPENSE)).toThrow();
+      expect(silverCount(game)).toBe(2);
+    });
+
+    it("Expense Not Spared destroys 2 Silver of any printing for +5", () => {
+      const game = scenario({ seats: [
+        assassinSeat({ hand: [FEVERISH, EXPENSE], resources: 2, board: ["DYN245", "EVR195", SILVER] }),
+        VICTIM,
+      ] });
+
+      game.play(FEVERISH).blockWith().react(EXPENSE, { targetCard: FEVERISH, settle: false });
+      expect(silverCount(game)).toBe(1);
+
+      game.settle();
+      game.expectLife(1, 9);
+    });
+
+    it("Festering Rot grants go again and a Bloodrot Pox under the hit hero's control", () => {
+      const game = scenario({ seats: [assassinSeat({ hand: [FEVERISH, FESTERING], resources: 3 }), VICTIM] });
+
+      game.play(FEVERISH).blockWith().react(FESTERING, { targetCard: FEVERISH }).settle();
+
+      game.expectAP(0, 1);
+      expect(boardNames(game, 1)).toEqual(["Bloodrot Pox"]);
+      expect(boardNames(game, 0)).toEqual([]);
+    });
+
+    it("Festering Rot cannot target a non-Assassin attack", () => {
+      const game = scenario({ seats: [assassinSeat({ hand: [WOUNDING_BLOW, FESTERING], resources: 3 }), VICTIM] });
+
+      game.play(WOUNDING_BLOW).blockWith();
+
+      expect(() => game.react(FESTERING, { targetCard: WOUNDING_BLOW })).toThrow();
+      expect(() => game.react(FESTERING)).toThrow();
+    });
+
+    it("Festering Rot's rider still applies when attacks cannot gain go again", () => {
+      const game = scenario({ seats: [
+        assassinSeat({ hand: [FEVERISH, FESTERING], resources: 3, board: ["hypothermia|3"] }),
+        VICTIM,
+      ] });
+
+      game.play(FEVERISH).blockWith().react(FESTERING, { targetCard: FEVERISH }).settle();
+
+      game.expectAP(0, 0);
+      expect(boardNames(game, 1)).toEqual(["Bloodrot Pox"]);
+    });
+
+    it("Festering Rot's rider fires when Flick Knives hits with its attack from an earlier link", () => {
+      const game = scenario({ seats: [
+        assassinSeat({
+          hand: [KISS_OF_DEATH, FESTERING, WOUNDING_BLOW],
+          resources: 6,
+          equipment: { ...NO_EQUIPMENT, arms: "flick knives|0" },
+        }),
+        { ...VICTIM, hand: [WOUNDING_BLOW, WOUNDING_BLOW] },
+      ] });
+
+      game.play(KISS_OF_DEATH).blockWith(WOUNDING_BLOW, WOUNDING_BLOW)
+        .react(FESTERING, { targetCard: KISS_OF_DEATH }).settle();
+      expect(boardNames(game, 1)).toEqual([]);
+
+      game.play(WOUNDING_BLOW).blockWith().activate("flick knives|0").chooseCard(KISS_OF_DEATH).settle();
+
+      expect(boardNames(game, 1)).toEqual(["Bloodrot Pox"]);
+    });
+
+    it("Outbreak's rider fires when Flick Knives hits with its attack from an earlier link", () => {
+      const game = scenario({ seats: [
+        assassinSeat({
+          hand: [KISS_OF_DEATH, OUTBREAK, FESTERING, WOUNDING_BLOW],
+          resources: 8,
+          equipment: { ...NO_EQUIPMENT, arms: "flick knives|0" },
+        }),
+        { ...VICTIM, hand: [WOUNDING_BLOW, WOUNDING_BLOW, WOUNDING_BLOW] },
+      ] });
+
+      game.play(KISS_OF_DEATH).blockWith(WOUNDING_BLOW, WOUNDING_BLOW, WOUNDING_BLOW)
+        .react(OUTBREAK, { targetCard: KISS_OF_DEATH, settle: false })
+        .passPriority()
+        .passPriority()
+        // Go again opens the later link the Flick Knives activation needs.
+        .react(FESTERING, { targetCard: KISS_OF_DEATH }).settle();
+      expect(boardNames(game, 1)).toEqual([]);
+
+      game.play(WOUNDING_BLOW).blockWith().activate("flick knives|0").chooseCard(KISS_OF_DEATH).settle();
+
+      expect(boardNames(game, 1).sort()).toEqual(["Bloodrot Pox", "Bloodrot Pox", "Frailty", "Inertia"]);
+    });
+
+    it("Pinpoint Elimination banishes a named top card and creates a Silver", () => {
+      const game = scenario({ seats: [
+        assassinSeat({ hand: [FEVERISH, PINPOINT], resources: 2 }),
+        { ...VICTIM, deck: [WOUNDING_BLOW, "raging onslaught|1"] },
+      ] });
+
+      game.play(FEVERISH).blockWith().react(PINPOINT).chooseName("Wounding Blow").settle();
+
+      game.expectInZone(1, WOUNDING_BLOW, "banish").expectDeckTop(1, "raging onslaught|1");
+      expect(silverCount(game)).toBe(1);
+      expect(publicLog(game)).toContain("reveal");
+    });
+
+    it("Pinpoint Elimination leaves a revealed miss on top and creates nothing", () => {
+      const game = scenario({ seats: [
+        assassinSeat({ hand: [FEVERISH, PINPOINT], resources: 2 }),
+        { ...VICTIM, deck: ["raging onslaught|1", WOUNDING_BLOW] },
+      ] });
+
+      game.play(FEVERISH).blockWith().react(PINPOINT).chooseName("Wounding Blow").settle();
+
+      game.expectZoneSize(1, "banish", 0).expectDeckTop(1, "raging onslaught|1").expectZoneSize(1, "deck", 2);
+      expect(silverCount(game)).toBe(0);
+      expect(publicLog(game)).toContain("reveal");
+    });
+
+    it("Pinpoint Elimination does nothing against an empty deck", () => {
+      const game = scenario({ seats: [
+        assassinSeat({ hand: [FEVERISH, PINPOINT], resources: 2 }),
+        { ...VICTIM, deck: [] },
+      ] });
+
+      game.play(FEVERISH).blockWith().react(PINPOINT).chooseName("Wounding Blow").settle();
+
+      game.expectZoneSize(1, "banish", 0);
+      expect(silverCount(game)).toBe(0);
+    });
+
+    it("Pinpoint Elimination's banish completes an active contract for both Silver rewards", () => {
+      const game = scenario({ seats: [
+        assassinSeat({ hand: [TAILORED, PINPOINT] }),
+        { ...VICTIM, deck: [WOUNDING_BLOW, "raging onslaught|1", "raging onslaught|2"] },
+      ] });
+
+      game.play(TAILORED).chooseName("Wounding Blow").blockWith().react(PINPOINT).chooseName("Wounding Blow");
+
+      game.expectInZone(1, WOUNDING_BLOW, "banish");
+      expect(silverCount(game)).toBe(2);
+    });
+
+    it("Mask of One Million Eyes draws, then bottoms a privately chosen hand card", () => {
+      const game = scenario({ seats: [
+        assassinSeat({
+          hand: [FEVERISH, WOUNDING_BLOW],
+          resources: 2,
+          deck: ["raging onslaught|1", "raging onslaught|2"],
+          equipment: { ...NO_EQUIPMENT, head: MASK },
+        }),
+        VICTIM,
+      ] });
+
+      game.play(FEVERISH).blockWith().activate(MASK);
+      game.expectInZone(0, MASK, "graveyard");
+      game.expectInZone(0, "raging onslaught|1", "hand");
+      expect(publicLog(game)).not.toContain("Wounding Blow");
+      game.chooseCard(WOUNDING_BLOW);
+
+      game.expectDeckBottom(0, WOUNDING_BLOW).expectNotInZone(0, WOUNDING_BLOW, "hand");
+      expect(publicLog(game)).not.toContain("Wounding Blow");
+    });
+
+    it("Mask of One Million Eyes still bottoms a card from an empty deck", () => {
+      const game = scenario({ seats: [
+        assassinSeat({
+          hand: [FEVERISH, WOUNDING_BLOW],
+          resources: 2,
+          deck: [],
+          equipment: { ...NO_EQUIPMENT, head: MASK },
+        }),
+        VICTIM,
+      ] });
+
+      game.play(FEVERISH).blockWith().activate(MASK).chooseCard(WOUNDING_BLOW);
+
+      game.expectHandSize(0, 0).expectDeckBottom(0, WOUNDING_BLOW);
+    });
+
+    it("Mask of One Million Eyes asks nothing with no deck and no hand", () => {
+      const game = scenario({ seats: [
+        assassinSeat({ hand: [FEVERISH], resources: 2, deck: [], equipment: { ...NO_EQUIPMENT, head: MASK } }),
+        VICTIM,
+      ] });
+
+      game.play(FEVERISH).blockWith().activate(MASK);
+
+      expect(game.state.pendingDecision?.chooseHook).toBeUndefined();
+      game.expectInZone(0, MASK, "graveyard").expectZoneSize(0, "deck", 0);
+    });
+
+    it("Mask of One Million Eyes re-equips from the graveyard for 2 Silver", () => {
+      const game = scenario({
+        active: 1,
+        seats: [assassinSeat({ graveyard: [MASK], board: [SILVER, SILVER, SILVER] }), VICTIM],
+      });
+
+      game.endTurn().chooseOption("yes");
+
+      game.expectEquipped(0, "head", MASK).expectNotInZone(0, MASK, "graveyard");
+      expect(silverCount(game)).toBe(1);
+    });
+
+    it("Mask of One Million Eyes stays in the graveyard with 1 Silver", () => {
+      const game = scenario({ active: 1, seats: [assassinSeat({ graveyard: [MASK], board: [SILVER] }), VICTIM] });
+
+      game.endTurn();
+
+      game.expectInZone(0, MASK, "graveyard");
+      expect(silverCount(game)).toBe(1);
     });
   });
 });

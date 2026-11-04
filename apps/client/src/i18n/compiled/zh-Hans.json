@@ -3972,7 +3972,7 @@
   "card.effect.mpa.outbreak": [
     {
       "type": 0,
-      "value": "在被命中英雄的操控下生成 Frailty、Inertia 和 Bloodrot Pox 衍生物各一个"
+      "value": "命中英雄时，在其操控下生成 Frailty、Inertia 和 Bloodrot Pox 衍生物各一个"
     }
   ],
   "card.effect.mpa.phial": [

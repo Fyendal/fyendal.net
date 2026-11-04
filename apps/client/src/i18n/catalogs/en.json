@@ -1880,7 +1880,7 @@
   "card.effect.mon.shadowpuppetry": "look at the top card of your deck and you may banish it",
   "card.effect.mon.seedsofagony": "your next attack action card with cost {cost} or less deals 1 arcane damage to target hero when it attacks",
   "card.effect.mon.eclipseexistence": "whenever an attack hits a Light hero, you may banish a card from their soul and they lose 1 life",
-  "card.effect.mpa.outbreak": "create a Frailty, Inertia, and Bloodrot Pox token under the hit hero's control",
+  "card.effect.mpa.outbreak": "when it hits a hero, create a Frailty, Inertia, and Bloodrot Pox token under their control",
   "card.effect.mpa.phial": "create a Frailty, Inertia, or Bloodrot Pox token under the hit hero's control",
   "card.effect.mpa.prolongedillness": "whenever a disease token is destroyed, if it's the first with that name, create a copy of it under the same hero's control",
   "card.effect.mpa.sickeningweakness": "defending cards get -1 defense this chain link",

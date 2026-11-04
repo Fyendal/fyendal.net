@@ -1880,7 +1880,7 @@
   "card.effect.mon.shadowpuppetry": "查看你的牌库顶牌，你可以将其放逐",
   "card.effect.mon.seedsofagony": "你的下一张费用不高于 {cost} 的攻击行动牌攻击时，对目标英雄造成 1 点奥术伤害",
   "card.effect.mon.eclipseexistence": "每当攻击命中 Light 英雄时，你可以放逐其 soul 中的一张牌，然后该英雄失去 1 点生命",
-  "card.effect.mpa.outbreak": "在被命中英雄的操控下生成 Frailty、Inertia 和 Bloodrot Pox 衍生物各一个",
+  "card.effect.mpa.outbreak": "命中英雄时，在其操控下生成 Frailty、Inertia 和 Bloodrot Pox 衍生物各一个",
   "card.effect.mpa.phial": "在被命中英雄的操控下生成一个 Frailty、Inertia 或 Bloodrot Pox 衍生物",
   "card.effect.mpa.prolongedillness": "每当一个疾病衍生物被摧毁时，若它是该名称第一个被摧毁的，在同一英雄的操控下生成它的一个复制",
   "card.effect.mpa.sickeningweakness": "本 chain link 中的防御牌 -1 防御",

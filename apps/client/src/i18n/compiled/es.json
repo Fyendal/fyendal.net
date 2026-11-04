@@ -4107,7 +4107,7 @@
   "card.effect.mpa.outbreak": [
     {
       "type": 0,
-      "value": "crea un token Frailty, uno Inertia y uno Bloodrot Pox bajo el control del héroe impactado"
+      "value": "cuando impacte a un héroe, crea un token Frailty, uno Inertia y uno Bloodrot Pox bajo su control"
     }
   ],
   "card.effect.mpa.phial": [

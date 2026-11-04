@@ -109,20 +109,33 @@ export function consumeDelayedEffect(ctx: ScriptCtx, filter?: DelayedEffectFilte
 
 const GRANTED_HIT_TARGET = "grantedHitTarget";
 
-/** Grant this card's on-hit rider to the active attack for the combat chain.
- * The attack keeps it after its link resolves, so a later effect hit (Flick
- * Knives) must still fire it. */
+/** Grant this card's on-hit rider to an attack, by default the active one, for
+ * the combat chain. The attack keeps it after its link resolves, so a later
+ * effect hit (Flick Knives) must still fire it. */
 export function armGrantedHitRider(
   ctx: ScriptCtx,
   label?: Pick<Modifier, "ongoingLabel" | "ongoingLabelMessage">,
+  target: number = ctx.link!.attackingCard.instanceId,
 ): void {
   ctx.addModifier({ scope: "until-end-of-turn", expiresOnChainClose: true, ...label });
-  ctx.setState(GRANTED_HIT_TARGET, ctx.link!.attackingCard.instanceId);
+  ctx.setState(GRANTED_HIT_TARGET, target);
 }
 
-/** Whether `card` still carries the rider this card armed. */
-export function grantedHitRiderOn(ctx: ScriptCtx, card: DeepReadonly<CardInstance> | undefined): boolean {
+function grantedHitRiderOn(ctx: ScriptCtx, card: DeepReadonly<CardInstance> | undefined): boolean {
   return !!card && ctx.getState(GRANTED_HIT_TARGET) === card.instanceId && !!pendingDelayedEffect(ctx);
+}
+
+/** The hit hooks for a rider armed with `armGrantedHitRider`: "When this hits a hero, ...".
+ * Its card also needs both on-hit-scope.ts entries, or a resolved reaction never fires it. */
+export function chainHitRider(
+  effect: (ctx: ScriptCtx, hitSeat: number) => void,
+): Pick<CardScript, "canTriggerOnHit" | "onHit" | "onFriendlyEffectHitCondition" | "onFriendlyEffectHit"> {
+  return {
+    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined && grantedHitRiderOn(ctx, ctx.link?.attackingCard),
+    onHit: (ctx) => effect(ctx, opponentSeat(ctx)),
+    onFriendlyEffectHitCondition: grantedHitRiderOn,
+    onFriendlyEffectHit: (ctx, _source, targetSeat) => effect(ctx, targetSeat),
+  };
 }
 
 /** The projected text of a granted on-hit script hook, after "when it hits:". */

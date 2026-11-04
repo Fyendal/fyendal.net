@@ -3,10 +3,10 @@ import {
   armGrantedHitRider,
   buffNextAttack,
   cardNamed,
+  chainHitRider,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
-  grantedHitRiderOn,
   heroChoiceSeat,
   heroTarget,
   mergeSetScripts,
@@ -108,20 +108,7 @@ function stealthReaction(pump: number, token?: string): CardScript {
       ctx.addModifier({ scope: "chain-link", attack: pump });
       if (token) armGrantedHitRider(ctx);
     },
-    ...(token
-      ? {
-          canTriggerOnHit(ctx: ScriptCtx) {
-            return ctx.link?.targetAllyId === undefined && grantedHitRiderOn(ctx, ctx.link?.attackingCard);
-          },
-          onHit(ctx: ScriptCtx) {
-            ctx.createToken(token, opponentSeat(ctx));
-          },
-          onFriendlyEffectHitCondition: grantedHitRiderOn,
-          onFriendlyEffectHit(ctx: ScriptCtx, _source: DeepReadonly<CardInstance>, targetSeat: number) {
-            ctx.createToken(token, targetSeat);
-          },
-        }
-      : {}),
+    ...(token ? chainHitRider((ctx, seat) => ctx.createToken(token, seat)) : {}),
   };
 }
 function nextStealth(pump: number): CardScript {

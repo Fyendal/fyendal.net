@@ -4,7 +4,9 @@ import {
   FRAILTY,
   INERTIA,
   NAMED_DISEASE_TOKENS,
+  armGrantedHitRider,
   cardNamed,
+  chainHitRider,
   commonOptionMessages,
   contractWithSilver,
   createChosenDisease,
@@ -22,6 +24,8 @@ import {
   targetsHero,
   tokenContractWithSilver,
 } from "./shared-helpers.js";
+
+const SILVER = "DYN245";
 
 function seedDisease(tokenId: string): CardScript {
   return {
@@ -56,6 +60,27 @@ function activeAssassinAttack(ctx: ScriptCtx): number[] {
   const link = ctx.link;
   if (!link || link.flags.attackGone === true || !ctx.cardTypes(link.attackingCard).includes("assassin")) return [];
   return [link.attackingCard.instanceId];
+}
+
+function assassinAttackActionTargets(ctx: ScriptCtx): number[] {
+  return ctx.state.chain
+    .filter((link) =>
+      link.flags.attackGone !== true &&
+      link.attackCardType === "action" &&
+      ctx.cardTypes(link.attackingCard).includes("assassin")
+    )
+    .map((link) => link.attackingCard.instanceId);
+}
+
+/** "As an additional cost to play this, destroy N Silver you control." */
+function silverAdditionalCost(amount: number): Pick<CardScript, "canPlay" | "additionalCost"> {
+  const silver = (ctx: ScriptCtx) => ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Silver"));
+  return {
+    canPlay: (ctx) => silver(ctx).length >= amount,
+    additionalCost(ctx) {
+      for (const card of silver(ctx).slice(0, amount)) ctx.destroyPermanent(card.instanceId);
+    },
+  };
 }
 
 function sickening(effect: (ctx: ScriptCtx, defender: number) => void): CardScript {
@@ -212,42 +237,100 @@ export const mpa: Record<string, CardScript> = {
     },
   },
 
+  "mask of one million eyes|0": {
+    triggers: [equipWithSilver(2)],
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "attack-reaction",
+      destroySelfCost: true,
+      onActivate(ctx) {
+        ctx.drawCards(ctx.seat, 1);
+        const hand = ctx.player(ctx.seat).hand;
+        if (!hand.length) return;
+        ctx.requestCardChoice(
+          "mpa-mask-bottom",
+          decisionPrompt(
+            "Put a card from your hand on the bottom of your deck",
+            "card.common.cost.hand.deckbottom",
+          ),
+          hand.map((card) => card.instanceId),
+        );
+      },
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "mpa-mask-bottom") ctx.putOnDeckBottom(Number(option));
+    },
+  },
+
   "seed bloodrot|3": seedDisease(BLOODROT_POX),
   "seed frailty|3": seedDisease(FRAILTY),
   "seed inertia|3": seedDisease(INERTIA),
 
   "outbreak|3": {
-    playTargetOptions(ctx) {
-      return ctx.state.chain
-        .filter((link) =>
-          link.flags.attackGone !== true &&
-          link.attackCardType === "action" &&
-          ctx.cardTypes(link.attackingCard).includes("assassin")
-        )
-        .map((link) => link.attackingCard.instanceId);
+    playTargetOptions: assassinAttackActionTargets,
+    onPlay(ctx) {
+      const target = ctx.playTargetInstanceId;
+      if (target === undefined) return;
+      ctx.addModifier({ scope: "chain-link", attack: 3, appliesTo: "attack-action", appliesToInstanceId: target });
+      armGrantedHitRider(
+        ctx,
+        ongoingLabel(
+          "when it hits a hero, create a Frailty, Inertia, and Bloodrot Pox token under their control",
+          "card.effect.mpa.outbreak",
+        ),
+        target,
+      );
     },
+    ...chainHitRider((ctx, seat) => {
+      for (const tokenId of NAMED_DISEASE_TOKENS) ctx.createToken(tokenId, seat);
+    }),
+  },
+
+  "expense not spared|2": {
+    ...silverAdditionalCost(2),
+    playTargetOptions: assassinAttackActionTargets,
     onPlay(ctx) {
       if (ctx.playTargetInstanceId === undefined) return;
       ctx.addModifier({
         scope: "chain-link",
-        attack: 3,
+        attack: 5,
         appliesTo: "attack-action",
         appliesToInstanceId: ctx.playTargetInstanceId,
-        onHitScriptHook: {
-          hook: "mpa-outbreak-hit",
-          ...hitHookLabel(
-            "create a Frailty, Inertia, and Bloodrot Pox token under the hit hero's control",
-            "card.effect.mpa.outbreak",
-          ),
-          heroOnly: true,
-        },
       });
     },
-    onGrantedHit(ctx, hook) {
-      if (hook !== "mpa-outbreak-hit") return;
-      for (const tokenId of NAMED_DISEASE_TOKENS) {
-        ctx.createToken(tokenId, opponentSeat(ctx));
-      }
+  },
+
+  "festering rot|2": {
+    playTargetOptions: assassinAttackActionTargets,
+    onPlay(ctx) {
+      const target = ctx.playTargetInstanceId;
+      if (target === undefined) return;
+      ctx.grantGoAgain(target);
+      armGrantedHitRider(
+        ctx,
+        ongoingLabel(
+          "when it hits a hero, create a Bloodrot Pox token under their control",
+          "card.effect.common.bloodrot.create.hit.hero",
+        ),
+        target,
+      );
+    },
+    ...chainHitRider((ctx, seat) => ctx.createToken(BLOODROT_POX, seat)),
+  },
+
+  "pinpoint elimination|3": {
+    onPlay(ctx) {
+      ctx.requestNameChoice("mpa-pinpoint-name", decisionPrompt("Name a card", "card.common.card.name"));
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "mpa-pinpoint-name") return;
+      const defender = opponentSeat(ctx);
+      const top = ctx.player(defender).deck[0];
+      if (!top || !ctx.revealCards([top.instanceId], defender) || !cardNamed(ctx, top, option)) return;
+      ctx.banish(top.instanceId);
+      ctx.createToken(SILVER);
     },
   },
 
@@ -581,6 +664,15 @@ export const mpa: Record<string, CardScript> = {
       for (const card of [...ctx.player(opponentSeat(ctx)).arsenal]) ctx.banish(card.instanceId);
     },
   },
+
+  ...eachPitch("the spider's cut", {
+    ...silverAdditionalCost(1),
+    canTriggerOnHit: targetsHero,
+    onHit(ctx) {
+      ctx.createToken(SILVER);
+      ctx.createToken(SILVER);
+    },
+  }),
 
   ...eachPitch("feverish strike", {
     modifyAttack: (ctx) => (isInfected(ctx, ctx.seat) ? 1 : 0),

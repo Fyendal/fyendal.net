@@ -73,6 +73,16 @@
     "set": "MPA"
   },
   {
+    "id": "MPA009",
+    "name": "Mask of One Million Eyes",
+    "cardType": "equipment",
+    "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nAttack Reaction - Destroy this: Draw a card, then put a card from your hand on the bottom of your deck.",
+    "defense": 0,
+    "classes": ["assassin"],
+    "subtypes": ["head"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA017",
     "name": "Bribe the Guards",
     "cardType": "action",
@@ -240,6 +250,17 @@
     "set": "MPA"
   },
   {
+    "id": "MPA030",
+    "name": "Expense Not Spared",
+    "cardType": "attack-reaction",
+    "text": "As an additional cost to play this, destroy 2 Silver you control.\nTarget Assassin attack action card gets +5{p}.",
+    "pitch": 2,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA031",
     "name": "Outbreak",
     "cardType": "attack-reaction",
@@ -340,6 +361,56 @@
     "defense": 3,
     "classes": ["assassin"],
     "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA046",
+    "name": "The Spider's Cut",
+    "cardType": "action",
+    "text": "As an additional cost to play this, destroy a Silver you control.\nWhen this hits a hero, create 2 Silver tokens.",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 6,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA047",
+    "name": "The Spider's Cut",
+    "cardType": "action",
+    "text": "As an additional cost to play this, destroy a Silver you control.\nWhen this hits a hero, create 2 Silver tokens.",
+    "pitch": 2,
+    "cost": 1,
+    "attack": 5,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA048",
+    "name": "The Spider's Cut",
+    "cardType": "action",
+    "text": "As an additional cost to play this, destroy a Silver you control.\nWhen this hits a hero, create 2 Silver tokens.",
+    "pitch": 3,
+    "cost": 1,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA055",
+    "name": "Pinpoint Elimination",
+    "cardType": "attack-reaction",
+    "text": "Name a card, then the defending hero reveals the top card of their deck. If it's the named card, banish it and create a Silver token.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
     "set": "MPA"
   },
   {
@@ -496,6 +567,17 @@
     "classes": ["assassin"],
     "subtypes": ["attack"],
     "keywords": ["Contract"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA119",
+    "name": "Festering Rot",
+    "cardType": "attack-reaction",
+    "text": "Target Assassin attack action card gets go again and \"When this hits a hero, create a Bloodrot Pox token under their control.\"",
+    "pitch": 2,
+    "cost": 1,
+    "defense": 2,
+    "classes": ["assassin"],
     "set": "MPA"
   },
   {
