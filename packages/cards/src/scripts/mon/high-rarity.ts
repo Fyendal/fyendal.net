@@ -682,14 +682,41 @@ export const monHighRarity: Record<string, CardScript> = {
     true,
   ),
   "blasmophet, the soul harvester|0": {
-    activated: {
-      cost: 0,
-      isAttack: true,
-      goAgain: false,
-      oncePerTurn: true,
-      onCostPaid(ctx, cards) {
-        ctx.setState("shadowDiscarded", cards.some((card) => ctx.cardTypes(card).includes("shadow")) ? 1 : 0);
-      },
+    activated: { cost: 0, isAttack: true, goAgain: false, oncePerTurn: true },
+    onAttackDeclared(ctx) {
+      const cards = ctx.player(ctx.seat).hand.filter((card) => ctx.cardTypes(card).includes("shadow"));
+      if (cards.length)
+        ctx.requestCardChoice(
+          "blasmophet-hand",
+          decisionPrompt(`${ctx.data.name}: banish a card from hand?`, "card.mon.hand.card.banish.optional", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("no"),
+          }),
+          ["no", ...cards.map((card) => card.instanceId)],
+        );
+    },
+    onChoose(ctx, hook, option) {
+      if (option === "no") return;
+      if (hook === "blasmophet-hand") {
+        if (!ctx.player(ctx.seat).hand.some((card) => card.instanceId === Number(option))) return;
+        const soul = ctx.link?.targetAllyId === undefined ? ctx.player(opponentSeat(ctx)).soul : [];
+        if (soul.length)
+          ctx.requestCardChoice(
+            "blasmophet-soul",
+            decisionPrompt(
+              `${ctx.data.name}: banish a card from the defending hero's soul`,
+              "card.mon.defending.soul.banish",
+              {
+                values: { card: { kind: "card", cardId: ctx.self.cardId } },
+                optionMessages: commonOptionMessages("no"),
+              },
+            ),
+            ["no", ...soul.map((card) => card.instanceId)],
+          );
+        ctx.banish(Number(option));
+      } else if (hook === "blasmophet-soul") {
+        ctx.banish(Number(option));
+      }
     },
   },
   "ursur, the soul reaper|0": {
