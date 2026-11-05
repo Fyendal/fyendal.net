@@ -415,6 +415,8 @@ export interface PlayerView {
   heroInstanceId: number;
   /** Set when the hero is tapped ({t} costs, e.g. Lyath) */
   heroTapped?: boolean;
+  /** The hero currently has no hero card abilities (Humble and similar). */
+  heroAbilitiesLost?: true;
   /** Named counters on the hero itself (e.g. Blaze's energy counters) */
   heroCounters?: Record<string, number>;
   /** Public -1 defense counters on a hero that is also equipment. */

@@ -1,6 +1,6 @@
 import { cardData, decklists, scripts } from "@fyendal/cards";
 import { createGame, projectStateFor } from "@fyendal/engine";
-import type { CardData, CardView, GameIntent } from "@fyendal/shared";
+import type { CardData, CardView, GameIntent, GameMessage, GameView } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import {
   allyLethalThreshold,
@@ -29,6 +29,58 @@ const NO_RESPONSE: BotPolicyScorers["response"] = {
   offensiveCards: () => [],
   evaluateResponse: () => responseEvaluation({}),
 };
+
+describe("Inertia trigger order", () => {
+  const FRAILTY = { id: "card.trigger.common.named.destroy", values: { target: "Frailty" } };
+  const INERTIA = { id: "card.trigger.common.inertia.destroy" };
+  const POX = { id: "card.trigger.common.bloodrotpox.destroy", values: { amount: 3, damage: 2 } };
+  const PONDER = { id: "card.trigger.common.ponder.destroy.draw" };
+  const POX_CARD = Object.keys(cardData).find((id) => cardData[id]!.name === "Bloodrot Pox")!;
+
+  function orderFor(messages: readonly GameMessage[], setup?: (view: GameView) => void): string[] | undefined {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 94_149,
+      startPlayer: 0,
+    });
+    const view = projectStateFor(state, 0);
+    view.players[0].hand = [];
+    const options = messages.map((_, index) => `${index}:0`);
+    view.pendingDecision = {
+      player: 0,
+      kind: "order-triggers",
+      prompt: "Order your triggered abilities",
+      options,
+      optionMessages: [...messages],
+    };
+    setup?.(view);
+    const intent = chooseSharedPolicyIntent({
+      seat: 0,
+      view,
+      legal: [{ kind: "order-triggers", optionIds: options }],
+      cards: cardData,
+    });
+    return intent?.kind === "order-triggers" ? intent.optionIds : undefined;
+  }
+
+  it("resolves draws after every Inertia, with other triggers first", () => {
+    expect(orderFor([FRAILTY, INERTIA, POX, PONDER, PONDER, FRAILTY, INERTIA, POX]))
+      .toEqual(["0:0", "2:0", "5:0", "7:0", "1:0", "6:0", "3:0", "4:0"]);
+  });
+
+  it("holds a lethal upkeep for the drawn cards when the hand is empty", () => {
+    expect(orderFor([POX, INERTIA, PONDER], (view) => {
+      view.players[0].life = 2;
+      view.players[0].board = [{ cardId: POX_CARD, instanceId: 900 } as CardView];
+    })).toEqual(["1:0", "2:0", "0:0"]);
+  });
+
+  it("leaves other trigger orders to the engine", () => {
+    expect(orderFor([FRAILTY, PONDER])).toBeUndefined();
+  });
+});
 
 describe("lethal Arcane Barrier", () => {
   for (const bot of botDefinitions) {

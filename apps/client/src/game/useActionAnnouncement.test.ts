@@ -439,7 +439,7 @@ describe("blocked equipment plays", () => {
 
     expect([...blockingEquipmentByPlay([memory], { head: recall })]).toEqual([[31, recall.cardId]]);
     expect([...blockingEquipmentByPlay([memory], { head: baseHead })]).toEqual([]);
-    expect([...blockingEquipmentByPlay([memory], {})]).toEqual([]);
+    expect([...blockingEquipmentByPlay([memory], {})]).toEqual([[31, null]]);
   });
 });
 
@@ -450,7 +450,7 @@ describe("announcement order", () => {
     legalIntents: [],
     hand: [],
     chainClosingPlayIds: new Set<number>(),
-    blockingEquipment: new Map<number, string>(),
+    blockingEquipment: new Map<number, string | null>(),
     skipPlayConfirmation: false,
   });
   const apply = (...actions: Parameters<typeof actionAnnouncementReducer>[1][]) =>

@@ -6,6 +6,8 @@ import { chooseBoltynIntent } from "./boltyn-policy.js";
 import { chooseHalaIntent } from "./hala-policy.js";
 import { decklistsFromState } from "./deck-knowledge.js";
 import { boltynPresentationFor, halaPresentationFor } from "./sideboard.js";
+import { boltynSolverRules } from "./boltyn-rules.js";
+import { handResponse } from "./hand-value.js";
 import { plannedDefenseReactionPlan, type BotPolicyInput } from "./policy.js";
 
 const BOLTYN_POOL = precon("bot-boltyn-raydn")!.pool;
@@ -258,6 +260,8 @@ function veinSwing(state: GameState, swing: 0 | 1): GameState {
 }
 
 const HERO = "Ser Boltyn, Breaker of Dawn";
+/** A hand whose attacks chain only through charged pumps and soul go again. */
+const CHARGE_LINE = ["ASB021", "PEN183", "ASB007"];
 const RAYDN = "Raydn, Duskbane";
 /** Wounding Blow: a plain four-power attack. */
 const PLAIN_ATTACK = "WTR203";
@@ -1023,5 +1027,53 @@ describe("Boltyn policy", () => {
     expect(played.some((entry) =>
       entry.startsWith("defend(") || entry === "Saving Grace" || entry === "Sink Below"
     )).toBe(true);
+  });
+
+  describe("hero ability locks", () => {
+    function lost(state: GameState): GameState {
+      state.modifiers.push({
+        scope: "until-end-of-turn", seat: 0, suppressesHeroAbilities: true, expiresAtEndOfSeatTurn: 0,
+        sourceInstanceId: state.players[1]!.hero.instanceId, createdTurn: state.turn - 1,
+      } as GameState["modifiers"][number]);
+      return state;
+    }
+
+    it("prices next turn without the hero ability as a smaller turn", () => {
+      const state = game();
+      state.activePlayer = 1;
+      state.priorityPlayer = 1;
+      hand(state, CHARGE_LINE);
+      soul(state, 2);
+      const respond = () => handResponse(
+        [...state.players[0]!.hand],
+        { seat: 0, view: projectStateFor(state, 0), legal: [], cards: cardData, state },
+        boltynSolverRules,
+      ).damageThreatened;
+      const free = respond();
+      lost(state);
+      expect(respond()).toBeLessThan(free);
+    });
+
+    it("does not plan go again through the soul while humbled", () => {
+      const free = game();
+      hand(free, CHARGE_LINE);
+      soul(free, 2);
+      const humbled = lost(game());
+      hand(humbled, CHARGE_LINE);
+      soul(humbled, 2);
+      expect(play(settled(free), turnOver).intents).toContain(HERO);
+      expect(play(settled(humbled), turnOver).intents).not.toContain(HERO);
+    }, 30_000);
+
+    it("stops Humble with hand cards when next turn runs through the hero ability", () => {
+      const state = settled(game());
+      state.players[0]!.equipment = {};
+      state.players[0]!.life = 10;
+      state.players[0]!.arsenal = [];
+      hand(state, ["ASB021", "ASB023", "ASB023", "ASB007"]);
+      soul(state, 3);
+      state.players[1]!.resources = 2;
+      expect(defenders(underAttack(state, "OUT189")).length).toBeGreaterThanOrEqual(2);
+    });
   });
 });

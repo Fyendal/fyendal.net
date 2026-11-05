@@ -126,4 +126,11 @@ describe("on-hit valuation", () => {
       destroysOccupiedArsenal: true,
     });
   });
+
+  it("marks a hero ability lock separately from its flat estimate", () => {
+    expect(evaluateOnHit({
+      ...base,
+      effects: [{ text: "When this hits a hero, they lose all hero card abilities until the end of their next turn." }],
+    })).toMatchObject({ value: 2, heroAbilitiesLost: true, heroAbilityLossValue: 2 });
+  });
 });

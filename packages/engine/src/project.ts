@@ -53,6 +53,7 @@ import {
 import { additionalTargetsAroundPrimary, currentLink, findCardAnywhere } from "./zoneQueries.js";
 import { queuedAttackObjects } from "./attackQueue.js";
 import { controlledPermanents } from "./sourceQueries.js";
+import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { activatedAbilityUsage } from "./abilityRules.js";
 import { defenseReactionRestriction, weaponAttacksProhibited } from "./combatRestrictions.js";
 import { cardTriggersPhantasm, legalDefenderCards } from "./defense.js";
@@ -379,6 +380,7 @@ function playerView(
     heroCardId: p.heroCardId,
     heroInstanceId: p.hero.instanceId,
     ...(p.hero.tapped ? { heroTapped: true } : {}),
+    ...(heroAbilitiesDisabled(state, p.seat) ? { heroAbilitiesLost: true as const } : {}),
     ...(heroCounters ? { heroCounters } : {}),
     ...(p.hero.defCounters ? { heroDefCounters: p.hero.defCounters } : {}),
     ...(heroSubcards ? { heroSubcards } : {}),

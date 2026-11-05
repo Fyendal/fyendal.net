@@ -1332,7 +1332,7 @@ const cardViews = (value: unknown): value is CardView[] => array(value, cardView
 function playerView(value: unknown): value is PlayerView {
   const player = object(value);
   if (!player || !exactKeys(player, [
-    "seat", "heroCardId", "heroInstanceId", "heroTapped", "heroCounters", "heroDefCounters", "heroSubcards",
+    "seat", "heroCardId", "heroInstanceId", "heroTapped", "heroAbilitiesLost", "heroCounters", "heroDefCounters", "heroSubcards",
     "heroAbilityLabels", "heroAttackAbilityIndexes", "heroTapAbilityIndexes", "heroUsedAbilityIndexes", "heroName",
     "life", "actionPoints", "resources", "chi", "hand", "handCount", "deckCount", "deck",
     "arsenal", "arsenalCount", "arsenalCapacity", "arsenalZones", "pitch", "pitchCount", "graveyard", "banish", "soul",
@@ -1344,6 +1344,7 @@ function playerView(value: unknown): value is PlayerView {
   ])) return false;
   return seat(player.seat) && id(player.heroCardId) && instanceId(player.heroInstanceId)
     && optional(player.heroTapped, (v): v is boolean => typeof v === "boolean")
+    && optional(player.heroAbilitiesLost, (v): v is true => v === true)
     && optional(player.heroCounters, numberRecord) && optional(player.heroDefCounters, nonNegativeInteger)
     && optional(player.heroSubcards, cardViews)
     && string(player.heroName, MAX_SHORT_TEXT, false)

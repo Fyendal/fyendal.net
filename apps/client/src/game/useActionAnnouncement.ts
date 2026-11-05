@@ -261,12 +261,13 @@ export function requiresChainCloseConfirmation(
 
 const EQUIPMENT_SLOTS: readonly EquipmentSlot[] = ["head", "chest", "arms", "legs"];
 
-/** CR 8.5.41c: equipment played over a non-base piece goes to the graveyard. */
+/** Plays whose equip fails and go to the graveyard: the non-base occupant
+ * (CR 8.5.41c), or null for an Evo with no base to transform (CR 1.8.4). */
 export function blockingEquipmentByPlay(
   cards: readonly CardView[],
   equipment: Partial<Record<EquipmentSlot, CardView>>,
-): ReadonlyMap<number, string> {
-  const blockers = new Map<number, string>();
+): ReadonlyMap<number, string | null> {
+  const blockers = new Map<number, string | null>();
   for (const card of cards) {
     const data = cardData[card.cardId];
     if (data?.cardType !== "equipment") continue;
@@ -274,6 +275,8 @@ export function blockingEquipmentByPlay(
     const occupant = slot ? equipment[slot] : undefined;
     if (occupant && !(cardData[occupant.cardId]?.subtypes ?? []).includes("base")) {
       blockers.set(card.instanceId, occupant.cardId);
+    } else if (slot && !occupant && (data.subtypes ?? []).includes("evo")) {
+      blockers.set(card.instanceId, null);
     }
   }
   return blockers;
@@ -378,7 +381,7 @@ export interface AnnouncementInputs {
   legalIntents: readonly GameIntent[];
   hand: readonly CardView[];
   chainClosingPlayIds: ReadonlySet<number>;
-  blockingEquipment: ReadonlyMap<number, string>;
+  blockingEquipment: ReadonlyMap<number, string | null>;
   skipPlayConfirmation: boolean;
 }
 

@@ -30313,6 +30313,20 @@
       "value": "Você ainda tem um Action Point. Tem certeza de que quer encerrar o turno?"
     }
   ],
+  "game.decision.equipFails.noBase.warning": [
+    {
+      "type": 0,
+      "value": "Atenção: não é possível equipar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " porque você não tem um equipamento base nesse espaço. A carta vai para o seu cemitério."
+    }
+  ],
   "game.decision.equipFails.warning": [
     {
       "type": 0,

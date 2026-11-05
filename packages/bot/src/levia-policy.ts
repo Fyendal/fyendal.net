@@ -58,6 +58,7 @@ import {
   leviaBloodDebtAction as bloodDebtAction,
   leviaBloodrushTurn,
   leviaBloodrushWorthSending,
+  leviaDebtSuppressed,
   leviaEffectActive,
   leviaHoldsBellow,
   leviaSixPower,
@@ -340,7 +341,7 @@ function hexGauntletValue(input: BotPolicyInput, gauntlet: CardView): number {
     return affordableFollowups(input, spent) > me.actionPoints ? 90 : -80;
   }
   const debt = ownBloodDebt(input);
-  if (input.view.phase !== "action" || debt === 0 || (debt < 3 && me.life > debt + 5)) return -80;
+  if (input.view.phase !== "action" || me.heroAbilitiesLost || debt === 0 || (debt < 3 && me.life > debt + 5)) return -80;
   // Above pass and close-chain only: every useful play this turn comes first,
   // so a natural 6{p} banish can still make the Gauntlet unnecessary.
   return 2;
@@ -370,11 +371,12 @@ function leviaRules(input: BotPolicyInput, gateMode: boolean): HeroSolverRules {
   const me = input.view.players[input.seat];
   const nextTurn = input.view.activePlayer !== input.seat;
   const banishedSix = !nextTurn && input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true;
+  const canSuppress = !me.heroAbilitiesLost;
   const weaponPower = Math.max(0, ...me.weapons.map((weapon) => input.cards[weapon.cardId]?.attack ?? 0));
   const debt = ownBloodDebt(input);
   const selfDamage = hexagoreSelfDamage(input);
   // Life the evaluated turn's end phase drains unless a six is banished.
-  const playExposure = nextTurn || !banishedSix ? debt : 0;
+  const playExposure = canSuppress && (nextTurn || !banishedSix) ? debt : 0;
   return {
     name: "levia",
     trackedTraits: [],
@@ -397,7 +399,7 @@ function leviaRules(input: BotPolicyInput, gateMode: boolean): HeroSolverRules {
           flags: { [SUPPRESSION_FLAG]: Math.round(suppressionAfter(view, chance) * 100) },
         });
       }
-      if (debt > 0 && handBanishSuppressor(card, input)) {
+      if (canSuppress && debt > 0 && handBanishSuppressor(card, input)) {
         // Held, it suppresses next turn's blood debt on demand.
         const printed = cardUses(data, input, card).alternative ?? 0;
         patch.uses = { ...patch.uses, alternative: Math.max(printed, debt) };
@@ -513,8 +515,9 @@ const HAND_BANISH_INSTANTS = ["cleave the heavens", "fallen herald", "blood harv
 function banishGain(card: CardView, input: BotPolicyInput): number {
   const data = input.cards[card.cardId];
   if (!data) return -Infinity;
-  const suppressed = input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true;
-  const gain = suppressed ? 0 : (data.attack ?? 0) >= 6 ? ownBloodDebt(input) : -1;
+  const suppressed = leviaDebtSuppressed(input);
+  const canSuppress = !input.view.players[input.seat].heroAbilitiesLost;
+  const gain = suppressed ? 0 : canSuppress && (data.attack ?? 0) >= 6 ? ownBloodDebt(input) : -1;
   return name(data) === "cleave the heavens" ? gain + newGateValue(input, card) : gain;
 }
 
@@ -542,8 +545,8 @@ function endOfTurnBanishScore(intent: GameIntent, card: CardView, input: BotPoli
   // A suppression that protects a large share of Levia's life ranks among the
   // attacks, so the planner's root candidates include it.
   const debt = ownBloodDebt(input);
-  const suppresses = debt > 0 && (input.cards[card.cardId]?.attack ?? 0) >= 6 &&
-    input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn !== true;
+  const suppresses = debt > 0 && (input.cards[card.cardId]?.attack ?? 0) >= 6 && !me.heroAbilitiesLost &&
+    !leviaDebtSuppressed(input);
   const urgent = suppresses && me.life <= debt * 2 + 6 ? Math.min(45, debt * 6) : 0;
   return 3 + Math.min(0.9, gain / 10) + urgent;
 }
@@ -772,8 +775,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     // whose go-again card was discarded can still go wide. Otherwise a one
     // whiffs the turn, which exposed blood debt cannot afford.
     const reserve = [...me.hand, ...me.arsenal];
-    const exposed = ownBloodDebt(input) > 0 &&
-      input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn !== true;
+    const exposed = ownBloodDebt(input) > 0 && !leviaDebtSuppressed(input);
     // Never gamble the action point while one attack already kills.
     const opponentLife = input.view.players[1 - input.seat]!.life;
     const lethalAttack = input.legal.some((candidate) => {
@@ -1017,6 +1019,8 @@ function scoreDefense(
     adjustCycleValue: leviaKeepsCards,
     defensePermission: leviaBellowBlocks,
     lifeThresholds: leviaLifeThresholds(input),
+    pricesHeroAbilityLoss: true,
+    endPhaseDrainWithoutHeroAbilities: ownBloodDebt,
     plannedPrevention: leviaPlannedPrevention,
     equipmentUseIsFree: (card, policy) => name(policy.cards[card.cardId]) === "savage sash" &&
       (card.defCounters ?? 0) === 0 && leviaSashEnablesPair(policy,

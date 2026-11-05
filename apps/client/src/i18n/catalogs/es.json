@@ -2896,6 +2896,7 @@
   "game.decision.closeChain.prompt": "¿Cerrar la combat chain?",
   "game.decision.closeChain.context": "Jugar {card} cerrará la combat chain actual.",
   "game.decision.closeChain.action": "Cerrar cadena y jugar",
+  "game.decision.equipFails.noBase.warning": "Atención: {card} no se puede equipar porque no tienes un equipo base en esa ranura. Irá a tu cementerio.",
   "game.decision.equipFails.warning": "Atención: {card} no se puede equipar porque {equipped} es un equipo que no es base en esa ranura. Irá a tu cementerio.",
   "game.decision.action.confirm": "¿{verb} {target}?",
   "game.decision.arsenal.prompt": "¿Omitir el arsenal?",

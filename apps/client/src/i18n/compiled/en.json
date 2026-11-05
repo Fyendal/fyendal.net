@@ -28751,6 +28751,20 @@
       "value": "You still have an action point. Are you sure you want to end your turn?"
     }
   ],
+  "game.decision.equipFails.noBase.warning": [
+    {
+      "type": 0,
+      "value": "Warning: "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " can't be equipped because you have no base equipment in that slot. It will go to your graveyard."
+    }
+  ],
   "game.decision.equipFails.warning": [
     {
       "type": 0,

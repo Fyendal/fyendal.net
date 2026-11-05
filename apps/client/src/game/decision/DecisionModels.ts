@@ -36,8 +36,9 @@ export interface ActionAnnouncementModel {
   sel: Sel;
   selCardId: string | undefined;
   step: ActionStep;
-  /** Non-base equipment that sends the selected equipment play to the graveyard. */
-  equipBlockedBy: string | undefined;
+  /** Set when the selected equipment play will go to the graveyard: the
+   * non-base occupant, or null when an Evo has no base to transform. */
+  equipBlockedBy: string | null | undefined;
   autoCommitPending: boolean;
   abilityChoices: { index: number; label: string }[];
   onSelectAbility: (index: number) => void;

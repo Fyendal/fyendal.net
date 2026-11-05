@@ -60,6 +60,13 @@ function hasSubtype(data: CardData | undefined, subtype: string): boolean {
   return data?.subtypes?.some((value) => value.toLowerCase() === subtype) === true;
 }
 
+/** Channel Lake Frigid dies at its first end phase without an Ice card in the pitch zone. */
+function pitchHoldsIce(input: BotPolicyInput, pitching: readonly number[] = []): boolean {
+  const me = input.view.players[input.seat];
+  const pitched = me.hand.filter((card) => pitching.includes(card.instanceId));
+  return [...me.pitch, ...pitched].some((card) => hasSubtype(input.cards[card.cardId], "ice"));
+}
+
 function earthBanished(input: BotPolicyInput): number {
   return input.view.players[input.seat].banish.filter((card) =>
     hasSubtype(input.cards[card.cardId], "earth")
@@ -223,7 +230,10 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   if (decision.resourcePayment) {
     const ids = resourcePaymentPitchIds(intent, input) ?? [];
     const own = new Map(input.view.players[input.seat].hand.map((held) => [held.instanceId, held]));
-    return 30 - ids.reduce((total, id) => {
+    const source = decision.preStackSource?.card;
+    const paysForLake = source !== undefined && key(input.cards[source.cardId]) === "imposing visage|3" &&
+      decision.resourcePayment.cost >= 5;
+    return (paysForLake && pitchHoldsIce(input, ids) ? 100 : 0) + 30 - ids.reduce((total, id) => {
       const held = own.get(id);
       return total + (held ? cardOpportunity(held, input) : 0);
     }, 0);
@@ -238,11 +248,12 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   }
   if (prompt === "choose x") {
     // Imposing Visage, the deck's only X card, fetches Channel Lake Frigid
-    // (X = 2) into aggro when affordable and Crumble to Eternity (X = 0)
-    // otherwise; an X in between pays for nothing.
+    // (X = 2) into aggro when affordable with an Ice pitch and Crumble to
+    // Eternity (X = 0) otherwise; an X in between pays for nothing.
     const value = declaredX(intent.optionId);
     const offered = (decision.options ?? []).map(declaredX);
-    const desired = opponentIsAggro(input) && offered.includes(2) ? 2 : 0;
+    const handIds = input.view.players[input.seat].hand.map((held) => held.instanceId);
+    const desired = opponentIsAggro(input) && offered.includes(2) && pitchHoldsIce(input, handIds) ? 2 : 0;
     return value === undefined ? -100 : 30 - Math.abs(value - desired) * 10;
   }
   if (prompt.includes("fuse")) {
@@ -258,7 +269,7 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   }
   if (prompt.includes("choose an aura")) {
     const functional = card ? key(input.cards[card.cardId]) : "";
-    if (functional === "channel lake frigid|3") return opponentIsAggro(input) ? 100 : 20;
+    if (functional === "channel lake frigid|3") return opponentIsAggro(input) && pitchHoldsIce(input) ? 100 : 20;
     if (functional === "crumble to eternity|3") return opponentIsAggro(input) ? 70 : 100;
     return card ? 10 : -20;
   }
@@ -572,7 +583,7 @@ function scorePlay(
   } else if (opening) {
     score = -100;
   } else if (functional === "channel lake frigid|3") {
-    score = aggro ? 58 : 18;
+    score = !pitchHoldsIce(input, pitchIds(intent)) ? -100 : aggro ? 58 : 18;
   } else if (functional === "oaken old|1") {
     score = 65;
   } else if (functional === "felling of the crown|1") {

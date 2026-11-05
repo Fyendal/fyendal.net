@@ -115,6 +115,10 @@ export interface OnHitEvaluation {
   handLossValue: number;
   /** The selector least favorable to the defender among hand-loss effects. */
   handLossSelector?: HandLossSelector;
+  /** The landed hit removes the defender's hero card abilities. */
+  heroAbilitiesLost: boolean;
+  /** The part of `value` that prices `heroAbilitiesLost` generically. */
+  heroAbilityLossValue: number;
   destroysOccupiedArsenal: boolean;
   equipmentDamage: boolean;
   tokenCreation: boolean;
@@ -127,6 +131,8 @@ export const EMPTY_ON_HIT_EVALUATION: OnHitEvaluation = {
   delayedDamage: 0,
   handCardsLost: 0,
   handLossValue: 0,
+  heroAbilitiesLost: false,
+  heroAbilityLossValue: 0,
   destroysOccupiedArsenal: false,
   equipmentDamage: false,
   tokenCreation: false,
@@ -179,6 +185,8 @@ function combine(left: OnHitEvaluation, right: OnHitEvaluation): OnHitEvaluation
     handCardsLost: left.handCardsLost + right.handCardsLost,
     handLossValue: left.handLossValue + right.handLossValue,
     ...(handLossSelector ? { handLossSelector } : {}),
+    heroAbilitiesLost: left.heroAbilitiesLost || right.heroAbilitiesLost,
+    heroAbilityLossValue: left.heroAbilityLossValue + right.heroAbilityLossValue,
     destroysOccupiedArsenal: left.destroysOccupiedArsenal || right.destroysOccupiedArsenal,
     equipmentDamage: left.equipmentDamage || right.equipmentDamage,
     tokenCreation: left.tokenCreation || right.tokenCreation,
@@ -320,6 +328,9 @@ function permanentRemoval(text: string): OnHitEvaluation | undefined {
 function lock(text: string): OnHitEvaluation | undefined {
   const weakened = /their first attack during their next turn has -(\d+)\{p\}/.exec(text);
   if (weakened) return part("lock", Number(weakened[1]) * DEFAULT_HIT_CHANCE);
+  if (/lose all hero card abilities/.test(text)) {
+    return part("lock", LOCK_VALUE, { heroAbilitiesLost: true, heroAbilityLossValue: LOCK_VALUE });
+  }
   if (new RegExp(
     "(?:they|that hero|cards they own|attacks they control) (?:can't|lose all|lose and can't)" +
       "|costs? an additional \\{r\\}|is halved",

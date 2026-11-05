@@ -296,12 +296,18 @@ describe("Jarl policy", () => {
       optionCards: [channel, crumble],
     };
     view.priorityPlayer = 0;
+    view.players[0].pitch = [{ instanceId: 80_003, cardId: "AJV020", owner: 0 }];
     const legal: GameIntent[] = [
       { kind: "choose", optionId: String(channel.instanceId) },
       { kind: "choose", optionId: String(crumble.instanceId) },
     ];
     expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
       .toEqual({ kind: "choose", optionId: String(channel.instanceId) });
+
+    // Without an Ice card in pitch the Lake would die this end phase.
+    view.players[0].pitch = [{ instanceId: 80_003, cardId: "ROS057", owner: 0 }];
+    expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "choose", optionId: String(crumble.instanceId) });
 
     view.players[1].heroName = "Dorinthea Ironsong";
     expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
@@ -342,6 +348,7 @@ describe("Jarl policy", () => {
     });
     const view = projectStateFor(state, 0);
     view.priorityPlayer = 0;
+    view.players[0].hand = [{ instanceId: 80_004, cardId: "AJV020", owner: 0 }];
     const chooseX = (options: readonly string[]) => {
       view.pendingDecision = {
         player: 0,
@@ -359,8 +366,69 @@ describe("Jarl policy", () => {
     // X = 1 would pay for nothing; fall back to Crumble.
     expect(chooseX(["X = 1", "X = 0"])).toEqual({ kind: "choose", optionId: "X = 0" });
 
+    // No Ice card to pitch: the Lake would die this end phase.
+    view.players[0].hand = [{ instanceId: 80_004, cardId: "ROS057", owner: 0 }];
+    expect(chooseX(["X = 0", "X = 1", "X = 2", "X = 3"])).toEqual({ kind: "choose", optionId: "X = 0" });
+    view.players[0].hand = [{ instanceId: 80_004, cardId: "AJV020", owner: 0 }];
+
     view.players[1].heroName = "Dorinthea Ironsong";
     expect(chooseX(["X = 2", "X = 1", "X = 0"])).toEqual({ kind: "choose", optionId: "X = 0" });
+  });
+
+  it("pitches an Ice card when paying Imposing Visage for Channel Lake Frigid", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 12_105,
+      startPlayer: 0,
+    });
+    const view = projectStateFor(state, 0);
+    const visage: CardView = { instanceId: 80_010, cardId: "EVR022", owner: 0 };
+    const fruits: CardView = { instanceId: 80_011, cardId: "ROS057", owner: 0 };
+    const fruits2: CardView = { instanceId: 80_012, cardId: "ROS057", owner: 0 };
+    const frozen: CardView = { instanceId: 80_013, cardId: "AJV020", owner: 0 };
+    view.players[0].hand = [visage, fruits, fruits2, frozen];
+    view.players[1].heroName = "Oscilio, Constella Intelligence";
+    view.priorityPlayer = 0;
+    const options = [
+      { optionId: "no-ice", pitchInstanceIds: [fruits.instanceId, fruits2.instanceId] },
+      { optionId: "ice", pitchInstanceIds: [fruits.instanceId, frozen.instanceId] },
+    ];
+    view.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Pay 5 resources",
+      options: options.map((option) => option.optionId),
+      resourcePayment: { cost: 5, options },
+      preStackSource: { card: visage, zone: "hand" },
+    };
+    const legal: GameIntent[] = options.map(({ optionId }) => ({ kind: "choose", optionId }));
+    expect(chooseJarlIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "choose", optionId: "ice" });
+  });
+
+  it("does not spend Imposing Visage on a Channel Lake Frigid that dies this end phase", () => {
+    const oscilio = oscilioDeck();
+    let state = createGame({
+      decklists: [jarlDeck(oscilio), oscilio],
+      cards: cardData,
+      scripts,
+      seed: 12_106,
+      startPlayer: 0,
+    });
+    replaceHand(state, ["ELE005", "ROS057", "ROS057", "EVR022"]);
+    for (let steps = 0; steps < 30 && state.turn === 1 && state.activePlayer === 0; steps += 1) {
+      const seat = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      const legal = legalIntents(state, 1);
+      const intent = seat === 0
+        ? chooseJarlIntent(inputFor(state))
+        : legal.find((candidate) => candidate.kind === "pass") ?? legal[0]!;
+      state = apply(state, intent, seat);
+    }
+    expect(state.activePlayer).toBe(1);
+    expect(state.players[0]!.graveyard.map((card) => card.cardId)).not.toContain("ELE146");
+    expect(state.players[0]!.board.map((card) => card.cardId)).toContain("AJV018");
   });
 
   describe("after the opening turn", () => {
@@ -386,6 +454,26 @@ describe("Jarl policy", () => {
         instanceId: conquer!.instanceId,
         pitchInstanceIds: [imposing!.instanceId],
       });
+    });
+
+    it("plays Channel Lake Frigid from hand only with an Ice card in pitch", () => {
+      const state = laterTurn(["ELE146", "ROS057", "AJV020", "SBR021"]);
+      const [lake, fruits, frozen] = state.players[0]!.hand as [CardView, CardView, CardView];
+      const play = (pitch: CardView): GameIntent => ({
+        kind: "play-card",
+        instanceId: lake.instanceId,
+        pitchInstanceIds: [pitch.instanceId],
+      });
+      const view = projectStateFor(state, 0);
+      view.players[1].heroName = "Oscilio, Forked Continuum";
+      const choose = (pitch: CardView) => chooseJarlIntent({
+        seat: 0,
+        view,
+        legal: [play(pitch), { kind: "pass" }],
+        cards: cardData,
+      });
+      expect(choose(fruits)).toEqual({ kind: "pass" });
+      expect(choose(frozen)).toEqual(play(frozen));
     });
 
     it("does not play Imposing Visage even when Channel Lake Frigid is affordable", () => {

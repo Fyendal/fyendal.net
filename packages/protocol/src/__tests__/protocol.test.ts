@@ -610,6 +610,14 @@ describe("GameView and server messages", () => {
     expect(decodeGameView(malformed)).toBeNull();
   });
 
+  it("accepts the lost hero abilities fact and rejects malformed values", () => {
+    const view = gameView();
+    Object.assign(view.players[0]!, { heroAbilitiesLost: true });
+    expect(decodeGameView(view)).not.toBeNull();
+    Object.assign(view.players[0]!, { heroAbilitiesLost: false });
+    expect(decodeGameView(view)).toBeNull();
+  });
+
   it("accepts defender defense entries without the optional phantasm flag", () => {
     const view = gameView();
     view.pendingDecision.defenderDefense = [{ instanceId: 1, defense: 3, attack: 5 }] as never;

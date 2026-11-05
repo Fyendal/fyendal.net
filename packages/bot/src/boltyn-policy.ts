@@ -116,6 +116,11 @@ function soulCount(input: BotPolicyInput): number {
   return me(input).soul.length;
 }
 
+/** Soul cards the hero ability can turn into go again. */
+function goAgainSoul(input: BotPolicyInput): number {
+  return me(input).heroAbilitiesLost ? 0 : soulCount(input);
+}
+
 function raydn(input: BotPolicyInput): CardView | undefined {
   return me(input).weapons.find((weapon) => key(input.cards[weapon.cardId]) === RAYDN);
 }
@@ -299,7 +304,7 @@ function goAgainExpected(
   if (key(data) === "bravery of the blade|1") {
     return charged(input) || chargeableAfter(intent, input, own).length > 0;
   }
-  return soulCount(input) > 0 && attackWillBePumped(data, card, intent, input, own);
+  return goAgainSoul(input) > 0 && attackWillBePumped(data, card, intent, input, own);
 }
 
 // Each damage per held card above a fair return weighs a block's lost offense more.
@@ -326,6 +331,7 @@ function scoreDefend(intent: DefendIntent, input: BotPolicyInput, own: ReadonlyM
   return scoreDefenseIntent(intent, input, own, {
     ...boltynResponse,
     cardOpportunity,
+    pricesHeroAbilityLoss: true,
     responseLossWeight: responseLossWeight(input),
     equipmentUseIsFree(card, observed) {
       // Solforge Gauntlet settles into the soul when the chain closes.
@@ -476,7 +482,7 @@ function scoreChargeOption(intent: ChooseIntent, input: BotPolicyInput): number 
     const sources = others.filter((held) => isAttack(input.cards[held.cardId])).length +
       me(input).arsenal.filter((held) => isAttack(input.cards[held.cardId])).length +
       (raydnAvailable(input) ? 1 : 0);
-    const fuel = soulCount(input) + 1 + boardCount(input, "quicken");
+    const fuel = (me(input).heroAbilitiesLost ? 0 : soulCount(input) + 1) + boardCount(input, "quicken");
     const attacksLeft = 1 + Math.max(0, Math.min(sources, fuel));
     gain += isLight(data) ? attacksLeft : 0;
     // The chain needs attacks to carry the pump.
@@ -701,7 +707,7 @@ function scoreRaydn(
   const further = attackSourcesAfter(intent, input, own) > 0;
   if (power === 0) return emptyRaydnSwing(input) ? -5 : 3;
   let score = power + (ongoingFrom(input, IRONSONG_VERSUS) ? 2 : 0);
-  if (further && (boardCount(input, "quicken") > 0 || soulCount(input) > 0)) score += 10;
+  if (further && (boardCount(input, "quicken") > 0 || goAgainSoul(input) > 0)) score += 10;
   // Set-up first: a charge, Lumina or Edict makes the swing bigger.
   if (!charged(input) && me(input).hand.some((held) => isChargeAttack(input.cards[held.cardId]))) score -= 4;
   // Every held Lumina resolves first; an instant one follows the swing instead.
@@ -766,11 +772,11 @@ function scoreAttackReaction(data: CardData, input: BotPolicyInput, own: Readonl
     // Uncharged it trades a soul card and the search for +1: hold it for a charged turn.
     if (!charged(input) && !lethal && !combo) return -100;
     return 8 + (charged(input) || combo ? 12 : 0) + (lethal ? 30 : 0) +
-      (canGainGoAgain(link) && further && soul >= 2 ? 4 : 0);
+      (canGainGoAgain(link) && further && goAgainSoul(input) >= 2 ? 4 : 0);
   }
   if (functional === ROARING_BEAM) return soul === 0 ? 14 : further ? 6 : 2;
   if (functional === COURAGEOUS_STEELHAND) {
-    return charged(input) ? 9 + (canGainGoAgain(link) && soul >= 1 && further ? 6 : 0) : -100;
+    return charged(input) ? 9 + (canGainGoAgain(link) && goAgainSoul(input) >= 1 && further ? 6 : 0) : -100;
   }
   return 4;
 }
@@ -841,7 +847,8 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     // Light charges pump V and feed the hero ability that extends it.
     const lights = chargeable.filter((held) => isLight(input.cards[held.cardId])).length;
     const pumped = lights > 0 || boardCount(input, "courage") > 0 || vBuffActive(input);
-    const goAgain = boardCount(input, "quicken") > 0 || (pumped && (soul >= 1 || lights > 0));
+    const goAgain = boardCount(input, "quicken") > 0 ||
+      (pumped && !player.heroAbilitiesLost && (soul >= 1 || lights > 0));
     score = 3 + Math.min(lights, 2) + (goAgain && further ? 14 : 0) +
       (chargeable.length >= 3 ? 10 + 3 * chargeable.length : 0);
   } else if (functional === LUMINA_ASCENSION && !ourTurn) {

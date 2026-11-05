@@ -1309,6 +1309,19 @@ describe("action confirmation", () => {
     expect(html).toContain("graveyard");
     expect(html).toContain("Evo Recall");
   });
+
+  it("warns when an Evo has no base to transform", () => {
+    const html = renderLocalized(createElement(ActionConfirmation, {
+      cardId: "TEST-CARD",
+      activation: false,
+      equipBlockedBy: null,
+      onConfirm: () => undefined,
+      onCancel: () => undefined,
+    }));
+
+    expect(html).toContain("no base equipment");
+    expect(html).toContain("graveyard");
+  });
 });
 
 describe("arsenal skip confirmation", () => {

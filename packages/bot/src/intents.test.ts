@@ -21,4 +21,12 @@ describe("advertised bot intents", () => {
       expect(isAdvertisedBotIntent({ kind: "stage-defenders", instanceIds: ids }, legal, [1])).toBe(false);
     }
   });
+
+  it("allows only permutations of the advertised trigger order", () => {
+    const legal = [{ kind: "order-triggers" as const, optionIds: ["1:0", "2:0", "3:0"] }];
+    expect(isAdvertisedBotIntent({ kind: "order-triggers", optionIds: ["3:0", "1:0", "2:0"] }, legal)).toBe(true);
+    for (const ids of [["1:0", "2:0"], ["1:0", "1:0", "2:0"], ["1:0", "2:0", "4:0"]]) {
+      expect(isAdvertisedBotIntent({ kind: "order-triggers", optionIds: ids }, legal)).toBe(false);
+    }
+  });
 });

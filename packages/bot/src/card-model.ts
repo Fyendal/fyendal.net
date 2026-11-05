@@ -300,7 +300,7 @@ export function buildHandSolver(context: ModelContext): HandSolver {
     if (nextTurn || (!weaponsProhibited && !weapon.usedAbilityIndexes?.includes(0))) add(weapon, "weapon");
   }
   for (const equipment of Object.values(me.equipment)) if (equipment) add(equipment, "equipment");
-  sources.push(...(rules.abilities?.(context, nextTurn) ?? []));
+  if (!me.heroAbilitiesLost) sources.push(...(rules.abilities?.(context, nextTurn) ?? []));
   return new HandSolver(sources, {
     startResources: (nextTurn ? 0 : me.resources) + (rules.startResources?.(input, nextTurn) ?? 0),
     startActionPoints: nextTurn ? 1 : me.actionPoints + (rules.startActionPoints?.(input, nextTurn) ?? 0),

@@ -65,12 +65,12 @@ function bloodrushTurn(draws: string[]) {
   return playAndResolve(state, play!);
 }
 
-function defending(state: ReturnType<typeof game>) {
+function defending(state: ReturnType<typeof game>, attackId = "WTR203") {
   state.activePlayer = 1;
   state.priorityPlayer = 1;
   state.players[0]!.actionPoints = 0;
   state.players[1]!.actionPoints = 1;
-  const attack = { instanceId: state.nextInstanceId++, cardId: "WTR203", owner: 1 };
+  const attack = { instanceId: state.nextInstanceId++, cardId: attackId, owner: 1 };
   state.players[1]!.hand = [attack];
   const play = legalIntents(state, 1).find((intent) => intent.kind === "play-card" && intent.instanceId === attack.instanceId)!;
   let applied = applyIntent(state, 1, play);
@@ -1627,6 +1627,84 @@ describe("Levia Gates policy", () => {
       const unknown = leviaEngineValue(input(state));
       expect(withList(filler)).toBe(unknown);
       expect(withList([...filler, "IAR228", "IAR228", "IAR228"])).toBeLessThan(unknown);
+    });
+  });
+
+  describe("hero ability locks", () => {
+    function humbled(state: ReturnType<typeof game>) {
+      state.modifiers.push({
+        scope: "until-end-of-turn", seat: 0, suppressesHeroAbilities: true, expiresAtEndOfSeatTurn: 0,
+        sourceInstanceId: state.players[1]!.hero.instanceId, createdTurn: state.turn - 1,
+      } as (typeof state.modifiers)[number]);
+      return state;
+    }
+
+    it("stops a Humble that would leave blood debt lethal once her armor is gone", () => {
+      const state = game();
+      hand(state, ["IAR212", "IAR020", "ROS218", "ROS218"]);
+      state.players[0]!.equipment = {};
+      state.players[0]!.arsenal = [];
+      // Any damage through leaves 7 life at or below 6 debt she can no longer suppress.
+      state.players[0]!.life = 7;
+      state.players[0]!.banish = cards(state, Array<string>(6).fill("MON126"));
+      state.players[1]!.resources = 2;
+      const attacked = defending(state, "OUT189");
+      const intent = chooseLeviaIntent({
+        seat: 0, view: projectStateFor(attacked, 0), legal: legalIntents(attacked, 0), cards: cardData, state: attacked,
+      });
+      const blocks = intent.kind === "defend" || intent.kind === "stage-defenders" ? intent.instanceIds : [];
+      const defense = attacked.players[0]!.hand
+        .filter((card) => blocks.includes(card.instanceId))
+        .reduce((total, card) => total + (cardData[card.cardId]?.defense ?? 0), 0);
+      expect(defense).toBeGreaterThanOrEqual(6);
+    });
+
+    it("counts a redeemed Levia's blood debt again while humbled", () => {
+      const state = game();
+      redeem(state);
+      state.players[0]!.banish = cards(state, ["MON126", "MON126"]);
+      const observed = () => ({
+        seat: 0 as const, view: projectStateFor(state, 0), legal: [], cards: cardData, state,
+      });
+      expect(leviaLifeRisk(observed(), observed())).toBe(0);
+      humbled(state);
+      expect(leviaLifeRisk(observed(), observed())).toBe(2);
+    });
+
+    it("loses the priced suppression when the hero ability is gone", () => {
+      const state = game();
+      state.players[0]!.banish = cards(state, Array<string>(5).fill("MON126"));
+      state.activePlayer = 1;
+      state.priorityPlayer = 1;
+      hand(state, ["IAR005", "IAR005", "MST236", "MST236"]);
+      const respond = () => handResponse([...state.players[0]!.hand], {
+        seat: 0, view: projectStateFor(state, 0), legal: [], cards: cardData, state,
+      }, leviaSolverRules).total;
+      const free = respond();
+      humbled(state);
+      expect(projectStateFor(state, 0).players[0].heroAbilitiesLost).toBe(true);
+      expect(respond()).toBeLessThan(free);
+    });
+
+    it("counts blood debt as exposed after a six is banished while humbled", () => {
+      const state = game();
+      state.players[0]!.banish = cards(state, Array<string>(4).fill("MON126"));
+      state.players[0]!.flags.banishedSixPlusThisTurn = true;
+      const observed = () => ({
+        seat: 0 as const, view: projectStateFor(state, 0), legal: [], cards: cardData, state,
+      });
+      expect(leviaLifeRisk(observed(), observed())).toBe(0);
+      humbled(state);
+      expect(leviaLifeRisk(observed(), observed())).toBe(4);
+    });
+
+    it("does not choose debt stabilization while humbled", () => {
+      const state = humbled(game());
+      state.players[0]!.life = 5;
+      state.players[0]!.banish = cards(state, ["MON126"]);
+      hand(state, ["ROS218", "MON140", "PEN322", "IAR214"]);
+      const input = { seat: 0 as const, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state };
+      expect(chooseLeviaIntentWithTrace(input).macro.goal).not.toBe("stabilize");
     });
   });
 });

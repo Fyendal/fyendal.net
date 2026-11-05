@@ -170,6 +170,7 @@ function chargeBonus(view: SolverView, targets: readonly SolverCard[]): number {
 
 interface AttackContext {
   readonly raydnId: number | undefined;
+  readonly heroAbilitiesLost: boolean;
 }
 
 /** Token consumption and the pumped flag the hero ability checks. */
@@ -209,7 +210,7 @@ function vCharges(view: SolverView, selfId: number, context: AttackContext): Sol
     const sources = remainingAttackSources(view, selfId, context) - chosenAttacks -
       (candidate.kind === "attack" ? 1 : 0);
     // Every link after V needs go again: a soul card, a charge, or a Quicken.
-    const goAgainFuel = soulLeft(view) + chosen.length + 1 + view.flag("quicken");
+    const goAgainFuel = (context.heroAbilitiesLost ? 0 : soulLeft(view) + chosen.length + 1) + view.flag("quicken");
     const attacksLeft = 1 + Math.max(0, Math.min(sources, goAgainFuel));
     if (attacksLeft > solverChargeCost(candidate)) chosen.push(candidate);
   }
@@ -220,7 +221,7 @@ function vCharges(view: SolverView, selfId: number, context: AttackContext): Sol
 export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
   const me = input.view.players[input.seat];
   const raydn = me.weapons.find((weapon) => key(input.cards[weapon.cardId]) === RAYDN);
-  const context: AttackContext = { raydnId: raydn?.instanceId };
+  const context: AttackContext = { raydnId: raydn?.instanceId, heroAbilitiesLost: me.heroAbilitiesLost === true };
   const spiritInArena = boardCount(input, "spirit of eirina") > 0;
   const facts = input.view.turnFacts?.players[input.seat];
   const ourTurn = input.view.activePlayer === input.seat;

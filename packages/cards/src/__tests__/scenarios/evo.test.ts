@@ -84,7 +84,7 @@ describe("EVO — registration and core mechanics", () => {
     expect(evo.subcards![0]!.cardId).toBe(printingId("teklo base head|0"));
   });
 
-  it("an Evo played into a Frostbite's zone equips because playing it destroys the Frostbite first", () => {
+  it("an Evo played into a Frostbite's zone has no base once playing it destroys the Frostbite", () => {
     const s = scenario({
       active: 1,
       seats: [
@@ -108,8 +108,9 @@ describe("EVO — registration and core mechanics", () => {
     s.play("colors of aria|1").chooseOption("arms").blockWith().settle();
     s.endTurn();
 
-    s.play("evo smoothbore|2", { pitch: [BLUE, BLUE] }).expectEquipped(0, "arms", "evo smoothbore|2");
+    s.play("evo smoothbore|2", { pitch: [BLUE, BLUE] }).expectInZone(0, "evo smoothbore|2", "graveyard");
     expect(s.state.players[0]!.board).toEqual([]);
+    expect(s.state.players[0]!.equipment.arms).toBeFalsy();
   });
 
   it("an Evo goes to the graveyard when a Frostbite enters its zone in response", () => {
@@ -530,7 +531,7 @@ describe("EVO — registration and core mechanics", () => {
       .expectInZone(0, "evo steel soul tower|3", "graveyard");
   });
 
-  it("an Evo played with no base equips to its empty zone without transforming", () => {
+  it("an Evo played with no base fails to equip and goes to the graveyard", () => {
     const s = scenario({
       seats: [
         {
@@ -543,8 +544,8 @@ describe("EVO — registration and core mechanics", () => {
       ],
     });
     s.play("evo sentry base head|1", { pitch: [BLUE] })
-      .expectEquipped(0, "head", "evo sentry base head|1");
-    expect(s.state.players[0]!.equipment.head!.subcards ?? []).toHaveLength(0);
+      .expectInZone(0, "evo sentry base head|1", "graveyard");
+    expect(s.state.players[0]!.equipment.head).toBeFalsy();
   });
 
   it("offers a banished Evo Beta Base Legs after Teklovossen resolves before defense", () => {

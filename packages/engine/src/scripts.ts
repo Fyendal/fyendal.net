@@ -1151,10 +1151,11 @@ export interface CardScript {
   /** Hero: 2H weapons with this subtype are equipped as though they were 1H. */
   equipsTwoHandedAsOneHanded?: string;
   /** This equipment is a deck-playable action object (Evo, CR 8.3.26). On
-   * resolution it equips to its empty zone or transforms the occupant. */
+   * resolution it transforms the occupant if `transformsEquipment` is set,
+   * otherwise it equips to its empty zone. */
   playableEquipment?: boolean;
   /** Whether resolving playable equipment transforms `equipped` and retains it
-   * underneath; otherwise equipping into the occupied zone fails. */
+   * underneath; otherwise, or with no occupant, equipping fails. */
   transformsEquipment?(ctx: ScriptCtx, equipped: DeepReadonly<CardInstance>): boolean;
   /** A live source may grant matching friendly cards permission to be played
    * from an otherwise inaccessible zone. */

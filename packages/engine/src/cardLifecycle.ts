@@ -419,9 +419,10 @@ export function settlePlayedCard(
       (data.subtypes ?? []).includes(candidate),
     );
     const base = slot ? player.equipment[slot] : undefined;
-    // CR 8.5.41c: equipping fails unless the zone is empty or it transforms the occupant.
-    const canEquip = base
-      ? script.transformsEquipment?.(runtime.makeCtx(state, player.seat, card), base)
+    // CR 1.8.4: an Evo's "if you have a base, transform, then equip" conditions both effects.
+    // CR 8.5.41c: other playable equipment needs an empty zone.
+    const canEquip = script.transformsEquipment
+      ? base && script.transformsEquipment(runtime.makeCtx(state, player.seat, card), base)
       : slot && equipmentZoneEmpty(player, slot);
     if (!slot || !canEquip) {
       runtime.commands.moveToGraveyard(state, card, "stack");

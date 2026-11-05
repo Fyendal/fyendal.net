@@ -719,6 +719,22 @@ describe("Blood Debt and Rune Gate", () => {
     levia.endTurn().expectLife(0, cardData[printingId("levia, shadowborn abomination|0")]!.life!);
   });
 
+  it.each([
+    ["levia, shadowborn abomination|0"],
+    ["levia, redeemed|0"],
+  ])("Humble restores Blood Debt on %s through her next end phase", (heroKey) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["humble|1", "sigil of solace|3"] },
+        { hero: "rhinar", heroKey, banish: ["shadow of blasmophet|1"] },
+      ],
+    });
+    const life = cardData[printingId(heroKey)]!.life!;
+    g.play("humble|1", { pitch: ["sigil of solace|3"] }).blockWith().settle().endTurn();
+    g.state.players[1]!.flags.banishedSixPlusThisTurn = true;
+    g.endTurn().expectLife(1, life - 6 - 1);
+  });
+
   it("Levia, Redeemed removes Blood Debt without a six-power banish", () => {
     const g = scenario({
       seats: [

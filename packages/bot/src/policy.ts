@@ -28,7 +28,7 @@ import {
   type LifeThreshold,
   type ValueBreakdown,
 } from "./value.js";
-import { chooseUpkeepPayment, strandsLethalUpkeep } from "./upkeep.js";
+import { chooseUpkeepPayment, lethalUpkeepReserve, strandsLethalUpkeep } from "./upkeep.js";
 import { BLOCK_USE_RATE } from "./card-ev.js";
 
 export interface BotPolicyInput {
@@ -583,11 +583,34 @@ export function scoreBinaryChoice(
   return undefined;
 }
 
+const INERTIA_TRIGGER = "card.trigger.common.inertia.destroy";
+const DRAW_TRIGGER = /(^|\.)draw(\.|$)/;
+
+/** Draws resolve after Inertia or it bottoms them, leaving a card to arsenal.
+ * Other triggers go first to spend the doomed hand, unless only the drawn cards
+ * can pay a lethal upkeep. */
+function inertiaTriggerOrderIntent(input: BotPolicyInput): GameIntent | undefined {
+  const decision = input.view.pendingDecision;
+  if (decision?.kind !== "order-triggers") return undefined;
+  const ids = decision.options ?? [];
+  const messages = decision.optionMessages ?? [];
+  if (!messages.some((message) => message?.id === INERTIA_TRIGGER)) return undefined;
+  const otherRank = input.view.players[input.seat].hand.length === 0 && lethalUpkeepReserve(input) > 0 ? 3 : 0;
+  const rank = (index: number): number => {
+    const id = messages[index]?.id ?? "";
+    return id === INERTIA_TRIGGER ? 1 : DRAW_TRIGGER.test(id) ? 2 : otherRank;
+  };
+  const order = ids.map((_, index) => index).sort((left, right) => rank(left) - rank(right) || left - right);
+  return { kind: "order-triggers", optionIds: order.map((index) => ids[index]!) };
+}
+
 /** Resolve cross-hero invariants before strategy-specific scoring. Shared
- * policy may only return an intent already exposed by the engine. */
+ * policy may only return an intent the engine exposes, or a reordered trigger list. */
 export function chooseSharedPolicyIntent(input: BotPolicyInput): GameIntent | undefined {
   const decision = input.view.pendingDecision;
   if (!decision) return undefined;
+  const triggerOrder = inertiaTriggerOrderIntent(input);
+  if (triggerOrder) return triggerOrder;
   const upkeep = chooseUpkeepPayment(input);
   if (upkeep) return upkeep;
   const unneededBoost = unneededDefenseBoostIntent(input);
@@ -1221,6 +1244,11 @@ export interface HeroCycleModel extends ResponseModel {
    * to refresh it or consume it offensively on the following turn. */
   equipmentUseIsFree?(card: CardView, input: BotPolicyInput): boolean;
   lifeThresholds?: readonly LifeThreshold[];
+  /** The response model reads `heroAbilitiesLost`, so a landed lock is priced
+   * by the projection rather than the flat on-hit estimate. */
+  pricesHeroAbilityLoss?: boolean;
+  /** Life the next end phase drains while the hero has no abilities. */
+  endPhaseDrainWithoutHeroAbilities?(input: BotPolicyInput): number;
   responseLossWeight?: number;
   defensePermission?(candidate: DefenseCandidateContext): DefensePermission;
   adjustCycleValue?(
@@ -1341,6 +1369,15 @@ function blendResponse(
     strategicAdjustment: stop.strategicAdjustment * stopProbability
       + continued.strategicAdjustment * continuing,
   });
+}
+
+/** The same decision with this bot's hero stripped of its abilities. */
+function withoutHeroAbilities(input: BotPolicyInput): BotPolicyInput {
+  const lost = { ...input.view.players[input.seat], heroAbilitiesLost: true as const };
+  const players: GameView["players"] = input.seat === 0
+    ? [lost, input.view.players[1]]
+    : [input.view.players[0], lost];
+  return { ...input, view: { ...input.view, players } };
 }
 
 function projectedResponseInput(
@@ -1473,9 +1510,10 @@ interface HandLossScenario {
 const NO_HAND_LOSS: readonly HandLossScenario[] = [{ lostIds: new Set(), weight: 1 }];
 /** Bounds the hand subsets examined for one landed on-hit hand loss. */
 const MAX_HAND_LOSS_SUBSETS = 35;
-/** A block that survives now but strands a lethal end-phase upkeep beats dying
- * now and loses to every block that survives both. */
-const STRANDED_UPKEEP_PENALTY = 50_000;
+/** A block that survives now but strands a lethal end phase (upkeep, or blood
+ * debt under a hero lock) beats dying now and loses to every block that
+ * survives both. */
+const STRANDED_END_PHASE_PENALTY = 50_000;
 
 function combinations<T>(items: readonly T[], size: number, limit: number): T[][] {
   const result: T[][] = [];
@@ -1666,8 +1704,9 @@ export function scoreDefenseIntentWithTrace(
   // A landed hand loss is priced through the response projection below, so
   // stopping the hit no longer earns its flat generic-card estimate.
   const modelledHandLoss = onHit.handLossSelector ? onHit.handLossValue : 0;
+  const modelledHeroLoss = model.pricesHeroAbilityLoss ? onHit.heroAbilityLossValue : 0;
   const stopHitValue = stopsHit
-    ? onHit.value - modelledHandLoss + (link.wagered ? wagerDefenseSwing(link.wagerRewards) : 0)
+    ? onHit.value - modelledHandLoss - modelledHeroLoss + (link.wagered ? wagerDefenseSwing(link.wagerRewards) : 0)
     : 0;
   const equipmentIds = new Set(
     Object.values(me.equipment).filter((card): card is CardView => !!card).map((card) => card.instanceId),
@@ -1681,9 +1720,9 @@ export function scoreDefenseIntentWithTrace(
       : [],
   );
   const plannedSpentIds = new Set([...spentIds, ...plannedPrevention.consumedIds]);
-  const survives = destroysAttack
-    ? survivableLife > 0
-    : Math.max(0, threatenedCombat - defense - plannedPrevention.amount) < survivableLife;
+  // Planned against public pumps, so a pumped hit still counts as landing.
+  const damageThroughBlock = destroysAttack ? 0 : Math.max(0, threatenedCombat - defense - plannedPrevention.amount);
+  const survives = destroysAttack ? survivableLife > 0 : damageThroughBlock < survivableLife;
   const removesDefenderOnHit = !stopsHit && incoming > 0 && onHitRemovesDefender(link, attackText);
   const candidate: DefenseCandidateContext = {
     input,
@@ -1799,6 +1838,8 @@ export function scoreDefenseIntentWithTrace(
     overblock - chosenHandDefense.slice(0, doomedBlockers).reduce((total, value) => total + value, 0),
   );
   const fullResponse = model.evaluateResponse(offensiveCards, input);
+  const heroLocked = onHit.heroAbilitiesLost && damageThroughBlock > 0;
+  const landedInput = heroLocked ? withoutHeroAbilities(responseInput) : responseInput;
   const lossScenarios = stopsHit || incoming <= 0
     ? NO_HAND_LOSS
     : handLossScenarios(input, model, onHit, offensiveCards, plannedSpentIds, responseInput);
@@ -1812,7 +1853,7 @@ export function scoreDefenseIntentWithTrace(
       fullResponse,
       model.evaluateResponse(
         offensiveCards.filter((card) => !consumedIds.has(card.instanceId)),
-        responseInput,
+        landedInput,
       ),
       responseWeight,
     ),
@@ -1833,7 +1874,7 @@ export function scoreDefenseIntentWithTrace(
     ? averageContinuation(scenarioConsumed.map(({ consumedIds, weight }) => ({
       continuation: bestContinuationResponse(
         input,
-        responseInput,
+        landedInput,
         model,
         fullResponse,
         offensiveCards,
@@ -1856,7 +1897,8 @@ export function scoreDefenseIntentWithTrace(
   );
   const unprevented = destroysAttack ? 0 : Math.max(0, incoming - defense - plannedPrevention.amount);
   const lifeAfterDamage = me.life - unprevented;
-  const strandsUpkeep = strandsLethalUpkeep(input, plannedSpentIds, lifeAfterDamage);
+  const strandsEndPhase = strandsLethalUpkeep(input, plannedSpentIds, lifeAfterDamage) || (heroLocked &&
+    me.life - damageThroughBlock <= (model.endPhaseDrainWithoutHeroAbilities?.(landedInput) ?? 0));
   const thresholdRisk = lifeThresholdRisk(lifeAfterDamage, model.lifeThresholds);
   const continueProbability = 1 - stopProbability;
   let value = valueBreakdown({
@@ -1930,7 +1972,7 @@ export function scoreDefenseIntentWithTrace(
     }
     // Staying alive is mandatory; among surviving plans the full value still
     // prices the life kept against the offense held.
-    const score = 100_000 + value.total - (strandsUpkeep ? STRANDED_UPKEEP_PENALTY : 0);
+    const score = 100_000 + value.total - (strandsEndPhase ? STRANDED_END_PHASE_PENALTY : 0);
     return { score, value, eligible: true, lethal, survives, stopsHit, ...cycleTrace };
   }
 
@@ -1948,7 +1990,7 @@ export function scoreDefenseIntentWithTrace(
 
   const requiredBonus = permission === "require" ? 100_000 : 0;
   return {
-    score: value.total + requiredBonus - (strandsUpkeep ? STRANDED_UPKEEP_PENALTY : 0),
+    score: value.total + requiredBonus - (strandsEndPhase ? STRANDED_END_PHASE_PENALTY : 0),
     value,
     eligible: true,
     lethal,

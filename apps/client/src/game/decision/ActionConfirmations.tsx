@@ -26,17 +26,17 @@ export function orderedBoostOptions(options: readonly number[]): number[] {
   });
 }
 
-function EquipFailWarning({ cardId, blockerId }: { cardId: string | undefined; blockerId: string }) {
+function EquipFailWarning({ cardId, blockerId }: { cardId: string | undefined; blockerId: string | null }) {
   const intl = useIntl();
+  const card = cardId ? <CardRef id={cardId} /> : intl.formatMessage({ id: "game.card" });
   return (
     <span className="decision-context decision-warning">
-      {intl.formatMessage(
-        { id: "game.decision.equipFails.warning" },
-        {
-          card: cardId ? <CardRef id={cardId} /> : intl.formatMessage({ id: "game.card" }),
-          equipped: <CardRef id={blockerId} />,
-        },
-      )}
+      {blockerId === null
+        ? intl.formatMessage({ id: "game.decision.equipFails.noBase.warning" }, { card })
+        : intl.formatMessage(
+            { id: "game.decision.equipFails.warning" },
+            { card, equipped: <CardRef id={blockerId} /> },
+          )}
     </span>
   );
 }
@@ -48,7 +48,7 @@ export function ChainCloseConfirmation({
   onCancel,
 }: {
   cardId: string | undefined;
-  equipBlockedBy?: string;
+  equipBlockedBy?: string | null;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -62,7 +62,7 @@ export function ChainCloseConfirmation({
           { card: cardId ? <CardRef id={cardId} /> : intl.formatMessage({ id: "game.card.nonAttack" }) },
         )}
       </span>
-      {equipBlockedBy ? <EquipFailWarning cardId={cardId} blockerId={equipBlockedBy} /> : null}
+      {equipBlockedBy !== undefined ? <EquipFailWarning cardId={cardId} blockerId={equipBlockedBy} /> : null}
       <ChoiceList
         options={[{
           key: "close-chain",
@@ -85,7 +85,7 @@ export function ActionConfirmation({
 }: {
   cardId: string | undefined;
   activation: boolean;
-  equipBlockedBy?: string;
+  equipBlockedBy?: string | null;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -104,7 +104,7 @@ export function ActionConfirmation({
           },
         )}
       </span>
-      {equipBlockedBy ? <EquipFailWarning cardId={cardId} blockerId={equipBlockedBy} /> : null}
+      {equipBlockedBy !== undefined ? <EquipFailWarning cardId={cardId} blockerId={equipBlockedBy} /> : null}
       <ChoiceList
         options={[{ key: "confirm", label: verb, spaceDefault: true, onChoose: onConfirm }]}
       />

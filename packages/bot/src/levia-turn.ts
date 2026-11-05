@@ -7,6 +7,12 @@ export function leviaEffectActive(input: BotPolicyInput, name: string): boolean 
   );
 }
 
+/** Whether Levia's hero text currently removes blood debt this end phase. */
+export function leviaDebtSuppressed(input: BotPolicyInput, seat: number = input.seat): boolean {
+  return !input.view.players[seat]!.heroAbilitiesLost &&
+    input.view.turnFacts?.players[seat]?.banishedSixPlusThisTurn === true;
+}
+
 export function leviaAttackPlayable(card: CardView, input: BotPolicyInput): boolean {
   const data = input.cards[card.cardId];
   if (!isAttack(data)) return false;
@@ -190,10 +196,11 @@ function controls(input: BotPolicyInput, name: string): number {
   return input.view.players[input.seat].board.filter((card) => input.cards[card.cardId]?.name === name).length;
 }
 
-/** Levia, Redeemed's cards lose blood debt. */
+/** Levia, Redeemed's cards lose blood debt while she has her abilities. */
 function carriesBloodDebt(card: CardView, input: BotPolicyInput): boolean {
+  const me = input.view.players[input.seat];
   return !card.faceDown && input.cards[card.cardId]?.keywords?.includes("Blood Debt") === true &&
-    input.cards[input.view.players[input.seat].heroCardId]?.name !== "Levia, Redeemed";
+    (me.heroAbilitiesLost === true || input.cards[me.heroCardId]?.name !== "Levia, Redeemed");
 }
 
 export function leviaBloodDebt(cards: readonly CardView[], input: BotPolicyInput): number {
