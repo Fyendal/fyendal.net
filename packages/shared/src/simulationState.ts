@@ -406,6 +406,13 @@ export type PersistedDecisionResumeV1 =
   | { kind: "reopen-reaction"; seat: number }
   | { kind: "game-setup"; nextSeat: number };
 
+export interface PersistedTokenCreationCauseV1 {
+  kind: "effect" | "wager";
+  sourceCardId?: string;
+  creatorSeat?: number;
+  ownerSeat?: number;
+}
+
 export interface PersistedPendingDecisionV1 {
   player: number;
   kind: "defend" | "attack-reaction" | "defense-reaction" | "priority-window" | "arsenal" | "choose-target" | "choose-name" | "order-triggers" | "optional-effect";
@@ -426,7 +433,7 @@ export interface PersistedPendingDecisionV1 {
   scriptSourceSnapshot?: { seat: number; card: PersistedCardInstanceV1 };
   chooseHook?: string;
   followUpDecisions?: PersistedPendingDecisionV1[];
-  tokenCreationCause?: { kind: "effect" | "wager"; sourceCardId?: string };
+  tokenCreationCause?: PersistedTokenCreationCauseV1;
   cardOptions?: (number | string | null)[];
   revealedCardIds?: number[];
   lookedCardIds?: number[];
@@ -465,7 +472,7 @@ export interface PersistedPendingDecisionV1 {
     seat: number;
     cardId: string;
     count: number;
-    cause: { kind: "effect" | "wager"; sourceCardId?: string };
+    cause: PersistedTokenCreationCauseV1;
     initialCounters?: CardCounters;
     initialState?: Record<string, number>;
     remainingReplacements: { instanceId: number; kind: "global" | "friendly" | "optional-friendly" }[];
@@ -475,7 +482,7 @@ export interface PersistedPendingDecisionV1 {
     seat: number;
     cardId: string;
     count: number;
-    cause: { kind: "effect" | "wager"; sourceCardId?: string };
+    cause: PersistedTokenCreationCauseV1;
     initialCounters?: CardCounters;
     initialState?: Record<string, number>;
     remainingReplacements: { instanceId: number; kind: "global" | "friendly" | "optional-friendly" }[];
@@ -576,7 +583,7 @@ export interface PersistedGameStateV1 {
     seat: number;
     cardId: string;
     count: number;
-    cause: { kind: "effect" | "wager"; sourceCardId?: string };
+    cause: PersistedTokenCreationCauseV1;
     initialCounters?: CardCounters;
     initialState?: Record<string, number>;
   }[];

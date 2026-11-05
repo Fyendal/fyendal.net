@@ -1392,6 +1392,21 @@ describe("SEA — pirate and generic attacks", () => {
 });
 
 describe("SEA — rules regression coverage", () => {
+  it("Midas Touch gives Gold to the ally's controller, not its owner", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["midas touch|2"], resources: 1 },
+        { hero: "dorinthea", board: ["barnacle|2"] },
+      ],
+    });
+    g.state.players[1]!.board[0]!.owner = 0;
+
+    g.play("midas touch|2", { targetPermanent: "barnacle|2" });
+
+    expect(countOnBoard(g, 0, "gold|0")).toBe(0);
+    expect(countOnBoard(g, 1, "gold|0")).toBe(2);
+  });
+
   const barbedBarrage = (opts: { resources?: number; hand?: string[]; board?: string[] } = {}) =>
     scenario({
       seats: [

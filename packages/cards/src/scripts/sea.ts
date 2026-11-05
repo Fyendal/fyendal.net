@@ -2564,12 +2564,13 @@ Object.assign(sea, {
         player.board.filter((card) => isAlly(ctx, card)).map((card) => card.instanceId),
       ),
     onPlay(ctx: ScriptCtx) {
-      const target = ctx.state.players
-        .flatMap((player) => player.board)
-        .find((card) => card.instanceId === ctx.playTargetInstanceId);
-      if (!target) return;
+      const controller = ctx.state.players.find((player) =>
+        player.board.some((card) => card.instanceId === ctx.playTargetInstanceId),
+      );
+      const target = controller?.board.find((card) => card.instanceId === ctx.playTargetInstanceId);
+      if (!controller || !target) return;
       const cost = data(ctx, target).cost ?? 0;
-      if (ctx.destroyPermanent(target.instanceId)) ctx.heroCreatesTokens(target.owner, GOLD, cost);
+      if (ctx.destroyPermanent(target.instanceId)) ctx.heroCreatesTokens(controller.seat, GOLD, cost);
     },
   },
   "amethyst amulet|3": seaAmulet((ctx) => buffNextAttack(ctx, { attack: 2 }), "instant"),

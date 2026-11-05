@@ -2289,6 +2289,14 @@ export function makeCtx(
         { ...creationCause, creatorSeat: heroSeat },
       );
     },
+    createOwnedTokenUnder(controllerSeat, cardId) {
+      return runtime.commands.createTokenFor(
+        state,
+        state.players[controllerSeat] as PlayerState,
+        cardId,
+        { ...creationCause, ownerSeat: seat },
+      );
+    },
     createCardInHand(cardId, targetSeat) {
       const target =
         targetSeat === undefined ? player : (state.players[targetSeat] as PlayerState);

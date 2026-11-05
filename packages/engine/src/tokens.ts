@@ -22,13 +22,14 @@ function createTokenRaw(
   runtime: EngineRuntime,
   player: PlayerState,
   cardId: string,
+  ownerSeat: number,
   initialCounters?: Readonly<CardCounters>,
   initialState?: Readonly<Record<string, number>>,
 ): CardInstance {
   const token: CardInstance = {
     instanceId: state.nextInstanceId++,
     cardId,
-    owner: player.seat,
+    owner: ownerSeat,
     ...(initialCounters && Object.keys(initialCounters).length > 0
       ? { counters: { ...initialCounters } }
       : {}),
@@ -126,7 +127,7 @@ function createTokenBatchRaw(
   const allowedCount = unique ? (alreadyControlled ? 0 : Math.min(1, count)) : count;
   const tokens = Array.from(
     { length: allowedCount },
-    () => createTokenRaw(state, runtime, player, cardId, initialCounters, initialState),
+    () => createTokenRaw(state, runtime, player, cardId, cause.ownerSeat ?? player.seat, initialCounters, initialState),
   );
   if (tokens.length === 0) return tokens;
   if (cause.creatorSeat !== undefined && cause.creatorSeat !== player.seat) {

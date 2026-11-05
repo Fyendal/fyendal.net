@@ -479,6 +479,8 @@ export interface ScriptCtx {
   /** "<Hero> creates": that hero is the creator (CR 8.5.2c), unlike the
    * effect's controller creating under their control with `createTokens`. */
   heroCreatesTokens(seat: number, cardId: string, count?: number): DeepReadonly<CardInstance>[];
+  /** Create under `seat`'s control while this effect's controller owns the token. */
+  createOwnedTokenUnder(seat: number, cardId: string): DeepReadonly<CardInstance> | undefined;
   /** Create a new card object directly in a player's hand. The created card's
    * identity is public because the generating effect names it. */
   createCardInHand(cardId: string, seat?: number): DeepReadonly<CardInstance>;

@@ -37,6 +37,7 @@ import type { CardInstance, PlayerState, StackLayer, StackResume } from "./state
 import { currentLink, findCardAnywhere, findPermanent, opponent, removeFromArray } from "./zoneQueries.js";
 import { destroyPermanent, moveToGraveyard } from "./zoneMoves.js";
 import { createTokensFor } from "./tokens.js";
+import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 
 import {
   applyOneShotDefenseModifiers,
@@ -854,10 +855,13 @@ export function announceCardPlayed(
         const token = modifier.onAttackActionPlayedFromBanishCreateToken;
         if (!token || modifier.consumed || modifier.seat !== seat) continue;
         modifier.consumed = true;
-        createTokensFor(state, runtime, player, token.cardId, token.count, {
-          kind: "effect",
-          creatorSeat: modifier.creatorSeat ?? modifier.seat,
-        });
+        createTokensFor(
+          state, runtime,
+          player,
+          token.cardId,
+          token.count,
+          tokenCreationCauseForModifier(state, modifier),
+        );
       }
     }
     if (

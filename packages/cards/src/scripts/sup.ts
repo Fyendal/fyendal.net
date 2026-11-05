@@ -2210,8 +2210,7 @@ Object.assign(sup, {
           decisionPrompt("Choose a card to put on top", "card.sup.card.top.choose"),
           deck.map((card) => card.instanceId),
         );
-      const bait = ctx.createToken("SUP259");
-      if (bait) ctx.giveControl(bait.instanceId, opponentSeat(ctx));
+      ctx.createOwnedTokenUnder(opponentSeat(ctx), "SUP259");
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook !== "bait-top") return;

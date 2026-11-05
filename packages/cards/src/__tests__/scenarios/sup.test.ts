@@ -715,6 +715,24 @@ describe("SUP — heroes and the crowd", () => {
     expect(g.state.pendingDecision).toMatchObject({ kind: "attack-reaction", player: 0 });
   });
 
+  it("Self-determination stops Take the Bait's token", () => {
+    const g = scenario({
+      seats: [
+        hero("tuffnut|0", { hand: ["take the bait|1"], deck: ["head jab|2"] }),
+        foe({ hand: ["self-determination|3"] }),
+      ],
+    });
+
+    g.play("take the bait|1", { settle: false })
+      .passPriority()
+      .activate("self-determination|3")
+      .settle()
+      .chooseCard("head jab|2");
+
+    expect(g.state.players[0]!.board).toEqual([]);
+    expect(g.state.players[1]!.board).toEqual([]);
+  });
+
   it("Bait stops its controller playing cards they own but leaves its own abilities usable", () => {
     const g = scenario({
       seats: [

@@ -3039,6 +3039,26 @@ describe("September 3 IAR spoilers", () => {
     expect(boardNames(g, 0).filter((name) => name === "Runechant")).toHaveLength(2);
   });
 
+  it("Ripple Away reduces Promise of Power's Runechants", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["promise of power|2", "ripple away|3"],
+        banish: ["rift bind|1"],
+        board: ["blasmophet, the insatiable hunger|0"],
+        resources: 2,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("ripple away|3")
+      .play("promise of power|2")
+      .play("rift bind|1", { fromZone: "banish" });
+
+    expect(boardNames(g, 0).filter((name) => name === "Runechant")).toHaveLength(1);
+  });
+
   it("Enshrine Sin charges its extra banish cost, opts, and creates a Runechant", () => {
     const g = scenario({ seats: [
       {

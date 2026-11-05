@@ -471,7 +471,7 @@ describe("PersistedStateV1", () => {
       seat: 0,
       cardId: "HVY241",
       count: 1,
-      cause: { kind: "effect", sourceCardId: "HVY176" },
+      cause: { kind: "effect", sourceCardId: "HVY176", creatorSeat: 1, ownerSeat: 1 },
     }];
 
     const encoded = encodePersistedState(source);

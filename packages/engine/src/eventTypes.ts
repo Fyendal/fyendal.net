@@ -95,4 +95,6 @@ export interface TokenCreationContext {
   readonly sourceCardId?: string;
   /** Seat whose effect creates the tokens, when they may land under another hero. */
   readonly creatorSeat?: number;
+  /** Owner when it isn't the hero the tokens land under. */
+  readonly ownerSeat?: number;
 }
