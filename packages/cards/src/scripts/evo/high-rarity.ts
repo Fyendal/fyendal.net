@@ -1088,8 +1088,8 @@ export const evoHighRarity: Record<string, CardScript> = {
   "intoxicating shot|3": {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
-      ctx.createToken("DTD232", opponentSeat(ctx));
-      ctx.createToken(QUICKEN, opponentSeat(ctx));
+      ctx.heroCreatesTokens(opponentSeat(ctx), "DTD232");
+      ctx.heroCreatesTokens(opponentSeat(ctx), QUICKEN);
     },
   },
   "sonata fantasmia|3": {

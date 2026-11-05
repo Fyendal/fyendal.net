@@ -75,7 +75,12 @@ function continueWagerPrizes(state: GameStateInternal,
     const cardId = wager.rewardCardIds[cursor]!;
     cursor++;
     link.flags[`wagerRewardCursor:${wagerIndex}`] = cursor;
-    createTokenFor(state, runtime, winningPlayer, cardId, { kind: "wager", sourceCardId: source.cardId });
+    // CR 8.5.46b: the winner creates the prize, whoever controls the wager.
+    createTokenFor(state, runtime, winningPlayer, cardId, {
+      kind: "wager",
+      sourceCardId: source.cardId,
+      creatorSeat: winner,
+    });
     if (state.pendingDecision?.chooseHook) {
       state.pendingDecision.resume = { kind: "continue-wager-prizes", wagerIndex };
       return;

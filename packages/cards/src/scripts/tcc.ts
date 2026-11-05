@@ -94,7 +94,7 @@ function destroyForEveryone(kind: "draw" | "might" | "quicken" | "vigor"): CardS
       onActivate(ctx) {
         for (const player of ctx.state.players) {
           if (kind === "draw") ctx.drawCards(player.seat, 1);
-          else ctx.createToken(kind === "might" ? MIGHT : kind === "quicken" ? QUICKEN : VIGOR, player.seat);
+          else ctx.heroCreatesTokens(player.seat, kind === "might" ? MIGHT : kind === "quicken" ? QUICKEN : VIGOR);
         }
       },
     },
@@ -223,7 +223,7 @@ export const tcc: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "jinglewood-token") return;
       const token = option === "Might" ? MIGHT : option === "Quicken" ? QUICKEN : VIGOR;
-      ctx.createToken(token, opponentSeat(ctx));
+      ctx.heroCreatesTokens(opponentSeat(ctx), token);
       ctx.createToken(COPPER);
     },
   },

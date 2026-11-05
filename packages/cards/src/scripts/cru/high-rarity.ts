@@ -436,7 +436,7 @@ const coaxACommotion: CardScript = {
     const draw = option === "all" || option.includes("draw");
     const life = option === "all" || option.includes("life");
     for (const player of ctx.state.players) {
-      if (quicken) ctx.createToken(QUICKEN, player.seat);
+      if (quicken) ctx.heroCreatesTokens(player.seat, QUICKEN);
       if (draw) ctx.drawCards(player.seat, 1);
       if (life) ctx.gainLife(player.seat, 1);
     }

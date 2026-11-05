@@ -931,7 +931,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
         ctx.revealCards([Number(option)], opponentSeat(ctx)) &&
         ctx.putOnDeckBottom(Number(option))
       )
-        ctx.createToken(PONDER, opponentSeat(ctx));
+        ctx.heroCreatesTokens(opponentSeat(ctx), PONDER);
     },
   },
   "censor|1": {

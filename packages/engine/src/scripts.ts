@@ -451,8 +451,8 @@ export interface ScriptCtx {
   preventAuraTokenCreationNextTurn(targetSeat: number): void;
   /** Create a token/aura; returns the created instance, or undefined when a
    *  replacement effect prevents its creation. Defaults to the
-   *  controller's board — pass `seat` to create it for another player
-   *  (e.g. Test of Strength's clash winner). `initialCounters` and
+   *  controller's board — pass `seat` for "create under that hero's control"
+   *  (`heroCreatesTokens` when the hero is the creator). `initialCounters` and
    *  `initialState` are present as the token enters, before Crank and
    *  enter-arena observers. */
   createToken(
@@ -476,6 +476,9 @@ export interface ScriptCtx {
     initialCounters?: Readonly<CardCounters>,
     initialState?: Readonly<Record<string, number>>,
   ): DeepReadonly<CardInstance>[];
+  /** "<Hero> creates": that hero is the creator (CR 8.5.2c), unlike the
+   * effect's controller creating under their control with `createTokens`. */
+  heroCreatesTokens(seat: number, cardId: string, count?: number): DeepReadonly<CardInstance>[];
   /** Create a new card object directly in a player's hand. The created card's
    * identity is public because the generating effect names it. */
   createCardInHand(cardId: string, seat?: number): DeepReadonly<CardInstance>;

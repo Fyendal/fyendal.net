@@ -2569,7 +2569,7 @@ Object.assign(sea, {
         .find((card) => card.instanceId === ctx.playTargetInstanceId);
       if (!target) return;
       const cost = data(ctx, target).cost ?? 0;
-      if (ctx.destroyPermanent(target.instanceId)) ctx.createTokens(GOLD, cost, target.owner);
+      if (ctx.destroyPermanent(target.instanceId)) ctx.heroCreatesTokens(target.owner, GOLD, cost);
     },
   },
   "amethyst amulet|3": seaAmulet((ctx) => buffNextAttack(ctx, { attack: 2 }), "instant"),

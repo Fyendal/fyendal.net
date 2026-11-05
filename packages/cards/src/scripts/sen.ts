@@ -309,15 +309,14 @@ export const sen: Record<string, CardScript> = {
   },
 
   "test of strength|1": {
-    // Clash with the attacking hero; the winner creates a Gold token (which may
-    // be the opponent — requestClash + createToken's seat param).
+    // Clash with the attacking hero; the winner, who may be the opponent, creates a Gold token.
     onDefend(ctx) {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined) return;
       ctx.requestClash(attacker, "test-of-strength");
     },
     onClashResult(ctx, hook, winner) {
-      if (hook === "test-of-strength" && winner >= 0) ctx.createToken(GOLD, winner);
+      if (hook === "test-of-strength" && winner >= 0) ctx.heroCreatesTokens(winner, GOLD);
     },
   },
 

@@ -1901,6 +1901,7 @@
   "card.effect.mpa.bountybrim": "cada vez que completes un contract, crea un token Silver",
   "card.effect.mpa.murdersprees": "la próxima vez que completes un contract, gana un Action Point",
   "card.effect.mpa.plaguewardens": "cuando impacte a un héroe, dale una enfermedad que controlas",
+  "card.effect.mpa.selfdetermination": "los oponentes no pueden crear tokens bajo tu control",
   "card.effect.mpa.scoutingcloak": "cada vez que completes un contract, gana 1 de vida",
   "card.effect.mst.justanick": "haz banish de la carta superior del mazo del héroe defensor",
   "card.effect.mst.maul": "crea 2 Crouching Tigers en tu zona de banish; puedes jugarlos este turno",

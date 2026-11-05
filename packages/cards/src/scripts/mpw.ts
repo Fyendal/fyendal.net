@@ -171,7 +171,7 @@ function silverdrop(power: number): CardScript {
 
 function smallOrBigBlinder(power: number, token: string, tokenName: string): CardScript {
   return wagerReaction(power, `Winner creates ${tokenName}`, (ctx, winner) => {
-    if (winner >= 0) ctx.createToken(token, winner);
+    if (winner >= 0) ctx.heroCreatesTokens(winner, token);
   });
 }
 
@@ -838,13 +838,13 @@ export const mpw: Record<string, CardScript> = {
     },
   },
   "gutshot|1": nextWager(3, "Winner creates Blade Dance", (ctx, winner) => {
-    if (winner >= 0) ctx.createToken(BLADE_DANCE, winner);
+    if (winner >= 0) ctx.heroCreatesTokens(winner, BLADE_DANCE);
   }),
   "gutshot|2": nextWager(2, "Winner creates Blade Dance", (ctx, winner) => {
-    if (winner >= 0) ctx.createToken(BLADE_DANCE, winner);
+    if (winner >= 0) ctx.heroCreatesTokens(winner, BLADE_DANCE);
   }),
   "gutshot|3": nextWager(1, "Winner creates Blade Dance", (ctx, winner) => {
-    if (winner >= 0) ctx.createToken(BLADE_DANCE, winner);
+    if (winner >= 0) ctx.heroCreatesTokens(winner, BLADE_DANCE);
   }),
   "jive|3": {
     onPlay: (ctx) => {
@@ -856,13 +856,13 @@ export const mpw: Record<string, CardScript> = {
   "sharp 'n shine|2": sharpenAction(2, "blade"),
   "sharp 'n shine|3": sharpenAction(3, "blade"),
   "showdown|1": nextWager(3, "Winner creates Flurry", (ctx, winner) => {
-    if (winner >= 0) ctx.createToken(FLURRY, winner);
+    if (winner >= 0) ctx.heroCreatesTokens(winner, FLURRY);
   }),
   "showdown|2": nextWager(2, "Winner creates Flurry", (ctx, winner) => {
-    if (winner >= 0) ctx.createToken(FLURRY, winner);
+    if (winner >= 0) ctx.heroCreatesTokens(winner, FLURRY);
   }),
   "showdown|3": nextWager(1, "Winner creates Flurry", (ctx, winner) => {
-    if (winner >= 0) ctx.createToken(FLURRY, winner);
+    if (winner >= 0) ctx.heroCreatesTokens(winner, FLURRY);
   }),
   "swordmaster's path|2": {
     onPlay(ctx) {

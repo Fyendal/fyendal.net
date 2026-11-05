@@ -405,7 +405,7 @@ export const cruArcaneGeneric: Record<string, CardScript> = {
         if (comparison !== 0) {
           const higher = comparison > 0 ? ctx.seat : other;
           ctx.loseLife(higher, 1);
-          ctx.createToken(COPPER, higher);
+          ctx.heroCreatesTokens(higher, COPPER);
         }
         const after = ctx.compareLife(ctx.seat, other);
         if (after !== 0) {

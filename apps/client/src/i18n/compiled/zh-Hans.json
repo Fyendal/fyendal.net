@@ -4043,6 +4043,12 @@
       "value": "每当你完成 contract 时，恢复 1 点生命"
     }
   ],
+  "card.effect.mpa.selfdetermination": [
+    {
+      "type": 0,
+      "value": "对手无法在你的操控下生成衍生物"
+    }
+  ],
   "card.effect.mpa.sickeningweakness": [
     {
       "type": 0,

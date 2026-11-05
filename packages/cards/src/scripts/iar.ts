@@ -1318,7 +1318,7 @@ function replaceActionPhaseDrawWithPonder(ctx: ScriptCtx, drawingSeat: number, c
   if (!["action", "defend", "reaction", "layer"].includes(ctx.state.phase) || count <= 0) {
     return count;
   }
-  ctx.createTokens(PONDER, count, drawingSeat);
+  ctx.heroCreatesTokens(drawingSeat, PONDER, count);
   return 0;
 }
 

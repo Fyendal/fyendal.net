@@ -4174,6 +4174,12 @@
       "value": "whenever you complete a contract, gain 1 life"
     }
   ],
+  "card.effect.mpa.selfdetermination": [
+    {
+      "type": 0,
+      "value": "opponents can't create tokens under your control"
+    }
+  ],
   "card.effect.mpa.sickeningweakness": [
     {
       "type": 0,

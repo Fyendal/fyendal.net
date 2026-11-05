@@ -106,7 +106,7 @@ function clashForToken(token: string): CardScript {
       ctx.requestClash(opponentSeat(ctx), "create-token");
     },
     onClashResult(ctx, hook, winner) {
-      if (hook === "create-token" && winner >= 0) ctx.createToken(token, winner);
+      if (hook === "create-token" && winner >= 0) ctx.heroCreatesTokens(winner, token);
     },
   };
 }

@@ -849,6 +849,24 @@ export const mpa: Record<string, CardScript> = {
     },
   },
 
+  "self-determination|3": {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      fromHand: true,
+      label: "Prohibit opponents' tokens",
+      onActivate(ctx) {
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          prohibitsOpponentTokenCreation: true,
+          ...ongoingLabel("opponents can't create tokens under your control", "card.effect.mpa.selfdetermination"),
+        });
+      },
+    },
+  },
+
   "pinpoint elimination|3": {
     onPlay(ctx) {
       ctx.requestNameChoice("mpa-pinpoint-name", decisionPrompt("Name a card", "card.common.card.name"));

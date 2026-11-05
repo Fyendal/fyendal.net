@@ -426,7 +426,7 @@ function clashOfMountains(): CardScript {
       if (ctx.link) ctx.requestClash(ctx.link.attacker, "clash-mountains");
     },
     onClashResult(ctx, hook, winner) {
-      if (hook === "clash-mountains" && winner >= 0) ctx.createToken(SEISMIC_SURGE, winner);
+      if (hook === "clash-mountains" && winner >= 0) ctx.heroCreatesTokens(winner, SEISMIC_SURGE);
     },
   };
 }

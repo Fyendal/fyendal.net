@@ -675,6 +675,10 @@ export function makeCtx(
         publishAttackPowerChange(state, runtime, observed, origin);
         return;
       }
+      const modifierSeat =
+        m.seat ??
+        (m.appliesToInstanceId !== undefined ? targetLink?.attacker : undefined) ??
+        seat;
       state.modifiers.push({
         ...m,
         createdTurn: state.turn,
@@ -682,10 +686,8 @@ export function makeCtx(
         ...(effectiveAttack !== undefined ? { attack: effectiveAttack } : {}),
         id: state.nextModifierId++,
         sourceInstanceId: origin.instanceId,
-        seat:
-          m.seat ??
-          (m.appliesToInstanceId !== undefined ? targetLink?.attacker : undefined) ??
-          seat,
+        seat: modifierSeat,
+        ...(modifierSeat !== seat ? { creatorSeat: seat } : {}),
       });
       if (Number(m.attack ?? 0) > 0 || Number(m.defense ?? 0) > 0) {
         for (const candidate of state.players as PlayerState[]) {
@@ -2276,6 +2278,15 @@ export function makeCtx(
         creationCause,
         initialCounters,
         initialState,
+      );
+    },
+    heroCreatesTokens(heroSeat, cardId, count = 1) {
+      return runtime.commands.createTokensFor(
+        state,
+        state.players[heroSeat] as PlayerState,
+        cardId,
+        count,
+        { ...creationCause, creatorSeat: heroSeat },
       );
     },
     createCardInHand(cardId, targetSeat) {

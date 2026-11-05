@@ -3169,6 +3169,15 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
         expect(publicLog).not.toContain("Wounding Blow");
       });
 
+      it("credits the attacker's contract when the hit hero banishes their chosen card", () => {
+        const completions = (game: ReturnType<typeof attack>) =>
+          Number(game.state.players[0]!.flags.contractCompletionsThisTurn ?? 0);
+        const baseline = attack({});
+        const game = attack({ arsenalFaceDown: ["wounding blow|1", "raging onslaught|1"] });
+        game.chooseCard("raging onslaught|1");
+        expect(completions(game)).toBe(completions(baseline) + 1);
+      });
+
       it("does nothing on hit with an empty arsenal", () => {
         const game = attack({});
         game.expectFinalAttack(6).expectZoneSize(1, "arsenal", 0);
@@ -3706,6 +3715,187 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       game.expectInZone(0, CLOAK, "graveyard");
       expect(game.state.pendingDecision?.chooseHook).toBeUndefined();
       expect(silverCount(game)).toBe(1);
+    });
+  });
+
+  describe("Self-determination", () => {
+    const SELF = "self-determination|3";
+    const HEAD_JAB = "head jab|1";
+    const ATTACKER: SeatSpec = { hero: "rhinar", weapons: [], equipment: NO_EQUIPMENT, resources: 5 };
+    const PROTECTED: SeatSpec = { hero: "dorinthea", hand: [SELF], weapons: [], equipment: NO_EQUIPMENT };
+
+    /** The attacker plays `key` and the defender discards Self-determination in response. */
+    const respond = (attacker: Partial<SeatSpec>, key: string, defender: Partial<SeatSpec> = {}) => {
+      const game = scenario({ seats: [
+        { ...ATTACKER, ...attacker },
+        { ...PROTECTED, ...defender, hand: [SELF, ...(defender.hand ?? [])] },
+      ] });
+      game.play(key, { settle: false }).passPriority().activate(SELF).settle();
+      return game;
+    };
+
+    it("is a 4-power attack that discards as an instant in either player's turn", () => {
+      const card = cardData.MPA142!;
+      expect(card).toMatchObject({ name: "Self-determination", pitch: 3, cost: 2, attack: 4, defense: 3 });
+      expect(isImplemented(card)).toBe(true);
+
+      const own = scenario({ seats: [{ ...ATTACKER, hand: [SELF] }, PROTECTED] });
+      own.activate(SELF);
+      own.expectInZone(0, SELF, "graveyard");
+      own.expectAP(0, 1);
+
+      const opposing = respond({ hand: [HEAD_JAB] }, HEAD_JAB);
+      opposing.expectInZone(1, SELF, "graveyard");
+
+      const played = scenario({ seats: [{ ...ATTACKER, hand: [SELF] }, { ...PROTECTED, hand: [] }] });
+      played.play(SELF).blockWith().settle().expectFinalAttack(4);
+    });
+
+    it("shows an ongoing effect for the rest of the turn", () => {
+      const game = respond({ hand: [HEAD_JAB] }, HEAD_JAB);
+      const modifier = game.state.modifiers.find((candidate) => candidate.prohibitsOpponentTokenCreation);
+      expect(modifier).toMatchObject({
+        seat: 1,
+        scope: "until-end-of-turn",
+        ongoingLabel: "opponents can't create tokens under your control",
+        ongoingLabelMessage: { id: "card.effect.mpa.selfdetermination" },
+      });
+    });
+
+    it("stops an on-hit token and leaves Sick Intent's contract incomplete", () => {
+      const game = respond(assassinSeat({ hand: [SICK_INTENT], resources: 2 }), SICK_INTENT);
+      game.blockWith().settle().chooseOption(FRAILTY_TOKEN).settle();
+
+      expect(boardNames(game, 1)).toEqual([]);
+      expect(silverCount(game)).toBe(0);
+      expect(game.state.players[1]!.flags.createdThisTurn).toBeUndefined();
+      game.expectLog("can't be created under");
+    });
+
+    it("stops Spawn Bloodrot's token on an Assassin hero", () => {
+      const game = respond(assassinSeat({ hand: ["spawn bloodrot|1"], resources: 5 }), "spawn bloodrot|1", { heroKey: "uzuri|0" });
+      game.blockWith().settle();
+      expect(boardNames(game, 1)).toEqual([]);
+    });
+
+    it("stops Viral Accelerant's token copies", () => {
+      const game = respond(
+        { hand: [HEAD_JAB, "viral accelerant|3"], board: ["frailty|0", "inertia|0"] },
+        HEAD_JAB,
+      );
+      game.blockWith().react("viral accelerant|3").settle();
+      game.expectInZone(0, "viral accelerant|3", "graveyard");
+      expect(boardNames(game, 1)).toEqual([]);
+      expect(boardNames(game, 0).sort()).toEqual(["Frailty", "Inertia"]);
+    });
+
+    it("protects an attacker from defend triggers and Traps", () => {
+      const defend = scenario({ seats: [
+        { ...PROTECTED, hand: [SELF, HEAD_JAB], resources: 3 },
+        { ...ATTACKER, hand: [VIRAL_DIFFUSION] },
+      ] });
+      defend.activate(SELF).play(HEAD_JAB).blockWith().passPriority().react(VIRAL_DIFFUSION).settle();
+      expect(boardNames(defend, 0)).toEqual([]);
+
+      const trap = scenario({ seats: [
+        { ...PROTECTED, hand: [SELF, HEAD_JAB], resources: 3 },
+        { ...ATTACKER, heroKey: "riptide|0", arsenal: ["frailty trap|1"] },
+      ] });
+      trap.activate(SELF).play(HEAD_JAB).blockWith().passPriority().react("frailty trap|1").settle();
+      expect(boardNames(trap, 0)).toEqual([]);
+    });
+
+    it("blocks only the protected hero's token from an each-hero effect", () => {
+      const game = respond({ hand: ["languid pace|3"] }, "languid pace|3");
+      expect(boardNames(game, 0)).toEqual(["Inertia"]);
+      expect(boardNames(game, 1)).toEqual([]);
+    });
+
+    it("keeps the controller's own creations, including under the opponent", () => {
+      const game = scenario({ seats: [
+        assassinSeat({ hand: [SELF, SICK_INTENT, "banger!|3"], resources: 2 }),
+        { ...PROTECTED, hand: [] },
+      ] });
+      game.activate(SELF).activate("banger!|3");
+      expect(boardNames(game, 0)).toEqual(["Silver"]);
+
+      game.play(SICK_INTENT).blockWith().settle().chooseOption(FRAILTY_TOKEN).settle();
+      expect(boardNames(game, 1)).toEqual(["Frailty"]);
+      expect(silverCount(game)).toBe(2);
+    });
+
+    it("does not stop tokens the protected hero is told to create", () => {
+      const clash = scenario({ seats: [
+        { ...ATTACKER, hand: ["raging onslaught|1"], deck: ["snatch|3"] },
+        { ...PROTECTED, hand: [SELF, "test of strength|1"], deck: ["raging onslaught|1"] },
+      ] });
+      clash.play("raging onslaught|1", { settle: false }).passPriority().activate(SELF).settle();
+      clash.blockWith("test of strength|1").settle();
+      clash.expectLog("wins the clash");
+      expect(boardNames(clash, 1)).toEqual(["Gold"]);
+
+      const missed = respond({ hand: ["take that!|1"] }, "take that!|1", {
+        hand: ["raging onslaught|1", "raging onslaught|2", "raging onslaught|3"],
+      });
+      missed.blockWith("raging onslaught|1", "raging onslaught|2", "raging onslaught|3").settle();
+      missed.passActionPhase();
+      missed.expectLog("Quicksilver Prodigy creates Might");
+
+      const wager = scenario({ seats: [
+        {
+          ...ATTACKER,
+          heroKey: "olympia, prized fighter|0",
+          weapons: ["golden grail|0"],
+          hand: ["money where ya mouth is|1"],
+        },
+        { ...PROTECTED, hand: [SELF, "raging onslaught|1", "raging onslaught|2", "raging onslaught|3"] },
+      ] });
+      wager.play("money where ya mouth is|1", { settle: false }).passPriority().activate(SELF).settle();
+      wager.attackWithWeapon("golden grail|0").chooseOption("yes");
+      wager.blockWith("raging onslaught|1", "raging onslaught|2", "raging onslaught|3").settle();
+      expect(boardNames(wager, 1)).toEqual(["Gold"]);
+    });
+
+    it("offers no replacement decision for a blocked token", () => {
+      const seats = (hand: string[]): [SeatSpec, SeatSpec] => [
+        { ...ATTACKER, hand: ["ancient earth oak|1"] },
+        { ...PROTECTED, hand, graveyard: ["smoldering steel|1"] },
+      ];
+      const unprotected = scenario({ seats: seats([]) });
+      unprotected.play("ancient earth oak|1").blockWith().settle();
+      expect(unprotected.state.pendingDecision?.chooseHook).toBe("engine-token-creation-replacement");
+
+      const game = scenario({ seats: seats([SELF]) });
+      game.play("ancient earth oak|1", { settle: false }).passPriority().activate(SELF).settle();
+      game.blockWith().settle();
+      expect(game.state.pendingDecision?.chooseHook ?? "").not.toMatch(/^engine-token/);
+      expect(game.state.pendingTokenCreations).toEqual([]);
+      expect(boardNames(game, 1)).toEqual([]);
+    });
+
+    it("applies Ripple Away to the other hero's token without a replacement order", () => {
+      const game = scenario({ seats: [
+        { ...ATTACKER, hand: ["languid pace|3"] },
+        { ...PROTECTED, hand: [SELF, "ripple away|3"] },
+      ] });
+      game.play("languid pace|3", { settle: false }).passPriority().activate(SELF, { settle: false }).activate("ripple away|3").settle();
+      expect(game.state.pendingDecision?.chooseHook ?? "").not.toMatch(/^engine-token/);
+      expect(boardNames(game, 0)).toEqual([]);
+      expect(boardNames(game, 1)).toEqual([]);
+    });
+
+    it("expires at end of turn", () => {
+      const game = scenario({ seats: [
+        { ...ATTACKER, hand: [HEAD_JAB, VIRAL_DIFFUSION], deck: [] },
+        { ...PROTECTED, hand: [SELF, HEAD_JAB], resources: 3 },
+      ] });
+      game.play(HEAD_JAB, { settle: false }).passPriority().activate(SELF).settle();
+      game.blockWith().settle().endTurn();
+      expect(game.state.modifiers.some((modifier) => modifier.prohibitsOpponentTokenCreation)).toBe(false);
+
+      game.state.players[0]!.resources = 3;
+      game.play(HEAD_JAB).blockWith().passPriority().react(VIRAL_DIFFUSION).settle();
+      expect(boardNames(game, 1).sort()).toEqual(["Bloodrot Pox", "Frailty", "Inertia"]);
     });
   });
 });

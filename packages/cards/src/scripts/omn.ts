@@ -735,7 +735,7 @@ function clearConscience(): CardScript {
         seat,
       );
     else {
-      ctx.createToken(PONDER, seat);
+      ctx.heroCreatesTokens(seat, PONDER);
       if (seat !== ctx.seat) ask(ctx, ctx.seat, "conscience-self");
     }
   };
@@ -747,7 +747,7 @@ function clearConscience(): CardScript {
     onChoose(ctx, hook, option) {
       if (hook === "conscience-opponent") {
         ctx.putOnDeckBottom(Number(option));
-        ctx.createToken(PONDER, opponentSeat(ctx));
+        ctx.heroCreatesTokens(opponentSeat(ctx), PONDER);
         ask(ctx, ctx.seat, "conscience-self");
       } else if (hook === "conscience-self") {
         ctx.putOnDeckBottom(Number(option));

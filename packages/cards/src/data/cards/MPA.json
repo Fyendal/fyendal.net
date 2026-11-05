@@ -1287,6 +1287,19 @@
     "set": "MPA"
   },
   {
+    "id": "MPA142",
+    "name": "Self-determination",
+    "cardType": "action",
+    "text": "Instant - Discard this: Until end of turn, opponents can't create tokens under your control.",
+    "pitch": 3,
+    "cost": 2,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["generic"],
+    "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA147",
     "name": "Free of Burdens",
     "cardType": "action",

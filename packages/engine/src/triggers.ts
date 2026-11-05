@@ -854,7 +854,10 @@ export function announceCardPlayed(
         const token = modifier.onAttackActionPlayedFromBanishCreateToken;
         if (!token || modifier.consumed || modifier.seat !== seat) continue;
         modifier.consumed = true;
-        createTokensFor(state, runtime, player, token.cardId, token.count);
+        createTokensFor(state, runtime, player, token.cardId, token.count, {
+          kind: "effect",
+          creatorSeat: modifier.creatorSeat ?? modifier.seat,
+        });
       }
     }
     if (

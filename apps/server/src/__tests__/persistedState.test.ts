@@ -1084,6 +1084,8 @@ describe("PersistedStateV1", () => {
       onBoostDominate: true,
       onActionPlayedGainActionPoints: 1,
       onFriendlyActivateCreateToken: "FYD-QUICKEN",
+      prohibitsOpponentTokenCreation: true,
+      creatorSeat: 1,
       extraDiceIgnoreLowest: 1,
       onHitClearHandAndArsenalAtEndPhase: true,
       onHitDealDamage: 2,

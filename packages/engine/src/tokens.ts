@@ -82,6 +82,14 @@ function createTokenRaw(
   return token;
 }
 
+function logTokenCreationProhibited(state: GameStateInternal, player: PlayerState, cardId: string): void {
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, cardId)} can't be created under ${nameOf(state, player.heroCardId)}'s control this turn`,
+    "engine.log.token.creation.prohibited",
+    { card: logCardValue(cardId), hero: logCardValue(player.heroCardId) },
+  ));
+}
+
 function fireFriendlyCreatesOpponentTokens(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -522,7 +530,7 @@ function beginTokenCreation(
   player: PlayerState,
   cardId: string,
   count: number,
-  cause: TokenCreationContext = { kind: "effect" },
+  cause: TokenCreationContext,
   initialCounters?: Readonly<CardCounters>,
   initialState?: Readonly<Record<string, number>>,
 ): CardInstance[] {
@@ -551,11 +559,7 @@ function beginTokenCreation(
     modifier.prohibitsTokenCreationOfType !== undefined &&
     (tokenData.subtypes ?? []).includes(modifier.prohibitsTokenCreationOfType)
   )) {
-    logPublic(state, gameLogMessage(
-      `${nameOf(state, cardId)} can't be created under ${nameOf(state, player.heroCardId)}'s control this turn`,
-      "engine.log.token.creation.prohibited",
-      { card: logCardValue(cardId), hero: logCardValue(player.heroCardId) },
-    ));
+    logTokenCreationProhibited(state, player, cardId);
     return [];
   }
   return continueTokenCreation(
@@ -591,6 +595,29 @@ function canonicalTokenCardId(state: GameStateInternal, requestedCardId: string)
   return requested.id;
 }
 
+/** An opponent's creation under a protected hero never becomes an event, so no
+ * replacement, flag, or hook observes it. */
+function opponentCreationProhibited(
+  state: GameStateInternal,
+  player: PlayerState,
+  cardId: string,
+  count: number,
+  cause: TokenCreationContext,
+): boolean {
+  if (
+    Math.floor(count) <= 0 ||
+    cause.creatorSeat === undefined ||
+    cause.creatorSeat === player.seat ||
+    !state.modifiers.some((modifier) =>
+      !modifier.consumed &&
+      modifier.seat === player.seat &&
+      modifier.prohibitsOpponentTokenCreation === true
+    )
+  ) return false;
+  logTokenCreationProhibited(state, player, cardId);
+  return true;
+}
+
 /** Create one token batch, applying each live count replacement once. If an
  * earlier command has already suspended the resolving effect, preserve this
  * event for the same continuation instead of overwriting its decision. */
@@ -600,11 +627,12 @@ export function createTokensFor(
   player: PlayerState,
   cardId: string,
   count: number,
-  cause: TokenCreationContext = { kind: "effect" },
+  cause: TokenCreationContext,
   initialCounters?: Readonly<CardCounters>,
   initialState?: Readonly<Record<string, number>>,
 ): CardInstance[] {
   const canonicalCardId = canonicalTokenCardId(state, cardId);
+  if (opponentCreationProhibited(state, player, canonicalCardId, count, cause)) return [];
   const pendingHook = state.pendingDecision?.chooseHook;
   if (
     pendingHook === "engine-token-creation-replacement" ||
@@ -640,7 +668,7 @@ export function resumePendingTokenCreations(state: GameStateInternal, runtime: E
   while (!state.pendingDecision?.chooseHook && queue.length > 0) {
     const request = queue.shift() as TokenCreationRequest;
     const player = state.players[request.seat] as PlayerState | undefined;
-    if (!player) continue;
+    if (!player || opponentCreationProhibited(state, player, request.cardId, request.count, request.cause)) continue;
     beginTokenCreation(
       state, runtime,
       player,
@@ -814,7 +842,7 @@ export function createTokenFor(
   runtime: EngineRuntime,
   player: PlayerState,
   cardId: string,
-  cause: TokenCreationContext = { kind: "effect" },
+  cause: TokenCreationContext,
   initialCounters?: Readonly<CardCounters>,
   initialState?: Readonly<Record<string, number>>,
 ): CardInstance | undefined {

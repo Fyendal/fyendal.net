@@ -744,6 +744,10 @@ export interface Modifier {
   appliesToTargetControllingType?: string;
   /** Tokens with this subtype can't be created under this modifier's seat. */
   prohibitsTokenCreationOfType?: string;
+  /** Opponents can't create tokens under this modifier's seat. */
+  prohibitsOpponentTokenCreation?: boolean;
+  /** Controller of the generating effect, recorded only when it isn't `seat`. */
+  creatorSeat?: number;
   /** Restrict an attack modifier to attacks targeting a currently marked hero. */
   appliesToMarkedHero?: boolean;
   /** negative subtype filter (e.g. "attack" for "'non-attack' action cards") */

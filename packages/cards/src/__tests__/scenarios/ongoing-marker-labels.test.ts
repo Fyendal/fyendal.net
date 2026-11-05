@@ -356,6 +356,15 @@ describe("labelled lingering markers (ELE, UPR, HVY, EVO, OUT)", () => {
     expect(labels(g, "ripple away|3")).toEqual(["action card effects create 1 fewer of each token · this turn"]);
   });
 
+  it("labels Self-determination's token prohibition", () => {
+    const g = scenario({
+      seats: [{ hero: "rhinar", hand: ["self-determination|3"] }, { hero: "dorinthea" }],
+    });
+    g.activate("self-determination|3");
+
+    expect(labels(g, "self-determination|3")).toEqual(["opponents can't create tokens under your control · this turn"]);
+  });
+
   it("labels Warband of Bellona's charge on the next attack", () => {
     const g = scenario({
       seats: [

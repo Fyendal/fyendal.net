@@ -306,9 +306,9 @@ export const hvyHighRarity: Record<string, CardScript> = {
         ctx.setState("trounce-winner", winner);
         ctx.requestClash(opponentSeat(ctx), "trounce-two");
       } else if (hook === "trounce-two" && winner >= 0 && winner === ctx.getState("trounce-winner")) {
-        ctx.createToken(GOLD, winner);
-        ctx.createToken(MIGHT, winner);
-        ctx.createToken(VIGOR, winner);
+        ctx.heroCreatesTokens(winner, GOLD);
+        ctx.heroCreatesTokens(winner, MIGHT);
+        ctx.heroCreatesTokens(winner, VIGOR);
       }
     },
   },
@@ -864,7 +864,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
     onPlay(ctx) {
       for (const player of ctx.state.players) {
         for (const card of [...player.arsenal]) ctx.putOnDeckBottom(card.instanceId);
-        ctx.createToken(PONDER, player.seat);
+        ctx.heroCreatesTokens(player.seat, PONDER);
       }
     },
   },

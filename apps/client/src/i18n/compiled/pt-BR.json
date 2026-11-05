@@ -4225,6 +4225,12 @@
       "value": "sempre que você completar um contract, ganhe 1 de vida"
     }
   ],
+  "card.effect.mpa.selfdetermination": [
+    {
+      "type": 0,
+      "value": "oponentes não podem criar tokens sob o seu controle"
+    }
+  ],
   "card.effect.mpa.sickeningweakness": [
     {
       "type": 0,

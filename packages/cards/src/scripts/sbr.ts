@@ -234,7 +234,7 @@ export const sbr: Record<string, CardScript> = {
       ctx.requestClash(opponentSeat(ctx), "clash-of-vigor");
     },
     onClashResult(ctx, hook, winner) {
-      if (hook === "clash-of-vigor" && winner >= 0) ctx.createToken(VIGOR, winner);
+      if (hook === "clash-of-vigor" && winner >= 0) ctx.heroCreatesTokens(winner, VIGOR);
     },
   },
 

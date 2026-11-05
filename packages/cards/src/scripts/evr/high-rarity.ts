@@ -377,7 +377,7 @@ export const evrHighRarity: Record<string, CardScript> = {
   },
   "swing big|1": {
     onMiss(ctx) {
-      ctx.createToken(QUICKEN, opponentSeat(ctx));
+      ctx.heroCreatesTokens(opponentSeat(ctx), QUICKEN);
     },
   },
   "ready to roll|3": {

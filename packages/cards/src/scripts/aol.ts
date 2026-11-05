@@ -219,10 +219,10 @@ export const aol: Record<string, CardScript> = {
     },
   },
   "belly buster|1": nextWager(3, "warrior", true, "Winner creates Courage", (ctx, winner) => {
-    if (winner >= 0) ctx.createToken(COURAGE, winner);
+    if (winner >= 0) ctx.heroCreatesTokens(winner, COURAGE);
   }),
   "belly buster|3": nextWager(1, "warrior", true, "Winner creates Courage", (ctx, winner) => {
-    if (winner >= 0) ctx.createToken(COURAGE, winner);
+    if (winner >= 0) ctx.heroCreatesTokens(winner, COURAGE);
   }),
   "big slick|1": nextWager(5, "sword", false, "Winner draws a card", (ctx, winner) => {
     if (winner >= 0) ctx.drawCards(winner, 1);

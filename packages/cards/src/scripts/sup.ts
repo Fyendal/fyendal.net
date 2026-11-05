@@ -404,7 +404,7 @@ function clashToken(tokenId: string): CardScript {
     },
     onClashResult(ctx, hook, winner) {
       if (hook !== "sup-clash") return;
-      if (winner >= 0) ctx.createToken(tokenId, winner);
+      if (winner >= 0) ctx.heroCreatesTokens(winner, tokenId);
       const top = ctx.player(ctx.seat).deck[0];
       if (top) {
         ctx.setState("clashTop", top.instanceId);
@@ -427,7 +427,7 @@ function missCreates(tokenId: string): CardScript {
       ctx.setState("missed", 1);
     },
     onCombatChainClosed(ctx) {
-      if (ctx.getState("missed")) ctx.createToken(tokenId, opponentSeat(ctx));
+      if (ctx.getState("missed")) ctx.heroCreatesTokens(opponentSeat(ctx), tokenId);
     },
   };
 }
@@ -1642,7 +1642,7 @@ Object.assign(sup, {
       ctx.requestClash(opponentSeat(ctx), "fix-clash");
     },
     onClashResult(ctx: ScriptCtx, hook: string, winner: number) {
-      if (hook === "fix-clash" && winner >= 0) ctx.createToken(MIGHT, winner);
+      if (hook === "fix-clash" && winner >= 0) ctx.heroCreatesTokens(winner, MIGHT);
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook !== "fix-top") return;

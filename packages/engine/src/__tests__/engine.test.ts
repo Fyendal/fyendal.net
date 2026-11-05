@@ -1,5 +1,5 @@
 import { engineRuntime } from "../engineRuntime.js";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { GameIntent } from "@fyendal/shared";
 import { actionCandidates, applyIntent, legalIntents, projectStateFor, projectStateForReplay, projectTransitionEvents, rngNext } from "../index.js";
 import { declareAttack, queueAttackCard } from "../attacks.js";
@@ -9,7 +9,8 @@ import { pendingOnHitEffects } from "../hits.js";
 import type { CardInstance, ChainLinkState } from "../state.js";
 import { resolveWagerLayer, resumeWagerResult } from "../wagers.js";
 import { destroyPermanent } from "../zoneMoves.js";
-import { answerTokenCreationReplacement, answerTokenReplacementOrder } from "../tokens.js";
+import { answerTokenCreationReplacement, answerTokenReplacementOrder, resumePendingTokenCreations } from "../tokens.js";
+import { tokenCreationCauseForModifier } from "../tokenQueries.js";
 import { cardColorOf, cardHasType, cardTypesOf, TALENT_SUPERTYPES } from "../cardProperties.js";
 import { logPrivate, logPublic } from "../gameLog.js";
 import { makeCtx } from "../scriptContext.js";
@@ -839,6 +840,83 @@ describe("game setup & turn structure", () => {
     expect(drawn).toBeDefined();
     expect(drawn).not.toHaveProperty("faceDown");
     expect(drawn).not.toHaveProperty("arsenalSlot");
+  });
+
+  it("prohibits opponents' tokens before replacements, flags, and hooks", () => {
+    const s = makeGame(102);
+    const p = player(s, 0);
+    const created = vi.fn();
+    const replace = vi.fn(() => 2);
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      HERO_A: { onFriendlyTokenCreated: created },
+      HERO_B: {
+        globalTokenCreationReplacement: { label: "Replace", replace },
+        onFriendlyCreatesOpponentToken: created,
+      },
+    };
+    s.modifiers.push({
+      id: s.nextModifierId++,
+      sourceInstanceId: p.hero.instanceId,
+      seat: 0,
+      scope: "until-end-of-turn",
+      prohibitsOpponentTokenCreation: true,
+    });
+
+    const opponentCtx = makeCtx(s, engineRuntime, 1, player(s, 1).hero);
+    expect(opponentCtx.createTokens("TOKEN", 2, 0)).toEqual([]);
+    expect(opponentCtx.createToken("TOKEN", 0)).toBeUndefined();
+    expect(replace).not.toHaveBeenCalled();
+    expect(created).not.toHaveBeenCalled();
+    expect(s.pendingDecision).toBeNull();
+    expect(s.pendingTokenCreations).toEqual([]);
+    expect(p.board).toEqual([]);
+    expect(p.flags.createdThisTurn).toBeUndefined();
+
+    expect(opponentCtx.heroCreatesTokens(0, "TOKEN")).toHaveLength(2);
+    expect(makeCtx(s, engineRuntime, 0, p.hero).createToken("TOKEN")).toBeDefined();
+  });
+
+  it("checks the prohibition again for an event queued behind a decision", () => {
+    const s = makeGame(102);
+    const p = player(s, 0);
+    s.pendingTokenCreations.push({ seat: 0, cardId: "TOKEN", count: 1, cause: { kind: "effect", creatorSeat: 1 } });
+    s.modifiers.push({
+      id: s.nextModifierId++,
+      sourceInstanceId: p.hero.instanceId,
+      seat: 0,
+      scope: "until-end-of-turn",
+      prohibitsOpponentTokenCreation: true,
+    });
+
+    resumePendingTokenCreations(s, engineRuntime);
+
+    expect(s.pendingTokenCreations).toEqual([]);
+    expect(p.board).toEqual([]);
+  });
+
+  it("attributes a modifier's token to the seat that generated it", () => {
+    const s = makeGame(102);
+    const p = player(s, 0);
+    const victim = player(s, 1);
+    s.modifiers.push({
+      id: s.nextModifierId++,
+      sourceInstanceId: victim.hero.instanceId,
+      seat: 1,
+      scope: "until-end-of-turn",
+      prohibitsOpponentTokenCreation: true,
+    });
+    makeCtx(s, engineRuntime, 0, p.hero).addModifier({
+      scope: "until-end-of-turn",
+      seat: 1,
+      onFriendlyActivateCreateToken: "TOKEN",
+    });
+    const armed = s.modifiers.at(-1)!;
+
+    expect(armed.creatorSeat).toBe(0);
+    expect(tokenCreationCauseForModifier(s, armed).creatorSeat).toBe(0);
+    makeCtx(s, engineRuntime, 1, victim.hero).addModifier({ scope: "until-end-of-turn", attack: 1 });
+    expect(s.modifiers.at(-1)!.creatorSeat).toBeUndefined();
   });
 
   it("logs publicly when a replacement cancels token creation", () => {

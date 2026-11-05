@@ -1901,6 +1901,7 @@
   "card.effect.mpa.bountybrim": "每当你完成 contract 时，生成一个 Silver 衍生物",
   "card.effect.mpa.murdersprees": "下一次你完成 contract 时，获得 1 个行动点",
   "card.effect.mpa.plaguewardens": "命中英雄时，将一个由你操控的疾病交给该英雄",
+  "card.effect.mpa.selfdetermination": "对手无法在你的操控下生成衍生物",
   "card.effect.mpa.scoutingcloak": "每当你完成 contract 时，恢复 1 点生命",
   "card.effect.mst.justanick": "放逐防御英雄的牌库顶牌",
   "card.effect.mst.maul": "在你的放逐区生成 2 张 Crouching Tiger；本回合你可以打出它们",
