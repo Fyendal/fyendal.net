@@ -4122,6 +4122,12 @@
       "value": "el héroe impactado hace banish de una carta de su arsenal"
     }
   ],
+  "card.effect.mpa.bountybrim": [
+    {
+      "type": 0,
+      "value": "cada vez que completes un contract, crea un token Silver"
+    }
+  ],
   "card.effect.mpa.easyprey": [
     {
       "type": 0,
@@ -4136,6 +4142,12 @@
       "value": " de poder mientras ataca a un héroe infectado"
     }
   ],
+  "card.effect.mpa.murdersprees": [
+    {
+      "type": 0,
+      "value": "la próxima vez que completes un contract, gana un Action Point"
+    }
+  ],
   "card.effect.mpa.outbreak": [
     {
       "type": 0,
@@ -4148,10 +4160,22 @@
       "value": "crea un token Frailty, Inertia o Bloodrot Pox bajo el control del héroe impactado"
     }
   ],
+  "card.effect.mpa.plaguewardens": [
+    {
+      "type": 0,
+      "value": "cuando impacte a un héroe, dale una enfermedad que controlas"
+    }
+  ],
   "card.effect.mpa.prolongedillness": [
     {
       "type": 0,
       "value": "cada vez que se destruya un token de enfermedad, si es el primero con ese nombre, crea una copia bajo el control del mismo héroe"
+    }
+  ],
+  "card.effect.mpa.scoutingcloak": [
+    {
+      "type": 0,
+      "value": "cada vez que completes un contract, gana 1 de vida"
     }
   ],
   "card.effect.mpa.sickeningweakness": [
@@ -11981,6 +12005,12 @@
       "value": "count"
     }
   ],
+  "card.mpa.bountybrim.silver": [
+    {
+      "type": 0,
+      "value": "Crea un token Silver"
+    }
+  ],
   "card.mpa.continuedcoercion.goagain": [
     {
       "type": 0,
@@ -12053,6 +12083,18 @@
       "value": "Puedes poner una carta de tu mano en la parte inferior de tu mazo"
     }
   ],
+  "card.mpa.patronslockbox.carriers": [
+    {
+      "type": 0,
+      "value": "Destruye esta carta. Si lo haces, crea un token Frailty, Inertia o Bloodrot Pox bajo el control de un héroe oponente"
+    }
+  ],
+  "card.mpa.patronslockbox.serums": [
+    {
+      "type": 0,
+      "value": "Destruye esta carta. Si lo haces, gana 1 Action Point"
+    }
+  ],
   "card.mpa.patronslockbox.valuables": [
     {
       "type": 0,
@@ -12101,6 +12143,12 @@
     {
       "type": 0,
       "value": " menos de jugar en este chain link"
+    }
+  ],
+  "card.mpa.stimtekvest.destroy": [
+    {
+      "type": 0,
+      "value": "¿Destruir esta carta para ganar 2 recursos?"
     }
   ],
   "card.mpg.arsenal.card.bottom": [

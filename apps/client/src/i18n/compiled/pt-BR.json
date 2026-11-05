@@ -4169,6 +4169,12 @@
       "value": "o herói atingido faz banish de uma carta do próprio arsenal"
     }
   ],
+  "card.effect.mpa.bountybrim": [
+    {
+      "type": 0,
+      "value": "sempre que você completar um contract, crie um token Silver"
+    }
+  ],
   "card.effect.mpa.easyprey": [
     {
       "type": 0,
@@ -4183,6 +4189,12 @@
       "value": " de poder enquanto ataca um herói infectado"
     }
   ],
+  "card.effect.mpa.murdersprees": [
+    {
+      "type": 0,
+      "value": "na próxima vez que você completar um contract, ganhe um Action Point"
+    }
+  ],
   "card.effect.mpa.outbreak": [
     {
       "type": 0,
@@ -4195,10 +4207,22 @@
       "value": "crie um token Frailty, Inertia ou Bloodrot Pox sob o controle do herói atingido"
     }
   ],
+  "card.effect.mpa.plaguewardens": [
+    {
+      "type": 0,
+      "value": "quando acertar um herói, dê a esse jogador uma doença que você controla"
+    }
+  ],
   "card.effect.mpa.prolongedillness": [
     {
       "type": 0,
       "value": "sempre que um token de doença for destruído, se for o primeiro com esse nome, crie uma cópia dele sob o controle do mesmo herói"
+    }
+  ],
+  "card.effect.mpa.scoutingcloak": [
+    {
+      "type": 0,
+      "value": "sempre que você completar um contract, ganhe 1 de vida"
     }
   ],
   "card.effect.mpa.sickeningweakness": [
@@ -12345,6 +12369,12 @@
       "value": "count"
     }
   ],
+  "card.mpa.bountybrim.silver": [
+    {
+      "type": 0,
+      "value": "Crie um token Silver"
+    }
+  ],
   "card.mpa.continuedcoercion.goagain": [
     {
       "type": 0,
@@ -12417,6 +12447,18 @@
       "value": "Você pode colocar uma carta da sua mão no fundo do seu deck"
     }
   ],
+  "card.mpa.patronslockbox.carriers": [
+    {
+      "type": 0,
+      "value": "Destrua esta carta. Se fizer isso, crie um token Frailty, Inertia ou Bloodrot Pox sob o controle de um herói oponente"
+    }
+  ],
+  "card.mpa.patronslockbox.serums": [
+    {
+      "type": 0,
+      "value": "Destrua esta carta. Se fizer isso, ganhe 1 Action Point"
+    }
+  ],
   "card.mpa.patronslockbox.valuables": [
     {
       "type": 0,
@@ -12465,6 +12507,12 @@
     {
       "type": 0,
       "value": " a menos para jogar neste chain link"
+    }
+  ],
+  "card.mpa.stimtekvest.destroy": [
+    {
+      "type": 0,
+      "value": "Destruir esta carta para ganhar 2 recursos?"
     }
   ],
   "card.mpg.arsenal.card.bottom": [

@@ -3987,6 +3987,12 @@
       "value": "被命中英雄放逐其 arsenal 中的一张牌"
     }
   ],
+  "card.effect.mpa.bountybrim": [
+    {
+      "type": 0,
+      "value": "每当你完成 contract 时，生成一个 Silver 衍生物"
+    }
+  ],
   "card.effect.mpa.easyprey": [
     {
       "type": 0,
@@ -4001,6 +4007,12 @@
       "value": " 力量"
     }
   ],
+  "card.effect.mpa.murdersprees": [
+    {
+      "type": 0,
+      "value": "下一次你完成 contract 时，获得 1 个行动点"
+    }
+  ],
   "card.effect.mpa.outbreak": [
     {
       "type": 0,
@@ -4013,10 +4025,22 @@
       "value": "在被命中英雄的操控下生成一个 Frailty、Inertia 或 Bloodrot Pox 衍生物"
     }
   ],
+  "card.effect.mpa.plaguewardens": [
+    {
+      "type": 0,
+      "value": "命中英雄时，将一个由你操控的疾病交给该英雄"
+    }
+  ],
   "card.effect.mpa.prolongedillness": [
     {
       "type": 0,
       "value": "每当一个疾病衍生物被摧毁时，若它是该名称第一个被摧毁的，在同一英雄的操控下生成它的一个复制"
+    }
+  ],
+  "card.effect.mpa.scoutingcloak": [
+    {
+      "type": 0,
+      "value": "每当你完成 contract 时，恢复 1 点生命"
     }
   ],
   "card.effect.mpa.sickeningweakness": [
@@ -11138,6 +11162,12 @@
       "value": " 张"
     }
   ],
+  "card.mpa.bountybrim.silver": [
+    {
+      "type": 0,
+      "value": "生成一个 Silver 衍生物"
+    }
+  ],
   "card.mpa.continuedcoercion.goagain": [
     {
       "type": 0,
@@ -11210,6 +11240,18 @@
       "value": "你可以将一张手牌置于你的牌库底"
     }
   ],
+  "card.mpa.patronslockbox.carriers": [
+    {
+      "type": 0,
+      "value": "摧毁此牌。若你这样做，在一名对手英雄的操控下生成一个 Frailty、Inertia 或 Bloodrot Pox 衍生物"
+    }
+  ],
+  "card.mpa.patronslockbox.serums": [
+    {
+      "type": 0,
+      "value": "摧毁此牌。若你这样做，获得 1 个行动点"
+    }
+  ],
   "card.mpa.patronslockbox.valuables": [
     {
       "type": 0,
@@ -11258,6 +11300,12 @@
     {
       "type": 0,
       "value": " 点"
+    }
+  ],
+  "card.mpa.stimtekvest.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁此牌以获得 2 点资源？"
     }
   ],
   "card.mpg.arsenal.card.bottom": [

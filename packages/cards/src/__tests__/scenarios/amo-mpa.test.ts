@@ -3324,4 +3324,388 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       });
     });
   });
+
+  describe("Mastery Pack Assassin contract rewards and equipment", () => {
+    const ARAKNI = "arakni|0";
+    const UZURI = "uzuri|0";
+    const CARRIERS = "patron's lockbox: carriers|3";
+    const SERUMS = "patron's lockbox: serums|3";
+    const STIMTEK = "stimtek vest|0";
+    const BRIM = "bounty brim|0";
+    const CLOAK = "scouting cloak|0";
+    const SPREES = "murder sprees|0";
+    const WRAPS = "plaguewarden's wraps|0";
+    const STEP_OVERS = "step overs|0";
+    const ONE_CONTRACT = "plunder the poor|1";
+    const THREE_CONTRACTS = "eradicate|2";
+    const FEVERISH = "feverish strike|1";
+    const ONE_TARGET = ["head jab|1"];
+    const THREE_TARGETS = ["head jab|2", "flex claws|2", "wrecker romp|2", "head jab|1"];
+    const LONG_TARGET_DECK = Array<string>(12).fill("head jab|1");
+    const victim = (deck: string[] = ONE_TARGET, spec: Partial<SeatSpec> = {}): SeatSpec => ({
+      hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT, deck, ...spec,
+    });
+    const passTurnCycle = (game: ReturnType<typeof scenario>) => game.endTurn().endTurn();
+    const playDecliningArakniLook = (game: ReturnType<typeof scenario>, key: string) =>
+      game.play(key).chooseOption("no");
+    const armedLabels = (game: ReturnType<typeof scenario>) =>
+      game.state.modifiers.filter((modifier) => !modifier.consumed).map((modifier) => modifier.ongoingLabel);
+
+    it("implements every printing, with Blade Break only on the pieces that print it", () => {
+      for (const id of ["MPA013", "MPA014", "MPA016"]) expect(cardData[id]!.keywords).toEqual(["Blade Break"]);
+      for (const id of ["MPA010", "MPA011", "MPA012"]) expect(cardData[id]!.keywords ?? []).toEqual([]);
+      for (const id of ["MPA010", "MPA011", "MPA012", "MPA013", "MPA014", "MPA016", "MPA065", "MPA066"]) {
+        expect(isImplemented(cardData[id]!)).toBe(true);
+      }
+    });
+
+    describe("Patron's Lockbox: Carriers", () => {
+      it("destroys itself for a disease of your choice under the opposing hero's control", () => {
+        const game = scenario({ seats: [assassinSeat({ hand: [ONE_CONTRACT], board: [CARRIERS] }), victim()] });
+
+        game.play(ONE_CONTRACT).blockWith().settle();
+        expect(game.state.pendingDecision?.player).toBe(0);
+        expect(game.state.pendingDecision?.chooseHook).toBe("mpa-carriers-disease");
+        game.chooseOption(INERTIA_TOKEN).settle();
+
+        expect(boardNames(game, 1)).toEqual(["Inertia"]);
+        expect(boardNames(game, 0)).toEqual(["Silver"]);
+        game.expectInZone(0, CARRIERS, "graveyard");
+      });
+
+      it("stays in play without a completed contract", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ hand: [ONE_CONTRACT], board: [CARRIERS] }),
+          victim(["wrecker romp|1"]),
+        ] });
+
+        game.play(ONE_CONTRACT).blockWith().settle();
+
+        expect(boardNames(game, 0)).toEqual(["Patron's Lockbox: Carriers"]);
+        expect(boardNames(game, 1)).toEqual([]);
+      });
+    });
+
+    describe("Patron's Lockbox: Serums", () => {
+      it("destroys itself for an action point", () => {
+        const game = scenario({ seats: [assassinSeat({ hand: [ONE_CONTRACT], board: [SERUMS] }), victim()] });
+
+        game.play(ONE_CONTRACT).blockWith().settle();
+
+        game.expectAP(0, 1).expectInZone(0, SERUMS, "graveyard");
+      });
+
+      it("grants one point when one contract completes three times", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ hand: [THREE_CONTRACTS], board: [SERUMS], resources: 1 }),
+          victim(THREE_TARGETS),
+        ] });
+
+        game.play(THREE_CONTRACTS).blockWith().settle();
+
+        game.expectAP(0, 1);
+      });
+    });
+
+    describe("Stimtek Vest", () => {
+      const vest = (heroKey: string, spec: Partial<SeatSpec> = {}) =>
+        assassinSeat({ heroKey, equipment: { ...NO_EQUIPMENT, chest: STIMTEK }, ...spec });
+
+      it("as Uzuri, may be destroyed for 2 resources", () => {
+        const game = scenario({ seats: [vest(UZURI, { hand: [ONE_CONTRACT] }), victim()] });
+
+        game.play(ONE_CONTRACT).blockWith().settle();
+        game.chooseOption("yes").settle();
+
+        game.expectNoEquipment(0, "chest").expectInZone(0, STIMTEK, "graveyard").expectResources(0, 2);
+      });
+
+      it("as Uzuri, can be declined and stays equipped", () => {
+        const game = scenario({ seats: [vest(UZURI, { hand: [ONE_CONTRACT] }), victim()] });
+
+        game.play(ONE_CONTRACT).blockWith().settle();
+        game.chooseOption("no").settle();
+
+        game.expectEquipped(0, "chest", STIMTEK).expectResources(0, 0);
+      });
+
+      it("isn't offered again after it was destroyed by an earlier completion", () => {
+        const game = scenario({ seats: [
+          vest(UZURI, { hand: [THREE_CONTRACTS], resources: 1 }),
+          victim(THREE_TARGETS),
+        ] });
+
+        game.play(THREE_CONTRACTS).blockWith().settle();
+        game.chooseOption("yes").settle();
+
+        expect(game.state.pendingDecision?.kind).not.toBe("optional-effect");
+        game.expectResources(0, 2);
+      });
+
+      it("does nothing for another hero", () => {
+        const game = scenario({ seats: [vest("dr. mortimer|0", { hand: [ONE_CONTRACT] }), victim()] });
+
+        game.play(ONE_CONTRACT).blockWith().settle();
+
+        game.expectEquipped(0, "chest", STIMTEK).expectResources(0, 0);
+      });
+    });
+
+    describe("Bounty Brim", () => {
+      const brim = (heroKey: string, spec: Partial<SeatSpec> = {}) =>
+        assassinSeat({ heroKey, equipment: { ...NO_EQUIPMENT, head: BRIM }, ...spec });
+
+      it("isn't activatable for another hero", () => {
+        const game = scenario({ seats: [brim(UZURI), victim()] });
+
+        expect(() => game.activate(BRIM)).toThrow(/no legal/);
+        game.expectEquipped(0, "head", BRIM);
+      });
+
+      it("as Arakni, creates a Silver on every contract that turn, with go again", () => {
+        const game = scenario({ seats: [
+          brim(ARAKNI, { hand: [THREE_CONTRACTS], resources: 1 }),
+          victim(THREE_TARGETS),
+        ] });
+
+        game.activate(BRIM).settle().expectAP(0, 1).expectInZone(0, BRIM, "graveyard");
+        expect(armedLabels(game)).toContain("whenever you complete a contract, create a Silver token");
+        playDecliningArakniLook(game, THREE_CONTRACTS).blockWith().settle();
+
+        expect(silverCount(game)).toBe(6);
+      });
+
+      it("adds nothing unless activated", () => {
+        const game = scenario({ seats: [brim(ARAKNI, { hand: [ONE_CONTRACT] }), victim()] });
+
+        playDecliningArakniLook(game, ONE_CONTRACT).blockWith().settle();
+
+        expect(silverCount(game)).toBe(1);
+      });
+
+      it("adds nothing on a later turn", () => {
+        const game = scenario({ seats: [brim(ARAKNI, { hand: [ONE_CONTRACT] }), victim(LONG_TARGET_DECK)] });
+
+        game.activate(BRIM).settle();
+        passTurnCycle(game);
+        expect(armedLabels(game)).toEqual([]);
+        playDecliningArakniLook(game, ONE_CONTRACT).blockWith().settle();
+
+        expect(silverCount(game)).toBe(1);
+      });
+    });
+
+    describe("Scouting Cloak", () => {
+      const cloak = (spec: Partial<SeatSpec> = {}) =>
+        assassinSeat({ equipment: { ...NO_EQUIPMENT, chest: CLOAK }, ...spec });
+
+      it("is an attack reaction, not an action", () => {
+        const game = scenario({ seats: [cloak(), victim()] });
+
+        expect(() => game.activate(CLOAK)).toThrow(/no legal/);
+      });
+
+      it("gains 1 life on every contract that turn", () => {
+        const game = scenario({ seats: [cloak({ hand: [THREE_CONTRACTS], resources: 1 }), victim(THREE_TARGETS)] });
+        const life = game.state.players[0]!.life;
+
+        game.play(THREE_CONTRACTS).blockWith().activate(CLOAK).settle();
+        game.expectInZone(0, CLOAK, "graveyard");
+
+        game.expectLife(0, life + 3);
+      });
+
+      it("gains nothing unless activated", () => {
+        const game = scenario({ seats: [cloak({ hand: [ONE_CONTRACT] }), victim()] });
+        const life = game.state.players[0]!.life;
+
+        game.play(ONE_CONTRACT).blockWith().settle();
+
+        game.expectLife(0, life);
+      });
+
+      it("gains nothing on a later turn", () => {
+        const game = scenario({ seats: [
+          cloak({ hand: ["wounding blow|3", ONE_CONTRACT] }),
+          victim(LONG_TARGET_DECK),
+        ] });
+        const life = game.state.players[0]!.life;
+
+        game.play("wounding blow|3").blockWith().activate(CLOAK).settle();
+        game.expectInZone(0, CLOAK, "graveyard");
+        passTurnCycle(game);
+        expect(armedLabels(game)).toEqual([]);
+        game.play(ONE_CONTRACT).blockWith().settle();
+
+        expect(silverCount(game)).toBe(1);
+        game.expectLife(0, life);
+      });
+    });
+
+    describe("Murder Sprees", () => {
+      const sprees = (spec: Partial<SeatSpec> = {}) =>
+        assassinSeat({ equipment: { ...NO_EQUIPMENT, legs: SPREES }, ...spec });
+
+      it("gains only one action point when one contract completes three times", () => {
+        const game = scenario({ seats: [sprees({ hand: [THREE_CONTRACTS], resources: 1 }), victim(THREE_TARGETS)] });
+
+        game.activate(SPREES).settle().expectAP(0, 1).expectInZone(0, SPREES, "graveyard");
+        expect(armedLabels(game)).toContain("the next time you complete a contract, gain an action point");
+        game.play(THREE_CONTRACTS).blockWith().settle();
+
+        game.expectAP(0, 1);
+        expect(armedLabels(game)).toEqual([]);
+      });
+
+      it("gains nothing unless activated", () => {
+        const game = scenario({ seats: [sprees({ hand: [ONE_CONTRACT] }), victim()] });
+
+        game.play(ONE_CONTRACT).blockWith().settle();
+
+        game.expectEquipped(0, "legs", SPREES).expectAP(0, 0);
+      });
+
+      it("gains nothing on a later turn", () => {
+        const game = scenario({ seats: [sprees({ hand: [ONE_CONTRACT] }), victim(LONG_TARGET_DECK)] });
+
+        game.activate(SPREES).settle();
+        passTurnCycle(game);
+        game.play(ONE_CONTRACT).blockWith().settle();
+
+        expect(silverCount(game)).toBe(1);
+        game.expectAP(0, 0);
+      });
+    });
+
+    describe("Plaguewarden's Wraps", () => {
+      const wraps = (spec: Partial<SeatSpec> = {}) =>
+        assassinSeat({ equipment: { ...NO_EQUIPMENT, arms: WRAPS }, hand: [FEVERISH], resources: 2, ...spec });
+      const hitWithWraps = (game: ReturnType<typeof scenario>) =>
+        game.play(FEVERISH).blockWith().activate(WRAPS, { targetCard: FEVERISH }).settle();
+
+      it("needs an Assassin attack action card to target", () => {
+        const game = scenario({ seats: [
+          wraps({ hand: ["wounding blow|3"], board: ["frailty|0"] }),
+          victim(),
+        ] });
+
+        game.play("wounding blow|3").blockWith();
+
+        expect(() => game.activate(WRAPS, { targetCard: "wounding blow|3" })).toThrow(/no legal/);
+        game.expectEquipped(0, "arms", WRAPS);
+      });
+
+      it("hits with no disease and gives nothing", () => {
+        const game = scenario({ seats: [wraps(), victim()] });
+
+        hitWithWraps(game);
+
+        game.expectInZone(0, WRAPS, "graveyard");
+        expect(game.state.pendingDecision?.chooseHook).toBeUndefined();
+        expect(boardNames(game, 1)).toEqual([]);
+      });
+
+      it("gives a lone disease without asking", () => {
+        const game = scenario({ seats: [wraps({ board: ["frailty|0"] }), victim()] });
+
+        hitWithWraps(game);
+
+        expect(game.state.pendingDecision?.chooseHook).toBeUndefined();
+        expect(boardNames(game, 0)).toEqual([]);
+        expect(boardNames(game, 1)).toEqual(["Frailty"]);
+      });
+
+      it("asks which disease to give when you control several", () => {
+        const game = scenario({ seats: [wraps({ board: ["frailty|0", "inertia|0"] }), victim()] });
+
+        hitWithWraps(game);
+        expect(game.state.pendingDecision?.chooseHook).toBe("mpa-plaguewarden-give");
+        game.chooseCard("inertia|0").settle();
+
+        expect(boardNames(game, 0)).toEqual(["Frailty"]);
+        expect(boardNames(game, 1)).toEqual(["Inertia"]);
+      });
+
+      it("gives nothing without the activation", () => {
+        const game = scenario({ seats: [wraps({ board: ["frailty|0"] }), victim()] });
+
+        game.play(FEVERISH).blockWith().settle();
+
+        expect(boardNames(game, 0)).toEqual(["Frailty"]);
+        expect(boardNames(game, 1)).toEqual([]);
+      });
+    });
+
+    describe("Step Overs", () => {
+      const DEFENSE_REACTION = "unmovable|3";
+      const steps = (spec: Partial<SeatSpec> = {}) =>
+        assassinSeat({ equipment: { ...NO_EQUIPMENT, legs: STEP_OVERS }, hand: [FEVERISH], resources: 2, ...spec });
+      const defenderSeat = (spec: Partial<SeatSpec>) => victim(["wrecker romp|1"], { resources: 3, ...spec });
+
+      it("is illegal before the defending hero plays a defense reaction", () => {
+        const game = scenario({ seats: [steps(), defenderSeat({ hand: [DEFENSE_REACTION] })] });
+
+        game.play(FEVERISH).blockWith();
+
+        expect(() => game.activate(STEP_OVERS, { targetCard: FEVERISH })).toThrow(/no legal/);
+      });
+
+      it.each<[string, Partial<SeatSpec>]>([
+        ["hand", { hand: [DEFENSE_REACTION] }],
+        ["arsenal", { arsenalFaceDown: [DEFENSE_REACTION] }],
+      ])("grants go again after a defense reaction from %s", (_zone, spec) => {
+        const game = scenario({ seats: [steps(), defenderSeat(spec)] });
+
+        game.play(FEVERISH).blockWith().passPriority().react(DEFENSE_REACTION, { settle: false }).passPriority();
+        game.activate(STEP_OVERS, { targetCard: FEVERISH }).settle();
+
+        game.expectInZone(0, STEP_OVERS, "graveyard").expectAP(0, 1);
+      });
+
+      it("doesn't count a defense reaction from an earlier chain link", () => {
+        const game = scenario({ seats: [
+          steps({ hand: ["head jab|1", FEVERISH] }),
+          defenderSeat({ hand: [DEFENSE_REACTION] }),
+        ] });
+
+        game.play("head jab|1").blockWith().passPriority().react(DEFENSE_REACTION).settle();
+        game.play(FEVERISH).blockWith();
+
+        expect(() => game.activate(STEP_OVERS, { targetCard: FEVERISH })).toThrow(/no legal/);
+      });
+    });
+
+    it.each([
+      [CLOAK, "chest"],
+      [WRAPS, "arms"],
+      [STEP_OVERS, "legs"],
+    ] as const)("%s re-equips from the graveyard for 2 Silver", (key, slot) => {
+      const game = scenario({
+        active: 1,
+        seats: [
+          assassinSeat({ graveyard: [key], board: ["silver|0", "silver|0", "silver|0"] }),
+          victim(),
+        ],
+      });
+
+      game.endTurn();
+      game.chooseOption("yes");
+
+      game.expectEquipped(0, slot, key).expectNotInZone(0, key, "graveyard");
+      expect(silverCount(game)).toBe(1);
+    });
+
+    it("isn't offered a re-equip with fewer than 2 Silver", () => {
+      const game = scenario({
+        active: 1,
+        seats: [assassinSeat({ graveyard: [CLOAK], board: ["silver|0"] }), victim()],
+      });
+
+      game.endTurn();
+
+      game.expectInZone(0, CLOAK, "graveyard");
+      expect(game.state.pendingDecision?.chooseHook).toBeUndefined();
+      expect(silverCount(game)).toBe(1);
+    });
+  });
 });

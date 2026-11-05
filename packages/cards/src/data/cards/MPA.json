@@ -83,6 +83,58 @@
     "set": "MPA"
   },
   {
+    "id": "MPA010",
+    "name": "Scouting Cloak",
+    "cardType": "equipment",
+    "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nAttack Reaction - Destroy this: Until end of turn, whenever you complete a contract, gain 1{h}.",
+    "defense": 0,
+    "classes": ["assassin"],
+    "subtypes": ["chest"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA011",
+    "name": "Plaguewarden's Wraps",
+    "cardType": "equipment",
+    "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nAttack Reaction - Destroy this: Target Assassin attack action card gets \"When this hits a hero, give them a disease you control.\"",
+    "defense": 0,
+    "classes": ["assassin"],
+    "subtypes": ["arms"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA012",
+    "name": "Step Overs",
+    "cardType": "equipment",
+    "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nAttack Reaction - Destroy this: Target Assassin attack action card gets go again. Activate this only if the defending hero has played a defense reaction this chain link.",
+    "defense": 0,
+    "classes": ["assassin"],
+    "subtypes": ["legs"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA013",
+    "name": "Bounty Brim",
+    "cardType": "equipment",
+    "text": "Action - Destroy this: Until end of turn, whenever you complete a contract, create a Silver token. Activate this only if you are Arakni. Go again\nBlade Break",
+    "defense": 1,
+    "classes": ["assassin"],
+    "subtypes": ["head"],
+    "keywords": ["Blade Break"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA014",
+    "name": "Stimtek Vest",
+    "cardType": "equipment",
+    "text": "When you complete a contract, if you are Uzuri, you may destroy this. If you do, gain {r}{r}.\nBlade Break",
+    "defense": 1,
+    "classes": ["assassin"],
+    "subtypes": ["chest"],
+    "keywords": ["Blade Break"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA015",
     "name": "Wristcuff Injectors",
     "cardType": "equipment",
@@ -90,6 +142,17 @@
     "defense": 1,
     "classes": ["assassin"],
     "subtypes": ["arms"],
+    "keywords": ["Blade Break"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA016",
+    "name": "Murder Sprees",
+    "cardType": "equipment",
+    "text": "Action - Destroy this: The next time you complete a contract this turn, gain an action point. Go again\nBlade Break",
+    "defense": 1,
+    "classes": ["assassin"],
+    "subtypes": ["legs"],
     "keywords": ["Blade Break"],
     "set": "MPA"
   },
@@ -603,6 +666,32 @@
     "cost": 0,
     "defense": 3,
     "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA065",
+    "name": "Patron's Lockbox: Carriers",
+    "cardType": "action",
+    "text": "Go again\nWhen you complete a contract, destroy this. If you do, create a Frailty, Inertia, or Bloodrot Pox token under an opposing hero's control.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["item"],
+    "keywords": ["Go again"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA066",
+    "name": "Patron's Lockbox: Serums",
+    "cardType": "action",
+    "text": "Go again\nWhen you complete a contract, destroy this. If you do, gain 1 action point.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["item"],
+    "keywords": ["Go again"],
     "set": "MPA"
   },
   {

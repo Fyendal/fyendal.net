@@ -3634,6 +3634,37 @@ describe("combat", () => {
     expect(optionCard?.defCounters).toBeUndefined();
   });
 
+  it.each(["hand", "arsenal"] as const)(
+    "records the seat that plays a defense reaction from %s on the chain link",
+    (zone) => {
+      let s = makeGame(34);
+      const atk = giveCard(s, 0, "ATK6");
+      const dr = 998;
+      if (zone === "hand") player(s, 1).hand.push({ instanceId: dr, cardId: "DREACT", owner: 1 });
+      else player(s, 1).arsenal.push({ instanceId: dr, cardId: "DREACT", owner: 1 });
+      const step = (seat: number, intent: Parameters<typeof applyIntent>[2]) => {
+        const r = applyIntent(s, seat, intent);
+        if (!r.ok) throw new Error(r.error);
+        s = r.state;
+      };
+
+      step(0, { kind: "play-card", instanceId: atk, pitchInstanceIds: [] });
+      step(1, { kind: "defend", instanceIds: [] });
+      step(0, { kind: "pass" });
+      expect(s.chain[0]!.flags["defenseReactionBySeat:1"]).toBeUndefined();
+      step(1, zone === "hand"
+        ? { kind: "play-card", instanceId: dr, pitchInstanceIds: [] }
+        : { kind: "play-from-arsenal", instanceId: dr, pitchInstanceIds: [] });
+
+      expect(s.chain[0]!.flags["defenseReactionBySeat:1"]).toBe(true);
+      expect(s.chain[0]!.flags["defenseReactionBySeat:0"]).toBeUndefined();
+      // Defense reactions stay out of the attack-reaction bookkeeping.
+      expect(s.chain[0]!.flags["reactionBySeat:1"]).toBeUndefined();
+      expect(s.chain[0]!.flags.reactionPlayedOrActivated).toBeUndefined();
+      expect(s.chain[0]!.flags.reactionCount).toBeUndefined();
+    },
+  );
+
   it("a defense reaction resolves as a defending card with its printed defense (8.1.3b)", () => {
     let s = makeGame(34);
     const atk = giveCard(s, 0, "ATK6"); // go again keeps the turn going after

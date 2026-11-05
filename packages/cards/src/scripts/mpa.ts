@@ -1,4 +1,12 @@
-import type { CardInstance, CardScript, DeepReadonly, Modifier, ScriptCtx } from "@fyendal/engine";
+import type {
+  ActivatedAbility,
+  CardInstance,
+  CardScript,
+  DeepReadonly,
+  Modifier,
+  ScriptCtx,
+  TriggerDef,
+} from "@fyendal/engine";
 import {
   BLOODROT_POX,
   FRAILTY,
@@ -290,7 +298,174 @@ function repeatReconOptions(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
   );
 }
 
+function patronsLockbox(label: string, labelId: string, reward: (ctx: ScriptCtx) => void): CardScript {
+  return {
+    triggers: [
+      {
+        event: "contract-completed",
+        sourceZone: "arena",
+        label,
+        labelMessage: { id: labelId },
+        effect(ctx) {
+          if (ctx.destroyPermanent(ctx.self.instanceId)) reward(ctx);
+        },
+      },
+    ],
+  };
+}
+
+/** Fires on contracts while this card's delayed effect is armed, even from the graveyard. */
+function armedContractTrigger(
+  label: string,
+  labelMessage: TriggerDef["labelMessage"],
+  effect: (ctx: ScriptCtx) => void,
+  { once = false }: { once?: boolean } = {},
+): TriggerDef {
+  return {
+    event: "contract-completed",
+    label,
+    labelMessage,
+    condition: (ctx) => !!pendingDelayedEffect(ctx),
+    // Consumed on trigger, so a second completion from one banish can't also claim "the next time".
+    ...(once ? { onTrigger: (ctx: ScriptCtx) => void consumeDelayedEffect(ctx) } : {}),
+    effect,
+  };
+}
+
+function destroySelfAction(ability: Pick<ActivatedAbility, "onActivate" | "canActivate">): ActivatedAbility {
+  return { cost: 0, isAttack: false, goAgain: true, destroySelfCost: true, ...ability };
+}
+
+function silverEquipReaction(
+  ability: Pick<ActivatedAbility, "onActivate" | "canActivate" | "targetCardOptions">,
+  ...triggers: TriggerDef[]
+): CardScript {
+  return {
+    triggers: [equipWithSilver(2), ...triggers],
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "attack-reaction",
+      destroySelfCost: true,
+      ...ability,
+    },
+  };
+}
+
+function giveDiseaseToHitHero(ctx: ScriptCtx, seat: number): void {
+  const diseases = controlledDiseases(ctx, ctx.seat);
+  if (diseases.length === 1) {
+    ctx.giveControl(diseases[0]!.instanceId, seat);
+  } else if (diseases.length > 1) {
+    ctx.requestCardChoice(
+      "mpa-plaguewarden-give",
+      decisionPrompt("Give a disease token you control to the hit hero", "card.obk.patientzero.disease.give"),
+      diseases.map((card) => card.instanceId),
+    );
+  }
+}
+
 export const mpa: Record<string, CardScript> = {
+  "scouting cloak|0": silverEquipReaction(
+    {
+      onActivate(ctx) {
+        armDelayedEffect(
+          ctx,
+          ongoingLabel("whenever you complete a contract, gain 1 life", "card.effect.mpa.scoutingcloak"),
+        );
+      },
+    },
+    armedContractTrigger(
+      "Gain 1 life",
+      decisionMessage("card.trigger.common.life.gain", { amount: 1 }),
+      (ctx) => ctx.gainLife(ctx.seat, 1),
+    ),
+  ),
+
+  "plaguewarden's wraps|0": {
+    ...silverEquipReaction({
+      targetCardOptions: assassinAttackActionTargets,
+      onActivate(ctx) {
+        if (ctx.playTargetInstanceId === undefined) return;
+        armGrantedHitRider(
+          ctx,
+          ongoingLabel("when it hits a hero, give them a disease you control", "card.effect.mpa.plaguewardens"),
+          ctx.playTargetInstanceId,
+        );
+      },
+    }),
+    ...chainHitRider(giveDiseaseToHitHero),
+    onChoose(ctx, hook, option) {
+      if (hook === "mpa-plaguewarden-give") ctx.giveControl(Number(option), opponentSeat(ctx));
+    },
+  },
+
+  "step overs|0": silverEquipReaction({
+    targetCardOptions: assassinAttackActionTargets,
+    canActivate: (ctx) => ctx.link?.flags[`defenseReactionBySeat:${opponentSeat(ctx)}`] === true,
+    onActivate(ctx) {
+      if (ctx.playTargetInstanceId !== undefined) ctx.grantGoAgain(ctx.playTargetInstanceId);
+    },
+  }),
+
+  "bounty brim|0": {
+    activated: destroySelfAction({
+      canActivate: youAreArakni,
+      onActivate(ctx) {
+        armDelayedEffect(
+          ctx,
+          ongoingLabel("whenever you complete a contract, create a Silver token", "card.effect.mpa.bountybrim"),
+        );
+      },
+    }),
+    triggers: [
+      armedContractTrigger(
+        "Create a Silver token",
+        decisionMessage("card.mpa.bountybrim.silver"),
+        (ctx) => ctx.createToken(SILVER),
+      ),
+    ],
+  },
+
+  "stimtek vest|0": {
+    triggers: [
+      {
+        event: "contract-completed",
+        sourceZone: "arena",
+        optional: true,
+        label: "Destroy this to gain 2 resources?",
+        labelMessage: { id: "card.mpa.stimtekvest.destroy" },
+        condition: youAreUzuri,
+        // A later completion's layer has nothing left to destroy once one was accepted.
+        canAccept: (ctx) =>
+          youAreUzuri(ctx) && ctx.player(ctx.seat).equipment.chest?.instanceId === ctx.self.instanceId,
+        effect(ctx) {
+          if (ctx.destroyPermanent(ctx.self.instanceId)) ctx.changeResources(ctx.seat, 2);
+        },
+      },
+    ],
+  },
+
+  "murder sprees|0": {
+    activated: destroySelfAction({
+      onActivate(ctx) {
+        armDelayedEffect(
+          ctx,
+          ongoingLabel("the next time you complete a contract, gain an action point", "card.effect.mpa.murdersprees"),
+        );
+      },
+    }),
+    triggers: [
+      armedContractTrigger(
+        "Gain 1 action point",
+        decisionMessage("card.trigger.common.actionpoint.gain", { amount: 1 }),
+        (ctx) => ctx.gainActionPoint(),
+        { once: true },
+      ),
+    ],
+  },
+
   "phial of calamity|0": {
     triggers: [equipWithSilver(2)],
     activated: {
@@ -342,11 +517,7 @@ export const mpa: Record<string, CardScript> = {
   },
 
   "wristcuff injectors|0": {
-    activated: {
-      cost: 0,
-      isAttack: false,
-      goAgain: true,
-      destroySelfCost: true,
+    activated: destroySelfAction({
       canActivate: youAreMortimer,
       onActivate(ctx) {
         armDelayedEffect(
@@ -358,7 +529,7 @@ export const mpa: Record<string, CardScript> = {
           ),
         );
       },
-    },
+    }),
     onFriendlyPlay(ctx, played) {
       if (!isAttackActionCard(ctx, played) || !ctx.cardTypes(played).includes("assassin")) return;
       // The granted rider is the card's other modifier; only the waiting effect is consumed.
@@ -379,13 +550,7 @@ export const mpa: Record<string, CardScript> = {
   },
 
   "cadaver handlers|0": {
-    triggers: [equipWithSilver(2)],
-    activated: {
-      cost: 0,
-      isAttack: false,
-      goAgain: false,
-      timing: "attack-reaction",
-      destroySelfCost: true,
+    ...silverEquipReaction({
       targetCardOptions: activeAssassinAttack,
       canActivate: (ctx) => isInfected(ctx, opponentSeat(ctx)),
       onActivate(ctx) {
@@ -397,20 +562,14 @@ export const mpa: Record<string, CardScript> = {
           ...ongoingLabel("defending cards get -1 defense this chain link", "card.effect.mpa.sickeningweakness"),
         });
       },
-    },
+    }),
     // Also read while equipped, so only the activated effect weakens defenders.
     modifyDefendingDefense: cadaverDefense,
     modifyDefendingEquipmentDefense: cadaverDefense,
   },
 
   "mask of one million eyes|0": {
-    triggers: [equipWithSilver(2)],
-    activated: {
-      cost: 0,
-      isAttack: false,
-      goAgain: false,
-      timing: "attack-reaction",
-      destroySelfCost: true,
+    ...silverEquipReaction({
       onActivate(ctx) {
         ctx.drawCards(ctx.seat, 1);
         const hand = ctx.player(ctx.seat).hand;
@@ -424,7 +583,7 @@ export const mpa: Record<string, CardScript> = {
           hand.map((card) => card.instanceId),
         );
       },
-    },
+    }),
     onChoose(ctx, hook, option) {
       if (hook === "mpa-mask-bottom") ctx.putOnDeckBottom(Number(option));
     },
@@ -643,11 +802,7 @@ export const mpa: Record<string, CardScript> = {
   "needlebane steppers|0": NEEDLEBANE,
 
   "puredew panacea|0": {
-    activated: {
-      cost: 0,
-      isAttack: false,
-      goAgain: true,
-      destroySelfCost: true,
+    activated: destroySelfAction({
       onActivate(ctx) {
         const diseases = controlledDiseases(ctx, ctx.seat);
         if (diseases.length === 1) {
@@ -660,7 +815,7 @@ export const mpa: Record<string, CardScript> = {
           );
         }
       },
-    },
+    }),
     onChoose(ctx, hook, option) {
       if (hook === "mpa-puredew-cure") cureForLife(ctx, Number(option));
     },
@@ -817,19 +972,28 @@ export const mpa: Record<string, CardScript> = {
   "free of burdens|2": FREE_OF_BURDENS,
   "free of burdens|3": FREE_OF_BURDENS,
 
-  "patron's lockbox: valuables|3": {
-    triggers: [
-      {
-        event: "contract-completed",
-        sourceZone: "arena",
-        label: "Destroy this. If you do, create 2 Silver tokens",
-        labelMessage: { id: "card.mpa.patronslockbox.valuables" },
-        effect(ctx) {
-          if (ctx.destroyPermanent(ctx.self.instanceId)) ctx.createTokens(SILVER, 2);
-        },
-      },
-    ],
+  "patron's lockbox: valuables|3": patronsLockbox(
+    "Destroy this. If you do, create 2 Silver tokens",
+    "card.mpa.patronslockbox.valuables",
+    (ctx) => ctx.createTokens(SILVER, 2),
+  ),
+
+  "patron's lockbox: carriers|3": {
+    ...patronsLockbox(
+      "Destroy this. If you do, create a Frailty, Inertia, or Bloodrot Pox token under an opposing hero's control",
+      "card.mpa.patronslockbox.carriers",
+      (ctx) => requestDiseaseTokenChoice(ctx, "mpa-carriers-disease"),
+    ),
+    onChoose(ctx, hook, option) {
+      if (hook === "mpa-carriers-disease") createChosenDisease(ctx, option);
+    },
   },
+
+  "patron's lockbox: serums|3": patronsLockbox(
+    "Destroy this. If you do, gain 1 action point",
+    "card.mpa.patronslockbox.serums",
+    (ctx) => ctx.gainActionPoint(),
+  ),
 
   "bribe the guards|3": {
     activated: {

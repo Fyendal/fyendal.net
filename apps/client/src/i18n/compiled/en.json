@@ -4118,6 +4118,12 @@
       "value": "the hit hero banishes a card from their arsenal"
     }
   ],
+  "card.effect.mpa.bountybrim": [
+    {
+      "type": 0,
+      "value": "whenever you complete a contract, create a Silver token"
+    }
+  ],
   "card.effect.mpa.easyprey": [
     {
       "type": 0,
@@ -4132,6 +4138,12 @@
       "value": " power while attacking an infected hero"
     }
   ],
+  "card.effect.mpa.murdersprees": [
+    {
+      "type": 0,
+      "value": "the next time you complete a contract, gain an action point"
+    }
+  ],
   "card.effect.mpa.outbreak": [
     {
       "type": 0,
@@ -4144,10 +4156,22 @@
       "value": "create a Frailty, Inertia, or Bloodrot Pox token under the hit hero's control"
     }
   ],
+  "card.effect.mpa.plaguewardens": [
+    {
+      "type": 0,
+      "value": "when it hits a hero, give them a disease you control"
+    }
+  ],
   "card.effect.mpa.prolongedillness": [
     {
       "type": 0,
       "value": "whenever a disease token is destroyed, if it's the first with that name, create a copy of it under the same hero's control"
+    }
+  ],
+  "card.effect.mpa.scoutingcloak": [
+    {
+      "type": 0,
+      "value": "whenever you complete a contract, gain 1 life"
     }
   ],
   "card.effect.mpa.sickeningweakness": [
@@ -11951,6 +11975,12 @@
       "value": "count"
     }
   ],
+  "card.mpa.bountybrim.silver": [
+    {
+      "type": 0,
+      "value": "Create a Silver token"
+    }
+  ],
   "card.mpa.continuedcoercion.goagain": [
     {
       "type": 0,
@@ -12023,6 +12053,18 @@
       "value": "You may put a card from your hand on the bottom of your deck"
     }
   ],
+  "card.mpa.patronslockbox.carriers": [
+    {
+      "type": 0,
+      "value": "Destroy this. If you do, create a Frailty, Inertia, or Bloodrot Pox token under an opposing hero's control"
+    }
+  ],
+  "card.mpa.patronslockbox.serums": [
+    {
+      "type": 0,
+      "value": "Destroy this. If you do, gain 1 action point"
+    }
+  ],
   "card.mpa.patronslockbox.valuables": [
     {
       "type": 0,
@@ -12071,6 +12113,12 @@
     {
       "type": 0,
       "value": " less to play this chain link"
+    }
+  ],
+  "card.mpa.stimtekvest.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy this to gain 2 resources?"
     }
   ],
   "card.mpg.arsenal.card.bottom": [

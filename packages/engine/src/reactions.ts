@@ -849,6 +849,9 @@ export function finishReactionPlay(
     link.flags[`reactionBySeat:${seat}`] = true;
     link.flags.reactionCount = Number(link.flags.reactionCount ?? 0) + 1;
   }
+  if (link && dataOf(state, removed.cardId).cardType === "defense-reaction") {
+    link.flags[`defenseReactionBySeat:${seat}`] = true;
+  }
   const { goAgain, layers: playedTriggers } = runtime.dispatchFlow("announceCardPlayed", state, seat, removed, origin);
   // reactions/instants become the top stack layer: their effects resolve only
   // once both players pass in succession (CR 5.3.2); a defense reaction becomes
