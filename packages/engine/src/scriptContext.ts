@@ -3041,7 +3041,7 @@ export function makeCtx(
       if (privateSource) {
         logPrivate(
           state,
-          found.owner.seat,
+          found.fromZone === "deck" ? seat : found.owner.seat,
           detail,
           gameLogMessage(
             `a card is put on the ${toBottom ? "bottom" : "top"} of the deck`,
@@ -3095,7 +3095,7 @@ export function makeCtx(
       if (privateSource) {
         logPrivate(
           state,
-          found.owner.seat,
+          found.fromZone === "deck" ? seat : found.owner.seat,
           detail,
           gameLogMessage(
             `a card is put ${depth}${suffix} from the top of the deck`,
@@ -3109,7 +3109,7 @@ export function makeCtx(
       return true;
     },
     putOnDeckBottom(instanceId) {
-      return runtime.commands.putCardOnDeckBottom(state, instanceId);
+      return runtime.commands.putCardOnDeckBottom(state, instanceId, false, seat);
     },
     shuffleIntoDeck(instanceIds) {
       return runtime.commands.shuffleCardsIntoDeck(state, instanceIds);

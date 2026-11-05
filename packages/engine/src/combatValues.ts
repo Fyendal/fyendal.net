@@ -399,6 +399,7 @@ function attackValueAdjustments(
   state: GameStateInternal,
   runtime: EngineRuntime,
   link: ChainLinkState,
+  excludeInstanceId?: number,
 ): AttackValueAdjustment[] {
   const out: AttackValueAdjustment[] = [];
   const data = dataOf(state, link.attackingCard.cardId);
@@ -435,7 +436,9 @@ function attackValueAdjustments(
     add(findCardAnywhere(state, piercing.sourceInstanceId)?.card, piercing.amount);
   }
 
-  add(link.attackingCard, conditionalAttackBonus(state, runtime, link.attacker, link.attackingCard, link));
+  if (link.attackingCard.instanceId !== excludeInstanceId) {
+    add(link.attackingCard, conditionalAttackBonus(state, runtime, link.attacker, link.attackingCard, link));
+  }
   if (!heroAbilitiesDisabled(state, link.attacker)) {
     add(attacker.hero, conditionalAttackBonus(state, runtime, link.attacker, attacker.hero, link));
   }
@@ -449,7 +452,10 @@ function attackValueAdjustments(
     weapons: true,
   });
   for (const source of attackerSources) {
-    if (source.instanceId === link.attackingCard.instanceId) continue;
+    if (
+      source.instanceId === link.attackingCard.instanceId ||
+      source.instanceId === excludeInstanceId
+    ) continue;
     const hook = scriptOf(state, source.cardId, source)?.modifyFriendlyAttack;
     if (hook) {
       add(
@@ -483,6 +489,7 @@ function attackValueAdjustments(
     if (modifier.scope !== "until-end-of-turn" && modifier.scope !== "static") continue;
     if (!modifierApplies(state, modifier, link)) continue;
     if (modifier.sourceInstanceId === link.attackingCard.instanceId) continue;
+    if (modifier.sourceInstanceId === excludeInstanceId) continue;
     const found = findCardAnywhere(state, modifier.sourceInstanceId);
     if (!found) continue;
     const hook = scriptOf(state, found.card.cardId, found.card)?.modifyAttack;
@@ -1250,12 +1257,10 @@ export function grantsAuraAttackMarker(
 }
 
 /**
- * The attack's current bonus over its base {p}: modifier-granted plus
- * script-granted contributions from the attacking object, hero, reactions,
- * friendly continuous sources, and lingering effect sources.
- * `excludeInstanceId` drops a card's own conditional contribution, so "if
- * this has {p} greater than its base" does not count the bonus the check
- * itself would grant (and cannot recurse).
+ * The attack's current bonus over its base {p}, from the same adjustments as
+ * `computeAttack`. `excludeInstanceId` drops a card's own conditional
+ * contribution, so "if this has {p} greater than its base" does not count the
+ * bonus the check itself would grant (and cannot recurse).
  */
 export function attackBonusAboveBase(
   state: GameStateInternal,
@@ -1265,54 +1270,6 @@ export function attackBonusAboveBase(
 ): number {
   if (scriptOf(state, link.attackingCard.cardId, link.attackingCard)
     ?.unmodifiableCharacteristics?.includes("power")) return 0;
-  let n = activeModifiers(state, link, [
-    "chain-link",
-    "combat-chain",
-    "until-end-of-turn",
-    "static",
-  ])
-    .reduce((total, modifier) => total + (modifier.attack ?? 0), 0);
-  // +1{p} counters and this-turn power grants on the attacking card are
-  // above-base too
-  const liveAttack =
-    findCardAnywhere(state, link.attackingCard.instanceId)?.card ?? link.attackingCard;
-  n += liveAttack.counters?.power ?? 0;
-  n += liveAttack.tempPower ?? 0;
-  const attacker = state.players[link.attacker] as PlayerState;
-  if (link.attackingCard.instanceId !== excludeInstanceId) {
-    n += conditionalAttackBonus(state, runtime, link.attacker, link.attackingCard, link);
-  }
-  if (!heroAbilitiesDisabled(state, link.attacker)) {
-    n += conditionalAttackBonus(state, runtime, link.attacker, attacker.hero, link);
-  }
-  for (const r of link.reactions) {
-    n += conditionalAttackBonus(state, runtime, link.attacker, r, link);
-  }
-  for (const source of hookSources(state, link.attacker, {
-    board: true,
-    equipment: true,
-    weapons: true,
-  })) {
-    if (
-      source.instanceId === link.attackingCard.instanceId ||
-      source.instanceId === excludeInstanceId
-    ) continue;
-    const hook = scriptOf(state, source.cardId, source)?.modifyFriendlyAttack;
-    if (hook) {
-      n += hook(runtime.makeCtx(state, link.attacker, source, link), link.attackingCard);
-    }
-  }
-  for (const mod of state.modifiers) {
-    if (mod.scope !== "until-end-of-turn" && mod.scope !== "static") continue;
-    if (!modifierApplies(state, mod, link)) continue;
-    if (mod.sourceInstanceId === link.attackingCard.instanceId) continue;
-    if (mod.sourceInstanceId === excludeInstanceId) continue;
-    const src = findCardAnywhere(state, mod.sourceInstanceId);
-    if (!src) continue;
-    const script = scriptOf(state, src.card.cardId, src.card);
-    if (script?.modifyAttack) {
-      n += script.modifyAttack(runtime.makeCtx(state, src.seat, src.card, link));
-    }
-  }
-  return n;
+  return attackValueAdjustments(state, runtime, link, excludeInstanceId)
+    .reduce((total, adjustment) => total + adjustment.amount, 0);
 }

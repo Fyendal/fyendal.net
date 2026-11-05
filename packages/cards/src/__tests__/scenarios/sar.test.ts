@@ -699,6 +699,52 @@ describe("SAR — traps", () => {
     expect(markedCount(s, 0)).toBe(0); // Den wasn't played
   });
 
+  it("Inertia Trap counts Piercing against defending equipment as above base", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, weapons: ["spider's bite|0"] },
+        { hero: "dorinthea", hand: ["inertia trap|1"], equipment: { head: "ironrot helm|0" } },
+      ],
+    });
+    s.attackWithWeapon("spider's bite|0")
+      .blockWith("ironrot helm|0")
+      .passPriority()
+      .react("inertia trap|1")
+      .settle();
+    s.expectInZone(0, "inertia|0", "board");
+  });
+
+  it("Inertia Trap does nothing when Piercing has no equipment to pierce", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, weapons: ["spider's bite|0"] },
+        { hero: "dorinthea", hand: ["inertia trap|1"], equipment: { head: "ironrot helm|0" } },
+      ],
+    });
+    s.attackWithWeapon("spider's bite|0")
+      .blockWith()
+      .passPriority()
+      .react("inertia trap|1")
+      .settle();
+    expect(s.state.players[0]!.board).toHaveLength(0);
+  });
+
+  it("Inertia Trap does nothing when suppressed Piercing leaves the attack at base", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, weapons: ["spider's bite|0"] },
+        { hero: "dorinthea", hand: ["inertia trap|1"], equipment: { head: "ironrot helm|0" } },
+      ],
+    });
+    s.state.players[0]!.flags.attacksCannotGainPower = true;
+    s.attackWithWeapon("spider's bite|0")
+      .blockWith("ironrot helm|0")
+      .passPriority()
+      .react("inertia trap|1")
+      .settle();
+    expect(s.state.players[0]!.board).toHaveLength(0);
+  });
+
   it("Den of the Spider marks the attacking hero when the attack is above base", () => {
     const s = scenario({
       seats: [

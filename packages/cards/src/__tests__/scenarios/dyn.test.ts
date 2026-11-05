@@ -64,6 +64,33 @@ describe("DYN — registration and heroes", () => {
     });
   });
 
+  it("hides the card Arakni, Huntsman bottoms from its owner and spectators", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "arakni, huntsman|0",
+          hand: ["DYN133"],
+          resources: 3,
+        },
+        { hero: "dorinthea", deck: ["head jab|1", "head jab|2"] },
+      ],
+    });
+    const topId = g.state.players[1]!.deck[0]!.instanceId;
+    const logLength = g.state.log.length;
+
+    g.play("DYN133").chooseOption("yes").chooseOption("bottom");
+
+    expect(g.state.players[1]!.deck.at(-1)?.instanceId).toBe(topId);
+    const moves = g.state.log.slice(logLength).filter((entry) =>
+      entry.publicPayload?.message.id === "engine.log.card.put.on.deck.bottom.hidden",
+    );
+    expect(moves).toHaveLength(1);
+    expect(moves[0]!.seatPayloads?.[0]?.message.id).toBe("engine.log.card.put.on.deck.bottom");
+    expect(moves[0]!.seatPayloads?.[1]).toBeNull();
+    expect(moves[0]!.seatText?.[1]).toBeNull();
+  });
+
   it.each(CONTRACT_PRINTINGS)("$id triggers Arakni, Huntsman when played", (contract) => {
     if (contract.cardType === "action") {
       const g = scenario({

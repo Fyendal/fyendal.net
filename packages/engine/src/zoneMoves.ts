@@ -955,6 +955,7 @@ interface DeckEntry {
   card: CardInstance;
   /** The card left a zone its owner's opponent cannot see. */
   privateSource: boolean;
+  fromDeck: boolean;
 }
 
 /** Move one card into its owner's deck (appended at the bottom) without
@@ -1021,7 +1022,7 @@ function moveCardIntoOwnerDeck(
   }
   if (found.fromArena) fireLeaveArena(state, runtime, found.owner.seat, found.card, "deck", asActivationCost);
   if (attackerSeat !== undefined) fireLeaveCombatChain(state, runtime, attackerSeat, found.card, "attacking");
-  return { owner: found.owner, card: found.card, privateSource };
+  return { owner: found.owner, card: found.card, privateSource, fromDeck: found.fromZone === "deck" };
 }
 
 /** Move one card to its owner's deck bottom with hidden-zone-safe logging. */
@@ -1030,15 +1031,17 @@ export function putCardOnDeckBottom(
   runtime: EngineRuntime,
   instanceId: number,
   asActivationCost = false,
+  actingSeat?: number,
 ): boolean {
   const entry = moveCardIntoOwnerDeck(state, runtime, instanceId, asActivationCost, "bottom");
   if (!entry) return false;
   if (entry === "ceased") return true;
   const detail = cardPutOnDeckBottomLogMessage(state, entry.card.cardId);
   if (entry.privateSource) {
+    // A deck card is known to the player moving it, not necessarily its owner.
     logPrivate(
       state,
-      entry.owner.seat,
+      entry.fromDeck && actingSeat !== undefined ? actingSeat : entry.owner.seat,
       detail,
       gameLogMessage(
         "a card is put on the bottom of the deck",
