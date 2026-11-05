@@ -3028,4 +3028,300 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       expect(silverCount(other)).toBe(0);
     });
   });
+
+  describe("Mastery Pack Assassin one-off printings", () => {
+    const VICTIM: SeatSpec = { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT };
+    const INFECTED: SeatSpec = { ...VICTIM, board: ["frailty|0"] };
+    const ESCAPED = "escaped subject|1";
+
+    describe("Needlebane", () => {
+      it.each([
+        ["head", "needlebane cowl|0"],
+        ["chest", "needlebane coat|0"],
+        ["arms", "needlebane gauntlets|0"],
+        ["legs", "needlebane steppers|0"],
+      ])("%s piece gets +1 defense only against a dagger, then breaks", (slot, key) => {
+        const defend = (attacker: SeatSpec, attack: (game: ReturnType<typeof scenario>) => void) => {
+          const game = scenario({ seats: [attacker, { ...VICTIM, equipment: { ...NO_EQUIPMENT, [slot]: key } }] });
+          attack(game);
+          game.blockWith(key).settle();
+          return game;
+        };
+
+        const dagger = defend(assassinSeat({ weapons: [KUNAI], resources: 2 }), (game) => game.attackWithWeapon(KUNAI));
+        dagger.expectFinalDefense(2);
+        dagger.passActionPhase().expectInZone(1, key, "graveyard");
+
+        const other = defend(assassinSeat({ hand: [ESCAPED], resources: 1 }), (game) => game.play(ESCAPED));
+        other.expectFinalDefense(1);
+      });
+    });
+
+    describe("Puredew Panacea", () => {
+      const PUREDEW = "puredew panacea|0";
+      const owner = (board: string[]) => assassinSeat({ weapons: [PUREDEW], board, life: 10 });
+
+      it("cures its only disease for 1 life with go again", () => {
+        const game = scenario({ seats: [owner(["frailty|0"]), VICTIM] });
+        game.activate(PUREDEW).settle();
+        expect(boardNames(game, 0)).toEqual([]);
+        game.expectLife(0, 11).expectAP(0, 1).expectInZone(0, PUREDEW, "graveyard");
+      });
+
+      it("asks which disease to cure when there are several", () => {
+        const game = scenario({ seats: [owner(["frailty|0", "inertia|0"]), VICTIM] });
+        game.activate(PUREDEW).chooseCard("inertia|0");
+        expect(boardNames(game, 0)).toEqual(["Frailty"]);
+        game.expectLife(0, 11);
+      });
+
+      it("gains no life without a disease to cure", () => {
+        const game = scenario({ seats: [owner([]), VICTIM] });
+        game.activate(PUREDEW).settle();
+        game.expectLife(0, 10).expectAP(0, 1).expectInZone(0, PUREDEW, "graveyard");
+      });
+    });
+
+    describe("Easy Prey", () => {
+      it.each([
+        ["easy prey|1", 3],
+        ["easy prey|2", 2],
+        ["easy prey|3", 1],
+      ] as const)("%s adds %i only against an infected hero", (key, amount) => {
+        const attack = (defender: SeatSpec) => {
+          const game = scenario({ seats: [assassinSeat({ hand: [ESCAPED, key], resources: 1 }), defender] });
+          game.play(ESCAPED).blockWith().react(key).settle();
+          return game;
+        };
+        attack(INFECTED).expectFinalAttack(4 + amount);
+        attack(VICTIM).expectFinalAttack(4);
+      });
+
+      it("can target an Assassin weapon attack", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ weapons: [HUMOUR_PLUNGE], hand: ["easy prey|1"], resources: 2 }),
+          INFECTED,
+        ] });
+        // Humour Plunge's own +1 applies against the infected hero too.
+        game.attackWithWeapon(HUMOUR_PLUNGE).blockWith().react("easy prey|1").settle();
+        game.expectFinalAttack(5);
+      });
+
+      it("cannot be played without an Assassin attack", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ hand: ["wounding blow|1", "easy prey|1"], resources: 2 }),
+          INFECTED,
+        ] });
+        game.play("wounding blow|1").blockWith();
+        game.expectNoLegalPlay("easy prey|1");
+      });
+
+      it("stays live after resolving and drops when the defender is cured", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ heroKey: DR_MORTIMER, hand: [ESCAPED, "easy prey|1"], resources: 1 }),
+          INFECTED,
+        ] });
+        game.play(ESCAPED).blockWith().react("easy prey|1", { settle: false });
+        game.passPriority().passPriority();
+        game.expectInZone(0, "easy prey|1", "graveyard");
+        game.expectAttackValue(7).expectAttackModifier("easy prey|1", 3);
+        game.activate(DR_MORTIMER, { ability: 0 }).chooseCard("frailty|0");
+        game.settle().expectFinalAttack(4);
+        expect(boardNames(game, 1)).toEqual([]);
+      });
+
+      it("starts applying when the defender becomes infected after it resolves", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ hand: [ESCAPED, "easy prey|1", "viral accelerant|3"], resources: 1, board: ["frailty|0"] }),
+          VICTIM,
+        ] });
+        game.play(ESCAPED).blockWith().react("easy prey|1", { settle: false });
+        game.passPriority().passPriority();
+        game.expectAttackValue(4);
+        game.react("viral accelerant|3").expectFinalAttack(7);
+      });
+    });
+
+    describe("Act on Intel: Plans", () => {
+      const PLANS = "act on intel: plans|2";
+      const CONTRACT = "eviscerate the enervated|1";
+      const attack = (defender: Partial<SeatSpec>, ...blockers: string[]) => {
+        const game = scenario({ seats: [
+          assassinSeat({ hand: [CONTRACT, PLANS], resources: 2 }),
+          { ...INFECTED, ...defender },
+        ] });
+        game.play(CONTRACT).blockWith(...blockers).react(PLANS).settle();
+        return game;
+      };
+
+      it("adds +1 and banishes a lone arsenal card on hit without asking", () => {
+        const game = attack({ arsenalFaceDown: ["wounding blow|1"] });
+        game.expectFinalAttack(6).expectInZone(1, "wounding blow|1", "banish");
+        expect(game.state.pendingDecision).toBeNull();
+      });
+
+      it("lets the hit hero choose among several arsenal cards, privately", () => {
+        const game = attack({ arsenalFaceDown: ["wounding blow|1", "raging onslaught|1"] });
+        expect(game.state.pendingDecision?.player).toBe(1);
+        game.chooseCard("raging onslaught|1");
+        game.expectInZone(1, "raging onslaught|1", "banish").expectInZone(1, "wounding blow|1", "arsenal");
+        const publicLog = game.state.log.map((entry) => entry.publicText ?? "").join("\n");
+        expect(publicLog).not.toContain("Wounding Blow");
+      });
+
+      it("does nothing on hit with an empty arsenal", () => {
+        const game = attack({});
+        game.expectFinalAttack(6).expectZoneSize(1, "arsenal", 0);
+        expect(game.state.pendingDecision).toBeNull();
+      });
+
+      it("keeps the arsenal when the attack does not hit", () => {
+        const game = attack(
+          { arsenalFaceDown: ["wounding blow|1"], hand: ["raging onslaught|1", "raging onslaught|2"] },
+          "raging onslaught|1",
+          "raging onslaught|2",
+        );
+        game.expectInZone(1, "wounding blow|1", "arsenal");
+      });
+
+      it("needs an Assassin attack action card with contract", () => {
+        const game = scenario({ seats: [assassinSeat({ hand: [ESCAPED, PLANS], resources: 1 }), VICTIM] });
+        game.play(ESCAPED).blockWith();
+        game.expectNoLegalPlay(PLANS);
+      });
+    });
+
+    describe("Kill Confirmed", () => {
+      const KILL = "kill confirmed|1";
+      const attack = (named: string) => {
+        const game = scenario({ seats: [
+          assassinSeat({ hand: [KILL], resources: 2 }),
+          { ...VICTIM, deck: ["wounding blow|1", "wounding blow|2"] },
+        ] });
+        game.play(KILL).chooseName(named);
+        return game;
+      };
+
+      it("banishes a matching top card for a Silver", () => {
+        const game = attack("Wounding Blow");
+        game.expectInZone(1, "wounding blow|1", "banish").expectDeckTop(1, "wounding blow|2");
+        expect(silverCount(game)).toBe(1);
+        game.blockWith().settle().expectFinalAttack(6);
+      });
+
+      it("leaves a missed top card on the deck", () => {
+        const game = attack("Raging Onslaught");
+        game.expectDeckTop(1, "wounding blow|1").expectZoneSize(1, "banish", 0);
+        expect(silverCount(game)).toBe(0);
+      });
+    });
+
+    describe("Funded Research", () => {
+      const FUNDED = "funded research|3";
+      const count = (names: string[], name: string) => names.filter((candidate) => candidate === name).length;
+
+      it("creates all three diseases under the opponent after a completed contract", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ hand: ["eviscerate the enervated|1", "festering rot|2", FUNDED], resources: 4 }),
+          { ...INFECTED, deck: ["wounding blow|1"] },
+        ] });
+        game.play("eviscerate the enervated|1").blockWith()
+          .react("festering rot|2", { targetCard: "eviscerate the enervated|1" })
+          .settle();
+        expect(game.state.players[0]!.flags.completedContractThisTurn).toBe(true);
+        game.expectAP(0, 1);
+        const before = boardNames(game, 1);
+
+        game.play(FUNDED).settle();
+
+        const after = boardNames(game, 1);
+        for (const name of ["Frailty", "Inertia", "Bloodrot Pox"]) {
+          expect(count(after, name)).toBe(count(before, name) + 1);
+        }
+        expect(boardNames(game, 0).filter((name) => name !== "Silver")).toEqual([]);
+      });
+
+      it("does nothing without a completed contract", () => {
+        const game = scenario({ seats: [assassinSeat({ hand: [FUNDED] }), VICTIM] });
+        game.play(FUNDED).settle();
+        expect(boardNames(game, 1)).toEqual([]);
+      });
+    });
+
+    describe("Viral Accelerant", () => {
+      const VIRAL = "viral accelerant|3";
+
+      it("copies one token per disease name, and the copies infect the defender", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ hand: [ESCAPED, VIRAL], resources: 1, board: ["frailty|0", "frailty|0", "inertia|0"] }),
+          VICTIM,
+        ] });
+        game.play(ESCAPED).blockWith().react(VIRAL);
+        expect(boardNames(game, 1).sort()).toEqual(["Frailty", "Inertia"]);
+        expect(boardNames(game, 0).sort()).toEqual(["Frailty", "Frailty", "Inertia"]);
+        // Escaped Subject has go again only against an infected hero.
+        game.settle().expectAP(0, 1);
+      });
+
+      it("creates nothing without a disease token", () => {
+        const game = scenario({ seats: [assassinSeat({ hand: [ESCAPED, VIRAL], resources: 1 }), VICTIM] });
+        game.play(ESCAPED).blockWith().react(VIRAL).settle();
+        expect(boardNames(game, 1)).toEqual([]);
+        game.expectAP(0, 0);
+      });
+
+      it("counts toward Sick Intent's contract for each copy", () => {
+        const game = scenario({ seats: [
+          assassinSeat({ hand: [SICK_INTENT, VIRAL], resources: 2, board: ["frailty|0", "inertia|0"] }),
+          VICTIM,
+        ] });
+        game.play(SICK_INTENT).blockWith().react(VIRAL);
+        expect(boardNames(game, 1).sort()).toEqual(["Frailty", "Inertia"]);
+        expect(silverCount(game)).toBe(2);
+        expect(game.state.players[0]!.flags.contractCompletionsThisTurn).toBe(2);
+      });
+    });
+
+    describe("Emergency Services", () => {
+      const EMERGENCY = "emergency services|3";
+      const start = (defenderBoard: string[]) => {
+        const game = scenario({ seats: [
+          assassinSeat({ hand: [EMERGENCY], board: ["bloodrot pox|0"] }),
+          { ...VICTIM, board: defenderBoard },
+        ] });
+        game.play(EMERGENCY).settle();
+        return game;
+      };
+
+      it("offers one disease per name and pays two Silver per cure", () => {
+        const game = start(["frailty|0", "frailty|0", "inertia|0"]);
+        const options = game.state.pendingDecision?.options ?? [];
+        expect(options).toHaveLength(2);
+        game.chooseMany(options).settle();
+        expect(boardNames(game, 1)).toEqual(["Frailty"]);
+        expect(silverCount(game)).toBe(4);
+        expect(boardNames(game, 0)).toContain("Bloodrot Pox");
+      });
+
+      it("can cure a single disease", () => {
+        const game = start(["frailty|0", "inertia|0"]);
+        game.chooseMany([game.state.pendingDecision!.options![0]!]).settle();
+        expect(boardNames(game, 1)).toHaveLength(1);
+        expect(silverCount(game)).toBe(2);
+      });
+
+      it("can choose to cure nothing", () => {
+        const game = start(["frailty|0"]);
+        game.chooseMany([]).settle();
+        expect(boardNames(game, 1)).toEqual(["Frailty"]);
+        expect(silverCount(game)).toBe(0);
+      });
+
+      it("does not ask when the opponent has no disease", () => {
+        const game = start([]);
+        expect(game.state.pendingDecision).toBeNull();
+        expect(silverCount(game)).toBe(0);
+      });
+    });
+  });
 });

@@ -12,6 +12,7 @@ import {
   commonOptionMessages,
   consumeDelayedEffect,
   contractWithSilver,
+  controlledDiseases,
   createChosenDisease,
   decisionMessage,
   decisionPrompt,
@@ -28,6 +29,7 @@ import {
   opponentSeat,
   pendingDelayedEffect,
   requestDiseaseTokenChoice,
+  sharesName,
   targetsHero,
   tokenContractWithSilver,
 } from "./shared-helpers.js";
@@ -211,6 +213,49 @@ function offerPainfulChoice(ctx: ScriptCtx): void {
     defender,
   );
 }
+
+function banishNamedTopForSilver(ctx: ScriptCtx, seat: number, name: string): void {
+  const top = ctx.player(seat).deck[0];
+  if (!top || !ctx.revealCards([top.instanceId], seat) || !cardNamed(ctx, top, name)) return;
+  ctx.banish(top.instanceId);
+  ctx.createToken(SILVER);
+}
+
+function differentlyNamed(ctx: ScriptCtx, cards: readonly DeepReadonly<CardInstance>[]): DeepReadonly<CardInstance>[] {
+  const kept: DeepReadonly<CardInstance>[] = [];
+  for (const card of cards) if (!kept.some((other) => sharesName(ctx, card, other))) kept.push(card);
+  return kept;
+}
+
+function cureForLife(ctx: ScriptCtx, instanceId: number): void {
+  if (ctx.destroyPermanent(instanceId)) ctx.gainLife(ctx.seat, 1);
+}
+
+function easyPrey(amount: number): CardScript {
+  const linkFlag = (ctx: ScriptCtx) => `easyPrey:${ctx.self.instanceId}`;
+  return {
+    playTargetOptions: activeAssassinAttack,
+    onPlay(ctx) {
+      if (ctx.playTargetInstanceId === undefined) return;
+      // Only a turn-long modifier keeps a resolved reaction's modifyAttack live; the flag holds it to this link.
+      ctx.setFlag("link", linkFlag(ctx), true);
+      ctx.addModifier({
+        scope: "until-end-of-turn",
+        expiresOnChainClose: true,
+        appliesToInstanceId: ctx.playTargetInstanceId,
+        ...ongoingLabel(`+${amount} power while attacking an infected hero`, "card.effect.mpa.easyprey", { amount }),
+      });
+    },
+    modifyAttack: (ctx) => (ctx.link?.flags[linkFlag(ctx)] === true && defenderInfected(ctx) ? amount : 0),
+  };
+}
+
+const NEEDLEBANE: CardScript = {
+  canTriggerOnDefend: (ctx) => ctx.currentAttackHasType("dagger"),
+  onDefend(ctx) {
+    ctx.addCardTempDefense(ctx.self.instanceId, 1);
+  },
+};
 
 function eachPitch(name: string, script: CardScript): Record<string, CardScript> {
   return { [`${name}|1`]: script, [`${name}|2`]: script, [`${name}|3`]: script };
@@ -498,18 +543,136 @@ export const mpa: Record<string, CardScript> = {
     },
   },
 
+  "act on intel: plans|2": {
+    playTargetOptions: assassinContractAttackTargets,
+    onPlay(ctx) {
+      if (ctx.playTargetInstanceId === undefined) return;
+      ctx.addModifier({
+        scope: "chain-link",
+        attack: 1,
+        appliesTo: "attack-action",
+        appliesToInstanceId: ctx.playTargetInstanceId,
+        onHitScriptHook: {
+          hook: "mpa-act-on-intel-plans-hit",
+          ...hitHookLabel("the hit hero banishes a card from their arsenal", "card.effect.mpa.actonintelplans"),
+          heroOnly: true,
+        },
+      });
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook !== "mpa-act-on-intel-plans-hit") return;
+      const defender = opponentSeat(ctx);
+      const arsenal = ctx.player(defender).arsenal;
+      if (arsenal.length === 1) {
+        ctx.banish(arsenal[0]!.instanceId);
+      } else if (arsenal.length > 1) {
+        ctx.requestCardChoice(
+          "mpa-act-on-intel-plans-banish",
+          decisionPrompt("Choose a card in your arsenal to banish", "card.iar.opponent.arsenal.banish"),
+          arsenal.map((card) => card.instanceId),
+          defender,
+        );
+      }
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "mpa-act-on-intel-plans-banish") ctx.banish(Number(option));
+    },
+  },
+
+  "kill confirmed|1": {
+    triggers: [
+      {
+        event: "attack-declared",
+        sourceZone: "self",
+        label: "Name a card",
+        labelMessage: decisionMessage("card.trigger.common.cardname.choose"),
+        effect(ctx) {
+          ctx.requestNameChoice("mpa-kill-confirmed-name", decisionPrompt("Name a card", "card.common.card.name"));
+        },
+      },
+    ],
+    onChoose(ctx, hook, option) {
+      if (hook === "mpa-kill-confirmed-name") banishNamedTopForSilver(ctx, opponentSeat(ctx), option);
+    },
+  },
+
+  "funded research|3": {
+    onPlay(ctx) {
+      if (ctx.getFlag("player", "completedContractThisTurn") !== true) return;
+      for (const player of ctx.state.players) {
+        if (player.seat === ctx.seat) continue;
+        for (const tokenId of NAMED_DISEASE_TOKENS) ctx.createToken(tokenId, player.seat);
+      }
+    },
+  },
+
+  "viral accelerant|3": {
+    onPlay(ctx) {
+      const tokens = ctx.player(ctx.seat).board.filter((card) => isDiseaseToken(ctx, card));
+      for (const token of differentlyNamed(ctx, tokens)) ctx.createTokenCopyOf(token, opponentSeat(ctx));
+    },
+  },
+
+  "emergency services|3": {
+    onPlay(ctx) {
+      const options = differentlyNamed(ctx, controlledDiseases(ctx, opponentSeat(ctx)));
+      if (!options.length) return;
+      ctx.requestCardChoices(
+        "mpa-emergency-cure",
+        decisionPrompt("Cure any number of diseases with different names", "card.mpa.emergencyservices.cure"),
+        options.map((card) => card.instanceId),
+        0,
+        options.length,
+      );
+    },
+    onChooseMany(ctx, hook, options) {
+      if (hook !== "mpa-emergency-cure") return;
+      let cured = 0;
+      for (const option of options) if (ctx.destroyPermanent(Number(option))) cured++;
+      if (cured > 0) ctx.createTokens(SILVER, cured * 2);
+    },
+  },
+
+  "easy prey|1": easyPrey(3),
+  "easy prey|2": easyPrey(2),
+  "easy prey|3": easyPrey(1),
+
+  "needlebane cowl|0": NEEDLEBANE,
+  "needlebane coat|0": NEEDLEBANE,
+  "needlebane gauntlets|0": NEEDLEBANE,
+  "needlebane steppers|0": NEEDLEBANE,
+
+  "puredew panacea|0": {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: true,
+      destroySelfCost: true,
+      onActivate(ctx) {
+        const diseases = controlledDiseases(ctx, ctx.seat);
+        if (diseases.length === 1) {
+          cureForLife(ctx, diseases[0]!.instanceId);
+        } else if (diseases.length > 1) {
+          ctx.requestCardChoice(
+            "mpa-puredew-cure",
+            decisionPrompt("Cure a disease you control", "card.obk.ceremony.disease.cure"),
+            diseases.map((card) => card.instanceId),
+          );
+        }
+      },
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "mpa-puredew-cure") cureForLife(ctx, Number(option));
+    },
+  },
+
   "just my type|1": {
     onDefendResolvesWithoutChainLink: true,
     onDefend(ctx) {
       ctx.requestNameChoice("mpa-just-my-type-name", decisionPrompt("Name a card", "card.common.card.name"));
     },
     onChoose(ctx, hook, option) {
-      if (hook !== "mpa-just-my-type-name") return;
-      const attacker = opponentSeat(ctx);
-      const top = ctx.player(attacker).deck[0];
-      if (!top || !ctx.revealCards([top.instanceId], attacker) || !cardNamed(ctx, top, option)) return;
-      ctx.banish(top.instanceId);
-      ctx.createToken(SILVER);
+      if (hook === "mpa-just-my-type-name") banishNamedTopForSilver(ctx, opponentSeat(ctx), option);
     },
   },
 
@@ -536,12 +699,7 @@ export const mpa: Record<string, CardScript> = {
       ctx.requestNameChoice("mpa-pinpoint-name", decisionPrompt("Name a card", "card.common.card.name"));
     },
     onChoose(ctx, hook, option) {
-      if (hook !== "mpa-pinpoint-name") return;
-      const defender = opponentSeat(ctx);
-      const top = ctx.player(defender).deck[0];
-      if (!top || !ctx.revealCards([top.instanceId], defender) || !cardNamed(ctx, top, option)) return;
-      ctx.banish(top.instanceId);
-      ctx.createToken(SILVER);
+      if (hook === "mpa-pinpoint-name") banishNamedTopForSilver(ctx, opponentSeat(ctx), option);
     },
   },
 

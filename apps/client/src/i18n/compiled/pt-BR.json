@@ -4163,6 +4163,26 @@
       "value": "faça banish da carta do topo do deck do herói atingido"
     }
   ],
+  "card.effect.mpa.actonintelplans": [
+    {
+      "type": 0,
+      "value": "o herói atingido faz banish de uma carta do próprio arsenal"
+    }
+  ],
+  "card.effect.mpa.easyprey": [
+    {
+      "type": 0,
+      "value": "+"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de poder enquanto ataca um herói infectado"
+    }
+  ],
   "card.effect.mpa.outbreak": [
     {
       "type": 0,
@@ -12329,6 +12349,12 @@
     {
       "type": 0,
       "value": "Ataques recebem go again neste chain link"
+    }
+  ],
+  "card.mpa.emergencyservices.cure": [
+    {
+      "type": 0,
+      "value": "Cure qualquer número de doenças com nomes diferentes"
     }
   ],
   "card.mpa.flipscript.power": [

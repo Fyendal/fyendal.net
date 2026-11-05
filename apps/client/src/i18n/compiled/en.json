@@ -4112,6 +4112,26 @@
       "value": "banish the top card of the hit hero's deck"
     }
   ],
+  "card.effect.mpa.actonintelplans": [
+    {
+      "type": 0,
+      "value": "the hit hero banishes a card from their arsenal"
+    }
+  ],
+  "card.effect.mpa.easyprey": [
+    {
+      "type": 0,
+      "value": "+"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power while attacking an infected hero"
+    }
+  ],
   "card.effect.mpa.outbreak": [
     {
       "type": 0,
@@ -11935,6 +11955,12 @@
     {
       "type": 0,
       "value": "Attacks get go again this chain link"
+    }
+  ],
+  "card.mpa.emergencyservices.cure": [
+    {
+      "type": 0,
+      "value": "Cure any number of diseases with different names"
     }
   ],
   "card.mpa.flipscript.power": [

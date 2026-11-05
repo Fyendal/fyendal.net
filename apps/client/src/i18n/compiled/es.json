@@ -4116,6 +4116,26 @@
       "value": "haz banish de la carta superior del mazo del héroe impactado"
     }
   ],
+  "card.effect.mpa.actonintelplans": [
+    {
+      "type": 0,
+      "value": "el héroe impactado hace banish de una carta de su arsenal"
+    }
+  ],
+  "card.effect.mpa.easyprey": [
+    {
+      "type": 0,
+      "value": "+"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de poder mientras ataca a un héroe infectado"
+    }
+  ],
   "card.effect.mpa.outbreak": [
     {
       "type": 0,
@@ -11965,6 +11985,12 @@
     {
       "type": 0,
       "value": "Los ataques obtienen go again en este chain link"
+    }
+  ],
+  "card.mpa.emergencyservices.cure": [
+    {
+      "type": 0,
+      "value": "Cura cualquier número de enfermedades con nombres distintos"
     }
   ],
   "card.mpa.flipscript.power": [

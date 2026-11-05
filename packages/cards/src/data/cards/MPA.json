@@ -375,6 +375,19 @@
     "set": "MPA"
   },
   {
+    "id": "MPA039",
+    "name": "Kill Confirmed",
+    "cardType": "action",
+    "text": "When this attacks, name a card, then the defending hero reveals the top card of their deck. If it's the named card, banish it and create a Silver token.",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 6,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA040",
     "name": "Lab Rat",
     "cardType": "action",
@@ -516,6 +529,17 @@
     "set": "MPA"
   },
   {
+    "id": "MPA053",
+    "name": "Act on Intel: Plans",
+    "cardType": "attack-reaction",
+    "text": "Target Assassin attack action card with contract gets +1{p} and \"When this hits a hero, they choose a card in their arsenal. Banish it.\"",
+    "pitch": 2,
+    "cost": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA055",
     "name": "Pinpoint Elimination",
     "cardType": "attack-reaction",
@@ -560,6 +584,17 @@
     "set": "MPA"
   },
   {
+    "id": "MPA063",
+    "name": "Viral Accelerant",
+    "cardType": "attack-reaction",
+    "text": "For each disease token you control with a different name, create a token copy of it under the defending hero's control.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA064",
     "name": "Just My Type",
     "cardType": "defense-reaction",
@@ -581,6 +616,29 @@
     "classes": ["assassin"],
     "subtypes": ["item"],
     "keywords": ["Go again"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA068",
+    "name": "Funded Research",
+    "cardType": "action",
+    "text": "If you've completed a contract this turn, create a Frailty, Inertia, and Bloodrot Pox token under each opposing hero's control.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA069",
+    "name": "Emergency Services",
+    "cardType": "instant",
+    "text": "Cure any number of diseases with different names an opponent controls.\nCreate twice that many Silver tokens.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "keywords": ["Cure"],
     "set": "MPA"
   },
   {
@@ -965,6 +1023,39 @@
     "set": "MPA"
   },
   {
+    "id": "MPA115",
+    "name": "Easy Prey",
+    "cardType": "attack-reaction",
+    "text": "Target Assassin attack gets +3{p} while it's attacking an infected hero.",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA116",
+    "name": "Easy Prey",
+    "cardType": "attack-reaction",
+    "text": "Target Assassin attack gets +2{p} while it's attacking an infected hero.",
+    "pitch": 2,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA117",
+    "name": "Easy Prey",
+    "cardType": "attack-reaction",
+    "text": "Target Assassin attack gets +1{p} while it's attacking an infected hero.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA118",
     "name": "Festering Exhaustion",
     "cardType": "attack-reaction",
@@ -1037,6 +1128,60 @@
     "pitch": 3,
     "cost": 0,
     "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA132",
+    "name": "Puredew Panacea",
+    "cardType": "equipment",
+    "text": "Action - Destroy this: Cure a disease you control. If you do, gain 1{h}. Go again",
+    "classes": ["generic"],
+    "subtypes": ["off-hand"],
+    "keywords": ["Cure"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA137",
+    "name": "Needlebane Cowl",
+    "cardType": "equipment",
+    "text": "When this defends a dagger, this gets +1{d}.\nBlade Break",
+    "defense": 1,
+    "classes": ["generic"],
+    "subtypes": ["head"],
+    "keywords": ["Blade Break"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA138",
+    "name": "Needlebane Coat",
+    "cardType": "equipment",
+    "text": "When this defends a dagger, this gets +1{d}.\nBlade Break",
+    "defense": 1,
+    "classes": ["generic"],
+    "subtypes": ["chest"],
+    "keywords": ["Blade Break"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA139",
+    "name": "Needlebane Gauntlets",
+    "cardType": "equipment",
+    "text": "When this defends a dagger, this gets +1{d}.\nBlade Break",
+    "defense": 1,
+    "classes": ["generic"],
+    "subtypes": ["arms"],
+    "keywords": ["Blade Break"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA140",
+    "name": "Needlebane Steppers",
+    "cardType": "equipment",
+    "text": "When this defends a dagger, this gets +1{d}.\nBlade Break",
+    "defense": 1,
+    "classes": ["generic"],
+    "subtypes": ["legs"],
+    "keywords": ["Blade Break"],
     "set": "MPA"
   },
   {

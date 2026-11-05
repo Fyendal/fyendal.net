@@ -3981,6 +3981,26 @@
       "value": "放逐被命中英雄的牌库顶牌"
     }
   ],
+  "card.effect.mpa.actonintelplans": [
+    {
+      "type": 0,
+      "value": "被命中英雄放逐其 arsenal 中的一张牌"
+    }
+  ],
+  "card.effect.mpa.easyprey": [
+    {
+      "type": 0,
+      "value": "攻击被感染的英雄时 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
   "card.effect.mpa.outbreak": [
     {
       "type": 0,
@@ -11122,6 +11142,12 @@
     {
       "type": 0,
       "value": "本 chain link 中的攻击获得 go again"
+    }
+  ],
+  "card.mpa.emergencyservices.cure": [
+    {
+      "type": 0,
+      "value": "治愈任意数量名称不同的疾病"
     }
   ],
   "card.mpa.flipscript.power": [
