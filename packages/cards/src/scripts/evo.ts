@@ -460,7 +460,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
         cards.map((card) => card.instanceId),
       );
   }, "Remove steam: recover a boosted attack"),
-  "cogwerx base chest|0": cogwerxAbility((ctx) => ctx.changeResources(ctx.seat, 2), "Remove steam: gain 2 resources"),
+  "cogwerx base chest|0": cogwerxAbility((ctx) => ctx.gainResources(ctx.seat, 2), "Remove steam: gain 2 resources"),
   "cogwerx base arms|0": cogwerxAbility(
     (ctx) => buffNextAttack(ctx, { attack: 1, appliesToClass: "mechanologist" }),
     "Remove steam: next Mechanologist attack +1",
@@ -553,7 +553,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   "evo buzz hive|2": instantEvoEquipment({
     triggers: [
       entersArenaTrigger("Gain 1 resource", decisionMessage("card.trigger.common.resource.gain", { amount: 1 }), (ctx) =>
-        ctx.changeResources(ctx.seat, 1),
+        ctx.gainResources(ctx.seat, 1),
       ),
     ],
   }),
@@ -688,7 +688,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   ...pitches("junkyard dogg", () => scrapAttack((ctx) => ctx.addModifier({ scope: "chain-link", attack: 1 }))),
   ...pitches("scrap compactor", () => scrapAttack((ctx) => ctx.setPlayerFlag(ctx.seat, "nextEvoAsInstant", true))),
   ...pitches("scrap harvester", () => scrapAttack((ctx) => addSteamToChoice(ctx, "scrap-harvester"))),
-  ...pitches("scrap prospector", () => scrapAttack((ctx) => ctx.changeResources(ctx.seat, 1))),
+  ...pitches("scrap prospector", () => scrapAttack((ctx) => ctx.gainResources(ctx.seat, 1))),
 
   ...pitches("bull bar", () => ({
     onAttackDeclared(ctx) {

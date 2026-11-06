@@ -275,7 +275,7 @@ export const sdo: Record<string, CardScript> = {
         label: "Destroy Vigor — gain {r}",
         effect(ctx) {
           ctx.destroySelf();
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
           ctx.logPublic(
             localizedCardLog(ctx, "Vigor is destroyed: gain {r}", "card.log.sdo.vigor.resources", { amount: 1 }),
           );

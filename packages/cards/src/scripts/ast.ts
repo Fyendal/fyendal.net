@@ -108,7 +108,7 @@ export const ast: Record<string, CardScript> = {
       destroySelfCost: true,
       canActivate: (ctx) => ctx.getFlag("player", "playedSubtype:lightning") === true,
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
+        ctx.gainResources(ctx.seat, 1);
       },
     },
   },

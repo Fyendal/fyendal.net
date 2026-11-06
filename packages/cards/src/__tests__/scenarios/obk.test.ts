@@ -1293,4 +1293,71 @@ describe("Outbreak cards", () => {
       ] }).play(QUIET_STREETS).expectNoLog("gets -3 power");
     });
   });
+
+  describe("Virulent Cascade", () => {
+    const CASCADE = "virulent cascade|1";
+    const DISEASES = ["Exertion", "Inertia", "Bloodrot Pox"];
+    const cascade = (defenderBoard: string[]) => scenario({ seats: [
+      { hero: "rhinar", hand: [CASCADE], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", board: defenderBoard, weapons: [], equipment: NO_EQUIPMENT },
+    ] }).play(CASCADE);
+
+    it("creates a random disease token that infects you in time for +1 power and go again", () => {
+      const game = cascade([FRAILTY]).expectLog("at random").expectAttackValue(4);
+      expect(boardNames(game, 0)).toHaveLength(1);
+      expect(DISEASES).toContain(boardNames(game, 0)[0]);
+      game.blockWith().settle().expectLife(1, 16).expectAP(0, 1);
+    });
+
+    it("gets nothing when the defending hero is not infected", () => {
+      const game = cascade([]).expectAttackValue(3);
+      expect(DISEASES).toContain(boardNames(game, 0)[0]);
+      game.blockWith().settle().expectLife(1, 17).expectAP(0, 0);
+    });
+  });
+
+  describe("Eidetic Endpoint", () => {
+    const ENDPOINT = "eidetic endpoint|1";
+    const azaleaArsenals = (deckTop: string) => scenario({ seats: [
+      { hero: "rhinar", heroKey: AZALEA, arsenal: [FILLER], deck: [deckTop], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", arsenalFaceDown: [PROWL], weapons: [], equipment: NO_EQUIPMENT },
+    ] }).activate(AZALEA).chooseCard(FILLER);
+
+    it("turns every face-down arsenal card face up when put face up into your arsenal", () => {
+      azaleaArsenals(ENDPOINT).expectInZone(0, ENDPOINT, "arsenal").expectFaceDown(1, PROWL, false);
+    });
+
+    it("does not trigger when another card enters the arsenal", () => {
+      azaleaArsenals(PROWL).expectInZone(0, PROWL, "arsenal").expectFaceDown(1, PROWL, true);
+    });
+  });
+
+  describe("Change of Mind", () => {
+    const CHANGE = "change of mind|3";
+    const minGame = () => scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: MIN,
+        hand: [CHANGE, ZERO_TO_SIXTY],
+        deck: Array<string>(8).fill(FILLER),
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    it("flips into the ▽ face and gives your next attack +2 power", () => {
+      const game = minGame().play(CHANGE);
+      expect(heroName(game, 0)).toBe("Min, Mad");
+      game.expectResources(0, 0).play(ZERO_TO_SIXTY, { boostCount: 0 }).expectAttackValue(6);
+    });
+
+    it("flips into the △ face and gains {r}{r}", () => {
+      const game = minGame().endTurn().endTurn();
+      expect(heroName(game, 0)).toBe("Min, Mad");
+      game.play(CHANGE);
+      expect(heroName(game, 0)).toBe("Min, Genius");
+      game.expectResources(0, 2).play(ZERO_TO_SIXTY, { boostCount: 0 }).expectAttackValue(4);
+    });
+  });
 });

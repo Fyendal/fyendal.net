@@ -174,7 +174,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
     },
     onDieRollResolved(ctx, hook, result) {
       if (hook !== "reckless") return;
-      ctx.changeActionPoints(ctx.seat, Math.floor(result / 2));
+      ctx.gainActionPoints(ctx.seat, Math.floor(result / 2));
       if (ctx.getPlayerFlag(ctx.seat, "rolledDie:6") === true) ctx.drawCards(ctx.seat, 1);
     },
   },

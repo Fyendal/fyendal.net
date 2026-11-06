@@ -923,7 +923,7 @@ export const ros: Record<string, CardScript> = {
       ],
       effectCardCostChoiceHook: "bloodtorn-cost",
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
+        ctx.gainResources(ctx.seat, 1);
       },
     },
   },
@@ -1041,7 +1041,7 @@ for (const pitch of [1, 2, 3]) {
     ...bloom,
     graveyardReplacement: (ctx) => (ctx.getState("surged") ? "bottom-of-deck" : undefined),
   };
-  ros[`overflow the aetherwell|${pitch}`] = arcaneHero(4 - pitch, (ctx) => ctx.changeResources(ctx.seat, 2));
+  ros[`overflow the aetherwell|${pitch}`] = arcaneHero(4 - pitch, (ctx) => ctx.gainResources(ctx.seat, 2));
   ros[`trailblazing aether|${pitch}`] = arcaneHero(4 - pitch, (ctx) => ctx.grantGoAgain());
   ros[`count your blessings|${pitch}`] = {
     onPlay(ctx) {

@@ -149,7 +149,7 @@ export const brute: Record<string, CardScript> = {
     onDieRollResolved(ctx, hook, roll) {
       if (hook !== "barkbone") return;
       const gained = Math.floor(roll / 2);
-      ctx.changeResources(ctx.seat, gained);
+      ctx.gainResources(ctx.seat, gained);
       ctx.logPublic(
         localizedLog(
           `Barkbone Strapping: rolled ${roll}, gained {r}${gained}`,

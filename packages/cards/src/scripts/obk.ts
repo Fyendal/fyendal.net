@@ -8,11 +8,13 @@ import {
   controlledDiseases,
   decisionMessage,
   decisionPrompt,
+  defenderInfected,
   effectPutSelfFaceUpFromDeck,
   entersArenaTrigger,
   heroChoiceSeat,
   isDisease,
   isDiseaseToken,
+  isInfected,
   localizedCardLog,
   opponentSeat,
   requestHeroChoice,
@@ -60,18 +62,64 @@ function minFace(ownedCardTypes: CardScript["ownedCardTypes"], flip: (ctx: Scrip
   };
 }
 
-function flipToBack(ctx: ScriptCtx): void {
-  const backId = ctx.cardData(ctx.self.cardId).backId;
-  if (backId) ctx.becomeHero(backId);
+/** Flip the controller's double-faced hero; returns the face it flipped into. */
+function flipHero(ctx: ScriptCtx): "front" | "back" | undefined {
+  const hero = ctx.player(ctx.seat).hero;
+  const backId = ctx.cardData(hero.cardId).backId;
+  if (backId) {
+    ctx.becomeHero(backId);
+    return "back";
+  }
+  const frontId = hero.originalHeroCardId;
+  if (frontId && ctx.cardData(frontId).backId === hero.cardId) {
+    ctx.becomeHero(frontId);
+    return "front";
+  }
+  return undefined;
 }
 
-function flipToFront(ctx: ScriptCtx): void {
-  const frontId = ctx.self.originalHeroCardId;
-  if (frontId) ctx.becomeHero(frontId);
+const minGenius = minFace({ gain: ["mechanologist"] }, flipHero);
+const minMad = minFace({ loseClassTalent: true }, flipHero);
+
+// Min's front faces are △, the backs ▽.
+const changeOfMind: CardScript = {
+  onPlay(ctx) {
+    const face = flipHero(ctx);
+    if (face === "front") ctx.gainResources(ctx.seat, 2);
+    else if (face === "back") buffNextAttack(ctx, { attack: 2 });
+  },
+};
+
+const CASCADE_TOKENS: readonly string[] = [EXERTION, INERTIA, BLOODROT_POX];
+
+function cascadeInfected(ctx: ScriptCtx): boolean {
+  return isInfected(ctx, ctx.seat) && defenderInfected(ctx);
 }
 
-const minGenius = minFace({ gain: ["mechanologist"] }, flipToBack);
-const minMad = minFace({ loseClassTalent: true }, flipToFront);
+const virulentCascade: CardScript = {
+  onAttackDeclared(ctx) {
+    const token = CASCADE_TOKENS[ctx.randomInt(CASCADE_TOKENS.length)]!;
+    ctx.logPublic(
+      localizedCardLog(
+        ctx,
+        `${ctx.data.name} chooses ${ctx.cardData(token).name} at random`,
+        "card.log.obk.virulentcascade.token",
+        { token: { kind: "card", cardId: token } },
+      ),
+    );
+    ctx.createToken(token, ctx.seat);
+  },
+  modifyAttack: (ctx) => (cascadeInfected(ctx) ? 1 : 0),
+  hasConditionalGoAgain: cascadeInfected,
+};
+
+const eideticEndpoint: CardScript = {
+  onEnterArsenal(ctx) {
+    for (const player of ctx.state.players) {
+      for (const card of player.arsenal) if (card.faceDown) ctx.turnArsenalFaceUp(card.instanceId);
+    }
+  },
+};
 
 const vyle: CardScript = {
   activated: {
@@ -786,4 +834,11 @@ export const obk: Record<string, CardScript> = {
   "one-click pinpointer|0": oneClickPinpointer,
   "max-tension shot|1": maxTensionShot,
   "cure-all elixir|0": cureAllElixir,
+  "virulent cascade|1": virulentCascade,
+  "virulent cascade|2": virulentCascade,
+  "virulent cascade|3": virulentCascade,
+  "change of mind|3": changeOfMind,
+  "eidetic endpoint|1": eideticEndpoint,
+  "eidetic endpoint|2": eideticEndpoint,
+  "eidetic endpoint|3": eideticEndpoint,
 };

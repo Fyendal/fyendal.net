@@ -298,7 +298,7 @@ export const arcArcane: Record<string, CardScript> = {
       destroySelfCost: true,
       label: "Destroy: gain 3 resources",
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 3);
+        ctx.gainResources(ctx.seat, 3);
         ctx.logPublic(
           localizedCardLog(ctx, `${ctx.data.name}: gained {r}{r}{r}`, "card.log.common.resources.gained", {
             amount: 3,

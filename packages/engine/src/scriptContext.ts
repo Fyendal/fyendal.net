@@ -709,23 +709,23 @@ export function makeCtx(
       const target = state.players[targetSeat] as PlayerState;
       return target.arsenal.length < arsenalCapacity(state, targetSeat);
     },
-    changeResources(targetSeat, delta) {
+    gainResources(targetSeat, amount) {
       const target = state.players[targetSeat] as PlayerState;
-      target.resources = Math.max(0, target.resources + delta);
-      if (delta > 0) {
+      target.resources = Math.max(0, target.resources + amount);
+      if (amount > 0) {
         for (const candidate of state.players as PlayerState[]) {
           candidate.flags.cardEffectResourceLifeOrStatGainThisTurn = true;
         }
       }
     },
-    changeChi(targetSeat, delta) {
+    gainChi(targetSeat, amount) {
       const target = state.players[targetSeat] as PlayerState;
-      target.chi = Math.max(0, target.chi + delta);
+      target.chi = Math.max(0, target.chi + amount);
     },
-    changeActionPoints(targetSeat, delta) {
-      if (delta > 0 && !inActionPhase(state, targetSeat)) return;
+    gainActionPoints(targetSeat, amount) {
+      if (amount > 0 && !inActionPhase(state, targetSeat)) return;
       const target = state.players[targetSeat] as PlayerState;
-      target.actionPoints = Math.max(0, target.actionPoints + delta);
+      target.actionPoints = Math.max(0, target.actionPoints + amount);
     },
     grantAdditionalActivation(instanceId, count = 1) {
       const found = findCardAnywhere(state, instanceId);

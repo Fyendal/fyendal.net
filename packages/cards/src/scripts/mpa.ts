@@ -441,7 +441,7 @@ export const mpa: Record<string, CardScript> = {
         canAccept: (ctx) =>
           youAreUzuri(ctx) && ctx.player(ctx.seat).equipment.chest?.instanceId === ctx.self.instanceId,
         effect(ctx) {
-          if (ctx.destroyPermanent(ctx.self.instanceId)) ctx.changeResources(ctx.seat, 2);
+          if (ctx.destroyPermanent(ctx.self.instanceId)) ctx.gainResources(ctx.seat, 2);
         },
       },
     ],

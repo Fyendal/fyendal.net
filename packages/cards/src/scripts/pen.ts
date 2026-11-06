@@ -1090,7 +1090,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       leavesArenaTrigger(
         "Gain 2 resources",
         decisionMessage("card.trigger.common.resources.gain", { amount: 2 }),
-        (ctx) => ctx.changeResources(ctx.seat, 2),
+        (ctx) => ctx.gainResources(ctx.seat, 2),
       ),
     ],
   },

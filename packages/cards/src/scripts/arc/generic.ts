@@ -28,7 +28,7 @@ function vestOfTheFirstFist(): CardScript {
     onChoose(ctx, hook, option) {
       if (hook !== "vest-first-fist" || option !== "yes") return;
       ctx.destroySelf();
-      ctx.changeResources(ctx.seat, 2);
+      ctx.gainResources(ctx.seat, 2);
       ctx.logPublic(
         localizedCardLog(
           ctx,

@@ -72,7 +72,7 @@ export const dvr: Record<string, CardScript> = {
       goAgain: true,
       destroySelfCost: true,
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
+        ctx.gainResources(ctx.seat, 1);
         ctx.logPublic(
           localizedCardLog(ctx, "Blossom of Spring: gained {r}", "card.log.common.resources.gained", { amount: 1 }),
         );

@@ -173,7 +173,7 @@ export const dynHighRarity: Record<string, CardScript> = {
         label: "Gain 1 resource",
         condition: (ctx, discarded, eventContext) =>
           eventContext?.atRandom === true && discarded?.instanceId === ctx.self.instanceId,
-        effect: (ctx) => ctx.changeResources(ctx.seat, 1),
+        effect: (ctx) => ctx.gainResources(ctx.seat, 1),
       },
     ],
   },
@@ -1067,7 +1067,7 @@ export const dynHighRarity: Record<string, CardScript> = {
   },
   "celestial kimono|0": {
     onFriendlyDestroyed(ctx, card) {
-      if (card.instanceId === ctx.self.instanceId || has(ctx, card, "ward")) ctx.changeResources(ctx.seat, 1);
+      if (card.instanceId === ctx.self.instanceId || has(ctx, card, "ward")) ctx.gainResources(ctx.seat, 1);
     },
   },
   "phantasmal symbiosis|2": {

@@ -1826,7 +1826,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       },
     },
     onChoose(ctx, hook, option) {
-      if (hook === "deep-blue-bottom" && ctx.putOnDeckBottom(Number(option))) ctx.changeResources(ctx.seat, 3);
+      if (hook === "deep-blue-bottom" && ctx.putOnDeckBottom(Number(option))) ctx.gainResources(ctx.seat, 3);
     },
   },
   "cracker jax|0": {

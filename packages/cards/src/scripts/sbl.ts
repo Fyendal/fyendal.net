@@ -220,7 +220,7 @@ export const sbl: Record<string, CardScript> = {
       goAgain: true,
       label: "Destroy: gain {r}",
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
+        ctx.gainResources(ctx.seat, 1);
         ctx.logPublic(
           localizedCardLog(ctx, "Garland of Spring: gain 1 resource", "card.log.common.resources.gained", {
             amount: 1,

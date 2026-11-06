@@ -84,11 +84,11 @@ export interface ScriptCtx {
   /** Attacks waiting in a player's attack queue, first attack first. CR
    * 3.15.7f treats them as on the stack when choosing targets. */
   queuedAttacks(targetSeat: number): readonly DeepReadonly<CardInstance>[];
-  /** Add or spend floating resources/chi or action points through bounded
-   * commands. Gaining action points fails outside that seat's action phase. */
-  changeResources(targetSeat: number, delta: number): void;
-  changeChi(targetSeat: number, delta: number): void;
-  changeActionPoints(targetSeat: number, delta: number): void;
+  /** Gain floating resources, chi or action points through bounded commands.
+   * Gaining action points fails outside that seat's action phase. */
+  gainResources(targetSeat: number, amount: number): void;
+  gainChi(targetSeat: number, amount: number): void;
+  gainActionPoints(targetSeat: number, amount: number): void;
   /** Permit a permanent's once-per-turn ability to be activated `count`
    * additional times this turn. */
   grantAdditionalActivation(instanceId: number, count?: number): void;
@@ -692,8 +692,9 @@ export interface ScriptCtx {
    *  additional zones granted by active continuous effects. */
   hasArsenalSpace(targetSeat?: number): boolean;
   /** Put one of the controller's cards (from hand, deck, graveyard, or banish, by instance id)
-   *  into their arsenal face up, triggering onEnterArsenal hooks (the entering
-   *  card's own and the controller's permanents') after the current effect
+   *  into their arsenal, face up by default or face down with `faceUp: false`.
+   *  Only a face-up entry triggers onEnterArsenal hooks (the entering card's
+   *  own and the controller's permanents'), after the current effect
    *  finishes. `from` names the source
    *  zone for triggers that care ("from your deck").
    *  Returns false when the card isn't in the named zone or its owner's
@@ -1800,7 +1801,8 @@ export interface CardScript {
    *  permanents ("whenever an arrow is put face up into your arsenal from your
    *  deck"). Each hook is a triggered layer that resolves after the effect
    *  that moved the card finishes. `from` names the zone it came from (for
-   *  example, "hand", "deck", or "banish"). Turning a face-down arsenal card
+   *  example, "hand", "deck", or "banish"). A card put in face down
+   *  (`faceUp: false`) does not fire it. Turning a face-down arsenal card
    *  face up does not put it into the arsenal; it fires this hook (with
    *  `from` "arsenal") only for scripts that set `onEnterArsenalWhenTurnedFaceUp`. */
   onEnterArsenal?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, from: string): void;

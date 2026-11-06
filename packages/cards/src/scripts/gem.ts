@@ -109,7 +109,7 @@ export const gem: Record<string, CardScript> = {
 
   "runechant of greed|2": specializedRunechant((ctx) => ctx.drawCards(ctx.seat, 1)),
   "runechant of envy|2": specializedRunechant((ctx) => ctx.gainLife(ctx.seat, 1)),
-  "runechant of gluttony|2": specializedRunechant((ctx) => ctx.changeResources(ctx.seat, 1)),
+  "runechant of gluttony|2": specializedRunechant((ctx) => ctx.gainResources(ctx.seat, 1)),
   "runechant of lust|2": specializedRunechant((ctx) => ctx.createToken(RUNECHANT)),
   "runechant of pride|2": specializedRunechant((ctx, attack) => {
     ctx.addCardTempPower(attack.instanceId, 1);

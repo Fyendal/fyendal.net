@@ -410,7 +410,7 @@ export const omnHighRarity: Record<string, CardScript> = {
           ctx.setFlag("player", "plutonicResource", true);
         },
         effect(ctx) {
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
         },
       },
     ],
@@ -829,7 +829,7 @@ export const omnHighRarity: Record<string, CardScript> = {
             .slice(0, 2);
           if (cards.length < 2) return;
           for (const card of cards) ctx.banish(card.instanceId);
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
         },
       },
     ],

@@ -55,7 +55,7 @@ export const agb: Record<string, CardScript> = {
       ],
       onCostPaid(ctx, paidCards) {
         const discarded = paidCards[0];
-        if (discarded) ctx.changeResources(ctx.seat, ctx.cardData(discarded.cardId).pitch ?? 0);
+        if (discarded) ctx.gainResources(ctx.seat, ctx.cardData(discarded.cardId).pitch ?? 0);
       },
     },
   },

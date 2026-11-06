@@ -87,7 +87,7 @@ const tekloCore: CardScript = {
       condition: (ctx) => ctx.getCounter("steam") > 0,
       effect(ctx) {
         ctx.setCounter("steam", ctx.getCounter("steam") - 1);
-        ctx.changeResources(ctx.seat, 2);
+        ctx.gainResources(ctx.seat, 2);
       },
     },
   ],
@@ -349,7 +349,7 @@ export const arcHighRarity: Record<string, CardScript> = {
           if (isType(ctx, card, "mechanologist")) gained++;
           ctx.banish(card.instanceId);
         }
-        ctx.changeResources(ctx.seat, gained);
+        ctx.gainResources(ctx.seat, gained);
       },
     },
   },
@@ -362,7 +362,7 @@ export const arcHighRarity: Record<string, CardScript> = {
       });
     },
     onBoosted(ctx) {
-      ctx.changeActionPoints(ctx.seat, 1);
+      ctx.gainActionPoints(ctx.seat, 1);
     },
   },
   "teklo core|3": tekloCore,

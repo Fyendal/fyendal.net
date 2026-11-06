@@ -181,7 +181,7 @@ export const aps: Record<string, CardScript> = {
       removeSuspenseChoice(ctx, "aps-bodice", "Remove a suspense counter to gain {r}{r}?");
     },
     onChoose(ctx, hook, option) {
-      if (hook === "aps-bodice" && resolveRemoveSuspense(ctx, option)) ctx.changeResources(ctx.seat, 2);
+      if (hook === "aps-bodice" && resolveRemoveSuspense(ctx, option)) ctx.gainResources(ctx.seat, 2);
     },
   },
   "attention grabbers|0": {

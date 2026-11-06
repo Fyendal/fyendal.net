@@ -184,7 +184,7 @@ export const aio: Record<string, CardScript> = {
           !modifier.consumed,
       );
       if (!activated) return;
-      ctx.changeResources(ctx.seat, 1);
+      ctx.gainResources(ctx.seat, 1);
       ctx.logPublic(
         localizedCardLog(ctx, "Heavy Industry Power Plant: gain {r}", "card.log.common.resources.gained", {
           amount: 1,
@@ -219,7 +219,7 @@ export const aio: Record<string, CardScript> = {
           if (isMech(ctx, top)) mech += 1;
           ctx.banish(top.instanceId);
         }
-        ctx.changeActionPoints(ctx.seat, mech);
+        ctx.gainActionPoints(ctx.seat, mech);
       },
     },
   },

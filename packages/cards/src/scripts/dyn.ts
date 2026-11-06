@@ -274,7 +274,7 @@ function hyperDriver(steam: number): CardScript {
           const steam = ctx.getCounter("steam");
           if (steam <= 0) return;
           ctx.setCounter("steam", steam - 1);
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
         },
       },
     ],

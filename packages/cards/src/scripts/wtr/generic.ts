@@ -132,8 +132,8 @@ const crazyBrewScript = (): CardScript => ({
       ctx.gainLife(ctx.seat, 2);
       ctx.grantAbilityGoAgain();
     } else {
-      ctx.changeResources(ctx.seat, 2);
-      ctx.changeActionPoints(ctx.seat, 2);
+      ctx.gainResources(ctx.seat, 2);
+      ctx.gainActionPoints(ctx.seat, 2);
       buffNextAttack(ctx, { attack: 2 });
     }
   },
@@ -691,7 +691,7 @@ const timesnapPotionScript = (): CardScript => ({
     goAgain: false,
     destroySelfCost: true,
     onActivate(ctx) {
-      ctx.changeActionPoints(ctx.seat, 2);
+      ctx.gainActionPoints(ctx.seat, 2);
       ctx.logPublic(
         localizedLog(`${ctx.data.name}: gained 2 action points`, "card.log.common.actionpoints.gained", {
           card: { kind: "card", cardId: ctx.self.cardId },

@@ -2146,7 +2146,7 @@ export const iar: Record<string, CardScript> = {
         );
       if (!target || !ctx.destroyPermanent(target.instanceId)) return;
       ctx.drawCards(ctx.seat, 1);
-      ctx.changeActionPoints(ctx.seat, 1);
+      ctx.gainActionPoints(ctx.seat, 1);
     },
   },
 
@@ -2723,7 +2723,7 @@ export const iar: Record<string, CardScript> = {
         tap: true,
         label: "Gain 1 resource",
         onActivate(ctx) {
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
         },
       },
       ...zombieAttack().map((ability) => ({ ...ability, label: "Attack" })),

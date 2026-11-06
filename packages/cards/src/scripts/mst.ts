@@ -1479,7 +1479,7 @@ Object.assign(mst, {
   "three visits|1": { wardValue: (ctx) => ctx.pitchedThisTurn({ color: "blue" }) * 3 },
   "twelve petal kāṣāya|0": {
     onFriendlyPlay(ctx, played) {
-      if (cardNamed(ctx, played, "Inner Chi")) ctx.changeResources(ctx.seat, 1);
+      if (cardNamed(ctx, played, "Inner Chi")) ctx.gainResources(ctx.seat, 1);
     },
     activated: {
       cost: 0,

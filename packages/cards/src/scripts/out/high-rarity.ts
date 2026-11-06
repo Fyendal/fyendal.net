@@ -499,7 +499,7 @@ export const outHighRarity: Record<string, CardScript> = {
       },
     },
     onChoose(ctx, hook, option) {
-      if (hook === "trench-bottom" && ctx.putOnDeckBottom(Number(option))) ctx.changeResources(ctx.seat, 1);
+      if (hook === "trench-bottom" && ctx.putOnDeckBottom(Number(option))) ctx.gainResources(ctx.seat, 1);
     },
   },
   "quiver of abyssal depths|0": {

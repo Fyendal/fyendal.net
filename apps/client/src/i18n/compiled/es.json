@@ -8999,6 +8999,24 @@
       "value": " de defensa en este chain link"
     }
   ],
+  "card.log.obk.virulentcascade.token": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " elige "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    },
+    {
+      "type": 0,
+      "value": " al azar"
+    }
+  ],
   "card.log.out.banish.faceup": [
     {
       "type": 1,

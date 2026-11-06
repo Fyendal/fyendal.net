@@ -50,7 +50,7 @@ function hyperDriver(steam: number): CardScript {
           const steam = ctx.getCounter("steam");
           if (steam <= 0) return;
           ctx.setCounter("steam", steam - 1);
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
         },
       },
     ],
@@ -211,7 +211,7 @@ export const amx: Record<string, CardScript> = {
       if (hook !== "twintek-driver" || option === "pass") return;
       if (ctx.putOnDeckBottom(Number(option))) {
         ctx.shuffleDeck();
-        ctx.changeResources(ctx.seat, 1);
+        ctx.gainResources(ctx.seat, 1);
       }
     },
   },

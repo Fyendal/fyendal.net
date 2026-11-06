@@ -75,7 +75,7 @@ export const aaz: Record<string, CardScript> = {
         return ctx.player(ctx.seat).arsenal.some((card) => card.faceDown && isArrow(ctx, card));
       },
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
+        ctx.gainResources(ctx.seat, 1);
         ctx.destroyAtEndPhase(ctx.self.instanceId);
       },
     },

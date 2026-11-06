@@ -1840,7 +1840,7 @@ export function resourceAbility(
     ...ability,
     resourceSource: amount,
     onActivate(ctx) {
-      ctx.changeResources(ctx.seat, amount);
+      ctx.gainResources(ctx.seat, amount);
       afterGain?.(ctx, amount);
     },
   };

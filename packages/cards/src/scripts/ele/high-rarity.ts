@@ -372,7 +372,7 @@ export const eleHighRarity: Record<string, CardScript> = {
       if (hook !== "korshem-benefit") return;
       const target = ctx.getState("revealingSeat") - 1;
       if (target < 0) return;
-      if (option === "resource") ctx.changeResources(target, 1);
+      if (option === "resource") ctx.gainResources(target, 1);
       else if (option === "life") ctx.gainLife(target, 1);
       else if (option === "attack") buffNextAttack(ctx, { seat: target, attack: 1 });
       else if (option === "defense")
@@ -877,7 +877,7 @@ export const eleHighRarity: Record<string, CardScript> = {
       }
     },
   }),
-  "blink|3": { onPlay: (ctx) => ctx.changeActionPoints(ctx.seat, 1) },
+  "blink|3": { onPlay: (ctx) => ctx.gainActionPoints(ctx.seat, 1) },
   "rampart of the ram's head|0": {
     defendCost: 1,
     onDefend(ctx) {

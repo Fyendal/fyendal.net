@@ -123,7 +123,7 @@ export const aac: Record<string, CardScript> = {
         event: "card-played",
         label: "Gain 1 resource",
         condition: (ctx, played) => lingeringFromSelf(ctx) && !!played && hasStealth(ctx, played),
-        effect: (ctx) => ctx.changeResources(ctx.seat, 1),
+        effect: (ctx) => ctx.gainResources(ctx.seat, 1),
       },
     ],
   },

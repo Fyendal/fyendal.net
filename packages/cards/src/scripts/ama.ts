@@ -195,7 +195,7 @@ export const ama: Record<string, CardScript> = {
               !modifier.consumed,
           ),
         effect(ctx) {
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
         },
       },
     ],

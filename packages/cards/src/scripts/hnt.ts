@@ -214,7 +214,7 @@ function offerBloodSplatteredVest(ctx: ScriptCtx): void {
 function resolveBloodSplatteredVest(ctx: ScriptCtx, option: string): void {
   if (!equippedSelf(ctx)) return;
   if (option === "yes") {
-    ctx.changeResources(ctx.seat, 1);
+    ctx.gainResources(ctx.seat, 1);
     ctx.addCounter(ctx.self.instanceId, "stain", 1);
   }
   // Effect-hit triggers carry last-known source information. Re-read the live
@@ -926,7 +926,7 @@ export const hnt: Record<string, CardScript> = {
       goAgain: true,
       destroySelfCost: true,
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
+        ctx.gainResources(ctx.seat, 1);
         ctx.addModifier({ scope: "until-end-of-turn", restrictCardPlaysToType: "draconic" });
       },
     },
@@ -976,7 +976,7 @@ export const hnt: Record<string, CardScript> = {
   "drop of dragon blood|1": {
     modifyPlayCost: (ctx, base) => base - draconicLinks(ctx),
     onPlay(ctx) {
-      ctx.changeResources(ctx.seat, 1);
+      ctx.gainResources(ctx.seat, 1);
       ctx.drawCards(ctx.seat, 1);
     },
   },
@@ -1025,7 +1025,7 @@ export const hnt: Record<string, CardScript> = {
     onPlay(ctx) {
       const target = opponentSeat(ctx);
       markHero(ctx, target);
-      if (heroIsArakni(ctx, target)) ctx.changeResources(ctx.seat, 1);
+      if (heroIsArakni(ctx, target)) ctx.gainResources(ctx.seat, 1);
     },
   },
   "tooth of the dragon|1": {

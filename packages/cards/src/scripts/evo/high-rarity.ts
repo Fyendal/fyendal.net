@@ -466,7 +466,7 @@ export const evoHighRarity: Record<string, CardScript> = {
   "evo steel soul processor|3": evoEquipment({
     onTransform(ctx, _direction, other) {
       const count = steelSoulTriggerCount(ctx, other);
-      if (count > 0) ctx.changeResources(ctx.seat, count * 3);
+      if (count > 0) ctx.gainResources(ctx.seat, count * 3);
     },
   }),
   "evo steel soul controller|3": evoEquipment({
@@ -487,7 +487,7 @@ export const evoHighRarity: Record<string, CardScript> = {
   "evo steel soul tower|3": evoEquipment({
     onTransform(ctx, _direction, other) {
       const count = steelSoulTriggerCount(ctx, other);
-      if (count > 0) ctx.changeActionPoints(ctx.seat, count);
+      if (count > 0) ctx.gainActionPoints(ctx.seat, count);
     },
   }),
   "evo circuit breaker|1": breakerEvo({
@@ -501,7 +501,7 @@ export const evoHighRarity: Record<string, CardScript> = {
       if (attacks.length) ctx.shuffleDeck();
     }),
   }),
-  "evo atom breaker|1": breakerEvo(optionalBreakerBoost((ctx) => ctx.changeResources(ctx.seat, 2))),
+  "evo atom breaker|1": breakerEvo(optionalBreakerBoost((ctx) => ctx.gainResources(ctx.seat, 2))),
   "evo face breaker|1": breakerEvo(
     optionalBreakerBoost((ctx, boostedInstanceId) => {
       ctx.addCardTempPower(boostedInstanceId, 2);
@@ -766,7 +766,7 @@ export const evoHighRarity: Record<string, CardScript> = {
     modifyAttack: (ctx) => ctx.getState("scrapperX"),
     onAttackDeclared(ctx) {
       if (ctx.getState("scrappedDrivers") >= 3) {
-        ctx.changeResources(ctx.seat, 6);
+        ctx.gainResources(ctx.seat, 6);
         ctx.grantGoAgain();
       }
     },
@@ -774,7 +774,7 @@ export const evoHighRarity: Record<string, CardScript> = {
   "scrap trader|1": scrap(
     {
       onPlay(ctx) {
-        ctx.changeResources(ctx.seat, ctx.getState("scrapped") * 2);
+        ctx.gainResources(ctx.seat, ctx.getState("scrapped") * 2);
       },
     },
     2,

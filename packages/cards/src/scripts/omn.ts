@@ -941,7 +941,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   ...pitches("corrosive space dust", (pitch) => fragmentWard(5 - pitch, true)),
   ...pitches("cosmic duality", () => discardArcaneFlow()),
   ...pitches("ebbing arcstride", () => fragment((ctx) => ctx.grantGoAgain())),
-  ...pitches("pulsing cardia", () => fragment((ctx) => ctx.changeResources(ctx.seat, 1))),
+  ...pitches("pulsing cardia", () => fragment((ctx) => ctx.gainResources(ctx.seat, 1))),
   ...pitches("shattering flowtide", () => fragment((ctx) => ctx.createToken(FLOW))),
   ...pitches("auric shards", (pitch) => auraEnterAttack({ attack: 1, fragmentOnly: true, holoAttack: 5 - pitch })),
   ...pitches("holo shield", (pitch) => fragmentWard(5 - pitch)),
@@ -1349,7 +1349,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       ctx.addModifier({ scope: "until-end-of-turn", onPreventCreateToken: FLOW });
     },
   })),
-  "cosmic flare|1": { onPlay: (ctx) => ctx.changeResources(ctx.seat, 3) },
+  "cosmic flare|1": { onPlay: (ctx) => ctx.gainResources(ctx.seat, 3) },
   "starworld warning|2": { onPlay: (ctx) => ctx.createTokens(FLOW, 2) },
   "starlight road|3": {
     onPlay: (ctx) =>

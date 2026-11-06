@@ -210,7 +210,7 @@ export const azs: Record<string, CardScript> = {
         "Gain 1 resource and amp 1",
         decisionMessage("card.trigger.common.resource.gain.amp", { amount: 1, amp: 1 }),
         (ctx) => {
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
           ampNextArcane(ctx, 1);
         },
       ),

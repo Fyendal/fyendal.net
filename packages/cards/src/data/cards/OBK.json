@@ -10,6 +10,48 @@
     "set": "OBK"
   },
   {
+    "id": "OBK003",
+    "name": "Virulent Cascade",
+    "cardType": "action",
+    "text": "Stealth\nWhen this attacks, choose Exertion, Inertia, or Bloodrot Pox at random and create that token under your control.\nIf you and the defending hero are infected, this gets +1{p} and go again.",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "defense": 3,
+    "classes": ["chaos", "assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK004",
+    "name": "Virulent Cascade",
+    "cardType": "action",
+    "text": "Stealth\nWhen this attacks, choose Exertion, Inertia, or Bloodrot Pox at random and create that token under your control.\nIf you and the defending hero are infected, this gets +1{p} and go again.",
+    "pitch": 2,
+    "cost": 0,
+    "attack": 2,
+    "defense": 3,
+    "classes": ["chaos", "assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK005",
+    "name": "Virulent Cascade",
+    "cardType": "action",
+    "text": "Stealth\nWhen this attacks, choose Exertion, Inertia, or Bloodrot Pox at random and create that token under your control.\nIf you and the defending hero are infected, this gets +1{p} and go again.",
+    "pitch": 3,
+    "cost": 0,
+    "attack": 1,
+    "defense": 3,
+    "classes": ["chaos", "assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "OBK"
+  },
+  {
     "id": "OBK006",
     "name": "Min, Genius",
     "cardType": "hero",
@@ -52,6 +94,18 @@
     "set": "OBK"
   },
   {
+    "id": "OBK009",
+    "name": "Change of Mind",
+    "cardType": "instant",
+    "text": "Min Specialization\nFlip your hero. If you flip into your △ face, gain {r}{r}. If you flip into your ▽ face, your next attack this turn gets +2{p}.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["chaos", "mechanologist"],
+    "keywords": ["Min Specialization"],
+    "set": "OBK"
+  },
+  {
     "id": "OBK012",
     "name": "Vyle, Catalyst of Collapse",
     "cardType": "hero",
@@ -69,6 +123,48 @@
     "classes": ["chaos", "ranger"],
     "life": 20,
     "intellect": 4,
+    "set": "OBK"
+  },
+  {
+    "id": "OBK015",
+    "name": "Eidetic Endpoint",
+    "cardType": "action",
+    "text": "When this is put face-up into your arsenal, turn all cards in all arsenals face-up.\nGo again",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["chaos", "ranger"],
+    "subtypes": ["arrow", "attack"],
+    "keywords": ["Go again"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK016",
+    "name": "Eidetic Endpoint",
+    "cardType": "action",
+    "text": "When this is put face-up into your arsenal, turn all cards in all arsenals face-up.\nGo again",
+    "pitch": 2,
+    "cost": 1,
+    "attack": 3,
+    "defense": 3,
+    "classes": ["chaos", "ranger"],
+    "subtypes": ["arrow", "attack"],
+    "keywords": ["Go again"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK017",
+    "name": "Eidetic Endpoint",
+    "cardType": "action",
+    "text": "When this is put face-up into your arsenal, turn all cards in all arsenals face-up.\nGo again",
+    "pitch": 3,
+    "cost": 1,
+    "attack": 2,
+    "defense": 3,
+    "classes": ["chaos", "ranger"],
+    "subtypes": ["arrow", "attack"],
+    "keywords": ["Go again"],
     "set": "OBK"
   },
   {

@@ -8290,6 +8290,20 @@
       "value": " 防御"
     }
   ],
+  "card.log.obk.virulentcascade.token": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 随机选择了 "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    }
+  ],
   "card.log.out.banish.faceup": [
     {
       "type": 0,

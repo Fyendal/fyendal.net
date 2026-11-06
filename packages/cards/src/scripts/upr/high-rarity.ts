@@ -278,7 +278,7 @@ export const uprHighRarity: Record<string, CardScript> = {
       oncePerTurn: true,
       canActivate: (ctx) => ctx.playedThisTurn("red") > 0,
       onActivate(ctx) {
-        ctx.changeResources(
+        ctx.gainResources(
           ctx.seat,
           ctx.player(ctx.seat).pitch.filter((card) => ctx.cardData(card.cardId).pitch === 1).length,
         );
@@ -659,7 +659,7 @@ export const uprHighRarity: Record<string, CardScript> = {
       if (hook !== "rewind-target") return;
       const id = Number(option);
       const owner = ctx.state.stack.find((layer) => layer.card?.instanceId === id)?.card?.owner;
-      if (owner !== undefined && ctx.negateStackCard(id) && ctx.moveToHand(id)) ctx.changeActionPoints(owner, 1);
+      if (owner !== undefined && ctx.negateStackCard(id) && ctx.moveToHand(id)) ctx.gainActionPoints(owner, 1);
     },
   },
   "crown of providence|0": {

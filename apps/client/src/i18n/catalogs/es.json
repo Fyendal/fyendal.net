@@ -1778,6 +1778,7 @@
   "card.log.obk.ragingstreets.boost": "{card}: {target} obtiene +{amount} de poder y +{amount} de defensa en este chain link",
   "card.log.obk.alpha.counters": "{card}: {target} recibe {amount, plural, one {un contador de +1 de poder} other {# contadores de +1 de poder}}",
   "card.log.obk.incubator.infected": "{card}: durante el resto de la partida, al principio de la end phase de {target}, crea {token} bajo su control",
+  "card.log.obk.virulentcascade.token": "{card} elige {token} al azar",
   "card.log.saz.card.attack.turn": "{card} obtiene +{amount} de poder este turno",
   "card.log.saz.card.goagain.turn": "{card} obtiene go again este turno",
   "card.log.saz.crowsnest.aim": "{card}: la arrow recibe un contador de aim",

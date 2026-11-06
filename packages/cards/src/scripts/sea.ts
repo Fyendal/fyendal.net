@@ -1083,7 +1083,7 @@ export const sea: Record<string, CardScript> = {
       },
     },
     onFriendlyActivate(ctx, activated) {
-      if (named(ctx, activated, "Goldkiss Rum")) ctx.changeResources(ctx.seat, 1);
+      if (named(ctx, activated, "Goldkiss Rum")) ctx.gainResources(ctx.seat, 1);
     },
   },
   "blue sea tricorn|0": {
@@ -1104,7 +1104,7 @@ export const sea: Record<string, CardScript> = {
       goAgain: true,
       destroySelfCost: true,
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
+        ctx.gainResources(ctx.seat, 1);
       },
     },
   },
@@ -1390,7 +1390,7 @@ export const sea: Record<string, CardScript> = {
       destroySelfCost: true,
       canActivate: (ctx) => Number(ctx.getFlag("player", "cardsDrawnThisTurn")) > 0,
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
+        ctx.gainResources(ctx.seat, 1);
       },
     },
   },
@@ -2574,7 +2574,7 @@ Object.assign(sea, {
     },
   },
   "amethyst amulet|3": seaAmulet((ctx) => buffNextAttack(ctx, { attack: 2 }), "instant"),
-  "diamond amulet|3": seaAmulet((ctx) => ctx.changeActionPoints(ctx.seat, 1), "instant"),
+  "diamond amulet|3": seaAmulet((ctx) => ctx.gainActionPoints(ctx.seat, 1), "instant"),
   "onyx amulet|3": seaAmulet((ctx) => {
     for (const p of ctx.state.players) {
       ctx.tap(p.hero.instanceId);
@@ -2603,7 +2603,7 @@ Object.assign(sea, {
       );
   }, "instant"),
   "pounamu amulet|3": seaAmulet((ctx) => ctx.gainLife(ctx.seat, 2)),
-  "ruby amulet|3": seaAmulet((ctx) => ctx.changeResources(ctx.seat, 2), "instant"),
+  "ruby amulet|3": seaAmulet((ctx) => ctx.gainResources(ctx.seat, 2), "instant"),
   "sapphire amulet|3": seaAmulet((ctx) => ctx.setFlag("player", "sapphireIntellect", true)),
   "bam bam|2": {
     ...destroyItemOnHit(),

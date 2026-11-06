@@ -107,7 +107,7 @@ const sandSketchedPlan: CardScript = {
   onChoose(ctx, hook, option) {
     if (hook !== "sand-search" || !finishSearchToHand(ctx, option)) return;
     const discarded = ctx.discardRandom(ctx.seat, 1)[0];
-    if (isSixPlus(ctx, discarded)) ctx.changeActionPoints(ctx.seat, 2);
+    if (isSixPlus(ctx, discarded)) ctx.gainActionPoints(ctx.seat, 2);
   },
 };
 
@@ -220,7 +220,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
       },
     },
     onDieRollResolved(ctx, hook, roll) {
-      if (hook === "scabskin") ctx.changeActionPoints(ctx.seat, Math.floor(roll / 2));
+      if (hook === "scabskin") ctx.gainActionPoints(ctx.seat, Math.floor(roll / 2));
     },
   },
   "bloodrush bellow|2": bloodrushBellow,

@@ -2171,7 +2171,7 @@ Object.assign(sup, {
     onPlay(ctx: ScriptCtx) {
       const drivers = ctx.player(ctx.seat).banish.filter((card) => named(ctx, card, "Hyper Driver") && !card.faceDown);
       for (const card of drivers) ctx.setCardFaceDown(card.instanceId, true);
-      ctx.changeActionPoints(ctx.seat, drivers.length);
+      ctx.gainActionPoints(ctx.seat, drivers.length);
       if (drivers.length >= 3) ctx.drawCards(ctx.seat, 1);
     },
   },

@@ -8953,6 +8953,24 @@
       "value": " defense this chain link"
     }
   ],
+  "card.log.obk.virulentcascade.token": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " chooses "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    },
+    {
+      "type": 0,
+      "value": " at random"
+    }
+  ],
   "card.log.out.banish.faceup": [
     {
       "type": 1,

@@ -100,7 +100,7 @@ export const asr: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "robe-autumn" || option !== "yes") return;
       ctx.destroySelf();
-      ctx.changeResources(ctx.seat, 1);
+      ctx.gainResources(ctx.seat, 1);
     },
   },
 

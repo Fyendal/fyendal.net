@@ -1427,7 +1427,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     alternativePlayCost: { kind: "banish-hand", min: 1 },
     onAlternativeCostPaid(ctx, paidCards) {
       const bloodDebt = paidCards.filter((card) => hasBloodDebt(ctx, card)).length;
-      if (bloodDebt > 0) ctx.changeResources(ctx.seat, bloodDebt);
+      if (bloodDebt > 0) ctx.gainResources(ctx.seat, bloodDebt);
     },
     onAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId === undefined && ctx.player(opponentSeat(ctx)).soul.length > 0) ctx.grantGoAgain();
@@ -1641,7 +1641,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         ctx.getFlag("player", "playedNonAttackAction") === true,
       label: "Destroy after playing attack and non-attack actions: gain 2 resources",
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 2);
+        ctx.gainResources(ctx.seat, 2);
       },
     },
   },
@@ -1683,7 +1683,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       goAgain: false,
       label: "Destroy: gain 2 action points",
       onActivate(ctx) {
-        ctx.changeActionPoints(ctx.seat, 2);
+        ctx.gainActionPoints(ctx.seat, 2);
       },
     },
   },
