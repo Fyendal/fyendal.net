@@ -692,7 +692,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
         label: "Destroy this and empower the next Guardian attack",
         effect(ctx) {
           ctx.destroySelf();
-          buffNextAttack(ctx, { attack: 4 - pitch, appliesToClass: "guardian" });
+          buffNextAttack(ctx, { attack: 4 - pitch, appliesToClass: "guardian", appliesTo: "attack-action" });
         },
       },
     ],
