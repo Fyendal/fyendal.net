@@ -3,12 +3,12 @@ import {
   armDelayedEffect,
   attackAbility,
   attackIntimidateTrigger,
+  beatChest,
   buffNextAttack,
   cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   decisionPrompt,
-  isSixPlus,
   localizedCardLog,
   mergeSetScripts,
   ongoingLabel,
@@ -116,45 +116,6 @@ function preventionToken(token: string): CardScript {
     onPlay(ctx) {
       ctx.preventNextDamage(ctx.seat, 2);
       ctx.addModifier({ scope: "until-end-of-turn", onPreventCreateToken: token });
-    },
-  };
-}
-
-function beatChest(extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    additionalCost(ctx) {
-      const sixes = ctx.player(ctx.seat).hand.filter((card) => isSixPlus(ctx, card));
-      if (sixes.length) {
-        ctx.requestCardChoice(
-          "beat-chest",
-          decisionPrompt(
-            `${ctx.data.name}: discard a card with 6 or more power to beat chest?`,
-            "card.hvy.beatchest.discard",
-            {
-              values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 6 },
-              optionMessages: commonOptionMessages("no"),
-            },
-          ),
-          ["no", ...sixes.map((card) => card.instanceId)],
-        );
-      }
-      extra.additionalCost?.(ctx);
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "beat-chest") {
-        ctx.setFlag("player", "discardingToBeatChest", true);
-        const attackAction = isAttackAction(ctx, ctx.self);
-        if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", true);
-        const discarded = option !== "no" && ctx.discardCard(ctx.seat, Number(option));
-        ctx.setFlag("player", "discardingToBeatChest", false);
-        if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", false);
-        if (discarded) {
-          ctx.setFlag("player", "beatenChestThisTurn", true);
-        }
-        return;
-      }
-      extra.onChoose?.(ctx, hook, option);
     },
   };
 }

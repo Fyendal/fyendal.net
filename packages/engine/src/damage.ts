@@ -17,7 +17,7 @@ import {
   nameOf,
 } from "./gameLog.js";
 
-import { recordAttackStats, recordHeroDamage } from "./stats.js";
+import { recordAttackStats, recordDamageTakenFromTypes, recordHeroDamage } from "./stats.js";
 import type { AdditionalTargetHit, ChainLinkState, PendingArcane, PlayerState } from "./state.js";
 
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
@@ -69,6 +69,8 @@ function applyHit(
   defender.life -= link.damage;
   if (link.damage > 0) defender.flags.lostLifeThisTurn = true;
   recordHeroDamage(state, link.attacker, link.damage);
+  const liveAttack = findCardAnywhere(state, link.attackingCard.instanceId)?.card ?? link.attackingCard;
+  recordDamageTakenFromTypes(defender, cardTypesOf(state, liveAttack), link.damage);
   logPublic(
     state,
     gameLogMessage(

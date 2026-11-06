@@ -1240,6 +1240,55 @@ export function queueIntimidate(ctx: ScriptCtx): void {
   );
 }
 
+/** Beat Chest: optional additional cost of discarding a card with 6 or more base {p}. */
+export function beatChest(
+  extra: CardScript = {},
+  opts: { hook?: string; messageId?: string } = {},
+): CardScript {
+  const hook = opts.hook ?? "beat-chest";
+  return {
+    ...extra,
+    additionalCost(ctx) {
+      const sixes = ctx.player(ctx.seat).hand.filter((card) => isSixPlus(ctx, card));
+      if (sixes.length) {
+        ctx.requestCardChoice(
+          hook,
+          decisionPrompt(
+            `${ctx.data.name}: discard a card with 6 or more power to beat chest?`,
+            opts.messageId ?? "card.hvy.beatchest.discard",
+            {
+              values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 6 },
+              optionMessages: commonOptionMessages("no"),
+            },
+          ),
+          ["no", ...sixes.map((card) => card.instanceId)],
+        );
+      }
+      extra.additionalCost?.(ctx);
+    },
+    onChoose(ctx, chosenHook, option) {
+      if (chosenHook !== hook) {
+        extra.onChoose?.(ctx, chosenHook, option);
+        return;
+      }
+      const attackAction = ctx.hasCardType(ctx.self, "action") && ctx.cardTypes(ctx.self).includes("attack");
+      ctx.setFlag("player", "discardingToBeatChest", true);
+      if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", true);
+      const discarded = option !== "no" && ctx.discardCard(ctx.seat, Number(option));
+      ctx.setFlag("player", "discardingToBeatChest", false);
+      if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", false);
+      if (discarded) {
+        ctx.setFlag("player", "beatenChestThisTurn", true);
+        ctx.setCardState(ctx.self.instanceId, "beatChestPaid", 1);
+      }
+    },
+  };
+}
+
+export function beatenChest(ctx: ScriptCtx): boolean {
+  return ctx.getFlag("player", "beatenChestThisTurn") === true;
+}
+
 export function isSixPlus(ctx: ScriptCtx, card: DeepReadonly<CardInstance> | undefined): boolean {
   if (!card) return false;
   return ctx.basePower(card) >= 6;

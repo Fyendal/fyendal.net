@@ -12145,6 +12145,34 @@
       "value": "Destroy this to gain 2 resources?"
     }
   ],
+  "card.mpb.babaza.mode.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose 1"
+    }
+  ],
+  "card.mpb.option.agility": [
+    {
+      "type": 0,
+      "value": "Create an Agility token"
+    }
+  ],
+  "card.mpb.option.intimidate": [
+    {
+      "type": 0,
+      "value": "Intimidate target hero"
+    }
+  ],
+  "card.mpb.option.might": [
+    {
+      "type": 0,
+      "value": "Create a Might token"
+    }
+  ],
   "card.mpg.arsenal.card.bottom": [
     {
       "type": 0,
@@ -18625,6 +18653,12 @@
     {
       "type": 0,
       "value": "Turn a banished card face down to create a Corrupted Corpse"
+    }
+  ],
+  "card.trigger.mpb.fury.destroy": [
+    {
+      "type": 0,
+      "value": "Destroy Fury; you've beaten chest this turn"
     }
   ],
   "card.trigger.mst.essence.prevent.blue": [

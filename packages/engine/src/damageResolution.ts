@@ -14,7 +14,7 @@ import {
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, Modifier, PendingArcane, PlayerState, StackLayer } from "./state.js";
-import { recordAllyAbsorbed, recordEffectThreat, recordHeroDamage, recordLifeGained } from "./stats.js";
+import { recordAllyAbsorbed, recordDamageTakenFromTypes, recordEffectThreat, recordHeroDamage, recordLifeGained } from "./stats.js";
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { createTokenFor, createTokensFor } from "./tokens.js";
 import { destroyPermanent, fireLeaveCombatChain, moveToGraveyard } from "./zoneMoves.js";
@@ -605,6 +605,7 @@ function applyEffectDamage(state: GameStateInternal,
     target.life -= packet.amount;
     target.flags.lostLifeThisTurn = true;
     noteEffectDamageDealer(state, packet, found, true);
+    if (found) recordDamageTakenFromTypes(target, cardTypesOf(state, found.card), packet.amount);
     if (packet.targetSeat !== packet.sourceSeat && !effectSourceIsAlly(state, packet, found)) {
       recordHeroDamage(state, packet.sourceSeat, packet.amount);
     }

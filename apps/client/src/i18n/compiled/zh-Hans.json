@@ -11328,6 +11328,34 @@
       "value": "摧毁此牌以获得 2 点资源？"
     }
   ],
+  "card.mpb.babaza.mode.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择 1 项"
+    }
+  ],
+  "card.mpb.option.agility": [
+    {
+      "type": 0,
+      "value": "创建一个 Agility 标记"
+    }
+  ],
+  "card.mpb.option.intimidate": [
+    {
+      "type": 0,
+      "value": "对目标英雄 intimidate"
+    }
+  ],
+  "card.mpb.option.might": [
+    {
+      "type": 0,
+      "value": "创建一个 Might 标记"
+    }
+  ],
   "card.mpg.arsenal.card.bottom": [
     {
       "type": 0,
@@ -17558,6 +17586,12 @@
     {
       "type": 0,
       "value": "将一张已放逐的牌翻至面朝下，以生成一张 Corrupted Corpse"
+    }
+  ],
+  "card.trigger.mpb.fury.destroy": [
+    {
+      "type": 0,
+      "value": "摧毁 Fury；你本回合已 beat chest"
     }
   ],
   "card.trigger.mst.essence.prevent.blue": [

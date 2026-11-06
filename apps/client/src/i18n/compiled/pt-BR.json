@@ -12539,6 +12539,34 @@
       "value": "Destruir esta carta para ganhar 2 recursos?"
     }
   ],
+  "card.mpb.babaza.mode.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": escolha 1"
+    }
+  ],
+  "card.mpb.option.agility": [
+    {
+      "type": 0,
+      "value": "Crie um token Agility"
+    }
+  ],
+  "card.mpb.option.intimidate": [
+    {
+      "type": 0,
+      "value": "Faça intimidate no herói alvo"
+    }
+  ],
+  "card.mpb.option.might": [
+    {
+      "type": 0,
+      "value": "Crie um token Might"
+    }
+  ],
   "card.mpg.arsenal.card.bottom": [
     {
       "type": 0,
@@ -19216,6 +19244,12 @@
     {
       "type": 0,
       "value": "Vire uma carta banished com a face para baixo para criar um Corrupted Corpse"
+    }
+  ],
+  "card.trigger.mpb.fury.destroy": [
+    {
+      "type": 0,
+      "value": "Destrua Fury; você fez beat chest neste turno"
     }
   ],
   "card.trigger.mst.essence.prevent.blue": [

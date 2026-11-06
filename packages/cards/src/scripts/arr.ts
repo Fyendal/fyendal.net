@@ -1,8 +1,8 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackIntimidateTrigger,
+  beatChest as sharedBeatChest,
   buffNextAttack,
-  commonOptionMessages,
   decisionPrompt,
   isSixPlus,
   opponentSeat,
@@ -14,43 +14,7 @@ const AGILITY = "ARR029";
 const MIGHT = "ARR030";
 
 function beatChest(extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    additionalCost(ctx) {
-      const sixes = ctx.player(ctx.seat).hand.filter((card) => isSixPlus(ctx, card));
-      if (sixes.length) {
-        ctx.requestCardChoice(
-          "arr-beat-chest",
-          decisionPrompt(
-            `${ctx.data.name}: discard a card with 6 or more power to beat chest?`,
-            "card.arr.beatchest.discard",
-            {
-              values: { card: { kind: "card", cardId: ctx.self.cardId } },
-              optionMessages: commonOptionMessages("no"),
-            },
-          ),
-          ["no", ...sixes.map((card) => card.instanceId)],
-        );
-      }
-      extra.additionalCost?.(ctx);
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "arr-beat-chest") {
-        ctx.setFlag("player", "discardingToBeatChest", true);
-        const attackAction = ctx.hasCardType(ctx.self, "action") && ctx.cardTypes(ctx.self).includes("attack");
-        if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", true);
-        const discarded = option !== "no" && ctx.discardCard(ctx.seat, Number(option));
-        ctx.setFlag("player", "discardingToBeatChest", false);
-        if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", false);
-        if (discarded) {
-          ctx.setFlag("player", "beatenChestThisTurn", true);
-          ctx.setCardState(ctx.self.instanceId, "beatChestPaid", 1);
-        }
-        return;
-      }
-      extra.onChoose?.(ctx, hook, option);
-    },
-  };
+  return sharedBeatChest(extra, { hook: "arr-beat-chest", messageId: "card.arr.beatchest.discard" });
 }
 
 function noChest(ctx: ScriptCtx): boolean {

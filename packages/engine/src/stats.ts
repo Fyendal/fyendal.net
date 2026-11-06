@@ -1,4 +1,5 @@
 import type { GameStateInternal } from "./runtimeState.js";
+import type { PlayerState } from "./state.js";
 import type { GameTurnStatsView } from "@fyendal/shared";
 
 function addForSeat(values: [number, number], seat: number, amount: number): void {
@@ -80,4 +81,17 @@ export function recordLifeLost(state: GameStateInternal, seat: number, amount: n
   const row = beginStatsTurn(state);
   row.lifeLost ??= [0, 0];
   addForSeat(row.lifeLost, seat, amount);
+}
+
+/** Per-turn `damageTakenFromType:<class/subtype>` totals for "damage dealt to them by clubs this turn". */
+export function recordDamageTakenFromTypes(
+  target: PlayerState,
+  sourceTypes: readonly string[],
+  amount: number,
+): void {
+  if (amount <= 0) return;
+  for (const type of new Set(sourceTypes)) {
+    const key = `damageTakenFromType:${type}`;
+    target.flags[key] = (Number(target.flags[key]) || 0) + amount;
+  }
 }
