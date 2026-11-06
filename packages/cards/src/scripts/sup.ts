@@ -148,6 +148,56 @@ function finishLiarsCharmModes(ctx: ScriptCtx): void {
   if ((modes & 4) !== 0) requestLiarsCharmDiscard(ctx, ctx.getState("liar-target"));
 }
 
+const CHEATERS_CHARM_MODES = [
+  { option: "steal", bit: 1, message: "card.sup.option.steal" },
+  { option: "boo", bit: 2, message: "card.sup.option.boo" },
+  { option: "damage", bit: 4, message: "card.sup.option.cheater.damage" },
+] as const;
+
+function requestCheatersCharmTarget(ctx: ScriptCtx): void {
+  if ((ctx.getState("cheater-modes") & 4) === 0) return;
+  ctx.requestCardChoice(
+    "cheater-target",
+    decisionPrompt(`${ctx.data.name}: choose target hero`, "card.common.target.hero.choose", {
+      values: { card: { kind: "card", cardId: ctx.self.cardId } },
+    }),
+    ctx.state.players.map((player) => player.hero.instanceId),
+    undefined,
+    undefined,
+    undefined,
+    ctx.player(opponentSeat(ctx)).hero.instanceId,
+  );
+}
+function controlsSixPowerAttack(ctx: ScriptCtx): boolean {
+  return ctx.link?.attacker === ctx.seat && ctx.currentAttackPower() >= 6;
+}
+function requestCheatersCharmMode(ctx: ScriptCtx): void {
+  const prompt = "Choose any number of modes";
+  const modes = controlsSixPowerAttack(ctx)
+    ? CHEATERS_CHARM_MODES
+    : CHEATERS_CHARM_MODES.filter((mode) => mode.option !== "damage");
+  if (!requestCharmMode(ctx, "cheater-mode", "cheater-modes", modes, prompt, "card.sup.modes.choose"))
+    requestCheatersCharmTarget(ctx);
+}
+function finishCheatersCharmModes(ctx: ScriptCtx): void {
+  const modes = ctx.getState("cheater-modes");
+  if ((modes & 2) !== 0) ctx.crowdBoo(ctx.seat);
+  if ((modes & 4) === 0 || !controlsSixPowerAttack(ctx)) return;
+  const target = ctx.getState("cheater-target");
+  const hand = ctx.player(target).hand;
+  if (hand.length)
+    ctx.requestCardChoice(
+      "cheater-discard",
+      decisionPrompt("Discard a card or take 2 damage", "card.sup.discard.or.damage", {
+        values: { amount: 2 },
+        optionMessages: { damage: decisionMessage("card.sup.option.take.damage", { amount: 2 }) },
+      }),
+      ["damage", ...hand.map((card) => card.instanceId)],
+      target,
+    );
+  else ctx.dealDamage(target, 2);
+}
+
 const NUMBSKULL_CHARM_MODES = [
   { option: "destroy", bit: 1, message: "card.sup.option.numbskull.destroy" },
   { option: "cheer", bit: 2, message: "card.sup.option.numbskull.cheer" },
@@ -1443,31 +1493,46 @@ Object.assign(sup, {
     },
   },
   "cheater's charm|2": {
+    declareAdditionalCost(ctx: ScriptCtx) {
+      ctx.setState("cheater-modes", 0);
+      requestCheatersCharmMode(ctx);
+    },
     onPlay(ctx: ScriptCtx) {
-      for (const name of ["Confidence", "Toughness"]) {
-        const token = tokenNamed(ctx, opponentSeat(ctx), name);
-        if (token) ctx.steal(token.instanceId, { duration: "indefinite" });
-      }
-      ctx.crowdBoo(ctx.seat);
-      if (ctx.link && ctx.currentAttackPower() >= 6) {
-        const hand = ctx.player(opponentSeat(ctx)).hand;
-        if (hand.length)
+      if ((ctx.getState("cheater-modes") & 1) !== 0) {
+        const tokens = ["Confidence", "Toughness"].flatMap((name) => {
+          const token = tokenNamed(ctx, opponentSeat(ctx), name);
+          return token ? [token] : [];
+        });
+        if (tokens.length) {
           ctx.requestCardChoice(
-            "cheater-discard",
-            decisionPrompt("Discard a card or take 2 damage", "card.sup.discard.or.damage", {
-              values: { amount: 2 },
-              optionMessages: { damage: decisionMessage("card.sup.option.take.damage", { amount: 2 }) },
-            }),
-            ["damage", ...hand.map((card) => card.instanceId)],
-            opponentSeat(ctx),
+            "cheater-steal",
+            decisionPrompt("Choose a Confidence or Toughness token to steal", "card.sup.token.steal.confidence.choose"),
+            tokens.map((card) => card.instanceId),
           );
-        else ctx.dealDamage(opponentSeat(ctx), 2);
+          return;
+        }
       }
+      finishCheatersCharmModes(ctx);
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook === "cheater-discard") {
-        if (option === "damage") ctx.dealDamage(opponentSeat(ctx), 2);
-        else ctx.discardCard(opponentSeat(ctx), Number(option));
+      if (hook === "cheater-mode") {
+        const mode = CHEATERS_CHARM_MODES.find((candidate) => candidate.option === option);
+        if (!mode) {
+          requestCheatersCharmTarget(ctx);
+          return;
+        }
+        ctx.setState("cheater-modes", ctx.getState("cheater-modes") | mode.bit);
+        requestCheatersCharmMode(ctx);
+      } else if (hook === "cheater-target") {
+        const target = ctx.state.players.find((player) => player.hero.instanceId === Number(option))?.seat;
+        if (target !== undefined) ctx.setState("cheater-target", target);
+      } else if (hook === "cheater-steal") {
+        ctx.steal(Number(option), { duration: "indefinite" });
+        finishCheatersCharmModes(ctx);
+      } else if (hook === "cheater-discard") {
+        const target = ctx.getState("cheater-target");
+        if (option === "damage") ctx.dealDamage(target, 2);
+        else resolveDiscardChoice(ctx, option, target);
       }
     },
   },

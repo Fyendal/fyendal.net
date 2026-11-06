@@ -14626,6 +14626,12 @@
       "value": "喝倒彩 (boo)"
     }
   ],
+  "card.sup.option.cheater.damage": [
+    {
+      "type": 0,
+      "value": "造成 2 点伤害，除非其弃置一张牌"
+    }
+  ],
   "card.sup.option.courage": [
     {
       "type": 0,
@@ -14810,6 +14816,12 @@
     {
       "type": 0,
       "value": "选择一个 Toughness 或 Vigor 衍生物并夺取其操控权"
+    }
+  ],
+  "card.sup.token.steal.confidence.choose": [
+    {
+      "type": 0,
+      "value": "选择一个 Confidence 或 Toughness 衍生物并夺取其操控权"
     }
   ],
   "card.sup.top.color.guess": [

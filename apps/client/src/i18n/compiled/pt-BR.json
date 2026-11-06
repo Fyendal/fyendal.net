@@ -16183,6 +16183,12 @@
       "value": "Boo"
     }
   ],
+  "card.sup.option.cheater.damage": [
+    {
+      "type": 0,
+      "value": "Causar 2 de dano a menos que descarte"
+    }
+  ],
   "card.sup.option.courage": [
     {
       "type": 0,
@@ -16351,6 +16357,12 @@
     {
       "type": 0,
       "value": "Escolha um token Toughness ou Vigor para roubar"
+    }
+  ],
+  "card.sup.token.steal.confidence.choose": [
+    {
+      "type": 0,
+      "value": "Escolha um token Confidence ou Toughness para roubar"
     }
   ],
   "card.sup.top.color.guess": [

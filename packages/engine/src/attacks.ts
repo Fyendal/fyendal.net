@@ -85,12 +85,16 @@ function attachNextAttackModifiers(
   runtime: EngineRuntime,
   link: ChainLinkState,
 ): void {
+  const printed = dataOf(state, link.attackingCard.cardId).attack ?? 0;
+  const basePower = basePowerOf(state, runtime, link.attacker, link.attackingCard, printed);
   const attach = (mod: Modifier): void => {
     if (mod.attackFromBasePower) {
-      const printed = dataOf(state, link.attackingCard.cardId).attack ?? 0;
-      mod.attack = basePowerOf(state, runtime, link.attacker, link.attackingCard, printed);
+      mod.attack = basePower;
       delete mod.attackFromBasePower;
     }
+    // The base-power condition is checked once here; later re-filtering reads printed power.
+    delete mod.minBasePower;
+    delete mod.maxBasePower;
     if (mod.attack !== undefined && mod.attack > 0) {
       mod.attack = replacePowerGain(state, runtime, link, mod.attack);
     }
@@ -114,12 +118,12 @@ function attachNextAttackModifiers(
   // Type grants attach first so another next-attack modifier can match the
   // resulting type (for example, an attack made Illusionist this turn).
   for (const mod of state.modifiers) {
-    if (mod.scope === "next-attack" && mod.grantType && modifierApplies(state, mod, link)) {
+    if (mod.scope === "next-attack" && mod.grantType && modifierApplies(state, mod, link, basePower)) {
       attach(mod);
     }
   }
   for (const mod of state.modifiers) {
-    if (mod.scope === "next-attack" && modifierApplies(state, mod, link)) {
+    if (mod.scope === "next-attack" && modifierApplies(state, mod, link, basePower)) {
       attach(mod);
     }
   }

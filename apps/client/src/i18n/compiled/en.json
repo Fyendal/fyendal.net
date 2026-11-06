@@ -15629,6 +15629,12 @@
       "value": "Boo"
     }
   ],
+  "card.sup.option.cheater.damage": [
+    {
+      "type": 0,
+      "value": "Deal 2 damage unless they discard"
+    }
+  ],
   "card.sup.option.courage": [
     {
       "type": 0,
@@ -15797,6 +15803,12 @@
     {
       "type": 0,
       "value": "Choose a Toughness or Vigor token to steal"
+    }
+  ],
+  "card.sup.token.steal.confidence.choose": [
+    {
+      "type": 0,
+      "value": "Choose a Confidence or Toughness token to steal"
     }
   ],
   "card.sup.top.color.guess": [

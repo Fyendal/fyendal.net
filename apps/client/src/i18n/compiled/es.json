@@ -15753,6 +15753,12 @@
       "value": "Abucheo (boo)"
     }
   ],
+  "card.sup.option.cheater.damage": [
+    {
+      "type": 0,
+      "value": "Infligir 2 de daño salvo que descarte"
+    }
+  ],
   "card.sup.option.courage": [
     {
       "type": 0,
@@ -15921,6 +15927,12 @@
     {
       "type": 0,
       "value": "Elige un token Toughness o Vigor para robar"
+    }
+  ],
+  "card.sup.token.steal.confidence.choose": [
+    {
+      "type": 0,
+      "value": "Elige un token Confidence o Toughness para robar"
     }
   ],
   "card.sup.top.color.guess": [

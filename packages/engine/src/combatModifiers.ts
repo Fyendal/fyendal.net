@@ -31,6 +31,7 @@ function modifierMatches(
     ...(data.classes ?? []),
     ...(data.subtypes ?? []),
   ].map((tag) => tag.toLowerCase()),
+  basePower = data.attack ?? 0,
 ): boolean {
   const appliesTo = modifier.appliesTo ?? "any";
   if (appliesTo === "weapon") {
@@ -48,10 +49,10 @@ function modifierMatches(
   const cost = data.cost ?? 0;
   if (modifier.minCost !== undefined && cost < modifier.minCost) return false;
   if (modifier.maxCost !== undefined && cost > modifier.maxCost) return false;
-  if (modifier.maxBasePower !== undefined && (data.attack ?? 0) > modifier.maxBasePower) {
+  if (modifier.maxBasePower !== undefined && basePower > modifier.maxBasePower) {
     return false;
   }
-  if (modifier.minBasePower !== undefined && (data.attack ?? 0) < modifier.minBasePower) {
+  if (modifier.minBasePower !== undefined && basePower < modifier.minBasePower) {
     return false;
   }
   const appliesToKeyword = modifier.appliesToKeyword?.toLowerCase();
@@ -115,6 +116,7 @@ export function modifierAppliesTo(
   color: number,
   card: CardInstance,
   granted?: (tag: string) => boolean,
+  basePower?: number,
 ): boolean {
   return modifierMatches(
     modifier,
@@ -126,6 +128,7 @@ export function modifierAppliesTo(
     !cardAbilitiesSuppressed(state, card),
     [data.cardType],
     cardTypesOf(state, card),
+    basePower,
   );
 }
 
@@ -163,6 +166,7 @@ export function modifierApplies(
   state: GameStateInternal,
   modifier: Modifier,
   link: ChainLinkState,
+  basePower?: number,
 ): boolean {
   if (modifier.seat !== link.attacker) return false;
   if (
@@ -203,6 +207,7 @@ export function modifierApplies(
     cardColorOf(state, link.attackingCard),
     link.attackingCard,
     (tag) => attackGrantedType(link, tag),
+    basePower,
   );
 }
 

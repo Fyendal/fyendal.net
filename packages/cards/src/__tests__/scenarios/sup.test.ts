@@ -251,6 +251,32 @@ describe("SUP — heroes and the crowd", () => {
     ]);
   });
 
+  it("Battle Clearing Bellow reads Big Bully's doubled base power when already booed", () => {
+    const g = scenario({
+      seats: [
+        foe({ hero: "rhinar", hand: ["battle clearing bellow|3", "big bully|1"], resources: 5 }),
+        foe(),
+      ],
+    });
+    g.state.players[0]!.flags.booedThisTurn = true;
+
+    g.play("battle clearing bellow|3").play("big bully|1").expectAttackValue(14);
+  });
+
+  it("Battle Clearing Bellow skips Big Bully when the boo comes from its own attack", () => {
+    const g = scenario({
+      seats: [
+        foe({ hero: "rhinar", hand: ["battle clearing bellow|3", "big bully|1"], resources: 5 }),
+        foe(),
+      ],
+    });
+    g.state.players[1]!.life = 10;
+
+    g.play("battle clearing bellow|3").play("big bully|1").expectAttackValue(8);
+    expect(g.state.modifiers.some((modifier) => modifier.scope === "next-attack" && modifier.minBasePower === 6))
+      .toBe(true);
+  });
+
   it("Numbskull Charm resolves only the modes its controller chooses", () => {
     const g = scenario({
       seats: [
@@ -336,6 +362,63 @@ describe("SUP — heroes and the crowd", () => {
     expect(suppressed(0)).toBe(true);
     expect(suppressed(1)).toBe(false);
     g.expectHandSize(1, 1);
+  });
+
+  it("Cheater's Charm resolves only its chosen modes and hides the damage mode without a 6-power attack", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["cheater's charm|2"] },
+        foe({ board: ["confidence|0", "toughness|0"] }),
+      ],
+    });
+
+    g.play("cheater's charm|2", { settle: false });
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "cheater-mode",
+      options: ["steal", "boo", "done"],
+    });
+    g.chooseOption("boo").chooseOption("done").settle();
+
+    expect(g.state.players[0]!.flags.booedThisTurn).toBe(true);
+    expect(g.state.players[1]!.board).toHaveLength(2);
+  });
+
+  it("Cheater's Charm steals one chosen Confidence or Toughness token", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["cheater's charm|2"] },
+        foe({ board: ["confidence|0", "toughness|0"] }),
+      ],
+    });
+
+    g.play("cheater's charm|2", { settle: false }).chooseOption("steal").chooseOption("done").settle();
+    expect(g.state.pendingDecision).toMatchObject({ chooseHook: "cheater-steal" });
+    g.chooseCard("toughness|0").settle();
+
+    expect(g.state.players[0]!.flags.booedThisTurn).not.toBe(true);
+    expect(g.state.players[0]!.board.map((card) => card.cardId)).toEqual([printingId("toughness|0")]);
+    expect(g.state.players[1]!.board.map((card) => card.cardId)).toEqual([printingId("confidence|0")]);
+  });
+
+  it("Cheater's Charm makes the target hero discard or take 2 while you attack with 6 or more power", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["big bully|1", "cheater's charm|2"], resources: 2 },
+        foe({ hand: ["sigil of solace|3"] }),
+      ],
+    });
+    g.state.players[0]!.flags.booedThisTurn = true;
+    const life = g.state.players[1]!.life;
+
+    g.play("big bully|1").expectAttackValue(8).blockWith();
+    g.play("cheater's charm|2", { settle: false });
+    expect(g.state.pendingDecision?.options).toEqual(["steal", "boo", "damage", "done"]);
+    g.chooseOption("damage").chooseOption("done");
+    expect(g.state.pendingDecision).toMatchObject({ chooseHook: "cheater-target" });
+    g.doRaw({ kind: "choose", optionId: String(g.state.players[1]!.hero.instanceId) }).settle();
+    expect(g.state.pendingDecision).toMatchObject({ chooseHook: "cheater-discard", player: 1 });
+    // 2 from the Charm, then Big Bully's 8 combat damage once the harness settles.
+    g.chooseOption("damage").expectLife(1, life - 10).expectHandSize(1, 1);
   });
 
   it("Liar's Charm suppresses the opposing hero only for this action phase", () => {
