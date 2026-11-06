@@ -323,6 +323,51 @@ describe("OUT — registration and core mechanics", () => {
     expect(s.state.pendingDecision).toBeNull();
   });
 
+  describe("Codex choices start with the controller when seat 1 plays it", () => {
+    // Makes each choice in order and returns the seat that made it.
+    const chooseInOrder = (s: ReturnType<typeof scenario>, keys: string[]) => keys.map((key) => {
+      const seat = s.state.pendingDecision!.player;
+      s.chooseCard(key);
+      return seat;
+    });
+
+    it("Codex of Bloodrot", () => {
+      const s = scenario({ active: 1, seats: [
+        { hero: "rhinar", hand: [NON_ATTACK] },
+        { hero: "dorinthea", hand: ["codex of bloodrot|2", BLUE] },
+      ] });
+
+      s.play("codex of bloodrot|2");
+
+      expect(chooseInOrder(s, [BLUE, NON_ATTACK])).toEqual([1, 0]);
+      s.expectInZone(1, BLUE, "arsenal").expectInZone(0, NON_ATTACK, "arsenal");
+    });
+
+    it("Codex of Frailty", () => {
+      const s = scenario({ active: 1, seats: [
+        { hero: "rhinar", hand: [NON_ATTACK], graveyard: ["infect|1"] },
+        { hero: "dorinthea", hand: ["codex of frailty|2", BLUE], graveyard: ["the weakest link|1"] },
+      ] });
+
+      s.play("codex of frailty|2");
+
+      expect(chooseInOrder(s, ["the weakest link|1", "infect|1", BLUE, NON_ATTACK])).toEqual([1, 0, 1, 0]);
+      s.expectInZone(1, BLUE, "graveyard").expectInZone(0, NON_ATTACK, "graveyard");
+    });
+
+    it("Codex of Inertia", () => {
+      const s = scenario({ active: 1, seats: [
+        { hero: "rhinar", hand: [NON_ATTACK], deck: ["infect|1"] },
+        { hero: "dorinthea", hand: ["codex of inertia|2", BLUE], deck: ["the weakest link|1"] },
+      ] });
+
+      s.play("codex of inertia|2");
+
+      expect(chooseInOrder(s, [BLUE, NON_ATTACK])).toEqual([1, 0]);
+      s.expectInZone(1, BLUE, "graveyard").expectInZone(0, NON_ATTACK, "graveyard");
+    });
+  });
+
   it("Codex of Frailty fills New Horizon's empty additional arsenal zone", () => {
     const s = scenario({
       seats: [

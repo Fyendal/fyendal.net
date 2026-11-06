@@ -430,6 +430,7 @@
   "card.obk.pinpointer.arsenal.bottom": "Choose the next card to put on the bottom of your deck",
   "card.obk.pinpointer.arrow.arsenal": "Put an arrow from your hand face-up into your arsenal",
   "card.obk.cureall.disease.cure": "Cure a disease you control?",
+  "card.obk.codex.arsenal.hand": "Put a card from your arsenal into your hand",
   "card.obk.patientzero.disease.give": "Give a disease token you control to the hit hero",
   "card.obk.ceremony.disease.cure": "Cure a disease you control",
   "card.obk.ceremony.mode.choose": "Choose a mode ({amount} remaining)",

@@ -12697,6 +12697,12 @@
       "value": "This gets veil"
     }
   ],
+  "card.obk.codex.arsenal.hand": [
+    {
+      "type": 0,
+      "value": "Put a card from your arsenal into your hand"
+    }
+  ],
   "card.obk.cureall.disease.cure": [
     {
       "type": 0,

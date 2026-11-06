@@ -13102,6 +13102,12 @@
       "value": "Esta carta recebe veil"
     }
   ],
+  "card.obk.codex.arsenal.hand": [
+    {
+      "type": 0,
+      "value": "Coloque uma carta do seu arsenal na sua mão"
+    }
+  ],
   "card.obk.cureall.disease.cure": [
     {
       "type": 0,

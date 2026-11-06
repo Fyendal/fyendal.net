@@ -11858,6 +11858,12 @@
       "value": "此牌获得 veil"
     }
   ],
+  "card.obk.codex.arsenal.hand": [
+    {
+      "type": 0,
+      "value": "将你 arsenal 中的一张牌置入你的手牌"
+    }
+  ],
   "card.obk.cureall.disease.cure": [
     {
       "type": 0,

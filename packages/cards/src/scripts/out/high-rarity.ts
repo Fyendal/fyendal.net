@@ -88,14 +88,22 @@ function flickKnivesDaggers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
       candidates.findIndex((candidate) => candidate.instanceId === card.instanceId) === index,
   );
 }
-function codexBloodrotChoice(ctx: ScriptCtx, seat: number): void {
-  if (seat > 1) {
+// Hooks carry the hero's seat; heroes act in turn order from the controller (CR 1.9.2c).
+function codexHeroes(ctx: ScriptCtx): number[] {
+  return [ctx.seat, opponentSeat(ctx)];
+}
+function codexHeroIndex(ctx: ScriptCtx, hook: string): number {
+  return codexHeroes(ctx).indexOf(Number(hook.split(":")[1]));
+}
+function codexBloodrotChoice(ctx: ScriptCtx, index: number): void {
+  const seat = codexHeroes(ctx)[index];
+  if (seat === undefined) {
     ctx.createToken(PONDER);
     ctx.createToken(BLOODROT, opponentSeat(ctx));
     return;
   }
   const player = ctx.player(seat);
-  if (!player.hand.length || !ctx.hasArsenalSpace(seat)) return codexBloodrotChoice(ctx, seat + 1);
+  if (!player.hand.length || !ctx.hasArsenalSpace(seat)) return codexBloodrotChoice(ctx, index + 1);
   ctx.requestCardChoice(
     `codex-bloodrot:${seat}`,
     decisionPrompt("Choose a card for arsenal", "card.out.arsenal.card.choose"),
@@ -103,21 +111,22 @@ function codexBloodrotChoice(ctx: ScriptCtx, seat: number): void {
     seat,
   );
 }
-function codexFrailtyChoice(ctx: ScriptCtx, seat: number): void {
-  if (seat > 1) {
-    const first = [0, 1].find(
-      (target) => ctx.getState(`codexFrailtyMoved:${target}`) > 0 && ctx.player(target).hand.length,
-    );
-    if (first !== undefined) chooseDiscard(ctx, `codex-frailty-discard:${first}`, first);
-    else {
-      ctx.createToken(PONDER);
-      ctx.createToken(FRAILTY, opponentSeat(ctx));
-    }
-    return;
+function codexFrailtyDiscard(ctx: ScriptCtx, fromIndex: number): void {
+  const seat = codexHeroes(ctx).slice(fromIndex).find(
+    (target) => ctx.getState(`codexFrailtyMoved:${target}`) > 0 && ctx.player(target).hand.length,
+  );
+  if (seat !== undefined) chooseDiscard(ctx, `codex-frailty-discard:${seat}`, seat);
+  else {
+    ctx.createToken(PONDER);
+    ctx.createToken(FRAILTY, opponentSeat(ctx));
   }
+}
+function codexFrailtyChoice(ctx: ScriptCtx, index: number): void {
+  const seat = codexHeroes(ctx)[index];
+  if (seat === undefined) return codexFrailtyDiscard(ctx, 0);
   const player = ctx.player(seat);
   const attacks = player.graveyard.filter((card) => !card.faceDown && isAttack(ctx, card));
-  if (!attacks.length || !ctx.hasArsenalSpace(seat)) return codexFrailtyChoice(ctx, seat + 1);
+  if (!attacks.length || !ctx.hasArsenalSpace(seat)) return codexFrailtyChoice(ctx, index + 1);
   ctx.requestCardChoice(
     `codex-frailty:${seat}`,
     decisionPrompt("Choose an attack for arsenal", "card.out.arsenal.attack.choose"),
@@ -679,42 +688,35 @@ export const outHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (!hook.startsWith("codex-bloodrot:")) return;
-      const seat = Number(hook.split(":")[1]);
-      if (ctx.putIntoArsenal(Number(option), "hand", { faceUp: false })) codexBloodrotChoice(ctx, seat + 1);
+      ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
+      codexBloodrotChoice(ctx, codexHeroIndex(ctx, hook) + 1);
     },
   },
   "codex of frailty|2": {
     onPlay(ctx) {
+      // Script state survives zone moves, so clear a previous play's marks.
+      for (const seat of codexHeroes(ctx)) ctx.setState(`codexFrailtyMoved:${seat}`, 0);
       codexFrailtyChoice(ctx, 0);
     },
     onChoose(ctx, hook, option) {
       if (hook.startsWith("codex-frailty-discard:")) {
-        const seat = Number(hook.split(":")[1]);
-        ctx.discardCard(seat, Number(option));
-        const next = [0, 1].find(
-          (target) =>
-            target > seat && ctx.getState(`codexFrailtyMoved:${target}`) > 0 && ctx.player(target).hand.length,
-        );
-        if (next !== undefined) chooseDiscard(ctx, `codex-frailty-discard:${next}`, next);
-        else {
-          ctx.createToken(PONDER);
-          ctx.createToken(FRAILTY, opponentSeat(ctx));
-        }
+        ctx.discardCard(Number(hook.split(":")[1]), Number(option));
+        codexFrailtyDiscard(ctx, codexHeroIndex(ctx, hook) + 1);
         return;
       }
       if (!hook.startsWith("codex-frailty:")) return;
       const seat = Number(hook.split(":")[1]);
       if (ctx.putIntoArsenal(Number(option), "graveyard", { faceUp: false }))
         ctx.setState(`codexFrailtyMoved:${seat}`, 1);
-      codexFrailtyChoice(ctx, seat + 1);
+      codexFrailtyChoice(ctx, codexHeroIndex(ctx, hook) + 1);
     },
   },
   "codex of inertia|2": {
     onPlay(ctx) {
-      for (const player of ctx.state.players) {
-        const top = player.deck[0];
+      for (const seat of codexHeroes(ctx)) {
+        const top = ctx.player(seat).deck[0];
         if (top && ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: false }))
-          chooseDiscard(ctx, `codex-discard:${player.seat}`, player.seat);
+          chooseDiscard(ctx, `codex-discard:${seat}`, seat);
       }
       ctx.createToken(PONDER);
       ctx.createToken(INERTIA, opponentSeat(ctx));

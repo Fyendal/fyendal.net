@@ -696,6 +696,105 @@ describe("Outbreak cards", () => {
     });
   });
 
+  describe("Codex of Exertion", () => {
+    const CODEX = "codex of exertion|2";
+
+    it("returns each hero's arsenal card to hand, draws for each, and creates the tokens", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [CODEX], arsenal: [FILLER], deck: [ZIPPER_HIT], weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: [], arsenalFaceDown: [PROWL], deck: [BLUE], weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(CODEX);
+
+      game.expectInZone(0, FILLER, "hand").expectInZone(0, ZIPPER_HIT, "hand").expectHandSize(0, 2);
+      game.expectInZone(1, PROWL, "hand").expectInZone(1, BLUE, "hand").expectHandSize(1, 2);
+      expect(boardNames(game, 0)).toEqual(["Ponder"]);
+      expect(boardNames(game, 1)).toEqual(["Exertion"]);
+      game.expectAP(0, 1).expectNoLog("Prowl");
+    });
+
+    it("does not draw for a hero with an empty arsenal", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [CODEX], deck: [ZIPPER_HIT], weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: [], arsenal: [PROWL], deck: [BLUE], weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(CODEX);
+
+      game.expectHandSize(0, 0).expectDeckTop(0, ZIPPER_HIT);
+      game.expectInZone(1, PROWL, "hand").expectInZone(1, BLUE, "hand");
+    });
+
+    it("lets a hero with several arsenal cards choose which to return", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [CODEX], deck: [ZIPPER_HIT], weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: [], arsenal: [PROWL, BLUE], deck: [FILLER], weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(CODEX);
+      expect(game.state.pendingDecision?.player).toBe(1);
+      game.chooseCard(BLUE);
+
+      game.expectInZone(1, BLUE, "hand").expectInZone(1, PROWL, "arsenal").expectInZone(1, FILLER, "hand");
+      expect(boardNames(game, 1)).toEqual(["Exertion"]);
+    });
+  });
+
+  describe("Cogwerx Gyrostriders", () => {
+    const GYROSTRIDERS = "cogwerx gyrostriders|0";
+    const legs = (game: ReturnType<typeof scenario>) => game.state.players[0]!.equipment.legs;
+    const gyroGame = (seat: Partial<SeatSpec> = {}) => scenario({ seats: [
+      { hero: "rhinar", weapons: [], equipment: { ...NO_EQUIPMENT, legs: GYROSTRIDERS }, ...seat },
+      { hero: "dorinthea", hand: [], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+    const destroyIntents = (game: ReturnType<typeof scenario>) => legalIntents(game.state, 0).filter((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === legs(game)?.instanceId &&
+      intent.abilityIndex === 1
+    );
+
+    it("taps to untap your hero, then stays tapped through your end phase", () => {
+      const game = gyroGame({ heroTapped: true });
+
+      game.activate(GYROSTRIDERS, { ability: 0 });
+      expect(game.state.players[0]!.hero.tapped ?? false).toBe(false);
+      expect(legs(game)?.tapped).toBe(true);
+
+      game.endTurn();
+      expect(legs(game)?.tapped).toBe(true);
+      game.endTurn().endTurn();
+      expect(legs(game)?.tapped).toBe(true);
+    });
+
+    it("can't use the destroy ability after untapping the hero this turn", () => {
+      const game = gyroGame({ heroTapped: true });
+      expect(destroyIntents(game)).not.toEqual([]);
+
+      game.activate(GYROSTRIDERS, { ability: 0 });
+
+      expect(destroyIntents(game)).toEqual([]);
+    });
+
+    it("gives the next attack action played from arsenal go again", () => {
+      const game = gyroGame({ arsenal: [FILLER], resources: 3 });
+
+      game.activate(GYROSTRIDERS, { ability: 1 });
+      game.expectNoEquipment(0, "legs");
+      game.play(FILLER, { fromArsenal: true }).blockWith().settle();
+
+      game.expectLife(1, 13).expectAP(0, 1);
+    });
+
+    it("does not give go again to an attack action played from hand", () => {
+      const game = gyroGame({ hand: [FILLER], resources: 3 });
+
+      game.activate(GYROSTRIDERS, { ability: 1 });
+      game.play(FILLER).blockWith().settle();
+
+      game.expectLife(1, 13).expectAP(0, 0);
+    });
+  });
+
   describe("Pauper's Knife", () => {
     it("taps for a go-again 1 power attack", () => {
       const game = scenario({ seats: [

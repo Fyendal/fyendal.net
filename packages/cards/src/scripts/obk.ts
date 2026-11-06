@@ -24,6 +24,7 @@ import {
 // Disease token names offered when an effect names a disease token.
 const DISEASE_TOKEN_NAMES: readonly string[] = ["Bloodrot Pox", "Exertion", "Frailty", "Inertia"];
 const EXERTION = "SLV035";
+const PONDER = "DYN244";
 const EXTINCTION_WIN_THRESHOLD = 33;
 
 function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: string): boolean {
@@ -670,6 +671,99 @@ const cureAllElixir: CardScript = {
   },
 };
 
+const CODEX_ARSENAL_HOOK = "obk-codex-arsenal";
+const CODEX_HERO = "codexHero";
+const codexMovedKey = (seat: number) => `codexMoved:${seat}`;
+
+function codexHeroes(ctx: ScriptCtx): number[] {
+  return [ctx.seat, opponentSeat(ctx)];
+}
+
+function codexMoveToHand(ctx: ScriptCtx, seat: number, instanceId: number): void {
+  if (ctx.moveToHand(instanceId)) ctx.setState(codexMovedKey(seat), 1);
+}
+
+/** Each hero, in turn order, returns an arsenal card to hand (choosing among
+ * several); then every hero that did draws, and the tokens are created. */
+function continueCodex(ctx: ScriptCtx): void {
+  const heroes = codexHeroes(ctx);
+  for (let index = ctx.getState(CODEX_HERO); index < heroes.length; index++) {
+    const seat = heroes[index]!;
+    const arsenal = ctx.player(seat).arsenal;
+    if (arsenal.length > 1) {
+      ctx.setState(CODEX_HERO, index);
+      ctx.requestCardChoice(
+        CODEX_ARSENAL_HOOK,
+        decisionPrompt("Put a card from your arsenal into your hand", "card.obk.codex.arsenal.hand"),
+        arsenal.map((card) => card.instanceId),
+        seat,
+      );
+      return;
+    }
+    if (arsenal.length === 1) codexMoveToHand(ctx, seat, arsenal[0]!.instanceId);
+  }
+  for (const seat of heroes) if (ctx.getState(codexMovedKey(seat)) > 0) ctx.drawCards(seat, 1);
+  ctx.createToken(PONDER);
+  ctx.createToken(EXERTION, opponentSeat(ctx));
+}
+
+const codexOfExertion: CardScript = {
+  onPlay(ctx) {
+    ctx.setState(CODEX_HERO, 0);
+    for (const seat of codexHeroes(ctx)) ctx.setState(codexMovedKey(seat), 0);
+    continueCodex(ctx);
+  },
+  onChoose(ctx, hook, option) {
+    if (hook !== CODEX_ARSENAL_HOOK) return;
+    const index = ctx.getState(CODEX_HERO);
+    const seat = codexHeroes(ctx)[index];
+    if (seat === undefined) return;
+    if (ctx.player(seat).arsenal.some((card) => card.instanceId === Number(option))) {
+      codexMoveToHand(ctx, seat, Number(option));
+    }
+    ctx.setState(CODEX_HERO, index + 1);
+    continueCodex(ctx);
+  },
+};
+
+// Stores turn + 1 so the default 0 never matches a real turn.
+const GYROSTRIDERS_ACTIVATED = "activatedTurn";
+
+function gyrostridersActivatedThisTurn(ctx: ScriptCtx): boolean {
+  return ctx.getState(GYROSTRIDERS_ACTIVATED) === ctx.state.turn + 1;
+}
+
+const cogwerxGyrostriders: CardScript = {
+  preventsUntapOf: (ctx, target) =>
+    target.instanceId === ctx.self.instanceId && ctx.state.phase === "end" && ctx.state.activePlayer === ctx.seat,
+  activated: [
+    {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      tap: true,
+      label: "Untap your hero",
+      onCostPaid: (ctx) => ctx.setState(GYROSTRIDERS_ACTIVATED, ctx.state.turn + 1),
+      onActivate(ctx) {
+        ctx.untap(ctx.player(ctx.seat).hero.instanceId);
+      },
+    },
+    {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      destroySelfCost: true,
+      label: "Next attack action from arsenal gets go again",
+      canActivate: (ctx) => !gyrostridersActivatedThisTurn(ctx),
+      onActivate(ctx) {
+        buffNextAttack(ctx, { goAgain: true, appliesTo: "attack-action", appliesToFromArsenal: true });
+      },
+    },
+  ],
+};
+
 function courier(tokenId: string): CardScript {
   return {
     canTriggerOnHit: targetsHero,
@@ -834,6 +928,8 @@ export const obk: Record<string, CardScript> = {
   "one-click pinpointer|0": oneClickPinpointer,
   "max-tension shot|1": maxTensionShot,
   "cure-all elixir|0": cureAllElixir,
+  "codex of exertion|2": codexOfExertion,
+  "cogwerx gyrostriders|0": cogwerxGyrostriders,
   "virulent cascade|1": virulentCascade,
   "virulent cascade|2": virulentCascade,
   "virulent cascade|3": virulentCascade,

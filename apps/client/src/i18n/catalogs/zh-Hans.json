@@ -430,6 +430,7 @@
   "card.obk.pinpointer.arsenal.bottom": "选择下一张要放到牌库底部的卡牌",
   "card.obk.pinpointer.arrow.arsenal": "将手牌中的一张 arrow 正面朝上放入你的 arsenal",
   "card.obk.cureall.disease.cure": "治愈一个由你操控的疾病？",
+  "card.obk.codex.arsenal.hand": "将你 arsenal 中的一张牌置入你的手牌",
   "card.obk.patientzero.disease.give": "将一个由你操控的疾病衍生物交给被击中的英雄",
   "card.obk.ceremony.disease.cure": "治愈一个由你操控的疾病",
   "card.obk.ceremony.mode.choose": "选择一项模式（剩余 {amount} 次）",

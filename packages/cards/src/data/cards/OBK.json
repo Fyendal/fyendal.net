@@ -678,6 +678,28 @@
     "set": "OBK"
   },
   {
+    "id": "OBK231",
+    "name": "Codex of Exertion",
+    "cardType": "action",
+    "text": "Each hero puts a card from their arsenal into their hand. Each hero that does, draws a card.\nCreate a Ponder token under your control and an Exertion token under each opponent's control.\nGo again",
+    "pitch": 2,
+    "cost": 0,
+    "defense": 2,
+    "classes": ["assassin", "ranger"],
+    "keywords": ["Go again"],
+    "set": "OBK"
+  },
+  {
+    "id": "OBK238",
+    "name": "Cogwerx Gyrostriders",
+    "cardType": "equipment",
+    "text": "This can't be untapped during your end phase.\nInstant - {t}: {u} your hero.\nInstant - Destroy this: The next attack action card you play from arsenal this turn gets go again. Activate this only if you haven't activated this card this turn.",
+    "defense": 0,
+    "classes": ["mechanologist", "ranger"],
+    "subtypes": ["legs"],
+    "set": "OBK"
+  },
+  {
     "id": "OBK256",
     "name": "Cure-All Elixir",
     "cardType": "action",

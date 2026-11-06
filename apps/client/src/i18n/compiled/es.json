@@ -12727,6 +12727,12 @@
       "value": "Esta carta obtiene veil"
     }
   ],
+  "card.obk.codex.arsenal.hand": [
+    {
+      "type": 0,
+      "value": "Pon una carta de tu arsenal en tu mano"
+    }
+  ],
   "card.obk.cureall.disease.cure": [
     {
       "type": 0,
