@@ -26,6 +26,14 @@ describe("MobileCardInspect", () => {
     expect(inspect("WTR160")).not.toContain("Flip card");
   });
 
+  it("links to each created card in one action row", () => {
+    const html = inspect("MPA027");
+    expect(html.match(/class="mobile-card-inspect-actions"/g)).toHaveLength(1);
+    for (const name of ["Silver", "Frailty", "Inertia", "Bloodrot Pox"]) {
+      expect(html).toContain(`type="button">Creates ${name}</button>`);
+    }
+  });
+
   it("localizes the flip control", () => {
     expect(inspect("DYN092", "zh-Hans")).toContain("翻转卡牌");
   });

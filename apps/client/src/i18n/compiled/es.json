@@ -29223,6 +29223,32 @@
       "value": "Más controles de la partida"
     }
   ],
+  "game.createdCards.back": [
+    {
+      "type": 0,
+      "value": "Volver a "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.createdCards.title": [
+    {
+      "type": 0,
+      "value": "Crea"
+    }
+  ],
+  "game.createdCards.view": [
+    {
+      "type": 0,
+      "value": "Crea "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "game.decision.action.confirm": [
     {
       "type": 0,
@@ -29691,6 +29717,54 @@
     {
       "type": 0,
       "value": " es un equipo que no es base en esa ranura. Irá a tu cementerio."
+    }
+  ],
+  "game.decision.lethal.action.confirm-blocks": [
+    {
+      "type": 0,
+      "value": "Confirmar bloqueos igualmente"
+    }
+  ],
+  "game.decision.lethal.action.confirm-no-blocks": [
+    {
+      "type": 0,
+      "value": "Confirmar sin bloqueos igualmente"
+    }
+  ],
+  "game.decision.lethal.action.pass": [
+    {
+      "type": 0,
+      "value": "Pasar igualmente"
+    }
+  ],
+  "game.decision.lethal.context.defend": [
+    {
+      "type": 0,
+      "value": "Aún tienes cartas con las que bloquear."
+    }
+  ],
+  "game.decision.lethal.context.reaction": [
+    {
+      "type": 0,
+      "value": "Todavía puedes jugar una carta o usar una habilidad."
+    }
+  ],
+  "game.decision.lethal.damage": [
+    {
+      "type": 0,
+      "value": "de daño"
+    }
+  ],
+  "game.decision.lethal.life": [
+    {
+      "type": 0,
+      "value": "de vida"
+    }
+  ],
+  "game.decision.lethal.prompt": [
+    {
+      "type": 0,
+      "value": "Este ataque te derrotaría."
     }
   ],
   "game.decision.name.choose": [
@@ -38665,6 +38739,18 @@
     {
       "type": 0,
       "value": "Volumen de los efectos de sonido"
+    }
+  ],
+  "settings.warnLethalPass": [
+    {
+      "type": 0,
+      "value": "Avisar antes de daño letal"
+    }
+  ],
+  "settings.warnLethalPass.description": [
+    {
+      "type": 0,
+      "value": "Pide confirmación antes de pasar o bloquear cuando un ataque te derrotaría y aún puedes responder."
     }
   ],
   "social.accept": [

@@ -12,6 +12,8 @@ export function useGameShortcuts({
   hotkeyIntent,
   pendingDecision,
   setConfirmArsenalSkip,
+  warnBeforeLethalPass,
+  setConfirmLethalPass,
   warnBeforeEndTurn,
   setConfirmEndTurn,
   onSend,
@@ -26,6 +28,8 @@ export function useGameShortcuts({
   hotkeyIntent: GameIntent | null;
   pendingDecision: PendingDecision | null;
   setConfirmArsenalSkip: (confirmed: boolean) => void;
+  warnBeforeLethalPass: boolean;
+  setConfirmLethalPass: (confirmed: boolean) => void;
   warnBeforeEndTurn: boolean;
   setConfirmEndTurn: (confirmed: boolean) => void;
   onSend: (intent: GameIntent) => boolean;
@@ -45,6 +49,10 @@ export function useGameShortcuts({
         setConfirmArsenalSkip(true);
         return;
       }
+      if (warnBeforeLethalPass) {
+        setConfirmLethalPass(true);
+        return;
+      }
       if (warnBeforeEndTurn && hotkeyIntent.kind === "pass") {
         setConfirmEndTurn(true);
         return;
@@ -61,7 +69,9 @@ export function useGameShortcuts({
     pendingDecision,
     setConfirmArsenalSkip,
     setConfirmEndTurn,
+    setConfirmLethalPass,
     warnBeforeEndTurn,
+    warnBeforeLethalPass,
   ]);
 
   useEffect(() => {

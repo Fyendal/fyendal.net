@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import type { ChainLinkView, GameView, PendingDecision, StackLayerView } from "@fyendal/shared";
+import type { ChainLinkView, GameIntent, GameView, PendingDecision, StackLayerView } from "@fyendal/shared";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 import { passUntilHotkey, passUntilStopHotkey } from "./passHotkey.js";
 import { chainLinkOpen, passUntilChoice, passUntilPaused } from "./passUntil.js";
@@ -39,6 +39,13 @@ describe("pass until", () => {
       expect(passUntilChoice(null, mode)).toBe(mode);
     }
     expect(passUntilChoice("turn", "chain-link")).toBe("chain-link");
+  });
+
+  it("is paused on a lethal final pass only while the seat can respond", () => {
+    const lethal = view({ kind: "defense-reaction" }, [link({ attackValue: 7, damage: 7 })], 5);
+    const respond: GameIntent = { kind: "play-card", instanceId: 9, pitchInstanceIds: [] };
+    expect(passUntilPaused(lethal, 1, "turn", [{ kind: "pass" }, respond])).toBe(true);
+    expect(passUntilPaused(lethal, 1, "turn", [{ kind: "pass" }])).toBe(false);
   });
 
   it("distinguishes an open chain link from a resolved or empty chain", () => {

@@ -11,6 +11,8 @@ import {
   cardPreviewSurfaceSize,
 } from "./cardPreviewFaces.js";
 import { PreviewCardFace } from "./PreviewCardFace.js";
+import { CreatedCardsPanel } from "./CreatedCardsPanel.js";
+import type { CreatedCardsPlacement } from "./createdCards.js";
 import { MARKED_TOKEN_ID, type CardBadge } from "./cardBadges.js";
 import { EffectHintPanel } from "./effects/EffectHintPanel.js";
 import type { EffectHint } from "./effects/effectHint.js";
@@ -34,6 +36,8 @@ export interface BoardPreview {
   effectPosition?: FloatingHintPosition;
   /** Statuses and counters shown on the hovered card, spelled out above it. */
   badges?: readonly CardBadge[];
+  /** Cards the previewed card creates, docked beside it. */
+  created?: CreatedCardsPlacement;
 }
 
 const VIEWPORT_PADDING = 8;
@@ -137,6 +141,7 @@ export function HoverCardPreview({
           <PreviewCardFace card={{ instanceId: -999 - index, cardId, owner }} />
         </div>
       ))}
+      {preview.created ? <CreatedCardsPanel created={preview.created} owner={owner} /> : null}
     </div>
   );
 }

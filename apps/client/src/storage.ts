@@ -526,6 +526,7 @@ export interface GameSettings {
   priorityWindowMode: PriorityWindowMode;
   lessGuidance: boolean;
   skipPlayConfirmation: boolean;
+  warnLethalPass: boolean;
   cardDisplayPreference: CardDisplayPreference;
   motionPreference: MotionPreference;
   playabilityCuePreference: PlayabilityCuePreference;
@@ -545,6 +546,7 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   priorityWindowMode: "always-pause",
   lessGuidance: true,
   skipPlayConfirmation: true,
+  warnLethalPass: true,
   cardDisplayPreference: "square",
   motionPreference: "system",
   playabilityCuePreference: "glow",
@@ -651,6 +653,9 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         : true,
       skipPlayConfirmation: typeof record.skipPlayConfirmation === "boolean"
         ? record.skipPlayConfirmation
+        : true,
+      warnLethalPass: typeof record.warnLethalPass === "boolean"
+        ? record.warnLethalPass
         : true,
       motionPreference,
       playabilityCuePreference,

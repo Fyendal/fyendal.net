@@ -1853,6 +1853,25 @@ describe("PgRoomStore storage", () => {
     expect((await store.getRoom(code))!.seats[defender]!.passUntil).toMatchObject({ mode: "turn" });
   });
 
+  it("pauses the turn shortcut before a lethal final pass the seat could answer, not a survivable one", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    const { attacker, defender, blows, sink } = await forceContestedAttacks(code, 4);
+    const play: GameIntent = { kind: "play-card", instanceId: blows[0]!.instanceId, pitchInstanceIds: [] };
+    expect((await store.applyIntent(code, { token: tokens[attacker] }, play)).ok).toBe(true);
+    const defending = await attackerPassesUntil(code, tokens, attacker, () => false);
+    expect(defending.pendingDecision).toMatchObject({ player: defender, kind: "defend" });
+    expect((await store.applyIntent(code, { token: tokens[defender] }, { kind: "defend", instanceIds: [] })).ok).toBe(true);
+    expect((await store.setPassUntil(code, { token: tokens[defender] }, "turn")).ok).toBe(true);
+
+    const window = await attackerPassesUntil(code, tokens, attacker, () => false);
+    expect(window.pendingDecision).toMatchObject({ player: defender, kind: "defense-reaction" });
+    expect(legalIntents(window, defender).some((intent) =>
+      intent.kind === "play-card" && intent.instanceId === sink.instanceId)).toBe(true);
+    expect(window.chain[0]?.resolved).toBe(false);
+    expect((await store.getRoom(code))!.seats[defender]!.passUntil).toMatchObject({ mode: "turn" });
+  });
+
   it.each(["turn", "chain-link"] as const)("pauses the %s shortcut on the opponent's new play, then resumes", async (mode) => {
     const { code, tokens } = await fullRoom();
     await startGame(code, tokens);

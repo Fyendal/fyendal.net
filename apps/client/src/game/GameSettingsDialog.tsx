@@ -143,6 +143,8 @@ export function GameSettingsDialog({
   onLessGuidanceChange,
   skipPlayConfirmation,
   onSkipPlayConfirmationChange,
+  warnLethalPass,
+  onWarnLethalPassChange,
   optionHotkeys,
   onOptionHotkeysChange,
   skipBotDelay = false,
@@ -181,6 +183,8 @@ export function GameSettingsDialog({
   onLessGuidanceChange: (enabled: boolean) => void;
   skipPlayConfirmation: boolean;
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
+  warnLethalPass: boolean;
+  onWarnLethalPassChange: (enabled: boolean) => void;
   optionHotkeys: boolean;
   onOptionHotkeysChange: (enabled: boolean) => void;
   skipBotDelay?: boolean;
@@ -293,6 +297,12 @@ export function GameSettingsDialog({
                 descriptionId="settings.confirmActions.description"
                 checked={!skipPlayConfirmation}
                 onChange={(checked) => onSkipPlayConfirmationChange(!checked)}
+              />
+              <ToggleRow
+                nameId="settings.warnLethalPass"
+                descriptionId="settings.warnLethalPass.description"
+                checked={warnLethalPass}
+                onChange={onWarnLethalPassChange}
               />
               <ToggleRow
                 nameId="settings.showGuidance"

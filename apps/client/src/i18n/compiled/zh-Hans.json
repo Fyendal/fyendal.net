@@ -27186,6 +27186,32 @@
       "value": "更多对局控制"
     }
   ],
+  "game.createdCards.back": [
+    {
+      "type": 0,
+      "value": "返回 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.createdCards.title": [
+    {
+      "type": 0,
+      "value": "生成"
+    }
+  ],
+  "game.createdCards.view": [
+    {
+      "type": 0,
+      "value": "生成 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "game.decision.action.confirm": [
     {
       "type": 1,
@@ -27658,6 +27684,54 @@
     {
       "type": 0,
       "value": " 无法装备，将被置入你的墓地。"
+    }
+  ],
+  "game.decision.lethal.action.confirm-blocks": [
+    {
+      "type": 0,
+      "value": "仍然确认防御"
+    }
+  ],
+  "game.decision.lethal.action.confirm-no-blocks": [
+    {
+      "type": 0,
+      "value": "仍然确认不防御"
+    }
+  ],
+  "game.decision.lethal.action.pass": [
+    {
+      "type": 0,
+      "value": "仍然让过"
+    }
+  ],
+  "game.decision.lethal.context.defend": [
+    {
+      "type": 0,
+      "value": "你还有可以用来防御的牌。"
+    }
+  ],
+  "game.decision.lethal.context.reaction": [
+    {
+      "type": 0,
+      "value": "你还可以打出牌或使用能力。"
+    }
+  ],
+  "game.decision.lethal.damage": [
+    {
+      "type": 0,
+      "value": "点伤害"
+    }
+  ],
+  "game.decision.lethal.life": [
+    {
+      "type": 0,
+      "value": "点生命"
+    }
+  ],
+  "game.decision.lethal.prompt": [
+    {
+      "type": 0,
+      "value": "这次攻击会击败你。"
     }
   ],
   "game.decision.name.choose": [
@@ -35869,6 +35943,18 @@
     {
       "type": 0,
       "value": "音效音量"
+    }
+  ],
+  "settings.warnLethalPass": [
+    {
+      "type": 0,
+      "value": "致命伤害前提醒"
+    }
+  ],
+  "settings.warnLethalPass.description": [
+    {
+      "type": 0,
+      "value": "当攻击会击败你且你仍可应对时，在让过或防御前要求确认。"
     }
   ],
   "social.accept": [

@@ -1,4 +1,5 @@
-import type { GameView, PassUntilMode } from "@fyendal/shared";
+import type { GameIntent, GameView, PassUntilMode } from "@fyendal/shared";
+import { reactionPassRisk } from "./lethalPass.js";
 
 const ANSWERED_KINDS = new Set(["priority-window", "attack-reaction", "defense-reaction", "defend"]);
 
@@ -23,15 +24,20 @@ export function attackThreatensLethal(view: GameView, seat: number): boolean {
 }
 
 /** The armed shortcut waits on `seat`: the server answers only pass windows
- *  and non-lethal blocks, and not a window over a new opposing play, so any
- *  other choice, or a window the server left with an opposing layer on the
- *  stack, is a pause. A chain-link shortcut waiting for its link is armed,
- *  not paused. */
-export function passUntilPaused(view: GameView, seat: number, mode: PassUntilMode | null): boolean {
+ *  and non-lethal blocks, and not a window over a new opposing play or a
+ *  lethal final pass with a response available, so any other choice, or a
+ *  window the server left with an opposing layer on the stack, is a pause. A
+ *  chain-link shortcut waiting for its link is armed, not paused. */
+export function passUntilPaused(
+  view: GameView,
+  seat: number,
+  mode: PassUntilMode | null,
+  legal: readonly GameIntent[] = [],
+): boolean {
   const decision = view.pendingDecision;
   if (!mode || !decision || decision.player !== seat) return false;
   if (mode === "chain-link" && !chainLinkOpen(view)) return false;
   if (!ANSWERED_KINDS.has(decision.kind)) return true;
   if (decision.kind === "defend") return attackThreatensLethal(view, seat);
-  return view.stack.some((layer) => layer.seat !== seat);
+  return view.stack.some((layer) => layer.seat !== seat) || reactionPassRisk(view, seat, legal) !== null;
 }

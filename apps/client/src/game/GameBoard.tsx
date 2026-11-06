@@ -59,9 +59,11 @@ import {
   toggleBoundedCardChoice,
 } from "./decisionPresentation.js";
 import { shouldHidePriorityGuidance } from "./decisionPass.js";
+import { lethalPassRisk } from "./lethalPass.js";
 import { hoverSurfaceLayout } from "./hoverSurfaceLayout.js";
 import { readEffectHint, sameEffectHint } from "./effects/effectHint.js";
 import { cardPreviewSurfaceSize } from "./cardPreviewFaces.js";
+import { CREATED_PANEL_GAP, createdCardsFor } from "./createdCards.js";
 import { skippableTokenRun } from "./tokenSkip.js";
 import { PassUntilControl } from "./PassUntilControl.js";
 import { chainLinkOpen, passUntilPaused } from "./passUntil.js";
@@ -281,6 +283,7 @@ export function GameBoard() {
     playabilityCuePreference,
     priorityWindowMode,
     skipPlayConfirmation,
+    warnLethalPass,
     optionHotkeys,
     skipBotDelay,
     showGameClock,
@@ -295,6 +298,7 @@ export function GameBoard() {
     updateMotionPreference,
     updatePlayabilityCuePreference,
     updateSkipPlayConfirmation,
+    updateWarnLethalPass,
     updateOptionHotkeys,
     updateSkipBotDelay,
     updateShowGameClock,
@@ -361,6 +365,7 @@ export function GameBoard() {
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
   const [confirmSkipArsenal, setConfirmSkipArsenal] = useState(false);
   const [confirmEndTurn, setConfirmEndTurn] = useState(false);
+  const [confirmLethalPass, setConfirmLethalPass] = useState(false);
   // Arming a turn-wide shortcut on the seat's own action phase ends it, so it shares the warning.
   const [confirmPassUntil, setConfirmPassUntil] = useState<PassUntilMode | null>(null);
   const [boundedChoiceSelection, setBoundedChoiceSelection] = useState<{
@@ -397,9 +402,10 @@ export function GameBoard() {
       : null;
   useEffect(() => setGameOverDismissed(false), [winnerNow]);
   useEffect(() => setConfirmSkipArsenal(false), [arsenalDecisionKey]);
-  // Any authoritative update (including undo) dismisses a pending end-turn warning.
+  // Any authoritative update (including undo) dismisses a pending pass warning.
   useEffect(() => {
     setConfirmEndTurn(false);
+    setConfirmLethalPass(false);
     setConfirmPassUntil(null);
   }, [authoritativeView]);
   // the combat chain window's on-screen rect, reported by ChainFloat so the
@@ -546,13 +552,19 @@ export function GameBoard() {
   useEffect(() => {
     if (sel.kind === "none") return;
     setConfirmEndTurn(false);
+    setConfirmLethalPass(false);
     setConfirmPassUntil(null);
   }, [sel.kind]);
+  const lethalRisk = warnLethalPass && view !== null && yourSeat !== null && !spectating && screen !== "replay"
+    ? lethalPassRisk(view, yourSeat, legal)
+    : null;
   useGameShortcuts({
-    passEnabled: passHotkeyEnabled && !confirmEndTurn && confirmPassUntil === null,
+    passEnabled: passHotkeyEnabled && !confirmEndTurn && !confirmLethalPass && confirmPassUntil === null,
     hotkeyIntent,
     pendingDecision: view?.pendingDecision ?? null,
     setConfirmArsenalSkip: setConfirmSkipArsenal,
+    warnBeforeLethalPass: lethalRisk !== null,
+    setConfirmLethalPass,
     warnBeforeEndTurn: endTurnWarning,
     setConfirmEndTurn,
     onSend: sendIntent,
@@ -822,6 +834,10 @@ export function GameBoard() {
     const intent = { kind: "pass" } as const;
     if (shouldConfirmArsenalPass(pd, intent)) {
       setConfirmSkipArsenal(true);
+      return;
+    }
+    if (lethalRisk) {
+      setConfirmLethalPass(true);
       return;
     }
     if (endTurnWarning) {
@@ -1165,13 +1181,13 @@ export function GameBoard() {
     sendPassUntil(mode);
   };
   // The server's turn latch also stops where the end-turn warning would ask.
-  const passUntilWaiting = passUntilPaused(view, seat, passUntil) || (passUntil === "turn" && endTurnWarning);
+  const passUntilWaiting = passUntilPaused(view, seat, passUntil, legal) || (passUntil === "turn" && endTurnWarning);
   const passUntilControl = (placement: "hud" | "toolbar") => passUntilAvailable ? (
     <PassUntilControl
       mode={passUntil}
       linkOpen={chainLinkOpen(view)}
       paused={passUntilWaiting}
-      hotkeys={placement === "hud"}
+      hotkeys={placement === "hud" && !confirmLethalPass}
       spacePasses={hotkeyIntent !== null}
       placement={placement}
       onArm={armPassUntil}
@@ -1180,7 +1196,8 @@ export function GameBoard() {
   ) : null;
   const triggerPrimaryAction = defending
     ? () => {
-        if (defendIntent) send(defendIntent);
+        if (lethalRisk) setConfirmLethalPass(true);
+        else if (defendIntent) send(defendIntent);
       }
     : requestPass;
 
@@ -1238,21 +1255,25 @@ export function GameBoard() {
     // A ledger row previews its source beside the ledger rather than over it.
     const ledger = el.closest<HTMLElement>(".effect-ledger")?.getBoundingClientRect();
     const anchor = ledger ? new DOMRect(ledger.left, r.top, ledger.width, r.height) : r;
+    const created = createdCardsFor(cardId, previewSurfaceSize, window.innerWidth);
+    const createdSpan = created ? created.layout.width + CREATED_PANEL_GAP : 0;
     const layout = hoverSurfaceLayout(
       anchor,
       { width: window.innerWidth, height: window.innerHeight },
-      previewSurfaceSize,
+      { ...previewSurfaceSize, width: previewSurfaceSize.width + createdSpan },
       240, // keep the card preview clear of the side panel when space permits
     );
     // Contextual card explanations use the preview side.
     el.dataset.previewSide = layout.side;
     setPreview({
       id: cardId,
-      x: layout.x,
+      // The source stays next to the hovered card; created cards sit beyond it.
+      x: layout.side === "left" ? layout.x + createdSpan : layout.x,
       y: layout.y,
       size: previewSize,
       ...(badges ? { badges } : {}),
       ...(effect ? { effect } : {}),
+      ...(created ? { created: { ...created, side: layout.side } } : {}),
     });
   };
 
@@ -1670,6 +1691,20 @@ export function GameBoard() {
       {gameMotion.turnStartUiReady ? <DecisionFloat
         viewerSeat={seat}
         optionHotkeys={optionHotkeys}
+        lethalConfirmation={confirmLethalPass && lethalRisk
+          ? {
+              risk: lethalRisk,
+              action: defending
+                ? stagedIds.size > 0 ? "confirm-blocks" : "confirm-no-blocks"
+                : "pass",
+              onConfirm: () => {
+                setConfirmLethalPass(false);
+                if (!defending) send({ kind: "pass" });
+                else if (defendIntent) send(defendIntent);
+              },
+              onCancel: () => setConfirmLethalPass(false),
+            }
+          : null}
         endTurnConfirmation={(confirmEndTurn || confirmPassUntil !== null) && endTurnWarning
           ? {
               onConfirm: () => {
@@ -1836,6 +1871,8 @@ export function GameBoard() {
         onLessGuidanceChange={updateLessGuidance}
         skipPlayConfirmation={skipPlayConfirmation}
         onSkipPlayConfirmationChange={updateSkipPlayConfirmation}
+        warnLethalPass={warnLethalPass}
+        onWarnLethalPassChange={updateWarnLethalPass}
         optionHotkeys={optionHotkeys}
         onOptionHotkeysChange={updateOptionHotkeys}
         skipBotDelay={skipBotDelay}

@@ -48,6 +48,8 @@ function sideRailProps(
     lessGuidance: false,
     onLessGuidanceChange: vi.fn(),
     skipPlayConfirmation: false,
+    warnLethalPass: true,
+    onWarnLethalPassChange: vi.fn(),
     optionHotkeys: false,
     onOptionHotkeysChange: vi.fn(),
     showGameClock: true,

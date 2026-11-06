@@ -29883,6 +29883,32 @@
       "value": "Mais controles do jogo"
     }
   ],
+  "game.createdCards.back": [
+    {
+      "type": 0,
+      "value": "Voltar para "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.createdCards.title": [
+    {
+      "type": 0,
+      "value": "Cria"
+    }
+  ],
+  "game.createdCards.view": [
+    {
+      "type": 0,
+      "value": "Cria "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "game.decision.action.confirm": [
     {
       "type": 1,
@@ -30347,6 +30373,54 @@
     {
       "type": 0,
       "value": " é um equipamento que não é base nesse espaço. A carta vai para o seu cemitério."
+    }
+  ],
+  "game.decision.lethal.action.confirm-blocks": [
+    {
+      "type": 0,
+      "value": "Confirmar bloqueios mesmo assim"
+    }
+  ],
+  "game.decision.lethal.action.confirm-no-blocks": [
+    {
+      "type": 0,
+      "value": "Confirmar sem bloqueios mesmo assim"
+    }
+  ],
+  "game.decision.lethal.action.pass": [
+    {
+      "type": 0,
+      "value": "Passar mesmo assim"
+    }
+  ],
+  "game.decision.lethal.context.defend": [
+    {
+      "type": 0,
+      "value": "Você ainda tem cartas para bloquear."
+    }
+  ],
+  "game.decision.lethal.context.reaction": [
+    {
+      "type": 0,
+      "value": "Você ainda pode jogar uma carta ou usar uma habilidade."
+    }
+  ],
+  "game.decision.lethal.damage": [
+    {
+      "type": 0,
+      "value": "de dano"
+    }
+  ],
+  "game.decision.lethal.life": [
+    {
+      "type": 0,
+      "value": "de vida"
+    }
+  ],
+  "game.decision.lethal.prompt": [
+    {
+      "type": 0,
+      "value": "Este ataque derrotaria você."
     }
   ],
   "game.decision.name.choose": [
@@ -39590,6 +39664,18 @@
     {
       "type": 0,
       "value": "Volume dos efeitos sonoros"
+    }
+  ],
+  "settings.warnLethalPass": [
+    {
+      "type": 0,
+      "value": "Avisar antes de dano letal"
+    }
+  ],
+  "settings.warnLethalPass.description": [
+    {
+      "type": 0,
+      "value": "Pede confirmação antes de passar ou bloquear quando um ataque derrotaria você e ainda é possível responder."
     }
   ],
   "social.accept": [

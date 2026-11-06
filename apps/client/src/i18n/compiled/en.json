@@ -28321,6 +28321,32 @@
       "value": "More game controls"
     }
   ],
+  "game.createdCards.back": [
+    {
+      "type": 0,
+      "value": "Back to "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.createdCards.title": [
+    {
+      "type": 0,
+      "value": "Creates"
+    }
+  ],
+  "game.createdCards.view": [
+    {
+      "type": 0,
+      "value": "Creates "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "game.decision.action.confirm": [
     {
       "type": 1,
@@ -28785,6 +28811,54 @@
     {
       "type": 0,
       "value": " is a non-base equipment in that slot. It will go to your graveyard."
+    }
+  ],
+  "game.decision.lethal.action.confirm-blocks": [
+    {
+      "type": 0,
+      "value": "Confirm blocks anyway"
+    }
+  ],
+  "game.decision.lethal.action.confirm-no-blocks": [
+    {
+      "type": 0,
+      "value": "Confirm no blocks anyway"
+    }
+  ],
+  "game.decision.lethal.action.pass": [
+    {
+      "type": 0,
+      "value": "Pass anyway"
+    }
+  ],
+  "game.decision.lethal.context.defend": [
+    {
+      "type": 0,
+      "value": "You still have cards you can block with."
+    }
+  ],
+  "game.decision.lethal.context.reaction": [
+    {
+      "type": 0,
+      "value": "You can still play a card or use an ability."
+    }
+  ],
+  "game.decision.lethal.damage": [
+    {
+      "type": 0,
+      "value": "damage"
+    }
+  ],
+  "game.decision.lethal.life": [
+    {
+      "type": 0,
+      "value": "life"
+    }
+  ],
+  "game.decision.lethal.prompt": [
+    {
+      "type": 0,
+      "value": "This attack would defeat you."
     }
   ],
   "game.decision.name.choose": [
@@ -37757,6 +37831,18 @@
     {
       "type": 0,
       "value": "Sound effects volume"
+    }
+  ],
+  "settings.warnLethalPass": [
+    {
+      "type": 0,
+      "value": "Warn before lethal damage"
+    }
+  ],
+  "settings.warnLethalPass.description": [
+    {
+      "type": 0,
+      "value": "Asks for confirmation before you pass or block when an attack would defeat you and you can still respond."
     }
   ],
   "social.accept": [

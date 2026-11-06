@@ -20,6 +20,12 @@ import {
 } from "../game/Card.js";
 import { cardPreviewFaceBox } from "../game/cardPreviewFaces.js";
 import { PreviewCardFace } from "../game/PreviewCardFace.js";
+import { CreatedCardsPanel } from "../game/CreatedCardsPanel.js";
+import {
+  CREATED_PANEL_GAP,
+  createdCardsFor,
+  type CreatedCardsPlacement,
+} from "../game/createdCards.js";
 import { MobileCardInspect } from "../game/MobileCardInspect.js";
 import { useMobileCardLongPress } from "../game/mobileCardLongPress.js";
 import { formatLabel } from "../lobby/FormatBadge.js";
@@ -155,7 +161,12 @@ export function PrepRoom() {
   })));
   const [sel, setSel] = useState<PrepSelection | null>(null);
   const [restoredPresentationRoom, setRestoredPresentationRoom] = useState<string | null>(null);
-  const [preview, setPreview] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [preview, setPreview] = useState<{
+    id: string;
+    x: number;
+    y: number;
+    created?: CreatedCardsPlacement;
+  } | null>(null);
   const [inspectedCardId, setInspectedCardId] = useState<string | null>(null);
   const cardLongPressHandlers = useMobileCardLongPress((cardId) => setInspectedCardId(cardId));
   const [errors, setErrors] = useState<string[]>([]);
@@ -384,15 +395,20 @@ export function PrepRoom() {
     // A ledger row previews beside its own ledger rather than over its rows.
     const span = el.closest(".prep-deck-zone")?.getBoundingClientRect() ?? r;
     const gap = 12;
+    const created = createdCardsFor(cardId, box, window.innerWidth);
+    const createdSpan = created ? created.layout.width + CREATED_PANEL_GAP : 0;
+    const totalWidth = box.width + createdSpan;
     let x = span.right + gap;
-    if (x + box.width > window.innerWidth - 8) {
-      x = Math.max(8, span.left - box.width - gap);
+    let side: "left" | "right" = "right";
+    if (x + totalWidth > window.innerWidth - 8) {
+      x = Math.max(8, span.left - totalWidth - gap) + createdSpan;
+      side = "left";
     }
     const y = Math.min(
       Math.max(r.top + r.height / 2 - box.height / 2, 8),
       window.innerHeight - box.height - 8,
     );
-    setPreview({ id: cardId, x, y });
+    setPreview({ id: cardId, x, y, ...(created ? { created: { ...created, side } } : {}) });
   };
 
   const toggleWeapon = (index: number) => {
@@ -913,6 +929,7 @@ export function PrepRoom() {
           }}
         >
           <PreviewCardFace card={{ instanceId: -999, cardId: preview.id, owner: yourSeat }} />
+          {preview.created ? <CreatedCardsPanel created={preview.created} owner={yourSeat} /> : null}
         </div>
       )}
 

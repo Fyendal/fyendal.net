@@ -3,6 +3,7 @@ import { ModalSurface } from "../components/ModalSurface.js";
 import { useIntl } from "react-intl";
 import { useState } from "react";
 import { cardPreviewFaceIds } from "./cardPreviewFaces.js";
+import { createdCardIds } from "./createdCards.js";
 import { PreviewCardFace } from "./PreviewCardFace.js";
 import { StandingOrderRows, type StandingOrderPanelModel } from "./StandingOrderPanel.js";
 
@@ -39,7 +40,10 @@ function CardInspect({ cardId, owner, onClose, standingOrders }: {
 }) {
   const intl = useIntl();
   const [visibleCardId, setVisibleCardId] = useState(cardId);
-  const otherFaceId = cardPreviewFaceIds(cardId).find((id) => id !== visibleCardId);
+  const faceIds = cardPreviewFaceIds(cardId);
+  const viewingCreated = !faceIds.includes(visibleCardId);
+  const otherFaceId = viewingCreated ? undefined : faceIds.find((id) => id !== visibleCardId);
+  const createdIds = viewingCreated ? [] : createdCardIds(cardId);
 
   return (
     <ModalSurface
@@ -50,10 +54,24 @@ function CardInspect({ cardId, owner, onClose, standingOrders }: {
       onClose={onClose}
     >
       <PreviewCardFace card={{ instanceId: -1000, cardId: visibleCardId, owner }} />
-      {otherFaceId ? (
-        <button className="mobile-card-inspect-flip" type="button" onClick={() => setVisibleCardId(otherFaceId)}>
-          {intl.formatMessage({ id: "game.flipCard" })}
-        </button>
+      {otherFaceId || createdIds.length > 0 || viewingCreated ? (
+        <div className="mobile-card-inspect-actions">
+          {otherFaceId ? (
+            <button className="mobile-card-inspect-flip" type="button" onClick={() => setVisibleCardId(otherFaceId)}>
+              {intl.formatMessage({ id: "game.flipCard" })}
+            </button>
+          ) : null}
+          {createdIds.map((id) => (
+            <button key={id} className="mobile-card-inspect-flip" type="button" onClick={() => setVisibleCardId(id)}>
+              {intl.formatMessage({ id: "game.createdCards.view" }, { card: cardData[id]?.name ?? id })}
+            </button>
+          ))}
+          {viewingCreated ? (
+            <button className="mobile-card-inspect-flip" type="button" onClick={() => setVisibleCardId(cardId)}>
+              {intl.formatMessage({ id: "game.createdCards.back" }, { card: cardData[cardId]?.name ?? cardId })}
+            </button>
+          ) : null}
+        </div>
       ) : null}
       {standingOrders ? (
         <section

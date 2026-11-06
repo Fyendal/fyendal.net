@@ -4,6 +4,7 @@ import { IntlProvider } from "react-intl";
 import { describe, expect, it } from "vitest";
 import en from "../i18n/catalogs/en.json";
 import { cardBadges } from "./cardBadges.js";
+import { createdCardsFor } from "./createdCards.js";
 import { HoverCardPreview } from "./HoverCardPreview.js";
 
 describe("HoverCardPreview", () => {
@@ -21,6 +22,22 @@ describe("HoverCardPreview", () => {
       expect(html.match(/class="card-preview-face"/g)).toHaveLength(2);
       expect(html).toContain("width:212px;height:140px");
     }
+  });
+
+  it("docks the created cards beside the card that makes them", () => {
+    const created = createdCardsFor("IAR017", { width: 296, height: 413 }, 1920)!;
+    const html = renderToStaticMarkup(createElement(
+      IntlProvider,
+      { locale: "en", messages: en },
+      createElement(HoverCardPreview, {
+        preview: { id: "IAR017", x: 10, y: 20, created: { ...created, side: "left" } },
+        owner: 0,
+      }),
+    ));
+
+    expect(html).toContain("created-cards-panel is-left");
+    expect(html).toContain(">Creates</h3>");
+    expect(html.indexOf('data-cardid="IAR017"')).toBeLessThan(html.indexOf('data-cardid="IAR221"'));
   });
 
   it("keeps an ordinary card as a single-face preview", () => {

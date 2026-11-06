@@ -1568,3 +1568,28 @@
 }
 .decision-sheet-restore:hover { border-color: var(--gold); }
 .decision-sheet-restore .ui-icon { font-size: 18px; color: var(--gold); }
+
+.decision-lethal { border-top: 3px solid var(--danger); }
+.lethal-tally {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #ffffff1f;
+}
+.lethal-tally-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 8px;
+  background: #00000059;
+  color: var(--text-primary);
+  font: 500 14px/1.2 var(--font-lobby-ui);
+}
+.lethal-tally-side strong { font-size: 32px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.lethal-tally-damage { color: var(--danger); }
+.decision-lethal .decision-choice-option { border-color: var(--danger); color: var(--danger); }
+.decision-lethal .decision-choice-option:hover:not(:disabled) { background: #ff7b7214; }

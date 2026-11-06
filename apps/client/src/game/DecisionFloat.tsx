@@ -2,6 +2,7 @@ import type { PendingDecision } from "@fyendal/shared";
 import { useState } from "react";
 import { useFloatDrag } from "./useFloatDrag.js";
 import { bloodModeAllocation } from "./decisionPresentation.js";
+import type { LethalPassRisk } from "./lethalPass.js";
 import type { Sel } from "./useActionAnnouncement.js";
 import { ActionAnnouncementPanel } from "./decision/ActionAnnouncementPanel.js";
 import type {
@@ -10,7 +11,7 @@ import type {
 } from "./decision/DecisionModels.js";
 import { PendingDecisionPanel, pendingDecisionPanelShown } from "./decision/PendingDecisionPanel.js";
 import { ChoiceHotkeysEnabled } from "./decision/choiceHotkeys.js";
-import { EndTurnConfirmation } from "./decision/ActionConfirmations.js";
+import { EndTurnConfirmation, LethalPassConfirmation } from "./decision/ActionConfirmations.js";
 import { DecisionSheetMinimize, DecisionSheetRestore } from "./decision/DecisionSheet.js";
 
 export type { ActionAnnouncementModel, PendingDecisionModel } from "./decision/DecisionModels.js";
@@ -53,6 +54,7 @@ export function DecisionFloat({
   pitchFocused = false,
   optionHotkeys = false,
   endTurnConfirmation = null,
+  lethalConfirmation = null,
 }: {
   pending: PendingDecisionModel;
   action: ActionAnnouncementModel;
@@ -61,18 +63,28 @@ export function DecisionFloat({
   optionHotkeys?: boolean;
   /** Present while the player confirms ending the turn with an unused action point. */
   endTurnConfirmation?: { onConfirm: () => void; onCancel: () => void } | null;
+  /** Present while the player confirms a pass or block that would defeat them. */
+  lethalConfirmation?: {
+    risk: LethalPassRisk;
+    action: "pass" | "confirm-blocks" | "confirm-no-blocks";
+    onConfirm: () => void;
+    onCancel: () => void;
+  } | null;
 }) {
-  const resetKey = endTurnConfirmation
-    ? "end-turn-confirmation"
-    : decisionFloatDragKey(
-        pending.decision,
-        action.sel,
-        action.autoCommitPending,
-      );
+  const resetKey = lethalConfirmation
+    ? "lethal-confirmation"
+    : endTurnConfirmation
+      ? "end-turn-confirmation"
+      : decisionFloatDragKey(
+          pending.decision,
+          action.sel,
+          action.autoCommitPending,
+        );
   const decisionFloat = useFloatDrag({ resetKey });
   const [minimizedKey, setMinimizedKey] = useState<string | null>(null);
   const minimized = minimizedKey === resetKey;
   if (
+    !lethalConfirmation &&
     !endTurnConfirmation &&
     !pendingDecisionPanelShown(pending) &&
     (action.sel.kind === "none" || action.autoCommitPending)
@@ -91,7 +103,11 @@ export function DecisionFloat({
       {minimized ? <DecisionSheetRestore onRestore={() => setMinimizedKey(null)} /> : null}
       <DecisionSheetMinimize.Provider value={() => setMinimizedKey(resetKey)}>
         <ChoiceHotkeysEnabled.Provider value={optionHotkeys}>
-          {endTurnConfirmation ? (
+          {lethalConfirmation ? (
+            <div className="decision decision-options decision-choice decision-lethal">
+              <LethalPassConfirmation {...lethalConfirmation} />
+            </div>
+          ) : endTurnConfirmation ? (
             <div className="decision decision-options decision-choice">
               <EndTurnConfirmation
                 onConfirm={endTurnConfirmation.onConfirm}

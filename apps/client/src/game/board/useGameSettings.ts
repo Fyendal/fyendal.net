@@ -55,6 +55,13 @@ export function useGameSettings({
       return next;
     });
   };
+  const updateWarnLethalPass = (warnLethalPass: boolean) => {
+    setSettings((current) => {
+      const next = { ...current, warnLethalPass };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
   const updateOptionHotkeys = (optionHotkeys: boolean) => {
     setSettings((current) => {
       const next = { ...current, optionHotkeys };
@@ -152,6 +159,7 @@ export function useGameSettings({
     updatePriorityWindowMode,
     updateLessGuidance,
     updateSkipPlayConfirmation,
+    updateWarnLethalPass,
     updateOptionHotkeys,
     updateSkipBotDelay,
     updateShowGameClock,

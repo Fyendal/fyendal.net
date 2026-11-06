@@ -175,6 +175,8 @@ export function SideRail({
   onLessGuidanceChange,
   skipPlayConfirmation,
   onSkipPlayConfirmationChange,
+  warnLethalPass,
+  onWarnLethalPassChange,
   optionHotkeys,
   onOptionHotkeysChange,
   skipBotDelay = false,
@@ -259,6 +261,8 @@ export function SideRail({
   onLessGuidanceChange: (enabled: boolean) => void;
   skipPlayConfirmation: boolean;
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
+  warnLethalPass: boolean;
+  onWarnLethalPassChange: (enabled: boolean) => void;
   optionHotkeys: boolean;
   onOptionHotkeysChange: (enabled: boolean) => void;
   skipBotDelay?: boolean;
@@ -670,6 +674,8 @@ export function SideRail({
           onLessGuidanceChange={onLessGuidanceChange}
           skipPlayConfirmation={skipPlayConfirmation}
           onSkipPlayConfirmationChange={onSkipPlayConfirmationChange}
+          warnLethalPass={warnLethalPass}
+          onWarnLethalPassChange={onWarnLethalPassChange}
           optionHotkeys={optionHotkeys}
           onOptionHotkeysChange={onOptionHotkeysChange}
           skipBotDelay={skipBotDelay}

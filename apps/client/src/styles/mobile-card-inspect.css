@@ -52,7 +52,21 @@
     font: 500 15px/1 var(--font-lobby-ui);
     letter-spacing: 0;
     text-transform: none;
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
+  /* One scrollable line, so the card keeps the height reserved for it. */
+  .mobile-card-inspect-actions {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 8px;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .mobile-card-inspect-actions > .mobile-card-inspect-flip { flex: 0 0 auto; }
 
   /* Radii in percent of the width and height match a 63 x 88 mm card's 3 mm corner. */
   .mobile-card-inspect-sheet .card-preview-frame.card-hasimg {
@@ -107,7 +121,7 @@
     width: fit-content;
     padding: 0 56px;
   }
-  .mobile-card-inspect-sheet:has(.mobile-card-inspect-flip) { --inspect-card-height: calc(100dvh - 76px); }
+  .mobile-card-inspect-sheet:has(.mobile-card-inspect-actions) { --inspect-card-height: calc(100dvh - 76px); }
   .mobile-card-inspect-sheet .modal-surface-header {
     position: absolute;
     top: 0;

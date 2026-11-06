@@ -18,6 +18,8 @@ function baseProps(): DialogProps {
     onLessGuidanceChange: vi.fn(),
     skipPlayConfirmation: true,
     onSkipPlayConfirmationChange: vi.fn(),
+    warnLethalPass: true,
+    onWarnLethalPassChange: vi.fn(),
     optionHotkeys: false,
     onOptionHotkeysChange: vi.fn(),
     showGameClock: true,

@@ -115,11 +115,24 @@ function threatensLethal(state: GameState, seat: number): boolean {
   return link.attackValue - (link.damageToPrevent ?? 0) >= life;
 }
 
+/** The seat's final pass of the reaction step would let the attack defeat it
+ *  while it can still respond. */
+function finalPassLethal(state: GameState, seat: number, legal: readonly GameIntent[]): boolean {
+  if (state.pendingDecision?.kind !== "defense-reaction" || state.stack.length > 0) return false;
+  if (!legal.some((intent) => intent.kind !== "pass")) return false;
+  const view = projectStateFor(state, seat);
+  const link = view.chain.at(-1);
+  const life = view.players[seat]?.life;
+  if (!link || link.resolved || life === undefined || link.targetAllyName !== undefined) return false;
+  const damage = link.damage - (link.damageUnpreventable ? 0 : link.damageToPrevent ?? 0);
+  return damage > 0 && damage >= life;
+}
+
 /** What the latch answers for `seat` in `state`: pass its priority and
  *  reaction windows and declare no blocks. Any other choice, a chain-link
- *  latch before its link opens, a new opposing play, a lethal attack, and
- *  ending the seat's turn with a usable action point pause it without
- *  disarming. */
+ *  latch before its link opens, a new opposing play, a lethal attack or final
+ *  pass, and ending the seat's turn with a usable action point pause it
+ *  without disarming. */
 export function passUntilIntent(state: GameState, seat: number, armed: SeatPassUntil): GameIntent | null {
   if (armed.mode === "chain-link" && !armed.link) return null;
   const decision = state.pendingDecision;
@@ -132,6 +145,7 @@ export function passUntilIntent(state: GameState, seat: number, armed: SeatPassU
       intent.kind === "defend" && intent.instanceIds.length === 0 && (intent.pitchInstanceIds?.length ?? 0) === 0
     ) ?? null;
   }
+  if (finalPassLethal(state, seat, legal)) return null;
   const passWindow = decision
     ? PASS_WINDOW_KINDS.has(decision.kind)
     : state.phase === "action" && state.priorityPlayer === seat
