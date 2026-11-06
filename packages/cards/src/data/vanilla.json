@@ -132,5 +132,14 @@
   "proto base legs|0": "blank rules text",
   "bastion of duty|0": "text is only the Protect and engine-native Temper keyword lines; Protect has no additional effect in a two-hero game",
   "chivalry|3": "text is only the Protect keyword line; Protect has no additional effect in a two-hero game",
-  "helm of the arknight|0": "text is only the engine-native Temper keyword line"
+  "helm of the arknight|0": "text is only the engine-native Temper keyword line",
+  "kickback|1": "text is only the engine-native Boost keyword line and Stealth, which has no rules meaning",
+  "kickback|2": "text is only the engine-native Boost keyword line and Stealth, which has no rules meaning",
+  "kickback|3": "text is only the engine-native Boost keyword line and Stealth, which has no rules meaning",
+  "whisper shot|1": "text is only the Stealth keyword line, which has no rules meaning",
+  "whisper shot|2": "text is only the Stealth keyword line, which has no rules meaning",
+  "whisper shot|3": "text is only the Stealth keyword line, which has no rules meaning",
+  "rocket-powered arrow|1": "text is only the engine-native Boost keyword line",
+  "rocket-powered arrow|2": "text is only the engine-native Boost keyword line",
+  "rocket-powered arrow|3": "text is only the engine-native Boost keyword line"
 }

@@ -1026,6 +1026,32 @@ describe("Outbreak cards", () => {
     it("does nothing on hit without a disease token", () => {
       hitWith([]).expectLife(1, 17);
     });
+
+    it("gives the hit hero a disease token from the yellow printing", () => {
+      const yellow = "patient zero|2";
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [yellow], board: [FRAILTY], weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] }).play(yellow).blockWith().settle();
+
+      game.expectLife(1, 18);
+      expect(boardNames(game, 0)).toEqual([]);
+      expect(boardNames(game, 1)).toEqual(["Frailty"]);
+    });
+  });
+
+  describe("Rocket-Powered Arrow", () => {
+    const ROCKET = "rocket-powered arrow|1";
+
+    it("boosts from arsenal with a bow and gets go again from a Mechanologist banish", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", arsenal: [ROCKET], deck: [ZIPPER_HIT], resources: 1, weapons: [DEATH_DEALER], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(ROCKET, { fromArsenal: true, boost: true }).expectAttackValue(5).blockWith().settle();
+      game.expectLife(1, 15).expectAP(0, 1);
+    });
   });
 
   describe("Curative Ceremony", () => {
