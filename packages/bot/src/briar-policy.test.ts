@@ -43,6 +43,39 @@ function resolveToAction(state: ReturnType<typeof createGame>): ReturnType<typeo
 }
 
 describe("Briar policy", () => {
+  it("attacks on the opening turn into an instant-heavy deck while keeping an arsenal card", () => {
+    let state = createGame({
+      decklists: [briarDeck(decklists.dorinthea), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 701,
+      startPlayer: 0,
+    });
+    replaceHand(state, 0, ["SBA012", "SBA015", "SBA029", "SBA023"]);
+    const instantHeavy = {
+      opponent: [...Array.from({ length: 32 }, () => "ANQ031"), ...Array.from({ length: 8 }, () => "WTR163")],
+    };
+
+    let attacked = false;
+    for (let step = 0; step < 30 && state.activePlayer === 0 && state.turn === 1; step++) {
+      const playable = (candidate: 0 | 1) => legalIntents(state, candidate).filter((intent) =>
+        intent.kind !== "concede" && !intent.kind.endsWith("-draw")
+      );
+      const seat: 0 | 1 = playable(0).length > 0 ? 0 : 1;
+      const legal = playable(seat);
+      const intent = seat === 0
+        ? chooseBriarIntent({ seat, view: projectStateFor(state, seat), legal, cards: cardData, state, decklists: instantHeavy })
+        : legal.find((candidate) => candidate.kind === "pass") ?? legal[0]!;
+      const result = applyIntent(state, seat, intent);
+      expect(result.ok, result.ok ? "" : result.error).toBe(true);
+      if (!result.ok) return;
+      state = result.state;
+      attacked ||= state.chain.some((link) => link.attackingCard.owner === 0);
+    }
+    expect(attacked).toBe(true);
+    expect(state.players[0]!.arsenal).toHaveLength(1);
+  });
+
   it("passes on the opening turn, then arsenals for a five-card setup turn", () => {
     let state = createGame({
       decklists: [briarDeck(decklists.dorinthea), decklists.dorinthea],

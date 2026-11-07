@@ -51,7 +51,7 @@ const INFORMED_DISRUPTION_VALUE = DEFAULT_DRAW_VALUE + 1.5;
 /** A random card is an average card. */
 const RANDOM_DISRUPTION_VALUE = DEFAULT_DRAW_VALUE;
 /** The defender gives up the worst card in hand. */
-const FORCED_DISCARD_VALUE = DEFAULT_DRAW_VALUE * 0.75;
+export const FORCED_DISCARD_VALUE = DEFAULT_DRAW_VALUE * 0.75;
 /** Cards a whole-hand discard is assumed to take. */
 const WHOLE_HAND_CARDS = 3;
 /** Extra copies banished from deck or graveyard by a named-card effect. */

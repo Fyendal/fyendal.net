@@ -2116,6 +2116,28 @@
       "value": "Skyward Serenade: choose a different second mode"
     }
   ],
+  "card.ast.serenade.stack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "first"
+    },
+    {
+      "type": 0,
+      "value": "; "
+    },
+    {
+      "type": 1,
+      "value": "second"
+    }
+  ],
   "card.ast.skyzyk.search": [
     {
       "type": 0,
@@ -7384,6 +7406,36 @@
     {
       "type": 0,
       "value": "; it may be played this turn"
+    }
+  ],
+  "card.log.ast.serenade.modes.chosen": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " chooses “"
+    },
+    {
+      "type": 1,
+      "value": "first"
+    },
+    {
+      "type": 0,
+      "value": "” and “"
+    },
+    {
+      "type": 1,
+      "value": "second"
+    },
+    {
+      "type": 0,
+      "value": "” for "
+    },
+    {
+      "type": 1,
+      "value": "card"
     }
   ],
   "card.log.common.actionpoints.gained": [

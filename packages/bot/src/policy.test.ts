@@ -18,6 +18,7 @@ import {
   scoreDefenseReaction,
   scoreDefenseIntent,
   scoreDefenseIntentWithTrace,
+  shouldPreserveOpeningHand,
   spendsOpeningArsenalReserve,
   type BotPolicyInput,
   type BotPolicyScorers,
@@ -457,6 +458,21 @@ describe("opening-turn aggression", () => {
     input.legal = [allIn, { kind: "pass" }];
 
     expect(spendsOpeningArsenalReserve(allIn, input)).toBe(false);
+  });
+
+  it("attacks into a full opposing hand only when the opponent runs many instants", () => {
+    const { input, allIn, preserving } = openingInput();
+    input.view.players[1].handCount = 4;
+    const actions = Array.from({ length: 34 }, () => "ANQ031");
+    expect(cardData.WTR163?.cardType).toBe("instant");
+
+    expect(shouldPreserveOpeningHand(input)).toBe(true);
+    input.decklists = { opponent: [...actions, ...Array.from({ length: 4 }, () => "WTR163")] };
+    expect(shouldPreserveOpeningHand(input)).toBe(true);
+    input.decklists = { opponent: [...actions, ...Array.from({ length: 8 }, () => "WTR163")] };
+    expect(shouldPreserveOpeningHand(input)).toBe(false);
+    expect(spendsOpeningArsenalReserve(allIn, input)).toBe(true);
+    expect(spendsOpeningArsenalReserve(preserving, input)).toBe(false);
   });
 
   it("reserves the last card after the bot has attacked", () => {

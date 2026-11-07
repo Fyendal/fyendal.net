@@ -19,6 +19,7 @@ import {
 import {
   EMPTY_ON_HIT_EVALUATION,
   evaluateOnHit,
+  FORCED_DISCARD_VALUE,
   SIGNIFICANT_ON_HIT_VALUE,
   type OnHitEvaluation,
 } from "./on-hit.js";
@@ -447,11 +448,22 @@ export function isOpeningTurn(input: BotPolicyInput): boolean {
   return input.view.turn === 1 && input.view.activePlayer === input.seat;
 }
 
+/** Instants rarely block, so a deck this instant-heavy defends poorly on turn one. */
+const OPENING_ATTACK_INSTANT_SHARE = 0.15;
+
+function opponentRunsManyInstants(input: BotPolicyInput): boolean {
+  const deck = input.decklists?.opponent;
+  if (!deck?.length) return false;
+  const instants = deck.filter((id) => input.cards[id]?.cardType === "instant").length;
+  return instants / deck.length >= OPENING_ATTACK_INSTANT_SHARE;
+}
+
 /** Preserve the normal first-turn hand-refill advantage unless the opponent
- * has already spent at least half of their opening hand. At two or fewer
- * cards, make them defend instead of giving them a free refill. */
+ * has already spent at least half of their opening hand or runs many
+ * instants. Otherwise attack while still reserving an arsenal card. */
 export function shouldPreserveOpeningHand(input: BotPolicyInput): boolean {
-  return isOpeningTurn(input) && input.view.players[1 - input.seat]!.handCount > 2;
+  return isOpeningTurn(input) && input.view.players[1 - input.seat]!.handCount > 2 &&
+    !opponentRunsManyInstants(input);
 }
 
 export function isOpeningTurnDefense(input: BotPolicyInput): boolean {
@@ -1320,19 +1332,39 @@ function clamp(value: number, minimum: number, maximum: number): number {
 function defaultContinuationProfile(
   input: BotPolicyInput,
   link: NonNullable<ReturnType<typeof currentLink>>,
+  handCardsDenied = 0,
 ): ContinuationProfile {
   const attacker = input.view.players[1 - input.seat]!;
   if (link.goAgain !== true && attacker.actionPoints <= 0) {
     return { stopProbability: 1, representativeAttack: 0 };
   }
+  const handCount = Math.max(0, attacker.handCount - handCardsDenied);
   return {
     stopProbability: clamp(
-      0.75 - 0.2 * Math.min(attacker.handCount, 3) - 0.15 * attacker.arsenalCount,
+      0.75 - 0.2 * Math.min(handCount, 3) - 0.15 * attacker.arsenalCount,
       0.15,
       0.75,
     ),
-    representativeAttack: Math.min(6, 3 + attacker.handCount + attacker.arsenalCount),
+    representativeAttack: Math.min(6, 3 + handCount + attacker.arsenalCount),
   };
+}
+
+const DEFEND_DISCARD =
+  /\bwhen this defends( a weapon attack)?, the attacking hero discards (a|\d+) cards?/i;
+
+/** Attacker hand cards the chosen defenders' own defend triggers discard. */
+function defendTriggerDiscards(
+  input: BotPolicyInput,
+  link: NonNullable<ReturnType<typeof currentLink>>,
+  chosen: readonly CardView[],
+): number {
+  const weaponAttack = input.cards[link.attackingCard.cardId]?.cardType === "weapon";
+  const discards = chosen.reduce((total, card) => {
+    const match = DEFEND_DISCARD.exec(input.cards[card.cardId]?.text ?? "");
+    if (!match || (match[1] && !weaponAttack)) return total;
+    return total + (match[2]!.toLowerCase() === "a" ? 1 : Number(match[2]));
+  }, 0);
+  return Math.min(discards, input.view.players[1 - input.seat]!.handCount);
 }
 
 function weightedResponse(
@@ -1862,7 +1894,8 @@ export function scoreDefenseIntentWithTrace(
     ),
     weight,
   })));
-  const defaultContinuation = defaultContinuationProfile(input, link);
+  const attackerDiscards = defendTriggerDiscards(input, link, chosen);
+  const defaultContinuation = defaultContinuationProfile(input, link, attackerDiscards);
   const override = model.continuationProfile?.(input, link) ?? {};
   const stopProbability = clamp(
     override.stopProbability ?? defaultContinuation.stopProbability,
@@ -1908,6 +1941,7 @@ export function scoreDefenseIntentWithTrace(
     damageThreatened: blendedResponse.damageThreatened,
     damagePrevented: prevented + continuation.prevention * continueProbability,
     onHitValue: stopHitValue,
+    opponentConversionDenied: attackerDiscards * FORCED_DISCARD_VALUE,
     futureHandValue: blendedResponse.futureHandValue,
     arsenalValue: blendedResponse.arsenalValue,
     boardValue: blendedResponse.boardValue,
@@ -1924,6 +1958,7 @@ export function scoreDefenseIntentWithTrace(
     damageThreatened: blendedResponse.damageThreatened,
     damagePrevented: prevented + continuation.prevention * continueProbability,
     onHitValue: stopHitValue,
+    opponentConversionDenied: attackerDiscards * FORCED_DISCARD_VALUE,
     futureHandValue: blendedResponse.futureHandValue,
     arsenalValue: blendedResponse.arsenalValue,
     boardValue: blendedResponse.boardValue,
@@ -1988,6 +2023,7 @@ export function scoreDefenseIntentWithTrace(
   if (isOpeningTurnDefense(input)) {
     const score = prevented * 100
       + stopHitValue
+      + value.opponentConversionDenied
       - chargedOverblock * 1.5
       - equipmentCost
       - chosen.length * 0.01

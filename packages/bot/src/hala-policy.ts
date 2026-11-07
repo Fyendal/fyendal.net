@@ -247,7 +247,9 @@ function shouldActivateRippleAway(input: BotPolicyInput, rippleId: number): bool
   const layer = input.view.stack[0];
   if (!layer?.card || layer.seat === input.seat) return false;
   const source = input.cards[layer.card.cardId];
-  return source?.cardType === "action" && hasDeterministicTokenCreation(source.text);
+  if (source?.cardType !== "action") return false;
+  // A modal card's stack label carries only its declared modes.
+  return hasDeterministicTokenCreation(/^choose \d/i.test(source.text) ? layer.label : source.text);
 }
 
 function toeTheLinePreventionCommitted(input: BotPolicyInput): number {
@@ -743,9 +745,20 @@ function actionWithoutPitch(intent: GameIntent): GameIntent {
 }
 
 function halaPaymentClass(intent: GameIntent, input: BotPolicyInput): string {
+  // Paying Zenith's swing with And Again forfeits the swing that follows it.
+  const paysZenith = intent.kind === "activate-ability" &&
+    intent.sourceInstanceId === zenithBlade(input)?.instanceId;
+  const own = ownCards(input);
+  const pitchedSwings = paysZenith
+    ? pitchIds(intent).flatMap((id) => {
+      const data = input.cards[own.get(id)?.cardId ?? ""];
+      return grantsDirectSwordAttack(data) ? [key(data)] : [];
+    }).sort()
+    : [];
   return JSON.stringify({
     action: actionWithoutPitch(intent),
     pitchValue: pitchValue(intent, input),
+    pitchedSwings,
   });
 }
 

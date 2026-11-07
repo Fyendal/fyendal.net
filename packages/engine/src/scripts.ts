@@ -1158,6 +1158,9 @@ export interface CardScript {
   /** Whether resolving playable equipment transforms `equipped` and retains it
    * underneath; otherwise, or with no occupant, equipping fails. */
   transformsEquipment?(ctx: ScriptCtx, equipped: DeepReadonly<CardInstance>): boolean;
+  /** Public stack label for this card's layer, showing parameters declared
+   * as it was played (modes). Must read only `card`; it runs at projection. */
+  stackLabel?(card: DeepReadonly<CardInstance>): { label: string; labelMessage?: GameMessage } | undefined;
   /** A live source may grant matching friendly cards permission to be played
    * from an otherwise inaccessible zone. */
   allowsFriendlyCardPlayFrom?(

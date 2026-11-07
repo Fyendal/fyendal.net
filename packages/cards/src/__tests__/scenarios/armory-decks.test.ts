@@ -1506,6 +1506,33 @@ describe("Armory Decks — rules regression coverage", () => {
     expect(g.state.pendingDecision?.prompt).toContain("Arc Lightning");
   });
 
+  it("Skyward Serenade publishes its declared modes before anyone can respond", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["skyward serenade|2"], resources: 0, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("skyward serenade|2").chooseOption("search");
+    const declared = applyIntent(g.state, 0, { kind: "choose", optionId: "3: Next attack +1" });
+    if (!declared.ok) throw new Error(declared.error);
+    const view = projectStateFor(declared.state, 1);
+    expect(view.stack[0]).toMatchObject({
+      card: { cardId: printingId("skyward serenade|2") },
+      label: "Skyward Serenade: Search your deck for a Skyzyk; Your next attack this turn gets +1{p}",
+      labelMessage: {
+        id: "card.ast.serenade.stack",
+        values: {
+          first: { kind: "term", id: "card.ast.option.skyzyk" },
+          second: { kind: "term", id: "card.ast.option.attack" },
+        },
+      },
+    });
+    expect(view.logEntries?.find(
+      (entry) => "message" in entry && entry.message.id === "card.log.ast.serenade.modes.chosen",
+    )).toBeDefined();
+  });
+
   it("Arc Lightning triggers when Sun Kiss gains go again as an instant", () => {
     const g = scenario({
       seats: [

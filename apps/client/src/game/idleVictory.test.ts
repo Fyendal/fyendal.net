@@ -9,7 +9,8 @@ const eligibleClaim = {
   waitingOnOpponent: true,
   opponentLastAction: 1_000,
   opponentIdleMs: IDLE_VICTORY_MS,
-  dismissedFor: null,
+  now: 1_000 + IDLE_VICTORY_MS,
+  snoozedUntil: null,
 };
 
 describe("idle victory claim visibility", () => {
@@ -23,5 +24,19 @@ describe("idle victory claim visibility", () => {
 
   it("never shows against a bot", () => {
     expect(shouldShowIdleVictoryClaim({ ...eligibleClaim, botGame: true })).toBe(false);
+  });
+
+  it("stays hidden while a dismissal is snoozed", () => {
+    expect(shouldShowIdleVictoryClaim({ ...eligibleClaim, snoozedUntil: eligibleClaim.now + 1 })).toBe(false);
+  });
+
+  it("offers again once the snooze elapses for a still-idle opponent", () => {
+    const now = eligibleClaim.now + IDLE_VICTORY_MS;
+    expect(shouldShowIdleVictoryClaim({
+      ...eligibleClaim,
+      now,
+      opponentIdleMs: now - eligibleClaim.opponentLastAction,
+      snoozedUntil: now,
+    })).toBe(true);
   });
 });

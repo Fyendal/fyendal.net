@@ -444,7 +444,7 @@ export function GameBoard() {
   });
   // idle-opponent prompt: no messages flow while the opponent is idle, so a
   // slow local tick re-evaluates their last-activity stamp
-  const { now, dismissedFor: idleDismissedFor, dismiss: dismissIdleVictory } =
+  const { now, snoozedUntil: idleSnoozedUntil, snooze: snoozeIdleVictory } =
     useIdleVictoryPrompt();
   const derived = useMemo(
     () => deriveBoardLegalState(actionCandidates, legal, roomCommandPending),
@@ -837,7 +837,8 @@ export function GameBoard() {
     waitingOnOpponent: waitingOnOpp,
     opponentLastAction: oppLastAction,
     opponentIdleMs: oppIdleMs,
-    dismissedFor: idleDismissedFor,
+    now,
+    snoozedUntil: idleSnoozedUntil,
   });
 
   /** Short authoritative UI label projected for one of a source's abilities. */
@@ -1997,11 +1998,9 @@ export function GameBoard() {
         showIdleVictory={showIdleToast}
         opponentHeroName={opp.heroName}
         opponentIdleMs={oppIdleMs}
-        onClaimVictory={() => {
-          claimVictory();
-          dismissIdleVictory(oppLastAction);
-        }}
-        onDismissIdleVictory={() => dismissIdleVictory(oppLastAction)}
+        idleVictoryClaimPending={roomCommandPending}
+        onClaimVictory={claimVictory}
+        onDismissIdleVictory={snoozeIdleVictory}
         gameView={view}
         spectating={spectating}
         replaying={replaying}

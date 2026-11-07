@@ -55,6 +55,28 @@ function revealInstantEquipment(effect: (ctx: ScriptCtx) => void): CardScript {
   };
 }
 
+const SERENADE_MODES = [
+  { id: 1, name: "Embodiment", text: "Create an Embodiment of Lightning token", message: "card.ast.option.embodiment" },
+  { id: 2, name: "Search Skyzyk", text: "Search your deck for a Skyzyk", message: "card.ast.option.skyzyk" },
+  { id: 3, name: "Next attack +1", text: "Your next attack this turn gets +1{p}", message: "card.ast.option.attack" },
+] as const;
+
+type SerenadeMode = (typeof SERENADE_MODES)[number];
+
+function serenadeOption(mode: SerenadeMode): string {
+  return `${mode.id}: ${mode.name}`;
+}
+
+function serenadeOptionMessages() {
+  return Object.fromEntries(SERENADE_MODES.map((mode) => [serenadeOption(mode), decisionMessage(mode.message)]));
+}
+
+function serenadeModes(first: unknown, second: unknown): [SerenadeMode, SerenadeMode] | undefined {
+  const a = SERENADE_MODES.find((mode) => mode.id === first);
+  const b = SERENADE_MODES.find((mode) => mode.id === second);
+  return a && b ? [a, b] : undefined;
+}
+
 function applySerenadeChoices(ctx: ScriptCtx, choices: number[]): void {
   if (choices.includes(1)) ctx.createToken(LIGHTNING);
   if (choices.includes(3)) buffNextAttack(ctx, { attack: 1 });
@@ -152,14 +174,25 @@ export const ast: Record<string, CardScript> = {
       ctx.requestChoice(
         "serenade-first",
         decisionPrompt("Skyward Serenade: choose the first mode", "card.ast.serenade.mode.first", {
-          optionMessages: {
-            "1: Embodiment": decisionMessage("card.ast.option.embodiment"),
-            "2: Search Skyzyk": decisionMessage("card.ast.option.skyzyk"),
-            "3: Next attack +1": decisionMessage("card.ast.option.attack"),
-          },
+          optionMessages: serenadeOptionMessages(),
         }),
-        ["1: Embodiment", "2: Search Skyzyk", "3: Next attack +1"],
+        SERENADE_MODES.map(serenadeOption),
       );
+    },
+    stackLabel(card) {
+      const modes = serenadeModes(card.scriptState?.serenadeFirst, card.scriptState?.serenadeSecond);
+      if (!modes) return undefined;
+      return {
+        label: `Skyward Serenade: ${modes[0].text}; ${modes[1].text}`,
+        labelMessage: {
+          id: "card.ast.serenade.stack",
+          values: {
+            card: { kind: "card", cardId: card.cardId },
+            first: { kind: "term", id: modes[0].message },
+            second: { kind: "term", id: modes[1].message },
+          },
+        },
+      };
     },
     onPlay(ctx) {
       applySerenadeChoices(ctx, [ctx.getState("serenadeFirst"), ctx.getState("serenadeSecond")]);
@@ -171,18 +204,24 @@ export const ast: Record<string, CardScript> = {
         ctx.requestChoice(
           "serenade-second",
           decisionPrompt("Skyward Serenade: choose a different second mode", "card.ast.serenade.mode.second", {
-            optionMessages: {
-              "1: Embodiment": decisionMessage("card.ast.option.embodiment"),
-              "2: Search Skyzyk": decisionMessage("card.ast.option.skyzyk"),
-              "3: Next attack +1": decisionMessage("card.ast.option.attack"),
-            },
+            optionMessages: serenadeOptionMessages(),
           }),
-          [1, 2, 3]
-            .filter((mode) => mode !== first)
-            .map((mode) => `${mode}: ${mode === 1 ? "Embodiment" : mode === 2 ? "Search Skyzyk" : "Next attack +1"}`),
+          SERENADE_MODES.filter((mode) => mode.id !== first).map(serenadeOption),
         );
       } else if (hook === "serenade-second") {
         ctx.setState("serenadeSecond", Number(option[0]));
+        const modes = serenadeModes(ctx.getState("serenadeFirst"), ctx.getState("serenadeSecond"));
+        if (modes)
+          ctx.logPublic(localizedCardLog(
+            ctx,
+            `${ctx.cardData(ctx.player(ctx.seat).heroCardId).name} chooses ${modes[0].name} and ${modes[1].name} for ${ctx.data.name}`,
+            "card.log.ast.serenade.modes.chosen",
+            {
+              player: { kind: "player", seat: ctx.seat },
+              first: { kind: "term", id: modes[0].message },
+              second: { kind: "term", id: modes[1].message },
+            },
+          ));
       } else if (hook === "serenade-skyzyk") {
         const id = Number(option);
         const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === id);

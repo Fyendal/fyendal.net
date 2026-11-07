@@ -21,6 +21,7 @@ export function BoardOverlays({
   showIdleVictory,
   opponentHeroName,
   opponentIdleMs,
+  idleVictoryClaimPending,
   onClaimVictory,
   onDismissIdleVictory,
   gameView,
@@ -57,6 +58,7 @@ export function BoardOverlays({
   showIdleVictory: boolean;
   opponentHeroName: string;
   opponentIdleMs: number;
+  idleVictoryClaimPending: boolean;
   onClaimVictory: () => void;
   onDismissIdleVictory: () => void;
   gameView: GameView;
@@ -118,7 +120,7 @@ export function BoardOverlays({
               { hero: opponentHeroName, minutes: Math.floor(opponentIdleMs / 60_000) },
             )}
           </span>
-          <button className="btn-primary" onClick={onClaimVictory}>
+          <button className="btn-primary" disabled={idleVictoryClaimPending} onClick={onClaimVictory}>
             {intl.formatMessage({ id: "game.idle.claim" })}
           </button>
           <button className="linklike" onClick={onDismissIdleVictory}>

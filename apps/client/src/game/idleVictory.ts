@@ -7,7 +7,8 @@ export function shouldShowIdleVictoryClaim({
   waitingOnOpponent,
   opponentLastAction,
   opponentIdleMs,
-  dismissedFor,
+  now,
+  snoozedUntil,
 }: {
   botGame: boolean;
   replaying: boolean;
@@ -15,7 +16,8 @@ export function shouldShowIdleVictoryClaim({
   waitingOnOpponent: boolean;
   opponentLastAction: number;
   opponentIdleMs: number;
-  dismissedFor: number | null;
+  now: number;
+  snoozedUntil: number | null;
 }): boolean {
   return !botGame &&
     !replaying &&
@@ -23,5 +25,5 @@ export function shouldShowIdleVictoryClaim({
     waitingOnOpponent &&
     opponentLastAction > 0 &&
     opponentIdleMs >= IDLE_VICTORY_MS &&
-    dismissedFor !== opponentLastAction;
+    (snoozedUntil === null || now >= snoozedUntil);
 }

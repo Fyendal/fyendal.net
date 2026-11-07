@@ -869,11 +869,16 @@ function projectedStackLayers(
       layer.triggerSource ??
       null;
     const secret = !revealAll && !layer.card && !!card?.faceDown && card.owner !== seat;
-    const labelMessage = secret ? undefined : triggerLabelMessage(state, layer);
+    const declared = layer.card
+      ? scriptOf(state, layer.card.cardId, layer.card)?.stackLabel?.(layer.card)
+      : undefined;
+    const labelMessage = secret
+      ? undefined
+      : declared ? declared.labelMessage : triggerLabelMessage(state, layer);
     return {
       card: card && !secret ? cardView(state, runtime, card) : null,
       seat: layer.seat,
-      label: layer.label,
+      label: declared?.label ?? layer.label,
       ...(labelMessage ? { labelMessage } : {}),
       optional: layer.optional,
       ...(layer.triggerCount !== undefined && layer.triggerCount > 1

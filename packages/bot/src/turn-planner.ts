@@ -9,7 +9,13 @@ import {
   heldCardValue,
   type HeroRulesFactory,
 } from "./hand-value.js";
-import { strategicPitchIntents, type BotPolicyInput } from "./policy.js";
+import {
+  isOpeningTurn,
+  ownCards,
+  spendsOpeningArsenalReserve,
+  strategicPitchIntents,
+  type BotPolicyInput,
+} from "./policy.js";
 import { reserveLethalUpkeep } from "./upkeep.js";
 
 export const DEFAULT_MAX_SEARCH_NODES = 64;
@@ -620,6 +626,12 @@ function evaluateHorizon<Evaluation extends TurnEvaluation>(
     : context.config.evaluateEnd(state, input, context.root, false);
 }
 
+function keepOpeningArsenalReserve(candidates: GameIntent[], input: BotPolicyInput): GameIntent[] {
+  const own = ownCards(input);
+  const reserving = candidates.filter((intent) => !spendsOpeningArsenalReserve(intent, input, own));
+  return reserving.length > 0 ? reserving : candidates;
+}
+
 function plannerCandidates<Evaluation extends TurnEvaluation>(
   input: BotPolicyInput,
   context: SearchContext<Evaluation>,
@@ -632,12 +644,13 @@ function plannerCandidates<Evaluation extends TurnEvaluation>(
     intent.kind !== "concede" && intent.kind !== "stage-defenders" &&
     !intent.kind.endsWith("-draw")
   );
-  const strategic = strategicPitchIntents(
+  const pitched = strategicPitchIntents(
     generated,
     context.config.comparePitchOrder
       ? (left, right) => context.config.comparePitchOrder!(left, right, input)
       : undefined,
   );
+  const strategic = isOpeningTurn(input) ? keepOpeningArsenalReserve(pitched, input) : pitched;
   const requested = context.config.prepareCandidates?.(
     strategic,
     input,

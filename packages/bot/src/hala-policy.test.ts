@@ -499,6 +499,79 @@ describe("Hala policy", () => {
       state.log.map((entry) => entry.publicText).join("\n")).toHaveLength(2);
   });
 
+  it("searches pitching Olé rather than And Again for a sharpened Zenith swing", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9345,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["MPW028", "MPW046"]);
+    const [andAgain, ole] = state.players[0]!.hand;
+    state.players[0]!.hero.tapped = true;
+    const blade = state.players[0]!.weapons[0]!;
+    blade.counters = { power: 1 };
+    blade.scriptState = { sharpenedTurn: state.turn };
+
+    const decision = chooseHalaIntentWithTrace({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal: legalIntents(state, 0),
+      cards: cardData,
+      state,
+    });
+    // Pitching Olé keeps And Again for a second sharpened swing.
+    const olePitch = decision.plan?.rootResults.find((result) =>
+      result.intent.kind === "activate-ability" &&
+      result.intent.sourceInstanceId === blade.instanceId &&
+      result.intent.pitchInstanceIds?.[0] === ole!.instanceId
+    );
+    expect(olePitch?.evaluation).toMatchObject({ complete: true, damage: 8 });
+    expect(decision.plan?.rootResults.some((result) =>
+      result.intent.kind === "activate-ability" &&
+      result.intent.pitchInstanceIds?.[0] === andAgain!.instanceId
+    )).toBe(true);
+    expect(decision.intent.kind).toBe("activate-ability");
+  });
+
+  it("defends a weapon attack with Blunten to discard the attacker's last card", () => {
+    let state = createGame({
+      decklists: [halaDeck(), halaDeck()],
+      cards: cardData,
+      scripts,
+      seed: 9346,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["MPW046", "SEA226"]);
+    replaceHand(state, 1, ["PEN049", "HNT117", "MPW105", "MPW121"]);
+    const blunten = state.players[1]!.hand[0]!;
+    const attacker = state.players[0]!;
+    attacker.hero.tapped = true;
+    const blade = attacker.weapons[0]!;
+    blade.counters = { power: 1 };
+    blade.scriptState = { sharpenedTurn: state.turn };
+    const swing = legalIntents(state, 0).find((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === blade.instanceId &&
+      intent.pitchInstanceIds?.includes(attacker.hand[0]!.instanceId)
+    );
+    if (!swing) throw new Error("Zenith Blade cannot attack");
+    state = advanceUntil(apply(state, 0, swing), (current) =>
+      current.pendingDecision?.kind === "defend" && current.pendingDecision.player === 1
+    );
+
+    const intent = chooseHalaIntent({
+      seat: 1,
+      view: projectStateFor(state, 1),
+      legal: legalIntents(state, 1),
+      cards: cardData,
+      decklists: decklistsFromState(state, 1),
+    });
+    expect(intent).toMatchObject({ instanceIds: expect.arrayContaining([blunten.instanceId]) });
+  });
+
   it("pitches a blue so a Flurry turn can pay for both Zenith Blade attacks", () => {
     const state = createGame({
       decklists: [halaDeck(), decklists.dorinthea],
@@ -3189,6 +3262,38 @@ describe("Hala policy", () => {
       optional: false,
     });
     expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData })).toEqual({ kind: "pass" });
+  });
+
+  it("uses Ripple Away on Skyward Serenade only when its declared modes create a token", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9306,
+      startPlayer: 1,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["HVY209", "MPW046"]);
+    const view = projectStateFor(state, 0);
+    view.phase = "layer";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "priority-window", prompt: "Play an instant or pass" };
+    view.stack = [{
+      card: { instanceId: 9013, cardId: "AST023", owner: 1 },
+      seat: 1,
+      label: "Skyward Serenade: Search your deck for a Skyzyk; Your next attack this turn gets +1{p}",
+      optional: false,
+    }];
+    const rippleId = view.players[0].hand[0]!.instanceId;
+    const legal: GameIntent[] = [
+      { kind: "activate-ability", sourceInstanceId: rippleId, pitchInstanceIds: [] },
+      { kind: "pass" },
+    ];
+
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData })).toEqual({ kind: "pass" });
+    view.stack[0]!.label = "Skyward Serenade: Create an Embodiment of Lightning token; Search your deck for a Skyzyk";
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }))
+      .toMatchObject({ kind: "activate-ability", sourceInstanceId: rippleId });
   });
 
   it("keeps Ripple without a future Zenith resource, but spends it with Vigor", () => {
