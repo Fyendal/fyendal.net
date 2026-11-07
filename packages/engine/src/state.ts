@@ -54,6 +54,9 @@ export interface CardInstance {
   scriptState?: Record<string, number>;
   /** Public name chosen for an active name-prohibition effect. */
   chosenName?: string;
+  /** Opponent whose effect created this token; stats-only credit for the
+   *  damage it later deals to its own controller (Bloodrot Pox). */
+  creatorSeat?: number;
   /** Extra zones this card may be played from, granted by an effect (e.g. a
    *  searched card banished face up with "you may play it this turn").
    *  Cleared at end of turn. */

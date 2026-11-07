@@ -322,7 +322,7 @@ function validateCounters(value: unknown, code: string, path: string): void {
 }
 
 const CARD_REQUIRED = ["instanceId", "cardId", "owner"] as const satisfies readonly (keyof CardInstance)[];
-const CARD_OPTIONAL = ["subcards", "pitchCount", "faceDown", "intimidated", "returnToHandAtTurn", "tapped", "defCounters", "counters", "lastKnownCounters", "scriptState", "chosenName", "playableFrom", "playableFromSourceCardId", "playableFromSingleUseGroup", "playableBySeat", "playableFromExpiry", "playableFromEndTurnExpiry", "playableFromUntilStartOfSeatTurn", "playableFromUntilEndOfSeatTurn", "playableFromGrantedTurn", "playableFromUntilChainClose", "playCostReduction", "playCostReductionSeat", "playTargetInstanceId", "boundToInstanceId", "grantedTypes", "grantedColor", "grantedNames", "originalHeroCardId", "temporaryHeroOriginalCardId", "temporaryHeroUntilTurn", "grantedBaseAbilitiesCardId", "grantedBaseAbilitiesCardIds", "copyOriginalCardId", "grantedKeywords", "suppressedKeywords", "tempPower", "basePowerOverride", "basePowerDoublings", "basePowerHalvingsRoundDown", "basePowerHalvingsRoundUp", "tempDefense", "temporaryAlly", "meldSide", "attackTargetIds", "life", "damagePrevented", "flipped", "arsenalSlot", "temporaryGraveyardReplacement", "playableAsInstant"] as const satisfies readonly (keyof CardInstance)[];
+const CARD_OPTIONAL = ["subcards", "pitchCount", "faceDown", "intimidated", "returnToHandAtTurn", "tapped", "defCounters", "counters", "lastKnownCounters", "scriptState", "chosenName", "creatorSeat", "playableFrom", "playableFromSourceCardId", "playableFromSingleUseGroup", "playableBySeat", "playableFromExpiry", "playableFromEndTurnExpiry", "playableFromUntilStartOfSeatTurn", "playableFromUntilEndOfSeatTurn", "playableFromGrantedTurn", "playableFromUntilChainClose", "playCostReduction", "playCostReductionSeat", "playTargetInstanceId", "boundToInstanceId", "grantedTypes", "grantedColor", "grantedNames", "originalHeroCardId", "temporaryHeroOriginalCardId", "temporaryHeroUntilTurn", "grantedBaseAbilitiesCardId", "grantedBaseAbilitiesCardIds", "copyOriginalCardId", "grantedKeywords", "suppressedKeywords", "tempPower", "basePowerOverride", "basePowerDoublings", "basePowerHalvingsRoundDown", "basePowerHalvingsRoundUp", "tempDefense", "temporaryAlly", "meldSide", "attackTargetIds", "life", "damagePrevented", "flipped", "arsenalSlot", "temporaryGraveyardReplacement", "playableAsInstant"] as const satisfies readonly (keyof CardInstance)[];
 type _CardValidatorIsExhaustive = Assert<
   SameKeys<CardInstance, Record<(typeof CARD_REQUIRED)[number] | (typeof CARD_OPTIONAL)[number], unknown>>
 >;
@@ -341,7 +341,7 @@ function validateCard(value: unknown, code: string, path: string, depth = 0): vo
   optional(card, "pitchCount", (v, p) => {
     if (integer(v, code, p) < 0) fail(code, p, "expected a non-negative safe integer");
   }, path);
-  for (const key of ["returnToHandAtTurn", "defCounters", "playableBySeat", "playableFromExpiry", "playableFromEndTurnExpiry", "playableFromUntilStartOfSeatTurn", "playableFromUntilEndOfSeatTurn", "playableFromGrantedTurn", "playCostReduction", "playCostReductionSeat", "playTargetInstanceId", "boundToInstanceId", "temporaryHeroUntilTurn", "tempPower", "tempDefense", "life", "arsenalSlot"] as const) optional(card, key, (v, p) => { integer(v, code, p); }, path);
+  for (const key of ["returnToHandAtTurn", "defCounters", "creatorSeat", "playableBySeat", "playableFromExpiry", "playableFromEndTurnExpiry", "playableFromUntilStartOfSeatTurn", "playableFromUntilEndOfSeatTurn", "playableFromGrantedTurn", "playCostReduction", "playCostReductionSeat", "playTargetInstanceId", "boundToInstanceId", "temporaryHeroUntilTurn", "tempPower", "tempDefense", "life", "arsenalSlot"] as const) optional(card, key, (v, p) => { integer(v, code, p); }, path);
   optional(card, "counters", (v, p) => validateCounters(v, code, p), path);
   optional(card, "lastKnownCounters", (v, p) => validateCounters(v, code, p), path);
   optional(card, "scriptState", (v, p) => validateFlags(v, code, p, true), path);
@@ -1098,7 +1098,7 @@ function validateState(value: unknown, code: string): PersistedGameStateV1 {
       const turnPath = `${statsPath}.turns[${index}]`;
       const turn = exact(turnValue, code, turnPath, [
         "turn", "activePlayer", "attacks", "threatened", "blocked", "damageDealt",
-      ], ["allyAbsorbed", "lifeGained", "lifeLost"]);
+      ], ["allyAbsorbed", "lifeGained", "lifeLost", "cardsDisrupted"]);
       integer(turn.turn, code, `${turnPath}.turn`);
       const activePlayer = integer(turn.activePlayer, code, `${turnPath}.activePlayer`);
       if (activePlayer !== 0 && activePlayer !== 1) fail(code, `${turnPath}.activePlayer`, "expected seat 0 or 1");
@@ -1110,7 +1110,7 @@ function validateState(value: unknown, code: string): PersistedGameStateV1 {
           if (count < 0) fail(code, `${turnPath}.${key}[${seatIndex}]`, "expected a non-negative integer");
         });
       }
-      for (const key of ["allyAbsorbed", "lifeGained", "lifeLost"] as const) {
+      for (const key of ["allyAbsorbed", "lifeGained", "lifeLost", "cardsDisrupted"] as const) {
         optional(turn, key, (value, valuePath) => {
           const values = array(value, code, valuePath, 2);
           if (values.length !== 2) fail(code, valuePath, "expected two seat values");

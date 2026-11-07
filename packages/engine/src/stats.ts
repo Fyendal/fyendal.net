@@ -1,5 +1,6 @@
 import type { GameStateInternal } from "./runtimeState.js";
-import type { PlayerState } from "./state.js";
+import type { CardInstance, PlayerState } from "./state.js";
+import { dataOf } from "./cardProperties.js";
 import type { GameTurnStatsView } from "@fyendal/shared";
 
 function addForSeat(values: [number, number], seat: number, amount: number): void {
@@ -21,9 +22,28 @@ export function beginStatsTurn(state: GameStateInternal): GameTurnStatsView {
     allyAbsorbed: [0, 0],
     lifeGained: [0, 0],
     lifeLost: [0, 0],
+    cardsDisrupted: [0, 0],
   };
   state.gameStats.turns.push(row);
   return row;
+}
+
+/** Zones a card can be taken from by an opponent's effect for disruption stats. */
+const DISRUPTED_ZONES: ReadonlySet<string> = new Set(["hand", "arsenal", "arena", "chain"]);
+
+/** An opponent's effect destroyed, discarded, or banished this card; tokens
+ * and the owner's own removals are not disruption. */
+export function recordDisruption(
+  state: GameStateInternal,
+  causedBySeat: number | undefined,
+  card: CardInstance,
+  from: string,
+): void {
+  if (causedBySeat === undefined || causedBySeat === card.owner) return;
+  if (!DISRUPTED_ZONES.has(from) || dataOf(state, card.cardId).cardType === "token") return;
+  const row = beginStatsTurn(state);
+  row.cardsDisrupted ??= [0, 0];
+  addForSeat(row.cardsDisrupted, causedBySeat, 1);
 }
 
 export function recordAttackStats(

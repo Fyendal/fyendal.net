@@ -131,6 +131,7 @@ function createTokenBatchRaw(
   );
   if (tokens.length === 0) return tokens;
   if (cause.creatorSeat !== undefined && cause.creatorSeat !== player.seat) {
+    for (const token of tokens) token.creatorSeat = cause.creatorSeat;
     fireFriendlyCreatesOpponentTokens(state, runtime, cause.creatorSeat, tokens);
   }
   runtime.events.queueTriggeredEvent(

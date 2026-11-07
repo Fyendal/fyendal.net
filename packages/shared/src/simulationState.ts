@@ -22,6 +22,7 @@ export interface PersistedCardInstanceV1 {
   lastKnownCounters?: CardCounters;
   scriptState?: Record<string, number>;
   chosenName?: string;
+  creatorSeat?: number;
   playableFrom?: ("banish" | "graveyard" | "deck")[];
   playableFromSourceCardId?: string;
   playableFromSingleUseGroup?: string;
@@ -556,6 +557,7 @@ export interface PersistedGameTurnStatsV1 {
   allyAbsorbed?: [number, number];
   lifeGained?: [number, number];
   lifeLost?: [number, number];
+  cardsDisrupted?: [number, number];
 }
 
 export interface PersistedGameStatsV1 {

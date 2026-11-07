@@ -198,6 +198,8 @@ describe("GameOver player statistics", () => {
     expect(html).toContain('role="tooltip">Opening turn (0) is excluded from per-turn averages.');
     expect(html).toContain('class="gameover-match-strip"');
     expect(html).not.toContain("Opponent final life");
+    expect(html).not.toContain("Disrupted</th>");
+    expect(html).toContain("Count disruption as 3 value per card");
     expect(html).not.toContain(">Attacks<");
     expect(html).toContain('title="Damage absorbed by allies">Allies</th>');
     expect(html).toContain("<td>0 (opening)</td>");

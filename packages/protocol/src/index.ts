@@ -1513,13 +1513,15 @@ function gameTurnStats(value: unknown): value is GameTurnStatsView {
   const stats = object(value);
   return !!stats && exactKeys(stats, [
     "turn", "activePlayer", "attacks", "threatened", "blocked", "damageDealt", "allyAbsorbed", "lifeGained", "lifeLost",
+    "cardsDisrupted",
   ], ["turn", "activePlayer", "attacks", "threatened", "blocked", "damageDealt"])
     && nonNegativeInteger(stats.turn) && seat(stats.activePlayer)
     && seatCounters(stats.attacks) && seatCounters(stats.threatened)
     && seatCounters(stats.blocked) && seatCounters(stats.damageDealt)
     && (stats.allyAbsorbed === undefined || seatCounters(stats.allyAbsorbed))
     && (stats.lifeGained === undefined || seatCounters(stats.lifeGained))
-    && (stats.lifeLost === undefined || seatCounters(stats.lifeLost));
+    && (stats.lifeLost === undefined || seatCounters(stats.lifeLost))
+    && (stats.cardsDisrupted === undefined || seatCounters(stats.cardsDisrupted));
 }
 
 function gameStats(value: unknown): value is GameStatsView {

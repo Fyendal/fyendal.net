@@ -661,6 +661,9 @@ export interface GameTurnStatsView {
   /** Life gained and non-damage life lost, for end-game value. Absent in older games. */
   lifeGained?: [number, number];
   lifeLost?: [number, number];
+  /** Opponent cards this seat destroyed, discarded, or banished from hand,
+   * arsenal, the arena, or the combat chain. Absent in older games. */
+  cardsDisrupted?: [number, number];
 }
 
 export interface GameStatsView {

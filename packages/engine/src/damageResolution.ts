@@ -14,7 +14,9 @@ import {
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, Modifier, PendingArcane, PlayerState, StackLayer } from "./state.js";
-import { recordAllyAbsorbed, recordDamageTakenFromTypes, recordEffectThreat, recordHeroDamage, recordLifeGained } from "./stats.js";
+import {
+  recordAllyAbsorbed, recordDamageTakenFromTypes, recordEffectThreat, recordHeroDamage, recordLifeGained, recordLifeLost,
+} from "./stats.js";
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { createTokenFor, createTokensFor } from "./tokens.js";
 import { destroyPermanent, fireLeaveCombatChain, moveToGraveyard } from "./zoneMoves.js";
@@ -457,6 +459,19 @@ function effectSourceIsAlly(
     (!!source && (dataOf(state, source.card.cardId).subtypes ?? []).includes("ally"));
 }
 
+/** Seat credited with hero effect damage in match stats: the source's
+ * controller, or the opponent whose token damages its own controller. */
+function statsCreditSeat(
+  state: GameStateInternal,
+  packet: PendingArcane,
+  source: ReturnType<typeof findCardAnywhere>,
+): number | undefined {
+  if (effectSourceIsAlly(state, packet, source)) return undefined;
+  if (packet.targetSeat !== packet.sourceSeat) return packet.sourceSeat;
+  const creator = (source?.card ?? packet.sourceSnapshot)?.creatorSeat;
+  return creator !== undefined && creator !== packet.targetSeat ? creator : undefined;
+}
+
 /** Complete a "source deals damage, then destroy it" effect. Permanents leave
  * the arena normally; attack action cards on an earlier chain link retain
  * last-known link information while the physical card goes to graveyard.
@@ -606,9 +621,9 @@ function applyEffectDamage(state: GameStateInternal,
     target.flags.lostLifeThisTurn = true;
     noteEffectDamageDealer(state, packet, found, true);
     if (found) recordDamageTakenFromTypes(target, cardTypesOf(state, found.card), packet.amount);
-    if (packet.targetSeat !== packet.sourceSeat && !effectSourceIsAlly(state, packet, found)) {
-      recordHeroDamage(state, packet.sourceSeat, packet.amount);
-    }
+    const credit = statsCreditSeat(state, packet, found);
+    if (credit !== undefined) recordHeroDamage(state, credit, packet.amount);
+    else if (packet.targetSeat === packet.sourceSeat) recordLifeLost(state, packet.targetSeat, packet.amount);
     target.flags.damageTakenThisTurn = true;
     if (packet.arcane) {
       target.flags.arcaneDamageTakenThisTurn = true;
@@ -1663,13 +1678,8 @@ export function dealEffectDamage(state: GameStateInternal,
   applyBoundArcaneCardBonus(state, packet);
   applyArcaneAmp(state, packet);
   packet.amount += effectDamageBonus(state, packet);
-  const sourceLocation = findCardAnywhere(state, packet.sourceInstanceId);
-  if (
-    packet.targetSeat !== packet.sourceSeat &&
-    !effectSourceIsAlly(state, packet, sourceLocation)
-  ) {
-    recordEffectThreat(state, packet.sourceSeat, packet.amount);
-  }
+  const credit = statsCreditSeat(state, packet, findCardAnywhere(state, packet.sourceInstanceId));
+  if (credit !== undefined) recordEffectThreat(state, credit, packet.amount);
   return beginHeroDamage(state, runtime, packet);
 }
 

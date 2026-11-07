@@ -32696,6 +32696,12 @@
       "value": "Detalhamento por rodada"
     }
   ],
+  "game.stats.cardsDisrupted": [
+    {
+      "type": 0,
+      "value": "Cartas do oponente removidas por disrupção"
+    }
+  ],
   "game.stats.damageBlocked": [
     {
       "type": 0,
@@ -32738,10 +32744,30 @@
       "value": "Causado"
     }
   ],
+  "game.stats.disrupted": [
+    {
+      "type": 0,
+      "value": "Disrupção"
+    }
+  ],
   "game.stats.finalLife": [
     {
       "type": 0,
       "value": "Vida final"
+    }
+  ],
+  "game.stats.includeDisruption": [
+    {
+      "type": 0,
+      "value": "Contar disrupção como "
+    },
+    {
+      "type": 1,
+      "value": "value"
+    },
+    {
+      "type": 0,
+      "value": " de valor por carta"
     }
   ],
   "game.stats.lifeGained": [

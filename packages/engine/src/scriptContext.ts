@@ -1,5 +1,5 @@
 import type { EngineRuntime } from "./runtimePorts.js";
-import { recordLifeLost } from "./stats.js";
+import { recordDisruption, recordLifeLost } from "./stats.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { EquipmentSlot, GameLogPayload } from "@fyendal/shared";
 import type {
@@ -1074,6 +1074,7 @@ export function makeCtx(
         seat,
         deckMoveEffectSource(),
       );
+      if (from === "effect") recordDisruption(state, seat, found.card, found.fromZone);
       if (found.fromArena) runtime.commands.fireLeaveArena(state, found.owner.seat, found.card, "graveyard");
       return true;
     },
