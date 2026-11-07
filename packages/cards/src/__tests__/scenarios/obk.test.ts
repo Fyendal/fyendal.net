@@ -602,6 +602,7 @@ describe("Outbreak cards", () => {
   const EXTINCTION = "extinction level event|1";
   const SWAP_SPIT = "swap spit|1";
   const BLUE = "raging onslaught|3";
+  const CHANGE_OF_MIND = "change of mind|3";
 
   describe("Bootlegger Bust-Up", () => {
     const boosted = (deckTop: string) => {
@@ -627,6 +628,33 @@ describe("Outbreak cards", () => {
       ] });
       game.play(BOOTLEGGER, { boostCount: 0 }).expectAttackValue(6);
       game.expectDeckTop(0, FILLER);
+    });
+
+    const minBoost = (deck: string[]) => scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: MIN,
+        hand: [BOOTLEGGER, CHANGE_OF_MIND],
+        deck,
+        resources: 3,
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    it("re-reads banished cards' classes when Min flips after boosting", () => {
+      const game = minBoost([FILLER]).play(BOOTLEGGER, { boost: true, settle: false }).react(CHANGE_OF_MIND);
+      expect(heroName(game, 0)).toBe("Min, Mad");
+      game.expectAttackValue(10).blockWith().settle().expectLife(1, 10).expectAP(0, 1);
+    });
+
+    it("loses the bonus when a flip makes the banished card Mechanologist", () => {
+      const game = minBoost(Array<string>(8).fill(BLUE)).endTurn().endTurn();
+      expect(heroName(game, 0)).toBe("Min, Mad");
+      game.play(BOOTLEGGER, { boost: true, settle: false, pitch: [BLUE] }).react(CHANGE_OF_MIND);
+      expect(heroName(game, 0)).toBe("Min, Genius");
+      game.expectAttackValue(6).blockWith().settle().expectLife(1, 14).expectAP(0, 0);
     });
 
     it.each([

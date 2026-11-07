@@ -3625,6 +3625,7 @@
   "engine.effect.part.attack": "{attack} 力量",
   "engine.effect.part.attack.base.power": "+X 力量，X 为其基础力量",
   "engine.effect.part.attack.lightly.defended": "被少于 {defenders} 张非装备牌防御时 {attack} 力量",
+  "engine.effect.part.attack.intimidated.at.least": "若你本回合已 intimidate {count} 次或更多，则 {attack} 力量",
   "engine.effect.part.piercing": "穿透 (piercing) {piercing}",
   "engine.effect.part.defense": "{defense} 防御",
   "engine.effect.part.base.attack": "基础力量为 {basePower}",

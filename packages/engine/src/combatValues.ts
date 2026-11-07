@@ -286,6 +286,34 @@ export function chainLinkNumber(
   return index < 0 ? state.chain.length : index + 1;
 }
 
+/** Attack scriptState key per card its own Boost banished; the value is the
+ * bonus at banish time, kept as last-known information. */
+export const BOOST_BANISHED_PREFIX = "boostBanished:";
+
+/** `boostBanishPowerBonus` is continuous: re-read each card while it is
+ * still the banished object, else use its recorded value. */
+function boostBanishBonus(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  card: CardInstance,
+): number {
+  const hook = scriptOf(state, card.cardId, card)?.boostBanishPowerBonus;
+  if (!card.scriptState || !hook) return 0;
+  const booster = state.players[seat] as PlayerState;
+  let total = 0;
+  for (const [key, snapshot] of Object.entries(card.scriptState)) {
+    if (!key.startsWith(BOOST_BANISHED_PREFIX)) continue;
+    const instanceId = Number(key.slice(BOOST_BANISHED_PREFIX.length));
+    const stillBanished = booster.flags[`banishedFromBoost:${instanceId}`] === true;
+    const banished = stillBanished
+      ? state.players.flatMap((player) => player.banish).find((candidate) => candidate.instanceId === instanceId)
+      : undefined;
+    total += banished ? hook(runtime.makeCtx(state, seat, card), banished) : snapshot;
+  }
+  return total;
+}
+
 export function conditionalAttackBonus(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -297,7 +325,9 @@ export function conditionalAttackBonus(
   const suppressOwn =
     link.attackCardType === "action" &&
     state.players.some((candidate) => candidate.flags.suppressAttackPowerEffectGains === true);
-  const own = suppressOwn ? 0 : script?.modifyAttack?.(runtime.makeCtx(state, seat, card, link)) ?? 0;
+  const own = suppressOwn
+    ? 0
+    : (script?.modifyAttack?.(runtime.makeCtx(state, seat, card, link)) ?? 0) + boostBanishBonus(state, runtime, seat, card);
   const inherited = [
     ...(card.grantedBaseAbilitiesCardId ? [card.grantedBaseAbilitiesCardId] : []),
     ...(card.grantedBaseAbilitiesCardIds ?? []),
@@ -419,6 +449,10 @@ function attackValueAdjustments(
     if (
       modifier.defendedLessThanNonEquip !== undefined &&
       link.defendingCards.length >= modifier.defendedLessThanNonEquip
+    ) continue;
+    if (
+      modifier.intimidatedAtLeastThisTurn !== undefined &&
+      (Number(state.players[modifier.seat]?.flags.intimidateCountThisTurn) || 0) < modifier.intimidatedAtLeastThisTurn
     ) continue;
     if (modifier.attack) {
       add(findCardAnywhere(state, modifier.sourceInstanceId)?.card, modifier.attack);

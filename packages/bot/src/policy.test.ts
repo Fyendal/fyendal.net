@@ -1295,6 +1295,25 @@ describe("projected defender defense", () => {
       ids.map((instanceId) => ({ instanceId, defense: 1, attack: 4 }));
     expect(score()).toMatchObject({ lethal: true, survives: false, stopsHit: false });
   });
+
+  it("does not reward surviving a lethal threat its own Piercing block creates", () => {
+    const fixture = cycleDefenseFixture([{ id: "PIERCED_BLOCKER", attack: 1, defense: 1 }], { attackValue: 1, life: 2 });
+    const [blocker] = fixture.held;
+    const score = (instanceIds: number[]) => scoreDefenseIntentWithTrace(
+      { kind: "defend", instanceIds },
+      fixture.input,
+      fixture.own,
+      fixture.model,
+    );
+    fixture.input.view.pendingDecision!.defenderDefense = [{ instanceId: blocker!.instanceId, defense: 1, attack: 2 }];
+    const pierced = score([blocker!.instanceId]);
+    expect(pierced).toMatchObject({ lethal: false, survives: true, stopsHit: false });
+    expect(pierced.score).toBeLessThan(score([]).score);
+
+    fixture.input.view.pendingDecision!.defenderDefense = [{ instanceId: blocker!.instanceId, defense: 1, attack: 3 }];
+    expect(score([blocker!.instanceId])).toMatchObject({ lethal: false, survives: false });
+    expect(score([blocker!.instanceId]).score).toBeLessThan(score([]).score);
+  });
 });
 
 describe("planned prevention", () => {

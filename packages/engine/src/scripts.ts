@@ -1647,7 +1647,8 @@ export interface CardScript {
   onBoosted?(ctx: ScriptCtx, boosted: DeepReadonly<CardInstance>, banished: DeepReadonly<CardInstance>): void;
   /** Power this attack card gains when one of its own Boost costs banishes
    * `banished` ("+N for each … card banished from boosting this"). Replaced
-   * Boost movements banish nothing and are not consulted. Must be pure. */
+   * Boost movements banish nothing and are not consulted. Re-evaluated
+   * continuously while `banished` stays in banish. Must be pure. */
   boostBanishPowerBonus?(ctx: ScriptCtx, banished: DeepReadonly<CardInstance>): number;
   /** Number of separate Boost abilities printed on this card. Defaults to 1
    * when the card has the Boost keyword. */

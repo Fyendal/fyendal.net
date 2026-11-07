@@ -708,6 +708,8 @@ export interface Modifier {
   onPreventCreateToken?: string;
   /** attack bonus applies only while defended by fewer than N non-equipment cards (Barraging Beatdown) */
   defendedLessThanNonEquip?: number;
+  /** attack bonus applies only while the modifier seat has intimidated at least N times this turn (Smell Fear) */
+  intimidatedAtLeastThisTurn?: number;
   appliesTo?: "any" | "attack" | "weapon" | "sword" | "attack-action";
   /** `attack` also changes matching cards' {p} while they defend ("while
    *  attacking and defending"). */

@@ -1634,10 +1634,13 @@ export function scoreDefenseIntentWithTrace(
   // spend after blocks. Direct damage ignores blocks, so it lowers the life
   // the combat damage must stay under instead; when it alone is lethal no
   // block matters, so plan for the attacker not using it.
-  const threatenedCombat = Math.max(incoming, threatenedCombatDamage(input, chosen.length > 0) + pump, 0);
+  const publicThreat = threatenedCombatDamage(input, chosen.length > 0);
+  const threatenedCombat = Math.max(incoming, publicThreat + pump, 0);
   const directDamage = publicCombatThreat(input).directDamage;
   const survivableLife = directDamage >= me.life ? me.life : me.life - directDamage;
-  const lethal = threatenedCombat >= survivableLife;
+  // Judged before the block's own power change, or a Piercing block would
+  // manufacture a lethal attack and earn the survival bonus for weathering it.
+  const lethal = Math.max(0, link.damage, publicThreat) >= survivableLife;
   if (model.canUseDefender && chosen.some((card) => !model.canUseDefender!(card, input))) {
     return {
       score: -1_000_000,
@@ -1974,6 +1977,10 @@ export function scoreDefenseIntentWithTrace(
     // prices the life kept against the offense held.
     const score = 100_000 + value.total - (strandsEndPhase ? STRANDED_END_PHASE_PENALTY : 0);
     return { score, value, eligible: true, lethal, survives, stopsHit, ...cycleTrace };
+  }
+  // The block's own power change made a survivable attack lethal.
+  if (!survives) {
+    return { score: -100_000 + value.total, value, eligible: true, lethal, survives, stopsHit, ...cycleTrace };
   }
 
   // Both players draw back up after the first turn, so maximize prevention

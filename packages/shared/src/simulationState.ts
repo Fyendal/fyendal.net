@@ -315,6 +315,7 @@ export interface PersistedModifierV1 {
   onDamageDealtCreateTokenPerPoint?: string;
   onPreventCreateToken?: string;
   defendedLessThanNonEquip?: number;
+  intimidatedAtLeastThisTurn?: number;
   appliesTo?: "any" | "attack" | "weapon" | "sword" | "attack-action";
   powerWhileDefending?: boolean;
   appliesToClass?: string;

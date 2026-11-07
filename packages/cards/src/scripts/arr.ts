@@ -44,11 +44,12 @@ function smellFear(amount: number): CardScript {
   return beatChest({
     onPlay(ctx) {
       if (ctx.getFlag("player", "beatenChestThisTurn") === true) queueIntimidate(ctx);
-      const resolved = Number(ctx.getFlag("player", "intimidateCountThisTurn")) || 0;
-      const pending = Number(ctx.getFlag("player", "pendingIntimidate")) || 0;
-      if (resolved + pending >= 2) {
-        buffNextAttack(ctx, { attack: amount, appliesTo: "attack", appliesToClass: "brute" });
-      }
+      buffNextAttack(ctx, {
+        attack: amount,
+        appliesTo: "attack",
+        appliesToClass: "brute",
+        intimidatedAtLeastThisTurn: 2,
+      });
     },
   });
 }

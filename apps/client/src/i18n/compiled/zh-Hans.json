@@ -20331,6 +20331,28 @@
       "value": " 点"
     }
   ],
+  "engine.effect.part.attack.intimidated.at.least": [
+    {
+      "type": 0,
+      "value": "若你本回合已 intimidate "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 次或更多，则 "
+    },
+    {
+      "type": 1,
+      "value": "attack"
+    },
+    {
+      "type": 0,
+      "value": " 力量"
+    }
+  ],
   "engine.effect.part.attack.lightly.defended": [
     {
       "type": 0,

@@ -22153,6 +22153,24 @@
       "value": " a mais"
     }
   ],
+  "engine.effect.part.attack.intimidated.at.least": [
+    {
+      "type": 1,
+      "value": "attack"
+    },
+    {
+      "type": 0,
+      "value": " de poder se você fez intimidate "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " ou mais vezes neste turno"
+    }
+  ],
   "engine.effect.part.attack.lightly.defended": [
     {
       "type": 1,

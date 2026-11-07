@@ -21292,6 +21292,24 @@
       "value": " more"
     }
   ],
+  "engine.effect.part.attack.intimidated.at.least": [
+    {
+      "type": 1,
+      "value": "attack"
+    },
+    {
+      "type": 0,
+      "value": " power if you've intimidated "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " or more times this turn"
+    }
+  ],
   "engine.effect.part.attack.lightly.defended": [
     {
       "type": 1,

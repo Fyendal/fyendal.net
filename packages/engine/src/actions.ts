@@ -41,6 +41,7 @@ import {
   removeFromArray,
 } from "./zoneQueries.js";
 import { closeChain } from "./combatChain.js";
+import { BOOST_BANISHED_PREFIX } from "./combatValues.js";
 import { finishReactionPlay, playReaction } from "./reactions.js";
 import { answerWagerLossReplacementOrder } from "./wagers.js";
 import {
@@ -527,11 +528,14 @@ export function finishPlayCard(
           // Per-object marker for "a card you've banished from boosting this
           // turn"; enterBanish clears it when the card becomes a new object.
           player.flags[`banishedFromBoost:${moved.instanceId}`] = true;
+          // Recorded even at 0: the bonus is re-read while the card stays banished.
           const banishPower = scriptOf(state, card.cardId, card)?.boostBanishPowerBonus?.(
             runtime.makeCtx(state, seat, card),
             moved,
-          ) ?? 0;
-          if (banishPower !== 0) card.tempPower = (card.tempPower ?? 0) + banishPower;
+          );
+          if (banishPower !== undefined) {
+            (card.scriptState ??= {})[`${BOOST_BANISHED_PREFIX}${moved.instanceId}`] = banishPower;
+          }
         }
         boosted = true;
         boostSucceeded = boostSucceeded ||

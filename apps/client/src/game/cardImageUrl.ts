@@ -50,6 +50,7 @@ const FABRARY_IMAGE_ID_OVERRIDES: Readonly<Record<string, string>> = {
   AMA004: "AMA004-RF",
   AMA005: "AMA005-RF",
   AMA006: "AMA006-RF",
+  AMG002: "AMG002-RF",
   AMO001: "AMO001-RF",
   AMO002: "AMO002-RF",
   AMO003: "AMO003-RF",
@@ -153,6 +154,8 @@ const FABRARY_IMAGE_ID_OVERRIDES: Readonly<Record<string, string>> = {
   ROS255: "ROS255-MV",
   ROS256: "ROS256-MV",
   ROS257: "AJV028",
+  SPW001: "SPW001-RF",
+  SPW003: "SPW003-RF",
 };
 
 /** Functionally identical token printings may have different art. Keep tokens
