@@ -38,6 +38,8 @@ export interface BoardPreview {
   badges?: readonly CardBadge[];
   /** Cards the previewed card creates, docked beside it. */
   created?: CreatedCardsPlacement;
+  /** The created cards are mounted but hidden until the pointer has dwelt. */
+  createdPending?: boolean;
 }
 
 const VIEWPORT_PADDING = 8;
@@ -91,11 +93,16 @@ export function HoverCardPreview({
   owner: number;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const createdRef = useRef<HTMLElement>(null);
   const [panelHeight, setPanelHeight] = useState(0);
+  const [createdHeight, setCreatedHeight] = useState(0);
   const badges = preview.badges ?? [];
   useLayoutEffect(() => {
     setPanelHeight(panelRef.current?.offsetHeight ?? 0);
   }, [preview.badges, preview.effect, preview.size?.width]);
+  useLayoutEffect(() => {
+    setCreatedHeight(createdRef.current?.offsetHeight ?? 0);
+  }, [preview.created, preview.size?.width]);
   if (!preview.id) {
     return preview.effect && preview.effectPosition ? (
       <EffectHintPanel hint={preview.effect} style={preview.effectPosition} floating />
@@ -108,12 +115,16 @@ export function HoverCardPreview({
     height: CARD_PREVIEW_HEIGHT,
   };
   const surfaceSize = cardPreviewSurfaceSize(preview.id, faceSize);
-  // The panels hang above the card; push the card down only as far as they
-  // need to stay on screen.
-  const top = panelHeight > 0
-    ? Math.min(
-        Math.max(preview.y, VIEWPORT_PADDING + panelHeight + PANEL_GAP),
-        Math.max(preview.y, window.innerHeight - VIEWPORT_PADDING - surfaceSize.height),
+  // Header panels push the card down and a docked created-cards panel pulls it
+  // up, each only as far as the viewport allows.
+  const extent = preview.created?.dock === "below"
+    ? surfaceSize.height + PANEL_GAP + createdHeight
+    : Math.max(surfaceSize.height, createdHeight);
+  const minTop = VIEWPORT_PADDING + (panelHeight > 0 ? panelHeight + PANEL_GAP : 0);
+  const top = panelHeight > 0 || createdHeight > 0
+    ? Math.max(
+        Math.min(Math.max(preview.y, minTop), window.innerHeight - VIEWPORT_PADDING - extent),
+        VIEWPORT_PADDING,
       )
     : preview.y;
   return (
@@ -141,7 +152,13 @@ export function HoverCardPreview({
           <PreviewCardFace card={{ instanceId: -999 - index, cardId, owner }} />
         </div>
       ))}
-      {preview.created ? <CreatedCardsPanel created={preview.created} owner={owner} /> : null}
+      {preview.created ? (
+        <CreatedCardsPanel
+          created={preview.created}
+          pending={preview.createdPending === true}
+          panelRef={createdRef}
+        />
+      ) : null}
     </div>
   );
 }

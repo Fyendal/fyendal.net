@@ -63,7 +63,13 @@ import { lethalPassRisk } from "./lethalPass.js";
 import { hoverSurfaceLayout } from "./hoverSurfaceLayout.js";
 import { readEffectHint, sameEffectHint } from "./effects/effectHint.js";
 import { cardPreviewSurfaceSize } from "./cardPreviewFaces.js";
-import { CREATED_PANEL_GAP, createdCardsFor } from "./createdCards.js";
+import {
+  CREATED_CARDS_DWELL_MS,
+  CREATED_PANEL_GAP,
+  CREATED_PANEL_WIDTH,
+  createdCardsFor,
+  preloadCreatedCardArt,
+} from "./createdCards.js";
 import { skippableTokenRun } from "./tokenSkip.js";
 import { PassUntilControl } from "./PassUntilControl.js";
 import { chainLinkOpen, passUntilPaused } from "./passUntil.js";
@@ -256,6 +262,21 @@ export function GameBoard() {
   });
   const [preview, setPreview] = useState<BoardPreview | null>(null);
   const previewTargetRef = useRef<HTMLElement | null>(null);
+  // Created cards show only once the pointer has rested on the card, so a
+  // sweep across the board shows the cards alone; they mount at once so their
+  // art is loaded by then.
+  const [createdDwelled, setCreatedDwelled] = useState(false);
+  const previewHasCreated = preview?.created !== undefined;
+  useEffect(() => {
+    setCreatedDwelled(false);
+    if (!previewHasCreated) return;
+    const timer = window.setTimeout(() => setCreatedDwelled(true), CREATED_CARDS_DWELL_MS);
+    return () => window.clearTimeout(timer);
+  }, [preview?.id, previewHasCreated]);
+  const shownPreview = useMemo(
+    () => (preview?.created && !createdDwelled ? { ...preview, createdPending: true } : preview),
+    [preview, createdDwelled],
+  );
   // The preview sits above the ledger, so drop the chip preview that was
   // showing when the slot was clicked.
   const openEffectLedger = (target: EffectLedgerTarget) => {
@@ -445,6 +466,12 @@ export function GameBoard() {
     ? nonAttackActionPlayIds(playableCards)
     : new Set<number>();
   const blockingEquipment = blockingEquipmentByPlay(playableCards, playerView?.equipment ?? {});
+  // Hovering a held card is the common case for created cards; have their art
+  // cached before the pointer dwells.
+  const arsenal = playerView?.arsenal;
+  useEffect(() => {
+    preloadCreatedCardArt([...playerHand, ...(arsenal ?? [])].map((card) => card.cardId));
+  }, [playerHand, arsenal]);
   const announcement = useActionAnnouncement({
     actionCandidates,
     legalIntents: legal,
@@ -1255,8 +1282,8 @@ export function GameBoard() {
     // A ledger row previews its source beside the ledger rather than over it.
     const ledger = el.closest<HTMLElement>(".effect-ledger")?.getBoundingClientRect();
     const anchor = ledger ? new DOMRect(ledger.left, r.top, ledger.width, r.height) : r;
-    const created = createdCardsFor(cardId, previewSurfaceSize, window.innerWidth);
-    const createdSpan = created ? created.layout.width + CREATED_PANEL_GAP : 0;
+    const created = createdCardsFor(cardId, previewSurfaceSize.width, window.innerWidth);
+    const createdSpan = created?.beside ? CREATED_PANEL_WIDTH + CREATED_PANEL_GAP : 0;
     const layout = hoverSurfaceLayout(
       anchor,
       { width: window.innerWidth, height: window.innerHeight },
@@ -1273,7 +1300,7 @@ export function GameBoard() {
       size: previewSize,
       ...(badges ? { badges } : {}),
       ...(effect ? { effect } : {}),
-      ...(created ? { created: { ...created, side: layout.side } } : {}),
+      ...(created ? { created: { ids: created.ids, dock: created.beside ? layout.side : "below" } } : {}),
     });
   };
 
@@ -1961,7 +1988,7 @@ export function GameBoard() {
       ) : null}
 
       <BoardOverlays
-        preview={pitchSource && preview?.id === pitchSource.card.cardId ? null : preview}
+        preview={pitchSource && preview?.id === pitchSource.card.cardId ? null : shownPreview}
         overlay={showCardSearchOverlay ? null : overlay}
         inspectedCardId={inspectedCardId}
         seat={seat}

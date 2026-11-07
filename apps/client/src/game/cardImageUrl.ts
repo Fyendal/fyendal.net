@@ -291,6 +291,13 @@ const LEGACY_FRAME_SETS = new Set([
 ]);
 const LEGACY_FRAME_PROMOS = new Set(["FAB005", "FAB087", "FAB124"]);
 
+/** Token printings whose Fabrary image is a sheet of two sideways half cards. */
+const HALF_CARD_SHEET_PRINTINGS = new Set(["SUP239", "SUP240", "SUP241", "SUP242"]);
+
+export function isHalfCardSheetPrinting(cardId: string): boolean {
+  return HALF_CARD_SHEET_PRINTINGS.has(cardId);
+}
+
 export function hasLegacySquareCardFrame(url: string): boolean {
   const printingId = /\/cards\/([A-Z0-9]+)(?:[-_]\w+)?\.webp(?:[?#]|$)/i.exec(url)?.[1];
   return printingId !== undefined &&

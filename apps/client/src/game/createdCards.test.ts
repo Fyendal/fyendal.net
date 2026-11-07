@@ -1,6 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { cardData } from "@fyendal/cards/client";
-import { createdCardIds, createdCardNames, createdCardsLayout } from "./createdCards.js";
+import {
+  createdCardIds,
+  createdCardNames,
+  createdCardsFitBeside,
+  preloadCreatedCardArt,
+} from "./createdCards.js";
 
 const idOf = (name: string) => Object.values(cardData).find((card) => card.name === name)!.id;
 const createdBy = (name: string) => createdCardIds(idOf(name)).map((id) => cardData[id]!.name);
@@ -47,34 +52,40 @@ describe("createdCardIds", () => {
     }
   });
 
+  it("skips token printings whose image is a half-card sheet", () => {
+    const ids = createdCardIds("SUP217");
+    expect(ids.map((id) => cardData[id]!.name)).toEqual(["Confidence", "Might", "Toughness", "Vigor"]);
+    expect(ids.some((id) => id.startsWith("SUP"))).toBe(false);
+  });
+
   it("is empty for a card that creates nothing", () => {
     expect(createdCardIds("WTR160")).toEqual([]);
   });
 });
 
-describe("createdCardsLayout", () => {
-  it("fills the source card's height for a single created card", () => {
-    const layout = createdCardsLayout(1, 413, 800)!;
-    expect(layout.height).toBeLessThanOrEqual(413);
-    expect(layout.cardHeight).toBeGreaterThan(413 * 0.85);
-    expect(layout.columns).toBe(1);
+describe("preloadCreatedCardArt", () => {
+  it("fetches the art of each created card once", () => {
+    const requested: string[] = [];
+    class FakeImage { set src(url: string) { requested.push(url); } }
+    vi.stubGlobal("Image", FakeImage);
+    try {
+      preloadCreatedCardArt(["AMO013", "WTR160"]);
+      preloadCreatedCardArt(["AMO013"]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+    expect(requested).toEqual(createdCardIds("AMO013").map((id) => `https://content.fabrary.net/cards/${id}.webp`));
+  });
+});
+
+describe("createdCardsFitBeside", () => {
+  it("docks the column beside a preview when the window has room for it", () => {
+    expect(createdCardsFitBeside(296, 1280)).toBe(true);
+    expect(createdCardsFitBeside(296, 296 + 16 + 12 + 272)).toBe(true);
   });
 
-  it("keeps several created cards in one reduced row when there is room", () => {
-    const layout = createdCardsLayout(3, 413, 900)!;
-    expect(layout.columns).toBe(3);
-    expect(layout.cardHeight).toBeLessThanOrEqual(413 * 0.72);
-  });
-
-  it("wraps into rows rather than overflow a narrow window", () => {
-    const layout = createdCardsLayout(4, 413, 320)!;
-    expect(layout.columns).toBe(2);
-    expect(layout.width).toBeLessThanOrEqual(320);
-    expect(layout.height).toBeLessThanOrEqual(413);
-  });
-
-  it("drops the panel when no legible size fits", () => {
-    expect(createdCardsLayout(1, 413, 100)).toBeNull();
-    expect(createdCardsLayout(0, 413, 800)).toBeNull();
+  it("moves the column under the preview when the window is too narrow", () => {
+    expect(createdCardsFitBeside(296, 296 + 16 + 12 + 271)).toBe(false);
+    expect(createdCardsFitBeside(604, 800)).toBe(false);
   });
 });

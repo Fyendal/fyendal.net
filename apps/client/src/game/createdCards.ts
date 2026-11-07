@@ -1,13 +1,11 @@
 import { cardData } from "@fyendal/cards/client";
-import { CARD_IMAGE_ASPECT_RATIO } from "./Card.js";
+import { isHalfCardSheetPrinting, resolveCardImageUrl } from "./cardImageUrl.js";
 import { cardPreviewFaceIds } from "./cardPreviewFaces.js";
 
 export const CREATED_PANEL_GAP = 12;
-const PANEL_CHROME_WIDTH = 18;
-const PANEL_CHROME_HEIGHT = 46;
-const PANEL_CARD_GAP = 8;
-const MULTI_CARD_MAX_SCALE = 0.72;
-const MIN_CARD_WIDTH = 110;
+export const CREATED_PANEL_WIDTH = 272;
+/** How long the pointer rests on a card before its created cards dock. */
+export const CREATED_CARDS_DWELL_MS = 250;
 const VIEWPORT_PADDING = 8;
 
 const QUANTITY = /^(?:(?:an?|another|(?:twice )?that many|up to \d+|\d+ or more|one or more|one|two|three|four|five|\d+|X)\s+)?/;
@@ -83,13 +81,18 @@ export function createdCardNames(text: string): string[] {
   return [...names];
 }
 
-/** A name can have many printings; prefer a token, then the source's own set. */
+/** The ids that pass `keep`, or all of them when none does. */
+function prefer(ids: readonly string[], keep: (id: string) => boolean): readonly string[] {
+  const kept = ids.filter(keep);
+  return kept.length > 0 ? kept : ids;
+}
+
+/** A name can have many printings; prefer a token with a full single-face
+ * image, then the source's own set. */
 function createdPrinting(name: string, sourceSet: string | undefined): string | undefined {
-  const ids = getNameIndex().ids.get(name) ?? [];
-  const tokens = ids.filter((id) => cardData[id]?.cardType === "token");
-  const named = tokens.length > 0 ? tokens : ids;
-  const singleFaced = named.filter((id) => cardPreviewFaceIds(id).length === 1);
-  const pool = singleFaced.length > 0 ? singleFaced : named;
+  let pool = prefer(getNameIndex().ids.get(name) ?? [], (id) => cardData[id]?.cardType === "token");
+  pool = prefer(pool, (id) => cardPreviewFaceIds(id).length === 1);
+  pool = prefer(pool, (id) => !isHalfCardSheetPrinting(id));
   return pool.find((id) => cardData[id]?.set === sourceSet) ?? pool[0];
 }
 
@@ -114,60 +117,41 @@ export function createdCardIds(cardId: string): readonly string[] {
   return result;
 }
 
-export interface CreatedCardsLayout {
-  columns: number;
-  cardWidth: number;
-  cardHeight: number;
-  width: number;
-  height: number;
+const preloadedArt = new Set<string>();
+
+/** Warm the browser cache with the art of the cards these cards create. */
+export function preloadCreatedCardArt(cardIds: Iterable<string>): void {
+  if (typeof Image === "undefined") return;
+  for (const cardId of cardIds) {
+    for (const id of createdCardIds(cardId)) {
+      const url = resolveCardImageUrl(id, cardData[id]);
+      if (preloadedArt.has(url)) continue;
+      preloadedArt.add(url);
+      new Image().src = url;
+    }
+  }
 }
 
-/** Largest grid that keeps the panel no taller than the card it sits beside. */
-export function createdCardsLayout(
-  count: number,
-  faceHeight: number,
-  maxWidth: number,
-): CreatedCardsLayout | null {
-  if (count === 0) return null;
-  const heightLimit = count === 1 ? Infinity : faceHeight * MULTI_CARD_MAX_SCALE;
-  let best: CreatedCardsLayout | null = null;
-  for (let rows = 1; rows <= count; rows += 1) {
-    const columns = Math.ceil(count / rows);
-    const widthEach = (maxWidth - PANEL_CHROME_WIDTH - PANEL_CARD_GAP * (columns - 1)) / columns;
-    const heightEach = (faceHeight - PANEL_CHROME_HEIGHT - PANEL_CARD_GAP * (rows - 1)) / rows;
-    const cardHeight = Math.floor(
-      Math.min(widthEach / CARD_IMAGE_ASPECT_RATIO, heightEach, heightLimit),
-    );
-    const cardWidth = Math.round(cardHeight * CARD_IMAGE_ASPECT_RATIO);
-    if (cardWidth < MIN_CARD_WIDTH || (best && cardHeight <= best.cardHeight)) continue;
-    best = {
-      columns,
-      cardWidth,
-      cardHeight,
-      width: PANEL_CHROME_WIDTH + cardWidth * columns + PANEL_CARD_GAP * (columns - 1),
-      height: PANEL_CHROME_HEIGHT + cardHeight * rows + PANEL_CARD_GAP * (rows - 1),
-    };
-  }
-  return best;
-}
+export type CreatedCardsDock = "left" | "right" | "below";
 
 export interface CreatedCardsPlacement {
   ids: readonly string[];
-  layout: CreatedCardsLayout;
-  side: "left" | "right";
+  /** Beside the preview on the side away from the hovered card, or under it. */
+  dock: CreatedCardsDock;
 }
 
-/** Size the created-cards panel for a preview, or nothing when none fits. */
+/** Whether a created-cards column fits beside a preview surface this wide. */
+export function createdCardsFitBeside(surfaceWidth: number, viewportWidth: number): boolean {
+  return viewportWidth - VIEWPORT_PADDING * 2 - surfaceWidth - CREATED_PANEL_GAP >= CREATED_PANEL_WIDTH;
+}
+
+/** The cards a preview creates and whether their column fits beside it. */
 export function createdCardsFor(
   cardId: string,
-  surface: { width: number; height: number },
+  surfaceWidth: number,
   viewportWidth: number,
-): Omit<CreatedCardsPlacement, "side"> | null {
+): { ids: readonly string[]; beside: boolean } | null {
   const ids = createdCardIds(cardId);
-  const layout = createdCardsLayout(
-    ids.length,
-    surface.height,
-    viewportWidth - VIEWPORT_PADDING * 2 - surface.width - CREATED_PANEL_GAP,
-  );
-  return layout ? { ids, layout } : null;
+  if (ids.length === 0) return null;
+  return { ids, beside: createdCardsFitBeside(surfaceWidth, viewportWidth) };
 }

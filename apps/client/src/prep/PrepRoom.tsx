@@ -23,6 +23,7 @@ import { PreviewCardFace } from "../game/PreviewCardFace.js";
 import { CreatedCardsPanel } from "../game/CreatedCardsPanel.js";
 import {
   CREATED_PANEL_GAP,
+  CREATED_PANEL_WIDTH,
   createdCardsFor,
   type CreatedCardsPlacement,
 } from "../game/createdCards.js";
@@ -395,8 +396,8 @@ export function PrepRoom() {
     // A ledger row previews beside its own ledger rather than over its rows.
     const span = el.closest(".prep-deck-zone")?.getBoundingClientRect() ?? r;
     const gap = 12;
-    const created = createdCardsFor(cardId, box, window.innerWidth);
-    const createdSpan = created ? created.layout.width + CREATED_PANEL_GAP : 0;
+    const created = createdCardsFor(cardId, box.width, window.innerWidth);
+    const createdSpan = created?.beside ? CREATED_PANEL_WIDTH + CREATED_PANEL_GAP : 0;
     const totalWidth = box.width + createdSpan;
     let x = span.right + gap;
     let side: "left" | "right" = "right";
@@ -408,7 +409,12 @@ export function PrepRoom() {
       Math.max(r.top + r.height / 2 - box.height / 2, 8),
       window.innerHeight - box.height - 8,
     );
-    setPreview({ id: cardId, x, y, ...(created ? { created: { ...created, side } } : {}) });
+    setPreview({
+      id: cardId,
+      x,
+      y,
+      ...(created ? { created: { ids: created.ids, dock: created.beside ? side : "below" } } : {}),
+    });
   };
 
   const toggleWeapon = (index: number) => {
@@ -929,7 +935,7 @@ export function PrepRoom() {
           }}
         >
           <PreviewCardFace card={{ instanceId: -999, cardId: preview.id, owner: yourSeat }} />
-          {preview.created ? <CreatedCardsPanel created={preview.created} owner={yourSeat} /> : null}
+          {preview.created ? <CreatedCardsPanel created={preview.created} /> : null}
         </div>
       )}
 
