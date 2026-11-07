@@ -147,14 +147,6 @@ function controls(ctx: ScriptCtx, name: string): boolean {
   ].some((card) => named(ctx, card, name));
 }
 
-function controlledType(ctx: ScriptCtx, tag: string): Card[] {
-  return [
-    ...ctx.player(ctx.seat).board,
-    ...ctx.player(ctx.seat).weapons,
-    ...Object.values(ctx.player(ctx.seat).equipment).filter((card): card is Card => card !== undefined),
-  ].filter((card) => hasTag(ctx, card, tag));
-}
-
 function allPermanents(ctx: ScriptCtx): Card[] {
   return ctx.state.players.flatMap((player) => [
     ...player.board,
@@ -889,7 +881,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       },
     },
   },
-  "blast rig|1": { modifyAttack: (ctx) => controlledType(ctx, "evo").length },
+  "blast rig|1": { modifyAttack: (ctx) => ctx.countEquipped("evo") },
   "speed demon|1": {
     declareAdditionalCost(ctx) {
       const choices = ctx

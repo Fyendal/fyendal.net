@@ -48,6 +48,34 @@ it("Tiger Taming Khakkara buffs only the next Crouching Tiger after it attacks",
 });
 
 describe("Beckoning Mistblade", () => {
+  it.each(["hiss|1", "venomous bite|1", "tide chakra|1", "intimate inducement|1"])(
+    "%s targets only Assassin or Mystic attack action cards, not daggers",
+    (reaction) => {
+      const g = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            weapons: ["beckoning mistblade|0"],
+            hand: [reaction, "bonds of attraction|3"],
+            resources: 3,
+          },
+          { hero: "dorinthea" },
+        ],
+      });
+
+      g.attackWithWeapon().blockWith().expectNoLegalPlay(reaction).settle();
+      g.play("bonds of attraction|3").blockWith();
+      const reactionId = printingId(reaction);
+      expect(
+        legalIntents(g.state, 0).some(
+          (intent) =>
+            intent.kind === "play-card" &&
+            g.state.players[0]!.hand.find((card) => card.instanceId === intent.instanceId)?.cardId === reactionId,
+        ),
+      ).toBe(true);
+    },
+  );
+
   it.each([false, true])("buffs only the next blue attack, even when that attack hits: %s", (hits) => {
     const g = scenario({
       seats: [

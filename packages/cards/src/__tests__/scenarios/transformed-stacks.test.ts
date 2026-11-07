@@ -259,6 +259,30 @@ describe("transformed permanent stacks", () => {
     expect(g.state.players[1]!.hand).toHaveLength(1);
   });
 
+  it("counts the Mechropotent as 4 equipped Evos for Blast Rig", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "teklovossen|0",
+          resources: 6,
+          hand: ["singularity|1", "blast rig|1"],
+          weapons: ["teklo leveler|0"],
+          equipment: {
+            head: "evo beta base head|3",
+            chest: "evo beta base chest|3",
+            arms: "evo beta base arms|3",
+            legs: "evo beta base legs|3",
+          },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.state.players[0]!.actionPoints = 2;
+
+    g.play("singularity|1").play("blast rig|1").expectAttackValue(5);
+  });
+
   it("allows the Mechropotent to defend once per combat chain and applies Battleworn", () => {
     const g = scenario({
       seats: [

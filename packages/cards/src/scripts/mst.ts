@@ -189,9 +189,13 @@ function currentAttackIs(ctx: ScriptCtx, ...types: string[]): boolean {
   );
 }
 
+function currentAttackActionIs(ctx: ScriptCtx, ...types: string[]): boolean {
+  return currentAttackIs(ctx, ...types) && isAttackAction(ctx, ctx.link!.attackingCard);
+}
+
 function mysticAssassinReaction(pump: number, token?: string): CardScript {
   return {
-    canPlay: (ctx) => currentAttackIs(ctx, "assassin", "mystic"),
+    canPlay: (ctx) => currentAttackActionIs(ctx, "assassin", "mystic"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: pump });
       if (token && pitchedBlue(ctx)) createInHand(ctx, token);
@@ -767,7 +771,7 @@ export const mst: Record<string, CardScript> = {
       goAgain: false,
       timing: "attack-reaction",
       destroySelfCost: true,
-      canActivate: (ctx) => currentAttackIs(ctx, "assassin", "mystic"),
+      canActivate: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat,
       onActivate(ctx) {
         createInHand(ctx, FANG_STRIKE);
       },
@@ -780,26 +784,26 @@ export const mst: Record<string, CardScript> = {
       goAgain: false,
       timing: "attack-reaction",
       destroySelfCost: true,
-      canActivate: (ctx) => currentAttackIs(ctx, "assassin", "mystic"),
+      canActivate: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat,
       onActivate(ctx) {
         createInHand(ctx, SLITHER);
       },
     },
   },
   "tide chakra|1": {
-    canPlay: (ctx) => currentAttackIs(ctx, "assassin", "mystic"),
+    canPlay: (ctx) => currentAttackActionIs(ctx, "assassin", "mystic"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: transcended(ctx) ? 5 : 3 });
     },
   },
   "tide chakra|2": {
-    canPlay: (ctx) => currentAttackIs(ctx, "assassin", "mystic"),
+    canPlay: (ctx) => currentAttackActionIs(ctx, "assassin", "mystic"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: transcended(ctx) ? 4 : 2 });
     },
   },
   "tide chakra|3": {
-    canPlay: (ctx) => currentAttackIs(ctx, "assassin", "mystic"),
+    canPlay: (ctx) => currentAttackActionIs(ctx, "assassin", "mystic"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: transcended(ctx) ? 3 : 1 });
     },
@@ -1041,7 +1045,7 @@ export const mst: Record<string, CardScript> = {
 
 function intimateInducement(count: number): CardScript {
   return {
-    canPlay: (ctx) => currentAttackIs(ctx, "assassin", "mystic"),
+    canPlay: (ctx) => currentAttackActionIs(ctx, "assassin", "mystic"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
       const cards = ctx.player(opponentSeat(ctx)).deck.slice(0, count);
