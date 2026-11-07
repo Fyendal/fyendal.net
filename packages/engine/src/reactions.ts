@@ -57,6 +57,7 @@ import { canPayRequiredHandCardsForAdditionalCost } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { defendingHeroCannotRespondBelowPower, defenseReactionRestriction } from "./combatRestrictions.js";
+import { boostDeclarationError, declareInstantBoosts, payDeclaredInstantBoosts } from "./boost.js";
 import { pushAbilityLayer, pushAttackCardLayer, recordAnnouncedAttackTarget, recordAttackTarget } from "./stackCore.js";
 
 import {
@@ -532,6 +533,8 @@ export function playReaction(
   declaredVariableX?: number,
   targetAllyId?: number,
   additionalCostDeclared = false,
+  boost = false,
+  boostCount?: number,
 ): string | undefined {
   const link = currentLink(state);
   if (state.phase !== "reaction" || !link) return "no active reaction window";
@@ -635,7 +638,10 @@ export function playReaction(
       return `${nameOf(state, card.cardId)} cannot defend this attack`;
     }
   }
+  const boostErr = boostDeclarationError(state, seat, card, boost, boostCount);
+  if (boostErr) return boostErr;
   if (!additionalCostDeclared) startPlayScriptState(player, card);
+  declareInstantBoosts(card, boost, boostCount);
   if (script?.canPlay && !script.canPlay(runtime.makeCtx(state, seat, card, link, fromArsenal))) {
     return `${nameOf(state, card.cardId)} cannot be played now`;
   }
@@ -857,6 +863,7 @@ export function finishReactionPlay(
   // once both players pass in succession (CR 5.3.2); a defense reaction becomes
   // a defending card when it resolves (7.4.2d)
   if (isAttackActionData(instanceDataOf(state, removed))) {
+    payDeclaredInstantBoosts(state, runtime, seat, removed);
     pushAttackCardLayer(state, seat, removed, origin);
     runtime.dispatchFlow("triggerPlayedAttackSpectra", state, seat, removed);
   } else {

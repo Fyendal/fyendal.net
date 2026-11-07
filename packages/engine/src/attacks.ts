@@ -1,5 +1,6 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
+import { takeInstantBoostResult } from "./boost.js";
 import {
   cardColorOf,
   cardHasType,
@@ -605,9 +606,12 @@ export function startNextQueuedAttack(
         continue;
       }
       const origin = queued.cardOrigin;
+      const boost = takeInstantBoostResult(card);
       startQueuedAttack(state, runtime, seat, card, queued.targetAllyId, queued.layer ?? {
         cardType: "action",
         flags: {
+          ...(boost.boosted ? { boosted: true } : {}),
+          ...(boost.boostSucceeded ? { grantedGoAgainAtLayer: true } : {}),
           ...(origin === "arsenal" ? { fromArsenal: true } : {}),
           ...(origin === "banish" ? { fromBanish: true } : {}),
           ...(origin !== "hand" && origin !== "arsenal" ? { fromOutsideHandOrArsenal: true } : {}),

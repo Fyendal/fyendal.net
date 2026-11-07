@@ -389,6 +389,13 @@ function playIntentsWithPitches(
     );
 }
 
+/** Declarable Boost counts for a play, 0 meaning no Boost. */
+function boostChoices(state: GameStateInternal, player: PlayerState, card: CardInstance): number[] {
+  if (!isAttackActionData(instanceDataOf(state, card))) return [0];
+  const maximum = Math.min(player.deck.length, boostCountForCardPlay(state, player.seat, card));
+  return Array.from({ length: Math.max(0, maximum) + 1 }, (_, count) => count);
+}
+
 function markInstantPlayMethod(
   candidates: GameIntent[],
   enabled: boolean,
@@ -487,6 +494,7 @@ function playIntentsForCard(
   if (cardTargets.length === 0) return [];
   if (sides.length === 0) {
     const intents: GameIntent[] = [];
+    const boosts = boostChoices(state, player, card);
     for (const targetAllyId of targets) for (const targetCardInstanceId of cardTargets) {
       const effectiveCost = cardPlayCost(state, runtime, player.seat, card, undefined, {
         ...(script?.variablePlayCost ? { baseCostOverride: script.variablePlayCost.base +
@@ -498,45 +506,22 @@ function playIntentsForCard(
         targetCardInstanceId,
         targetAllyId,
       });
-      intents.push(...announceAttackTarget(deferVariablePayment(playIntentsWithPitches(
-        state,
-        player,
-        card,
-        from,
-        6,
-        effectiveCost,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        targetCardInstanceId,
-        includeUnaffordable,
-      )), targetAllyId));
-      if (
-        isAttackAction &&
-        boostCountForCardPlay(state, player.seat, card) > 0 &&
-        player.deck.length > 0
-      ) {
-        const maximumBoosts = Math.min(
-          player.deck.length,
-          boostCountForCardPlay(state, player.seat, card),
+      for (const boostCount of boosts) {
+        const pitched = playIntentsWithPitches(
+          state,
+          player,
+          card,
+          from,
+          6,
+          effectiveCost,
+          undefined,
+          boostCount > 0 ? true : undefined,
+          boostCount > 0 ? boostCount : undefined,
+          undefined,
+          targetCardInstanceId,
+          includeUnaffordable,
         );
-        for (let boostCount = 1; boostCount <= maximumBoosts; boostCount++) {
-          intents.push(...announceAttackTarget(playIntentsWithPitches(
-            state,
-            player,
-            card,
-            from,
-            6,
-            effectiveCost,
-            undefined,
-            true,
-            boostCount,
-            undefined,
-            targetCardInstanceId,
-            includeUnaffordable,
-          ), targetAllyId));
-        }
+        intents.push(...announceAttackTarget(boostCount > 0 ? pitched : deferVariablePayment(pitched), targetAllyId));
       }
       for (const alternativeCostCardInstanceIds of alternativeCosts) {
         const alternativeCost = cardPlayCost(state, runtime, player.seat, card, undefined, {
@@ -547,45 +532,21 @@ function playIntentsForCard(
           targetCardInstanceId,
           targetAllyId,
         });
-        intents.push(...announceAttackTarget(playIntentsWithPitches(
-          state,
-          player,
-          card,
-          from,
-          6,
-          alternativeCost,
-          undefined,
-          undefined,
-          undefined,
-          alternativeCostCardInstanceIds,
-          targetCardInstanceId,
-          includeUnaffordable,
-        ), targetAllyId));
-        if (
-          isAttackAction &&
-          boostCountForCardPlay(state, player.seat, card) > 0 &&
-          player.deck.length > 0
-        ) {
-          const maximumBoosts = Math.min(
-            player.deck.length,
-            boostCountForCardPlay(state, player.seat, card),
-          );
-          for (let boostCount = 1; boostCount <= maximumBoosts; boostCount++) {
-            intents.push(...announceAttackTarget(playIntentsWithPitches(
-              state,
-              player,
-              card,
-              from,
-              6,
-              alternativeCost,
-              undefined,
-              true,
-              boostCount,
-              alternativeCostCardInstanceIds,
-              targetCardInstanceId,
-              includeUnaffordable,
-            ), targetAllyId));
-          }
+        for (const boostCount of boosts) {
+          intents.push(...announceAttackTarget(playIntentsWithPitches(
+            state,
+            player,
+            card,
+            from,
+            6,
+            alternativeCost,
+            undefined,
+            boostCount > 0 ? true : undefined,
+            boostCount > 0 ? boostCount : undefined,
+            alternativeCostCardInstanceIds,
+            targetCardInstanceId,
+            includeUnaffordable,
+          ), targetAllyId));
         }
       }
     }
@@ -1023,8 +984,9 @@ function reactionIntents(
       const markInstantMethod = (candidates: GameIntent[]): GameIntent[] =>
         markInstantPlayMethod(candidates, data.cardType === "action" && asInstant);
       const firstCardIntent = intents.length;
+      const boosts = boostChoices(state, player, card);
       for (const meldSide of meldSides) {
-        for (const targetAllyId of allyTargets) for (const targetCardInstanceId of cardTargets) {
+        for (const targetAllyId of allyTargets) for (const targetCardInstanceId of cardTargets) for (const boostCount of boosts) {
           const regularIntents = announceAttackTarget(markInstantMethod(playIntentsWithPitches(
             state,
             player,
@@ -1041,8 +1003,8 @@ function reactionIntents(
               targetAllyId,
             }),
             meldSide,
-            undefined,
-            undefined,
+            boostCount > 0 ? true : undefined,
+            boostCount > 0 ? boostCount : undefined,
             undefined,
             targetCardInstanceId,
             includeUnaffordable,
@@ -1071,8 +1033,8 @@ function reactionIntents(
                 targetAllyId,
               }),
               meldSide,
-              undefined,
-              undefined,
+              boostCount > 0 ? true : undefined,
+              boostCount > 0 ? boostCount : undefined,
               alternativeCostCardInstanceIds,
               targetCardInstanceId,
               includeUnaffordable,
@@ -1488,8 +1450,9 @@ function enumerateIntents(
           const allyTargets = isAttackActionData(instanceDataOf(state, card))
             ? attackTargets(state, runtime, player)
             : [undefined];
+          const boosts = boostChoices(state, player, card);
           for (const meldSide of meldSides) {
-            for (const targetAllyId of allyTargets) for (const targetCardInstanceId of cardTargets) {
+            for (const targetAllyId of allyTargets) for (const targetCardInstanceId of cardTargets) for (const boostCount of boosts) {
               const regularIntents = announceAttackTarget(markInstantMethod(playIntentsWithPitches(
                 state,
                 player,
@@ -1507,8 +1470,8 @@ function enumerateIntents(
                   perCardReduction: cardPlayReductionForSeat(card, seat),
                 }),
                 meldSide,
-                undefined,
-                undefined,
+                boostCount > 0 ? true : undefined,
+                boostCount > 0 ? boostCount : undefined,
                 undefined,
                 targetCardInstanceId,
                 includeUnaffordable,
@@ -1538,8 +1501,8 @@ function enumerateIntents(
                     perCardReduction: cardPlayReductionForSeat(card, seat),
                   }),
                   meldSide,
-                  undefined,
-                  undefined,
+                  boostCount > 0 ? true : undefined,
+                  boostCount > 0 ? boostCount : undefined,
                   alternativeCostCardInstanceIds,
                   targetCardInstanceId,
                   includeUnaffordable,

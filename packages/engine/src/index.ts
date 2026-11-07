@@ -222,6 +222,8 @@ function dispatchPlay(
       undefined,
       alternativeCostCardInstanceIds,
       targetAllyId,
+      boost,
+      boostCount,
     );
   }
   if (state.phase === "reaction") {
@@ -237,6 +239,9 @@ function dispatchPlay(
       undefined,
       undefined,
       targetAllyId,
+      false,
+      boost,
+      boostCount,
     );
   }
   return playCard(
@@ -674,9 +679,11 @@ export function applyIntent(
           undefined,
           intent.alternativeCostCardInstanceIds,
           intent.targetAllyId,
+          intent.boost,
+          intent.boostCount,
         );
       } else if (next.phase === "reaction") {
-        err = playReaction(next, runtime, seat, found.card, false, intent.pitchInstanceIds, intent.meldSide, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId, intent.zone, undefined, intent.targetAllyId);
+        err = playReaction(next, runtime, seat, found.card, false, intent.pitchInstanceIds, intent.meldSide, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId, intent.zone, undefined, intent.targetAllyId, false, intent.boost, intent.boostCount);
       } else {
         err = playCard(next, runtime, seat, intent.instanceId, intent.pitchInstanceIds, intent.zone, intent.meldSide, intent.targetAllyId, intent.boost, intent.boostCount, intent.asInstant, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId);
       }

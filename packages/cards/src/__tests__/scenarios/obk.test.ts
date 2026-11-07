@@ -14,6 +14,7 @@ const ZERO_TO_SIXTY = "zero to sixty|1";
 const ZIPPER_HIT = "zipper hit|1";
 const PROWL = "prowl|1";
 const KISS_OF_DEATH = "kiss of death|1";
+const KICKBACK = "kickback|1";
 const FILLER = "raging onslaught|1";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 const BLOODROT_POX = "bloodrot pox|0";
@@ -293,6 +294,54 @@ describe("Outbreak heroes", () => {
       expect(game.state.chain[1]?.flags.boosted).toBe(true);
       game.blockWith().settle();
       game.expectLife(1, 13).expectAP(0, 0);
+    });
+
+    // Zero to Sixty boosts Kickback; a second Zero to Sixty under it is the Mechanologist card Kickback boosts.
+    const huxleyKickbackGame = () => scenario({ seats: [
+      { hero: "rhinar", heroKey: HUXLEY, hand: [ZERO_TO_SIXTY], deck: [KICKBACK, ZERO_TO_SIXTY], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    const expectBoostedKickbackLink = (game: ReturnType<typeof scenario>) => {
+      const link = game.state.chain.find((candidate) => candidate.attackingCard.cardId === printingId(KICKBACK));
+      expect(link?.flags.boosted).toBe(true);
+      expect(link?.goAgain).toBe(true);
+      game.expectLog("Kickback boosts");
+    };
+
+    it("lets a banished stealth attack boost when played above the boosted attack-layer", () => {
+      const game = huxleyKickbackGame();
+
+      game.play(ZERO_TO_SIXTY, { boost: true }).doRaw({ kind: "choose", optionId: "yes" });
+      for (let guard = 0; guard < 6 && banishedPlayIntents(game, 0, KICKBACK).length === 0; guard++) {
+        game.passPriority();
+      }
+      expect(game.state.pendingDecision?.kind).toBe("priority-window");
+      expect(banishedPlayIntents(game, 0, KICKBACK)).toContainEqual(
+        expect.objectContaining({ asInstant: true, boost: true }),
+      );
+
+      game.play(KICKBACK, { fromZone: "banish", asInstant: true, boost: true, settle: false });
+      expect(game.state.players[0]!.deck).toHaveLength(0);
+      game.passPriority().passPriority().settle();
+
+      expectBoostedKickbackLink(game);
+    });
+
+    it("lets a banished stealth attack boost when played during the reaction step", () => {
+      const game = huxleyKickbackGame();
+
+      game.play(ZERO_TO_SIXTY, { boost: true }).chooseOption("yes").blockWith();
+      expect(game.state.phase).toBe("reaction");
+      expect(banishedPlayIntents(game, 0, KICKBACK)).toContainEqual(
+        expect.objectContaining({ asInstant: true, boost: true }),
+      );
+
+      game.play(KICKBACK, { fromZone: "banish", asInstant: true, boost: true, settle: false });
+      expect(game.state.players[0]!.deck).toHaveLength(0);
+      game.passPriority().passPriority().settle().blockWith().settle();
+
+      expectBoostedKickbackLink(game);
     });
 
     it("puts Kiss of Death played above a boosted Zero to Sixty on the combat chain first", () => {

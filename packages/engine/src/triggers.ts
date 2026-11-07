@@ -55,6 +55,7 @@ import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { consumeFirstActionExtraCost, firstActionExtraCost, goAgainSuppressed, inActionPhase, isFrozen, opposingInstantsProhibited, snapshotSerializable } from "./ruleQueries.js";
 import { opposingActionsProhibited } from "./restrictions.js";
 import { defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
+import { boostDeclarationError, declareInstantBoosts, payDeclaredInstantBoosts } from "./boost.js";
 import { pushAttackCardLayer, pushCardLayer, recordAnnouncedAttackTarget, takeAttackLayerOrigin } from "./stackCore.js";
 import { DESTROY_AT_END_PHASE_HOOK, logTriggerAnnouncement, triggerAnnouncement, triggerLabelMessage } from "./triggerPresentation.js";
 import { declaredLayerTargetLegal, departedAttackTarget, layerTargetOptions, logPlayTargetIllegal, layerTargetSpec, triggerLayerEventContext } from "./layerTargets.js";
@@ -536,6 +537,8 @@ export function playWindowInstant(
   declaredVariableX?: number,
   alternativeCostCardInstanceIds?: number[],
   targetAllyId?: number,
+  boost = false,
+  boostCount?: number,
 ): string | undefined {
   if (state.phase !== "layer" || (
     declaredVariableX === undefined && state.pendingDecision?.kind !== "priority-window"
@@ -610,7 +613,10 @@ export function playWindowInstant(
   if (cardPlayRestrictedByModifier(state, seat, card)) {
     return `${nameOf(state, card.cardId)} cannot be played due to a card-type restriction`;
   }
+  const boostErr = boostDeclarationError(state, seat, card, boost, boostCount);
+  if (boostErr) return boostErr;
   startPlayScriptState(player, card);
+  declareInstantBoosts(card, boost, boostCount);
   if (script?.canPlay && !script.canPlay(runtime.makeCtx(state, seat, card, link, fromArsenal))) {
     return `${nameOf(state, card.cardId)} cannot be played now`;
   }
@@ -776,6 +782,7 @@ export function finishWindowInstantPlay(
   // the instant becomes the top stack layer: its effect resolves only once
   // both players pass in succession (CR 5.3.2)
   if (isAttackActionData(instanceDataOf(state, card))) {
+    payDeclaredInstantBoosts(state, runtime, seat, card);
     pushAttackCardLayer(state, seat, card, origin);
     runtime.dispatchFlow("triggerPlayedAttackSpectra", state, seat, card);
   } else {
