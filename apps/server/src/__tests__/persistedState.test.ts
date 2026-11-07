@@ -1124,6 +1124,7 @@ describe("PersistedStateV1", () => {
         arcane: false,
         sourceIsRunechant: true,
         arcaneBarrierResolved: true,
+        spellvoidDeclined: true,
         destroySourceAfterDamage: true,
         targetWasMarked: true,
         combat: true,

@@ -381,6 +381,7 @@ export interface PersistedPendingArcaneV1 {
   unpreventable?: boolean;
   payTotal?: number;
   arcaneBarrierResolved?: true;
+  spellvoidDeclined?: true;
   usedQuellSourceIds?: number[];
   wardSourceIds?: number[];
   usedDiscardDamagePreventionModifierIds?: number[];
