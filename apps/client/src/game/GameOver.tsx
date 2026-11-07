@@ -3,7 +3,6 @@ import { useIntl } from "react-intl";
 import type { GameClockSummary, GameView } from "@fyendal/shared";
 import { heroImageUrl } from "../lobby/heroImage.js";
 import {
-  DISRUPTION_VALUE_PER_CARD,
   averagePerRound,
   averageValue,
   computeCycleStats,
@@ -56,8 +55,6 @@ export function GameOver({
   const winner = view.winner;
   const initialSeat = (spectating ? winner ?? 0 : seat) === 1 ? 1 : 0;
   const [selectedSeat, setSelectedSeat] = useState<0 | 1>(initialSeat);
-  const [includeDisruption, setIncludeDisruption] = useState(false);
-  const disruptionValue = includeDisruption ? DISRUPTION_VALUE_PER_CARD : 0;
   const stats = useMemo(
     () => computeCycleStats(recordedViews.length > 0 ? recordedViews : [view]),
     [recordedViews, view],
@@ -187,7 +184,7 @@ export function GameOver({
                 tabIndex={0}
                 aria-describedby={openingTooltipId}
               >
-                <strong>{fmt(averageValue(stats, selectedSeat, disruptionValue))}</strong>
+                <strong>{fmt(averageValue(stats, selectedSeat))}</strong>
                 <span>{intl.formatMessage({ id: "game.stats.valuePerTurn" })}</span>
                 <span className="gameover-tooltip-mark" aria-hidden="true">i</span>
                 <span className="gameover-average-tooltip" id={openingTooltipId} role="tooltip">
@@ -217,22 +214,7 @@ export function GameOver({
             </section>
 
             <section className="gameover-breakdown">
-              <div className="gameover-breakdown-header">
-                <h3>{intl.formatMessage({ id: "game.stats.breakdown" })}</h3>
-                <label className="toggle-switch gameover-disruption-toggle">
-                  <input
-                    type="checkbox"
-                    role="switch"
-                    checked={includeDisruption}
-                    onChange={(event) => setIncludeDisruption(event.target.checked)}
-                  />
-                  <span className="switch-track" aria-hidden="true" />
-                  <span>{intl.formatMessage(
-                    { id: "game.stats.includeDisruption" },
-                    { value: DISRUPTION_VALUE_PER_CARD },
-                  )}</span>
-                </label>
-              </div>
+              <h3>{intl.formatMessage({ id: "game.stats.breakdown" })}</h3>
               <div className="gameover-table-wrap">
                 <table className="gameover-table">
                   <thead>
@@ -248,12 +230,6 @@ export function GameOver({
                       <th>{intl.formatMessage({ id: "game.stats.prevented" })}</th>
                       <th>{intl.formatMessage({ id: "game.stats.lifeGained" })}</th>
                       <th>{intl.formatMessage({ id: "game.stats.lifeLost" })}</th>
-                      {includeDisruption ? (
-                        <th
-                          aria-label={intl.formatMessage({ id: "game.stats.cardsDisrupted" })}
-                          title={intl.formatMessage({ id: "game.stats.cardsDisrupted" })}
-                        >{intl.formatMessage({ id: "game.stats.disrupted" })}</th>
-                      ) : null}
                       <th>{intl.formatMessage({ id: "game.stats.value" })}</th>
                     </tr>
                   </thead>
@@ -270,8 +246,7 @@ export function GameOver({
                         <td>{row.prevented[selectedSeat]}</td>
                         <td>{row.lifeGained[selectedSeat]}</td>
                         <td>{row.lifeLost[selectedSeat]}</td>
-                        {includeDisruption ? <td>{row.cardsDisrupted[selectedSeat]}</td> : null}
-                        <td>{cycleValue(row, selectedSeat, disruptionValue)}</td>
+                        <td>{cycleValue(row, selectedSeat)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -285,8 +260,7 @@ export function GameOver({
                       <td>{stats.total.prevented[selectedSeat]}</td>
                       <td>{stats.total.lifeGained[selectedSeat]}</td>
                       <td>{stats.total.lifeLost[selectedSeat]}</td>
-                      {includeDisruption ? <td>{stats.total.cardsDisrupted[selectedSeat]}</td> : null}
-                      <td>{totalValue(stats, selectedSeat, disruptionValue)}</td>
+                      <td>{totalValue(stats, selectedSeat)}</td>
                     </tr>
                   </tfoot>
                 </table>

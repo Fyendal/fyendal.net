@@ -31040,12 +31040,6 @@
       "value": "Round-by-round breakdown"
     }
   ],
-  "game.stats.cardsDisrupted": [
-    {
-      "type": 0,
-      "value": "Opponent cards disrupted"
-    }
-  ],
   "game.stats.damageBlocked": [
     {
       "type": 0,
@@ -31088,30 +31082,10 @@
       "value": "Dealt"
     }
   ],
-  "game.stats.disrupted": [
-    {
-      "type": 0,
-      "value": "Disrupted"
-    }
-  ],
   "game.stats.finalLife": [
     {
       "type": 0,
       "value": "Final life"
-    }
-  ],
-  "game.stats.includeDisruption": [
-    {
-      "type": 0,
-      "value": "Count disruption as "
-    },
-    {
-      "type": 1,
-      "value": "value"
-    },
-    {
-      "type": 0,
-      "value": " value per card"
     }
   ],
   "game.stats.lifeGained": [

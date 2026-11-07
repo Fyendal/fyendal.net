@@ -137,45 +137,6 @@ describe("authoritative match stats", () => {
     expect(state.gameStats.turns[0]?.allyAbsorbed).toEqual([0, 4]);
   });
 
-  it("counts opponent cards removed from hand, arsenal, and the arena as disruption", () => {
-    const state = makeGame(86);
-    const sourceId = giveCard(state, 0, "INSTANT");
-    const source = player(state, 0).hand.find((card) => card.instanceId === sourceId)!;
-    const ctx = makeCtx(state, engineRuntime, 0, source);
-    giveCard(state, 1, "BLOCK3");
-    const helm = { instanceId: state.nextInstanceId++, cardId: "HELM", owner: 1 };
-    player(state, 1).equipment.head = helm;
-    const arsenalId = giveCard(state, 1, "ATK4");
-    const arsenalCard = player(state, 1).hand.find((card) => card.instanceId === arsenalId)!;
-    player(state, 1).hand = player(state, 1).hand.filter((card) => card !== arsenalCard);
-    player(state, 1).arsenal.push(arsenalCard);
-
-    ctx.discardRandom(1, 1);
-    expect(ctx.destroyPermanent(helm.instanceId)).toBe(true);
-    expect(ctx.moveToGraveyard(arsenalId)).toBe(true);
-    expect(state.gameStats.turns[0]?.cardsDisrupted).toEqual([3, 0]);
-
-    giveCard(state, 0, "BLOCK3");
-    ctx.discardRandom(0, 1);
-    const ownTokenId = ctx.createToken("TOKEN", 0)!.instanceId;
-    expect(ctx.destroyPermanent(ownTokenId)).toBe(true);
-    expect(state.gameStats.turns[0]?.cardsDisrupted).toEqual([3, 0]);
-  });
-
-  it("does not count temporary or still-playable banishes as disruption", () => {
-    const state = makeGame(87);
-    const sourceId = giveCard(state, 0, "INSTANT");
-    const source = player(state, 0).hand.find((card) => card.instanceId === sourceId)!;
-    const ctx = makeCtx(state, engineRuntime, 0, source);
-    giveCard(state, 1, "BLOCK3");
-    expect(ctx.banishRandomFromHandUntilEndPhase(1, state.turn)).toBeDefined();
-    expect(state.gameStats.turns[0]?.cardsDisrupted ?? [0, 0]).toEqual([0, 0]);
-
-    const bannedId = giveCard(state, 1, "ATK4");
-    expect(ctx.banish(bannedId)).toBe(true);
-    expect(state.gameStats.turns[0]?.cardsDisrupted).toEqual([1, 0]);
-  });
-
   it("credits an opponent-created token's self-damage to its creator", () => {
     const state = makeGame(88);
     const sourceId = giveCard(state, 0, "INSTANT");

@@ -528,25 +528,11 @@
   padding: 14px 18px;
   border-radius: 3px;
 }
-.gameover-breakdown-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 18px;
-  flex-wrap: wrap;
-  margin: 0 0 10px;
-}
 .gameover-breakdown h3 {
-  margin: 0;
+  margin: 0 0 10px;
   color: #ded0b2;
   font-family: inherit;
   font-size: 18px;
-}
-.gameover-disruption-toggle {
-  font: 500 13px inherit;
-  letter-spacing: normal;
-  text-transform: none;
-  white-space: normal;
 }
 .gameover-table-wrap { width: 100%; overflow-x: auto; }
 .gameover-table {

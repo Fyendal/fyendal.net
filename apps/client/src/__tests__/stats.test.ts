@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ChainLinkView, GameTurnStatsView, GameView } from "@fyendal/shared";
 import {
-  DISRUPTION_VALUE_PER_CARD,
   averagePerRound,
   averageThreatPerAttack,
   averageValue,
@@ -68,7 +67,6 @@ function totals(partial: Partial<CycleTotals> = {}): CycleTotals {
     prevented: [0, 0],
     lifeGained: [0, 0],
     lifeLost: [0, 0],
-    cardsDisrupted: [0, 0],
     ...partial,
   };
 }
@@ -101,7 +99,6 @@ describe("computeCycleStats", () => {
           allyAbsorbed: [1, 2],
           lifeGained: [0, 2],
           lifeLost: [1, 0],
-          cardsDisrupted: [0, 1],
         },
       ],
     };
@@ -119,7 +116,6 @@ describe("computeCycleStats", () => {
           allyAbsorbed: [1, 2],
           lifeGained: [0, 2],
           lifeLost: [1, 0],
-          cardsDisrupted: [0, 1],
         }),
       ],
       rounds: [[0, 1], [1]],
@@ -133,7 +129,6 @@ describe("computeCycleStats", () => {
         allyAbsorbed: [1, 2],
         lifeGained: [0, 2],
         lifeLost: [1, 0],
-        cardsDisrupted: [0, 1],
       }),
     });
   });
@@ -389,26 +384,6 @@ describe("cycleValue / averageValue", () => {
     const stats = computeCycleStats([view]);
     expect(stats.rows[1]!.prevented[1]).toBe(3);
     expect(cycleValue(stats.rows[1]!, 1)).toBe(5);
-  });
-
-  it("adds disruption only at the requested value per card", () => {
-    const view = frame(2, 1, []);
-    view.gameStats = { turns: [
-      {
-        turn: 1, activePlayer: 0, attacks: [1, 0], threatened: [4, 0],
-        blocked: [0, 0], damageDealt: [4, 0], cardsDisrupted: [2, 0],
-      },
-      {
-        turn: 2, activePlayer: 1, attacks: [0, 0], threatened: [0, 0],
-        blocked: [0, 0], damageDealt: [0, 0], cardsDisrupted: [0, 1],
-      },
-    ] };
-    const stats = computeCycleStats([view]);
-    expect(cycleValue(stats.rows[0]!, 0)).toBe(4);
-    expect(cycleValue(stats.rows[0]!, 0, DISRUPTION_VALUE_PER_CARD)).toBe(10);
-    expect(averageValue(stats, 1)).toBe(0);
-    expect(averageValue(stats, 1, DISRUPTION_VALUE_PER_CARD)).toBe(3);
-    expect(totalValue(stats, 0, DISRUPTION_VALUE_PER_CARD)).toBe(10);
   });
 
   it("averages value over post-opening rounds each seat took a turn in", () => {

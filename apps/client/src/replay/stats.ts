@@ -15,9 +15,7 @@ import type { GameTurnStatsView, GameView } from "@fyendal/shared";
  *  - prevented:   damage stopped after defense (shields, Ward, Arcane Barrier, …)
  *  - damageDealt: damage actually dealt to the opposing hero
  *  - allyAbsorbed: damage dealt by the opponent to your allies
- *  - cardsDisrupted: opponent cards this seat destroyed, discarded, or banished
- *  - value:       threatened + blocked + prevented + life gained - life lost,
- *                 plus `DISRUPTION_VALUE_PER_CARD` per card when opted in
+ *  - value:       threatened + blocked + prevented + life gained - life lost
  */
 export interface CycleRow {
   cycle: number;
@@ -29,7 +27,6 @@ export interface CycleRow {
   prevented: [number, number];
   lifeGained: [number, number];
   lifeLost: [number, number];
-  cardsDisrupted: [number, number];
 }
 
 export type CycleTotals = Omit<CycleRow, "cycle">;
@@ -47,12 +44,9 @@ export interface CycleStats {
   total: CycleTotals;
 }
 
-/** Talishar's flat value for each opponent card taken away. */
-export const DISRUPTION_VALUE_PER_CARD = 3;
-
 const METRICS: readonly CycleMetric[] = [
   "attacks", "threatened", "blocked", "damageDealt", "allyAbsorbed", "prevented",
-  "lifeGained", "lifeLost", "cardsDisrupted",
+  "lifeGained", "lifeLost",
 ];
 
 function emptyTotals(): CycleTotals {
@@ -65,7 +59,6 @@ function emptyTotals(): CycleTotals {
     prevented: [0, 0],
     lifeGained: [0, 0],
     lifeLost: [0, 0],
-    cardsDisrupted: [0, 0],
   };
 }
 
@@ -125,7 +118,6 @@ function fromTurnRecords(turns: readonly GameTurnStatsView[]): CycleStats {
       );
       row.lifeGained[seat] += turn.lifeGained?.[seat] ?? 0;
       row.lifeLost[seat] += turn.lifeLost?.[seat] ?? 0;
-      row.cardsDisrupted[seat] += turn.cardsDisrupted?.[seat] ?? 0;
     }
   }
   const rows = [...byCycle.values()].sort((a, b) => a.cycle - b.cycle);
@@ -225,16 +217,14 @@ export function rowsFor(stats: CycleStats, seat: 0 | 1): CycleRow[] {
   return stats.rows.filter((row) => rounds.has(row.cycle));
 }
 
-/** Talishar-style value: threat + blocks + prevention + life gain - life loss,
- * plus an opt-in flat value per opponent card disrupted. */
-export function cycleValue(row: CycleRow, seat: 0 | 1, disruptionValue = 0): number {
+/** Talishar-style value: threat + blocks + prevention + life gain - life loss. */
+export function cycleValue(row: CycleRow, seat: 0 | 1): number {
   return row.threatened[seat] + row.blocked[seat] + row.prevented[seat]
-    + row.lifeGained[seat] - row.lifeLost[seat]
-    + disruptionValue * row.cardsDisrupted[seat];
+    + row.lifeGained[seat] - row.lifeLost[seat];
 }
 
-export function totalValue(stats: CycleStats, seat: 0 | 1, disruptionValue = 0): number {
-  return rowsFor(stats, seat).reduce((sum, row) => sum + cycleValue(row, seat, disruptionValue), 0);
+export function totalValue(stats: CycleStats, seat: 0 | 1): number {
+  return rowsFor(stats, seat).reduce((sum, row) => sum + cycleValue(row, seat), 0);
 }
 
 /** Post-opening rows in which the seat took its turn. */
@@ -244,11 +234,11 @@ function averagedRows(stats: CycleStats, seat: 0 | 1): CycleRow[] {
 }
 
 /** Average value over post-opening rounds the seat took a turn in. */
-export function averageValue(stats: CycleStats, seat: 0 | 1, disruptionValue = 0): number {
+export function averageValue(stats: CycleStats, seat: 0 | 1): number {
   const cycles = stats.cyclesPlayed[seat];
   if (cycles === 0) return 0;
   return averagedRows(stats, seat)
-    .reduce((sum, row) => sum + cycleValue(row, seat, disruptionValue), 0) / cycles;
+    .reduce((sum, row) => sum + cycleValue(row, seat), 0) / cycles;
 }
 
 export function averagePerRound(

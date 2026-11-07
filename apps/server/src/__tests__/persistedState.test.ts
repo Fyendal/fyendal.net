@@ -1235,10 +1235,6 @@ describe("PersistedStateV1", () => {
     corruptLifeLoss.state.gameStats!.turns[0]!.lifeLost = [0, -1];
     expect(() => decodePersistedState(corruptLifeLoss, "ABC123", cardData, scripts))
       .toThrow(/lifeLost\[1\].*non-negative/);
-    const corruptDisruption = jsonCopy(encodePersistedState(game()));
-    corruptDisruption.state.gameStats!.turns[0]!.cardsDisrupted = [-1, 0];
-    expect(() => decodePersistedState(corruptDisruption, "ABC123", cardData, scripts))
-      .toThrow(/cardsDisrupted\[0\].*non-negative/);
   });
 
   it("round trips paused reaction costs and damage replacement modifiers", () => {

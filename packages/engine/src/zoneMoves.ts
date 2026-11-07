@@ -32,7 +32,6 @@ import {
 } from "./zoneQueries.js";
 import { controlledPermanents, hookSources } from "./sourceQueries.js";
 import { snapshotSerializable } from "./ruleQueries.js";
-import { recordDisruption } from "./stats.js";
 
 import {
   clearPrivateZonePlacement,
@@ -66,7 +65,6 @@ function enterGraveyard(
 ): void {
   const owner = state.players[card.owner] as PlayerState;
   if (dataOf(state, card.cardId).cardType === "token") return;
-  recordDisruption(state, causedBySeat, card, from);
   // Ephemeral (CR 8.3.21): "If this would be put into a graveyard from
   //  anywhere, instead it ceases to exist" — no graveyard, no graveyard flags
   //  or triggers
@@ -652,11 +650,6 @@ export function enterBanish(
   const owner = state.players[card.owner] as PlayerState;
   const causedBy = state.players[causedBySeat] as PlayerState | undefined;
   const power = powerAtOrigin(state, runtime, card, from);
-  // A card that comes back or stays playable was not really taken away.
-  const stillUsable = card.returnToHandAtTurn !== undefined || card.intimidated === true
-    || (card.playableFrom?.includes("banish") === true
-      && (card.playableBySeat === undefined || card.playableBySeat === card.owner));
-  if (!stillUsable) recordDisruption(state, causedBySeat, card, from);
   // A card in banish is a new object (CR 3.0.9), so arena-only tap state and
   // effects on its previous object must not follow it or survive a later
   // play from this zone.

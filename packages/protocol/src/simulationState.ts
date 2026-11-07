@@ -1098,7 +1098,7 @@ function validateState(value: unknown, code: string): PersistedGameStateV1 {
       const turnPath = `${statsPath}.turns[${index}]`;
       const turn = exact(turnValue, code, turnPath, [
         "turn", "activePlayer", "attacks", "threatened", "blocked", "damageDealt",
-      ], ["allyAbsorbed", "lifeGained", "lifeLost", "cardsDisrupted"]);
+      ], ["allyAbsorbed", "lifeGained", "lifeLost"]);
       integer(turn.turn, code, `${turnPath}.turn`);
       const activePlayer = integer(turn.activePlayer, code, `${turnPath}.activePlayer`);
       if (activePlayer !== 0 && activePlayer !== 1) fail(code, `${turnPath}.activePlayer`, "expected seat 0 or 1");
@@ -1110,7 +1110,7 @@ function validateState(value: unknown, code: string): PersistedGameStateV1 {
           if (count < 0) fail(code, `${turnPath}.${key}[${seatIndex}]`, "expected a non-negative integer");
         });
       }
-      for (const key of ["allyAbsorbed", "lifeGained", "lifeLost", "cardsDisrupted"] as const) {
+      for (const key of ["allyAbsorbed", "lifeGained", "lifeLost"] as const) {
         optional(turn, key, (value, valuePath) => {
           const values = array(value, code, valuePath, 2);
           if (values.length !== 2) fail(code, valuePath, "expected two seat values");

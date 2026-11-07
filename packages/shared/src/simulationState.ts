@@ -557,7 +557,6 @@ export interface PersistedGameTurnStatsV1 {
   allyAbsorbed?: [number, number];
   lifeGained?: [number, number];
   lifeLost?: [number, number];
-  cardsDisrupted?: [number, number];
 }
 
 export interface PersistedGameStatsV1 {

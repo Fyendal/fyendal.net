@@ -29763,12 +29763,6 @@
       "value": "逐回合明细"
     }
   ],
-  "game.stats.cardsDisrupted": [
-    {
-      "type": 0,
-      "value": "干扰的对手卡牌"
-    }
-  ],
   "game.stats.damageBlocked": [
     {
       "type": 0,
@@ -29811,30 +29805,10 @@
       "value": "造成"
     }
   ],
-  "game.stats.disrupted": [
-    {
-      "type": 0,
-      "value": "干扰"
-    }
-  ],
   "game.stats.finalLife": [
     {
       "type": 0,
       "value": "最终生命"
-    }
-  ],
-  "game.stats.includeDisruption": [
-    {
-      "type": 0,
-      "value": "每张干扰的卡牌计 "
-    },
-    {
-      "type": 1,
-      "value": "value"
-    },
-    {
-      "type": 0,
-      "value": " 点价值"
     }
   ],
   "game.stats.lifeGained": [
