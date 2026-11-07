@@ -1091,33 +1091,40 @@ function tryOpenBarrierDecision(state: GameStateInternal,
   return true;
 }
 
-/** Open the arcane-damage prevention decisions for a packet: Spellvoid first
- *  (destroy an equipment to prevent N — optional, "you may destroy"), then
- *  Arcane Barrier. Returns false when neither applies and the damage should be
- *  applied immediately. */
-function openArcaneDecision(state: GameStateInternal,
+/** Offer the target's optional Spellvoid decision; returns false when no
+ *  piece applies or it was declined for this event. */
+function openSpellvoidDecision(state: GameStateInternal,
   runtime: EngineRuntime, packet: PendingArcane): boolean {
+  if (!packet.arcane || packet.amount <= 0 || packet.spellvoidDeclined) return false;
   const target = state.players[packet.targetSeat] as PlayerState;
   const pieces = spellvoidPieces(state, runtime, target);
-  if (packet.amount > 0 && pieces.length > 0) {
-    state.pendingDecision = {
-      player: packet.targetSeat,
-      kind: "choose-target",
-      prompt: `Spellvoid: you would be dealt ${packet.amount} arcane damage — destroy an equipment with Spellvoid to prevent some of it?`,
-      promptMessage: {
-        id: "engine.decision.damage.spellvoid",
-        values: { amount: packet.amount },
-      },
-      options: [...pieces.map((p) => `destroy ${p.id}`), "decline"],
-      optionMessages: [...pieces.map(() => null), { id: "common.option.decline" }],
-      cardOptions: [...pieces.map((p) => p.id as number | null), null],
-      sourceInstanceId: packet.sourceInstanceId,
-      chooseHook: "spellvoid",
-      arcane: packet,
-    };
-    return true;
-  }
-  return tryOpenBarrierDecision(state, runtime, packet);
+  if (pieces.length === 0) return false;
+  state.pendingDecision = {
+    player: packet.targetSeat,
+    kind: "choose-target",
+    prompt: `Spellvoid: you would be dealt ${packet.amount} arcane damage — destroy an equipment with Spellvoid to prevent some of it?`,
+    promptMessage: {
+      id: "engine.decision.damage.spellvoid",
+      values: { amount: packet.amount },
+    },
+    options: [...pieces.map((p) => `destroy ${p.id}`), "decline"],
+    optionMessages: [...pieces.map(() => null), { id: "common.option.decline" }],
+    cardOptions: [...pieces.map((p) => p.id as number | null), null],
+    sourceInstanceId: packet.sourceInstanceId,
+    chooseHook: "spellvoid",
+    arcane: packet,
+  };
+  return true;
+}
+
+/** The target orders its own prevention effects (CR 6.5.5): Arcane Barrier,
+ *  then optional Spellvoid, both before the mandatory Ward. */
+function continuePlayerPrevention(state: GameStateInternal,
+  runtime: EngineRuntime, packet: PendingArcane): number {
+  if (packet.amount > 0 && packet.arcane && tryOpenBarrierDecision(state, runtime, packet)) return 0;
+  if (openSpellvoidDecision(state, runtime, packet)) return 0;
+  if (packet.amount > 0 && openWardDecision(state, runtime, packet)) return 0;
+  return finishHeroDamage(state, runtime, packet);
 }
 
 /** Process queued arcane packets one at a time (a new prevention decision pauses the rest). */
@@ -1202,29 +1209,9 @@ function finishHeroDamage(
   return packet.amount;
 }
 
-/** After a Spellvoid answer: continue the packet through any remaining
- *  prevention decisions (Spellvoid again after a destroy, Arcane Barrier
- *  unless declined into it), then apply and drain the queue. */
-function continueArcaneDamage(
-  state: GameStateInternal,
-  runtime: EngineRuntime,
-  packet: PendingArcane,
-  allowSpellvoid: boolean,
-): void {
-  if (packet.amount > 0) {
-    const opened = allowSpellvoid
-      ? openArcaneDecision(state, runtime, packet)
-      : tryOpenBarrierDecision(state, runtime, packet);
-    if (opened) return;
-  }
-  finishHeroDamage(state, runtime, packet);
-}
-
 /** After a Ward answer: Ward is mandatory — re-offer it while damage and
  *  sources remain (one source destroyed at a time, the player only picks the
- *  order), then continue the packet — combat damage resumes the paused
- *  chain-link resolution; arcane damage falls through to the remaining
- *  Spellvoid / Arcane Barrier decisions; anything else applies. */
+ *  order), then finish the packet; combat damage resumes the paused link. */
 function continueAfterWard(state: GameStateInternal,
   runtime: EngineRuntime, packet: PendingArcane): void {
   if (!packet.unpreventable && packet.amount > 0) {
@@ -1232,11 +1219,7 @@ function continueAfterWard(state: GameStateInternal,
     const source = findCardAnywhere(state, packet.sourceInstanceId)?.card;
     packet.amount = applyPitchSourcePrevention(state, target, packet.amount, source);
   }
-  if (packet.amount > 0 && openWardDecision(state, runtime, packet)) return;
-  if (packet.amount > 0 && packet.arcane) {
-    if (openArcaneDecision(state, runtime, packet)) return;
-  }
-  finishHeroDamage(state, runtime, packet);
+  continuePlayerPrevention(state, runtime, packet);
 }
 
 /**
@@ -1492,11 +1475,9 @@ function applyHeroDamageRedirect(
 
 /**
  * Deal effect damage. A prevention shield ("the next time you would be dealt
- *  damage this turn, prevent N") soaks first. Arcane Barrier is offered before
- *  Ward so its controller can choose to pay before Ward's mandatory
- *  destroy-to-prevent replacement applies; choosing pay 0 declines Arcane
- *  Barrier for this event. Ward applies to any remaining damage (combat damage
- *  opens the same decision from resolveLink), then Spellvoid is offered. The damage is deferred until it is
+ *  damage this turn, prevent N") soaks first, then the target's own
+ *  Arcane Barrier / Spellvoid / Ward decisions (continuePlayerPrevention;
+ *  combat damage opens Ward from resolveLink). The damage is deferred until it is
  *  answered (or queued behind an already-open prevention decision), and the
  *  result reaches scripts via onDamageDealt. Ally targets bypass all of that
  *  (see dealAllyDamage). Returns the damage dealt
@@ -1513,10 +1494,7 @@ function continueHeroDamageAfterQuell(
     arcane: packet.arcane,
     preventable: !packet.unpreventable,
   });
-  if (packet.amount > 0 && packet.arcane && tryOpenBarrierDecision(state, runtime, packet)) return 0;
-  if (packet.amount > 0 && openWardDecision(state, runtime, packet)) return 0;
-  if (packet.amount > 0 && packet.arcane && openArcaneDecision(state, runtime, packet)) return 0;
-  return finishHeroDamage(state, runtime, packet);
+  return continuePlayerPrevention(state, runtime, packet);
 }
 
 function continueAfterPaidQuell(state: GameStateInternal,
@@ -1705,8 +1683,7 @@ function finishArcanePacket(state: GameStateInternal,
       { hero: logCardValue(heroCardId) },
     ));
   }
-  if (arc.amount > 0 && openWardDecision(state, runtime, arc)) return;
-  continueArcaneDamage(state, runtime, arc, true);
+  continuePlayerPrevention(state, runtime, arc);
 }
 
 function pitchableHandOptions(state: GameStateInternal, player: PlayerState): string[] {
@@ -2047,13 +2024,12 @@ export function answerArcaneBarrier(
           ...(arc.unpreventable ? {} : { amount: prevented }),
         },
       ));
-      // further Spellvoid pieces may still apply to the rest of the packet
-      continueArcaneDamage(state, runtime, arc, true);
+      continuePlayerPrevention(state, runtime, arc);
       return undefined;
     }
     state.pendingDecision = null;
-    // declined Spellvoid: fall through to the Arcane Barrier decision
-    continueArcaneDamage(state, runtime, arc, false);
+    arc.spellvoidDeclined = true;
+    continuePlayerPrevention(state, runtime, arc);
     return undefined;
   }
   if (pd.chooseHook === "arcane-barrier") {

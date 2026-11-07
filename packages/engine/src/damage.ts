@@ -49,13 +49,17 @@ function dispatchSuppressedHitObservers(state: GameStateInternal,
   }
 }
 
-/** Record that the link's attack hit this turn, as `hitType:<class/subtype>`
- * flags on the attacking player, so "if a <subtype> has hit this turn" checks
- * also see hits from before their source entered the arena. */
+/** Record that the link's attack hit this turn, as `hitType:<card type/class/
+ * subtype>` flags on the attacking player, so "if a <type> has hit this turn"
+ * checks also see hits from before their source entered the arena, and count
+ * each hit-event (hero or ally) per attacking object as `attackHits:<instanceId>`. */
 function recordAttackHit(state: GameStateInternal, link: ChainLinkState): void {
   const attacker = state.players[link.attacker] as PlayerState;
   const live = findCardAnywhere(state, link.attackingCard.instanceId)?.card ?? link.attackingCard;
+  attacker.flags[`hitType:${link.attackCardType}`] = true;
   for (const type of cardTypesOf(state, live)) attacker.flags[`hitType:${type}`] = true;
+  const hitsKey = `attackHits:${link.attackingCard.instanceId}`;
+  attacker.flags[hitsKey] = (Number(attacker.flags[hitsKey]) || 0) + 1;
 }
 
 function applyHit(

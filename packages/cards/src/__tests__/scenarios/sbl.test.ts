@@ -600,6 +600,64 @@ describe("SBL — equipment", () => {
     s.expectLife(1, 15);
   });
 
+  it("Spellvoid can be applied before Ward (CR 6.5.5)", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["voltic bolt|1", YELLOW] },
+        { hero: "dorinthea", life: 20, equipment: { head: "halo of illumination|0", arms: "wave of reality|0" } },
+      ],
+    });
+    s.play("voltic bolt|1", { pitch: [YELLOW] });
+    s.chooseOption("opposing hero");
+    expect(s.state.pendingDecision?.chooseHook).toBe("spellvoid");
+    s.chooseOption("destroy");
+    expect(s.state.pendingDecision?.chooseHook).toBe("ward");
+    s.chooseOption("destroy");
+    s.expectNoEquipment(1, "head");
+    s.expectNoEquipment(1, "arms");
+    s.expectLife(1, 18); // 5 - 2 Spellvoid - 1 Ward
+  });
+
+  it("Arcane Barrier, then Spellvoid, then Ward", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["voltic bolt|1", YELLOW] },
+        {
+          hero: "dorinthea",
+          life: 20,
+          resources: 1,
+          equipment: { head: "halo of illumination|0", arms: "wave of reality|0", legs: "silent stilettos|0" },
+        },
+      ],
+    });
+    s.play("voltic bolt|1", { pitch: [YELLOW] });
+    s.chooseOption("opposing hero");
+    expect(s.state.pendingDecision?.chooseHook).toBe("arcane-barrier");
+    s.chooseOption("pay 1");
+    expect(s.state.pendingDecision?.chooseHook).toBe("spellvoid");
+    s.chooseOption("destroy");
+    expect(s.state.pendingDecision?.chooseHook).toBe("ward");
+    s.chooseOption("destroy");
+    s.expectLife(1, 19); // 5 - 1 Barrier - 2 Spellvoid - 1 Ward
+  });
+
+  it("Spellvoid declined is not offered again after Ward", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["voltic bolt|1", YELLOW] },
+        { hero: "dorinthea", life: 20, equipment: { head: "halo of illumination|0", arms: "wave of reality|0" } },
+      ],
+    });
+    s.play("voltic bolt|1", { pitch: [YELLOW] });
+    s.chooseOption("opposing hero");
+    s.chooseOption("decline");
+    expect(s.state.pendingDecision?.chooseHook).toBe("ward");
+    s.chooseOption("destroy");
+    expect(s.state.pendingDecision?.chooseHook).not.toBe("spellvoid");
+    s.expectEquipped(1, "head", "halo of illumination|0");
+    s.expectLife(1, 16);
+  });
+
   it("Halo of Illumination: pay {r}, destroy it, put a hand card into your soul (Light draws)", () => {
     const s = scenario({
       seats: [

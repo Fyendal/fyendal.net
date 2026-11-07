@@ -15,7 +15,7 @@ import {
 // Warrior cards — almost everything rides existing engine mechanics:
 // - Dawnblade's hit-count +1{p} counters ride the generic weapon power
 //   counters (computeAttack) and an end-of-turn trigger; the hit count itself
-//   is a per-turn flag (auto-wiped).
+//   is the engine's per-turn `attackHits:<instanceId>` flag (hero or ally).
 // - Wreck Havoc's "defense reactions can't be played to this chain link" is
 //   the defenseReactionsProhibited script field. Its arsenal reveal destroys the
 //   revealed card if it is a defense reaction (arsenal cards are public in
@@ -68,13 +68,8 @@ export const sdo: Record<string, CardScript> = {
     //  turn, put a +1{p} counter on it. At the beginning of your end phase,
     //  if this hasn't hit this turn, remove all +1{p} counters from it."
     activated: attackAbility(1),
-    onFriendlyCombatDamageDealt(ctx, source, target, amount) {
-      if (amount <= 0 || target === ctx.seat || source.instanceId !== ctx.self.instanceId) return;
-      const key = `hits:${ctx.self.instanceId}`;
-      ctx.setFlag("player", key, (Number(ctx.getFlag("player", key)) || 0) + 1);
-    },
     canTriggerOnHit(ctx) {
-      return !!ctx.link && Number(ctx.getFlag("player", `hits:${ctx.self.instanceId}`)) === 2;
+      return !!ctx.link && Number(ctx.getFlag("player", `attackHits:${ctx.self.instanceId}`)) === 2;
     },
     onHit(ctx) {
       ctx.addCounter(ctx.self.instanceId, "power", 1);
@@ -88,7 +83,7 @@ export const sdo: Record<string, CardScript> = {
       {
         event: "end-of-turn",
         condition: (ctx) =>
-          !ctx.getFlag("player", `hits:${ctx.self.instanceId}`) && (ctx.self.counters?.power ?? 0) > 0,
+          !ctx.getFlag("player", `attackHits:${ctx.self.instanceId}`) && (ctx.self.counters?.power ?? 0) > 0,
         label: "Dawnblade hasn't hit this turn — remove all +1{p} counters",
         effect(ctx) {
           const n = ctx.self.counters?.power ?? 0;

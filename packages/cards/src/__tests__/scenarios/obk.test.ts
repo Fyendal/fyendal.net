@@ -1352,7 +1352,8 @@ describe("Outbreak cards", () => {
 
     // Dawnblade attack defended by a card and equipment; Rhinar holds `streets`
     // and gets priority after Dorinthea passes.
-    const weaponAttack = (streets: string) => scenario({
+    const weaponAttack = (streets: string, seed = 1) => scenario({
+      seed,
       active: 1,
       seats: [
         { hero: "rhinar", hand: [FILLER, streets], weapons: [], equipment: { ...NO_EQUIPMENT, chest: TUNIC } },
@@ -1367,11 +1368,19 @@ describe("Outbreak cards", () => {
         .expectFinalAttack(10).expectLog("Raging Streets").expectLife(1, 10);
     });
 
-    it("never chooses a weapon attack's proxy or defending equipment", () => {
-      weaponAttack(QUIET_STREETS).react(QUIET_STREETS)
-        .expectFinalAttack(3).expectFinalDefense(1).expectLife(0, 18);
-      weaponAttack(RAGING_STREETS).react(RAGING_STREETS)
-        .expectFinalAttack(3).expectFinalDefense(7).expectLife(0, 20);
+    it("can choose a weapon attack's source but never defending equipment", () => {
+      const equipmentOnly = (streets: string) => scenario({
+        active: 1,
+        seats: [
+          { hero: "rhinar", hand: [streets], weapons: [], equipment: { ...NO_EQUIPMENT, chest: TUNIC } },
+          { hero: "dorinthea", resources: 1, weapons: ["dawnblade|0"], equipment: NO_EQUIPMENT },
+        ],
+      }).attackWithWeapon("dawnblade|0").blockWith(TUNIC).passPriority();
+
+      equipmentOnly(QUIET_STREETS).react(QUIET_STREETS)
+        .expectFinalAttack(0).expectFinalDefense(1).expectLife(0, 20);
+      equipmentOnly(RAGING_STREETS).react(RAGING_STREETS)
+        .expectFinalAttack(6).expectFinalDefense(1).expectLife(0, 15);
     });
 
     it("attributes the change to itself in the attack and defense breakdowns", () => {
@@ -1382,7 +1391,11 @@ describe("Outbreak cards", () => {
           .chain.at(-1);
 
       expect(resolveStreets(actionAttack(RAGING_STREETS))?.attackModifiers).toEqual([raging]);
-      expect(resolveStreets(weaponAttack(RAGING_STREETS))?.defenseModifiers).toEqual([raging]);
+      // The weapon and the defending card are both eligible, so sweep seeds.
+      const links = Array.from({ length: 12 }, (_, seed) => resolveStreets(weaponAttack(RAGING_STREETS, seed)));
+      expect(links.some((link) => link?.defenseModifiers?.length === 1 &&
+        link.defenseModifiers?.[0]?.sourceCardId === raging.sourceCardId)).toBe(true);
+      expect(links.some((link) => link?.attackModifiers?.length === 1)).toBe(true);
     });
 
     it("does nothing without an active chain link", () => {

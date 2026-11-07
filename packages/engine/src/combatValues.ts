@@ -1215,9 +1215,19 @@ export function stagedDefenseTotal(
       });
     }
   }
-  const previewState: GameStateInternal = previewModifiers.length > 0
-    ? { ...state, modifiers: [...state.modifiers, ...previewModifiers] }
-    : state;
+  // Declared defenders leave hand and arsenal (Unyielding Grip reads hand size).
+  const stagedIds = new Set(staged.map((card) => card.instanceId));
+  const withoutStaged = (player: PlayerState): PlayerState => ({
+    ...player,
+    hand: player.hand.filter((card) => !stagedIds.has(card.instanceId)),
+    arsenal: player.arsenal.filter((card) => !stagedIds.has(card.instanceId)),
+  });
+  const previewState: GameStateInternal = {
+    ...state,
+    players: [withoutStaged(state.players[0]), withoutStaged(state.players[1])],
+    chain: state.chain.map((chainLink) => chainLink === link ? stagedLink : chainLink),
+    modifiers: previewModifiers.length > 0 ? [...state.modifiers, ...previewModifiers] : state.modifiers,
+  };
   return cards.reduce(
     (total, card) => total + defendingCardDefense(previewState, runtime, stagedLink, card),
     0,

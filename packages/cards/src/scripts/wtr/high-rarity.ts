@@ -298,17 +298,12 @@ export const wtrHighRarity: Record<string, CardScript> = {
   },
 
   "braveforge bracers|0": {
-    onFriendlyCombatDamageDealt(ctx, source, target, amount) {
-      if (amount > 0 && target !== ctx.seat && ctx.cardData(source.cardId).cardType === "weapon") {
-        ctx.setFlag("player", "weaponHitThisTurn", true);
-      }
-    },
     activated: {
       cost: 1,
       isAttack: false,
       goAgain: true,
       oncePerTurn: true,
-      canActivate: (ctx) => ctx.getFlag("player", "weaponHitThisTurn") === true,
+      canActivate: (ctx) => ctx.getPlayerFlag(ctx.seat, "hitType:weapon") === true,
       onActivate(ctx) {
         ctx.addModifier({ scope: "next-attack", attack: 1, appliesTo: "weapon" });
       },

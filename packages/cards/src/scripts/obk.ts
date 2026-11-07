@@ -844,7 +844,8 @@ const incubatorImplanter: CardScript = {
   },
 };
 
-// Weapon and ally attacks are attack-proxies, not cards on the chain link.
+// A weapon or ally attack-source is a non-equipment card on the chain link;
+// its attack-proxy is not, and neither is defending equipment.
 function streets(delta: number): CardScript {
   const sign = delta < 0 ? "-" : "+";
   const amount = Math.abs(delta);
@@ -853,7 +854,7 @@ function streets(delta: number): CardScript {
       const link = ctx.link;
       if (!link) return;
       const cards = [
-        ...(link.attackCardType === "action" && link.flags.attackGone !== true ? [link.attackingCard] : []),
+        ...(link.attackCardType !== "action" || link.flags.attackGone !== true ? [link.attackingCard] : []),
         ...link.defendingCards,
       ].filter((card) => !ctx.hasCardType(card, "equipment"));
       if (!cards.length) return;

@@ -1636,6 +1636,31 @@ describe("PEN — import and set mechanics", () => {
 });
 
 describe("PEN — generalized rules interactions", () => {
+  it("Unyielding Grip previews +3 when the staged block empties the hand", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["ravenous rabble|1"] },
+        { hero: "dorinthea", hand: ["wrecker romp|3", "wrecker romp|3"], equipment: { arms: "unyielding grip|0" } },
+      ],
+    }).play("ravenous rabble|1");
+    const defender = g.state.players[1]!;
+    const [first, second] = defender.hand.map((card) => card.instanceId);
+    const grip = defender.equipment.arms!.instanceId;
+    const preview = (instanceIds: number[]) => {
+      g.doRaw({ kind: "stage-defenders", instanceIds });
+      const decision = projectStateFor(g.state, 1).pendingDecision;
+      return [
+        decision?.stagedDefense,
+        decision?.defenderDefense?.find((entry) => entry.instanceId === grip)?.defense,
+      ];
+    };
+    expect(preview([first!, grip])).toEqual([3, 0]);
+    expect(preview([first!])).toEqual([3, 0]);
+    expect(preview([first!, second!])).toEqual([6, 3]);
+    expect(preview([first!, second!, grip])).toEqual([9, 3]);
+    g.blockWith("wrecker romp|3", "wrecker romp|3", "unyielding grip|0").settle().expectFinalDefense(9);
+  });
+
   it("Seismic Shift lets its controller announce X, tap exactly X Surges, and choose its targets", () => {
     const g = scenario({
       seats: [

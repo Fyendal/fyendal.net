@@ -867,6 +867,8 @@ export interface PendingArcane {
    * evaluated before Ward; choosing pay 0 or having no payable option closes
    * it for the rest of the original damage event. */
   arcaneBarrierResolved?: true;
+  /** Spellvoid was declined; it is not offered again for this event. */
+  spellvoidDeclined?: true;
   /** Quell sources already paid for during this damage event. */
   usedQuellSourceIds?: number[];
   /** Ward sources present when this event first offered Ward (CR 6.4.3).
