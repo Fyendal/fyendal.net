@@ -338,6 +338,18 @@ interface SearchResult<Evaluation extends TurnEvaluation> {
   line: GameIntent[];
   checkpoints: TurnPlanCheckpoint[];
   evaluation: Evaluation;
+  /** The line ends the game with the planning seat losing. */
+  lost: boolean;
+}
+
+/** A losing line never beats a surviving one, whatever the policy scored it. */
+function isBetterResult<Evaluation extends TurnEvaluation>(
+  candidate: SearchResult<Evaluation>,
+  best: SearchResult<Evaluation> | undefined,
+): boolean {
+  if (!best) return true;
+  if (candidate.lost !== best.lost) return !candidate.lost;
+  return candidate.score > best.score;
 }
 
 interface SearchContext<Evaluation extends TurnEvaluation> {
@@ -636,7 +648,7 @@ function plannerCandidates<Evaluation extends TurnEvaluation>(
   input: BotPolicyInput,
   context: SearchContext<Evaluation>,
   depth: number,
-): GameIntent[] {
+): { selected: GameIntent[]; deferred: GameIntent[] } {
   // Bot tasks omit draw negotiation, but speculative observations regenerate
   // legal intents from the engine. Keep offer/withdraw loops out of every
   // search depth so they cannot consume the budget or become a continuation.
@@ -701,7 +713,37 @@ function plannerCandidates<Evaluation extends TurnEvaluation>(
     context.candidateTrace.rootStrategic = strategic.length;
     context.candidateTrace.rootPrepared = selected.length;
   }
-  return selected;
+  return { selected, deferred: ordered.slice(selected.length) };
+}
+
+/** Scores the line that starts with `intent`, searching on from a clean decision. */
+function lineResult<Evaluation extends TurnEvaluation>(
+  advanced: AdvancedState,
+  context: SearchContext<Evaluation>,
+  intent: GameIntent,
+  intentScore: number,
+  observationKey: string | undefined,
+  nextDepth: number,
+): SearchResult<Evaluation> {
+  const checkpoint = observationKey ? [{ observationKey, intent }] : [];
+  if (advanced.kind === "decision") {
+    const continuation = search(advanced.state, context, nextDepth);
+    return {
+      score: continuation.score + intentScore,
+      line: [intent, ...continuation.line],
+      checkpoints: [...checkpoint, ...continuation.checkpoints],
+      evaluation: continuation.evaluation,
+      lost: continuation.lost,
+    };
+  }
+  const evaluation = evaluateEnd(advanced.state, context, advanced.complete);
+  return {
+    score: evaluation.score + intentScore,
+    line: [intent],
+    checkpoints: checkpoint,
+    evaluation,
+    lost: advanced.state.winner === 1 - context.root.seat,
+  };
 }
 
 function search<Evaluation extends TurnEvaluation>(
@@ -713,7 +755,7 @@ function search<Evaluation extends TurnEvaluation>(
   if (context.nodes >= context.nodeLimit ||
     context.transitions >= context.transitionLimit || depth >= maxDepth) {
     const evaluation = evaluateHorizon(state, context);
-    return { score: evaluation.score, line: [], checkpoints: [], evaluation };
+    return { score: evaluation.score, line: [], checkpoints: [], evaluation, lost: false };
   }
   // Projection and legal-intent generation are among the planner's heavier
   // operations. Build the observation once and reuse it for both the memo key
@@ -726,7 +768,7 @@ function search<Evaluation extends TurnEvaluation>(
     ? botObservationKey(observed)
     : undefined;
 
-  const candidates = plannerCandidates(observed, context, depth);
+  const candidates = plannerCandidates(observed, context, depth).selected;
   let best: SearchResult<Evaluation> | undefined;
   for (const intent of candidates) {
     if (context.nodes >= context.nodeLimit || context.transitions >= context.transitionLimit) break;
@@ -736,32 +778,12 @@ function search<Evaluation extends TurnEvaluation>(
     if (!applied.ok) continue;
     const intentScore = context.config.scoreIntent?.(intent, observed) ?? 0;
     const advanced = advanceForced(applied.state, context, { before: state, intent });
-    const result = advanced.kind === "decision"
-      ? (() => {
-          const continuation = search(advanced.state, context, depth + 1);
-          return {
-            score: continuation.score + intentScore,
-            line: [intent, ...continuation.line],
-            checkpoints: observedKey
-              ? [{ observationKey: observedKey, intent }, ...continuation.checkpoints]
-              : continuation.checkpoints,
-            evaluation: continuation.evaluation,
-          };
-        })()
-      : (() => {
-          const evaluation = evaluateEnd(advanced.state, context, advanced.complete);
-          return {
-            score: evaluation.score + intentScore,
-            line: [intent],
-            checkpoints: observedKey ? [{ observationKey: observedKey, intent }] : [],
-            evaluation,
-          };
-        })();
-    if (!best || result.score > best.score) best = result;
+    const result = lineResult(advanced, context, intent, intentScore, observedKey, depth + 1);
+    if (isBetterResult(result, best)) best = result;
   }
   const result = best ?? (() => {
     const evaluation = evaluateHorizon(state, context);
-    return { score: evaluation.score, line: [], checkpoints: [], evaluation };
+    return { score: evaluation.score, line: [], checkpoints: [], evaluation, lost: false };
   })();
   context.memo.set(key, result);
   return result;
@@ -811,13 +833,27 @@ export function planTurn<Evaluation extends TurnEvaluation>(
       rootPrepared: 0,
     },
   };
-  const rootCandidates = plannerCandidates(input, context, 0);
+  const { selected: rootCandidates, deferred } = plannerCandidates(input, context, 0);
   if (rootCandidates.length === 0) return undefined;
   const totalBudget = config.maxSearchNodes ?? DEFAULT_MAX_SEARCH_NODES;
   const totalTransitionBudget = config.maxTransitions ?? DEFAULT_MAX_SEARCH_TRANSITIONS;
   const rootObservationKey = config.recordCheckpoints ? botObservationKey(input) : undefined;
   let best: SearchResult<Evaluation> | undefined;
   const rootResults: TurnPlanRootResult<Evaluation>[] = [];
+  const exploreRoot = (intent: GameIntent, nodeLimit: number, transitionLimit: number): void => {
+    context.nodeLimit = nodeLimit;
+    context.transitionLimit = transitionLimit;
+    context.memo = new Map();
+    context.nodes++;
+    context.transitions++;
+    const applied = applySimulationIntent(simulation, input.seat, intent);
+    if (!applied.ok) return;
+    const intentScore = config.scoreIntent?.(intent, input) ?? 0;
+    const advanced = advanceForced(applied.state, context, { before: simulation, intent });
+    const result = lineResult(advanced, context, intent, intentScore, rootObservationKey, 1);
+    rootResults.push({ intent, score: result.score, evaluation: result.evaluation });
+    if (isBetterResult(result, best)) best = result;
+  };
   for (const [index, intent] of rootCandidates.entries()) {
     if (context.nodes >= totalBudget || context.transitions >= totalTransitionBudget) break;
     const rootsRemaining = rootCandidates.length - index;
@@ -825,45 +861,22 @@ export function planTurn<Evaluation extends TurnEvaluation>(
     const rootBudget = index === 0 && config.firstRootNodeBudget !== undefined
       ? Math.max(1, Math.min(budgetRemaining, config.firstRootNodeBudget))
       : Math.max(1, Math.floor(budgetRemaining / rootsRemaining));
-    context.nodeLimit = Math.min(totalBudget, context.nodes + rootBudget);
     const transitionsRemaining = totalTransitionBudget - context.transitions;
     const rootTransitionBudget = index === 0 && config.firstRootTransitionBudget !== undefined
       ? Math.max(1, Math.min(transitionsRemaining, config.firstRootTransitionBudget))
       : Math.max(1, Math.floor(transitionsRemaining / rootsRemaining));
-    context.transitionLimit = Math.min(
-      totalTransitionBudget,
-      context.transitions + rootTransitionBudget,
+    exploreRoot(
+      intent,
+      Math.min(totalBudget, context.nodes + rootBudget),
+      Math.min(totalTransitionBudget, context.transitions + rootTransitionBudget),
     );
-    context.memo = new Map();
-    context.nodes++;
-    context.transitions++;
-    const applied = applySimulationIntent(simulation, input.seat, intent);
-    if (!applied.ok) continue;
-    const intentScore = config.scoreIntent?.(intent, input) ?? 0;
-    const advanced = advanceForced(applied.state, context, { before: simulation, intent });
-    const result = advanced.kind === "decision"
-      ? (() => {
-          const continuation = search(advanced.state, context, 1);
-          return {
-            score: continuation.score + intentScore,
-            line: [intent, ...continuation.line],
-            checkpoints: rootObservationKey
-              ? [{ observationKey: rootObservationKey, intent }, ...continuation.checkpoints]
-              : continuation.checkpoints,
-            evaluation: continuation.evaluation,
-          };
-        })()
-      : (() => {
-          const evaluation = evaluateEnd(advanced.state, context, advanced.complete);
-          return {
-            score: evaluation.score + intentScore,
-            line: [intent],
-            checkpoints: rootObservationKey ? [{ observationKey: rootObservationKey, intent }] : [],
-            evaluation,
-          };
-        })();
-    rootResults.push({ intent, score: result.score, evaluation: result.evaluation });
-    if (!best || result.score > best.score) best = result;
+  }
+  // Every capped root loses, so try lower-ranked roots until one survives.
+  const fallbackNodes = Math.max(1, Math.floor(totalBudget / rootCandidates.length));
+  const fallbackTransitions = Math.max(1, Math.floor(totalTransitionBudget / rootCandidates.length));
+  for (const intent of deferred) {
+    if (!best?.lost) break;
+    exploreRoot(intent, context.nodes + fallbackNodes, context.transitions + fallbackTransitions);
   }
   const first = best?.line[0];
   return first && best

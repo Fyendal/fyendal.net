@@ -89,6 +89,37 @@ describe("Ira policy", () => {
     expect(state.chain.at(-1)?.defendingEquipment).toHaveLength(1);
   });
 
+  it("attacks with a weapon instead of playing a hand card into a lethal Exertion", () => {
+    const state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9131,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.life = 1;
+    replaceHand(state, 0, ["ASR007", "ASR015", "ASR022"]);
+    state.players[0]!.board.push({
+      instanceId: state.nextInstanceId++,
+      cardId: "SLV035",
+      owner: 0,
+      creatorSeat: 1,
+    });
+
+    const intent = chooseIraIntent({
+      seat: 0,
+      state,
+      view: projectStateFor(state, 0),
+      legal: legalIntents(state, 0),
+      cards: cardData,
+    });
+    expect(intent).toMatchObject({
+      kind: "activate-ability",
+      sourceInstanceId: state.players[0]!.weapons[0]!.instanceId,
+    });
+  });
+
   it("uses an exact three-damage attack to clear untapped Sawbones", () => {
     const state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],
