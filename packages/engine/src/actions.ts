@@ -832,14 +832,18 @@ function dispatchScriptChoice(
   sourceInstanceId: number | undefined,
   tokenCreationCause: TokenCreationContext | undefined,
   scriptSourceSnapshot: PendingDecisionState["scriptSourceSnapshot"],
+  resume: PendingDecisionState["resume"],
   visit: (script: CardScript, ctx: ScriptCtx) => void,
 ): void {
   if (sourceInstanceId === undefined) return;
   const owner = findCardAnywhere(state, sourceInstanceId) ?? scriptSourceSnapshot;
   if (!owner) return;
+  // A resolving card reports its owner, but its suspended play belongs to whoever played it.
+  const controllerSeat =
+    resume && "card" in resume && resume.card.instanceId === sourceInstanceId ? resume.seat : owner.seat;
   const ctx = runtime.makeCtx(
     state,
-    owner.seat,
+    controllerSeat,
     owner.card,
     currentLink(state),
     undefined,
@@ -865,12 +869,13 @@ function resolveScriptChoice(
   sourceInstanceId: number | undefined,
   hook: string | undefined,
   result: string,
+  resume: PendingDecisionState["resume"],
   tokenCreationCause?: TokenCreationContext,
   scriptSourceSnapshot?: PendingDecisionState["scriptSourceSnapshot"],
 ): void {
   if (!hook) return;
   dispatchScriptChoice(
-    state, runtime, sourceInstanceId, tokenCreationCause, scriptSourceSnapshot,
+    state, runtime, sourceInstanceId, tokenCreationCause, scriptSourceSnapshot, resume,
     (script, ctx) => script.onChoose?.(ctx, hook, result),
   );
 }
@@ -881,12 +886,13 @@ function resolveScriptChoices(
   sourceInstanceId: number | undefined,
   hook: string | undefined,
   optionIds: readonly string[],
+  resume: PendingDecisionState["resume"],
   tokenCreationCause?: TokenCreationContext,
   scriptSourceSnapshot?: PendingDecisionState["scriptSourceSnapshot"],
 ): void {
   if (!hook) return;
   dispatchScriptChoice(
-    state, runtime, sourceInstanceId, tokenCreationCause, scriptSourceSnapshot,
+    state, runtime, sourceInstanceId, tokenCreationCause, scriptSourceSnapshot, resume,
     (script, ctx) => script.onChooseMany?.(ctx, hook, optionIds),
   );
 }
@@ -1049,6 +1055,7 @@ export function answerChoices(
     srcId,
     hook,
     optionIds,
+    resume,
     tokenCreationCause,
     scriptSourceSnapshot,
   );
@@ -1186,6 +1193,7 @@ export function answerChoice(
         srcId,
         hook,
         noPitch.result,
+        resume,
         tokenCreationCause,
         scriptSourceSnapshot,
       );
@@ -1239,6 +1247,7 @@ export function answerChoice(
       srcId,
       hook,
       picked ? picked.result : "declined",
+      resume,
       tokenCreationCause,
       scriptSourceSnapshot,
     );
@@ -1250,6 +1259,7 @@ export function answerChoice(
       srcId,
       hook,
       resolvedOption,
+      resume,
       tokenCreationCause,
       scriptSourceSnapshot,
     );

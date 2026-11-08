@@ -103,6 +103,23 @@ describe("SBL — Charge as an additional cost", () => {
     s.expectHandSize(0, 1); // the on-hit draw
   });
 
+  it("Bolt of Courage played from an opponent's banish charges its player's soul", () => {
+    const s = scenario({
+      seats: [
+        { hero: "dorinthea", hand: [YELLOW], deck: ["snatch|1"] },
+        boltynSeat({ banish: ["bolt of courage|1"] }),
+      ],
+    });
+    const bolt = s.state.players[1]!.banish[0]!;
+    bolt.playableFrom = ["banish"];
+    bolt.playableBySeat = 0;
+    s.play("bolt of courage|1", { fromZone: "banish" });
+    s.chooseCard(YELLOW);
+    s.expectZoneSize(0, "soul", 1).expectZoneSize(1, "soul", 0);
+    s.blockWith().settle();
+    s.expectHandSize(0, 1);
+  });
+
   it("Light the Way gains go again on hit if a yellow card was charged for it", () => {
     const s = scenario({
       seats: [
