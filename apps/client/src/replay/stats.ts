@@ -6,10 +6,11 @@ import type { GameTurnStatsView, GameView } from "@fyendal/shared";
  *
  * A round is one hand cycle for a seat: the opponent's turn it defended on,
  * then its own turn, so blocks pair with the attack the same hand made.
- * Engine turn 1 is FaB's opening turn, round 0 for the seat that took it; the
- * other seat's round 1 starts by defending it. Rounds are indexed per seat,
- * so one row holds both seats' round n. For each seat a round tallies:
- *  - threatened:  attack and effect damage aimed at the opposing hero before prevention
+ * Engine turn 1 is FaB's opening turn, round 0 for both seats: the attack for
+ * the seat that took it and the blocks alone for the other, whose round 1 is
+ * its first attack. Rounds are indexed per seat, so one row holds both seats'
+ * round n. For each seat a round tallies:
+ *  - threatened:  attack and effect damage aimed at the opposing hero or allies before prevention
  *  - blocked:     damage actually blocked against the opponent's links,
  *                 capped at the attack value (over-block is not extra value)
  *  - prevented:   damage stopped after defense (shields, Ward, Arcane Barrier, …)
@@ -98,6 +99,8 @@ function fromTurnRecords(turns: readonly GameTurnStatsView[]): CycleStats {
     // legacy turn 0 (pre-game effects) joins the opening turn
     if (turn.turn !== 0) ownTurns[active] += 1;
     const roundOf = (seat: 0 | 1): number => {
+      // blocks before a seat's first turn stand alone as its opening round
+      if (seat !== active && ownTurns[seat] === 0) return 0;
       const upcoming = seat === active ? ownTurns[seat] : ownTurns[seat] + 1;
       return Math.max(0, upcoming - (seat === openingSeat ? 1 : 0));
     };
@@ -114,7 +117,8 @@ function fromTurnRecords(turns: readonly GameTurnStatsView[]): CycleStats {
       row.allyAbsorbed[seat] += turn.allyAbsorbed?.[seat] ?? 0;
       row.prevented[seat] += Math.max(
         0,
-        turn.threatened[opponent] - turn.blocked[seat] - turn.damageDealt[opponent],
+        turn.threatened[opponent] - turn.blocked[seat] - turn.damageDealt[opponent]
+          - (turn.allyAbsorbed?.[seat] ?? 0),
       );
       row.lifeGained[seat] += turn.lifeGained?.[seat] ?? 0;
       row.lifeLost[seat] += turn.lifeLost?.[seat] ?? 0;
@@ -189,12 +193,12 @@ function legacyTurnRecords(views: GameView[]): GameTurnStatsView[] {
       for (const link of links.slice(prev)) {
         const atk = link.attackingCard.owner === 0 ? 0 : 1;
         const def = atk === 0 ? 1 : 0;
+        record.attacks[atk] += 1;
+        record.threatened[atk] += link.attackValue;
         if (link.targetAllyName) {
           record.allyAbsorbed![def] += link.damage;
           continue;
         }
-        record.attacks[atk] += 1;
-        record.threatened[atk] += link.attackValue;
         record.blocked[def] += Math.min(link.attackValue, link.defenseValue);
         record.damageDealt[atk] += link.damage;
       }

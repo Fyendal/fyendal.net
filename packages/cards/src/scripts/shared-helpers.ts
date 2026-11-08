@@ -1894,3 +1894,29 @@ export function resourceAbility(
     },
   };
 }
+
+/** Flip the controller's double-faced hero; returns the face it flipped into. */
+export function flipHero(ctx: ScriptCtx): "front" | "back" | undefined {
+  const hero = ctx.player(ctx.seat).hero;
+  const backId = ctx.cardData(hero.cardId).backId;
+  if (backId) {
+    ctx.becomeHero(backId);
+    return "back";
+  }
+  const frontId = hero.originalHeroCardId;
+  if (frontId && ctx.cardData(frontId).backId === hero.cardId) {
+    ctx.becomeHero(frontId);
+    return "front";
+  }
+  return undefined;
+}
+
+/** Whether this source's until-end-of-turn effect is still live, even after the source left the arena. */
+export function hasLiveTurnEffect(ctx: ScriptCtx): boolean {
+  return ctx.state.modifiers.some(
+    (modifier) =>
+      modifier.sourceInstanceId === ctx.self.instanceId &&
+      modifier.scope === "until-end-of-turn" &&
+      !modifier.consumed,
+  );
+}

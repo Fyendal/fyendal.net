@@ -9,6 +9,7 @@ import {
   decisionPrompt,
   hitHookLabel,
   ongoingLabel,
+  hasLiveTurnEffect,
 } from "./shared-helpers.js";
 
 const CORRUPTED_CORPSE = "IAR090";
@@ -188,12 +189,7 @@ export const ama: Record<string, CardScript> = {
           !!card &&
           card.owner === ctx.seat &&
           hasType(ctx, card, "zombie") &&
-          ctx.state.modifiers.some(
-            (modifier) =>
-              modifier.sourceInstanceId === ctx.self.instanceId &&
-              modifier.scope === "until-end-of-turn" &&
-              !modifier.consumed,
-          ),
+          hasLiveTurnEffect(ctx),
         effect(ctx) {
           ctx.gainResources(ctx.seat, 1);
         },

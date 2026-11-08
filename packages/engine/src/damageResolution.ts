@@ -1253,6 +1253,11 @@ export function dealAllyDamage(state: GameStateInternal,
   applyBoundArcaneCardBonus(state, packet);
   applyArcaneAmp(state, packet);
   packet.amount += effectDamageBonus(state, packet);
+  if (!packet.combat) {
+    // combat damage to an ally is already counted by the chain link's attack stats
+    const credit = statsCreditSeat(state, packet, src);
+    if (credit !== undefined) recordEffectThreat(state, credit, packet.amount);
+  }
   const sourceWide = sourceWidePrevention(state, src?.card, packet.unpreventable !== true);
   if (sourceWide && src) {
     const prevented = packet.amount;

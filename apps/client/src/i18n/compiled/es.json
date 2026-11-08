@@ -1485,6 +1485,12 @@
       "value": "¿Poner una carta zombie en tu cementerio?"
     }
   ],
+  "card.amg.quickdigit.item.optional": [
+    {
+      "type": 0,
+      "value": "¿Poner un item de coste 0 de tu mano en la arena?"
+    }
+  ],
   "card.amg.revere.shuffle.choose": [
     {
       "type": 0,
@@ -3487,6 +3493,12 @@
     {
       "type": 0,
       "value": "destruye el zombie atacante cuando impacte"
+    }
+  ],
+  "card.effect.amg.heartpump": [
+    {
+      "type": 0,
+      "value": "gana 1 recurso cada vez que se haga banish de 1 o más cartas del mazo de un oponente"
     }
   ],
   "card.effect.amo.actonintel": [

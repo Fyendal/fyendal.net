@@ -11,6 +11,7 @@ import {
   opponentSeat,
   resourceAbility,
   yesNoPrompt,
+  hasLiveTurnEffect,
 } from "./shared-helpers.js";
 import {
   addNextSharpenBonus,
@@ -374,13 +375,7 @@ export const mpw: Record<string, CardScript> = {
         ),
       }),
     onFriendlyAttackDeclared(ctx) {
-      const marker = ctx.state.modifiers.find(
-        (modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId &&
-          modifier.scope === "until-end-of-turn" &&
-          !modifier.consumed,
-      );
-      if (!isSwordAttack(ctx) || !marker || ctx.getState("allInUsed") > 0) return;
+      if (!isSwordAttack(ctx) || !hasLiveTurnEffect(ctx) || ctx.getState("allInUsed") > 0) return;
       ctx.setState("allInUsed", 1);
       const gold = [...controlledNamed(ctx, "Gold")];
       for (const token of gold) ctx.destroyPermanent(token.instanceId);

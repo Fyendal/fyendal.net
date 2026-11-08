@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "id": "FYD-RULE-001",
+    "source": "packages/cards/src/scripts/amg.ts",
+    "expected": "Syncopated Heart Pump gains {r} once per event in which 1 or more cards are banished from an opponent's deck; the engine raises one card-banished event per card, so a multi-card banish gains {r} per card.",
+    "testFile": "packages/cards/src/__tests__/scenarios/amg.test.ts",
+    "testName": "[FYD-RULE-001] gains one resource when several cards are banished at once",
+    "implemented": false
+  }
+]

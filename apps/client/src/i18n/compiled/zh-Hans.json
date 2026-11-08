@@ -1459,6 +1459,12 @@
       "value": "将一个 zombie 放入你的墓地？"
     }
   ],
+  "card.amg.quickdigit.item.optional": [
+    {
+      "type": 0,
+      "value": "将你手牌中一个费用为 0 的物品放入竞技场？"
+    }
+  ],
   "card.amg.revere.shuffle.choose": [
     {
       "type": 0,
@@ -3397,6 +3403,12 @@
     {
       "type": 0,
       "value": "命中时摧毁该进行攻击的 zombie"
+    }
+  ],
+  "card.effect.amg.heartpump": [
+    {
+      "type": 0,
+      "value": "每当 1 张或更多牌从对手的牌库中被放逐时，获得 1 点资源"
     }
   ],
   "card.effect.amo.actonintel": [

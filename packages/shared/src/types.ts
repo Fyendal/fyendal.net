@@ -653,8 +653,10 @@ export interface GameTurnStatsView {
   turn: number;
   activePlayer: number;
   attacks: [number, number];
+  /** Attack and effect damage aimed at the opposing hero or allies before prevention. */
   threatened: [number, number];
   blocked: [number, number];
+  /** Damage dealt to the opposing hero. */
   damageDealt: [number, number];
   /** Damage dealt by an opponent to this seat's allies. Absent in older games. */
   allyAbsorbed?: [number, number];

@@ -10,6 +10,39 @@
     "set": "AMG"
   },
   {
+    "id": "AMG003",
+    "name": "Brainwave Reformer",
+    "cardType": "equipment",
+    "text": "Instant - Destroy this: Flip your hero.\nTemper",
+    "defense": 2,
+    "classes": ["chaos", "mechanologist"],
+    "subtypes": ["head"],
+    "keywords": ["Temper"],
+    "set": "AMG"
+  },
+  {
+    "id": "AMG004",
+    "name": "Syncopated Heart Pump",
+    "cardType": "equipment",
+    "text": "Instant - {t}: Until end of turn, whenever 1 or more cards are banished from an opponent's deck, gain {r}. At the beginning of the end phase, destroy this.\nArcane Barrier 1",
+    "defense": 0,
+    "classes": ["chaos", "mechanologist"],
+    "subtypes": ["chest"],
+    "keywords": ["Arcane Barrier 1"],
+    "set": "AMG"
+  },
+  {
+    "id": "AMG005",
+    "name": "Quickdigit Assemblers",
+    "cardType": "equipment",
+    "text": "When this defends, you may put an item with cost 0 from your hand into the arena. If you do, this gets +1{d}.\nBlade Break",
+    "defense": 1,
+    "classes": ["mechanologist"],
+    "subtypes": ["arms"],
+    "keywords": ["Blade Break"],
+    "set": "AMG"
+  },
+  {
     "id": "AMG023",
     "name": "Madness Spiral",
     "cardType": "action",

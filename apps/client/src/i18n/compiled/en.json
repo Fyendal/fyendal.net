@@ -1481,6 +1481,12 @@
       "value": "Put a zombie into your graveyard?"
     }
   ],
+  "card.amg.quickdigit.item.optional": [
+    {
+      "type": 0,
+      "value": "Put an item with cost 0 from your hand into the arena?"
+    }
+  ],
   "card.amg.revere.shuffle.choose": [
     {
       "type": 0,
@@ -3487,6 +3493,12 @@
     {
       "type": 0,
       "value": "destroy the attacking zombie when it hits"
+    }
+  ],
+  "card.effect.amg.heartpump": [
+    {
+      "type": 0,
+      "value": "gain 1 resource whenever 1 or more cards are banished from an opponent's deck"
     }
   ],
   "card.effect.amo.actonintel": [

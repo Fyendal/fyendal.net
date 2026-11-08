@@ -6,6 +6,7 @@ import {
   localizedCardLog,
   ongoingLabel,
   yesNoPrompt,
+  hasLiveTurnEffect,
 } from "./shared-helpers.js";
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
@@ -177,13 +178,7 @@ export const aio: Record<string, CardScript> = {
       },
     },
     onBoosted(ctx) {
-      const activated = ctx.state.modifiers.some(
-        (modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId &&
-          modifier.scope === "until-end-of-turn" &&
-          !modifier.consumed,
-      );
-      if (!activated) return;
+      if (!hasLiveTurnEffect(ctx)) return;
       ctx.gainResources(ctx.seat, 1);
       ctx.logPublic(
         localizedCardLog(ctx, "Heavy Industry Power Plant: gain {r}", "card.log.common.resources.gained", {

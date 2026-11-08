@@ -11,6 +11,7 @@ import {
   defenderInfected,
   effectPutSelfFaceUpFromDeck,
   entersArenaTrigger,
+  flipHero,
   heroChoiceSeat,
   isDisease,
   isDiseaseToken,
@@ -61,22 +62,6 @@ function minFace(ownedCardTypes: CardScript["ownedCardTypes"], flip: (ctx: Scrip
       },
     ],
   };
-}
-
-/** Flip the controller's double-faced hero; returns the face it flipped into. */
-function flipHero(ctx: ScriptCtx): "front" | "back" | undefined {
-  const hero = ctx.player(ctx.seat).hero;
-  const backId = ctx.cardData(hero.cardId).backId;
-  if (backId) {
-    ctx.becomeHero(backId);
-    return "back";
-  }
-  const frontId = hero.originalHeroCardId;
-  if (frontId && ctx.cardData(frontId).backId === hero.cardId) {
-    ctx.becomeHero(frontId);
-    return "front";
-  }
-  return undefined;
 }
 
 const minGenius = minFace({ gain: ["mechanologist"] }, flipHero);

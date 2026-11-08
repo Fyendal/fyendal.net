@@ -25,6 +25,7 @@ import {
   requestDiscardChoice,
   resolveDiscardChoice,
   resourceAbility,
+  hasLiveTurnEffect,
 } from "./shared-helpers.js";
 
 // Rosetta (ROS) — commons, rares, young heroes, and their required tokens.
@@ -1563,12 +1564,7 @@ Object.assign(ros, {
         event: "card-left-arena",
         label: "Amp 1",
         condition: (ctx, left) =>
-          ctx.state.modifiers.some(
-            (modifier) =>
-              modifier.sourceInstanceId === ctx.self.instanceId &&
-              modifier.scope === "until-end-of-turn" &&
-              !modifier.consumed,
-          ) &&
+          hasLiveTurnEffect(ctx) &&
           !!left &&
           isAura(ctx, left) &&
           cardNameContains(ctx, left, "sigil"),

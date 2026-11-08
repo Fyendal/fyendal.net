@@ -15,6 +15,7 @@ import {
   sharesName,
   wizardActionAsInstant,
   yesNoPrompt,
+  hasLiveTurnEffect,
 } from "../shared-helpers.js";
 
 const COPPER = "CRU197";
@@ -210,13 +211,7 @@ const viziertronic: CardScript = {
     },
   },
   onBoosted(ctx) {
-    const activated = ctx.state.modifiers.some(
-      (modifier) =>
-        modifier.sourceInstanceId === ctx.self.instanceId &&
-        modifier.scope === "until-end-of-turn" &&
-        !modifier.consumed,
-    );
-    if (!activated) return;
+    if (!hasLiveTurnEffect(ctx)) return;
     ctx.drawCards(ctx.seat, 1);
     const pendingTopKey = `viziertronicPendingTops:${ctx.self.instanceId}`;
     const pendingTops = Number(ctx.getPlayerFlag(ctx.seat, pendingTopKey));

@@ -445,6 +445,7 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
     // on-hit hooks still fire; scripts whose text says "hits a hero" filter
     // out links with targetAllyId.
     const targetAlly = defenderPlayer.board.find((c) => c.instanceId === link.targetAllyId);
+    recordAttackStats(state, link.attacker, defenderPlayer.seat, damage, 0);
     if (!targetAlly) {
       logPublic(state, gameLogMessage(
         `${nameOf(state, link.attackingCard.cardId)} finds no target (the ally is gone)`,

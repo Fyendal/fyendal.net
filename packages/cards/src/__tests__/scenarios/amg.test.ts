@@ -12,6 +12,12 @@ const ZERO_TO_SIXTY = "zero to sixty|1";
 const ZIPPER_HIT = "zipper hit|1";
 const PROWL = "prowl|1";
 const FILLER = "raging onslaught|1";
+const MIN = "min, genius|0";
+const BRAINWAVE = "brainwave reformer|0";
+const HEART_PUMP = "syncopated heart pump|0";
+const QUICKDIGIT = "quickdigit assemblers|0";
+const ENERGY_POTION = "energy potion|3";
+const ERADICATE = "eradicate|2";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 
 type Game = ReturnType<typeof scenario>;
@@ -208,6 +214,106 @@ describe("Min armory deck cards", () => {
       game.play(REVERE).chooseMany([]);
 
       game.expectInZone(0, ZIPPER_HIT, "banish");
+    });
+  });
+
+  describe("Brainwave Reformer", () => {
+    it("is destroyed to flip a double-faced hero", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", heroKey: MIN, weapons: [], equipment: { ...NO_EQUIPMENT, head: BRAINWAVE } },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.activate(BRAINWAVE);
+
+      expect(cardData[game.state.players[0]!.heroCardId]!.name).toBe("Min, Mad");
+      game.expectInZone(0, BRAINWAVE, "graveyard");
+    });
+  });
+
+  describe("Syncopated Heart Pump", () => {
+    function pumpGame(ownTop: string, opponentDeck: string[]) {
+      return scenario({ seats: [
+        {
+          hero: "rhinar",
+          hand: [ZERO_TO_SIXTY],
+          deck: [ownTop, FILLER],
+          weapons: [],
+          equipment: { ...NO_EQUIPMENT, chest: HEART_PUMP },
+        },
+        { hero: "dorinthea", deck: opponentDeck, weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+    }
+
+    it("gains a resource when a card is banished from an opponent's deck, then is destroyed", () => {
+      const game = pumpGame(MADNESS_SPIRAL, [FILLER, PROWL]);
+
+      game.activate(HEART_PUMP);
+      expect(game.state.players[0]!.equipment.chest?.tapped).toBe(true);
+      game.play(ZERO_TO_SIXTY, { boost: true }).blockWith().settle();
+
+      game.expectResources(0, 1);
+      game.endTurn();
+      game.expectInZone(0, HEART_PUMP, "graveyard");
+    });
+
+    it("ignores the controller's own deck", () => {
+      const game = pumpGame(ZIPPER_HIT, [FILLER]);
+
+      game.activate(HEART_PUMP).play(ZERO_TO_SIXTY, { boost: true }).blockWith().settle();
+
+      game.expectResources(0, 0);
+    });
+
+    it("does nothing unless activated", () => {
+      const game = pumpGame(MADNESS_SPIRAL, [FILLER]);
+
+      game.play(ZERO_TO_SIXTY, { boost: true }).blockWith().settle();
+
+      game.expectResources(0, 0);
+    });
+
+    it.fails("[FYD-RULE-001] gains one resource when several cards are banished at once", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar",
+          hand: [ERADICATE],
+          resources: 1,
+          weapons: [],
+          equipment: { ...NO_EQUIPMENT, chest: HEART_PUMP },
+        },
+        { hero: "dorinthea", deck: Array<string>(6).fill(FILLER), weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.activate(HEART_PUMP).play(ERADICATE).blockWith().settle();
+
+      expect(game.state.players[1]!.banish.length).toBeGreaterThan(1);
+      game.expectResources(0, 1);
+    });
+  });
+
+  describe("Quickdigit Assemblers", () => {
+    function defendGame(hand: string[]) {
+      return scenario({ seats: [
+        { hero: "rhinar", hand: [FILLER], resources: 3, weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand, weapons: [], equipment: { ...NO_EQUIPMENT, arms: QUICKDIGIT } },
+      ] });
+    }
+
+    it("puts a cost 0 item from hand into the arena for +1{d}", () => {
+      const game = defendGame([ENERGY_POTION]);
+
+      game.play(FILLER).blockWith(QUICKDIGIT).settle().chooseCard(ENERGY_POTION).settle();
+
+      game.expectInZone(1, ENERGY_POTION, "board").expectFinalDefense(2);
+    });
+
+    it("keeps its printed defense when declined", () => {
+      const game = defendGame([ENERGY_POTION]);
+
+      game.play(FILLER).blockWith(QUICKDIGIT).settle().chooseOption("none").settle();
+
+      game.expectInZone(1, ENERGY_POTION, "hand").expectFinalDefense(1);
     });
   });
 });
