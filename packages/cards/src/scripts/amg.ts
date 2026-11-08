@@ -71,7 +71,6 @@ const brainwaveReformer: CardScript = {
   },
 };
 
-// [FYD-RULE-001] Each banished card is its own event, so a multi-card banish gains {r} per card.
 const syncopatedHeartPump: CardScript = {
   activated: {
     cost: 0,
@@ -92,7 +91,7 @@ const syncopatedHeartPump: CardScript = {
   },
   triggers: [
     {
-      event: "card-banished",
+      event: "cards-banished",
       whose: "any",
       label: "Gain 1 resource",
       labelMessage: { id: "card.trigger.common.resource.gain", values: { amount: 1 } },

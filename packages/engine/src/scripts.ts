@@ -412,6 +412,9 @@ export interface ScriptCtx {
    *  to keep the state the card already had. `asAttackingCard` attributes the
    *  banish to the active attack when resolving an ability granted to it. */
   banish(instanceId: number, opts?: { faceDown?: boolean; asAttackingCard?: boolean }): boolean;
+  /** Banish several cards as one event ("banish the top 2 cards"), so
+   *  "cards-banished" triggers once per owner and zone. Returns the count moved. */
+  banishCards(instanceIds: readonly number[], opts?: { faceDown?: boolean; asAttackingCard?: boolean }): number;
   /** Mark every card currently defending on the open combat chain to be
    *  banished by the ordinary chain-close settlement flow. */
   banishAllDefendingCardsOnChainClose(): void;

@@ -663,7 +663,7 @@ export const mpa: Record<string, CardScript> = {
   "wound excision|1": {
     canTriggerOnHit: hitsHeroAfterDaggerHit,
     onHit(ctx) {
-      for (const card of ctx.player(opponentSeat(ctx)).deck.slice(0, 2)) ctx.banish(card.instanceId);
+      ctx.banishCards(ctx.player(opponentSeat(ctx)).deck.slice(0, 2).map((card) => card.instanceId));
     },
   },
 

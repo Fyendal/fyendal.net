@@ -1195,9 +1195,9 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
     onHit(ctx) {
       const target = opponentSeat(ctx);
-      for (const card of [...ctx.player(target).deck]) {
-        if (named(ctx, card, "Inner Chi")) ctx.banish(card.instanceId);
-      }
+      ctx.banishCards(
+        ctx.player(target).deck.filter((card) => named(ctx, card, "Inner Chi")).map((card) => card.instanceId),
+      );
       ctx.shuffleDeck(target);
     },
   },

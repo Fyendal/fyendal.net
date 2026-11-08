@@ -638,6 +638,9 @@ function powerAtOrigin(
   return basePowerOf(state, runtime, card.owner, card, dataOf(state, card.cardId).attack ?? 0);
 }
 
+/** Cards banished by one event; the caller raises "cards-banished" once for them. */
+export type BanishBatch = { card: CardInstance; from: string }[];
+
 /** Put an already removed card into its owner's banished zone and record all
  * public, per-turn, and observer consequences of the move. */
 export function enterBanish(
@@ -646,6 +649,7 @@ export function enterBanish(
   card: CardInstance,
   from: string,
   causedBySeat = card.owner,
+  batch?: BanishBatch,
 ): void {
   const owner = state.players[card.owner] as PlayerState;
   const causedBy = state.players[causedBySeat] as PlayerState | undefined;
@@ -726,6 +730,8 @@ export function enterBanish(
     );
   }
   runtime.events.fireCardBanished(state, owner.seat, card, from);
+  if (batch) batch.push({ card, from });
+  else runtime.events.fireCardsBanished(state, [{ card, from }]);
 }
 
 /** Banish a card from any of its owner's zones (hand/soul/equipment/board/…). */
@@ -736,6 +742,7 @@ export function banishCard(
   causedBySeat?: number,
   faceDown?: boolean,
   effectSource?: TriggerEventContext["effectSource"],
+  batch?: BanishBatch,
 ): boolean {
   const applyBanishVisibility = (card: CardInstance): void => {
     if (faceDown === true) card.faceDown = true;
@@ -767,7 +774,7 @@ export function banishCard(
     active.flags.attackGone = true;
     if (!fromAttackingOwnerZone) {
       applyBanishVisibility(card);
-      enterBanish(state, runtime, card, "chain", causedBySeat);
+      enterBanish(state, runtime, card, "chain", causedBySeat, batch);
       fireLeaveCombatChain(state, runtime, active.attacker, card, "attacking");
       return true;
     }
@@ -804,7 +811,7 @@ export function banishCard(
   const { owner, card, fromArena, fromZone } = found;
   if (fromArena) fireLeaveArena(state, runtime, owner.seat, card, "banish");
   applyBanishVisibility(card);
-  enterBanish(state, runtime, card, fromZone, causedBySeat);
+  enterBanish(state, runtime, card, fromZone, causedBySeat, batch);
   if (fromZone === "chain" && card === defendingCard) {
     fireLeaveCombatChain(state, runtime, card.owner, card, "defending");
   }

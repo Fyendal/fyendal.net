@@ -11,6 +11,7 @@ import type {
 import { scriptPromptParts } from "./scriptPresentation.js";
 import { abilityList, oncePerTurnEffectFlagKey } from "./scripts.js";
 import type { CardInstance, ChainLinkState, EnterArsenalZone, PendingArcane, PendingDecisionState, PlayerState } from "./state.js";
+import type { BanishBatch } from "./zoneMoves.js";
 import { queueDecisionBehindCrank } from "./decisionQueue.js";
 import { queuedAttackObjects } from "./attackQueue.js";
 import { rngInt } from "./rng.js";
@@ -454,6 +455,34 @@ export function makeCtx(
       link.attackCardType !== "action"
     ) return "activated-ability";
     return "other";
+  };
+  const banishOne = (
+    instanceId: number,
+    opts?: { faceDown?: boolean; asAttackingCard?: boolean },
+    batch?: BanishBatch,
+  ): boolean => {
+    const before = findCardAnywhere(state, instanceId);
+    const source = opts?.asAttackingCard && link?.attacker === seat && link.flags.attackGone !== true
+      ? link.attackingCard
+      : self;
+    const moved = runtime.commands.banishCard(
+      state,
+      instanceId,
+      seat,
+      opts?.faceDown,
+      deckMoveEffectSource(),
+      batch,
+    );
+    if (moved && before && before.card.owner !== seat) {
+      fireFriendlyBanishesOpponentCard(state, runtime, seat, before.card);
+    }
+    if (moved && before) {
+      scriptOf(state, source.cardId, source)?.onBanishedCard?.(
+        runtime.makeCtx(state, seat, source, currentLink(state)),
+        before.card,
+      );
+    }
+    return moved;
   };
   const requestScriptedChoice = (
     hook: string,
@@ -2033,26 +2062,12 @@ export function makeCtx(
       );
     },
     banish(instanceId, opts) {
-      const before = findCardAnywhere(state, instanceId);
-      const source = opts?.asAttackingCard && link?.attacker === seat && link.flags.attackGone !== true
-        ? link.attackingCard
-        : self;
-      const moved = runtime.commands.banishCard(
-        state,
-        instanceId,
-        seat,
-        opts?.faceDown,
-        deckMoveEffectSource(),
-      );
-      if (moved && before && before.card.owner !== seat) {
-        fireFriendlyBanishesOpponentCard(state, runtime, seat, before.card);
-      }
-      if (moved && before) {
-        scriptOf(state, source.cardId, source)?.onBanishedCard?.(
-          runtime.makeCtx(state, seat, source, currentLink(state)),
-          before.card,
-        );
-      }
+      return banishOne(instanceId, opts);
+    },
+    banishCards(instanceIds, opts) {
+      const batch: BanishBatch = [];
+      const moved = instanceIds.filter((instanceId) => banishOne(instanceId, opts, batch)).length;
+      runtime.events.fireCardsBanished(state, batch);
       return moved;
     },
     banishAllDefendingCardsOnChainClose() {

@@ -412,8 +412,7 @@ function doubleTrouble(): CardScript {
       return ctx.link?.targetAllyId === undefined && Number(ctx.getFlag("link", "reactionCount")) >= 2;
     },
     onHit(ctx) {
-      const opponent = ctx.player(opponentSeat(ctx));
-      for (const card of opponent.deck.slice(0, 2)) ctx.banish(card.instanceId);
+      ctx.banishCards(ctx.player(opponentSeat(ctx)).deck.slice(0, 2).map((card) => card.instanceId));
     },
   };
 }

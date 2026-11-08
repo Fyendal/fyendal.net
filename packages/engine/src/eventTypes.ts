@@ -11,6 +11,9 @@ export type TriggerEvent =
   | "card-discarded"
   | "card-banished"
   | "card-banished-for-boost"
+  /** One or more of the subject's cards were banished from one zone by the
+   * same event; raised once after the per-card "card-banished" events. */
+  | "cards-banished"
   | "card-boosted"
   | "card-put-into-graveyard"
   | "card-charged"

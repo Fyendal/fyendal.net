@@ -729,7 +729,7 @@ export const dynHighRarity: Record<string, CardScript> = {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
       const count = Math.max(0, ctx.link?.damage ?? 0);
-      for (const card of ctx.player(opponentSeat(ctx)).deck.slice(0, count)) ctx.banish(card.instanceId);
+      ctx.banishCards(ctx.player(opponentSeat(ctx)).deck.slice(0, count).map((card) => card.instanceId));
     },
   },
   "leave no witnesses|1": {

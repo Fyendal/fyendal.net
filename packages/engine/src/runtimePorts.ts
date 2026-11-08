@@ -76,6 +76,7 @@ export type ScriptCommandName =
 export type ScriptEventName =
   | "collectCardEventTriggerLayers"
   | "fireCardBanished"
+  | "fireCardsBanished"
   | "fireCardLeavesGraveyard"
   | "fireFriendlyAttackLost"
   | "fireFriendlyDestroyed"

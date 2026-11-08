@@ -273,7 +273,7 @@ describe("Min armory deck cards", () => {
       game.expectResources(0, 0);
     });
 
-    it.fails("[FYD-RULE-001] gains one resource when several cards are banished at once", () => {
+    it("gains one resource when several cards are banished at once", () => {
       const game = scenario({ seats: [
         {
           hero: "rhinar",

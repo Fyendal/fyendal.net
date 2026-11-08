@@ -6,6 +6,7 @@ import type { TriggerAnnouncement } from "./triggerPresentation.js";
 import { triggerOccurrenceCount } from "./scripts.js";
 import type { DamageEventContext, ScriptCtx, TriggerEvent, TriggerEventContext } from "./scripts.js";
 import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./state.js";
+import type { BanishBatch } from "./zoneMoves.js";
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { currentLink, opponent, removeFromArray } from "./zoneQueries.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
@@ -406,6 +407,22 @@ export function fireCardBanished(
       card,
       from,
     );
+  }
+}
+
+/** Raise "cards-banished" once per owner and origin zone for cards one event banished. */
+export function fireCardsBanished(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  moved: Readonly<BanishBatch>,
+): void {
+  const groups = new Map<string, BanishBatch[number]>();
+  for (const entry of moved) {
+    const key = `${entry.card.owner}\u0000${entry.from}`;
+    if (!groups.has(key)) groups.set(key, entry);
+  }
+  for (const { card, from } of groups.values()) {
+    runtime.events.queueTriggeredEvent(state, "cards-banished", card.owner, card, { from, to: "banish" });
   }
 }
 

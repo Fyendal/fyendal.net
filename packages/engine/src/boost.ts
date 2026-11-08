@@ -8,6 +8,7 @@ import { boostCountForCardPlay } from "./playRules.js";
 import { lingeringModifierSources } from "./sourceQueries.js";
 import { removeFromArray } from "./zoneQueries.js";
 import { enterBanish } from "./zoneMoves.js";
+import type { BanishBatch } from "./zoneMoves.js";
 
 // Instant-speed plays can pause for cost decisions, so the declaration and its
 // result ride on the card until the attack reaches the combat chain.
@@ -122,9 +123,10 @@ export function payBoosts(
         }
       }
     }
+    const banishBatch: BanishBatch = [];
     for (const moved of banishedForBoost) {
       removeFromArray(state.resolving, moved.instanceId);
-      enterBanish(state, runtime, moved, "deck", seat);
+      enterBanish(state, runtime, moved, "deck", seat, banishBatch);
       runtime.dispatchFlow(
         "deferEventTriggers",
         state,
@@ -166,6 +168,7 @@ export function payBoosts(
         (card.scriptState ??= {})[`${BOOST_BANISHED_PREFIX}${moved.instanceId}`] = banishPower;
       }
     }
+    runtime.events.fireCardsBanished(state, banishBatch);
     boosted = true;
     boostSucceeded = boostSucceeded ||
       (replaced ? [banished] : banishedForBoost).some((moved) =>
