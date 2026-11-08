@@ -708,6 +708,40 @@ describe("Ira policy", () => {
     expect(state.players[0]!.equipment.legs?.instanceId).toBe(intent.sourceInstanceId);
   });
 
+  it("keeps Double Cross Strap when no action point remains for the attack it would fund", () => {
+    let state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9112,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.equipment.chest = { instanceId: state.nextInstanceId++, cardId: "SFA007", owner: 0 };
+    replaceHand(state, 0, ["ASR007", "ASR012", "SEA226"]);
+    replaceHand(state, 1, []);
+    state.players[0]!.resources = 2;
+    for (const cardId of ["ASR007", "ASR012"]) {
+      const attack = state.players[0]!.hand.find((card) => card.cardId === cardId)!;
+      state = apply(state, 0, { kind: "play-card", instanceId: attack.instanceId, pitchInstanceIds: [] });
+      state = advanceUntil(state, (candidate) =>
+        candidate.phase === "action" && candidate.chain.at(-1)?.resolved === true &&
+        candidate.chain.at(-1)?.attackingCard.cardId === cardId
+      );
+    }
+
+    const view = projectStateFor(state, 0);
+    expect(view.players[0].actionPoints).toBe(0);
+    expect(view.players[0].resources).toBe(1);
+    const strap = state.players[0]!.equipment.chest!.instanceId;
+    const destroyStrap = { kind: "activate-ability", sourceInstanceId: strap };
+    const legal = legalIntents(state, 0);
+    expect(legal).toContainEqual(expect.objectContaining(destroyStrap));
+
+    const intent = chooseIraIntent({ seat: 0, view, legal, cards: cardData });
+    expect(intent).not.toMatchObject(destroyStrap);
+  });
+
   it("preserves Snapdragon Scalers when an underblocked attack will get go again on hit", () => {
     let state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],

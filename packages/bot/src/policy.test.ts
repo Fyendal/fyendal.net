@@ -922,6 +922,26 @@ describe("shared Spectra targeting", () => {
     expect(enforceSpectraPolicy(setup.input, snatchHero)).toEqual(lavaSpectra);
   });
 
+  it("keeps a terminal attack on the hero when no block can stop lethal", () => {
+    const setup = spectraInput([]);
+    const opponent = setup.input.view.players[1];
+    opponent.handCount = 0;
+    opponent.arsenal = [];
+    opponent.equipment = {};
+    const lavaHero: GameIntent = {
+      kind: "play-card",
+      instanceId: setup.lava.instanceId,
+      pitchInstanceIds: [],
+    };
+    const lavaSpectra: GameIntent = { ...lavaHero, targetAllyId: setup.haze.instanceId };
+    setup.input.legal = [lavaSpectra, lavaHero, { kind: "pass" }];
+
+    opponent.life = 2;
+    expect(enforceSpectraPolicy(setup.input, lavaSpectra)).toEqual(lavaHero);
+    opponent.life = 3;
+    expect(enforceSpectraPolicy(setup.input, lavaHero)).toEqual(lavaSpectra);
+  });
+
   it("uses the final remaining attack to clear Spectra even when it has go again", () => {
     const setup = spectraInput([]);
     setup.input.view.players[0].hand = [setup.tag];

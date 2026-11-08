@@ -607,8 +607,9 @@ function scorePlay(
     } else if (functional === "tearing shuko|0") {
       score = atActionDecision(input) && tigerInReserve(input) ? 6 : -100;
     } else if (functional === "blood scent|0" || functional === "double cross strap|0") {
-      // Only worth destroying when the resource pays for a reserved attack.
-      score = !affordableAttackInReserve(intent, input, own) && affordableAttackInReserve(intent, input, own, 1)
+      // Only worth destroying when the resource pays for a reserved attack Ira can still play.
+      score = canPlayActionNow(input) && !affordableAttackInReserve(intent, input, own) &&
+          affordableAttackInReserve(intent, input, own, 1)
         ? 16
         : -100;
     } else {

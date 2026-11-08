@@ -1180,17 +1180,31 @@ export function equipmentDefense(
   return Math.max(0, modified);
 }
 
-/** `link` as it would stand with an uncommitted staged set declared as
- * defenders, without moving cards or firing defend hooks. */
-export function linkWithStagedDefenders(
+/** State and link with `staged` declared as defenders, moved out of hand and
+ * arsenal onto the chain, so scripts reading `ctx.state` see where they are. */
+export function stagedDefenderPreview(
   state: GameStateInternal,
   link: ChainLinkState,
   staged: readonly CardInstance[],
-): ChainLinkState {
-  return {
+): { state: GameStateInternal; link: ChainLinkState } {
+  const stagedLink: ChainLinkState = {
     ...link,
     defendingCards: [...link.defendingCards, ...staged.filter((card) => !cardHasType(state, card, "equipment"))],
     defendingEquipment: [...link.defendingEquipment, ...staged.filter((card) => cardHasType(state, card, "equipment"))],
+  };
+  const stagedIds = new Set(staged.map((card) => card.instanceId));
+  const withoutStaged = (player: PlayerState): PlayerState => ({
+    ...player,
+    hand: player.hand.filter((card) => !stagedIds.has(card.instanceId)),
+    arsenal: player.arsenal.filter((card) => !stagedIds.has(card.instanceId)),
+  });
+  return {
+    state: {
+      ...state,
+      players: [withoutStaged(state.players[0]), withoutStaged(state.players[1])],
+      chain: state.chain.map((chainLink) => chainLink === link ? stagedLink : chainLink),
+    },
+    link: stagedLink,
   };
 }
 
@@ -1219,10 +1233,10 @@ export function stagedDefenseTotal(
   staged: CardInstance[],
 ): number {
   const equipment = staged.filter((card) => cardHasType(state, card, "equipment"));
-  const stagedLink = linkWithStagedDefenders(state, link, staged);
+  const { state: stagedState, link: stagedLink } = stagedDefenderPreview(state, link, staged);
   // A Mirage defender is destroyed before damage, so it adds no defense.
   const cards = staged.filter((card) =>
-    !cardHasType(state, card, "equipment") && !mirageConditionMet(state, runtime, stagedLink, card)
+    !cardHasType(state, card, "equipment") && !mirageConditionMet(stagedState, runtime, stagedLink, card)
   );
   // Preview the attachments that applyOneShotDefenseModifiers would create
   // if this staged set became the next defend event, without consuming the
@@ -1249,19 +1263,9 @@ export function stagedDefenseTotal(
       });
     }
   }
-  // Declared defenders leave hand and arsenal (Unyielding Grip reads hand size).
-  const stagedIds = new Set(staged.map((card) => card.instanceId));
-  const withoutStaged = (player: PlayerState): PlayerState => ({
-    ...player,
-    hand: player.hand.filter((card) => !stagedIds.has(card.instanceId)),
-    arsenal: player.arsenal.filter((card) => !stagedIds.has(card.instanceId)),
-  });
-  const previewState: GameStateInternal = {
-    ...state,
-    players: [withoutStaged(state.players[0]), withoutStaged(state.players[1])],
-    chain: state.chain.map((chainLink) => chainLink === link ? stagedLink : chainLink),
-    modifiers: previewModifiers.length > 0 ? [...state.modifiers, ...previewModifiers] : state.modifiers,
-  };
+  const previewState: GameStateInternal = previewModifiers.length > 0
+    ? { ...stagedState, modifiers: [...state.modifiers, ...previewModifiers] }
+    : stagedState;
   return cards.reduce(
     (total, card) => total + defendingCardDefense(previewState, runtime, stagedLink, card),
     0,

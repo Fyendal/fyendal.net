@@ -41,7 +41,7 @@ import {
   defenseValueModifiers,
   effectiveDefense,
   grantsAuraAttackMarker,
-  linkWithStagedDefenders,
+  stagedDefenderPreview,
   stagedDefenseTotal,
 } from "./combatValues.js";
 import {
@@ -1279,17 +1279,17 @@ function projectState(
             }
             const link = currentLink(state);
             const total = mine && link ? stagedDefenseTotal(state, runtime, link, stagedInstances) : 0;
-            const stagedLink = link ? linkWithStagedDefenders(state, link, visibleStaged) : undefined;
+            const preview = link ? stagedDefenderPreview(state, link, visibleStaged) : undefined;
             staged = {
               stagedCards: cards,
               stagedHandCount,
               stagedDefense: mine ? total : 0,
-              ...(stagedLink
+              ...(preview
                 ? {
-                    stagedAttack: computeAttack(state, runtime, stagedLink),
+                    stagedAttack: computeAttack(preview.state, runtime, preview.link),
                     stagedAttackModifiers: projectedCombatValueModifiers(
                       state,
-                      attackValueModifiers(state, runtime, stagedLink),
+                      attackValueModifiers(preview.state, runtime, preview.link),
                       seat,
                       revealAll,
                     ),
@@ -1416,20 +1416,19 @@ function projectedDefenderDefense(
   if (!link) return [];
   const total = (cards: CardInstance[]) =>
     cards.length > 0 ? stagedDefenseTotal(state, runtime, link, cards) : 0;
-  const attack = (cards: readonly CardInstance[]) =>
-    computeAttack(state, runtime, linkWithStagedDefenders(state, link, cards));
   const base = total([...staged]);
   const stagedIds = new Set(staged.map((card) => card.instanceId));
   const { hand, arsenal, equipment } = legalDefenderCards(state, runtime, defenderSeat);
   return [...hand, ...arsenal, ...equipment].map((card) => {
     const defenders = stagedIds.has(card.instanceId) ? staged : [...staged, card];
+    const preview = stagedDefenderPreview(state, link, defenders);
     return {
       instanceId: card.instanceId,
       defense: Math.max(0, stagedIds.has(card.instanceId)
         ? base - total(staged.filter((other) => other.instanceId !== card.instanceId))
         : total([...staged, card]) - base),
-      attack: attack(defenders),
-      ...(cardTriggersPhantasm(state, runtime, linkWithStagedDefenders(state, link, defenders), card)
+      attack: computeAttack(preview.state, runtime, preview.link),
+      ...(cardTriggersPhantasm(preview.state, runtime, preview.link, card)
         ? { triggersPhantasm: true as const }
         : {}),
     };

@@ -25,6 +25,7 @@ import {
   shouldPreserveOpeningHand,
   spendsOpeningArsenalReserve,
   targetableAttackIntent,
+  visibleWardCards,
   type BotPolicyInput,
   type TargetableAttackIntent,
   type ResponseModel,
@@ -861,20 +862,6 @@ function ancestralEmpowermentIsPending(input: BotPolicyInput): boolean {
     layer.seat === input.seat && layer.card !== null &&
     key(input.cards[layer.card.cardId]) === CARD.ancestralEmpowerment
   );
-}
-
-function visibleWardCards(input: BotPolicyInput): CardView[] {
-  const opponent = input.view.players[1 - input.seat]!;
-  const visibleCards = [
-    ...opponent.board,
-    ...opponent.weapons,
-    ...Object.values(opponent.equipment).filter((card): card is CardView => card !== undefined),
-  ];
-  return visibleCards.filter((card) => {
-    const data = input.cards[card.cardId];
-    return /\bward\s+(?:[1-9]\d*|x)\b/i.test(data?.text ?? "") ||
-      data?.keywords?.some((keyword) => /^ward\s+(?:[1-9]\d*|x)$/i.test(keyword)) === true;
-  });
 }
 
 function opponentHasVisibleWard(input: BotPolicyInput): boolean {

@@ -260,6 +260,18 @@ describe("MON — Light Illusionist", () => {
       expect(projected(s, SEVEN)?.triggersPhantasm).toBe(true);
     });
 
+    it("drops Kayo's off-chain power from a projected defender", () => {
+      const s = scenario({
+        seats: [
+          prismSeat({ hand: ["herald of triumph|1", BLUE] }),
+          { hero: "rhinar", heroKey: "kayo|0", hand: [SIX, SEVEN] },
+        ],
+      });
+      s.play("herald of triumph|1", { pitch: [BLUE] });
+      expect(projected(s, SIX)?.triggersPhantasm).toBeUndefined();
+      expect(projected(s, SEVEN)?.triggersPhantasm).toBe(true);
+    });
+
     it("drops the flag once Dream Weavers removes Phantasm", () => {
       const s = scenario({
         seats: [

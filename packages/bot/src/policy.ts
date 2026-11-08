@@ -2307,6 +2307,33 @@ function holdsAttackAfter(
   );
 }
 
+/** Opposing permanents with a Ward value. */
+export function visibleWardCards(input: BotPolicyInput): CardView[] {
+  const opponent = input.view.players[1 - input.seat]!;
+  const visibleCards = [
+    ...opponent.board,
+    ...opponent.weapons,
+    ...Object.values(opponent.equipment).filter((card): card is CardView => card !== undefined),
+  ];
+  return visibleCards.filter((card) => {
+    const data = input.cards[card.cardId];
+    return /\bward\s+(?:[1-9]\d*|x)\b/i.test(data?.text ?? "") ||
+      data?.keywords?.some((keyword) => /^ward\s+(?:[1-9]\d*|x)$/i.test(keyword)) === true;
+  });
+}
+
+/** Lethal even if the opponent blocks with every card, at the planner's three
+ * defense per hidden card, and has no visible Ward. */
+function heroAttackLethalThroughBlocks(option: SpectraAttackOption, input: BotPolicyInput): boolean {
+  if (visibleWardCards(input).length > 0) return false;
+  const opponent = input.view.players[1 - input.seat]!;
+  const equipmentDefense = Object.values(opponent.equipment)
+    .flatMap((card) => card ? [card] : [])
+    .reduce((total, card) => total + Math.max(0, card.defense ?? input.cards[card.cardId]?.defense ?? 0), 0);
+  const blockCapacity = (opponent.handCount + opponent.arsenal.length) * 3 + equipmentDefense;
+  return option.attack - blockCapacity >= opponent.life;
+}
+
 /** Shared target discipline for every practice bot. Spectra clears the attack
  * immediately, so continuing attacks stay aimed at the hero until the bot's
  * terminal attack. The terminal clear spends the least attack power possible,
@@ -2335,6 +2362,7 @@ export function enforceSpectraPolicy(input: BotPolicyInput, selected: GameIntent
   const selectedVariant = attackIntentVariantKey(selected);
   const selectedOption = options.find((option) => attackIntentVariantKey(option.target) === selectedVariant);
   if (!selectedOption) return selected;
+  if (selectedOption.hero && heroAttackLethalThroughBlocks(selectedOption, input)) return selectedOption.hero;
   const sourceCount = new Set(options.map((option) => option.source)).size;
   if (selectedOption.continues &&
     (sourceCount > 1 || holdsAttackAfter(selectedOption.target, input, own))) {
