@@ -1063,8 +1063,25 @@ function equipmentWearCost(card: CardView, input: BotPolicyInput): number {
   if (keywords.has("battleworn")) return 1;
   if (keywords.has("temper")) return defense <= 1 ? 2 : 1.5;
   if (keywords.has("guardwell")) return Math.max(1, defense);
-  if (keywords.has("blade break")) return Math.max(2, defense);
+  if (keywords.has("blade break")) return Math.max(2, defense) + destroyedAbilityValue(card, input);
   return defense > 0 ? 2 : 0;
+}
+
+/** Destroyed armor also takes its printed ability out of the rest of the game. */
+const EQUIPMENT_ABILITY_VALUE = 1;
+/** The Spring Tunic's future resources beyond the energy it already holds. */
+const SPRING_TUNIC_FUTURE_RESOURCES = 1;
+
+function destroyedAbilityValue(card: CardView, input: BotPolicyInput): number {
+  if (isSpringTunic(card, input)) return SPRING_TUNIC_FUTURE_RESOURCES + (card.counters?.energy ?? 0) / 3;
+  // weaponLockCost already prices Kabuto's lock.
+  if (isWeaponLock(card, input)) return 0;
+  const keywords = [...equipmentKeywords(card, input)];
+  const hasAbility = (input.cards[card.cardId]?.text ?? "").split("\n").some((raw) => {
+    const line = raw.trim().toLowerCase();
+    return line !== "" && !line.startsWith("(") && !keywords.some((keyword) => line.startsWith(keyword));
+  });
+  return hasAbility ? EQUIPMENT_ABILITY_VALUE : 0;
 }
 
 /** Already Dead-style hits banish or destroy a defender, armor included. */
@@ -1816,8 +1833,10 @@ export function scoreDefenseIntentWithTrace(
     // to improve an otherwise nonlethal opening block.
     if (openingDefense) return true;
     if (locksWeapons(card)) return false;
-    if (isMidgameDurableArmor(card, input)) return false;
     if (model.equipmentUseIsFree?.(card, input)) return false;
+    // Chipping a hit whose meaningful on-hit lands anyway wears armor for little.
+    if (!stopsHit && meaningfulOnHit) return true;
+    if (isMidgameDurableArmor(card, input)) return false;
     if (attackIsWeapon && isBladeBeckoner(card, input)) return false;
     return true;
   });

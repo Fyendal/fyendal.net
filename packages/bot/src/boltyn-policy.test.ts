@@ -7,7 +7,7 @@ import { chooseHalaIntent } from "./hala-policy.js";
 import { decklistsFromState } from "./deck-knowledge.js";
 import { boltynPresentationFor, halaPresentationFor } from "./sideboard.js";
 import { boltynSolverRules } from "./boltyn-rules.js";
-import { handResponse } from "./hand-value.js";
+import { handResponse, solveHand } from "./hand-value.js";
 import { plannedDefenseReactionPlan, type BotPolicyInput } from "./policy.js";
 
 const BOLTYN_POOL = precon("bot-boltyn-raydn")!.pool;
@@ -1027,6 +1027,44 @@ describe("Boltyn policy", () => {
     expect(played.some((entry) =>
       entry.startsWith("defend(") || entry === "Saving Grace" || entry === "Sink Below"
     )).toBe(true);
+  });
+
+  it("does not chip Command and Conquer with armor alone when its on-hit still lands", () => {
+    const state = settled(game());
+    const me = state.players[0]!;
+    me.life = 20;
+    hand(state, ["ASB020", "ASB023", "ASB007", "MON032"]);
+    me.arsenal = cards(state, ["DTD052"]);
+    soul(state, 2);
+    me.equipment.head = { instanceId: state.nextInstanceId++, cardId: "EVO247", owner: 0 };
+    delete me.equipment.legs;
+    me.equipment.arms!.defCounters = 1;
+    state.players[1]!.resources = 2;
+    const defending = underAttack(state, "ARC159");
+    const chosen = defenders(defending);
+    const { hand: held, equipment } = defending.players[0]!;
+    const worn = Object.values(equipment).filter((card) => card && chosen.includes(card.instanceId));
+    // Every hand card here defends for 3.
+    const defense = 3 * held.filter((card) => chosen.includes(card.instanceId)).length + worn.reduce(
+      (total, card) => total + (cardData[card!.cardId]?.defense ?? 0) - (card!.defCounters ?? 0), 0);
+    expect(worn.length === 0 || defense >= 6).toBe(true);
+  });
+
+  it("charges a stranded V of the Vanguard to open a charged Raydn swing next turn", () => {
+    const state = game();
+    state.activePlayer = 1;
+    state.priorityPlayer = 1;
+    // With no other Light card for V to charge, Beaming Bravado charging it beats holding V.
+    hand(state, ["ASB020", "ASB023"]);
+    soul(state, 2);
+    const raydn = state.players[0]!.weapons[0]!;
+    const result = solveHand(
+      [...state.players[0]!.hand],
+      { seat: 0, view: projectStateFor(state, 0), legal: [], cards: cardData, state },
+      boltynSolverRules,
+    );
+    expect(result.damage).toBeGreaterThanOrEqual(6);
+    expect(result.line.map((step) => step.instanceId)).toContain(raydn.instanceId);
   });
 
   describe("hero ability locks", () => {

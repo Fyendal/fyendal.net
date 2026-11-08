@@ -107,10 +107,16 @@ const PLAY_VALUE: Readonly<Record<string, number>> = {
 };
 
 /** What a turn gives up by charging a hand card instead of playing or keeping it. */
-export function solverChargeCost(card: SolverCard): number {
+export function solverChargeCost(card: SolverCard, view?: SolverView, selfId?: number): number {
+  const functional = `${card.name.toLowerCase()}|${card.pitch}`;
   // Spirit of Eirina enters the arena when charged, so it costs nothing.
-  if (`${card.name.toLowerCase()}|${card.pitch}` === SPIRIT_OF_EIRINA) return 0;
-  const explicit = PLAY_VALUE[`${card.name.toLowerCase()}|${card.pitch}`];
+  if (functional === SPIRIT_OF_EIRINA) return 0;
+  // V is worth its setup value only while another Light hand card remains for it to charge.
+  const stranded = functional === V_OF_THE_VANGUARD && view !== undefined && !view.held.some((other) =>
+    other.zone === "hand" && other.instanceId !== card.instanceId && other.instanceId !== selfId &&
+    !isCharged(view, other.instanceId) && other.traits.includes("light")
+  );
+  const explicit = stranded ? undefined : PLAY_VALUE[functional];
   const offense = card.kind === "attack"
     ? (card.power + card.onHit * DEFAULT_HIT_CHANCE) * 0.6
     : card.kind === "attack-reaction"
@@ -132,7 +138,7 @@ export function chargeCandidates(view: SolverView, selfId: number): SolverCard[]
   const yellow = (card: SolverCard) => card.pitch === 2 ? 1 : 0;
   return candidates.sort((left, right) =>
     (yellowFirst ? yellow(right) - yellow(left) : 0) ||
-    solverChargeCost(left) - solverChargeCost(right) ||
+    solverChargeCost(left, view, selfId) - solverChargeCost(right, view, selfId) ||
     yellow(right) - yellow(left) ||
     left.instanceId - right.instanceId
   );
@@ -160,9 +166,9 @@ function recordCharges(view: SolverView, flags: Record<string, number>, targets:
 }
 
 /** Soul gained (plus Suraya's Ponder) minus what the charged cards were worth. */
-function chargeBonus(view: SolverView, targets: readonly SolverCard[]): number {
+function chargeBonus(view: SolverView, targets: readonly SolverCard[], selfId?: number): number {
   return targets.reduce((total, target) =>
-    total + SOUL_VALUE - solverChargeCost(target) + (view.flag("suraya") > 0 ? PONDER_TOKEN_VALUE : 0) +
+    total + SOUL_VALUE - solverChargeCost(target, view, selfId) + (view.flag("suraya") > 0 ? PONDER_TOKEN_VALUE : 0) +
     (`${target.name.toLowerCase()}|${target.pitch}` === SPIRIT_OF_EIRINA && view.flag("spirit") === 0
       ? SPIRIT_OF_EIRINA_VALUE
       : 0), 0);
@@ -212,7 +218,7 @@ function vCharges(view: SolverView, selfId: number, context: AttackContext): Sol
     // Every link after V needs go again: a soul card, a charge, or a Quicken.
     const goAgainFuel = (context.heroAbilitiesLost ? 0 : soulLeft(view) + chosen.length + 1) + view.flag("quicken");
     const attacksLeft = 1 + Math.max(0, Math.min(sources, goAgainFuel));
-    if (attacksLeft > solverChargeCost(candidate)) chosen.push(candidate);
+    if (attacksLeft > solverChargeCost(candidate, view, selfId)) chosen.push(candidate);
   }
   return chosen;
 }
@@ -334,7 +340,7 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
         }
         patch.bonusIn = (view) => {
           const target = chargeTarget(view, self);
-          return (bonus?.(view) ?? 0) + (target ? chargeBonus(view, [target]) : 0);
+          return (bonus?.(view) ?? 0) + (target ? chargeBonus(view, [target], self) : 0);
         };
         const pumped = (view: SolverView) => named(data) === "beaming bravado" && yellowCharge(view);
         patch.after = (view) => attackAfter(view, self, pumped(view), (flags) => {
@@ -347,7 +353,7 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
       switch (functional) {
         case V_OF_THE_VANGUARD:
           patch.powerIn = (view) => power + vCharges(view, self, context).length + view.flag("vBuff");
-          patch.bonusIn = (view) => chargeBonus(view, vCharges(view, self, context));
+          patch.bonusIn = (view) => chargeBonus(view, vCharges(view, self, context), self);
           patch.replaceAfter = true;
           patch.after = (view) => {
             const chosen = vCharges(view, self, context);

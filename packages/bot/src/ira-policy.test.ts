@@ -992,6 +992,54 @@ describe("Ira policy", () => {
       .toEqual({ kind: "pass" });
   });
 
+  it("covers an early on-hit draw from hand instead of Okana Scar Wraps", () => {
+    const state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9105,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["ASR012", "ASR023", "ASR009", "ASR007"]);
+    state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "ASR012", owner: 0, faceDown: true }];
+    const view = projectStateFor(state, 0);
+    const wraps = view.players[0].equipment.arms!;
+    expect(cardData[wraps.cardId]?.name).toBe("Okana Scar Wraps");
+    const [thorns, , kick, vengeance] = view.players[0].hand;
+    view.phase = "defend";
+    view.activePlayer = 1;
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+    view.players[1].resources = 2;
+    view.chain = [{
+      attackingCard: { instanceId: 99_201, cardId: "AHA002", owner: 1 },
+      defendingCards: [],
+      attackValue: 5,
+      defenseValue: 0,
+      damage: 5,
+      goAgain: true,
+      resolved: false,
+      reactions: [],
+      onHitEffects: [
+        {
+          sourceCardId: "HVY097",
+          text: "Whenever a weapon attack you control hits, you may pay {r}. If you do, create a Vigor token.",
+        },
+        { sourceCardId: "MPW030", text: "When this hits, draw 1 card." },
+      ],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [] },
+      { kind: "defend", instanceIds: [kick!.instanceId] },
+      { kind: "defend", instanceIds: [kick!.instanceId, wraps.instanceId] },
+      { kind: "defend", instanceIds: [vengeance!.instanceId, thorns!.instanceId] },
+    ];
+
+    expect(chooseIraIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "defend", instanceIds: [vengeance!.instanceId, thorns!.instanceId] });
+  });
+
   it("keeps an offensive starter instead of making a nonlethal partial block", () => {
     const state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],

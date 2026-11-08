@@ -163,17 +163,31 @@ const GRAINS = "Whenever a weapon attack you control hits, you may pay {r}. If y
 function tunicBlock(
   cardIds: readonly string[],
   onHit: string,
-  { turn = 1, arsenal = [] }: { turn?: number; arsenal?: readonly string[] } = {},
+  { turn = 1, arsenal = [], damage = 3, energy = 0, armor = {} }: {
+    turn?: number;
+    arsenal?: readonly string[];
+    damage?: number;
+    energy?: number;
+    armor?: Partial<Record<"head" | "arms" | "legs", string>>;
+  } = {},
 ) {
   let state = game();
   state.turn = turn;
   hand(state, cardIds);
-  const tunic = { instanceId: state.nextInstanceId++, cardId: "WTR150", owner: 0 };
-  state.players[0]!.equipment = { chest: tunic };
+  const tunic = {
+    instanceId: state.nextInstanceId++,
+    cardId: "WTR150",
+    owner: 0,
+    ...(energy > 0 ? { counters: { energy } } : {}),
+  };
+  const others = Object.fromEntries(Object.entries(armor).map(([slot, cardId]) =>
+    [slot, { instanceId: state.nextInstanceId++, cardId, owner: 0 }]
+  ));
+  state.players[0]!.equipment = { ...others, chest: tunic };
   state.players[0]!.arsenal = cards(state, arsenal).map((card) => ({ ...card, faceDown: true }));
   state = defending(state);
   const view = projectStateFor(state, 0);
-  const link = { ...view.chain.at(-1)!, damage: 3, onHitEffects: [{ sourceCardId: "", text: onHit }] };
+  const link = { ...view.chain.at(-1)!, damage, onHitEffects: [{ sourceCardId: "", text: onHit }] };
   const intent = chooseLeviaIntent({
     seat: 0, view: { ...view, chain: [...view.chain.slice(0, -1), link] },
     legal: legalIntents(state, 0), cards: cardData, state,
@@ -207,6 +221,19 @@ describe("Levia Gates policy", () => {
       { turn: 3, arsenal },
     );
     expect(selected).toEqual(expect.arrayContaining([handIds[0], tunicId]));
+  });
+
+  it("covers arsenal destruction with Skullcap and Scabskin before a charged Spring Tunic", () => {
+    const { selected, handIds, tunicId } = tunicBlock(["SUP165", "IAR022"], COMMAND_AND_CONQUER, {
+      turn: 3,
+      arsenal: ["IAR017"],
+      damage: 6,
+      energy: 1,
+      armor: { head: "IAR038", legs: "WTR004" },
+    });
+    expect(selected).toContain(handIds[0]);
+    expect(selected).toHaveLength(3);
+    expect(selected).not.toContain(tunicId);
   });
 
   it("answers an opening attack with Fallen Herald instead of blocking", () => {
