@@ -54,13 +54,16 @@ function discardChoice(ctx: ScriptCtx, hook: string, seat = opponentSeat(ctx)): 
       seat,
     );
 }
-function arcane(amount: number, extra?: (ctx: ScriptCtx, dealt: number) => void): CardScript {
+function arcane(amount: number, onDealt?: (ctx: ScriptCtx, dealt: number) => void): CardScript {
   return {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [amount],
     onPlay(ctx) {
-      const dealt = dealArcane(ctx, opponentSeat(ctx), amount);
-      extra?.(ctx, dealt);
+      dealArcane(ctx, opponentSeat(ctx), amount);
+    },
+    // Not dealArcane's result: it is 0 while an Arcane Barrier decision defers the damage.
+    onDamageDealt(ctx, _target, dealt) {
+      onDealt?.(ctx, dealt);
     },
   };
 }

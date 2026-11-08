@@ -755,6 +755,40 @@ describe("DYN — Mind Warp", () => {
   });
 });
 
+describe("DYN — Swell Tidings", () => {
+  const equipment = { head: null, chest: null, arms: null, legs: null };
+  function setup(barrier = false) {
+    return scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["volzar, meteor storm|0"], hand: ["swell tidings|1", "sigil of solace|1"], equipment,
+          resources: 3 },
+        { hero: "dorinthea", hand: ["head jab|1"], resources: barrier ? 1 : 0,
+          equipment: { ...equipment, head: barrier ? "nullrune hood|0" : null } },
+      ],
+    });
+  }
+  const ponders = (g: ReturnType<typeof setup>) =>
+    g.state.players[0]!.board.filter((card) => cardData[card.cardId]?.name === "Ponder").length;
+
+  it("creates a Ponder only when it deals more than 5 damage", () => {
+    const plain = setup();
+    plain.play("swell tidings|1").settle().expectLife(1, 15);
+    expect(ponders(plain)).toBe(0);
+    const amplified = setup();
+    amplified.play("sigil of solace|1").activate("volzar, meteor storm|0").play("swell tidings|1").settle()
+      .expectLife(1, 14);
+    expect(ponders(amplified)).toBe(1);
+  });
+
+  it.each(["pay 0", "pay 1"])("checks actual damage after arcane barrier: %s", (payment) => {
+    const g = setup(true);
+    g.play("sigil of solace|1").activate("volzar, meteor storm|0").play("swell tidings|1");
+    expect(g.state.pendingDecision?.chooseHook).toBe("arcane-barrier");
+    g.chooseOption(payment).settle().expectLife(1, payment === "pay 0" ? 14 : 15);
+    expect(ponders(g)).toBe(payment === "pay 0" ? 1 : 0);
+  });
+});
+
 describe("DYN — Sandscour Greatbow", () => {
   const BOW = "sandscour greatbow|0";
   const ARROW = "drill shot|1";

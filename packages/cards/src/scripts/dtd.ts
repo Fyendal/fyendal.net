@@ -115,6 +115,8 @@ function celestialReprimand(amount: number): CardScript {
     },
   };
 }
+const boltynTargetLegal = (ctx: ScriptCtx) =>
+  !!ctx.link && ctx.currentAttackPower() > ctx.basePower(ctx.link.attackingCard);
 function boltynHero(): CardScript {
   return {
     modifyAttack(ctx) {
@@ -127,7 +129,8 @@ function boltynHero(): CardScript {
       timing: "attack-reaction",
       banishSoulCost: 1,
       label: "Banish a soul card: grant go again",
-      canActivate: (ctx) => ownAttack(ctx) && ctx.currentAttackPower() > ctx.basePower(ctx.link!.attackingCard),
+      canActivate: (ctx) => ownAttack(ctx) && boltynTargetLegal(ctx),
+      attackTargetLegal: boltynTargetLegal,
       onActivate(ctx) {
         ctx.grantGoAgain();
       },

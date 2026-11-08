@@ -264,8 +264,10 @@ export const omnHighRarity: Record<string, CardScript> = {
         ctx.link?.targetAllyId !== undefined
       )
         return;
-      const dealt = ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
-      if (dealt > 0) ctx.addModifier({ scope: "chain-link", attack: 1 });
+      ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
+    },
+    onDamageDealt(ctx, _target, dealt) {
+      if (dealt > 0 && ctx.link) ctx.addModifier({ scope: "chain-link", attack: 1 });
     },
   },
   "caress of the reaper|1": {

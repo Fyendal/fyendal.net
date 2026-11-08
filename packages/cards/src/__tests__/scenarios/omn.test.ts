@@ -49,6 +49,23 @@ describe("OMN — Lionclaw Maul", () => {
   });
 });
 
+describe("OMN — Gauntlet of Sword and Sorcery", () => {
+  it.each(["pay 0", "pay 1"])("gives +1 power only if its damage survives Arcane Barrier: %s", (payment) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, hand: ["head jab|1"],
+          equipment: { head: null, chest: null, arms: "gauntlet of sword and sorcery|0", legs: null } },
+        { hero: "dorinthea", resources: 1, weapons: [],
+          equipment: { head: "nullrune hood|0", chest: null, arms: null, legs: null } },
+      ],
+    });
+    g.activate("gauntlet of sword and sorcery|0").play("head jab|1", { settle: false });
+    while (g.state.pendingDecision?.chooseHook !== "arcane-barrier" && g.state.stack.length) g.passPriority();
+    expect(g.state.pendingDecision?.chooseHook).toBe("arcane-barrier");
+    g.chooseOption(payment).blockWith().settle().expectLife(1, payment === "pay 0" ? 20 - 1 - 4 : 20 - 3);
+  });
+});
+
 describe("OMN — wager targeting", () => {
   it("Pile Driver may wager with the defending hero when it attacks an ally", () => {
     const g = scenario({ seats: [

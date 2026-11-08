@@ -583,6 +583,21 @@ describe("HVY — Heavy Hitters mechanics", () => {
       .expectInZone(0, "ponder|0", "board");
   });
 
+  it.each(["pay 0", "pay 1"])("Aether Arc creates Ponder only if damage survives Arcane Barrier: %s", (payment) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["aether arc|3"] },
+        { hero: "dorinthea", hand: ["head jab|1"], resources: 1,
+          equipment: { head: "nullrune hood|0", chest: null, arms: null, legs: null } },
+      ],
+    });
+    g.play("aether arc|3");
+    expect(g.state.pendingDecision?.chooseHook).toBe("arcane-barrier");
+    g.chooseOption(payment).settle();
+    if (payment === "pay 0") g.expectLife(1, 19).expectInZone(0, "ponder|0", "board");
+    else expect(g.state.players[0]!.board).toHaveLength(0);
+  });
+
   it("Beat Chest pays with a 6-power card and Pound Town creates Might", () => {
     const g = scenario({
       seats: [

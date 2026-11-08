@@ -939,6 +939,10 @@ export interface ActivatedAbility {
   fromArsenal?: boolean;
   /** Extra legality beyond cost/AP (e.g. "only if you attacked with a weapon this turn") */
   canActivate?(ctx: ScriptCtx): boolean;
+  /** "Target attack with …" qualifier of an `abilityTargetsAttackingCard`
+   * ability, rechecked at resolution (CR 1.8.9). `canActivate` must apply it
+   * too. Must be pure. */
+  attackTargetLegal?(ctx: ScriptCtx): boolean;
   /** Dynamic resource cost of the ability ("this ability costs {r} less for
    *  each …"): consulted in enumeration AND validation — must be pure. */
   modifyCost?(ctx: ScriptCtx, baseCost: number): number;

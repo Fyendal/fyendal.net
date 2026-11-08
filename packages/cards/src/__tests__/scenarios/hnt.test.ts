@@ -754,6 +754,31 @@ describe("HNT — marked heroes and daggers", () => {
     g.expectHandSize(0, 0);
   });
 
+  it.each([false, true])("Throw Dagger draws only if damage is dealt and destroys the dagger afterward (Ward: %s)", (ward) => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 1,
+          weapons: ["kunai of retribution|0", "kunai of retribution|0"],
+          hand: ["throw dagger|3"],
+          deck: ["head jab|1", "head jab|1"],
+        },
+        { hero: "dorinthea", board: ward ? ["auric shards|1"] : [] },
+      ],
+    });
+    g.attackWithWeapon("kunai of retribution|0").blockWith().react("throw dagger|3", { settle: false })
+      .passPriority().passPriority();
+    if (ward) {
+      expect(g.state.pendingDecision?.chooseHook).toBe("ward");
+      expect(g.state.players[0]!.weapons).toHaveLength(2);
+      g.chooseOption("destroy");
+    }
+    expect(g.state.players[0]!.weapons).toHaveLength(1);
+    g.expectHandSize(0, ward ? 0 : 1);
+    if (!ward) g.expectLife(1, 19);
+  });
+
   it("Throw Dagger cannot be played without an off-link dagger", () => {
     const g = scenario({
       seats: [

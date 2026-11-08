@@ -392,6 +392,29 @@ describe("DTD — registration and core mechanics", () => {
     expect(projectStateFor(s.state, 0).chain.at(-1)!.attackValue).toBe(attack);
   });
 
+  describe("Ser Boltyn, Breaker of Dawn's go again ability", () => {
+    // Courage lifts the attack above its base power; the ability waits on the stack.
+    const activated = () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", heroKey: "ser boltyn, breaker of dawn|0", hand: ["wounding blow|1"], soul: [BLUE],
+          board: ["courage|0"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: ["quiet streets|2"], equipment: NO_EQUIPMENT },
+      ] }).play("wounding blow|1").blockWith().activate("ser boltyn, breaker of dawn|0", { settle: false });
+      return game.doRaw({ kind: "choose", optionId: String(game.state.players[0]!.soul[0]!.instanceId) });
+    };
+
+    it("grants go again to an attack still above its base power", () => {
+      const game = activated().settle();
+      expect(game.state.chain.at(-1)?.goAgain).toBe(true);
+    });
+
+    it("fails when the attack drops to its base power before it resolves", () => {
+      const game = activated().passPriority().react("quiet streets|2")
+        .expectLog("Quiet Streets:").expectLog("target is no longer legal");
+      expect(game.state.chain.at(-1)?.goAgain).toBe(false);
+    });
+  });
+
   it("random-banish attacks recognize a six-power card banished for their own cost", () => {
     const s = scenario({
       seats: [

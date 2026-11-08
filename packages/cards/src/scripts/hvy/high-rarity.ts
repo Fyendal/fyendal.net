@@ -857,7 +857,10 @@ export const hvyHighRarity: Record<string, CardScript> = {
     },
     onPlay(ctx) {
       for (const target of ctx.state.players.filter((player) => player.seat !== ctx.seat))
-        if (ctx.dealDamage(target.seat, 1, { arcane: true }) > 0) ctx.createToken(PONDER);
+        ctx.dealDamage(target.seat, 1, { arcane: true });
+    },
+    onDamageDealt(ctx, _target, dealt) {
+      if (dealt > 0) ctx.createToken(PONDER);
     },
   },
   "dissolve reality|2": {

@@ -1131,10 +1131,13 @@ export function resolveAbilityLayer(state: GameStateInternal,
   } else {
     delete found.card.playTargetInstanceId;
   }
-  if (departedAttackTarget(state, found.card, link) !== undefined) logPlayTargetIllegal(state, found.card);
-  ability?.onActivate?.(
-    runtime.makeCtx(state, layer.seat, found.card, link, undefined, layer.targetCardInstanceId),
-  );
+  const ctx = runtime.makeCtx(state, layer.seat, found.card, link, undefined, layer.targetCardInstanceId);
+  const targetDeparted = departedAttackTarget(state, found.card, link) !== undefined;
+  // A departed attack still answers the effect through last-known information.
+  const targetDisqualified = !targetDeparted && layer.targetCardInstanceId !== undefined &&
+    ability?.attackTargetLegal?.(ctx) === false;
+  if (targetDeparted || targetDisqualified) logPlayTargetIllegal(state, found.card);
+  if (!targetDisqualified) ability?.onActivate?.(ctx);
   if (
     link &&
     (ability?.timing === "attack-reaction" || ability?.timing === "defense-reaction")

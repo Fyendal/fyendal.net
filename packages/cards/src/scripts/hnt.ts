@@ -1721,10 +1721,13 @@ Object.assign(hnt, {
     onPlay(ctx) {
       const id = ctx.playTargetInstanceId;
       if (id === undefined || !offLinkDaggerOptions(ctx).includes(id)) return;
-      if (ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: id, countsAsHit: true }) > 0) {
-        ctx.drawCards(ctx.seat, 1);
-      }
-      ctx.destroyPermanent(id);
+      // Prevention decisions can defer the damage; the marker keeps this observing it.
+      ctx.setState("throwDaggerSource", id);
+      ctx.addModifier({ scope: "chain-link" });
+      ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: id, countsAsHit: true, destroySourceAfterDamage: true });
+    },
+    onFriendlyDamageDealt(ctx, source) {
+      if (source.instanceId === ctx.getState("throwDaggerSource")) ctx.drawCards(ctx.seat, 1);
     },
   },
   "perforate|2": {
