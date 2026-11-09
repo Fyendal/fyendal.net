@@ -1103,6 +1103,22 @@ function equipmentKeywords(card: CardView, input: BotPolicyInput): ReadonlySet<s
   return new Set((input.cards[card.cardId]?.keywords ?? []).map((keyword) => keyword.toLowerCase()));
 }
 
+/** Whether gaining `gain` resources (Spring Tunic, Energy Potion) closes a cost
+ * gap: it pays a wanted cost that the floating resources plus the rest of the
+ * hand's pitch cannot. Unspent resources drain at end of turn, so any other
+ * gain is wasted. */
+export function resourceGainClosesCost(
+  input: BotPolicyInput,
+  wants: readonly { readonly card: CardView; readonly cost: number }[],
+  gain: number,
+): boolean {
+  const resources = input.view.players[input.seat].resources;
+  return wants.some(({ card, cost }) => {
+    const available = resources + remainingPitchValue(input, new Set([card.instanceId]));
+    return available < cost && available + gain >= cost;
+  });
+}
+
 function isSpringTunic(card: CardView, input: BotPolicyInput): boolean {
   return input.cards[card.cardId]?.name.trim().toLowerCase() === "fyendal's spring tunic";
 }

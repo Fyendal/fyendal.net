@@ -14,6 +14,7 @@ import {
   pitchIds,
   pitchValue,
   preferredPitchIntents,
+  resourceGainClosesCost,
   resourcePaymentPitchIds,
   resourcesAfterCost,
   scoreArsenalChoice,
@@ -323,6 +324,17 @@ function affordableFollowups(input: BotPolicyInput, spent: ReadonlySet<number>):
     (input.cards[card.cardId]?.cost ?? 0) <= me.resources + pitch -
       (me.hand.some((held) => held.instanceId === card.instanceId) ? input.cards[card.cardId]?.pitch ?? 0 : 0)
   ).length;
+}
+
+/** Whether the Tunic's resource makes an attack, or a second attack, affordable that is not already. */
+function tunicFundsAttack(input: BotPolicyInput): boolean {
+  const sash = leviaEffectActive(input, "savage sash");
+  const wants = attackReserve(input, new Set()).filter((card) => leviaAttackPlayable(card, input))
+    .map((card) => ({ card, cost: leviaAttackCost(input.cards[card.cardId], sash) }));
+  if (resourceGainClosesCost(input, wants, 1)) return true;
+  const me = input.view.players[input.seat];
+  const reserve = [...me.hand, ...me.arsenal];
+  return leviaAttackPair(input, reserve, { resources: me.resources + 1 }) && !leviaAttackPair(input, reserve);
 }
 
 /** Hex Gauntlet is a one-shot 6{p} banish. Spend it only where that banish
@@ -795,9 +807,9 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
         !leviaAttackPair(input, reserve) &&
         (leviaAttackPair(input, reserve, { grantGoAgain: true }) || weaponSwingPair(input, reserve))
         ? (bloodrushActive ? 85 : 53)
-        : -55;  } else if (named === "fyendal's spring tunic") {
-    // Unspent resources drain at end of turn, so gain only where an action can use it.
-    score = input.view.activePlayer === input.seat && !midTurnSetupBlocked && followups() > 0 ? 32 : -30;
+        : -55;
+  } else if (named === "fyendal's spring tunic") {
+    score = input.view.activePlayer === input.seat && !midTurnSetupBlocked && tunicFundsAttack(input) ? 32 : -30;
   } else if (named === "hex gauntlet") {
     score = hexGauntletValue(input, card);
   } else if (named === "embraforged gauntlet") {

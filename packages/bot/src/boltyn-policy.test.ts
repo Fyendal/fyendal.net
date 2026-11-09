@@ -427,6 +427,18 @@ describe("Boltyn policy", () => {
     expect(after.players[0]!.board.map((card) => cardData[card.cardId]?.name)).toContain("Energy Potion");
   });
 
+  it("keeps Tunic counters and Energy Potion when the hand's pitch already pays its costs", () => {
+    const state = settled(game());
+    hand(state, ["ASB023", "ASB021"]);
+    state.players[0]!.board = cards(state, ["MPW146"]);
+    state.players[0]!.equipment.chest!.counters = { energy: 3 };
+    const { state: after, intents } = play(state, turnOver);
+    expect(intents).not.toContain("Fyendal's Spring Tunic");
+    expect(intents).not.toContain("Energy Potion");
+    expect(after.players[0]!.equipment.chest!.counters?.energy).toBe(3);
+    expect(after.players[0]!.board.map((card) => cardData[card.cardId]?.name)).toContain("Energy Potion");
+  });
+
   it("plays Edict of Steel before a charged Raydn swing", () => {
     const state = settled(game());
     hand(state, ["AHA012", "ASB007", "PEN181"]);

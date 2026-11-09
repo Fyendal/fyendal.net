@@ -14,6 +14,7 @@ import {
   nextTurnArsenalOpportunityCost,
   ownCards,
   plannedDefenseReactionPlan,
+  resourceGainClosesCost,
   responseEvaluation,
   scoreDefenseReaction,
   scoreDefenseIntent,
@@ -81,6 +82,28 @@ describe("Inertia trigger order", () => {
 
   it("leaves other trigger orders to the engine", () => {
     expect(orderFor([FRAILTY, PONDER])).toBeUndefined();
+  });
+});
+
+describe("resource gain cost gap", () => {
+  it.each([
+    { label: "an empty hand", held: [] as string[], resources: 0, cost: 3, gain: 1, closes: false },
+    { label: "a yellow pitch", held: ["WTR007"], resources: 0, cost: 3, gain: 1, closes: true },
+    { label: "a blue pitch that already pays", held: ["MON140"], resources: 0, cost: 3, gain: 1, closes: false },
+    { label: "a floating resource and a yellow pitch", held: ["WTR007"], resources: 1, cost: 3, gain: 1, closes: false },
+    { label: "an empty hand, gaining two for two", held: [], resources: 0, cost: 2, gain: 2, closes: true },
+    { label: "an empty hand, gaining two for three", held: [], resources: 0, cost: 3, gain: 2, closes: false },
+  ])("closes a cost gap only by the gain, holding $label", ({ held, resources, cost, gain, closes }) => {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar], cards: cardData, scripts, seed: 1, startPlayer: 0,
+    });
+    const view = projectStateFor(state, 0);
+    let id = 10_000;
+    view.players[0].hand = held.map((cardId) => ({ instanceId: id++, cardId, owner: 0 }));
+    view.players[0].resources = resources;
+    const attack: CardView = { instanceId: id++, cardId: "SUP165", owner: 0 };
+    const input: BotPolicyInput = { seat: 0, view, legal: [], cards: cardData };
+    expect(resourceGainClosesCost(input, [{ card: attack, cost }], gain)).toBe(closes);
   });
 });
 

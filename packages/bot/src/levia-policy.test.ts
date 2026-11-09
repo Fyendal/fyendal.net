@@ -241,6 +241,20 @@ describe("Levia Gates policy", () => {
     expect(intent).toEqual({ kind: "defend", instanceIds: [] });
   });
 
+  it.each([
+    { label: "an empty hand", held: [] as string[], activates: false },
+    { label: "a yellow pitch", held: ["WTR007"], activates: true },
+  ])("spends the Spring Tunic only when it funds an attack, holding $label", ({ held, activates }) => {
+    const state = game();
+    hand(state, held);
+    state.players[0]!.arsenal = cards(state, ["SUP165"]).map((card) => ({ ...card, faceDown: true }));
+    const tunic = { instanceId: state.nextInstanceId++, cardId: "WTR150", owner: 0, counters: { energy: 3 } };
+    state.players[0]!.equipment = { ...state.players[0]!.equipment, chest: tunic };
+    const intent = choice(state);
+    const spent = intent.kind === "activate-ability" && intent.sourceInstanceId === tunic.instanceId;
+    expect(spent).toBe(activates);
+  });
+
   it("activates Fallen Herald after leaving an opening attack unblocked", () => {
     let state = game();
     state.turn = 1;

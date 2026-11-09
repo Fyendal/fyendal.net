@@ -16,6 +16,7 @@ import {
   optionCard,
   ownCards,
   pitchIds,
+  resourceGainClosesCost,
   resourcePaymentPitchIds,
   resourcesAfterCost,
   scoreArsenalChoice,
@@ -741,12 +742,10 @@ function tunicEnablesOffense(input: BotPolicyInput): boolean {
     const data = input.cards[attack.cardId];
     if (!data) return false;
     const otherHand = me.hand.filter((card) => card.instanceId !== attack.instanceId);
-    const available = me.resources + availablePitch(otherHand, new Set(), input);
     const cost = attackCost(data);
-    if (available < cost && available + 1 >= cost) return true;
+    if (resourceGainClosesCost(input, [{ card: attack, cost }], 1)) return true;
     return starvoBonusActive(input) && isEligibleStarvoAttack(data) &&
-      available < cost + 3 && available + 1 >= cost + 3 &&
-      hasIcePitch(otherHand, new Set(), input);
+      hasIcePitch(otherHand, new Set(), input) && resourceGainClosesCost(input, [{ card: attack, cost: cost + 3 }], 1);
   });
 }
 

@@ -15,6 +15,7 @@ import {
   pitchIds,
   pitchValue,
   plannedDefenseReactionPlan,
+  resourceGainClosesCost,
   resourcePaymentPitchIds,
   scoreArsenalChoice,
   scoreBinaryChoice,
@@ -610,19 +611,22 @@ function scoreChoice(intent: ChooseIntent, input: BotPolicyInput): number {
   return card ? 10 - cardOpportunity(card, input) : 1;
 }
 
-/** Resources a card playable now still needs beyond what is floating. */
-function resourcesWanted(input: BotPolicyInput): number {
-  const player = me(input);
+/** Reserve cards that can spend resources now, with their costs. */
+function resourceWants(input: BotPolicyInput): { card: CardView; cost: number }[] {
   const ourTurn = input.view.activePlayer === input.seat;
   const reacting = input.view.pendingDecision?.kind === "defense-reaction";
-  const costs = reserve(input).flatMap((card) => {
+  return reserve(input).flatMap((card) => {
     const data = input.cards[card.cardId];
     // A defense reaction only spends resources in the opponent's reaction step.
     const usable = ourTurn ? data?.cardType !== "defense-reaction" : reacting && data?.cardType === "defense-reaction";
-    return usable ? [resourceCost(data)] : [];
+    return usable ? [{ card, cost: resourceCost(data) }] : [];
   });
-  const needed = Math.max(0, ...costs);
-  return Math.max(0, needed - player.resources);
+}
+
+/** Resources a card playable now still needs beyond what is floating. */
+function resourcesWanted(input: BotPolicyInput): number {
+  const needed = Math.max(0, ...resourceWants(input).map(({ cost }) => cost));
+  return Math.max(0, needed - me(input).resources);
 }
 
 /** Go-again sources are offered again while one of their layers is still pending. */
@@ -811,8 +815,9 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       score = opening ? -100 : scoreRaydn(card, intent, input, own);
     } else if (functional === FYENDALS_SPRING_TUNIC) {
       // Unneeded resource sources rank below pass so the root cap still compares passing.
-      score = resourcesWanted(input) > 0
-        ? (ourTurn && holds(input, V_OF_THE_VANGUARD) && player.hand.length >= 4 ? 50 : 25)
+      // Paying V of the Vanguard frees its pitch card to charge; otherwise the {r} must close a cost gap.
+      score = ourTurn && holds(input, V_OF_THE_VANGUARD) && player.hand.length >= 4 && resourcesWanted(input) > 0 ? 50
+        : resourceGainClosesCost(input, resourceWants(input), 1) ? 25
         : -100;
     } else if (functional === IRONSONG_VERSUS) {
       score = ourTurn && !opening && raydnSwingSecured(intent, input, own) ? 8 : -20;
@@ -833,7 +838,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
         ? 28
         : -100;
     } else if (functional === ENERGY_POTION) {
-      score = resourcesWanted(input) > 0 ? 15 : -100;
+      score = resourceGainClosesCost(input, resourceWants(input), 2) ? 15 : -100;
     } else {
       score = -100;
     }
