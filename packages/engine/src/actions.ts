@@ -65,6 +65,7 @@ import {
   deferTriggerLayers,
   finishStackCardResolution,
   finishWindowInstantPlay,
+  playWindowInstant,
 } from "./triggers.js";
 import {
   answerTokenCreationReplacement,
@@ -977,6 +978,25 @@ function continueAfterScriptedChoice(
       resume.from === "hand" || resume.from === "arsenal" ? undefined : resume.from,
       resume.declaredVariableX,
       resume.targetAllyId,
+      true,
+    );
+  }
+  if (resume?.kind === "continue-window-instant-after-declaration") {
+    return playWindowInstant(
+      state,
+      runtime,
+      resume.seat,
+      resume.instanceId,
+      resume.from === "arsenal",
+      resume.pitchInstanceIds,
+      resume.meldSide,
+      resume.targetCardInstanceId,
+      resume.from === "hand" || resume.from === "arsenal" ? undefined : resume.from,
+      resume.declaredVariableX,
+      resume.alternativeCostCardInstanceIds,
+      resume.targetAllyId,
+      resume.boost ?? false,
+      resume.boostCount,
       true,
     );
   }

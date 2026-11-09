@@ -81,6 +81,39 @@ function advanceUntil(
   throw new Error("state did not reach expected point");
 }
 
+/** Plays out seat 0's current turn with the Hala bot against a passive
+ * opponent and returns the bot's open-priority action-phase intents. */
+function cleanHalaActions(initial: ReturnType<typeof createGame>): GameIntent[] {
+  const turn = initial.turn;
+  let current = initial;
+  const cleanActions: GameIntent[] = [];
+  for (let step = 0; step < 120 && current.turn === turn; step++) {
+    const actor = (current.pendingDecision?.player ?? current.priorityPlayer) as 0 | 1;
+    const legal = legalIntents(current, actor);
+    const cleanAction = actor === 0 && current.phase === "action" &&
+      current.pendingDecision === null && current.stack.length === 0;
+    const intent = actor === 0
+      ? chooseHalaIntent({
+          seat: 0,
+          view: projectStateFor(current, 0),
+          legal,
+          cards: cardData,
+          state: current,
+        })
+      : current.pendingDecision?.kind === "defend"
+      ? legal.find((candidate) => candidate.kind === "defend" && candidate.instanceIds.length === 0)
+      : legal.find((candidate) => candidate.kind === "choose" &&
+          ["no", "decline", "pass", "pay 0"].includes(candidate.optionId)) ??
+        legal.find((candidate) => candidate.kind === "pass") ??
+        legal.find((candidate) => candidate.kind === "close-chain") ??
+        legal.find((candidate) => candidate.kind === "order-triggers");
+    if (!intent) throw new Error(`no Hala rollout intent for ${current.phase}`);
+    if (cleanAction) cleanActions.push(intent);
+    current = apply(current, actor, intent);
+  }
+  return cleanActions;
+}
+
 function chooseRerebracePayment(options: {
   counters: number;
   resolvingCardId?: string;
@@ -740,33 +773,7 @@ describe("Hala policy", () => {
     const bladeId = state.players[0]!.weapons[0]!.instanceId;
     const heroId = state.players[0]!.hero.instanceId;
 
-    let current = state;
-    const cleanActions: GameIntent[] = [];
-    for (let step = 0; step < 120 && current.turn === 2; step++) {
-      const actor = (current.pendingDecision?.player ?? current.priorityPlayer) as 0 | 1;
-      const legal = legalIntents(current, actor);
-      const cleanAction = actor === 0 && current.phase === "action" &&
-        current.pendingDecision === null && current.stack.length === 0;
-      const intent = actor === 0
-        ? chooseHalaIntent({
-            seat: 0,
-            view: projectStateFor(current, 0),
-            legal,
-            cards: cardData,
-            state: current,
-          })
-        : current.pendingDecision?.kind === "defend"
-        ? legal.find((candidate) => candidate.kind === "defend" && candidate.instanceIds.length === 0)
-        : legal.find((candidate) => candidate.kind === "choose" &&
-            ["no", "decline", "pass", "pay 0"].includes(candidate.optionId)) ??
-          legal.find((candidate) => candidate.kind === "pass") ??
-          legal.find((candidate) => candidate.kind === "close-chain") ??
-          legal.find((candidate) => candidate.kind === "order-triggers");
-      if (!intent) throw new Error(`no sharpener rollout intent for ${current.phase}`);
-      if (cleanAction) cleanActions.push(intent);
-      current = apply(current, actor, intent);
-    }
-
+    const cleanActions = cleanHalaActions(state);
     const brimmingIndex = cleanActions.findIndex((intent) =>
       intent.kind === "play-card" && intent.instanceId === brimmingId
     );
@@ -783,6 +790,27 @@ describe("Hala policy", () => {
     expect(cleanActions.slice(swordIndex + 1).some((intent) =>
       intent.kind === "activate-ability" && intent.sourceInstanceId === heroId
     )).toBe(false);
+  });
+
+  it("pitches the yellow Edict to fund the Flurry swing from room EA470E", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 93203,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["MPW130", "PEN049", "MPW103", "MPW104"]);
+    const yellowEdictId = state.players[0]!.hand.find((card) => card.cardId === "MPW104")!.instanceId;
+    const bladeId = state.players[0]!.weapons[0]!.instanceId;
+
+    const swings = cleanHalaActions(state).filter((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === bladeId
+    );
+    expect(swings).toHaveLength(2);
+    expect(swings.flatMap((intent) => "pitchInstanceIds" in intent ? intent.pitchInstanceIds : []))
+      .toContain(yellowEdictId);
   });
 
   it("pitches an arsenal-worthy setup card to kill an ally with Zenith", () => {
@@ -852,9 +880,9 @@ describe("Hala policy", () => {
     });
   });
 
-  it("plays an arsenaled Edict then pitches Big Blinder to kill the replay ally", () => {
+  it("keeps an unfundable Flurry Edict and pitches Big Blinder to kill the replay ally", () => {
     const gravy = gravyDeck();
-    let state = createGame({
+    const state = createGame({
       decklists: [halaDeck(gravy), gravy],
       cards: cardData,
       scripts,
@@ -876,21 +904,7 @@ describe("Hala policy", () => {
     });
     const anka = addOpponentAlly(state, "SEA262", 3);
     const blinder = state.players[0]!.hand[0]!;
-    const edict = state.players[0]!.arsenal[0]!;
     const blade = state.players[0]!.weapons[0]!;
-
-    const setup = chooseHalaIntent({
-      seat: 0,
-      view: projectStateFor(state, 0),
-      legal: legalIntents(state, 0),
-      cards: cardData,
-      state,
-    });
-    expect(setup).toMatchObject({ kind: "play-from-arsenal", instanceId: edict.instanceId });
-    state = advanceUntil(apply(state, 0, setup), (candidate) =>
-      candidate.phase === "action" && candidate.priorityPlayer === 0 &&
-      candidate.pendingDecision === null && candidate.stack.length === 0
-    );
 
     expect(chooseHalaIntent({
       seat: 0,

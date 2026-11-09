@@ -421,6 +421,26 @@ describe("SUP — heroes and the crowd", () => {
     g.chooseOption("damage").expectLife(1, life - 10).expectHandSize(1, 1);
   });
 
+  it("Liar's Charm declares its modes when played in response to a layer on the stack", () => {
+    const g = scenario({
+      seats: [{ hero: "rhinar", weapons: [], hand: ["sigil of solace|3", "liar's charm|2"] }, foe()],
+    });
+
+    g.play("sigil of solace|3", { settle: false });
+    expect(g.state.phase).toBe("layer");
+    g.play("liar's charm|2", { settle: false });
+    expect(g.state.pendingDecision).toMatchObject({ chooseHook: "liar-mode" });
+    g.expectInZone(0, "liar's charm|2", "hand");
+    g.chooseOption("boo").doRaw({ kind: "choose", optionId: "done" });
+    expect(g.state.stack.map((layer) => layer.card?.cardId)).toEqual([
+      printingId("liar's charm|2"),
+      printingId("sigil of solace|3"),
+    ]);
+    g.settle();
+
+    expect(g.state.players[0]!.flags.booedThisTurn).toBe(true);
+  });
+
   it("Liar's Charm suppresses the opposing hero only for this action phase", () => {
     const g = scenario({
       seats: [{ hero: "rhinar", weapons: [], hand: ["liar's charm|2"] }, foe()],

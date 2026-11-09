@@ -24,6 +24,7 @@ import {
   type BotPolicyScorers,
   wagerRewardValue,
 } from "./policy.js";
+import { defenseReactionThreat } from "./hand-value.js";
 import { botDefinitions } from "./registry.js";
 
 const NO_RESPONSE: BotPolicyScorers["response"] = {
@@ -1349,6 +1350,29 @@ describe("projected defender defense", () => {
     fixture.input.view.pendingDecision!.defenderDefense = [{ instanceId: blocker!.instanceId, defense: 1, attack: 3 }];
     expect(score([blocker!.instanceId])).toMatchObject({ lethal: false, survives: false });
     expect(score([blocker!.instanceId]).score).toBeLessThan(score([]).score);
+  });
+
+  it("counts on-hit damage toward a lethal hit", () => {
+    const fixture = cycleDefenseFixture([{ id: "SMALL_BLOCKER", attack: 4, defense: 2 }], {
+      attackValue: 1,
+      life: 2,
+      onHitText: "When this hits a hero, deal 1 arcane damage to them.",
+    });
+    const [blocker] = fixture.held;
+    const score = (instanceIds: number[]) => scoreDefenseIntentWithTrace(
+      { kind: "defend", instanceIds },
+      fixture.input,
+      fixture.own,
+      fixture.model,
+    );
+    expect(score([])).toMatchObject({ lethal: true, survives: false });
+    expect(score([blocker!.instanceId])).toMatchObject({ lethal: true, survives: true, stopsHit: true });
+    expect(score([blocker!.instanceId]).score).toBeGreaterThan(score([]).score);
+    expect(defenseReactionThreat(fixture.input)).toEqual({ incoming: 1, lethal: true });
+
+    fixture.input.view.players[0].life = 3;
+    expect(score([])).toMatchObject({ lethal: false, survives: true });
+    expect(defenseReactionThreat(fixture.input)).toEqual({ incoming: 1, lethal: false });
   });
 });
 

@@ -16,6 +16,7 @@ import {
   type ModelContext,
 } from "./card-model.js";
 import type { HandSolver, SolverResult } from "./hand-solver.js";
+import { immediateOnHitDamage } from "./on-hit.js";
 import {
   currentLink,
   pendingDefenseReactionValue,
@@ -214,7 +215,8 @@ export function defenseReactionThreat(input: BotPolicyInput): { incoming: number
   const pending = pendingDefenseReactionValue(input);
   const incoming = Math.max(0, link.damage - pending);
   const threatened = Math.max(incoming, threatenedAttackDamage(input) - pending);
-  return { incoming, lethal: threatened >= input.view.players[input.seat].life };
+  const landed = threatened > 0 ? threatened + immediateOnHitDamage(link.onHitEffects ?? []) : 0;
+  return { incoming, lethal: landed >= input.view.players[input.seat].life };
 }
 
 /** Short of lethal, a defense reaction (with its pitch) must stop more damage

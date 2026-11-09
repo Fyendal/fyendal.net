@@ -109,6 +109,8 @@ export interface OnHitEvaluation {
   value: number;
   categories: readonly OnHitCategory[];
   cardDraw: number;
+  /** Damage the landed hit deals now, on top of its combat damage. */
+  immediateDamage: number;
   delayedDamage: number;
   handCardsLost: number;
   /** The part of `value` that prices `handCardsLost` as generic cards. */
@@ -128,6 +130,7 @@ export const EMPTY_ON_HIT_EVALUATION: OnHitEvaluation = {
   value: 0,
   categories: [],
   cardDraw: 0,
+  immediateDamage: 0,
   delayedDamage: 0,
   handCardsLost: 0,
   handLossValue: 0,
@@ -181,6 +184,7 @@ function combine(left: OnHitEvaluation, right: OnHitEvaluation): OnHitEvaluation
     value: left.value + right.value,
     categories: [...new Set([...left.categories, ...right.categories])],
     cardDraw: left.cardDraw + right.cardDraw,
+    immediateDamage: left.immediateDamage + right.immediateDamage,
     delayedDamage: left.delayedDamage + right.delayedDamage,
     handCardsLost: left.handCardsLost + right.handCardsLost,
     handLossValue: left.handLossValue + right.handLossValue,
@@ -280,12 +284,14 @@ function cardAdvantage(text: string, context: OnHitValueContext): OnHitEvaluatio
 }
 
 function damage(text: string): OnHitEvaluation | undefined {
-  if (/they lose the game/.test(text)) return part("damage", GAME_LOSS_VALUE);
+  if (/they lose the game/.test(text)) {
+    return part("damage", GAME_LOSS_VALUE, { immediateDamage: GAME_LOSS_VALUE });
+  }
   const match = /(?:deal|deals|loses?)\D{0,24}(\d+)\s*(?:arcane\s+)?(?:damage|life|\{h\})/.exec(text);
   if (!match || /\byou lose\b/.test(text)) return undefined;
   const amount = Number(match[1]);
   const delayed = /(?:end phase|beginning of|next turn)/.test(text) ? amount : 0;
-  return part("damage", amount, { delayedDamage: delayed });
+  return part("damage", amount, { immediateDamage: amount - delayed, delayedDamage: delayed });
 }
 
 function tokens(text: string): OnHitEvaluation | undefined {
@@ -414,7 +420,12 @@ function classifyImpact(impact: OnHitImpactView, context: OnHitValueContext): On
     ? part("arsenal-disruption", ARSENAL_DISRUPTION_VALUE, { destroysOccupiedArsenal: true })
     : part("arsenal-disruption", 0);
   return sum([
-    impact.damage ? part("damage", impact.damage, { delayedDamage: impact.delayedDamage ?? 0 }) : undefined,
+    impact.damage
+      ? part("damage", impact.damage, {
+        immediateDamage: impact.damage - (impact.delayedDamage ?? 0),
+        delayedDamage: impact.delayedDamage ?? 0,
+      })
+      : undefined,
     impact.drawCards ? drawn(impact.drawCards, context) : undefined,
     impact.discardCards
       ? handLoss("forced-discard", impact.discardCards, FORCED_DISCARD_VALUE, context)
@@ -445,4 +456,15 @@ export function evaluateOnHit(context: OnHitValueContext): OnHitEvaluation {
   return /when (?:this|you) hits|on hit/i.test(context.sourceText ?? "")
     ? part("unclassified", UNCLASSIFIED_VALUE)
     : EMPTY_ON_HIT_EVALUATION;
+}
+
+/** Damage the current link's public on-hit effects deal as soon as it hits. */
+export function immediateOnHitDamage(effects: readonly PublicOnHitEffect[]): number {
+  return evaluateOnHit({
+    effects,
+    attackerCanContinue: false,
+    attackerCanArsenal: false,
+    defenderHasHand: false,
+    defenderHasArsenal: false,
+  }).immediateDamage;
 }

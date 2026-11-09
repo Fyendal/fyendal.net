@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluateOnHit, type OnHitValueContext } from "./on-hit.js";
+import { evaluateOnHit, immediateOnHitDamage, type OnHitValueContext } from "./on-hit.js";
 
 const base: Omit<OnHitValueContext, "effects"> = {
   sourceText: "",
@@ -27,6 +27,12 @@ const MARK = "When this hits a hero, mark them.";
 const DIG = "When this hits, destroy this zombie.\"";
 
 describe("on-hit valuation", () => {
+  it("separates immediate on-hit damage from delayed damage", () => {
+    expect(immediateOnHitDamage([{ text: "When this hits a hero, deal 1 arcane damage to them." }])).toBe(1);
+    expect(immediateOnHitDamage([{ text: "Scripted summary", impact: { damage: 3, delayedDamage: 2 } }])).toBe(1);
+    expect(immediateOnHitDamage([{ text: "When this hits a hero, they draw a card." }])).toBe(0);
+  });
+
   it("ranks informed disruption highest and self-destruction lowest", () => {
     const ranked = [BONDS, SURGICAL, COMMAND, RANDOM, PUMMEL, MARK, DIG].map((text) => value(text));
     expect(ranked).toEqual([...ranked].sort((left, right) => right - left));

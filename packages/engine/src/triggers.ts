@@ -539,9 +539,12 @@ export function playWindowInstant(
   targetAllyId?: number,
   boost = false,
   boostCount?: number,
+  additionalCostDeclared = false,
 ): string | undefined {
   if (state.phase !== "layer" || (
-    declaredVariableX === undefined && state.pendingDecision?.kind !== "priority-window"
+    declaredVariableX === undefined &&
+    !additionalCostDeclared &&
+    state.pendingDecision?.kind !== "priority-window"
   )) {
     return "no priority window";
   }
@@ -566,6 +569,7 @@ export function playWindowInstant(
         : player.hand;
   const card = source.find((c) => c.instanceId === instanceId);
   if (!card) return "card not found in that zone";
+  const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
   if (fromArsenal && !mayPlayFromArsenal(state, card, seat)) {
     return `${nameOf(state, card.cardId)} may not be played from arsenal`;
   }
@@ -615,7 +619,7 @@ export function playWindowInstant(
   }
   const boostErr = boostDeclarationError(state, seat, card, boost, boostCount);
   if (boostErr) return boostErr;
-  startPlayScriptState(player, card);
+  if (!additionalCostDeclared) startPlayScriptState(player, card);
   declareInstantBoosts(card, boost, boostCount);
   if (script?.canPlay && !script.canPlay(runtime.makeCtx(state, seat, card, link, fromArsenal))) {
     return `${nameOf(state, card.cardId)} cannot be played now`;
@@ -672,9 +676,6 @@ export function playWindowInstant(
         resolvedVariableCost.prompt ?? DEFAULT_CHOOSE_X_PROMPT,
         options,
       );
-      const origin = fromZone ?? (fromArsenal
-        ? "arsenal"
-        : source === player.banish ? "banish" : "hand");
       state.pendingDecision = {
         player: seat,
         kind: "choose-target",
@@ -701,7 +702,7 @@ export function playWindowInstant(
       variableCost,
       runtime.makeCtx(state, seat, card, link, fromArsenal),
     );
-    if (!isValidVariableX(declaredVariableX, resolvedVariableCost)) {
+    if (!additionalCostDeclared && !isValidVariableX(declaredVariableX, resolvedVariableCost)) {
       return "invalid X declaration";
     }
     variableBaseCost = variableResourceCost(resolvedVariableCost, declaredVariableX);
@@ -713,6 +714,32 @@ export function playWindowInstant(
     card,
     [...pitchInstanceIds, ...(alternativeCostCardInstanceIds ?? [])],
   )) return "cannot pay the card's additional hand-card cost";
+  if (!additionalCostDeclared && script?.declareAdditionalCost) {
+    // Marks the card as being played while it is still in its origin zone.
+    (card.scriptState ??= {}).declaringAdditionalCost = 1;
+    script.declareAdditionalCost(runtime.makeCtx(state, seat, card, link, fromArsenal));
+    const declarationDecision = state.pendingDecision;
+    if (declarationDecision?.chooseHook) {
+      declarationDecision.resume = {
+        kind: "continue-window-instant-after-declaration",
+        seat,
+        instanceId: card.instanceId,
+        pitchInstanceIds: [...pitchInstanceIds],
+        from: origin,
+        ...(meldSide ? { meldSide } : {}),
+        ...(targetAllyId === undefined ? {} : { targetAllyId }),
+        ...(boost ? { boost } : {}),
+        ...(boostCount === undefined ? {} : { boostCount }),
+        ...(alternativeCostCardInstanceIds === undefined
+          ? {}
+          : { alternativeCostCardInstanceIds: [...alternativeCostCardInstanceIds] }),
+        ...(targetCardInstanceId === undefined ? {} : { targetCardInstanceId }),
+        ...(declaredVariableX === undefined ? {} : { declaredVariableX }),
+      };
+      return undefined;
+    }
+  }
+  delete card.scriptState?.declaringAdditionalCost;
   const costErr = payCost(state, runtime, player, cost, pitchInstanceIds, card.instanceId, {
     beforePitch: () =>
       logPublic(state, gameLogMessage(
@@ -748,7 +775,6 @@ export function playWindowInstant(
       paidCards,
     );
   }
-  const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
   notePlayPermissionSource(state, runtime, card, origin, seat);
   removeFromArray(source, card.instanceId);
   delete card.faceDown;

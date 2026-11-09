@@ -327,6 +327,26 @@ function opponentEquipment(input: BotPolicyInput): CardView[] {
   ];
 }
 
+const EQUIPMENT_SLOTS = ["head", "chest", "arms", "legs"] as const;
+
+/** Jarl's Frostbite trigger fizzles unless an opponent equipment zone is exposed. */
+function opponentHasExposedZone(input: BotPolicyInput): boolean {
+  const opponent = input.view.players[1 - input.seat]!;
+  return EQUIPMENT_SLOTS.some((slot) =>
+    !opponent.equipment[slot] && !opponent.board.some((card) => card.counters?.[`frostZone:${slot}`])
+  );
+}
+
+function scoreBlizzard(intent: GameIntent, input: BotPolicyInput): number {
+  const targetId = "targetCardInstanceId" in intent ? intent.targetCardInstanceId : undefined;
+  const target = input.view.chain.find((link) =>
+    !link.resolved && link.attackingCard.instanceId === targetId
+  );
+  if (!target || target.attackingCard.owner === input.seat) return -100;
+  const value = (target.goAgain === true ? 40 : 0) + (opponentHasExposedZone(input) ? 15 : 0);
+  return value > 0 ? value : -100;
+}
+
 function compass(input: BotPolicyInput): CardView | undefined {
   return opponentEquipment(input).find((card) =>
     input.cards[card.cardId]?.name.toLowerCase().includes("compass of sunken depths")
@@ -619,6 +639,8 @@ function scorePlay(
     score = attackFollowsPlay(intent, input, own) ? 70 : -100;
   } else if (functional === "fruits of the forest|3") {
     score = 5;
+  } else if (functional === "blizzard|3") {
+    score = scoreBlizzard(intent, input);
   } else if (data.cardType === "defense-reaction") {
     score = defenseReactionWorthSpending(card, input, jarlSolverRules, pitchIds(intent))
       ? scoreDefenseReaction(data, input)

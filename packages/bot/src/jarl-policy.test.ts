@@ -591,6 +591,50 @@ describe("Jarl policy", () => {
       .toEqual({ kind: "defend", instanceIds: [stalagmite.instanceId] });
   });
 
+  it("plays Blizzard only when it denies go again or lands a Frostbite", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 12_109,
+      startPlayer: 1,
+    });
+    replaceHand(state, ["ELE147"]);
+    const blizzard = state.players[0]!.hand[0]!;
+    const view = projectStateFor(state, 0);
+    view.phase = "layer";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "priority-window", prompt: "Play an instant or pass" };
+    view.stack = [];
+    view.chain = [{
+      attackingCard: { instanceId: 91_001, cardId: "DYN005", owner: 1 },
+      defendingCards: [], reactions: [], attackValue: 7, defenseValue: 0,
+      damage: 7, resolved: false, onStack: true,
+    }];
+    view.players[1].equipment = {
+      head: { instanceId: 91_002, cardId: "DTD200", owner: 1 },
+      chest: { instanceId: 91_003, cardId: "CRU178", owner: 1 },
+      arms: { instanceId: 91_004, cardId: "SUP125", owner: 1 },
+      legs: { instanceId: 91_005, cardId: "WTR004", owner: 1 },
+    };
+    const play: GameIntent = {
+      kind: "play-card",
+      instanceId: blizzard.instanceId,
+      pitchInstanceIds: [],
+      targetCardInstanceId: 91_001,
+    };
+    const input = { seat: 0 as const, view, legal: [play, { kind: "pass" as const }], cards: cardData };
+
+    expect(chooseJarlIntent(input)).toEqual({ kind: "pass" });
+    view.chain[0]!.goAgain = true;
+    expect(chooseJarlIntent(input)).toEqual(play);
+    view.chain[0]!.goAgain = false;
+    delete view.players[1].equipment.head;
+    expect(chooseJarlIntent(input)).toEqual(play);
+    view.chain[0]!.attackingCard.owner = 0;
+    expect(chooseJarlIntent(input)).toEqual({ kind: "pass" });
+  });
+
   it("does not destroy fresh Boots of Omnis Ward without pending damage", () => {
     const state = createGame({
       decklists: [jarlDeck(), decklists.dorinthea],

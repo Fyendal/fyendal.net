@@ -533,6 +533,32 @@ describe("PersistedStateV1", () => {
       .pendingDecision).toEqual(source.pendingDecision);
   });
 
+  it("round trips a priority-window instant paused for a pre-payment mode declaration", () => {
+    const source = game();
+    const [card] = source.players[0]!.hand;
+    source.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose any number of modes",
+      options: ["boo", "done"],
+      sourceInstanceId: card!.instanceId,
+      chooseHook: "mode",
+      resume: {
+        kind: "continue-window-instant-after-declaration",
+        seat: 0,
+        instanceId: card!.instanceId,
+        pitchInstanceIds: [],
+        from: "hand",
+        boost: true,
+        boostCount: 2,
+      },
+    };
+
+    const encoded = encodePersistedState(source);
+    expect(decodePersistedState(jsonCopy(encoded), "ABC123", cardData, scripts)
+      .pendingDecision).toEqual(source.pendingDecision);
+  });
+
   it("round trips wager-loss replacement ordering and continuation", () => {
     const source = game();
     const sourceIds = source.players[0]!.weapons.map((card) => card.instanceId);

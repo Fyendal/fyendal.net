@@ -1687,9 +1687,21 @@ export function scoreDefenseIntentWithTrace(
   const threatenedCombat = Math.max(incoming, publicThreat + pump, 0);
   const directDamage = publicCombatThreat(input).directDamage;
   const survivableLife = directDamage >= me.life ? me.life : me.life - directDamage;
+  const attackText = input.cards[link.attackingCard.cardId]?.text ?? "";
+  const attacker = input.view.players[1 - input.seat]!;
+  const onHit = evaluateOnHit({
+    effects: link.onHitEffects ?? [],
+    sourceText: attackText,
+    attackerCanContinue: link.goAgain === true || attacker.actionPoints > 0,
+    attackerCanArsenal: attacker.arsenalCount === 0,
+    defenderHasHand: me.handCount > 0,
+    defenderHasArsenal: me.arsenalCount > 0,
+  });
+  // A landed hit also deals its immediate on-hit damage.
+  const landedDamage = (combat: number) => combat > 0 ? combat + onHit.immediateDamage : 0;
   // Judged before the block's own power change, or a Piercing block would
   // manufacture a lethal attack and earn the survival bonus for weathering it.
-  const lethal = Math.max(0, link.damage, publicThreat) >= survivableLife;
+  const lethal = landedDamage(Math.max(0, link.damage, publicThreat)) >= survivableLife;
   if (model.canUseDefender && chosen.some((card) => !model.canUseDefender!(card, input))) {
     return {
       score: -1_000_000,
@@ -1738,16 +1750,6 @@ export function scoreDefenseIntentWithTrace(
   const overblock = destroysAttack
     ? defense - phantasmDefense
     : Math.max(0, defense - incomingWithoutBlock);
-  const attackText = input.cards[link.attackingCard.cardId]?.text ?? "";
-  const attacker = input.view.players[1 - input.seat]!;
-  const onHit = evaluateOnHit({
-    effects: link.onHitEffects ?? [],
-    sourceText: attackText,
-    attackerCanContinue: link.goAgain === true || attacker.actionPoints > 0,
-    attackerCanArsenal: attacker.arsenalCount === 0,
-    defenderHasHand: me.handCount > 0,
-    defenderHasArsenal: me.arsenalCount > 0,
-  });
   // Marks, pumps and tempo are not worth wearing armor; disruption and card
   // advantage are.
   const meaningfulOnHit = onHit.value >= SIGNIFICANT_ON_HIT_VALUE;
@@ -1774,7 +1776,7 @@ export function scoreDefenseIntentWithTrace(
   const plannedSpentIds = new Set([...spentIds, ...plannedPrevention.consumedIds]);
   // Planned against public pumps, so a pumped hit still counts as landing.
   const damageThroughBlock = destroysAttack ? 0 : Math.max(0, threatenedCombat - defense - plannedPrevention.amount);
-  const survives = destroysAttack ? survivableLife > 0 : damageThroughBlock < survivableLife;
+  const survives = destroysAttack ? survivableLife > 0 : landedDamage(damageThroughBlock) < survivableLife;
   const removesDefenderOnHit = !stopsHit && incoming > 0 && onHitRemovesDefender(link, attackText);
   const candidate: DefenseCandidateContext = {
     input,
@@ -2010,8 +2012,6 @@ export function scoreDefenseIntentWithTrace(
   };
 
   if (lethal) {
-    const handDefenseNeeded = Math.max(0, threatenedCombat - plannedPrevention.amount - survivableLife + 1);
-    const survives = survivableLife > 0 && (destroysAttack || defense >= handDefenseNeeded);
     // Equipment wear is priced by equipmentCost; opportunity is for hand cards.
     const preservationCost = chosen
       .filter((card) => !equipmentIds.has(card.instanceId))

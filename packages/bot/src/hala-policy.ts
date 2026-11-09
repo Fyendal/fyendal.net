@@ -553,7 +553,8 @@ function preFirstSwordSharpenIntent(input: BotPolicyInput): GameIntent | undefin
     const excluded = new Set([...sharpenerIds, ...pitchIds(intent)]);
     const available = resourcesAfter(intent, data, input, own) +
       remainingPitchValue(input, excluded);
-    return available >= remainingSetupCost + 1;
+    // A Flurry swing needs its own activation, so reserve one per planned swing.
+    return available >= remainingSetupCost + plannedZenithSwings(input, new Set(pitchIds(intent)));
   }), input, own);
   return candidates.sort((left, right) => {
     const leftCard = intentCard(left, own)!;
