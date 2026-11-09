@@ -71,6 +71,8 @@ const LOCK_VALUE = 2;
 const MINOR_LOCK_VALUE = 1;
 const GAME_LOSS_VALUE = 40;
 const RESOURCE_TOKEN_VALUE = 2;
+/** Each {r} the attacker pays to enable an on-hit. */
+const PAID_RESOURCE_VALUE = 1;
 /** Attacker-side setup (soul, opt, counters). */
 const SETUP_VALUE = 1;
 const TEMPO_VALUE = 1;
@@ -396,7 +398,7 @@ function selfEffect(text: string): OnHitEvaluation | undefined {
 
 function classifyText(rawText: string, context: OnHitValueContext): OnHitEvaluation | undefined {
   const text = rawText.trim().toLowerCase();
-  return sum([
+  const classified = sum([
     handDisruption(text, context),
     arsenalDisruption(text, context),
     cardAdvantage(text, context),
@@ -411,6 +413,11 @@ function classifyText(rawText: string, context: OnHitValueContext): OnHitEvaluat
     minorEffects(text),
     selfEffect(text),
   ]);
+  // The attacker's optional payment is spent on the hit, so it nets out.
+  const paid = /\byou may pay ((?:\{r\})+)/.exec(text)?.[1]!.match(/\{r\}/g)!.length ?? 0;
+  return classified && paid > 0
+    ? { ...classified, value: Math.max(0, classified.value - paid * PAID_RESOURCE_VALUE) }
+    : classified;
 }
 
 /** Structured engine tags, used when the display text is not recognized

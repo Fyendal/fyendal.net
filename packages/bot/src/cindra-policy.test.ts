@@ -7,7 +7,8 @@ import {
   chooseCindraIntent,
   chooseCindraIntentWithTrace,
 } from "./cindra-policy.js";
-import { cindraPresentationFor } from "./sideboard.js";
+import { decklistsFromState } from "./deck-knowledge.js";
+import { cindraPresentationFor, halaPresentationFor } from "./sideboard.js";
 import { botObservationKey, isCleanActionDecision } from "./turn-planner.js";
 
 function cindraDeck(): Decklist {
@@ -271,6 +272,64 @@ describe("Cindra Head Jabs policy", () => {
       const card = view.players[0].hand.find((candidate) => candidate.instanceId === id);
       return total + (card?.defense ?? 0);
     }, 0)).toBeGreaterThanOrEqual(3);
+  });
+
+  it("blocks a nonlethal card-draw hit from hand instead of breaking Flick Knives or Vest", () => {
+    const cindra = cindraDeck();
+    const halaPool = precon("precon-hala-masterclass")!.pool;
+    const game = createGame({
+      decklists: [cindra, { heroId: halaPool.heroId, ...halaPresentationFor(cindra) }],
+      cards: cardData,
+      scripts,
+      seed: 12_301,
+      startPlayer: 1,
+    });
+    replaceHand(game, 0, ["HNT064", "GEM010", "CIN020", "ANQ029"]);
+    const view = projectStateFor(game, 0);
+    opposingAttack(view, 5);
+    view.chain[0] = {
+      ...view.chain[0]!,
+      attackingCard: { instanceId: 90_001, cardId: "AHA002", owner: 1, attack: 5 },
+      goAgain: true,
+      onHitEffects: [{ sourceCardId: "MPW030", text: "When this hits, draw 2 cards.", impact: { drawCards: 2 } }],
+    };
+    view.players[0].arsenal = [{ instanceId: 90_010, cardId: "WTR082", owner: 0, faceDown: true }];
+    view.players[0].arsenalCount = 1;
+    let nextId = 91_000;
+    const equipped = (cardId: string): CardView => ({
+      instanceId: nextId++,
+      cardId,
+      owner: 0,
+      defense: cardData[cardId]?.defense,
+    });
+    const flickKnives = equipped("SUP244");
+    const vest = equipped("HNT168");
+    view.players[0].equipment = {
+      arms: flickKnives,
+      head: equipped("WTR079"),
+      legs: equipped("HNT143"),
+      chest: vest,
+    };
+    const breakable = new Set([flickKnives.instanceId, vest.instanceId]);
+    const defenders = [
+      ...view.players[0].hand,
+      ...Object.values(view.players[0].equipment).filter((card) => card !== undefined),
+    ];
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [] },
+      ...defenders.map((card) => ({ kind: "stage-defenders" as const, instanceIds: [card.instanceId] })),
+      { kind: "concede" },
+    ];
+
+    const intent = chooseCindraIntent({
+      seat: 0,
+      view,
+      legal,
+      cards: cardData,
+      decklists: decklistsFromState(game, 0),
+    });
+    if (intent.kind !== "stage-defenders" && intent.kind !== "defend") throw new Error(intent.kind);
+    expect(intent.instanceIds.some((id) => breakable.has(id))).toBe(false);
   });
 
   it("plays Blaze Headlong as the second link before terminal Draconic attacks", () => {

@@ -1056,14 +1056,17 @@ function wagerDefenseSwing(rewards: readonly string[] | undefined): number {
 /** Opportunity cost of one equipment block. Durable keywords lose counters
  * rather than the whole card, so price the defense actually worn away instead
  * of charging every armor piece as though it had Blade Break. */
-function equipmentWearCost(card: CardView, input: BotPolicyInput): number {
+function equipmentWearCost(card: CardView, input: BotPolicyInput, model: HeroCycleModel): number {
   const data = input.cards[card.cardId];
   const keywords = new Set((data?.keywords ?? []).map((keyword) => keyword.toLowerCase()));
   const defense = Math.max(0, card.defense ?? data?.defense ?? 0);
   if (keywords.has("battleworn")) return 1;
   if (keywords.has("temper")) return defense <= 1 ? 2 : 1.5;
   if (keywords.has("guardwell")) return Math.max(1, defense);
-  if (keywords.has("blade break")) return Math.max(2, defense) + destroyedAbilityValue(card, input);
+  if (keywords.has("blade break")) {
+    const abilityValue = model.equipmentAbilityValue?.(card, input) ?? destroyedAbilityValue(card, input);
+    return Math.max(2, defense) + abilityValue;
+  }
   return defense > 0 ? 2 : 0;
 }
 
@@ -1272,6 +1275,9 @@ export interface HeroCycleModel extends ResponseModel {
   /** Equipment whose defense is free to cash in now because the hero expects
    * to refresh it or consume it offensively on the following turn. */
   equipmentUseIsFree?(card: CardView, input: BotPolicyInput): boolean;
+  /** Rest-of-game value of a piece's printed ability when blocking destroys
+   * it; undefined falls back to the generic estimate. */
+  equipmentAbilityValue?(card: CardView, input: BotPolicyInput): number | undefined;
   lifeThresholds?: readonly LifeThreshold[];
   /** The response model reads `heroAbilitiesLost`, so a landed lock is priced
    * by the projection rather than the flat on-hit estimate. */
@@ -1870,7 +1876,7 @@ export function scoreDefenseIntentWithTrace(
   const equipmentCost = removedEquipmentCost + selectedEquipment.reduce(
     (total, card) => total + (model.equipmentUseIsFree?.(card, input)
       ? 0
-      : equipmentWearCost(card, input)) + weaponLockCost(card),
+      : equipmentWearCost(card, input, model)) + weaponLockCost(card),
     0,
   );
   // Damage projection captures cards essential to the next offensive line,

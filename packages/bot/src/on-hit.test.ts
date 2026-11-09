@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluateOnHit, immediateOnHitDamage, type OnHitValueContext } from "./on-hit.js";
+import { evaluateOnHit, immediateOnHitDamage, SIGNIFICANT_ON_HIT_VALUE, type OnHitValueContext } from "./on-hit.js";
 
 const base: Omit<OnHitValueContext, "effects"> = {
   sourceText: "",
@@ -31,6 +31,12 @@ describe("on-hit valuation", () => {
     expect(immediateOnHitDamage([{ text: "When this hits a hero, deal 1 arcane damage to them." }])).toBe(1);
     expect(immediateOnHitDamage([{ text: "Scripted summary", impact: { damage: 3, delayedDamage: 2 } }])).toBe(1);
     expect(immediateOnHitDamage([{ text: "When this hits a hero, they draw a card." }])).toBe(0);
+  });
+
+  it("nets an optional resource payment out of the on-hit value", () => {
+    const grains = "Whenever a weapon attack you control hits, you may pay {r}. If you do, create a Vigor token.";
+    expect(value(grains)).toBe(value("When this hits, create a Vigor token.") - 1);
+    expect(value(grains)).toBeLessThan(SIGNIFICANT_ON_HIT_VALUE);
   });
 
   it("ranks informed disruption highest and self-destruction lowest", () => {

@@ -68,6 +68,9 @@ const CARD = {
 } as const;
 
 const MASK_ENDGAME_LIFE = 4;
+/** About two future dagger pings, each 1 damage plus a Vest or Fealty payoff. */
+const FLICK_KNIVES_ABILITY_VALUE = 4;
+const VEST_STAIN_LIMIT = 3;
 
 type CardPlayIntent = Extract<GameIntent,
   { kind: "play-card" | "play-from-arsenal" | "play-from-zone" }>;
@@ -1061,6 +1064,15 @@ function scoreDefend(
     equipmentUseIsFree(card, policyInput) {
       return key(policyInput.cards[card.cardId]) === CARD.dragonscalerFlightPath &&
         flightPathWillBeConsumedNextTurn(policyInput);
+    },
+    equipmentAbilityValue(card, policyInput) {
+      const functional = key(policyInput.cards[card.cardId]);
+      if (functional === CARD.flickKnives) return FLICK_KNIVES_ABILITY_VALUE;
+      // Each remaining stain is one future resource.
+      if (functional === CARD.bloodSplatteredVest) {
+        return Math.max(0, VEST_STAIN_LIMIT - (card.counters?.stain ?? 0));
+      }
+      return undefined;
     },
     defensePermission(candidate) {
       if (candidate.lethal) return candidate.survives ? "require" : "forbid";
