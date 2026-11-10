@@ -113,6 +113,24 @@ describe("Aurora policy", () => {
     expect(startLife - state.players[1]!.life).toBeGreaterThanOrEqual(13);
   });
 
+  it("keeps attacking the hero when an inactive Chum survives every attack", () => {
+    let state = newGame(4242, 0);
+    replaceHand(state, 0, ["AST022", "GEM155", "ROS101", "LGS368"]);
+    const chum = { instanceId: state.nextInstanceId++, cardId: "SEA050", owner: 1 as const, life: 6 };
+    state.players[1]!.board.push(chum);
+    const startLife = state.players[1]!.life;
+
+    const targets: Array<number | undefined> = [];
+    for (let step = 0; step < 80 && state.turn === 2 && state.winner === null; step++) {
+      const seat = actor(state);
+      const intent = seat === 0 ? choose(state, 0) : passive(state, 1);
+      if (seat === 0 && "targetAllyId" in intent) targets.push(intent.targetAllyId);
+      state = apply(state, seat, intent);
+    }
+    expect(targets).not.toContain(chum.instanceId);
+    expect(startLife - state.players[1]!.life).toBeGreaterThanOrEqual(13);
+  });
+
   function firstPlay(hand: readonly string[], seed: number): string | undefined {
     const state = newGame(seed, 0);
     replaceHand(state, 0, hand);

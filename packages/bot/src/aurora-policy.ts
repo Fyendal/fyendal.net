@@ -17,6 +17,7 @@ import {
   currentAttackIsOurs,
   currentLink,
   defenderDefense,
+  enforceAllyTargetPolicy,
   enforceSpectraPolicy,
   functionalKey as key,
   incomingAttackDamage,
@@ -408,7 +409,7 @@ export interface AuroraIntentDecision {
  * phases, projection scoring in reactive windows. */
 export function chooseAuroraIntentWithTrace(input: BotPolicyInput): AuroraIntentDecision {
   if (shouldPreserveOpeningHand(input)) {
-    return { intent: enforceSpectraPolicy(input, chooseAuroraReactiveIntent(input)) };
+    return { intent: enforceAllyTargetPolicy(input, enforceSpectraPolicy(input, chooseAuroraReactiveIntent(input))) };
   }
   const plan = planBriarTurn(input, {
     chooseForced: (forced) => chooseAuroraReactiveIntent({ ...forced, state: undefined }),
@@ -419,7 +420,10 @@ export function chooseAuroraIntentWithTrace(input: BotPolicyInput): AuroraIntent
     prepareCandidates,
     fatiguePlan: false,
   });
-  const intent = enforceSpectraPolicy(input, plan?.intent ?? chooseAuroraReactiveIntent(input));
+  const intent = enforceAllyTargetPolicy(
+    input,
+    enforceSpectraPolicy(input, plan?.intent ?? chooseAuroraReactiveIntent(input)),
+  );
   return plan ? { intent, plan } : { intent };
 }
 
