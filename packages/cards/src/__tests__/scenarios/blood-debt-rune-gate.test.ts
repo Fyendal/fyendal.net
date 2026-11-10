@@ -191,6 +191,41 @@ describe("Blood Debt and Rune Gate", () => {
     }));
   });
 
+  it("random graveyard banish costs ignore face-down graveyard cards", () => {
+    for (const key of ["shadowrealm horror|1", "dread screamer|1"]) {
+      const short = scenario({
+        seats: [
+          { hero: "rhinar", hand: [key], graveyard: ["wounding blow|1", "wounding blow|2", "raging onslaught|1"], resources: 10 },
+          { hero: "dorinthea" },
+        ],
+      });
+      short.state.players[0]!.graveyard[2]!.faceDown = true;
+      const card = short.state.players[0]!.hand[0]!;
+      expect(legalIntents(short.state, 0).some(
+        (intent) => intent.kind === "play-card" && intent.instanceId === card.instanceId,
+      )).toBe(false);
+
+      const g = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            hand: [key],
+            graveyard: ["raging onslaught|1", "wounding blow|1", "wounding blow|2", "wounding blow|3"],
+            resources: 10,
+          },
+          { hero: "dorinthea" },
+        ],
+      });
+      const hidden = g.state.players[0]!.graveyard[0]!;
+      hidden.faceDown = true;
+
+      g.play(key, { settle: false });
+
+      expect(g.state.players[0]!.graveyard.map((c) => c.instanceId)).toEqual([hidden.instanceId]);
+      expect(g.state.players[0]!.banish.filter((c) => !c.faceDown)).toHaveLength(3);
+    }
+  });
+
   it("Shadowrealm Horror gets go again only after banishing at least two 6-power cards", () => {
     const oneSix = scenario({
       seats: [

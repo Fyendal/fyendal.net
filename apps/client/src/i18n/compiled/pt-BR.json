@@ -3505,6 +3505,16 @@
       "value": "Escolha um off-hand Guardian"
     }
   ],
+  "card.dyn.witnesses.arsenal.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": faça banish de até 1 carta do arsenal do oponente"
+    }
+  ],
   "card.effect.aac.invertersnightcowl": [
     {
       "type": 0,

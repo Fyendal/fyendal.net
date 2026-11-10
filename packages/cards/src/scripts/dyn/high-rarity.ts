@@ -741,11 +741,25 @@ export const dynHighRarity: Record<string, CardScript> = {
       const opp = ctx.player(opponentSeat(ctx));
       const top = opp.deck[0];
       if (top) ctx.banish(top.instanceId);
-      const arsenal = opp.arsenal[0];
-      if (arsenal) {
-        ctx.setCardFaceDown(arsenal.instanceId, false);
-        ctx.banish(arsenal.instanceId);
-      }
+      if (!opp.arsenal.length) return;
+      ctx.requestCardChoice(
+        "leave-no-witnesses-arsenal",
+        decisionPrompt(
+          `${ctx.data.name}: banish up to 1 card in the opponent's arsenal`,
+          "card.dyn.witnesses.arsenal.banish",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("pass"),
+          },
+        ),
+        ["pass", ...opp.arsenal.map((card) => card.instanceId)],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "leave-no-witnesses-arsenal" || option === "pass") return;
+      const id = Number(option);
+      ctx.setCardFaceDown(id, false);
+      ctx.banish(id);
     },
   },
   "regicide|3": {

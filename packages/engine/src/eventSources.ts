@@ -1,6 +1,6 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import { cardNameKeysOf, dataOf, scriptOf } from "./cardProperties.js";
+import { cardNameKeysOf, dataOf, grantedBaseAbilityCardIds, scriptOf } from "./cardProperties.js";
 import { logTriggerAnnouncement, triggerAnnouncement } from "./triggerPresentation.js";
 import type { TriggerAnnouncement } from "./triggerPresentation.js";
 import { triggerOccurrenceCount } from "./scripts.js";
@@ -484,11 +484,7 @@ export function runHook<K extends
   ) return;
   const ctx = runtime.makeCtx(state, seat, card, link, fromArsenal, playTargetInstanceId);
   if (fn) (fn as (c: ScriptCtx) => void)(ctx);
-  const inheritedIds = [
-    ...(card.grantedBaseAbilitiesCardId ? [card.grantedBaseAbilitiesCardId] : []),
-    ...(card.grantedBaseAbilitiesCardIds ?? []),
-  ];
-  for (const inheritedId of inheritedIds) {
+  for (const inheritedId of grantedBaseAbilityCardIds(card)) {
     const inherited = state.scriptsRef[inheritedId]?.[hook];
     if (inherited) (inherited as (c: ScriptCtx) => void)(ctx);
   }

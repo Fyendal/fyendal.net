@@ -11,6 +11,7 @@ import {
   dealArcaneToTargetHero,
   decisionMessage,
   decisionPrompt,
+  faceUpGraveyard,
   heroTarget,
   ironhideScript,
   isCard,
@@ -277,7 +278,7 @@ function secondSwing(attack: number): CardScript {
 }
 
 function banishRandomFromGraveyard(ctx: ScriptCtx, count: number) {
-  const graveyard = [...ctx.player(ctx.seat).graveyard];
+  const graveyard = faceUpGraveyard(ctx);
   const banished = [];
   for (let i = 0; i < count && graveyard.length > 0; i++) {
     const index = ctx.randomInt(graveyard.length);
@@ -289,7 +290,7 @@ function banishRandomFromGraveyard(ctx: ScriptCtx, count: number) {
 
 function banishThreeCost(extra: CardScript = {}): CardScript {
   return {
-    canPlay: (ctx) => ctx.player(ctx.seat).graveyard.length >= 3,
+    canPlay: (ctx) => faceUpGraveyard(ctx).length >= 3,
     additionalCost(ctx) {
       const banished = banishRandomFromGraveyard(ctx, 3);
       if (banished.some((card) => isSixPlus(ctx, card))) ctx.setState("banishedSix", 1);

@@ -76,6 +76,14 @@ export function cardAbilitiesSuppressed(
   return ownAbilitiesSuppressed(state, card) || abilitiesLostToChosenName(state, card);
 }
 
+/** Printed cards whose base abilities this instance has been granted. */
+export function grantedBaseAbilityCardIds(card: CardInstance): string[] {
+  return [
+    ...(card.grantedBaseAbilitiesCardId ? [card.grantedBaseAbilitiesCardId] : []),
+    ...(card.grantedBaseAbilitiesCardIds ?? []),
+  ];
+}
+
 function ownAbilitiesSuppressed(state: GameStateInternal, card: CardInstance): boolean {
   const owner = state.players[card.owner] as PlayerState | undefined;
   const link = currentLink(state);
@@ -164,10 +172,7 @@ export function instanceKeywords(
   const materialKeywords = (card.subcards ?? []).flatMap((subcard) =>
     scriptOf(state, subcard.cardId, subcard)?.materialKeywords ?? []
   );
-  const grantedBaseKeywords = [
-    ...(card.grantedBaseAbilitiesCardId ? [card.grantedBaseAbilitiesCardId] : []),
-    ...(card.grantedBaseAbilitiesCardIds ?? []),
-  ].flatMap((cardId) => dataOf(state, cardId).keywords ?? []);
+  const grantedBaseKeywords = grantedBaseAbilityCardIds(card).flatMap((cardId) => dataOf(state, cardId).keywords ?? []);
   return [
     ...(cardAbilitiesSuppressed(state, card) ? [] : state.cardsRef[card.cardId]?.keywords ?? []),
     ...(opts?.gained === false ? [] : card.grantedKeywords ?? []),

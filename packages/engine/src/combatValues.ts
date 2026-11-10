@@ -13,6 +13,7 @@ import {
   hasWardKeyword,
   instanceHasKeyword,
   instanceKeywordValues,
+  grantedBaseAbilityCardIds,
   scriptOf,
 } from "./cardProperties.js";
 import {
@@ -328,10 +329,7 @@ export function conditionalAttackBonus(
   const own = suppressOwn
     ? 0
     : (script?.modifyAttack?.(runtime.makeCtx(state, seat, card, link)) ?? 0) + boostBanishBonus(state, runtime, seat, card);
-  const inherited = [
-    ...(card.grantedBaseAbilitiesCardId ? [card.grantedBaseAbilitiesCardId] : []),
-    ...(card.grantedBaseAbilitiesCardIds ?? []),
-  ].reduce((sum, cardId) => sum + (state.scriptsRef[cardId]?.modifyAttack?.(
+  const inherited = grantedBaseAbilityCardIds(card).reduce((sum, cardId) => sum + (state.scriptsRef[cardId]?.modifyAttack?.(
     runtime.makeCtx(state, seat, card, link),
   ) ?? 0), 0);
   return own + inherited;

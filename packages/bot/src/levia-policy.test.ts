@@ -657,6 +657,16 @@ describe("Levia Gates policy", () => {
     expect(intent).toEqual({ kind: "stage-defenders", instanceIds: [blocker.instanceId] });
   });
 
+  it("blocks a Fragment attack with one card once its -2 power is counted", () => {
+    let state = game();
+    state.turn = 1;
+    hand(state, ["MON140", "IAR017", "IAR214", "ROS218"]);
+    state.players[0]!.arsenal = [];
+    state = defending(state, "AZS014");
+    const intent = choice(state);
+    expect(intent).toMatchObject({ kind: "stage-defenders", instanceIds: [expect.any(Number)] });
+  });
+
   describe("Call to the Grave", () => {
     function callChoice(handIds: readonly string[], banishCleave = false) {
       const state = game();

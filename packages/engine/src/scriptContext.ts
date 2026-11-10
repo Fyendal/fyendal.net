@@ -18,6 +18,7 @@ import { rngInt } from "./rng.js";
 import { arcaneDamageCardsPlayedThisTurn, pitchedThisTurn, playedThisTurn } from "./turnRecords.js";
 import { equipmentZoneEmpty, heroAbilitiesDisabled } from "./stateQueries.js";
 import {
+  cardAbilitiesSuppressed,
   cardColorOf,
   cardCostOf,
   cardHasType,
@@ -25,6 +26,7 @@ import {
   cardNamesOf,
   cardTypesOf,
   dataOf,
+  grantedBaseAbilityCardIds,
   hasWardKeyword,
   isClassOrTalentSupertype,
   scriptOf,
@@ -477,10 +479,17 @@ export function makeCtx(
       fireFriendlyBanishesOpponentCard(state, runtime, seat, before.card);
     }
     if (moved && before) {
-      scriptOf(state, source.cardId, source)?.onBanishedCard?.(
-        runtime.makeCtx(state, seat, source, currentLink(state)),
-        before.card,
-      );
+      const ownScript = scriptOf(state, source.cardId, source);
+      const scripts = new Set(ownScript ? [ownScript] : []);
+      if (!cardAbilitiesSuppressed(state, source)) {
+        for (const inheritedId of grantedBaseAbilityCardIds(source)) {
+          const inherited = state.scriptsRef[inheritedId];
+          if (inherited) scripts.add(inherited);
+        }
+      }
+      for (const script of scripts) {
+        script.onBanishedCard?.(runtime.makeCtx(state, seat, source, currentLink(state)), before.card);
+      }
     }
     return moved;
   };

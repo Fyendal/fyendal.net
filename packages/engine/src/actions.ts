@@ -14,6 +14,7 @@ import {
   isArrowData,
   isAttackActionData,
   meldSideHasType,
+  grantedBaseAbilityCardIds,
   scriptOf,
 } from "./cardProperties.js";
 import { answerClashDecision } from "./clash.js";
@@ -854,11 +855,7 @@ function dispatchScriptChoice(
   );
   const script = scriptOf(state, owner.card.cardId, owner.card);
   if (script) visit(script, ctx);
-  const inheritedIds = [
-    ...(owner.card.grantedBaseAbilitiesCardId ? [owner.card.grantedBaseAbilitiesCardId] : []),
-    ...(owner.card.grantedBaseAbilitiesCardIds ?? []),
-  ];
-  for (const inheritedId of inheritedIds) {
+  for (const inheritedId of grantedBaseAbilityCardIds(owner.card)) {
     const inherited = state.scriptsRef[inheritedId];
     if (inherited) visit(inherited, ctx);
   }

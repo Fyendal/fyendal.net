@@ -1204,7 +1204,8 @@ function opponentWeaponAttackLeft(input: BotPolicyInput): boolean {
  * from the engine's defend projection: the link's attack value is computed
  * from its defenders, so a charged Boltyn's bonus against attack action
  * defenders is missing from the link until the block commits. The projection
- * prices each defender added alone, so a set takes its largest change. */
+ * prices each defender added alone, so a set takes its largest change. Fragment
+ * resolves after the projection, so its -2 per trigger is added here. */
 export function defendersAttackChange(input: BotPolicyInput, defenders: readonly CardView[]): number {
   const link = currentLink(input);
   const decision = input.view.pendingDecision;
@@ -1213,7 +1214,15 @@ export function defendersAttackChange(input: BotPolicyInput, defenders: readonly
     const projected = decision.defenderDefense?.find((entry) => entry.instanceId === card.instanceId);
     return projected ? [projected.attack - link.attackValue] : [];
   });
-  return changes.length > 0 ? Math.max(...changes) : 0;
+  return (changes.length > 0 ? Math.max(...changes) : 0) - fragmentPowerLoss(input, link, defenders);
+}
+
+/** Fragment triggers once per defender with 2+ defense. */
+function fragmentPowerLoss(input: BotPolicyInput, link: ChainLinkView, defenders: readonly CardView[]): number {
+  const fragment = input.cards[link.attackingCard.cardId]?.keywords?.some((keyword) =>
+    keyword.toLowerCase() === "fragment"
+  );
+  return fragment ? 2 * defenders.filter((card) => defenderDefense(card, input) >= 2).length : 0;
 }
 
 /** Defense a card would contribute if it defended the current attack. */

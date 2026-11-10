@@ -359,12 +359,29 @@ describe("DYN — registration and heroes", () => {
     s.play("leave no witnesses|1")
       .blockWith()
       .settle()
+      .chooseCard(BLUE)
       .expectInZone(1, "flex claws|1", "banish")
       .expectInZone(1, BLUE, "banish")
       .expectInZone(0, "silver|0", "board");
     expect(s.state.players[0]!.board.filter(
       (card) => functionalKeyOf(cardData[card.cardId]!) === "silver|0",
     )).toHaveLength(1);
+  });
+
+  it("Leave No Witnesses may leave the arsenal card in place", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["leave no witnesses|1"] },
+        { hero: "dorinthea", deck: ["flex claws|1"], arsenalFaceDown: [BLUE] },
+      ],
+    });
+
+    s.play("leave no witnesses|1").blockWith().settle();
+    expect(s.state.pendingDecision?.player).toBe(0);
+    s.chooseOption("pass")
+      .expectInZone(1, "flex claws|1", "banish")
+      .expectInZone(1, BLUE, "arsenal");
+    expect(s.state.players[1]!.arsenal[0]?.faceDown).toBe(true);
   });
 
   it("keeps destroyed Blacktek Whisperers visible on the chain after resolution", () => {

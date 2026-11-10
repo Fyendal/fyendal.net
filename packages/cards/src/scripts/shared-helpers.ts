@@ -578,6 +578,11 @@ export function opponentSeat(ctx: ScriptCtx): number {
   return ctx.seat === 0 ? 1 : 0;
 }
 
+/** Graveyard cards an effect may refer to; face-down ones are private (CR 3.0.4e). */
+export function faceUpGraveyard(ctx: ScriptCtx, seat = ctx.seat): DeepReadonly<CardInstance>[] {
+  return ctx.player(seat).graveyard.filter((card) => !card.faceDown);
+}
+
 /** Grant `seat` +1 intellect during the end phase of `turn`; repeated grants for that turn stack. */
 export function grantEndPhaseIntellect(ctx: ScriptCtx, seat: number, turn: number): void {
   const hero = ctx.player(seat).hero;

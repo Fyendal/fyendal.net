@@ -11,6 +11,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
   hitHookLabel,
   isCard,
   leavesArenaTrigger,
@@ -2056,11 +2057,11 @@ Object.assign(mst, {
   },
   "dust from stillwater shrine|1": { materialKeywords: ["phantasm"] },
   "shadowrealm horror|1": bloodDebt({
-    canPlay: (ctx) => ctx.player(ctx.seat).graveyard.length >= 3,
+    canPlay: (ctx) => faceUpGraveyard(ctx).length >= 3,
     additionalCost(ctx) {
       let sixPlusBanished = 0;
       const banished: number[] = [];
-      const graveyard = [...ctx.player(ctx.seat).graveyard];
+      const graveyard = faceUpGraveyard(ctx);
       const selected: typeof graveyard = [];
       for (let picked = 0; picked < 3 && graveyard.length > 0; picked++) {
         selected.push(graveyard.splice(ctx.randomInt(graveyard.length), 1)[0]!);

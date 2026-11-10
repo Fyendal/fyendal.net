@@ -388,6 +388,7 @@
   "card.dyn.surgical.hand.banish": "选择一张对方手牌并放逐",
   "card.dyn.tessen.hand.bottom": "将一张手牌置于牌库底部",
   "card.dyn.tranquil.aura.banish": "放逐一个对方灵气 (Aura)，直到此牌离场",
+  "card.dyn.witnesses.arsenal.banish": "{card}：放逐对手 arsenal 中至多一张牌",
   "card.dyn.arakni.opponenttop.look": "查看对手牌库顶牌？",
   "card.dyn.ironsong.sword.target": "选择你控制的一把目标剑",
   "card.dyn.warhorn.heroes.choose": "选择英雄",

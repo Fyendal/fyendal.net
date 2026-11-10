@@ -1966,6 +1966,25 @@ describe("Armory Decks — rules regression coverage", () => {
     expect(g.state.players[1]!.board.filter((card) => functionalKeyOf(cardData[card.cardId]!) === "bloodrot pox|0")).toHaveLength(2);
   });
 
+  it("Horrors of the Past rewards red banishes from inherited Art of Desire: Body", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "arakni, 5l!p3d 7hru 7h3 cr4x|0",
+          hand: ["art of desire: body|1", "horrors of the past|2"],
+          deck: ["wounding blow|3", "wounding blow|3"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", deck: ["wounding blow|1", "wounding blow|1"], equipment: NO_EQUIPMENT },
+      ],
+    });
+    const life = g.state.players[0]!.life;
+    g.play("art of desire: body|1").blockWith().settle().expectZoneSize(0, "hand", 2).expectLife(0, life + 1);
+    g.play("horrors of the past|2").blockWith().settle().expectZoneSize(0, "hand", 2).expectLife(0, life + 2);
+    expect(g.state.players[1]!.banish).toHaveLength(2);
+  });
+
   it("Horrors of the Past resolves choices from inherited base abilities", () => {
     const g = scenario({
       seats: [

@@ -3387,6 +3387,16 @@
       "value": "选择一件 Guardian 副手装备"
     }
   ],
+  "card.dyn.witnesses.arsenal.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐对手 arsenal 中至多一张牌"
+    }
+  ],
   "card.effect.aac.invertersnightcowl": [
     {
       "type": 0,

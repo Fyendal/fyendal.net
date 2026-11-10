@@ -13,6 +13,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
   isChargeDecline,
   localizedCardLog,
   ongoingLabel,
@@ -781,7 +782,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
   "numbskull|1": { unmodifiableCharacteristics: ["cost", "power", "defense"] },
   "dig up dinner|3": {
     onPlay(ctx) {
-      const pool = [...ctx.player(ctx.seat).graveyard];
+      const pool = faceUpGraveyard(ctx);
       const chosen: DeepReadonly<CardInstance>[] = [];
       while (pool.length && chosen.length < 3) chosen.push(pool.splice(ctx.randomInt(pool.length), 1)[0]!);
       const attacks = chosen.filter((card) => isAttack(ctx, card) && ctx.basePower(card) >= 6);

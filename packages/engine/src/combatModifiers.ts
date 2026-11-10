@@ -7,6 +7,7 @@ import {
   cardNamesOf,
   cardTypesOf,
   dataOf,
+  grantedBaseAbilityCardIds,
   scriptOf,
 } from "./cardProperties.js";
 import type { CardInstance, ChainLinkState, Modifier, PlayerState } from "./state.js";
@@ -273,10 +274,5 @@ export function conditionalScriptGrantsGoAgain(
     scriptOf(state, link.attackingCard.cardId, link.attackingCard)
       ?.hasConditionalGoAgain?.(ctx) === true
   ) return true;
-  return [
-    ...(link.attackingCard.grantedBaseAbilitiesCardId
-      ? [link.attackingCard.grantedBaseAbilitiesCardId]
-      : []),
-    ...(link.attackingCard.grantedBaseAbilitiesCardIds ?? []),
-  ].some((cardId) => state.scriptsRef[cardId]?.hasConditionalGoAgain?.(ctx) === true);
+  return grantedBaseAbilityCardIds(link.attackingCard).some((cardId) => state.scriptsRef[cardId]?.hasConditionalGoAgain?.(ctx) === true);
 }
