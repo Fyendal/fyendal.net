@@ -12,6 +12,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   equipWithSilver,
+  faceUpGraveyard,
   heroChoiceSeat,
   heroDamage,
   heroTarget,
@@ -95,14 +96,14 @@ function haboobAsh(ctx: ScriptCtx) {
 
 function requestDeepRecessesBanish(ctx: ScriptCtx, startSeat = 0): void {
   for (let seat = startSeat; seat < ctx.state.players.length; seat++) {
-    const player = ctx.player(seat);
-    if (player.flags.lostLifeThisTurn !== true || player.graveyard.length === 0) continue;
+    const graveyard = faceUpGraveyard(ctx, seat);
+    if (ctx.player(seat).flags.lostLifeThisTurn !== true || graveyard.length === 0) continue;
     ctx.requestCardChoice(
       `deep-recesses-graveyard:${seat}`,
       decisionPrompt(`Choose a card from hero ${seat + 1}'s graveyard to banish`, "card.pen.graveyard.card.banish", {
         values: { hero: seat + 1 },
       }),
-      player.graveyard.map((card) => card.instanceId),
+      graveyard.map((card) => card.instanceId),
     );
     return;
   }
@@ -304,7 +305,7 @@ function auraFromGraveArcane(): CardScript {
   return {
     arcaneDamageEffect: true,
     onAttackDeclared(ctx) {
-      const auras = ctx.player(ctx.seat).graveyard.filter((card) => hasTag(ctx, card, "aura"));
+      const auras = faceUpGraveyard(ctx).filter((card) => hasTag(ctx, card, "aura"));
       if (auras.length)
         ctx.requestCardChoice(
           "pen-banish-aura",
@@ -395,7 +396,7 @@ function evoBeta(slot: "head" | "chest" | "arms" | "legs"): CardScript {
 function decompose(payoff: (ctx: ScriptCtx) => void): CardScript {
   return {
     onPlay(ctx) {
-      const grave = ctx.player(ctx.seat).graveyard;
+      const grave = faceUpGraveyard(ctx);
       const firstEarth = grave.filter(
         (first) =>
           hasTag(ctx, first, "earth") &&
@@ -424,18 +425,14 @@ function decompose(payoff: (ctx: ScriptCtx) => void): CardScript {
     onChoose(ctx, hook, option) {
       if (hook === "pen-decompose-earth-1") {
         if (option === "no") return;
-        const first = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
+        const first = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
         if (!first || !hasTag(ctx, first, "earth")) return;
         ctx.setState("decomposeEarth1", first.instanceId);
-        const secondEarth = ctx
-          .player(ctx.seat)
-          .graveyard.filter(
+        const secondEarth = faceUpGraveyard(ctx).filter(
             (second) =>
               second.instanceId !== first.instanceId &&
               hasTag(ctx, second, "earth") &&
-              ctx
-                .player(ctx.seat)
-                .graveyard.some(
+              faceUpGraveyard(ctx).some(
                   (action) =>
                     action.instanceId !== first.instanceId &&
                     action.instanceId !== second.instanceId &&
@@ -449,12 +446,10 @@ function decompose(payoff: (ctx: ScriptCtx) => void): CardScript {
         );
       } else if (hook === "pen-decompose-earth-2") {
         const firstId = ctx.getState("decomposeEarth1");
-        const second = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
+        const second = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
         if (!second || second.instanceId === firstId || !hasTag(ctx, second, "earth")) return;
         ctx.setState("decomposeEarth2", second.instanceId);
-        const actions = ctx
-          .player(ctx.seat)
-          .graveyard.filter(
+        const actions = faceUpGraveyard(ctx).filter(
             (card) =>
               card.instanceId !== firstId && card.instanceId !== second.instanceId && ctx.hasCardType(card, "action"),
           );
@@ -465,7 +460,7 @@ function decompose(payoff: (ctx: ScriptCtx) => void): CardScript {
         );
       } else if (hook === "pen-decompose-action") {
         const ids = [ctx.getState("decomposeEarth1"), ctx.getState("decomposeEarth2"), Number(option)];
-        const grave = ctx.player(ctx.seat).graveyard;
+        const grave = faceUpGraveyard(ctx);
         const chosen = ids.map((id) => grave.find((card) => card.instanceId === id));
         if (
           new Set(ids).size !== 3 ||
@@ -884,9 +879,8 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "blast rig|1": { modifyAttack: (ctx) => ctx.countEquipped("evo") },
   "speed demon|1": {
     declareAdditionalCost(ctx) {
-      const choices = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => hasTag(ctx, card, "item") || data(ctx, card).cardType === "equipment");
+      const choices = faceUpGraveyard(ctx)
+        .filter((card) => hasTag(ctx, card, "item") || data(ctx, card).cardType === "equipment");
       if (choices.length)
         ctx.requestCardChoice(
           "pen-scrap",
@@ -899,9 +893,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     modifyAttack: (ctx) => (controls(ctx, "Hyper Driver") ? 1 : 0),
     onChoose(ctx, hook, option) {
       if (hook !== "pen-scrap" || option === "no") return;
-      const target = ctx
-        .player(ctx.seat)
-        .graveyard.find(
+      const target = faceUpGraveyard(ctx).find(
           (card) =>
             card.instanceId === Number(option) &&
             (hasTag(ctx, card, "item") || data(ctx, card).cardType === "equipment"),
@@ -1050,7 +1042,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "runic fellingsong|3": auraFromGraveArcane(),
   ...pitches("weeping battleground", () => ({
     onPlay(ctx) {
-      const auras = ctx.player(ctx.seat).graveyard.filter((card) => hasTag(ctx, card, "aura"));
+      const auras = faceUpGraveyard(ctx).filter((card) => hasTag(ctx, card, "aura"));
       if (auras.length)
         ctx.requestCardChoice(
           "pen-weeping",
@@ -1217,7 +1209,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       goAgain: true,
       destroySelfCost: true,
       onActivate(ctx) {
-        const allies = ctx.player(ctx.seat).graveyard.filter((card) => hasTag(ctx, card, "ally"));
+        const allies = faceUpGraveyard(ctx).filter((card) => hasTag(ctx, card, "ally"));
         if (allies.length)
           ctx.requestCardChoice(
             "pen-reach-ally",
@@ -1249,9 +1241,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   ...pitches("man overboard", discardAllyAttack),
   ...pitches("tentacular toll", (pitch) => ({
     onPlay(ctx) {
-      const allies = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => hasTag(ctx, card, "ally") && !card.faceDown)
+      const allies = faceUpGraveyard(ctx).filter((card) => hasTag(ctx, card, "ally"))
         .slice(0, 4 - pitch);
       for (const ally of allies) ctx.setCardFaceDown(ally.instanceId, true);
       create(ctx, GOLD, allies.length);
@@ -1293,7 +1283,8 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   "trench of watery depths|0": {
     onDefend(ctx) {
-      const blues = ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardColor(card) === 3 && (ctx.cardData(card.cardId).pitch ?? 0) > 0);
+      const blues = faceUpGraveyard(ctx)
+        .filter((card) => ctx.cardColor(card) === 3 && (ctx.cardData(card.cardId).pitch ?? 0) > 0);
       if (blues.length)
         ctx.requestCardChoice(
           "pen-trench-pitch",
@@ -1851,7 +1842,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   "four feathers one crown|1": {
     modifyAttack: (ctx) =>
-      ctx.player(ctx.seat).graveyard.filter((card) => cardNameContains(ctx, card, "Phoenix Bannerman")).length,
+      faceUpGraveyard(ctx).filter((card) => cardNameContains(ctx, card, "Phoenix Bannerman")).length,
   },
   "phoenix bannerman: head|1": phoenixBannerman(PONDER),
   "phoenix bannerman: chest|1": phoenixBannerman(VIGOR),
@@ -2233,9 +2224,8 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   "pilfer the tomb|3": {
     onPlay(ctx) {
-      const cards = ctx
-        .player(opponentSeat(ctx))
-        .graveyard.filter((card) => ctx.hasCardType(card, "instant") || ctx.cardColor(card) === 2);
+      const cards = faceUpGraveyard(ctx, opponentSeat(ctx))
+        .filter((card) => ctx.hasCardType(card, "instant") || ctx.cardColor(card) === 2);
       if (cards.length)
         ctx.requestCardChoice(
           "pen-pilfer",

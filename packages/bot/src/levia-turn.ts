@@ -22,8 +22,8 @@ export function leviaAttackPlayable(card: CardView, input: BotPolicyInput): bool
   );
   // These attacks pay an additional graveyard cost before they can attack.
   if (["Dread Screamer", "Endless Maw", "Shadowrealm Horror"]
-    .includes(data?.name ?? "")) return me.graveyard.length >= 3;
-  if (data?.name === "Soul Harvest") return me.graveyard.length >= 6;
+    .includes(data?.name ?? "")) return me.graveyard.filter((card) => !card.faceDown).length >= 3;
+  if (data?.name === "Soul Harvest") return me.graveyard.filter((card) => !card.faceDown).length >= 6;
   if (data?.name === "Wrecker Romp") return me.hand.length >= 2;
   return true;
 }
@@ -41,10 +41,10 @@ export function leviaAttackContinues(card: CardView, input: BotPolicyInput, futu
       input.view.players[input.seat].deckCount > 0;
   }
   if (data?.name === "Dread Screamer") return input.view.players[input.seat].graveyard.some((card) =>
-    (input.cards[card.cardId]?.attack ?? 0) >= 6
+    !card.faceDown && (input.cards[card.cardId]?.attack ?? 0) >= 6
   );
   if (data?.name === "Shadowrealm Horror") return input.view.players[input.seat].graveyard.filter((card) =>
-    (input.cards[card.cardId]?.attack ?? 0) >= 6
+    !card.faceDown && (input.cards[card.cardId]?.attack ?? 0) >= 6
   ).length >= 2;
   return data?.keywords?.includes("Go again") === true;
 }

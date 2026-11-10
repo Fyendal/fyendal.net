@@ -4,6 +4,7 @@ import {
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  faceUpGraveyard,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
@@ -182,9 +183,7 @@ export const aac: Record<string, CardScript> = {
       const marked = isMarked(ctx, opponentSeat(ctx));
       ctx.addModifier({ scope: "chain-link", attack: marked ? 3 : 2 });
       if (!marked) return;
-      const options = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => ctx.hasCardType(card, "action") && hasStealth(ctx, card));
+      const options = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "action") && hasStealth(ctx, card));
       if (options.length)
         ctx.requestCardChoice(
           "aac-mantle",
@@ -196,7 +195,7 @@ export const aac: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "aac-mantle" || option === "pass") return;
-      const chosen = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
+      const chosen = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
       if (!chosen || !ctx.link || !ctx.banish(chosen.instanceId)) return;
       ctx.becomeCardCopy(ctx.link.attackingCard.instanceId, chosen.cardId);
     },

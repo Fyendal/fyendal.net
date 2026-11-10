@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  faceUpGraveyard,
   localizedLog,
   nextAttack,
   opponentSeat,
@@ -24,7 +25,7 @@ function cardInGraveyard(
   ctx: ScriptCtx,
   name: string,
 ): { readonly instanceId: number; readonly cardId: string } | undefined {
-  return ctx.player(ctx.seat).graveyard.find((c) => cardNamed(ctx, c, name));
+  return faceUpGraveyard(ctx).find((c) => cardNamed(ctx, c, name));
 }
 
 function currentLinkData(ctx: ScriptCtx) {

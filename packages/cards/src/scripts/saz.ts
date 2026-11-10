@@ -3,6 +3,7 @@ import {
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  faceUpGraveyard,
   heroChoiceSeat,
   heroTarget,
   localizedCardLog,
@@ -570,12 +571,12 @@ export const saz: Record<string, CardScript> = {
     // "Put target attack action card with cost 1 or less from your graveyard
     //  on top of your deck."
     canPlay: (ctx) =>
-      ctx.player(ctx.seat).graveyard.some((c) => {
+      faceUpGraveyard(ctx).some((c) => {
         const d = ctx.cardData(c.cardId);
         return ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack") && (d.cost ?? 0) <= 1;
       }),
     onPlay(ctx) {
-      const targets = ctx.player(ctx.seat).graveyard.filter((c) => {
+      const targets = faceUpGraveyard(ctx).filter((c) => {
         const d = ctx.cardData(c.cardId);
         return ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack") && (d.cost ?? 0) <= 1;
       });

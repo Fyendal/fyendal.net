@@ -6,6 +6,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
@@ -353,9 +354,7 @@ function reloadChoice(ctx: ScriptCtx, hook: string, option: string): boolean {
 const rattleBones: CardScript = {
   playAsInstant: (ctx) => ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true,
   onPlay(ctx) {
-    const cards = ctx
-      .player(ctx.seat)
-      .graveyard.filter((card) => isAttack(ctx, card) && hasType(ctx, card, "runeblade"));
+    const cards = faceUpGraveyard(ctx).filter((card) => isAttack(ctx, card) && hasType(ctx, card, "runeblade"));
     if (cards.length > 0)
       ctx.requestCardChoice(
         "rattle-banish",
@@ -775,7 +774,7 @@ export const cruHighRarity: Record<string, CardScript> = {
   "gorganian tome|0": {
     onPlay(ctx) {
       const copies = ctx.state.players
-        .flatMap((player) => player.graveyard)
+        .flatMap((player) => faceUpGraveyard(ctx, player.seat))
         .filter((card) => cardNamed(ctx, card, "Gorganian Tome")).length;
       ctx.drawCards(ctx.seat, 1 + copies);
     },

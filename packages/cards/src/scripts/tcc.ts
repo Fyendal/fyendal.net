@@ -5,6 +5,7 @@ import {
   cardNamed,
   decisionMessage,
   decisionPrompt,
+  faceUpGraveyard,
   opponentSeat,
   payForDefenseBoost,
   previousAttackHasName,
@@ -239,7 +240,7 @@ export const tcc: Record<string, CardScript> = {
   },
   "encore|2": {
     onPlay(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
+      const cards = faceUpGraveyard(ctx).filter((card) => {
         return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack") && hasType(ctx, card, "bard");
       });
       if (cards.length) {
@@ -311,7 +312,7 @@ export const tcc: Record<string, CardScript> = {
   // the pending choice routes back to the song's own functional script.
   "song of yesteryears|3": {
     ...song((ctx, target) => {
-      const attacks = ctx.player(target).graveyard.filter((card) => {
+      const attacks = faceUpGraveyard(ctx, target).filter((card) => {
         return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
       });
       if (attacks.length)

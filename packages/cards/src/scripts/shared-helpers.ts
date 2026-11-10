@@ -1044,9 +1044,8 @@ function canEquipDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boole
 }
 
 export function retrievableDaggerIds(ctx: ScriptCtx): number[] {
-  return ctx
-    .player(ctx.seat)
-    .graveyard.filter((card) => canEquipDagger(ctx, card))
+  return faceUpGraveyard(ctx)
+    .filter((card) => canEquipDagger(ctx, card))
     .map((card) => card.instanceId);
 }
 

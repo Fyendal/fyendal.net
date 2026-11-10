@@ -8,6 +8,7 @@ import {
   decisionMessage,
   decisionPrompt,
   effectPutSelfFaceUpFromDeck,
+  faceUpGraveyard,
   localizedCardLog,
   nextAttack,
   ongoingLabel,
@@ -200,7 +201,7 @@ export const sgb: Record<string, CardScript> = {
       if (ctx.getFlag("player", "blueToGraveyard") !== true) return;
       // "If a blue card has been put into your graveyard this turn, you may
       // play cards with watery grave from your graveyard."
-      for (const c of ctx.player(ctx.seat).graveyard) {
+      for (const c of faceUpGraveyard(ctx)) {
         if (hasWateryGrave(ctx, c.cardId)) ctx.allowPlayFrom(c.instanceId, "graveyard");
       }
     },

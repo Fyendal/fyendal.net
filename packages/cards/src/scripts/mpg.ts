@@ -8,6 +8,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
   localizedCardLog,
   opponentSeat,
   sharesName,
@@ -915,9 +916,8 @@ Object.assign(mpg, {
   },
   "call for backup|1": {
     onDefend(ctx: ScriptCtx) {
-      const attacks = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => ctx.hasCardType(card, "action") && hasType(ctx, card, "attack"));
+      const attacks = faceUpGraveyard(ctx)
+        .filter((card) => ctx.hasCardType(card, "action") && hasType(ctx, card, "attack"));
       if (attacks.length === 0) return;
       // With a single name only one card can be chosen, so the opponent's pick is forced.
       const single = attacks.every((card) => sharesName(ctx, card, attacks[0]!));
@@ -956,7 +956,7 @@ Object.assign(mpg, {
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (!hook.startsWith("backup-banish:")) return;
-      const attacks = ctx.player(ctx.seat).graveyard.filter(
+      const attacks = faceUpGraveyard(ctx).filter(
         (card) => ctx.hasCardType(card, "action") && hasType(ctx, card, "attack"),
       );
       const [firstId, secondId] = hook.slice("backup-banish:".length).split(":").map(Number);

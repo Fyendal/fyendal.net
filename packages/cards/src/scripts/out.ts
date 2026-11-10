@@ -7,6 +7,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  faceUpGraveyard,
   heroChoiceSeat,
   heroTarget,
   mergeSetScripts,
@@ -224,7 +225,7 @@ function infectiousHost(): CardScript {
 function lookingForScrap(): CardScript {
   return {
     declareAdditionalCost(ctx) {
-      const choices = ctx.player(ctx.seat).graveyard.filter((card) => ctx.basePower(card) === 1);
+      const choices = faceUpGraveyard(ctx).filter((card) => ctx.basePower(card) === 1);
       if (choices.length)
         ctx.requestCardChoice(
           "scrap",
@@ -431,7 +432,7 @@ function bonds(pitch: number): CardScript {
     onAttackDeclared(ctx) {
       if (!previousAttackNameContains(ctx, "gustwave")) return;
       ctx.grantGoAgain();
-      const combo = ctx.player(ctx.seat).graveyard.filter((card) => has(ctx, card, "combo"));
+      const combo = faceUpGraveyard(ctx).filter((card) => has(ctx, card, "combo"));
       if (combo.length)
         ctx.requestCardChoice(
           `bonds-grave:${pitch}`,
@@ -443,7 +444,7 @@ function bonds(pitch: number): CardScript {
     },
     onChoose(ctx, hook, option) {
       if (!hook.startsWith("bonds-grave") || option === "pass") return;
-      const chosen = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
+      const chosen = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
       if (!chosen || !ctx.banish(chosen.instanceId)) return;
       const matches = ctx.player(ctx.seat).deck.filter((card) => sharesName(ctx, card, chosen));
       if (matches.length)

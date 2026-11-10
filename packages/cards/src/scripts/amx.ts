@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  faceUpGraveyard,
 } from "./shared-helpers.js";
 
 const HYPER_DRIVER = "AMX028";
@@ -195,7 +196,7 @@ export const amx: Record<string, CardScript> = {
   "twintek charging station|1": {
     onPlay(ctx) {
       ctx.addModifier({ scope: "until-end-of-turn", onBoostAttack: 3 });
-      const choices = ctx.player(ctx.seat).graveyard.filter((card) => cardNamed(ctx, card, "Hyper Driver"));
+      const choices = faceUpGraveyard(ctx).filter((card) => cardNamed(ctx, card, "Hyper Driver"));
       if (choices.length)
         ctx.requestCardChoice(
           "twintek-driver",

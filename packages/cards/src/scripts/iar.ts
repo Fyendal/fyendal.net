@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
+  faceUpGraveyard,
   hasBloodDebt,
   ampNextArcane,
   anyDamageTarget,
@@ -1240,7 +1241,7 @@ function shadowrealmStrength(payoff: number | "go-again"): CardScript {
       const selected = ctx.player(ctx.seat).banish.find((card) => card.instanceId === instanceId && !card.faceDown);
       if (!selected) return;
       if (!ctx.moveToGraveyard(instanceId, "banish")) return;
-      const moved = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === instanceId);
+      const moved = faceUpGraveyard(ctx).find((card) => card.instanceId === instanceId);
       if (moved && ctx.cardTypes(moved).includes("zombie")) {
         buffNextAttack(ctx, payoff === "go-again" ? { goAgain: true } : { attack: payoff });
       }
@@ -1553,9 +1554,9 @@ export const iar: Record<string, CardScript> = {
       goAgain: true,
       tap: true,
       canActivate: (ctx) =>
-        ctx.player(ctx.seat).graveyard.some((card) => !card.faceDown && hasType(ctx, card, "zombie")),
+        faceUpGraveyard(ctx).some((card) => hasType(ctx, card, "zombie")),
       onActivate(ctx) {
-        const zombies = ctx.player(ctx.seat).graveyard.filter((card) => !card.faceDown && hasType(ctx, card, "zombie"));
+        const zombies = faceUpGraveyard(ctx).filter((card) => hasType(ctx, card, "zombie"));
         ctx.requestCardChoice(
           "iar-malice-zombie",
           decisionPrompt("Choose a zombie in your graveyard", "card.iar.malice.zombie.choose"),

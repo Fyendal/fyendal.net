@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  faceUpGraveyard,
   hasBloodDebt,
   armDelayedEffect,
   attackAbility,
@@ -666,7 +667,7 @@ export const penHighRarity: Record<string, CardScript> = {
   },
   "bone puppetry|0": {
     onDefend(ctx) {
-      const allies = ctx.player(ctx.seat).graveyard.filter((card) => has(ctx, card, "ally"));
+      const allies = faceUpGraveyard(ctx).filter((card) => has(ctx, card, "ally"));
       if (allies.length) ctx.requestCardChoice(
         "bone-puppetry-ally",
         decisionPrompt("Return an ally from your graveyard?", "card.pen.bonepuppetry.ally.return", {
@@ -763,9 +764,7 @@ export const penHighRarity: Record<string, CardScript> = {
     },
     onPlay(ctx) {
       if (ctx.getState("embalmFromBanish") === 1) ctx.grantGoAgain();
-      const attack = ctx
-        .player(ctx.seat)
-        .graveyard.find(
+      const attack = faceUpGraveyard(ctx).find(
           (card) =>
             isAttack(ctx, card) &&
             hasBloodDebt(ctx, card),

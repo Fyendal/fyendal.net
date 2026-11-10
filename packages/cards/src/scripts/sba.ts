@@ -8,6 +8,7 @@ import {
   consumeDelayedEffect,
   dealArcane,
   decisionPrompt,
+  faceUpGraveyard,
   isWeaponAttack,
   localizedCardLog,
   nextAttack,
@@ -277,14 +278,10 @@ export const sba: Record<string, CardScript> = {
       goAgain: false,
       destroySelfCost: true,
       canActivate(ctx) {
-        const p = ctx.player(ctx.seat);
-        return (
-          p.graveyard.some((c) => isRunebladeAction(ctx, c, true)) ||
-          p.graveyard.some((c) => isRunebladeAction(ctx, c, false))
-        );
+        return faceUpGraveyard(ctx).some((c) => isRunebladeAction(ctx, c, true) || isRunebladeAction(ctx, c, false));
       },
       onActivate(ctx) {
-        const attacks = ctx.player(ctx.seat).graveyard.filter((c) => isRunebladeAction(ctx, c, true));
+        const attacks = faceUpGraveyard(ctx).filter((c) => isRunebladeAction(ctx, c, true));
         if (attacks.length === 0) {
           crownPickNonAttack(ctx);
           return;
@@ -377,7 +374,7 @@ export const sba: Record<string, CardScript> = {
   // Jack Be Quick — may banish a Nimblism from graveyard for +1{p} and go again
   "jack be quick|1": {
     onAttackDeclared(ctx) {
-      const nimblisms = ctx.player(ctx.seat).graveyard.filter((c) => cardNamed(ctx, c, "Nimblism"));
+      const nimblisms = faceUpGraveyard(ctx).filter((c) => cardNamed(ctx, c, "Nimblism"));
       if (nimblisms.length === 0) return;
       ctx.requestCardChoice(
         "jack-banish",
@@ -396,7 +393,7 @@ export const sba: Record<string, CardScript> = {
         return;
       }
       if (hook !== "jack-banish" || option === "no") return;
-      const card = ctx.player(ctx.seat).graveyard.find((c) => c.instanceId === Number(option));
+      const card = faceUpGraveyard(ctx).find((c) => c.instanceId === Number(option));
       if (!card) return;
       ctx.banish(card.instanceId);
       ctx.setState("jackBuff", 1);
@@ -790,7 +787,7 @@ export const sba: Record<string, CardScript> = {
 // ── Crown of Dichotomy choice chain ─────────────────────────────────────────
 
 function crownPickNonAttack(ctx: ScriptCtx): void {
-  const nonAttacks = ctx.player(ctx.seat).graveyard.filter((c) => isRunebladeAction(ctx, c, false));
+  const nonAttacks = faceUpGraveyard(ctx).filter((c) => isRunebladeAction(ctx, c, false));
   if (nonAttacks.length === 0) {
     // only an attack action was available: straight to the top
     const picked = ctx.getState("crownAttack");

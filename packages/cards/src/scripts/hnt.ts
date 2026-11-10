@@ -11,6 +11,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
   hitWithDaggerThisChain,
   markedStealthHeroScript,
   heroHasMoniker,
@@ -303,7 +304,7 @@ function daggerDamageAttack(condition: (ctx: ScriptCtx) => boolean = () => true)
 
 function availableDraconicDaggers(ctx: ScriptCtx): number[] {
   return retrievableDaggerIds(ctx).filter((instanceId) => {
-    const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === instanceId);
+    const card = faceUpGraveyard(ctx).find((candidate) => candidate.instanceId === instanceId);
     return !!card && isDraconic(ctx, card);
   });
 }
@@ -405,9 +406,7 @@ function soundTheAlarm(ctx: ScriptCtx): void {
 }
 
 function onePowerGraveyardCards(ctx: ScriptCtx, seat: number): number[] {
-  return ctx
-    .player(seat)
-    .graveyard.filter((card) => ctx.basePower(card) === 1)
+  return faceUpGraveyard(ctx, seat).filter((card) => ctx.basePower(card) === 1)
     .map((card) => card.instanceId);
 }
 
@@ -585,9 +584,8 @@ export const hnt: Record<string, CardScript> = {
     onChooseMany(ctx, hook, options) {
       if (hook !== "cindra-equip") return;
       const chosen = new Set(options);
-      const daggers = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => chosen.has(String(card.instanceId)) && isDagger(ctx, card) && isDraconic(ctx, card))
+      const daggers = faceUpGraveyard(ctx)
+        .filter((card) => chosen.has(String(card.instanceId)) && isDagger(ctx, card) && isDraconic(ctx, card))
         .map((card) => card.instanceId);
       for (const id of daggers) if (!ctx.equipFromGraveyard(id)) return;
     },
@@ -1338,7 +1336,7 @@ Object.assign(hnt, {
       timing: "instant",
       fromHand: true,
       onActivate(ctx) {
-        const traps = ctx.player(ctx.seat).graveyard.filter((card) => dataTags(ctx, card).includes("trap"));
+        const traps = faceUpGraveyard(ctx).filter((card) => dataTags(ctx, card).includes("trap"));
         if (traps.length)
           ctx.requestCardChoice(
             "trap-door",
@@ -1677,12 +1675,10 @@ Object.assign(hnt, {
         optional: true,
         label: "Banish two Loyalty Beyond the Grave to draw",
         condition: (ctx) =>
-          ctx.player(ctx.seat).graveyard.filter((card) => cardNamed(ctx, card, "Loyalty Beyond the Grave"))
+          faceUpGraveyard(ctx).filter((card) => cardNamed(ctx, card, "Loyalty Beyond the Grave"))
             .length >= 2,
         effect(ctx) {
-          for (const card of ctx
-            .player(ctx.seat)
-            .graveyard.filter((card) => cardNamed(ctx, card, "Loyalty Beyond the Grave"))
+          for (const card of faceUpGraveyard(ctx).filter((card) => cardNamed(ctx, card, "Loyalty Beyond the Grave"))
             .slice(0, 2))
             ctx.banish(card.instanceId);
           ctx.drawCards(ctx.seat, 1);

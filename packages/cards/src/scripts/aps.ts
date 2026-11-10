@@ -7,6 +7,7 @@ import {
   crowdTrigger,
   decisionMessage,
   decisionPrompt,
+  faceUpGraveyard,
   opponentSeat,
   suspenseAura as suspense,
   type SuspenseTrigger,
@@ -97,9 +98,7 @@ function pleiades(): CardScript {
 }
 
 function returnAttackToTop(ctx: ScriptCtx): void {
-  const attacks = ctx
-    .player(ctx.seat)
-    .graveyard.filter(
+  const attacks = faceUpGraveyard(ctx).filter(
       (card) =>
         ctx.hasCardType(card, "action") &&
         ctx.cardTypes(card).includes("attack") &&

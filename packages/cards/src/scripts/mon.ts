@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  faceUpGraveyard,
   hasBloodDebt,
   attackedWithWeapon,
   bloodDebtScript as bloodDebt,
@@ -11,7 +12,6 @@ import {
   dealArcaneToTargetHero,
   decisionMessage,
   decisionPrompt,
-  faceUpGraveyard,
   heroTarget,
   ironhideScript,
   isCard,
@@ -639,7 +639,7 @@ function warmongersRecital(attack: number): CardScript {
 
 function memorialGround(maxCost: number): CardScript {
   const targets = (ctx: ScriptCtx) =>
-    ctx.player(ctx.seat).graveyard.filter((card) => {
+    faceUpGraveyard(ctx).filter((card) => {
       const data = ctx.cardData(card.cardId);
       return isAttackAction(ctx, card) && (data.cost ?? 0) <= maxCost;
     });
@@ -856,7 +856,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   }),
   "herald of rebirth|1": putAttackIntoSoulOnHit({
     onHit(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
+      const cards = faceUpGraveyard(ctx).filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
       if (cards.length > 0)
         ctx.requestCardChoice(
           "herald-rebirth",
@@ -873,7 +873,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   }),
   "herald of rebirth|2": putAttackIntoSoulOnHit({
     onHit(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
+      const cards = faceUpGraveyard(ctx).filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
       if (cards.length > 0)
         ctx.requestCardChoice(
           "herald-rebirth",
@@ -890,7 +890,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   }),
   "herald of rebirth|3": putAttackIntoSoulOnHit({
     onHit(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
+      const cards = faceUpGraveyard(ctx).filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
       if (cards.length > 0)
         ctx.requestCardChoice(
           "herald-rebirth",
@@ -1070,7 +1070,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       ctx.drawCards(ctx.seat, 1);
       const discarded = ctx.discardRandom(ctx.seat, 1)[0];
       if (!isSixPlus(ctx, discarded)) return;
-      const graves = ctx.state.players.flatMap((player) => player.graveyard);
+      const graves = ctx.state.players.flatMap((player) => faceUpGraveyard(ctx, player.seat));
       if (graves.length > 0)
         ctx.requestCardChoice(
           "deadwood-banish",
@@ -1089,7 +1089,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       ctx.drawCards(ctx.seat, 1);
       const discarded = ctx.discardRandom(ctx.seat, 1)[0];
       if (!isSixPlus(ctx, discarded)) return;
-      const graves = ctx.state.players.flatMap((player) => player.graveyard);
+      const graves = ctx.state.players.flatMap((player) => faceUpGraveyard(ctx, player.seat));
       if (graves.length > 0)
         ctx.requestCardChoice(
           "deadwood-banish",
@@ -1108,7 +1108,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       ctx.drawCards(ctx.seat, 1);
       const discarded = ctx.discardRandom(ctx.seat, 1)[0];
       if (!isSixPlus(ctx, discarded)) return;
-      const graves = ctx.state.players.flatMap((player) => player.graveyard);
+      const graves = ctx.state.players.flatMap((player) => faceUpGraveyard(ctx, player.seat));
       if (graves.length > 0)
         ctx.requestCardChoice(
           "deadwood-banish",
@@ -1182,7 +1182,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         return !inBanish || ctx.getFlag("player", "playedNonAttackAction") === true;
       },
       onPlay(ctx) {
-        const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
+        const cards = faceUpGraveyard(ctx).filter((card) => {
           return (
             ctx.hasCardType(card, "action") &&
             !hasType(ctx, card, "attack") &&
@@ -1216,7 +1216,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         return !inBanish || ctx.getFlag("player", "playedNonAttackAction") === true;
       },
       onPlay(ctx) {
-        const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
+        const cards = faceUpGraveyard(ctx).filter((card) => {
           return (
             ctx.hasCardType(card, "action") &&
             !hasType(ctx, card, "attack") &&
@@ -1250,7 +1250,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         return !inBanish || ctx.getFlag("player", "playedNonAttackAction") === true;
       },
       onPlay(ctx) {
-        const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
+        const cards = faceUpGraveyard(ctx).filter((card) => {
           return (
             ctx.hasCardType(card, "action") &&
             !hasType(ctx, card, "attack") &&
@@ -1394,14 +1394,14 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     },
   },
   "soul harvest|3": {
-    canPlay: (ctx) => ctx.player(ctx.seat).graveyard.length >= 6,
+    canPlay: (ctx) => faceUpGraveyard(ctx).length >= 6,
     additionalCost(ctx) {
       ctx.requestCardChoices(
         "soul-harvest-banish",
         decisionPrompt(`${ctx.data.name}: choose 6 graveyard cards to banish`, "card.mon.graveyard.cards.banish", {
           values: { card: { kind: "card", cardId: ctx.self.cardId }, count: 6 },
         }),
-        ctx.player(ctx.seat).graveyard.map((card) => card.instanceId),
+        faceUpGraveyard(ctx).map((card) => card.instanceId),
         6,
         6,
       );
@@ -1416,7 +1416,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     onChooseMany(ctx, hook, options) {
       if (hook !== "soul-harvest-banish") return;
       for (const option of options) {
-        const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
+        const card = faceUpGraveyard(ctx).find((candidate) => candidate.instanceId === Number(option));
         if (!card) continue;
         if (hasBloodDebt(ctx, card))
           ctx.setState("harvestBloodDebt", ctx.getState("harvestBloodDebt") + 1);
@@ -1582,7 +1582,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         ),
       });
       if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0) {
-        const actions = ctx.player(ctx.seat).graveyard.filter((card) => ctx.hasCardType(card, "action"));
+        const actions = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "action"));
         if (actions.length > 0)
           ctx.requestCardChoice(
             "eclipse-grave",

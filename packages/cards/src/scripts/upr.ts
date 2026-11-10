@@ -11,6 +11,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
   heroDamage,
   localizedCardLog,
   mergeSetScripts,
@@ -462,7 +463,7 @@ function strategicPlanning(maxCost: number): CardScript {
   return {
     onPlay(ctx) {
       const choices = ctx.state.players
-        .flatMap((player) => player.graveyard)
+        .flatMap((player) => faceUpGraveyard(ctx, player.seat))
         .filter((card) => {
           const cardData = data(ctx, card);
           return ctx.hasCardType(card, "action") && (cardData.cost ?? 0) <= maxCost;

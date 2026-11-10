@@ -127,7 +127,8 @@ function topSixShare(input: BotPolicyInput): number {
  * chosen six for Soul Harvest. */
 function sixBanishChance(data: CardData | undefined, input: BotPolicyInput): number {
   const me = input.view.players[input.seat];
-  const sixes = me.graveyard.filter((card) => (input.cards[card.cardId]?.attack ?? 0) >= 6).length;
+  const graveyard = me.graveyard.filter((card) => !card.faceDown);
+  const sixes = graveyard.filter((card) => (input.cards[card.cardId]?.attack ?? 0) >= 6).length;
   switch (name(data)) {
     case "feeding frenzy":
     case "beckoning hunger":
@@ -136,7 +137,7 @@ function sixBanishChance(data: CardData | undefined, input: BotPolicyInput): num
     case "dread screamer":
     case "endless maw":
     case "shadowrealm horror":
-      return probabilityAtLeastOne(sixes, me.graveyard.length, 3);
+      return probabilityAtLeastOne(sixes, graveyard.length, 3);
     case "soul harvest":
       return sixes > 0 ? 1 : 0;
     default:

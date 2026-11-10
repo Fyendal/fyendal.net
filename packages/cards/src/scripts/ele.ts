@@ -10,6 +10,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
   heroTarget,
   localizedCardLog,
   mergeSetScripts,
@@ -366,7 +367,7 @@ function ritesOfLightning(): CardScript {
 
 function requestRitesAttack(ctx: ScriptCtx): void {
   if (!ctx.getState("ritesAttack")) return;
-  const attacks = ctx.player(ctx.seat).graveyard.filter((card) => isAttack(ctx, card));
+  const attacks = faceUpGraveyard(ctx).filter((card) => isAttack(ctx, card));
   if (attacks.length > 0) {
     ctx.requestCardChoice(
       "rites-attack",
@@ -384,7 +385,7 @@ function ritesOfReplenishment(): CardScript {
     additionalCost: fusionAdditionalCost("earth"),
     onAttackDeclared(ctx) {
       ctx.setState("ritesAttack", isFused(ctx) ? 1 : 0);
-      const nonAttacks = ctx.player(ctx.seat).graveyard.filter((card) => isNonAttackAction(ctx, card));
+      const nonAttacks = faceUpGraveyard(ctx).filter((card) => isNonAttackAction(ctx, card));
       if (ctx.getFlag("player", "arcaneDamageDealtThisTurn") === true && nonAttacks.length > 0) {
         ctx.requestCardChoice(
           "rites-non-attack",
@@ -620,7 +621,7 @@ function sowTomorrow(minCost: number): CardScript {
   return {
     onPlay(ctx) {
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
+      const cards = faceUpGraveyard(ctx).filter((card) => {
         const data = ctx.cardData(card.cardId);
         return (
           ctx.hasCardType(card, "action") &&
@@ -1051,12 +1052,12 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       timing: "instant",
       destroySelfCost: true,
       canActivate(ctx) {
-        return ctx.player(ctx.seat).graveyard.some((card) => {
+        return faceUpGraveyard(ctx).some((card) => {
           return hasType(ctx, card, "earth") && (ctx.hasCardType(card, "action") || ctx.hasCardType(card, "instant"));
         });
       },
       onActivate(ctx) {
-        const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
+        const cards = faceUpGraveyard(ctx).filter((card) => {
           return hasType(ctx, card, "earth") && (ctx.hasCardType(card, "action") || ctx.hasCardType(card, "instant"));
         });
         ctx.requestCardChoice(

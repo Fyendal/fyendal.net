@@ -195,7 +195,12 @@ describe("Blood Debt and Rune Gate", () => {
     for (const key of ["shadowrealm horror|1", "dread screamer|1"]) {
       const short = scenario({
         seats: [
-          { hero: "rhinar", hand: [key], graveyard: ["wounding blow|1", "wounding blow|2", "raging onslaught|1"], resources: 10 },
+          {
+            hero: "rhinar",
+            hand: [key],
+            graveyard: ["wounding blow|1", "wounding blow|2", "raging onslaught|1"],
+            resources: 10,
+          },
           { hero: "dorinthea" },
         ],
       });

@@ -14,6 +14,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
   heroDamage,
   heroTarget,
   leavesArenaTrigger,
@@ -369,7 +370,7 @@ function quickstrike(opts: {
 }
 
 function chooseGraveInstantBottom(ctx: ScriptCtx, hook: string, optional = true): void {
-  const instants = ctx.player(ctx.seat).graveyard.filter((card) => isInstant(ctx, card));
+  const instants = faceUpGraveyard(ctx).filter((card) => isInstant(ctx, card));
   if (instants.length)
     ctx.requestCardChoice(
       hook,
@@ -382,7 +383,7 @@ function chooseGraveInstantBottom(ctx: ScriptCtx, hook: string, optional = true)
 }
 
 function chooseGraveAttackBottom(ctx: ScriptCtx, hook: string): void {
-  const attacks = ctx.player(ctx.seat).graveyard.filter((card) => isAttackAction(ctx, card));
+  const attacks = faceUpGraveyard(ctx).filter((card) => isAttackAction(ctx, card));
   if (attacks.length) {
     ctx.requestCardChoice(
       hook,
@@ -1394,7 +1395,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   }),
   "ominous excavation|3": {
     onPlay(ctx) {
-      const instants = ctx.player(ctx.seat).graveyard.filter((card) => isInstant(ctx, card));
+      const instants = faceUpGraveyard(ctx).filter((card) => isInstant(ctx, card));
       if (instants.length)
         ctx.requestCardChoice(
           "excavate",

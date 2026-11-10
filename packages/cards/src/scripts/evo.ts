@@ -6,6 +6,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
   hyperDriverCounterFromBoostBanish,
   localizedCardLog,
   mergeSetScripts,
@@ -69,7 +70,7 @@ function initializeCogwerx(ctx: ScriptCtx): void {
 }
 
 function scrapCards(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return ctx.player(ctx.seat).graveyard.filter((card) => isItem(ctx, card) || data(ctx, card).cardType === "equipment");
+  return faceUpGraveyard(ctx).filter((card) => isItem(ctx, card) || data(ctx, card).cardType === "equipment");
 }
 
 function addSteamToChoice(ctx: ScriptCtx, hook: string): void {
@@ -208,9 +209,7 @@ function backupProtocol(pitch: number): CardScript {
       timing: "instant",
       destroySelfCost: true,
       onActivate(ctx) {
-        const cards = ctx
-          .player(ctx.seat)
-          .graveyard.filter((card) => isMechAttack(ctx, card) && ctx.cardColor(card) === pitch);
+        const cards = faceUpGraveyard(ctx).filter((card) => isMechAttack(ctx, card) && ctx.cardColor(card) === pitch);
         if (cards.length)
           ctx.requestCardChoice(
             "backup",

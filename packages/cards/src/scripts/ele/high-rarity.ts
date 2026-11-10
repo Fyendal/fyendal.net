@@ -6,6 +6,7 @@ import {
   dealtByThis,
   decisionMessage,
   decisionPrompt,
+  faceUpGraveyard,
   heroTarget,
   ongoingLabel,
   opponentSeat,
@@ -204,9 +205,7 @@ function withFusionChoices(
 const fused = (ctx: ScriptCtx) => ctx.getState("fused") > 0;
 
 function blossomingBanishChoice(ctx: ScriptCtx): void {
-  const cards = ctx
-    .player(ctx.seat)
-    .graveyard.filter((card) => ctx.hasCardType(card, "action") && !isAttack(ctx, card));
+  const cards = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "action") && !isAttack(ctx, card));
   if (cards.length)
     ctx.requestCardChoice(
       "blossoming-banish",
@@ -702,9 +701,7 @@ export const eleHighRarity: Record<string, CardScript> = {
   },
   "pulse of candlehold|2": {
     onPlay(ctx) {
-      const cards = ctx
-        .player(ctx.seat)
-        .graveyard.filter(
+      const cards = faceUpGraveyard(ctx).filter(
           (card) => isAttack(ctx, card) && ["earth", "lightning", "elemental"].some((type) => hasType(ctx, card, type)),
         );
       if (cards.length)

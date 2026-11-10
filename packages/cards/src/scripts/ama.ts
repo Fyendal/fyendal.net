@@ -7,6 +7,7 @@ import {
   commonOptionMessages,
   consumeDelayedEffect,
   decisionPrompt,
+  faceUpGraveyard,
   hitHookLabel,
   ongoingLabel,
   hasLiveTurnEffect,
@@ -104,9 +105,9 @@ export const ama: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       tap: true,
-      canActivate: (ctx) => zombies(ctx, ctx.player(ctx.seat).graveyard).length > 0,
+      canActivate: (ctx) => zombies(ctx, faceUpGraveyard(ctx)).length > 0,
       onActivate(ctx) {
-        const choices = zombies(ctx, ctx.player(ctx.seat).graveyard);
+        const choices = zombies(ctx, faceUpGraveyard(ctx));
         ctx.requestCardChoice(
           "ama-malice-zombie",
           decisionPrompt("Choose a zombie in your graveyard", "card.common.zombie.graveyard.choose"),

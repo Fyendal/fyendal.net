@@ -9,6 +9,7 @@ import type {
 } from "@fyendal/engine";
 import {
   BLOODROT_POX,
+  faceUpGraveyard,
   FRAILTY,
   INERTIA,
   NAMED_DISEASE_TOKENS,
@@ -293,7 +294,7 @@ function isAttackActionCard(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): b
 }
 
 function repeatReconOptions(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return ctx.player(ctx.seat).graveyard.filter(
+  return faceUpGraveyard(ctx).filter(
     (card) => isAttackActionCard(ctx, card) && ctx.cardData(card.cardId).cost === 2,
   );
 }

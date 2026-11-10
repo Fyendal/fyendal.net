@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  faceUpGraveyard,
   hasBloodDebt,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
@@ -564,7 +565,7 @@ export const monHighRarity: Record<string, CardScript> = {
       arcaneDamageEffect: true,
       arcaneDamageEffectAmounts: [2],
       onPlay(ctx) {
-        const cards = ctx.player(opponentSeat(ctx)).graveyard;
+        const cards = faceUpGraveyard(ctx, opponentSeat(ctx));
         if (!cards.length) return;
         ctx.requestCardChoices(
           "invert-existence-banish",
@@ -583,9 +584,8 @@ export const monHighRarity: Record<string, CardScript> = {
         let attack = false;
         let nonAttack = false;
         for (const option of options) {
-          const card = ctx
-            .player(opponentSeat(ctx))
-            .graveyard.find((candidate) => candidate.instanceId === Number(option));
+          const card = faceUpGraveyard(ctx, opponentSeat(ctx))
+            .find((candidate) => candidate.instanceId === Number(option));
           if (!card) continue;
           const isAttackCard = isAttack(ctx, card);
           const isNonAttackCard = isNonAttackAction(ctx, card);
@@ -741,9 +741,9 @@ export const monHighRarity: Record<string, CardScript> = {
     },
   },
   "nourishing emptiness|1": {
-    hasConditionalDominate: (ctx) => !ctx.player(ctx.seat).graveyard.some((card) => isAttack(ctx, card)),
+    hasConditionalDominate: (ctx) => !faceUpGraveyard(ctx).some((card) => isAttack(ctx, card)),
     onHit(ctx) {
-      if (!ctx.player(ctx.seat).graveyard.some((card) => isAttack(ctx, card))) {
+      if (!faceUpGraveyard(ctx).some((card) => isAttack(ctx, card))) {
         ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1);
       }
     },

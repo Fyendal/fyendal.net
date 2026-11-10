@@ -7,6 +7,7 @@ import {
   dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
+  faceUpGraveyard,
   isCard,
   localizedCardLog,
   opponentSeat,
@@ -188,9 +189,9 @@ export const sfa: Record<string, CardScript> = {
       timing: "instant",
       label: "Return a Phoenix Flame from your graveyard to your hand",
       modifyCost: (ctx, base) => base - draconicLinks(ctx),
-      canActivate: (ctx) => ctx.player(ctx.seat).graveyard.some((c) => isPhoenixFlame(ctx, c.cardId)),
+      canActivate: (ctx) => faceUpGraveyard(ctx).some((c) => isPhoenixFlame(ctx, c.cardId)),
       onActivate(ctx) {
-        const flames = ctx.player(ctx.seat).graveyard.filter((c) => isPhoenixFlame(ctx, c.cardId));
+        const flames = faceUpGraveyard(ctx).filter((c) => isPhoenixFlame(ctx, c.cardId));
         ctx.requestCardChoice(
           "fai-return",
           decisionPrompt("Fai: return a Phoenix Flame from your graveyard to your hand", "card.sfa.fai.flame.return"),
@@ -217,7 +218,7 @@ export const sfa: Record<string, CardScript> = {
         return;
       }
       if (hook !== "fai-return") return;
-      const flame = ctx.player(ctx.seat).graveyard.find((c) => c.instanceId === Number(option));
+      const flame = faceUpGraveyard(ctx).find((c) => c.instanceId === Number(option));
       if (!flame) return;
       ctx.moveToHand(flame.instanceId);
       ctx.logPublic(
@@ -530,7 +531,7 @@ export const sfa: Record<string, CardScript> = {
     //  hand." Go again is printed (native).
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action", appliesToType: ["draconic", "ninja"] });
-      const flames = ctx.player(ctx.seat).graveyard.filter((c) => isPhoenixFlame(ctx, c.cardId));
+      const flames = faceUpGraveyard(ctx).filter((c) => isPhoenixFlame(ctx, c.cardId));
       if (flames.length > 0) {
         ctx.requestCardChoice(
           "rise-from-the-ashes",
@@ -545,7 +546,7 @@ export const sfa: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "rise-from-the-ashes" || option === "pass") return;
-      const flame = ctx.player(ctx.seat).graveyard.find((c) => c.instanceId === Number(option));
+      const flame = faceUpGraveyard(ctx).find((c) => c.instanceId === Number(option));
       if (!flame) return;
       ctx.moveToHand(flame.instanceId);
       ctx.logPublic(

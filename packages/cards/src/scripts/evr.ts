@@ -9,6 +9,7 @@ import {
   decisionPrompt,
   destroyedTrigger,
   discardSixPlusPayoff,
+  faceUpGraveyard,
   heroChoiceSeat,
   isCard,
   isWeaponAttack,
@@ -442,7 +443,7 @@ function drowningDire(): CardScript {
       if (auraActivity(ctx)) ctx.addModifier({ scope: "chain-link", dominate: true });
     },
     onHit(ctx) {
-      const options = ctx.player(ctx.seat).graveyard.filter((card) => {
+      const options = faceUpGraveyard(ctx).filter((card) => {
         return ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack");
       });
       if (options.length === 0) return;
@@ -1210,7 +1211,7 @@ const talismanCremation: CardScript = {
           ...new Set(
             ctx.state.players
               .filter((player) => player.seat !== ctx.seat)
-              .flatMap((player) => player.graveyard.map((card) => ctx.cardData(card.cardId).name)),
+              .flatMap((player) => faceUpGraveyard(ctx, player.seat).map((card) => ctx.cardData(card.cardId).name)),
           ),
         ];
         if (names.length > 0)
@@ -1226,7 +1227,7 @@ const talismanCremation: CardScript = {
     if (hook !== "cremation-name") return;
     for (const player of ctx.state.players) {
       if (player.seat === ctx.seat) continue;
-      for (const card of [...player.graveyard]) {
+      for (const card of faceUpGraveyard(ctx, player.seat)) {
         if (cardNamed(ctx, card, option)) ctx.banish(card.instanceId);
       }
     }

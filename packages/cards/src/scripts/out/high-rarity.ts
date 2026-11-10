@@ -5,6 +5,7 @@ import {
   decisionMessage,
   decisionPrompt,
   equipWithSilver,
+  faceUpGraveyard,
   localizedLog,
   ongoingLabel,
   opponentSeat,
@@ -124,8 +125,7 @@ function codexFrailtyDiscard(ctx: ScriptCtx, fromIndex: number): void {
 function codexFrailtyChoice(ctx: ScriptCtx, index: number): void {
   const seat = codexHeroes(ctx)[index];
   if (seat === undefined) return codexFrailtyDiscard(ctx, 0);
-  const player = ctx.player(seat);
-  const attacks = player.graveyard.filter((card) => !card.faceDown && isAttack(ctx, card));
+  const attacks = faceUpGraveyard(ctx, seat).filter((card) => isAttack(ctx, card));
   if (!attacks.length || !ctx.hasArsenalSpace(seat)) return codexFrailtyChoice(ctx, index + 1);
   ctx.requestCardChoice(
     `codex-frailty:${seat}`,
@@ -410,7 +410,7 @@ export const outHighRarity: Record<string, CardScript> = {
   },
   "visit the floating dojo|3": {
     onPlay(ctx) {
-      const strikes = ctx.player(ctx.seat).graveyard.filter((card) => namedCard(ctx, card, "surging strike"));
+      const strikes = faceUpGraveyard(ctx).filter((card) => namedCard(ctx, card, "surging strike"));
       if (strikes.length)
         ctx.requestCardChoice(
           "dojo-strike",
@@ -418,7 +418,7 @@ export const outHighRarity: Record<string, CardScript> = {
           strikes.map((card) => card.instanceId),
         );
       else {
-        const combos = ctx.player(ctx.seat).graveyard.filter((card) => combo(ctx, card));
+        const combos = faceUpGraveyard(ctx).filter((card) => combo(ctx, card));
         if (combos.length)
           ctx.requestCardChoice(
             "dojo-combo",
@@ -443,7 +443,7 @@ export const outHighRarity: Record<string, CardScript> = {
         if (option === "top") ctx.putOnDeckTop(id);
         else ctx.putOnDeckBottom(id);
         if (isStrike) {
-          const combos = ctx.player(ctx.seat).graveyard.filter((card) => combo(ctx, card) && card.instanceId !== id);
+          const combos = faceUpGraveyard(ctx).filter((card) => combo(ctx, card) && card.instanceId !== id);
           if (combos.length)
             ctx.requestCardChoice(
               "dojo-combo",
@@ -519,7 +519,7 @@ export const outHighRarity: Record<string, CardScript> = {
       timing: "instant",
       destroySelfCost: true,
       onActivate(ctx) {
-        const arrows = ctx.player(ctx.seat).graveyard.filter((card) => has(ctx, card, "arrow"));
+        const arrows = faceUpGraveyard(ctx).filter((card) => has(ctx, card, "arrow"));
         if (!arrows.length) {
           ctx.shuffleDeck();
           return;
@@ -610,7 +610,7 @@ export const outHighRarity: Record<string, CardScript> = {
       const top = ctx.player(seat).deck[0];
       if (!top) return;
       ctx.moveToGraveyard(top.instanceId, "deck");
-      ctx.loseLife(seat, ctx.player(seat).graveyard.filter((card) => sharesName(ctx, card, top)).length);
+      ctx.loseLife(seat, faceUpGraveyard(ctx, seat).filter((card) => sharesName(ctx, card, top)).length);
     },
   },
   "melting point|1": {
@@ -788,9 +788,8 @@ export const outHighRarity: Record<string, CardScript> = {
           "card.effect.out.burdensofthepast",
         ),
       });
-      const count = ctx
-        .player(target)
-        .graveyard.filter((card) => ctx.cardData(card.cardId).cardType === "defense-reaction").length;
+      const count = faceUpGraveyard(ctx, target)
+        .filter((card) => ctx.cardData(card.cardId).cardType === "defense-reaction").length;
       if (count >= 10) ctx.drawCards(ctx.seat, 1);
     },
   },

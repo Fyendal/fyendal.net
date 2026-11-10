@@ -4,6 +4,7 @@ import {
   commonOptionMessages,
   dealArcane,
   decisionPrompt,
+  faceUpGraveyard,
   hitHookLabel,
   ongoingLabel,
   opponentSeat,
@@ -117,10 +118,10 @@ const fai: CardScript = {
     goAgain: false,
     timing: "instant",
     oncePerTurn: true,
-    canActivate: (ctx) => ctx.player(ctx.seat).graveyard.some((card) => cardNamed(ctx, card, "phoenix flame")),
+    canActivate: (ctx) => faceUpGraveyard(ctx).some((card) => cardNamed(ctx, card, "phoenix flame")),
     modifyCost: (ctx, base) => Math.max(0, base - ctx.chainLinksControlled(ctx.seat, "draconic")),
     onActivate(ctx) {
-      const flame = ctx.player(ctx.seat).graveyard.find((card) => cardNamed(ctx, card, "phoenix flame"));
+      const flame = faceUpGraveyard(ctx).find((card) => cardNamed(ctx, card, "phoenix flame"));
       if (flame) ctx.moveToHand(flame.instanceId);
     },
   },

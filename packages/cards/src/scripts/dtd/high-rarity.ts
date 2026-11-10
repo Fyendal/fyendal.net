@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import type { GameMessage } from "@fyendal/shared";
 import {
+  faceUpGraveyard,
   hasBloodDebt,
   armDelayedEffect,
   attackAbility,
@@ -13,7 +14,6 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
-  faceUpGraveyard,
   isChargeDecline,
   localizedCardLog,
   ongoingLabel,
@@ -333,9 +333,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     "Put a yellow action from your graveyard on top of your deck",
     decisionMessage("card.trigger.common.yellowaction.graveyard.decktop"),
     (ctx) => {
-      const cards = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => ctx.hasCardType(card, "action") && ctx.cardColor(card) === 2);
+      const cards = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "action") && ctx.cardColor(card) === 2);
       if (cards.length)
         ctx.requestCardChoice(
           "figment-top",
@@ -345,7 +343,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
   ),
   "avalon, archangel of rebirth|0": angel((ctx) => {
-    const cards = ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardColor(card) === 2);
+    const cards = faceUpGraveyard(ctx).filter((card) => ctx.cardColor(card) === 2);
     if (cards.length)
       ctx.requestCardChoice(
         "angel-top",
@@ -431,7 +429,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
       );
     },
     onHit(ctx) {
-      const attacks = ctx.player(ctx.seat).graveyard.filter((card) => isAttack(ctx, card));
+      const attacks = faceUpGraveyard(ctx).filter((card) => isAttack(ctx, card));
       if (attacks.length)
         ctx.requestCardChoice(
           "beckon-top",

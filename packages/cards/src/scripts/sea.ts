@@ -11,6 +11,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
   hitHookLabel,
   localizedCardLog,
   nextAttack,
@@ -857,8 +858,8 @@ export const sea: Record<string, CardScript> = {
     ...attackAbilityForAlly(3),
     onAttackDeclared(ctx) {
       const yellow = ctx.state.players
-        .flatMap((player) => player.graveyard)
-        .filter((card) => ctx.cardColor(card) === 2 && !card.faceDown);
+        .flatMap((player) => faceUpGraveyard(ctx, player.seat))
+        .filter((card) => ctx.cardColor(card) === 2);
       if (yellow.length)
         ctx.requestCardChoice(
           "scooba-yellow",
@@ -1173,7 +1174,7 @@ export const sea: Record<string, CardScript> = {
   },
   "sea floor salvage|3": {
     onPlay(ctx) {
-      const cards = ctx.state.players.flatMap((player) => player.graveyard.filter((card) => !card.faceDown));
+      const cards = ctx.state.players.flatMap((player) => faceUpGraveyard(ctx, player.seat));
       if (cards.length)
         ctx.requestCardChoice(
           "salvage-face-down",
@@ -1184,7 +1185,7 @@ export const sea: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "salvage-face-down") return;
       const card = ctx.state.players
-        .flatMap((player) => player.graveyard)
+        .flatMap((player) => faceUpGraveyard(ctx, player.seat))
         .find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
       const yellow = ctx.cardColor(card) === 2;
@@ -1300,7 +1301,7 @@ export const sea: Record<string, CardScript> = {
   "crash down the gates|3": crashDownTheGates(),
   "jack be nimble|1": {
     onAttackDeclared(ctx) {
-      const nimblisms = ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Nimblism"));
+      const nimblisms = faceUpGraveyard(ctx).filter((card) => named(ctx, card, "Nimblism"));
       if (nimblisms.length)
         ctx.requestCardChoice(
           "jack-nimble-banish",
@@ -1319,7 +1320,7 @@ export const sea: Record<string, CardScript> = {
         return;
       }
       if (hook !== "jack-nimble-banish" || option === "pass") return;
-      const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
+      const card = faceUpGraveyard(ctx).find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
       ctx.banish(card.instanceId);
       ctx.setState("jackNimbleBuff", 1);
@@ -1363,7 +1364,7 @@ export const sea: Record<string, CardScript> = {
       discardCost: { count: 1 },
       canActivate: (ctx) => ctx.player(ctx.seat).hand.length > 0,
       onActivate(ctx) {
-        const blue = ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardColor(card) === 3);
+        const blue = faceUpGraveyard(ctx).filter((card) => ctx.cardColor(card) === 3);
         if (blue.length)
           ctx.requestCardChoice(
             "bandana-blue",
@@ -1604,7 +1605,7 @@ Object.assign(
       {
         canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined,
         onHit(ctx: ScriptCtx) {
-          const cards = ctx.player(opponentSeat(ctx)).graveyard.filter((card) => !card.faceDown);
+          const cards = faceUpGraveyard(ctx, opponentSeat(ctx));
           if (cards.length)
             ctx.requestCardChoice(
               "pilfer-wreck",
@@ -1616,9 +1617,8 @@ Object.assign(
         },
         onChoose(ctx: ScriptCtx, hook: string, option: string) {
           if (hook !== "pilfer-wreck" || option === "pass") return;
-          const card = ctx
-            .player(opponentSeat(ctx))
-            .graveyard.find((candidate) => candidate.instanceId === Number(option));
+          const card = faceUpGraveyard(ctx, opponentSeat(ctx))
+            .find((candidate) => candidate.instanceId === Number(option));
           if (!card) return;
           const yellow = ctx.cardColor(card) === 2;
           if (ctx.setCardFaceDown(card.instanceId, true) && yellow) createGold(ctx);
@@ -2529,7 +2529,7 @@ Object.assign(sea, {
   },
   "sunken treasure|3": {
     onDefend(ctx: ScriptCtx) {
-      const cards = ctx.state.players.flatMap((player) => player.graveyard.filter((card) => !card.faceDown));
+      const cards = ctx.state.players.flatMap((player) => faceUpGraveyard(ctx, player.seat));
       if (cards.length)
         ctx.requestCardChoice(
           "sunken",
@@ -2542,7 +2542,7 @@ Object.assign(sea, {
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook !== "sunken" || option === "pass") return;
       const card = ctx.state.players
-        .flatMap((player) => player.graveyard)
+        .flatMap((player) => faceUpGraveyard(ctx, player.seat))
         .find((candidate) => candidate.instanceId === Number(option));
       if (card && ctx.setCardFaceDown(card.instanceId, true) && ctx.cardColor(card) === 2) createGold(ctx);
     },
@@ -2761,7 +2761,7 @@ Object.assign(sea, {
       if (ctx.self.meldSide !== "right") {
         const gained = Number(ctx.getPlayerFlag(ctx.seat, "lifeGainedThisTurn"));
         const cards = ctx.state.players
-          .flatMap((player) => player.graveyard)
+          .flatMap((player) => faceUpGraveyard(ctx, player.seat))
           .filter((card) => ctx.hasCardType(card, "action") && (data(ctx, card).cost ?? 0) < gained);
         if (cards.length)
           ctx.requestCardChoice(
@@ -2783,7 +2783,7 @@ Object.assign(sea, {
       if (ctx.self.meldSide !== "right") {
         const amount = Number(ctx.getPlayerFlag(ctx.seat, `arcaneDamageAmountToSeat:${opponentSeat(ctx)}`));
         const cards = ctx.state.players
-          .flatMap((player) => player.graveyard)
+          .flatMap((player) => faceUpGraveyard(ctx, player.seat))
           .filter((card) => ctx.hasCardType(card, "instant") || hasTag(ctx, card, "aura"));
         for (const card of cards.slice(0, amount)) ctx.banish(card.instanceId);
       }

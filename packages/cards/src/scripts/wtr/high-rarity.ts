@@ -5,6 +5,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
   isSixPlus,
   localizedCardLog,
   opponentSeat,
@@ -170,9 +171,7 @@ const lordOfWind: CardScript = {
     if (hook === "lord-wind-x" && option.startsWith("x:")) {
       const amount = Number(option.slice(2));
       ctx.setState("lordWindX", amount);
-      const eligible = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) =>
+      const eligible = faceUpGraveyard(ctx).filter((card) =>
           namedAny(ctx, card, ["surging strike", "whelming gustwave", "mugenshi: release"]),
         );
       if (amount > 0 && eligible.length > 0) {
@@ -497,7 +496,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
   },
   "remembrance|2": {
     onPlay(ctx) {
-      const actions = ctx.player(ctx.seat).graveyard.filter((card) => ctx.hasCardType(card, "action"));
+      const actions = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "action"));
       if (!actions.length) {
         ctx.shuffleDeck();
         return;

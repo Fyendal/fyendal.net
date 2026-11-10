@@ -10,6 +10,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
   heroTarget,
   isSixPlus,
   leavesArenaTrigger,
@@ -1048,7 +1049,7 @@ export const sup: Record<string, CardScript> = {
   },
   "visit the boneyard|3": {
     onPlay(ctx) {
-      const targets = ctx.player(ctx.seat).graveyard.filter((card) => isSixPlus(ctx, card));
+      const targets = faceUpGraveyard(ctx).filter((card) => isSixPlus(ctx, card));
       if (targets.length)
         ctx.requestCardChoice(
           "boneyard",
@@ -1162,9 +1163,8 @@ export const sup: Record<string, CardScript> = {
       timing: "instant",
       destroySelfCost: true,
       onActivate(ctx) {
-        const cards = ctx
-          .player(ctx.seat)
-          .graveyard.filter((card) => ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack"));
+        const cards = faceUpGraveyard(ctx)
+          .filter((card) => ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack"));
         if (cards.length)
           ctx.requestCardChoice(
             "hindsight",
@@ -2313,7 +2313,7 @@ Object.assign(sup, {
         label: "Add a sand counter",
         effect(ctx: ScriptCtx) {
           ctx.setCounter("sand", ctx.getCounter("sand") + 1);
-          const reds = ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardColor(card) === 1);
+          const reds = faceUpGraveyard(ctx).filter((card) => ctx.cardColor(card) === 1);
           if (reds.length < ctx.getCounter("sand")) ctx.destroySelf();
           else for (const card of reds.slice(0, ctx.getCounter("sand"))) ctx.banish(card.instanceId);
         },

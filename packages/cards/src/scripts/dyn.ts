@@ -11,6 +11,7 @@ import {
   contractWithSilver,
   dealArcane,
   dealToAnyTarget,
+  faceUpGraveyard,
   type DecisionPromptOptions,
   decisionMessage,
   decisionPrompt,
@@ -168,7 +169,7 @@ function blessingFocus(amount: number): CardScript {
 
 function blessingIngenuity(count: number): CardScript {
   const offer = (ctx: ScriptCtx) => {
-    const candidates = [...ctx.player(ctx.seat).graveyard, ...ctx.player(ctx.seat).banish].filter(
+    const candidates = [...faceUpGraveyard(ctx), ...ctx.player(ctx.seat).banish].filter(
       (card) => cardNamed(ctx, card, "Hyper Driver"),
     );
     if (ctx.getState("ingenuityRemaining") <= 0 || candidates.length === 0) return;

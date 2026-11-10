@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   consumeDelayedEffect,
   decisionPrompt,
+  faceUpGraveyard,
   grantEndPhaseIntellect,
   ongoingLabel,
   opponentSeat,
@@ -365,7 +366,7 @@ export const aol: Record<string, CardScript> = {
     ...nextWager(2, "sword", false, "Winner may equip an equipment card from their graveyard", (ctx, winner) => {
       const equipment =
         winner >= 0
-          ? ctx.player(winner).graveyard.filter((card) => ctx.cardData(card.cardId).cardType === "equipment")
+          ? faceUpGraveyard(ctx, winner).filter((card) => ctx.cardData(card.cardId).cardType === "equipment")
           : [];
       if (equipment.length) {
         ctx.setState("decisionSeat", winner);

@@ -1,5 +1,12 @@
 import type { CardInstance, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, cardNamed, commonOptionMessages, decisionPrompt, localizedLog } from "../shared-helpers.js";
+import {
+  buffNextAttack,
+  cardNamed,
+  commonOptionMessages,
+  decisionPrompt,
+  faceUpGraveyard,
+  localizedLog,
+} from "../shared-helpers.js";
 
 type Card = DeepReadonly<CardInstance>;
 
@@ -72,9 +79,7 @@ export function resolveSharpenFollowup(
       );
       break;
     case SHARPEN_FOLLOWUP.TOP_ATTACK_REACTION: {
-      const reactions = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => ctx.cardData(card.cardId).cardType === "attack-reaction");
+      const reactions = faceUpGraveyard(ctx).filter((card) => ctx.cardData(card.cardId).cardType === "attack-reaction");
       if (reactions.length) {
         ctx.requestCardChoice(
           SHARPEN_TOP_ATTACK_REACTION_HOOK,

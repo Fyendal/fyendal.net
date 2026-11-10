@@ -7,6 +7,7 @@ import {
   consumeDelayedEffect,
   decisionMessage,
   decisionPrompt,
+  faceUpGraveyard,
   ongoingLabel,
   opponentSeat,
   resourceAbility,
@@ -297,7 +298,7 @@ export const mpw: Record<string, CardScript> = {
   "hot top|0": {
     canTriggerOnDefend: isWeaponAttack,
     onDefend(ctx) {
-      const reactions = ctx.player(ctx.seat).graveyard.filter((card) => data(ctx, card).cardType === "attack-reaction");
+      const reactions = faceUpGraveyard(ctx).filter((card) => data(ctx, card).cardType === "attack-reaction");
       if (reactions.length)
         ctx.requestCardChoice(
           "hot-top",
@@ -490,7 +491,7 @@ export const mpw: Record<string, CardScript> = {
   },
   "lessons learned|3": {
     onPlay(ctx) {
-      const reactions = ctx.player(ctx.seat).graveyard.filter((card) => data(ctx, card).cardType === "attack-reaction");
+      const reactions = faceUpGraveyard(ctx).filter((card) => data(ctx, card).cardType === "attack-reaction");
       if (reactions.length)
         ctx.requestCardChoices(
           "lessons-learned",
@@ -510,7 +511,7 @@ export const mpw: Record<string, CardScript> = {
     onChooseMany(ctx, hook, options) {
       if (hook !== "lessons-learned") return;
       const chosen = new Set(options);
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => chosen.has(String(card.instanceId)));
+      const cards = faceUpGraveyard(ctx).filter((card) => chosen.has(String(card.instanceId)));
       let moved = false;
       for (const card of cards) if (ctx.putOnDeckBottom(card.instanceId)) moved = true;
       if (moved) ctx.shuffleDeck();

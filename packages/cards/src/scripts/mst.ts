@@ -355,9 +355,7 @@ function topBanishDesire(matches: (ctx: ScriptCtx, card: DeepReadonly<CardInstan
 }
 
 function murkyWaterTraps(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return ctx
-    .player(ctx.seat)
-    .graveyard.filter((card) => hasType(ctx, card, "trap") && (data(ctx, card).cost ?? -1) >= 0);
+  return faceUpGraveyard(ctx).filter((card) => hasType(ctx, card, "trap") && (data(ctx, card).cost ?? -1) >= 0);
 }
 
 function resolveMurkyWater(ctx: ScriptCtx, instanceIds: readonly number[]): void {
@@ -385,21 +383,21 @@ function bonds(kind: "pitch" | "name"): CardScript {
       const top = opponent.deck[0];
       if (!top) return;
       ctx.banish(top.instanceId);
-      if (opponent.graveyard.length) {
+      const graveyard = faceUpGraveyard(ctx, opponent.seat);
+      if (graveyard.length) {
         ctx.requestCardChoice(
           "bonds",
           decisionPrompt(
             "Choose a card in the defending hero's graveyard to banish",
             "card.mst.defendinghero.graveyard.banish",
           ),
-          opponent.graveyard.map((card) => card.instanceId),
+          graveyard.map((card) => card.instanceId),
         );
       }
     },
     onChoose(ctx, hook, option) {
       if (hook !== "bonds") return;
-      const opponent = ctx.player(opponentSeat(ctx));
-      const second = opponent.graveyard.find((card) => card.instanceId === Number(option));
+      const second = faceUpGraveyard(ctx, opponentSeat(ctx)).find((card) => card.instanceId === Number(option));
       if (!second) return;
       ctx.banish(second.instanceId);
     },
@@ -654,7 +652,7 @@ function gravekeeping(): CardScript {
   return {
     onAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId !== undefined) return;
-      const grave = ctx.player(opponentSeat(ctx)).graveyard;
+      const grave = faceUpGraveyard(ctx, opponentSeat(ctx));
       if (grave.length)
         ctx.requestCardChoice(
           "gravekeeping",
@@ -1111,7 +1109,7 @@ function truthsRetold(): CardScript {
       timing: "instant",
       turnsFaceUp: true,
       onActivate(ctx) {
-        const auras = ctx.player(ctx.seat).graveyard.filter((card) => isAura(ctx, card));
+        const auras = faceUpGraveyard(ctx).filter((card) => isAura(ctx, card));
         if (auras.length)
           ctx.requestCardChoice(
             "truths",
@@ -1241,7 +1239,7 @@ function artSoul(): CardScript {
 function maskWhiskers(): CardScript {
   return {
     onDefend(ctx) {
-      const combo = ctx.player(ctx.seat).graveyard.filter((card) => hasKeyword(ctx, card, "combo"));
+      const combo = faceUpGraveyard(ctx).filter((card) => hasKeyword(ctx, card, "combo"));
       if (combo.length)
         ctx.requestCardChoice(
           "whiskers",
@@ -1427,7 +1425,7 @@ Object.assign(mst, {
     onPlay(ctx) {
       createInHand(ctx, FANG_STRIKE);
       createInHand(ctx, SLITHER);
-      const grave = ctx.player(opponentSeat(ctx)).graveyard.slice(0, 2);
+      const grave = faceUpGraveyard(ctx, opponentSeat(ctx)).slice(0, 2);
       for (const card of grave) ctx.banish(card.instanceId);
       ctx.transcend();
     },
@@ -1640,7 +1638,7 @@ Object.assign(mst, {
       const target = opponentSeat(ctx);
       const chosen = ctx.player(target).hand.find((card) => card.instanceId === Number(option));
       if (!chosen) return;
-      for (const card of [...ctx.player(target).hand, ...ctx.player(target).deck, ...ctx.player(target).graveyard]
+      for (const card of [...ctx.player(target).hand, ...ctx.player(target).deck, ...faceUpGraveyard(ctx, target)]
         .filter((card) => sharesName(ctx, card, chosen))
         .slice(0, 3))
         ctx.banish(card.instanceId);

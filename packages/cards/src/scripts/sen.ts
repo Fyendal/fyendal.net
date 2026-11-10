@@ -3,6 +3,7 @@ import {
   decisionMessage,
   decisionPrompt,
   destroyedTrigger,
+  faceUpGraveyard,
   isCard,
   leavesArenaTrigger,
   localizedCardLog,
@@ -377,11 +378,11 @@ export const sen: Record<string, CardScript> = {
       ctx.requestCardChoice(
         "pass-over",
         decisionPrompt("Pass Over: banish a card from the opponent's graveyard", "card.sen.opponent.graveyard.banish"),
-        ctx.player(opponentSeat(ctx)).graveyard.map((c) => c.instanceId),
+        faceUpGraveyard(ctx, opponentSeat(ctx)).map((c) => c.instanceId),
       );
     },
     {
-      canPlay: (ctx) => ctx.player(opponentSeat(ctx)).graveyard.length > 0,
+      canPlay: (ctx) => faceUpGraveyard(ctx, opponentSeat(ctx)).length > 0,
       onChoose(ctx, hook, option) {
         if (hook !== "pass-over") return;
         ctx.banish(Number(option));
@@ -392,7 +393,7 @@ export const sen: Record<string, CardScript> = {
 
   "preserve tradition|3": transcendInstant(
     (ctx) => {
-      const actions = ctx.player(ctx.seat).graveyard.filter((c) => ctx.hasCardType(c, "action"));
+      const actions = faceUpGraveyard(ctx).filter((c) => ctx.hasCardType(c, "action"));
       ctx.requestCardChoice(
         "preserve-tradition",
         decisionPrompt(
@@ -403,10 +404,10 @@ export const sen: Record<string, CardScript> = {
       );
     },
     {
-      canPlay: (ctx) => ctx.player(ctx.seat).graveyard.some((c) => ctx.hasCardType(c, "action")),
+      canPlay: (ctx) => faceUpGraveyard(ctx).some((c) => ctx.hasCardType(c, "action")),
       onChoose(ctx, hook, option) {
         if (hook !== "preserve-tradition") return;
-        const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
+        const card = faceUpGraveyard(ctx).find((candidate) => candidate.instanceId === Number(option));
         if (!card) return;
         ctx.putOnDeckBottom(Number(option));
         ctx.logPublic(

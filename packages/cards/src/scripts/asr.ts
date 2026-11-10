@@ -4,6 +4,7 @@ import {
   cardNamed,
   commonOptionMessages,
   decisionPrompt,
+  faceUpGraveyard,
   opponentSeat,
   previousAttackHasName,
   previousAttackNameContains,
@@ -30,9 +31,7 @@ function ninjaAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean 
 }
 
 function offerGiveAndTake(ctx: ScriptCtx): void {
-  const choices = ctx
-    .player(ctx.seat)
-    .graveyard.filter(
+  const choices = faceUpGraveyard(ctx).filter(
       (card) => ctx.hasCardType(card, "action") && (data(ctx, card).cost ?? 0) < ctx.currentAttackPower(),
     );
   if (choices.length)

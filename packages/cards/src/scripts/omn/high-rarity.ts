@@ -9,6 +9,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
   heroDamage,
   heroTarget,
   ongoingLabel,
@@ -82,9 +83,7 @@ export const omnHighRarity: Record<string, CardScript> = {
       ctx.drawCards(ctx.seat, 1);
     },
     onFragment(ctx) {
-      const cards = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => isInstant(ctx, card) && has(ctx, card, "lightning"));
+      const cards = faceUpGraveyard(ctx).filter((card) => isInstant(ctx, card) && has(ctx, card, "lightning"));
       if (cards.length)
         ctx.requestCardChoice(
           "unwinding-top",
@@ -527,7 +526,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   "unmake the underlings|3": {
     onAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId !== undefined) return;
-      const ally = ctx.player(opponentSeat(ctx)).graveyard.find((card) => has(ctx, card, "ally"));
+      const ally = faceUpGraveyard(ctx, opponentSeat(ctx)).find((card) => has(ctx, card, "ally"));
       if (ally) ctx.setCardFaceDown(ally.instanceId, true);
     },
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId !== undefined,
@@ -553,7 +552,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   },
   "swift pickup|1": {
     onAttackDeclared(ctx) {
-      const item = ctx.player(ctx.seat).graveyard.find((card) => has(ctx, card, "shuriken") && has(ctx, card, "item"));
+      const item = faceUpGraveyard(ctx).find((card) => has(ctx, card, "shuriken") && has(ctx, card, "item"));
       if (item && ctx.putOnDeckBottom(item.instanceId)) ctx.addModifier({ scope: "chain-link", attack: 1 });
     },
   },
@@ -685,9 +684,8 @@ export const omnHighRarity: Record<string, CardScript> = {
   },
   "crash site salvage|2": {
     declareAdditionalCost(ctx) {
-      const choices = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => has(ctx, card, "item") || data(ctx, card).cardType === "equipment");
+      const choices = faceUpGraveyard(ctx)
+        .filter((card) => has(ctx, card, "item") || data(ctx, card).cardType === "equipment");
       if (choices.length)
         ctx.requestCardChoice(
           "salvage-scrap",
@@ -699,9 +697,7 @@ export const omnHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "salvage-scrap" || option === "no") return;
-      const card = ctx
-        .player(ctx.seat)
-        .graveyard.find(
+      const card = faceUpGraveyard(ctx).find(
           (candidate) =>
             candidate.instanceId === Number(option) &&
             (has(ctx, candidate, "item") || data(ctx, candidate).cardType === "equipment"),
@@ -722,9 +718,8 @@ export const omnHighRarity: Record<string, CardScript> = {
       return ctx.link?.targetAllyId === undefined && ctx.getFlag("player", "activatedCannonThisTurn") === true;
     },
     onHit(ctx) {
-      const cards = ctx
-        .player(opponentSeat(ctx))
-        .graveyard.filter((card) => ctx.cardColor(card) === 1 && ctx.hasCardType(card, "action"));
+      const cards = faceUpGraveyard(ctx, opponentSeat(ctx))
+        .filter((card) => ctx.cardColor(card) === 1 && ctx.hasCardType(card, "action"));
       if (cards.length)
         ctx.requestCardChoice(
           "harpoon-banish",
@@ -819,15 +814,13 @@ export const omnHighRarity: Record<string, CardScript> = {
         optional: true,
         label: "Banish 2 Draco Fire to gain 1 resource",
         condition(ctx) {
-          return ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).length >= 2;
+          return faceUpGraveyard(ctx).filter((card) => named(ctx, card, "Draco Fire")).length >= 2;
         },
         canAccept(ctx) {
-          return ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).length >= 2;
+          return faceUpGraveyard(ctx).filter((card) => named(ctx, card, "Draco Fire")).length >= 2;
         },
         onAccept(ctx) {
-          const cards = ctx
-            .player(ctx.seat)
-            .graveyard.filter((card) => named(ctx, card, "Draco Fire"))
+          const cards = faceUpGraveyard(ctx).filter((card) => named(ctx, card, "Draco Fire"))
             .slice(0, 2);
           if (cards.length < 2) return;
           for (const card of cards) ctx.banish(card.instanceId);

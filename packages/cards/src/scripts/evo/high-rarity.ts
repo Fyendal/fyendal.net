@@ -12,6 +12,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   equipWithSilver,
+  faceUpGraveyard,
   isChargeDecline,
   leavesArenaTrigger,
   ongoingLabel,
@@ -130,9 +131,7 @@ function steelSoulTriggerCount(ctx: ScriptCtx, other: DeepReadonly<CardInstance>
   return ctx.cardData(other.cardId).cardType === "hero" ? 2 : 1;
 }
 function steelControllerTargets(ctx: ScriptCtx) {
-  return ctx
-    .player(ctx.seat)
-    .graveyard.filter(
+  return faceUpGraveyard(ctx).filter(
       (card) => ctx.hasCardType(card, "action") && has(ctx, card, "attack") && ctx.basePower(card) >= 6,
     );
 }
@@ -179,7 +178,7 @@ function scrap(extra: CardScript = {}, count = 1): CardScript {
   return {
     ...extra,
     declareAdditionalCost(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => scrappable(ctx, card));
+      const cards = faceUpGraveyard(ctx).filter((card) => scrappable(ctx, card));
       if (cards.length)
         ctx.requestCardChoices(
           "evo-scrap",
@@ -200,9 +199,8 @@ function scrap(extra: CardScript = {}, count = 1): CardScript {
         return;
       }
       for (const option of options) {
-        const card = ctx
-          .player(ctx.seat)
-          .graveyard.find((candidate) => candidate.instanceId === Number(option) && scrappable(ctx, candidate));
+        const card = faceUpGraveyard(ctx)
+          .find((candidate) => candidate.instanceId === Number(option) && scrappable(ctx, candidate));
         if (card && ctx.banish(card.instanceId)) ctx.setState("scrapped", ctx.getState("scrapped") + 1);
       }
     },
@@ -737,11 +735,11 @@ export const evoHighRarity: Record<string, CardScript> = {
       stateKey: "scrapperX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum(ctx) {
-        return ctx.player(ctx.seat).graveyard.filter((card) => isItem(ctx, card)).length;
+        return faceUpGraveyard(ctx).filter((card) => isItem(ctx, card)).length;
       },
     },
     declareAdditionalCost(ctx) {
-      const items = ctx.player(ctx.seat).graveyard.filter((card) => isItem(ctx, card));
+      const items = faceUpGraveyard(ctx).filter((card) => isItem(ctx, card));
       const count = Math.min(ctx.getState("scrapperX"), items.length);
       if (count <= 0) return;
       ctx.requestCardChoices(
@@ -757,7 +755,7 @@ export const evoHighRarity: Record<string, CardScript> = {
     onChooseMany(ctx, hook, options) {
       if (hook !== "hyper-scrapper-item") return;
       for (const option of options) {
-        const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
+        const card = faceUpGraveyard(ctx).find((candidate) => candidate.instanceId === Number(option));
         if (!card || !ctx.banish(card.instanceId)) continue;
         ctx.addCardState(ctx.self.instanceId, "scrapped", 1);
         if (named(ctx, card, "hyper driver")) ctx.addCardState(ctx.self.instanceId, "scrappedDrivers", 1);

@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionPrompt,
   effectPutSelfFaceUpFromDeck,
+  faceUpGraveyard,
   localizedCardLog,
   optN,
   optOnChoose,
@@ -137,7 +138,7 @@ function backAlleyBreakline(): CardScript {
 function cadaverousContraband(): CardScript {
   return {
     onHit(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
+      const cards = faceUpGraveyard(ctx).filter((card) => {
         return ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack");
       });
       if (cards.length === 0) return;

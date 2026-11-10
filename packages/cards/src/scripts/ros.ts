@@ -14,6 +14,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
   heroDamage,
   hitHookLabel,
   leavesArenaTrigger,
@@ -199,7 +200,7 @@ type DecomposePayoff = (ctx: ScriptCtx) => void;
 
 function decompose(trigger: "attack" | "play", payoff: DecomposePayoff): CardScript {
   const offer = (ctx: ScriptCtx) => {
-    const grave = ctx.player(ctx.seat).graveyard;
+    const grave = faceUpGraveyard(ctx);
     const firstEarth = grave.filter(
       (first) =>
         hasTag(ctx, first, "earth") &&
@@ -231,18 +232,14 @@ function decompose(trigger: "attack" | "play", payoff: DecomposePayoff): CardScr
     onChoose(ctx, hook, option) {
       if (hook === "decompose-earth-1") {
         if (option === "no") return;
-        const first = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
+        const first = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
         if (!first || !hasTag(ctx, first, "earth")) return;
         ctx.setState("decomposeEarth1", first.instanceId);
-        const secondEarth = ctx
-          .player(ctx.seat)
-          .graveyard.filter(
+        const secondEarth = faceUpGraveyard(ctx).filter(
             (second) =>
               second.instanceId !== first.instanceId &&
               hasTag(ctx, second, "earth") &&
-              ctx
-                .player(ctx.seat)
-                .graveyard.some(
+              faceUpGraveyard(ctx).some(
                   (action) =>
                     action.instanceId !== first.instanceId &&
                     action.instanceId !== second.instanceId &&
@@ -262,12 +259,10 @@ function decompose(trigger: "attack" | "play", payoff: DecomposePayoff): CardScr
       }
       if (hook === "decompose-earth-2") {
         const firstId = ctx.getState("decomposeEarth1");
-        const second = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
+        const second = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
         if (!second || second.instanceId === firstId || !hasTag(ctx, second, "earth")) return;
         ctx.setState("decomposeEarth2", second.instanceId);
-        const actions = ctx
-          .player(ctx.seat)
-          .graveyard.filter(
+        const actions = faceUpGraveyard(ctx).filter(
             (card) =>
               card.instanceId !== firstId && card.instanceId !== second.instanceId && ctx.hasCardType(card, "action"),
           );
@@ -283,7 +278,7 @@ function decompose(trigger: "attack" | "play", payoff: DecomposePayoff): CardScr
       if (hook !== "decompose-action") return;
       const ids = [ctx.getState("decomposeEarth1"), ctx.getState("decomposeEarth2"), Number(option)];
       if (new Set(ids).size !== 3) return;
-      const grave = ctx.player(ctx.seat).graveyard;
+      const grave = faceUpGraveyard(ctx);
       const chosen = ids.map((id) => grave.find((card) => card.instanceId === id));
       if (
         !chosen.every(Boolean) ||
@@ -694,7 +689,7 @@ function saveThought(max: number): CardScript {
     ctx.createToken(PONDER);
   };
   const offer = (ctx: ScriptCtx, remaining: number) => {
-    const cards = ctx.player(ctx.seat).graveyard.filter((card) => isNonAttackAction(ctx, card));
+    const cards = faceUpGraveyard(ctx).filter((card) => isNonAttackAction(ctx, card));
     if (remaining <= 0 || cards.length === 0) {
       finish(ctx);
       return;
@@ -726,9 +721,7 @@ function saveThought(max: number): CardScript {
 
 function etchings(amount: number): CardScript {
   const base = arcaneHero(amount, (ctx) => {
-    const choices = ctx
-      .player(ctx.seat)
-      .graveyard.filter((card) => isAura(ctx, card) && cardNameContains(ctx, card, "sigil"));
+    const choices = faceUpGraveyard(ctx).filter((card) => isAura(ctx, card) && cardNameContains(ctx, card, "sigil"));
     if (choices.length)
       ctx.requestCardChoice(
         "etching-sigil",
@@ -1046,9 +1039,7 @@ for (const pitch of [1, 2, 3]) {
   ros[`trailblazing aether|${pitch}`] = arcaneHero(4 - pitch, (ctx) => ctx.grantGoAgain());
   ros[`count your blessings|${pitch}`] = {
     onPlay(ctx) {
-      const copies = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => cardNamed(ctx, card, "Count Your Blessings")).length;
+      const copies = faceUpGraveyard(ctx).filter((card) => cardNamed(ctx, card, "Count Your Blessings")).length;
       ctx.gainLife(ctx.seat, 4 - pitch + copies);
     },
   };
@@ -1848,9 +1839,8 @@ Object.assign(ros, {
         requestAnyTarget(ctx, "regrowth-shock", `Choose a target for ${ctx.previewArcaneDamage(1)} arcane damage`, 1);
       if (ctx.self.meldSide !== "right") {
         const x = Number(ctx.getPlayerFlag(ctx.seat, `arcaneDamageAmountToSeat:${opponentSeat(ctx)}`));
-        const cards = ctx
-          .player(ctx.seat)
-          .graveyard.filter((card) => isAttackAction(ctx, card) && (data(ctx, card).cost ?? 0) < x);
+        const cards = faceUpGraveyard(ctx)
+          .filter((card) => isAttackAction(ctx, card) && (data(ctx, card).cost ?? 0) < x);
         if (cards.length)
           ctx.requestCardChoice(
             "regrowth-card",

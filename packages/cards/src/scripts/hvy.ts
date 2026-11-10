@@ -9,6 +9,7 @@ import {
   commonOptionMessages,
   consumeDelayedEffect,
   decisionPrompt,
+  faceUpGraveyard,
   localizedCardLog,
   mergeSetScripts,
   ongoingLabel,
@@ -336,9 +337,7 @@ function stackInFavor(defense: number): CardScript {
 }
 
 function findPitchedGraveCards(ctx: ScriptCtx, pitch: number, count: number): DeepReadonly<CardInstance>[] {
-  return ctx
-    .player(ctx.seat)
-    .graveyard.filter((card) => ctx.cardColor(card) === pitch)
+  return faceUpGraveyard(ctx).filter((card) => ctx.cardColor(card) === pitch)
     .slice(0, count);
 }
 
@@ -843,7 +842,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
     canTriggerOnDefend: (ctx) => controls(ctx, "Might"),
     onDefend(ctx) {
       if (!controls(ctx, "Might")) return;
-      const attacks = ctx.player(ctx.seat).graveyard.filter((card) => isAttackAction(ctx, card));
+      const attacks = faceUpGraveyard(ctx).filter((card) => isAttackAction(ctx, card));
       if (attacks.length)
         ctx.requestCardChoice(
           "wall-top",
