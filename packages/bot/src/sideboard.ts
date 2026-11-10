@@ -966,7 +966,7 @@ export function auroraPresentationFor(
     weaponIds: [...registered.pool.weaponIds],
     equipment: {
       head: "PEN310", // Crown of Providence
-      chest: "DTD211", // Dyadic Carapace
+      chest: matchup.arcane ? "DTD211" : "MON230", // Dyadic Carapace / Aether Ironweave
       arms: matchup.arcane ? "EVR103" : "ARC078", // Vexing Quillhand / Grasp of the Arknight
       legs: "WTR154", // Snapdragon Scalers
     },

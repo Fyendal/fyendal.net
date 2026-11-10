@@ -2,9 +2,11 @@ import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import { auroraSolverRules } from "./aurora-rules.js";
 import { auroraMatchupForHeroName, type AuroraMatchup } from "./aurora-strategy.js";
 import { planBriarTurn, type BriarTurnPlan } from "./briar-turn-planner.js";
+import { nextTurnLandingRate } from "./turn-planner.js";
 import {
   arsenalValuer,
   defenseReactionWorthSpending,
+  handDamage,
   handResponse,
   opportunityValuer,
   solveHand,
@@ -16,6 +18,7 @@ import {
   currentLink,
   enforceSpectraPolicy,
   functionalKey as key,
+  incomingAttackDamage,
   intentCard,
   isAttack,
   optionCard,
@@ -112,22 +115,49 @@ function hasSetupFollowup(
   });
 }
 
-/** Arc Lightning grants the next action card go again, so any other action
- * card left after paying will go again and trigger a ping. */
-function arcHasGoAgainFollowup(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
-  const arc = intentCard(intent, own);
-  if (!arc) return false;
-  const spent = new Set([arc.instanceId, ...pitchIds(intent)]);
+/** Pings Arc Lightning and Burn Up need to beat holding them for a refilled hand. */
+const FULL_HAND_FOLLOWUPS = 2;
+
+/** Hand and arsenal cards left after paying for `intent` that `counts`. */
+function followups(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView>,
+  counts: (data: CardData) => boolean,
+): number {
+  const played = intentCard(intent, own);
+  if (!played) return 0;
+  const spent = new Set([played.instanceId, ...pitchIds(intent)]);
   const me = input.view.players[input.seat];
-  return [...me.hand, ...me.arsenal].some((card) =>
-    !spent.has(card.instanceId) && input.cards[card.cardId]?.cardType === "action"
-  );
+  return [...me.hand, ...me.arsenal].filter((card) => {
+    const data = input.cards[card.cardId];
+    return !spent.has(card.instanceId) && !!data && counts(data);
+  }).length;
 }
 
-function isArcLightningPlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
+const isActionCard = (data: CardData) => data.cardType === "action";
+
+/** Arc Lightning grants the next action card go again, so each other action
+ * card, or go-again instant, left after paying pings. */
+const pingsUnderArc = (data: CardData) =>
+  isActionCard(data) || data.keywords?.some((keyword) => keyword.toLowerCase() === "go again") === true;
+
+function isArcLightning(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
   if (intent.kind !== "play-card" && intent.kind !== "play-from-arsenal") return false;
   const card = intentCard(intent, own);
-  return !!card && key(input.cards[card.cardId]) === "arc lightning|2" && arcHasGoAgainFollowup(intent, input, own);
+  return !!card && key(input.cards[card.cardId]) === "arc lightning|2";
+}
+
+/** With too few pings Arc Lightning is worth more in arsenal beside a refilled hand. */
+function arcWorthPlaying(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
+  const pings = followups(intent, input, own, pingsUnderArc);
+  return pings >= FULL_HAND_FOLLOWUPS || pings >= input.view.players[1 - input.seat]!.life;
+}
+
+function arcActive(input: BotPolicyInput): boolean {
+  return input.view.ongoing.some((effect) =>
+    effect.seat === input.seat && key(input.cards[effect.cardId]) === "arc lightning|2"
+  );
 }
 
 function pendingSetups(input: BotPolicyInput): string[] {
@@ -166,17 +196,25 @@ function snapdragonWorthUsing(input: BotPolicyInput): boolean {
   return [...me.hand, ...me.arsenal].some((card) => input.cards[card.cardId]?.cardType === "action");
 }
 
+/** Burn Up needs several attacks to get one through (see aurora-rules). */
 function shouldMeldBurnUp(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
   if (!("meldSide" in intent) || intent.meldSide !== "both") return false;
   return input.view.players[1 - input.seat]!.life <= 1 ||
-    hasSetupFollowup("burn up // shock|1", intent, input, own);
+    (hasSetupFollowup("burn up // shock|1", intent, input, own) &&
+      followups(intent, input, own, isActionCard) >= FULL_HAND_FOLLOWUPS);
 }
 
 function prepareCandidates(candidates: readonly GameIntent[], input: BotPolicyInput): readonly GameIntent[] {
   const own = ownCards(input);
-  // Arc Lightning goes first so every later go again pings.
-  const arcs = candidates.filter((intent) => isArcLightningPlay(intent, input, own));
-  if (arcs.length > 0) return arcs;
+  // Arc Lightning goes first so every later go again pings, or waits for a fuller hand.
+  const arcs = candidates.filter((intent) => isArcLightning(intent, input, own));
+  const worthy = arcs.filter((intent) => arcWorthPlaying(intent, input, own));
+  if (worthy.length > 0) return worthy;
+  const heldArcs = new Set(arcs.flatMap((intent) => intentCard(intent, own)?.instanceId ?? []));
+  const keepingArc = candidates.filter((intent) =>
+    !arcs.includes(intent) && !pitchIds(intent).some((id) => heldArcs.has(id))
+  );
+  if (keepingArc.length > 0) candidates = keepingArc;
   const melds = candidates.filter((intent) => {
     const card = intentCard(intent, own);
     return !!card && key(input.cards[card.cardId]) === "burn up // shock|1" && shouldMeldBurnUp(intent, input, own);
@@ -194,17 +232,30 @@ const auroraResponse: ResponseModel = {
   evaluateResponse: (cards, input) => handResponse(cards, input, auroraSolverRules),
 };
 
+/** Whether the held hand lands more next turn, past a refilled opponent's
+ * blocks, than the current attack deals now. */
+function handConversion(input: BotPolicyInput): { converts: boolean; landingRate: number } {
+  const me = input.view.players[input.seat];
+  const threat = handDamage([...me.hand, ...me.arsenal], input, auroraSolverRules);
+  const landingRate = nextTurnLandingRate(input, threat);
+  return { converts: threat * landingRate >= incomingAttackDamage(input), landingRate };
+}
+
 function scoreDefend(
   intent: Extract<GameIntent, { kind: "defend" }>,
   input: BotPolicyInput,
   own: ReadonlyMap<number, CardView>,
 ): number {
   const matchup = matchupFor(input);
+  const conversion = handConversion(input);
   return scoreDefenseIntent(intent, input, own, {
     ...auroraResponse,
     cardOpportunity,
-    // Play style: Aurora races and keeps its hand for Lightning chains.
-    responseLossWeight: matchup.stance === "beatdown" ? 1.6 : 1.35,
+    // Play style: Aurora races and keeps its hand for Lightning chains, but a
+    // hand that won't convert loses only the offense expected to land.
+    responseLossWeight: !conversion.converts
+      ? conversion.landingRate
+      : matchup.stance === "beatdown" ? 1.6 : 1.35,
     defensePermission(candidate) {
       if (candidate.lethal) return "allow";
       const me = candidate.input.view.players[candidate.input.seat];
@@ -213,10 +264,11 @@ function scoreDefend(
         handIds.has(card.instanceId) && !candidate.stagedIds.has(card.instanceId)
       );
       // Armor alone may always cover a hit; hand cards block only for a reason.
-      if (handBlockers.length === 0) return "allow";
+      if (handBlockers.length === 0 || !conversion.converts) return "allow";
       if (me.life - candidate.incoming <= BLOCKING_LIFE) return "allow";
       if (candidate.onHit.value >= 6 || candidate.onHit.handCardsLost >= 2 ||
         candidate.onHit.destroysOccupiedArsenal) return "allow";
+      // Cards the best line only pitches or leaves over are spare blockers.
       const played = new Set(
         solveHand([...me.hand, ...me.arsenal], candidate.input, auroraSolverRules).line
           .map((step) => step.instanceId),
@@ -269,11 +321,19 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     if (data.cardType === "weapon") {
       if (wastesPendingSetup(card, input, own)) return -100;
       score = 12 + pendingSetups(input).length * 10;
+    } else if (functional === "aether ironweave|0") {
+      // Its go again pings under Arc Lightning and its resources fund Grasp.
+      const grasp = Object.values(me.equipment).some((equipped) =>
+        key(input.cards[equipped?.cardId ?? ""]) === "grasp of the arknight|0"
+      );
+      score = grasp || arcActive(input) ? 20 : 8;
     } else if (functional === "grasp of the arknight|0" || functional === "vexing quillhand|0") {
       const arcane = matchupFor(input).arcane;
       score = functional === "vexing quillhand|0" && arcane
         ? -10
-        : hasSetupFollowup(functional, intent, input, own) ? 8 : -10;
+        : !hasSetupFollowup(functional, intent, input, own) ? -10
+        // Floating resources (Aether Ironweave) are lost unless spent here.
+        : pitchIds(intent).length === 0 && functional === "grasp of the arknight|0" ? 18 : 8;
     } else if (functional === "snapdragon scalers|0") {
       score = snapdragonWorthUsing(input) ? 20 : -100;
     } else if (functional === "path of same ends|1") {
@@ -285,7 +345,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   } else if (isNonAttack(data)) {
     if (SETUPS.has(functional) && !hasSetupFollowup(functional, intent, input, own)) return -100;
     score = NON_ATTACK_PRIORITIES[functional] ?? 12;
-    if (functional === "arc lightning|2") score = arcHasGoAgainFollowup(intent, input, own) ? 40 : 6;
+    if (functional === "arc lightning|2") score = arcWorthPlaying(intent, input, own) ? 40 : 6;
   } else if (isAttack(data)) {
     if (wastesPendingSetup(card, input, own)) return -100;
     score = (card.attack ?? data.attack ?? 0) + pendingSetups(input).length * 10;

@@ -51,6 +51,9 @@ export interface CardUses {
   pump: number;
   /** Extra value of pump riders, such as granting go again. */
   pumpRider?: number;
+  /** Damage that blocks cannot stop, such as arcane pings, so it is not
+   * scaled by the opponent's response. */
+  unblockable?: number;
   /** Ambush: can defend from arsenal like a card in hand. */
   ambush?: boolean;
   /** A blue card that is still worth playing out of arsenal: printed
@@ -83,7 +86,7 @@ export function offenseValue(uses: CardUses, hitChance: number, offenseRate = 1)
     const value = uses.power + uses.onHit * hitChance;
     return (uses.reliableGoAgain || uses.finisher ? value : value * ARSENAL_TERMINAL_FACTOR) * offenseRate;
   }
-  return (uses.pump + (uses.pumpRider ?? 0)) * offenseRate;
+  return (uses.pump + (uses.pumpRider ?? 0)) * offenseRate + (uses.unblockable ?? 0);
 }
 
 /** Damage a defense reaction (or, at a lower use rate, a blocker) stops. */

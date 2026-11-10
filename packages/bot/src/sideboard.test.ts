@@ -644,7 +644,7 @@ describe("Aurora stance guide", () => {
     const { presented, validation } = guide("Oldhim, Grandfather of Eternity", ["guardian"]);
     expect(validation).toMatchObject({ ok: true });
     expect(presented.weaponIds).toEqual(["SBA002"]);
-    expect(presented.equipment).toEqual({ head: "PEN310", chest: "DTD211", arms: "ARC078", legs: "WTR154" });
+    expect(presented.equipment).toEqual({ head: "PEN310", chest: "MON230", arms: "ARC078", legs: "WTR154" });
     expect(presented.deck).toHaveLength(60);
     expect(count(presented.deck, "AST010")).toBe(3);
     expect(count(presented.deck, "LGS347")).toBe(3);

@@ -6,6 +6,7 @@ import {
   heldValue,
   offenseValue,
   standaloneValue,
+  TYPICAL_INCOMING,
 } from "./card-ev.js";
 import {
   buildHandSolver,
@@ -219,8 +220,16 @@ export function defenseReactionThreat(input: BotPolicyInput): { incoming: number
   return { incoming, lethal: landed >= input.view.players[input.seat].life };
 }
 
-/** Short of lethal, a defense reaction (with its pitch) must stop more damage
- * than it takes from next turn's hand. */
+/** Short of lethal, a defense reaction is saved for a later attack unless it
+ * stops at least half of what it would stop against a typical one. */
+export function defenseReactionStopsEnough(input: BotPolicyInput, defense: number): boolean {
+  const { incoming, lethal } = defenseReactionThreat(input);
+  return lethal || Math.min(incoming, defense) * 2 >= Math.min(defense, TYPICAL_INCOMING);
+}
+
+/** Short of lethal, a defense reaction (with its pitch) must stop enough
+ * (`defenseReactionStopsEnough`) and more damage than it takes from next
+ * turn's hand. */
 export function defenseReactionWorthSpending(
   card: CardView,
   input: BotPolicyInput,
@@ -230,6 +239,7 @@ export function defenseReactionWorthSpending(
 ): boolean {
   const { incoming, lethal } = defenseReactionThreat(input);
   if (lethal) return true;
+  if (!defenseReactionStopsEnough(input, defense)) return false;
   return Math.min(incoming, defense) > reserveDamageLost(input, factory, new Set([card.instanceId, ...pitched]));
 }
 

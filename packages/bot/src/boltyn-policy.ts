@@ -32,6 +32,7 @@ import {
 import { weaponCost } from "./card-model.js";
 import {
   arsenalValuer,
+  defenseReactionStopsEnough,
   defenseReactionThreat,
   defenseReactionWorthSpending,
   handResponse,
@@ -743,7 +744,7 @@ function boltynDefenseReactionWorthSpending(
   // An earlier charge this turn already gives Saving Grace its -2.
   const plainDefense = defense + (grace && charged(input) ? 2 : 0);
   if (defenseReactionWorthSpending(card, input, boltynSolverRules, pitchIds(intent), plainDefense)) return true;
-  if (!grace || charged(input)) return false;
+  if (!grace || charged(input) || !defenseReactionStopsEnough(input, defense + 2)) return false;
   const { incoming } = defenseReactionThreat(input);
   return chargeable.some((charge) =>
     Math.min(incoming, defense + 2) + defensiveChargeBonus(charge, input) >

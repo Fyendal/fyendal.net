@@ -864,7 +864,8 @@ describe("Jarl policy", () => {
       expect(state.players[0]!.banish).toHaveLength(decompose ? 3 : 0);
       expect(state.players[0]!.hand.some((card) => card.instanceId === spare!.instanceId)).toBe(true);
       const next = chooseJarlIntent(inputFor(state));
-      expect(next).toMatchObject(decompose
+      // The spare reaction is kept for 1 damage unless that damage is lethal.
+      expect(next).toMatchObject(decompose || life > 1
         ? { kind: "pass" }
         : { kind: "play-card", instanceId: spare!.instanceId });
       expect(legalIntents(state, 0)).toContainEqual(next);

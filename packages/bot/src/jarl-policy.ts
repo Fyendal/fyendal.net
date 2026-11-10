@@ -29,7 +29,13 @@ import {
 import { threatenedAttackDamage } from "./public-threat.js";
 import type { HeroSolverRules } from "./card-model.js";
 import { cardsCanFuse, guardianPatch } from "./guardian-rules.js";
-import { arsenalValuer, defenseReactionWorthSpending, handResponse, opportunityValuer } from "./hand-value.js";
+import {
+  arsenalValuer,
+  defenseReactionStopsEnough,
+  defenseReactionWorthSpending,
+  handResponse,
+  opportunityValuer,
+} from "./hand-value.js";
 import { adjustValueBreakdown } from "./value.js";
 import {
   chooseTacticalIntentWithTrace,
@@ -609,7 +615,9 @@ function scorePlay(
   } else if (functional === "felling of the crown|1") {
     score = earthBanished(input) >= 4 ? 62 : 12;
   } else if (functional === "rootbound carapace|1") {
-    score = scoreDefenseReaction(data, input) + (earthBanished(input) < 4 ? 12 : 2);
+    score = defenseReactionStopsEnough(input, Math.max(0, card.defense ?? data.defense ?? 0))
+      ? scoreDefenseReaction(data, input) + (earthBanished(input) < 4 ? 12 : 2)
+      : -100;
   } else if (functional === "tear asunder|3") {
     const secondCycle = (card.pitchCount ?? 0) > 0;
     score = secondCycle && remainingBlueCount(intent, input, own) >= 1 ? 60 : 4;

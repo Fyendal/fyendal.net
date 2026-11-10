@@ -126,18 +126,52 @@ describe("Aurora policy", () => {
   });
 
   it("leads with Arc Lightning when its grant is the only go again", () => {
-    expect(firstPlay(["ANQ031", "AST022"], 4249)).toBe("AST022");
+    expect(firstPlay(["ANQ031", "ANQ029", "AST022"], 4249)).toBe("AST022");
   });
 
-  /** Rhinar attacks with `attackId` into Aurora holding four Lightning attacks. */
+  it("keeps Arc Lightning for arsenal beside a single follow-up", () => {
+    let state = newGame(4252, 0);
+    replaceHand(state, 0, ["ANQ031", "AST022"]);
+    const arc = state.players[0]!.hand[1]!;
+    for (let step = 0; step < 80 && state.turn === 2 && state.winner === null; step++) {
+      const seat = actor(state);
+      state = apply(state, seat, seat === 0 ? choose(state, 0) : passive(state, 1));
+    }
+    expect(state.players[0]!.arsenal.map((card) => card.instanceId)).toEqual([arc.instanceId]);
+  });
+
+  it("spends Aether Ironweave on Grasp of the Arknight after Arc Lightning and an attack", () => {
+    let state = newGame(4253, 0);
+    replaceHand(state, 0, ["AST022", "GEM155", "ROS101"]);
+    const { chest, arms } = state.players[0]!.equipment;
+    expect([chest?.cardId, arms?.cardId]).toEqual(["MON230", "ARC078"]);
+    const activated: string[] = [];
+    for (let step = 0; step < 80 && state.turn === 2 && state.winner === null; step++) {
+      const seat = actor(state);
+      const intent = seat === 0 ? choose(state, 0) : passive(state, 1);
+      if (intent.kind === "activate-ability") {
+        const source = Object.values(state.players[0]!.equipment).find((card) => card?.instanceId === intent.sourceInstanceId);
+        if (source) activated.push(source.cardId);
+      }
+      state = apply(state, seat, intent);
+    }
+    expect(activated).toEqual(expect.arrayContaining(["MON230", "ARC078"]));
+  });
+
+  interface DefenseSetup {
+    hand?: readonly string[];
+    arsenal?: readonly string[];
+    onlyHeadAndLegs?: boolean;
+  }
+
+  /** Rhinar attacks with `attackId`; Aurora holds four Lightning attacks by default. */
   function defendAgainst(
     attackId: string,
     seed: number,
-    arsenal: readonly string[] = [],
-    onlyHeadAndLegs = false,
+    { hand = ["GEM155", "ROS101", "LGS368", "SBA016"], arsenal = [], onlyHeadAndLegs = false }: DefenseSetup = {},
   ): { state: Game; defense: GameIntent } {
     let state = newGame(seed, 1);
-    replaceHand(state, 0, ["GEM155", "ROS101", "LGS368", "SBA016"]);
+    replaceHand(state, 0, hand);
     replaceHand(state, 1, [attackId, "WTR205"]);
     state.players[0]!.arsenal = arsenal.map((cardId) => ({ instanceId: state.nextInstanceId++, cardId, owner: 0 }));
     if (onlyHeadAndLegs) {
@@ -154,6 +188,40 @@ describe("Aurora policy", () => {
     expect(defense).toEqual({ kind: "defend", instanceIds: [] });
   });
 
+  it("blocks with a hand that won't convert into damage", () => {
+    // Burn Up // Shock and Current Funnel threaten little on their own.
+    const { state, defense } = defendAgainst("WTR203", 4251, { hand: ["ROS012", "ROS074"] });
+    const handIds = new Set(state.players[0]!.hand.map((card) => card.instanceId));
+    expect("instanceIds" in defense && defense.instanceIds.some((id) => handIds.has(id))).toBe(true);
+  });
+
+  it("blocks with Burn Up when too few attacks would carry it", () => {
+    // Enlightened Strike is the only attack Burn Up could ride.
+    const { state, defense } = defendAgainst("WTR203", 4254, { hand: ["ROS012", "WTR159", "AST022", "SEA239"] });
+    const burnUp = state.players[0]!.hand[0]!;
+    expect("instanceIds" in defense && defense.instanceIds.includes(burnUp.instanceId)).toBe(true);
+  });
+
+  it.each([
+    { reaction: "ANQ034", name: "Sink Below" },
+    { reaction: "ELE227", name: "Sigil of Suffering" },
+  ])("keeps $name against a 1-power attack", ({ reaction }) => {
+    let { state, defense } = defendAgainst("WTR196", 4255, { hand: [reaction, "GEM155", "ROS101", "LGS368"] });
+    expect(state.players[0]!.life).toBeGreaterThan(4);
+    const reactionCard = state.players[0]!.hand[0]!;
+    let reactions = 0;
+    for (let step = 0; step < 10 && state.chain.length > 0; step++) {
+      const seat = actor(state);
+      const intent = seat === 0 ? (step === 0 ? defense : choose(state, 0)) : passive(state, 1);
+      if (seat === 0 && state.pendingDecision?.kind === "defense-reaction") {
+        reactions++;
+        expect(intent.kind === "play-card" && intent.instanceId === reactionCard.instanceId).toBe(false);
+      }
+      state = apply(state, seat, intent);
+    }
+    expect(reactions).toBeGreaterThan(0);
+  });
+
   it("covers a card-drawing hit with armor rather than hand cards", () => {
     const { state, defense } = defendAgainst("WTR167", 4245);
     const handIds = new Set(state.players[0]!.hand.map((card) => card.instanceId));
@@ -166,7 +234,7 @@ describe("Aurora policy", () => {
   });
 
   it("blocks with Crown of Providence to sink the arsenal card Command and Conquer would destroy", () => {
-    let { state, defense } = defendAgainst("ANQ009", 4250, ["AST022"], true);
+    let { state, defense } = defendAgainst("ANQ009", 4250, { arsenal: ["AST022"], onlyHeadAndLegs: true });
     const crown = state.players[0]!.equipment.head!;
     const arc = state.players[0]!.arsenal[0]!;
     const handIds = new Set(state.players[0]!.hand.map((card) => card.instanceId));

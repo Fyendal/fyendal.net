@@ -159,7 +159,7 @@ export function evaluateOpponentResponse(
 }
 
 function opponentResponseTo(
-  root: TurnPlannerRoot,
+  root: Pick<TurnPlannerRoot, "opponentHandCount" | "opponentEquipmentDefense">,
   opponentLife: number,
   rawDamage: number,
   attackThreat: number,
@@ -230,6 +230,20 @@ export function futureOffenseRate(
   const opponentLife = input.view.players[1 - root.seat]!.life;
   const response = opponentResponseTo(root, opponentLife, attackThreat, attackThreat, false);
   return responseWeightedDamage(response) / attackThreat;
+}
+
+/** Share of the bot's next-turn attack threat expected to land past blocks,
+ * judged while defending: the attacker refills to a full hand before then. */
+export function nextTurnLandingRate(input: BotPolicyInput, attackThreat: number): number {
+  if (attackThreat <= 0) return 1;
+  const opponent = input.view.players[1 - input.seat]!;
+  const defenders = {
+    opponentHandCount: Math.max(opponent.handCount, input.cards[opponent.heroCardId]?.intellect ?? 4),
+    opponentEquipmentDefense: Object.values(opponent.equipment)
+      .flatMap((card) => card ? [card] : [])
+      .reduce((total, card) => total + Math.max(0, card.defense ?? input.cards[card.cardId]?.defense ?? 0), 0),
+  };
+  return opponentResponseTo(defenders, opponent.life, attackThreat, attackThreat, false).hitRate;
 }
 
 export interface TurnFutureValue {
