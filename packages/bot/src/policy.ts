@@ -633,6 +633,8 @@ export function chooseSharedPolicyIntent(input: BotPolicyInput): GameIntent | un
   if (graveyardEquip) return graveyardEquip;
   const spellvoid = spellvoidIntent(input);
   if (spellvoid) return spellvoid;
+  const arsenalSink = arsenalSinkIntent(input);
+  if (arsenalSink) return arsenalSink;
 
   const incoming = arcaneBarrierIncoming(decision);
   if (incoming === undefined) return undefined;
@@ -1117,6 +1119,56 @@ export function resourceGainClosesCost(
     const available = resources + remainingPitchValue(input, new Set([card.instanceId]));
     return available < cost && available + gain >= cost;
   });
+}
+
+/** Armor that may put a hand or arsenal card on the bottom of the deck when it
+ * defends (Crown of Providence), emptying an arsenal an on-hit would take. */
+const SINKS_ON_DEFEND =
+  /when you defend with [^.]*?, you may put a card from your hand or arsenal on the bottom of your deck/i;
+
+function sinksArsenalOnDefend(card: CardView, input: BotPolicyInput): boolean {
+  return SINKS_ON_DEFEND.test(input.cards[card.cardId]?.text ?? "");
+}
+
+function linkOnHit(
+  input: BotPolicyInput,
+  link: NonNullable<ReturnType<typeof currentLink>>,
+  defenderHasArsenal: boolean,
+): OnHitEvaluation {
+  const me = input.view.players[input.seat];
+  const attacker = input.view.players[1 - input.seat]!;
+  return evaluateOnHit({
+    effects: link.onHitEffects ?? [],
+    sourceText: input.cards[link.attackingCard.cardId]?.text ?? "",
+    attackerCanContinue: link.goAgain === true || attacker.actionPoints > 0,
+    attackerCanArsenal: attacker.arsenalCount === 0,
+    defenderHasHand: me.handCount > 0,
+    defenderHasArsenal,
+  });
+}
+
+/** Sink the arsenal card with a defending Crown of Providence-style piece when
+ * a landing hit would destroy or banish it. */
+function arsenalSinkIntent(input: BotPolicyInput): GameIntent | undefined {
+  const decision = input.view.pendingDecision;
+  if (decision?.kind !== "choose-target" || decision.player !== input.seat || !decision.options?.includes("no")) {
+    return undefined;
+  }
+  const link = currentLink(input);
+  if (!link || link.attackingCard.owner === input.seat || link.attackValue <= link.defenseValue) return undefined;
+  const me = input.view.players[input.seat];
+  const equipmentIds = new Set(
+    Object.values(me.equipment).flatMap((card) => card ? [card.instanceId] : []),
+  );
+  if (!link.defendingCards.some((card) => equipmentIds.has(card.instanceId) && sinksArsenalOnDefend(card, input))) {
+    return undefined;
+  }
+  if (!linkOnHit(input, link, true).destroysOccupiedArsenal) return undefined;
+  const arsenalIds = new Set(me.arsenal.map((card) => String(card.instanceId)));
+  const option = decision.options.find((id) => arsenalIds.has(id));
+  return option === undefined
+    ? undefined
+    : input.legal.find((intent) => intent.kind === "choose" && intent.optionId === option);
 }
 
 function isSpringTunic(card: CardView, input: BotPolicyInput): boolean {
@@ -1710,15 +1762,7 @@ export function scoreDefenseIntentWithTrace(
   const directDamage = publicCombatThreat(input).directDamage;
   const survivableLife = directDamage >= me.life ? me.life : me.life - directDamage;
   const attackText = input.cards[link.attackingCard.cardId]?.text ?? "";
-  const attacker = input.view.players[1 - input.seat]!;
-  const onHit = evaluateOnHit({
-    effects: link.onHitEffects ?? [],
-    sourceText: attackText,
-    attackerCanContinue: link.goAgain === true || attacker.actionPoints > 0,
-    attackerCanArsenal: attacker.arsenalCount === 0,
-    defenderHasHand: me.handCount > 0,
-    defenderHasArsenal: me.arsenalCount > 0,
-  });
+  const onHit = linkOnHit(input, link, me.arsenalCount > 0);
   // A landed hit also deals its immediate on-hit damage.
   const landedDamage = (combat: number) => combat > 0 ? combat + onHit.immediateDamage : 0;
   // Judged before the block's own power change, or a Piercing block would
@@ -1788,6 +1832,13 @@ export function scoreDefenseIntentWithTrace(
     Object.values(me.equipment).filter((card): card is CardView => !!card).map((card) => card.instanceId),
   );
   const selectedEquipment = chosen.filter((card) => equipmentIds.has(card.instanceId));
+  // A defending sinker empties the arsenal first, so a landing hit takes nothing there.
+  const arsenalSinker = me.arsenalCount > 0 && onHit.destroysOccupiedArsenal
+    ? selectedEquipment.find((card) => sinksArsenalOnDefend(card, input))
+    : undefined;
+  const arsenalRescue = arsenalSinker ? Math.max(0, onHit.value - linkOnHit(input, link, false).value) : 0;
+  const rescuer = arsenalRescue > 0 ? arsenalSinker : undefined;
+  const blockOnHitValue = stopsHit ? stopHitValue : arsenalRescue;
   const handIds = new Set(me.hand.map((card) => card.instanceId));
   const openingDefense = isOpeningTurnDefense(input);
   const stagedIds = new Set(
@@ -1849,6 +1900,7 @@ export function scoreDefenseIntentWithTrace(
     // treating the sunk equipment selection as a new strategic choice.
     if (stagedIds.has(card.instanceId)) return false;
     if (lethal) return false;
+    if (card === rescuer) return false;
     if (isSpringTunic(card, input)) return openingDefense || !(stopsHit && devastatingOnHit);
     // Early armor is justified by an on-hit or Wager only when the complete
     // defense actually stops that hit and therefore answers the effect.
@@ -1868,7 +1920,8 @@ export function scoreDefenseIntentWithTrace(
   const responseInput = projectedResponseInput(input, plannedPrevention);
   // Even when armor is otherwise justified, spare hand cards block first.
   const spendsArmor = !lethal && selectedEquipment.some((card) =>
-    !stagedIds.has(card.instanceId) && !model.equipmentUseIsFree?.(card, input) && !locksWeapons(card)
+    !stagedIds.has(card.instanceId) && !model.equipmentUseIsFree?.(card, input) && !locksWeapons(card) &&
+    card !== rescuer
   );
   if (
     protectedEquipment.length > 0 ||
@@ -1983,7 +2036,7 @@ export function scoreDefenseIntentWithTrace(
   let value = valueBreakdown({
     damageThreatened: blendedResponse.damageThreatened,
     damagePrevented: prevented + continuation.prevention * continueProbability,
-    onHitValue: stopHitValue,
+    onHitValue: blockOnHitValue,
     opponentConversionDenied: attackerDiscards * FORCED_DISCARD_VALUE,
     futureHandValue: blendedResponse.futureHandValue,
     arsenalValue: blendedResponse.arsenalValue,
@@ -2000,7 +2053,7 @@ export function scoreDefenseIntentWithTrace(
   const strategicDelta = value.total - valueBreakdown({
     damageThreatened: blendedResponse.damageThreatened,
     damagePrevented: prevented + continuation.prevention * continueProbability,
-    onHitValue: stopHitValue,
+    onHitValue: blockOnHitValue,
     opponentConversionDenied: attackerDiscards * FORCED_DISCARD_VALUE,
     futureHandValue: blendedResponse.futureHandValue,
     arsenalValue: blendedResponse.arsenalValue,
@@ -2063,7 +2116,7 @@ export function scoreDefenseIntentWithTrace(
   // when this bot was sent second and will receive a fresh hand afterward.
   if (isOpeningTurnDefense(input)) {
     const score = prevented * 100
-      + stopHitValue
+      + blockOnHitValue
       + value.opponentConversionDenied
       - chargedOverblock * 1.5
       - equipmentCost

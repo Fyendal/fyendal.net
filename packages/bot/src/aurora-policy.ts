@@ -35,7 +35,6 @@ import {
 const BLOCKING_LIFE = 5;
 
 const NON_ATTACK_PRIORITIES: Record<string, number> = {
-  "arc lightning|2": 33,
   "quick succession|1": 31,
   "skyward serenade|2": 29,
   "nimblism|1": 27,
@@ -73,7 +72,7 @@ function isLightning(data: CardData): boolean {
 
 function matchupFor(input: BotPolicyInput): AuroraMatchup {
   const opponent = input.view.players[1 - input.seat]!;
-  const classes = input.cards[opponent.heroCardId ?? ""]?.classes?.map((value) => value.toLowerCase()) ?? [];
+  const classes = input.cards[opponent.heroCardId]?.classes?.map((value) => value.toLowerCase()) ?? [];
   return auroraMatchupForHeroName(opponent.heroName, classes);
 }
 
@@ -113,12 +112,22 @@ function hasSetupFollowup(
   });
 }
 
-/** Arc Lightning pays off only when several more action cards can chain. */
-function arcChainLength(input: BotPolicyInput, arcId: number): number {
+/** Arc Lightning grants the next action card go again, so any other action
+ * card left after paying will go again and trigger a ping. */
+function arcHasGoAgainFollowup(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
+  const arc = intentCard(intent, own);
+  if (!arc) return false;
+  const spent = new Set([arc.instanceId, ...pitchIds(intent)]);
   const me = input.view.players[input.seat];
-  return [...me.hand, ...me.arsenal].filter((card) =>
-    card.instanceId !== arcId && input.cards[card.cardId]?.cardType === "action"
-  ).length;
+  return [...me.hand, ...me.arsenal].some((card) =>
+    !spent.has(card.instanceId) && input.cards[card.cardId]?.cardType === "action"
+  );
+}
+
+function isArcLightningPlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
+  if (intent.kind !== "play-card" && intent.kind !== "play-from-arsenal") return false;
+  const card = intentCard(intent, own);
+  return !!card && key(input.cards[card.cardId]) === "arc lightning|2" && arcHasGoAgainFollowup(intent, input, own);
 }
 
 function pendingSetups(input: BotPolicyInput): string[] {
@@ -129,15 +138,16 @@ function pendingSetups(input: BotPolicyInput): string[] {
   });
 }
 
-function wastesPendingSetup(data: CardData, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
+function wastesPendingSetup(card: CardView, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
   const pending = pendingSetups(input);
-  if (pending.every((setup) => consumesSetup(setup, data))) return false;
+  const data = input.cards[card.cardId];
+  if (!data || pending.every((setup) => consumesSetup(setup, data))) return false;
   // Only a waste when some other playable card would consume them.
   return input.legal.some((candidate) => {
-    const card = intentCard(candidate, own);
-    const other = card ? input.cards[card.cardId] : undefined;
-    return !!other && other !== data && (isAttack(other) || other.cardType === "weapon") &&
-      pending.every((setup) => consumesSetup(setup, other));
+    const other = intentCard(candidate, own);
+    const otherData = other && other.instanceId !== card.instanceId ? input.cards[other.cardId] : undefined;
+    return !!otherData && (isAttack(otherData) || otherData.cardType === "weapon") &&
+      pending.every((setup) => consumesSetup(setup, otherData));
   });
 }
 
@@ -164,6 +174,9 @@ function shouldMeldBurnUp(intent: GameIntent, input: BotPolicyInput, own: Readon
 
 function prepareCandidates(candidates: readonly GameIntent[], input: BotPolicyInput): readonly GameIntent[] {
   const own = ownCards(input);
+  // Arc Lightning goes first so every later go again pings.
+  const arcs = candidates.filter((intent) => isArcLightningPlay(intent, input, own));
+  if (arcs.length > 0) return arcs;
   const melds = candidates.filter((intent) => {
     const card = intentCard(intent, own);
     return !!card && key(input.cards[card.cardId]) === "burn up // shock|1" && shouldMeldBurnUp(intent, input, own);
@@ -217,13 +230,10 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   const decision = input.view.pendingDecision;
   if (!decision) return 0;
   if (decision.kind === "arsenal") return scoreArsenalChoice(intent, input, arsenalValuer(auroraSolverRules));
-  if (decision.kind === "choose-target") {
-    const opponent = input.view.players[1 - input.seat]!;
-    if (intent.optionId === String(opponent.heroInstanceId)) return 50;
-    if (intent.optionId === String(input.view.players[input.seat].heroInstanceId)) return -100;
-    return intent.optionId === "pass" ? -50 : 10;
-  }
   const me = input.view.players[input.seat];
+  // Arc Lightning and Shock ping the opposing hero.
+  if (intent.optionId === String(input.view.players[1 - input.seat]!.heroInstanceId)) return 50;
+  if (intent.optionId === String(me.heroInstanceId)) return -100;
   const attacksHeld = me.hand.filter((card) => isAttack(input.cards[card.cardId])).length + me.arsenal.length;
   switch (intent.optionId) {
     case "1: Embodiment": return 30;
@@ -257,7 +267,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
 
   if (intent.kind === "activate-ability") {
     if (data.cardType === "weapon") {
-      if (wastesPendingSetup(data, input, own)) return -100;
+      if (wastesPendingSetup(card, input, own)) return -100;
       score = 12 + pendingSetups(input).length * 10;
     } else if (functional === "grasp of the arknight|0" || functional === "vexing quillhand|0") {
       const arcane = matchupFor(input).arcane;
@@ -275,10 +285,9 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   } else if (isNonAttack(data)) {
     if (SETUPS.has(functional) && !hasSetupFollowup(functional, intent, input, own)) return -100;
     score = NON_ATTACK_PRIORITIES[functional] ?? 12;
-    // Arc Lightning opens the power turn only when the hand can keep chaining.
-    if (functional === "arc lightning|2" && arcChainLength(input, card.instanceId) < 2) score = 6;
+    if (functional === "arc lightning|2") score = arcHasGoAgainFollowup(intent, input, own) ? 40 : 6;
   } else if (isAttack(data)) {
-    if (wastesPendingSetup(data, input, own)) return -100;
+    if (wastesPendingSetup(card, input, own)) return -100;
     score = (card.attack ?? data.attack ?? 0) + pendingSetups(input).length * 10;
     const printedGoAgain = data.keywords?.includes("Go again") && !CONDITIONAL_GO_AGAIN.has(functional);
     const conditionalGoAgain =

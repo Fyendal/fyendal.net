@@ -1,6 +1,6 @@
 import { cardData, decklists, precon, scripts } from "@fyendal/cards";
 import { applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal/engine";
-import type { Decklist, GameIntent } from "@fyendal/shared";
+import type { Decklist, GameIntent, PendingDecision } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import { chooseAuroraIntent } from "./aurora-policy.js";
 import { auroraPresentationFor } from "./sideboard.js";
@@ -10,6 +10,19 @@ type Game = ReturnType<typeof createGame>;
 function auroraDeck(opponent: Decklist): Decklist {
   const pool = precon("bot-aurora-tempest")!.pool;
   return { heroId: pool.heroId, ...auroraPresentationFor(opponent) };
+}
+
+/** Aurora (seat 0) against Rhinar, past the opening turn. */
+function newGame(seed: number, startPlayer: 0 | 1): Game {
+  const state = createGame({
+    decklists: [auroraDeck(decklists.rhinar), decklists.rhinar],
+    cards: cardData,
+    scripts,
+    seed,
+    startPlayer,
+  });
+  state.turn = 2;
+  return state;
 }
 
 function replaceHand(state: Game, seat: 0 | 1, cardIds: readonly string[]): void {
@@ -38,16 +51,48 @@ function actor(state: Game): 0 | 1 {
   return (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
 }
 
+function apply(state: Game, seat: 0 | 1, intent: GameIntent): Game {
+  const result = applyIntent(state, seat, intent);
+  if (!result.ok) throw new Error(result.error);
+  return result.state;
+}
+
+/** Play `cardId` from `seat`'s hand, paying from hand only if it costs anything. */
+function playFromHand(state: Game, seat: 0 | 1, cardId: string): Game {
+  const play = legalIntents(state, seat).find((intent) =>
+    intent.kind === "play-card" &&
+    state.players[seat]!.hand.find((card) => card.instanceId === intent.instanceId)?.cardId === cardId
+  );
+  if (!play) throw new Error(`${cardId} is not playable`);
+  return apply(state, seat, play);
+}
+
+/** Both seats pass until `done` holds. */
+function passUntil(state: Game, done: (state: Game) => boolean): Game {
+  for (let step = 0; step < 20; step++) {
+    if (done(state)) return state;
+    state = apply(state, actor(state), passive(state, actor(state)));
+  }
+  throw new Error("state never reached");
+}
+
+/** Answer a synthetic decision on a fresh game view. */
+function decide(decision: Omit<PendingDecision, "player">, hand: readonly string[] = []): GameIntent {
+  const state = newGame(4244, 0);
+  replaceHand(state, 0, hand);
+  const view = projectStateFor(state, 0);
+  view.pendingDecision = { player: 0, ...decision } as PendingDecision;
+  return chooseAuroraIntent({
+    seat: 0,
+    view,
+    legal: decision.options!.map((optionId) => ({ kind: "choose", optionId })),
+    cards: cardData,
+  });
+}
+
 describe("Aurora policy", () => {
   it("opens the turn with Arc Lightning and chains go-again attacks into its pings", () => {
-    let state = createGame({
-      decklists: [auroraDeck(decklists.rhinar), decklists.rhinar],
-      cards: cardData,
-      scripts,
-      seed: 4242,
-      startPlayer: 0,
-    });
-    state.turn = 2;
+    let state = newGame(4242, 0);
     // Arc Lightning, Path of Same Ends, Second Strike, Fry.
     replaceHand(state, 0, ["AST022", "GEM155", "ROS101", "LGS368"]);
     const startLife = state.players[1]!.life;
@@ -60,10 +105,7 @@ describe("Aurora policy", () => {
         const card = state.players[0]!.hand.find((candidate) => candidate.instanceId === intent.instanceId);
         if (card) played.push(card.cardId);
       }
-      const result = applyIntent(state, seat, intent);
-      expect(result.ok, result.ok ? "" : result.error).toBe(true);
-      if (!result.ok) return;
-      state = result.state;
+      state = apply(state, seat, intent);
     }
     expect(played[0]).toBe("AST022");
     expect(played).toEqual(expect.arrayContaining(["GEM155", "ROS101", "LGS368"]));
@@ -71,31 +113,39 @@ describe("Aurora policy", () => {
     expect(startLife - state.players[1]!.life).toBeGreaterThanOrEqual(13);
   });
 
-  function defendAgainst(attackId: string, seed: number): { state: Game; defense: GameIntent } {
-    let state = createGame({
-      decklists: [auroraDeck(decklists.rhinar), decklists.rhinar],
-      cards: cardData,
-      scripts,
-      seed,
-      startPlayer: 1,
-    });
-    state.turn = 2;
+  function firstPlay(hand: readonly string[], seed: number): string | undefined {
+    const state = newGame(seed, 0);
+    replaceHand(state, 0, hand);
+    const intent = choose(state, 0);
+    if (intent.kind !== "play-card") return undefined;
+    return state.players[0]!.hand.find((card) => card.instanceId === intent.instanceId)?.cardId;
+  }
+
+  it("leads with Arc Lightning ahead of a Burn Up meld", () => {
+    expect(firstPlay(["ROS012", "AST022", "LGS368"], 4248)).toBe("AST022");
+  });
+
+  it("leads with Arc Lightning when its grant is the only go again", () => {
+    expect(firstPlay(["ANQ031", "AST022"], 4249)).toBe("AST022");
+  });
+
+  /** Rhinar attacks with `attackId` into Aurora holding four Lightning attacks. */
+  function defendAgainst(
+    attackId: string,
+    seed: number,
+    arsenal: readonly string[] = [],
+    onlyHeadAndLegs = false,
+  ): { state: Game; defense: GameIntent } {
+    let state = newGame(seed, 1);
     replaceHand(state, 0, ["GEM155", "ROS101", "LGS368", "SBA016"]);
     replaceHand(state, 1, [attackId, "WTR205"]);
-    const attack = legalIntents(state, 1).find((intent) =>
-      intent.kind === "play-card" &&
-      state.players[1]!.hand.find((card) => card.instanceId === intent.instanceId)?.cardId === attackId
-    );
-    expect(attack).toBeDefined();
-    let result = applyIntent(state, 1, attack!);
-    if (!result.ok) throw new Error(result.error);
-    state = result.state;
-    for (let step = 0; step < 10 && state.pendingDecision?.kind !== "defend"; step++) {
-      result = applyIntent(state, actor(state), passive(state, actor(state)));
-      if (!result.ok) throw new Error(result.error);
-      state = result.state;
+    state.players[0]!.arsenal = arsenal.map((cardId) => ({ instanceId: state.nextInstanceId++, cardId, owner: 0 }));
+    if (onlyHeadAndLegs) {
+      delete state.players[0]!.equipment.chest;
+      delete state.players[0]!.equipment.arms;
     }
-    expect(state.pendingDecision?.kind).toBe("defend");
+    state = playFromHand(state, 1, attackId);
+    state = passUntil(state, (current) => current.pendingDecision?.kind === "defend");
     return { state, defense: choose(state, 0) };
   }
 
@@ -115,40 +165,43 @@ describe("Aurora policy", () => {
     expect(defense.instanceIds.some((id) => armorIds.has(id))).toBe(true);
   });
 
-  function reactionWindowAfter(attackId: string, seed: number): Game {
-    let state = createGame({
-      decklists: [auroraDeck(decklists.rhinar), decklists.rhinar],
-      cards: cardData,
-      scripts,
-      seed,
-      startPlayer: 0,
-    });
-    state.turn = 2;
-    replaceHand(state, 0, [attackId, "ROS101", "GEM155"]);
-    const attack = legalIntents(state, 0).find((intent) =>
-      intent.kind === "play-card" &&
-      state.players[0]!.hand.find((card) => card.instanceId === intent.instanceId)?.cardId === attackId &&
-      intent.pitchInstanceIds.length === 0
-    );
-    expect(attack).toBeDefined();
-    let result = applyIntent(state, 0, attack!);
-    expect(result.ok, result.ok ? "" : result.error).toBe(true);
-    if (!result.ok) throw new Error(result.error);
-    state = result.state;
-    for (let step = 0; step < 20; step++) {
-      if (state.pendingDecision?.kind === "attack-reaction" && actor(state) === 0) return state;
+  it("blocks with Crown of Providence to sink the arsenal card Command and Conquer would destroy", () => {
+    let { state, defense } = defendAgainst("ANQ009", 4250, ["AST022"], true);
+    const crown = state.players[0]!.equipment.head!;
+    const arc = state.players[0]!.arsenal[0]!;
+    const handIds = new Set(state.players[0]!.hand.map((card) => card.instanceId));
+    expect(crown.cardId).toBe("PEN310");
+    expect("instanceIds" in defense && defense.instanceIds.includes(crown.instanceId)).toBe(true);
+    expect("instanceIds" in defense && defense.instanceIds.some((id) => handIds.has(id))).toBe(false);
+
+    let sank = false;
+    for (let step = 0; step < 20 && state.chain.length > 0; step++) {
       const seat = actor(state);
-      result = applyIntent(state, seat, passive(state, seat));
-      if (!result.ok) throw new Error(result.error);
-      state = result.state;
+      const intent = seat === 0 ? choose(state, 0) : passive(state, 1);
+      if (seat === 0 && state.pendingDecision?.kind === "choose-target" && intent.kind === "choose") {
+        expect(intent.optionId).toBe(String(arc.instanceId));
+        sank = true;
+      }
+      state = apply(state, seat, intent);
     }
-    throw new Error("no attack reaction window");
+    expect(sank).toBe(true);
+    expect(state.players[0]!.arsenal).toEqual([]);
+    expect(state.players[0]!.deck.at(-1)?.instanceId).toBe(arc.instanceId);
+  });
+
+  /** Aurora attacks with `attackId` and waits in its own reaction window. */
+  function reactionWindowAfter(attackId: string, seed: number): Game {
+    let state = newGame(seed, 0);
+    replaceHand(state, 0, [attackId, "ROS101", "GEM155"]);
+    state = playFromHand(state, 0, attackId);
+    return passUntil(state, (current) =>
+      current.pendingDecision?.kind === "attack-reaction" && actor(current) === 0
+    );
   }
 
   const activatesSnapdragon = (state: Game) => {
     const intent = choose(state, 0);
-    const legs = state.players[0]!.equipment.legs!;
-    return intent.kind === "activate-ability" && intent.sourceInstanceId === legs.instanceId;
+    return intent.kind === "activate-ability" && intent.sourceInstanceId === state.players[0]!.equipment.legs!.instanceId;
   };
 
   it("keeps Snapdragon Scalers when the attack already has go again", () => {
@@ -160,28 +213,15 @@ describe("Aurora policy", () => {
   });
 
   it("aims Arc Lightning's ping at the opposing hero", () => {
-    const state = createGame({
-      decklists: [auroraDeck(decklists.rhinar), decklists.rhinar],
-      cards: cardData,
-      scripts,
-      seed: 4244,
-      startPlayer: 0,
-    });
-    const view = projectStateFor(state, 0);
-    const opponentHero = String(view.players[1].heroInstanceId);
+    const view = projectStateFor(newGame(4244, 0), 0);
     const ownHero = String(view.players[0].heroInstanceId);
-    view.pendingDecision = {
-      player: 0,
-      kind: "choose-target",
-      prompt: "Arc Lightning: deal 1 arcane damage to any target",
-      options: [ownHero, opponentHero],
-    } as typeof view.pendingDecision;
-    const intent = chooseAuroraIntent({
-      seat: 0,
-      view,
-      legal: [{ kind: "choose", optionId: ownHero }, { kind: "choose", optionId: opponentHero }],
-      cards: cardData,
-    });
-    expect(intent).toEqual({ kind: "choose", optionId: opponentHero });
+    const opponentHero = String(view.players[1].heroInstanceId);
+    expect(decide({ kind: "choose-target", prompt: "Arc Lightning", options: [ownHero, opponentHero] }))
+      .toEqual({ kind: "choose", optionId: opponentHero });
+  });
+
+  it("takes Enlightened Strike's go again while attacks remain in hand", () => {
+    expect(decide({ kind: "choose-target", prompt: "Choose a mode", options: ["draw", "+2", "go again"] }, ["LGS368"]))
+      .toEqual({ kind: "choose", optionId: "go again" });
   });
 });
