@@ -16,6 +16,7 @@ import {
   chooseScoredIntent,
   currentAttackIsOurs,
   currentLink,
+  defenderDefense,
   enforceSpectraPolicy,
   functionalKey as key,
   incomingAttackDamage,
@@ -36,6 +37,8 @@ import {
 
 /** Below this life after an unblocked hit, Aurora stops racing and blocks. */
 const BLOCKING_LIFE = 5;
+/** Above that, a hand block must prevent this many times the offense it costs. */
+const BLOCK_OVER_OFFENSE = 2;
 
 const NON_ATTACK_PRIORITIES: Record<string, number> = {
   "quick succession|1": 31,
@@ -224,13 +227,13 @@ const auroraResponse: ResponseModel = {
   evaluateResponse: (cards, input) => handResponse(cards, input, auroraSolverRules),
 };
 
-/** Whether the held hand lands more next turn, past a refilled opponent's
- * blocks, than the current attack deals now. */
+/** Whether the held hand threatens at least what the current attack deals
+ * now; blocks it forces still cost the opponent cards, so landing is not
+ * required. */
 function handConversion(input: BotPolicyInput): { converts: boolean; landingRate: number } {
   const me = input.view.players[input.seat];
   const threat = handDamage([...me.hand, ...me.arsenal], input, auroraSolverRules);
-  const landingRate = nextTurnLandingRate(input, threat);
-  return { converts: threat * landingRate >= incomingAttackDamage(input), landingRate };
+  return { converts: threat >= incomingAttackDamage(input), landingRate: nextTurnLandingRate(input, threat) };
 }
 
 function scoreDefend(
@@ -261,11 +264,17 @@ function scoreDefend(
       if (candidate.onHit.value >= 6 || candidate.onHit.handCardsLost >= 2 ||
         candidate.onHit.destroysOccupiedArsenal) return "allow";
       // Cards the best line only pitches or leaves over are spare blockers.
-      const played = new Set(
-        solveHand([...me.hand, ...me.arsenal], candidate.input, auroraSolverRules).line
-          .map((step) => step.instanceId),
+      const cards = [...me.hand, ...me.arsenal];
+      const played = new Set(solveHand(cards, candidate.input, auroraSolverRules).line.map((step) => step.instanceId));
+      if (handBlockers.every((card) => !played.has(card.instanceId))) return "allow";
+      const blockerIds = new Set(handBlockers.map((card) => card.instanceId));
+      const lost = handDamage(cards, candidate.input, auroraSolverRules) -
+        handDamage(cards.filter((card) => !blockerIds.has(card.instanceId)), candidate.input, auroraSolverRules);
+      const stopped = Math.min(
+        candidate.incoming,
+        handBlockers.reduce((total, card) => total + defenderDefense(card, candidate.input), 0),
       );
-      return handBlockers.every((card) => !played.has(card.instanceId)) ? "allow" : "forbid";
+      return stopped >= lost * BLOCK_OVER_OFFENSE ? "allow" : "forbid";
     },
   });
 }

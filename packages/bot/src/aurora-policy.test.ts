@@ -195,6 +195,18 @@ describe("Aurora policy", () => {
     expect("instanceIds" in defense && defense.instanceIds.some((id) => handIds.has(id))).toBe(true);
   });
 
+  it("keeps a hand that threatens more than the attack even into a full blocking hand", () => {
+    // Enlightened Strike (go again) and Nimblism into Nimby out-damage the hit.
+    const { state, defense } = defendAgainst("WTR200", 4262, {
+      hand: ["ROS074", "GEM062", "WTR159", "ELE189"],
+      arsenal: ["GEM065"],
+    });
+    const [, nimby, strike] = state.players[0]!.hand;
+    expect("instanceIds" in defense && defense.instanceIds.some((id) =>
+      id === nimby!.instanceId || id === strike!.instanceId
+    )).toBe(false);
+  });
+
   it("blocks with Burn Up when too few attacks would carry it", () => {
     // Enlightened Strike is the only attack Burn Up could ride.
     const { state, defense } = defendAgainst("WTR203", 4254, { hand: ["ROS012", "WTR159", "AST022", "SEA239"] });
