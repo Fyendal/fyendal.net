@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
-import { BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY } from "../storage.js";
+import { BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY, BOT_SHOW_BANNED_STORAGE_KEY } from "../storage.js";
 import type { StoreState } from "../store/types.js";
 
 const botModalStore = vi.hoisted(() => ({ state: { betaTester: false } as StoreState }));
@@ -18,7 +18,7 @@ afterEach(() => {
 });
 
 describe("BotOpponentModal", () => {
-  it("offers Ira, Hala, Cindra, Jarl, Levia, and Boltyn in a focused opponent dialog", () => {
+  it("offers Ira, Hala, Jarl, Levia, and Boltyn in a focused opponent dialog and hides banned Cindra", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
@@ -37,10 +37,10 @@ describe("BotOpponentModal", () => {
     expect(html).toContain("Bladesaint of the Vow");
     expect(html).toContain("Midrange");
     expect(html).toContain("A flexible value deck that balances offense and defense.");
-    expect(html).toContain("Cindra");
-    expect(html).toContain("Dracai of Retribution");
+    expect(html).not.toContain("Dracai of Retribution");
+    expect(html).toContain("Cindra is hidden because its deck includes banned cards.");
+    expect(html).toContain('>Show</button>');
     expect(html).toContain("Aggro");
-    expect(html).toContain("A fast redline deck built to keep the pressure on.");
     expect(html).toContain("Jarl");
     expect(html).toContain("Vetreiði");
     expect(html).toContain("Defensive");
@@ -59,16 +59,14 @@ describe("BotOpponentModal", () => {
     expect(html.match(/aria-hidden="true"/g)).toHaveLength(1);
   });
 
-  it("offers Kayo, Briar, Bravo, and SAGE Ira for Silver Age", () => {
+  it("offers Kayo, Bravo, and SAGE Ira for Silver Age and hides banned Briar by default", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="silver-age" onSelect={vi.fn()} onClose={vi.fn()} />
       </TestI18nProvider>,
     );
 
-    expect(html).toContain("Briar");
     expect(html).toContain("Kayo");
-    expect(html).toContain("Elemental Runeblade");
     expect(html).toContain("Aggro");
     expect(html).toContain("Bravo");
     expect(html).toContain("Flattering Showman");
@@ -76,9 +74,16 @@ describe("BotOpponentModal", () => {
     expect(html).toContain("Crimson Haze");
     expect(html).toContain("Midrange");
     expect(html).not.toContain("Scarlet Revenger");
+    expect(html).not.toContain("Elemental Runeblade");
+    expect(html).not.toContain("Includes banned");
+    expect(html).toContain("Briar is hidden because its deck includes banned cards.");
   });
 
-  it("shows benched Briar with an accessible custom tooltip for restricted cards", () => {
+  it("shows banned Briar with an accessible custom tooltip once the toggle is on", () => {
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => key === BOT_SHOW_BANNED_STORAGE_KEY ? "1" : null,
+      setItem: vi.fn(),
+    });
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal
@@ -89,11 +94,13 @@ describe("BotOpponentModal", () => {
       </TestI18nProvider>,
     );
 
-    expect(html).toContain("Briar");
+    expect(html).toContain("Elemental Runeblade");
     expect(html).toContain("Includes banned");
     expect(html).toContain('role="tooltip">Banned cards:\nBriar');
     expect(html).toContain('aria-describedby=');
     expect(html).not.toContain('title="Banned cards:');
+    expect(html).toContain("Showing bots with banned cards.");
+    expect(html).toContain('>Hide</button>');
     expect(html).toContain("Kayo");
     expect(html).toContain("Bravo");
   });

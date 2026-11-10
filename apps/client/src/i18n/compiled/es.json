@@ -34460,6 +34460,66 @@
       "value": "Observar"
     }
   ],
+  "lobby.bot.bannedHidden": [
+    {
+      "type": 0,
+      "value": "Ocultamos "
+    },
+    {
+      "type": 1,
+      "value": "bots"
+    },
+    {
+      "type": 0,
+      "value": " porque "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "su mazo incluye"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "sus mazos incluyen"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " cartas prohibidas."
+    }
+  ],
+  "lobby.bot.bannedHide": [
+    {
+      "type": 0,
+      "value": "Ocultar"
+    }
+  ],
+  "lobby.bot.bannedShow": [
+    {
+      "type": 0,
+      "value": "Mostrar"
+    }
+  ],
+  "lobby.bot.bannedShown": [
+    {
+      "type": 0,
+      "value": "Mostrando bots con cartas prohibidas."
+    }
+  ],
   "lobby.bot.boltyn.description": [
     {
       "type": 0,

@@ -254,6 +254,28 @@
   outline-offset: 2px;
 }
 
+.bot-banned-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 14px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.bot-banned-toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gold);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.bot-banned-toggle:hover { text-decoration: underline; text-underline-offset: 3px; }
+.bot-banned-toggle:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 2px; }
+
 .bot-opponent-options {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));

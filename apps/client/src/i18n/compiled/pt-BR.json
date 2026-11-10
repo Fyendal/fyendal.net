@@ -35294,6 +35294,74 @@
       "value": "Assistir"
     }
   ],
+  "lobby.bot.bannedHidden": [
+    {
+      "type": 0,
+      "value": "Ocultamos "
+    },
+    {
+      "type": 1,
+      "value": "bots"
+    },
+    {
+      "type": 0,
+      "value": " porque "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "os decks incluem"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "o deck inclui"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "os decks incluem"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " cartas banidas."
+    }
+  ],
+  "lobby.bot.bannedHide": [
+    {
+      "type": 0,
+      "value": "Ocultar"
+    }
+  ],
+  "lobby.bot.bannedShow": [
+    {
+      "type": 0,
+      "value": "Mostrar"
+    }
+  ],
+  "lobby.bot.bannedShown": [
+    {
+      "type": 0,
+      "value": "Mostrando bots com cartas banidas."
+    }
+  ],
   "lobby.bot.boltyn.description": [
     {
       "type": 0,

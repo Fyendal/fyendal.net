@@ -32067,6 +32067,34 @@
       "value": "观战"
     }
   ],
+  "lobby.bot.bannedHidden": [
+    {
+      "type": 1,
+      "value": "bots"
+    },
+    {
+      "type": 0,
+      "value": " 的牌组包含禁用卡牌，已隐藏。"
+    }
+  ],
+  "lobby.bot.bannedHide": [
+    {
+      "type": 0,
+      "value": "隐藏"
+    }
+  ],
+  "lobby.bot.bannedShow": [
+    {
+      "type": 0,
+      "value": "显示"
+    }
+  ],
+  "lobby.bot.bannedShown": [
+    {
+      "type": 0,
+      "value": "正在显示牌组包含禁用卡牌的机器人。"
+    }
+  ],
   "lobby.bot.boltyn.description": [
     {
       "type": 0,

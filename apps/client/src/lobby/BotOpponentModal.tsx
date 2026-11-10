@@ -7,7 +7,12 @@ import { heroImageUrl } from "./heroImage.js";
 import { cardImageUrl } from "../game/Card.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { ViewportTooltip } from "../components/ViewportTooltip.js";
-import { loadBotMatchmakingPreference, saveBotMatchmakingPreference } from "../storage.js";
+import {
+  loadBotMatchmakingPreference,
+  loadBotShowBannedPreference,
+  saveBotMatchmakingPreference,
+  saveBotShowBannedPreference,
+} from "../storage.js";
 import { useStore } from "../store.js";
 
 interface BotOption {
@@ -152,7 +157,12 @@ export function BotOpponentModal(props: {
 }) {
   const intl = useIntl();
   const betaTester = useStore((state) => state.betaTester);
-  const bots = BOTS[props.format].filter((bot) => betaTester || !BETA_BOT_OPPONENTS.has(bot.id));
+  const [showBanned, setShowBanned] = useState(() =>
+    typeof localStorage === "undefined" ? false : loadBotShowBannedPreference(localStorage)
+  );
+  const availableBots = BOTS[props.format].filter((bot) => betaTester || !BETA_BOT_OPPONENTS.has(bot.id));
+  const bannedBots = availableBots.filter((bot) => BOT_CARD_WARNINGS.get(bot.id)!.banned.length > 0);
+  const bots = showBanned ? availableBots : availableBots.filter((bot) => !bannedBots.includes(bot));
   const [searchForPlayer, setSearchForPlayer] = useState(() =>
     typeof localStorage === "undefined" ? true : loadBotMatchmakingPreference(localStorage)
   );
@@ -252,6 +262,29 @@ export function BotOpponentModal(props: {
           );
         })}
       </div>
+      {bannedBots.length > 0 ? (
+        <p className="bot-banned-note">
+          <span>
+            {showBanned
+              ? intl.formatMessage({ id: "lobby.bot.bannedShown" })
+              : intl.formatMessage({ id: "lobby.bot.bannedHidden" }, {
+                  bots: intl.formatList(bannedBots.map((bot) => bot.name), { type: "conjunction" }),
+                  count: bannedBots.length,
+                })}
+          </span>
+          <button
+            type="button"
+            className="bot-banned-toggle"
+            onClick={() => {
+              const enabled = !showBanned;
+              setShowBanned(enabled);
+              if (typeof localStorage !== "undefined") saveBotShowBannedPreference(localStorage, enabled);
+            }}
+          >
+            {intl.formatMessage({ id: showBanned ? "lobby.bot.bannedHide" : "lobby.bot.bannedShow" })}
+          </button>
+        </p>
+      ) : null}
       {bots.map((bot) => {
         const warnings = BOT_CARD_WARNINGS.get(bot.id)!;
         return warnings.banned.length > 0 || warnings.future.length > 0 ? (

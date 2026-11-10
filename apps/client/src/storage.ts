@@ -7,6 +7,7 @@ export const ROOM_SESSION_STORAGE_KEY = "fyendal-room-session";
 export const REPLAY_STORAGE_PREFIX = "fyendal-replay-";
 export const GAME_SETTINGS_STORAGE_KEY = "fyendal-game-settings";
 export const BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY = "fyendal-bot-matchmaking-preference";
+export const BOT_SHOW_BANNED_STORAGE_KEY = "fyendal-bot-show-banned";
 const PREP_SORT_STORAGE_KEY = "fyendal-prep-sort";
 const PREP_VIEW_STORAGE_KEY = "fyendal-prep-view";
 const HOME_GAME_MODE_STORAGE_PREFIX = "fyendal-home-game-mode-";
@@ -201,6 +202,22 @@ export function saveBotMatchmakingPreference(
     }));
   } catch {
     // A blocked/full localStorage should not prevent changing the checkbox.
+  }
+}
+
+export function loadBotShowBannedPreference(storage: Pick<Storage, "getItem">): boolean {
+  try {
+    return storage.getItem(BOT_SHOW_BANNED_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function saveBotShowBannedPreference(storage: Pick<Storage, "setItem">, show: boolean): void {
+  try {
+    storage.setItem(BOT_SHOW_BANNED_STORAGE_KEY, show ? "1" : "0");
+  } catch {
+    // A blocked/full localStorage should not prevent changing the toggle.
   }
 }
 
