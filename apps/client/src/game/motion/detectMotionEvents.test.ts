@@ -1602,6 +1602,48 @@ describe("game motion detection", () => {
     expect(draw!.delayMs).toBeGreaterThan(arsenal!.delayMs);
   });
 
+  it("does not infer an opponent's arsenal card into hand when it is bottomed for a draw", () => {
+    // Crown of Providence: the hidden arsenal card goes to the deck bottom, then a card is drawn.
+    const previous = view([
+      player(0),
+      player(1, { handCount: 2, deckCount: 10, arsenalCount: 1 }),
+    ]);
+    const current = view([
+      player(0),
+      player(1, { handCount: 3, deckCount: 10, arsenalCount: 0 }),
+    ]);
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 16,
+      kind: "forward",
+      events: [
+        { kind: "move", from: { kind: "arsenal", seat: 1 }, to: { kind: "deck", seat: 1, position: "bottom" }, count: 1 },
+        { kind: "move", from: { kind: "deck", seat: 1 }, to: { kind: "hand", seat: 1 }, count: 1 },
+      ],
+    }, "forward");
+    expect(events.filter((event) => event.kind === "move").map((event) => (
+      event.kind === "move" ? [event.source.kind, event.destination.kind] : []
+    ))).toEqual([["arsenal", "deck"], ["deck", "hand"]]);
+  });
+
+  it("bottoms an own face-down arsenal card as a back without a conceal flip", () => {
+    const arsenaled = { ...face(130), faceDown: true };
+    const previous = view([
+      player(0, { deckCount: 10, arsenal: [arsenaled], arsenalCount: 1 }),
+      player(1),
+    ]);
+    const current = view([player(0, { deckCount: 11 }), player(1)]);
+    const events = transitionMotionEvents(previous, current, {
+      fromVersion: 17,
+      kind: "forward",
+      events: [
+        { kind: "move", from: { kind: "arsenal", seat: 0 }, to: { kind: "deck", seat: 0, position: "bottom" }, count: 1, instanceId: arsenaled.instanceId },
+      ],
+    }, "forward");
+    expect(events.find((event) => event.kind === "move")).toEqual(expect.objectContaining({
+      visual: { kind: "back" },
+    }));
+  });
+
   it("keeps an arsenal move recorded after an effect draw in its usual phase", () => {
     const drawn = face(126);
     const previous = view([player(0, { deckCount: 8 }), player(1)]);
