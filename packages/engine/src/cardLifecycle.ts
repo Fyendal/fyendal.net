@@ -414,6 +414,11 @@ export function settlePlayedCard(
 ): void {
   const data = dataOf(state, card.cardId);
   const script = scriptOf(state, card.cardId, card);
+  // Go again gained on the stack already paid out; attack-proxies never inherit it (CR 1.4.3a).
+  if (card.grantedKeywords) {
+    card.grantedKeywords = card.grantedKeywords.filter((keyword) => keyword !== "go again");
+    if (card.grantedKeywords.length === 0) delete card.grantedKeywords;
+  }
   if (data.cardType === "equipment" && script?.playableEquipment === true) {
     const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
       (data.subtypes ?? []).includes(candidate),

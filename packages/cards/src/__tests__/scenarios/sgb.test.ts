@@ -831,6 +831,8 @@ describe("SGB — Gravy Bones hero", () => {
     g.expectLog("Compass of Sunken Depths: Barnacle gets go again")
       .expectInZone(0, "barnacle|2", "board")
       .expectAP(0, 1); // the play's action point was refunded
+    // CR 1.4.3a: the ally's attack-proxy does not inherit the go again it gained when played.
+    g.activate("barnacle|2").blockWith().settle().expectAP(0, 0);
   });
 });
 
