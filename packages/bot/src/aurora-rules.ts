@@ -42,7 +42,7 @@ function burnUp(card: CardView, view: SolverView, hitChance: number): SolverEffe
   return landed > 0 ? { pending: [{ key: `burn#${card.instanceId}`, uses: 1, onHit: (4 * landed) / hitChance }] } : undefined;
 }
 
-function activeArcLightnings(input: BotPolicyInput): { pings: number; grants: number } {
+export function activeArcLightnings(input: BotPolicyInput): { pings: number; grants: number } {
   let pings = 0;
   let grants = 0;
   for (const effect of input.view.ongoing) {

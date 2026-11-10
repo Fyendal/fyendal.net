@@ -18,7 +18,8 @@ afterEach(() => {
 });
 
 describe("BotOpponentModal", () => {
-  it("offers Ira, Hala, Jarl, Levia, Boltyn, and Aurora in a focused opponent dialog and hides banned Cindra", () => {
+  it("offers Ira, Hala, Jarl, Levia, Boltyn, and Aurora to beta testers in a focused opponent dialog and hides banned Cindra", () => {
+    botModalStore.state = { betaTester: true } as StoreState;
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
@@ -58,6 +59,17 @@ describe("BotOpponentModal", () => {
     expect(html).toContain('class="bot-deck-type bot-deck-type-aggro">Aggro</span>');
     // Deck-type chips are text only; the dialog's close icon is the sole decoration.
     expect(html.match(/aria-hidden="true"/g)).toHaveLength(1);
+  });
+
+  it("hides the beta-only Aurora bot from other players", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain("Boltyn");
+    expect(html).not.toContain("Legacy of Tempest");
   });
 
   it("offers Kayo, Bravo, and SAGE Ira for Silver Age and hides banned Briar by default", () => {

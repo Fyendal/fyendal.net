@@ -222,8 +222,11 @@ export function defenseReactionThreat(input: BotPolicyInput): { incoming: number
 
 /** Short of lethal, a defense reaction is saved for a later attack unless it
  * stops at least half of what it would stop against a typical one. */
-export function defenseReactionStopsEnough(input: BotPolicyInput, defense: number): boolean {
-  const { incoming, lethal } = defenseReactionThreat(input);
+export function defenseReactionStopsEnough(
+  input: BotPolicyInput,
+  defense: number,
+  { incoming, lethal } = defenseReactionThreat(input),
+): boolean {
   return lethal || Math.min(incoming, defense) * 2 >= Math.min(defense, TYPICAL_INCOMING);
 }
 
@@ -237,10 +240,10 @@ export function defenseReactionWorthSpending(
   pitched: Iterable<number>,
   defense = Math.max(0, card.defense ?? input.cards[card.cardId]?.defense ?? 0),
 ): boolean {
-  const { incoming, lethal } = defenseReactionThreat(input);
-  if (lethal) return true;
-  if (!defenseReactionStopsEnough(input, defense)) return false;
-  return Math.min(incoming, defense) > reserveDamageLost(input, factory, new Set([card.instanceId, ...pitched]));
+  const threat = defenseReactionThreat(input);
+  if (threat.lethal) return true;
+  if (!defenseReactionStopsEnough(input, defense, threat)) return false;
+  return Math.min(threat.incoming, defense) > reserveDamageLost(input, factory, new Set([card.instanceId, ...pitched]));
 }
 
 /** Blocking value an equipment piece gives up when it is spent. */

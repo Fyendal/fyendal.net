@@ -1,5 +1,5 @@
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
-import { auroraSolverRules } from "./aurora-rules.js";
+import { activeArcLightnings, auroraSolverRules } from "./aurora-rules.js";
 import { auroraMatchupForHeroName, type AuroraMatchup } from "./aurora-strategy.js";
 import { planBriarTurn, type BriarTurnPlan } from "./briar-turn-planner.js";
 import { nextTurnLandingRate } from "./turn-planner.js";
@@ -115,7 +115,7 @@ function hasSetupFollowup(
   });
 }
 
-/** Pings Arc Lightning and Burn Up need to beat holding them for a refilled hand. */
+/** Cards left behind Arc Lightning or Burn Up before they beat holding out for a fuller hand. */
 const FULL_HAND_FOLLOWUPS = 2;
 
 /** Hand and arsenal cards left after paying for `intent` that `counts`. */
@@ -135,12 +135,10 @@ function followups(
   }).length;
 }
 
-const isActionCard = (data: CardData) => data.cardType === "action";
-
 /** Arc Lightning grants the next action card go again, so each other action
  * card, or go-again instant, left after paying pings. */
 const pingsUnderArc = (data: CardData) =>
-  isActionCard(data) || data.keywords?.some((keyword) => keyword.toLowerCase() === "go again") === true;
+  data.cardType === "action" || data.keywords?.some((keyword) => keyword.toLowerCase() === "go again") === true;
 
 function isArcLightning(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
   if (intent.kind !== "play-card" && intent.kind !== "play-from-arsenal") return false;
@@ -152,12 +150,6 @@ function isArcLightning(intent: GameIntent, input: BotPolicyInput, own: Readonly
 function arcWorthPlaying(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
   const pings = followups(intent, input, own, pingsUnderArc);
   return pings >= FULL_HAND_FOLLOWUPS || pings >= input.view.players[1 - input.seat]!.life;
-}
-
-function arcActive(input: BotPolicyInput): boolean {
-  return input.view.ongoing.some((effect) =>
-    effect.seat === input.seat && key(input.cards[effect.cardId]) === "arc lightning|2"
-  );
 }
 
 function pendingSetups(input: BotPolicyInput): string[] {
@@ -196,12 +188,12 @@ function snapdragonWorthUsing(input: BotPolicyInput): boolean {
   return [...me.hand, ...me.arsenal].some((card) => input.cards[card.cardId]?.cardType === "action");
 }
 
-/** Burn Up needs several attacks to get one through (see aurora-rules). */
+/** Burn Up needs several attacks to get one through (`burnUp` in aurora-rules). */
 function shouldMeldBurnUp(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
   if (!("meldSide" in intent) || intent.meldSide !== "both") return false;
   return input.view.players[1 - input.seat]!.life <= 1 ||
     (hasSetupFollowup("burn up // shock|1", intent, input, own) &&
-      followups(intent, input, own, isActionCard) >= FULL_HAND_FOLLOWUPS);
+      followups(intent, input, own, isAttack) >= FULL_HAND_FOLLOWUPS);
 }
 
 function prepareCandidates(candidates: readonly GameIntent[], input: BotPolicyInput): readonly GameIntent[] {
@@ -326,7 +318,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       const grasp = Object.values(me.equipment).some((equipped) =>
         key(input.cards[equipped?.cardId ?? ""]) === "grasp of the arknight|0"
       );
-      score = grasp || arcActive(input) ? 20 : 8;
+      score = grasp || activeArcLightnings(input).pings > 0 ? 20 : 8;
     } else if (functional === "grasp of the arknight|0" || functional === "vexing quillhand|0") {
       const arcane = matchupFor(input).arcane;
       score = functional === "vexing quillhand|0" && arcane

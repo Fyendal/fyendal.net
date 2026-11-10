@@ -233,7 +233,7 @@ export function futureOffenseRate(
 }
 
 /** Share of the bot's next-turn attack threat expected to land past blocks,
- * judged while defending: the attacker refills to a full hand before then. */
+ * judged while defending: the opponent attacking now refills its hand first. */
 export function nextTurnLandingRate(input: BotPolicyInput, attackThreat: number): number {
   if (attackThreat <= 0) return 1;
   const opponent = input.view.players[1 - input.seat]!;
