@@ -285,6 +285,20 @@ function nextTigerPump(source: string, power: number, uses = 1): PendingEffect {
   return { key: source, uses, power, appliesTo: (card) => card.name === "Crouching Tiger" };
 }
 
+const TIGER_PUMP_POWER: Readonly<Record<string, number>> = {
+  "tearing shuko|0": 2,
+  "growl|1": 1,
+  "untamed|1": 1,
+};
+
+/** Next-Crouching-Tiger pumps already active this turn. */
+function activeTigerPumps(input: BotPolicyInput): PendingEffect[] {
+  return input.view.ongoing.flatMap((effect, index) => {
+    const power = effect.seat === input.seat ? TIGER_PUMP_POWER[key(input.cards[effect.cardId])] : undefined;
+    return power ? [nextTigerPump(`active-pump#${index}`, power)] : [];
+  });
+}
+
 /** Hand-value rules: the second-attack bonus, on-hit go again (assumed to
  * connect, as the planner's public rollout does), Edge of Autumn combos,
  * Flying Kick, Bittering Thorns, Whirling Mist Blossom, Razor Reflex, Legacy
@@ -312,6 +326,10 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
     };
   };
   const blessings = me.board.filter((card) => key(input.cards[card.cardId]) === "blessing of qi|1").length;
+  // The solver's held cards exclude the banished zone.
+  const banishedTiger = me.banish.some((card) =>
+    card.playableFromSourceCardId !== undefined && key(input.cards[card.cardId]) === TIGER_KEY
+  );
   return {
     name: "ira",
     trackedTraits: [],
@@ -322,7 +340,8 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
     },
     startPending(observed, nextTurn) {
       const pending = nextTurn || attacksThisTurn(observed) < 2 ? [IRA_SECOND_ATTACK] : [];
-      return nextTurn && blessings > 0 ? [...pending, nextTigerPump("blessing-of-qi", 3, blessings)] : pending;
+      if (!nextTurn) return [...pending, ...activeTigerPumps(observed)];
+      return blessings > 0 ? [...pending, nextTigerPump("blessing-of-qi", 3, blessings)] : pending;
     },
     abilities() {
       const tiger = input.cards[CROUCHING_TIGER_ID];
@@ -354,7 +373,13 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
         return { ...destroy, after: (view) => ({ flags: makeTigers(view, 1) }) };
       }
       if (functional === "tearing shuko|0") {
-        return { ...destroy, after: () => ({ pending: [nextTigerPump(`shuko#${card.instanceId}`, 2)] }) };
+        return {
+          ...destroy,
+          // Only with a tiger to pump; a worn-out Shuko is otherwise a free, pointless step.
+          canPlay: (view) =>
+            banishedTiger || view.flag("tigers") > 0 || view.held.some((held) => held.name === "Crouching Tiger"),
+          after: () => ({ pending: [nextTigerPump(`shuko#${card.instanceId}`, 2)] }),
+        };
       }
       if (functional === "blood scent|0") {
         return {

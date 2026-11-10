@@ -1353,19 +1353,18 @@ describe("SAGE Ira policy", () => {
     const paws = state.players[0]!.equipment.legs!.instanceId;
     const shuko = state.players[0]!.equipment.arms!.instanceId;
     const activated: number[] = [];
-    while (!activated.includes(paws)) {
-      const activate = chooseIraIntent(input());
-      expect(activate.kind).toBe("activate-ability");
-      if (activate.kind !== "activate-ability") return;
-      expect([paws, shuko]).toContain(activate.sourceInstanceId);
-      activated.push(activate.sourceInstanceId);
-      state = advanceUntil(apply(state, 0, activate), (current) =>
+    let intent = chooseIraIntent(input());
+    while (intent.kind === "activate-ability") {
+      expect([paws, shuko]).toContain(intent.sourceInstanceId);
+      activated.push(intent.sourceInstanceId);
+      state = advanceUntil(apply(state, 0, intent), (current) =>
         current.priorityPlayer === 0 && current.stack.length === 0
       );
       if (activated.length > 2) throw new Error("Ira did not make a Crouching Tiger");
+      intent = chooseIraIntent(input());
     }
-
-    const tiger = chooseIraIntent(input());
+    expect(activated).toContain(paws);
+    const tiger = intent;
     expect(tiger.kind).toBe("play-from-zone");
     if (tiger.kind !== "play-from-zone") return;
     expect(cardData[state.players[0]!.banish.find((card) => card.instanceId === tiger.instanceId)!.cardId]!.name)
@@ -1378,6 +1377,66 @@ describe("SAGE Ira policy", () => {
     expect(combo.kind).toBe("play-card");
     if (combo.kind !== "play-card") return;
     expect(state.players[0]!.hand.find((card) => card.instanceId === combo.instanceId)?.cardId).toBe("MST182");
+  });
+
+  it("makes the Crouching Tiger with Pouncing Paws before spending Tearing Shuko", () => {
+    const state = createGame({
+      decklists: [sageIra(), kayo()],
+      cards: cardData, scripts, seed: 9304, startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.weapons = [];
+    state.players[0]!.equipment.arms!.defCounters = 1;
+    state.players[0]!.equipment.legs!.defCounters = 1;
+    state.players[0]!.resources = 2;
+    // Ira's second-attack bonus is already spent, so only the Shuko pump makes the tiger worth playing.
+    state.players[0]!.flags.attacksDeclaredThisTurn = 2;
+    replaceHand(state, 0, ["SEA228"]);
+    const paws = state.players[0]!.equipment.legs!.instanceId;
+
+    expect(chooseIraIntent({
+      seat: 0, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state,
+    })).toMatchObject({ kind: "activate-ability", sourceInstanceId: paws });
+  });
+
+  it("follows an already active Tearing Shuko with Pouncing Paws and the pumped Crouching Tiger", () => {
+    let state = createGame({
+      decklists: [sageIra(), kayo()],
+      cards: cardData, scripts, seed: 9305, startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.weapons = [];
+    state.players[0]!.equipment.arms!.defCounters = 1;
+    state.players[0]!.equipment.legs!.defCounters = 1;
+    state.players[0]!.resources = 2;
+    state.players[0]!.flags.attacksDeclaredThisTurn = 2;
+    replaceHand(state, 0, ["SEA228"]);
+    state.players[1]!.hand = [];
+    const shuko = state.players[0]!.equipment.arms!.instanceId;
+    state = advanceUntil(
+      apply(state, 0, { kind: "activate-ability", sourceInstanceId: shuko, pitchInstanceIds: [], pitchRequired: 0 }),
+      (current) => current.priorityPlayer === 0 && current.stack.length === 0,
+    );
+
+    const attacks: string[] = [];
+    const lifeBefore = state.players[1]!.life;
+    for (let step = 0; step < 60 && state.turn === 2; step++) {
+      const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      const legal = legalIntents(state, actor);
+      const intent = actor === 0
+        ? chooseIraIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state })
+        : legal.find((candidate) => candidate.kind === "defend" && candidate.instanceIds.length === 0) ??
+          legal.find((candidate) => candidate.kind === "pass")!;
+      const before = state.chain.length;
+      state = apply(state, actor, intent);
+      const link = state.chain.at(-1);
+      if (state.chain.length > before && link) {
+        attacks.push(cardData[link.attackingCard.cardId]!.name);
+      }
+    }
+    expect(attacks).toEqual(["Crouching Tiger", "Sirens of Safe Harbor"]);
+    // The pumped tiger adds at least its +2 over Sirens of Safe Harbor alone.
+    expect(lifeBefore - state.players[1]!.life).toBeGreaterThanOrEqual(6);
   });
 
   it("converts a Scar hand through its Crouching Tiger equipment instead of pitching Pouncing Qi to Edge", () => {
