@@ -307,6 +307,18 @@
       "value": "Contra todo pronóstico"
     }
   ],
+  "achievements.beataurora.description": [
+    {
+      "type": 0,
+      "value": "Derrota a Aurora Bot en una partida de práctica."
+    }
+  ],
+  "achievements.beataurora.name": [
+    {
+      "type": 0,
+      "value": "Vence a Aurora Bot"
+    }
+  ],
   "achievements.beatboltyn.description": [
     {
       "type": 0,
@@ -34458,6 +34470,12 @@
     {
       "type": 0,
       "value": "Observar"
+    }
+  ],
+  "lobby.bot.aurora.description": [
+    {
+      "type": 0,
+      "value": "Un mazo aggro que planea grandes turnos de Arc Lightning con ataques sin fin."
     }
   ],
   "lobby.bot.bannedHidden": [

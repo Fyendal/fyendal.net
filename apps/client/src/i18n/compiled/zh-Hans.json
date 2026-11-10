@@ -307,6 +307,18 @@
       "value": "逆转乾坤"
     }
   ],
+  "achievements.beataurora.description": [
+    {
+      "type": 0,
+      "value": "在练习对局中击败 Aurora 机器人。"
+    }
+  ],
+  "achievements.beataurora.name": [
+    {
+      "type": 0,
+      "value": "击败 Aurora 机器人"
+    }
+  ],
   "achievements.beatboltyn.description": [
     {
       "type": 0,
@@ -32065,6 +32077,12 @@
     {
       "type": 0,
       "value": "观战"
+    }
+  ],
+  "lobby.bot.aurora.description": [
+    {
+      "type": 0,
+      "value": "以无尽攻击筹划 Arc Lightning 大回合的快攻牌组。"
     }
   ],
   "lobby.bot.bannedHidden": [

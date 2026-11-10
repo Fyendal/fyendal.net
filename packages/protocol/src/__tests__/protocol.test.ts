@@ -408,6 +408,7 @@ describe("client messages", () => {
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "levia" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "starvo" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "boltyn" },
+    { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "aurora" },
     { type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "ira-sage" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira", searchForPlayer: true, avoidRoomCodes: ["ABC123"] },
     { type: "create-bot-room", deckId: "precon-sba" },
@@ -1516,7 +1517,7 @@ describe("replays and HTTP responses", () => {
         "full-hand", "overkill", "healthy-victory", "last-life",
         "five-strike-turn", "iron-wall", "second-wind", "long-game", "against-the-odds", "empty-tank",
         "beat-bravo", "beat-briar", "beat-kayo", "beat-cindra", "beat-ira", "beat-hala",
-        "beat-jarl", "beat-levia", "beat-starvo", "beat-boltyn", "beat-ira-sage",
+        "beat-jarl", "beat-levia", "beat-starvo", "beat-boltyn", "beat-ira-sage", "beat-aurora",
       ].map((id) => ({ id, percent: 12.5 })),
     };
     for (const id of [

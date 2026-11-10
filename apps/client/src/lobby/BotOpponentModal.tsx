@@ -83,6 +83,15 @@ const BOTS: Readonly<Record<Format, readonly BotOption[]>> = {
       deckType: "aggro",
       descriptionId: "lobby.bot.boltyn.description",
     },
+    {
+      id: "aurora",
+      name: "Aurora",
+      title: "Legacy of Tempest",
+      heroName: "Aurora, Legacy of Tempest",
+      deckId: "bot-aurora-tempest",
+      deckType: "elemental",
+      descriptionId: "lobby.bot.aurora.description",
+    },
   ],
   "silver-age": [
     {

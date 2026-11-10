@@ -58,6 +58,7 @@ it("does not expose internal bot decks through player deck resolution", async ()
     "bot-starvo-boss",
     "bot-boltyn-raydn",
     "bot-ira-sage",
+    "bot-aurora-tempest",
   ]) {
     const result = await resolveFreshDeck(db, 1, id, {
       fetchDeck: async () => { throw new Error("should not fetch"); },

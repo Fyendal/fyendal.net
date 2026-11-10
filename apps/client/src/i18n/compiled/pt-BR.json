@@ -307,6 +307,18 @@
       "value": "Contra Todas as Probabilidades"
     }
   ],
+  "achievements.beataurora.description": [
+    {
+      "type": 0,
+      "value": "Derrote o Aurora Bot em um jogo de treino."
+    }
+  ],
+  "achievements.beataurora.name": [
+    {
+      "type": 0,
+      "value": "Derrote o Aurora Bot"
+    }
+  ],
   "achievements.beatboltyn.description": [
     {
       "type": 0,
@@ -35292,6 +35304,12 @@
     {
       "type": 0,
       "value": "Assistir"
+    }
+  ],
+  "lobby.bot.aurora.description": [
+    {
+      "type": 0,
+      "value": "Um deck aggro que planeja grandes turnos de Arc Lightning com ataques sem fim."
     }
   ],
   "lobby.bot.bannedHidden": [

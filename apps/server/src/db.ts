@@ -1174,6 +1174,15 @@ export const MIGRATIONS: Migration[] = [
     sql: `ALTER TABLE rooms ADD COLUMN clock JSONB;
     ALTER TABLE replay_games ADD COLUMN clock JSONB;`,
   },
+  {
+    version: 64,
+    // Classic Constructed Aurora joins the durable pending-practice bot ids.
+    sql: `ALTER TABLE pending_bot_starts
+      DROP CONSTRAINT IF EXISTS pending_bot_starts_bot_check;
+    ALTER TABLE pending_bot_starts
+      ADD CONSTRAINT pending_bot_starts_bot_check
+      CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia', 'boltyn', 'ira-sage', 'aurora'));`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

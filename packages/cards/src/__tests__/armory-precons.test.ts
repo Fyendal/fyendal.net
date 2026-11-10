@@ -178,6 +178,27 @@ describe("Classic Constructed shared decks", () => {
     expect(names.filter((name) => name === "Saving Grace")).toHaveLength(3);
   });
 
+  it("keeps the complete Aurora pool internal, legal and implemented", () => {
+    const aurora = precon("bot-aurora-tempest");
+    expect(aurora).toMatchObject({ name: "Aurora, Legacy of Tempest", format: "cc", botOnly: true });
+    expect(preconsForFormat("cc").map((deck) => deck.id)).not.toContain("bot-aurora-tempest");
+    const pool = aurora!.pool;
+    expect(pool.heroId).toBe("OMN047");
+    expect(pool.weaponIds).toEqual(["SBA002"]);
+    expect(pool.deck).toHaveLength(60);
+    expect(pool.sideboard).toHaveLength(10);
+    expect(pool.equipmentPool).toHaveLength(9);
+    expect(formatLegalityIssues(cardData, pool, "cc")).toEqual([]);
+    for (const id of [...pool.weaponIds, ...pool.equipmentPool, ...pool.deck, ...pool.sideboard!]) {
+      expect(cardData[id], id).toBeTruthy();
+      expect(isImplemented(cardData[id]!), id).toBe(true);
+    }
+    const names = [...pool.deck, ...pool.sideboard!].map((id) => cardData[id]!.name);
+    expect(names.filter((name) => name === "Arc Lightning")).toHaveLength(3);
+    expect(names.filter((name) => name === "Lightning Surge")).toHaveLength(4);
+    expect(names.filter((name) => name === "Scar for a Scar")).toHaveLength(3);
+  });
+
   it("registers the open-pool Starvo boss only for the practice bot", () => {
     const starvo = precon("bot-starvo-boss");
     expect(starvo).toMatchObject({

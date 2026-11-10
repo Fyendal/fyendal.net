@@ -1,5 +1,6 @@
 export type { BotPrepOpponent } from "./sideboard.js";
 export {
+  auroraPresentationFor,
   boltynPreferredTurnOrderFor,
   boltynPresentationFor,
   bravoPresentationFor,
@@ -60,4 +61,6 @@ export type { StarvoIntentDecision } from "./starvo-policy.js";
 export { cloneStateForBotSimulation } from "./turn-planner.js";
 export { chooseKayoIntent, chooseKayoIntentWithTrace } from "./kayo-policy.js";
 export { chooseBoltynIntent, chooseBoltynIntentWithTrace } from "./boltyn-policy.js";
+export { chooseAuroraIntent, chooseAuroraIntentWithTrace } from "./aurora-policy.js";
+export type { AuroraIntentDecision } from "./aurora-policy.js";
 export type { BoltynIntentDecision } from "./boltyn-policy.js";

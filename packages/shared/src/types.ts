@@ -14,7 +14,7 @@ export type CardPoolMode = "legal" | "future" | "open";
 export type QueuePoolCounts = Record<CardPoolMode, Record<CardPoolMode, number>>;
 
 /** Stable identities for the supported practice opponents. */
-export type BotOpponent = "bravo" | "briar" | "kayo" | "cindra" | "ira" | "hala" | "jarl" | "levia" | "starvo" | "boltyn" | "ira-sage";
+export type BotOpponent = "bravo" | "briar" | "kayo" | "cindra" | "ira" | "hala" | "jarl" | "levia" | "starvo" | "boltyn" | "ira-sage" | "aurora";
 
 /** What a finished bot game needs to start again with the same deck and bot. */
 export interface BotRematch {

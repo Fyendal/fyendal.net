@@ -12,6 +12,7 @@ export const ACHIEVEMENT_GROUPS: ReadonlyArray<{
   { titleId: "achievements.group.bots", ids: [
     "beat-bravo", "beat-briar", "beat-kayo", "beat-cindra",
     "beat-ira", "beat-hala", "beat-jarl", "beat-levia", "beat-boltyn", "beat-ira-sage",
+    "beat-aurora",
   ] },
 ];
 
@@ -29,6 +30,7 @@ export const ACHIEVEMENT_BOT_HEROES: Partial<Record<AchievementId, string>> = {
   "beat-levia": "Levia, Shadowborn Abomination",
   "beat-boltyn": "Ser Boltyn, Breaker of Dawn",
   "beat-ira-sage": "Ira, Crimson Haze",
+  "beat-aurora": "Aurora, Legacy of Tempest",
 };
 
 export function achievementMessageId(id: AchievementId, part: "name" | "description"): string {

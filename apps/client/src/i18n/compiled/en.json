@@ -307,6 +307,18 @@
       "value": "Against the Odds"
     }
   ],
+  "achievements.beataurora.description": [
+    {
+      "type": 0,
+      "value": "Defeat Aurora Bot in a practice game."
+    }
+  ],
+  "achievements.beataurora.name": [
+    {
+      "type": 0,
+      "value": "Beat Aurora Bot"
+    }
+  ],
   "achievements.beatboltyn.description": [
     {
       "type": 0,
@@ -33548,6 +33560,12 @@
     {
       "type": 0,
       "value": "Spectate"
+    }
+  ],
+  "lobby.bot.aurora.description": [
+    {
+      "type": 0,
+      "value": "An aggro deck that plans for big Arc Lightning turns with endless attacks."
     }
   ],
   "lobby.bot.bannedHidden": [

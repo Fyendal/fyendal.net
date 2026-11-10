@@ -1,5 +1,6 @@
 import { cardData, precon } from "@fyendal/cards";
 import type { CardData, EquipmentSlot, PresentedDeck, RevealedArena } from "@fyendal/shared";
+import { auroraMatchupForHeroName, type AuroraMatchup } from "./aurora-strategy.js";
 import { briarMatchupForHeroName } from "./briar-strategy.js";
 
 /** Only information visible after arena reveal; never the opponent's deck. */
@@ -17,6 +18,7 @@ const JARL_BOT_DECK_ID = "bot-jarl";
 const LEVIA_BOT_DECK_ID = "bot-levia-gates";
 const STARVO_BOT_DECK_ID = "bot-starvo-boss";
 const BOLTYN_BOT_DECK_ID = "bot-boltyn-raydn";
+const AURORA_BOT_DECK_ID = "bot-aurora-tempest";
 
 const BRAVO_ARCANE_POLARITY = ["SBA030", "SBA030"];
 const BRAVO_RED_CHOKESLAM = ["SBR016", "SBR016"];
@@ -919,4 +921,55 @@ export function boltynPresentationFor(
     throw new Error(`Boltyn matchup presentation has ${deck.length} cards`);
   }
   return { weaponIds: ["ASB002"], equipment, deck };
+}
+
+// ── Aurora, Legacy of Tempest ───────────────────────────────────────────
+
+const AURORA_BEATDOWN_PACKAGE = [
+  "AST010", "AST010", "AST010", // Flittering Charge
+  "LGS347", "LGS347", "LGS347", // Electrostatic Discharge
+  "FAB262", "FAB262", "FAB262", // Lightning Press
+];
+const AURORA_DEFENSIVE_PACKAGE = [
+  "ELE227", "ELE227", "ELE227", // Sigil of Suffering
+  "ANQ034", "ANQ034", "ANQ034", // Sink Below
+  "OMN068", "OMN068", // Rush of Power
+  "ANQ030", // Scar for a Scar
+];
+const AURORA_CORE_SIZE = 51;
+
+function auroraMatchupFor(
+  opponent: BotPrepOpponent,
+  cards: Readonly<Record<string, CardData>>,
+): AuroraMatchup {
+  const classes = cards[opponent.heroId]?.classes?.map((value) => value.toLowerCase()) ?? [];
+  return auroraMatchupForHeroName(opponentHeroName(opponent, cards), classes);
+}
+
+/** Present the Aurora list in the guide's beatdown or defensive stance. */
+export function auroraPresentationFor(
+  opponent: BotPrepOpponent,
+  cards: Readonly<Record<string, CardData>> = cardData,
+): PresentedDeck {
+  const registered = precon(AURORA_BOT_DECK_ID);
+  if (!registered || registered.format !== "cc" || registered.botOnly !== true) {
+    throw new Error("Aurora bot deck is not registered");
+  }
+  const deck = [...registered.pool.deck];
+  for (const cardId of AURORA_BEATDOWN_PACKAGE) removeCopies(deck, cardId, 1);
+  if (deck.length !== AURORA_CORE_SIZE) {
+    throw new Error(`Aurora core has ${deck.length} cards, expected ${AURORA_CORE_SIZE}`);
+  }
+  const matchup = auroraMatchupFor(opponent, cards);
+  deck.push(...(matchup.stance === "defensive" ? AURORA_DEFENSIVE_PACKAGE : AURORA_BEATDOWN_PACKAGE));
+  return {
+    weaponIds: [...registered.pool.weaponIds],
+    equipment: {
+      head: "PEN310", // Crown of Providence
+      chest: "DTD211", // Dyadic Carapace
+      arms: matchup.arcane ? "EVR103" : "ARC078", // Vexing Quillhand / Grasp of the Arknight
+      legs: "WTR154", // Snapdragon Scalers
+    },
+    deck,
+  };
 }

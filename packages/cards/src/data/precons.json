@@ -1096,5 +1096,47 @@
                 "MPW146"
             ]
         }
+    },
+    "_comment_bot_aurora":"Aurora aggro list",
+    "bot-aurora-tempest": {
+        "name": "Aurora, Legacy of Tempest",
+        "format": "cc",
+        "botOnly": true,
+        "pool": {
+            "heroId": "OMN047",
+            "weaponIds": ["SBA002"],
+            "equipmentPool": ["DYN234", "PEN310", "ROS114", "DTD211", "WTR150", "MON230", "ARC078", "EVR103", "WTR154"],
+            "deck": [
+                "ROS012", "ROS012", "ROS012",
+                "WTR159", "WTR159", "WTR159",
+                "LGS368", "LGS368", "LGS368",
+                "SEA201", "SEA201", "SEA201",
+                "ELE189", "ELE189", "ELE189",
+                "ELE190",
+                "GEM065", "GEM065", "GEM065",
+                "SEA239",
+                "GEM062", "GEM062",
+                "GEM155", "GEM155", "GEM155",
+                "OMN083", "OMN083", "OMN083",
+                "ANQ029", "ANQ029", "ANQ029",
+                "ANQ030", "ANQ030",
+                "ROS101", "ROS101", "ROS101",
+                "AST013", "AST013", "AST013",
+                "ANQ031", "ANQ031", "ANQ031",
+                "AST022", "AST022", "AST022",
+                "AST023", "AST023", "AST023",
+                "ROS074", "ROS074", "ROS074",
+                "AST010", "AST010", "AST010",
+                "LGS347", "LGS347", "LGS347",
+                "FAB262", "FAB262", "FAB262"
+            ],
+            "sideboard": [
+                "ELE227", "ELE227", "ELE227",
+                "ANQ034", "ANQ034", "ANQ034",
+                "OMN068", "OMN068",
+                "ANQ030",
+                "MPW146"
+            ]
+        }
     }
 }

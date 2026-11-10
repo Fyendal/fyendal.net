@@ -5,6 +5,7 @@ import type {
   PresentedDeck,
   PresentedArena,
 } from "@fyendal/shared";
+import { chooseAuroraIntent, chooseAuroraIntentWithTrace } from "./aurora-policy.js";
 import { chooseBoltynIntent, chooseBoltynIntentWithTrace } from "./boltyn-policy.js";
 import { chooseBravoIntent, chooseBravoIntentWithTrace } from "./bravo-policy.js";
 import { chooseKayoIntent, chooseKayoIntentWithTrace } from "./kayo-policy.js";
@@ -33,6 +34,7 @@ import {
   type TurnPlannerCandidateTrace,
 } from "./turn-planner.js";
 import {
+  auroraPresentationFor,
   boltynPresentationFor,
   bravoPresentationFor,
   briarPresentationFor,
@@ -264,6 +266,16 @@ export const BOT_DEFINITIONS = {
     chooseIntent: chooseBoltynIntent,
     chooseDecision: (input) => botDecisionFromTrace(chooseBoltynIntentWithTrace(input)),
     presentationFor: (opponent) => boltynPresentationFor(opponent),
+  }),
+  aurora: stagedDefinition({
+    id: "aurora",
+    format: "cc",
+    deckId: "bot-aurora-tempest",
+    username: "Aurora Bot",
+    deckName: "Aurora, Legacy of Tempest",
+    chooseIntent: chooseAuroraIntent,
+    chooseDecision: (input) => botDecisionFromTrace(chooseAuroraIntentWithTrace(input)),
+    presentationFor: (opponent) => auroraPresentationFor(opponent),
   }),
 } as const satisfies Readonly<Record<BotOpponent, BotDefinition>>;
 

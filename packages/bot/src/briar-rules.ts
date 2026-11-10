@@ -9,7 +9,7 @@ const named = (data: CardData | undefined): string => data?.name.trim().toLowerC
 /** Damage-equivalent of stealing an opposing item for the action phase. */
 const STEAL_ITEM_VALUE = 2;
 
-function runechantPending(prefix: string, count: number): PendingEffect[] {
+export function runechantPending(prefix: string, count: number): PendingEffect[] {
   // Every Runechant fires on the next attack action card or weapon attack.
   return Array.from({ length: count }, (_, index) => ({
     key: `${prefix}.runechant.${index}`,
@@ -18,7 +18,7 @@ function runechantPending(prefix: string, count: number): PendingEffect[] {
   }));
 }
 
-function embodimentOfLightning(key: string): PendingEffect {
+export function embodimentOfLightning(key: string): PendingEffect {
   return {
     key,
     uses: 1,
@@ -27,10 +27,9 @@ function embodimentOfLightning(key: string): PendingEffect {
   };
 }
 
-/** Hand-value rules for Briar: Runechants, the second non-attack action
- * Embodiment of Lightning, Lightning Fusion, conditional go again, Star Fall,
- * Quick Succession and the Burn Up meld. */
-export function briarSolverRules(input: BotPolicyInput): HeroSolverRules {
+/** Solver patches for the Lightning and generic Runeblade cards Briar and
+ * Aurora share: conditional go again, Quick Succession and the Burn Up meld. */
+export function lightningCardPatcher(input: BotPolicyInput): (data: CardData, card: CardView) => SolverCardPatch {
   const me = input.view.players[input.seat];
   const opponent = input.view.players[1 - input.seat]!;
   const arsenalIds = new Set(me.arsenal.map((card) => card.instanceId));
@@ -141,7 +140,13 @@ export function briarSolverRules(input: BotPolicyInput): HeroSolverRules {
         return {};
     }
   };
+  return cardPatch;
+}
 
+/** Hand-value rules for Briar: Runechants, the second non-attack action
+ * Embodiment of Lightning and the shared Lightning card patches. */
+export function briarSolverRules(input: BotPolicyInput): HeroSolverRules {
+  const cardPatch = lightningCardPatcher(input);
   return {
     name: "briar",
     trackedTraits: ["lightning"],

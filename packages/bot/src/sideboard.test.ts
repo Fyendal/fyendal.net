@@ -2,6 +2,7 @@ import { cardData, precon, validatePresentation } from "@fyendal/cards";
 import type { Decklist } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import {
+  auroraPresentationFor,
   boltynPreferredTurnOrderFor,
   boltynPresentationFor,
   bravoPresentationFor,
@@ -627,5 +628,47 @@ describe("Boltyn Raydn matchup guide", () => {
     expect(count(guide("Marlynn, Treasure Hunter").presented.deck, "ASB016")).toBe(3);
     expect(guide("Aurora, Tempest in a Teacup").presented.equipment.arms).toBe("PEN179");
     expect(guide("Olympia, Prized Fighter").presented.deck).toHaveLength(63);
+  });
+});
+
+describe("Aurora stance guide", () => {
+  const pool = precon("bot-aurora-tempest")!.pool;
+  const guide = (heroName: string, classes: string[] = []) => {
+    const cards = { ...cardData, GUIDE_HERO: { ...cardData["WTR001"]!, name: heroName, classes } };
+    const presented = auroraPresentationFor({ heroId: "GUIDE_HERO", weaponIds: [], equipment: {} }, cards);
+    return { presented, validation: validatePresentation(pool, presented, "cc", { cardPoolMode: "open" }) };
+  };
+  const count = (deck: readonly string[], id: string) => deck.filter((card) => card === id).length;
+
+  it("is the beatdown with Flittering Charge and the +3 instants against slower heroes", () => {
+    const { presented, validation } = guide("Oldhim, Grandfather of Eternity", ["guardian"]);
+    expect(validation).toMatchObject({ ok: true });
+    expect(presented.weaponIds).toEqual(["SBA002"]);
+    expect(presented.equipment).toEqual({ head: "PEN310", chest: "DTD211", arms: "ARC078", legs: "WTR154" });
+    expect(presented.deck).toHaveLength(60);
+    expect(count(presented.deck, "AST010")).toBe(3);
+    expect(count(presented.deck, "LGS347")).toBe(3);
+    expect(count(presented.deck, "FAB262")).toBe(3);
+    expect(presented.deck).not.toContain("ELE227");
+    expect(presented.deck).not.toContain("ANQ034");
+  });
+
+  it("brings defense reactions, Rush of Power and the third Scar against racing heroes", () => {
+    const { presented, validation } = guide("Cindra, Dracai of Retribution", ["ninja"]);
+    expect(validation).toMatchObject({ ok: true });
+    expect(presented.deck).toHaveLength(60);
+    expect(count(presented.deck, "ELE227")).toBe(3);
+    expect(count(presented.deck, "ANQ034")).toBe(3);
+    expect(count(presented.deck, "OMN068")).toBe(2);
+    expect(count(presented.deck, "ANQ030")).toBe(3);
+    expect(presented.deck).not.toContain("AST010");
+    expect(presented.equipment.arms).toBe("ARC078");
+  });
+
+  it("wears Vexing Quillhand into arcane damage", () => {
+    expect(guide("Oscilio, Constella Intelligence", ["wizard"]).presented.equipment.arms).toBe("EVR103");
+    expect(guide("Briar, Warden of Thorns", ["runeblade"]).presented).toMatchObject({
+      equipment: { arms: "EVR103" },
+    });
   });
 });
