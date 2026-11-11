@@ -36730,24 +36730,6 @@
       "value": "Criar sala"
     }
   ],
-  "lobby.home.hint.bot": [
-    {
-      "type": 0,
-      "value": "Em seguida, escolha um bot para praticar."
-    }
-  ],
-  "lobby.home.hint.private": [
-    {
-      "type": 0,
-      "value": "Só entra quem você convidar."
-    }
-  ],
-  "lobby.home.hint.public": [
-    {
-      "type": 0,
-      "value": "O pareamento acontece com a próxima pessoa que procurar. Amigos também podem entrar pelo link da sala."
-    }
-  ],
   "lobby.home.importCc": [
     {
       "type": 0,
@@ -38091,12 +38073,6 @@
       "value": "Você ainda não tem amigos."
     }
   ],
-  "prep.openSeat.nobodySearching": [
-    {
-      "type": 0,
-      "value": "Ninguém mais está procurando ainda."
-    }
-  ],
   "prep.openSeat.offline": [
     {
       "type": 0,
@@ -38109,7 +38085,7 @@
       "value": "Ou convide um amigo"
     }
   ],
-  "prep.openSeat.searchHint": [
+  "prep.openSeat.searchStatus": [
     {
       "type": 0,
       "value": "O pareamento acontece automaticamente quando outra pessoa procurar."
@@ -38183,49 +38159,6 @@
     {
       "type": 0,
       "value": "Todos os confrontos"
-    }
-  ],
-  "prep.othersInQueue": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "=0": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " outros na fila"
-            }
-          ]
-        },
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " outro na fila"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " outros na fila"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
     }
   ],
   "prep.pitch.blue": [

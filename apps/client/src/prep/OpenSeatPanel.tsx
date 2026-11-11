@@ -18,7 +18,6 @@ export function OpenSeatPanel({
   cardPoolMode,
   deckId,
   switching,
-  searchers,
 }: {
   mode: "invite" | "search";
   roomCode: string;
@@ -27,8 +26,6 @@ export function OpenSeatPanel({
   deckId: string;
   /** A deck switch is loading; the room shows its progress. */
   switching: boolean;
-  /** Other players this search could pair with. */
-  searchers: number;
 }) {
   const intl = useIntl();
   const {
@@ -109,11 +106,8 @@ export function OpenSeatPanel({
               <h4 className="open-seat-chair-title">{intl.formatMessage({ id: "prep.openSeat.searchTitle" })}</h4>
               <p className="open-seat-searching">
                 <span className="home-play-live-dot" aria-hidden="true" />
-                {searchers > 0
-                  ? intl.formatMessage({ id: "lobby.home.othersSearchingNow" }, { count: searchers })
-                  : intl.formatMessage({ id: "prep.openSeat.nobodySearching" })}
+                {intl.formatMessage({ id: "prep.openSeat.searchStatus" })}
               </p>
-              <p className="open-seat-hint">{intl.formatMessage({ id: "prep.openSeat.searchHint" })}</p>
               <span className="open-seat-label open-seat-or">{intl.formatMessage({ id: "prep.openSeat.orInvite" })}</span>
             </div>
           ) : (

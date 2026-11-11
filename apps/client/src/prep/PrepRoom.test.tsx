@@ -246,7 +246,8 @@ describe("preparation stage layout", () => {
     });
     const text = html.replace(/<[^>]*>/g, " ");
     expect(text).toContain("Searching for a match");
-    expect(text).toContain("No one else is searching yet.");
+    expect(text).toContain("be matched automatically");
+    expect(text).not.toMatch(/searching yet|players searching/);
     expect(text).toContain("You can switch decks until someone joins.");
     expect(html).not.toMatch(/<button[^>]*class="listbox-trigger[^"]*"[^>]*disabled/);
     expect(text).toContain("Copy link");
@@ -281,6 +282,19 @@ describe("preparation stage layout", () => {
     expect(html.replace(/<[^>]*>/g, "").replaceAll("&#x27;", "'"))
       .toContain(`Player 1 joined before your deck switched, so you'll play ${deck.name}.`);
     expect(render(null, false, deck, { deckSwitchLocked: true })).not.toContain("prep-deck-notice");
+  });
+
+  it("keeps a search looking like a search after a refresh", () => {
+    const waiting: PrepView = {
+      format: "cc", phase: "waiting", yourSeat: 0, die: null, startPlayer: null, searching: true,
+      seats: [{
+        username: "Player 0", heroId: deck.decklist.heroId, heroName: deck.heroName,
+        ready: false, connected: true, arenaLocked: false,
+      }, null],
+    };
+    const text = render(waiting, false, deck, { matchmakingActive: false }).replace(/<[^>]*>/g, " ");
+    expect(text).toContain("Searching for a match");
+    expect(render({ ...waiting, searching: undefined }, false).replace(/<[^>]*>/g, " ")).toContain("Open seat");
   });
 
   it("waits for uncached card art before opening the room", () => {

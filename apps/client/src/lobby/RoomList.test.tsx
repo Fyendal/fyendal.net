@@ -142,7 +142,9 @@ describe("RoomList", () => {
     expect(html).toContain(">Player</button>");
     expect(html).toContain(">Bot</button>");
     expect(html).toMatch(/class="opponent-picker-segments" role="group" aria-labelledby="[^"]+"/);
+    expect(html).toContain('class="opponent-picker-private"');
     expect(html).toContain("Private</label>");
+    expect(html).not.toContain("opponent-picker-hint");
     expect(html).not.toContain("Invite friend");
     expect(html.match(/aria-pressed="true"/g)).toHaveLength(1);
     expect(html).toContain('class="home-play-field home-card-pool-field"');
@@ -191,6 +193,7 @@ describe("RoomList", () => {
       const html = renderLocalized(<Home />);
       expect(html).toMatch(/<button[^>]*aria-pressed="true"[^>]*>(?:<span[^>]*><\/span>)?Bot<\/button>/);
       expect(html).toMatch(/role="switch" disabled=""/);
+      expect(html).toContain('class="opponent-picker-private inactive"');
       expect(html).toContain('class="btn-cta">Play vs bot</button>');
       expect(html).toContain('<option value="cc" selected="">Classic Constructed</option>');
     } finally {

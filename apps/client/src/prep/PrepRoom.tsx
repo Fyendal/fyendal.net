@@ -10,7 +10,6 @@ import {
   validatePresentation,
   validateArena,
 } from "@fyendal/cards/client";
-import { deckCardPool, pairableSearchers } from "../matchmaking/pairableSearchers.js";
 import { useStore } from "../store.js";
 import {
   CARD_PREVIEW_HEIGHT,
@@ -141,7 +140,7 @@ function FirstPlayerChoice({
 export function PrepRoom() {
   const intl = useIntl();
   const {
-    prepDeck, prep, roomCode, queueCounts, matchmakingActive, matchAcceptanceRole,
+    prepDeck, prep, roomCode, matchmakingActive, matchAcceptanceRole,
     acceptMatch, declineMatch, playBotFromPrep, presentArena, presentDeck, prepUnready,
     chooseFirst, leave, selectPrepMatchup, setDeckArt, betaTester,
     deckSwitch, deckSwitchLocked, dismissDeckSwitchLocked,
@@ -149,7 +148,6 @@ export function PrepRoom() {
     prepDeck: state.prepDeck,
     prep: state.prep,
     roomCode: state.roomCode,
-    queueCounts: state.queueCounts,
     matchmakingActive: state.matchmakingActive,
     matchAcceptanceRole: state.matchAcceptanceRole,
     acceptMatch: state.acceptMatch,
@@ -216,9 +214,11 @@ export function PrepRoom() {
   const opponentPresent = prep
     ? prep.seats[1 - prep.yourSeat] !== null
     : false;
+  // The server's flag survives a refresh; the local one covers the moment before it arrives.
+  const searching = prep?.searching === true || (matchmakingActive && !opponentPresent);
   const botNudgeEligible = shouldOfferBotPractice({
     format: prepFormat,
-    matchmakingActive,
+    matchmakingActive: searching,
     opponentPresent,
   });
   const botNudgeKey = botNudgeEligible && prepDeck
@@ -245,9 +245,6 @@ export function PrepRoom() {
     OPPONENT_ARENA_IMAGE_TIMEOUT_MS,
   );
   const opponentHeroId = opponentSeat?.heroId ?? null;
-  const otherPlayersInQueue = prepFormat
-    ? pairableSearchers(queueCounts[prepFormat], prep?.cardPoolMode ?? "legal", deckCardPool(prepDeck), matchmakingActive)
-    : 0;
 
   // The opponent's hero is visible from pairing onward; warm it without a gate.
   useEffect(() => {
@@ -552,13 +549,12 @@ export function PrepRoom() {
   ) : null;
   const openSeat = roomCode && !opp && prep?.botGame !== true ? (
     <OpenSeatPanel
-      mode={matchmakingActive ? "search" : "invite"}
+      mode={searching ? "search" : "invite"}
       roomCode={roomCode}
       format={format}
       cardPoolMode={prep?.cardPoolMode ?? "legal"}
       deckId={prepDeck.id}
       switching={deckLoading}
-      searchers={otherPlayersInQueue}
     />
   ) : null;
 
@@ -802,15 +798,7 @@ export function PrepRoom() {
         ) : openSeat ?? (!mobilePrepLayout ? (
           <section className="panel prep-opponent">
             <h3 className="panel-title">{intl.formatMessage({ id: "prep.matchup" })}</h3>
-            <p className="muted">
-              {intl.formatMessage({ id: "prep.waitingOpponent" })}
-              {otherPlayersInQueue > 0
-                ? ` (${intl.formatMessage(
-                    { id: "prep.othersInQueue" },
-                    { count: otherPlayersInQueue },
-                  )})`
-                : null}
-            </p>
+            <p className="muted">{intl.formatMessage({ id: "prep.waitingOpponent" })}</p>
           </section>
         ) : null)}
 

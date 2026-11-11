@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { precon } from "@fyendal/cards";
-import { PgRoomStore } from "../store.js";
+import { decodeServerMessage } from "@fyendal/protocol";
+import { PgRoomStore, prepViewFor } from "../store.js";
 import { DECKS_LOCKED, encodeWireMessage } from "../errors.js";
 import type { Queryable } from "../db.js";
 import { freshDb } from "./testdb.js";
@@ -70,10 +71,15 @@ describe("changing decks while the seat is open", () => {
       deckId: "precon-asr", deckName: "ASR",
     })).toMatchObject({ ok: true });
 
+    const waiting = prepViewFor((await store.getRoom(opened.code))!, 0);
+    expect(waiting.searching).toBe(true);
+    expect(decodeServerMessage({ type: "prep-state", prep: waiting, version: 1 })).not.toBeNull();
+
     const second = await searcher("Second", "precon-asb");
     const matched = await second.queue();
     if (!matched.ok || matched.kind !== "matched") throw new Error("search did not pair");
     const room = (await store.getRoom(matched.code))!;
+    expect(prepViewFor(room, 0).searching).toBeUndefined();
     const firstSeat = room.seats.find((member) => member?.userId === first.userId)!;
     expect(firstSeat).toMatchObject({ deckId: "precon-asr", heroId: precon("precon-asr")!.pool.heroId });
   });
@@ -107,6 +113,7 @@ describe("changing decks while the seat is open", () => {
 
   it("describes an open invite or matchmaking room for a friend invite", async () => {
     const host = await store.createRoom("cc", { deckId: "precon-asb" }, "private", "future");
+    expect(prepViewFor((await store.getRoom(host.code))!, 0).searching).toBeUndefined();
     expect(await store.friendInviteRoom(host.code, { token: host.token }))
       .toEqual({ ok: true, room: { code: host.code, format: "cc", cardPoolMode: "future" } });
     const search = await store.createRoom("cc", { deckId: "precon-asb", fromQueue: true });

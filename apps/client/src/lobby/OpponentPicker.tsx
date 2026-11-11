@@ -22,50 +22,41 @@ export function OpponentPicker({
 
   return (
     <div className="opponent-picker">
-      <div className="opponent-picker-row">
-        <div
-          className="opponent-picker-segments"
-          role="group"
-          aria-labelledby={labelledBy}
-          aria-label={labelledBy ? undefined : intl.formatMessage({ id: "lobby.home.opponent" })}
+      <div
+        className="opponent-picker-segments"
+        role="group"
+        aria-labelledby={labelledBy}
+        aria-label={labelledBy ? undefined : intl.formatMessage({ id: "lobby.home.opponent" })}
+      >
+        <button
+          type="button"
+          aria-pressed={!bot}
+          disabled={disabled}
+          onClick={() => onChange(privateRoom ? "invite-friend" : "find-match")}
         >
-          <button
-            type="button"
-            aria-pressed={!bot}
-            disabled={disabled}
-            onClick={() => onChange(privateRoom ? "invite-friend" : "find-match")}
-          >
-            <UiIcon name="friends" />
-            {intl.formatMessage({ id: "lobby.home.opponentPlayer" })}
-          </button>
-          <button type="button" aria-pressed={bot} disabled={disabled} onClick={() => onChange("bot")}>
-            <UiIcon name="bot" />
-            {intl.formatMessage({ id: "lobby.home.opponentBot" })}
-          </button>
-        </div>
-        <label className="opponent-picker-private">
-          <input
-            type="checkbox"
-            role="switch"
-            checked={!bot && privateRoom}
-            disabled={disabled || bot}
-            onChange={(event) => {
-              setPrivateRoom(event.target.checked);
-              onChange(event.target.checked ? "invite-friend" : "find-match");
-            }}
-          />
-          <span className="opponent-picker-switch" aria-hidden="true" />
-          <UiIcon name="lock" />
-          {intl.formatMessage({ id: "lobby.home.private" })}
-        </label>
+          <UiIcon name="friends" />
+          {intl.formatMessage({ id: "lobby.home.opponentPlayer" })}
+        </button>
+        <button type="button" aria-pressed={bot} disabled={disabled} onClick={() => onChange("bot")}>
+          <UiIcon name="bot" />
+          {intl.formatMessage({ id: "lobby.home.opponentBot" })}
+        </button>
       </div>
-      <p className="opponent-picker-hint">
-        {intl.formatMessage({ id: bot
-          ? "lobby.home.hint.bot"
-          : mode === "invite-friend"
-            ? "lobby.home.hint.private"
-            : "lobby.home.hint.public" })}
-      </p>
+      {/* Bot games are always private; keep the space so the segments hold still. */}
+      <label className={`opponent-picker-private${bot ? " inactive" : ""}`}>
+        <input
+          type="checkbox"
+          role="switch"
+          checked={!bot && privateRoom}
+          disabled={disabled || bot}
+          onChange={(event) => {
+            setPrivateRoom(event.target.checked);
+            onChange(event.target.checked ? "invite-friend" : "find-match");
+          }}
+        />
+        <span className="opponent-picker-switch" aria-hidden="true" />
+        {intl.formatMessage({ id: "lobby.home.private" })}
+      </label>
     </div>
   );
 }

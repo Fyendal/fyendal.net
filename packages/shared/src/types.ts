@@ -1038,6 +1038,8 @@ export interface PrepView {
   cardPoolMode?: Exclude<CardPoolMode, "legal">;
   /** This room has a synthetic AI opponent and is deleted when its human ends it. */
   botGame?: boolean;
+  /** Your seat came from matchmaking and is still waiting to be paired. */
+  searching?: true;
   seats: [PrepSeatView | null, PrepSeatView | null];
   yourSeat: number;
   /** your saved deck, cc/silver-age only (for loading the sideboarding pool after a reconnect) */

@@ -1813,7 +1813,7 @@ function prepSeat(value: unknown): boolean {
 
 function prepView(value: unknown): value is PrepView {
   const prep = object(value);
-  if (!prep || !exactKeys(prep, ["format", "seats", "yourSeat", "yourDeckId", "die", "startPlayer", "botGame", "cardPoolMode", "deadlineAt", "deadlinePhase", "phase", "yourArena", "yourPresentedDeck"], ["format", "seats", "yourSeat", "die", "startPlayer", "phase"])) return false;
+  if (!prep || !exactKeys(prep, ["format", "seats", "yourSeat", "yourDeckId", "die", "startPlayer", "botGame", "searching", "cardPoolMode", "deadlineAt", "deadlinePhase", "phase", "yourArena", "yourPresentedDeck"], ["format", "seats", "yourSeat", "die", "startPlayer", "phase"])) return false;
   let dieValid = prep.die === null;
   if (!dieValid) {
     const die = object(prep.die);
@@ -1826,6 +1826,8 @@ function prepView(value: unknown): value is PrepView {
     && prep.seats.every((item) => item === null || prepSeat(item)) && seat(prep.yourSeat)
     && optional(prep.yourDeckId, id)
     && optional(prep.botGame, (v): v is boolean => typeof v === "boolean")
+    && optional(prep.searching, (v): v is true => v === true)
+    && (prep.searching === undefined || prep.phase === "waiting")
     && optional(prep.cardPoolMode, (v): v is "future" | "open" => v === "future" || v === "open")
     && optional(prep.deadlineAt, nonNegativeInteger)
     && (prep.phase === "waiting" || matchPrepPhase(prep.phase))

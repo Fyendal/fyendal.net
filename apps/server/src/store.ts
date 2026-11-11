@@ -5152,6 +5152,7 @@ export function prepViewFor(room: RoomRow, seat: number): PrepView {
     format: room.format,
     ...(room.cardPoolMode === "legal" ? {} : { cardPoolMode: room.cardPoolMode }),
     ...(room.seats.some((member) => member?.controller === "bot") ? { botGame: true } : {}),
+    ...(room.seats[seat]?.fromQueue && room.seats[1 - seat] === null ? { searching: true as const } : {}),
     phase: prepPhase(room),
     ...(room.seats[seat]?.presented ? { yourPresentedDeck: [...room.seats[seat]!.presented!.deck] } : {}),
     ...(room.prep?.arenas[seat] ? { yourArena: room.prep.arenas[seat]! } : {}),

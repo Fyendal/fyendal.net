@@ -34940,24 +34940,6 @@
       "value": "Create room"
     }
   ],
-  "lobby.home.hint.bot": [
-    {
-      "type": 0,
-      "value": "Pick a bot to practice against next."
-    }
-  ],
-  "lobby.home.hint.private": [
-    {
-      "type": 0,
-      "value": "Only players you invite can join."
-    }
-  ],
-  "lobby.home.hint.public": [
-    {
-      "type": 0,
-      "value": "You'll be matched with the next player who searches. Friends can also join from your room link."
-    }
-  ],
   "lobby.home.importCc": [
     {
       "type": 0,
@@ -36270,12 +36252,6 @@
       "value": "No friends yet."
     }
   ],
-  "prep.openSeat.nobodySearching": [
-    {
-      "type": 0,
-      "value": "No one else is searching yet."
-    }
-  ],
   "prep.openSeat.offline": [
     {
       "type": 0,
@@ -36288,7 +36264,7 @@
       "value": "Or invite a friend"
     }
   ],
-  "prep.openSeat.searchHint": [
+  "prep.openSeat.searchStatus": [
     {
       "type": 0,
       "value": "You'll be matched automatically when another player searches."
@@ -36362,38 +36338,6 @@
     {
       "type": 0,
       "value": "All matchups"
-    }
-  ],
-  "prep.othersInQueue": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " other in queue"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " others in queue"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
     }
   ],
   "prep.pitch.blue": [

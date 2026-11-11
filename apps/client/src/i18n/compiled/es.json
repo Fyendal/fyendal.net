@@ -35850,24 +35850,6 @@
       "value": "Crear sala"
     }
   ],
-  "lobby.home.hint.bot": [
-    {
-      "type": 0,
-      "value": "A continuación eliges un bot para practicar."
-    }
-  ],
-  "lobby.home.hint.private": [
-    {
-      "type": 0,
-      "value": "Solo pueden unirse los jugadores que invites."
-    }
-  ],
-  "lobby.home.hint.public": [
-    {
-      "type": 0,
-      "value": "Te emparejaremos con el siguiente jugador que busque. Tus amigos también pueden unirse con el enlace de la sala."
-    }
-  ],
   "lobby.home.importCc": [
     {
       "type": 0,
@@ -37180,12 +37162,6 @@
       "value": "Aún no tienes amigos."
     }
   ],
-  "prep.openSeat.nobodySearching": [
-    {
-      "type": 0,
-      "value": "Nadie más está buscando todavía."
-    }
-  ],
   "prep.openSeat.offline": [
     {
       "type": 0,
@@ -37198,7 +37174,7 @@
       "value": "O invita a un amigo"
     }
   ],
-  "prep.openSeat.searchHint": [
+  "prep.openSeat.searchStatus": [
     {
       "type": 0,
       "value": "Te emparejaremos automáticamente cuando otro jugador busque."
@@ -37272,38 +37248,6 @@
     {
       "type": 0,
       "value": "Todos los enfrentamientos"
-    }
-  ],
-  "prep.othersInQueue": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " más en la cola"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " más en la cola"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
     }
   ],
   "prep.pitch.blue": [
