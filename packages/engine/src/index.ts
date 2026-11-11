@@ -6,7 +6,7 @@ import { assignDefenders, stageDefenders } from "./defense.js";
 import { scriptOf } from "./cardProperties.js";
 import { gameLogMessage, logCardValue, logPlayerValue, logPublic, nameOf } from "./gameLog.js";
 import { checkWin } from "./win.js";
-import { currentLink, findCardAnywhere, opponent } from "./zoneQueries.js";
+import { currentLink, defendingSeatOf, findCardAnywhere, opponent } from "./zoneQueries.js";
 import { closeChain } from "./combatChain.js";
 import {
   activateDefenseAbility,
@@ -691,8 +691,8 @@ export function applyIntent(
     }
     case "activate-ability": {
       const ai = intent.abilityIndex ?? 0;
-      const defending = next.chain.some((link) => link.defendingCards.some(
-        (card) => card.instanceId === intent.sourceInstanceId && card.owner === seat,
+      const defending = next.chain.some((link) => defendingSeatOf(link) === seat && link.defendingCards.some(
+        (card) => card.instanceId === intent.sourceInstanceId,
       ));
       if (next.phase === "reaction" || next.phase === "defend") {
         err = defending

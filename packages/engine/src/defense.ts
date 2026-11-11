@@ -38,6 +38,7 @@ import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./st
 
 import {
   currentLink,
+  defendingSeatOf,
   findCardAnywhere,
   findPermanent,
   opponent,
@@ -382,7 +383,7 @@ function mirageLayers(state: GameStateInternal,
     ));
     return [{
       sourceInstanceId: card.instanceId,
-      seat: card.owner,
+      seat: defendingSeatOf(link),
       triggerIndex: -12,
       label: "Mirage — destroy this",
       optional: false,
@@ -418,7 +419,7 @@ export function resolveMirageLayer(
     ));
     return;
   }
-  runtime.makeCtx(state, card.owner, card, link).destroyDefendingCard(sourceInstanceId);
+  runtime.makeCtx(state, defendingSeatOf(link), card, link).destroyDefendingCard(sourceInstanceId);
 }
 
 /** Resolve Spectra's triggered layer: destroy its source (CR 8.3.14b). An
@@ -544,14 +545,15 @@ function collectDefendEventLayers(
     undefined,
     { defenderInstanceIds: defenders.map(({ card }) => card.instanceId) },
   );
+  const defenderSeat = defendingSeatOf(link);
   for (const { card } of defenders) {
     const script = scriptOf(state, card.cardId, card);
     if (!script?.onDefend) continue;
-    const ctx = runtime.makeCtx(state, card.owner, card, link);
+    const ctx = runtime.makeCtx(state, defenderSeat, card, link);
     if (script.canTriggerOnDefend && !script.canTriggerOnDefend(ctx)) continue;
-    appendTriggerLayer(groups, card.owner, {
+    appendTriggerLayer(groups, defenderSeat, {
       sourceInstanceId: card.instanceId,
-      seat: card.owner,
+      seat: defenderSeat,
       triggerIndex: -4,
       label: "When this defends",
       optional: false,

@@ -51,6 +51,7 @@ import {
 import {
   chainLinkForAttack,
   currentLink,
+  defendingSeatOf,
   findCard,
   findCardAnywhere,
   findPermanent,
@@ -1004,10 +1005,11 @@ export function makeCtx(
         const card = removeFromArray(chainLink.defendingCards, instanceId);
         if (!card) continue;
         runtime.commands.moveToGraveyard(state, card, "chain", seat, undefined, true);
-        runtime.commands.fireLeaveCombatChain(state, card.owner, card, "defending", true);
+        const defenderSeat = defendingSeatOf(chainLink);
+        runtime.commands.fireLeaveCombatChain(state, defenderSeat, card, "defending", true);
         logPublic(state, cardDestroyedLogMessage(state, card.cardId));
-        runtime.events.runHook(state, card.owner, card, "onDestroyed", chainLink);
-        runtime.events.fireFriendlyDestroyed(state, card.owner, card, seat);
+        runtime.events.runHook(state, defenderSeat, card, "onDestroyed", chainLink);
+        runtime.events.fireFriendlyDestroyed(state, defenderSeat, card, seat);
         return true;
       }
       return false;
@@ -2107,8 +2109,10 @@ export function makeCtx(
       }
       let chainCard: CardInstance | undefined;
       let defendingCard: CardInstance | undefined;
+      let defenderSeat: number | undefined;
       for (const link of state.chain) {
         const defending = removeFromArray(link.defendingCards, self.instanceId);
+        if (defending && !defendingCard) defenderSeat = defendingSeatOf(link);
         defendingCard ??= defending;
         chainCard ??= defending ?? removeFromArray(link.reactions, self.instanceId);
       }
@@ -2135,7 +2139,7 @@ export function makeCtx(
         runtime.commands.fireLeaveCombatChain(state, attackerSeat, card, "attacking");
       }
       if (!removed && card === defendingCard) {
-        runtime.commands.fireLeaveCombatChain(state, card.owner, card, "defending");
+        runtime.commands.fireLeaveCombatChain(state, defenderSeat ?? card.owner, card, "defending");
       }
       return true;
     },

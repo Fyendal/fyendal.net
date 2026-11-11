@@ -25,7 +25,7 @@ import {
   modifierAppliesToDefense,
 } from "./combatModifiers.js";
 import type { BasePowerSource, CardInstance, ChainLinkState, CombatValueModifier, Modifier, PlayerState } from "./state.js";
-import { findCardAnywhere, opponent } from "./zoneQueries.js";
+import { defendingSeatOf, findCardAnywhere, opponent } from "./zoneQueries.js";
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 
@@ -36,7 +36,7 @@ function matchingOneShotDefenseCards(
   defenders: readonly CardInstance[],
 ): CardInstance[] {
   let matching = defenders.filter((card) => {
-    if (modifier.seat !== card.owner) return false;
+    if (modifier.seat !== defendingSeatOf(link)) return false;
     const equipment = link.defendingEquipment.some(
       (candidate) => candidate.instanceId === card.instanceId,
     );
@@ -86,7 +86,7 @@ export function applyOneShotDefenseModifiers(
         id: state.nextModifierId++,
         sourceInstanceId: modifier.sourceInstanceId,
         ...(modifier.sourceCardId ? { sourceCardId: modifier.sourceCardId } : {}),
-        seat: card.owner,
+        seat: defendingSeatOf(link),
         scope: "combat-chain",
         defense: modifier.defense,
         appliesToInstanceId: card.instanceId,
@@ -514,7 +514,7 @@ function attackValueAdjustments(
   }
   for (const source of link.defendingCards) {
     const hook = scriptOf(state, source.cardId, source)?.modifyOpposingAttack;
-    if (hook) add(source, hook(runtime.makeCtx(state, source.owner, source, link), link.attackingCard));
+    if (hook) add(source, hook(runtime.makeCtx(state, defenderSeat, source, link), link.attackingCard));
   }
 
   for (const modifier of state.modifiers) {
@@ -582,7 +582,7 @@ function defendingCardModifiers(
       )
     ) return false;
     if (
-      modifier.seat !== card.owner ||
+      modifier.seat !== defendingSeatOf(link) ||
       !modifierAppliesToDefense(state, modifier, data, color, card)
     ) return false;
     if (!modifier.appliesToFirstDefenderOnly) return true;
@@ -666,7 +666,7 @@ export function defenseValueModifiers(
       defendingCardDefenseAdjustment(
         link,
         scriptOf(state, card.cardId, card)?.modifyDefense?.(
-          runtime.makeCtx(state, card.owner, card, link),
+          runtime.makeCtx(state, defendingSeatOf(link), card, link),
         ) ?? 0,
       ),
     );
@@ -811,7 +811,7 @@ export function currentPowerOf(
       modifier.attack &&
       !modifier.consumed &&
       (modifier.scope === "until-end-of-turn" || modifier.scope === "static") &&
-      modifier.seat === card.owner &&
+      modifier.seat === defenderSeat &&
       modifierAppliesToDefense(state, modifier, data, color, card)
     ) power += modifier.attack;
   }
@@ -1026,7 +1026,7 @@ function defendingCardDefense(
   let defense = defendingCardBaseDefense(
     link,
     printed,
-    baseDefenseOf(state, runtime, card.owner, card, raw),
+    baseDefenseOf(state, runtime, defendingSeatOf(link), card, raw),
   );
   defense += defendingCardDefenseAdjustment(link, Number(card.counters?.defense ?? 0));
   for (const source of attackingDefenseModifierSources(state, link)) {
@@ -1044,7 +1044,7 @@ function defendingCardDefense(
   defense += defendingCardDefenseAdjustment(
     link,
     scriptOf(state, card.cardId, card)?.modifyDefense?.(
-      runtime.makeCtx(state, card.owner, card, link),
+      runtime.makeCtx(state, defendingSeatOf(link), card, link),
     ) ?? 0,
   );
   for (const modifier of activeModifiers(state, link, ["chain-link", "until-end-of-turn"])) {
@@ -1085,16 +1085,16 @@ export function noteAttackDefendedBy(
 ): boolean {
   const defendingData = dataOf(state, defending.cardId);
   const defendingColor = cardColorOf(state, defending);
+  const defender = state.players[defendingSeatOf(link)] as PlayerState;
   if (defendingColor > 0) {
-    const owner = state.players[defending.owner] as PlayerState;
-    owner.flags[`defendedPitch:${defendingColor}`] =
-      (Number(owner.flags[`defendedPitch:${defendingColor}`]) || 0) + 1;
+    defender.flags[`defendedPitch:${defendingColor}`] =
+      (Number(defender.flags[`defendedPitch:${defendingColor}`]) || 0) + 1;
   }
   if (
     defendingData.cardType === "action" &&
     (defendingData.subtypes ?? []).includes("attack")
   ) {
-    (state.players[defending.owner] as PlayerState).flags.defendedWithAttackActionThisTurn = true;
+    defender.flags.defendedWithAttackActionThisTurn = true;
   }
   const defense = link.defendingEquipment.some(
     (card) => card.instanceId === defending.instanceId,
@@ -1253,7 +1253,7 @@ export function stagedDefenseTotal(
         id: previewId--,
         sourceInstanceId: modifier.sourceInstanceId,
         ...(modifier.sourceCardId ? { sourceCardId: modifier.sourceCardId } : {}),
-        seat: card.owner,
+        seat: defendingSeatOf(stagedLink),
         scope: "combat-chain",
         defense: modifier.defense,
         appliesToInstanceId: card.instanceId,

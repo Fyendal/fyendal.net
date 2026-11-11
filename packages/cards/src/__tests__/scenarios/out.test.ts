@@ -796,6 +796,31 @@ describe("OUT — rules regression coverage", () => {
       .expectNoLegalPlay("cut through|1");
   });
 
+  describe("an Infiltrated defense reaction defends for its controller", () => {
+    function infiltrated(reaction: string, attack: string) {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", hand: ["infiltrate|1"], deck: Array(6).fill(BLUE) },
+          { hero: "dorinthea", hand: [], deck: [reaction, attack] },
+        ],
+      });
+      g.play("infiltrate|1").blockWith().settle().endTurn();
+      g.play(attack).blockWith().passPriority();
+      return g.react(reaction);
+    }
+
+    it("Drag Down weakens the opposing attack", () => {
+      infiltrated("drag down|1", "snatch|1").settle().expectLife(0, 19);
+    });
+
+    it("That All You Got? draws for its controller when the chain closes", () => {
+      const g = infiltrated("that all you got?|2", "wounding blow|3");
+      const hands = g.state.players.map((player) => player.hand.length);
+      while (g.state.chain.length > 0) g.passPriority();
+      g.expectHandSize(0, hands[0]! + 1).expectHandSize(1, hands[1]!);
+    });
+  });
+
   it("Redback Shroud reduces the next attack reaction's cost", () => {
     const g = scenario({
       seats: [

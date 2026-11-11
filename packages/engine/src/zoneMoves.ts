@@ -26,6 +26,7 @@ import type { CardInstance, PlayerState } from "./state.js";
 import type { TriggerEventContext } from "./eventTypes.js";
 import {
   currentLink,
+  defendingSeatOf,
   findPermanent,
   removeFromArray,
   severDefendingEquipment,
@@ -485,9 +486,9 @@ export function destroyControlledCard(
       return true;
     }
 
-    const defending = link.defendingCards.find(
-      (candidate) => candidate.owner === seat && candidate.instanceId === card.instanceId,
-    );
+    const defending = defendingSeatOf(link) === seat
+      ? link.defendingCards.find((candidate) => candidate.instanceId === card.instanceId)
+      : undefined;
     if (defending) {
       removeFromArray(link.defendingCards, defending.instanceId);
       moveToGraveyard(state, runtime, defending, "chain", seat, undefined, true);
@@ -784,8 +785,10 @@ export function banishCard(
   // A resolving instant/reaction is represented on both its stack layer and
   // the combat-chain link. Explicitly moving it must clear both copies.
   let defendingCard: CardInstance | undefined;
+  let defenderSeat: number | undefined;
   for (const link of state.chain) {
     const defending = removeFromArray(link.defendingCards, instanceId);
+    if (defending && !defendingCard) defenderSeat = defendingSeatOf(link);
     defendingCard ??= defending;
     const card = defending
       ?? removeFromArray(link.defendingEquipment, instanceId)
@@ -815,7 +818,7 @@ export function banishCard(
   applyBanishVisibility(card);
   enterBanish(state, runtime, card, fromZone, causedBySeat, batch);
   if (fromZone === "chain" && card === defendingCard) {
-    fireLeaveCombatChain(state, runtime, card.owner, card, "defending");
+    fireLeaveCombatChain(state, runtime, defenderSeat ?? card.owner, card, "defending");
   }
   if (fromZone === "deck" && !card.faceDown) {
     runtime.events.queueTriggeredEvent(

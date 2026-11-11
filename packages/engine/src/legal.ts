@@ -16,7 +16,7 @@ import {
   scriptOf,
   veilBlocksDefender,
 } from "./cardProperties.js";
-import { currentLink, findCardAnywhere, heroSoulCards } from "./zoneQueries.js";
+import { currentLink, defendingSeatOf, findCardAnywhere, heroSoulCards } from "./zoneQueries.js";
 import { enumeratePitchSequences } from "./pitchSequences.js";
 import {
   attackablePermanents,
@@ -836,7 +836,7 @@ function defendingCardAbilityIntents(
   if (opposingInstantsProhibited(state, player.seat)) return intents;
   for (const link of state.chain) {
     for (const card of link.defendingCards) {
-      if (card.owner !== player.seat || activatedAbilitiesSuppressed(state, card)) continue;
+      if (defendingSeatOf(link) !== player.seat || activatedAbilitiesSuppressed(state, card)) continue;
       const ability = scriptOf(state, card.cardId, card)?.defenseAbility;
       if (!ability || (ability.oncePerTurn && player.flags[`defAbility:${card.instanceId}`])) continue;
       if (ability.discard !== 1) continue;

@@ -20,7 +20,7 @@ import {
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { createTokenFor, createTokensFor } from "./tokens.js";
 import { destroyPermanent, fireLeaveCombatChain, moveToGraveyard } from "./zoneMoves.js";
-import { currentLink, findCardAnywhere, findPermanent, removeFromArray } from "./zoneQueries.js";
+import { currentLink, defendingSeatOf, findCardAnywhere, findPermanent, removeFromArray } from "./zoneQueries.js";
 import { drawCards } from "./cardLifecycle.js";
 import { queuedAttackObjects } from "./attackQueue.js";
 import { takeAttackLayerOrigin } from "./stackCore.js";
@@ -1608,7 +1608,7 @@ export function beginHeroDamage(state: GameStateInternal,
     const transient = [
       ...state.resolving.filter((card) => card.owner === target.seat),
       ...(link?.attackingCard.owner === target.seat ? [link.attackingCard] : []),
-      ...(link?.defendingCards.filter((card) => card.owner === target.seat) ?? []),
+      ...(link && defendingSeatOf(link) === target.seat ? link.defendingCards : []),
     ];
     const seen = new Set<number>();
     const activePrevention = transient.reduce((sum, source) => {

@@ -3,7 +3,7 @@ import { heroAbilitiesDisabled } from "./stateQueries.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardScript } from "./scripts.js";
 import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
-import { findCardAnywhere, globalCardInstances } from "./zoneQueries.js";
+import { defendingSeatOf, findCardAnywhere, globalCardInstances } from "./zoneQueries.js";
 
 /** Permanents controlled by `seat` in the standard iteration order: hero,
  *  weapons, equipment, board. Used for untap, ability enumeration, and
@@ -142,9 +142,9 @@ export function contractObserverSources(state: GameStateInternal, seat: number):
     sources.set(attackingCard.instanceId, attackingCard);
   }
   for (const link of state.chain) {
-    for (const reaction of [...link.defendingCards, ...link.reactions]) {
+    const defending = defendingSeatOf(link) === seat ? link.defendingCards : [];
+    for (const reaction of [...defending, ...link.reactions.filter((card) => card.owner === seat)]) {
       if (
-        reaction.owner === seat &&
         !reaction.faceDown &&
         dataOf(state, reaction.cardId).cardType === "defense-reaction"
       ) sources.set(reaction.instanceId, reaction);

@@ -45,6 +45,7 @@ import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
 
 import {
   currentLink,
+  defendingSeatOf,
   findCard,
   heroSoulCards,
   isPermanentSource,
@@ -919,7 +920,7 @@ export function activateDefenseAbility(
     candidate.defendingCards.some((card) => card.instanceId === sourceInstanceId)
   );
   const card = link?.defendingCards.find((candidate) => candidate.instanceId === sourceInstanceId);
-  if (!link || !card || card.owner !== seat) return "source is not defending for you";
+  if (!link || !card || defendingSeatOf(link) !== seat) return "source is not defending for you";
   if (activatedAbilitiesSuppressed(state, card)) return "activated abilities are suppressed";
   const script = scriptOf(state, card.cardId, card);
   const ability = script?.defenseAbility;

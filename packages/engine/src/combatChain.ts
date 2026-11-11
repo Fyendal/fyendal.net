@@ -26,7 +26,7 @@ import {
 } from "./gameLog.js";
 import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
 
-import { findCardAnywhere, severDefendingEquipment } from "./zoneQueries.js";
+import { defendingSeatOf, findCardAnywhere, severDefendingEquipment } from "./zoneQueries.js";
 import {
   destroyPermanent,
   enterBanish,
@@ -127,15 +127,15 @@ export function finishLinkResolution(state: GameStateInternal,
       runtime.makeCtx(state, link.attacker, source, link),
     );
   }
+  const defenderSeat = defendingSeatOf(link);
   const linkParticipants = [
-    link.attackingCard,
-    ...link.defendingCards,
-    ...link.defendingEquipment,
-    ...link.reactions,
+    { source: link.attackingCard, seat: link.attacker },
+    ...[...link.defendingCards, ...link.defendingEquipment].map((source) => ({ source, seat: defenderSeat })),
+    ...link.reactions.map((source) => ({ source, seat: source.owner })),
   ];
-  for (const source of linkParticipants) {
+  for (const { source, seat } of linkParticipants) {
     scriptOf(state, source.cardId, source)?.onChainLinkResolved?.(
-      runtime.makeCtx(state, source.owner, source, link),
+      runtime.makeCtx(state, seat, source, link),
     );
   }
   // Delayed effects may mark attack-action cards on the active link to return
@@ -246,7 +246,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
   for (const [link, defenders] of defendingCloseHooks) {
     for (const card of defenders) {
       scriptOf(state, card.cardId, card)?.onDefendingCombatChainClosed?.(
-        runtime.makeCtx(state, card.owner, card, link),
+        runtime.makeCtx(state, defendingSeatOf(link), card, link),
       );
     }
   }
@@ -313,7 +313,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
       } else {
         moveToGraveyard(state, runtime, c, "chain", undefined, undefined, true);
       }
-      fireLeaveCombatChain(state, runtime, c.owner, c, "defending");
+      fireLeaveCombatChain(state, runtime, defendingSeatOf(link), c, "defending");
     }
     for (const c of link.reactions) {
       moveToGraveyard(state, runtime, c);

@@ -12,7 +12,7 @@ import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, ChainLinkState, Modifier, PlayerState, StackLayer } from "./state.js";
 import { destroyControlledCard, destroyPermanent, enterBanish } from "./zoneMoves.js";
-import { currentLink, findCardAnywhere, opponent, removeFromArray } from "./zoneQueries.js";
+import { currentLink, defendingSeatOf, findCardAnywhere, opponent, removeFromArray } from "./zoneQueries.js";
 import type { MeldSide, PlayableZone } from "@fyendal/shared";
 import { clearPlayFromZoneGrant, noteActionPlayedOrActivated } from "./cardLifecycle.js";
 import {
@@ -1154,7 +1154,7 @@ export function controlledCostCards(state: GameStateInternal, player: PlayerStat
         link.flags.attackGone !== true
         ? [link.attackingCard]
         : []),
-      ...link.defendingCards.filter((card) => card.owner === player.seat),
+      ...(defendingSeatOf(link) === player.seat ? link.defendingCards : []),
       ...link.reactions.filter((card) => card.owner === player.seat),
     ]),
   ];
