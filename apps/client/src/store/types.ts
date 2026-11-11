@@ -299,8 +299,13 @@ export interface StoreState {
   presentArena: (arena: PresentedArena) => void;
   presentDeck: (deck: PresentedDeck) => void;
   prepUnready: () => void;
+  /** A deck switch from its request until the new deck's pool has loaded. */
+  deckSwitch: { deckId: string; deckName: string } | null;
+  /** An opponent took the seat before the requested switch committed. */
+  deckSwitchLocked: boolean;
   /** Swap the seat's saved deck while no opponent has joined. */
-  changeRoomDeck: (deckId: string) => void;
+  changeRoomDeck: (deckId: string, deckName: string) => void;
+  dismissDeckSwitchLocked: () => void;
   inviteFriendToRoom: (username: string) => void;
   chooseFirst: (first: boolean) => void;
   /** True when the command was sent or intentionally queued. */

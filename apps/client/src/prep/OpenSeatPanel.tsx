@@ -8,8 +8,6 @@ import { deckChoicesFor } from "../lobby/DeckGrid.js";
 import { useStore } from "../store.js";
 
 const COPIED_MS = 2_000;
-// A switch ends with the new deck or a server error; this only covers a lost reply.
-const DECK_SWITCH_TIMEOUT_MS = 8_000;
 
 /** Waiting room before an opponent arrives: your seat with a switchable deck,
  *  and the open seat with every way to fill it, including a matchmaking search. */
@@ -19,6 +17,7 @@ export function OpenSeatPanel({
   format,
   cardPoolMode,
   deckId,
+  switching,
   searchers,
 }: {
   mode: "invite" | "search";
@@ -26,13 +25,15 @@ export function OpenSeatPanel({
   format: Format;
   cardPoolMode: CardPoolMode;
   deckId: string;
+  /** A deck switch is loading; the room shows its progress. */
+  switching: boolean;
   /** Other players this search could pair with. */
   searchers: number;
 }) {
   const intl = useIntl();
   const {
     decks, deckPlayedAt, refreshDecks, changeRoomDeck, friends, roomFriendInvites,
-    inviteFriendToRoom, socialError, clearSocialError, setSocialOpen, roomError,
+    inviteFriendToRoom, socialError, clearSocialError, setSocialOpen, deckSwitch,
   } = useStore(useShallow((state) => ({
     decks: state.decks,
     deckPlayedAt: state.deckPlayedAt,
@@ -44,31 +45,20 @@ export function OpenSeatPanel({
     socialError: state.socialError,
     clearSocialError: state.clearSocialError,
     setSocialOpen: state.setSocialOpen,
-    roomError: state.error,
+    deckSwitch: state.deckSwitch,
   })));
   const [copied, setCopied] = useState(false);
-  const [pendingDeck, setPendingDeck] = useState<{ id: string; errorBefore: string | null } | null>(null);
   const [pendingInvite, setPendingInvite] = useState<string | null>(null);
   const searching = mode === "search";
   const url = `${location.origin}/${roomCode}`;
   const canShare = typeof navigator !== "undefined" && typeof navigator.share === "function";
 
   const choices = deckChoicesFor(format, decks, cardPoolMode);
-  const shownDeckId = pendingDeck?.id ?? deckId;
+  const shownDeckId = deckSwitch?.deckId ?? deckId;
   const selected = choices.find((deck) => deck.id === shownDeckId);
   const sortedFriends = useMemo(() => [...friends].sort((a, b) =>
     Number(b.presence === "online") - Number(a.presence === "online")
       || a.username.localeCompare(b.username)), [friends]);
-
-  useEffect(() => {
-    if (pendingDeck === null) return;
-    if (pendingDeck.id === deckId || (roomError !== null && roomError !== pendingDeck.errorBefore)) {
-      setPendingDeck(null);
-      return;
-    }
-    const timer = window.setTimeout(() => setPendingDeck(null), DECK_SWITCH_TIMEOUT_MS);
-    return () => window.clearTimeout(timer);
-  }, [pendingDeck, deckId, roomError]);
 
   useEffect(() => {
     if (pendingInvite && (roomFriendInvites.includes(pendingInvite) || socialError)) {
@@ -97,7 +87,7 @@ export function OpenSeatPanel({
       <div className="open-seat-table">
         <div className="open-seat-you">
           <span className="open-seat-label">{intl.formatMessage({ id: "prep.openSeat.yourDeck" })}</span>
-          <div className="open-seat-deck-picker" aria-busy={pendingDeck !== null}>
+          <div className="open-seat-deck-picker" aria-busy={switching}>
             <DeckDropdown
               decks={choices}
               selected={selected}
@@ -105,9 +95,8 @@ export function OpenSeatPanel({
               deckPlayedAt={deckPlayedAt}
               onOpen={() => { void refreshDecks(true); }}
               onSelect={(id) => {
-                if (id === deckId) return;
-                setPendingDeck({ id, errorBefore: roomError });
-                changeRoomDeck(id);
+                const deck = choices.find((choice) => choice.id === id);
+                if (deck) changeRoomDeck(deck.id, deck.name);
               }}
             />
           </div>

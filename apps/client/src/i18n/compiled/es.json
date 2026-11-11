@@ -36854,6 +36854,46 @@
       "value": "¡Copiado!"
     }
   ],
+  "prep.deckSwitch.loadingDeck": [
+    {
+      "type": 0,
+      "value": "Preparando tu mazo…"
+    }
+  ],
+  "prep.deckSwitch.opponentFirst": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " se unió antes de que cambiara tu mazo, así que jugarás con "
+    },
+    {
+      "type": 1,
+      "value": "deck"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "prep.deckSwitch.showNow": [
+    {
+      "type": 0,
+      "value": "Mostrar cartas ya"
+    }
+  ],
+  "prep.deckSwitch.title": [
+    {
+      "type": 0,
+      "value": "Cargando "
+    },
+    {
+      "type": 1,
+      "value": "deck"
+    }
+  ],
   "prep.defaultDeck": [
     {
       "type": 0,

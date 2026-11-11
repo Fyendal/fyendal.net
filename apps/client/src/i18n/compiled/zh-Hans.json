@@ -34160,6 +34160,46 @@
       "value": "已复制！"
     }
   ],
+  "prep.deckSwitch.loadingDeck": [
+    {
+      "type": 0,
+      "value": "正在准备你的牌组…"
+    }
+  ],
+  "prep.deckSwitch.opponentFirst": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " 在你更换牌组前加入了，你将使用 "
+    },
+    {
+      "type": 1,
+      "value": "deck"
+    },
+    {
+      "type": 0,
+      "value": "。"
+    }
+  ],
+  "prep.deckSwitch.showNow": [
+    {
+      "type": 0,
+      "value": "立即显示卡牌"
+    }
+  ],
+  "prep.deckSwitch.title": [
+    {
+      "type": 0,
+      "value": "正在加载 "
+    },
+    {
+      "type": 1,
+      "value": "deck"
+    }
+  ],
   "prep.defaultDeck": [
     {
       "type": 0,

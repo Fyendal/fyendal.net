@@ -37780,6 +37780,46 @@
       "value": "Copiado!"
     }
   ],
+  "prep.deckSwitch.loadingDeck": [
+    {
+      "type": 0,
+      "value": "Preparando seu deck…"
+    }
+  ],
+  "prep.deckSwitch.opponentFirst": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " entrou antes da troca de deck, então você vai jogar com "
+    },
+    {
+      "type": 1,
+      "value": "deck"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "prep.deckSwitch.showNow": [
+    {
+      "type": 0,
+      "value": "Mostrar cartas agora"
+    }
+  ],
+  "prep.deckSwitch.title": [
+    {
+      "type": 0,
+      "value": "Carregando "
+    },
+    {
+      "type": 1,
+      "value": "deck"
+    }
+  ],
   "prep.defaultDeck": [
     {
       "type": 0,

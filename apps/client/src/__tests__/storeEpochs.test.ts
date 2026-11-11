@@ -2617,3 +2617,83 @@ describe("client connection and account race fences", () => {
     expect(history.replaceState).toHaveBeenLastCalledWith(null, "", "/");
   });
 });
+
+describe("waiting-room deck switch", () => {
+  async function waitingRoom() {
+    const { useStore } = await import("../store.js");
+    const { preconPrepDeck } = await import("../prep/prepDeck.js");
+    useStore.setState({ authToken: "token-a", authUser: "Alice", prepDeck: preconPrepDeck("precon-asb") });
+    useStore.getState().listRooms();
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.sent = [];
+    return { useStore, socket };
+  }
+  const sentTypes = (socket: FakeWebSocket) => socket.sent.map((raw) => (JSON.parse(raw) as { type: string }).type);
+
+  it("stays in flight until the new deck's pool loads, and ignores repeat picks", async () => {
+    const { useStore, socket } = await waitingRoom();
+
+    useStore.getState().changeRoomDeck("precon-asr", "ASR deck");
+    useStore.getState().changeRoomDeck("precon-asr", "ASR deck");
+    expect(sentTypes(socket)).toEqual(["change-deck"]);
+    expect(useStore.getState().deckSwitch).toEqual({ deckId: "precon-asr", deckName: "ASR deck" });
+
+    socket.message({ type: "deck-changed", deckId: "precon-asr" });
+    expect(useStore.getState().deckSwitch).not.toBeNull();
+    await vi.waitFor(() => expect(useStore.getState().prepDeck?.id).toBe("precon-asr"));
+    expect(useStore.getState().deckSwitch).toBeNull();
+  });
+
+  it("explains an opponent who took the seat first instead of showing an error", async () => {
+    const { useStore, socket } = await waitingRoom();
+
+    useStore.getState().changeRoomDeck("precon-asr", "ASR deck");
+    socket.message({ type: "error", code: "DECK_LOCKED", message: "decks lock once an opponent joins" });
+
+    expect(useStore.getState()).toMatchObject({
+      deckSwitch: null,
+      deckSwitchLocked: true,
+      error: null,
+      prepDeck: { id: "precon-asb" },
+    });
+    useStore.getState().dismissDeckSwitchLocked();
+    expect(useStore.getState().deckSwitchLocked).toBe(false);
+  });
+
+  it("ends the switch on any other failure and shows it", async () => {
+    const { useStore, socket } = await waitingRoom();
+
+    useStore.getState().changeRoomDeck("precon-asr", "ASR deck");
+    socket.message({ type: "error", code: "CONFLICT", message: "this search has already ended" });
+
+    expect(useStore.getState()).toMatchObject({
+      deckSwitch: null,
+      deckSwitchLocked: false,
+      error: "this search has already ended",
+    });
+  });
+
+  it("stops waiting when the reply never comes", async () => {
+    vi.useFakeTimers();
+    const { useStore } = await waitingRoom();
+
+    useStore.getState().changeRoomDeck("precon-asr", "ASR deck");
+    vi.advanceTimersByTime(15_000);
+
+    expect(useStore.getState().deckSwitch).toBeNull();
+  });
+
+  it("lets only the latest switch's timer end it", async () => {
+    vi.useFakeTimers();
+    const { useStore, socket } = await waitingRoom();
+
+    useStore.getState().changeRoomDeck("precon-asr", "ASR deck");
+    socket.message({ type: "error", code: "CONFLICT", message: "busy" });
+    vi.advanceTimersByTime(10_000);
+    useStore.getState().changeRoomDeck("precon-asr", "ASR deck");
+    vi.advanceTimersByTime(5_000);
+
+    expect(useStore.getState().deckSwitch).toEqual({ deckId: "precon-asr", deckName: "ASR deck" });
+  });
+});

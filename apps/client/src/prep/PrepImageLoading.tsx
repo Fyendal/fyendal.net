@@ -123,3 +123,62 @@ export function PrepImageLoading({
     </div>
   );
 }
+
+/**
+ * A deck switch inside the room: the arena panel waits in place, so the open
+ * seat and its invites stay on screen. The hero appears once the pool loads.
+ */
+export function PrepDeckSwitchLoading({
+  deckName,
+  heroId,
+  art,
+  progress,
+  onSkip,
+}: {
+  deckName: string;
+  /** Null while the server and pool requests are still in flight. */
+  heroId: string | null;
+  art: CardImageArt | null;
+  progress: CardImagePreload | null;
+  onSkip?: () => void;
+}) {
+  const intl = useIntl();
+  const ratio = progress && progress.total > 0 ? progress.settled / progress.total : 0;
+  return (
+    <div className="prep-deck-switch" role="status">
+      <div
+        className={`prep-image-loading-hero prep-deck-switch-hero${heroId && art ? "" : " pending"}`}
+        style={{ "--prep-load-ratio": ratio } as CSSProperties}
+        aria-hidden="true"
+      >
+        {heroId && art ? (
+          <>
+            <CardArtwork className="prep-image-loading-base" cardId={heroId} artImage={art[heroId]} alt="" />
+            <CardArtwork className="prep-image-loading-fill" cardId={heroId} artImage={art[heroId]} alt="" />
+          </>
+        ) : null}
+      </div>
+      <div className="prep-deck-switch-copy">
+        <p className="prep-deck-switch-title">
+          {intl.formatMessage({ id: "prep.deckSwitch.title" }, { deck: deckName })}
+        </p>
+        <div className={`prep-image-loading-meter${progress ? "" : " indeterminate"}`} aria-hidden="true">
+          <span style={progress ? { transform: `scaleX(${ratio})` } : undefined} />
+        </div>
+        <p className="muted prep-deck-switch-count">
+          {progress
+            ? intl.formatMessage(
+                { id: "prep.imageLoading.progress" },
+                { settled: progress.settled, total: progress.total },
+              )
+            : intl.formatMessage({ id: "prep.deckSwitch.loadingDeck" })}
+        </p>
+        {onSkip ? (
+          <button type="button" className="lobby-create-action" onClick={onSkip}>
+            {intl.formatMessage({ id: "prep.deckSwitch.showNow" })}
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}

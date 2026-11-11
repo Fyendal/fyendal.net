@@ -1318,6 +1318,8 @@ export type ErrorCode =
   | "FRIEND_UNAVAILABLE"
   | "MESSAGE_BOUNDS"
   | "MESSAGE_RATE_LIMITED"
+  /** An opponent took the open seat before a deck switch committed. */
+  | "DECK_LOCKED"
   | "INTERNAL_ERROR";
 /** Operator-authored plain text shown to every visitor. */
 export interface GlobalNotice {

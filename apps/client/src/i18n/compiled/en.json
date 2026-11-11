@@ -35944,6 +35944,46 @@
       "value": "Copied!"
     }
   ],
+  "prep.deckSwitch.loadingDeck": [
+    {
+      "type": 0,
+      "value": "Getting your deck ready…"
+    }
+  ],
+  "prep.deckSwitch.opponentFirst": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
+    {
+      "type": 0,
+      "value": " joined before your deck switched, so you'll play "
+    },
+    {
+      "type": 1,
+      "value": "deck"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "prep.deckSwitch.showNow": [
+    {
+      "type": 0,
+      "value": "Show cards now"
+    }
+  ],
+  "prep.deckSwitch.title": [
+    {
+      "type": 0,
+      "value": "Loading "
+    },
+    {
+      "type": 1,
+      "value": "deck"
+    }
+  ],
   "prep.defaultDeck": [
     {
       "type": 0,

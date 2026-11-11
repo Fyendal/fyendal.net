@@ -50,6 +50,7 @@ function render(
     decks: [], deckPlayedAt: {}, refreshDecks: vi.fn(), changeRoomDeck: vi.fn(),
     friends: [], roomFriendInvites: [], inviteFriendToRoom: vi.fn(),
     socialError: null, clearSocialError: vi.fn(), setSocialOpen: vi.fn(),
+    deckSwitch: null, deckSwitchLocked: false, dismissDeckSwitchLocked: vi.fn(),
     ...overrides,
   });
   return renderToStaticMarkup(<TestI18nProvider><PrepRoom /></TestI18nProvider>);
@@ -251,6 +252,35 @@ describe("preparation stage layout", () => {
     expect(text).toContain("Copy link");
     expect(text).toContain("bob");
     expect(text.indexOf("Searching for a match")).toBeLessThan(text.indexOf("Copy link"));
+  });
+
+  it.each([false, true])("loads a deck switch in place without the arena picker (mobile: %s)", (mobile) => {
+    const html = render(null, mobile, deck, { deckSwitch: { deckId: "precon-asr", deckName: "Next deck" } });
+    const text = html.replace(/<[^>]*>/g, " ");
+    expect(text).toContain("Loading Next deck");
+    expect(text).toContain("Getting your deck ready…");
+    expect(html).not.toContain("prep-card-choice");
+    expect(html).toContain('class="open-seat-deck-picker" aria-busy="true"');
+    expect(html).toContain("Copy link");
+    expect(html).not.toContain("Loading Card Art");
+  });
+
+  it("waits for the seat's new deck before offering arena cards", () => {
+    const prep = pairedPrep("select-arena");
+    prep.botGame = false;
+    prep.yourDeckId = "precon-asr";
+    const html = render(prep, false);
+    expect(html).toContain("prep-deck-switch");
+    expect(html).not.toContain("prep-card-choice");
+  });
+
+  it("says which deck stands when the opponent arrived before the switch", () => {
+    const prep = pairedPrep("select-arena");
+    prep.botGame = false;
+    const html = render(prep, false, deck, { deckSwitchLocked: true });
+    expect(html.replace(/<[^>]*>/g, "").replaceAll("&#x27;", "'"))
+      .toContain(`Player 1 joined before your deck switched, so you'll play ${deck.name}.`);
+    expect(render(null, false, deck, { deckSwitchLocked: true })).not.toContain("prep-deck-notice");
   });
 
   it("waits for uncached card art before opening the room", () => {

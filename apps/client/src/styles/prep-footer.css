@@ -1369,8 +1369,73 @@
   justify-content: center;
 }
 .prep-image-loading-actions > button { min-width: 108px; min-height: 40px; }
+/* The opponent's arrival beat a deck switch: say which deck stands. */
+.prep-deck-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 10px 8px 10px 14px;
+  border: 1px solid #806334;
+  border-radius: 4px;
+  background: #2a1d0e;
+  color: var(--text-primary);
+  font: 14px/1.4 var(--font-lobby-ui);
+}
+.prep-match-accept-prompt .prep-deck-notice { margin-bottom: 14px; text-align: left; }
+.prep-deck-notice button {
+  display: grid;
+  flex: none;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  clip-path: none;
+  background: transparent;
+  color: var(--text-muted);
+}
+.prep-deck-notice button:hover { background: #ffd47914; color: var(--gold); }
+.prep-deck-notice button:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+.prep-deck-notice .ui-icon { width: 16px; height: 16px; }
+
+/* A deck switch keeps the room on screen and waits inside the arena panel. */
+.prep-deck-switch {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  min-height: 190px;
+  padding: 8px 4px 4px;
+}
+.prep-deck-switch-hero.prep-image-loading-hero { flex: none; width: 112px; margin: 0; }
+.prep-deck-switch-hero.pending { background: var(--surface-well); }
+.prep-deck-switch-hero.pending::after { opacity: 0; }
+.prep-deck-switch-copy { display: grid; flex: 1 1 auto; max-width: 340px; min-width: 0; gap: 10px; }
+.prep-deck-switch-title {
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font: 600 15px/1.3 var(--font-lobby-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.prep-deck-switch-count { margin: 0; font: 13px var(--font-lobby-ui); font-variant-numeric: tabular-nums; }
+.prep-deck-switch-copy .lobby-create-action { justify-self: start; }
+/* No count yet: a short bar sweeps until the pool arrives. */
+.prep-image-loading-meter.indeterminate > span {
+  width: 30%;
+  animation: prep-meter-sweep 1.2s ease-in-out infinite;
+}
+@keyframes prep-meter-sweep {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(340%); }
+}
 @media (prefers-reduced-motion: reduce) {
   .prep-image-loading-fill,
   .prep-image-loading-hero::after,
   .prep-image-loading-meter > span { transition: none; }
+  .prep-image-loading-meter.indeterminate > span { width: 100%; opacity: .45; animation: none; }
 }

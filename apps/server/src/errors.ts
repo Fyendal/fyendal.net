@@ -1,5 +1,8 @@
 import type { ErrorCode, ServerMessage } from "@fyendal/shared";
 
+/** A deck switch lost the race with an opponent taking the open seat. */
+export const DECKS_LOCKED = "decks lock once an opponent joins";
+
 export type WireServerMessage = ServerMessage | { type: "error"; message: string };
 
 /** Compatibility classifier while store methods migrate to coded results. */
@@ -13,6 +16,7 @@ function errorCodeFor(message: string): ErrorCode {
   if (message === "room state must be reloaded") return "RESYNC_REQUIRED";
   if (message === "stale room version") return "RESYNC_REQUIRED";
   if (message === "invalid message") return "INVALID_MESSAGE";
+  if (message === DECKS_LOCKED) return "DECK_LOCKED";
   if (message === "internal error") return "INTERNAL_ERROR";
   if (message.includes("presentation") || message.includes("main deck") || message.includes("weapon")) {
     return "INVALID_PRESENTATION";

@@ -17,7 +17,7 @@ import {
 } from "@fyendal/protocol";
 import { isBetaTester } from "./betaTesters.js";
 import { StateLogTransport } from "./stateLogTransport.js";
-import { encodeWireMessage, type WireServerMessage } from "./errors.js";
+import { DECKS_LOCKED, encodeWireMessage, type WireServerMessage } from "./errors.js";
 import { RoomBroadcaster } from "./roomBroadcaster.js";
 import { ConnectionRegistry, type ClientCtx } from "./gateway/connectionSession.js";
 import { composeProductionGateway } from "./gateway/composition.js";
@@ -1224,6 +1224,11 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         const room = await rooms.getRoom(player.code);
         if (!room) {
           send(ws, { type: "error", message: "room not found" });
+          return;
+        }
+        // Skip the deck refresh when the seat is already taken; the store re-checks.
+        if (room.seats.every(Boolean)) {
+          send(ws, { type: "error", message: DECKS_LOCKED });
           return;
         }
         const choice = await resolveChoice(ctx.user, room.format, msg.deckId, room.cardPoolMode);

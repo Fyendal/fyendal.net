@@ -93,6 +93,9 @@ let reconnectAttempts = 0;
 let emoteSequence = 0;
 let viewUpdateSequence = 0;
 const friendInviteTimers = new Map<string, ReturnType<typeof setTimeout>>();
+let deckSwitchSequence = 0;
+/** Longest a deck switch may wait for its reply before the room stops waiting. */
+const DECK_SWITCH_TIMEOUT_MS = 15_000;
 const SOCIAL_ERROR_CODES = new Set([
   "USER_NOT_FOUND",
   "INVALID_FRIEND_REQUEST",
@@ -757,18 +760,27 @@ export const useStore = create<StoreState>((set, get) => {
     if (id.startsWith("precon-")) {
       const { preconPrepDeck } = await import("./prep/prepDeck.js");
       const deck = preconPrepDeck(id);
-      if (deck && prepDeckId === id && isCurrentAuth(request)) set({ prepDeck: deck });
+      if (deck && prepDeckId === id && isCurrentAuth(request)) adoptPrepDeck(deck);
       return;
     }
     const r = await apiDeck(token, id, request.signal);
     if (!isCurrentAuth(request) || load !== prepDeckLoad) return;
     if (r.ok && prepDeckId === id) {
-      set({ prepDeck: r.deck });
+      adoptPrepDeck(r.deck);
     } else if (!r.ok) {
       // surface the failure — otherwise the prep room shows "Loading your deck…"
       // forever; the user can get back with the Cancel button there
       errors.show(r.error);
+      if (get().deckSwitch?.deckId === id) set({ deckSwitch: null });
     }
+  }
+
+  /** The room's pool is loaded; a deck switch ends once its deck arrives. */
+  function adoptPrepDeck(deck: NonNullable<StoreState["prepDeck"]>): void {
+    set({
+      prepDeck: deck,
+      ...(get().deckSwitch?.deckId === deck.id ? { deckSwitch: null } : {}),
+    });
   }
 
   /** Consume a pending decline once another room replaces it. */
@@ -972,6 +984,8 @@ export const useStore = create<StoreState>((set, get) => {
           inviteRoom: null,
           friendInviteTarget: null,
           roomFriendInvites: [],
+          deckSwitch: null,
+          deckSwitchLocked: false,
           error: null,
           queuedFormat: null,
           matchmakingActive: fromMatchmaking,
@@ -1318,6 +1332,12 @@ export const useStore = create<StoreState>((set, get) => {
         joiningRoomCode = null;
         if (SOCIAL_ERROR_CODES.has(msg.code)) {
           set({ socialError: msg.code });
+          break;
+        }
+        // Switch failures arrive as plain errors; none of them leave it in flight.
+        if (get().deckSwitch) set({ deckSwitch: null });
+        if (msg.code === "DECK_LOCKED") {
+          set({ deckSwitchLocked: true });
           break;
         }
         set({ roomStartPending: false });
@@ -1843,7 +1863,18 @@ export const useStore = create<StoreState>((set, get) => {
       }
     },
     prepUnready: () => send({ type: "prep-unready" }),
-    changeRoomDeck: (deckId) => send({ type: "change-deck", deckId }),
+    changeRoomDeck: (deckId, deckName) => {
+      if (get().deckSwitch || get().prepDeck?.id === deckId) return;
+      if (!send({ type: "change-deck", deckId })) return;
+      set({ deckSwitch: { deckId, deckName }, deckSwitchLocked: false });
+      // A lost reply must not pin the room in its switching state; the next
+      // prep-state re-syncs the pool from the seat either way.
+      const sequence = ++deckSwitchSequence;
+      setTimeout(() => {
+        if (sequence === deckSwitchSequence && get().deckSwitch) set({ deckSwitch: null });
+      }, DECK_SWITCH_TIMEOUT_MS);
+    },
+    dismissDeckSwitchLocked: () => set({ deckSwitchLocked: false }),
     inviteFriendToRoom: (username) => {
       set({ socialError: null });
       send({ type: "invite-friend-to-room", username });

@@ -55,6 +55,7 @@ import {
 import { PrepPresentation, type PrepCardArt } from "./PrepPresentation.js";
 import { PrepArtPopover } from "./PrepArtPopover.js";
 import { OpenSeatPanel } from "./OpenSeatPanel.js";
+import { UiIcon } from "../components/UiIcon.js";
 import { hasCardArtChoices, shownCardArt } from "../components/CardArtVariants.js";
 import { useCardArtCatalog } from "../game/cardArtCatalog.js";
 import { PrepArenaCards } from "./PrepArenaCards.js";
@@ -70,6 +71,7 @@ import {
   DECK_IMAGE_TIMEOUT_MS,
   deckPoolCardIds,
   PrepDeckLoading,
+  PrepDeckSwitchLoading,
   PrepImageLoading,
   useDeckImageArt,
 } from "./PrepImageLoading.js";
@@ -142,6 +144,7 @@ export function PrepRoom() {
     prepDeck, prep, roomCode, queueCounts, matchmakingActive, matchAcceptanceRole,
     acceptMatch, declineMatch, playBotFromPrep, presentArena, presentDeck, prepUnready,
     chooseFirst, leave, selectPrepMatchup, setDeckArt, betaTester,
+    deckSwitch, deckSwitchLocked, dismissDeckSwitchLocked,
   } = useStore(useShallow((state) => ({
     prepDeck: state.prepDeck,
     prep: state.prep,
@@ -160,6 +163,9 @@ export function PrepRoom() {
     selectPrepMatchup: state.selectPrepMatchup,
     setDeckArt: state.setDeckArt,
     betaTester: state.betaTester,
+    deckSwitch: state.deckSwitch,
+    deckSwitchLocked: state.deckSwitchLocked,
+    dismissDeckSwitchLocked: state.dismissDeckSwitchLocked,
   })));
   const [sel, setSel] = useState<PrepSelection | null>(null);
   const [restoredPresentationRoom, setRestoredPresentationRoom] = useState<string | null>(null);
@@ -175,6 +181,9 @@ export function PrepRoom() {
   const [confirmingGaps, setConfirmingGaps] = useState<ArenaGap[] | null>(null);
   const [weaponToast, setWeaponToast] = useState<{ message: string; shownAt: number } | null>(null);
   const [matchupBusy, setMatchupBusy] = useState(false);
+  // After the room first renders, deck switches load in place instead of
+  // returning to the full-screen art gate.
+  const [roomShownFor, setRoomShownFor] = useState<string | null>(null);
   const [mobilePrepLayout, setMobilePrepLayout] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 700px)").matches,
   );
@@ -307,12 +316,10 @@ export function PrepRoom() {
   ]);
 
   if (!prepDeck) return <PrepDeckLoading onCancel={leave} />;
+  const roomKey = roomCode ?? "queue";
+  const imagesPending = (!deckImages.done || !deckImageArt) && imageWaitSkippedFor !== deckImageKey;
   // The match-accept dialog lives in this room, so never hide it behind loading.
-  if (
-    (!deckImages.done || !deckImageArt)
-    && imageWaitSkippedFor !== deckImageKey
-    && prep?.phase !== "accept"
-  ) {
+  if (imagesPending && prep?.phase !== "accept" && roomShownFor !== roomKey) {
     return (
       <PrepImageLoading
         heroId={prepDeck.decklist.heroId}
@@ -323,8 +330,14 @@ export function PrepRoom() {
       />
     );
   }
+  if (roomShownFor !== roomKey) setRoomShownFor(roomKey);
+  // The seat's deck changed but its pool has not loaded here yet.
+  const deckOutOfSync = !!prep?.yourDeckId && prep.yourDeckId !== prepDeck.id;
+  // First the server and pool requests, then the new deck's card art.
+  const loadingPool = deckSwitch !== null || deckOutOfSync;
+  const deckLoading = loadingPool || imagesPending;
   // adjust state during render when the pool (re)loads — React-sanctioned pattern
-  const roomSelectionKey = `${roomCode ?? "queue"}:${prepDeck.id}`;
+  const roomSelectionKey = `${roomKey}:${prepDeck.id}`;
   const selectionKey = `${roomSelectionKey}:${prepDeck.updatedAt}:${prepDeck.selectedMatchupId ?? "default"}`;
   let selection = sel?.forDeck === selectionKey
     ? sel
@@ -518,7 +531,25 @@ export function PrepRoom() {
     ready,
     startPlayer: prep?.startPlayer ?? null,
   });
-  const canReady = deckStage && readiness.canReady;
+  const canReady = deckStage && readiness.canReady && !deckLoading;
+  const showAcceptPrompt = accepting && matchAcceptanceRole === "existing" && !!prep?.deadlineAt;
+  const deckLockedNotice = deckSwitchLocked && opp ? (
+    <p className="prep-deck-notice" role="status">
+      <span>
+        {intl.formatMessage(
+          { id: "prep.deckSwitch.opponentFirst" },
+          { opponent: opp.username, deck: prepDeck.name },
+        )}
+      </span>
+      <button
+        type="button"
+        aria-label={intl.formatMessage({ id: "common.dismiss" })}
+        onClick={dismissDeckSwitchLocked}
+      >
+        <UiIcon name="close" />
+      </button>
+    </p>
+  ) : null;
   const openSeat = roomCode && !opp && prep?.botGame !== true ? (
     <OpenSeatPanel
       mode={matchmakingActive ? "search" : "invite"}
@@ -526,6 +557,7 @@ export function PrepRoom() {
       format={format}
       cardPoolMode={prep?.cardPoolMode ?? "legal"}
       deckId={prepDeck.id}
+      switching={deckLoading}
       searchers={otherPlayersInQueue}
     />
   ) : null;
@@ -539,7 +571,15 @@ export function PrepRoom() {
     if (error) setErrors([error]);
   };
 
-  const presentation = (
+  const presentation = deckLoading ? (
+    <PrepDeckSwitchLoading
+      deckName={loadingPool ? deckSwitch?.deckName ?? me?.heroName ?? prepDeck.name : prepDeck.name}
+      heroId={loadingPool ? null : prepDeck.decklist.heroId}
+      art={deckImageArt}
+      progress={loadingPool ? null : deckImages}
+      onSkip={loadingPool ? undefined : () => setImageWaitSkippedFor(deckImageKey)}
+    />
+  ) : (
     <PrepPresentation
       pool={pool}
       selection={selection}
@@ -563,7 +603,7 @@ export function PrepRoom() {
     />
   );
   const arenaLockButton = (
-    <button type="button" className="btn-primary" onClick={() => onLockArena()} disabled={!arenaStage || arenaLocked}>
+    <button type="button" className="btn-primary" onClick={() => onLockArena()} disabled={!arenaStage || arenaLocked || deckLoading}>
       {intl.formatMessage({ id: me?.arenaLocked ? "prep.arena.locked" : "prep.arena.lock" })}
       {prep?.deadlineAt && arenaStage ? <> · <DeadlineCountdown deadlineAt={prep.deadlineAt} /></> : null}
     </button>
@@ -746,6 +786,7 @@ export function PrepRoom() {
       </div>
 
       <div className="prep-columns">
+        {showAcceptPrompt ? null : deckLockedNotice}
         {!mobilePrepLayout && opp && prep ? (
           <PrepMatchSheet
             phase={prep.phase}
@@ -774,7 +815,7 @@ export function PrepRoom() {
         ) : null)}
 
         <div className="prep-selection-column">
-          {matchupPlan}
+          {deckLoading ? null : matchupPlan}
           {!deckStage || mobilePrepLayout ? <section
             className={`panel prep-arena-stage${choosingTurnOrder ? " prep-arena-pending" : ""}`}
             aria-live="polite"
@@ -803,6 +844,7 @@ export function PrepRoom() {
         />
       ) : null}
       {botNudgeKey
+        && !deckLoading
         && botNudgeVisibleFor === botNudgeKey
         && botNudgeDismissedFor !== botNudgeKey
         && prepFormat ? (
@@ -817,7 +859,7 @@ export function PrepRoom() {
           />
         ) : null}
 
-      {accepting && matchAcceptanceRole === "existing" && prep?.deadlineAt ? (
+      {showAcceptPrompt && prep?.deadlineAt ? (
         <div className="prep-match-accept-backdrop">
           <section
             className="panel prep-match-accept-prompt"
@@ -826,6 +868,7 @@ export function PrepRoom() {
             aria-labelledby="prep-match-accept-title"
             aria-live="polite"
           >
+            {deckLockedNotice}
             <MatchAcceptContent
               titleId="prep-match-accept-title"
               you={me}

@@ -85,6 +85,7 @@ import { decodeDeckPool, resolveDeck, validatePresentation } from "./decks.js";
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
 import { assertActiveRuleset } from "./rulesetFence.js";
 import { withTransaction, type Queryable } from "./db.js";
+import { DECKS_LOCKED } from "./errors.js";
 import {
   CorruptRoomError,
   decodePersistedState,
@@ -3485,9 +3486,7 @@ export class PgRoomStore {
       if (room.state) return { error: "game has already started" };
       const seatIdx = seatForCredentials(room, credentials);
       if (seatIdx === null) return { error: "not a player in this room" };
-      if (room.seats[1 - seatIdx] !== null || room.prep) {
-        return { error: "decks lock once an opponent joins" };
-      }
+      if (room.seats[1 - seatIdx] !== null || room.prep) return { error: DECKS_LOCKED };
       const seat = room.seats[seatIdx]!;
       if (seat.fromQueue) {
         // Pairing, hero avoidance, and requeues read the search's deck.

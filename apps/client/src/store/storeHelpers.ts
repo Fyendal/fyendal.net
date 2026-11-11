@@ -80,6 +80,8 @@ export function initialStoreProjection(
     chatHasMore: {},
     friendInviteTarget: null,
     roomFriendInvites: [],
+    deckSwitch: null,
+    deckSwitchLocked: false,
     prepDeck: null,
     prep: null,
     cardPoolModes: lobbySettings.cardPoolModes,
@@ -142,6 +144,8 @@ export function clearedRoomProjection(): Pick<
   | "prep"
   | "prepDeck"
   | "roomFriendInvites"
+  | "deckSwitch"
+  | "deckSwitchLocked"
   | "error"
   | "connectionIssueVisible"
 > {
@@ -191,6 +195,8 @@ export function clearedRoomProjection(): Pick<
     prep: null,
     prepDeck: null,
     roomFriendInvites: [],
+    deckSwitch: null,
+    deckSwitchLocked: false,
     error: null,
     connectionIssueVisible: false,
   };
