@@ -2744,10 +2744,14 @@ Object.assign(sea, {
         event: "end-of-turn",
         whose: "any",
         label: "Lose life for auras",
-        effect(ctx: ScriptCtx) {
+        // X is fixed when the layer is created, before simultaneous end-phase triggers resolve.
+        onTrigger(ctx: ScriptCtx) {
           const seat = ctx.state.activePlayer;
-          const count = ctx.player(seat).board.filter((card) => hasTag(ctx, card, "aura")).length;
-          ctx.loseLife(seat, count);
+          ctx.setState("riddleAuras", ctx.player(seat).board.filter((card) => hasTag(ctx, card, "aura")).length);
+        },
+        effect(ctx: ScriptCtx) {
+          const count = ctx.getState("riddleAuras");
+          ctx.loseLife(ctx.state.activePlayer, count);
           if (count >= 3) ctx.destroySelf();
         },
       },

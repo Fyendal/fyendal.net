@@ -1636,6 +1636,23 @@ describe("PEN — import and set mechanics", () => {
 });
 
 describe("PEN — generalized rules interactions", () => {
+  it("Bad Breath creates Might only on the next hit this turn", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["bad breath|1", "head jab|3", "head jab|3"], resources: 20 },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    const mightCount = () => g.state.players[0]!.board.filter(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "might|0",
+    ).length;
+
+    g.play("bad breath|1").play("head jab|3").blockWith().settle();
+    expect(mightCount()).toBe(3);
+    g.play("head jab|3").blockWith().settle();
+    expect(mightCount()).toBe(3);
+  });
+
   it("Unyielding Grip previews +3 when the staged block empties the hand", () => {
     const g = scenario({
       seats: [

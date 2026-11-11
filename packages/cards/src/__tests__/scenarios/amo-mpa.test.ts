@@ -1884,6 +1884,24 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       clean.play("viral sampling|3").blockWith().settle();
       expect(boardNames(clean, 0)).toEqual([]);
     });
+
+    it("Viral Sampling on an earlier chain link completes its contract on later hits", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: ["viral sampling|3", "viral sampling|1", "lab rat|3"], resources: 2, weapons: [], equipment: NO_EQUIPMENT },
+        { ...VICTIM, board: ["frailty|0"] },
+      ] });
+      game.play("viral sampling|3").blockWith().settle();
+      expect(boardNames(game, 0)).toEqual(["Silver"]);
+
+      game.state.players[0]!.actionPoints = 1;
+      game.play("viral sampling|1").blockWith().settle();
+      expect(boardNames(game, 0)).toEqual(Array(3).fill("Silver"));
+      expect(game.state.players[0]!.flags.contractCompletionsThisTurn).toBe(3);
+
+      game.state.players[0]!.actionPoints = 1;
+      game.play("lab rat|3").blockWith().settle();
+      expect(boardNames(game, 0)).toEqual(Array(5).fill("Silver"));
+    });
   });
 
   describe("Mastery Pack Assassin batch 2", () => {

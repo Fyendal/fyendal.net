@@ -390,7 +390,7 @@ export interface ScriptCtx {
    *  the move's destination.
    *  Returns the charged card, or undefined when it is not in hand. */
   charge(instanceId: number): DeepReadonly<CardInstance> | undefined;
-  /** Move a card from any of its owner's zones into its owner's soul (face up).
+  /** Move a card from any zone into this controller's hero's soul (face up).
    *  Sets the per-turn "put into soul" flags (`soulThisTurn`, `soulPitch:<n>`)
    *  but does NOT raise "card-charged" — only charging does. */
   putIntoSoul(instanceId: number): boolean;

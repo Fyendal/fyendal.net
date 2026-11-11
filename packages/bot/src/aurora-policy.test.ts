@@ -77,9 +77,20 @@ function passUntil(state: Game, done: (state: Game) => boolean): Game {
 }
 
 /** Answer a synthetic decision on a fresh game view. */
-function decide(decision: Omit<PendingDecision, "player">, hand: readonly string[] = []): GameIntent {
+function decide(
+  decision: Omit<PendingDecision, "player">,
+  hand: readonly string[] = [],
+  arsenal: readonly string[] = [],
+): GameIntent {
   const state = newGame(4244, 0);
   replaceHand(state, 0, hand);
+  state.players[0]!.arsenal = arsenal.map((cardId, arsenalSlot) => ({
+    instanceId: state.nextInstanceId++,
+    cardId,
+    owner: 0,
+    faceDown: true,
+    arsenalSlot,
+  }));
   const view = projectStateFor(state, 0);
   view.pendingDecision = { player: 0, ...decision } as PendingDecision;
   return chooseAuroraIntent({
@@ -321,5 +332,11 @@ describe("Aurora policy", () => {
   it("takes Enlightened Strike's go again while attacks remain in hand", () => {
     expect(decide({ kind: "choose-target", prompt: "Choose a mode", options: ["draw", "+2", "go again"] }, ["LGS368"]))
       .toEqual({ kind: "choose", optionId: "go again" });
+  });
+
+  it("takes Enlightened Strike's +2 when the only follow-up needs a hand card it lacks", () => {
+    // Bug AA53F2: an empty hand cannot pay the arsenal Enlightened Strike's additional cost.
+    expect(decide({ kind: "choose-target", prompt: "Choose a mode", options: ["draw", "+2", "go again"] }, [], ["WTR159"]))
+      .toEqual({ kind: "choose", optionId: "+2" });
   });
 });

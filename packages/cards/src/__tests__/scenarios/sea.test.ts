@@ -1813,4 +1813,21 @@ describe("SEA — rules regression coverage", () => {
     g.state.players[0]!.actionPoints = 1;
     g.play("wailer humperdinck|2").expectResources(0, 0);
   });
+
+  it("Riddle with Regret counts auras when it triggers, not when it resolves", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", life: 20, board: ["riddle with regret|1", "ponder|0", "ponder|0"], hand: [] },
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    g.passActionPhase();
+    const riddle = g.state.players[0]!.board.find((card) => card.cardId === printingId("riddle with regret|1"))!;
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("trigger-order");
+    g.doRaw({ kind: "choose", optionId: pd.options!.find((id) => !id.startsWith(`${riddle.instanceId}:`))! });
+    g.settle();
+    g.expectLife(0, 17).expectNotInZone(0, "riddle with regret|1", "board");
+    expect(countOnBoard(g, 0, "ponder|0")).toBe(0);
+  });
 });

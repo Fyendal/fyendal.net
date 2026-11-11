@@ -2637,6 +2637,27 @@ describe("September 2 IAR spoilers", () => {
 
     expect(boardNames(g, 0).filter((name) => name === "Ponder")).toHaveLength(1);
   });
+
+  it("Blessing of Suraya played from an opponent's deck goes into its controller's soul", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["tome of pandemonium|2"],
+        resources: 3,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", deck: ["blessing of suraya|2"], equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("tome of pandemonium|2")
+      .play("blessing of suraya|2", { fromZone: "banish" })
+      .endTurn()
+      .endTurn()
+      .expectInZone(0, "blessing of suraya|2", "soul");
+
+    expect(g.state.players[1]!.soul).toHaveLength(0);
+    expect(boardNames(g, 0).filter((name) => name === "Ponder")).toHaveLength(1);
+  });
 });
 
 describe("September 3 IAR spoilers", () => {

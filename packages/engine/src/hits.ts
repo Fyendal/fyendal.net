@@ -20,7 +20,7 @@ import { createTokensFor } from "./tokens.js";
 
 import { currentLink, findCardAnywhere, opponent } from "./zoneQueries.js";
 import { moveToGraveyard } from "./zoneMoves.js";
-import { hookSources } from "./sourceQueries.js";
+import { functionalChainAttackLinks, hookSources } from "./sourceQueries.js";
 
 import { drawCards } from "./cardLifecycle.js";
 
@@ -255,6 +255,10 @@ export function pendingOnHitEffects(
     equipment: true,
   })) {
     addHook(source);
+  }
+  // Earlier links' attacks stay on the combat chain with functional abilities.
+  for (const other of functionalChainAttackLinks(state, link.attacker)) {
+    if (other.flags.attackAbilitiesSuppressed !== true) addHook(other.attackingCard);
   }
   // Some delayed riders consume their marker when the matching attack is
   // declared, but retain event data on the link for their on-hit hook.

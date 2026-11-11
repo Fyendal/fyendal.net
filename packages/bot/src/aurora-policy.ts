@@ -280,6 +280,13 @@ function scoreDefend(
   });
 }
 
+/** Damage the rest of the turn adds if Enlightened Strike keeps its action
+ * point; its cost card has already left the hand at the mode choice. */
+function enlightenedFollowUp(input: BotPolicyInput): number {
+  const me = input.view.players[input.seat];
+  return handDamage([...me.hand, ...me.arsenal], input, auroraSolverRules);
+}
+
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
   const decision = input.view.pendingDecision;
   if (!decision) return 0;
@@ -293,8 +300,8 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
     case "1: Embodiment": return 30;
     case "3: Next attack +1": return 20;
     case "2: Search Skyzyk": return attacksHeld === 0 ? 40 : 10;
-    case "go again": return attacksHeld > 0 ? 30 : 5;
-    case "+2": return attacksHeld > 0 ? 20 : 30;
+    case "go again": return enlightenedFollowUp(input) > 2 ? 30 : 5;
+    case "+2": return enlightenedFollowUp(input) > 2 ? 20 : 30;
     case "draw": return 15;
     default: break;
   }

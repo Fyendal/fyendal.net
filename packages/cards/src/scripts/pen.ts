@@ -2112,7 +2112,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   ...pitches("bad breath", (pitch) => ({
     onPlay(ctx) {
       queueIntimidate(ctx);
-      ctx.addModifier({ scope: "until-end-of-turn", onHitCreateToken: { cardId: MIGHT, count: 4 - pitch } });
+      ctx.addModifier({ scope: "until-end-of-turn", onHitCreateToken: { cardId: MIGHT, count: 4 - pitch }, once: true });
     },
   })),
 

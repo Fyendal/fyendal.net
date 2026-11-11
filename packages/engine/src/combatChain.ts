@@ -269,7 +269,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
       // "if this hits, put it into your hero's soul" (Illuminate, Engulfing
       // Light): the attacking card goes to the soul instead of the graveyard
       if (link.flags.attackToSoul === true) {
-        enterSoul(state, runtime, link.attackingCard, false);
+        enterSoul(state, runtime, link.attackingCard, false, undefined, link.attacker);
       } else if (link.flags.attackToBanish === true) {
         enterBanish(state, runtime, link.attackingCard, "chain");
       } else if (link.flags.attackToBottom === true) {

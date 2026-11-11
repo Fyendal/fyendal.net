@@ -539,8 +539,10 @@ export function enterSoul(
   card: CardInstance,
   charged: boolean,
   lastKnownObserver?: CardInstance,
+  heroSeat = card.owner,
 ): void {
-  const owner = state.players[card.owner] as PlayerState;
+  // The soul sits under a hero (CR 3.11.5), so a controlled non-owned card joins its controller's soul.
+  const owner = state.players[heroSeat] as PlayerState;
   if (scriptOf(state, card.cardId, card)?.replacesSoulMoveWithArena === true) {
     owner.board.push(card);
     stampControlledName(state, owner, card);
@@ -896,15 +898,17 @@ export function removeFromOwnerZones(state: GameStateInternal, instanceId: numbe
     ?? findAndRemoveCard(state, instanceId, { includeEquipment: true, includeBanish: true });
 }
 
-/** Move a card into its owner's soul, including an attack action that is
- * currently represented only on the combat chain. The chain retains a
- * last-known snapshot while settlement skips the card that already left. */
+/** Move a card into `heroSeat`'s soul (default: its owner's), including an
+ * attack action that is currently represented only on the combat chain. The
+ * chain retains a last-known snapshot while settlement skips the card that
+ * already left. */
 export function putCardIntoSoul(
   state: GameStateInternal,
   runtime: EngineRuntime,
   instanceId: number,
   causedBySeat?: number,
   effectSource?: TriggerEventContext["effectSource"],
+  heroSeat?: number,
 ): boolean {
   const fromResolving = removeFromStackResolution(state, instanceId);
   const link = currentLink(state);
@@ -933,12 +937,13 @@ export function putCardIntoSoul(
     ?? fromChain
     ?? findAndRemoveCard(state, instanceId, { includeEquipment: true, includeBanish: true });
   if (!found) return false;
-  const lastKnownObserver = found.fromArena && found.owner.seat === found.card.owner
+  const destinationSeat = heroSeat ?? found.card.owner;
+  const lastKnownObserver = found.fromArena && found.owner.seat === destinationSeat
     ? snapshotSerializable(found.card)
     : undefined;
   delete found.card.faceDown;
   if (found.fromArena) fireLeaveArena(state, runtime, found.owner.seat, found.card, "soul");
-  enterSoul(state, runtime, found.card, false, lastKnownObserver);
+  enterSoul(state, runtime, found.card, false, lastKnownObserver, destinationSeat);
   if (found.fromZone === "chain" && link) {
     fireLeaveCombatChain(state, runtime, link.attacker, found.card, "attacking");
   }

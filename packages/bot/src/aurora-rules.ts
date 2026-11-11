@@ -124,6 +124,9 @@ export function auroraSolverRules(input: BotPolicyInput): HeroSolverRules {
       case "enlightened strike":
         // Go again while the hand can follow up, otherwise the +2{p} mode.
         return {
+          // Its additional cost bottoms another card from hand.
+          canPlay: (view, self) =>
+            view.held.some((held) => held.zone === "hand" && held.instanceId !== self.instanceId),
           goAgainIn: (view) => view.held.length >= 3,
           powerIn: (view) => power + (view.held.length >= 3 ? 0 : 2),
         };

@@ -2068,6 +2068,7 @@ export function makeCtx(
         instanceId,
         seat,
         deckMoveEffectSource(),
+        seat,
       );
     },
     banish(instanceId, opts) {
