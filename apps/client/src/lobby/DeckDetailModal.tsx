@@ -10,25 +10,14 @@ import { cardImageUrl } from "../game/Card.js";
 import { deckArtIsCustom, useCardArtCatalog } from "../game/cardArtCatalog.js";
 import { shownCardArt } from "../components/CardArtVariants.js";
 import { ModalSurface } from "../components/ModalSurface.js";
-import { UiIcon, type UiIconName } from "../components/UiIcon.js";
+import { UiIcon } from "../components/UiIcon.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
+import { OpponentPicker, startMessageId } from "./OpponentPicker.js";
 import { CardPoolHelp } from "./CardPoolHelp.js";
 import { CARD_POOL_MODES } from "./CardPoolModeControl.js";
 import { deckBlockedCards } from "./DeckGrid.js";
 import { shortFormatLabel } from "./FormatBadge.js";
 import { heroImageUrl } from "./heroImage.js";
-
-const GAME_MODES = ["find-match", "invite-friend", "bot"] as const satisfies readonly HomeGameMode[];
-const GAME_MODE_MESSAGES: Record<HomeGameMode, string> = {
-  "find-match": "lobby.action.findMatch",
-  "invite-friend": "lobby.action.inviteFriend",
-  bot: "lobby.action.playBot",
-};
-const GAME_MODE_ICONS: Record<HomeGameMode, UiIconName> = {
-  "find-match": "search",
-  "invite-friend": "user-add",
-  bot: "bot",
-};
 
 /**
  * A saved deck's hub: start a game with it in its own format, or open,
@@ -162,20 +151,7 @@ export function DeckDetailModal(props: {
       </div>
 
       <div className="deck-detail-body">
-        <div className="deck-detail-modes" role="group" aria-label={intl.formatMessage({ id: "lobby.home.gameMode" })}>
-          {GAME_MODES.map((gameMode) => (
-            <button
-              key={gameMode}
-              type="button"
-              aria-pressed={mode === gameMode}
-              disabled={queued}
-              onClick={() => selectMode(gameMode)}
-            >
-              <UiIcon name={GAME_MODE_ICONS[gameMode]} />
-              {intl.formatMessage({ id: GAME_MODE_MESSAGES[gameMode] })}
-            </button>
-          ))}
-        </div>
+        <OpponentPicker mode={mode} disabled={queued} onChange={selectMode} />
 
         {blocked.length > 0 ? (
           <p className="deck-detail-blocked" role="status">
@@ -217,7 +193,7 @@ export function DeckDetailModal(props: {
               data-modal-initial-focus={blocked.length > 0 ? undefined : ""}
               onClick={start}
             >
-              {intl.formatMessage({ id: "lobby.home.start" })}
+              {intl.formatMessage({ id: startMessageId(mode) })}
             </button>
           )}
         </div>

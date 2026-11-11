@@ -54,6 +54,7 @@ import {
 } from "./BotPracticeNudge.js";
 import { PrepPresentation, type PrepCardArt } from "./PrepPresentation.js";
 import { PrepArtPopover } from "./PrepArtPopover.js";
+import { OpenSeatPanel } from "./OpenSeatPanel.js";
 import { hasCardArtChoices, shownCardArt } from "../components/CardArtVariants.js";
 import { useCardArtCatalog } from "../game/cardArtCatalog.js";
 import { PrepArenaCards } from "./PrepArenaCards.js";
@@ -173,7 +174,6 @@ export function PrepRoom() {
   const [errors, setErrors] = useState<string[]>([]);
   const [confirmingGaps, setConfirmingGaps] = useState<ArenaGap[] | null>(null);
   const [weaponToast, setWeaponToast] = useState<{ message: string; shownAt: number } | null>(null);
-  const [inviteCopied, setInviteCopied] = useState(false);
   const [matchupBusy, setMatchupBusy] = useState(false);
   const [mobilePrepLayout, setMobilePrepLayout] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(max-width: 700px)").matches,
@@ -519,14 +519,16 @@ export function PrepRoom() {
     startPlayer: prep?.startPlayer ?? null,
   });
   const canReady = deckStage && readiness.canReady;
-  const inviteUrl = roomCode ? `${location.origin}/${roomCode}` : "";
-
-  const copyInviteUrl = async () => {
-    if (!inviteUrl) return;
-    await navigator.clipboard.writeText(inviteUrl);
-    setInviteCopied(true);
-    window.setTimeout(() => setInviteCopied(false), 2_000);
-  };
+  const openSeat = roomCode && !opp && prep?.botGame !== true ? (
+    <OpenSeatPanel
+      mode={matchmakingActive ? "search" : "invite"}
+      roomCode={roomCode}
+      format={format}
+      cardPoolMode={prep?.cardPoolMode ?? "legal"}
+      deckId={prepDeck.id}
+      searchers={otherPlayersInQueue}
+    />
+  ) : null;
 
   const chooseMatchup = async (matchupId: string) => {
     if (matchupLocked || matchupBusy) return;
@@ -734,15 +736,6 @@ export function PrepRoom() {
             )}
             {roomCode && <span className="room-code prep-code">{roomCode}</span>}
           </h2>
-          {roomCode && !opp ? (
-            <button
-              className="prep-copy-link"
-              title={intl.formatMessage({ id: "prep.copyInviteTitle" })}
-              onClick={() => void copyInviteUrl()}
-            >
-              {intl.formatMessage({ id: inviteCopied ? "prep.copied" : "prep.copyUrl" })}
-            </button>
-          ) : null}
         </div>
         <div className="prep-topbar-actions">
           <FullscreenButton placement="header" />
@@ -765,7 +758,7 @@ export function PrepRoom() {
             action={sheetAction}
             cardArt={prepArt?.cardArt}
           />
-        ) : !mobilePrepLayout ? (
+        ) : openSeat ?? (!mobilePrepLayout ? (
           <section className="panel prep-opponent">
             <h3 className="panel-title">{intl.formatMessage({ id: "prep.matchup" })}</h3>
             <p className="muted">
@@ -778,7 +771,7 @@ export function PrepRoom() {
                 : null}
             </p>
           </section>
-        ) : null}
+        ) : null)}
 
         <div className="prep-selection-column">
           {matchupPlan}

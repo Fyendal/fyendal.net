@@ -35280,12 +35280,6 @@
       "value": "Buscar partida"
     }
   ],
-  "lobby.action.inviteFriend": [
-    {
-      "type": 0,
-      "value": "Convidar amigo"
-    }
-  ],
   "lobby.action.join": [
     {
       "type": 0,
@@ -36730,10 +36724,28 @@
       "value": "Escolha um formato, um deck e um modo de jogo para começar."
     }
   ],
-  "lobby.home.gameMode": [
+  "lobby.home.createRoom": [
     {
       "type": 0,
-      "value": "Modo de jogo"
+      "value": "Criar sala"
+    }
+  ],
+  "lobby.home.hint.bot": [
+    {
+      "type": 0,
+      "value": "Em seguida, escolha um bot para praticar."
+    }
+  ],
+  "lobby.home.hint.private": [
+    {
+      "type": 0,
+      "value": "Só entra quem você convidar."
+    }
+  ],
+  "lobby.home.hint.public": [
+    {
+      "type": 0,
+      "value": "O pareamento acontece com a próxima pessoa que procurar. Amigos também podem entrar pelo link da sala."
     }
   ],
   "lobby.home.importCc": [
@@ -36752,6 +36764,24 @@
     {
       "type": 0,
       "value": "Gerenciar decks"
+    }
+  ],
+  "lobby.home.opponent": [
+    {
+      "type": 0,
+      "value": "Oponente"
+    }
+  ],
+  "lobby.home.opponentBot": [
+    {
+      "type": 0,
+      "value": "Bot"
+    }
+  ],
+  "lobby.home.opponentPlayer": [
+    {
+      "type": 0,
+      "value": "Jogador"
     }
   ],
   "lobby.home.othersSearchingNow": [
@@ -36802,6 +36832,12 @@
       "pluralType": "cardinal"
     }
   ],
+  "lobby.home.play": [
+    {
+      "type": 0,
+      "value": "Jogar"
+    }
+  ],
   "lobby.home.playCc": [
     {
       "type": 0,
@@ -36812,6 +36848,12 @@
     {
       "type": 0,
       "value": "Jogar Silver Age"
+    }
+  ],
+  "lobby.home.private": [
+    {
+      "type": 0,
+      "value": "Privada"
     }
   ],
   "lobby.home.rejoinRooms": [
@@ -36858,12 +36900,6 @@
       },
       "offset": 0,
       "pluralType": "cardinal"
-    }
-  ],
-  "lobby.home.start": [
-    {
-      "type": 0,
-      "value": "Começar"
     }
   ],
   "lobby.home.tryPrecon": [
@@ -37744,18 +37780,6 @@
       "value": "Copiado!"
     }
   ],
-  "prep.copyInviteTitle": [
-    {
-      "type": 0,
-      "value": "Copiar URL de convite da sala"
-    }
-  ],
-  "prep.copyUrl": [
-    {
-      "type": 0,
-      "value": "Copiar URL"
-    }
-  ],
   "prep.defaultDeck": [
     {
       "type": 0,
@@ -37977,6 +38001,108 @@
     {
       "type": 0,
       "value": "Plano de confronto do Fabrary"
+    }
+  ],
+  "prep.openSeat.addFriends": [
+    {
+      "type": 0,
+      "value": "Adicionar amigo"
+    }
+  ],
+  "prep.openSeat.copyLink": [
+    {
+      "type": 0,
+      "value": "Copiar link"
+    }
+  ],
+  "prep.openSeat.deckHint": [
+    {
+      "type": 0,
+      "value": "Você pode trocar de deck até alguém entrar."
+    }
+  ],
+  "prep.openSeat.friends": [
+    {
+      "type": 0,
+      "value": "Amigos"
+    }
+  ],
+  "prep.openSeat.invite": [
+    {
+      "type": 0,
+      "value": "Convidar"
+    }
+  ],
+  "prep.openSeat.invited": [
+    {
+      "type": 0,
+      "value": "Convite enviado"
+    }
+  ],
+  "prep.openSeat.linkLabel": [
+    {
+      "type": 0,
+      "value": "Link da sala"
+    }
+  ],
+  "prep.openSeat.noFriends": [
+    {
+      "type": 0,
+      "value": "Você ainda não tem amigos."
+    }
+  ],
+  "prep.openSeat.nobodySearching": [
+    {
+      "type": 0,
+      "value": "Ninguém mais está procurando ainda."
+    }
+  ],
+  "prep.openSeat.offline": [
+    {
+      "type": 0,
+      "value": "Offline"
+    }
+  ],
+  "prep.openSeat.orInvite": [
+    {
+      "type": 0,
+      "value": "Ou convide um amigo"
+    }
+  ],
+  "prep.openSeat.searchHint": [
+    {
+      "type": 0,
+      "value": "O pareamento acontece automaticamente quando outra pessoa procurar."
+    }
+  ],
+  "prep.openSeat.searchTitle": [
+    {
+      "type": 0,
+      "value": "Procurando partida"
+    }
+  ],
+  "prep.openSeat.seatTitle": [
+    {
+      "type": 0,
+      "value": "Lugar vago"
+    }
+  ],
+  "prep.openSeat.share": [
+    {
+      "type": 0,
+      "value": "Compartilhar"
+    }
+  ],
+  "prep.openSeat.shareTitle": [
+    {
+      "type": 0,
+      "value": "Entre na minha sala do Fyendal"
+    }
+  ],
+  "prep.openSeat.yourDeck": [
+    {
+      "type": 0,
+      "value": "Seu deck"
     }
   ],
   "prep.opponent": [

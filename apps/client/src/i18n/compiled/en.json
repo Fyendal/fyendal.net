@@ -33536,12 +33536,6 @@
       "value": "Find match"
     }
   ],
-  "lobby.action.inviteFriend": [
-    {
-      "type": 0,
-      "value": "Invite friend"
-    }
-  ],
   "lobby.action.join": [
     {
       "type": 0,
@@ -34940,10 +34934,28 @@
       "value": "Choose a format, deck, and game mode to start playing."
     }
   ],
-  "lobby.home.gameMode": [
+  "lobby.home.createRoom": [
     {
       "type": 0,
-      "value": "Game mode"
+      "value": "Create room"
+    }
+  ],
+  "lobby.home.hint.bot": [
+    {
+      "type": 0,
+      "value": "Pick a bot to practice against next."
+    }
+  ],
+  "lobby.home.hint.private": [
+    {
+      "type": 0,
+      "value": "Only players you invite can join."
+    }
+  ],
+  "lobby.home.hint.public": [
+    {
+      "type": 0,
+      "value": "You'll be matched with the next player who searches. Friends can also join from your room link."
     }
   ],
   "lobby.home.importCc": [
@@ -34962,6 +34974,24 @@
     {
       "type": 0,
       "value": "Manage decks"
+    }
+  ],
+  "lobby.home.opponent": [
+    {
+      "type": 0,
+      "value": "Opponent"
+    }
+  ],
+  "lobby.home.opponentBot": [
+    {
+      "type": 0,
+      "value": "Bot"
+    }
+  ],
+  "lobby.home.opponentPlayer": [
+    {
+      "type": 0,
+      "value": "Player"
     }
   ],
   "lobby.home.othersSearchingNow": [
@@ -34996,6 +35026,12 @@
       "pluralType": "cardinal"
     }
   ],
+  "lobby.home.play": [
+    {
+      "type": 0,
+      "value": "Play"
+    }
+  ],
   "lobby.home.playCc": [
     {
       "type": 0,
@@ -35006,6 +35042,12 @@
     {
       "type": 0,
       "value": "Play Silver Age"
+    }
+  ],
+  "lobby.home.private": [
+    {
+      "type": 0,
+      "value": "Private"
     }
   ],
   "lobby.home.rejoinRooms": [
@@ -35044,12 +35086,6 @@
       },
       "offset": 0,
       "pluralType": "cardinal"
-    }
-  ],
-  "lobby.home.start": [
-    {
-      "type": 0,
-      "value": "Start"
     }
   ],
   "lobby.home.tryPrecon": [
@@ -35908,18 +35944,6 @@
       "value": "Copied!"
     }
   ],
-  "prep.copyInviteTitle": [
-    {
-      "type": 0,
-      "value": "Copy room invite URL"
-    }
-  ],
-  "prep.copyUrl": [
-    {
-      "type": 0,
-      "value": "Copy URL"
-    }
-  ],
   "prep.defaultDeck": [
     {
       "type": 0,
@@ -36156,6 +36180,108 @@
     {
       "type": 0,
       "value": "Fabrary matchup plan"
+    }
+  ],
+  "prep.openSeat.addFriends": [
+    {
+      "type": 0,
+      "value": "Add a friend"
+    }
+  ],
+  "prep.openSeat.copyLink": [
+    {
+      "type": 0,
+      "value": "Copy link"
+    }
+  ],
+  "prep.openSeat.deckHint": [
+    {
+      "type": 0,
+      "value": "You can switch decks until someone joins."
+    }
+  ],
+  "prep.openSeat.friends": [
+    {
+      "type": 0,
+      "value": "Friends"
+    }
+  ],
+  "prep.openSeat.invite": [
+    {
+      "type": 0,
+      "value": "Invite"
+    }
+  ],
+  "prep.openSeat.invited": [
+    {
+      "type": 0,
+      "value": "Invited"
+    }
+  ],
+  "prep.openSeat.linkLabel": [
+    {
+      "type": 0,
+      "value": "Room link"
+    }
+  ],
+  "prep.openSeat.noFriends": [
+    {
+      "type": 0,
+      "value": "No friends yet."
+    }
+  ],
+  "prep.openSeat.nobodySearching": [
+    {
+      "type": 0,
+      "value": "No one else is searching yet."
+    }
+  ],
+  "prep.openSeat.offline": [
+    {
+      "type": 0,
+      "value": "Offline"
+    }
+  ],
+  "prep.openSeat.orInvite": [
+    {
+      "type": 0,
+      "value": "Or invite a friend"
+    }
+  ],
+  "prep.openSeat.searchHint": [
+    {
+      "type": 0,
+      "value": "You'll be matched automatically when another player searches."
+    }
+  ],
+  "prep.openSeat.searchTitle": [
+    {
+      "type": 0,
+      "value": "Searching for a match"
+    }
+  ],
+  "prep.openSeat.seatTitle": [
+    {
+      "type": 0,
+      "value": "Open seat"
+    }
+  ],
+  "prep.openSeat.share": [
+    {
+      "type": 0,
+      "value": "Share"
+    }
+  ],
+  "prep.openSeat.shareTitle": [
+    {
+      "type": 0,
+      "value": "Join my Fyendal room"
+    }
+  ],
+  "prep.openSeat.yourDeck": [
+    {
+      "type": 0,
+      "value": "Your deck"
     }
   ],
   "prep.opponent": [

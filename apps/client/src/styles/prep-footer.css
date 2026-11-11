@@ -22,22 +22,6 @@
 .prep-topbar-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; }
 .prep-heading { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; }
 .prep-code { display: inline-block; margin-left: 16px; font-size: 21px; letter-spacing: 5px; white-space: nowrap; }
-.prep-copy-link {
-  padding: 6px 10px;
-  border-color: #ffe6a2;
-  background: linear-gradient(180deg, #ffe08a, #c9912d);
-  box-shadow: inset 0 1px 0 #fff7d488, 0 2px 8px #d69b2d30;
-  color: #241506;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-shadow: 0 1px 0 #fff2bd66;
-}
-.prep-copy-link:hover {
-  border-color: #fff2c2;
-  background: linear-gradient(180deg, #ffeba9, #dda73f);
-  color: #180d03;
-}
 .prep-columns {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -49,6 +33,170 @@
   align-items: start;
 }
 .prep-opponent { text-align: center; }
+
+/* Waiting room before an opponent joins: your seat, then the empty one. */
+.open-seat-table {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 28px;
+  align-items: start;
+}
+.open-seat-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #9c8a6d;
+  font: 600 13px/1.2 var(--font-lobby-ui);
+}
+.open-seat-you { min-width: 0; }
+.open-seat-deck-picker[aria-busy="true"] { opacity: .6; pointer-events: none; }
+.open-seat-hint { margin: 8px 0 0; color: var(--text-muted); font: 13px/1.4 var(--font-lobby-ui); }
+
+/* The vacant chair: the one dashed outline on the page, waiting to be filled. */
+.open-seat-chair {
+  min-width: 0;
+  padding: 18px 20px 14px;
+  border: 1px dashed #806334b3;
+  border-radius: 6px;
+  background: radial-gradient(120% 70% at 50% 0%, #ffd4790d, transparent 70%), var(--surface-well);
+}
+.open-seat-chair-title {
+  margin: 0 0 14px;
+  color: var(--gold);
+  font-family: var(--font-heading);
+  font-size: 19px;
+  font-weight: 600;
+}
+.open-seat-search .open-seat-or {
+  margin: 16px 0 8px;
+  padding-top: 14px;
+  border-top: 1px solid #4d3a2366;
+}
+.open-seat-search .open-seat-chair-title { margin-bottom: 10px; }
+.open-seat-searching {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  color: var(--text-primary);
+  font: 600 14px/1.3 var(--font-lobby-ui);
+}
+.open-seat-link { display: flex; gap: 8px; min-width: 0; }
+.open-seat-link-field {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  background: var(--surface-page);
+}
+.open-seat-link-field:has(input:focus-visible) { border-color: var(--bronze); box-shadow: 0 0 0 1px var(--bronze); }
+.open-seat-link input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font: 14px var(--font-lobby-ui);
+  text-overflow: ellipsis;
+}
+.open-seat-link input:focus { outline: none; }
+.open-seat-link-field .open-seat-copy {
+  flex: none;
+  min-height: 0;
+  margin: 3px;
+  border-color: #a8833f;
+  background: #2a1d0e;
+  color: var(--gold);
+}
+.open-seat-link-field .open-seat-copy:hover { border-color: var(--gold); background: #35250f; }
+.open-seat-link-field .open-seat-copy .ui-icon { color: var(--gold); }
+.open-seat-link > .lobby-create-action { flex: none; }
+
+.open-seat-friends { margin-top: 20px; }
+.open-seat-friends ul {
+  display: grid;
+  max-height: 220px;
+  margin: 0 -8px;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.open-seat-friends li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.open-seat-friends li + li { border-top: 1px solid #4d3a2340; }
+.open-seat-friends li:hover { background: #ffd4790a; }
+.open-seat-friend-avatar {
+  position: relative;
+  display: grid;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface-control);
+  color: var(--gold);
+  font: 700 13px var(--font-lobby-ui);
+}
+/* Presence dot, matching the social panel's colors. */
+.open-seat-friend-avatar i {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--surface-well);
+  border-radius: 50%;
+  background: #5a5144;
+}
+.open-seat-friends li.online .open-seat-friend-avatar i { background: #61b978; }
+.open-seat-friends li.offline .open-seat-friend-avatar { border-color: var(--border-subtle); color: var(--text-muted); }
+.open-seat-friend-name {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font: 600 14px var(--font-lobby-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.open-seat-friends li.offline .open-seat-friend-name { color: #a39784; font-weight: 500; }
+.open-seat-friend-status { color: var(--text-muted); font-size: 12px; font-weight: 500; }
+.open-seat-friends li .lobby-create-action { flex: none; min-height: 34px; padding: 6px 14px; font-size: 13px; }
+.open-seat-friends li .lobby-create-action:disabled { opacity: .55; cursor: progress; }
+.open-seat-invited {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+  color: var(--success);
+  font: 600 13px var(--font-lobby-ui);
+}
+.open-seat-invited .ui-icon { width: 15px; height: 15px; }
+.open-seat-empty { margin: 0; color: var(--text-muted); font: 14px/1.4 var(--font-lobby-ui); }
+.open-seat .social-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--danger);
+  font: 13px var(--font-lobby-ui);
+}
+.open-seat .social-error button { padding: 2px 8px; }
+
 .prep-selection-column { min-width: 0; display: grid; gap: 16px; }
 .prep-arena-stage .prep-cardrow { flex-wrap: wrap; }
 /* While you pick turn order the grid recedes, hover previews included, so
@@ -810,8 +958,16 @@
   .prep-selection-column { order: 2; }
 }
 
+@media (max-width: 860px) {
+  .open-seat-table { grid-template-columns: 1fr; gap: 18px; }
+}
+
 @media (max-width: 700px) {
   .prep-topbar { padding-inline: 14px; }
+  .open-seat-chair { padding: 14px 14px 10px; }
+  .open-seat-link { flex-wrap: wrap; }
+  .open-seat-link-field { flex-basis: 100%; }
+  .open-seat-link > .lobby-create-action { flex: 1 1 auto; }
   .prep-code { margin-left: 8px; }
   .prep-columns {
     grid-template-columns: 1fr;

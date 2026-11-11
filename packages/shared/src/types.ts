@@ -1208,6 +1208,10 @@ export type ClientMessage =
   | { type: "present-deck"; deck: PresentedDeck }
   /** prep room: withdraw readiness to edit the presented deck again */
   | { type: "prep-unready" }
+  /** prep room: swap your saved deck while the other seat is empty */
+  | { type: "change-deck"; deckId: string }
+  /** prep room: invite an online friend to take the open seat */
+  | { type: "invite-friend-to-room"; username: string }
   /** prep room: authorized player picks who goes first (first=true → self) */
   | { type: "choose-first"; first: boolean }
   /** Leave a pre-game room, or explicitly delete a bot game. */
@@ -1256,6 +1260,8 @@ export type ServerMessage =
   | { type: "room-created"; code: string; seat: number; token: string; version: number }
   | { type: "joined"; code: string; seat: number | null; token: string; spectator?: boolean; resumed?: true; version: number }
   | { type: "room-info"; room: RoomInvite }
+  | { type: "deck-changed"; deckId: string }
+  | { type: "friend-invited"; username: string }
   | { type: "game-started"; version: number }
   | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; /** Absent for rooms started before the clock existed. */ clock?: GameClockView; botGame?: boolean; /** The recipient seat's armed pass shortcut; never sent to anyone else. */ passUntil?: PassUntilMode; /** Passing now would end the recipient seat's turn with a usable action point; never sent to anyone else. */ endTurnWarning?: true; /** Per-seat printing id -> image id, limited to cards this viewer can see. */ cardArt?: [Record<string, string>, Record<string, string>] }
   | { type: "spectators"; count: number; version: number }

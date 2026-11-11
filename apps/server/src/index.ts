@@ -1218,6 +1218,52 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         await publishRoomEvent({ code: player.code, kind: "prep", version: r.version });
         return;
       }
+      case "change-deck": {
+        const player = requirePlayer(ws, ctx);
+        if (!player || !ctx.user) return;
+        const room = await rooms.getRoom(player.code);
+        if (!room) {
+          send(ws, { type: "error", message: "room not found" });
+          return;
+        }
+        const choice = await resolveChoice(ctx.user, room.format, msg.deckId, room.cardPoolMode);
+        if ("error" in choice) {
+          send(ws, { type: "error", message: choice.error });
+          return;
+        }
+        const r = await rooms.changeDeck(player.code, player.credentials, choice.choice);
+        if (!r.ok) {
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
+        send(ws, { type: "deck-changed", deckId: choice.choice.deckId });
+        await publishRoomEvent({ code: player.code, kind: "prep", version: r.version });
+        return;
+      }
+      case "invite-friend-to-room": {
+        const player = requirePlayer(ws, ctx);
+        if (!player) return;
+        if (!ctx.user) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        if (!(await friendInviteLimiter.allow(String(ctx.user.id), "send"))) {
+          return sendSocialError(ctx, "MESSAGE_RATE_LIMITED");
+        }
+        const friend = await friendByUsername(deps.db, ctx.user.id, msg.username);
+        if (!friend) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        if (!(await isUserOnline(deps.db, friend.id))) return sendSocialError(ctx, "FRIEND_UNAVAILABLE");
+        const r = await rooms.friendInviteRoom(player.code, player.credentials);
+        if (!r.ok) {
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        await publishClusterEvent({
+          type: "friend-game-invite",
+          userId: friend.id,
+          invite: { inviteId: randomUUID(), fromUsername: ctx.user.username, room: r.room, sentAt: Date.now() },
+        });
+        send(ws, { type: "friend-invited", username: friend.username });
+        return;
+      }
       case "prep-unready": {
         const player = requirePlayer(ws, ctx);
         if (!player) return;

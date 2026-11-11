@@ -32053,12 +32053,6 @@
       "value": "寻找对局"
     }
   ],
-  "lobby.action.inviteFriend": [
-    {
-      "type": 0,
-      "value": "邀请好友"
-    }
-  ],
   "lobby.action.join": [
     {
       "type": 0,
@@ -33240,10 +33234,28 @@
       "value": "选择赛制、牌组和游戏模式后开始游戏。"
     }
   ],
-  "lobby.home.gameMode": [
+  "lobby.home.createRoom": [
     {
       "type": 0,
-      "value": "游戏模式"
+      "value": "创建房间"
+    }
+  ],
+  "lobby.home.hint.bot": [
+    {
+      "type": 0,
+      "value": "接下来选择一个机器人进行练习。"
+    }
+  ],
+  "lobby.home.hint.private": [
+    {
+      "type": 0,
+      "value": "只有你邀请的玩家可以加入。"
+    }
+  ],
+  "lobby.home.hint.public": [
+    {
+      "type": 0,
+      "value": "将与下一位寻找对局的玩家匹配。好友也可以通过房间链接加入。"
     }
   ],
   "lobby.home.importCc": [
@@ -33264,6 +33276,24 @@
       "value": "管理牌组"
     }
   ],
+  "lobby.home.opponent": [
+    {
+      "type": 0,
+      "value": "对手"
+    }
+  ],
+  "lobby.home.opponentBot": [
+    {
+      "type": 0,
+      "value": "机器人"
+    }
+  ],
+  "lobby.home.opponentPlayer": [
+    {
+      "type": 0,
+      "value": "玩家"
+    }
+  ],
   "lobby.home.othersSearchingNow": [
     {
       "type": 0,
@@ -33278,6 +33308,12 @@
       "value": " 名玩家正在寻找对局"
     }
   ],
+  "lobby.home.play": [
+    {
+      "type": 0,
+      "value": "开始游戏"
+    }
+  ],
   "lobby.home.playCc": [
     {
       "type": 0,
@@ -33288,6 +33324,12 @@
     {
       "type": 0,
       "value": "白银时代 (Silver Age)"
+    }
+  ],
+  "lobby.home.private": [
+    {
+      "type": 0,
+      "value": "私密"
     }
   ],
   "lobby.home.rejoinRooms": [
@@ -33304,12 +33346,6 @@
     {
       "type": 0,
       "value": " 名玩家正在寻找对局"
-    }
-  ],
-  "lobby.home.start": [
-    {
-      "type": 0,
-      "value": "开始"
     }
   ],
   "lobby.home.tryPrecon": [
@@ -34124,18 +34160,6 @@
       "value": "已复制！"
     }
   ],
-  "prep.copyInviteTitle": [
-    {
-      "type": 0,
-      "value": "复制房间邀请链接"
-    }
-  ],
-  "prep.copyUrl": [
-    {
-      "type": 0,
-      "value": "复制链接"
-    }
-  ],
   "prep.defaultDeck": [
     {
       "type": 0,
@@ -34324,6 +34348,108 @@
     {
       "type": 0,
       "value": "Fabrary 对阵方案"
+    }
+  ],
+  "prep.openSeat.addFriends": [
+    {
+      "type": 0,
+      "value": "添加好友"
+    }
+  ],
+  "prep.openSeat.copyLink": [
+    {
+      "type": 0,
+      "value": "复制链接"
+    }
+  ],
+  "prep.openSeat.deckHint": [
+    {
+      "type": 0,
+      "value": "有人加入前都可以更换牌组。"
+    }
+  ],
+  "prep.openSeat.friends": [
+    {
+      "type": 0,
+      "value": "好友"
+    }
+  ],
+  "prep.openSeat.invite": [
+    {
+      "type": 0,
+      "value": "邀请"
+    }
+  ],
+  "prep.openSeat.invited": [
+    {
+      "type": 0,
+      "value": "已邀请"
+    }
+  ],
+  "prep.openSeat.linkLabel": [
+    {
+      "type": 0,
+      "value": "房间链接"
+    }
+  ],
+  "prep.openSeat.noFriends": [
+    {
+      "type": 0,
+      "value": "还没有好友。"
+    }
+  ],
+  "prep.openSeat.nobodySearching": [
+    {
+      "type": 0,
+      "value": "暂时没有其他玩家在寻找对局。"
+    }
+  ],
+  "prep.openSeat.offline": [
+    {
+      "type": 0,
+      "value": "离线"
+    }
+  ],
+  "prep.openSeat.orInvite": [
+    {
+      "type": 0,
+      "value": "或邀请好友"
+    }
+  ],
+  "prep.openSeat.searchHint": [
+    {
+      "type": 0,
+      "value": "有其他玩家开始寻找对局时，会自动为你匹配。"
+    }
+  ],
+  "prep.openSeat.searchTitle": [
+    {
+      "type": 0,
+      "value": "正在寻找对局"
+    }
+  ],
+  "prep.openSeat.seatTitle": [
+    {
+      "type": 0,
+      "value": "空位"
+    }
+  ],
+  "prep.openSeat.share": [
+    {
+      "type": 0,
+      "value": "分享"
+    }
+  ],
+  "prep.openSeat.shareTitle": [
+    {
+      "type": 0,
+      "value": "加入我的 Fyendal 房间"
+    }
+  ],
+  "prep.openSeat.yourDeck": [
+    {
+      "type": 0,
+      "value": "你的牌组"
     }
   ],
   "prep.opponent": [

@@ -10,6 +10,7 @@ import { DeckDropdown } from "./CreateRoomModal.js";
 import { RoomCard } from "./RoomCard.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
 import { CardPoolHelp } from "./CardPoolHelp.js";
+import { OpponentPicker, startMessageId } from "./OpponentPicker.js";
 import { formatSelectLabel } from "./FormatBadge.js";
 import { deckCardPool, pairableSearchers } from "../matchmaking/pairableSearchers.js";
 
@@ -62,6 +63,7 @@ export function Home() {
   );
   const [choosingBot, setChoosingBot] = useState(false);
   const cardPoolId = useId();
+  const opponentLabelId = useId();
 
   if (decksLoading) {
     return <div className="panel home-panel"><p className="muted" role="status">{intl.formatMessage({ id: "lobby.loadingDecks" })}</p></div>;
@@ -116,7 +118,7 @@ export function Home() {
         </section>
       ) : null}
 
-      <section className="home-play" aria-label={intl.formatMessage({ id: "lobby.home.start" })}>
+      <section className="home-play" aria-label={intl.formatMessage({ id: "lobby.home.play" })}>
         <div className="home-play-poster">
           <img
             src={playPoster}
@@ -182,28 +184,26 @@ export function Home() {
           </div>
 
           <div className="home-play-field home-play-mode-field">
-            <span>{intl.formatMessage({ id: "lobby.home.gameMode" })}</span>
-            <div className="home-play-mode-segments" role="group" aria-label={intl.formatMessage({ id: "lobby.home.gameMode" })}>
-              {(["find-match", "invite-friend", "bot"] as const).map((gameMode) => (
-                <button
-                  key={gameMode}
-                  type="button"
-                  aria-pressed={mode === gameMode}
-                  disabled={queuedFormat !== null}
-                  onClick={() => selectMode(gameMode)}
-                >
-                  {intl.formatMessage({ id: gameMode === "find-match"
-                    ? "lobby.action.findMatch"
-                    : gameMode === "invite-friend"
-                      ? "lobby.action.inviteFriend"
-                      : "lobby.action.playBot" })}
-                </button>
-              ))}
-            </div>
+            <span id={opponentLabelId}>{intl.formatMessage({ id: "lobby.home.opponent" })}</span>
+            <OpponentPicker
+              mode={mode}
+              disabled={queuedFormat !== null}
+              labelledBy={opponentLabelId}
+              onChange={selectMode}
+            />
           </div>
 
           <div className="home-play-actions">
-            {searching > 0 ? (
+            {queuedFormat !== null ? (
+              <button type="button" className="btn-primary" onClick={queueLeave}>
+                {intl.formatMessage({ id: "lobby.action.cancelSearch" })}
+              </button>
+            ) : (
+              <button type="submit" className="btn-cta" disabled={!selectedDeck}>
+                {intl.formatMessage({ id: startMessageId(mode) })}
+              </button>
+            )}
+            {searching > 0 && mode === "find-match" ? (
               <p className="home-play-live">
                 <span className="home-play-live-dot" aria-hidden="true" />
                 {intl.formatMessage(
@@ -212,15 +212,6 @@ export function Home() {
                 )}
               </p>
             ) : null}
-            {queuedFormat !== null ? (
-              <button type="button" className="btn-primary" onClick={queueLeave}>
-                {intl.formatMessage({ id: "lobby.action.cancelSearch" })}
-              </button>
-            ) : (
-              <button type="submit" className="btn-cta" disabled={!selectedDeck}>
-                {intl.formatMessage({ id: "lobby.home.start" })}
-              </button>
-            )}
           </div>
         </form>
       </section>

@@ -3472,6 +3472,76 @@ export class PgRoomStore {
     return r.ok ? { ok: true, version: r.version } : { ok: false, error: r.error };
   }
 
+  /** Prep room: swap the seat's saved deck while the other seat is still empty,
+   *  including a matchmaking search's deck. */
+  async changeDeck(
+    code: string,
+    credentials: SeatCredentials,
+    choice: { deckId: string; deckName: string },
+  ): Promise<{ ok: true; version: number } | { ok: false; error: string }> {
+    const heroId = (await resolveDeck(this.db, choice.deckId))?.decklist.heroId;
+    if (!heroId) return { ok: false, error: "your deck is no longer available" };
+    const r = await this.withRetry<undefined>(code.toUpperCase(), async (room, db) => {
+      if (room.state) return { error: "game has already started" };
+      const seatIdx = seatForCredentials(room, credentials);
+      if (seatIdx === null) return { error: "not a player in this room" };
+      if (room.seats[1 - seatIdx] !== null || room.prep) {
+        return { error: "decks lock once an opponent joins" };
+      }
+      const seat = room.seats[seatIdx]!;
+      if (seat.fromQueue) {
+        // Pairing, hero avoidance, and requeues read the search's deck.
+        const updated = seat.userId === undefined ? { rowCount: 0 } : await db.query(
+          `UPDATE matchmaking_entries SET deck_id = $3, deck_name = $4
+           WHERE user_id = $1 AND retained_room_code = $2`,
+          [seat.userId, room.code, choice.deckId, choice.deckName],
+        );
+        if (updated.rowCount !== 1) return { error: "this search has already ended" };
+      }
+      seat.deckId = choice.deckId;
+      seat.deckName = choice.deckName;
+      seat.heroId = heroId;
+      seat.ready = false;
+      delete seat.presented;
+      delete seat.cardArt;
+      return {
+        room,
+        result: undefined,
+        seatWrites: [{ kind: "full", seat: seatIdx, mode: "update" }],
+      };
+    }, undefined, {
+      // Serialize with pairing so a match never lands mid-switch.
+      lockMatchmaking: (room) => room.seats.some((seat) => seat?.fromQueue === true),
+    });
+    return r.ok ? { ok: true, version: r.version } : { ok: false, error: r.error };
+  }
+
+  /** The room a seated player may invite a friend into, or why not. */
+  async friendInviteRoom(
+    code: string,
+    credentials: SeatCredentials,
+  ): Promise<{ ok: true; room: RoomInvite } | { ok: false; error: string }> {
+    const room = await this.getRoom(code.toUpperCase());
+    if (!room) return { ok: false, error: "room not found" };
+    if (room.state) return { ok: false, error: "game has already started" };
+    const seatIdx = seatForCredentials(room, credentials);
+    if (seatIdx === null) return { ok: false, error: "not a player in this room" };
+    if (room.seats[1 - seatIdx] !== null) return { ok: false, error: "room is full" };
+    // League seats are reserved for the two members. Matchmaking rooms are fine:
+    // a friend's direct join ends the search like any other.
+    if (await leagueRoomSeats(this.db, room.code)) {
+      return { ok: false, error: "league rooms cannot take invites" };
+    }
+    return {
+      ok: true,
+      room: {
+        code: room.code,
+        format: room.format,
+        ...(room.cardPoolMode === "legal" ? {} : { cardPoolMode: room.cardPoolMode }),
+      },
+    };
+  }
+
   /** Prep room: the die winner picks in PvP; the human always picks against a bot. */
   async chooseFirst(
     code: string,

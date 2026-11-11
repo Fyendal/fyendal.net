@@ -34446,12 +34446,6 @@
       "value": "Buscar partida"
     }
   ],
-  "lobby.action.inviteFriend": [
-    {
-      "type": 0,
-      "value": "Invitar a un amigo"
-    }
-  ],
   "lobby.action.join": [
     {
       "type": 0,
@@ -35850,10 +35844,28 @@
       "value": "Elige un formato, un mazo y un modo de juego para empezar a jugar."
     }
   ],
-  "lobby.home.gameMode": [
+  "lobby.home.createRoom": [
     {
       "type": 0,
-      "value": "Modo de juego"
+      "value": "Crear sala"
+    }
+  ],
+  "lobby.home.hint.bot": [
+    {
+      "type": 0,
+      "value": "A continuación eliges un bot para practicar."
+    }
+  ],
+  "lobby.home.hint.private": [
+    {
+      "type": 0,
+      "value": "Solo pueden unirse los jugadores que invites."
+    }
+  ],
+  "lobby.home.hint.public": [
+    {
+      "type": 0,
+      "value": "Te emparejaremos con el siguiente jugador que busque. Tus amigos también pueden unirse con el enlace de la sala."
     }
   ],
   "lobby.home.importCc": [
@@ -35872,6 +35884,24 @@
     {
       "type": 0,
       "value": "Gestionar mazos"
+    }
+  ],
+  "lobby.home.opponent": [
+    {
+      "type": 0,
+      "value": "Oponente"
+    }
+  ],
+  "lobby.home.opponentBot": [
+    {
+      "type": 0,
+      "value": "Bot"
+    }
+  ],
+  "lobby.home.opponentPlayer": [
+    {
+      "type": 0,
+      "value": "Jugador"
     }
   ],
   "lobby.home.othersSearchingNow": [
@@ -35906,6 +35936,12 @@
       "pluralType": "cardinal"
     }
   ],
+  "lobby.home.play": [
+    {
+      "type": 0,
+      "value": "Jugar"
+    }
+  ],
   "lobby.home.playCc": [
     {
       "type": 0,
@@ -35916,6 +35952,12 @@
     {
       "type": 0,
       "value": "Jugar Silver Age"
+    }
+  ],
+  "lobby.home.private": [
+    {
+      "type": 0,
+      "value": "Privada"
     }
   ],
   "lobby.home.rejoinRooms": [
@@ -35954,12 +35996,6 @@
       },
       "offset": 0,
       "pluralType": "cardinal"
-    }
-  ],
-  "lobby.home.start": [
-    {
-      "type": 0,
-      "value": "Empezar"
     }
   ],
   "lobby.home.tryPrecon": [
@@ -36818,18 +36854,6 @@
       "value": "¡Copiado!"
     }
   ],
-  "prep.copyInviteTitle": [
-    {
-      "type": 0,
-      "value": "Copiar URL de invitación a la sala"
-    }
-  ],
-  "prep.copyUrl": [
-    {
-      "type": 0,
-      "value": "Copiar URL"
-    }
-  ],
   "prep.defaultDeck": [
     {
       "type": 0,
@@ -37066,6 +37090,108 @@
     {
       "type": 0,
       "value": "Plan de enfrentamiento de Fabrary"
+    }
+  ],
+  "prep.openSeat.addFriends": [
+    {
+      "type": 0,
+      "value": "Añadir un amigo"
+    }
+  ],
+  "prep.openSeat.copyLink": [
+    {
+      "type": 0,
+      "value": "Copiar enlace"
+    }
+  ],
+  "prep.openSeat.deckHint": [
+    {
+      "type": 0,
+      "value": "Puedes cambiar de mazo hasta que alguien se una."
+    }
+  ],
+  "prep.openSeat.friends": [
+    {
+      "type": 0,
+      "value": "Amigos"
+    }
+  ],
+  "prep.openSeat.invite": [
+    {
+      "type": 0,
+      "value": "Invitar"
+    }
+  ],
+  "prep.openSeat.invited": [
+    {
+      "type": 0,
+      "value": "Invitación enviada"
+    }
+  ],
+  "prep.openSeat.linkLabel": [
+    {
+      "type": 0,
+      "value": "Enlace de la sala"
+    }
+  ],
+  "prep.openSeat.noFriends": [
+    {
+      "type": 0,
+      "value": "Aún no tienes amigos."
+    }
+  ],
+  "prep.openSeat.nobodySearching": [
+    {
+      "type": 0,
+      "value": "Nadie más está buscando todavía."
+    }
+  ],
+  "prep.openSeat.offline": [
+    {
+      "type": 0,
+      "value": "Desconectado"
+    }
+  ],
+  "prep.openSeat.orInvite": [
+    {
+      "type": 0,
+      "value": "O invita a un amigo"
+    }
+  ],
+  "prep.openSeat.searchHint": [
+    {
+      "type": 0,
+      "value": "Te emparejaremos automáticamente cuando otro jugador busque."
+    }
+  ],
+  "prep.openSeat.searchTitle": [
+    {
+      "type": 0,
+      "value": "Buscando partida"
+    }
+  ],
+  "prep.openSeat.seatTitle": [
+    {
+      "type": 0,
+      "value": "Asiento libre"
+    }
+  ],
+  "prep.openSeat.share": [
+    {
+      "type": 0,
+      "value": "Compartir"
+    }
+  ],
+  "prep.openSeat.shareTitle": [
+    {
+      "type": 0,
+      "value": "Únete a mi sala de Fyendal"
+    }
+  ],
+  "prep.openSeat.yourDeck": [
+    {
+      "type": 0,
+      "value": "Tu mazo"
     }
   ],
   "prep.opponent": [

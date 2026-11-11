@@ -12,6 +12,7 @@ const PREP_SORT_STORAGE_KEY = "fyendal-prep-sort";
 const PREP_VIEW_STORAGE_KEY = "fyendal-prep-view";
 const HOME_GAME_MODE_STORAGE_PREFIX = "fyendal-home-game-mode-";
 const HOME_FORMAT_STORAGE_PREFIX = "fyendal-home-format-";
+/** Stored values predate the Private switch: "invite-friend" is a private player game. */
 export type HomeGameMode = "find-match" | "invite-friend" | "bot";
 /** Legacy browser-wide key. Read once to migrate it to the signed-in account. */
 export const LOBBY_SETTINGS_STORAGE_KEY = "fyendal-lobby-settings";

@@ -1110,6 +1110,12 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
     case "friend-game-invite-dismiss":
       valid = exactKeys(message, ["type", "inviteId"]) && requestId(message.inviteId);
       break;
+    case "invite-friend-to-room":
+      valid = exactKeys(message, ["type", "username"]) && username(message.username);
+      break;
+    case "change-deck":
+      valid = exactKeys(message, ["type", "deckId"]) && id(message.deckId);
+      break;
     case "enter-league-room":
       valid = exactKeys(message, ["type", "matchId", "deckId"]) && leagueRecordId(message.matchId) && id(message.deckId);
       break;
@@ -2015,6 +2021,12 @@ function decodeServerEvent(value: unknown): Exclude<ServerMessage, StateMessage>
       break;
     case "room-info":
       valid = exactKeys(message, ["type", "room"]) && roomInvite(message.room);
+      break;
+    case "deck-changed":
+      valid = exactKeys(message, ["type", "deckId"]) && id(message.deckId);
+      break;
+    case "friend-invited":
+      valid = exactKeys(message, ["type", "username"]) && username(message.username);
       break;
     case "queue-status": {
       const counts = object(message.counts);

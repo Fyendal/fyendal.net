@@ -971,6 +971,7 @@ export const useStore = create<StoreState>((set, get) => {
           spectatorKicked: false,
           inviteRoom: null,
           friendInviteTarget: null,
+          roomFriendInvites: [],
           error: null,
           queuedFormat: null,
           matchmakingActive: fromMatchmaking,
@@ -1042,6 +1043,15 @@ export const useStore = create<StoreState>((set, get) => {
         }
         break;
       }
+      case "deck-changed":
+        prepDeckId = msg.deckId;
+        void loadPrepDeck(msg.deckId);
+        break;
+      case "friend-invited":
+        if (!get().roomFriendInvites.includes(msg.username)) {
+          set({ roomFriendInvites: [...get().roomFriendInvites, msg.username] });
+        }
+        break;
       case "room-info":
         roomEntryPending = false;
         roomEntryRetryable = false;
@@ -1833,6 +1843,11 @@ export const useStore = create<StoreState>((set, get) => {
       }
     },
     prepUnready: () => send({ type: "prep-unready" }),
+    changeRoomDeck: (deckId) => send({ type: "change-deck", deckId }),
+    inviteFriendToRoom: (username) => {
+      set({ socialError: null });
+      send({ type: "invite-friend-to-room", username });
+    },
     chooseFirst: (first) => send({ type: "choose-first", first }),
     browserBotStatus: null,
     retryBrowserBot: () => browserBot.retry(),

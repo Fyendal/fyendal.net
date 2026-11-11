@@ -79,6 +79,7 @@ export function initialStoreProjection(
     chatMessages: {},
     chatHasMore: {},
     friendInviteTarget: null,
+    roomFriendInvites: [],
     prepDeck: null,
     prep: null,
     cardPoolModes: lobbySettings.cardPoolModes,
@@ -140,6 +141,7 @@ export function clearedRoomProjection(): Pick<
   | "matchAcceptanceRole"
   | "prep"
   | "prepDeck"
+  | "roomFriendInvites"
   | "error"
   | "connectionIssueVisible"
 > {
@@ -188,6 +190,7 @@ export function clearedRoomProjection(): Pick<
     matchAcceptanceRole: null,
     prep: null,
     prepDeck: null,
+    roomFriendInvites: [],
     error: null,
     connectionIssueVisible: false,
   };

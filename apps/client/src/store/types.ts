@@ -164,6 +164,8 @@ export interface StoreState {
   chatMessages: Record<string, ChatMessage[]>;
   chatHasMore: Record<string, boolean>;
   friendInviteTarget: string | null;
+  /** Friends invited into the current room's open seat. */
+  roomFriendInvites: string[];
   setSocialOpen: (open: boolean) => void;
   clearSocialError: () => void;
   sendFriendRequest: (username: string) => void;
@@ -297,6 +299,9 @@ export interface StoreState {
   presentArena: (arena: PresentedArena) => void;
   presentDeck: (deck: PresentedDeck) => void;
   prepUnready: () => void;
+  /** Swap the seat's saved deck while no opponent has joined. */
+  changeRoomDeck: (deckId: string) => void;
+  inviteFriendToRoom: (username: string) => void;
   chooseFirst: (first: boolean) => void;
   /** True when the command was sent or intentionally queued. */
   sendIntent: (intent: GameIntent) => boolean;
