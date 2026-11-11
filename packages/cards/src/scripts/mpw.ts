@@ -699,7 +699,7 @@ export const mpw: Record<string, CardScript> = {
     },
     onHit(ctx) {
       const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment).filter(
-        (card): card is Card => !!card && (data(ctx, card).defense ?? 0) === 0,
+        (card): card is Card => !!card && (data(ctx, card).defense ?? 0) - (card.defCounters ?? 0) <= 0,
       );
       if (equipment.length)
         ctx.requestCardChoice(
