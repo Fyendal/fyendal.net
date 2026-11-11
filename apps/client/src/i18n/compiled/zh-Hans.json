@@ -33264,16 +33264,50 @@
       "value": "对手"
     }
   ],
+  "lobby.home.opponentAnyone": [
+    {
+      "type": 0,
+      "value": "任意玩家"
+    }
+  ],
+  "lobby.home.opponentAnyoneHint": [
+    {
+      "type": 0,
+      "value": "与下一位正在寻找对局的玩家匹配。"
+    }
+  ],
+  "lobby.home.opponentAnyoneLiveHint": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 名玩家正在寻找对局。与下一位正在寻找对局的玩家匹配。"
+    }
+  ],
   "lobby.home.opponentBot": [
     {
       "type": 0,
       "value": "机器人"
     }
   ],
-  "lobby.home.opponentPlayer": [
+  "lobby.home.opponentBotHint": [
     {
       "type": 0,
-      "value": "玩家"
+      "value": "选择一个机器人进行练习。"
+    }
+  ],
+  "lobby.home.opponentPrivate": [
+    {
+      "type": 0,
+      "value": "私密"
+    }
+  ],
+  "lobby.home.opponentPrivateHint": [
+    {
+      "type": 0,
+      "value": "只有拥有链接的人才能加入。"
     }
   ],
   "lobby.home.othersSearchingNow": [
@@ -33308,26 +33342,10 @@
       "value": "白银时代 (Silver Age)"
     }
   ],
-  "lobby.home.private": [
-    {
-      "type": 0,
-      "value": "私密"
-    }
-  ],
   "lobby.home.rejoinRooms": [
     {
       "type": 0,
       "value": "重新加入房间"
-    }
-  ],
-  "lobby.home.searchingNow": [
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": " 名玩家正在寻找对局"
     }
   ],
   "lobby.home.tryPrecon": [

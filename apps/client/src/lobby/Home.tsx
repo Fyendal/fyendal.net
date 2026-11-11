@@ -189,6 +189,7 @@ export function Home() {
               mode={mode}
               disabled={queuedFormat !== null}
               labelledBy={opponentLabelId}
+              searching={queuedFormat === null ? searching : 0}
               onChange={selectMode}
             />
           </div>
@@ -203,13 +204,10 @@ export function Home() {
                 {intl.formatMessage({ id: startMessageId(mode) })}
               </button>
             )}
-            {searching > 0 && mode === "find-match" ? (
+            {searching > 0 && queuedFormat === format ? (
               <p className="home-play-live">
                 <span className="home-play-live-dot" aria-hidden="true" />
-                {intl.formatMessage(
-                  { id: queuedFormat === format ? "lobby.home.othersSearchingNow" : "lobby.home.searchingNow" },
-                  { count: searching },
-                )}
+                {intl.formatMessage({ id: "lobby.home.othersSearchingNow" }, { count: searching })}
               </p>
             ) : null}
           </div>

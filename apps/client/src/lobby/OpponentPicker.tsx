@@ -1,62 +1,66 @@
-import { useState } from "react";
 import { useIntl } from "react-intl";
 import type { HomeGameMode } from "../storage.js";
-import { UiIcon } from "../components/UiIcon.js";
+import { TooltipButton } from "../components/TooltipButton.js";
+import { UiIcon, type UiIconName } from "../components/UiIcon.js";
 
-/** Player or bot, and for a player game whether strangers may be matched in. */
+const OPTIONS: readonly { mode: HomeGameMode; icon: UiIconName; label: string; hint: string }[] = [
+  { mode: "find-match", icon: "friends", label: "lobby.home.opponentAnyone", hint: "lobby.home.opponentAnyoneHint" },
+  { mode: "invite-friend", icon: "lock", label: "lobby.home.opponentPrivate", hint: "lobby.home.opponentPrivateHint" },
+  { mode: "bot", icon: "bot", label: "lobby.home.opponentBot", hint: "lobby.home.opponentBotHint" },
+];
+
+/** Who the game is against; each choice explains itself in a tooltip, and
+ * matchmaking carries the live count of players it could pair with. */
 export function OpponentPicker({
   mode,
   disabled,
   labelledBy,
+  searching = 0,
   onChange,
 }: {
   mode: HomeGameMode;
   disabled: boolean;
   labelledBy?: string;
+  searching?: number;
   onChange: (mode: HomeGameMode) => void;
 }) {
   const intl = useIntl();
-  // Kept across a detour to Bot so returning to Player restores the choice.
-  const [privateRoom, setPrivateRoom] = useState(mode === "invite-friend");
-  const bot = mode === "bot";
 
   return (
-    <div className="opponent-picker">
-      <div
-        className="opponent-picker-segments"
-        role="group"
-        aria-labelledby={labelledBy}
-        aria-label={labelledBy ? undefined : intl.formatMessage({ id: "lobby.home.opponent" })}
-      >
-        <button
-          type="button"
-          aria-pressed={!bot}
-          disabled={disabled}
-          onClick={() => onChange(privateRoom ? "invite-friend" : "find-match")}
-        >
-          <UiIcon name="friends" />
-          {intl.formatMessage({ id: "lobby.home.opponentPlayer" })}
-        </button>
-        <button type="button" aria-pressed={bot} disabled={disabled} onClick={() => onChange("bot")}>
-          <UiIcon name="bot" />
-          {intl.formatMessage({ id: "lobby.home.opponentBot" })}
-        </button>
-      </div>
-      {/* Bot games are always private; keep the space so the segments hold still. */}
-      <label className={`opponent-picker-private${bot ? " inactive" : ""}`}>
-        <input
-          type="checkbox"
-          role="switch"
-          checked={!bot && privateRoom}
-          disabled={disabled || bot}
-          onChange={(event) => {
-            setPrivateRoom(event.target.checked);
-            onChange(event.target.checked ? "invite-friend" : "find-match");
-          }}
-        />
-        <span className="opponent-picker-switch" aria-hidden="true" />
-        {intl.formatMessage({ id: "lobby.home.private" })}
-      </label>
+    <div
+      className="opponent-picker"
+      role="group"
+      aria-labelledby={labelledBy}
+      aria-label={labelledBy ? undefined : intl.formatMessage({ id: "lobby.home.opponent" })}
+    >
+      {OPTIONS.map((option) => {
+        const live = option.mode === "find-match" && searching > 0;
+        const hint = live
+          ? intl.formatMessage({ id: "lobby.home.opponentAnyoneLiveHint" }, { count: searching })
+          : intl.formatMessage({ id: option.hint });
+        return (
+          <TooltipButton
+            key={option.mode}
+            // The visible label names the button; the hint only describes it.
+            aria-label={undefined}
+            aria-description={hint}
+            aria-pressed={option.mode === mode}
+            disabled={disabled}
+            tooltip={hint}
+            tooltipSide="above"
+            onClick={() => onChange(option.mode)}
+          >
+            <UiIcon name={option.icon} />
+            {intl.formatMessage({ id: option.label })}
+            {live ? (
+              <span className="opponent-picker-live" aria-hidden="true">
+                <span className="home-play-live-dot" />
+                {intl.formatNumber(searching)}
+              </span>
+            ) : null}
+          </TooltipButton>
+        );
+      })}
     </div>
   );
 }

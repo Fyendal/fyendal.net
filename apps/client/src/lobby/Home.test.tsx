@@ -39,19 +39,21 @@ describe("Home live searchers", () => {
     const html = render({ queueCounts: legalSearchers(2, 1) });
     expect(html).toContain(">Classic Constructed</option>");
     expect(html).toContain(">Silver Age</option>");
-    expect(html).toMatch(/class="home-play-live">.*1 player searching now/);
+    expect(html).toContain("1 player searching now. Get matched");
+    expect(html).toMatch(/class="opponent-picker-live"[^>]*><span[^>]*><\/span>1</);
   });
 
   it("shows nothing when nobody else is searching", () => {
     const html = render();
     expect(html).toContain(">Classic Constructed</option>");
-    expect(html).not.toContain("home-play-live");
+    expect(html).not.toContain("opponent-picker-live");
     expect(render({ queuedFormat: "cc", queueCounts: legalSearchers(1, 0) }))
-      .not.toContain("home-play-live");
+      .not.toMatch(/opponent-picker-live|home-play-live"/);
   });
 
   it("counts other players while this account is searching", () => {
     const html = render({ queuedFormat: "silver-age", queueCounts: legalSearchers(0, 3) });
     expect(html).toContain("2 other players searching");
+    expect(html).not.toContain("opponent-picker-live");
   });
 });

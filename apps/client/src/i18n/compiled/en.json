@@ -34964,16 +34964,76 @@
       "value": "Opponent"
     }
   ],
+  "lobby.home.opponentAnyone": [
+    {
+      "type": 0,
+      "value": "Anyone"
+    }
+  ],
+  "lobby.home.opponentAnyoneHint": [
+    {
+      "type": 0,
+      "value": "Get matched with the next player searching."
+    }
+  ],
+  "lobby.home.opponentAnyoneLiveHint": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " player searching now."
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " players searching now."
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " Get matched with the next player searching."
+    }
+  ],
   "lobby.home.opponentBot": [
     {
       "type": 0,
       "value": "Bot"
     }
   ],
-  "lobby.home.opponentPlayer": [
+  "lobby.home.opponentBotHint": [
     {
       "type": 0,
-      "value": "Player"
+      "value": "Choose a bot to practice against."
+    }
+  ],
+  "lobby.home.opponentPrivate": [
+    {
+      "type": 0,
+      "value": "Private"
+    }
+  ],
+  "lobby.home.opponentPrivateHint": [
+    {
+      "type": 0,
+      "value": "Only people with your link can join."
     }
   ],
   "lobby.home.othersSearchingNow": [
@@ -35026,48 +35086,10 @@
       "value": "Play Silver Age"
     }
   ],
-  "lobby.home.private": [
-    {
-      "type": 0,
-      "value": "Private"
-    }
-  ],
   "lobby.home.rejoinRooms": [
     {
       "type": 0,
       "value": "Rejoin Rooms"
-    }
-  ],
-  "lobby.home.searchingNow": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " player searching now"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " players searching now"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
     }
   ],
   "lobby.home.tryPrecon": [

@@ -36754,16 +36754,84 @@
       "value": "Oponente"
     }
   ],
+  "lobby.home.opponentAnyone": [
+    {
+      "type": 0,
+      "value": "Qualquer pessoa"
+    }
+  ],
+  "lobby.home.opponentAnyoneHint": [
+    {
+      "type": 0,
+      "value": "Você joga com a próxima pessoa na fila."
+    }
+  ],
+  "lobby.home.opponentAnyoneLiveHint": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Ninguém na fila agora."
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " pessoa na fila agora."
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " pessoas na fila agora."
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " Você joga com a próxima pessoa na fila."
+    }
+  ],
   "lobby.home.opponentBot": [
     {
       "type": 0,
       "value": "Bot"
     }
   ],
-  "lobby.home.opponentPlayer": [
+  "lobby.home.opponentBotHint": [
     {
       "type": 0,
-      "value": "Jogador"
+      "value": "Escolha um bot para treinar."
+    }
+  ],
+  "lobby.home.opponentPrivate": [
+    {
+      "type": 0,
+      "value": "Privada"
+    }
+  ],
+  "lobby.home.opponentPrivateHint": [
+    {
+      "type": 0,
+      "value": "Só quem tiver seu link pode entrar."
     }
   ],
   "lobby.home.othersSearchingNow": [
@@ -36832,56 +36900,10 @@
       "value": "Jogar Silver Age"
     }
   ],
-  "lobby.home.private": [
-    {
-      "type": 0,
-      "value": "Privada"
-    }
-  ],
   "lobby.home.rejoinRooms": [
     {
       "type": 0,
       "value": "Voltar às salas"
-    }
-  ],
-  "lobby.home.searchingNow": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "=0": {
-          "value": [
-            {
-              "type": 0,
-              "value": "Ninguém na fila"
-            }
-          ]
-        },
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " pessoa na fila"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " pessoas na fila"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
     }
   ],
   "lobby.home.tryPrecon": [

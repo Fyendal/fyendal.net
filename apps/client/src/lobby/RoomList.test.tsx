@@ -139,13 +139,12 @@ describe("RoomList", () => {
     expect(html).not.toContain("Welcome to Fyendal");
     expect(html).not.toContain("Choose a format");
     expect(html).toContain("Precon");
-    expect(html).toContain(">Player</button>");
+    expect(html).toContain(">Anyone</button>");
+    expect(html).toContain(">Private</button>");
     expect(html).toContain(">Bot</button>");
-    expect(html).toMatch(/class="opponent-picker-segments" role="group" aria-labelledby="[^"]+"/);
-    expect(html).toContain('class="opponent-picker-private"');
-    expect(html).toContain("Private</label>");
-    expect(html).not.toContain("opponent-picker-hint");
-    expect(html).not.toContain("Invite friend");
+    expect(html).toMatch(/class="opponent-picker" role="group" aria-labelledby="[^"]+"/);
+    expect(html).toContain("Get matched with the next player searching.");
+    expect(html).not.toContain('role="switch"');
     expect(html.match(/aria-pressed="true"/g)).toHaveLength(1);
     expect(html).toContain('class="home-play-field home-card-pool-field"');
     expect(html).toContain('<option value="future">Future</option>');
@@ -192,8 +191,7 @@ describe("RoomList", () => {
     try {
       const html = renderLocalized(<Home />);
       expect(html).toMatch(/<button[^>]*aria-pressed="true"[^>]*>(?:<span[^>]*><\/span>)?Bot<\/button>/);
-      expect(html).toMatch(/role="switch" disabled=""/);
-      expect(html).toContain('class="opponent-picker-private inactive"');
+      expect(html).toContain("Choose a bot to practice against.");
       expect(html).toContain('class="btn-cta">Play vs bot</button>');
       expect(html).toContain('<option value="cc" selected="">Classic Constructed</option>');
     } finally {
@@ -217,7 +215,7 @@ describe("RoomList", () => {
     expect(html).not.toContain("欢迎来到 Fyendal，NewPlayer。");
     expect(html).toContain("对手");
     expect(html).toContain("寻找对局");
-    expect(html).toContain("私密</label>");
+    expect(html).toContain("私密</button>");
     expect(html).toContain("机器人</button>");
     expect(html).toContain("了解卡牌范围模式");
     expect(html).not.toContain("管理牌组");

@@ -1113,12 +1113,9 @@
 }
 .home-play-deck-field .listbox { min-width: 0; }
 .home-play-deck-field .listbox-trigger { min-height: 50px; }
-/* Opponent: who you play, and for a player game whether strangers can join. */
-.opponent-picker { display: flex; min-width: 0; align-items: center; gap: 18px; }
-.opponent-picker-segments {
+.opponent-picker {
   display: grid;
-  flex: 1 1 auto;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   min-width: 0;
   min-height: 50px;
   padding: 3px;
@@ -1126,13 +1123,13 @@
   border-radius: 4px;
   background: var(--surface-well);
 }
-.opponent-picker-segments button {
+.opponent-picker button {
   display: inline-flex;
   min-width: 0;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 5px 10px;
+  padding: 5px 8px;
   border: 1px solid transparent;
   border-radius: 3px;
   clip-path: none;
@@ -1141,70 +1138,33 @@
   font: 600 14px/1.2 var(--font-lobby-ui);
   letter-spacing: normal;
   text-transform: none;
-  white-space: nowrap;
   transition: background-color 120ms ease, color 120ms ease;
 }
-.opponent-picker-segments button:hover:not(:disabled, [aria-pressed="true"]) { background: #241b14; color: var(--text-primary); }
-.opponent-picker-segments button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
-.opponent-picker-segments button[aria-pressed="true"] {
+.opponent-picker button:hover:not(:disabled, [aria-pressed="true"]) { background: #241b14; color: var(--text-primary); }
+.opponent-picker button:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.opponent-picker button[aria-pressed="true"] {
   border-color: #806334;
   background: #3d2817;
   color: var(--gold);
 }
-.opponent-picker .ui-icon { width: 16px; height: 16px; }
-/* A setting of Player, so it sits beside the segments without a box of its own. */
-.opponent-picker-private {
-  position: relative;
+.opponent-picker .ui-icon { flex: none; width: 16px; height: 16px; }
+.opponent-picker-live {
   display: inline-flex;
-  flex: none;
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  color: var(--text-secondary);
-  font: 600 14px var(--font-lobby-ui);
-  cursor: pointer;
-  transition: color 120ms ease;
+  gap: 5px;
+  margin-left: 2px;
+  color: #8fdca2;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
-.opponent-picker-private input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: inherit; }
-.opponent-picker-private:hover:not(:has(input:disabled)) { color: var(--text-primary); }
-.opponent-picker-private:has(input:checked) { color: var(--gold); }
-.opponent-picker-private.inactive { visibility: hidden; }
-.opponent-picker-private:has(input:disabled):not(.inactive) { opacity: .5; cursor: default; }
-.opponent-picker-switch {
-  position: relative;
-  flex: none;
-  width: 34px;
-  height: 20px;
-  border: 1px solid var(--border-strong);
-  border-radius: 10px;
-  background: var(--surface-page);
-  transition: background-color 120ms ease, border-color 120ms ease;
-}
-.opponent-picker-private:has(input:focus-visible) .opponent-picker-switch { outline: 2px solid var(--gold); outline-offset: 2px; }
-.opponent-picker-switch::after {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--text-muted);
-  content: "";
-  transition: transform 120ms ease, background-color 120ms ease;
-}
-.opponent-picker-private input:checked + .opponent-picker-switch { border-color: var(--bronze); background: #4a311c; }
-.opponent-picker-private input:checked + .opponent-picker-switch::after { background: var(--gold); transform: translateX(14px); }
 @media (prefers-reduced-motion: reduce) {
-  .opponent-picker-segments button,
-  .opponent-picker-private,
-  .opponent-picker-switch,
-  .opponent-picker-switch::after { transition: none; }
+  .opponent-picker button { transition: none; }
 }
 @media (max-width: 480px) {
-  .opponent-picker-segments button .ui-icon { display: none; }
-  .opponent-picker { gap: 14px; }
+  .opponent-picker button { font-size: 13px; }
+  .opponent-picker button .ui-icon { display: none; }
 }
-/* Start lines up with the controls; the live count sits under it. */
+/* Start lines up with the controls; while queued the live count sits under it. */
 .home-play-actions {
   display: flex;
   flex-direction: column;
