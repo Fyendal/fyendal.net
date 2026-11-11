@@ -613,6 +613,31 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     };
   }
 
+  /** The previous socket's close dropped this seat's foreground search. */
+  async function resumeRetainedSearch(ctx: ClientCtx, code: string): Promise<void> {
+    const user = ctx.user;
+    if (!user) return;
+    // Let that close's queue cleanup land first so it cannot delete the resumed entry.
+    await Promise.allSettled([...disconnectTasks]);
+    const search = await rooms.searchToResume(user.id, code);
+    if (!search || ctx.closed) return;
+    queuedUsers.set(user.id, ctx);
+    const result = await rooms.queueForMatch(search.format, {
+      userId: user.id,
+      username: user.username,
+      deckId: search.deckId,
+      deckName: search.deckName,
+      cardPoolMode: search.cardPoolMode,
+      retainedRoomCode: code,
+    });
+    if (!result.ok) {
+      if (queuedUsers.get(user.id) === ctx) queuedUsers.delete(user.id);
+      ctx.send({ type: "error", message: result.error });
+      return;
+    }
+    clusterConsumer?.nudge();
+  }
+
   /** Takes a seat, reconnects, or spectates in an existing room. */
   async function joinExistingRoom(
     ws: WebSocket,
@@ -683,6 +708,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
       // Reload locally to restore prep/state and negotiate browser bot work.
       await broadcaster.afterCommit({ code, kind: "sync", version });
       await publishRoomEvent({ code, kind: "presence", seat: r.seat, connected: true, version });
+      await resumeRetainedSearch(ctx, code);
       return;
     }
     if (r.started) {

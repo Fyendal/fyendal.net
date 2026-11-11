@@ -2451,6 +2451,30 @@ export class PgRoomStore {
     });
   }
 
+  /** A matchmade seat still waiting alone whose search ended with its socket;
+   * reconnecting resumes it so the room is not left "searching" unqueued. */
+  async searchToResume(userId: number, code: string): Promise<{
+    format: Format;
+    deckId?: string;
+    deckName?: string;
+    cardPoolMode: CardPoolMode;
+  } | null> {
+    const room = await this.getRoom(code);
+    if (!room || room.state || room.prep) return null;
+    const seat = room.seats.findIndex((member) => member?.userId === userId);
+    if (seat !== 0 && seat !== 1) return null;
+    const member = room.seats[seat]!;
+    if (!member.fromQueue || room.seats[1 - seat] !== null) return null;
+    const { rows } = await this.db.query("SELECT 1 FROM matchmaking_entries WHERE user_id = $1", [userId]);
+    if (rows.length > 0) return null;
+    return {
+      format: room.format,
+      deckId: member.deckId,
+      deckName: member.deckName,
+      cardPoolMode: member.queueCardPoolMode ?? room.cardPoolMode,
+    };
+  }
+
   async isRetainedMatchmakingRoom(userId: number, code: string): Promise<boolean> {
     const { rows } = await this.db.query(
       `SELECT 1

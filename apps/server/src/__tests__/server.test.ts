@@ -1421,6 +1421,50 @@ describe("lobby and matchmaking", () => {
     b.ws.close();
   });
 
+  it("reconnecting to a matchmade opener resumes its search", async () => {
+    const a = await authedClient();
+    a.sendMsg({ type: "queue-join", format: "cc", deckId: "precon-asb" });
+    const created = (await a.next((m) => m.type === "room-created")) as Extract<
+      ServerMessage,
+      { type: "room-created" }
+    >;
+    const closed = new Promise<void>((resolve) => a.ws.once("close", () => resolve()));
+    a.ws.close();
+    await closed;
+    const entries = async () =>
+      Number((await db.query("SELECT COUNT(*) AS count FROM matchmaking_entries")).rows[0]!.count);
+    await expect.poll(entries).toBe(0);
+
+    const again = await client();
+    again.sendMsg({ type: "auth", token: a.authToken });
+    await again.next((m) => m.type === "authed");
+    again.sendMsg({ type: "join-room", code: created.code, token: created.token });
+    expect(await again.next((m) => m.type === "joined")).toMatchObject({ code: created.code, resumed: true });
+    await again.next((m) => m.type === "queued");
+    expect(await entries()).toBe(1);
+
+    const lobby = await authedClient();
+    lobby.sendMsg({ type: "list-rooms" });
+    await lobby.next((m) => m.type === "queue-status" && m.counts.cc.legal.legal === 1);
+
+    const b = await authedClient();
+    b.sendMsg({ type: "queue-join", format: "cc", deckId: "precon-asb" });
+    const joined = (await b.next((m) => m.type === "joined")) as Extract<ServerMessage, { type: "joined" }>;
+    expect(joined.code).toBe(created.code);
+
+    b.inbox.length = 0;
+    again.sendMsg({ type: "leave-room" });
+    await again.next((m) => m.type === "left");
+    // The survivor goes back into the queue before leaving it.
+    await b.next((m) => m.type === "queued");
+    b.sendMsg({ type: "leave-room" });
+    await b.next((m) => m.type === "left");
+    await expect.poll(entries).toBe(0);
+    again.ws.close();
+    lobby.ws.close();
+    b.ws.close();
+  });
+
   it("leaving an unmatched opener removes its matchmaking entry", async () => {
     const a = await authedClient();
     a.sendMsg({ type: "queue-join", format: "cc", deckId: "precon-asb" });
