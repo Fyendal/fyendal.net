@@ -37145,19 +37145,7 @@
   "prep.openSeat.copyLink": [
     {
       "type": 0,
-      "value": "Copiar enlace"
-    }
-  ],
-  "prep.openSeat.deckHint": [
-    {
-      "type": 0,
-      "value": "Puedes cambiar de mazo hasta que alguien se una."
-    }
-  ],
-  "prep.openSeat.friends": [
-    {
-      "type": 0,
-      "value": "Amigos"
+      "value": "Copiar enlace de invitación"
     }
   ],
   "prep.openSeat.invite": [
@@ -37166,22 +37154,26 @@
       "value": "Invitar"
     }
   ],
+  "prep.openSeat.inviteFriend": [
+    {
+      "type": 0,
+      "value": "Invitar a "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "prep.openSeat.inviteFriends": [
+    {
+      "type": 0,
+      "value": "Invitar a un amigo"
+    }
+  ],
   "prep.openSeat.invited": [
     {
       "type": 0,
       "value": "Invitación enviada"
-    }
-  ],
-  "prep.openSeat.linkLabel": [
-    {
-      "type": 0,
-      "value": "Enlace de la sala"
-    }
-  ],
-  "prep.openSeat.noFriends": [
-    {
-      "type": 0,
-      "value": "Aún no tienes amigos."
     }
   ],
   "prep.openSeat.offline": [
@@ -37190,46 +37182,10 @@
       "value": "Desconectado"
     }
   ],
-  "prep.openSeat.orInvite": [
+  "prep.openSeat.searching": [
     {
       "type": 0,
-      "value": "O invita a un amigo"
-    }
-  ],
-  "prep.openSeat.searchStatus": [
-    {
-      "type": 0,
-      "value": "Te emparejaremos automáticamente cuando otro jugador busque."
-    }
-  ],
-  "prep.openSeat.searchTitle": [
-    {
-      "type": 0,
-      "value": "Buscando partida"
-    }
-  ],
-  "prep.openSeat.seatTitle": [
-    {
-      "type": 0,
-      "value": "Asiento libre"
-    }
-  ],
-  "prep.openSeat.share": [
-    {
-      "type": 0,
-      "value": "Compartir"
-    }
-  ],
-  "prep.openSeat.shareTitle": [
-    {
-      "type": 0,
-      "value": "Únete a mi sala de Fyendal"
-    }
-  ],
-  "prep.openSeat.yourDeck": [
-    {
-      "type": 0,
-      "value": "Tu mazo"
+      "value": "Buscando un oponente"
     }
   ],
   "prep.opponent": [

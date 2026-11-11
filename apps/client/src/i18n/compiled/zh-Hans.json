@@ -34399,19 +34399,7 @@
   "prep.openSeat.copyLink": [
     {
       "type": 0,
-      "value": "复制链接"
-    }
-  ],
-  "prep.openSeat.deckHint": [
-    {
-      "type": 0,
-      "value": "有人加入前都可以更换牌组。"
-    }
-  ],
-  "prep.openSeat.friends": [
-    {
-      "type": 0,
-      "value": "好友"
+      "value": "复制邀请链接"
     }
   ],
   "prep.openSeat.invite": [
@@ -34420,22 +34408,26 @@
       "value": "邀请"
     }
   ],
+  "prep.openSeat.inviteFriend": [
+    {
+      "type": 0,
+      "value": "邀请 "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "prep.openSeat.inviteFriends": [
+    {
+      "type": 0,
+      "value": "邀请好友"
+    }
+  ],
   "prep.openSeat.invited": [
     {
       "type": 0,
       "value": "已邀请"
-    }
-  ],
-  "prep.openSeat.linkLabel": [
-    {
-      "type": 0,
-      "value": "房间链接"
-    }
-  ],
-  "prep.openSeat.noFriends": [
-    {
-      "type": 0,
-      "value": "还没有好友。"
     }
   ],
   "prep.openSeat.offline": [
@@ -34444,46 +34436,10 @@
       "value": "离线"
     }
   ],
-  "prep.openSeat.orInvite": [
+  "prep.openSeat.searching": [
     {
       "type": 0,
-      "value": "或邀请好友"
-    }
-  ],
-  "prep.openSeat.searchStatus": [
-    {
-      "type": 0,
-      "value": "有其他玩家开始寻找对局时，会自动为你匹配。"
-    }
-  ],
-  "prep.openSeat.searchTitle": [
-    {
-      "type": 0,
-      "value": "正在寻找对局"
-    }
-  ],
-  "prep.openSeat.seatTitle": [
-    {
-      "type": 0,
-      "value": "空位"
-    }
-  ],
-  "prep.openSeat.share": [
-    {
-      "type": 0,
-      "value": "分享"
-    }
-  ],
-  "prep.openSeat.shareTitle": [
-    {
-      "type": 0,
-      "value": "加入我的 Fyendal 房间"
-    }
-  ],
-  "prep.openSeat.yourDeck": [
-    {
-      "type": 0,
-      "value": "你的牌组"
+      "value": "正在寻找对手"
     }
   ],
   "prep.opponent": [

@@ -229,14 +229,15 @@ describe("preparation stage layout", () => {
       roomFriendInvites: ["amy"],
     });
     const text = html.replace(/<[^>]*>/g, " ");
-    expect(html).toContain('value="http://localhost/ABC123"');
-    expect(text).toContain("Copy link");
-    expect(text).toContain("You can switch decks until someone joins.");
-    expect(text.indexOf("amy")).toBeLessThan(text.indexOf("bob"));
-    expect(text.indexOf("bob")).toBeLessThan(text.indexOf("zed"));
-    expect(text).toContain("Invited");
-    expect(text).toContain("Offline");
-    expect(html.match(/>Invite<\/button>/g)).toHaveLength(1);
+    expect(text).toContain("Copy invite link");
+    expect(text).toContain("Waiting for an opponent");
+    expect(text).toContain("Invite a friend");
+    expect(html).toContain('aria-expanded="false"');
+    expect(text).toContain("Your Presentation");
+    const moves = html.match(/<button[^>]*prep-(step|tile-face)[^>]*>/g) ?? [];
+    expect(moves.some((button) => !button.includes("disabled"))).toBe(true);
+    expect(html).not.toContain("open-seat-friends");
+    expect(html).not.toContain("Share");
   });
 
   it.each([false, true])("shows a matchmaking search with deck switching and invites (mobile: %s)", (mobile) => {
@@ -245,14 +246,12 @@ describe("preparation stage layout", () => {
       friends: [{ username: "bob", presence: "online", friendsSince: 0, unreadCount: 0 }],
     });
     const text = html.replace(/<[^>]*>/g, " ");
-    expect(text).toContain("Searching for a match");
-    expect(text).toContain("be matched automatically");
+    expect(text).toContain("Searching for an opponent");
     expect(text).not.toMatch(/searching yet|players searching/);
-    expect(text).toContain("You can switch decks until someone joins.");
     expect(html).not.toMatch(/<button[^>]*class="listbox-trigger[^"]*"[^>]*disabled/);
-    expect(text).toContain("Copy link");
-    expect(text).toContain("bob");
-    expect(text.indexOf("Searching for a match")).toBeLessThan(text.indexOf("Copy link"));
+    expect(text).toContain("Copy invite link");
+    expect(text).toContain("Invite a friend");
+    expect(text.indexOf("Searching for an opponent")).toBeLessThan(text.indexOf("Copy invite link"));
   });
 
   it.each([false, true])("loads a deck switch in place without the arena picker (mobile: %s)", (mobile) => {
@@ -262,7 +261,7 @@ describe("preparation stage layout", () => {
     expect(text).toContain("Getting your deck ready…");
     expect(html).not.toContain("prep-card-choice");
     expect(html).toContain('class="open-seat-deck-picker" aria-busy="true"');
-    expect(html).toContain("Copy link");
+    expect(html).toContain("Copy invite link");
     expect(html).not.toContain("Loading Card Art");
   });
 
@@ -293,8 +292,8 @@ describe("preparation stage layout", () => {
       }, null],
     };
     const text = render(waiting, false, deck, { matchmakingActive: false }).replace(/<[^>]*>/g, " ");
-    expect(text).toContain("Searching for a match");
-    expect(render({ ...waiting, searching: undefined }, false).replace(/<[^>]*>/g, " ")).toContain("Open seat");
+    expect(text).toContain("Searching for an opponent");
+    expect(render({ ...waiting, searching: undefined }, false).replace(/<[^>]*>/g, " ")).not.toContain("Searching");
   });
 
   it("waits for uncached card art before opening the room", () => {

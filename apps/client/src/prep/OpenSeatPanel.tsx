@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { CardPoolMode, Format } from "@fyendal/shared";
@@ -9,8 +9,8 @@ import { useStore } from "../store.js";
 
 const COPIED_MS = 2_000;
 
-/** Waiting room before an opponent arrives: your seat with a switchable deck,
- *  and the open seat with every way to fill it, including a matchmaking search. */
+/** One bar before an opponent arrives: a switchable deck, the wait status,
+ *  and the ways to fill the open seat. */
 export function OpenSeatPanel({
   mode,
   roomCode,
@@ -46,9 +46,11 @@ export function OpenSeatPanel({
   })));
   const [copied, setCopied] = useState(false);
   const [pendingInvite, setPendingInvite] = useState<string | null>(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const inviteRef = useRef<HTMLDivElement>(null);
+  const inviteTriggerRef = useRef<HTMLButtonElement>(null);
   const searching = mode === "search";
   const url = `${location.origin}/${roomCode}`;
-  const canShare = typeof navigator !== "undefined" && typeof navigator.share === "function";
 
   const choices = deckChoicesFor(format, decks, cardPoolMode);
   const shownDeckId = deckSwitch?.deckId ?? deckId;
@@ -69,138 +71,131 @@ export function OpenSeatPanel({
     window.setTimeout(() => setCopied(false), COPIED_MS);
   };
 
-  const shareLink = () => {
-    void navigator.share({
-      title: intl.formatMessage({ id: "prep.openSeat.shareTitle" }),
-      url,
-    }).catch(() => undefined);
-  };
+  useEffect(() => {
+    if (!inviteOpen) return;
+    const pressOutside = (event: PointerEvent) => {
+      if (!inviteRef.current?.contains(event.target as Node)) setInviteOpen(false);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setInviteOpen(false);
+      inviteTriggerRef.current?.focus();
+    };
+    document.addEventListener("pointerdown", pressOutside);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", pressOutside);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [inviteOpen]);
 
   return (
-    <section className="panel open-seat" aria-labelledby="open-seat-title">
-      <h3 className="panel-title" id="open-seat-title">
-        {intl.formatMessage({ id: "prep.waitingOpponent" })}
-      </h3>
-      <div className="open-seat-table">
-        <div className="open-seat-you">
-          <span className="open-seat-label">{intl.formatMessage({ id: "prep.openSeat.yourDeck" })}</span>
-          <div className="open-seat-deck-picker" aria-busy={switching}>
-            <DeckDropdown
-              decks={choices}
-              selected={selected}
-              cardPoolMode={cardPoolMode}
-              deckPlayedAt={deckPlayedAt}
-              onOpen={() => { void refreshDecks(true); }}
-              onSelect={(id) => {
-                const deck = choices.find((choice) => choice.id === id);
-                if (deck) changeRoomDeck(deck.id, deck.name);
-              }}
-            />
-          </div>
-          <p className="open-seat-hint">{intl.formatMessage({ id: "prep.openSeat.deckHint" })}</p>
-        </div>
-
-        <div className="open-seat-chair">
-          {searching ? (
-            <div className="open-seat-search">
-              <h4 className="open-seat-chair-title">{intl.formatMessage({ id: "prep.openSeat.searchTitle" })}</h4>
-              <p className="open-seat-searching">
-                <span className="home-play-live-dot" aria-hidden="true" />
-                {intl.formatMessage({ id: "prep.openSeat.searchStatus" })}
-              </p>
-              <span className="open-seat-label open-seat-or">{intl.formatMessage({ id: "prep.openSeat.orInvite" })}</span>
-            </div>
-          ) : (
-            <h4 className="open-seat-chair-title">{intl.formatMessage({ id: "prep.openSeat.seatTitle" })}</h4>
-          )}
-          <div className="open-seat-link">
-            <div className="open-seat-link-field">
-              <input
-                readOnly
-                value={url}
-                aria-label={intl.formatMessage({ id: "prep.openSeat.linkLabel" })}
-                onFocus={(event) => event.currentTarget.select()}
-              />
-              <button type="button" className="lobby-create-action open-seat-copy" aria-live="polite" onClick={() => void copyLink()}>
-                <UiIcon name={copied ? "check" : "invite-game"} />
-                {intl.formatMessage({ id: copied ? "prep.copied" : "prep.openSeat.copyLink" })}
-              </button>
-            </div>
-            {canShare ? (
-              <button type="button" className="lobby-create-action" onClick={shareLink}>
-                <UiIcon name="share" />
-                {intl.formatMessage({ id: "prep.openSeat.share" })}
-              </button>
-            ) : null}
-          </div>
-
-          <div className="open-seat-friends">
-            <span className="open-seat-label">{intl.formatMessage({ id: "prep.openSeat.friends" })}</span>
-            {sortedFriends.length === 0 ? (
-              <p className="open-seat-empty">
-                {intl.formatMessage({ id: "prep.openSeat.noFriends" })}{" "}
-                <button type="button" className="linklike" onClick={() => setSocialOpen(true)}>
-                  {intl.formatMessage({ id: "prep.openSeat.addFriends" })}
-                </button>
-              </p>
-            ) : (
-              <ul>
-                {sortedFriends.map((friend) => {
-                  const online = friend.presence === "online";
-                  const invited = roomFriendInvites.includes(friend.username);
-                  return (
-                    <li key={friend.username} className={online ? "online" : "offline"}>
-                      <span className="open-seat-friend-avatar" aria-hidden="true">
-                        {friend.username.charAt(0).toUpperCase()}
-                        <i />
-                      </span>
-                      <span className="open-seat-friend-name">
-                        {friend.username}
-                        {!online ? (
-                          <span className="open-seat-friend-status">
-                            {intl.formatMessage({ id: "prep.openSeat.offline" })}
-                          </span>
-                        ) : null}
-                      </span>
-                      {invited ? (
-                        <span className="open-seat-invited">
-                          <UiIcon name="check" />
-                          {intl.formatMessage({ id: "prep.openSeat.invited" })}
-                        </span>
-                      ) : online ? (
-                        <button
-                          type="button"
-                          className="lobby-create-action"
-                          disabled={pendingInvite === friend.username}
-                          onClick={() => {
-                            setPendingInvite(friend.username);
-                            inviteFriendToRoom(friend.username);
-                          }}
-                        >
-                          <UiIcon name="invite-game" />
-                          {intl.formatMessage({ id: "prep.openSeat.invite" })}
-                        </button>
-                      ) : null}
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-            {socialError ? (
-              <div className="social-error" role="alert">
-                <span>{intl.formatMessage({
-                  id: socialError === "FRIEND_UNAVAILABLE"
-                    ? "social.error.unavailable"
-                    : socialError === "MESSAGE_RATE_LIMITED"
-                      ? "social.error.rateLimited"
-                      : "social.error.friendRequired",
-                })}</span>
-                <button type="button" aria-label={intl.formatMessage({ id: "common.dismiss" })} onClick={clearSocialError}>×</button>
-              </div>
-            ) : null}
-          </div>
-        </div>
+    <section className="panel open-seat" aria-labelledby="open-seat-status">
+      <div className="open-seat-deck-picker" aria-busy={switching}>
+        <DeckDropdown
+          decks={choices}
+          selected={selected}
+          cardPoolMode={cardPoolMode}
+          deckPlayedAt={deckPlayedAt}
+          onOpen={() => { void refreshDecks(true); }}
+          onSelect={(id) => {
+            const deck = choices.find((choice) => choice.id === id);
+            if (deck) changeRoomDeck(deck.id, deck.name);
+          }}
+        />
       </div>
+
+      <p className="open-seat-status" id="open-seat-status" role="status">
+        {searching ? <span className="home-play-live-dot" aria-hidden="true" /> : null}
+        {intl.formatMessage({ id: searching ? "prep.openSeat.searching" : "prep.waitingOpponent" })}
+      </p>
+
+      <div className="open-seat-invite" ref={inviteRef}>
+        {friends.length === 0 ? (
+          <button type="button" className="lobby-create-action" onClick={() => setSocialOpen(true)}>
+            <UiIcon name="friends" />
+            {intl.formatMessage({ id: "prep.openSeat.addFriends" })}
+          </button>
+        ) : (
+          <button
+            ref={inviteTriggerRef}
+            type="button"
+            className="lobby-create-action open-seat-invite-trigger"
+            aria-haspopup="dialog"
+            aria-expanded={inviteOpen}
+            onClick={() => setInviteOpen((open) => !open)}
+          >
+            <UiIcon name="friends" />
+            {intl.formatMessage({ id: "prep.openSeat.inviteFriends" })}
+          </button>
+        )}
+        <button type="button" className="lobby-create-action" aria-live="polite" onClick={() => void copyLink()}>
+          <UiIcon name={copied ? "check" : "invite-game"} />
+          {intl.formatMessage({ id: copied ? "prep.copied" : "prep.openSeat.copyLink" })}
+        </button>
+        {inviteOpen && friends.length > 0 ? (
+          <div
+            className="open-seat-friends"
+            role="dialog"
+            aria-label={intl.formatMessage({ id: "prep.openSeat.inviteFriends" })}
+          >
+            <ul>
+              {sortedFriends.map((friend) => {
+                const online = friend.presence === "online";
+                const invited = roomFriendInvites.includes(friend.username);
+                return (
+                  <li key={friend.username} className={online ? "online" : "offline"}>
+                    <span className="open-seat-friend-avatar" aria-hidden="true">
+                      {friend.username.charAt(0).toUpperCase()}
+                      <i />
+                    </span>
+                    <span className="open-seat-friend-name" title={friend.username}>{friend.username}</span>
+                    {invited ? (
+                      <span className="open-seat-invited">
+                        <UiIcon name="check" />
+                        {intl.formatMessage({ id: "prep.openSeat.invited" })}
+                      </span>
+                    ) : online ? (
+                      <button
+                        type="button"
+                        className="lobby-create-action"
+                        disabled={pendingInvite === friend.username}
+                        aria-label={intl.formatMessage(
+                          { id: "prep.openSeat.inviteFriend" },
+                          { username: friend.username },
+                        )}
+                        onClick={() => {
+                          setPendingInvite(friend.username);
+                          inviteFriendToRoom(friend.username);
+                        }}
+                      >
+                        {intl.formatMessage({ id: "prep.openSeat.invite" })}
+                      </button>
+                    ) : (
+                      <span className="open-seat-friend-status">
+                        {intl.formatMessage({ id: "prep.openSeat.offline" })}
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+
+      {socialError ? (
+        <div className="social-error" role="alert">
+          <span>{intl.formatMessage({
+            id: socialError === "FRIEND_UNAVAILABLE"
+              ? "social.error.unavailable"
+              : socialError === "MESSAGE_RATE_LIMITED"
+                ? "social.error.rateLimited"
+                : "social.error.friendRequired",
+          })}</span>
+          <button type="button" aria-label={intl.formatMessage({ id: "common.dismiss" })} onClick={clearSocialError}>×</button>
+        </div>
+      ) : null}
     </section>
   );
 }

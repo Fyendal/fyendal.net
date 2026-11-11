@@ -38056,19 +38056,7 @@
   "prep.openSeat.copyLink": [
     {
       "type": 0,
-      "value": "Copiar link"
-    }
-  ],
-  "prep.openSeat.deckHint": [
-    {
-      "type": 0,
-      "value": "Você pode trocar de deck até alguém entrar."
-    }
-  ],
-  "prep.openSeat.friends": [
-    {
-      "type": 0,
-      "value": "Amigos"
+      "value": "Copiar link de convite"
     }
   ],
   "prep.openSeat.invite": [
@@ -38077,22 +38065,26 @@
       "value": "Convidar"
     }
   ],
+  "prep.openSeat.inviteFriend": [
+    {
+      "type": 0,
+      "value": "Convidar "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "prep.openSeat.inviteFriends": [
+    {
+      "type": 0,
+      "value": "Convidar um amigo"
+    }
+  ],
   "prep.openSeat.invited": [
     {
       "type": 0,
       "value": "Convite enviado"
-    }
-  ],
-  "prep.openSeat.linkLabel": [
-    {
-      "type": 0,
-      "value": "Link da sala"
-    }
-  ],
-  "prep.openSeat.noFriends": [
-    {
-      "type": 0,
-      "value": "Você ainda não tem amigos."
     }
   ],
   "prep.openSeat.offline": [
@@ -38101,46 +38093,10 @@
       "value": "Offline"
     }
   ],
-  "prep.openSeat.orInvite": [
+  "prep.openSeat.searching": [
     {
       "type": 0,
-      "value": "Ou convide um amigo"
-    }
-  ],
-  "prep.openSeat.searchStatus": [
-    {
-      "type": 0,
-      "value": "O pareamento acontece automaticamente quando outra pessoa procurar."
-    }
-  ],
-  "prep.openSeat.searchTitle": [
-    {
-      "type": 0,
-      "value": "Procurando partida"
-    }
-  ],
-  "prep.openSeat.seatTitle": [
-    {
-      "type": 0,
-      "value": "Lugar vago"
-    }
-  ],
-  "prep.openSeat.share": [
-    {
-      "type": 0,
-      "value": "Compartilhar"
-    }
-  ],
-  "prep.openSeat.shareTitle": [
-    {
-      "type": 0,
-      "value": "Entre na minha sala do Fyendal"
-    }
-  ],
-  "prep.openSeat.yourDeck": [
-    {
-      "type": 0,
-      "value": "Seu deck"
+      "value": "Procurando um oponente"
     }
   ],
   "prep.opponent": [

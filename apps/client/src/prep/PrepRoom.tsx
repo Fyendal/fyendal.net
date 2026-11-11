@@ -363,7 +363,9 @@ export function PrepRoom() {
   // under the card grid. Waiting on an opponent's pick still allows drafting.
   const choosingTurnOrder = nextStep === "first-player";
   const arenaLocked = accepting || choosingTurnOrder || deckStage || me?.arenaLocked === true;
-  const locked = ready || !deckStage;
+  const seatOpen = !!roomCode && !opp && prep?.botGame !== true;
+  // An open seat lets you draft the main deck early; the draft carries into the deck stage.
+  const locked = ready || !(deckStage || seatOpen);
   const matchupLocked = ready || accepting || (me?.arenaLocked === true && !deckStage);
   const floatingFooter = mobilePrepLayout && (deckStage || (!accepting && opp !== null));
   const matchups = prepDeck.matchups ?? [];
@@ -547,7 +549,7 @@ export function PrepRoom() {
       </button>
     </p>
   ) : null;
-  const openSeat = roomCode && !opp && prep?.botGame !== true ? (
+  const openSeat = roomCode && seatOpen ? (
     <OpenSeatPanel
       mode={searching ? "search" : "invite"}
       roomCode={roomCode}
@@ -567,21 +569,13 @@ export function PrepRoom() {
     if (error) setErrors([error]);
   };
 
-  const presentation = deckLoading ? (
-    <PrepDeckSwitchLoading
-      deckName={loadingPool ? deckSwitch?.deckName ?? me?.heroName ?? prepDeck.name : prepDeck.name}
-      heroId={loadingPool ? null : prepDeck.decklist.heroId}
-      art={deckImageArt}
-      progress={loadingPool ? null : deckImages}
-      onSkip={loadingPool ? undefined : () => setImageWaitSkippedFor(deckImageKey)}
-    />
-  ) : (
+  const renderPresentation = (sections: "arena" | "deck") => (
     <PrepPresentation
       pool={pool}
       selection={selection}
       selectionKey={selectionKey}
-      locked={deckStage ? locked : arenaLocked}
-      sections={deckStage ? "deck" : "arena"}
+      locked={sections === "deck" ? locked : arenaLocked}
+      sections={sections}
       showHero={mobilePrepLayout}
       mainCount={mainCount}
       minimumMainCount={min}
@@ -598,6 +592,15 @@ export function PrepRoom() {
       compact={mobilePrepLayout}
     />
   );
+  const presentation = deckLoading ? (
+    <PrepDeckSwitchLoading
+      deckName={loadingPool ? deckSwitch?.deckName ?? me?.heroName ?? prepDeck.name : prepDeck.name}
+      heroId={loadingPool ? null : prepDeck.decklist.heroId}
+      art={deckImageArt}
+      progress={loadingPool ? null : deckImages}
+      onSkip={loadingPool ? undefined : () => setImageWaitSkippedFor(deckImageKey)}
+    />
+  ) : renderPresentation(deckStage ? "deck" : "arena");
   const arenaLockButton = (
     <button type="button" className="btn-primary" onClick={() => onLockArena()} disabled={!arenaStage || arenaLocked || deckLoading}>
       {intl.formatMessage({ id: me?.arenaLocked ? "prep.arena.locked" : "prep.arena.lock" })}
@@ -821,6 +824,7 @@ export function PrepRoom() {
           </section> : null}
 
           {deckStage ? presentation : null}
+          {seatOpen && !deckLoading ? renderPresentation("deck") : null}
         </div>
       </div>
 

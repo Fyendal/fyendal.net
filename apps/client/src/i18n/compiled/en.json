@@ -36235,19 +36235,7 @@
   "prep.openSeat.copyLink": [
     {
       "type": 0,
-      "value": "Copy link"
-    }
-  ],
-  "prep.openSeat.deckHint": [
-    {
-      "type": 0,
-      "value": "You can switch decks until someone joins."
-    }
-  ],
-  "prep.openSeat.friends": [
-    {
-      "type": 0,
-      "value": "Friends"
+      "value": "Copy invite link"
     }
   ],
   "prep.openSeat.invite": [
@@ -36256,22 +36244,26 @@
       "value": "Invite"
     }
   ],
+  "prep.openSeat.inviteFriend": [
+    {
+      "type": 0,
+      "value": "Invite "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "prep.openSeat.inviteFriends": [
+    {
+      "type": 0,
+      "value": "Invite a friend"
+    }
+  ],
   "prep.openSeat.invited": [
     {
       "type": 0,
       "value": "Invited"
-    }
-  ],
-  "prep.openSeat.linkLabel": [
-    {
-      "type": 0,
-      "value": "Room link"
-    }
-  ],
-  "prep.openSeat.noFriends": [
-    {
-      "type": 0,
-      "value": "No friends yet."
     }
   ],
   "prep.openSeat.offline": [
@@ -36280,46 +36272,10 @@
       "value": "Offline"
     }
   ],
-  "prep.openSeat.orInvite": [
+  "prep.openSeat.searching": [
     {
       "type": 0,
-      "value": "Or invite a friend"
-    }
-  ],
-  "prep.openSeat.searchStatus": [
-    {
-      "type": 0,
-      "value": "You'll be matched automatically when another player searches."
-    }
-  ],
-  "prep.openSeat.searchTitle": [
-    {
-      "type": 0,
-      "value": "Searching for a match"
-    }
-  ],
-  "prep.openSeat.seatTitle": [
-    {
-      "type": 0,
-      "value": "Open seat"
-    }
-  ],
-  "prep.openSeat.share": [
-    {
-      "type": 0,
-      "value": "Share"
-    }
-  ],
-  "prep.openSeat.shareTitle": [
-    {
-      "type": 0,
-      "value": "Join my Fyendal room"
-    }
-  ],
-  "prep.openSeat.yourDeck": [
-    {
-      "type": 0,
-      "value": "Your deck"
+      "value": "Searching for an opponent"
     }
   ],
   "prep.opponent": [
