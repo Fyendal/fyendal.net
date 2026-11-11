@@ -1,6 +1,6 @@
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import { intentCard, isAttack, ownCards, type BotPolicyInput } from "./policy.js";
-import { leviaBloodDebt, leviaBloodrushTurn, leviaBloodrushWorthSending, leviaDebtSuppressed, leviaEffectActive } from "./levia-turn.js";
+import { LEVIA_CONSUMED_LIFE, leviaBloodDebt, leviaBloodrushTurn, leviaBloodrushWorthSending, leviaDebtSuppressed, leviaEffectActive } from "./levia-turn.js";
 import { POINTS_PER_DAMAGE } from "./turn-planner.js";
 
 export type LeviaMacro = "redeem" | "stabilize" | "engine" | "bloodrush" | "attrition" | "pressure";
@@ -49,7 +49,8 @@ export function chooseLeviaMacro(input: BotPolicyInput): LeviaMacroChoice {
   );
   const hasEngine = enginePermanents(me.board, input) > 0;
 
-  if (canRedeem && (me.life <= 8 || (!suppressed && debt >= me.life))) {
+  // Above 13 life blood debt can still drain her into Consumed instead.
+  if (canRedeem && me.life <= LEVIA_CONSUMED_LIFE && (me.life <= 8 || (!suppressed && debt >= me.life))) {
     return { goal: "redeem", matchup: context };
   }
   if (leviaEffectActive(input, "bloodrush bellow")) return { goal: "bloodrush", matchup: context };

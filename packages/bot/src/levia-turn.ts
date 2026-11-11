@@ -188,6 +188,9 @@ export function leviaBloodrushWorthSending(turn: LeviaBloodrushTurn, opponentLif
 }
 
 const BLASMOPHET = "Blasmophet, the Insatiable Hunger";
+const CONSUMED = "Blasmophet, Levia Consumed";
+/** Blood debt reducing Levia's life to this offers the Consumed transform. */
+export const LEVIA_CONSUMED_LIFE = 13;
 
 /** A Gate's activation cost. */
 export const LEVIA_GATE_COST = 1;
@@ -203,12 +206,27 @@ function carriesBloodDebt(card: CardView, input: BotPolicyInput): boolean {
     (me.heroAbilitiesLost === true || input.cards[me.heroCardId]?.name !== "Levia, Redeemed");
 }
 
+/** Blasmophet, Levia Consumed with her abilities: blood debt banishes the top
+ * of her deck instead of draining life, and she plays one banished card a turn. */
+export function leviaConsumed(input: BotPolicyInput): boolean {
+  const me = input.view.players[input.seat];
+  return me.heroAbilitiesLost !== true && input.cards[me.heroCardId]?.name === CONSUMED;
+}
+
+/** Life `cards`' blood debt drains at Levia's end phase. */
 export function leviaBloodDebt(cards: readonly CardView[], input: BotPolicyInput): number {
+  if (leviaConsumed(input)) return 0;
   return cards.filter((card) => carriesBloodDebt(card, input)).length;
 }
 
 export function leviaBloodDebtAction(card: CardView, input: BotPolicyInput): boolean {
   return input.cards[card.cardId]?.cardType === "action" && carriesBloodDebt(card, input);
+}
+
+/** Open once-per-turn Blasmophet banish plays: the ally's and, next turn, Consumed's.
+ * This turn's Consumed play is already a projected permission on the card. */
+function blasmophetSlots(input: BotPolicyInput, nextTurn: boolean): number {
+  return (blasmophetPlayOpen(input, nextTurn) ? 1 : 0) + (nextTurn && leviaConsumed(input) ? 1 : 0);
 }
 
 /** Whether Blasmophet's once-per-turn banish play is still available. */
@@ -237,18 +255,61 @@ export function leviaBanishAccess(
   extra: { gates?: number; banished?: readonly CardView[] } = {},
 ): LeviaBanishAccess[] {
   const me = input.view.players[input.seat];
-  const blasmophet = blasmophetPlayOpen(input, nextTurn) ? 1 : 0;
+  const blasmophet = blasmophetSlots(input, nextTurn);
   const slots = controls(input, GATE) + (extra.gates ?? 0) + blasmophet;
   if (slots === 0) return [];
-  return [...me.banish, ...(extra.banished ?? [])]
-    .filter((card) => card.playableFromSourceCardId === undefined && leviaBloodDebtAction(card, input) &&
-      leviaAttackPlayable(card, input))
-    .sort((left, right) => {
-      const a = input.cards[left.cardId];
-      const b = input.cards[right.cardId];
-      return (b?.attack ?? 0) - (a?.attack ?? 0) || (a?.cost ?? 0) - (b?.cost ?? 0) ||
-        left.instanceId - right.instanceId;
-    })
+  // A shared Blasmophet permission projected now is next turn's open play too.
+  const reachable = (card: CardView) => card.playableFromSourceCardId === undefined ||
+    (nextTurn && leviaSharedBanishPlay(card, input));
+  return leviaBanishPriority([...me.banish, ...(extra.banished ?? [])]
+    .filter((card) => reachable(card) && leviaBloodDebtAction(card, input) && leviaAttackPlayable(card, input)), input)
     .slice(0, slots)
     .map((card, index) => ({ card, viaGate: index >= blasmophet }));
+}
+
+/** Banished cards playable through a once-per-turn Blasmophet permission
+ * (the ally's or Consumed's), as opposed to a Gate or a card's own grant. */
+function leviaSharedBanishPlay(card: CardView, input: BotPolicyInput): boolean {
+  const source = card.playableFromSourceCardId;
+  if (source === undefined || card.faceDown) return false;
+  const name = input.cards[source]?.name;
+  return name === BLASMOPHET || name === CONSUMED;
+}
+
+/** Shadowrealm Horror, then Dread Screamer and Feeding Frenzy, then other go
+ * again, then Endless Maw: go-again attacks keep the banish turn going. */
+function banishRank(data: CardData | undefined): number {
+  switch (data?.name) {
+    case "Shadowrealm Horror": return 0;
+    case "Dread Screamer":
+    case "Feeding Frenzy": return 1;
+    case "Endless Maw": return 3;
+    // Conditional go again (Ram Raider, Soul Cleaver) is only in the text.
+    default: return data?.keywords?.includes("Go again") || /go again/i.test(data?.text ?? "") ? 2 : 4;
+  }
+}
+
+/** Banished attacks in the order Levia spends a banish play on them. */
+function leviaBanishPriority(cards: readonly CardView[], input: BotPolicyInput): CardView[] {
+  return [...cards].sort((left, right) => {
+    const a = input.cards[left.cardId];
+    const b = input.cards[right.cardId];
+    return banishRank(a) - banishRank(b) || (b?.attack ?? 0) - (a?.attack ?? 0) ||
+      (a?.cost ?? 0) - (b?.cost ?? 0) || left.instanceId - right.instanceId;
+  });
+}
+
+/** Keep only the best banished cards each open Blasmophet permission can play;
+ * every face-up Blood Debt card is otherwise its own search branch. */
+export function leviaSharedBanishPicks(cards: readonly CardView[], input: BotPolicyInput): Set<number> {
+  const shared = cards.filter((card) => leviaSharedBanishPlay(card, input));
+  const slots = new Set(shared.map((card) => card.playableFromSourceCardId)).size;
+  const playable = shared.filter((card) => !isAttack(input.cards[card.cardId]) || leviaAttackPlayable(card, input));
+  return new Set(leviaBanishPriority(playable, input).slice(0, slots).map((card) => card.instanceId));
+}
+
+/** `cards` without the Blasmophet banish plays beyond the priority picks. */
+export function leviaPrunedBanish(cards: readonly CardView[], input: BotPolicyInput): CardView[] {
+  const picks = leviaSharedBanishPicks(cards, input);
+  return cards.filter((card) => !leviaSharedBanishPlay(card, input) || picks.has(card.instanceId));
 }

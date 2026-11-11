@@ -400,7 +400,6 @@ export function SocialDock() {
                 </TooltipButton>
                 {canInviteFriends ? (
                   <TooltipButton
-                    className="social-secondary-action"
                     tooltip={intl.formatMessage({ id: "social.invite.title" }, { username: friend.username })}
                     tooltipSide="above"
                     disabled={friend.presence === "offline"}
@@ -410,7 +409,7 @@ export function SocialDock() {
                   </TooltipButton>
                 ) : null}
                 <TooltipButton
-                  className="social-remove social-secondary-action"
+                  className="social-remove"
                   tooltip={intl.formatMessage({ id: "social.removeNamed" }, { username: friend.username })}
                   tooltipSide="above"
                   onClick={() => {

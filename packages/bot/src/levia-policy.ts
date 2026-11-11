@@ -62,7 +62,9 @@ import {
   leviaDebtSuppressed,
   leviaEffectActive,
   leviaHoldsBellow,
+  leviaPrunedBanish,
   leviaSixPower,
+  LEVIA_CONSUMED_LIFE,
   LEVIA_GATE_COST,
   leviaSashEnablesPair,
   type LeviaBanishAccess,
@@ -94,6 +96,21 @@ function costlyHexagore(intent: GameIntent, input: BotPolicyInput): boolean {
   if (selfDamage <= HEXAGORE_MAX_SELF_DAMAGE) return false;
   const lethal = (data?.attack ?? 0) >= input.view.players[1 - input.seat]!.life && selfDamage < me.life;
   return !lethal;
+}
+
+/** Blasmophet banish plays beyond the priority picks never enter the search. */
+function withoutLesserBanishPlays(intents: readonly GameIntent[], input: BotPolicyInput): GameIntent[] {
+  const banishPlay = (intent: GameIntent): intent is Extract<GameIntent, { kind: "play-from-zone" }> =>
+    intent.kind === "play-from-zone" && intent.zone === "banish";
+  const offered = new Set(intents.filter(banishPlay).map((intent) => intent.instanceId));
+  const kept = new Set(leviaPrunedBanish(
+    input.view.players[input.seat].banish.filter((card) => offered.has(card.instanceId)), input,
+  ).map((card) => card.instanceId));
+  return intents.filter((intent) => !banishPlay(intent) || kept.has(intent.instanceId));
+}
+
+function leviaCandidates(intents: readonly GameIntent[], input: BotPolicyInput): GameIntent[] {
+  return withoutLesserBanishPlays(withoutCostlyHexagore(intents, input), input);
 }
 
 function withoutCostlyHexagore(intents: readonly GameIntent[], input: BotPolicyInput): GameIntent[] {
@@ -469,6 +486,7 @@ function leviaRules(input: BotPolicyInput, gateMode: boolean): HeroSolverRules {
       }
       return patch;
     },
+    playableBanish: (observed, cards) => leviaPrunedBanish(cards, observed),
     // Banished Blood Debt attacks reachable through Gates and Blasmophet.
     abilities(context, next) {
       return leviaBanishAccess(input, next).flatMap(({ card, viaGate }): SolverCard[] => {
@@ -779,8 +797,9 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     score = fundsAttackPair(card, input) ? 20
       : input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn === true ? 52 : -20;
   } else if (named === "levia, shadowborn abomination" && intent.kind === "activate-ability") {
-    score = me.life <= 8 || (ownBloodDebt(input) >= me.life &&
-      input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn !== true) ? 180 : -120;
+    // Above 13 life blood debt can still drain her into Consumed instead.
+    score = me.life <= LEVIA_CONSUMED_LIFE && (me.life <= 8 || (ownBloodDebt(input) >= me.life &&
+      input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn !== true)) ? 180 : -120;
   } else if (named === "doomsday") {
     score = 75;
   } else if (named === "scabskin leathers") {
@@ -860,10 +879,6 @@ function scorePullOptChoice(
     input.cards[selected.cardId]?.pitch !== requiredPitch ? 100 : -100;
 }
 
-function opponentHero(input: BotPolicyInput): string {
-  return name(input.cards[input.view.players[1 - input.seat]!.heroCardId]);
-}
-
 /** Whether Back Alley Breakline's action point funds a second attack that Call
  * to the Grave's go again would not: two attacks fit the resources and the
  * first is terminal. */
@@ -930,15 +945,6 @@ function scoreForcedHandBanish(card: CardView, input: BotPolicyInput): number {
   return 20 - (full - rest) + access - drain;
 }
 
-/** Transform into Consumed, except into Marionette without Engulfing Shadows banished. */
-function scoreTransformChoice(optionId: string, input: BotPolicyInput): number | undefined {
-  const engulfing = input.view.players[input.seat].banish.some((card) =>
-    !card.faceDown && name(input.cards[card.cardId]) === "engulfing shadows"
-  );
-  const accept = !opponentHero(input).includes("marionette") || engulfing;
-  return scoreBinaryChoice(optionId, accept ? 12 : 0, accept ? 0 : 12);
-}
-
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
   if (input.view.pendingDecision?.kind === "arsenal") {
     return scoreArsenalChoice(intent, input, arsenalValuer(leviaSolverRules));
@@ -947,10 +953,8 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   if (pullOpt !== undefined) return pullOpt;
   const messageId = input.view.pendingDecision?.promptMessage?.id;
   if (messageId === "card.agb.deck.card.graveyard") return scoreCallChoice(optionCard(intent, input), input);
-  if (messageId === "card.common.levia.transform") {
-    const transform = scoreTransformChoice(intent.optionId, input);
-    if (transform !== undefined) return transform;
-  }
+  // Consumed's blood debt mills instead of draining life: always transform.
+  if (messageId === "card.common.levia.transform") return scoreBinaryChoice(intent.optionId, 12, 0) ?? 0;
   if (messageId === "card.iar.hand.banish.optional" && input.view.phase === "end" &&
     input.view.players[input.seat].board.some((held) =>
       name(input.cards[held.cardId]) === "blasmophet, the insatiable hunger"
@@ -1096,7 +1100,7 @@ export interface LeviaIntentDecision {
 }
 
 export function chooseLeviaIntentWithTrace(raw: BotPolicyInput): LeviaIntentDecision {
-  const input = { ...raw, legal: withoutCostlyHexagore(raw.legal, raw) };
+  const input = { ...raw, legal: leviaCandidates(raw.legal, raw) };
   const macro = chooseLeviaMacro(input);
   // Levia's instants set up her own attacks. Keep the hand for blocks throughout
   // the opponent's turn, including priority windows before an attack is declared.
@@ -1126,7 +1130,7 @@ export function chooseLeviaIntentWithTrace(raw: BotPolicyInput): LeviaIntentDeci
     // Continuations keep the preferred pitch pattern per action; the root
     // candidates still carry every pattern.
     prepareCandidates: (candidates, observed, { depth }) => {
-      const allowed = withoutCostlyHexagore(candidates, observed);
+      const allowed = leviaCandidates(candidates, observed);
       return depth === 0 ? allowed : preferredPitchIntents(allowed, observed);
     },
     maxForcedSteps: 48,

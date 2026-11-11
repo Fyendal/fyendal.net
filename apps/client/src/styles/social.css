@@ -360,14 +360,13 @@
 }
 .social-panel .social-friend-actions button:hover:not(:disabled) { border-color: transparent; background: #ffd47914; color: var(--gold); }
 .social-panel .social-friend-actions button:disabled { opacity: .35; }
-/* Invite and remove stay findable but recede behind message until hovered. */
-.social-panel .social-friend-actions .social-secondary-action { color: #7d705c; }
 .social-friend-actions .ui-icon { width: 16px; height: 16px; }
 @media (pointer: coarse) {
   .social-panel .social-friend-actions button,
   .social-panel .social-header-action { width: 34px; min-width: 34px; height: 34px; min-height: 34px; }
   .social-friend { min-height: 38px; }
 }
+.social-panel .social-friend-actions .social-remove { color: #d47a70; }
 .social-panel .social-friend-actions .social-remove:hover:not(:disabled) { background: #ff7b7214; color: var(--danger); }
 .social-empty { margin: 6px 12px 8px; color: var(--text-muted); font-size: 12.5px; line-height: 1.4; }
 

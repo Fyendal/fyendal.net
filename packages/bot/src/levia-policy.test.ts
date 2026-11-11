@@ -6,6 +6,7 @@ import { chooseLeviaIntent, chooseLeviaIntentWithTrace, leviaEngineValue, leviaS
 import { arsenalCardValue, handDamage, handResponse, heldCardValue } from "./hand-value.js";
 import { leviaLifeRisk, leviaMacroPositionBonus } from "./levia-macros.js";
 import { leviaPresentationFor } from "./sideboard.js";
+import { leviaSharedBanishPicks } from "./levia-turn.js";
 
 const opponent = decklists.dorinthea;
 
@@ -416,6 +417,71 @@ describe("Levia Gates policy", () => {
     expect(leviaLifeRisk(observe(), observe())).toBe(1);
     redeem(state);
     expect(leviaLifeRisk(observe(), observe())).toBe(0);
+  });
+
+  it("waits for Consumed instead of redeeming above 13 life", () => {
+    const state = game();
+    state.players[0]!.life = 15;
+    state.players[0]!.banish = cards(state, Array<string>(15).fill("MON126"));
+    hand(state, ["MON140", "PEN322", "DTD107", "IAR214"]);
+    const heroId = state.players[0]!.hero.instanceId;
+    const input = { seat: 0 as const, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state };
+    expect(input.legal).toContainEqual(expect.objectContaining({ kind: "activate-ability", sourceInstanceId: heroId }));
+    expect(chooseLeviaIntentWithTrace(input).macro.goal).not.toBe("redeem");
+    expect(choice(state)).not.toMatchObject({ kind: "activate-ability", sourceInstanceId: heroId });
+  });
+
+  describe("Blasmophet, Levia Consumed", () => {
+    function consumed() {
+      const state = game();
+      const me = state.players[0]!;
+      me.heroCardId = "DTD164B";
+      me.hero.cardId = "DTD164B";
+      me.inventory = [];
+      me.life = 13;
+      me.graveyard = cards(state, ["MON140", "WTR007", "ROS218", "IAR212", "MON140", "WTR007"]);
+      hand(state, ["MON140", "IAR212", "ROS218", "DTD107"]);
+      return state;
+    }
+
+    it("counts no life lost to blood debt, which mills instead", () => {
+      const state = consumed();
+      state.players[0]!.banish = cards(state, Array<string>(12).fill("MON126"));
+      const observe = () => ({
+        seat: 0 as const, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state,
+      });
+      expect(leviaLifeRisk(observe(), observe())).toBe(0);
+      expect(chooseLeviaIntentWithTrace(observe()).macro.goal).not.toBe("stabilize");
+    });
+
+    it.each([
+      [["MON126", "DTD115", "LEV011", "MST236", "IAR026", "DTD112"], "MST236"],
+      [["MON126", "DTD115", "LEV011", "IAR026", "DTD112"], "LEV011"],
+      [["MON126", "DTD115", "DTD112"], "DTD112"],
+      [["DTD115", "MON126"], "MON126"],
+    ])("searches only the priority banish play from %j: %s", (banished, expected) => {
+      const state = consumed();
+      state.players[0]!.banish = cards(state, banished);
+      const legal = legalIntents(state, 0);
+      const view = projectStateFor(state, 0);
+      const input = { seat: 0 as const, view, legal, cards: cardData, state };
+      const decision = chooseLeviaIntentWithTrace(input);
+      const searched = new Set((decision.plan?.rootResults ?? []).flatMap(({ intent }) =>
+        intent.kind === "play-from-zone" ? [intent.instanceId] : []));
+      const target = state.players[0]!.banish.find((card) => card.cardId === expected)!;
+      expect([...leviaSharedBanishPicks(view.players[0].banish, input)]).toEqual([target.instanceId]);
+      expect([...searched].every((id) => id === target.instanceId)).toBe(true);
+      expect(legal).toContainEqual(decision.intent);
+    });
+
+    it("leads with a banished Shadowrealm Horror", () => {
+      const state = consumed();
+      state.players[0]!.banish = cards(state, [
+        "MON126", "LEV011", "MST236", "IAR026", "DTD112", "DTD115", "DTD124", "IAR011", "LEV014", "DTD121",
+      ]);
+      const horror = state.players[0]!.banish.find((card) => card.cardId === "MST236")!;
+      expect(choice(state)).toMatchObject({ kind: "play-from-zone", zone: "banish", instanceId: horror.instanceId });
+    });
   });
 
   it("changes matchup priors without reading an opponent's hidden hand", () => {
@@ -1654,19 +1720,17 @@ describe("Levia Gates policy", () => {
     });
 
     it.each([
-      ["Dorinthea Ironsong", false, "yes"],
-      ["Arakni, Marionette", false, "no"],
-      ["Arakni, Marionette", true, "yes"],
-    ])("transforms into Consumed against %s (Engulfing banished: %s): %s", (opponent, engulfing, expected) => {
+      ["Dorinthea Ironsong"],
+      ["Arakni, Marionette"],
+    ])("transforms into Consumed against %s", (opponent) => {
       let state = game();
       state.players[1]!.heroCardId = heroId(opponent);
       state.players[0]!.life = 14;
       state.players[0]!.actionPoints = 0;
       state.players[0]!.banish = [{ instanceId: state.nextInstanceId++, cardId: "MON126", owner: 0 }];
-      if (engulfing) state.players[0]!.banish.push({ instanceId: state.nextInstanceId++, cardId: "PEN194", owner: 0 });
       hand(state, ["MON140"]);
       state = passUntil(state, (current) => current.pendingDecision?.promptMessage?.id === "card.common.levia.transform");
-      expect(choice(state)).toEqual({ kind: "choose", optionId: expected });
+      expect(choice(state)).toEqual({ kind: "choose", optionId: "yes" });
     });
 
     it("discounts a carried Gate by aura removal in the opponent's decklist", () => {

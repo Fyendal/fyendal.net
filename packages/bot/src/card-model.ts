@@ -79,6 +79,9 @@ export interface HeroSolverRules {
   equipment?(data: CardData, card: CardView, context: ModelContext): SolverCardPatch | undefined;
   /** Hero activated abilities as solver sources (zone "ability"). */
   abilities?(context: ModelContext, nextTurn: boolean): readonly SolverCard[];
+  /** Narrow this turn's playable banished cards, e.g. to the picks a
+   * once-per-turn permission would spend. */
+  playableBanish?(input: BotPolicyInput, cards: readonly CardView[]): readonly CardView[];
 }
 
 const NO_HERO_RULES: HeroSolverRules = { name: "generic" };
@@ -291,9 +294,8 @@ export function buildHandSolver(context: ModelContext): HandSolver {
   for (const card of me.arsenal) add(card, "arsenal");
   // A permission to play a banished card lasts only for the current turn.
   if (!nextTurn) {
-    for (const card of me.banish) {
-      if (card.playableFromSourceCardId !== undefined && !card.faceDown) add(card, "banish");
-    }
+    const banished = me.banish.filter((card) => card.playableFromSourceCardId !== undefined && !card.faceDown);
+    for (const card of rules.playableBanish?.(input, banished) ?? banished) add(card, "banish");
   }
   const weaponsProhibited = !nextTurn && input.view.turnFacts?.players[input.seat]?.weaponAttacksProhibited === true;
   for (const weapon of me.weapons) {
