@@ -29,6 +29,7 @@ import type { BoardLegalState } from "./boardModel.js";
 import { useHandReorder } from "./useHandReorder.js";
 import { handDropAction, handPlayWindow, type HandDropAction } from "./handOrder.js";
 import { handFanSlotStyle } from "./handFan.js";
+import { presentedHandCount } from "../defenderState.js";
 import type { MotionPreference } from "../../storage.js";
 import { useMotionPreference } from "../motion/useMotionPreference.js";
 
@@ -255,7 +256,8 @@ export function PlayerHand({
   const fannedHandCards = visibleCards.filter((card) =>
     interaction.focusedSourceInstanceId !== card.instanceId
   );
-  const handSlots = showBacks ? player.handCount : fannedHandCards.length;
+  const backCount = presentedHandCount(view, player.seat);
+  const handSlots = showBacks ? backCount : fannedHandCards.length;
   const fanCount = handSlots + playableZoneCards.length + activatableZoneCards.length;
   const fanSlot = (card: CardView) => {
     const index = fannedHandCards.indexOf(card);
@@ -297,7 +299,7 @@ export function PlayerHand({
         {...reorderHandlers}
       >
         {showBacks
-          ? Array.from({ length: player.handCount }, (_, index) => (
+          ? Array.from({ length: backCount }, (_, index) => (
               <CardBack
                 key={index}
                 label=""

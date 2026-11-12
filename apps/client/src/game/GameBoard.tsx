@@ -1399,6 +1399,9 @@ export function GameBoard() {
     />
   ) : null;
   const oppHandRevealed = view.phase === "game-over" || replaying;
+  const oppRevealedHand = oppHandRevealed
+    ? opp.hand.filter((card) => !stagedIds.has(card.instanceId))
+    : [];
   const oppHand = (
     <div
       className={`opp-hand${oppHandRevealed ? " opp-hand-revealed" : ""}`}
@@ -1406,11 +1409,11 @@ export function GameBoard() {
       role="group"
       aria-label={intl.formatMessage({ id: "game.hand.opponentCount" }, { count: presentedOppHandCount })}
       style={{
-        "--fan-n": Math.max(1, oppHandRevealed ? opp.hand.length : presentedOppHandCount),
+        "--fan-n": Math.max(1, oppHandRevealed ? oppRevealedHand.length : presentedOppHandCount),
       } as CSSProperties}
     >
       {oppHandRevealed
-        ? opp.hand.map((card, i) => (
+        ? oppRevealedHand.map((card, i) => (
             <CardFace
               key={card.instanceId}
               card={card}
