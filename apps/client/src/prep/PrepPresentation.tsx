@@ -86,6 +86,8 @@ function countCopies(ids: readonly string[]): Map<string, number> {
 interface LedgerEntry {
   id: string;
   count: number;
+  /** Copies across both zones; the tile draws one pip each. */
+  owned: number;
   fixed: boolean;
 }
 
@@ -172,10 +174,20 @@ function PrepViewToggle({
   );
 }
 
+/** Past this many copies the pips give way to a written total. */
+const MAX_COPY_PIPS = 4;
+
+/** Lit for a copy in this zone; `last` marks the one a click moves. */
+function pipClass(index: number, count: number): string | undefined {
+  if (index >= count) return undefined;
+  return index === count - 1 ? "on last" : "on";
+}
+
 /** Cards view: the whole card is the control that moves one copy. */
 function CardTile({
   id,
   count,
+  owned,
   fixed = false,
   locked,
   label,
@@ -184,6 +196,7 @@ function CardTile({
 }: {
   id: string;
   count: number;
+  owned: number;
   /** Registered to inventory only; shown locked, never moved. */
   fixed?: boolean;
   locked: boolean;
@@ -196,8 +209,17 @@ function CardTile({
   const face = (
     <>
       <CardArtwork className="prep-tile-art" cardId={id} artImage={cardArt?.imageFor(id)} alt="" />
-      <span className="prep-tile-copies" aria-hidden="true" data-copies={Math.min(count, 3)}>
-        <span className="prep-tile-times">×</span>{count}
+      <span className="prep-tile-copies" aria-hidden="true">
+        <span className="prep-tile-count">{count}</span>
+        {owned <= MAX_COPY_PIPS ? (
+          <span className="prep-tile-pips">
+            {Array.from({ length: owned }, (_, index) => (
+              <i key={index} className={pipClass(index, count)} />
+            ))}
+          </span>
+        ) : (
+          <span className="prep-tile-owned">/ {owned}</span>
+        )}
       </span>
       <span className="prep-sr-only">{countLabel}</span>
     </>
@@ -424,14 +446,14 @@ export const PrepPresentation = memo(function PrepPresentation({
   const sortedMainEntries = sortCards(poolMainEntries, sortOrder, ([cardId]) => ({ cardId }));
   const spareCopies = new Map(poolMainEntries.map(([id, total]) => [id, total - mainOf(id)]));
   const mainGroups = groupLedger(
-    sortedMainEntries.flatMap(([id]) => (mainOf(id) > 0 ? [{ id, count: mainOf(id), fixed: false }] : [])),
+    sortedMainEntries.flatMap(([id, owned]) => (mainOf(id) > 0 ? [{ id, count: mainOf(id), owned, fixed: false }] : [])),
     sortOrder,
   );
   const inventoryGroups = groupLedger(
     sortCards<LedgerEntry>(
       [
-        ...poolMainEntries.map(([id]) => ({ id, count: spareCopies.get(id) ?? 0, fixed: false })),
-        ...[...fixedInventoryCounts].map(([id, count]) => ({ id, count, fixed: true })),
+        ...poolMainEntries.map(([id, owned]) => ({ id, count: spareCopies.get(id) ?? 0, owned, fixed: false })),
+        ...[...fixedInventoryCounts].map(([id, count]) => ({ id, count, owned: count, fixed: true })),
       ].filter(({ count }) => count > 0),
       sortOrder,
       ({ id }) => ({ cardId: id }),
@@ -463,6 +485,7 @@ export const PrepPresentation = memo(function PrepPresentation({
           <span className="prep-group-title">
             <i className={`prep-pitch prep-pitch-${group.pitch}`} aria-hidden="true" />
             {intl.formatMessage({ id: PITCH_NAME_MESSAGES[group.pitch] })}
+            <span className="prep-group-count">{group.rows.reduce((sum, row) => sum + row.count, 0)}</span>
           </span>
         ) : null}
         <ul className={grid ? "prep-card-grid" : "prep-ledger-rows"}>{group.rows.map(render)}</ul>
@@ -489,22 +512,24 @@ export const PrepPresentation = memo(function PrepPresentation({
       </TooltipButton>
     </LedgerRow>
   );
-  const mainTile = ({ id, count }: LedgerEntry) => (
+  const mainTile = ({ id, count, owned }: LedgerEntry) => (
     <CardTile
       key={id}
       id={id}
       count={count}
+      owned={owned}
       locked={locked}
       label={moveLabel(id, "inventory")}
       cardArt={cardArt}
       onMove={(button) => moveCopy(button, id, -1)}
     />
   );
-  const inventoryTile = ({ id, count, fixed }: LedgerEntry) => (
+  const inventoryTile = ({ id, count, owned, fixed }: LedgerEntry) => (
     <CardTile
       key={fixed ? `fixed-${id}` : id}
       id={id}
       count={count}
+      owned={owned}
       fixed={fixed}
       locked={locked}
       label={fixed ? cardData[id]?.name ?? id : moveLabel(id, "main")}
@@ -566,10 +591,6 @@ export const PrepPresentation = memo(function PrepPresentation({
               <span>{intl.formatMessage({ id: "prep.art.highestRarity" })}</span>
             </label>
           ) : null}
-          <div className="prep-pool-controls">
-            <PrepViewToggle value={viewMode} onChange={changeViewMode} />
-            <CardSortToggle options={PREP_SORT_OPTIONS} value={sortOrder} onChange={changeSortOrder} />
-          </div>
         </div>
       ) : null}
       {sections !== "deck" && showHero ? <div className="prep-section">
@@ -693,6 +714,10 @@ export const PrepPresentation = memo(function PrepPresentation({
                   {intl.formatMessage({ id: "prep.presentation.restore" })}
                 </button>
               ) : null}
+              <div className="prep-pool-controls">
+                <PrepViewToggle value={viewMode} onChange={changeViewMode} />
+                <CardSortToggle options={PREP_SORT_OPTIONS} value={sortOrder} onChange={changeSortOrder} />
+              </div>
             </div>
             {mainCount > 0 ? (
               <div className="prep-pitch-row">

@@ -263,7 +263,7 @@ describe("PrepPresentation equipment controls", () => {
       expect(html).not.toContain("prep-tile");
     });
 
-    it("renders a remembered cards view as whole-card buttons with copy badges", () => {
+    it("renders a remembered cards view as whole-card buttons with copy pips", () => {
       vi.stubGlobal("localStorage", { getItem: () => "cards", setItem: vi.fn() });
       const html = renderDeck(false);
       expect(html).toContain('aria-pressed="true">Cards</button>');
@@ -272,7 +272,10 @@ describe("PrepPresentation equipment controls", () => {
       const [main, inventory] = html.split("prep-inventory-zone");
       expect(main).toContain('class="prep-tile" data-cardid="WTR219"');
       expect(main).toContain('aria-label="Move one copy of Nimblism to Inventory"');
-      expect(main).toContain('<span class="prep-tile-times">×</span>1</span><span class="prep-sr-only">1 copy</span>');
+      // One of Nimblism's two copies is here: one lit pip, one hollow.
+      expect(main).toContain(
+        '<span class="prep-tile-count">1</span><span class="prep-tile-pips"><i class="on last"></i><i></i></span></span><span class="prep-sr-only">1 copy</span>',
+      );
       expect(inventory).toContain('aria-label="Move one copy of Nimblism to Main deck"');
       // Inventory-only cards show as a locked, unpressable tile.
       expect(inventory).toContain('class="prep-tile fixed" data-cardid="WTR215"');
@@ -347,9 +350,9 @@ describe("PrepPresentation equipment controls", () => {
       vi.stubGlobal("localStorage", { getItem: () => "pitch", setItem: vi.fn() });
       const html = renderDeck();
       expect(html).toContain('aria-pressed="true"><span class="card-sort-pips"');
-      // Groups name the color; the counts stay with the bar.
-      expect(html).toContain('prep-pitch-2" aria-hidden="true"></i>Yellow</span>');
-      expect(html).toContain('prep-pitch-3" aria-hidden="true"></i>Blue</span>');
+      // Each group names its color and totals its copies.
+      expect(html).toContain('prep-pitch-2" aria-hidden="true"></i>Yellow<span class="prep-group-count">1</span></span>');
+      expect(html).toContain('prep-pitch-3" aria-hidden="true"></i>Blue<span class="prep-group-count">1</span></span>');
       expect(html).toContain('prep-pitch-legend');
       expect(order(html, 0)).toEqual(["WTR218", "WTR219"]);
       expect(order(html, 1)).toEqual(["WTR215", "WTR219", "WTR217"]);

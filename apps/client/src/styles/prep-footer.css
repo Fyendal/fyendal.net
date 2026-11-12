@@ -317,7 +317,7 @@
   margin-bottom: 16px;
 }
 .prep-pool-heading .panel-title { margin: 0; border-bottom: 0; padding-bottom: 0; }
-.prep-pool-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.prep-pool-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-left: auto; }
 /* Sideboarding ledger: the main deck's head pins while its rows scroll, and
    Inventory is a sticky tray that scrolls inside its own frame beside them. */
 .prep-ledgers {
@@ -368,7 +368,7 @@
 .prep-zone-heading {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 6px 14px;
 }
@@ -413,9 +413,10 @@
   display: flex;
   flex: 1 1 auto;
   gap: 2px;
-  height: 8px;
-  border-radius: 4px;
+  height: 4px;
+  border-radius: 2px;
   overflow: hidden;
+  opacity: .85;
 }
 .prep-pitch-bar span { flex: 0 1 0; min-width: 0; }
 .prep-pitch-legend {
@@ -470,6 +471,11 @@
   padding: 0 4px;
   color: var(--text-muted);
   font-size: 12px;
+}
+.prep-group-count {
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 .prep-group-title::after { content: ""; flex: 1; height: 1px; background: #2f2315; }
 .prep-row {
@@ -590,7 +596,7 @@
 .prep-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-  gap: 14px 8px;
+  gap: 16px 8px;
   margin: 0;
   padding: 6px 0 2px;
   list-style: none;
@@ -631,28 +637,32 @@
 }
 .prep-tile-face:hover:not(:disabled) .prep-tile-art { transform: translateY(-2px); }
 .prep-tile-face:active:not(:disabled) .prep-tile-art { transform: scale(.96); }
-/* A tag under the card keeps the printed face clear; its fill brightens per copy. */
+/* Under the card: the count, then a pip per owned copy; lit pips are here,
+   hollow ones sit in the other zone. */
 .prep-tile-copies {
-  position: relative;
-  z-index: -1;
-  display: block;
-  width: 48px;
-  margin: -4px auto 0;
-  padding: 6px 0 3px;
-  border-radius: 0 0 10px 10px;
-  background: #4a3620;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 14px;
+  margin-top: 7px;
   color: var(--text-primary);
-  font: 700 15px/16px var(--font-lobby-ui);
+  font: 600 13px/14px var(--font-lobby-ui);
   font-variant-numeric: tabular-nums;
-  text-align: center;
 }
-.prep-tile-copies[data-copies="2"] { background: #a8741f; color: #fff6df; }
-.prep-tile-copies[data-copies="3"] { background: var(--gold); color: #1c1004; }
-.prep-tile-times {
-  margin-right: 1px;
-  font-weight: 600;
-  font-size: 12px;
-  opacity: .7;
+.prep-tile-pips { display: flex; gap: 3px; }
+.prep-tile-pips i {
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px #6b5433;
+  transition: opacity 120ms ease-out;
+}
+.prep-tile-pips i.on { background: var(--gold); box-shadow: none; }
+.prep-tile-owned { color: var(--text-muted); font-weight: 500; }
+@media (hover: hover) and (pointer: fine) {
+  /* Previews the copy a click sends to the other zone. */
+  .prep-tile-face:hover:not(:disabled) .prep-tile-pips i.last { opacity: .35; }
 }
 .prep-tile.fixed .prep-tile-copies { opacity: .55; }
 .prep-tile-lock {
@@ -922,11 +932,11 @@
     min-width: 0;
     padding-inline: 12px;
   }
-  /* Title and the art toggle share the first line; both switches take the next. */
   .prep-pool-heading { gap: 10px; }
   .prep-pool-heading .panel-title { flex: 1 1 auto; }
   .prep-pool-heading .prep-art-toggle { flex: none; margin-left: auto; }
-  .prep-pool-controls { flex: 1 1 100%; justify-content: space-between; }
+  /* Both switches take their own line under the main deck heading. */
+  .prep-pool-controls { flex: 1 1 100%; justify-content: space-between; margin-left: 0; }
   .prep-zone-head { position: static; padding-top: 0; }
   .prep-row { min-height: 52px; }
   .prep-row,
@@ -1000,7 +1010,8 @@
   50% { filter: drop-shadow(0 0 7px #ffd479cc) drop-shadow(0 0 18px #e8bd4a80); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .prep-tile-art { transition: none; }
+  .prep-tile-art,
+  .prep-tile-pips i { transition: none; }
   .prep-tile-face:hover:not(:disabled) .prep-tile-art,
   .prep-tile-face:active:not(:disabled) .prep-tile-art { transform: none; }
   .prep-nudge {

@@ -406,18 +406,19 @@ export function PrepRoom() {
       width: CARD_PREVIEW_WIDTH,
       height: CARD_PREVIEW_HEIGHT,
     });
-    // A ledger row previews beside its own ledger rather than over its rows.
-    const span = el.closest(".prep-deck-zone")?.getBoundingClientRect() ?? r;
+    // A ledger row previews beside its own ledger rather than over its rows;
+    // a card previews beside itself.
+    const span = (el.matches(".prep-row") ? el.closest(".prep-deck-zone")?.getBoundingClientRect() : null) ?? r;
     const gap = 12;
     const created = createdCardsFor(cardId, box.width, window.innerWidth);
     const createdSpan = created?.beside ? CREATED_PANEL_WIDTH + CREATED_PANEL_GAP : 0;
     const totalWidth = box.width + createdSpan;
-    let x = span.right + gap;
-    let side: "left" | "right" = "right";
-    if (x + totalWidth > window.innerWidth - 8) {
-      x = Math.max(8, span.left - totalWidth - gap) + createdSpan;
-      side = "left";
-    }
+    const roomRight = window.innerWidth - 8 - span.right - gap;
+    const roomLeft = span.left - gap - 8;
+    const side: "left" | "right" = roomRight >= totalWidth || roomRight >= roomLeft ? "right" : "left";
+    const x = side === "right"
+      ? Math.min(span.right + gap, window.innerWidth - 8 - totalWidth)
+      : Math.max(8, span.left - totalWidth - gap) + createdSpan;
     const y = Math.min(
       Math.max(r.top + r.height / 2 - box.height / 2, 8),
       window.innerHeight - box.height - 8,
