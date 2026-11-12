@@ -84,6 +84,10 @@ describe("card values", () => {
     // A block card can never leave arsenal: it only wastes the slot.
     const block = defaultCardUses(findPrinting("Crash and Bash", 1)!);
     expect(arsenalValue(block, 0)).toBe(-DEAD_ARSENAL_COST);
+    // An Ambush block card still defends from arsenal.
+    const tigerEye = defaultCardUses(findPrinting("Tiger Eye Reflex", 2)!);
+    expect(tigerEye.ambush).toBe(true);
+    expect(arsenalValue(tigerEye, 0)).toBeGreaterThan(0);
   });
 
   it("charges blue cards that cannot defend from arsenal", () => {

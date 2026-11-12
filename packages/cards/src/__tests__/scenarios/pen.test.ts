@@ -1342,6 +1342,24 @@ describe("PEN — import and set mechanics", () => {
     expect(aboveBase.state.players[0]!.weapons[0]!.counters?.power ?? 0).toBe(0);
   });
 
+  it("Courageous Crossing creates Courage under the chosen hero's control", () => {
+    const courage = (g: ReturnType<typeof scenario>, seat: number) =>
+      g.state.players[seat]!.board.filter((card) => cardData[card.cardId]?.name === "Courage").length;
+    for (const [option, seat] of [["your hero", 0], ["opposing hero", 1]] as const) {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", hand: ["courageous crossing|3"], equipment: NO_EQUIPMENT },
+          { hero: "dorinthea", equipment: NO_EQUIPMENT },
+        ],
+      });
+      g.play("courageous crossing|3");
+      expect(g.state.pendingDecision?.defaultOption).toBe("your hero");
+      g.chooseOption(option);
+      expect(courage(g, seat)).toBe(1);
+      expect(courage(g, 1 - seat)).toBe(0);
+    }
+  });
+
   it("Frail Swingline makes the weakened attack's controller discard", () => {
     const g = scenario({
       seats: [
@@ -1355,7 +1373,10 @@ describe("PEN — import and set mechanics", () => {
       ],
     });
 
-    g.play("frail swingline|3").endTurn();
+    g.play("frail swingline|3");
+    expect(g.state.pendingDecision?.defaultOption).toBe("opposing hero");
+    g.chooseOption("opposing hero").endTurn();
+    expect(g.state.players[1]!.board.some((card) => cardData[card.cardId]?.name === "Frailty")).toBe(true);
     const defenderHand = g.state.players[0]!.hand.length;
     g.activate("dawnblade|0").expectAttackValue(2).blockWith("frail swingline|3").settle();
     expect(g.state.pendingDecision?.chooseHook).toBe("frail-swingline-discard");

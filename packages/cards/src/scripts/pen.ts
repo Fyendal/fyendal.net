@@ -972,7 +972,18 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   "courageous crossing|3": {
     onPlay(ctx) {
-      create(ctx, COURAGE, 1, opponentSeat(ctx));
+      requestHeroChoice(
+        ctx,
+        "courageous-crossing-hero",
+        `${ctx.data.name}: choose target hero`,
+        "card.common.target.hero.choose",
+        { values: { card: { kind: "card", cardId: ctx.self.cardId } }, defaultOption: "your hero" },
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "courageous-crossing-hero") return;
+      const seat = heroChoiceSeat(ctx, option);
+      if (seat !== undefined) create(ctx, COURAGE, 1, seat);
     },
     canTriggerOnDefend: (ctx) => ctx.attackBonusAboveBase() > 0,
     onDefendTarget: {
@@ -986,7 +997,13 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   "frail swingline|3": {
     onPlay(ctx) {
-      create(ctx, FRAILTY, 1, opponentSeat(ctx));
+      requestHeroChoice(
+        ctx,
+        "frail-swingline-hero",
+        `${ctx.data.name}: choose target hero`,
+        "card.common.target.hero.choose",
+        { values: { card: { kind: "card", cardId: ctx.self.cardId } }, defaultOption: "opposing hero" },
+      );
     },
     canTriggerOnDefend: (ctx) => !!ctx.link && ctx.currentAttackPower() < ctx.basePower(ctx.link.attackingCard),
     onDefend(ctx) {
@@ -998,6 +1015,10 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       );
     },
     onChoose(ctx, hook, option) {
+      if (hook === "frail-swingline-hero") {
+        const seat = heroChoiceSeat(ctx, option);
+        if (seat !== undefined) create(ctx, FRAILTY, 1, seat);
+      }
       if (hook === "frail-swingline-discard") resolveDiscardChoice(ctx, option, opponentSeat(ctx));
     },
   },

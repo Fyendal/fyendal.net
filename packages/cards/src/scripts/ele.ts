@@ -11,11 +11,13 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
+  heroChoiceSeat,
   heroTarget,
   localizedCardLog,
   mergeSetScripts,
   ongoingLabel,
   opponentSeat,
+  requestHeroChoice,
   targetHeroSeat,
 } from "./shared-helpers.js";
 import { eleHighRarity } from "./ele/high-rarity.js";
@@ -1230,7 +1232,19 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       isAttack: false,
       goAgain: true,
       destroySelfCost: true,
-      onActivate: (ctx) => createFrostbites(ctx, opponentSeat(ctx)),
+      onActivate(ctx) {
+        requestHeroChoice(
+          ctx,
+          "coat-of-frost-hero",
+          `${ctx.data.name}: choose target hero`,
+          "card.common.target.hero.choose",
+          { values: { card: { kind: "card", cardId: ctx.self.cardId } }, defaultOption: "opposing hero" },
+        );
+      },
+    },
+    onChoose(ctx, hook, option) {
+      const seat = hook === "coat-of-frost-hero" ? heroChoiceSeat(ctx, option) : undefined;
+      if (seat !== undefined) createFrostbites(ctx, seat);
     },
   },
   "frost fang|1": {

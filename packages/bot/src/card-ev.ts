@@ -119,6 +119,10 @@ export function arsenalValue(
     case "defense-reaction":
       value = blockValue(uses);
       break;
+    case "block":
+      if (!uses.ambush) return -DEAD_ARSENAL_COST;
+      value = blockValue(uses);
+      break;
     default:
       return -DEAD_ARSENAL_COST;
   }
