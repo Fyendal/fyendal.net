@@ -772,20 +772,12 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
   },
   ...pitches("cut the deck", (pitch) => cutTheDeck(4 - pitch)),
   ...pitches("fatal engagement", (pitch) => ({
-    ...warriorReaction(6 - pitch),
-    canPlay: (ctx) =>
-      !!ctx.link &&
-      ctx.link.attacker === ctx.seat &&
-      ctx.currentAttackHasType("warrior") &&
-      defendedByAttackAction(ctx),
+    canPlay: defendedByAttackAction,
+    onPlay: (ctx) => ctx.addModifier({ scope: "chain-link", attack: 6 - pitch }),
   })),
   ...pitches("take the upper hand", (pitch) => ({
-    ...warriorReaction(4 - pitch),
-    canPlay: (ctx) =>
-      !!ctx.link &&
-      ctx.link.attacker === ctx.seat &&
-      ctx.currentAttackHasType("warrior") &&
-      ctx.getFlag("link", "wagered") === true,
+    canPlay: (ctx) => ctx.getFlag("link", "wagered") === true,
+    onPlay: (ctx) => ctx.addModifier({ scope: "chain-link", attack: 4 - pitch }),
   })),
   "agile engagement|2": warriorReaction(2, (ctx) => {
     if (defendedByAttackAction(ctx)) ctx.createToken(AGILITY);

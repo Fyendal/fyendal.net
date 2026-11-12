@@ -987,3 +987,36 @@ describe("HVY — Commanding Performance", () => {
       .expectInZone(1, "sink below|1", "arsenal");
   });
 });
+
+describe("HVY — Warrior reactions that target any attack", () => {
+  it("Take the Upper Hand pumps a wagered non-Warrior attack", () => {
+    const g = scenario({ seats: [
+      { hero: "dorinthea", heroKey: "olympia|0", resources: 10, hand: ["wage gold|1", "take the upper hand|1"] },
+      { hero: "rhinar" },
+    ] });
+    g.play("wage gold|1").chooseOption("yes").blockWith()
+      .react("take the upper hand|1", { settle: false })
+      .passPriority().passPriority()
+      .expectAttackValue(10);
+  });
+
+  it("Take the Upper Hand needs a wager this chain link", () => {
+    const g = scenario({ seats: [
+      { hero: "dorinthea", heroKey: "olympia|0", resources: 10, hand: ["wage gold|1", "take the upper hand|1"] },
+      { hero: "rhinar" },
+    ] });
+    g.play("wage gold|1").chooseOption("no").blockWith()
+      .expectNoLegalPlay("take the upper hand|1");
+  });
+
+  it("Fatal Engagement pumps a non-Warrior attack defended by an attack action", () => {
+    const g = scenario({ seats: [
+      { hero: "dorinthea", heroKey: "olympia|0", resources: 10, hand: ["wage gold|1", "fatal engagement|1"] },
+      { hero: "rhinar", hand: ["wrecker romp|3"] },
+    ] });
+    g.play("wage gold|1").chooseOption("no").blockWith("wrecker romp|3")
+      .react("fatal engagement|1", { settle: false })
+      .passPriority().passPriority()
+      .expectAttackValue(12);
+  });
+});

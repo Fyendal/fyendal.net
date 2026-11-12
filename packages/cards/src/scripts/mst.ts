@@ -204,14 +204,8 @@ function mysticAssassinReaction(pump: number, token?: string): CardScript {
   };
 }
 
-function simpleAttackReaction(pump: number, token?: string): CardScript {
-  return {
-    canPlay: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat,
-    onPlay(ctx) {
-      if (pump) ctx.addModifier({ scope: "chain-link", attack: pump });
-      if (token) createInHand(ctx, token);
-    },
-  };
+function attackingWithAttackAction(ctx: ScriptCtx): boolean {
+  return !!ctx.link && isAttackAction(ctx, ctx.link.attackingCard);
 }
 
 function lastLifeCloak(): CardScript {
@@ -815,9 +809,12 @@ export const mst: Record<string, CardScript> = {
   "venomous bite|1": mysticAssassinReaction(3, FANG_STRIKE),
   "venomous bite|2": mysticAssassinReaction(2, FANG_STRIKE),
   "venomous bite|3": mysticAssassinReaction(1, FANG_STRIKE),
-  "fang strike|0": simpleAttackReaction(1),
+  "fang strike|0": {
+    canPlay: attackingWithAttackAction,
+    onPlay: (ctx) => ctx.addModifier({ scope: "chain-link", attack: 1 }),
+  },
   "slither|0": {
-    canPlay: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat,
+    canPlay: attackingWithAttackAction,
     onPlay(ctx) {
       ctx.grantGoAgain();
     },

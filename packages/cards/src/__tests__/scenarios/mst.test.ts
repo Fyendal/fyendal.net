@@ -632,6 +632,18 @@ describe("MST — Assassin", () => {
       .expectZoneSize(1, "banish", 2);
   });
 
+  it("Fang Strike and Slither only target attack action cards", () => {
+    const g = scenario({
+      seats: [
+        { hero: "dorinthea", resources: 3, hand: ["fang strike|0", "slither|0"] },
+        { hero: "rhinar" },
+      ],
+    });
+    g.attackWithWeapon().blockWith()
+      .expectNoLegalPlay("fang strike|0")
+      .expectNoLegalPlay("slither|0");
+  });
+
   it("Just a Nick lets Unmake the Underlings choose both modes and banish on hit", () => {
     const g = scenario({
       seats: [
