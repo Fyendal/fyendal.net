@@ -50,6 +50,8 @@
       "tools tools";
     column-gap: 8px;
   }
+  /* Guests have no account block, so the tools take its cell on the brand row. */
+  .lobby-topbar-guest { grid-template-areas: "brand tools"; }
   .lobby-topbar-authenticated {
     min-height: calc(56px + env(safe-area-inset-top));
     grid-template-columns: minmax(0, 1fr) auto;
