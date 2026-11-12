@@ -61,6 +61,7 @@ import { PrepArenaCards } from "./PrepArenaCards.js";
 import { opponentPrepState, PrepMatchSheet } from "./PrepMatchSheet.js";
 import { nextPrepStep, useStepNudge } from "./nextStepNudge.js";
 import { FullscreenButton } from "../components/FullscreenButton.js";
+import { TopbarSocialSlot } from "../social/TopbarSocialSlot.js";
 import {
   canPreloadCardImages,
   preloadCardImage,
@@ -777,6 +778,7 @@ export function PrepRoom() {
           </h2>
         </div>
         <div className="prep-topbar-actions">
+          <TopbarSocialSlot />
           <FullscreenButton placement="header" />
           <button className="lobby-create-action" onClick={leave}>
             {intl.formatMessage({ id: "common.leave" })}

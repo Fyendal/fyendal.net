@@ -8,6 +8,8 @@
   font-family: var(--font-lobby-ui);
 }
 .social-mobile-backdrop { display: none; }
+/* The deck-art loading screen has no header slot and lasts a moment. */
+#root:has(.prep-image-loading-page) .social-dock { display: none; }
 
 @media (min-width: 701px) {
   #root:has(.table) .social-dock .social-message-toast {
@@ -51,19 +53,24 @@
   place-items: center;
   padding: 0;
   clip-path: none;
-  border: 1px solid #c59d4d;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 25%, #4a3419, #211508 68%);
-  box-shadow: 0 8px 26px #000c, inset 0 1px #ffe7a838;
-  color: var(--gold);
+  border: 1px solid #5a4426;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #2d1f0e, #201508);
+  box-shadow: 0 6px 18px #000a;
+  color: #c9b78f;
   cursor: grab;
   touch-action: none;
 }
 .social-dock[data-dragging="true"] .social-bubble { cursor: grabbing; }
 .social-bubble:hover,
-.social-bubble[aria-expanded="true"] { background: radial-gradient(circle at 35% 25%, #604521, #2b1b0a 68%); }
+.social-bubble[aria-expanded="true"] {
+  border-color: #7a5c32;
+  background: linear-gradient(180deg, #3a2812, #2a1c0a);
+  color: var(--gold);
+}
 .social-bubble .ui-icon { width: 23px; height: 23px; }
-.social-bubble > span:not(.ui-icon) {
+.social-bubble > span:not(.ui-icon),
+.topbar-social-button > span:not(.ui-icon) {
   display: grid;
   min-width: 20px;
   height: 20px;
@@ -76,7 +83,8 @@
   font-size: 10px;
   font-weight: 800;
 }
-.social-bubble > span:not(.ui-icon) { position: absolute; top: -5px; right: -5px; }
+.social-bubble > span:not(.ui-icon),
+.topbar-social-button > span:not(.ui-icon) { position: absolute; top: -5px; right: -5px; }
 
 .social-unread-badge {
   display: grid;
@@ -124,7 +132,7 @@
   overflow: hidden;
   padding: 6px 10px 6px 7px;
   border: 1px solid #655033;
-  border-radius: 10px;
+  border-radius: 4px;
   background: #21170f;
   box-shadow: 0 5px 14px #0009;
   clip-path: none;
@@ -179,7 +187,7 @@
   -webkit-line-clamp: 1;
 }
 @keyframes social-toast-in {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(var(--social-enter-y, 4px)); }
   to { opacity: 1; transform: translateY(0); }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -209,7 +217,7 @@
   animation: social-panel-in 140ms ease-out;
 }
 @keyframes social-panel-in {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(var(--social-enter-y, 4px)); }
 }
 @media (min-width: 701px) {
   #root:has(.table) .social-dock .social-panel {
@@ -400,6 +408,30 @@
   bottom: calc(100% + 8px);
   left: -1px;
 }
+
+/* ── lobby and prep: a tool button in the header ── */
+.topbar-social-slot { display: contents; }
+.topbar-social { position: relative; display: inline-flex; }
+.topbar-social-button { position: relative; padding: 0; clip-path: none; font-family: var(--font-lobby-ui); letter-spacing: 0; }
+.topbar-social-button .ui-icon { width: 21px; height: 21px; }
+.topbar-social-button[aria-expanded="true"] {
+  border-color: var(--bronze);
+  background: linear-gradient(180deg, #3a2812, #2a1c0a);
+  color: var(--gold);
+}
+.topbar-social .social-panel,
+.topbar-social .social-message-toast {
+  z-index: 60;
+  top: calc(100% + 8px);
+  right: 0;
+  bottom: auto;
+  left: auto;
+  --social-enter-y: -4px;
+}
+/* Prep's buttons wrap under the title on phones, so the panel hangs from the group's right edge. */
+.prep-topbar-actions { position: relative; }
+.prep-topbar-actions .topbar-social { position: static; }
+
 .table[data-motion-preference="reduced"] .social-panel { animation: none; }
 @media (prefers-reduced-motion: reduce) {
   .social-panel { animation: none; }
@@ -733,28 +765,14 @@
 
 @media (max-width: 700px) {
   .social-dock { right: auto; bottom: calc(84px + env(safe-area-inset-bottom)); left: max(16px, env(safe-area-inset-left)); }
-  #root:has(.table) .social-dock,
-  #root:has(.prep-page) .social-dock {
+  #root:has(.table) .social-dock {
     right: max(16px, env(safe-area-inset-right));
     left: auto;
   }
-  #root:has(.table) .social-message-toast,
-  #root:has(.prep-page) .social-message-toast {
+  #root:has(.table) .social-message-toast {
     right: 0;
     left: auto;
   }
-  #root:has(.prep-page) .social-dock {
-    bottom: var(--prep-ready-float-offset, calc(190px + env(safe-area-inset-bottom)));
-  }
-  /* Sit inside the collapsed sideboarding tray, clear of the deck rows, and
-     step aside for its open sheet or a prep dialog. */
-  #root:has(.prep-tray) .social-dock {
-    bottom: calc(
-      var(--prep-float-height, 0px)
-      + (var(--prep-tray-height, 0px) - var(--social-bubble-size)) / 2
-    );
-  }
-  #root:has(:is(.prep-tray.open, .prep-dialog-backdrop)) .social-dock { display: none; }
   .social-mobile-backdrop {
     position: fixed;
     z-index: 0;
@@ -782,8 +800,7 @@
     width: min(300px, calc(100vw - 32px));
     max-height: min(460px, calc(100dvh - 180px));
   }
-  #root:has(.table) .social-panel,
-  #root:has(.prep-page) .social-panel {
+  #root:has(.table) .social-panel {
     right: 0;
     left: auto;
   }

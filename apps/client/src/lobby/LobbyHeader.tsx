@@ -7,6 +7,7 @@ import { LobbyBrand } from "./GuestLanding.js";
 import { DiscordLink } from "./DiscordLink.js";
 import { BugFixedNotification } from "./BugFixedNotification.js";
 import { FullscreenButton } from "../components/FullscreenButton.js";
+import { TopbarSocialSlot } from "../social/TopbarSocialSlot.js";
 
 export function LobbyHeader() {
   const intl = useIntl();
@@ -48,6 +49,7 @@ export function LobbyHeader() {
           <LanguagePicker placement="header" />
           <DiscordLink />
           <FullscreenButton placement="header" />
+          {authUser ? <TopbarSocialSlot wideOnly /> : null}
         </div>
         {authUser ? (
           <div className="topbar-account">

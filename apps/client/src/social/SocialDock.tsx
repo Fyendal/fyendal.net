@@ -160,33 +160,6 @@ export function SocialDock() {
   }, [open, setOpen]);
 
   useEffect(() => {
-    const dock = dockRef.current;
-    if (screen !== "prep" || !dock) return;
-
-    const readyFloat = document.querySelector<HTMLElement>(".prep-ready-float");
-    if (!readyFloat) return;
-
-    const updateOffset = () => {
-      const gap = 12;
-      const readyTop = readyFloat.getBoundingClientRect().top;
-      dock.style.setProperty(
-        "--prep-ready-float-offset",
-        `${Math.max(gap, window.innerHeight - readyTop + gap)}px`,
-      );
-    };
-    updateOffset();
-
-    const observer = new ResizeObserver(updateOffset);
-    observer.observe(readyFloat);
-    window.addEventListener("resize", updateOffset);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", updateOffset);
-      dock.style.removeProperty("--prep-ready-float-offset");
-    };
-  }, [screen]);
-
-  useEffect(() => {
     if (!open) setAdding(false);
   }, [open]);
 
@@ -452,23 +425,24 @@ export function SocialDock() {
 
   const modals = <><ChatModal /><FriendRoomModal /></>;
 
-  // In a game the control sits on the player's own nameplate instead of floating over the board.
+  // A screen with a slot hosts the control itself: the header's tool row, or the player's nameplate in a game.
   if (anchor) {
+    const topbar = anchor.dataset.socialSlot === "topbar";
     return (
       <>
         {createPortal(
           <div
             ref={dockRef}
-            className="nameplate-actions nameplate-social"
+            className={topbar ? "topbar-social" : "nameplate-actions nameplate-social"}
             data-open={open}
             onKeyDown={onRootKeyDown}
             onBlur={onRootBlur}
           >
             <TooltipButton
               ref={triggerRef}
-              className="nameplate-action nameplate-action-social"
+              className={topbar ? "topbar-icon-link topbar-social-button" : "nameplate-action nameplate-action-social"}
               tooltip={intl.formatMessage({ id: "social.friends" })}
-              tooltipSide="above"
+              tooltipSide={topbar ? "below" : "above"}
               aria-haspopup="dialog"
               aria-expanded={open}
               onClick={toggleOpen}

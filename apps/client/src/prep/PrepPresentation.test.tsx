@@ -272,7 +272,7 @@ describe("PrepPresentation equipment controls", () => {
       const [main, inventory] = html.split("prep-inventory-zone");
       expect(main).toContain('class="prep-tile" data-cardid="WTR219"');
       expect(main).toContain('aria-label="Move one copy of Nimblism to Inventory"');
-      expect(main).toContain('aria-hidden="true">×1</span><span class="prep-sr-only">1 copy</span>');
+      expect(main).toContain('<span class="prep-tile-times">×</span>1</span><span class="prep-sr-only">1 copy</span>');
       expect(inventory).toContain('aria-label="Move one copy of Nimblism to Main deck"');
       // Inventory-only cards show as a locked, unpressable tile.
       expect(inventory).toContain('class="prep-tile fixed" data-cardid="WTR215"');

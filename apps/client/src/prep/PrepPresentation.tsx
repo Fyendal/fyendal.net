@@ -196,7 +196,9 @@ function CardTile({
   const face = (
     <>
       <CardArtwork className="prep-tile-art" cardId={id} artImage={cardArt?.imageFor(id)} alt="" />
-      <span className="prep-tile-count" aria-hidden="true">×{count}</span>
+      <span className="prep-tile-copies" aria-hidden="true" data-copies={Math.min(count, 3)}>
+        <span className="prep-tile-times">×</span>{count}
+      </span>
       <span className="prep-sr-only">{countLabel}</span>
     </>
   );

@@ -3,7 +3,7 @@ import { useIntl } from "react-intl";
 import type { BotOpponent, Format } from "@fyendal/shared";
 import { BotOpponentModal } from "../lobby/BotOpponentModal.js";
 
-export const BOT_PRACTICE_NUDGE_DELAY_MS = 10_000;
+export const BOT_PRACTICE_NUDGE_DELAY_MS = 30_000;
 
 export function shouldOfferBotPractice(input: {
   format: Format | undefined;

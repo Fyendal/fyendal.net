@@ -590,7 +590,7 @@
 .prep-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-  gap: 10px 8px;
+  gap: 14px 8px;
   margin: 0;
   padding: 6px 0 2px;
   list-style: none;
@@ -631,24 +631,30 @@
 }
 .prep-tile-face:hover:not(:disabled) .prep-tile-art { transform: translateY(-2px); }
 .prep-tile-face:active:not(:disabled) .prep-tile-art { transform: scale(.96); }
-/* Bottom center covers only the type line; the name, cost, power and
-   defense printed on the card stay readable. */
-.prep-tile-count {
-  position: absolute;
-  bottom: 5px;
-  left: 50%;
-  z-index: 3;
-  transform: translateX(-50%);
-  min-width: 28px;
-  height: 22px;
-  padding: 0 7px;
-  border-radius: 11px;
-  background: #0d0703e6;
+/* A tag under the card keeps the printed face clear; its fill brightens per copy. */
+.prep-tile-copies {
+  position: relative;
+  z-index: -1;
+  display: block;
+  width: 48px;
+  margin: -4px auto 0;
+  padding: 6px 0 3px;
+  border-radius: 0 0 10px 10px;
+  background: #4a3620;
   color: var(--text-primary);
-  font: 700 13px/22px var(--font-lobby-ui);
+  font: 700 15px/16px var(--font-lobby-ui);
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
+.prep-tile-copies[data-copies="2"] { background: #a8741f; color: #fff6df; }
+.prep-tile-copies[data-copies="3"] { background: var(--gold); color: #1c1004; }
+.prep-tile-times {
+  margin-right: 1px;
+  font-weight: 600;
+  font-size: 12px;
+  opacity: .7;
+}
+.prep-tile.fixed .prep-tile-copies { opacity: .55; }
 .prep-tile-lock {
   position: absolute;
   top: 6px;
@@ -699,8 +705,6 @@
   align-items: center;
   gap: 4px;
   min-height: 40px;
-  /* Leaves the right end free for the social bubble, which docks into this bar. */
-  padding-right: 52px;
 }
 .prep-tray-head h4 {
   display: flex;
