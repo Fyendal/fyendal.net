@@ -17,6 +17,7 @@ import {
   faceUpGraveyard,
   heroDamage,
   heroTarget,
+  isAttackAction,
   leavesArenaTrigger,
   mergeSetScripts,
   ongoingLabel,
@@ -48,9 +49,6 @@ function isAura(ctx: ScriptCtx, card: Card): boolean {
 }
 function isInstant(ctx: ScriptCtx, card: Card): boolean {
   return ctx.hasCardType(card, "instant");
-}
-function isAttackAction(ctx: ScriptCtx, card: Card): boolean {
-  return ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack");
 }
 function isTokenAura(ctx: ScriptCtx, card: Card): boolean {
   return data(ctx, card).cardType === "token" && isAura(ctx, card);

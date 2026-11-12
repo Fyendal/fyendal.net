@@ -16,6 +16,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  isAttackAction,
   localizedCardLog,
   optN,
   optOnChoose,
@@ -50,10 +51,6 @@ const EQUIPMENT_SLOTS = ["head", "chest", "arms", "legs"] as const;
 
 function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
   return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
 }
 
 function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {

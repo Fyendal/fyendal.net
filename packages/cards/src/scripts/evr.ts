@@ -11,6 +11,7 @@ import {
   discardSixPlusPayoff,
   faceUpGraveyard,
   heroChoiceSeat,
+  isAttackAction,
   isCard,
   isWeaponAttack,
   localizedCardLog,
@@ -36,10 +37,6 @@ const SPECTRAL_SHIELD = "EVR153";
 
 function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
   return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
 }
 
 function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {

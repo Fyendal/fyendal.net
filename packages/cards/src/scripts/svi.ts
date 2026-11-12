@@ -8,6 +8,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
+  isAttackAction,
   isCard,
   leavesArenaTrigger,
   localizedCardLog,
@@ -24,10 +25,6 @@ const RUNECHANT = "SVI034";
 
 function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.cardTypes(card).includes("aura");
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
 }
 
 function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {

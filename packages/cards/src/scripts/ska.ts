@@ -1,9 +1,10 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
   decisionMessage,
   decisionPrompt,
   discardSixPlusPayoff,
+  isAttackAction,
   isSixPlus,
   localizedCardLog,
   opponentSeat,
@@ -17,10 +18,6 @@ import {
 const AGILITY = "SKA034";
 const MIGHT = "SKA035";
 const VIGOR = "SKA036";
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
-}
 
 function isOnCombatChain(ctx: ScriptCtx, card: { readonly instanceId: number; readonly cardId: string }): boolean {
   return ctx.state.chain.some((link) =>

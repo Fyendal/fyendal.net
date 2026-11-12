@@ -12,6 +12,7 @@ import {
   dealArcane,
   dealToAnyTarget,
   faceUpGraveyard,
+  isAttackAction,
   type DecisionPromptOptions,
   decisionMessage,
   decisionPrompt,
@@ -61,10 +62,6 @@ function logDeckTopReveal(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): voi
       { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
     ),
   );
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
 }
 
 function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {

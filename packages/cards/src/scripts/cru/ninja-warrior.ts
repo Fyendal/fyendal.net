@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   commonOptionMessages,
   decisionPrompt,
+  isAttackAction,
   localizedCardLog,
   opponentSeat,
   previousAttackHasName,
@@ -12,10 +13,6 @@ type CardRef = DeepReadonly<CardInstance>;
 
 function comboWith(ctx: ScriptCtx, name: string): boolean {
   return previousAttackHasName(ctx, name);
-}
-
-function isAttackAction(ctx: ScriptCtx, card: CardRef): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
 }
 
 function hasCombo(ctx: ScriptCtx, card: CardRef): boolean {

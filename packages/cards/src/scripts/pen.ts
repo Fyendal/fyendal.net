@@ -18,6 +18,7 @@ import {
   heroTarget,
   hitHookLabel,
   hitWithDaggerThisChain,
+  isAttackAction,
   isSixPlus,
   leavesArenaTrigger,
   mergeSetScripts,
@@ -78,10 +79,6 @@ function named(ctx: ScriptCtx, card: Card | string, name: string): boolean {
   return typeof card === "string"
     ? data(ctx, card).name.trim().toLowerCase() === wanted
     : ctx.cardNames(card).includes(wanted);
-}
-
-function isAttackAction(ctx: ScriptCtx, card: Card): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
 }
 
 // Static ability of a permanent: inert while Haboob is only a defending card on the chain.

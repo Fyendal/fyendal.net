@@ -12,6 +12,7 @@ import {
   faceUpGraveyard,
   FRAILTY,
   INERTIA,
+  isAttackAction,
   NAMED_DISEASE_TOKENS,
   armDelayedEffect,
   armGrantedHitRider,
@@ -289,13 +290,9 @@ const youAreArakni = youAre("Arakni");
 const youAreUzuri = youAre("Uzuri");
 const youAreMortimer = youAre("Mortimer");
 
-function isAttackActionCard(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
-}
-
 function repeatReconOptions(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
   return faceUpGraveyard(ctx).filter(
-    (card) => isAttackActionCard(ctx, card) && ctx.cardData(card.cardId).cost === 2,
+    (card) => isAttackAction(ctx, card) && ctx.cardData(card.cardId).cost === 2,
   );
 }
 
@@ -532,7 +529,7 @@ export const mpa: Record<string, CardScript> = {
       },
     }),
     onFriendlyPlay(ctx, played) {
-      if (!isAttackActionCard(ctx, played) || !ctx.cardTypes(played).includes("assassin")) return;
+      if (!isAttackAction(ctx, played) || !ctx.cardTypes(played).includes("assassin")) return;
       // The granted rider is the card's other modifier; only the waiting effect is consumed.
       if (!consumeDelayedEffect(ctx, { match: (modifier) => !modifier.expiresOnChainClose })) return;
       armGrantedHitRider(

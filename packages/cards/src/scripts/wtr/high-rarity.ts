@@ -6,6 +6,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
+  isAttackAction,
   isSixPlus,
   localizedCardLog,
   opponentSeat,
@@ -18,10 +19,6 @@ const SEISMIC_SURGE = "WTR075B";
 
 function namedAny(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, names: readonly string[]): boolean {
   return names.some((name) => cardNamed(ctx, card, name));
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
 }
 
 function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {

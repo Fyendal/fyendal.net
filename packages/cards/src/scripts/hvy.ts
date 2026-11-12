@@ -10,6 +10,7 @@ import {
   consumeDelayedEffect,
   decisionPrompt,
   faceUpGraveyard,
+  isAttackAction,
   localizedCardLog,
   mergeSetScripts,
   ongoingLabel,
@@ -32,10 +33,6 @@ function hasTag(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, tag: string): 
   const d = data(ctx, card);
   if (tag.toLowerCase() === "token" && d.cardType === "token") return true;
   return ctx.cardTypes(card).includes(tag.toLowerCase());
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack");
 }
 
 function controls(ctx: ScriptCtx, name: string): boolean {

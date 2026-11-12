@@ -14,6 +14,7 @@ import {
   decisionPrompt,
   heroTarget,
   ironhideScript,
+  isAttackAction,
   isCard,
   isChargeDecline,
   isSixPlus,
@@ -37,10 +38,6 @@ import { monHighRarity } from "./mon/high-rarity.js";
 
 const SPECTRAL_SHIELD = "SEN037";
 const SOUL_SHACKLE = "MON186";
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
-}
 
 function lessLifePlayTrigger(effect: { attack?: number; keyword?: string }): CardScript {
   return {

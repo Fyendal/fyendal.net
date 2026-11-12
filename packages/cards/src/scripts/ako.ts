@@ -1,11 +1,14 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { discardSixPlusPayoff, isSixPlus, localizedCardLog, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
+import {
+  discardSixPlusPayoff,
+  isAttackAction,
+  isSixPlus,
+  localizedCardLog,
+  opponentSeat,
+  yesNoPrompt,
+} from "./shared-helpers.js";
 
 const MIGHT = "AKO028";
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
-}
 
 function isOnCombatChain(ctx: ScriptCtx, instanceId: number): boolean {
   return ctx.state.chain.some((link) =>

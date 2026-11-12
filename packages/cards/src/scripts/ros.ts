@@ -17,6 +17,7 @@ import {
   faceUpGraveyard,
   heroDamage,
   hitHookLabel,
+  isAttackAction,
   leavesArenaTrigger,
   localizedCardLog,
   ongoingLabel,
@@ -65,10 +66,6 @@ function requestPlanForWorstHandShuffle(ctx: ScriptCtx): void {
 
 function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return hasTag(ctx, card, "aura");
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack");
 }
 
 function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {

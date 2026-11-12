@@ -486,6 +486,10 @@ export const FRAILTY = "OUT235";
 export const INERTIA = "OUT236";
 export const NAMED_DISEASE_TOKENS: readonly string[] = [FRAILTY, INERTIA, BLOODROT_POX];
 
+export function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
+}
+
 export function isDisease(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.cardTypes(card).includes("disease");
 }

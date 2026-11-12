@@ -1,5 +1,11 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { commonOptionMessages, decisionPrompt, localizedLog, previousAttackHasName } from "../shared-helpers.js";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
+import {
+  commonOptionMessages,
+  decisionPrompt,
+  isAttackAction,
+  localizedLog,
+  previousAttackHasName,
+} from "../shared-helpers.js";
 
 // ── WTR Ninja helpers ───────────────────────────────────────────────────────
 
@@ -11,10 +17,6 @@ function nameKey(name: string): string {
 /** True if the previous resolved attack matches the named card (any pitch). */
 function comboWith(ctx: ScriptCtx, name: string): boolean {
   return previousAttackHasName(ctx, nameKey(name));
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
 }
 
 function hasCombo(ctx: ScriptCtx, cardId: string): boolean {

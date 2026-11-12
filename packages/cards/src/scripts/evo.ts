@@ -8,6 +8,7 @@ import {
   entersArenaTrigger,
   faceUpGraveyard,
   hyperDriverCounterFromBoostBanish,
+  isAttackAction,
   localizedCardLog,
   mergeSetScripts,
   opponentSeat,
@@ -31,10 +32,6 @@ function hasTag(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, tag: string): 
 
 function isMechAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "action") && hasTag(ctx, card, "mechanologist") && hasTag(ctx, card, "attack");
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack");
 }
 
 function isItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {

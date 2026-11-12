@@ -13,6 +13,7 @@ import {
   entersArenaTrigger,
   faceUpGraveyard,
   hitHookLabel,
+  isAttackAction,
   isCard,
   leavesArenaTrigger,
   localizedCardLog,
@@ -80,10 +81,6 @@ function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: s
 
 function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return hasType(ctx, card, "aura");
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
 }
 
 function isIllusionistAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
