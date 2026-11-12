@@ -31959,6 +31959,30 @@
       "value": "Continuar passando até"
     }
   ],
+  "game.passUntil.hint.close": [
+    {
+      "type": 0,
+      "value": "Fechar dica"
+    }
+  ],
+  "game.passUntil.hint.reason": [
+    {
+      "type": 0,
+      "value": "Passando muito?"
+    }
+  ],
+  "game.passUntil.hint.tap": [
+    {
+      "type": 0,
+      "value": "Toque para continuar passando"
+    }
+  ],
+  "game.passUntil.hint.tapDetail": [
+    {
+      "type": 0,
+      "value": "até o chain link ou o turno acabar"
+    }
+  ],
   "game.passUntil.hold": [
     {
       "type": 0,

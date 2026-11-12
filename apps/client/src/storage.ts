@@ -98,6 +98,26 @@ export function saveFullscreenNudgeSeen(storage: Pick<Storage, "setItem">): void
   }
 }
 
+const PASS_UNTIL_HINT_STORAGE_KEY = "fyendal-pass-until-hint";
+
+/** Games the keep-passing hint has opened in; it retires at its cap. */
+export function loadPassUntilHintGames(storage: Pick<Storage, "getItem">): number {
+  try {
+    const games = Number(storage.getItem(PASS_UNTIL_HINT_STORAGE_KEY));
+    return Number.isInteger(games) && games > 0 ? games : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function savePassUntilHintGames(storage: Pick<Storage, "setItem">, games: number): void {
+  try {
+    storage.setItem(PASS_UNTIL_HINT_STORAGE_KEY, String(games));
+  } catch {
+    // The hint still closes for this game when storage is unavailable.
+  }
+}
+
 const PLAYMAT_HINT_STORAGE_PREFIX = "fyendal-playmat-hint-";
 
 function playmatHintStorageKey(username: string | null): string {

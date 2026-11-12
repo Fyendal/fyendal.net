@@ -30348,6 +30348,30 @@
       "value": "Keep passing until"
     }
   ],
+  "game.passUntil.hint.close": [
+    {
+      "type": 0,
+      "value": "Close hint"
+    }
+  ],
+  "game.passUntil.hint.reason": [
+    {
+      "type": 0,
+      "value": "Passing a lot?"
+    }
+  ],
+  "game.passUntil.hint.tap": [
+    {
+      "type": 0,
+      "value": "Tap to keep passing"
+    }
+  ],
+  "game.passUntil.hint.tapDetail": [
+    {
+      "type": 0,
+      "value": "until the chain link or the turn ends"
+    }
+  ],
   "game.passUntil.hold": [
     {
       "type": 0,

@@ -29179,6 +29179,30 @@
       "value": "持续让过，直到"
     }
   ],
+  "game.passUntil.hint.close": [
+    {
+      "type": 0,
+      "value": "关闭提示"
+    }
+  ],
+  "game.passUntil.hint.reason": [
+    {
+      "type": 0,
+      "value": "一直在让过？"
+    }
+  ],
+  "game.passUntil.hint.tap": [
+    {
+      "type": 0,
+      "value": "点按可持续让过"
+    }
+  ],
+  "game.passUntil.hint.tapDetail": [
+    {
+      "type": 0,
+      "value": "直到 chain link 或回合结束"
+    }
+  ],
   "game.passUntil.hold": [
     {
       "type": 0,

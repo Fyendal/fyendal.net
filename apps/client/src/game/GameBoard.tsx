@@ -1,7 +1,7 @@
 import { BrowserBotNotice } from "../bot/BrowserBotNotice.js";
 import { useMatchAchievements } from "../achievements/useMatchAchievements.js";
 import { AchievementToast } from "../achievements/AchievementToast.js";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { CardView, GameIntent, MeldSide, PassUntilMode } from "@fyendal/shared";
@@ -73,6 +73,7 @@ import {
 import { skippableTokenRun } from "./tokenSkip.js";
 import { PassUntilControl } from "./PassUntilControl.js";
 import { chainLinkOpen, passUntilPaused } from "./passUntil.js";
+import { usePassUntilHint } from "./passUntilHint.js";
 import { useStandingOrders } from "./useStandingOrders.js";
 import { standingOrderKey } from "./standingOrders.js";
 import { PlayerNameplate } from "./PlayerNameplate.js";
@@ -138,7 +139,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, endTurnWarning, sendPassUntil, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, clock, clockReceivedAt, replayClock, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent: sendStoreIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, endTurnWarning, sendPassUntil, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, clock, clockReceivedAt, replayClock, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -200,6 +201,13 @@ export function GameBoard() {
       setSocialOpen: state.setSocialOpen,
     })),
   );
+  const passHint = usePassUntilHint(connected && !spectating && screen !== "replay", passUntil !== null);
+  const notePassHintIntent = passHint.noteIntent;
+  const sendIntent = useCallback((intent: GameIntent) => {
+    const sent = sendStoreIntent(intent);
+    if (sent) notePassHintIntent(intent);
+    return sent;
+  }, [sendStoreIntent, notePassHintIntent]);
   // Only a saved copy the account owns can be shared; replays opened from a
   // file, another player's link, or straight from the room have no saved id.
   const savedReplayShare = useStore(useShallow((state) => {
@@ -1202,6 +1210,7 @@ export function GameBoard() {
     (spectating || replaying || view.phase === "game-over" ? null : "pass");
   const passUntilAvailable = connected && !spectating && !replaying && view.phase !== "game-over";
   const armPassUntil = (mode: PassUntilMode) => {
+    passHint.close(true);
     if (mode !== "chain-link" && endTurnWarning) {
       setConfirmPassUntil(mode);
       return;
@@ -1218,6 +1227,8 @@ export function GameBoard() {
       hotkeys={placement === "hud" && !confirmLethalPass}
       spacePasses={hotkeyIntent !== null}
       placement={placement}
+      hint={passHint.open}
+      onHintClose={passHint.close}
       onArm={armPassUntil}
       onCancel={() => sendPassUntil(null)}
     />
