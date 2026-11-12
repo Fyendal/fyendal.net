@@ -244,9 +244,12 @@
 
 .prep-art-toggle {
   display: inline-flex;
+  min-height: 34px;
   align-items: center;
   gap: 7px;
-  margin-left: auto;
+  margin-left: 6px;
+  padding-left: 14px;
+  border-left: 1px solid #3b2a16;
   color: var(--text-secondary);
   font: 600 12.5px var(--font-lobby-ui);
   cursor: pointer;

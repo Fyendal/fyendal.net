@@ -317,6 +317,7 @@
   margin-bottom: 16px;
 }
 .prep-pool-heading .panel-title { margin: 0; border-bottom: 0; padding-bottom: 0; }
+/* Display settings apply to both zones, so they sit above them in one bar. */
 .prep-pool-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-left: auto; }
 /* Sideboarding ledger: the main deck's head pins while its rows scroll, and
    Inventory is a sticky tray that scrolls inside its own frame beside them. */
@@ -369,7 +370,6 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: 6px 14px;
 }
 .prep-zone-heading h4 {
@@ -402,17 +402,11 @@
   text-transform: none;
 }
 .prep-restore:hover { border-color: var(--border-strong); background: #231709; color: var(--text-primary); }
-/* Pitch split: the bar shows each color's share, the figures beside it the count. */
-.prep-pitch-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 10px;
-}
+/* Pitch split: the bar shows each color's share, the heading's figures the count. */
 .prep-pitch-bar {
   display: flex;
-  flex: 1 1 auto;
   gap: 2px;
+  margin-top: 10px;
   height: 4px;
   border-radius: 2px;
   overflow: hidden;
@@ -422,6 +416,7 @@
 .prep-pitch-legend {
   display: flex;
   flex: none;
+  margin-left: auto;
   gap: 10px;
   color: var(--text-secondary);
   font: 600 12px/1 var(--font-lobby-ui);
@@ -934,9 +929,8 @@
   }
   .prep-pool-heading { gap: 10px; }
   .prep-pool-heading .panel-title { flex: 1 1 auto; }
-  .prep-pool-heading .prep-art-toggle { flex: none; margin-left: auto; }
-  /* Both switches take their own line under the main deck heading. */
-  .prep-pool-controls { flex: 1 1 100%; justify-content: space-between; margin-left: 0; }
+  .prep-pool-controls { flex: 1 1 100%; margin-left: 0; }
+  .prep-pool-controls .prep-art-toggle { flex-basis: 100%; min-height: 0; margin-left: 0; padding-left: 0; border-left: 0; }
   .prep-zone-head { position: static; padding-top: 0; }
   .prep-row { min-height: 52px; }
   .prep-row,

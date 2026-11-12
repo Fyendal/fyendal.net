@@ -335,20 +335,13 @@ describe("PrepPresentation equipment controls", () => {
 
     afterEach(() => vi.unstubAllGlobals());
 
-    it("sorts both zones by name, then pitch, by default", () => {
-      vi.stubGlobal("localStorage", { getItem: () => null, setItem: vi.fn() });
+    it("groups both zones by pitch by default, ignoring a pre-v2 name choice", () => {
+      vi.stubGlobal("localStorage", {
+        getItem: (key: string) => (key === "fyendal-prep-sort" ? "name" : null),
+        setItem: vi.fn(),
+      });
       const html = renderDeck();
       expect(html).toContain('role="group" aria-label="Sort by"');
-      expect(html).toContain('aria-pressed="true">Name</button>');
-      expect(html).not.toContain("Zone order");
-      expect(html).not.toContain("prep-group-title");
-      expect(order(html, 0)).toEqual(["WTR218", "WTR219"]);
-      expect(order(html, 1)).toEqual(["WTR219", "WTR215", "WTR217"]);
-    });
-
-    it("restores a remembered pitch sort", () => {
-      vi.stubGlobal("localStorage", { getItem: () => "pitch", setItem: vi.fn() });
-      const html = renderDeck();
       expect(html).toContain('aria-pressed="true"><span class="card-sort-pips"');
       // Each group names its color and totals its copies.
       expect(html).toContain('prep-pitch-2" aria-hidden="true"></i>Yellow<span class="prep-group-count">1</span></span>');
@@ -356,6 +349,19 @@ describe("PrepPresentation equipment controls", () => {
       expect(html).toContain('prep-pitch-legend');
       expect(order(html, 0)).toEqual(["WTR218", "WTR219"]);
       expect(order(html, 1)).toEqual(["WTR215", "WTR219", "WTR217"]);
+    });
+
+    it("restores a remembered name sort", () => {
+      vi.stubGlobal("localStorage", {
+        getItem: (key: string) => (key === "fyendal-prep-sort-v2" ? "name" : null),
+        setItem: vi.fn(),
+      });
+      const html = renderDeck();
+      expect(html).toContain('aria-pressed="true">Name</button>');
+      expect(html).not.toContain("Zone order");
+      expect(html).not.toContain("prep-group-title");
+      expect(order(html, 0)).toEqual(["WTR218", "WTR219"]);
+      expect(order(html, 1)).toEqual(["WTR219", "WTR215", "WTR217"]);
     });
   });
 });

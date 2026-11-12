@@ -580,17 +580,21 @@ export const PrepPresentation = memo(function PrepPresentation({
       {sections === "deck" ? (
         <div className="prep-pool-heading">
           <h3 className="panel-title">{intl.formatMessage({ id: "prep.presentation.title" })}</h3>
-          {cardArt ? (
-            <label className="prep-art-toggle">
-              <input
-                type="checkbox"
-                checked={cardArt.highestRarity}
-                disabled={cardArt.locked}
-                onChange={(event) => cardArt.onHighestRarityChange(event.target.checked)}
-              />
-              <span>{intl.formatMessage({ id: "prep.art.highestRarity" })}</span>
-            </label>
-          ) : null}
+          <div className="prep-pool-controls">
+            <PrepViewToggle value={viewMode} onChange={changeViewMode} />
+            <CardSortToggle options={PREP_SORT_OPTIONS} value={sortOrder} onChange={changeSortOrder} />
+            {cardArt ? (
+              <label className="prep-art-toggle">
+                <input
+                  type="checkbox"
+                  checked={cardArt.highestRarity}
+                  disabled={cardArt.locked}
+                  onChange={(event) => cardArt.onHighestRarityChange(event.target.checked)}
+                />
+                <span>{intl.formatMessage({ id: "prep.art.highestRarity" })}</span>
+              </label>
+            ) : null}
+          </div>
         </div>
       ) : null}
       {sections !== "deck" && showHero ? <div className="prep-section">
@@ -714,29 +718,7 @@ export const PrepPresentation = memo(function PrepPresentation({
                   {intl.formatMessage({ id: "prep.presentation.restore" })}
                 </button>
               ) : null}
-              <div className="prep-pool-controls">
-                <PrepViewToggle value={viewMode} onChange={changeViewMode} />
-                <CardSortToggle options={PREP_SORT_OPTIONS} value={sortOrder} onChange={changeSortOrder} />
-              </div>
-            </div>
-            {mainCount > 0 ? (
-              <div className="prep-pitch-row">
-                <div
-                  className="prep-pitch-bar"
-                  role="img"
-                  aria-label={intl.formatMessage(
-                    { id: "prep.presentation.pitchSplit" },
-                    { red: pitchLabel(1), yellow: pitchLabel(2), blue: pitchLabel(3) },
-                  )}
-                >
-                  {([1, 2, 3] as const).map((pitch) => (
-                    <span
-                      key={pitch}
-                      className={`prep-pitch-${pitch}`}
-                      style={{ flexGrow: pitchTotals[pitch] }}
-                    />
-                  ))}
-                </div>
+              {mainCount > 0 ? (
                 <div className="prep-pitch-legend" aria-hidden="true">
                   {([1, 2, 3] as const).map((pitch) => (
                     <span key={pitch} className={pitchTotals[pitch] === 0 ? "empty" : undefined}>
@@ -745,6 +727,24 @@ export const PrepPresentation = memo(function PrepPresentation({
                     </span>
                   ))}
                 </div>
+              ) : null}
+            </div>
+            {mainCount > 0 ? (
+              <div
+                className="prep-pitch-bar"
+                role="img"
+                aria-label={intl.formatMessage(
+                  { id: "prep.presentation.pitchSplit" },
+                  { red: pitchLabel(1), yellow: pitchLabel(2), blue: pitchLabel(3) },
+                )}
+              >
+                {([1, 2, 3] as const).map((pitch) => (
+                  <span
+                    key={pitch}
+                    className={`prep-pitch-${pitch}`}
+                    style={{ flexGrow: pitchTotals[pitch] }}
+                  />
+                ))}
               </div>
             ) : null}
             {gridView ? null : <LedgerHead />}

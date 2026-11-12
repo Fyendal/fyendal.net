@@ -8,7 +8,8 @@ export const REPLAY_STORAGE_PREFIX = "fyendal-replay-";
 export const GAME_SETTINGS_STORAGE_KEY = "fyendal-game-settings";
 export const BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY = "fyendal-bot-matchmaking-preference";
 export const BOT_SHOW_BANNED_STORAGE_KEY = "fyendal-bot-show-banned";
-const PREP_SORT_STORAGE_KEY = "fyendal-prep-sort";
+// v2 drops every earlier choice so pitch becomes everyone's default once.
+const PREP_SORT_STORAGE_KEY = "fyendal-prep-sort-v2";
 const PREP_VIEW_STORAGE_KEY = "fyendal-prep-view";
 const HOME_GAME_MODE_STORAGE_PREFIX = "fyendal-home-game-mode-";
 const HOME_FORMAT_STORAGE_PREFIX = "fyendal-home-format-";
@@ -150,9 +151,9 @@ export type PrepSortOrder = "name" | "pitch";
 
 export function loadPrepSortOrder(storage: Pick<Storage, "getItem">): PrepSortOrder {
   try {
-    return storage.getItem(PREP_SORT_STORAGE_KEY) === "pitch" ? "pitch" : "name";
+    return storage.getItem(PREP_SORT_STORAGE_KEY) === "name" ? "name" : "pitch";
   } catch {
-    return "name";
+    return "pitch";
   }
 }
 
