@@ -187,6 +187,23 @@ describe("Aurora policy", () => {
     expect(activated).toEqual(expect.arrayContaining(["MON230", "ARC078"]));
   });
 
+  it("saves Aether Ironweave for an Arc Lightning turn", () => {
+    // Bug 8B059E: it spent the chest on a Grasp Runechant without Arc Lightning.
+    let state = newGame(4254, 0);
+    replaceHand(state, 0, ["GEM065", "ANQ029", "ROS012", "ELE189"]);
+    state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "ANQ029", owner: 0 }];
+    state.players[1]!.life = 40;
+    const chest = state.players[0]!.equipment.chest!;
+    expect(chest.cardId).toBe("MON230");
+    for (let step = 0; step < 80 && state.turn === 2 && state.winner === null; step++) {
+      const seat = actor(state);
+      const intent = seat === 0 ? choose(state, 0) : passive(state, 1);
+      expect(intent.kind === "activate-ability" && intent.sourceInstanceId === chest.instanceId).toBe(false);
+      state = apply(state, seat, intent);
+    }
+    expect(state.turn).toBe(3);
+  });
+
   interface DefenseSetup {
     hand?: readonly string[];
     arsenal?: readonly string[];
@@ -299,9 +316,9 @@ describe("Aurora policy", () => {
   });
 
   /** Aurora attacks with `attackId` and waits in its own reaction window. */
-  function reactionWindowAfter(attackId: string, seed: number): Game {
+  function reactionWindowAfter(attackId: string, seed: number, rest = ["ROS101", "GEM155"]): Game {
     let state = newGame(seed, 0);
-    replaceHand(state, 0, [attackId, "ROS101", "GEM155"]);
+    replaceHand(state, 0, [attackId, ...rest]);
     state = playFromHand(state, 0, attackId);
     return passUntil(state, (current) =>
       current.pendingDecision?.kind === "attack-reaction" && actor(current) === 0
@@ -319,6 +336,21 @@ describe("Aurora policy", () => {
 
   it("spends Snapdragon Scalers to continue from an attack without go again", () => {
     expect(activatesSnapdragon(reactionWindowAfter("ANQ031", 4247))).toBe(true);
+  });
+
+  it("keeps Snapdragon Scalers when the follow-up attack has its own go again", () => {
+    // Bug 8B059E: Ravenous Rabble should have attacked before Lightning Surge.
+    expect(activatesSnapdragon(reactionWindowAfter("ELE189", 4248, ["ANQ029"]))).toBe(false);
+  });
+
+  it("keeps Snapdragon Scalers rather than enable a weapon swing", () => {
+    const state = reactionWindowAfter("ELE189", 4249, ["GEM065"]);
+    expect(state.players[0]!.weapons.map((weapon) => weapon.cardId)).toContain("SBA002");
+    expect(activatesSnapdragon(state)).toBe(false);
+  });
+
+  it("spends Snapdragon Scalers to open an Arc Lightning turn", () => {
+    expect(activatesSnapdragon(reactionWindowAfter("ELE189", 4250, ["ROS010", "ANQ029"]))).toBe(true);
   });
 
   it("aims Arc Lightning's ping at the opposing hero", () => {

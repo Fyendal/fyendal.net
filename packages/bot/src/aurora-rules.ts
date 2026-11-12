@@ -207,7 +207,9 @@ export function auroraSolverRules(input: BotPolicyInput): HeroSolverRules {
             cost: 0,
             goAgain: true,
             consumeCost: Math.max(0, card.defense ?? data.defense ?? 0) * BLOCK_USE_RATE,
-            canPlay: (view) => view.flag("playedAttack") > 0 && view.flag("playedNonAttack") > 0,
+            // Saved for an Arc Lightning turn, where its go again also pings.
+            canPlay: (view) =>
+              view.flag("arc") > 0 && view.flag("playedAttack") > 0 && view.flag("playedNonAttack") > 0,
             after: () => ({ resources: 2 }),
           };
         case "vexing quillhand":

@@ -177,8 +177,14 @@ function wastesPendingSetup(card: CardView, input: BotPolicyInput, own: Readonly
   });
 }
 
-/** Snapdragon only adds go again to an own cost-1-or-less attack action that
- * lacks it, and only with another action card left to continue into. */
+function hasReliableGoAgain(data: CardData, fromArsenal: boolean): boolean {
+  if (key(data).startsWith("lightning surge|")) return fromArsenal;
+  return data.keywords?.includes("Go again") === true && !CONDITIONAL_GO_AGAIN.has(key(data));
+}
+
+/** Snapdragon unbricks a second attack without go again or opens an Arc
+ * Lightning turn; a go-again follow-up should have attacked first, and a
+ * weapon swing is not worth the legs. */
 function snapdragonWorthUsing(input: BotPolicyInput): boolean {
   const link = currentLink(input);
   if (!link || !currentAttackIsOurs(input) || !canGainGoAgain(link)) return false;
@@ -189,7 +195,33 @@ function snapdragonWorthUsing(input: BotPolicyInput): boolean {
   const attack = input.cards[link.attackingCard.cardId];
   if (!isAttack(attack) || (attack?.cost ?? Infinity) > 1) return false;
   const me = input.view.players[input.seat];
-  return [...me.hand, ...me.arsenal].some((card) => input.cards[card.cardId]?.cardType === "action");
+  const held = [
+    ...me.hand.map((card) => ({ card, fromArsenal: false })),
+    ...me.arsenal.map((card) => ({ card, fromArsenal: true })),
+  ];
+  return held.some(({ card, fromArsenal }) => {
+    const data = input.cards[card.cardId];
+    if (!data) return false;
+    if (key(data) === "arc lightning|2") {
+      return held.some((other) => {
+        const otherData = input.cards[other.card.cardId];
+        return other.card.instanceId !== card.instanceId && !!otherData && pingsUnderArc(otherData);
+      });
+    }
+    return isAttack(data) && !hasReliableGoAgain(data, fromArsenal);
+  });
+}
+
+/** Aether Ironweave waits for an Arc Lightning turn, where its go again pings. */
+const ironweaveWorthUsing = (input: BotPolicyInput) => activeArcLightnings(input).pings > 0;
+
+/** Whether `intent` spends equipment the bot is saving for its real payoff. */
+function spendsSavedEquipment(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
+  if (intent.kind !== "activate-ability") return false;
+  const functional = key(input.cards[intentCard(intent, own)?.cardId ?? ""]);
+  if (functional === "snapdragon scalers|0") return !snapdragonWorthUsing(input);
+  if (functional === "aether ironweave|0") return !ironweaveWorthUsing(input);
+  return false;
 }
 
 /** Burn Up needs several attacks to get one through (`burnUp` in aurora-rules). */
@@ -202,6 +234,9 @@ function shouldMeldBurnUp(intent: GameIntent, input: BotPolicyInput, own: Readon
 
 function prepareCandidates(candidates: readonly GameIntent[], input: BotPolicyInput): readonly GameIntent[] {
   const own = ownCards(input);
+  // The rollout would otherwise trade equipment for any extra damage this turn.
+  const keeping = candidates.filter((intent) => !spendsSavedEquipment(intent, input, own));
+  if (keeping.length > 0) candidates = keeping;
   // Arc Lightning goes first so every later go again pings, or waits for a fuller hand.
   const arcs = candidates.filter((intent) => isArcLightning(intent, input, own));
   const worthy = arcs.filter((intent) => arcWorthPlaying(intent, input, own));
@@ -331,11 +366,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       if (wastesPendingSetup(card, input, own)) return -100;
       score = 12 + pendingSetups(input).length * 10;
     } else if (functional === "aether ironweave|0") {
-      // Its go again pings under Arc Lightning and its resources fund Grasp.
-      const grasp = Object.values(me.equipment).some((equipped) =>
-        key(input.cards[equipped?.cardId ?? ""]) === "grasp of the arknight|0"
-      );
-      score = grasp || activeArcLightnings(input).pings > 0 ? 20 : 8;
+      score = ironweaveWorthUsing(input) ? 20 : -100;
     } else if (functional === "grasp of the arknight|0" || functional === "vexing quillhand|0") {
       const arcane = matchupFor(input).arcane;
       score = functional === "vexing quillhand|0" && arcane
@@ -358,9 +389,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   } else if (isAttack(data)) {
     if (wastesPendingSetup(card, input, own)) return -100;
     score = (card.attack ?? data.attack ?? 0) + pendingSetups(input).length * 10;
-    const printedGoAgain = data.keywords?.includes("Go again") && !CONDITIONAL_GO_AGAIN.has(functional);
     const conditionalGoAgain =
-      (functional.startsWith("lightning surge|") && intent.kind === "play-from-arsenal") ||
       (functional === "scar for a scar|1" && me.life < opponent.life) ||
       (functional === "second strike|1" && input.view.turnFacts?.players[input.seat].dealtDamage === true) ||
       (functional === "jack be nimble|1" && me.graveyard.some((grave) =>
@@ -369,7 +398,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       functional === "path of same ends|1" ||
       (functional === "current funnel|3" &&
         input.view.turnFacts?.players[input.seat].playedSubtypes.includes("lightning") === true);
-    if (printedGoAgain || conditionalGoAgain) score += 13;
+    if (hasReliableGoAgain(data, intent.kind === "play-from-arsenal") || conditionalGoAgain) score += 13;
     if (functional === "snatch|1") score += 3;
   } else if (data.cardType === "instant") {
     const ownAttack = currentLink(input)?.attackingCard.owner === input.seat;
