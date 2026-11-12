@@ -19,6 +19,7 @@ import {
   scoreDefenseReaction,
   scoreDefenseIntent,
   scoreDefenseIntentWithTrace,
+  scoreTacticalRoot,
   shouldPreserveOpeningHand,
   spendsOpeningArsenalReserve,
   type BotPolicyInput,
@@ -104,6 +105,21 @@ describe("resource gain cost gap", () => {
     const attack: CardView = { instanceId: id++, cardId: "SUP165", owner: 0 };
     const input: BotPolicyInput = { seat: 0, view, legal: [], cards: cardData };
     expect(resourceGainClosesCost(input, [{ card: attack, cost }], gain)).toBe(closes);
+  });
+});
+
+describe("tactical root score", () => {
+  it.each([
+    { label: "a declined play", intent: { kind: "play-card", instanceId: 1, pitchInstanceIds: [], pitchRequired: 0 }, play: -40, score: -40 },
+    { label: "pass under a cardless fallback", intent: { kind: "pass" }, play: -50, score: 0 },
+    { label: "close-chain under a cardless fallback", intent: { kind: "close-chain" }, play: -50, score: 1 },
+    { label: "a hero-raised close-chain", intent: { kind: "close-chain" }, play: 75, score: 75 },
+  ] as { label: string; intent: GameIntent; play: number; score: number }[])("scores $label", ({ intent, play, score }) => {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar], cards: cardData, scripts, seed: 1, startPlayer: 0,
+    });
+    const input: BotPolicyInput = { seat: 0, view: projectStateFor(state, 0), legal: [], cards: cardData };
+    expect(scoreTacticalRoot(intent, input, () => play)).toBe(score);
   });
 });
 

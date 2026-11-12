@@ -22,6 +22,7 @@ import {
   scoreDefenseIntent,
   scoreDefenseReaction,
   scoreSpendCardChoice,
+  scoreTacticalRoot,
   shouldPreserveOpeningHand,
   spendsOpeningArsenalReserve,
   targetableAttackIntent,
@@ -1748,8 +1749,8 @@ function cindraTacticalConfig(): TacticalIntentConfig {
   return {
     chooseForced: (forced) => chooseCindraReactiveIntent({ ...forced, state: undefined }),
     rules: cindraSolverRules,
-    rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
-    rootScore: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
+    rankCandidate: (intent, observed) => scoreTacticalRoot(intent, observed, scorePlay),
+    rootScore: (intent, observed) => scoreTacticalRoot(intent, observed, scorePlay),
     maxSearchNodes: CINDRA_MAX_SEARCH_NODES,
     maxRootCandidates: CINDRA_MAX_ROOT_CANDIDATES,
     maxTransitions: CINDRA_MAX_TRANSITIONS,

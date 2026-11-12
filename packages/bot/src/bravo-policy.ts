@@ -11,7 +11,6 @@ import {
   isAttack,
   opponentDamageEffectOnStack,
   optionCard,
-  ownCards,
   pitchIds,
   preventableAttackDamage,
   resourcesAfterCost,
@@ -20,6 +19,7 @@ import {
   scoreDefenseIntent,
   scoreDefenseReaction,
   scoreSpendCardChoice,
+  scoreTacticalRoot,
   shouldPreserveOpeningHand,
   spendsOpeningArsenalReserve,
   visibleOpponentDamageAmount,
@@ -336,8 +336,8 @@ export function chooseBravoIntentWithTrace(input: BotPolicyInput): BravoIntentDe
   const decision = chooseTacticalIntentWithTrace(input, reactive, {
     chooseForced: (forced) => chooseBravoReactiveIntent({ ...forced, state: undefined }),
     rules: bravoSolverRules,
-    rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
-    rootScore: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
+    rankCandidate: (intent, observed) => scoreTacticalRoot(intent, observed, scorePlay),
+    rootScore: (intent, observed) => scoreTacticalRoot(intent, observed, scorePlay),
   });
   const intent = enforceSpectraPolicy(input, decision.intent);
   return decision.plan ? { intent, plan: decision.plan } : { intent };

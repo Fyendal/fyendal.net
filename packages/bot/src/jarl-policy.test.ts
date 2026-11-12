@@ -1216,6 +1216,19 @@ describe("Jarl policy", () => {
     expect(chooseJarlIntent(inputFor(state, legal))).toEqual({ kind: "pass" });
   });
 
+  it("keeps Everbloom // Life instead of cycling it for 1 life on its own turn", () => {
+    const state = createGame({
+      decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,
+      seed: 12_206, startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, ["SEA258", "SEA258", "ROS042"]);
+    state.players[0]!.actionPoints = 0;
+    const legal = legalIntents(state, 0);
+    expect(legal).toContainEqual(expect.objectContaining({ kind: "play-card", meldSide: "right" }));
+    expect(chooseJarlIntent(inputFor(state, legal))).toEqual({ kind: "pass" });
+  });
+
   it("plays Sprout Strength from arsenal ahead of an affordable hammer swing", () => {
     const state = createGame({
       decklists: [jarlDeck(), decklists.dorinthea], cards: cardData, scripts,

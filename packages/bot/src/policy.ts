@@ -2475,6 +2475,19 @@ export function enforceSpectraPolicy(input: BotPolicyInput, selected: GameIntent
   return smallestSpectraAttack(terminal.length > 0 ? terminal : options, input, own) ?? selected;
 }
 
+/** Floors pass and close-chain at their `scoreIntent` baseline so a play
+ * scorer's cardless fallback cannot rank a declined play above them. */
+export function scoreTacticalRoot(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  play: BotPolicyScorers["play"],
+): number {
+  const score = play(intent, input, ownCards(input));
+  if (intent.kind === "pass") return Math.max(0, score);
+  if (intent.kind === "close-chain") return Math.max(1, score);
+  return score;
+}
+
 /** Deterministic projection-only baseline. Equal scores retain engine order. */
 export function chooseScoredIntent(input: BotPolicyInput, scorers: BotPolicyScorers): GameIntent {
   if (input.legal.length === 0) throw new Error("bot has no legal intents");

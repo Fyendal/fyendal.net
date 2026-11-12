@@ -12,7 +12,6 @@ import {
   isAttack,
   opponentDamageEffectOnStack,
   optionCard,
-  ownCards,
   pitchIds,
   resourcePaymentPitchIds,
   scoreArsenalChoice,
@@ -20,6 +19,7 @@ import {
   scoreDefenseIntent,
   scoreDefenseReaction,
   scoreSpendCardChoice,
+  scoreTacticalRoot,
   shouldPreserveOpeningHand,
   spendsOpeningArsenalReserve,
   visibleOpponentDamageAmount,
@@ -722,8 +722,8 @@ export function chooseJarlIntentWithTrace(input: BotPolicyInput): JarlIntentDeci
   const decision = chooseTacticalIntentWithTrace(input, reactive, {
     chooseForced: (forced) => chooseJarlReactiveIntent({ ...forced, state: undefined }),
     rules: jarlSolverRules,
-    rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
-    rootScore: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
+    rankCandidate: (intent, observed) => scoreTacticalRoot(intent, observed, scorePlay),
+    rootScore: (intent, observed) => scoreTacticalRoot(intent, observed, scorePlay),
   });
   const intent = enforceAllyTargetPolicy(input, enforceSpectraPolicy(input, decision.intent), {
     preserveHeroTarget(card) {

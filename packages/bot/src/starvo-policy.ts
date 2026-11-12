@@ -24,6 +24,7 @@ import {
   scoreDefenseIntent,
   scoreDefenseReaction,
   scoreSpendCardChoice,
+  scoreTacticalRoot,
   shouldPreserveOpeningHand,
   spendsOpeningArsenalReserve,
   targetableAttackIntent,
@@ -922,7 +923,7 @@ function starvoTacticalConfig(): TacticalIntentConfig {
       );
     },
     rules: starvoSolverRules,
-    rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
+    rankCandidate: (intent, observed) => scoreTacticalRoot(intent, observed, scorePlay),
     prepareCandidates: (candidates, observed, context) =>
       prepareStarvoRootCandidates(candidates, observed, context.depth),
     scoreIntent: (intent, observed) => {
@@ -946,7 +947,7 @@ function starvoTacticalConfig(): TacticalIntentConfig {
       }
       return 0;
     },
-    rootScore: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
+    rootScore: (intent, observed) => scoreTacticalRoot(intent, observed, scorePlay),
     maxSearchNodes: STARVO_MAX_SEARCH_NODES,
     maxTransitions: STARVO_MAX_TRANSITIONS,
     maxRootCandidates: STARVO_MAX_ROOT_CANDIDATES,
