@@ -220,6 +220,23 @@ describe("Classic Constructed shared decks", () => {
 });
 
 describe("Silver Age bot decks", () => {
+  it("keeps the complete SAGE Dorinthea pool internal, legal and implemented", () => {
+    const dorinthea = precon("bot-dorinthea-sage");
+    expect(dorinthea).toMatchObject({ name: "SAGE Dorinthea", format: "silver-age", botOnly: true });
+    expect(preconsForFormat("silver-age").map((deck) => deck.id)).not.toContain("bot-dorinthea-sage");
+    const pool = dorinthea!.pool;
+    expect(cardData[pool.heroId]?.name).toBe("Dorinthea");
+    expect(pool.weaponIds.map((id) => cardData[id]?.name)).toEqual(["Decimator Great Axe"]);
+    expect(pool.equipmentPool).toHaveLength(8);
+    expect(pool.deck).toHaveLength(46);
+    expect(formatLegalityIssues(cardData, pool, "silver-age")).toEqual([]);
+    for (const id of [...pool.weaponIds, ...pool.equipmentPool, ...pool.deck]) {
+      expect(cardData[id], id).toBeTruthy();
+      expect(isImplemented(cardData[id]!), id).toBe(true);
+    }
+  });
+
+
   it("keeps the complete SAGE Ira pool internal, legal and implemented", () => {
     const ira = precon("bot-ira-sage");
     expect(ira).toMatchObject({ name: "SAGE Ira", format: "silver-age", botOnly: true });

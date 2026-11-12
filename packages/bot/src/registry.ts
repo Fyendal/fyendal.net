@@ -8,6 +8,7 @@ import type {
 import { chooseAuroraIntent, chooseAuroraIntentWithTrace } from "./aurora-policy.js";
 import { chooseBoltynIntent, chooseBoltynIntentWithTrace } from "./boltyn-policy.js";
 import { chooseBravoIntent, chooseBravoIntentWithTrace } from "./bravo-policy.js";
+import { chooseDorintheaIntent, chooseDorintheaIntentWithTrace } from "./dorinthea-policy.js";
 import { chooseKayoIntent, chooseKayoIntentWithTrace } from "./kayo-policy.js";
 import { chooseBriarIntent, chooseBriarIntentWithTrace } from "./briar-policy.js";
 import {
@@ -40,6 +41,7 @@ import {
   briarPresentationFor,
   kayoPresentationFor,
   cindraPresentationFor,
+  dorintheaSagePresentationFor,
   halaPresentationFor,
   iraPresentation,
   iraSagePresentationFor,
@@ -193,6 +195,16 @@ export const BOT_DEFINITIONS = {
     chooseIntent: chooseIraIntent,
     chooseDecision: (input) => botDecisionFromTrace(chooseIraIntentWithTrace(input)),
     presentationFor: (opponent) => iraSagePresentationFor(opponent),
+  }),
+  dorinthea: stagedDefinition({
+    id: "dorinthea",
+    format: "silver-age",
+    deckId: "bot-dorinthea-sage",
+    username: "Dorinthea Bot",
+    deckName: "SAGE Dorinthea",
+    chooseIntent: chooseDorintheaIntent,
+    chooseDecision: (input) => botDecisionFromTrace(chooseDorintheaIntentWithTrace(input)),
+    presentationFor: (opponent, botTurnOrder) => dorintheaSagePresentationFor(opponent, botTurnOrder),
   }),
   cindra: stagedDefinition({
     id: "cindra",

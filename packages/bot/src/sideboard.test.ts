@@ -8,6 +8,8 @@ import {
   bravoPresentationFor,
   briarPresentationFor,
   cindraPresentationFor,
+  dorintheaSageMatchupForHeroName,
+  dorintheaSagePresentationFor,
   halaPresentationFor,
   iraPresentation,
   iraSageMatchupForHeroName,
@@ -189,6 +191,84 @@ describe("SAGE Ira matchup presentation", () => {
     expect(guide("Kayo").equipment).toEqual({
       head: "SLY005", chest: "SFA006", arms: "SFA008", legs: "SFA009",
     });
+  });
+});
+
+describe("SAGE Dorinthea matchup presentation", () => {
+  const pool = precon("bot-dorinthea-sage")!.pool;
+  const present = (heroName: string, classes: string[] = ["mechanologist"], order: "first" | "second" = "first") => {
+    const cards = { ...cardData, OPPONENT: { ...cardData["MON119"]!, name: heroName, classes } };
+    return dorintheaSagePresentationFor({ heroId: "OPPONENT", weaponIds: [], equipment: {} }, order, cards);
+  };
+  const flex = (heroName: string, classes?: string[]) => {
+    const names = ["Arcane Polarity", "Oasis Respite", "On the Horizon", "Test of Strength",
+      "Crash Down the Gates", "Raging Onslaught"];
+    const deck = present(heroName, classes).deck.map((id) => cardData[id]!.name);
+    return names.filter((name) => deck.includes(name));
+  };
+  const equipment = (heroName: string, classes?: string[], order?: "first" | "second") =>
+    Object.values(present(heroName, classes, order).equipment).map((id) => cardData[id!]?.name);
+  const unity = ["Helm of Unity", "Plating of Unity", "Gauntlets of Unity", "Pillar of Unity"];
+
+  it("groups heroes by matchup", () => {
+    expect(dorintheaSageMatchupForHeroName("kano", ["wizard"])).toBe("wizard");
+    expect(dorintheaSageMatchupForHeroName("briar", ["runeblade"])).toBe("briar");
+    expect(dorintheaSageMatchupForHeroName("florian", ["runeblade"])).toBe("runeblade");
+    expect(dorintheaSageMatchupForHeroName("dorinthea", ["warrior"])).toBe("fatigue");
+    expect(dorintheaSageMatchupForHeroName("bravo, flattering showman", ["guardian"])).toBe("guardian");
+    expect(dorintheaSageMatchupForHeroName("kayo", ["brute"])).toBe("default");
+    expect(dorintheaSageMatchupForHeroName("fai", ["ninja"])).toBe("aggro");
+    expect(dorintheaSageMatchupForHeroName("azalea", ["ranger"])).toBe("value");
+    expect(dorintheaSageMatchupForHeroName("kassai", ["warrior"])).toBe("value");
+    expect(dorintheaSageMatchupForHeroName("dromai", ["illusionist"])).toBe("default");
+  });
+
+  it("presents a legal forty in every matchup and turn order", () => {
+    const heroes = [
+      ["Kano", "wizard"], ["Briar", "runeblade"], ["Florian", "runeblade"], ["Dorinthea", "warrior"],
+      ["Oldhim", "guardian"], ["Kayo", "brute"], ["Fai", "ninja"], ["Azalea", "ranger"], ["Dromai", "illusionist"],
+      ["Puffin", "mechanologist"],
+    ] as const;
+    for (const [name, heroClass] of heroes) {
+      for (const order of ["first", "second"] as const) {
+        const presented = present(name, [heroClass], order);
+        expect(presented.deck, name).toHaveLength(40);
+        expect(validatePresentation(pool, presented, "silver-age", { cardPoolMode: "open" }), name)
+          .toMatchObject({ ok: true });
+      }
+    }
+  });
+
+  it("adds each matchup's four flex cards to the core", () => {
+    expect(flex("Puffin", ["mechanologist"])).toEqual(["On the Horizon", "Test of Strength"]);
+    expect(flex("Dromai", ["illusionist"])).toEqual(["On the Horizon", "Test of Strength"]);
+    expect(flex("Enigma", ["illusionist"])).toEqual(["On the Horizon", "Test of Strength"]);
+    expect(flex("Fai", ["ninja"])).toEqual(["On the Horizon", "Test of Strength"]);
+    expect(flex("Kayo", ["brute"])).toEqual(["On the Horizon", "Test of Strength"]);
+    expect(flex("Azalea", ["ranger"])).toEqual(["Oasis Respite", "On the Horizon"]);
+    expect(flex("Oldhim", ["guardian"])).toEqual(["Oasis Respite", "On the Horizon"]);
+    expect(flex("Kano", ["wizard"])).toEqual(["Arcane Polarity", "Oasis Respite"]);
+    expect(flex("Florian", ["runeblade"])).toEqual(["Arcane Polarity", "Oasis Respite"]);
+    expect(flex("Briar", ["runeblade"])).toEqual(["Arcane Polarity", "On the Horizon"]);
+    expect(flex("Dorinthea", ["warrior"])).toEqual(["Oasis Respite", "Crash Down the Gates", "Raging Onslaught"]);
+  });
+
+  it("wears full Nullrune into Wizards and one piece into Runeblades", () => {
+    expect(equipment("Kayo", ["brute"])).toEqual(unity);
+    expect(equipment("Kano", ["wizard"]))
+      .toEqual(["Nullrune Hood", "Nullrune Robe", "Nullrune Gloves", "Pillar of Unity"]);
+    expect(equipment("Florian", ["runeblade"])).toEqual(["Nullrune Hood", ...unity.slice(1)]);
+  });
+
+  it("wears Refraction Bolters into Guardians, fatigue and when racing aggro on the draw", () => {
+    const bolters = [...unity.slice(0, 3), "Refraction Bolters"];
+    expect(equipment("Oldhim", ["guardian"])).toEqual(bolters);
+    expect(equipment("Dorinthea", ["warrior"])).toEqual(bolters);
+    expect(equipment("Fai", ["ninja"], "first")).toEqual(unity);
+    expect(equipment("Fai", ["ninja"], "second")).toEqual(bolters);
+    expect(equipment("Briar", ["runeblade"], "second"))
+      .toEqual(["Nullrune Hood", "Plating of Unity", "Gauntlets of Unity", "Refraction Bolters"]);
+    expect(equipment("Kayo", ["brute"], "second")).toEqual(unity);
   });
 });
 

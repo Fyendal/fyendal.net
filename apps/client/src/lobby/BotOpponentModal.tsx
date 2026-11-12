@@ -130,6 +130,15 @@ const BOTS: Readonly<Record<Format, readonly BotOption[]>> = {
       deckType: "midrange",
       descriptionId: "lobby.bot.irasage.description",
     },
+    {
+      id: "dorinthea",
+      name: "Dorinthea",
+      title: "Decimator Great Axe",
+      heroName: "Dorinthea",
+      deckId: "bot-dorinthea-sage",
+      deckType: "guardian",
+      descriptionId: "lobby.bot.dorinthea.description",
+    },
   ],
 };
 

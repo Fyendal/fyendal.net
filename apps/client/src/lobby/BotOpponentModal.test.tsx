@@ -87,9 +87,22 @@ describe("BotOpponentModal", () => {
     expect(html).toContain("Crimson Haze");
     expect(html).toContain("Midrange");
     expect(html).not.toContain("Scarlet Revenger");
+    expect(html).not.toContain("Decimator Great Axe");
     expect(html).not.toContain("Elemental Runeblade");
     expect(html).not.toContain("Includes banned");
     expect(html).toContain("Briar is hidden because its deck includes banned cards.");
+  });
+
+  it("offers the beta-only Dorinthea bot to beta testers", () => {
+    botModalStore.state = { betaTester: true } as StoreState;
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <BotOpponentModal format="silver-age" onSelect={vi.fn()} onClose={vi.fn()} />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain("Decimator Great Axe");
+    expect(html).toContain("A defensive deck that blocks patiently and swings Decimator Great Axe every turn.");
   });
 
   it("shows banned Briar with an accessible custom tooltip once the toggle is on", () => {

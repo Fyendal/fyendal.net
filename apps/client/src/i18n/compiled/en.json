@@ -367,6 +367,18 @@
       "value": "Beat Cindra Bot"
     }
   ],
+  "achievements.beatdorinthea.description": [
+    {
+      "type": 0,
+      "value": "Defeat Dorinthea Bot in a practice game."
+    }
+  ],
+  "achievements.beatdorinthea.name": [
+    {
+      "type": 0,
+      "value": "Beat Dorinthea Bot"
+    }
+  ],
   "achievements.beathala.description": [
     {
       "type": 0,
@@ -33680,6 +33692,12 @@
     {
       "type": 0,
       "value": "A fast redline deck built to keep the pressure on."
+    }
+  ],
+  "lobby.bot.dorinthea.description": [
+    {
+      "type": 0,
+      "value": "A defensive deck that blocks patiently and swings Decimator Great Axe every turn."
     }
   ],
   "lobby.bot.hala.description": [

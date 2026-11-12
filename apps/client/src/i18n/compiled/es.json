@@ -367,6 +367,18 @@
       "value": "Vence a Cindra Bot"
     }
   ],
+  "achievements.beatdorinthea.description": [
+    {
+      "type": 0,
+      "value": "Derrota a Dorinthea Bot en una partida de práctica."
+    }
+  ],
+  "achievements.beatdorinthea.name": [
+    {
+      "type": 0,
+      "value": "Vence a Dorinthea Bot"
+    }
+  ],
   "achievements.beathala.description": [
     {
       "type": 0,
@@ -34594,6 +34606,12 @@
     {
       "type": 0,
       "value": "Un mazo rápido de redline pensado para mantener la presión."
+    }
+  ],
+  "lobby.bot.dorinthea.description": [
+    {
+      "type": 0,
+      "value": "Un mazo defensivo que bloquea con paciencia y ataca con Decimator Great Axe cada turno."
     }
   ],
   "lobby.bot.hala.description": [

@@ -714,6 +714,87 @@ export function iraSagePresentationFor(
   };
 }
 
+// ── Dorinthea (Silver Age) ───────────────────────────────────────────────
+
+export type DorintheaSageMatchup =
+  | "wizard"
+  | "runeblade"
+  | "briar"
+  | "aggro"
+  | "value"
+  | "guardian"
+  | "fatigue"
+  | "default";
+
+const DORINTHEA_SAGE_BOT_DECK_ID = "bot-dorinthea-sage";
+const DORINTHEA_POLARITY = ["SBW023", "SBW023"]; // Arcane Polarity
+const DORINTHEA_OASIS = ["SLY019", "SLY019"]; // Oasis Respite
+const DORINTHEA_HORIZON = ["SIY017", "SIY017"]; // On the Horizon
+const DORINTHEA_TEST = ["SEN019", "SEN019"]; // Test of Strength
+const DORINTHEA_FATIGUE_ATTACKS = ["SEA198", "WTR190"]; // Crash Down the Gates, Raging Onslaught
+const DORINTHEA_FLEX = [
+  ...DORINTHEA_POLARITY, ...DORINTHEA_OASIS, ...DORINTHEA_HORIZON, ...DORINTHEA_TEST, ...DORINTHEA_FATIGUE_ATTACKS,
+];
+
+/** The four flex cards each matchup adds to the 36-card Axe core. */
+const DORINTHEA_SAGE_PACKAGE: Readonly<Record<DorintheaSageMatchup, readonly string[]>> = {
+  wizard: [...DORINTHEA_POLARITY, ...DORINTHEA_OASIS],
+  runeblade: [...DORINTHEA_POLARITY, ...DORINTHEA_OASIS],
+  briar: [...DORINTHEA_POLARITY, ...DORINTHEA_HORIZON],
+  aggro: [...DORINTHEA_HORIZON, ...DORINTHEA_TEST],
+  value: [...DORINTHEA_HORIZON, ...DORINTHEA_OASIS],
+  guardian: [...DORINTHEA_HORIZON, ...DORINTHEA_OASIS],
+  fatigue: [...DORINTHEA_OASIS, ...DORINTHEA_FATIGUE_ATTACKS],
+  default: [...DORINTHEA_HORIZON, ...DORINTHEA_TEST],
+};
+
+export function dorintheaSageMatchupForHeroName(
+  name: string,
+  classes: readonly string[] = [],
+): DorintheaSageMatchup {
+  if (classes.includes("wizard") || /kano|blaze|iyslander|oscilio|verdance/.test(name)) return "wizard";
+  if (name.includes("briar")) return "briar";
+  if (classes.includes("runeblade") || /viserai|aurora|florian|chane|vynnset/.test(name)) return "runeblade";
+  if (/dorinthea|riptide/.test(name)) return "fatigue";
+  if (classes.includes("guardian") || /oldhim|bravo|jarl|terra|victor|betsy|valda/.test(name)) return "guardian";
+  if (/\b(?:rhinar|katsu|fai|ira|cindra|dash|boltyn|fang|levia)\b/.test(name)) return "aggro";
+  if (classes.includes("warrior") || /azalea|kassai|hala|olympia/.test(name)) return "value";
+  return "default";
+}
+
+/** Present the matchup's forty: Nullrune against arcane damage, and Refraction
+ * Bolters against Guardians, fatigue, and aggro decks when on the draw. */
+export function dorintheaSagePresentationFor(
+  opponent: BotPrepOpponent,
+  botTurnOrder: "first" | "second" = "first",
+  cards: Readonly<Record<string, CardData>> = cardData,
+): PresentedDeck {
+  const registered = precon(DORINTHEA_SAGE_BOT_DECK_ID);
+  if (!registered || registered.format !== "silver-age" || registered.botOnly !== true) {
+    throw new Error("SAGE Dorinthea bot deck is not registered");
+  }
+  const classes = cards[opponent.heroId]?.classes?.map((value) => value.toLowerCase()) ?? [];
+  const matchup = dorintheaSageMatchupForHeroName(opponentHeroName(opponent, cards), classes);
+  const deck = [...registered.pool.deck];
+  for (const id of DORINTHEA_FLEX) removeCopies(deck, id, 1);
+  deck.push(...DORINTHEA_SAGE_PACKAGE[matchup]);
+  if (deck.length !== 40) throw new Error(`SAGE Dorinthea presentation has ${deck.length} cards, expected 40`);
+  const wizard = matchup === "wizard";
+  const barrier = wizard || matchup === "runeblade" || matchup === "briar";
+  const racing = (matchup === "briar" || matchup === "aggro") && botTurnOrder === "second";
+  const bolters = matchup === "fatigue" || matchup === "guardian" || racing;
+  return {
+    weaponIds: [...registered.pool.weaponIds],
+    equipment: {
+      head: barrier ? "SLY006" : "SBL004", // Nullrune Hood / Helm of Unity
+      chest: wizard ? "SLY008" : "PEN045", // Nullrune Robe / Plating of Unity
+      arms: wizard ? "SGB006" : "SBL007", // Nullrune Gloves / Gauntlets of Unity
+      legs: bolters ? "MPW020" : "PEN047", // Refraction Bolters / Pillar of Unity
+    },
+    deck,
+  };
+}
+
 // ── Ser Boltyn, Breaker of Dawn ──────────────────────────────────────────
 
 const BOLTYN_EDICT = "SBL020";

@@ -391,7 +391,7 @@ export const ACHIEVEMENT_IDS = [
   "five-strike-turn", "iron-wall", "second-wind", "long-game", "against-the-odds", "empty-tank",
   "beat-bravo", "beat-briar", "beat-kayo", "beat-cindra",
   "beat-ira", "beat-hala", "beat-jarl", "beat-levia", "beat-starvo", "beat-boltyn",
-  "beat-ira-sage", "beat-aurora",
+  "beat-ira-sage", "beat-aurora", "beat-dorinthea",
 ] as const;
 export type AchievementId = typeof ACHIEVEMENT_IDS[number];
 // Keep retired IDs decodable so existing unlocks and account exports remain valid.
@@ -579,9 +579,9 @@ const FORMATS = new Set(["cc", "silver-age"]);
 const CARD_POOL_MODES = new Set(["legal", "future", "open"]);
 const PHASES = new Set(["start", "action", "layer", "reaction", "defend", "end", "game-over"]);
 const MELD_SIDES = new Set(["left", "right", "both"]);
-const BOT_OPPONENTS = new Set(["bravo", "briar", "kayo", "cindra", "ira", "hala", "jarl", "levia", "starvo", "boltyn", "ira-sage", "aurora"]);
+const BOT_OPPONENTS = new Set(["bravo", "briar", "kayo", "cindra", "ira", "hala", "jarl", "levia", "starvo", "boltyn", "ira-sage", "aurora", "dorinthea"]);
 /** Practice bots offered only to operator-allowlisted beta testers. */
-export const BETA_BOT_OPPONENTS: ReadonlySet<BotOpponent> = new Set<BotOpponent>(["aurora"]);
+export const BETA_BOT_OPPONENTS: ReadonlySet<BotOpponent> = new Set<BotOpponent>(["aurora", "dorinthea"]);
 const PLAYABLE_ZONES = new Set(["banish", "graveyard", "deck"]);
 const EQUIPMENT_SLOTS = new Set(["head", "chest", "arms", "legs"]);
 const DECISION_KINDS = new Set([

@@ -1000,6 +1000,52 @@
             "sideboard": []
         }
     },
+    "bot-dorinthea-sage": {
+        "name": "SAGE Dorinthea",
+        "format": "silver-age",
+        "botOnly": true,
+        "pool": {
+            "heroId": "SDO001",
+            "weaponIds": ["DTD205"],
+            "equipmentPool": [
+                "SBL004",
+                "PEN045",
+                "SBL007",
+                "PEN047",
+                "SLY006",
+                "SLY008",
+                "SGB006",
+                "MPW020"
+            ],
+            "deck": [
+                "SBW023", "SBW023",
+                "SUP222", "SUP222",
+                "SEA198",
+                "DYN082", "DYN082",
+                "DYN083", "DYN083",
+                "DYN084", "DYN084",
+                "AOL008", "AOL008",
+                "SDO025", "SDO025",
+                "SLY019", "SLY019",
+                "SIY017", "SIY017",
+                "SDO015", "SDO015",
+                "SDO027", "SDO027",
+                "MPW122", "MPW122",
+                "SEA226", "SEA226",
+                "SEA228", "SEA228",
+                "MPW056", "MPW056",
+                "MPW057", "MPW057",
+                "MPW058", "MPW058",
+                "SEN019", "SEN019",
+                "WTR137", "WTR137",
+                "PEN053", "PEN053",
+                "HVY111", "HVY111",
+                "MPW114", "MPW114",
+                "WTR190"
+            ],
+            "sideboard": []
+        }
+    },
     "_comment_bot_boltyn":"User-supplied Raydn Boltyn list fetched through the Fabrary API. The registered sixty is the 53-card main deck plus the guide's default package (2 Edict of Steel, 2 Courageous Steelhand, 1 Tenacity, 2 Saving Grace); the other eight flex cards are sideboard. Printings are the latest reprints because the API reports identifiers only.",
     "bot-boltyn-raydn": {
         "name": "Raydn Boltyn",

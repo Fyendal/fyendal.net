@@ -1183,6 +1183,15 @@ export const MIGRATIONS: Migration[] = [
       ADD CONSTRAINT pending_bot_starts_bot_check
       CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia', 'boltyn', 'ira-sage', 'aurora'));`,
   },
+  {
+    version: 65,
+    // Silver Age Dorinthea joins the durable pending-practice bot ids.
+    sql: `ALTER TABLE pending_bot_starts
+      DROP CONSTRAINT IF EXISTS pending_bot_starts_bot_check;
+    ALTER TABLE pending_bot_starts
+      ADD CONSTRAINT pending_bot_starts_bot_check
+      CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia', 'boltyn', 'ira-sage', 'aurora', 'dorinthea'));`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

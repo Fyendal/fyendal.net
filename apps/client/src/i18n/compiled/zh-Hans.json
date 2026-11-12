@@ -367,6 +367,18 @@
       "value": "击败 Cindra 机器人"
     }
   ],
+  "achievements.beatdorinthea.description": [
+    {
+      "type": 0,
+      "value": "在练习对局中击败 Dorinthea 机器人。"
+    }
+  ],
+  "achievements.beatdorinthea.name": [
+    {
+      "type": 0,
+      "value": "击败 Dorinthea 机器人"
+    }
+  ],
   "achievements.beathala.description": [
     {
       "type": 0,
@@ -32169,6 +32181,12 @@
     {
       "type": 0,
       "value": "以持续施压为目标的高速红线牌组。"
+    }
+  ],
+  "lobby.bot.dorinthea.description": [
+    {
+      "type": 0,
+      "value": "耐心防御、每回合挥动 Decimator Great Axe 的防守型牌组。"
     }
   ],
   "lobby.bot.hala.description": [

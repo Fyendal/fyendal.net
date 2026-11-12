@@ -58,7 +58,7 @@ function attackValue(data: CardData, input: BotPolicyInput): number {
 
 /** Arcane Polarity's life gain while held: the larger amount once arcane
  * damage has been dealt this turn. */
-function lifeGainAlternative(data: CardData, input: BotPolicyInput): number {
+export function lifeGainAlternative(data: CardData, input: BotPolicyInput): number {
   if (data.cardType !== "instant") return 0;
   const arcaneTaken = input.view.turnFacts?.players[input.seat].arcaneDamageTaken === true;
   return Number(
@@ -131,7 +131,7 @@ function committedOasisPrevention(input: BotPolicyInput): number {
   );
 }
 
-function damageWorthOasis(input: BotPolicyInput): number {
+export function damageWorthOasis(input: BotPolicyInput): number {
   const attack = Math.max(
     0,
     preventableAttackDamage(input) - (currentLink(input)?.damageToPrevent ?? 0),
@@ -186,13 +186,16 @@ function scoreDefend(
   });
 }
 
-function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
+/** Oasis Respite targets: the bot's own hero and the opposing damage source. */
+export function scoreOasisChoice(
+  intent: Extract<GameIntent, { kind: "choose" }>,
+  input: BotPolicyInput,
+): number | undefined {
   const decision = input.view.pendingDecision;
-  if (!decision) return 0;
-  if (decision.promptMessage?.id === "card.sly.oasis.hero.choose") {
+  if (decision?.promptMessage?.id === "card.sly.oasis.hero.choose") {
     return intent.optionId === "your hero" ? 100 : -100;
   }
-  if (decision.promptMessage?.id === "card.sly.damage.source.choose") {
+  if (decision?.promptMessage?.id === "card.sly.damage.source.choose") {
     const link = currentLink(input);
     const attackSource = link?.attackingCard.owner !== input.seat
       ? link?.attackingCard.instanceId
@@ -202,6 +205,14 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
     const desired = attackSource ?? stackSource;
     return desired !== undefined && intent.optionId === String(desired) ? 100 : -100;
   }
+  return undefined;
+}
+
+function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
+  const decision = input.view.pendingDecision;
+  if (!decision) return 0;
+  const oasis = scoreOasisChoice(intent, input);
+  if (oasis !== undefined) return oasis;
   if (decision.kind === "arsenal") {
     return scoreArsenalChoice(intent, input, arsenalValuer(bravoSolverRules));
   }
