@@ -58,9 +58,12 @@ function attackValue(data: CardData, input: BotPolicyInput): number {
 
 /** Arcane Polarity's life gain while held: the larger amount once arcane
  * damage has been dealt this turn. */
-export function lifeGainAlternative(data: CardData, input: BotPolicyInput): number {
+export function lifeGainAlternative(
+  data: CardData,
+  input: BotPolicyInput,
+  arcaneTaken = input.view.turnFacts?.players[input.seat].arcaneDamageTaken === true,
+): number {
   if (data.cardType !== "instant") return 0;
-  const arcaneTaken = input.view.turnFacts?.players[input.seat].arcaneDamageTaken === true;
   return Number(
     (arcaneTaken ? /if you've been dealt arcane damage this turn, instead gain (\d+)\{h\}/i : /^gain (\d+)\{h\}/im)
       .exec(data.text)?.[1] ?? 0,

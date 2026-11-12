@@ -350,7 +350,8 @@ describe("non-lethal Arcane Barrier", () => {
       .toEqual({ kind: "choose", optionId: "pay 1" });
   });
 
-  for (const bot of botDefinitions) {
+  // Dorinthea holds cards to block with while the opponent can still attack.
+  for (const bot of botDefinitions.filter((definition) => definition.id !== "dorinthea")) {
     it(`${bot.id} pitches surplus blue cards into Arcane Barrier`, () => {
       const input = barrierInput(["DVR027", "DVR027", "DVR027", "DVR027"]);
       expect(bot.chooseIntent(input)).toEqual({ kind: "choose", optionId: "pay 1" });

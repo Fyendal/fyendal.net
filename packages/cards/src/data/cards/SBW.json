@@ -421,7 +421,7 @@
     "id": "SBW023",
     "name": "Arcane Polarity",
     "cardType": "instant",
-    "text": "Gain 1{g}\nIf you've been dealt arcane damage this turn, instead gain 4{g}.",
+    "text": "Gain 1{h}\nIf you've been dealt arcane damage this turn, instead gain 4{h}.",
     "pitch": 1,
     "cost": 0,
     "classes": [

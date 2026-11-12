@@ -1,5 +1,6 @@
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
-import { damageWorthOasis, scoreOasisChoice } from "./bravo-policy.js";
+import { damageWorthOasis, lifeGainAlternative, scoreOasisChoice } from "./bravo-policy.js";
+import { BLOCK_USE_RATE, TYPICAL_INCOMING } from "./card-ev.js";
 import {
   chooseScoredIntent,
   continuationResources,
@@ -291,13 +292,59 @@ function chooseDefenseReaction(input: BotPolicyInput): GameIntent | undefined {
   return best?.intent;
 }
 
+/** Until the opponent's end phase another attack may come (most arcane
+ * damage arrives with or before one), so a held card can still block. */
+function opponentCanStillAttack(input: BotPolicyInput): boolean {
+  return input.view.activePlayer !== input.seat && input.view.phase !== "end";
+}
+
+/** Arcane Barrier pricing: a pitched card also gives up its Arcane Polarity
+ * life and, while attacks are still coming, the block it would have made. */
+const dorintheaBarrierResponse: ResponseModel = {
+  offensiveCards: dorintheaResponse.offensiveCards,
+  evaluateResponse(cards, input) {
+    const response = dorintheaResponse.evaluateResponse(cards, input);
+    const handIds = new Set(input.view.players[input.seat].hand.map((card) => card.instanceId));
+    const blocking = opponentCanStillAttack(input);
+    const kept = cards.filter((card) => handIds.has(card.instanceId)).reduce((total, card) => {
+      const data = input.cards[card.cardId];
+      const block = blocking
+        ? Math.min(Math.max(0, card.defense ?? data?.defense ?? 0), TYPICAL_INCOMING) * BLOCK_USE_RATE
+        : 0;
+      return total + block + (data ? lifeGainAlternative(data, input, true) : 0);
+    }, 0);
+    return responseEvaluation({ ...response, boardValue: response.boardValue + kept });
+  },
+};
+
+/** Take non-lethal arcane damage unprevented while a held Arcane Polarity
+ * would gain more life than the barrier stops. */
+function declineBarrierForPolarity(input: BotPolicyInput): GameIntent | undefined {
+  const decision = input.view.pendingDecision;
+  if (decision?.promptMessage?.id !== "engine.decision.damage.arcane.barrier") return undefined;
+  const me = input.view.players[input.seat];
+  const incoming = decision.promptMessage.values?.amount;
+  if (typeof incoming !== "number" || incoming >= me.life) return undefined;
+  if (input.view.turnFacts?.players[input.seat].arcaneDamageTaken) return undefined;
+  const polarity = me.hand.map((card) => input.cards[card.cardId]).find((data) => named(data) === "arcane polarity");
+  if (!polarity) return undefined;
+  // Damage the barrier cannot fully stop turns Arcane Polarity on anyway.
+  const stoppable = Math.max(0, ...input.legal.map((intent) =>
+    intent.kind === "choose" ? Number(/^pay (\d+)$/.exec(intent.optionId)?.[1] ?? 0) : 0
+  ));
+  const extraLife = lifeGainAlternative(polarity, input, true) - lifeGainAlternative(polarity, input, false);
+  if (stoppable < incoming || extraLife < incoming) return undefined;
+  return input.legal.find((intent) => intent.kind === "choose" && intent.optionId === "pay 0");
+}
+
 function chooseReactive(input: BotPolicyInput): GameIntent {
-  const reaction = chooseDefenseReaction(input);
-  if (reaction) return reaction;
+  const forced = declineBarrierForPolarity(input) ?? chooseDefenseReaction(input);
+  if (forced) return forced;
   return chooseScoredIntent(input, {
     play: scorePlay,
-    nextTurnArsenal: arsenalValuer(dorintheaSolverRules),
-    response: dorintheaResponse,
+    // The response model already prices the arsenal card a block gives up.
+    nextTurnArsenal: input.view.pendingDecision?.kind === "defend" ? () => 0 : arsenalValuer(dorintheaSolverRules),
+    response: dorintheaBarrierResponse,
     defend: (intent, observed, own) => scoreDefenseIntent(intent, observed, own, dorintheaDefense),
     choose: scoreChoice,
   });

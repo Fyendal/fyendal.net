@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { chooseDorintheaIntent } from "./dorinthea-policy.js";
 import { dorintheaSolverRules } from "./dorinthea-rules.js";
 import { solveHand } from "./hand-value.js";
+import { ownCards, responseEvaluation, scoreDefenseIntentWithTrace } from "./policy.js";
 import { dorintheaSagePresentationFor } from "./sideboard.js";
 
 type State = ReturnType<typeof createGame>;
@@ -59,6 +60,36 @@ function playUntil(state: State, stop: (state: State) => boolean): { state: Stat
     }
   }
   return { state, played };
+}
+
+/** The opponent plays `name` as an attack against Dorinthea. */
+function attacked(state: State, name: string, pitch = 1): State {
+  const attacker = state.players[1]!;
+  const attack = { instanceId: state.nextInstanceId++, cardId: findPrinting(name, pitch)!.id, owner: 1 as const };
+  attacker.hand = [attack];
+  attacker.resources = 3;
+  attacker.actionPoints = 1;
+  state.activePlayer = 1;
+  state.priorityPlayer = 1;
+  return apply(state, 1, legalIntents(state, 1).find((intent) =>
+    intent.kind === "play-card" && intent.instanceId === attack.instanceId
+  )!);
+}
+
+/** Dorinthea answers the open attack until its link resolves, declaring no
+ * blockers when `noBlock` is set. */
+function resolveLink(state: State, noBlock = false): State {
+  for (let step = 0; step < 20 && state.chain.at(-1)?.resolved !== true; step++) {
+    const seat = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+    const forced = seat === 0 && noBlock && projectStateFor(state, 0).pendingDecision?.kind === "defend"
+      ? legalIntents(state, 0).find((intent) => intent.kind === "defend" && intent.instanceIds.length === 0)
+      : undefined;
+    state = apply(state, seat, forced ?? (seat === 0
+      ? chooseDorintheaIntent(input(state))
+      : legalIntents(state, 1).find((candidate) => candidate.kind === "pass")!));
+  }
+  expect(state.chain.at(-1)?.resolved).toBe(true);
+  return state;
 }
 
 describe("Dorinthea policy", () => {
@@ -117,34 +148,11 @@ describe("Dorinthea policy", () => {
     expect(state.players[1]!.life).toBe(12);
   });
 
-  /** Rhinar attacks with a red Raging Onslaught; Dorinthea answers until the
-   * link resolves, declaring no blockers when `noBlock` is set. */
+  /** A red Raging Onslaught attacks Dorinthea's hand of `names`. */
   function defend(names: readonly [string, number][], noBlock = false): { state: State; blue: number } {
-    let state = game(names);
-    const attacker = state.players[1]!;
-    const attack = {
-      instanceId: state.nextInstanceId++, cardId: findPrinting("Raging Onslaught", 1)!.id, owner: 1 as const,
-    };
-    attacker.hand = [attack];
-    attacker.resources = 3;
-    attacker.actionPoints = 1;
-    state.activePlayer = 1;
-    state.priorityPlayer = 1;
-    state = apply(state, 1, legalIntents(state, 1).find((intent) =>
-      intent.kind === "play-card" && intent.instanceId === attack.instanceId
-    )!);
-    const blue = state.players[0]!.hand.find((card) => cardData[card.cardId]?.pitch === 3)?.instanceId ?? -1;
-    for (let step = 0; step < 20 && state.chain.at(-1)?.resolved !== true; step++) {
-      const seat = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
-      const forced = seat === 0 && noBlock && projectStateFor(state, 0).pendingDecision?.kind === "defend"
-        ? legalIntents(state, 0).find((intent) => intent.kind === "defend" && intent.instanceIds.length === 0)
-        : undefined;
-      state = apply(state, seat, forced ?? (seat === 0
-        ? chooseDorintheaIntent(input(state))
-        : legalIntents(state, 1).find((candidate) => candidate.kind === "pass")!));
-    }
-    expect(state.chain.at(-1)?.resolved).toBe(true);
-    return { state, blue };
+    const start = attacked(game(names), "Raging Onslaught");
+    const blue = start.players[0]!.hand.find((card) => cardData[card.cardId]?.pitch === 3)?.instanceId ?? -1;
+    return { state: resolveLink(start, noBlock), blue };
   }
 
   it("blocks a big attack while keeping the blue that funds the Axe", () => {
@@ -175,4 +183,112 @@ describe("Dorinthea hand value", () => {
     expect(result.damage).toBeGreaterThan(4);
     expect(result.damage).toBeLessThan(8);
   });
+});
+
+describe("Unity blocks", () => {
+  it("credits Unity's bonus to equipment defending beside a hand card", () => {
+    const start = game([["On the Horizon", 1]]);
+    // Armor is only worn when the hit matters, so make it lethal.
+    start.players[0]!.life = 7;
+    let state = attacked(start, "Raging Onslaught");
+    for (let step = 0; step < 6 && projectStateFor(state, 0).pendingDecision?.kind !== "defend"; step++) {
+      const seat = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      state = apply(state, seat, legalIntents(state, seat).find((candidate) => candidate.kind === "pass")!);
+    }
+    const observed = input(state);
+    const model = {
+      cardOpportunity: () => 0,
+      offensiveCards: () => [],
+      evaluateResponse: () => responseEvaluation({}),
+    };
+    const prevented = (ids: number[]) => scoreDefenseIntentWithTrace(
+      { kind: "defend", instanceIds: ids }, observed, ownCards(observed), model,
+    ).value.damagePrevented;
+    const horizon = state.players[0]!.hand[0]!.instanceId;
+    const helm = state.players[0]!.equipment.head!.instanceId;
+    expect(prevented([horizon])).toBe(4);
+    expect(prevented([horizon, helm])).toBe(6);
+  });
+});
+
+describe("Dorinthea Arcane Barrier", () => {
+  /** One arcane damage offered to Arcane Barrier 1 on the opponent's turn. */
+  function barrier(names: readonly [string, number][], phase: "action" | "end") {
+    const state = game(names);
+    state.activePlayer = 1;
+    const observed = input(state);
+    observed.view.phase = phase;
+    observed.view.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Arcane Barrier: you would be dealt 1 arcane damage — pay {r} to prevent that much?",
+      promptMessage: { id: "engine.decision.damage.arcane.barrier", values: { amount: 1 } },
+      options: ["pay 0", "pay 1"],
+    };
+    return {
+      ...observed,
+      state: undefined,
+      legal: [{ kind: "choose", optionId: "pay 0" }, { kind: "choose", optionId: "pay 1" }] as GameIntent[],
+    };
+  }
+
+  it("keeps a red to block with while the opponent can still attack", () => {
+    const observed = barrier([["On the Horizon", 1], ["Raging Onslaught", 3]], "action");
+    expect(chooseDorintheaIntent(observed)).toEqual({ kind: "choose", optionId: "pay 0" });
+  });
+
+  it("pitches a spare red once no more attacks can come", () => {
+    const observed = barrier([["On the Horizon", 1], ["Raging Onslaught", 3]], "end");
+    expect(chooseDorintheaIntent(observed)).toEqual({ kind: "choose", optionId: "pay 1" });
+  });
+
+  it("takes the arcane damage to turn on a held Arcane Polarity", () => {
+    const observed = barrier([["Arcane Polarity", 1], ["On the Horizon", 1], ["Raging Onslaught", 3]], "end");
+    expect(chooseDorintheaIntent(observed)).toEqual({ kind: "choose", optionId: "pay 0" });
+  });
+
+  /** Swap the hand's Arcane Polarity for the pool's own printing. */
+  function withPoolPolarity<T extends ReturnType<typeof barrier>>(observed: T): T {
+    for (const card of observed.view.players[0].hand) {
+      if (cardData[card.cardId]?.name === "Arcane Polarity") card.cardId = "SBW023";
+    }
+    return observed;
+  }
+
+  it("reads the life gain of the deck's Arcane Polarity printing", () => {
+    expect(cardData.SBW023?.text).toBe(cardData.SBA030?.text);
+    const observed = withPoolPolarity(barrier([["Arcane Polarity", 1]], "end"));
+    expect(chooseDorintheaIntent(observed)).toEqual({ kind: "choose", optionId: "pay 0" });
+  });
+
+  it("never pitches Arcane Polarity to the barrier after arcane damage has landed", () => {
+    const observed = withPoolPolarity(barrier([["Arcane Polarity", 1]], "end"));
+    observed.view.turnFacts!.players[0].arcaneDamageTaken = true;
+    expect(chooseDorintheaIntent(observed)).toEqual({ kind: "choose", optionId: "pay 0" });
+  });
+
+  it("plays Arcane Polarity once arcane damage has been dealt", () => {
+    const state = game([["Arcane Polarity", 1]]);
+    state.players[0]!.life = 10;
+    const observed = input(state);
+    observed.view.turnFacts!.players[0].arcaneDamageTaken = true;
+    expect(cardName(chooseDorintheaIntent({ ...observed, state: undefined }), state)).toBe("Arcane Polarity");
+  });
+});
+
+describe("Dorinthea on-hit blocks", () => {
+  it.each([["Overpower", 1], ["Sirens of Safe Harbor", 1]] as const)(
+    "stops Snatch's draw with %s and one Unity piece",
+    (name, pitch) => {
+      const start = game([["Felling Swing", 3], [name, pitch]]);
+      start.players[0]!.life = 9;
+      const blue = start.players[0]!.hand[0]!.instanceId;
+      const state = resolveLink(attacked(start, "Snatch"));
+      const link = state.chain.at(-1)!;
+      expect(link.hit).toBe(false);
+      expect(state.players[0]!.life).toBe(9);
+      expect(link.defendingEquipment).toHaveLength(1);
+      expect(state.players[0]!.hand.map((card) => card.instanceId)).toEqual([blue]);
+    },
+  );
 });

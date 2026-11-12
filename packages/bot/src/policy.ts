@@ -1251,6 +1251,16 @@ export function defenderDefense(card: CardView, input: BotPolicyInput): number {
   return Math.max(0, card.defense ?? data?.defense ?? 0);
 }
 
+/** Unity: +1{d} on each such equipment defending beside a card from hand.
+ * It is a defend trigger, so the staged-defense projection never shows it. */
+function unityDefenseBonus(chosen: readonly CardView[], input: BotPolicyInput): number {
+  const handIds = new Set(input.view.players[input.seat].hand.map((card) => card.instanceId));
+  if (!chosen.some((card) => handIds.has(card.instanceId))) return 0;
+  return chosen.filter((card) =>
+    !handIds.has(card.instanceId) && input.cards[card.cardId]?.keywords?.includes("Unity")
+  ).length;
+}
+
 /** Mirage (8.3.25) destroys this defender before damage, so it blocks nothing. */
 function mirageNullifiesDefense(data: CardData | undefined, input: BotPolicyInput): boolean {
   const link = currentLink(input);
@@ -1808,7 +1818,7 @@ export function scoreDefenseIntentWithTrace(
   const incomingAfterPlannedPrevention = Math.max(0, incoming - plannedPrevention.amount);
   const defense = chosen.reduce(
     (sum, card) => sum + defenderDefense(card, input),
-    0,
+    unityDefenseBonus(chosen, input),
   );
   // Future reaction/prevention cards are reserved here so the staged block is
   // planned around them, but they have not resolved yet. Count only prevention
