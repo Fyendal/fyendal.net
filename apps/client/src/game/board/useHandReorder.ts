@@ -3,6 +3,7 @@ import {
   handDragLocation,
   handDragScrollSpeed,
   handDragStarted,
+  handDragTargetIndex,
   handDropOnOwnArsenal,
   handPlayDropTargetAllowed,
   type HandDropAction,
@@ -368,12 +369,10 @@ export function useHandReorder(
     // Read all slot geometry before moving the dragged card.
     const center = drag.x - drag.slotGrabOffset + drag.cardWidth / 2;
     const cards = [...hand.querySelectorAll<HTMLElement>("[data-hand-instance-id]")];
-    const others = cards.filter((element) => element !== drag.element);
-    const targetIndex = others.filter((element) => {
-      return center > handCardSlotLeft(hand, element, bounds.left) + element.offsetWidth / 2;
-    }).length;
+    const currentIndex = cards.indexOf(drag.element);
+    const targetIndex = handDragTargetIndex(center, cards.map((element) =>
+      handCardSlotLeft(hand, element, bounds.left) + element.offsetWidth / 2), currentIndex);
     const visibleOrder = cards.map((element) => Number(element.dataset.handInstanceId));
-    const currentIndex = visibleOrder.indexOf(drag.instanceId);
     if (currentIndex !== targetIndex) {
       // Staged/hidden hand cards retain their slots in the full local order.
       const next = moveVisibleHandCard(orderRef.current, visibleOrder, drag.instanceId, targetIndex);
