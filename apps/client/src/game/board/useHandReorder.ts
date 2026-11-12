@@ -40,6 +40,8 @@ interface HandDrag {
   y: number;
   grabOffset: number;
   grabOffsetY: number;
+  /** The true grab point; touch recentring would otherwise swap tightly fanned neighbours. */
+  slotGrabOffset: number;
   handTop: number;
   started: boolean;
   originalOrder: readonly number[];
@@ -364,7 +366,7 @@ export function useHandReorder(
     }
     hand.scrollLeft += handDragScrollSpeed(drag.x, bounds.left, bounds.right) * elapsed / 1000;
     // Read all slot geometry before moving the dragged card.
-    const center = drag.x - drag.grabOffset + drag.cardWidth / 2;
+    const center = drag.x - drag.slotGrabOffset + drag.cardWidth / 2;
     const cards = [...hand.querySelectorAll<HTMLElement>("[data-hand-instance-id]")];
     const others = cards.filter((element) => element !== drag.element);
     const targetIndex = others.filter((element) => {
@@ -409,6 +411,7 @@ export function useHandReorder(
           y: event.clientY,
           grabOffset: event.clientX - rect.left,
           grabOffsetY: event.clientY - rect.top,
+          slotGrabOffset: event.clientX - rect.left,
           // A resting card tucked below the edge starts the play line where it
           // shows, not at its untranslated slot.
           handTop: Math.max(

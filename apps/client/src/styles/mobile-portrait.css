@@ -27,7 +27,7 @@
     right: 0;
     bottom: 0;
     left: 0;
-    height: calc(max(8px, env(safe-area-inset-bottom)) + 146px);
+    height: calc(max(8px, env(safe-area-inset-bottom)) + 146px + var(--mobile-hand-grow));
     pointer-events: none;
     background: linear-gradient(
       180deg,
@@ -86,7 +86,7 @@
 
   .zone-overlay {
     padding-top: calc(58px + env(safe-area-inset-top));
-    padding-bottom: calc(224px + env(safe-area-inset-bottom));
+    padding-bottom: calc(224px + var(--mobile-hand-grow) + env(safe-area-inset-bottom));
   }
 
   /* Seven card tracks keep equipment, both weapons, hero, pitch, and deck on
@@ -165,11 +165,11 @@
 
   .board {
     padding-top: calc(54px + env(safe-area-inset-top));
-    padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 150px);
+    padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 150px + var(--mobile-hand-grow));
   }
   #root:has(.table) {
     scroll-padding-top: calc(58px + env(safe-area-inset-top));
-    scroll-padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 154px);
+    scroll-padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 154px + var(--mobile-hand-grow));
   }
   /* Always reserve the opponent-hand rail. Tying this padding to the first
      card back made draw-up resize the board underneath fixed motion flights. */
@@ -181,19 +181,41 @@
   }
   .opp-hand { top: calc(54px + env(safe-area-inset-top)); }
 
-  /* Resting cards tuck behind the bottom bar; selected or pitched ones rise clear. */
+  /* Four cards (each 90% visible, plus the fan's spill) span the width. Fixed
+     offsets assume a 124px-tall card, so they add the difference. */
+  :root {
+    --mobile-hand-card-width: min(116px, calc((100vw - 16px) / (1.06 + 3 * .9)));
+    --mobile-hand-grow: calc(var(--mobile-hand-card-width) * 124 / 90 - 124px);
+  }
+  /* Resting cards tuck behind the bottom bar; selected or pitched ones rise clear.
+     Bigger hands squeeze to a strip that keeps the pitch pips in view, then
+     shrink to fit, and scroll only below 70% size. */
   .hand {
     --hand-tuck: 45px;
+    --fan-spill: .06;
+    --fan-arc: 14deg;
+    --fan-min-visible: .3;
+    --hand-card-width: clamp(
+      var(--mobile-hand-card-width) * .7,
+      (100vw - 16px) / (1 + var(--fan-spill) + var(--fan-min-visible) * (var(--fan-n, 1) - 1)),
+      var(--mobile-hand-card-width)
+    );
     bottom: calc(64px + env(safe-area-inset-bottom) - 9px - var(--hand-tuck));
-    height: calc(144px + var(--hand-outline-clearance) + var(--hand-tuck));
+    height: calc(144px + var(--mobile-hand-grow) + var(--hand-outline-clearance) + var(--hand-tuck));
     padding-top: calc(9px + var(--hand-outline-clearance) + var(--hand-tuck));
+    padding-inline: 8px;
+  }
+  .hand .card-hand {
+    height: auto;
+    align-self: flex-start;
+    aspect-ratio: 90 / 124;
   }
   .hand .card-hand.card-selected,
   .hand .card-hand.card-selected:hover,
   .hand .card-hand.card-pitched,
   .hand .card-hand.card-pitched:hover { transform: translateY(calc(-7px - var(--hand-tuck))); }
   .end-turn-pass-toast-mobile-hand {
-    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 154px);
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 154px + var(--mobile-hand-grow));
   }
 
   .status-float {
@@ -295,11 +317,11 @@
 
   .decision-float,
   .idle-toast {
-    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 154px) !important;
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 154px + var(--mobile-hand-grow)) !important;
   }
   .mobile-game-alerts .toast,
   .mobile-game-alerts .winner {
-    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 154px);
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 154px + var(--mobile-hand-grow));
   }
   .waiting:not(.waiting-spectating),
   .stack-float { top: calc(58px + env(safe-area-inset-top)) !important; }
@@ -316,25 +338,25 @@
     bottom: calc(max(8px, env(safe-area-inset-bottom)) + 160px);
   }
   #root:has(.replay-bar:not(.replay-bar-collapsed)) .board {
-    padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 312px);
+    padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 312px + var(--mobile-hand-grow));
   }
   #root:has(.replay-bar:not(.replay-bar-collapsed)) {
-    scroll-padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 316px);
+    scroll-padding-bottom: calc(max(8px, env(safe-area-inset-bottom)) + 316px + var(--mobile-hand-grow));
   }
   #root:has(.replay-bar:not(.replay-bar-collapsed)) .decision-float {
-    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 310px) !important;
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 310px + var(--mobile-hand-grow)) !important;
   }
   #root:has(.replay-bar:not(.replay-bar-collapsed)) .zone-overlay {
-    padding-bottom: calc(312px + env(safe-area-inset-bottom));
+    padding-bottom: calc(312px + var(--mobile-hand-grow) + env(safe-area-inset-bottom));
   }
   #root:has(.replay-bar:not(.replay-bar-collapsed)) .table::after {
-    height: calc(max(8px, env(safe-area-inset-bottom)) + 304px);
+    height: calc(max(8px, env(safe-area-inset-bottom)) + 304px + var(--mobile-hand-grow));
   }
 
   .hand-scroll-button,
   .mobile-hand-toggle {
     top: auto;
-    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 146px);
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 146px + var(--mobile-hand-grow));
   }
   .mobile-hand-toggle[aria-expanded="false"] {
     top: auto;
@@ -396,18 +418,6 @@
     grid-template-rows: repeat(3, minmax(72px, 1fr));
   }
 
-}
-
-@media (max-width: 420px) {
-  /* Card width follows the viewport; larger hands overlap tighter before
-     they scroll. The aspect ratio lets height follow width instead of
-     leaving oversized cards on narrower screens. */
-  .hand { --hand-card-width: calc(25vw - 11.25px); }
-  .hand .card-hand {
-    height: auto;
-    align-self: flex-start;
-    aspect-ratio: 90 / 124;
-  }
 }
 
 @media (max-width: 380px) {
