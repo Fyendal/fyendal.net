@@ -32225,6 +32225,12 @@
       "value": "构筑传送门，在血涌回合爆发进攻的快攻牌组。"
     }
   ],
+  "lobby.bot.new": [
+    {
+      "type": 0,
+      "value": "新"
+    }
+  ],
   "lobby.bot.searchForPlayer": [
     {
       "type": 0,

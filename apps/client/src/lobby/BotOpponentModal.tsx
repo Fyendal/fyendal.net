@@ -23,12 +23,24 @@ interface BotOption {
   deckId: string;
   deckType: DeckType;
   descriptionId: string;
+  /** Recently released; wears the "New" ribbon. */
+  isNew?: boolean;
 }
 
 type DeckType = "beginner" | "midrange" | "aggro" | "elemental" | "guardian" | "boss";
 
 const BOTS: Readonly<Record<Format, readonly BotOption[]>> = {
   cc: [
+    {
+      id: "aurora",
+      name: "Aurora",
+      title: "Legacy of Tempest",
+      heroName: "Aurora, Legacy of Tempest",
+      deckId: "bot-aurora-tempest",
+      deckType: "elemental",
+      descriptionId: "lobby.bot.aurora.description",
+      isNew: true,
+    },
     {
       id: "ira",
       name: "Ira",
@@ -82,15 +94,6 @@ const BOTS: Readonly<Record<Format, readonly BotOption[]>> = {
       deckId: "bot-boltyn-raydn",
       deckType: "aggro",
       descriptionId: "lobby.bot.boltyn.description",
-    },
-    {
-      id: "aurora",
-      name: "Aurora",
-      title: "Legacy of Tempest",
-      heroName: "Aurora, Legacy of Tempest",
-      deckId: "bot-aurora-tempest",
-      deckType: "elemental",
-      descriptionId: "lobby.bot.aurora.description",
     },
   ],
   "silver-age": [
@@ -243,6 +246,9 @@ export function BotOpponentModal(props: {
               onClick={() => props.onSelect(bot.id, searchForPlayer)}
             >
               <BotArt bot={bot} />
+              {bot.isNew ? (
+                <span className="bot-new-ribbon">{intl.formatMessage({ id: "lobby.bot.new" })}</span>
+              ) : null}
               <strong className="bot-opponent-name">{bot.name}</strong>
               <small className="bot-opponent-title">{bot.title}</small>
               {warnings.banned.length > 0 || warnings.future.length > 0 ? (

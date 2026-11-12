@@ -18,8 +18,7 @@ afterEach(() => {
 });
 
 describe("BotOpponentModal", () => {
-  it("offers Ira, Hala, Jarl, Levia, Boltyn, and Aurora to beta testers in a focused opponent dialog and hides banned Cindra", () => {
-    botModalStore.state = { betaTester: true } as StoreState;
+  it("offers Ira, Hala, Jarl, Levia, Boltyn, and Aurora in a focused opponent dialog and hides banned Cindra", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
@@ -61,15 +60,17 @@ describe("BotOpponentModal", () => {
     expect(html.match(/aria-hidden="true"/g)).toHaveLength(1);
   });
 
-  it("hides the beta-only Aurora bot from other players", () => {
+  it("lists Aurora first with the only New ribbon", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
       </TestI18nProvider>,
     );
 
-    expect(html).toContain("Boltyn");
-    expect(html).not.toContain("Legacy of Tempest");
+    expect(html).toContain("Legacy of Tempest");
+    expect(html.indexOf("Legacy of Tempest")).toBeLessThan(html.indexOf("Scarlet Revenger"));
+    expect(html.match(/class="bot-new-ribbon"/g)).toHaveLength(1);
+    expect(html).toMatch(/class="bot-opponent-card" data-modal-initial-focus="">.*?<span class="bot-new-ribbon">New<\/span>/);
   });
 
   it("offers Kayo, Bravo, and SAGE Ira for Silver Age and hides banned Briar by default", () => {

@@ -33736,6 +33736,12 @@
       "value": "An aggressive deck that builds Gates for explosive Bloodrush turns."
     }
   ],
+  "lobby.bot.new": [
+    {
+      "type": 0,
+      "value": "New"
+    }
+  ],
   "lobby.bot.searchForPlayer": [
     {
       "type": 0,

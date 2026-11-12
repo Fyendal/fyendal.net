@@ -317,6 +317,41 @@
   text-shadow: 0 1px 2px #000, 0 0 14px #000c;
 }
 .bot-opponent-card:hover .bot-opponent-name { color: var(--gold); }
+/* The drop shadow sits on the host because clip-path on the body would cut it. */
+.bot-new-ribbon {
+  position: absolute;
+  top: 12px;
+  right: 0;
+  z-index: 2;
+  isolation: isolate;
+  padding: 3px 12px 3px 19px;
+  color: #fcebc6;
+  font: 700 12px/16px var(--font-lobby-title);
+  letter-spacing: .05em;
+  text-shadow: 0 1px 0 #4a0e12;
+  filter: drop-shadow(0 2px 3px #000b);
+}
+.bot-new-ribbon::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(#e7c27a, #e7c27a) left top 2px / 100% 1px no-repeat,
+    linear-gradient(#c99c55, #c99c55) left bottom 2px / 100% 1px no-repeat,
+    linear-gradient(180deg, #b0302f 0%, #861d21 55%, #6c1519 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 8px 50%);
+  content: "";
+}
+.bot-new-ribbon::after {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 5px;
+  height: 4px;
+  background: #3b0b0e;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+  content: "";
+}
 .bot-opponent-title {
   max-width: 62%;
   color: #d9c9a8;
@@ -747,6 +782,7 @@
   }
   .bot-opponent-options { gap: 10px; }
   .bot-opponent-card { min-height: 150px; padding: 13px 14px 12px; }
+  .bot-new-ribbon { top: 10px; }
   .bot-opponent-name { font-size: 18px; }
   .bot-opponent-title { font-size: 13px; }
   .bot-opponent-description { -webkit-line-clamp: 2; line-clamp: 2; }

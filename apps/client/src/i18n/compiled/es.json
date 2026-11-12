@@ -34650,6 +34650,12 @@
       "value": "Un mazo agresivo que construye Gates para turnos explosivos de Bloodrush."
     }
   ],
+  "lobby.bot.new": [
+    {
+      "type": 0,
+      "value": "Nuevo"
+    }
+  ],
   "lobby.bot.searchForPlayer": [
     {
       "type": 0,

@@ -3260,6 +3260,7 @@
   "lobby.bot.chooseOpponent": "选择对手",
   "lobby.bot.searchForPlayer": "继续寻找真人玩家",
   "lobby.bot.searchForPlayer.description": "与此机器人对战时，Fyendal 会同时寻找其他玩家。",
+  "lobby.bot.new": "新",
   "lobby.bot.type.beginner": "新手友好",
   "lobby.bot.type.midrange": "中速",
   "lobby.bot.type.aggro": "快攻",

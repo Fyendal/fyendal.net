@@ -3260,6 +3260,7 @@
   "lobby.bot.chooseOpponent": "Escolha seu oponente",
   "lobby.bot.searchForPlayer": "Continuar buscando um jogador real",
   "lobby.bot.searchForPlayer.description": "Jogue contra este bot enquanto o Fyendal procura outro jogador.",
+  "lobby.bot.new": "Novo",
   "lobby.bot.type.beginner": "Iniciante",
   "lobby.bot.type.midrange": "Midrange",
   "lobby.bot.type.aggro": "Aggro",

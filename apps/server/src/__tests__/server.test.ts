@@ -769,15 +769,8 @@ describe("server rooms over websocket", () => {
     a.ws.close();
   });
 
-  it("creates the selected Classic Constructed Aurora bot room only for beta testers", async () => {
+  it("creates the selected Classic Constructed Aurora bot room", async () => {
     const a = await authedClient();
-    a.sendMsg({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "aurora" });
-    expect(await a.next((message) => message.type === "error"))
-      .toMatchObject({ type: "error", message: "choose a cc bot" });
-    await db.query(
-      "INSERT INTO beta_testers (user_id, added_at) SELECT id, 1 FROM users WHERE username_lc = $1",
-      [a.username.toLowerCase()],
-    );
     a.sendMsg({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "aurora" });
     await a.next((message) => message.type === "room-created");
     const prep = await a.next(
@@ -792,6 +785,14 @@ describe("server rooms over websocket", () => {
     });
     a.sendMsg({ type: "leave-room", endGame: true });
     await a.next((message) => message.type === "left");
+    a.ws.close();
+  });
+
+  it("refuses the beta-only Dorinthea bot to other players", async () => {
+    const a = await authedClient();
+    a.sendMsg({ type: "create-bot-room", format: "silver-age", deckId: "precon-sly", bot: "dorinthea" });
+    expect(await a.next((message) => message.type === "error"))
+      .toMatchObject({ type: "error", message: "choose a silver-age bot" });
     a.ws.close();
   });
 

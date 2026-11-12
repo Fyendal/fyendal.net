@@ -35492,6 +35492,12 @@
       "value": "Um deck agressivo que monta Gates para turnos explosivos de Bloodrush."
     }
   ],
+  "lobby.bot.new": [
+    {
+      "type": 0,
+      "value": "Novo"
+    }
+  ],
   "lobby.bot.searchForPlayer": [
     {
       "type": 0,
