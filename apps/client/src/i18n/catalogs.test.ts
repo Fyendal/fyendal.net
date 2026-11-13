@@ -218,6 +218,8 @@ describe("locale catalogs", () => {
       { id: "card.log.common.dominate.gained" },
       { card: "Regurgitating Slog" },
     )).toBe("Regurgitating Slog 获得压制 (dominate)");
+    expect(intl.formatMessage({ id: "game.card.badge.steam" }, { count: 2 })).toBe("2 个 steam 指示物");
+    expect(intl.formatMessage({ id: "card.evo.maintenance.choose" })).toBe("移除一个 steam 指示物，或摧毁此牌？");
     expect(intl.formatMessage({ id: "game.zone.pitch" })).toBe("Pitch");
     expect(intl.formatMessage({ id: "game.decision.choosePitch" })).toBe("选择要 pitch 以支付资源的手牌。");
   });

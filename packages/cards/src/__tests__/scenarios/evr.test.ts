@@ -685,6 +685,19 @@ describe("EVR — auras, items, and utility", () => {
 });
 
 describe("EVR — rules regression coverage", () => {
+  it("Pick a Card, Any Card names a transcended card by its active back face", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["pick a card, any card|3"], resources: 3 },
+        { hero: "dorinthea", hand: ["a drop in the ocean|3"] },
+      ],
+    });
+    g.state.players[1]!.hand[0]!.flipped = true;
+    g.play("pick a card, any card|3", { settle: false });
+    for (let guard = 0; guard < 6 && g.state.pendingDecision?.chooseHook !== "pick-name"; guard++) g.passPriority();
+    expect(g.state.pendingDecision?.options).toEqual(["Inner Chi"]);
+  });
+
   it("Talisman of Balance fills an empty additional arsenal zone when behind on arsenal cards", () => {
     const lexi = {
       hero: "rhinar",

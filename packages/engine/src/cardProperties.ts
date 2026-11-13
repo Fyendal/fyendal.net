@@ -282,7 +282,7 @@ export function cardNamesOf(state: GameStateInternal, card: CardInstance): strin
     ? []
     : (scriptOf(state, card.cardId, card)?.allZoneNames ?? []);
   return [...new Set([
-    dataOf(state, card.cardId).name,
+    instanceDataOf(state, card).name,
     ...allZone,
     ...(card.grantedNames ?? []),
   ].map((name) => name.trim().toLowerCase()))];

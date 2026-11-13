@@ -1346,9 +1346,10 @@ export function cardNamed(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name
   return ctx.cardNames(card).includes(name.trim().toLowerCase());
 }
 
-/** Printed name while the card still has it, else its first effective name; undefined when it has none. */
+/** Active face's printed name while the card still has it, else its first effective name. */
 export function effectiveCardName(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): string | undefined {
-  const printed = ctx.cardData(card.cardId).name;
+  const front = ctx.cardData(card.cardId);
+  const printed = card.flipped && front.backId ? ctx.cardData(front.backId).name : front.name;
   return cardNamed(ctx, card, printed) ? printed : ctx.cardNames(card)[0];
 }
 

@@ -138,7 +138,7 @@ Hand valuation:
   `localizedCardLog`. Every new `TriggerDef` supplies `labelMessage` (and
   `publicLogMessage` for a custom `publicLog`). Option values are never
   translated.
-- zh-Hans keeps `go again`, `On hit`, `Links`/`Chain`, and `arsenal`, and
+- zh-Hans keeps `go again`, `On hit`, `Links`/`Chain`, `arsenal`, and `steam`, and
   renders `压制 (dominate)` and `灵气 (Aura)`.
 - pt-BR and es keep FaB-defined terms in English (keywords, zones, card types,
   Action Point, Intellect, classes, talents, card and token names, phases,

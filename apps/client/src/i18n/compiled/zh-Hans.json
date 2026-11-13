@@ -1282,7 +1282,7 @@
   "card.aio.crankitem.steam": [
     {
       "type": 0,
-      "value": "在一个具有 crank 的物品上放置一个蒸汽指示物"
+      "value": "在一个具有 crank 的物品上放置一个 steam 指示物"
     }
   ],
   "card.aio.deck.top.banish": [
@@ -1308,7 +1308,7 @@
   "card.aio.symbiosisshot.steam": [
     {
       "type": 0,
-      "value": "在 Symbiosis Shot 上放置一个蒸汽指示物？"
+      "value": "在 Symbiosis Shot 上放置一个 steam 指示物？"
     }
   ],
   "card.ajv.channel.ice.many": [
@@ -1436,13 +1436,13 @@
   "card.amx.clamppress.maintenance": [
     {
       "type": 0,
-      "value": "移除一个蒸汽指示物，或摧毁 Clamp Press？"
+      "value": "移除一个 steam 指示物，或摧毁 Clamp Press？"
     }
   ],
   "card.amx.crankitem.steam": [
     {
       "type": 0,
-      "value": "在一个具有 crank 的物品上放置一个蒸汽指示物"
+      "value": "在一个具有 crank 的物品上放置一个 steam 指示物"
     }
   ],
   "card.amx.hyperdriver.choose": [
@@ -3284,7 +3284,7 @@
   "card.dyn.plasmamainline.counter.move": [
     {
       "type": 0,
-      "value": "将一个蒸汽指示物从 "
+      "value": "将一个 steam 指示物从 "
     },
     {
       "type": 1,
@@ -5015,13 +5015,13 @@
   "card.evo.crankitem.steam.add": [
     {
       "type": 0,
-      "value": "在一个具有 crank 的物品上放置一个蒸汽指示物"
+      "value": "在一个具有 crank 的物品上放置一个 steam 指示物"
     }
   ],
   "card.evo.crankitem.steam.add.optional": [
     {
       "type": 0,
-      "value": "在一个具有 crank 的物品上放置一个蒸汽指示物？"
+      "value": "在一个具有 crank 的物品上放置一个 steam 指示物？"
     }
   ],
   "card.evo.defender.banish": [
@@ -5249,7 +5249,7 @@
   "card.evo.maintenance.choose": [
     {
       "type": 0,
-      "value": "移除一个蒸汽指示物，或摧毁此牌？"
+      "value": "移除一个 steam 指示物，或摧毁此牌？"
     }
   ],
   "card.evo.matching.item.top": [
@@ -5273,13 +5273,13 @@
   "card.evo.permanent.steam.remove": [
     {
       "type": 0,
-      "value": "移除一个永久物上的所有蒸汽指示物"
+      "value": "移除一个永久物上的所有 steam 指示物"
     }
   ],
   "card.evo.permanent.steam.remove.uptox": [
     {
       "type": 0,
-      "value": "移除至多 X 个永久物上的蒸汽指示物"
+      "value": "移除至多 X 个永久物上的 steam 指示物"
     }
   ],
   "card.evo.red.pitch.choose": [
@@ -18601,7 +18601,7 @@
     },
     {
       "type": 0,
-      "value": "：Crank——移除一个蒸汽指示物以获得 1 个行动点？"
+      "value": "：Crank——移除一个 steam 指示物以获得 1 个行动点？"
     }
   ],
   "engine.decision.damage.arcane.barrier": [
@@ -26685,7 +26685,7 @@
     },
     {
       "type": 0,
-      "value": " 个蒸汽指示物"
+      "value": " 个 steam 指示物"
     }
   ],
   "game.card.badge.undefendable": [
