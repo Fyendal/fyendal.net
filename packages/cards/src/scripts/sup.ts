@@ -37,21 +37,16 @@ import {
   isAura,
   isSuspenseAura,
   isSword,
+  isTokenAura,
 } from "./shared-helpers.js";
+import { AGILITY, BAIT, CINTARI_SELLSWORD, CONFIDENCE, COURAGE, MIGHT, TOUGHNESS, VIGOR } from "./tokens.js";
 
-const CONFIDENCE = "SLY034";
-const MIGHT = "SLY035";
-const TOUGHNESS = "SUP241";
-const VIGOR = "SKA036";
 const CHEER = crowdTrigger("cheer");
 
 type Card = DeepReadonly<CardInstance>;
 
 function controlsAny(ctx: ScriptCtx, names: string[]): boolean {
   return names.some((name) => controlsNamed(ctx, name));
-}
-function tokenAura(ctx: ScriptCtx, card: Card): boolean {
-  return ctx.hasCardType(card, "token") && isAura(ctx, card);
 }
 
 type CharmMode = { readonly option: string; readonly bit: number; readonly message: string };
@@ -596,11 +591,11 @@ function bashHero(className: string): CardScript {
       return ctx.link?.targetAllyId === undefined && heroHas(ctx, opponentSeat(ctx), className);
     },
     onHit(ctx) {
-      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => tokenAura(ctx, card));
+      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => isTokenAura(ctx, card));
       if (targets.length)
         ctx.requestCardChoice(
           "bash-aura",
-          decisionPrompt(`${ctx.data.name}: destroy an aura token`, "card.sup.aura.token.destroy", {
+          decisionPrompt(`${ctx.data.name}: destroy an aura token`, "card.common.auratoken.destroy.named", {
             values: { card: { kind: "card", cardId: ctx.self.cardId } },
           }),
           targets.map((card) => card.instanceId),
@@ -743,7 +738,7 @@ export const sup: Record<string, CardScript> = {
         if (targets.length)
           ctx.requestChoice(
             "pleiades-add",
-            decisionPrompt("Put a suspense counter on an aura of suspense?", "card.sup.suspense.counter.add", {
+            decisionPrompt("Put a suspense counter on an aura of suspense?", "card.common.suspense.counter.add", {
               optionMessages: commonOptionMessages("pass"),
             }),
             ["pass", ...targets.map((card) => String(card.instanceId))],
@@ -793,7 +788,7 @@ export const sup: Record<string, CardScript> = {
       if (hand.length)
         ctx.requestCardChoice(
           "disarm-bottom",
-          decisionPrompt("Put a hand card on the bottom", "card.sup.hand.bottom"),
+          decisionPrompt("Put a hand card on the bottom", "card.common.hand.bottom"),
           hand.map((card) => card.instanceId),
           opponentSeat(ctx),
         );
@@ -1093,7 +1088,7 @@ export const sup: Record<string, CardScript> = {
       if (targets.length)
         ctx.requestCardChoice(
           "small-aura",
-          decisionPrompt("Destroy an aura", "card.sup.aura.destroy"),
+          decisionPrompt("Destroy an aura", "card.common.aura.destroy"),
           targets.map((card) => card.instanceId),
         );
     },
@@ -1208,12 +1203,8 @@ export const sup: Record<string, CardScript> = {
   },
 };
 
-const AGILITY = "AKO027";
-const COURAGE = "ASB027";
-const SELLSWORD = "HVY134";
-
 function tokenNamed(ctx: ScriptCtx, seat: number, name: string): Card | undefined {
-  return ctx.player(seat).board.find((card) => cardNamed(ctx, card, name) && tokenAura(ctx, card));
+  return ctx.player(seat).board.find((card) => cardNamed(ctx, card, name) && isTokenAura(ctx, card));
 }
 
 function convertTokens(from: string, to: string, max = 3): CardScript {
@@ -1221,7 +1212,7 @@ function convertTokens(from: string, to: string, max = 3): CardScript {
     onPlay(ctx) {
       const tokens = ctx.state.players
         .flatMap((player) => player.board)
-        .filter((card) => cardNamed(ctx, card, from) && tokenAura(ctx, card))
+        .filter((card) => cardNamed(ctx, card, from) && isTokenAura(ctx, card))
         .slice(0, max);
       for (const token of tokens) if (ctx.destroyPermanent(token.instanceId)) ctx.createToken(to);
     },
@@ -1247,7 +1238,7 @@ function destroyAuraAtTarget(ctx: ScriptCtx, seat: number, hook: string): void {
   if (targets.length)
     ctx.requestCardChoice(
       hook,
-      decisionPrompt(`${ctx.data.name}: destroy an aura`, "card.sup.aura.destroy.named", {
+      decisionPrompt(`${ctx.data.name}: destroy an aura`, "card.common.aura.destroy.named", {
         values: { card: { kind: "card", cardId: ctx.self.cardId } },
       }),
       targets.map((card) => card.instanceId),
@@ -1326,7 +1317,7 @@ Object.assign(sup, {
       if ((modes & 1) !== 0) {
         const tokens = ctx.state.players.flatMap((player) =>
           player.board.filter((card) =>
-            tokenAura(ctx, card) && (cardNamed(ctx, card, "Confidence") || cardNamed(ctx, card, "Might"))),
+            isTokenAura(ctx, card) && (cardNamed(ctx, card, "Confidence") || cardNamed(ctx, card, "Might"))),
         );
         if (tokens.length > 1) {
           ctx.requestCardChoice(
@@ -1511,11 +1502,11 @@ Object.assign(sup, {
   },
   "steal victory|3": {
     onDefend(ctx: ScriptCtx) {
-      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => tokenAura(ctx, card));
+      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => isTokenAura(ctx, card));
       if (targets.length)
         ctx.requestCardChoice(
           "steal-victory",
-          decisionPrompt("Steal an aura token", "card.sup.aura.token.steal"),
+          decisionPrompt("Steal an aura token", "card.common.auratoken.steal"),
           targets.map((card) => card.instanceId),
         );
     },
@@ -1606,7 +1597,7 @@ Object.assign(sup, {
         ctx.lookAt(top.instanceId);
         ctx.requestChoice(
           "truth-color",
-          decisionPrompt("Choose a color", "card.sup.color.choose", {
+          decisionPrompt("Choose a color", "card.common.color.choose", {
             optionMessages: {
               ...commonOptionMessages("pass"),
               red: decisionMessage("card.common.option.red"),
@@ -1671,7 +1662,7 @@ Object.assign(sup, {
       if (deck.length)
         ctx.requestCardChoice(
           "fix-top",
-          decisionPrompt("Choose a card to put on top", "card.sup.card.top.choose"),
+          decisionPrompt("Choose a card to put on top", "card.common.card.top.choose"),
           deck.map((card) => card.instanceId),
         );
     },
@@ -1713,11 +1704,11 @@ Object.assign(sup, {
   "gang robbery|2": {
     modifyAttack: (ctx: ScriptCtx) => (countAuras(ctx) >= 3 ? 3 : 0),
     onAttackDeclared(ctx: ScriptCtx) {
-      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => tokenAura(ctx, card));
+      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => isTokenAura(ctx, card));
       if (targets.length)
         ctx.requestCardChoice(
           "gang-steal",
-          decisionPrompt("Steal an aura token", "card.sup.aura.token.steal"),
+          decisionPrompt("Steal an aura token", "card.common.auratoken.steal"),
           targets.map((card) => card.instanceId),
         );
     },
@@ -1981,7 +1972,7 @@ Object.assign(sup, {
         const n = Number(option.slice(2));
         const tokens = ctx
           .player(opponentSeat(ctx))
-          .board.filter((card) => tokenAura(ctx, card))
+          .board.filter((card) => isTokenAura(ctx, card))
           .slice(0, n);
         for (const token of tokens)
           if (ctx.destroyPermanent(token.instanceId)) ctx.addModifier({ scope: "chain-link", attack: 1 });
@@ -1992,14 +1983,14 @@ Object.assign(sup, {
     modifyAttack(ctx: ScriptCtx) {
       return new Set(
         ctx.state.players.flatMap((p) =>
-          p.board.filter((card) => tokenAura(ctx, card)).map((card) => ctx.cardData(card.cardId).name),
+          p.board.filter((card) => isTokenAura(ctx, card)).map((card) => ctx.cardData(card.cardId).name),
         ),
       ).size;
     },
     modifyDefense(ctx: ScriptCtx) {
       return new Set(
         ctx.state.players.flatMap((p) =>
-          p.board.filter((card) => tokenAura(ctx, card)).map((card) => ctx.cardData(card.cardId).name),
+          p.board.filter((card) => isTokenAura(ctx, card)).map((card) => ctx.cardData(card.cardId).name),
         ),
       ).size;
     },
@@ -2155,7 +2146,7 @@ Object.assign(sup, {
     onPlay(ctx: ScriptCtx) {
       if (ctx.link && isSword(ctx, ctx.link.attackingCard)) {
         ctx.grantGoAgain();
-        ctx.addModifier({ scope: "chain-link", onHitCreateToken: { cardId: SELLSWORD, count: 1 } });
+        ctx.addModifier({ scope: "chain-link", onHitCreateToken: { cardId: CINTARI_SELLSWORD, count: 1 } });
       }
     },
   },
@@ -2245,10 +2236,10 @@ Object.assign(sup, {
       if (deck.length)
         ctx.requestCardChoice(
           "bait-top",
-          decisionPrompt("Choose a card to put on top", "card.sup.card.top.choose"),
+          decisionPrompt("Choose a card to put on top", "card.common.card.top.choose"),
           deck.map((card) => card.instanceId),
         );
-      ctx.createOwnedTokenUnder(opponentSeat(ctx), "SUP259");
+      ctx.createOwnedTokenUnder(opponentSeat(ctx), BAIT);
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook !== "bait-top") return;

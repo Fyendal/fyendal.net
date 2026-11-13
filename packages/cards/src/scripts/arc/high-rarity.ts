@@ -10,6 +10,7 @@ import {
   hasCardSubtype,
   heroChoiceSeat,
   isAttackAction,
+  isItem,
   isNonAttackAction,
   localizedCardLog,
   ongoingLabel,
@@ -22,8 +23,7 @@ import {
   runeCount,
   wizardActionAsInstant,
 } from "../shared-helpers.js";
-
-const RUNECHANT = "ARC112";
+import { RUNECHANT } from "../tokens.js";
 
 function chooseFromDeck(
   ctx: ScriptCtx,
@@ -46,7 +46,7 @@ function mechanologistItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, exa
   const data = ctx.cardData(card.cardId);
   return (
     hasCardSubtype(ctx, card, "mechanologist") &&
-    hasCardSubtype(ctx, card, "item") &&
+    isItem(ctx, card) &&
     (exactCost === undefined || (data.cost ?? 0) === exactCost)
   );
 }

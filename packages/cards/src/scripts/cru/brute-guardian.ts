@@ -1,5 +1,12 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { chokeslam, crushTriggered, discardRandomCost, localizedCardLog, opponentSeat } from "../shared-helpers.js";
+import {
+  chokeslam,
+  crushTriggered,
+  discardRandomCost,
+  hasCardSubtype,
+  localizedCardLog,
+  opponentSeat,
+} from "../shared-helpers.js";
 
 function barragingBigHorn(): CardScript {
   const grantConditionalGoAgain = (ctx: ScriptCtx): void => {
@@ -114,7 +121,7 @@ export const cruBruteGuardian: Record<string, CardScript> = {
         condition: (ctx, played) =>
           !!played &&
           ctx.hasCardType(played, "action") &&
-          ctx.cardTypes(played).includes("attack") &&
+          hasCardSubtype(ctx, played, "attack") &&
           (ctx.cardData(played.cardId).attack ?? 0) >= 6,
         effect(ctx, played) {
           if (!played) return;

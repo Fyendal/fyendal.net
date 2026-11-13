@@ -19,6 +19,7 @@ import {
   resourceAbility,
   yesNoPrompt,
 } from "./shared-helpers.js";
+import { CROUCHING_TIGER, FEALTY } from "./tokens.js";
 
 // ── SFA (Silver Age: Fai precon, Chapter 2) ─────────────────────────────────
 //
@@ -47,8 +48,6 @@ import {
 //   playCostReduction granted with allowPlayFrom.
 // - Fealty's "the next card you play this turn is Draconic" rides the
 //   next-play modifier scope (consumed by noteCardPlayed).
-const CROUCHING_TIGER = "SFA036";
-const FEALTY = "SFA037";
 
 function isPhoenixFlame(ctx: ScriptCtx, cardId: string): boolean {
   return isCard(ctx, cardId, "Phoenix Flame", 1);

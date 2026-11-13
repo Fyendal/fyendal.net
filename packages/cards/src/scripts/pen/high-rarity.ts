@@ -28,16 +28,10 @@ import {
   isAura,
   isNonAttackAction,
   isSword,
+  isAlly,
+  isItem,
 } from "../shared-helpers.js";
-
-const COURAGE = "DTD232";
-const EMBODIMENT_LIGHTNING = "DTD195";
-const GOLD = "DYN243";
-const MIGHT = "SKA035";
-const PONDER = "DYN244";
-const RUNECHANT = "ROS162";
-const SPELLBANE = "DTD235";
-const VIGOR = "SBR036";
+import { COURAGE, EMBODIMENT_OF_LIGHTNING, GOLD, MIGHT, PONDER, RUNECHANT, SPELLBANE_AEGIS, VIGOR } from "../tokens.js";
 
 type Card = DeepReadonly<CardInstance>;
 
@@ -46,7 +40,7 @@ function createSkybreakerMight(ctx: ScriptCtx): void {
 }
 
 function isShurikenItem(ctx: ScriptCtx, card: Card): boolean {
-  return hasCardSubtype(ctx, card, "shuriken") && hasCardSubtype(ctx, card, "item");
+  return hasCardSubtype(ctx, card, "shuriken") && isItem(ctx, card);
 }
 function cardIdNamed(ctx: ScriptCtx, name: string): string | undefined {
   return ctx.cardIdsNamed(name)[0];
@@ -228,7 +222,7 @@ export const penHighRarity: Record<string, CardScript> = {
     },
     onHit(ctx) {
       const damage = ctx.link?.damage ?? 0;
-      for (const ally of ctx.player(opponentSeat(ctx)).board.filter((card) => hasCardSubtype(ctx, card, "ally"))) {
+      for (const ally of ctx.player(opponentSeat(ctx)).board.filter((card) => isAlly(ctx, card))) {
         ctx.dealDamage(opponentSeat(ctx), damage, { targetAllyId: ally.instanceId });
       }
     },
@@ -325,7 +319,7 @@ export const penHighRarity: Record<string, CardScript> = {
       if (hand.length)
         ctx.requestCardChoice(
           "blunten-discard",
-          decisionPrompt("Discard a card", "card.pen.card.discard"),
+          decisionPrompt("Discard a card", "card.common.card.discard.choose"),
           hand.map((card) => card.instanceId),
           attacker,
         );
@@ -502,7 +496,7 @@ export const penHighRarity: Record<string, CardScript> = {
       if (count > 0) ctx.dealDamage(opponentSeat(ctx), 3, { arcane: true });
       for (const ally of ctx
         .player(opponentSeat(ctx))
-        .board.filter((card) => hasCardSubtype(ctx, card, "ally"))
+        .board.filter((card) => isAlly(ctx, card))
         .slice(0, Math.max(0, count - 1)))
         ctx.dealDamage(opponentSeat(ctx), 3, { arcane: true, targetAllyId: ally.instanceId });
     },
@@ -655,7 +649,7 @@ export const penHighRarity: Record<string, CardScript> = {
   },
   "bone puppetry|0": {
     onDefend(ctx) {
-      const allies = faceUpGraveyard(ctx).filter((card) => hasCardSubtype(ctx, card, "ally"));
+      const allies = faceUpGraveyard(ctx).filter((card) => isAlly(ctx, card));
       if (allies.length) ctx.requestCardChoice(
         "bone-puppetry-ally",
         decisionPrompt("Return an ally from your graveyard?", "card.pen.bonepuppetry.ally.return", {
@@ -766,7 +760,7 @@ export const penHighRarity: Record<string, CardScript> = {
       if (hand.length)
         ctx.requestCardChoice(
           "elemental-banish",
-          decisionPrompt("Banish a card", "card.pen.card.banish"),
+          decisionPrompt("Banish a card", "card.common.card.banish"),
           hand.map((card) => card.instanceId),
         );
     },
@@ -791,7 +785,7 @@ export const penHighRarity: Record<string, CardScript> = {
         const card = ctx.player(ctx.seat).arsenal[0];
         if (card && ctx.putOnDeckBottom(card.instanceId)) {
           ctx.drawCards(ctx.seat, 1);
-          ctx.createToken(SPELLBANE);
+          ctx.createToken(SPELLBANE_AEGIS);
         }
       },
     },
@@ -876,7 +870,7 @@ export const penHighRarity: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook === "astravolt" && option !== "no" && ctx.discardCard(ctx.seat, Number(option))) {
         ctx.drawCards(ctx.seat, 1);
-        ctx.createToken(EMBODIMENT_LIGHTNING);
+        ctx.createToken(EMBODIMENT_OF_LIGHTNING);
       }
     },
   },
@@ -983,7 +977,7 @@ export const penHighRarity: Record<string, CardScript> = {
     prohibitsChosenName: true,
     triggers: [
       entersArenaTrigger("Name a card", decisionMessage("card.trigger.common.cardname.choose"), (ctx) =>
-        ctx.requestNameChoice("speechless-name", decisionPrompt("Name a card", "card.pen.card.name")),
+        ctx.requestNameChoice("speechless-name", decisionPrompt("Name a card", "card.common.card.name")),
       ),
       { event: "begin-action-phase", label: "Destroy Leave 'Em Speechless", effect: (ctx) => ctx.destroySelf() },
     ],
@@ -998,7 +992,7 @@ export const penHighRarity: Record<string, CardScript> = {
         if (hand.length)
           ctx.requestCardChoice(
             "safe-discard",
-            decisionPrompt("Discard a card", "card.pen.card.discard"),
+            decisionPrompt("Discard a card", "card.common.card.discard.choose"),
             hand.map((card) => card.instanceId),
           );
       }

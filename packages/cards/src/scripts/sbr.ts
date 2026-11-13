@@ -13,11 +13,9 @@ import {
   ongoingLabel,
   opponentSeat,
 } from "./shared-helpers.js";
+import { SEISMIC_SURGE, VIGOR } from "./tokens.js";
 
 // ── SBR (Silver Age Chapter 1: Bravo, Flattering Showman precon) ───────────
-
-const SEISMIC_SURGE = "SBR035";
-const VIGOR = "SBR036";
 
 export const sbr: Record<string, CardScript> = {
   "bravo, flattering showman|0": {

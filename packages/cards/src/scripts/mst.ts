@@ -39,13 +39,10 @@ import {
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { hasType as hasPrintedType } from "@fyendal/shared";
+import { CROUCHING_TIGER, FANG_STRIKE, SLITHER, SPECTRAL_SHIELD } from "./tokens.js";
 
 // Part the Mistveil. Reprints reuse their existing functional-key scripts;
 // this module contains only identities first introduced by MST.
-const FANG_STRIKE = "MST023";
-const SLITHER = "MST024";
-const SPECTRAL_SHIELD = "MST158";
-const CROUCHING_TIGER = "MST188";
 
 function pitchedChiThisTurn(ctx: ScriptCtx): boolean {
   return ctx.pitchedThisTurn({ subtype: "chi" }) > 0;
@@ -591,7 +588,7 @@ function emissary(kind: "moon" | "tides" | "wind"): CardScript {
       if (hand.length)
         ctx.requestCardChoice(
           `emissary-${kind}`,
-          decisionPrompt("Put a card from your hand on the bottom of your deck?", "card.mst.hand.card.bottom", {
+          decisionPrompt("Put a card from your hand on the bottom of your deck?", "card.common.hand.card.bottom", {
             optionMessages: commonOptionMessages("pass"),
           }),
           ["pass", ...hand.map((card) => card.instanceId)],
@@ -1022,7 +1019,7 @@ function intimateInducement(count: number): CardScript {
       if (cards.length)
         ctx.requestCardChoice(
           "induce-defender",
-          decisionPrompt("Choose a defending card", "card.mst.defending.card.choose"),
+          decisionPrompt("Choose a defending card", "card.common.defending.card.choose"),
           cards.map((card) => card.instanceId),
         );
     },
@@ -1345,7 +1342,7 @@ Object.assign(mst, {
         if (hand.length)
           ctx.requestCardChoice(
             "mask-recurring-banish",
-            decisionPrompt("Choose a card to banish", "card.mst.card.banish"),
+            decisionPrompt("Choose a card to banish", "card.common.card.banish"),
             hand.map((card) => card.instanceId),
             target,
           );
@@ -1595,7 +1592,7 @@ Object.assign(mst, {
       if (hand.length)
         ctx.requestCardChoice(
           "agony-name",
-          decisionPrompt("Choose a card", "card.mst.card.choose"),
+          decisionPrompt("Choose a card", "card.common.card.choose"),
           hand.map((card) => card.instanceId),
         );
     },
@@ -1809,7 +1806,7 @@ Object.assign(mst, {
       requestDiscardChoice(
         ctx,
         "rowdy-self-discard",
-        decisionPrompt("Choose a card to discard", "card.mst.card.discard"),
+        decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
         ctx.seat,
       );
     },
@@ -1818,7 +1815,7 @@ Object.assign(mst, {
         requestDiscardChoice(
           ctx,
           "rowdy-opponent-discard",
-          decisionPrompt("Choose a card to discard", "card.mst.card.discard"),
+          decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
           opponentSeat(ctx),
         );
       else if (hook === "rowdy-opponent-discard") resolveDiscardChoice(ctx, option, opponentSeat(ctx));

@@ -1,8 +1,5 @@
 import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal/engine";
 import {
-  BLOODROT_POX,
-  FRAILTY,
-  INERTIA,
   armGrantedHitRider,
   buffNextAttack,
   cardNamed,
@@ -33,9 +30,9 @@ import {
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { outHighRarity, uzuriAbility } from "./out/high-rarity.js";
+import { BLOODROT_POX, FRAILTY, INERTIA, PONDER } from "./tokens.js";
 
 // OUT — Outsiders common/rare cards and young heroes.
-const PONDER = "DYN244";
 
 function tokenOnHit(tokenId: string): CardScript {
   return {
@@ -353,7 +350,7 @@ function recoil(): CardScript {
     if (hand.length)
       ctx.requestCardChoice(
         "recoil",
-        decisionPrompt("Put a card from your hand on top of your deck", "card.out.hand.top"),
+        decisionPrompt("Put a card from your hand on top of your deck", "card.common.hand.card.top"),
         hand.map((card) => card.instanceId),
         seat,
       );
@@ -702,7 +699,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
       if (eq.length)
         ctx.requestCardChoice(
           "boulder",
-          decisionPrompt("Put a -1 defense counter on equipment", "card.out.equipment.counter"),
+          decisionPrompt("Put a -1 defense counter on equipment", "card.common.equipment.defensecounter"),
           eq.map((card) => card.instanceId),
         );
     },
@@ -828,7 +825,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
         const p = ctx.player(ctx.seat);
         ctx.requestCardChoice(
           "malicious-bottom",
-          decisionPrompt("Put a card from hand or arsenal on the bottom", "card.out.hand.arsenal.bottom"),
+          decisionPrompt("Put a card from hand or arsenal on the bottom", "card.common.handorarsenal.bottom"),
           [...p.hand, ...p.arsenal].map((card) => card.instanceId),
         );
       },

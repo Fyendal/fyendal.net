@@ -16,12 +16,9 @@ import {
   yesNoPrompt,
   warnIfNoActionPoint,
 } from "./shared-helpers.js";
+import { AGILITY, MIGHT, VIGOR } from "./tokens.js";
 
 // ── SKA (Silver Age Chapter 1: Kayo precon) ────────────────────────────────
-
-const AGILITY = "SKA034";
-const MIGHT = "SKA035";
-const VIGOR = "SKA036";
 
 function conditionalPitchGoAgain(): CardScript {
   return { hasConditionalGoAgain: hasSixPlusInPitch };

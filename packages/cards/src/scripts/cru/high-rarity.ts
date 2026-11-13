@@ -14,6 +14,7 @@ import {
   hasLiveTurnEffect,
   isArrow,
   isAttackAction,
+  isItem,
   isNonAttackAction,
   localizedCardLog,
   ongoingLabel,
@@ -28,11 +29,7 @@ import {
   wizardActionAsInstant,
   yesNoPrompt,
 } from "../shared-helpers.js";
-
-const COPPER = "CRU197";
-const QUICKEN = "CRU196";
-const RUNECHANT = "CRU157";
-const ZEN_STATE = "CRU075";
+import { COPPER, QUICKEN, RUNECHANT, ZEN_STATE } from "../tokens.js";
 
 function stampAuthorityPitched(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).pitch.filter((card) => (ctx.cardData(card.cardId).cost ?? 0) >= 3).length >= 2;
@@ -439,7 +436,7 @@ export const cruHighRarity: Record<string, CardScript> = {
     onDieRollResolved(ctx, hook, roll) {
       if (hook !== "argh-smash") return;
       const count = Math.floor(roll / 2);
-      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasCardSubtype(ctx, card, "item"));
+      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => isItem(ctx, card));
       if (count > 0 && items.length > 0)
         ctx.requestCardChoices(
           "smash-item",

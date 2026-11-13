@@ -38,12 +38,10 @@ import {
   isArrow,
   isAura,
   isNonAttackAction,
+  isItem,
 } from "./shared-helpers.js";
 import { dynHighRarity } from "./dyn/high-rarity.js";
-
-const CROUCHING_TIGER = "DYN065";
-const RUNECHANT = "DYN191";
-const SPECTRAL_SHIELD = "DYN233";
+import { CROUCHING_TIGER, PONDER, RUNECHANT, SPECTRAL_SHIELD } from "./tokens.js";
 
 function logDeckTopReveal(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): void {
   ctx.logPublic(
@@ -222,7 +220,7 @@ function drillShot(): CardScript {
       if (equipment.length)
         ctx.requestCardChoice(
           "drill",
-          decisionPrompt("Put a -1 defense counter on equipment", "card.dyn.drill.equipment.counter"),
+          decisionPrompt("Put a -1 defense counter on equipment", "card.common.equipment.defensecounter"),
           equipment.map((card) => card.instanceId),
         );
     },
@@ -320,7 +318,7 @@ function aetherSlash(): CardScript {
         condition: (ctx) => ctx.getState("nonAttackPitched") > 0,
         target: anyDamageTarget((ctx) => {
           const amount = ctx.previewArcaneDamage(1);
-          return decisionPrompt(`Deal ${amount} arcane damage to any target`, "card.dyn.aetherslash.target.choose", {
+          return decisionPrompt(`Deal ${amount} arcane damage to any target`, "card.common.arcane.anytarget.choose", {
             values: { amount },
           });
         }),
@@ -851,7 +849,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
         .player(ctx.seat)
         .hand.filter(
           (card) =>
-            hasCardSubtype(ctx, card, "mechanologist") && hasCardSubtype(ctx, card, "item") &&
+            hasCardSubtype(ctx, card, "mechanologist") && isItem(ctx, card) &&
               (ctx.cardData(card.cardId).cost ?? 0) <= boosts,
         );
       if (items.length)
@@ -874,7 +872,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
         .player(ctx.seat)
         .hand.filter(
           (card) =>
-            hasCardSubtype(ctx, card, "mechanologist") && hasCardSubtype(ctx, card, "item") &&
+            hasCardSubtype(ctx, card, "mechanologist") && isItem(ctx, card) &&
               (ctx.cardData(card.cardId).cost ?? 0) <= boosts,
         );
       if (items.length)
@@ -897,7 +895,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
         .player(ctx.seat)
         .hand.filter(
           (card) =>
-            hasCardSubtype(ctx, card, "mechanologist") && hasCardSubtype(ctx, card, "item") &&
+            hasCardSubtype(ctx, card, "mechanologist") && isItem(ctx, card) &&
               (ctx.cardData(card.cardId).cost ?? 0) <= boosts,
         );
       if (items.length)
@@ -999,7 +997,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
       const defenders = [...(ctx.link?.defendingCards ?? []), ...(ctx.link?.defendingEquipment ?? [])];
       ctx.requestCardChoice(
         "shred",
-        decisionPrompt("Choose a defending card", "card.dyn.shred.defender.choose"),
+        decisionPrompt("Choose a defending card", "card.common.defending.card.choose"),
         defenders.map((card) => card.instanceId),
       );
     },
@@ -1016,7 +1014,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
       const defenders = [...(ctx.link?.defendingCards ?? []), ...(ctx.link?.defendingEquipment ?? [])];
       ctx.requestCardChoice(
         "shred",
-        decisionPrompt("Choose a defending card", "card.dyn.shred.defender.choose"),
+        decisionPrompt("Choose a defending card", "card.common.defending.card.choose"),
         defenders.map((card) => card.instanceId),
       );
     },
@@ -1292,13 +1290,13 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
           ctx.lookAt(top.instanceId);
           ctx.setState("seerTop", top.instanceId);
           ctx.requestChoice("seerstone", bottomOrKeepPrompt(), ["bottom", "keep"]);
-        } else ctx.createToken("DYN244");
+        } else ctx.createToken(PONDER);
       },
     },
     onChoose(ctx, h, o) {
       if (h !== "seerstone") return;
       if (o === "bottom") ctx.putOnDeckBottom(ctx.getState("seerTop"));
-      ctx.createToken("DYN244");
+      ctx.createToken(PONDER);
     },
   },
 
@@ -1365,7 +1363,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
         if (hand.length)
           ctx.requestCardChoice(
             "tessen",
-            decisionPrompt("Put a hand card on the bottom", "card.dyn.tessen.hand.bottom"),
+            decisionPrompt("Put a hand card on the bottom", "card.common.hand.bottom"),
             hand.map((card) => card.instanceId),
           );
       },

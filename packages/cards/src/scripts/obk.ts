@@ -1,7 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
-  BLOODROT_POX,
-  INERTIA,
   attackAbility,
   bothHeroSeats,
   buffNextAttack,
@@ -22,12 +20,12 @@ import {
   requestHeroChoice,
   targetsHero,
   isArrow,
+  hasCardSubtype,
 } from "./shared-helpers.js";
+import { BLOODROT_POX, EXERTION, INERTIA, PONDER } from "./tokens.js";
 
 // Disease token names offered when an effect names a disease token.
 const DISEASE_TOKEN_NAMES: readonly string[] = ["Bloodrot Pox", "Exertion", "Frailty", "Inertia"];
-const EXERTION = "SLV035";
-const PONDER = "DYN244";
 const EXTINCTION_WIN_THRESHOLD = 33;
 
 /** Each hero, in turn order, puts their deck top face-up into their arsenal;
@@ -549,7 +547,7 @@ const cogwerxDuelingPistol: CardScript = {
 };
 
 const bootleggerBustUp: CardScript = {
-  boostBanishPowerBonus: (ctx, banished) => (ctx.cardTypes(banished).includes("mechanologist") ? 0 : 2),
+  boostBanishPowerBonus: (ctx, banished) => (hasCardSubtype(ctx, banished, "mechanologist") ? 0 : 2),
 };
 
 const PINPOINTER_BOTTOM_HOOK = "obk-pinpointer-bottom";
@@ -557,7 +555,7 @@ const PINPOINTER_ARROW_HOOK = "obk-pinpointer-arrow";
 
 function controlsOtherTappedBow(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).weapons.some((weapon) =>
-    weapon.instanceId !== ctx.self.instanceId && weapon.tapped === true && ctx.cardTypes(weapon).includes("bow")
+    weapon.instanceId !== ctx.self.instanceId && weapon.tapped === true && hasCardSubtype(ctx, weapon, "bow")
   );
 }
 

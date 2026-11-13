@@ -5,7 +5,9 @@ import {
   cardNamed,
   decisionMessage,
   decisionPrompt,
+  hasCardSubtype,
   hyperDriverCounterFromBoostBanish,
+  isItem,
   localizedCardLog,
   opponentSeat,
 } from "./shared-helpers.js";
@@ -56,7 +58,7 @@ export const sda: Record<string, CardScript> = {
       const candidates = p.deck.filter((card) => {
         const data = ctx.cardData(card.cardId);
         return (
-          ctx.cardTypes(card).includes("mechanologist") && ctx.cardTypes(card).includes("item") && (data.cost ?? 0) <= 2
+          hasCardSubtype(ctx, card, "mechanologist") && isItem(ctx, card) && (data.cost ?? 0) <= 2
         );
       });
       if (candidates.length === 0) return;
@@ -227,7 +229,7 @@ export const sda: Record<string, CardScript> = {
       return (
         ctx.link?.targetAllyId === undefined &&
         ctx.link?.attackCardType === "action" &&
-        ctx.cardTypes(ctx.link.attackingCard).includes("mechanologist")
+        hasCardSubtype(ctx, ctx.link.attackingCard, "mechanologist")
       );
     },
     onHit(ctx) {

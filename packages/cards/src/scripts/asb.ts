@@ -9,9 +9,7 @@ import {
   localizedCardLog,
   optionalChargeOptions,
 } from "./shared-helpers.js";
-
-const COURAGE = "ASB027";
-const QUICKEN = "ASB028";
+import { COURAGE, QUICKEN } from "./tokens.js";
 
 function graceEquipment(effect: (ctx: ScriptCtx) => void): CardScript {
   return {

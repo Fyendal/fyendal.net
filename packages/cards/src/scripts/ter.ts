@@ -1,7 +1,6 @@
 import type { CardScript } from "@fyendal/engine";
 import { decisionMessage, decisionPrompt, hasCardSubtype, isAttackAction, yesNoPrompt } from "./shared-helpers.js";
-
-const MIGHT = "TER028";
+import { MIGHT } from "./tokens.js";
 
 function earthBond(extra: CardScript): CardScript {
   return {

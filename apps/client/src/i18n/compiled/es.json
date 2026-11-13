@@ -1121,22 +1121,10 @@
       "value": "Elige una carta de tu mano para hacer banish"
     }
   ],
-  "card.aac.item.steal": [
-    {
-      "type": 0,
-      "value": "Roba un item"
-    }
-  ],
   "card.aac.stealthattack.copy": [
     {
       "type": 0,
       "value": "¿Hacer banish de un ataque con stealth para que el objetivo se convierta en su copia?"
-    }
-  ],
-  "card.aaz.arrow.arsenal.faceup": [
-    {
-      "type": 0,
-      "value": "Pon una carta arrow boca arriba en tu arsenal"
     }
   ],
   "card.aaz.arrow.search": [
@@ -1257,12 +1245,6 @@
       "value": " y destruir esto para hacer sharpen una vez más?"
     }
   ],
-  "card.aha.sword.sharpen": [
-    {
-      "type": 0,
-      "value": "Elige un arma sword para hacer sharpen"
-    }
-  ],
   "card.aha.sword.sharpen.named": [
     {
       "type": 1,
@@ -1277,12 +1259,6 @@
     {
       "type": 0,
       "value": "Elige un arma sword para hacer sharpen dos veces"
-    }
-  ],
-  "card.aio.crankitem.steam": [
-    {
-      "type": 0,
-      "value": "Pon un contador de steam en un item con crank"
     }
   ],
   "card.aio.deck.top.banish": [
@@ -1465,12 +1441,6 @@
       "value": "¿Quitar un contador de steam o destruir Clamp Press?"
     }
   ],
-  "card.amx.crankitem.steam": [
-    {
-      "type": 0,
-      "value": "Pon un contador de steam en un item con crank"
-    }
-  ],
   "card.amx.hyperdriver.choose": [
     {
       "type": 0,
@@ -1517,18 +1487,6 @@
     {
       "type": 0,
       "value": "Elige una carta del arsenal para destruir"
-    }
-  ],
-  "card.aol.card.discard": [
-    {
-      "type": 0,
-      "value": "Descarta una carta"
-    }
-  ],
-  "card.aol.deck.card.top": [
-    {
-      "type": 0,
-      "value": "Elige una carta para poner en la parte superior"
     }
   ],
   "card.aol.defender.nonequipment.banish": [
@@ -1597,43 +1555,6 @@
       "value": "¿Devolver un aura que controles a la mano de su propietario?"
     }
   ],
-  "card.aps.card.discard.choose": [
-    {
-      "type": 0,
-      "value": "Elige "
-    },
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "una carta"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " cartas"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " para descartar"
-    }
-  ],
   "card.aps.crowd.cheer": [
     {
       "type": 0,
@@ -1658,12 +1579,6 @@
     {
       "type": 0,
       "value": "Pon un contador de suspense en un aura"
-    }
-  ],
-  "card.aps.suspense.counter.add.optional": [
-    {
-      "type": 0,
-      "value": "¿Poner un contador de suspense en un aura con suspense?"
     }
   ],
   "card.aps.suspense.remove.defense": [
@@ -1996,20 +1911,6 @@
       "value": "Busca Whirling Mist Blossom para hacer banish de esa carta"
     }
   ],
-  "card.ast.arcane.target.choose": [
-    {
-      "type": 0,
-      "value": "Aplica "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de daño arcane a cualquier objetivo"
-    }
-  ],
   "card.ast.instant.reveal": [
     {
       "type": 1,
@@ -2144,6 +2045,34 @@
       "value": "Atención: no ganarás un Action Point porque no es tu action phase."
     }
   ],
+  "card.common.arcane.anytarget.choose": [
+    {
+      "type": 0,
+      "value": "Aplica "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de daño arcane a cualquier objetivo"
+    }
+  ],
+  "card.common.arcane.damage.target": [
+    {
+      "type": 0,
+      "value": "Elige un objetivo para "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de daño arcane"
+    }
+  ],
   "card.common.arcane.hero.choose": [
     {
       "type": 1,
@@ -2186,6 +2115,18 @@
       "value": "¿Poner boca arriba en tu arsenal una carta arrow de tu mano?"
     }
   ],
+  "card.common.arrow.arsenal.faceup": [
+    {
+      "type": 0,
+      "value": "Pon una carta arrow boca arriba en tu arsenal"
+    }
+  ],
+  "card.common.arsenal.faceup": [
+    {
+      "type": 0,
+      "value": "Pon boca arriba una carta boca abajo del arsenal"
+    }
+  ],
   "card.common.attack.target.choose": [
     {
       "type": 1,
@@ -2196,10 +2137,66 @@
       "value": ": elige el ataque objetivo"
     }
   ],
+  "card.common.aura.destroy": [
+    {
+      "type": 0,
+      "value": "Destruye un aura"
+    }
+  ],
+  "card.common.aura.destroy.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destruye un aura"
+    }
+  ],
+  "card.common.auratoken.destroy.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destruye un token de aura"
+    }
+  ],
+  "card.common.auratoken.steal": [
+    {
+      "type": 0,
+      "value": "Roba un token de aura"
+    }
+  ],
   "card.common.bonus.choose": [
     {
       "type": 0,
       "value": "Elige una bonificación"
+    }
+  ],
+  "card.common.card.banish": [
+    {
+      "type": 0,
+      "value": "Haz banish de una carta"
+    }
+  ],
+  "card.common.card.banish.choose": [
+    {
+      "type": 0,
+      "value": "Elige una carta de la que hacer banish"
+    }
+  ],
+  "card.common.card.choose": [
+    {
+      "type": 0,
+      "value": "Elige una carta"
+    }
+  ],
+  "card.common.card.discard": [
+    {
+      "type": 0,
+      "value": "Descarta una carta"
     }
   ],
   "card.common.card.discard.choose": [
@@ -2208,10 +2205,73 @@
       "value": "Elige una carta para descartar"
     }
   ],
+  "card.common.card.discard.choose.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": elige una carta para descartar"
+    }
+  ],
   "card.common.card.name": [
     {
       "type": 0,
       "value": "Nombra una carta"
+    }
+  ],
+  "card.common.card.name.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": nombra una carta"
+    }
+  ],
+  "card.common.card.top.choose": [
+    {
+      "type": 0,
+      "value": "Elige una carta para poner en la parte superior"
+    }
+  ],
+  "card.common.cards.discard.choose": [
+    {
+      "type": 0,
+      "value": "Elige "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "una carta"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " para descartar"
     }
   ],
   "card.common.charge.choose": [
@@ -2222,6 +2282,12 @@
     {
       "type": 0,
       "value": ": elige una carta de tu mano para hacer charge, o rechaza"
+    }
+  ],
+  "card.common.color.choose": [
+    {
+      "type": 0,
+      "value": "Elige un color"
     }
   ],
   "card.common.cost.arsenalarrow.faceup": [
@@ -2398,16 +2464,106 @@
       "value": "Descarta una carta zombie"
     }
   ],
+  "card.common.crankitem.steam": [
+    {
+      "type": 0,
+      "value": "Pon un contador de steam en un item con crank"
+    }
+  ],
+  "card.common.defending.card.choose": [
+    {
+      "type": 0,
+      "value": "Elige una carta defensora"
+    }
+  ],
+  "card.common.discardormill.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": ¿descartar una carta o destruir la carta superior de tu mazo?"
+    }
+  ],
   "card.common.disease.token.choose": [
     {
       "type": 0,
       "value": "Elige un token de enfermedad"
     }
   ],
+  "card.common.equipment.defensecounter": [
+    {
+      "type": 0,
+      "value": "Pon un contador de -1 de defensa en un equipo"
+    }
+  ],
+  "card.common.hand.bottom": [
+    {
+      "type": 0,
+      "value": "Pon una carta de la mano en la parte inferior"
+    }
+  ],
+  "card.common.hand.card.banish": [
+    {
+      "type": 0,
+      "value": "Haz banish de una carta de tu mano"
+    }
+  ],
+  "card.common.hand.card.bottom": [
+    {
+      "type": 0,
+      "value": "Pon una carta de tu mano en la parte inferior"
+    }
+  ],
+  "card.common.hand.card.top": [
+    {
+      "type": 0,
+      "value": "Pon una carta de tu mano en la parte superior de tu mazo"
+    }
+  ],
+  "card.common.handorarsenal.bottom": [
+    {
+      "type": 0,
+      "value": "Pon una carta de tu mano o arsenal en la parte inferior"
+    }
+  ],
+  "card.common.heroally.tap": [
+    {
+      "type": 0,
+      "value": "Haz tap al héroe o ally objetivo"
+    }
+  ],
   "card.common.hyperdriver.steam.add": [
     {
       "type": 0,
       "value": "Pon un contador de steam en un Hyper Driver"
+    }
+  ],
+  "card.common.item.destroy.defense": [
+    {
+      "type": 0,
+      "value": "¿Destruir un item para obtener +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de defensa?"
+    }
+  ],
+  "card.common.item.steal": [
+    {
+      "type": 0,
+      "value": "Roba un item"
+    }
+  ],
+  "card.common.katsu.combo.choose": [
+    {
+      "type": 0,
+      "value": "Katsu: elige una carta con combo para hacer banish de esa carta boca arriba"
     }
   ],
   "card.common.levia.transform": [
@@ -2420,6 +2576,12 @@
     {
       "type": 0,
       "value": "¿Poner la carta mirada en la parte inferior?"
+    }
+  ],
+  "card.common.mode.choose": [
+    {
+      "type": 0,
+      "value": "Elige un modo"
     }
   ],
   "card.common.opt": [
@@ -2552,6 +2714,12 @@
       "value": " para equipar esta dagger?"
     }
   ],
+  "card.common.scrap.choose": [
+    {
+      "type": 0,
+      "value": "¿Hacer scrap de un item o equipo de tu cementerio?"
+    }
+  ],
   "card.common.specialization.arsenal": [
     {
       "type": 1,
@@ -2560,6 +2728,18 @@
     {
       "type": 0,
       "value": ": elige una carta de Specialization para poner boca arriba en el arsenal"
+    }
+  ],
+  "card.common.suspense.counter.add": [
+    {
+      "type": 0,
+      "value": "¿Poner un contador de suspense en un aura con suspense?"
+    }
+  ],
+  "card.common.sword.sharpen": [
+    {
+      "type": 0,
+      "value": "Elige un arma sword para hacer sharpen"
     }
   ],
   "card.common.target.card": [
@@ -2576,6 +2756,12 @@
     {
       "type": 0,
       "value": ": elige el héroe objetivo"
+    }
+  ],
+  "card.common.token.create.choose": [
+    {
+      "type": 0,
+      "value": "¿Qué token quieres crear?"
     }
   ],
   "card.common.ward.x.choose": [
@@ -2714,12 +2900,6 @@
     {
       "type": 0,
       "value": ": ¿hacer banish de la carta superior y permitir jugarla como un instant?"
-    }
-  ],
-  "card.cru.katsu.combo.choose": [
-    {
-      "type": 0,
-      "value": "Katsu: elige una carta con combo para hacer banish de esa carta boca arriba"
     }
   ],
   "card.cru.katsu.discard": [
@@ -2938,18 +3118,6 @@
       "value": "¿Poner boca abajo una carta en la zona de banish?"
     }
   ],
-  "card.dtd.card.banish": [
-    {
-      "type": 0,
-      "value": "Haz banish de una carta"
-    }
-  ],
-  "card.dtd.card.name": [
-    {
-      "type": 0,
-      "value": "Nombra una carta"
-    }
-  ],
   "card.dtd.charge.choose": [
     {
       "type": 0,
@@ -2960,12 +3128,6 @@
     {
       "type": 0,
       "value": "¿Hacer charge de una carta?"
-    }
-  ],
-  "card.dtd.charge.soul.optional": [
-    {
-      "type": 0,
-      "value": "¿Hacer charge del soul de tu héroe?"
     }
   ],
   "card.dtd.defender.defense.halve": [
@@ -3008,18 +3170,6 @@
     {
       "type": 0,
       "value": "Elige una carta de tu mano para hacer banish"
-    }
-  ],
-  "card.dtd.hand.card.banish": [
-    {
-      "type": 0,
-      "value": "Haz banish de una carta de tu mano"
-    }
-  ],
-  "card.dtd.item.steal": [
-    {
-      "type": 0,
-      "value": "Roba un item"
     }
   ],
   "card.dtd.lance.mode": [
@@ -3182,20 +3332,6 @@
       "value": "¿Poner la carta amarilla revelada en tu soul?"
     }
   ],
-  "card.dyn.aetherslash.target.choose": [
-    {
-      "type": 0,
-      "value": "Aplica "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de daño arcane a cualquier objetivo"
-    }
-  ],
   "card.dyn.arakni.opponenttop.look": [
     {
       "type": 0,
@@ -3206,20 +3342,6 @@
     {
       "type": 0,
       "value": "Elige un héroe al que aplicar "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de daño arcane"
-    }
-  ],
-  "card.dyn.brainstorm.target.choose": [
-    {
-      "type": 0,
-      "value": "Elige un objetivo para "
     },
     {
       "type": 1,
@@ -3264,12 +3386,6 @@
     {
       "type": 0,
       "value": "Elige un aura para destruir"
-    }
-  ],
-  "card.dyn.drill.equipment.counter": [
-    {
-      "type": 0,
-      "value": "Pon un contador de -1 de defensa en un equipo"
     }
   ],
   "card.dyn.harpoon.defender.choose": [
@@ -3429,12 +3545,6 @@
       "value": "Descarta una carta o recibe 1 de daño"
     }
   ],
-  "card.dyn.shred.defender.choose": [
-    {
-      "type": 0,
-      "value": "Elige una carta defensora"
-    }
-  ],
   "card.dyn.suraya.shield.choose": [
     {
       "type": 0,
@@ -3445,12 +3555,6 @@
     {
       "type": 0,
       "value": "Elige una carta de la mano del oponente de la que hacer banish"
-    }
-  ],
-  "card.dyn.tessen.hand.bottom": [
-    {
-      "type": 0,
-      "value": "Pon una carta de la mano en la parte inferior"
     }
   ],
   "card.dyn.tranquil.aura.banish": [
@@ -4685,12 +4789,6 @@
       "value": "Pon una carta boca abajo del arsenal en la parte inferior"
     }
   ],
-  "card.ele.arsenal.faceup": [
-    {
-      "type": 0,
-      "value": "Pon boca arriba una carta boca abajo del arsenal"
-    }
-  ],
   "card.ele.attack.bottom": [
     {
       "type": 1,
@@ -4699,12 +4797,6 @@
     {
       "type": 0,
       "value": ": ¿poner una carta de attack action en la parte inferior?"
-    }
-  ],
-  "card.ele.bonus.choose": [
-    {
-      "type": 0,
-      "value": "Elige una bonificación"
     }
   ],
   "card.ele.breakground.arsenal.bottom": [
@@ -4753,16 +4845,6 @@
     {
       "type": 0,
       "value": " de defensa?"
-    }
-  ],
-  "card.ele.discard.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": elige una carta para descartar"
     }
   ],
   "card.ele.dominate.pay": [
@@ -5229,24 +5311,6 @@
       "value": "?"
     }
   ],
-  "card.evo.card.discard": [
-    {
-      "type": 0,
-      "value": "Elige una carta para descartar"
-    }
-  ],
-  "card.evo.crankitem.steam.add": [
-    {
-      "type": 0,
-      "value": "Pon un contador de steam en un item con crank"
-    }
-  ],
-  "card.evo.crankitem.steam.add.optional": [
-    {
-      "type": 0,
-      "value": "¿Poner un contador de steam en un item con crank?"
-    }
-  ],
   "card.evo.defender.banish": [
     {
       "type": 1,
@@ -5261,12 +5325,6 @@
     {
       "type": 0,
       "value": "Toma el control de un item controlado por el héroe defensor"
-    }
-  ],
-  "card.evo.emboldened.arsenal.choose": [
-    {
-      "type": 0,
-      "value": "Pon boca arriba una carta boca abajo del arsenal"
     }
   ],
   "card.evo.emboldened.option.arsenal": [
@@ -5397,20 +5455,6 @@
       "value": "Elige un equipo Evo bajo el que poner Fabricate"
     }
   ],
-  "card.evo.galvanize.item": [
-    {
-      "type": 0,
-      "value": "¿Destruir un item para obtener +"
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de defensa?"
-    }
-  ],
   "card.evo.graveyard.items.banish": [
     {
       "type": 0,
@@ -5455,12 +5499,6 @@
     {
       "type": 0,
       "value": "¿Hacer banish de una carta de tu mano para robar una carta?"
-    }
-  ],
-  "card.evo.hand.card.top": [
-    {
-      "type": 0,
-      "value": "Pon una carta de tu mano en la parte superior de tu mazo"
     }
   ],
   "card.evo.hyperdriver.arena.optional": [
@@ -5643,12 +5681,6 @@
     {
       "type": 0,
       "value": "Ninguna carta revelada puede defender"
-    }
-  ],
-  "card.evo.scrap.choose": [
-    {
-      "type": 0,
-      "value": "¿Hacer scrap de un item o equipo de tu cementerio?"
     }
   ],
   "card.evo.scrap.choose.many": [
@@ -5997,16 +6029,6 @@
       "value": "lightning"
     }
   ],
-  "card.evr.card.name": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": nombra una carta"
-    }
-  ],
   "card.evr.card.reveal": [
     {
       "type": 0,
@@ -6053,57 +6075,10 @@
       "value": "Elige la siguiente carta usada como pitch para poner en la parte superior (la última elección quedará arriba)"
     }
   ],
-  "card.evr.discard.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": elige una carta para descartar"
-    }
-  ],
   "card.evr.dreadbore.arrow.load": [
     {
       "type": 0,
       "value": "¿Poner una carta arrow de tu mano boca arriba en el arsenal?"
-    }
-  ],
-  "card.evr.echoes.discard.choose": [
-    {
-      "type": 0,
-      "value": "Elige "
-    },
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "una carta"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " cartas"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " para descartar"
     }
   ],
   "card.evr.echoes.hero.choose": [
@@ -6404,28 +6379,6 @@
       "value": " boca abajo"
     }
   ],
-  "card.hnt.card.choose": [
-    {
-      "type": 0,
-      "value": "Elige una carta"
-    }
-  ],
-  "card.hnt.card.name": [
-    {
-      "type": 0,
-      "value": "Nombra una carta"
-    }
-  ],
-  "card.hnt.card.name.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": nombra una carta"
-    }
-  ],
   "card.hnt.dagger.choose": [
     {
       "type": 0,
@@ -6490,12 +6443,6 @@
       "value": " armas dagger Draconic de tu cementerio"
     }
   ],
-  "card.hnt.equipment.defensecounter": [
-    {
-      "type": 0,
-      "value": "Pon un contador de -1 de defensa en un equipo"
-    }
-  ],
   "card.hnt.graveyard.power.banish.opponent": [
     {
       "type": 0,
@@ -6522,12 +6469,6 @@
     {
       "type": 0,
       "value": " de poder de tu cementerio?"
-    }
-  ],
-  "card.hnt.hand.card.banish": [
-    {
-      "type": 0,
-      "value": "Haz banish de una carta de tu mano"
     }
   ],
   "card.hnt.ignite.discount": [
@@ -6790,22 +6731,10 @@
       "value": "¿Cuántos Gold quieres destruir?"
     }
   ],
-  "card.hvy.hand.arsenal.bottom": [
-    {
-      "type": 0,
-      "value": "Pon una carta de tu mano o arsenal en la parte inferior"
-    }
-  ],
   "card.hvy.hand.keep": [
     {
       "type": 0,
       "value": "Elige una carta para conservar"
-    }
-  ],
-  "card.hvy.hand.top": [
-    {
-      "type": 0,
-      "value": "Pon una carta de tu mano en la parte superior de tu mazo"
     }
   ],
   "card.hvy.item.control": [
@@ -7038,18 +6967,6 @@
       "value": "¿Quitar un contador de +1 de poder para aplicar mark al héroe impactado?"
     }
   ],
-  "card.iar.hand.banish": [
-    {
-      "type": 0,
-      "value": "Haz banish de una carta de tu mano"
-    }
-  ],
-  "card.iar.hand.banish.choose": [
-    {
-      "type": 0,
-      "value": "Elige una carta de la que hacer banish"
-    }
-  ],
   "card.iar.hand.banish.optional": [
     {
       "type": 0,
@@ -7060,24 +6977,6 @@
     {
       "type": 0,
       "value": "Descarta cualquier número de otras cartas"
-    }
-  ],
-  "card.iar.item.crank.steam.choose": [
-    {
-      "type": 0,
-      "value": "¿Poner un contador de steam en un item con crank?"
-    }
-  ],
-  "card.iar.looter.discard.choose": [
-    {
-      "type": 0,
-      "value": "Elige una carta para descartar"
-    }
-  ],
-  "card.iar.malice.zombie.choose": [
-    {
-      "type": 0,
-      "value": "Elige una carta zombie de tu cementerio"
     }
   ],
   "card.iar.mark.ally.bind.choose": [
@@ -12205,16 +12104,6 @@
       "value": "Fearless Confrontation: elige un ataque"
     }
   ],
-  "card.mpg.aura.destroy": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": destruye un aura"
-    }
-  ],
   "card.mpg.aura.steal": [
     {
       "type": 0,
@@ -12331,12 +12220,6 @@
       "value": "Annexation of the Forge: equipa un equipo oponente"
     }
   ],
-  "card.mpw.aura.destroy": [
-    {
-      "type": 0,
-      "value": "Destruye un aura"
-    }
-  ],
   "card.mpw.blunt.counter.remove": [
     {
       "type": 0,
@@ -12389,12 +12272,6 @@
       "value": ": elige una sword"
     }
   ],
-  "card.mpw.token.create.choose": [
-    {
-      "type": 0,
-      "value": "¿Qué token quieres crear?"
-    }
-  ],
   "card.mpw.tokens.destroy": [
     {
       "type": 0,
@@ -12417,24 +12294,6 @@
     {
       "type": 0,
       "value": "Elige una carta azul para defender"
-    }
-  ],
-  "card.mst.card.banish": [
-    {
-      "type": 0,
-      "value": "Haz banish de una carta"
-    }
-  ],
-  "card.mst.card.choose": [
-    {
-      "type": 0,
-      "value": "Elige una carta"
-    }
-  ],
-  "card.mst.card.discard": [
-    {
-      "type": 0,
-      "value": "Elige una carta para descartar"
     }
   ],
   "card.mst.card.nodefense.choose": [
@@ -12461,12 +12320,6 @@
       "value": "Nombra un Crouching Tiger"
     }
   ],
-  "card.mst.defending.card.choose": [
-    {
-      "type": 0,
-      "value": "Elige una carta defensora"
-    }
-  ],
   "card.mst.defendinghero.graveyard.banish": [
     {
       "type": 0,
@@ -12489,12 +12342,6 @@
     {
       "type": 0,
       "value": "Elige una carta boca abajo para mirarla"
-    }
-  ],
-  "card.mst.hand.card.bottom": [
-    {
-      "type": 0,
-      "value": "Pon una carta de tu mano en la parte inferior"
     }
   ],
   "card.mst.hero.damage.choose": [
@@ -12793,12 +12640,6 @@
       "value": ": elige hasta 1 ataque objetivo"
     }
   ],
-  "card.omn.aura.destroy": [
-    {
-      "type": 0,
-      "value": "Destruye un aura"
-    }
-  ],
   "card.omn.aura.holo.counter": [
     {
       "type": 1,
@@ -12815,44 +12656,10 @@
       "value": "¿Crear una copia token de un aura?"
     }
   ],
-  "card.omn.aura.token.destroy": [
-    {
-      "type": 0,
-      "value": "Destruye un token de aura"
-    }
-  ],
-  "card.omn.aura.token.destroy.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": destruye un token de aura"
-    }
-  ],
-  "card.omn.aura.token.steal": [
-    {
-      "type": 0,
-      "value": "Roba un token de aura"
-    }
-  ],
-  "card.omn.card.discard": [
-    {
-      "type": 0,
-      "value": "Descarta una carta"
-    }
-  ],
   "card.omn.cog.search.arena": [
     {
       "type": 0,
       "value": "¿Buscar un cog en tu mazo para ponerlo en la arena?"
-    }
-  ],
-  "card.omn.color.choose": [
-    {
-      "type": 0,
-      "value": "Elige un color"
     }
   ],
   "card.omn.flow.destroy": [
@@ -12925,12 +12732,6 @@
       "value": "¿Barajar una carta de instant en tu mazo?"
     }
   ],
-  "card.omn.hand.card.bottom": [
-    {
-      "type": 0,
-      "value": "Pon una carta de tu mano en la parte inferior"
-    }
-  ],
   "card.omn.hero.tap.bonus": [
     {
       "type": 1,
@@ -12969,12 +12770,6 @@
     {
       "type": 0,
       "value": "¿Poner una carta de instant Lightning en la parte superior?"
-    }
-  ],
-  "card.omn.mode.choose": [
-    {
-      "type": 0,
-      "value": "Elige un modo"
     }
   ],
   "card.omn.option.blue": [
@@ -13023,12 +12818,6 @@
     {
       "type": 0,
       "value": "Amarillo"
-    }
-  ],
-  "card.omn.permanent.scrap": [
-    {
-      "type": 0,
-      "value": "¿Hacer scrap de un item o equipo de tu cementerio?"
     }
   ],
   "card.omn.red.action.banish": [
@@ -13093,12 +12882,6 @@
       "value": "Nombra otra carta"
     }
   ],
-  "card.out.color.choose": [
-    {
-      "type": 0,
-      "value": "Elige un color"
-    }
-  ],
   "card.out.combo.banish": [
     {
       "type": 0,
@@ -13135,12 +12918,6 @@
       "value": "¿Pagar 1 para obtener +1 de defensa y blade break?"
     }
   ],
-  "card.out.equipment.counter": [
-    {
-      "type": 0,
-      "value": "Pon un contador de -1 de defensa en un equipo"
-    }
-  ],
   "card.out.flickknives.dagger.choose": [
     {
       "type": 0,
@@ -13153,22 +12930,10 @@
       "value": "¿Poner una carta de tu mano boca abajo en el arsenal?"
     }
   ],
-  "card.out.hand.arsenal.bottom": [
-    {
-      "type": 0,
-      "value": "Pon una carta de tu mano o arsenal en la parte inferior"
-    }
-  ],
   "card.out.hand.bottom.draw": [
     {
       "type": 0,
       "value": "¿Poner una carta de la mano en la parte inferior para robar?"
-    }
-  ],
-  "card.out.hand.top": [
-    {
-      "type": 0,
-      "value": "Pon una carta de tu mano en la parte superior de tu mazo"
     }
   ],
   "card.out.hurl.dagger.choose": [
@@ -13445,12 +13210,6 @@
       "value": "Pon un contador de +1 de poder en un aura"
     }
   ],
-  "card.pen.auratoken.destroy": [
-    {
-      "type": 0,
-      "value": "Destruye un token de aura"
-    }
-  ],
   "card.pen.auratoken.target.choose": [
     {
       "type": 0,
@@ -13475,28 +13234,10 @@
       "value": "¿Devolver un ally de tu cementerio?"
     }
   ],
-  "card.pen.card.banish": [
-    {
-      "type": 0,
-      "value": "Haz banish de una carta"
-    }
-  ],
-  "card.pen.card.discard": [
-    {
-      "type": 0,
-      "value": "Elige una carta para descartar"
-    }
-  ],
   "card.pen.card.fifthfromtop": [
     {
       "type": 0,
       "value": "Pon una carta en la quinta posición desde arriba"
-    }
-  ],
-  "card.pen.card.name": [
-    {
-      "type": 0,
-      "value": "Nombra una carta"
     }
   ],
   "card.pen.cloaked.equipment.facedown.choose": [
@@ -13537,12 +13278,6 @@
     {
       "type": 0,
       "value": " boca abajo"
-    }
-  ],
-  "card.pen.color.choose": [
-    {
-      "type": 0,
-      "value": "Elige un color"
     }
   ],
   "card.pen.combatchain.card.choose": [
@@ -13675,22 +13410,10 @@
       "value": " Ash para conservar Haboob?"
     }
   ],
-  "card.pen.hand.card.banish": [
-    {
-      "type": 0,
-      "value": "Haz banish de una carta de tu mano"
-    }
-  ],
   "card.pen.hand.fifthfromtop": [
     {
       "type": 0,
       "value": "Pon una carta de tu mano en la quinta posición desde arriba"
-    }
-  ],
-  "card.pen.heroally.tap": [
-    {
-      "type": 0,
-      "value": "Haz tap al héroe o ally objetivo"
     }
   ],
   "card.pen.hyperdriver.search.arena": [
@@ -13709,20 +13432,6 @@
     {
       "type": 0,
       "value": "Haz banish de una carta de instant o de una carta amarilla"
-    }
-  ],
-  "card.pen.item.destroy.defense": [
-    {
-      "type": 0,
-      "value": "¿Destruir un item para obtener +"
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de defensa?"
     }
   ],
   "card.pen.livinglegend.hero.name": [
@@ -13783,12 +13492,6 @@
     {
       "type": 0,
       "value": "Rend Flesh: ¿quitar un contador de +1 de poder para que el héroe impactado pierda 2 de vida?"
-    }
-  ],
-  "card.pen.scrap.choose": [
-    {
-      "type": 0,
-      "value": "¿Hacer scrap de un item o equipo de tu cementerio?"
     }
   ],
   "card.pen.seismic.resources.pay": [
@@ -13857,12 +13560,6 @@
     {
       "type": 0,
       "value": "Haz banish de esta carta de tu cementerio en lugar de crear Frostbite"
-    }
-  ],
-  "card.pen.sword.sharpen": [
-    {
-      "type": 0,
-      "value": "Elige un arma sword para hacer sharpen"
     }
   ],
   "card.pen.token.aura.counters.remove": [
@@ -13947,12 +13644,6 @@
       "value": " aura en la parte inferior del mazo de su propietario"
     }
   ],
-  "card.ros.aura.destroy": [
-    {
-      "type": 0,
-      "value": "Destruye un aura"
-    }
-  ],
   "card.ros.aura.destroy.eligible": [
     {
       "type": 0,
@@ -13997,12 +13688,6 @@
       "value": "¿Devolver un aura válida a la mano de su propietario?"
     }
   ],
-  "card.ros.card.discard": [
-    {
-      "type": 0,
-      "value": "Elige una carta para descartar"
-    }
-  ],
   "card.ros.decompose.action": [
     {
       "type": 1,
@@ -14031,12 +13716,6 @@
     {
       "type": 0,
       "value": ": elige la segunda carta Earth para hacer banish"
-    }
-  ],
-  "card.ros.hand.card.bottom": [
-    {
-      "type": 0,
-      "value": "Pon una carta de tu mano en la parte inferior de tu mazo"
     }
   ],
   "card.ros.intimidated.card.graveyard": [
@@ -14127,12 +13806,6 @@
     {
       "type": 0,
       "value": "¿Devolver un aura Sigil de tu cementerio?"
-    }
-  ],
-  "card.ros.token.create": [
-    {
-      "type": 0,
-      "value": "¿Qué token quieres crear?"
     }
   ],
   "card.sar.blackwidow.hand.banish": [
@@ -14417,18 +14090,6 @@
       "value": "¿Hacer banish de una carta arrow?"
     }
   ],
-  "card.sea.arrow.hand.arsenal": [
-    {
-      "type": 0,
-      "value": "¿Poner una carta arrow de tu mano boca arriba en tu arsenal?"
-    }
-  ],
-  "card.sea.arrow.hand.arsenal.required": [
-    {
-      "type": 0,
-      "value": "Pon una carta arrow boca arriba en tu arsenal"
-    }
-  ],
   "card.sea.arrow.top.arsenal": [
     {
       "type": 1,
@@ -14509,20 +14170,6 @@
       "value": "¿Hacer tap a un cog para poner esta carta en la parte inferior de tu mazo?"
     }
   ],
-  "card.sea.damage.arcane.target": [
-    {
-      "type": 0,
-      "value": "Elige un objetivo para "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de daño arcane"
-    }
-  ],
   "card.sea.damage.target.choose": [
     {
       "type": 0,
@@ -14539,16 +14186,6 @@
     {
       "type": 0,
       "value": "Destruye una carta defensora"
-    }
-  ],
-  "card.sea.discardormill.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": ¿descartar una carta o destruir la carta superior de tu mazo?"
     }
   ],
   "card.sea.gofish.card.choose": [
@@ -14585,12 +14222,6 @@
     {
       "type": 0,
       "value": "Haz untap a otro héroe objetivo"
-    }
-  ],
-  "card.sea.heroally.tap": [
-    {
-      "type": 0,
-      "value": "Haz tap al héroe o ally objetivo"
     }
   ],
   "card.sea.hoist.ally.tap": [
@@ -14933,16 +14564,6 @@
       "value": "Carrion Crown: descarta un ally"
     }
   ],
-  "card.sgb.discardormill.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": ¿descartar una carta o destruir la carta superior de tu mazo?"
-    }
-  ],
   "card.sgb.gravy.discard.choose": [
     {
       "type": 0,
@@ -15021,16 +14642,6 @@
     {
       "type": 0,
       "value": "Cold Snap: elige un héroe"
-    }
-  ],
-  "card.siy.discard.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": elige una carta para descartar"
     }
   ],
   "card.siy.discard.pay": [
@@ -15275,38 +14886,6 @@
       "value": "Pon otra aura objetivo en la parte inferior del mazo de su propietario"
     }
   ],
-  "card.sup.aura.destroy": [
-    {
-      "type": 0,
-      "value": "Destruye un aura"
-    }
-  ],
-  "card.sup.aura.destroy.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": destruye un aura"
-    }
-  ],
-  "card.sup.aura.token.destroy": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": destruye un token de aura"
-    }
-  ],
-  "card.sup.aura.token.steal": [
-    {
-      "type": 0,
-      "value": "Roba un token de aura"
-    }
-  ],
   "card.sup.beacon.mode.choose": [
     {
       "type": 1,
@@ -15323,18 +14902,6 @@
     {
       "type": 0,
       "value": ")"
-    }
-  ],
-  "card.sup.card.top.choose": [
-    {
-      "type": 0,
-      "value": "Elige una carta para poner en la parte superior"
-    }
-  ],
-  "card.sup.color.choose": [
-    {
-      "type": 0,
-      "value": "Elige un color"
     }
   ],
   "card.sup.combat.card.reduce": [
@@ -15403,12 +14970,6 @@
     {
       "type": 0,
       "value": "Despierta un figment"
-    }
-  ],
-  "card.sup.hand.bottom": [
-    {
-      "type": 0,
-      "value": "Pon una carta de la mano en la parte inferior"
     }
   ],
   "card.sup.hero.abilities.discard": [
@@ -15717,12 +15278,6 @@
     {
       "type": 0,
       "value": "Pon una carta de 6 o más en la parte superior"
-    }
-  ],
-  "card.sup.suspense.counter.add": [
-    {
-      "type": 0,
-      "value": "¿Poner un contador de suspense en un aura de suspense?"
     }
   ],
   "card.sup.suspense.counter.change": [
@@ -19019,12 +18574,6 @@
       "value": " objetivos"
     }
   ],
-  "card.upr.card.banish.choose": [
-    {
-      "type": 0,
-      "value": "Elige una carta para hacer banish"
-    }
-  ],
   "card.upr.card.bottom.draw": [
     {
       "type": 0,
@@ -19047,12 +18596,6 @@
     {
       "type": 0,
       "value": " de daño a cualquier objetivo"
-    }
-  ],
-  "card.upr.discard.choose": [
-    {
-      "type": 0,
-      "value": "Elige una carta para descartar"
     }
   ],
   "card.upr.discard.draw": [
@@ -19298,12 +18841,6 @@
       "value": "Enlightened Strike: pon una carta de tu mano en la parte inferior de tu mazo"
     }
   ],
-  "card.wtr.estrike.mode.choose": [
-    {
-      "type": 0,
-      "value": "Elige un modo"
-    }
-  ],
   "card.wtr.estrike.option.draw": [
     {
       "type": 0,
@@ -19332,12 +18869,6 @@
     {
       "type": 0,
       "value": "Hope Merchant's Hood: elige cualquier número de cartas de tu mano para barajarlas en tu mazo"
-    }
-  ],
-  "card.wtr.katsu.combo.choose": [
-    {
-      "type": 0,
-      "value": "Katsu: elige una carta con combo para hacer banish de esa carta boca arriba"
     }
   ],
   "card.wtr.katsu.discard": [

@@ -7,6 +7,8 @@ import {
   flipHero,
   ongoingLabel,
   hasLiveTurnEffect,
+  hasCardSubtype,
+  isItem,
 } from "./shared-helpers.js";
 
 // AMG — Min armory deck, released beside OBK.
@@ -16,7 +18,7 @@ const REVERE_HOOK = "amg-revere-shuffle";
 const revereTheCopperIdol: CardScript = {
   onPlay(ctx) {
     const candidates = ctx.player(ctx.seat).banish.filter(
-      (card) => !card.faceDown && ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("mechanologist"),
+      (card) => !card.faceDown && ctx.hasCardType(card, "action") && hasCardSubtype(ctx, card, "mechanologist"),
     );
     if (!candidates.length) {
       ctx.shuffleIntoDeck([]);
@@ -112,7 +114,7 @@ const QUICKDIGIT_HOOK = "amg-quickdigit-item";
 const quickdigitAssemblers: CardScript = {
   onDefend(ctx) {
     const items = ctx.player(ctx.seat).hand.filter(
-      (card) => ctx.cardTypes(card).includes("item") && (ctx.cardData(card.cardId).cost ?? 0) === 0,
+      (card) => isItem(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === 0,
     );
     if (!items.length) return;
     ctx.requestCardChoice(

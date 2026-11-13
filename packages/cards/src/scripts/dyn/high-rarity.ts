@@ -15,7 +15,6 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
-  equipWithSilver,
   equippedCards,
   hasCardSubtype,
   heroDamage,
@@ -31,11 +30,10 @@ import {
   previousAttackHasName,
   withdrawNextArcaneDamageCard,
   yesNoPrompt,
+  isItem,
+  silverEquipment,
 } from "../shared-helpers.js";
-
-const CROUCHING_TIGER = "DYN065";
-const SILVER = "DYN245";
-const PONDER = "DYN244";
+import { COPPER, CROUCHING_TIGER, GOLD, PONDER, SILVER, SPELLBANE_AEGIS } from "../tokens.js";
 
 function discardChoice(ctx: ScriptCtx, hook: string, seat = opponentSeat(ctx)): void {
   const hand = ctx.player(seat).hand;
@@ -58,12 +56,6 @@ function arcane(amount: number, onDealt?: (ctx: ScriptCtx, dealt: number) => voi
     onDamageDealt(ctx, _target, dealt) {
       onDealt?.(ctx, dealt);
     },
-  };
-}
-function graveyardAssassinEquipment(extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    triggers: [equipWithSilver(2)],
   };
 }
 function typedPermanents(ctx: ScriptCtx, seat: number, type: string): readonly DeepReadonly<CardInstance>[] {
@@ -311,7 +303,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       ctx.link?.targetAllyId === undefined &&
       !ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, "spellbane aegis")),
     onHit(ctx) {
-      ctx.createToken("DYN246");
+      ctx.createToken(SPELLBANE_AEGIS);
     },
   }),
   "merciless battleaxe|0": attackingWeapon(3, {
@@ -463,7 +455,7 @@ export const dynHighRarity: Record<string, CardScript> = {
             !!pendingDelayedEffect(ctx, { match: (modifier) => modifier.onBoostAttack === undefined }) &&
             !!card &&
             hasCardSubtype(ctx, card, "mechanologist") &&
-            hasCardSubtype(ctx, card, "item") &&
+            isItem(ctx, card) &&
             (ctx.cardData(card.cardId).cost ?? 99) <= 2
           );
         },
@@ -476,7 +468,7 @@ export const dynHighRarity: Record<string, CardScript> = {
           if (
             item &&
             hasCardSubtype(ctx, item, "mechanologist") &&
-            hasCardSubtype(ctx, item, "item") &&
+            isItem(ctx, item) &&
             (ctx.cardData(item.cardId).cost ?? 99) <= 2
           )
             ctx.settleCard(item.instanceId);
@@ -589,7 +581,7 @@ export const dynHighRarity: Record<string, CardScript> = {
     onFriendlyEnterArena(ctx, card) {
       if (
         !hasCardSubtype(ctx, card, "mechanologist") ||
-        !hasCardSubtype(ctx, card, "item") ||
+        !isItem(ctx, card) ||
         (ctx.cardData(card.cardId).cost ?? 99) > 2 ||
         ctx.getCounter("steam") <= 0
       )
@@ -614,7 +606,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       if (
         !target ||
         !hasCardSubtype(ctx, target, "mechanologist") ||
-        !hasCardSubtype(ctx, target, "item") ||
+        !isItem(ctx, target) ||
         (ctx.cardData(target.cardId).cost ?? 99) > 2
       )
         return;
@@ -678,7 +670,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       }
     },
   },
-  "blacktek whisperers|0": graveyardAssassinEquipment({
+  "blacktek whisperers|0": silverEquipment({
     activated: {
       cost: 0,
       isAttack: false,
@@ -691,7 +683,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       },
     },
   }),
-  "mask of perdition|0": graveyardAssassinEquipment({
+  "mask of perdition|0": silverEquipment({
     activated: {
       cost: 0,
       isAttack: false,
@@ -1035,7 +1027,7 @@ export const dynHighRarity: Record<string, CardScript> = {
         condition: (ctx) => ["action", "layer", "reaction"].includes(ctx.state.phase),
         target: anyDamageTarget((ctx) => {
           const amount = ctx.previewArcaneDamage(1);
-          return decisionPrompt(`Choose a target for ${amount} arcane damage`, "card.dyn.brainstorm.target.choose", {
+          return decisionPrompt(`Choose a target for ${amount} arcane damage`, "card.common.arcane.damage.target", {
             values: { amount },
           });
         }),
@@ -1113,7 +1105,7 @@ export const dynHighRarity: Record<string, CardScript> = {
   "crown of dominion|0": {
     equippedHeroTypes: ["royal"],
     onGameStart(ctx) {
-      ctx.createToken("DYN243");
+      ctx.createToken(GOLD);
     },
   },
   "imperial edict|1": {
@@ -1150,7 +1142,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       oncePerTurn: false,
       onActivate(ctx) {
         ctx.putOnDeckBottom(ctx.self.instanceId);
-        ctx.createToken(hasCardSubtype(ctx, ctx.player(ctx.seat).hero, "royal") ? "DYN243" : "DYN247");
+        ctx.createToken(hasCardSubtype(ctx, ctx.player(ctx.seat).hero, "royal") ? GOLD : COPPER);
       },
     },
   },

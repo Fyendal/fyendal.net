@@ -17,6 +17,7 @@ import {
   hitHookLabel,
   isAttackAction,
   isAura,
+  isItem,
   isSword,
   localizedCardLog,
   ongoingLabel,
@@ -24,13 +25,8 @@ import {
   pendingDelayedEffect,
 } from "../shared-helpers.js";
 import { hasType } from "@fyendal/shared";
+import { AGILITY, CINTARI_SELLSWORD, GOLD, MIGHT, PONDER, VIGOR } from "../tokens.js";
 
-const AGILITY = "HVY240";
-const CINTARI_SELLSWORD = "HVY134";
-const GOLD = "HVY243";
-const MIGHT = "HVY241";
-const PONDER = "DYN244";
-const VIGOR = "HVY242";
 // Options must stay enumerable for legalIntents; no single hit realistically reaches 100.
 const TALK_A_BIG_GAME_MAX_NUMBER = 99;
 
@@ -735,7 +731,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
         const items = ctx
           .player(opponentSeat(ctx))
           .board.filter(
-            (card) => !isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "item") &&
+            (card) => !isAttackAction(ctx, card) && isItem(ctx, card) &&
               (ctx.cardData(card.cardId).cost ?? 0) <= 1,
           );
         if (items.length)

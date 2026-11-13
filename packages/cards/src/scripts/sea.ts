@@ -35,11 +35,9 @@ import {
   resourceAbility,
   yesNoPrompt,
 } from "./shared-helpers.js";
+import { GOLD, GOLDEN_COG, GOLDKISS_RUM, SEISMIC_SURGE } from "./tokens.js";
 
-const GOLD = "SGB035";
-const GOLDEN_COG = "SEA042";
 const GOLDFIN_HARPOON = "SEA093";
-const GOLDKISS_RUM = "SEA245";
 
 type Card = DeepReadonly<CardInstance>;
 type NextAttackMod = Omit<Modifier, "id" | "sourceInstanceId" | "scope" | "defense" | "seat">;
@@ -112,7 +110,7 @@ function discardOrMill(hook: string, apply: (ctx: ScriptCtx) => void): CardScrip
           hook,
           decisionPrompt(
             `${ctx.data.name}: discard a card or destroy the top card of your deck?`,
-            "card.sea.discardormill.choose",
+            "card.common.discardormill.choose",
             {
               values: { card: { kind: "card", cardId: ctx.self.cardId } },
               optionMessages: {
@@ -342,7 +340,7 @@ function treasureIsland(): CardScript {
 }
 
 function pirateHero(ctx: ScriptCtx, seat: number): boolean {
-  return hasCardSubtype(ctx, ctx.player(seat).hero, "pirate");
+  return isPirate(ctx, ctx.player(seat).hero);
 }
 
 function yellowDiscardAttack(hook: string): CardScript {
@@ -439,7 +437,7 @@ function callBigGuns(power: number): CardScript {
       if (ctx.hasArsenalSpace() && arrows.length) {
         ctx.requestCardChoice(
           "call-big-guns",
-          decisionPrompt("Put an arrow from your hand face-up into your arsenal?", "card.sea.arrow.hand.arsenal", {
+          decisionPrompt("Put an arrow from your hand face-up into your arsenal?", "card.common.arrow.arsenal", {
             optionMessages: commonOptionMessages("pass"),
           }),
           ["pass", ...arrows.map((card) => card.instanceId)],
@@ -757,7 +755,7 @@ export const sea: Record<string, CardScript> = {
           if (targets.length)
             ctx.requestCardChoice(
               "kelpie-tap",
-              decisionPrompt("Tap target hero or ally", "card.sea.heroally.tap"),
+              decisionPrompt("Tap target hero or ally", "card.common.heroally.tap"),
               targets.map((card) => card.instanceId),
             );
         },
@@ -915,7 +913,7 @@ export const sea: Record<string, CardScript> = {
         const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
         ctx.requestCardChoice(
           "glidewell",
-          decisionPrompt("Put an arrow face-up into your arsenal", "card.sea.arrow.hand.arsenal.required"),
+          decisionPrompt("Put an arrow face-up into your arsenal", "card.common.arrow.arsenal.faceup"),
           arrows.map((card) => card.instanceId),
         );
       },
@@ -1731,7 +1729,7 @@ function seaTargets(ctx: ScriptCtx, hook: string, baseAmount: number): void {
   ]);
   ctx.requestChoice(
     hook,
-    decisionPrompt(`Choose a target for ${amount} arcane damage`, "card.sea.damage.arcane.target", {
+    decisionPrompt(`Choose a target for ${amount} arcane damage`, "card.common.arcane.damage.target", {
       values: { amount },
       optionMessages: Object.fromEntries(
         targets.map(({ option, cardId }) => [
@@ -2236,7 +2234,7 @@ Object.assign(sea, {
         const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
         ctx.requestCardChoice(
           "manta",
-          decisionPrompt("Put an arrow face-up into arsenal", "card.sea.arrow.hand.arsenal.required"),
+          decisionPrompt("Put an arrow face-up into arsenal", "card.common.arrow.arsenal.faceup"),
           arrows.map((card) => card.instanceId),
         );
       },
@@ -2536,7 +2534,7 @@ Object.assign(sea, {
       entersArenaTrigger(
         "Create 3 Seismic Surge tokens",
         decisionMessage("card.trigger.common.seismicsurge.create.count", { count: 3 }),
-        (ctx) => ctx.createTokens("SBR035", 3),
+        (ctx) => ctx.createTokens(SEISMIC_SURGE, 3),
       ),
       {
         event: "begin-action-phase",

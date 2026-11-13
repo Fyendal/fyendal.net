@@ -13,13 +13,12 @@ import {
   resolveDiscardChoice,
   resourceAbility,
 } from "../shared-helpers.js";
+import { QUICKEN } from "../tokens.js";
 
 // ── WTR generic class cards ─────────────────────────────────────────────────
 //
 // These are the generic (class = "generic") cards from Welcome to Rathe that
 // need scripted behaviour beyond the engine's keyword handling.
-
-const QUICKEN_TOKEN_ID = "DVR028";
 
 function cardInGraveyard(
   ctx: ScriptCtx,
@@ -192,7 +191,7 @@ const flockScript = (): CardScript => {
         );
     },
     onAttackDeclared(ctx) {
-      ctx.createToken(QUICKEN_TOKEN_ID);
+      ctx.createToken(QUICKEN);
     },
   };
 };

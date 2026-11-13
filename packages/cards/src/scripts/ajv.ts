@@ -18,10 +18,8 @@ import {
   requestHeroChoice,
   withFusion,
 } from "./shared-helpers.js";
+import { EMBODIMENT_OF_EARTH, FROSTBITE, SEISMIC_SURGE } from "./tokens.js";
 
-const FROSTBITE = "AJV029";
-const EARTH = "AJV028";
-const SEISMIC = "AJV030";
 const SLOTS = ["head", "chest", "arms", "legs"] as const;
 
 function exposed(ctx: ScriptCtx, seat: number): string[] {
@@ -101,7 +99,7 @@ export const ajv: Record<string, CardScript> = {
   "tectonic crust|0": {
     canTriggerOnDefend: (ctx) => defendedWith(ctx, "earth"),
     onDefend(ctx) {
-      ctx.createToken(SEISMIC);
+      ctx.createToken(SEISMIC_SURGE);
     },
   },
   "gauntlets of the boreal domain|0": {
@@ -125,7 +123,7 @@ export const ajv: Record<string, CardScript> = {
   "root-bound trunks|0": {
     canTriggerOnDefend: (ctx) => defendedWith(ctx, "aura"),
     onDefend(ctx) {
-      ctx.createToken(EARTH);
+      ctx.createToken(EMBODIMENT_OF_EARTH);
     },
   },
   "mangle|1": {

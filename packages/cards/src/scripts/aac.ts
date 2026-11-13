@@ -5,7 +5,7 @@ import {
   commonOptionMessages,
   decisionPrompt,
   faceUpGraveyard,
-  hasCardSubtype,
+  isItem,
   isMarked,
   markHero,
   ongoingLabel,
@@ -188,11 +188,11 @@ export const aac: Record<string, CardScript> = {
       return ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasCardSubtype(ctx, card, "item"));
+      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => isItem(ctx, card));
       if (items.length)
         ctx.requestCardChoice(
           "aac-steal-item",
-          decisionPrompt("Steal an item", "card.aac.item.steal"),
+          decisionPrompt("Steal an item", "card.common.item.steal"),
           items.map((card) => card.instanceId),
         );
     },

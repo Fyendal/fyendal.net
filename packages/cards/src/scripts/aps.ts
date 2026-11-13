@@ -17,9 +17,8 @@ import {
   type SuspenseTrigger,
   yesNoPrompt,
 } from "./shared-helpers.js";
+import { CONFIDENCE, TOUGHNESS } from "./tokens.js";
 
-const CONFIDENCE = "APS031";
-const TOUGHNESS = "APS032";
 type Card = DeepReadonly<CardInstance>;
 
 function suspenseTargets(ctx: ScriptCtx): Card[] {
@@ -71,7 +70,7 @@ function pleiades(): CardScript {
         if (targets.length)
           ctx.requestCardChoice(
             "aps-pleiades-add",
-            decisionPrompt("Put a suspense counter on an aura of suspense?", "card.aps.suspense.counter.add.optional", {
+            decisionPrompt("Put a suspense counter on an aura of suspense?", "card.common.suspense.counter.add", {
               optionMessages: commonOptionMessages("pass"),
             }),
             ["pass", ...targets.map((card) => card.instanceId)],
@@ -93,7 +92,7 @@ function returnAttackToTop(ctx: ScriptCtx): void {
   const attacks = faceUpGraveyard(ctx).filter(
       (card) =>
         ctx.hasCardType(card, "action") &&
-        ctx.cardTypes(card).includes("attack") &&
+        hasCardSubtype(ctx, card, "attack") &&
         (hasCardSubtype(ctx, card, "revered") || hasCardSubtype(ctx, card, "guardian")),
     );
   if (attacks.length)
@@ -266,7 +265,7 @@ export const aps: Record<string, CardScript> = {
       if (n > 0)
         ctx.requestCardChoices(
           "aps-tear-discard",
-          decisionPrompt(`Choose ${n} ${n === 1 ? "card" : "cards"} to discard`, "card.aps.card.discard.choose", {
+          decisionPrompt(`Choose ${n} ${n === 1 ? "card" : "cards"} to discard`, "card.common.cards.discard.choose", {
             values: { count: n },
           }),
           hand.map((card) => card.instanceId),

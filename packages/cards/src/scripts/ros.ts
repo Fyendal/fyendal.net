@@ -43,14 +43,9 @@ import {
   resourceAbility,
   splitScript,
 } from "./shared-helpers.js";
+import { EMBODIMENT_OF_EARTH, EMBODIMENT_OF_LIGHTNING, PONDER, RUNECHANT, SPECTRAL_SHIELD } from "./tokens.js";
 
 // Rosetta (ROS) — commons, rares, young heroes, and their required tokens.
-
-const EARTH = "ROS025";
-const LIGHTNING = "ROS026";
-const RUNECHANT = "ROS162";
-const PONDER = "ROS237";
-const SPECTRAL_SHIELD = "MST158";
 
 function requestPlanForWorstHandShuffle(ctx: ScriptCtx): void {
   const hand = ctx.player(ctx.seat).hand;
@@ -116,7 +111,7 @@ function dealArcaneRecordingAllyTarget(ctx: ScriptCtx, option: string, amount: n
 }
 
 function earthForm(): CardScript {
-  return { onHit: (ctx) => ctx.createToken(EARTH) };
+  return { onHit: (ctx) => ctx.createToken(EMBODIMENT_OF_EARTH) };
 }
 
 function fellingOfTheCrown(): CardScript {
@@ -128,7 +123,7 @@ function fellingOfTheCrown(): CardScript {
       if (hand.length === 0) continue;
       ctx.requestCardChoice(
         `felling-hand:${index}:${choiceSeat}`,
-        decisionPrompt("Put a card from your hand on the bottom of your deck", "card.ros.hand.card.bottom"),
+        decisionPrompt("Put a card from your hand on the bottom of your deck", "card.common.cost.hand.deckbottom"),
         hand.map((card) => card.instanceId),
         choiceSeat,
       );
@@ -235,7 +230,7 @@ function conditionalPreventEquipment(amount: number, condition: (ctx: ScriptCtx)
 }
 
 function lightningForm(): CardScript {
-  return { onHit: (ctx) => ctx.createToken(LIGHTNING) };
+  return { onHit: (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING) };
 }
 
 const valleyChannel = channelLightning("valleyChannelRemaining", "ros-valley-channel");
@@ -406,7 +401,7 @@ function popBubble(amount: number): CardScript {
       if (auras.length)
         ctx.requestCardChoice(
           "pop-aura",
-          decisionPrompt("Destroy an aura permanent", "card.ros.aura.destroy"),
+          decisionPrompt("Destroy an aura permanent", "card.common.aura.destroy"),
           auras.map((card) => card.instanceId),
         );
     },
@@ -507,7 +502,7 @@ function arsenalHit(required: "attack" | "non-attack" | "instant"): CardScript {
 export const ros: Record<string, CardScript> = {
   "florian|0": {
     replaceFriendlyTokenCreation(ctx, cardId, count) {
-      return fourEarthBanished(ctx) && hasCardSubtype(ctx, { cardId, owner: ctx.seat, instanceId: -1 }, "aura")
+      return fourEarthBanished(ctx) && isAura(ctx, { cardId, owner: ctx.seat, instanceId: -1 })
         ? count + 1
         : count;
     },
@@ -521,7 +516,7 @@ export const ros: Record<string, CardScript> = {
       timing: "instant",
       oncePerTurn: true,
       canActivate: (ctx) => playedLightning(ctx),
-      onActivate: (ctx) => ctx.createToken(LIGHTNING),
+      onActivate: (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING),
     },
   },
   "verdance|0": verdance(4),
@@ -550,7 +545,7 @@ export const ros: Record<string, CardScript> = {
           event.damage.byController &&
           ctx.getState("earthPitchedTurn") === ctx.state.turn,
         onTrigger: (ctx) => ctx.setState("earthPitchedTurn", 0),
-        effect: (ctx) => ctx.createToken(EARTH),
+        effect: (ctx) => ctx.createToken(EMBODIMENT_OF_EARTH),
       },
     ],
   },
@@ -600,7 +595,7 @@ export const ros: Record<string, CardScript> = {
       leavesArenaTrigger(
         "Create Embodiment of Earth",
         decisionMessage("card.trigger.common.embodimentearth.create"),
-        (ctx) => ctx.createToken(EARTH),
+        (ctx) => ctx.createToken(EMBODIMENT_OF_EARTH),
       ),
     ],
   },
@@ -629,7 +624,7 @@ export const ros: Record<string, CardScript> = {
       leavesArenaTrigger(
         "Create Embodiment of Lightning",
         decisionMessage("card.trigger.common.embodimentlightning.create"),
-        (ctx) => ctx.createToken(LIGHTNING),
+        (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING),
       ),
     ],
   },
@@ -714,7 +709,7 @@ export const ros: Record<string, CardScript> = {
     if (hand.length) {
       ctx.requestCardChoice(
         "cycles-discard",
-        decisionPrompt("Discard a card", "card.ros.card.discard"),
+        decisionPrompt("Discard a card", "card.common.card.discard.choose"),
         hand.map((card) => card.instanceId),
       );
     } else {
@@ -722,8 +717,8 @@ export const ros: Record<string, CardScript> = {
     }
   }),
   "sigil of fyendal|3": beginningAuraWithLeave(undefined, (ctx) => ctx.gainLife(ctx.seat, 1)),
-  "sigil of earth|3": beginningAuraWithLeave(undefined, (ctx) => ctx.createToken(EARTH)),
-  "sigil of lightning|3": beginningAuraWithLeave(undefined, (ctx) => ctx.createToken(LIGHTNING)),
+  "sigil of earth|3": beginningAuraWithLeave(undefined, (ctx) => ctx.createToken(EMBODIMENT_OF_EARTH)),
+  "sigil of lightning|3": beginningAuraWithLeave(undefined, (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING)),
 };
 
 for (const pitch of [1, 2, 3]) {
@@ -937,7 +932,7 @@ Object.assign(ros, {
       ctx.setState("germinateRemaining", count);
       ctx.requestChoice(
         "germinate-token",
-        decisionPrompt("Create which token?", "card.ros.token.create", {
+        decisionPrompt("Create which token?", "card.common.token.create.choose", {
           optionMessages: {
             Runechant: decisionMessage("card.ros.option.runechant"),
             "Embodiment of Earth": decisionMessage("card.ros.option.earth"),
@@ -1044,7 +1039,7 @@ Object.assign(ros, {
   "barkskin of the millennium tree|0": {
     canTriggerOnDefend: fourEarthBanished,
     onDefend(ctx: ScriptCtx) {
-      if (fourEarthBanished(ctx)) ctx.createToken(EARTH);
+      if (fourEarthBanished(ctx)) ctx.createToken(EMBODIMENT_OF_EARTH);
     },
   },
   "felling of the crown|1": fellingOfTheCrown(),
@@ -1073,7 +1068,7 @@ Object.assign(ros, {
         event: "end-of-turn",
         label: "Create Embodiment of Earth",
         effect(ctx: ScriptCtx) {
-          ctx.createToken(EARTH);
+          ctx.createToken(EMBODIMENT_OF_EARTH);
           if (ctx.getFlag("player", "banishedSubtype:earth") !== true) ctx.destroySelf();
         },
       },
@@ -1186,7 +1181,7 @@ Object.assign(ros, {
         !requestDiscardChoice(
           ctx,
           "face-purgatory-discard",
-          decisionPrompt("Choose a card to discard", "card.ros.card.discard"),
+          decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
           opponentSeat(ctx),
         )
       )
@@ -1209,7 +1204,7 @@ Object.assign(ros, {
         requestDiscardChoice(
           ctx,
           "snuff-discard",
-          decisionPrompt("Choose a card to discard", "card.ros.card.discard"),
+          decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
           opponentSeat(ctx),
         );
       else if (hook === "snuff-discard") resolveDiscardChoice(ctx, option, opponentSeat(ctx));
@@ -1361,7 +1356,7 @@ Object.assign(ros, {
       if (auras.length)
         ctx.requestCardChoice(
           "facade-aura",
-          decisionPrompt("Destroy an aura", "card.ros.aura.destroy", { optionMessages: commonOptionMessages("no") }),
+          decisionPrompt("Destroy an aura", "card.common.aura.destroy", { optionMessages: commonOptionMessages("no") }),
           ["no", ...auras.map((card) => card.instanceId)],
         );
     },
@@ -1450,7 +1445,7 @@ Object.assign(ros, {
       requestDiscardChoice(
         ctx,
         "drink-discard",
-        decisionPrompt("Choose a card to discard", "card.ros.card.discard"),
+        decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
         loser,
       );
     },
@@ -1592,13 +1587,13 @@ Object.assign(ros, {
 
 ros["germinate|3"]!.onChoose = (ctx, hook, option) => {
   if (hook === "germinate-token") {
-    ctx.createToken(option === "Runechant" ? RUNECHANT : EARTH);
+    ctx.createToken(option === "Runechant" ? RUNECHANT : EMBODIMENT_OF_EARTH);
     const remaining = ctx.getState("germinateRemaining") - 1;
     ctx.setState("germinateRemaining", remaining);
     if (remaining > 0)
       ctx.requestChoice(
         "germinate-token",
-        decisionPrompt("Create which token?", "card.ros.token.create", {
+        decisionPrompt("Create which token?", "card.common.token.create.choose", {
           optionMessages: {
             Runechant: decisionMessage("card.ros.option.runechant"),
             "Embodiment of Earth": decisionMessage("card.ros.option.earth"),

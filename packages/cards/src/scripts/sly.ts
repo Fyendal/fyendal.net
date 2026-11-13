@@ -21,6 +21,7 @@ import {
   yesNoPrompt,
   isSuspenseAura,
 } from "./shared-helpers.js";
+import { CONFIDENCE, MIGHT } from "./tokens.js";
 
 // ── SLY (Silver Age: Lyath Goldmane precon) ─────────────────────────────────
 //
@@ -41,8 +42,6 @@ import {
 //   engine: ctx.compareLife + the lifeTiebreak script marker), and the
 //   Confidence defender limit (engine: Modifier.maxNonBlockDefenders).
 
-const CONFIDENCE = "SLY034";
-const MIGHT = "SLY035";
 const BOO = crowdTrigger("boo");
 
 /** An "aura of suspense" is an aura with the Suspense keyword (SUP notes). */

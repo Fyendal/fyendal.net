@@ -12,6 +12,7 @@ import {
   faceUpGraveyard,
   hasCardSubtype,
   hitHookLabel,
+  isAlly,
   isAttackAction,
   isFused,
   isNonAttackAction,
@@ -24,9 +25,7 @@ import {
   yesNoPrompt,
 } from "../shared-helpers.js";
 import { dragonAttack } from "./dragon-attack.js";
-
-const ASH = "UPR043";
-const FROSTBITE = "SIY035";
+import { ASH, FROSTBITE } from "../tokens.js";
 
 function isIceAffliction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return cardNamed(ctx, card, "frostbite") || (hasCardSubtype(ctx, card, "ice") &&
@@ -236,8 +235,8 @@ export const uprHighRarity: Record<string, CardScript> = {
     canPlay(ctx) {
       return (
         !!ctx.link &&
-        (ctx.cardTypes(ctx.link.attackingCard).includes("draconic") ||
-          ctx.cardTypes(ctx.link.attackingCard).includes("ninja"))
+        (hasCardSubtype(ctx, ctx.link.attackingCard, "draconic") ||
+          hasCardSubtype(ctx, ctx.link.attackingCard, "ninja"))
       );
     },
     onPlay(ctx) {
@@ -390,7 +389,7 @@ export const uprHighRarity: Record<string, CardScript> = {
           if (hand.length)
             ctx.requestCardChoice(
               "coronet-discard",
-              decisionPrompt("Choose a card to discard", "card.upr.discard.choose"),
+              decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
               hand.map((card) => card.instanceId),
               seat,
             );
@@ -403,7 +402,7 @@ export const uprHighRarity: Record<string, CardScript> = {
         if (hand.length)
           ctx.requestCardChoice(
             "coronet-discard",
-            decisionPrompt("Choose a card to discard", "card.upr.discard.choose"),
+            decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
             hand.map((card) => card.instanceId),
             opponentSeat(ctx),
           );
@@ -477,7 +476,7 @@ export const uprHighRarity: Record<string, CardScript> = {
         requestDiscardChoice(
           ctx,
           "chill-discard",
-          decisionPrompt("Choose a card to discard", "card.upr.discard.choose"),
+          decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
           opponentSeat(ctx),
         );
       else if (hook === "chill-discard") resolveDiscardChoice(ctx, option, opponentSeat(ctx));
@@ -509,7 +508,7 @@ export const uprHighRarity: Record<string, CardScript> = {
         goAgain: false,
         oncePerTurn: true,
         label: "Attack",
-        canActivate: (ctx) => hasCardSubtype(ctx, ctx.self, "ally"),
+        canActivate: (ctx) => isAlly(ctx, ctx.self),
       },
     ],
   },
@@ -604,7 +603,7 @@ export const uprHighRarity: Record<string, CardScript> = {
       if (cards.length)
         ctx.requestCardChoice(
           "duplicity",
-          decisionPrompt("Choose a card to banish", "card.upr.card.banish.choose"),
+          decisionPrompt("Choose a card to banish", "card.common.card.banish.choose"),
           cards.map((card) => card.instanceId),
         );
     },

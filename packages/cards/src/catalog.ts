@@ -1,6 +1,7 @@
 import type { CardData, Decklist, DeckPool, Format, PresentedDeck } from "@fyendal/shared";
 import { decodeCardDataList } from "./cardData.js";
 import { functionalKey, functionalKeyOf } from "./functional.js";
+import * as canonicalTokens from "./scripts/tokens.js";
 import cards1HP from "./data/cards/1HP.json" with { type: "json" };
 import cardsAAC from "./data/cards/AAC.json" with { type: "json" };
 import cardsAHA from "./data/cards/AHA.json" with { type: "json" };
@@ -860,9 +861,13 @@ export const cardList = rawCardList.map((c) => {
   };
 });
 
-export const cardData: Record<string, CardData> = Object.fromEntries(
-  cardList.map((c) => [c.id, c]),
-);
+const canonicalTokenIds = new Set<string>(Object.values(canonicalTokens));
+
+// The engine creates every token as the first same-name printing in this record.
+export const cardData: Record<string, CardData> = Object.fromEntries([
+  ...cardList.filter((c) => canonicalTokenIds.has(c.id)),
+  ...cardList.filter((c) => !canonicalTokenIds.has(c.id)),
+].map((c) => [c.id, c]));
 
 /** Validate arena cards independently of the later main-deck selection. */
 export function validateArena(

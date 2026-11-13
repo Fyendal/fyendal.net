@@ -9,12 +9,9 @@ import {
   isSword,
   localizedLog,
 } from "../shared-helpers.js";
+import { BLADE_DANCE, FLURRY } from "../tokens.js";
 
 type Card = DeepReadonly<CardInstance>;
-
-const BLADE_DANCE = "MPW134";
-const MPW_FLURRY = "MPW135";
-const SBL_FLURRY = "SBL036";
 
 export const SHARPEN_FOLLOWUP = {
   SBL_FLURRY: 1,
@@ -54,7 +51,7 @@ export function resolveSharpenFollowup(
 
   switch (kind) {
     case SHARPEN_FOLLOWUP.SBL_FLURRY:
-      ctx.createToken(SBL_FLURRY);
+      ctx.createToken(FLURRY);
       break;
     case SHARPEN_FOLLOWUP.DISCOUNT:
       buffNextAttack(ctx, { attackActivationCostReduction: 1, appliesToInstanceId: instanceId }, source);
@@ -63,7 +60,7 @@ export function resolveSharpenFollowup(
       ctx.createToken(BLADE_DANCE);
       break;
     case SHARPEN_FOLLOWUP.MPW_FLURRY:
-      ctx.createToken(MPW_FLURRY);
+      ctx.createToken(FLURRY);
       break;
     case SHARPEN_FOLLOWUP.DRAW_ON_HIT:
       ctx.addModifier(

@@ -14,10 +14,11 @@ import {
   hasLiveTurnEffect,
   hasCardSubtype,
   skeletalPuppetry,
+  isAlly,
 } from "./shared-helpers.js";
+import { GATE_TO_IARATHAEL } from "./tokens.js";
 
 const CORRUPTED_CORPSE = "IAR090";
-const GATE = "IAR222";
 
 function zombies(ctx: ScriptCtx, zone: readonly DeepReadonly<CardInstance>[]) {
   return zone.filter((card) => !card.faceDown && hasCardSubtype(ctx, card, "zombie"));
@@ -76,7 +77,7 @@ export const ama: Record<string, CardScript> = {
       if (hook === "ama-malice-zombie") ctx.allowPlayFrom(Number(option), "graveyard");
     },
     onFriendlyDestroyed(ctx, destroyed) {
-      if (!hasCardSubtype(ctx, destroyed, "zombie") || !hasCardSubtype(ctx, destroyed, "ally")) return;
+      if (!hasCardSubtype(ctx, destroyed, "zombie") || !isAlly(ctx, destroyed)) return;
       ctx.banish(destroyed.instanceId, { faceDown: true });
       ctx.createCardInBanish(CORRUPTED_CORPSE);
     },
@@ -295,7 +296,7 @@ export const ama: Record<string, CardScript> = {
 
   "rites of nightfall|3": {
     onPlay(ctx) {
-      ctx.createToken(GATE);
+      ctx.createToken(GATE_TO_IARATHAEL);
     },
   },
 

@@ -32,27 +32,29 @@ import {
   hasCardSubtype,
   isAttackAction,
   isAura,
+  isItem,
 } from "../shared-helpers.js";
-
-const COURAGE = "DTD232";
-const EARTH = "ELE109";
-const ELOQUENCE = "DTD233";
-const LIGHTNING = "ELE110";
-const NASRETH = "DTD193";
-const PONDER = "DYN244";
-const QUICKEN = "DTD234";
-const RUNECHANT = "DTD214";
-const SEISMIC = "DTD204";
-const SPELLBANE = "DTD235";
-const SPECTRAL_SHIELD = "DTD220";
+import {
+  COURAGE,
+  ELOQUENCE,
+  EMBODIMENT_OF_EARTH,
+  EMBODIMENT_OF_LIGHTNING,
+  NASRETH,
+  PONDER,
+  QUICKEN,
+  RUNECHANT,
+  SEISMIC_SURGE,
+  SPECTRAL_SHIELD,
+  SPELLBANE_AEGIS,
+} from "../tokens.js";
 
 const UNITY_TOKEN_BY_HERO = [
   ["boltyn", COURAGE],
-  ["bravo", SEISMIC],
-  ["briar", EARTH],
+  ["bravo", SEISMIC_SURGE],
+  ["briar", EMBODIMENT_OF_EARTH],
   ["dorinthea", COURAGE],
-  ["lexi", LIGHTNING],
-  ["oldhim", SPELLBANE],
+  ["lexi", EMBODIMENT_OF_LIGHTNING],
+  ["oldhim", SPELLBANE_AEGIS],
   ["prism", SPECTRAL_SHIELD],
   ["shiyana", ELOQUENCE],
 ] as const;
@@ -422,7 +424,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
   },
   "banneret of courage|2": solflareToken(COURAGE),
   "banneret of gallantry|2": solflareToken(QUICKEN),
-  "banneret of protection|2": solflareToken(SPELLBANE),
+  "banneret of protection|2": solflareToken(SPELLBANE_AEGIS),
   "beckoning light|1": {
     additionalCost(ctx) {
       const hand = ctx.player(ctx.seat).hand;
@@ -637,7 +639,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
         effect(ctx) {
           ctx.requestCardChoice(
             "vynnset-adult",
-            decisionPrompt("Banish a card", "card.dtd.card.banish"),
+            decisionPrompt("Banish a card", "card.common.card.banish"),
             ctx.player(ctx.seat).hand.map((card) => card.instanceId),
           );
         },
@@ -770,7 +772,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
     canTriggerOnDefend: defendsTogetherWithCardFromHand,
     onDefend(ctx) {
-      ctx.createToken(EARTH);
+      ctx.createToken(EMBODIMENT_OF_EARTH);
     },
   },
   "northern winds|3": {
@@ -788,7 +790,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
     canTriggerOnDefend: defendsTogetherWithCardFromHand,
     onDefend(ctx) {
-      ctx.createToken(SPELLBANE);
+      ctx.createToken(SPELLBANE_AEGIS);
     },
   },
   "call down the lightning|2": {
@@ -797,7 +799,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
     canTriggerOnDefend: defendsTogetherWithCardFromHand,
     onDefend(ctx) {
-      ctx.createToken(LIGHTNING);
+      ctx.createToken(EMBODIMENT_OF_LIGHTNING);
     },
   },
   "scowling flesh bag|0": { onDefend: queueIntimidate },
@@ -826,7 +828,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
     canTriggerOnDefend: defendsTogetherWithCardFromHand,
     onDefend(ctx) {
-      ctx.createToken(SEISMIC);
+      ctx.createToken(SEISMIC_SURGE);
     },
   },
   "bastion of unity|0": {
@@ -960,7 +962,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
       return ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      ctx.requestNameChoice("censor-name", decisionPrompt("Name a card", "card.dtd.card.name"), ctx.seat);
+      ctx.requestNameChoice("censor-name", decisionPrompt("Name a card", "card.common.card.name"), ctx.seat);
     },
     onChoose(ctx, hook, option) {
       if (hook === "censor-name")
@@ -980,11 +982,11 @@ export const dtdHighRarity: Record<string, CardScript> = {
     onHit(ctx) {
       const items = ctx
         .player(opponentSeat(ctx))
-        .board.filter((card) => hasCardSubtype(ctx, card, "item") && (ctx.cardData(card.cardId).cost ?? 0) <= 2);
+        .board.filter((card) => isItem(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 2);
       if (items.length)
         ctx.requestCardChoice(
           "meeps",
-          decisionPrompt("Steal an item", "card.dtd.item.steal"),
+          decisionPrompt("Steal an item", "card.common.item.steal"),
           items.map((card) => card.instanceId),
         );
       else ctx.drawCards(ctx.seat, 1);

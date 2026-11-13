@@ -80,7 +80,7 @@ export const aaz: Record<string, CardScript> = {
         const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
         ctx.requestCardChoice(
           "sharp-shooters",
-          decisionPrompt("Put an arrow face up into your arsenal", "card.aaz.arrow.arsenal.faceup"),
+          decisionPrompt("Put an arrow face up into your arsenal", "card.common.arrow.arsenal.faceup"),
           arrows.map((card) => card.instanceId),
         );
       },

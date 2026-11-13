@@ -10,6 +10,9 @@ import {
   dealArcaneToAnyTargetChoice,
   decisionPrompt,
   faceUpGraveyard,
+  hasCardSubtype,
+  isAlly,
+  isAttackAction,
   isFused,
   isWeaponAttack,
   localizedCardLog,
@@ -22,6 +25,7 @@ import {
   splitScript,
   withFusion,
 } from "./shared-helpers.js";
+import { EMBODIMENT_OF_EARTH, EMBODIMENT_OF_LIGHTNING, RUNECHANT } from "./tokens.js";
 
 // ── SBA (Silver Age: Briar precon) ──────────────────────────────────────────
 //
@@ -33,18 +37,14 @@ import {
 //   base cost, though both SBA splits cost 0)
 // - Guardwell (engine keyword), Quickstrike / Lightning Flow (label keywords)
 
-const EMBODIMENT_OF_EARTH = "SBA034";
-const EMBODIMENT_OF_LIGHTNING = "SBA035";
-const RUNECHANT = "SBA036";
-
 // dealArcane comes from shared-helpers (applies the "next arcane card +N" pool)
 
 // ── Crown of Dichotomy helpers ──────────────────────────────────────────────
 
 function isRunebladeAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, attack: boolean): boolean {
   if (!ctx.hasCardType(card, "action")) return false;
-  if (!ctx.cardTypes(card).includes("runeblade")) return false;
-  return ctx.cardTypes(card).includes("attack") === attack;
+  if (!hasCardSubtype(ctx, card, "runeblade")) return false;
+  return hasCardSubtype(ctx, card, "attack") === attack;
 }
 
 // ── the scripts ─────────────────────────────────────────────────────────────
@@ -77,7 +77,7 @@ export const sba: Record<string, CardScript> = {
         condition: (ctx, played) =>
           !!played &&
           ctx.hasCardType(played, "action") &&
-          !ctx.cardTypes(played).includes("attack") &&
+          !hasCardSubtype(ctx, played, "attack") &&
           Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) === 2,
         effect: (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING),
       },
@@ -91,7 +91,7 @@ export const sba: Record<string, CardScript> = {
       tap: true,
       canActivate(ctx) {
         return ctx.state.chain.some(
-          (l) => l.attacker === ctx.seat && ctx.cardTypes(l.attackingCard).includes("lightning"),
+          (l) => l.attacker === ctx.seat && hasCardSubtype(ctx, l.attackingCard, "lightning"),
         );
       },
     }),
@@ -125,7 +125,7 @@ export const sba: Record<string, CardScript> = {
     },
     onFriendlyPlay(ctx, played) {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
-      if (!ctx.cardTypes(played).includes("lightning")) return;
+      if (!hasCardSubtype(ctx, played, "lightning")) return;
       ctx.grantGoAgain();
     },
   },
@@ -293,7 +293,7 @@ export const sba: Record<string, CardScript> = {
     onHit(ctx) {
       // "When this hits a hero, {u} an ally they control, then steal it until
       // the end of this action phase."
-      const allies = ctx.player(opponentSeat(ctx)).board.filter((c) => ctx.cardTypes(c).includes("ally"));
+      const allies = ctx.player(opponentSeat(ctx)).board.filter((c) => isAlly(ctx, c));
       if (allies.length === 0) return;
       if (allies.length === 1) {
         ctx.untap(allies[0]!.instanceId);
@@ -610,7 +610,7 @@ export const sba: Record<string, CardScript> = {
         event: "card-played",
         label: "Destroy Embodiment of Lightning (attack gains go again)",
         condition: (ctx, played) =>
-          !!played && ctx.hasCardType(played, "action") && ctx.cardTypes(played).includes("attack"),
+          !!played && isAttackAction(ctx, played),
         effect(ctx) {
           ctx.destroySelf();
           ctx.grantGoAgain();
@@ -638,7 +638,7 @@ export const sba: Record<string, CardScript> = {
         event: "card-played",
         label: "Destroy Runechant: 1 arcane damage to the opposing hero",
         condition: (ctx, played) =>
-          !!played && ctx.hasCardType(played, "action") && ctx.cardTypes(played).includes("attack"),
+          !!played && isAttackAction(ctx, played),
         effect(ctx) {
           ctx.destroySelf();
           const unpreventable = ctx.getFlag("player", "nextRunechantUnpreventable") === true;

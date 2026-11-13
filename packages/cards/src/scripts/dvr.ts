@@ -2,6 +2,7 @@ import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
   attackedWithWeapon,
+  isAttackAction,
   isCard,
   isSwordAttack,
   isWeaponAttack,
@@ -15,6 +16,7 @@ import {
   reprise,
   weaponAttackCount,
 } from "./shared-helpers.js";
+import { QUICKEN } from "./tokens.js";
 
 function isDawnblade(ctx: ScriptCtx, cardId: string): boolean {
   return isCard(ctx, cardId, "Dawnblade") || isCard(ctx, cardId, "Dawnblade, Resplendent");
@@ -121,7 +123,7 @@ export const dvr: Record<string, CardScript> = {
         event: "card-played",
         label: "Destroy Quicken (attack gains go again)",
         condition: (ctx, played) =>
-          !!played && ctx.hasCardType(played, "action") && ctx.cardTypes(played).includes("attack"),
+          !!played && isAttackAction(ctx, played),
         effect(ctx) {
           ctx.grantGoAgain();
           ctx.logPublic(
@@ -171,7 +173,7 @@ export const dvr: Record<string, CardScript> = {
           );
       },
       onAttackDeclared(ctx) {
-        ctx.createToken("DVR028");
+        ctx.createToken(QUICKEN);
       },
     };
   })(),

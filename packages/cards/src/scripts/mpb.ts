@@ -5,13 +5,13 @@ import {
   beatenChest,
   decisionMessage,
   decisionPrompt,
+  hasCardSubtype,
   opponentSeat,
   targetsHero,
 } from "./shared-helpers.js";
+import { AGILITY, MIGHT } from "./tokens.js";
 
 // Mastery Pack: Brute.
-const AGILITY = "SBL034";
-const MIGHT = "SLY035";
 const CLUB = "club";
 
 function babaza(): CardScript {
@@ -63,7 +63,7 @@ function zuul(): CardScript {
       },
     },
     onFriendlyAttackDeclared(ctx) {
-      if (ctx.link && ctx.cardTypes(ctx.link.attackingCard).includes(CLUB)) {
+      if (ctx.link && hasCardSubtype(ctx, ctx.link.attackingCard, CLUB)) {
         ctx.addModifier({ scope: "chain-link", goAgainIfAttackPowerAtLeast: 6 });
       }
     },

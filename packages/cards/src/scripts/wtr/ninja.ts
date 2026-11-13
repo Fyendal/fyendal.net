@@ -163,7 +163,7 @@ const katsu: CardScript = {
       }
       ctx.requestCardChoice(
         "katsu-search",
-        decisionPrompt("Katsu: choose a combo card to banish face up", "card.wtr.katsu.combo.choose"),
+        decisionPrompt("Katsu: choose a combo card to banish face up", "card.common.katsu.combo.choose"),
         comboCards.map((c) => c.instanceId),
       );
       return;

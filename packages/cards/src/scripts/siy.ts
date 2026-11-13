@@ -8,7 +8,9 @@ import {
   decisionMessage,
   decisionPrompt,
   discardUnlessPay,
+  hasCardSubtype,
   heroChoiceSeat,
+  isAlly,
   isFused,
   isWizardNonAttack,
   localizedCardLog,
@@ -18,13 +20,12 @@ import {
   withFusion,
   wizardActionAsInstant,
 } from "./shared-helpers.js";
+import { FROSTBITE } from "./tokens.js";
 
 // ── SIY (Silver Age Chapter 1: Iyslander precon) ───────────────────────────
 // Ice Fusion reuses the engine's card-backed additional-cost pause. Frostbite
 // uses generic static-cost and friendly-play/activation hooks so every copy
 // stacks and then destroys itself after the taxed event.
-
-const FROSTBITE = "SIY035";
 
 function dealToChosenTarget(ctx: ScriptCtx, option: string, damage: number): void {
   const target = dealArcaneToAnyTargetChoice(ctx, option, damage);
@@ -39,7 +40,7 @@ function handleDiscardUnlessPay(ctx: ScriptCtx, hook: string, option: string, ke
     if (option !== "paid" && player.hand.length > 0) {
       ctx.requestCardChoice(
         `${key}:discard:${target}`,
-        decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.siy.discard.choose", {
+        decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.common.card.discard.choose.named", {
           values: { card: { kind: "card", cardId: ctx.self.cardId } },
         }),
         player.hand.map((card) => card.instanceId),
@@ -105,7 +106,7 @@ function offerFreezeTarget(ctx: ScriptCtx, target: number): void {
     cardOptions.push(null); // do not reveal the private arsenal card
   }
   for (const card of player.board) {
-    if (!ctx.cardTypes(card).includes("ally")) continue;
+    if (!isAlly(ctx, card)) continue;
     options.push(`ally:${card.instanceId}`);
     cardOptions.push(card.instanceId);
   }
@@ -164,7 +165,7 @@ export const siy: Record<string, CardScript> = {
         event: "card-played",
         label: "Create a Frostbite",
         condition: (ctx, played) =>
-          ctx.state.activePlayer !== ctx.seat && !!played && ctx.cardTypes(played).includes("ice"),
+          ctx.state.activePlayer !== ctx.seat && !!played && hasCardSubtype(ctx, played, "ice"),
         effect: (ctx) => ctx.createToken(FROSTBITE, ctx.state.activePlayer),
       },
     ],

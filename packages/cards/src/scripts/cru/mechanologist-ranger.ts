@@ -1,27 +1,21 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   boostedLinks,
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
   isArrow,
+  isMechanologistItemAtMost,
   localizedCardLog,
   opponentSeat,
   optN,
   optOnChoose,
 } from "../shared-helpers.js";
 
-function isMechanologistItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, maxCost: number): boolean {
-  const data = ctx.cardData(card.cardId);
-  return (
-    ctx.cardTypes(card).includes("mechanologist") && ctx.cardTypes(card).includes("item") && (data.cost ?? 0) <= maxCost
-  );
-}
-
 function dashSetup(): CardScript {
   return {
     onGameStart(ctx) {
-      const candidates = ctx.state.players[ctx.seat]!.deck.filter((card) => isMechanologistItem(ctx, card, 2));
+      const candidates = ctx.state.players[ctx.seat]!.deck.filter((card) => isMechanologistItemAtMost(ctx, card, 2));
       if (candidates.length === 0) return;
       ctx.requestCardChoice(
         "dash-start-item",
@@ -40,7 +34,7 @@ function dashSetup(): CardScript {
       if (hook !== "dash-start-item" || option === "none") return;
       const instanceId = Number(option);
       const card = ctx.state.players[ctx.seat]!.deck.find((candidate) => candidate.instanceId === instanceId);
-      if (!card || !isMechanologistItem(ctx, card, 2)) return;
+      if (!card || !isMechanologistItemAtMost(ctx, card, 2)) return;
       if (ctx.settleCard(instanceId)) ctx.shuffleDeck(ctx.seat);
     },
   };
@@ -49,7 +43,7 @@ function dashSetup(): CardScript {
 function dataDoll(): CardScript {
   return {
     onCardBanished(ctx, card, from) {
-      if (from !== "deck" || !isMechanologistItem(ctx, card, 2)) return;
+      if (from !== "deck" || !isMechanologistItemAtMost(ctx, card, 2)) return;
       ctx.settleCard(card.instanceId);
     },
   };
@@ -117,7 +111,7 @@ function finishWorkshop(ctx: ScriptCtx, maxCost: number): void {
       { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
     ),
   );
-  if (isMechanologistItem(ctx, top, maxCost)) ctx.settleCard(top.instanceId);
+  if (isMechanologistItemAtMost(ctx, top, maxCost)) ctx.settleCard(top.instanceId);
 }
 
 function teklovossensWorkshop(maxCost: number): CardScript {

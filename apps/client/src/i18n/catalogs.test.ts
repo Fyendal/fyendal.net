@@ -137,6 +137,11 @@ const LOCALIZED_CATALOGS: ReadonlyArray<readonly [string, Record<string, unknown
 ];
 
 describe("locale catalogs", () => {
+  it.each([["en", englishMessages], ...LOCALIZED_CATALOGS])("keeps %s keys sorted", (_, messages) => {
+    const ids = Object.keys(messages);
+    expect(ids).toEqual([...ids].sort());
+  });
+
   it.each(LOCALIZED_CATALOGS)("keeps %s complete with the English source catalog", (_, messages) => {
     expect(Object.keys(messages).sort()).toEqual(Object.keys(englishMessages).sort());
   });

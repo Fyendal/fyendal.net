@@ -5,6 +5,8 @@ import {
   commonOptionMessages,
   decisionPrompt,
   faceUpGraveyard,
+  hasCardSubtype,
+  isAttackAction,
   opponentSeat,
   previousAttackHasName,
   previousAttackNameContains,
@@ -22,7 +24,7 @@ function previousWasEdgeOrVengeance(ctx: ScriptCtx): boolean {
 
 function ninjaAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return (
-    ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack") && ctx.cardTypes(card).includes("ninja")
+    isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "ninja")
   );
 }
 
@@ -202,7 +204,7 @@ export const asr: Record<string, CardScript> = {
 
   "legacy of ikaru|3": {
     canPlay: (ctx) =>
-      !!ctx.link && ctx.link.attacker === ctx.seat && ctx.cardTypes(ctx.link.attackingCard).includes("ninja"),
+      !!ctx.link && ctx.link.attacker === ctx.seat && hasCardSubtype(ctx, ctx.link.attackingCard, "ninja"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
     },

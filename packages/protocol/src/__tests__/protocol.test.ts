@@ -117,7 +117,7 @@ describe("semantic game messages", () => {
     "engine.decision.token.playerorder",
     "engine.decision.token.next",
     "engine.decision.wager.next",
-    "card.sea.damage.arcane.target",
+    "card.common.arcane.damage.target",
     "card.sea.target.card",
     "card.sea.treasure.counter.add",
     "card.sea.treasure.counter.remove",

@@ -24,12 +24,9 @@ import {
   revealTopSixPlusStays,
 } from "./shared-helpers.js";
 import { hvyHighRarity, wagerAttack } from "./hvy/high-rarity.js";
+import { AGILITY, GOLD, MIGHT, VIGOR } from "./tokens.js";
 
 // Heavy Hitters — commons, rares, young heroes, and required wager tokens.
-const AGILITY = "SBL034";
-const MIGHT = "SLY035";
-const VIGOR = "SDO036";
-const GOLD = "SGB035";
 
 function drawnThisTurn(ctx: ScriptCtx): boolean {
   return Number(ctx.getPlayerFlag(ctx.seat, "cardsDrawnThisTurn")) > 0;
@@ -157,7 +154,7 @@ function cutTheDeck(power: number): CardScript {
       if (options.length) {
         ctx.requestCardChoice(
           "cut-bottom",
-          decisionPrompt("Put a card from hand or arsenal on the bottom", "card.hvy.hand.arsenal.bottom"),
+          decisionPrompt("Put a card from hand or arsenal on the bottom", "card.common.handorarsenal.bottom"),
           options,
         );
       }
@@ -265,7 +262,7 @@ function stackInFavor(defense: number): CardScript {
           if (hand.length) {
             ctx.requestCardChoice(
               "stacked-top",
-              decisionPrompt("Put a card from your hand on top of your deck", "card.hvy.hand.top"),
+              decisionPrompt("Put a card from your hand on top of your deck", "card.common.hand.card.top"),
               hand.map((card) => card.instanceId),
             );
           }

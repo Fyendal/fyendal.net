@@ -8,10 +8,7 @@ import type {
   TriggerDef,
 } from "@fyendal/engine";
 import {
-  BLOODROT_POX,
   faceUpGraveyard,
-  FRAILTY,
-  INERTIA,
   isAttackAction,
   NAMED_DISEASE_TOKENS,
   armDelayedEffect,
@@ -44,9 +41,9 @@ import {
   targetsHero,
   tokenContractWithSilver,
   isDagger,
+  hasCardSubtype,
 } from "./shared-helpers.js";
-
-const SILVER = "DYN245";
+import { BLOODROT_POX, FRAILTY, INERTIA, SILVER } from "./tokens.js";
 
 function seedDisease(tokenId: string): CardScript {
   return {
@@ -106,7 +103,7 @@ function daggerTargets(ctx: ScriptCtx): number[] {
 
 function activeAssassinAttack(ctx: ScriptCtx): number[] {
   const link = ctx.link;
-  if (!link || link.flags.attackGone === true || !ctx.cardTypes(link.attackingCard).includes("assassin")) return [];
+  if (!link || link.flags.attackGone === true || !hasCardSubtype(ctx, link.attackingCard, "assassin")) return [];
   return [link.attackingCard.instanceId];
 }
 
@@ -115,7 +112,7 @@ function assassinAttackActionTargets(ctx: ScriptCtx): number[] {
     .filter((link) =>
       link.flags.attackGone !== true &&
       link.attackCardType === "action" &&
-      ctx.cardTypes(link.attackingCard).includes("assassin")
+      hasCardSubtype(ctx, link.attackingCard, "assassin")
     )
     .map((link) => link.attackingCard.instanceId);
 }
@@ -134,7 +131,7 @@ function festering(tokenId: string, label: Pick<Modifier, "ongoingLabel" | "ongo
 }
 
 function hitsAssassinHero(ctx: ScriptCtx): boolean {
-  return targetsHero(ctx) && ctx.cardTypes(ctx.player(opponentSeat(ctx)).hero).includes("assassin");
+  return targetsHero(ctx) && hasCardSubtype(ctx, ctx.player(opponentSeat(ctx)).hero, "assassin");
 }
 
 function spawnDisease(tokenId: string): CardScript {
@@ -525,7 +522,7 @@ export const mpa: Record<string, CardScript> = {
       },
     }),
     onFriendlyPlay(ctx, played) {
-      if (!isAttackAction(ctx, played) || !ctx.cardTypes(played).includes("assassin")) return;
+      if (!isAttackAction(ctx, played) || !hasCardSubtype(ctx, played, "assassin")) return;
       // The granted rider is the card's other modifier; only the waiting effect is consumed.
       if (!consumeDelayedEffect(ctx, { match: (modifier) => !modifier.expiresOnChainClose })) return;
       armGrantedHitRider(
@@ -1276,7 +1273,7 @@ export const mpa: Record<string, CardScript> = {
         youAreArakni(ctx) &&
         card.owner === opponentSeat(ctx) &&
         !card.faceDown &&
-        ctx.cardTypes(card).includes("assassin"),
+        hasCardSubtype(ctx, card, "assassin"),
       youAreArakni,
     ),
   ),

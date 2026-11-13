@@ -8,8 +8,7 @@ import {
   opponentSeat,
   yesNoPrompt,
 } from "./shared-helpers.js";
-
-const MIGHT = "AKO028";
+import { MIGHT } from "./tokens.js";
 
 export const ako: Record<string, CardScript> = {
   "kayo, armed and dangerous|0": {

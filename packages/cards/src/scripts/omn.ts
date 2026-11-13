@@ -22,6 +22,7 @@ import {
   heroTarget,
   isAttackAction,
   isAura,
+  isTokenAura,
   leavesArenaTrigger,
   mergeSetScripts,
   ongoingLabel,
@@ -34,19 +35,12 @@ import {
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { omnHighRarity } from "./omn/high-rarity.js";
+import { EMBODIMENT_OF_LIGHTNING, LIGHTNING_FLOW, OMENS_OF_ARCANA, PONDER } from "./tokens.js";
 
 // Omens of the Third Age (OMN) — complete set and tokens.
 
-const FLOW = "OMN203";
-const EMBODIMENT = "ROS026";
-const PONDER = "ROS237";
-const OMENS = "OMN227";
-
 type Card = DeepReadonly<CardInstance>;
 
-function isTokenAura(ctx: ScriptCtx, card: Card): boolean {
-  return ctx.hasCardType(card, "token") && isAura(ctx, card);
-}
 function flows(ctx: ScriptCtx, seat = ctx.seat): Card[] {
   return ctx.player(seat).board.filter((card) => cardNamed(ctx, card, "Lightning Flow"));
 }
@@ -90,7 +84,7 @@ function createOnStarfall(base: number): CardScript {
   return {
     ...spell,
     onPlay(ctx) {
-      if (starfall(ctx)) ctx.createToken(FLOW);
+      if (starfall(ctx)) ctx.createToken(LIGHTNING_FLOW);
       spell.onPlay?.(ctx);
     },
   };
@@ -216,7 +210,7 @@ function leavesFlowTrigger(): TriggerDef {
   return leavesArenaTrigger(
     "Create a Lightning Flow token",
     decisionMessage("card.trigger.common.lightningflow.create"),
-    (ctx) => ctx.createToken(FLOW),
+    (ctx) => ctx.createToken(LIGHTNING_FLOW),
   );
 }
 
@@ -235,7 +229,7 @@ function discardArcaneFlow(): CardScript {
     onChoose(ctx, hook, option) {
       if (hook !== "discard-bolt") return;
       dealToChoice(ctx, option, 1);
-      ctx.createToken(FLOW);
+      ctx.createToken(LIGHTNING_FLOW);
     },
   };
 }
@@ -368,7 +362,7 @@ function nextAttackDamageRider(kind: "memory" | "renown" | "vitality"): CardScri
       if (auras.length)
         ctx.requestCardChoice(
           "leech-renown",
-          decisionPrompt("Destroy an aura token", "card.omn.aura.token.destroy"),
+          decisionPrompt("Destroy an aura token", "card.common.cost.auratoken.destroy"),
           auras.map((card) => card.instanceId),
         );
     }
@@ -616,14 +610,14 @@ function twicePump(): CardScript {
         ctx.addCardTempPower(ctx.self.instanceId, 1);
       },
     },
-    onHit: (ctx) => ctx.createToken(FLOW),
+    onHit: (ctx) => ctx.createToken(LIGHTNING_FLOW),
   };
 }
 
 function playedInstantBonus(amount: number, goAgain = false): CardScript {
   return {
     modifyAttack: (ctx) => (ctx.link?.flags.playedInstant === true ? amount : 0),
-    ...(goAgain ? {} : { onHit: (ctx: ScriptCtx) => ctx.createToken(FLOW) }),
+    ...(goAgain ? {} : { onHit: (ctx: ScriptCtx) => ctx.createToken(LIGHTNING_FLOW) }),
   };
 }
 
@@ -643,7 +637,7 @@ function destroyAuraTokenOnHit(): CardScript {
       if (auras.length)
         ctx.requestCardChoice(
           "destroy-token-aura",
-          decisionPrompt(`${ctx.data.name}: destroy an aura token`, "card.omn.aura.token.destroy.named", {
+          decisionPrompt(`${ctx.data.name}: destroy an aura token`, "card.common.auratoken.destroy.named", {
             values: { card: { kind: "card", cardId: ctx.self.cardId } },
           }),
           auras.map((card) => card.instanceId),
@@ -661,7 +655,7 @@ function clearConscience(): CardScript {
     if (hand.length)
       ctx.requestCardChoice(
         hook,
-        decisionPrompt("Put a card from your hand on the bottom", "card.omn.hand.card.bottom"),
+        decisionPrompt("Put a card from your hand on the bottom", "card.common.hand.card.bottom"),
         hand.map((card) => card.instanceId),
         seat,
       );
@@ -804,10 +798,10 @@ function chromatic(pitch: number): CardScript {
 export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRarity, {
   "omens of arcana|0": {
     global: true,
-    onGameStart: (ctx) => ctx.createToken(FLOW),
+    onGameStart: (ctx) => ctx.createToken(LIGHTNING_FLOW),
   },
   "lightning flow|0": {
-    spellvoidValue: (ctx) => (ctx.state.globalCardIds.includes(OMENS) ? 1 : 0),
+    spellvoidValue: (ctx) => (ctx.state.globalCardIds.includes(OMENS_OF_ARCANA) ? 1 : 0),
   },
   "zyggy|0": {
     activated: {
@@ -849,7 +843,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   },
   "blink of an eye|1": holoBlink(),
   "fraying lifeforce|1": fragment((ctx) => ctx.gainLife(ctx.seat, 1)),
-  "scattering conflux|1": fragment((ctx) => ctx.createToken(EMBODIMENT)),
+  "scattering conflux|1": fragment((ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING)),
   ...pitches("polarus pulse ray", () =>
     fragment((ctx) => {
       if (ctx.link?.targetAllyId === undefined) dealArcane(ctx, opponentSeat(ctx), 1);
@@ -859,7 +853,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   ...pitches("cosmic duality", () => discardArcaneFlow()),
   ...pitches("ebbing arcstride", () => fragment((ctx) => ctx.grantGoAgain())),
   ...pitches("pulsing cardia", () => fragment((ctx) => ctx.gainResources(ctx.seat, 1))),
-  ...pitches("shattering flowtide", () => fragment((ctx) => ctx.createToken(FLOW))),
+  ...pitches("shattering flowtide", () => fragment((ctx) => ctx.createToken(LIGHTNING_FLOW))),
   ...pitches("auric shards", (pitch) => auraEnterAttack({ attack: 1, fragmentOnly: true, holoAttack: 5 - pitch })),
   ...pitches("holo shield", (pitch) => fragmentWard(5 - pitch)),
   "circular flowtide|2": { triggers: [leavesFlowTrigger()] },
@@ -868,7 +862,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       leavesArenaTrigger(
         "Create Embodiment of Lightning",
         decisionMessage("card.trigger.common.embodimentlightning.create"),
-        (ctx) => ctx.createToken(EMBODIMENT),
+        (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING),
       ),
     ],
   },
@@ -917,7 +911,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
           prompt: decisionPrompt("Choose a Lightning Flow to destroy", "card.common.cost.lightningflow.destroy"),
         },
       ],
-      onActivate: (ctx) => ctx.createToken(EMBODIMENT),
+      onActivate: (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING),
     },
   },
   "snap fingers|0": {
@@ -939,7 +933,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
     firstDamage: {
       label: "Create Embodiment of Lightning",
       labelMessage: { id: "card.trigger.common.embodimentlightning.create" },
-      effect: (ctx) => ctx.createToken(EMBODIMENT),
+      effect: (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING),
     },
   }),
   "electryn mindmeld|2": {
@@ -981,7 +975,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       firstDamage: {
         label: "Create a Lightning Flow token",
         labelMessage: { id: "card.trigger.common.lightningflow.create" },
-        effect: (ctx) => ctx.createToken(FLOW),
+        effect: (ctx) => ctx.createToken(LIGHTNING_FLOW),
       },
     }),
   ),
@@ -1009,7 +1003,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   ...pitches("electryn joltstep", (pitch) => ({
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 4 - pitch, appliesToType: ["runeblade", "lightning"] });
-      ctx.createToken(FLOW);
+      ctx.createToken(LIGHTNING_FLOW);
     },
   })),
   ...pitches("quick succession", (pitch) => quickSuccession(4 - pitch)),
@@ -1039,7 +1033,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
         if (hand.length) {
           ctx.requestCardChoice(
             "oscilio-scion-discard",
-            decisionPrompt("Discard a card", "card.omn.card.discard"),
+            decisionPrompt("Discard a card", "card.common.card.discard"),
             hand.map((card) => card.instanceId),
           );
           return;
@@ -1089,7 +1083,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   })),
   ...pitches("flash bolt", (pitch) => arcaneHero(4 - pitch)),
   ...pitches("comet collision", (pitch) => starfallAny(4 - pitch, 1)),
-  ...pitches("enion surge", (pitch) => damageThenTap(4 - pitch, (ctx) => ctx.createToken(FLOW))),
+  ...pitches("enion surge", (pitch) => damageThenTap(4 - pitch, (ctx) => ctx.createToken(LIGHTNING_FLOW))),
   ...pitches("lightning overload", (pitch) => createOnStarfall(5 - pitch)),
   ...pitches("meteoric impact", (pitch) => starfallAny(4 - pitch, 2)),
   ...pitches("nebula duality", (pitch) => arcaneAndDiscardFlow(4 - pitch)),
@@ -1098,7 +1092,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   ),
   ...pitches("cosmic suture", (pitch) => cosmicSuture(5 - pitch)),
   "constella contemplation|2": constellaStarfall(PONDER),
-  "constella flowslide|2": constellaStarfall(FLOW),
+  "constella flowslide|2": constellaStarfall(LIGHTNING_FLOW),
   "constella uplift|2": {
     ...constellaStarfall(),
     onPlay(ctx) {
@@ -1138,8 +1132,8 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   ),
 
   "constella tiara|0": preventEquipment(PONDER),
-  "starflow robes|0": preventEquipment(FLOW),
-  "laced lightning|0": preventEquipment(EMBODIMENT),
+  "starflow robes|0": preventEquipment(LIGHTNING_FLOW),
+  "laced lightning|0": preventEquipment(EMBODIMENT_OF_LIGHTNING),
   "helm of astral sanctuary|0": sanctuaryEquipment(),
   "robe of astral sanctuary|0": sanctuaryEquipment(),
   "gloves of astral sanctuary|0": sanctuaryEquipment(),
@@ -1166,7 +1160,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
     },
     onChoose(ctx, hook, option) {
       if (hook === "flowshard-discard" && option !== "no" && ctx.discardCard(ctx.seat, Number(option))) {
-        ctx.createToken(FLOW);
+        ctx.createToken(LIGHTNING_FLOW);
         ctx.grantGoAgain();
       }
     },
@@ -1201,7 +1195,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       scope: "chain-link",
       attack: 1,
       appliesToInstanceId: ctx.playTargetInstanceId,
-      onHitCreateToken: { cardId: FLOW, count: 1 },
+      onHitCreateToken: { cardId: LIGHTNING_FLOW, count: 1 },
     });
   }, "lightning"),
   "livewire press|1": {
@@ -1241,14 +1235,14 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       fromHand: true,
       onActivate(ctx) {
         ctx.preventNextDamage(ctx.seat, 1);
-        ctx.addModifier({ scope: "until-end-of-turn", onPreventCreateToken: FLOW });
+        ctx.addModifier({ scope: "until-end-of-turn", onPreventCreateToken: LIGHTNING_FLOW });
       },
     },
   })),
   ...pitches("stellar glide", () => attackDestroysFlowForGoAgain()),
   ...pitches("volatile fluxor", (pitch) => ({
     modifyAttack: (ctx) => (ctx.link?.flags.playedInstant === true ? 4 - pitch : 0),
-    onHit: (ctx) => ctx.createToken(FLOW),
+    onHit: (ctx) => ctx.createToken(LIGHTNING_FLOW),
   })),
   ...pitches("flittering forcefield", () => ({
     modifyDefense: (ctx) => (ctx.link?.flags.playedInstant === true ? 1 : 0),
@@ -1256,22 +1250,22 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   ...pitches("calmveil of volthaven", (pitch) => ({
     onPlay(ctx) {
       ctx.preventNextDamage(ctx.seat, 4 - pitch);
-      ctx.addModifier({ scope: "until-end-of-turn", onPreventCreateToken: FLOW });
+      ctx.addModifier({ scope: "until-end-of-turn", onPreventCreateToken: LIGHTNING_FLOW });
     },
   })),
   "cosmic flare|1": { onPlay: (ctx) => ctx.gainResources(ctx.seat, 3) },
-  "starworld warning|2": { onPlay: (ctx) => ctx.createTokens(FLOW, 2) },
+  "starworld warning|2": { onPlay: (ctx) => ctx.createTokens(LIGHTNING_FLOW, 2) },
   "starlight road|3": {
     onPlay: (ctx) =>
       ctx.requestChoice(
         "starlight-token",
         decisionPrompt("Choose a token", "card.omn.token.choose", {
           optionMessages: {
-            [EMBODIMENT]: decisionMessage("card.omn.option.embodimentoflightning"),
-            [FLOW]: decisionMessage("card.omn.option.lightningflow"),
+            [EMBODIMENT_OF_LIGHTNING]: decisionMessage("card.omn.option.embodimentoflightning"),
+            [LIGHTNING_FLOW]: decisionMessage("card.omn.option.lightningflow"),
           },
         }),
-        [EMBODIMENT, FLOW],
+        [EMBODIMENT_OF_LIGHTNING, LIGHTNING_FLOW],
       ),
     onChoose(ctx, hook, option) {
       if (hook === "starlight-token") ctx.createToken(option);

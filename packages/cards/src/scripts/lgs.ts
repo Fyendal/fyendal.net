@@ -12,8 +12,7 @@ import {
   opponentSeat,
   queueIntimidate,
 } from "./shared-helpers.js";
-
-const RUNECHANT = "SBA036";
+import { RUNECHANT } from "./tokens.js";
 
 function jackOLantern(pitch: 1 | 2 | 3): CardScript {
   return {

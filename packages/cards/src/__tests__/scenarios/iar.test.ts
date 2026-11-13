@@ -1214,10 +1214,8 @@ describe("IAR cards", () => {
 
     g.blockWith().settle().expectLife(1, 16);
 
-    expect(g.state.players[0]!.board.filter((card) => card.cardId === "AJV028"))
-      .toHaveLength(1);
-    expect(g.state.players[1]!.board.filter((card) => card.cardId === "AJV029"))
-      .toHaveLength(4);
+    expect(boardNames(g, 0).filter((name) => name === "Embodiment of Earth")).toHaveLength(1);
+    expect(boardNames(g, 1).filter((name) => name === "Frostbite")).toHaveLength(4);
   });
 
   it("Ancient Earth Oak's Earth Bond adds power and bottoms the attack on hit", () => {
@@ -2314,7 +2312,7 @@ describe("August 31–September 1 IAR spoilers", () => {
         appliesTo: "attack-action",
         attack: 2,
         overpower: true,
-        onHitCreateToken: { cardId: "SBA036", count: 2 },
+        onHitCreateToken: { cardId: RUNECHANT_ID, count: 2 },
       }),
     ]));
     g.play("raging onslaught|1");

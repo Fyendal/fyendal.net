@@ -25,13 +25,13 @@ import {
   optN,
   optOnChoose,
   pitches,
+  requestCrankSteam,
+  resolveCrankSteam,
   resourceAbility,
   upToOneTargetAttack,
 } from "./shared-helpers.js";
 import { evoHighRarity, isMechAttack } from "./evo/high-rarity.js";
-
-const HYPER_DRIVER = "EVO234";
-const QUICKEN = "DVR028";
+import { HYPER_DRIVER, QUICKEN } from "./tokens.js";
 
 function isEvo(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return hasCardSubtype(ctx, card, "evo");
@@ -51,22 +51,6 @@ function initializeCogwerx(ctx: ScriptCtx): void {
 
 function scrapCards(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
   return faceUpGraveyard(ctx).filter((card) => isItem(ctx, card) || ctx.hasCardType(card, "equipment"));
-}
-
-function addSteamToChoice(ctx: ScriptCtx, hook: string): void {
-  const choices = ctx.player(ctx.seat).board.filter((card) => isItem(ctx, card) && ctx.hasCrank(card));
-  if (choices.length)
-    ctx.requestCardChoice(
-      hook,
-      decisionPrompt("Put a steam counter on an item with crank", "card.evo.crankitem.steam.add"),
-      choices.map((card) => card.instanceId),
-    );
-}
-
-function addSteam(ctx: ScriptCtx, option: string): void {
-  const id = Number(option);
-  const target = ctx.player(ctx.seat).board.find((card) => card.instanceId === id);
-  if (target) ctx.addCounter(id, "steam", 1);
 }
 
 function addHyperSteam(ctx: ScriptCtx): void {
@@ -193,7 +177,7 @@ function scrapAttack(effect?: (ctx: ScriptCtx) => void): CardScript {
       if (choices.length)
         ctx.requestCardChoice(
           "scrap",
-          decisionPrompt("Scrap an item or equipment from your graveyard?", "card.evo.scrap.choose", {
+          decisionPrompt("Scrap an item or equipment from your graveyard?", "card.common.scrap.choose", {
             optionMessages: commonOptionMessages("none"),
           }),
           ["none", ...choices.map((card) => card.instanceId)],
@@ -405,11 +389,11 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
     if (hand.length)
       ctx.requestCardChoice(
         "data-mine",
-        decisionPrompt("Put a card from your hand on top of your deck", "card.evo.hand.card.top"),
+        decisionPrompt("Put a card from your hand on top of your deck", "card.common.hand.card.top"),
         hand.map((card) => card.instanceId),
       );
   }),
-  "evo battery pack|2": destroyUnderAbility((ctx) => addSteamToChoice(ctx, "battery-pack")),
+  "evo battery pack|2": destroyUnderAbility((ctx) => requestCrankSteam(ctx, "battery-pack")),
   "evo cogspitter|2": destroyUnderAbility((ctx) => {
     const items = ctx.player(ctx.seat).hand.filter((card) => isItem(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 1);
     if (items.length)
@@ -511,7 +495,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
       timing: "instant",
       putSelfOnDeckBottomCost: true,
       onActivate(ctx) {
-        addSteamToChoice(ctx, "steam-canister");
+        requestCrankSteam(ctx, "steam-canister");
       },
     },
   },
@@ -577,7 +561,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   ...pitches("infuse titanium", () => galvanize()),
   ...pitches("junkyard dogg", () => scrapAttack((ctx) => ctx.addModifier({ scope: "chain-link", attack: 1 }))),
   ...pitches("scrap compactor", () => scrapAttack((ctx) => ctx.setPlayerFlag(ctx.seat, "nextEvoAsInstant", true))),
-  ...pitches("scrap harvester", () => scrapAttack((ctx) => addSteamToChoice(ctx, "scrap-harvester"))),
+  ...pitches("scrap harvester", () => scrapAttack((ctx) => requestCrankSteam(ctx, "scrap-harvester"))),
   ...pitches("scrap prospector", () => scrapAttack((ctx) => ctx.gainResources(ctx.seat, 1))),
 
   ...pitches("bull bar", () => ({
@@ -732,7 +716,8 @@ for (const key of [
   script.onChoose = (ctx, hook, option) => {
     if (hook === "thruster") ctx.grantAdditionalActivation(Number(option));
     else if (hook === "data-mine") ctx.putOnDeckTop(Number(option));
-    else if (hook === "battery-pack" || hook === "steam-canister" || hook === "scrap-harvester") addSteam(ctx, option);
+    else if (hook === "battery-pack" || hook === "steam-canister" || hook === "scrap-harvester")
+      resolveCrankSteam(ctx, option);
     else if (hook === "cogspitter") ctx.settleCard(Number(option));
     else if (hook === "zoom-call" && option !== "none" && ctx.banish(Number(option))) ctx.drawCards(ctx.seat, 1);
     else prior?.(ctx, hook, option);

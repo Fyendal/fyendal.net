@@ -1,8 +1,5 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
-  BLOODROT_POX,
-  FRAILTY,
-  INERTIA,
   NAMED_DISEASE_TOKENS,
   assassinContractAttackTargets,
   attackAbility,
@@ -20,9 +17,9 @@ import {
   opponentSeat,
   requestDiseaseTokenChoice,
   targetsHero,
+  hasCardSubtype,
 } from "./shared-helpers.js";
-
-const SILVER = "DYN245";
+import { BLOODROT_POX, FRAILTY, INERTIA, SILVER } from "./tokens.js";
 
 function opposingDiseases(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
   return controlledDiseases(ctx, opponentSeat(ctx));
@@ -68,7 +65,7 @@ const mortimer: CardScript = {
       ],
       canActivate(ctx) {
         return (
-          !!ctx.link && ctx.link.attacker === ctx.seat && ctx.cardTypes(ctx.link.attackingCard).includes("assassin")
+          !!ctx.link && ctx.link.attacker === ctx.seat && hasCardSubtype(ctx, ctx.link.attackingCard, "assassin")
         );
       },
       onActivate(ctx) {
@@ -274,7 +271,7 @@ export const amo: Record<string, CardScript> = {
       if (hand.length) {
         ctx.requestCardChoice(
           "amo-act-on-intel-banish",
-          decisionPrompt("Banish a card from your hand", "card.hnt.hand.card.banish"),
+          decisionPrompt("Banish a card from your hand", "card.common.hand.card.banish"),
           hand.map((card) => card.instanceId),
           defender,
         );

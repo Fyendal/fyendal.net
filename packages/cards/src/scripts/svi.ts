@@ -9,6 +9,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
+  hasCardSubtype,
   isAura,
   isNonAttackAction,
   leavesArenaTrigger,
@@ -106,7 +107,7 @@ export const svi: Record<string, CardScript> = {
           const currentIsNonAttack = isNonAttackAction(ctx, played);
           const priorNonAttacks =
             Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) - (currentIsNonAttack ? 1 : 0);
-          return ctx.cardTypes(played).includes("runeblade") && priorNonAttacks > 0;
+          return hasCardSubtype(ctx, played, "runeblade") && priorNonAttacks > 0;
         },
         effect: (ctx) => createRunechants(ctx, 1),
       },

@@ -19,8 +19,10 @@ import {
   hasCardSubtype,
   heroChoiceSeat,
   heroDamage,
+  isAlly,
   isenhowlFrostbitesKey,
   isFused,
+  isItem,
   localizedCardLog,
   mergeSetScripts,
   ongoingLabel,
@@ -37,12 +39,10 @@ import {
 } from "./shared-helpers.js";
 import { uprHighRarity } from "./upr/high-rarity.js";
 import { dragonAttack } from "./upr/dragon-attack.js";
+import { AETHER_ASHWING, ASH, FROSTBITE } from "./tokens.js";
 
 // Uprising commons, rares, and young heroes. Invocation back faces use a
 // synthetic `B` registry id linked from the playable front by CardData.backId.
-const ASH = "UPR043";
-const AETHER_ASHWING = "UPR042";
-const FROSTBITE = "SIY035";
 
 /** Cromai's attack and leave-arena triggers share one per-turn limit, consumed
  * as a layer is created (CR 6.6.5e). */
@@ -72,7 +72,7 @@ function livingTargets(ctx: ScriptCtx): number[] {
     ...ctx.state.players.map((player) => player.hero.instanceId),
     ...ctx.state.players.flatMap((player) =>
       player.board
-        .filter((card) => hasCardSubtype(ctx, card, "ally") && card.life !== undefined)
+        .filter((card) => isAlly(ctx, card) && card.life !== undefined)
         .map((card) => card.instanceId),
     ),
   ];
@@ -399,7 +399,7 @@ function singe(maxAllyTargets: number): CardScript {
       const target = heroChoiceSeat(ctx, option)!;
       ctx.setState("singeTarget", target);
       dealArcane(ctx, target, 1);
-      const allies = ctx.player(target).board.filter((card) => hasCardSubtype(ctx, card, "ally"));
+      const allies = ctx.player(target).board.filter((card) => isAlly(ctx, card));
       if (!allies.length) return;
       const amount = ctx.previewArcaneDamage(1);
       ctx.requestCardChoices(
@@ -516,7 +516,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     activated: dragonAttack(),
     canTriggerOnHit: (ctx) => !!ctx.link && ctx.link.targetAllyId === undefined,
     onHit(ctx) {
-      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasCardSubtype(ctx, card, "item"));
+      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => isItem(ctx, card));
       if (items.length === 0) {
         ctx.drawCards(ctx.seat, 1);
         return;
@@ -1185,7 +1185,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         ) {
           const choices = [
             ...ctx.player(target).arsenal,
-            ...ctx.player(target).board.filter((c) => hasCardSubtype(ctx, c, "ally")),
+            ...ctx.player(target).board.filter((c) => isAlly(ctx, c)),
           ];
           if (choices.length)
             ctx.requestCardChoice(
@@ -1198,7 +1198,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         const target = ctx.getState("coldTarget");
         const choices = [
           ...ctx.player(target).arsenal,
-          ...ctx.player(target).board.filter((c) => hasCardSubtype(ctx, c, "ally")),
+          ...ctx.player(target).board.filter((c) => isAlly(ctx, c)),
         ];
         if (choices.length)
           ctx.requestCardChoice(
@@ -1235,7 +1235,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         ) {
           const choices = [
             ...ctx.player(target).arsenal,
-            ...ctx.player(target).board.filter((c) => hasCardSubtype(ctx, c, "ally")),
+            ...ctx.player(target).board.filter((c) => isAlly(ctx, c)),
           ];
           if (choices.length)
             ctx.requestCardChoice(
@@ -1248,7 +1248,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         const target = ctx.getState("coldTarget");
         const choices = [
           ...ctx.player(target).arsenal,
-          ...ctx.player(target).board.filter((c) => hasCardSubtype(ctx, c, "ally")),
+          ...ctx.player(target).board.filter((c) => isAlly(ctx, c)),
         ];
         if (choices.length)
           ctx.requestCardChoice(
@@ -1357,7 +1357,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
             "no",
           ]);
         else {
-          const allies = ctx.player(target).board.filter((c) => hasCardSubtype(ctx, c, "ally"));
+          const allies = ctx.player(target).board.filter((c) => isAlly(ctx, c));
           if (allies.length)
             ctx.requestCardChoice(
               "horns-ally",
@@ -1371,7 +1371,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         const target = ctx.getState("hornsTarget");
         const arsenalCard = ctx.player(target).arsenal[0];
         if (o === "yes" && arsenalCard) freeze(ctx, arsenalCard);
-        const allies = ctx.player(target).board.filter((c) => hasCardSubtype(ctx, c, "ally"));
+        const allies = ctx.player(target).board.filter((c) => isAlly(ctx, c));
         if (allies.length)
           ctx.requestCardChoice(
             "horns-ally",

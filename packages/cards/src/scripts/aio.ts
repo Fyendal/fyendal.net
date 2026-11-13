@@ -9,24 +9,12 @@ import {
   yesNoPrompt,
   hasLiveTurnEffect,
   hasCardSubtype,
+  requestCrankSteam,
+  resolveCrankSteam,
 } from "./shared-helpers.js";
 
 function isMech(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return hasCardSubtype(ctx, card, "mechanologist");
-}
-
-function isCrankItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return isItem(ctx, card) && ctx.hasCrank(card);
-}
-
-function addSteamChoice(ctx: ScriptCtx, hook: string): void {
-  const items = ctx.player(ctx.seat).board.filter((card) => isCrankItem(ctx, card));
-  if (items.length)
-    ctx.requestCardChoice(
-      hook,
-      decisionPrompt("Put a steam counter on an item with crank", "card.aio.crankitem.steam"),
-      items.map((card) => card.instanceId),
-    );
 }
 
 export const aio: Record<string, CardScript> = {
@@ -177,14 +165,14 @@ export const aio: Record<string, CardScript> = {
         event: "card-banished-for-boost",
         sourceZone: "self",
         label: "Put a steam counter on an item with crank",
-        labelMessage: decisionMessage("card.aio.crankitem.steam"),
+        labelMessage: decisionMessage("card.common.crankitem.steam"),
         effect(ctx) {
-          addSteamChoice(ctx, "fast-furious-steam");
+          requestCrankSteam(ctx, "fast-furious-steam");
         },
       },
     ],
     onChoose(ctx, hook, option) {
-      if (hook === "fast-furious-steam") ctx.addCounter(Number(option), "steam", 1);
+      if (hook === "fast-furious-steam") resolveCrankSteam(ctx, option);
     },
   },
   "maximum velocity|1": {

@@ -12,6 +12,7 @@ import {
   opponentSeat,
   yesNoPrompt,
   ongoingLabel,
+  isNonAttackAction,
 } from "../shared-helpers.js";
 
 function vestOfTheFirstFist(): CardScript {
@@ -139,7 +140,7 @@ function cadaverousContraband(): CardScript {
   return {
     onHit(ctx) {
       const cards = faceUpGraveyard(ctx).filter((card) => {
-        return ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack");
+        return isNonAttackAction(ctx, card);
       });
       if (cards.length === 0) return;
       ctx.requestCardChoice(

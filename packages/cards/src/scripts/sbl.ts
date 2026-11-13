@@ -7,12 +7,14 @@ import {
   chargedThisTurn,
   decisionMessage,
   decisionPrompt,
+  isAttackAction,
   isLight,
   isSword,
   localizedCardLog,
   solflareTrigger,
   unityEquipment,
 } from "./shared-helpers.js";
+import { AGILITY, COURAGE, FLURRY } from "./tokens.js";
 
 // ── SBL (Silver Age: Boltyn precon) ─────────────────────────────────────────
 //
@@ -37,10 +39,6 @@ import {
 // - Toe the Line's "if you prevent damage this way, create a Flurry token"
 //   (engine: Modifier.onPreventCreateToken on the generic prevention shield).
 
-const AGILITY = "SBL034";
-const COURAGE = "SBL035";
-const FLURRY = "SBL036";
-
 function sharpenForEdict(ctx: ScriptCtx, instanceId: number): void {
   sharpenSword(ctx, instanceId, 1, {
     threshold: 1,
@@ -62,7 +60,7 @@ export const sbl: Record<string, CardScript> = {
     modifyAttack(ctx) {
       if (!ctx.link || !chargedThisTurn(ctx)) return 0;
       const defendedByAttackAction = ctx.link.defendingCards.some((c) => {
-        return ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack");
+        return isAttackAction(ctx, c);
       });
       return defendedByAttackAction ? 1 : 0;
     },
@@ -455,7 +453,7 @@ export const sbl: Record<string, CardScript> = {
         event: "card-played",
         label: "Destroy Courage (attack +1{p})",
         condition: (ctx, played) =>
-          !!played && ctx.hasCardType(played, "action") && ctx.cardTypes(played).includes("attack"),
+          !!played && isAttackAction(ctx, played),
         effect(ctx) {
           ctx.destroySelf();
           ctx.addModifier({ scope: "chain-link", attack: 1 });

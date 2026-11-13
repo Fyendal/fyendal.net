@@ -19,6 +19,7 @@ import {
   isAttackAction,
   isAura,
   isCard,
+  isLight,
   isSixPlus,
   leviaRedeemedAbility,
   localizedCardLog,
@@ -34,11 +35,9 @@ import {
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { monHighRarity } from "./mon/high-rarity.js";
+import { SOUL_SHACKLE, SPECTRAL_SHIELD } from "./tokens.js";
 
 // ── Monarch (commons, rares, young heroes, and required tokens) ────────────
-
-const SPECTRAL_SHIELD = "SEN037";
-const SOUL_SHACKLE = "MON186";
 
 function lessLifePlayTrigger(effect: { attack?: number; keyword?: string }): CardScript {
   return {
@@ -754,7 +753,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         effect(ctx, destroyed) {
           dealArcaneToTargetHero(ctx);
           if (destroyed && !ctx.hasCardType(destroyed, "token") &&
-            hasCardSubtype(ctx, destroyed, "light")) {
+            isLight(ctx, destroyed)) {
             ctx.putIntoSoul(destroyed.instanceId);
           }
         },
@@ -1548,7 +1547,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       }
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && hasCardSubtype(ctx, ctx.player(opponentSeat(ctx)).hero, "light");
+      return ctx.link?.targetAllyId === undefined && isLight(ctx, ctx.player(opponentSeat(ctx)).hero);
     },
     onHit(ctx) {
       const soul = ctx.player(opponentSeat(ctx)).soul;

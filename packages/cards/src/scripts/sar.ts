@@ -1,8 +1,5 @@
 import type { ActivatedAbility, CardScript, ScriptCtx } from "@fyendal/engine";
 import {
-  BLOODROT_POX,
-  FRAILTY,
-  INERTIA,
   armGrantedHitRider,
   armedBySelf,
   attackAbility,
@@ -23,7 +20,9 @@ import {
   ongoingLabel,
   opponentSeat,
   yesNoPrompt,
+  hasCardSubtype,
 } from "./shared-helpers.js";
+import { BLOODROT_POX, FRAILTY, GRAPHENE_CHELICERA, INERTIA } from "./tokens.js";
 
 // ── SAR (Silver Age: Arakni, Web of Deceit precon, Chapter 2) ───────────────
 //
@@ -51,7 +50,6 @@ import {
 // - Stealth (CR 8.3.24) means nothing — a keyword tag the scripts read.
 
 const WEB_OF_DECEIT = "SAR001";
-const GRAPHENE = "SAR033";
 const BLACK_WIDOW = "SAR034";
 const FUNNEL_WEB = "SAR035";
 const ORB_WEAVER = "SAR036";
@@ -60,7 +58,6 @@ const TARANTULA = "SAR038";
 const TRAP_DOOR = "SAR039";
 /** The brood — the Agents of Chaos Web of Deceit randomly becomes. */
 const AGENTS = [BLACK_WIDOW, FUNNEL_WEB, ORB_WEAVER, REDBACK, TARANTULA, TRAP_DOOR];
-
 
 function requestHuntsmanMark(ctx: ScriptCtx): void {
   ctx.requestChoice(
@@ -419,7 +416,7 @@ export const sar: Record<string, CardScript> = {
     // "Equip a Graphene Chelicera token. Your next attack with stealth this
     //  turn gets +3{p}." Go again is printed (native).
     onPlay(ctx) {
-      ctx.equipToken(GRAPHENE);
+      ctx.equipToken(GRAPHENE_CHELICERA);
       buffNextAttack(ctx, { attack: 3, appliesToKeyword: "stealth" });
     },
   },
@@ -671,7 +668,7 @@ export const sar: Record<string, CardScript> = {
       discardCost: { count: 1, classes: ["assassin"] },
       label: "Discard an Assassin card: equip a Graphene Chelicera; next stealth attack +3{p}",
       onActivate(ctx) {
-        ctx.equipToken(GRAPHENE);
+        ctx.equipToken(GRAPHENE_CHELICERA);
         buffNextAttack(ctx, { attack: 3, appliesToKeyword: "stealth" });
       },
     },
@@ -771,7 +768,7 @@ export const sar: Record<string, CardScript> = {
         ),
       );
       ctx.shuffleDeck();
-      if (ctx.cardTypes(card).includes("trap")) {
+      if (hasCardSubtype(ctx, card, "trap")) {
         ctx.allowPlayFrom(card.instanceId, "banish", { untilNextTurn: true });
         ctx.logPublic(
           localizedCardLog(

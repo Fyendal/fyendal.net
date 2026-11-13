@@ -33,11 +33,10 @@ import {
   resolveDiscardChoice,
   sharesName,
   yesNoPrompt,
+  requestCrankSteam,
+  resolveCrankSteam,
 } from "../shared-helpers.js";
-
-const QUICKEN = "EVO250";
-const RUNECHANT = "DTD214";
-const SEISMIC = "DTD204";
+import { COURAGE, QUICKEN, RUNECHANT, SEISMIC_SURGE, ZEN_STATE } from "../tokens.js";
 
 const TICK_TOCK_ITEM = "tick-tock-item";
 
@@ -276,22 +275,12 @@ export const evoHighRarity: Record<string, CardScript> = {
         label: "Put a steam counter on an item with crank?",
         condition: (ctx, pitched) => pitched?.instanceId === ctx.self.instanceId,
         effect(ctx) {
-          const items = ctx
-            .player(ctx.seat)
-            .board.filter((card) => isItem(ctx, card) && ctx.hasCrank(card));
-          if (items.length)
-            ctx.requestCardChoice(
-              "master-cog",
-              decisionPrompt("Put a steam counter on an item with crank?", "card.evo.crankitem.steam.add.optional", {
-                optionMessages: commonOptionMessages("no"),
-              }),
-              ["no", ...items.map((card) => card.instanceId)],
-            );
+          requestCrankSteam(ctx, "master-cog", true);
         },
       },
     ],
     onChoose(ctx, hook, option) {
-      if (hook === "master-cog" && option !== "no") ctx.addCounter(Number(option), "steam", 1);
+      if (hook === "master-cog" && option !== "no") resolveCrankSteam(ctx, option);
     },
   },
   "teklovossen, esteemed magnate|0": {
@@ -359,7 +348,7 @@ export const evoHighRarity: Record<string, CardScript> = {
         requestDiscardChoice(
           ctx,
           "mechropotent-discard",
-          decisionPrompt("Choose a card to discard", "card.evo.card.discard"),
+          decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
           opponentSeat(ctx),
         );
     },
@@ -473,7 +462,7 @@ export const evoHighRarity: Record<string, CardScript> = {
         requestDiscardChoice(
           ctx,
           "terminator-discard",
-          decisionPrompt("Choose a card to discard", "card.evo.card.discard"),
+          decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
           opponentSeat(ctx),
         );
     }),
@@ -975,12 +964,12 @@ export const evoHighRarity: Record<string, CardScript> = {
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
     },
     onPlay(ctx) {
-      ctx.createTokens(SEISMIC, ctx.getState("tectonicX"));
+      ctx.createTokens(SEISMIC_SURGE, ctx.getState("tectonicX"));
     },
   },
   "wax off|3": {
     onPlay(ctx) {
-      if (ctx.getPlayerFlag(ctx.seat, "playedName:wax on") === true) ctx.createToken("OUT239");
+      if (ctx.getPlayerFlag(ctx.seat, "playedName:wax on") === true) ctx.createToken(ZEN_STATE);
     },
   },
   "emboldened blade|3": {
@@ -999,7 +988,7 @@ export const evoHighRarity: Record<string, CardScript> = {
       const options = slots.map(({ seat, index }) => `${seat}:${index}`);
       ctx.requestChoice(
         "emboldened-arsenal",
-        decisionPrompt("Turn a face-down arsenal card face up", "card.evo.emboldened.arsenal.choose", {
+        decisionPrompt("Turn a face-down arsenal card face up", "card.common.arsenal.faceup", {
           optionMessages: Object.fromEntries(slots.map(({ seat }, index) => [
             options[index]!,
             seat === ctx.seat
@@ -1023,7 +1012,7 @@ export const evoHighRarity: Record<string, CardScript> = {
   "intoxicating shot|3": {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
-      ctx.heroCreatesTokens(opponentSeat(ctx), "DTD232");
+      ctx.heroCreatesTokens(opponentSeat(ctx), COURAGE);
       ctx.heroCreatesTokens(opponentSeat(ctx), QUICKEN);
     },
   },

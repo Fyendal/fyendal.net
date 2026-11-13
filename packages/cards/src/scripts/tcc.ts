@@ -14,12 +14,7 @@ import {
   payForDefenseBoost,
   previousAttackHasName,
 } from "./shared-helpers.js";
-
-const COPPER = "TCC103";
-const CROUCHING_TIGER = "TCC104";
-const MIGHT = "TCC105";
-const QUICKEN = "TCC106";
-const VIGOR = "TCC107";
+import { COPPER, CROUCHING_TIGER, MIGHT, QUICKEN, VIGOR } from "./tokens.js";
 
 function guardianAura(power: number, reduction = 0): CardScript {
   return {

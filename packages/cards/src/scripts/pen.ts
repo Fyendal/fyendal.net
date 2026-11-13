@@ -1,9 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import type { CounterKind } from "@fyendal/shared";
 import {
-  BLOODROT_POX,
-  FRAILTY,
-  INERTIA,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   cardNameContains,
@@ -49,32 +46,39 @@ import {
   isDagger,
   isNonAttackAction,
   isSword,
+  isAlly,
+  isItem,
 } from "./shared-helpers.js";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 import { penHighRarity } from "./pen/high-rarity.js";
 import { concoctDisorder } from "./sar.js";
 import { LIVING_LEGEND_HEROES } from "../formatLegality.js";
 import { hasType } from "@fyendal/shared";
+import {
+  AGILITY,
+  BLOODROT_POX,
+  COURAGE,
+  EMBODIMENT_OF_EARTH,
+  EMBODIMENT_OF_LIGHTNING,
+  FANG_STRIKE,
+  FRAILTY,
+  FROSTBITE,
+  GOLD,
+  HYPER_DRIVER,
+  INERTIA,
+  MIGHT,
+  PONDER,
+  QUICKEN,
+  RUNECHANT,
+  SEISMIC_SURGE,
+  SIGIL_OF_FATE,
+  SLITHER,
+  SPECTRAL_SHIELD,
+  SPELLBANE_AEGIS,
+  VIGOR,
+} from "./tokens.js";
 
 // Compendium of Rathe (PEN) — complete set and required tokens.
-
-const AGILITY = "SBL034";
-const COURAGE = "DTD232";
-const EARTH = "DTD194";
-const FANG_STRIKE = "MST023";
-const FROSTBITE = "EVR197";
-const GOLD = "DYN243";
-const HYPER_DRIVER = "EVO234";
-const LIGHTNING = "DTD195";
-const MIGHT = "SKA035";
-const PONDER = "DYN244";
-const RUNECHANT = "ROS162";
-const SEISMIC_SURGE = "CRU044";
-const SIGIL_OF_FATE = "PEN120";
-const SLITHER = "MST024";
-const SPELLBANE_AEGIS = "DTD235";
-const SPECTRAL_SHIELD = "DTD220";
-const VIGOR = "SBR036";
 
 type Card = DeepReadonly<CardInstance>;
 
@@ -117,7 +121,7 @@ function continuePoundOfFlesh(ctx: ScriptCtx, startIndex = 0): void {
     if (hand.length === 0) continue;
     ctx.requestCardChoice(
       `pen-pound-banish:${index}`,
-      decisionPrompt("Banish a card from your hand", "card.pen.hand.card.banish"),
+      decisionPrompt("Banish a card from your hand", "card.common.hand.card.banish"),
       hand.map((card) => card.instanceId),
       seat,
     );
@@ -135,7 +139,7 @@ function allPermanents(ctx: ScriptCtx): Card[] {
 function heroesAndAllies(ctx: ScriptCtx): Card[] {
   return ctx.state.players.flatMap((player) => [
     player.hero,
-    ...player.board.filter((card) => hasCardSubtype(ctx, card, "ally")),
+    ...player.board.filter((card) => isAlly(ctx, card)),
   ]);
 }
 
@@ -189,7 +193,7 @@ function penArcaneSpell(
     onPlay(ctx) {
       const preview = ctx.previewArcaneDamage(damage(ctx));
       const allies = ctx.state.players.flatMap((player) =>
-        player.board.filter((card) => ctx.cardTypes(card).includes("ally")).map((card) => ({ player, card })),
+        player.board.filter((card) => isAlly(ctx, card)).map((card) => ({ player, card })),
       );
       ctx.requestChoice(
         "pen-arcane",
@@ -244,7 +248,7 @@ function nextAttackPump(amount: number, extra: Partial<Parameters<typeof buffNex
 function discardAllyAttack(): CardScript {
   return {
     onAttackDeclared(ctx) {
-      const allies = ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, "ally"));
+      const allies = ctx.player(ctx.seat).hand.filter((card) => isAlly(ctx, card));
       if (allies.length)
         ctx.requestCardChoice(
           "pen-discard-ally",
@@ -358,7 +362,7 @@ function evoBeta(slot: "head" | "chest" | "arms" | "legs"): CardScript {
 function oathOfOak(count: number): CardScript {
   return {
     onPlay(ctx) {
-      create(ctx, EARTH, count);
+      create(ctx, EMBODIMENT_OF_EARTH, count);
     },
   };
 }
@@ -367,7 +371,7 @@ function putOnIce(count: number): CardScript {
   return {
     onPlay(ctx) {
       const allies = ctx.state.players.flatMap((player) => player.board).filter((card) =>
-        hasCardSubtype(ctx, card, "ally"));
+        isAlly(ctx, card));
       if (allies.length)
         ctx.requestCardChoices(
           "pen-freeze-ally",
@@ -643,7 +647,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     additionalCost(ctx) {
       ctx.requestChoice(
         "pen-cup-color",
-        decisionPrompt("Choose a color", "card.pen.color.choose", {
+        decisionPrompt("Choose a color", "card.common.color.choose", {
           optionMessages: {
             red: decisionMessage("card.pen.option.red"),
             yellow: decisionMessage("card.pen.option.yellow"),
@@ -715,7 +719,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       if (swords.length)
         ctx.requestCardChoice(
           "pen-sharpen",
-          decisionPrompt("Choose a sword to sharpen", "card.pen.sword.sharpen"),
+          decisionPrompt("Choose a sword to sharpen", "card.common.sword.sharpen"),
           swords.map((card) => card.instanceId),
         );
     },
@@ -761,11 +765,11 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "speed demon|1": {
     declareAdditionalCost(ctx) {
       const choices = faceUpGraveyard(ctx)
-        .filter((card) => hasCardSubtype(ctx, card, "item") || ctx.hasCardType(card, "equipment"));
+        .filter((card) => isItem(ctx, card) || ctx.hasCardType(card, "equipment"));
       if (choices.length)
         ctx.requestCardChoice(
           "pen-scrap",
-          decisionPrompt("Scrap an item or equipment from your graveyard?", "card.pen.scrap.choose", {
+          decisionPrompt("Scrap an item or equipment from your graveyard?", "card.common.scrap.choose", {
             optionMessages: commonOptionMessages("no"),
           }),
           ["no", ...choices.map((card) => card.instanceId)],
@@ -777,7 +781,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       const target = faceUpGraveyard(ctx).find(
           (card) =>
             card.instanceId === Number(option) &&
-            (hasCardSubtype(ctx, card, "item") || ctx.hasCardType(card, "equipment")),
+            (isItem(ctx, card) || ctx.hasCardType(card, "equipment")),
         );
       if (!target) return;
       const driver = cardNamed(ctx, target, "Hyper Driver");
@@ -891,7 +895,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       requestDiscardChoice(
         ctx,
         "frail-swingline-discard",
-        decisionPrompt("Choose a card to discard", "card.pen.card.discard"),
+        decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
         opponentSeat(ctx),
       );
     },
@@ -916,12 +920,12 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     onChoose(ctx, hook, option) {
       if (hook !== "quickening-sand-hero") return;
       const seat = heroChoiceSeat(ctx, option);
-      if (seat !== undefined) create(ctx, "DVR028", 1, seat);
+      if (seat !== undefined) create(ctx, QUICKEN, 1, seat);
     },
     canTriggerOnDefend: (ctx) => ctx.currentAttackHasGoAgain(),
     onDefendTarget: {
       options: (ctx) => heroesAndAllies(ctx).map((card) => card.instanceId),
-      prompt: () => decisionPrompt("Tap target hero or ally", "card.pen.heroally.tap"),
+      prompt: () => decisionPrompt("Tap target hero or ally", "card.common.heroally.tap"),
     },
     onDefend(ctx) {
       if (ctx.playTargetInstanceId !== undefined) ctx.tap(ctx.playTargetInstanceId);
@@ -995,7 +999,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
                 .flatMap((player) => player.board)
                 .filter((card) => isAura(ctx, card) && ctx.hasCardType(card, "token"))
                 .map((card) => card.instanceId),
-            prompt: () => decisionPrompt("Destroy an aura token", "card.pen.auratoken.destroy"),
+            prompt: () => decisionPrompt("Destroy an aura token", "card.common.cost.auratoken.destroy"),
           },
         },
       ),
@@ -1107,7 +1111,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       goAgain: true,
       destroySelfCost: true,
       onActivate(ctx) {
-        const allies = faceUpGraveyard(ctx).filter((card) => hasCardSubtype(ctx, card, "ally"));
+        const allies = faceUpGraveyard(ctx).filter((card) => isAlly(ctx, card));
         if (allies.length)
           ctx.requestCardChoice(
             "pen-reach-ally",
@@ -1118,7 +1122,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
           requestDiscardChoice(
             ctx,
             "pen-reach-discard",
-            decisionPrompt("Choose a card to discard", "card.pen.card.discard"),
+            decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
             ctx.seat,
           );
       },
@@ -1129,7 +1133,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
         requestDiscardChoice(
           ctx,
           "pen-reach-discard",
-          decisionPrompt("Choose a card to discard", "card.pen.card.discard"),
+          decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
           ctx.seat,
         );
       } else if (hook === "pen-reach-discard") resolveDiscardChoice(ctx, option, ctx.seat);
@@ -1139,7 +1143,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   ...pitches("man overboard", discardAllyAttack),
   ...pitches("tentacular toll", (pitch) => ({
     onPlay(ctx) {
-      const allies = faceUpGraveyard(ctx).filter((card) => hasCardSubtype(ctx, card, "ally"))
+      const allies = faceUpGraveyard(ctx).filter((card) => isAlly(ctx, card))
         .slice(0, 4 - pitch);
       for (const ally of allies) ctx.setCardFaceDown(ally.instanceId, true);
       create(ctx, GOLD, allies.length);
@@ -1147,11 +1151,11 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   })),
   "skywarden no.161803|2": {
     onDefend(ctx) {
-      const items = ctx.player(ctx.seat).board.filter((card) => hasCardSubtype(ctx, card, "item"));
+      const items = ctx.player(ctx.seat).board.filter((card) => isItem(ctx, card));
       if (items.length)
         ctx.requestCardChoice(
           "pen-galvanize",
-          decisionPrompt("Destroy an item for +1 defense?", "card.pen.item.destroy.defense", {
+          decisionPrompt("Destroy an item for +1 defense?", "card.common.item.destroy.defense", {
             values: { amount: 1 },
             optionMessages: commonOptionMessages("no"),
           }),
@@ -1210,7 +1214,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   ...pitches("lighten the load", () => ({
     onAttackDeclared(ctx) {
       const hand = ctx.player(ctx.seat).hand;
-      const items = ctx.player(ctx.seat).board.filter((card) => hasCardSubtype(ctx, card, "item"));
+      const items = ctx.player(ctx.seat).board.filter((card) => isItem(ctx, card));
       const options = [
         "no",
         ...hand.map((card) => String(card.instanceId)),
@@ -1298,7 +1302,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
         labelMessage: decisionMessage("card.trigger.pen.themis.name"),
         condition: (ctx, card) => card?.instanceId === ctx.self.instanceId,
         effect(ctx) {
-          ctx.requestNameChoice("pen-themis-name", decisionPrompt("Name a card", "card.pen.card.name"));
+          ctx.requestNameChoice("pen-themis-name", decisionPrompt("Name a card", "card.common.card.name"));
         },
       },
       {
@@ -1404,7 +1408,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
   },
   "verdant tide|1": {
-    ...bond("earth", (ctx) => create(ctx, EARTH)),
+    ...bond("earth", (ctx) => create(ctx, EMBODIMENT_OF_EARTH)),
     onPlay(ctx) {
       ctx.addModifier({
         scope: "until-end-of-turn",
@@ -1413,7 +1417,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
           "card.effect.pen.verdanttide",
         ),
       });
-      if (ctx.getState("bonded")) create(ctx, EARTH);
+      if (ctx.getState("bonded")) create(ctx, EMBODIMENT_OF_EARTH);
     },
     replaceFriendlyTokenCreation(ctx, cardId, count) {
       return printedHasTag(ctx, cardId, "aura") && (printedHasTag(ctx, cardId, "elemental") ||
@@ -1431,13 +1435,13 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   "colors of aria|1": { allZoneTypes: ["earth", "ice", "lightning"] },
   "frosthaven sheath|1": bond("ice", (ctx) => create(ctx, FROSTBITE, 1, ctx.link?.attacker ?? opponentSeat(ctx))),
-  "leaven sheath|1": bond("earth", (ctx) => create(ctx, EARTH)),
-  "stormwind sheath|1": bond("lightning", (ctx) => create(ctx, LIGHTNING)),
+  "leaven sheath|1": bond("earth", (ctx) => create(ctx, EMBODIMENT_OF_EARTH)),
+  "stormwind sheath|1": bond("lightning", (ctx) => create(ctx, EMBODIMENT_OF_LIGHTNING)),
   "laden with earth|1": {
-    ...bond("earth", (ctx) => create(ctx, EARTH)),
+    ...bond("earth", (ctx) => create(ctx, EMBODIMENT_OF_EARTH)),
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3 });
-      if (ctx.getState("bonded")) create(ctx, EARTH);
+      if (ctx.getState("bonded")) create(ctx, EMBODIMENT_OF_EARTH);
     },
   },
   "laden with frost|1": {
@@ -1448,28 +1452,18 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
   },
   "laden with lightning|1": {
-    ...bond("lightning", (ctx) => create(ctx, LIGHTNING)),
+    ...bond("lightning", (ctx) => create(ctx, EMBODIMENT_OF_LIGHTNING)),
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3 });
-      if (ctx.getState("bonded")) create(ctx, LIGHTNING);
+      if (ctx.getState("bonded")) create(ctx, EMBODIMENT_OF_LIGHTNING);
     },
   },
-  "chorus of rotwood|1": {
-    ...decompose("play", (ctx) => create(ctx, EARTH)),
-    onPlay(ctx) {
-      create(ctx, RUNECHANT, 3);
-      decompose("play", (inner) => create(inner, EARTH)).onPlay?.(ctx);
-    },
-    onChoose: decompose("play", (ctx) => create(ctx, EARTH)).onChoose,
-  },
-  "sowing thorns|1": {
-    ...decompose("play", () => {}),
-    onPlay(ctx) {
-      ctx.gainLife(ctx.seat, 1);
-      decompose("play", () => {}).onPlay?.(ctx);
-    },
-    onChoose: decompose("play", () => {}).onChoose,
-  },
+  "chorus of rotwood|1": decompose(
+    "play",
+    (ctx) => create(ctx, EMBODIMENT_OF_EARTH),
+    (ctx) => create(ctx, RUNECHANT, 3),
+  ),
+  "sowing thorns|1": decompose("play", () => {}, (ctx) => ctx.gainLife(ctx.seat, 1)),
   "limbs of lignum vitae|0": {
     modifyDefense: (ctx) =>
       ctx.player(ctx.seat).banish.filter((card) =>
@@ -1507,11 +1501,11 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       canActivate: (ctx) =>
         ctx.state.players
           .flatMap((player) => player.board)
-          .some((card) => hasCardSubtype(ctx, card, "ally") && ctx.isFrozen(card)),
+          .some((card) => isAlly(ctx, card) && ctx.isFrozen(card)),
       onActivate(ctx) {
         const allies = ctx.state.players
           .flatMap((player) => player.board)
-          .filter((card) => hasCardSubtype(ctx, card, "ally") && ctx.isFrozen(card));
+          .filter((card) => isAlly(ctx, card) && ctx.isFrozen(card));
         ctx.requestCardChoice(
           "pen-shatter-ally",
           decisionPrompt("Destroy a frozen ally", "card.pen.frozen.ally.destroy"),

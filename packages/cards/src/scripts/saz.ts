@@ -1,8 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
-  BLOODROT_POX,
-  FRAILTY,
-  INERTIA,
   armedBySelf,
   buffNextAttack,
   commonOptionMessages,
@@ -21,7 +18,10 @@ import {
   requestHeroChoice,
   resolveReload,
   spireSnipingScript,
+  isAlly,
+  isAttackAction,
 } from "./shared-helpers.js";
+import { BLOODROT_POX, FRAILTY, INERTIA } from "./tokens.js";
 
 // ── SAZ (Silver Age: Azalea precon, Chapter 2) ──────────────────────────────
 //
@@ -433,7 +433,7 @@ export const saz: Record<string, CardScript> = {
       ctx.tap(opp.hero.instanceId);
       for (const c of opp.board) {
         const d = ctx.cardData(c.cardId);
-        if (ctx.cardTypes(c).includes("ally") && d.life !== undefined) ctx.tap(c.instanceId);
+        if (isAlly(ctx, c) && d.life !== undefined) ctx.tap(c.instanceId);
       }
     },
   ),
@@ -535,12 +535,12 @@ export const saz: Record<string, CardScript> = {
     canPlay: (ctx) =>
       faceUpGraveyard(ctx).some((c) => {
         const d = ctx.cardData(c.cardId);
-        return ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack") && (d.cost ?? 0) <= 1;
+        return isAttackAction(ctx, c) && (d.cost ?? 0) <= 1;
       }),
     onPlay(ctx) {
       const targets = faceUpGraveyard(ctx).filter((c) => {
         const d = ctx.cardData(c.cardId);
-        return ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack") && (d.cost ?? 0) <= 1;
+        return isAttackAction(ctx, c) && (d.cost ?? 0) <= 1;
       });
       ctx.requestCardChoice(
         "memorial-ground",

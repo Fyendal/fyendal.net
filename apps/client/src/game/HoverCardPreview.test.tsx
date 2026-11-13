@@ -80,7 +80,7 @@ describe("HoverCardPreview", () => {
     ));
 
     expect(html).toContain('class="created-cards-panel is-right is-pending" aria-hidden="true"');
-    expect(html).toContain("https://content.fabrary.net/cards/AAZ031.webp");
+    expect(html).toContain("https://content.fabrary.net/cards/OUT235.webp");
   });
 
   it("stacks the created cards under the card when no column fits beside it", () => {

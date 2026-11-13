@@ -10,6 +10,7 @@ import {
   faceUpGraveyard,
   hasCardSubtype,
   heroTarget,
+  isArrow,
   isAttackAction,
   isFused,
   isFusedWith,
@@ -19,11 +20,7 @@ import {
   targetHeroSeat,
   withFusion,
 } from "../shared-helpers.js";
-
-const FROSTBITE = "SIY035";
-const SEISMIC_SURGE = "CRU044";
-const EMBODIMENT_OF_EARTH = "ELE109";
-const EMBODIMENT_OF_LIGHTNING = "ELE110";
+import { EMBODIMENT_OF_EARTH, EMBODIMENT_OF_LIGHTNING, FROSTBITE, SEISMIC_SURGE } from "../tokens.js";
 
 function playedAttackAndNonAttack(ctx: ScriptCtx): boolean {
   return (
@@ -126,7 +123,7 @@ const lexi: CardScript = {
     onActivate(ctx) {
       ctx.requestCardChoice(
         "adult-lexi-flip",
-        decisionPrompt("Turn a face-down arsenal card face up", "card.ele.arsenal.faceup"),
+        decisionPrompt("Turn a face-down arsenal card face up", "card.common.arsenal.faceup"),
         ctx
           .player(ctx.seat)
           .arsenal.filter((card) => card.faceDown)
@@ -333,14 +330,14 @@ export const eleHighRarity: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       oncePerTurn: true,
-      canActivate: (ctx) => ctx.player(ctx.seat).hand.some((card) => ctx.cardTypes(card).includes("arrow")),
+      canActivate: (ctx) => ctx.player(ctx.seat).hand.some((card) => isArrow(ctx, card)),
       onActivate(ctx) {
         ctx.requestCardChoice(
           "shiver-load",
           decisionPrompt("Load an arrow face up", "card.ele.arrow.load.faceup"),
           ctx
             .player(ctx.seat)
-            .hand.filter((card) => ctx.cardTypes(card).includes("arrow"))
+            .hand.filter((card) => isArrow(ctx, card))
             .map((card) => card.instanceId),
         );
       },
@@ -349,7 +346,7 @@ export const eleHighRarity: Record<string, CardScript> = {
       if (hook === "shiver-load" && ctx.putIntoArsenal(Number(option), "hand", { faceUp: true }))
         ctx.requestChoice(
           "shiver-mode",
-          decisionPrompt("Choose a bonus", "card.ele.bonus.choose", {
+          decisionPrompt("Choose a bonus", "card.common.bonus.choose", {
             optionMessages: {
               power: decisionMessage("card.ele.option.power.one"),
               dominate: decisionMessage("card.ele.option.dominate"),
@@ -370,14 +367,14 @@ export const eleHighRarity: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       activationsPerTurn: 2,
-      canActivate: (ctx) => ctx.player(ctx.seat).hand.some((card) => ctx.cardTypes(card).includes("arrow")),
+      canActivate: (ctx) => ctx.player(ctx.seat).hand.some((card) => isArrow(ctx, card)),
       onActivate(ctx) {
         ctx.requestCardChoice(
           "voltaire-load",
           decisionPrompt("Load an arrow face up", "card.ele.arrow.load.faceup"),
           ctx
             .player(ctx.seat)
-            .hand.filter((card) => ctx.cardTypes(card).includes("arrow"))
+            .hand.filter((card) => isArrow(ctx, card))
             .map((card) => card.instanceId),
         );
       },
@@ -386,7 +383,7 @@ export const eleHighRarity: Record<string, CardScript> = {
       if (hook === "voltaire-load" && ctx.putIntoArsenal(Number(option), "hand", { faceUp: true }))
         ctx.requestChoice(
           "voltaire-mode",
-          decisionPrompt("Choose a bonus", "card.ele.bonus.choose", {
+          decisionPrompt("Choose a bonus", "card.common.bonus.choose", {
             optionMessages: {
               power: decisionMessage("card.ele.option.power.one"),
               "go again": decisionMessage("card.ele.option.goagain"),

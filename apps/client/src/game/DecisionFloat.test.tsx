@@ -481,7 +481,7 @@ describe("priority guidance help", () => {
     );
 
     expect(html).toContain('data-cardid="AHA005"');
-    expect(html).toContain("Crank——移除一个蒸汽指示物");
+    expect(html).toContain("Crank——移除一个 steam 指示物");
     expect(html).toContain(">是");
     expect(html).toContain(">否<");
     expect(html).toContain('title="是（空格键）"');
@@ -716,7 +716,7 @@ describe("priority guidance help", () => {
       kind: "choose-target",
       prompt: "Choose a target for 7 arcane damage",
       promptMessage: {
-        id: "card.sea.damage.arcane.target",
+        id: "card.common.arcane.damage.target",
         values: { amount: 7 },
       },
       options: ["hero:1"],

@@ -13,8 +13,7 @@ import {
   opponentSeat,
   playedLightning,
 } from "./shared-helpers.js";
-
-const LIGHTNING = "AST028";
+import { EMBODIMENT_OF_LIGHTNING } from "./tokens.js";
 
 function instantCards(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
   return ctx.player(ctx.seat).hand.filter((card) => ctx.hasCardType(card, "instant"));
@@ -75,7 +74,7 @@ function serenadeModes(first: unknown, second: unknown): [SerenadeMode, Serenade
 }
 
 function applySerenadeChoices(ctx: ScriptCtx, choices: number[]): void {
-  if (choices.includes(1)) ctx.createToken(LIGHTNING);
+  if (choices.includes(1)) ctx.createToken(EMBODIMENT_OF_LIGHTNING);
   if (choices.includes(3)) buffNextAttack(ctx, { attack: 1 });
   if (!choices.includes(2)) return;
   const skyzyks = ctx.player(ctx.seat).deck.filter((card) => cardNamed(ctx, card, "skyzyk"));
@@ -98,7 +97,7 @@ export const ast: Record<string, CardScript> = {
       oncePerTurn: true,
       canActivate: (ctx) => playedLightning(ctx),
       onActivate: (ctx) => {
-        ctx.createToken(LIGHTNING);
+        ctx.createToken(EMBODIMENT_OF_LIGHTNING);
       },
     },
   },
@@ -135,7 +134,7 @@ export const ast: Record<string, CardScript> = {
     dealArcane(ctx, ctx.link?.attacker ?? opponentSeat(ctx), 1);
   }),
   "starlight striders|0": revealInstantEquipment((ctx) => {
-    ctx.createToken(LIGHTNING);
+    ctx.createToken(EMBODIMENT_OF_LIGHTNING);
   }),
   "photon rush|1": {
     onAttackDeclared(ctx) {
@@ -158,7 +157,7 @@ export const ast: Record<string, CardScript> = {
         target: anyDamageTarget((ctx) =>
           decisionPrompt(
             `Arc Lightning: deal ${ctx.previewArcaneDamage(1)} arcane damage to any target`,
-            "card.ast.arcane.target.choose",
+            "card.common.arcane.anytarget.choose",
             { values: { amount: ctx.previewArcaneDamage(1) } },
           ),
         ),
@@ -254,7 +253,7 @@ export const ast: Record<string, CardScript> = {
   },
   "written in the stars|3": {
     onPlay(ctx) {
-      ctx.createToken(LIGHTNING);
+      ctx.createToken(EMBODIMENT_OF_LIGHTNING);
       if (ctx.getFlag("player", "arcaneDamageDealtThisTurn") === true) ctx.drawCards(ctx.seat, 1);
     },
   },

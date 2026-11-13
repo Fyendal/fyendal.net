@@ -5,6 +5,7 @@ import {
   decisionPrompt,
   destroyedTrigger,
   faceUpGraveyard,
+  hasCardSubtype,
   isAura,
   isCard,
   leavesArenaTrigger,
@@ -14,6 +15,7 @@ import {
   transcendIfBlue,
   warnIfNoActionPoint,
 } from "./shared-helpers.js";
+import { GOLD, SPECTRAL_SHIELD } from "./tokens.js";
 
 // ── SEN (Silver Age: Enigma precon) ─────────────────────────────────────────
 //
@@ -41,8 +43,6 @@ import {
 //   createTokenFor) powering Fluid Motion / Manifest Muscle, and clash with
 //   an opponent winner (Test of Strength — engine: requestClash and the
 //   optional seat param on ctx.createToken).
-const SPECTRAL_SHIELD = "SEN037";
-const GOLD = "SEN036";
 
 /** Auras with ward on the controller's board (Spectral Shield, Waning/Waxing, …). */
 function wardAuras(ctx: ScriptCtx) {
@@ -236,7 +236,7 @@ export const sen: Record<string, CardScript> = {
       const otherIllusionistAura = ctx
         .player(ctx.seat)
         .board.some(
-          (c) => c.instanceId !== shield.instanceId && isAura(ctx, c) && ctx.cardTypes(c).includes("illusionist"),
+          (c) => c.instanceId !== shield.instanceId && isAura(ctx, c) && hasCardSubtype(ctx, c, "illusionist"),
         );
       if (!otherIllusionistAura) ctx.addCounter(shield.instanceId, "power", 3);
     },

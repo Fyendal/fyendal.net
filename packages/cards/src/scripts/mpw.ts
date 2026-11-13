@@ -31,9 +31,7 @@ import {
   SHARPEN_TOP_ATTACK_REACTION_HOOK,
   sharpenSword,
 } from "./aha/warrior-sharpen.js";
-
-const BLADE_DANCE = "MPW134";
-const FLURRY = "MPW135";
+import { BLADE_DANCE, FLURRY } from "./tokens.js";
 
 type Card = DeepReadonly<CardInstance>;
 
@@ -230,7 +228,7 @@ export const mpw: Record<string, CardScript> = {
       onActivate(ctx) {
         ctx.requestChoice(
           "longsword-token",
-          decisionPrompt("Create which token?", "card.mpw.token.create.choose", {
+          decisionPrompt("Create which token?", "card.common.token.create.choose", {
             optionMessages: {
               "Blade Dance": decisionMessage("card.common.target.card", {
                 card: { kind: "card", cardId: BLADE_DANCE },
@@ -725,7 +723,7 @@ export const mpw: Record<string, CardScript> = {
     if (auras.length)
       ctx.requestCardChoice(
         "dice-aura",
-        decisionPrompt("Destroy an aura", "card.mpw.aura.destroy"),
+        decisionPrompt("Destroy an aura", "card.common.aura.destroy"),
         auras.map((card) => card.instanceId),
       );
   }),

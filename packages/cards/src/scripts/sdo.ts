@@ -5,11 +5,13 @@ import {
   buffNextAttack,
   decisionMessage,
   decisionPrompt,
+  isAttackAction,
   isWeaponAttack,
   localizedCardLog,
   opponentSeat,
   reprise,
 } from "./shared-helpers.js";
+import { AGILITY, VIGOR } from "./tokens.js";
 
 // ── SDO (Silver Age: Dorinthea precon, Chapter 2) ───────────────────────────
 //
@@ -28,9 +30,6 @@ import {
 //   Modifier.maxBasePower filter (printed base power).
 // - Agility/Vigor are aura tokens on the board; Vigor's start-of-turn trigger
 //   rides the trigger stack machinery.
-
-const AGILITY = "SDO035";
-const VIGOR = "SDO036";
 
 /** Attack-reaction legality: my unresolved attack is on the chain and matches
  *  `target` — then pump it by `pump`. */
@@ -162,7 +161,7 @@ export const sdo: Record<string, CardScript> = {
       // "If it's defended by an attack action card, create an Agility token."
       //  Defenders were committed in the defend step, before this resolves.
       const defended = ctx.link?.defendingCards.some((c) => {
-        return ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack");
+        return isAttackAction(ctx, c);
       });
       if (defended) ctx.createToken(AGILITY);
     },

@@ -19,12 +19,10 @@ import {
   warnIfNoActionPoint,
   isAttackAction,
   isNonAttackAction,
+  hasCardSubtype,
+  isLight,
 } from "../shared-helpers.js";
-
-const SPECTRAL_SHIELD = "MON104";
-const SOUL_SHACKLE = "MON186";
-const BLASMOPHET = "MON219";
-const URSUR = "MON220";
+import { BLASMOPHET_SOUL_HARVESTER, SOUL_SHACKLE, SPECTRAL_SHIELD, URSUR } from "../tokens.js";
 
 function hatchet(otherCode: 1 | 2): CardScript {
   return attackingWeapon(1, {
@@ -329,8 +327,8 @@ export const monHighRarity: Record<string, CardScript> = {
       if (hook !== "genesis-soul") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card || !ctx.putIntoSoul(card.instanceId)) return;
-      if (ctx.cardTypes(card).includes("illusionist")) ctx.createToken(SPECTRAL_SHIELD);
-      if (ctx.cardTypes(card).includes("light")) ctx.drawCards(ctx.seat, 1);
+      if (hasCardSubtype(ctx, card, "illusionist")) ctx.createToken(SPECTRAL_SHIELD);
+      if (isLight(ctx, card)) ctx.drawCards(ctx.seat, 1);
     },
   },
   "bolting blade|2": {
@@ -341,7 +339,7 @@ export const monHighRarity: Record<string, CardScript> = {
   "beacon of victory|2": beaconOfVictory,
   "vestige of sol|0": {
     replacePitchResources(ctx, pitched, amount) {
-      return ctx.cardTypes(pitched).includes("light") && ctx.player(ctx.seat).soul.length > 0 ? amount + 1 : amount;
+      return isLight(ctx, pitched) && ctx.player(ctx.seat).soul.length > 0 ? amount + 1 : amount;
     },
   },
   "celestial cataclysm|2": celestialCataclysm,
@@ -376,7 +374,7 @@ export const monHighRarity: Record<string, CardScript> = {
       );
       if (!ctx.link) return;
       if (
-        !ctx.cardTypes(ctx.link.attackingCard).includes("illusionist") &&
+        !hasCardSubtype(ctx, ctx.link.attackingCard, "illusionist") &&
         ctx.basePower(ctx.link.attackingCard) >= 6
       ) {
         ctx.setFlag("link", `destroyOnClose:${ctx.self.instanceId}`, true);
@@ -389,8 +387,7 @@ export const monHighRarity: Record<string, CardScript> = {
         labelMessage: decisionMessage("card.trigger.common.actionpoint.gain", { amount: 1 }),
         condition(ctx, card) {
           if (!card || ctx.getState("actionPointTurn") === ctx.state.turn) return false;
-          const types = ctx.cardTypes(card);
-          return ctx.hasCardType(card, "action") && types.includes("illusionist") && types.includes("attack");
+          return isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "illusionist");
         },
         onTrigger: (ctx) => ctx.setState("actionPointTurn", ctx.state.turn),
         effect: (ctx) =>
@@ -536,12 +533,12 @@ export const monHighRarity: Record<string, CardScript> = {
         target: heroTarget(),
         condition(ctx, played, event) {
           if (!played || event?.from !== "banish" || !ctx.hasCardType(played, "action")) return false;
-          const kind = ctx.cardTypes(played).includes("attack") ? "attack" : "nonattack";
+          const kind = hasCardSubtype(ctx, played, "attack") ? "attack" : "nonattack";
           return !ctx.getState(`crossroads:${kind}`);
         },
         onTrigger(ctx, played) {
           if (!played) return;
-          const kind = ctx.cardTypes(played).includes("attack") ? "attack" : "nonattack";
+          const kind = hasCardSubtype(ctx, played, "attack") ? "attack" : "nonattack";
           ctx.setState(`crossroads:${kind}`, 1);
         },
         effect(ctx) {
@@ -615,7 +612,7 @@ export const monHighRarity: Record<string, CardScript> = {
             hasBloodDebt(ctx, card),
         ).length >= 6,
     onPlay(ctx) {
-      ctx.createToken(BLASMOPHET);
+      ctx.createToken(BLASMOPHET_SOUL_HARVESTER);
     },
   },
   "eclipse|3": {
@@ -691,7 +688,7 @@ export const monHighRarity: Record<string, CardScript> = {
       goAgain: false,
       oncePerTurn: true,
       onCostPaid(ctx, cards) {
-        ctx.setState("shadowDiscarded", cards.some((card) => ctx.cardTypes(card).includes("shadow")) ? 1 : 0);
+        ctx.setState("shadowDiscarded", cards.some((card) => hasCardSubtype(ctx, card, "shadow")) ? 1 : 0);
       },
     },
   },

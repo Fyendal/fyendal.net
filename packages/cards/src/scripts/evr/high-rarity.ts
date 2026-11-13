@@ -20,12 +20,7 @@ import {
   previousAttackHasName,
   yesNoPrompt,
 } from "../shared-helpers.js";
-
-const SEISMIC_SURGE = "CRU044";
-const FROSTBITE = "SIY035";
-const RUNECHANT = "EVR119";
-const SILVER = "EVR195";
-const QUICKEN = "EVR196";
+import { FROSTBITE, QUICKEN, RUNECHANT, SEISMIC_SURGE, SILVER } from "../tokens.js";
 
 function elementalRevealOptions(ctx: ScriptCtx): string[] {
   const hand = ctx.player(ctx.seat).hand;
@@ -885,7 +880,7 @@ export const evrHighRarity: Record<string, CardScript> = {
         condition: (ctx, played) =>
           !!played &&
           ctx.state.chain.some((link) => link.defendingCards.some((card) => card.instanceId === ctx.self.instanceId)) &&
-          ctx.cardTypes(played).includes("wizard"),
+          hasCardSubtype(ctx, played, "wizard"),
         effect(ctx) {
           ctx.addCardTempDefense(ctx.self.instanceId, 2);
         },

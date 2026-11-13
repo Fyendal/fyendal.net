@@ -4,7 +4,7 @@ import { cardNamed, hasCardSubtype, opponentSeat } from "./shared-helpers.js";
 function applyContractBonus(ctx: ScriptCtx, attacking: DeepReadonly<CardInstance>, duringAttack = false): void {
   if (
     !ctx.hasCardType(attacking, "action") ||
-    !ctx.cardTypes(attacking).includes("attack") ||
+    !hasCardSubtype(ctx, attacking, "attack") ||
     !ctx.hasKeyword(attacking, "contract") ||
     ctx.getPlayerFlag(ctx.seat, "handContractAttackThisTurn") === true
   )

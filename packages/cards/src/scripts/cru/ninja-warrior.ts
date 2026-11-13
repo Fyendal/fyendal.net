@@ -11,8 +11,7 @@ import {
   opponentSeat,
   previousAttackHasName,
 } from "../shared-helpers.js";
-
-const COPPER = "CRU197";
+import { COPPER } from "../tokens.js";
 
 function weaponAttacks(ctx: ScriptCtx): number {
   return Number(ctx.getFlag("player", "weaponAttackCount")) || 0;
@@ -178,7 +177,7 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
         }
         ctx.requestCardChoice(
           "katsu-search",
-          decisionPrompt("Katsu: choose a combo card to banish face up", "card.cru.katsu.combo.choose"),
+          decisionPrompt("Katsu: choose a combo card to banish face up", "card.common.katsu.combo.choose"),
           combo.map((card) => card.instanceId),
         );
         return;

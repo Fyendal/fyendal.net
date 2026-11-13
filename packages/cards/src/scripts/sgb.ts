@@ -19,6 +19,7 @@ import {
   ongoingLabel,
   opponentSeat,
 } from "./shared-helpers.js";
+import { GOLD } from "./tokens.js";
 
 // ── SGB (Silver Age: Gravy Bones precon) ────────────────────────────────────
 //
@@ -33,7 +34,6 @@ import {
 //   driven off pitch zone contents and the engine's per-turn graveyard hook).
 // - Gold tokens (item with an activated ability).
 //
-const GOLD = "SGB035";
 
 /** "Destroy the top card of your deck": it goes to the graveyard (face up). */
 function destroyDeckTop(ctx: ScriptCtx): DeepReadonly<CardInstance> | undefined {
@@ -79,7 +79,7 @@ function discardOrMillChoice(hook: string, name: string) {
         hook,
         decisionPrompt(
           `${name}: discard a card or destroy the top card of your deck?`,
-          "card.sgb.discardormill.choose",
+          "card.common.discardormill.choose",
           {
             values: { card: { kind: "card", cardId: ctx.self.cardId } },
             optionMessages: {

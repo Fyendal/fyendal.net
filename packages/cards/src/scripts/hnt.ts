@@ -39,11 +39,10 @@ import {
   isDagger,
   isNonAttackAction,
 } from "./shared-helpers.js";
+import { FEALTY, GRAPHENE_CHELICERA, RUNECHANT } from "./tokens.js";
 
 // HNT — The Hunted. Mark/Contract (CR 8.4.7, 8.5.39, 8.5.50, 9.3),
 // Retrieve (CR 8.5.51), and Draconic chain-link counting are shared mechanics.
-const GRAPHENE = "HNT053";
-const FEALTY = "HNT167";
 const SPUR_NUMBERS = ["1", "2", "3", "4", "5", "6"];
 
 function spurNumberPrompt() {
@@ -400,7 +399,7 @@ export const hnt: Record<string, CardScript> = {
       attackTrigger(
         "Equip a Graphene Chelicera token",
         decisionMessage("card.trigger.common.graphenechelicera.equip"),
-        (ctx) => ctx.equipToken(GRAPHENE),
+        (ctx) => ctx.equipToken(GRAPHENE_CHELICERA),
         (ctx) => attacksHero(ctx) && isMarked(ctx, opponentSeat(ctx)),
       ),
     ],
@@ -409,13 +408,13 @@ export const hnt: Record<string, CardScript> = {
   "stains of the redback|3": stealthPump(1),
   "orb-weaver spinneret|2": {
     onPlay(ctx) {
-      ctx.equipToken(GRAPHENE);
+      ctx.equipToken(GRAPHENE_CHELICERA);
       buffNextAttack(ctx, { attack: 2, appliesToKeyword: "stealth" });
     },
   },
   "orb-weaver spinneret|3": {
     onPlay(ctx) {
-      ctx.equipToken(GRAPHENE);
+      ctx.equipToken(GRAPHENE_CHELICERA);
       buffNextAttack(ctx, { attack: 1, appliesToKeyword: "stealth" });
     },
   },
@@ -444,7 +443,7 @@ export const hnt: Record<string, CardScript> = {
       if (hand.length)
         ctx.requestCardChoice(
           "hnt-black-widow",
-          decisionPrompt("Banish a card from your hand", "card.hnt.hand.card.banish"),
+          decisionPrompt("Banish a card from your hand", "card.common.hand.card.banish"),
           hand.map((card) => card.instanceId),
           opponentSeat(ctx),
         );
@@ -633,7 +632,7 @@ export const hnt: Record<string, CardScript> = {
       if (equipment.length)
         ctx.requestCardChoice(
           "art-scale",
-          decisionPrompt("Put a -1 defense counter on equipment", "card.hnt.equipment.defensecounter"),
+          decisionPrompt("Put a -1 defense counter on equipment", "card.common.equipment.defensecounter"),
           equipment.map((card) => card.instanceId),
         );
     },
@@ -1825,7 +1824,7 @@ Object.assign(hnt, {
         (ctx) =>
           ctx.requestNameChoice(
             "retrace-name",
-            decisionPrompt(`${ctx.data.name}: name a card`, "card.hnt.card.name.named", {
+            decisionPrompt(`${ctx.data.name}: name a card`, "card.common.card.name.named", {
               values: { card: { kind: "card", cardId: ctx.self.cardId } },
             }),
           ),
@@ -1861,7 +1860,7 @@ Object.assign(hnt, {
     },
     triggers: [
       entersArenaTrigger("Name a card", decisionMessage("card.trigger.common.cardname.choose"), (ctx) =>
-        ctx.requestNameChoice("null-name", decisionPrompt("Name a card", "card.hnt.card.name")),
+        ctx.requestNameChoice("null-name", decisionPrompt("Name a card", "card.common.card.name")),
       ),
       {
         event: "start-of-turn",
@@ -1912,7 +1911,7 @@ Object.assign(hnt, {
         decisionMessage("card.trigger.common.runechants.create.nonattack"),
         (ctx) => {
           const count = Number(ctx.getPlayerFlag(ctx.seat, "nonAttackActionsPlayedThisTurn"));
-          ctx.createTokens("ARC112", count);
+          ctx.createTokens(RUNECHANT, count);
           if (count >= 3) ctx.grantGoAgain();
         },
       ),
@@ -1965,7 +1964,7 @@ Object.assign(hnt, {
         if (cards.length)
           ctx.requestCardChoice(
             "spur-search",
-            decisionPrompt("Choose a card", "card.hnt.card.choose"),
+            decisionPrompt("Choose a card", "card.common.card.choose"),
             cards.map((card) => card.instanceId),
             loser,
           );
@@ -2087,7 +2086,7 @@ Object.assign(hnt, {
         if (player.hand.length) {
           ctx.requestCardChoice(
             `cull-hand:${player.seat}`,
-            decisionPrompt("Banish a card from your hand", "card.hnt.hand.card.banish"),
+            decisionPrompt("Banish a card from your hand", "card.common.hand.card.banish"),
             player.hand.map((card) => card.instanceId),
             player.seat,
           );

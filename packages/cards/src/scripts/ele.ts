@@ -31,11 +31,10 @@ import {
   withFusion,
 } from "./shared-helpers.js";
 import { eleHighRarity } from "./ele/high-rarity.js";
+import { SEISMIC_SURGE } from "./tokens.js";
 
 // Tales of Aria commons, rares, and young heroes. Fusion is paid by revealing
 // a matching talent card from hand; the revealed card never leaves the hand.
-
-const SEISMIC_SURGE = "CRU044";
 
 /** Fused Explosive Growth: "whenever it deals damage" to any target. */
 const explosiveGrowthDamage: TriggerDef = {
@@ -54,7 +53,7 @@ function discardUnlessPayOnChoose(ctx: ScriptCtx, hook: string, option: string, 
     if (option !== "paid" && ctx.player(target).hand.length > 0) {
       ctx.requestCardChoice(
         `${key}:discard:${target}`,
-        decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.ele.discard.choose", {
+        decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.common.card.discard.choose.named", {
           values: { card: { kind: "card", cardId: ctx.self.cardId } },
         }),
         ctx.player(target).hand.map((card) => card.instanceId),

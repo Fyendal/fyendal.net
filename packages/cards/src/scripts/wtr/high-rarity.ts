@@ -16,8 +16,7 @@ import {
   reprise,
   resourceAbility,
 } from "../shared-helpers.js";
-
-const SEISMIC_SURGE = "WTR075B";
+import { SEISMIC_SURGE } from "../tokens.js";
 
 function namedAny(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, names: readonly string[]): boolean {
   return names.some((name) => cardNamed(ctx, card, name));
@@ -423,7 +422,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
         if (ctx.putOnDeckBottom(Number(option)))
           ctx.requestChoice(
             "estrike-mode",
-            decisionPrompt("Choose a mode", "card.wtr.estrike.mode.choose", {
+            decisionPrompt("Choose a mode", "card.common.mode.choose", {
               optionMessages: {
                 draw: decisionMessage("card.wtr.estrike.option.draw"),
                 "+2": decisionMessage("card.wtr.estrike.option.power"),

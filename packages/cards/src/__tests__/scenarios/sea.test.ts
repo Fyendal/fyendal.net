@@ -122,7 +122,7 @@ describe("SEA — High Seas heroes and cogs", () => {
       .play("burn bare|0");
     expect(g.state.pendingDecision?.prompt).toBe("Choose a target for 7 arcane damage");
     expect(g.state.pendingDecision?.promptMessage).toEqual({
-      id: "card.sea.damage.arcane.target",
+      id: "card.common.arcane.damage.target",
       values: { amount: 7 },
     });
     expect(g.state.pendingDecision?.optionMessages).toHaveLength(

@@ -14,6 +14,7 @@ import type {
 } from "@fyendal/engine";
 import type { GameLogEvent, GameLogPayload, GameMessage } from "@fyendal/shared";
 import { functionalKey, functionalKeyOf } from "../functional.js";
+import { BLOODROT_POX, FRAILTY, FROSTBITE, GOLD, INERTIA, RUNECHANT, SILVER } from "./tokens.js";
 
 export interface DecisionPromptOptions {
   values?: GameMessage["values"];
@@ -194,7 +195,12 @@ export function isChargeDecline(option: string): boolean {
 
 const CHARGE_COST_HOOK = "charge-cost";
 /** Hooks of charge-cost decisions persisted before the cost was shared. */
-const LEGACY_CHARGE_COST_HOOKS: ReadonlySet<string> = new Set(["asb-charge", "dtd-charge", "mon-charge"]);
+const LEGACY_CHARGE_COST_HOOKS: ReadonlySet<string> = new Set([
+  "asb-charge",
+  "dtd-charge",
+  "iar-bravery-charge",
+  "mon-charge",
+]);
 
 /** "As an additional cost, you may charge your hero's soul." The charged
  * card's pitch is kept as `chargedPitch` (0 when nothing was charged);
@@ -357,7 +363,7 @@ export function anyTargetIds(ctx: ScriptCtx, opts: { opposing?: boolean } = {}):
     .filter((player) => !opts.opposing || player.seat !== ctx.seat)
     .flatMap((player) => [
       player.hero.instanceId,
-      ...player.board.filter((card) => ctx.cardTypes(card).includes("ally")).map((card) => card.instanceId),
+      ...player.board.filter((card) => isAlly(ctx, card)).map((card) => card.instanceId),
     ]);
 }
 
@@ -516,9 +522,6 @@ export function warnIfNoActionPoint(ctx: ScriptCtx, prompt: ScriptDecisionPrompt
     : { ...prompt, warningMessage: decisionMessage("card.common.actionpoint.nogain") };
 }
 
-export const BLOODROT_POX = "OUT234";
-export const FRAILTY = "OUT235";
-export const INERTIA = "OUT236";
 export const NAMED_DISEASE_TOKENS: readonly string[] = [FRAILTY, INERTIA, BLOODROT_POX];
 
 /** Effective class, talent or subtype (case-insensitive). Card types use `ctx.hasCardType`. */
@@ -543,6 +546,10 @@ export function isSuspenseAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>)
   return isAura(ctx, card) && ctx.hasKeyword(card, "suspense");
 }
 
+export function isTokenAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return ctx.hasCardType(card, "token") && isAura(ctx, card);
+}
+
 export function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return hasCardSubtype(ctx, card, "arrow");
 }
@@ -556,7 +563,7 @@ export function isDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): bool
 }
 
 export function isDisease(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("disease");
+  return hasCardSubtype(ctx, card, "disease");
 }
 
 export function isDiseaseToken(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
@@ -824,7 +831,7 @@ export function channelLightning(
   const payNext = (ctx: ScriptCtx): void => {
     const remaining = ctx.getState(remainingKey);
     if (remaining <= 0) return;
-    const lightning = ctx.player(ctx.seat).pitch.filter((card) => ctx.cardTypes(card).includes("lightning"));
+    const lightning = ctx.player(ctx.seat).pitch.filter((card) => hasCardSubtype(ctx, card, "lightning"));
     if (lightning.length < remaining) {
       ctx.destroySelf();
       return;
@@ -899,7 +906,6 @@ export function resolveReload(ctx: ScriptCtx, hook: string, option: string, expe
 
 export type FusionType = "earth" | "ice" | "lightning";
 
-const FUSION_FROSTBITE = "SIY035";
 const ELEMENTAL_FUSION_HOOK = "elemental-fusion";
 /** Hooks of decisions persisted before fusion was shared. */
 const LEGACY_FUSION_HOOKS: Readonly<Record<string, string>> = {
@@ -946,7 +952,7 @@ function completeFusion(
   for (const player of ctx.state.players) {
     const key = isenhowlFrostbitesKey(player.seat);
     const count = Number(ctx.getPlayerFlag(ctx.seat, key));
-    if (count > 0) ctx.createTokens(FUSION_FROSTBITE, count, player.seat);
+    if (count > 0) ctx.createTokens(FROSTBITE, count, player.seat);
     ctx.setPlayerFlag(ctx.seat, key, 0);
   }
 }
@@ -1210,7 +1216,7 @@ export function hitWithDaggerThisChain(ctx: ScriptCtx): boolean {
   return ctx.state.chain.some(
     (link) =>
       link.attacker === ctx.seat &&
-      ((link.damage > 0 && ctx.cardTypes(link.attackingCard).includes("dagger")) ||
+      ((link.damage > 0 && isDagger(ctx, link.attackingCard)) ||
         Number(link.flags["effectDamageBySubtype:dagger"]) > 0),
   );
 }
@@ -1234,7 +1240,7 @@ export function contractWithSilver(
     onFriendlyBanishesOpponentCard(ctx, card) {
       if (!condition(ctx, card)) return;
       ctx.completeContract();
-      ctx.createToken("DYN245");
+      ctx.createToken(SILVER);
     },
   };
 }
@@ -1248,7 +1254,7 @@ export function tokenContractWithSilver(
     onFriendlyCreatesOpponentToken(ctx, token) {
       if (!condition(ctx, token)) return;
       ctx.completeContract();
-      ctx.createToken("DYN245");
+      ctx.createToken(SILVER);
     },
   };
 }
@@ -1282,13 +1288,18 @@ export function equipWithSilver(amount: number): TriggerDef {
   };
 }
 
+/** Equipment that may be equipped from the graveyard by destroying 2 Silver. */
+export function silverEquipment(extra: CardScript = {}): CardScript {
+  return { ...extra, triggers: [...(extra.triggers ?? []), equipWithSilver(2)] };
+}
+
 function canEquipFromGraveyard(ctx: ScriptCtx): boolean {
   const subtypes = ctx.cardTypes(ctx.self);
   const player = ctx.player(ctx.seat);
   const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) => subtypes.includes(candidate));
   if (slot) return ctx.equipmentZoneEmpty(ctx.seat, slot);
   const hands = subtypes.includes("2h") ? 2 : 1;
-  const occupied = player.weapons.reduce((total, card) => total + (ctx.cardTypes(card).includes("2h") ? 2 : 1), 0);
+  const occupied = player.weapons.reduce((total, card) => total + (hasCardSubtype(ctx, card, "2h") ? 2 : 1), 0);
   return occupied + hands <= 2;
 }
 
@@ -1359,7 +1370,7 @@ export function assassinContractAttackTargets(ctx: ScriptCtx): number[] {
     .filter((link) =>
       link.flags.attackGone !== true &&
       link.attackCardType === "action" &&
-      ctx.cardTypes(link.attackingCard).includes("assassin") &&
+      hasCardSubtype(ctx, link.attackingCard, "assassin") &&
       ctx.hasKeyword(link.attackingCard, "contract")
     )
     .map((link) => link.attackingCard.instanceId);
@@ -1425,11 +1436,11 @@ export function markedStealthHeroScript(agentCardIds: readonly string[]): CardSc
 }
 
 function weaponHands(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): number {
-  return ctx.cardTypes(card).includes("2h") ? 2 : 1;
+  return hasCardSubtype(ctx, card, "2h") ? 2 : 1;
 }
 
 function canEquipDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  if (card.faceDown || !ctx.cardTypes(card).includes("dagger") || !ctx.hasCardType(card, "weapon")) {
+  if (card.faceDown || !isDagger(ctx, card) || !ctx.hasCardType(card, "weapon")) {
     return false;
   }
   const occupiedHands = ctx.player(ctx.seat).weapons.reduce((total, weapon) => total + weaponHands(ctx, weapon), 0);
@@ -1667,7 +1678,7 @@ export function beatChest(
         extra.onChoose?.(ctx, chosenHook, option);
         return;
       }
-      const attackAction = ctx.hasCardType(ctx.self, "action") && ctx.cardTypes(ctx.self).includes("attack");
+      const attackAction = isAttackAction(ctx, ctx.self);
       ctx.setFlag("player", "discardingToBeatChest", true);
       if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", true);
       const discarded = option !== "no" && ctx.discardCard(ctx.seat, Number(option));
@@ -2078,7 +2089,7 @@ export function ampNextArcane(ctx: ScriptCtx, n: number): void {
  * because private arsenal cards are still face-down while legality is built. */
 export function wizardActionAsInstant(ctx: ScriptCtx): boolean {
   if (ctx.getFlag("player", `asInstant:${ctx.self.instanceId}`) === true) return true;
-  const nonAttackAction = ctx.hasCardType(ctx.self, "action") && !ctx.cardTypes(ctx.self).includes("attack");
+  const nonAttackAction = isNonAttackAction(ctx, ctx.self);
   if (!nonAttackAction) return false;
   const player = ctx.state.players[ctx.seat]!;
   if (
@@ -2089,7 +2100,7 @@ export function wizardActionAsInstant(ctx: ScriptCtx): boolean {
     player.arsenal.some((card) => card.instanceId === ctx.self.instanceId)
   )
     return true;
-  const wizardNonAttack = ctx.cardTypes(ctx.self).includes("wizard");
+  const wizardNonAttack = hasCardSubtype(ctx, ctx.self, "wizard");
   if (!wizardNonAttack) return false;
   if (ctx.getFlag("player", "nextWizardNonAttackAsInstant") === true) return true;
   return false;
@@ -2612,9 +2623,6 @@ export function banishAttackOnHit(hook: string, reward: BanishReward): CardScrip
 
 // Runeblade and Wizard
 
-// Token creation canonicalizes printings, so one id serves every set.
-const RUNECHANT = "SVI034";
-
 export function createRunechants(ctx: ScriptCtx, count: number): void {
   ctx.createTokens(RUNECHANT, count);
 }
@@ -2866,8 +2874,6 @@ export function boulderDrop(): CardScript {
 
 // Elemental
 
-const FROSTBITE = "SIY035";
-
 export function createFrostbites(ctx: ScriptCtx, seat: number, count = 1): void {
   ctx.createTokens(FROSTBITE, count, seat);
 }
@@ -2896,7 +2902,7 @@ export function discardUnlessPay(ctx: ScriptCtx, target: number, cost: number, k
     return;
   ctx.requestCardChoice(
     `${key}:discard:${target}`,
-    decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.siy.discard.choose", {
+    decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.common.card.discard.choose.named", {
       values: { card: { kind: "card", cardId: ctx.self.cardId } },
     }),
     player.hand.map((card) => card.instanceId),
@@ -2904,9 +2910,15 @@ export function discardUnlessPay(ctx: ScriptCtx, target: number, cost: number, k
   );
 }
 
-/** Decompose: banish two Earth cards and an action card from your graveyard; if you do, `payoff`. */
-export function decompose(trigger: "attack" | "play", payoff: (ctx: ScriptCtx) => void): CardScript {
+/** Decompose: banish two Earth cards and an action card from your graveyard; if you do, `payoff`.
+ * `before` is the card's own effect that resolves ahead of the offer. */
+export function decompose(
+  trigger: "attack" | "play",
+  payoff: (ctx: ScriptCtx) => void,
+  before?: (ctx: ScriptCtx) => void,
+): CardScript {
   const offer = (ctx: ScriptCtx) => {
+    before?.(ctx);
     const grave = faceUpGraveyard(ctx);
     const firstEarth = grave.filter(
       (first) =>
@@ -3004,8 +3016,6 @@ export function decompose(trigger: "attack" | "play", payoff: (ctx: ScriptCtx) =
 
 // Gold and Pirate
 
-const GOLD = "SGB035";
-
 export function createGold(ctx: ScriptCtx, count = 1): void {
   ctx.createTokens(GOLD, count);
 }
@@ -3061,6 +3071,32 @@ export function nextAllyAttack(key: string, mod: NextAllyMod, onHitEffect: (ctx:
 }
 
 // Mechanologist
+
+export function isMechanologistItemAtMost(ctx: ScriptCtx, card: Card, maxCost: number): boolean {
+  return (
+    hasCardSubtype(ctx, card, "mechanologist") && isItem(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= maxCost
+  );
+}
+
+/** Resolve with `resolveCrankSteam`; optional prompts offer "no". */
+export function requestCrankSteam(ctx: ScriptCtx, hook: string, optional = false): void {
+  const items = ctx.player(ctx.seat).board.filter((card) => isItem(ctx, card) && ctx.hasCrank(card));
+  if (!items.length) return;
+  ctx.requestCardChoice(
+    hook,
+    decisionPrompt(
+      "Put a steam counter on an item with crank",
+      "card.common.crankitem.steam",
+      optional ? { optionMessages: commonOptionMessages("no") } : {},
+    ),
+    [...(optional ? ["no"] : []), ...items.map((card) => card.instanceId)],
+  );
+}
+
+export function resolveCrankSteam(ctx: ScriptCtx, option: string): void {
+  const id = Number(option);
+  if (ctx.player(ctx.seat).board.some((card) => card.instanceId === id)) ctx.addCounter(id, "steam", 1);
+}
 
 export function hyperDrivers(ctx: ScriptCtx): readonly Card[] {
   return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Hyper Driver"));
@@ -3166,7 +3202,7 @@ export function galvanize(extra: CardScript = {}): CardScript {
       if (items.length)
         ctx.requestCardChoice(
           "galvanize",
-          decisionPrompt("Destroy an item for +2 defense?", "card.evo.galvanize.item", {
+          decisionPrompt("Destroy an item for +2 defense?", "card.common.item.destroy.defense", {
             values: { amount: 2 },
             optionMessages: commonOptionMessages("none"),
           }),

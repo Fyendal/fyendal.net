@@ -18,8 +18,7 @@ import {
   opponentSeat,
   sharesName,
 } from "./shared-helpers.js";
-
-const SEISMIC_SURGE = "SBR035";
+import { SEISMIC_SURGE } from "./tokens.js";
 
 function isAuraToken(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "token") && isAura(ctx, card);
@@ -645,7 +644,7 @@ function destroyAuraChoice(ctx: ScriptCtx, seat: number, hook: string): void {
   if (auras.length)
     ctx.requestCardChoice(
       hook,
-      decisionPrompt(`${ctx.data.name}: destroy an aura`, "card.mpg.aura.destroy", {
+      decisionPrompt(`${ctx.data.name}: destroy an aura`, "card.common.aura.destroy.named", {
         values: { card: { kind: "card", cardId: ctx.self.cardId } },
       }),
       auras.map((card) => card.instanceId),

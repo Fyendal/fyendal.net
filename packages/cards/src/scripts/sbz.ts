@@ -5,6 +5,7 @@ import {
   dealArcane,
   dealArcaneToAnyTargetChoice,
   decisionPrompt,
+  hasCardSubtype,
   localizedCardLog,
   opponentSeat,
   optN,
@@ -14,6 +15,7 @@ import {
   wizardActionAsInstant,
   yesNoPrompt,
 } from "./shared-helpers.js";
+import { PONDER } from "./tokens.js";
 
 // ── SBZ (Silver Age: Blaze, Firemind precon) ────────────────────────────────
 //
@@ -28,8 +30,6 @@ import {
 //   the hero, charged by every opt its controller performs)
 // - Arcane Barrier / Guardwell are native engine keywords
 
-const PONDER = "SBZ033";
-
 /** True while this card may be played as an instant via Blaze, Firemind's
  *  ability (per-turn flag set when the counters are removed). */
 function viaBlaze(ctx: ScriptCtx): boolean {
@@ -39,8 +39,8 @@ function viaBlaze(ctx: ScriptCtx): boolean {
 function blazeMatches(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, amount: number): boolean {
   return (
     ctx.hasCardType(card, "action") &&
-    !ctx.cardTypes(card).includes("attack") &&
-    ctx.cardTypes(card).includes("wizard") &&
+    !hasCardSubtype(ctx, card, "attack") &&
+    hasCardSubtype(ctx, card, "wizard") &&
     ctx.arcaneDamageEffectAmounts(card.cardId).includes(amount)
   );
 }

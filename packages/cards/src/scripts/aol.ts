@@ -16,10 +16,7 @@ import {
   wagerReaction,
   yesNoPrompt,
 } from "./shared-helpers.js";
-
-const COURAGE = "SBL035";
-const VIGOR = "SDO036";
-const GOLD = "SGB035";
+import { COURAGE, GOLD, VIGOR } from "./tokens.js";
 
 function attached(ctx: ScriptCtx): boolean {
   return ctx.state.modifiers.some(
@@ -263,7 +260,7 @@ export const aol: Record<string, CardScript> = {
       ctx.setState("decisionSeat", winner);
       ctx.requestCardChoice(
         "drawing-discard",
-        decisionPrompt("Discard a card", "card.aol.card.discard"),
+        decisionPrompt("Discard a card", "card.common.card.discard"),
         hand.map((card) => card.instanceId),
         winner,
       );
@@ -322,7 +319,7 @@ export const aol: Record<string, CardScript> = {
       ctx.setState("decisionSeat", winner);
       ctx.requestCardChoice(
         "odds-top",
-        decisionPrompt("Choose a card to put on top", "card.aol.deck.card.top"),
+        decisionPrompt("Choose a card to put on top", "card.common.card.top.choose"),
         deck.map((card) => card.instanceId),
         winner,
       );

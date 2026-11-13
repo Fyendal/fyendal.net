@@ -1034,7 +1034,7 @@ describe("SUP — heroes and the crowd", () => {
       .chooseOption("no")
       .expectLog("The crowd boos Kayo, Strong-arm")
       .expectZoneSize(0, "board", 2);
-    expect(g.state.players[0]!.board.every((card) => card.cardId.endsWith("036"))).toBe(true);
+    expect(g.state.players[0]!.board.every((card) => cardData[card.cardId]!.name === "Vigor")).toBe(true);
   });
 
   it("Vigorous Smashup leaves its revealed card on top when its bottom choice is declined", () => {

@@ -5,7 +5,9 @@ import {
   createRunechants,
   dealArcane,
   decisionPrompt,
+  hasCardSubtype,
   heroChoiceSeat,
+  isAttackAction,
   isNonAttackAction,
   mauvrionSkies,
   opponentSeat,
@@ -15,14 +17,13 @@ import {
   requestHeroChoice,
   wizardActionAsInstant,
 } from "../shared-helpers.js";
-
-const COPPER = "CRU197";
+import { COPPER } from "../tokens.js";
 
 function isRunebladeAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return (
     ctx.hasCardType(card, "action") &&
-    ctx.cardTypes(card).includes("attack") &&
-    ctx.cardTypes(card).includes("runeblade")
+    hasCardSubtype(ctx, card, "attack") &&
+    hasCardSubtype(ctx, card, "runeblade")
   );
 }
 
@@ -175,11 +176,11 @@ function reinforceTheLine(defense: number): CardScript {
   return {
     canPlay: (ctx) =>
       ctx.link?.defendingCards.some((card) => {
-        return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
+        return isAttackAction(ctx, card);
       }) === true,
     onPlay(ctx) {
       const defenders = (ctx.link?.defendingCards ?? []).filter((card) => {
-        return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
+        return isAttackAction(ctx, card);
       });
       if (defenders.length > 0) {
         ctx.requestCardChoice(
@@ -211,7 +212,7 @@ export const cruArcaneGeneric: Record<string, CardScript> = {
           const currentIsNonAttack = isNonAttackAction(ctx, played);
           const priorNonAttacks =
             Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) - (currentIsNonAttack ? 1 : 0);
-          return ctx.cardTypes(played).includes("runeblade") && priorNonAttacks > 0;
+          return hasCardSubtype(ctx, played, "runeblade") && priorNonAttacks > 0;
         },
         effect: (ctx) => createRunechants(ctx, 1),
       },

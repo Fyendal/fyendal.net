@@ -36,14 +36,9 @@ import {
   isDagger,
   isNonAttackAction,
   isSword,
+  isItem,
 } from "./shared-helpers.js";
-
-const COPPER = "EVR194";
-const SILVER = "EVR195";
-const QUICKEN = "EVR196";
-const SEISMIC_SURGE = "EVR036";
-const RUNECHANT = "EVR119";
-const SPECTRAL_SHIELD = "EVR153";
+import { COPPER, QUICKEN, RUNECHANT, SEISMIC_SURGE, SILVER, SPECTRAL_SHIELD } from "./tokens.js";
 
 function makeCopies(ctx: ScriptCtx, cardId: string, count: number): void {
   ctx.createTokens(cardId, count);
@@ -465,7 +460,7 @@ function reekOfCorruption(): CardScript {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "reek-discard",
-          decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.evr.discard.choose", {
+          decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.common.card.discard.choose.named", {
             values: { card: { kind: "card", cardId: ctx.self.cardId } },
           }),
           hand.map((card) => card.instanceId),
@@ -774,7 +769,7 @@ function pickACard(repeats: number): CardScript {
       const names = [...new Set(hand.flatMap((card) => effectiveCardName(ctx, card) ?? []))];
       ctx.requestChoice(
         "pick-name",
-        decisionPrompt(`${ctx.data.name}: name a card`, "card.evr.card.name", {
+        decisionPrompt(`${ctx.data.name}: name a card`, "card.common.card.name.named", {
           values: { card: { kind: "card", cardId: ctx.self.cardId } },
         }),
         names,
@@ -828,7 +823,7 @@ function smashingGoodTime(amount: number): CardScript {
       ctx.setState("smashingReady", 0);
       const items = ctx
         .player(opponentSeat(ctx))
-        .board.filter((card) => hasCardSubtype(ctx, card, "item") && (ctx.cardData(card.cardId).cost ?? 0) <= 2);
+        .board.filter((card) => isItem(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 2);
       if (items.length > 0) {
         ctx.requestCardChoice(
           "smashing-item",
@@ -954,7 +949,7 @@ const amuletEchoes: CardScript = {
       "echoes-discard",
       decisionPrompt(
         count === 1 ? "Choose a card to discard" : `Choose ${count} cards to discard`,
-        "card.evr.echoes.discard.choose",
+        "card.common.cards.discard.choose",
         { values: { count } },
       ),
       hand.map((card) => card.instanceId),

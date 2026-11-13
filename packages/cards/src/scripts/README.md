@@ -19,6 +19,11 @@ Do not add root-level fragments such as `<set>-additional.ts`. Shared mechanics
 used by multiple sets belong in `shared-helpers.ts`; helpers used by one set
 stay with that set.
 
+Token and other created-card printing ids live only in `tokens.ts`, one
+full-size printing per card. The catalog puts those printings first, so the
+engine creates every same-name token as that printing. Identify tokens in play
+by name or type, never by id, because saved games hold other printings.
+
 Script maps remain keyed by functional identity (`name lowercase|pitch`). The
 central registry rejects duplicate keys between sets, and the layout test keeps
 entry points, partitions, and registration ordering consistent.

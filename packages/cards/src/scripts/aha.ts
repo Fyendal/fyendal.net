@@ -20,8 +20,7 @@ import {
   SHARPEN_TOP_ATTACK_REACTION_HOOK,
   sharpenSword,
 } from "./aha/warrior-sharpen.js";
-
-const FLURRY = "SBL036";
+import { FLURRY } from "./tokens.js";
 
 function chooseSwordToSharpen(ctx: ScriptCtx, hook: string, prompt: string): void {
   const choices = swords(ctx);
@@ -29,7 +28,7 @@ function chooseSwordToSharpen(ctx: ScriptCtx, hook: string, prompt: string): voi
   else if (choices.length > 1)
     ctx.requestCardChoice(
       hook,
-      decisionPrompt(prompt, "card.aha.sword.sharpen"),
+      decisionPrompt(prompt, "card.common.sword.sharpen"),
       choices.map((card) => card.instanceId),
     );
 }
@@ -302,7 +301,7 @@ export const aha: Record<string, CardScript> = {
       } else if (choices.length > 1) {
         ctx.requestCardChoice(
           "indefensible-sharpen",
-          decisionPrompt("Choose a sword to sharpen", "card.aha.sword.sharpen"),
+          decisionPrompt("Choose a sword to sharpen", "card.common.sword.sharpen"),
           choices.map((card) => card.instanceId),
         );
       }

@@ -1,15 +1,11 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
-  BLOODROT_POX,
-  FRAILTY,
-  INERTIA,
   bothHeroSeats,
   buffNextAttack,
   cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
-  equipWithSilver,
   faceUpGraveyard,
   hasCardSubtype,
   isArrow,
@@ -21,9 +17,10 @@ import {
   previousAttackHasName,
   sharesName,
   yesNoPrompt,
+  silverEquipment,
 } from "../shared-helpers.js";
+import { BLOODROT_POX, FRAILTY, INERTIA, PONDER } from "../tokens.js";
 
-const PONDER = "DYN244";
 function dagger(extra: CardScript = {}): CardScript {
   return {
     ...extra,
@@ -55,12 +52,6 @@ function chooseDiscard(ctx: ScriptCtx, hook: string, seat: number): void {
     );
 }
 const ABYSSAL_DEPTHS_HOOK = "abyssal-depths";
-function graveyardChest(extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    triggers: [equipWithSilver(2)],
-  };
-}
 function flickKnivesDaggers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
   const activeAttackId = ctx.link?.attackingCard.instanceId;
   const candidates = [
@@ -255,7 +246,7 @@ export const outHighRarity: Record<string, CardScript> = {
       });
     },
   }),
-  "redback shroud|0": graveyardChest({
+  "redback shroud|0": silverEquipment({
     activated: {
       cost: 0,
       isAttack: false,
@@ -274,7 +265,7 @@ export const outHighRarity: Record<string, CardScript> = {
     onHit(ctx) {
       ctx.requestChoice(
         "shake-color",
-        decisionPrompt("Choose a color", "card.out.color.choose", {
+        decisionPrompt("Choose a color", "card.common.color.choose", {
           optionMessages: {
             red: decisionMessage("card.common.option.red"),
             yellow: decisionMessage("card.common.option.yellow"),

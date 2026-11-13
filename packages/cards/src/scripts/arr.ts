@@ -9,9 +9,7 @@ import {
   queueIntimidate,
   yesNoPrompt,
 } from "./shared-helpers.js";
-
-const AGILITY = "ARR029";
-const MIGHT = "ARR030";
+import { AGILITY, MIGHT } from "./tokens.js";
 
 function arrBeatChest(extra: CardScript = {}): CardScript {
   return beatChest(extra, { hook: "arr-beat-chest", messageId: "card.arr.beatchest.discard" });

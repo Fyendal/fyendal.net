@@ -10,9 +10,12 @@ import {
   hasCardSubtype,
   hyperDriver,
   hyperDrivers,
+  isItem,
+  requestCrankSteam,
+  resolveCrankSteam,
 } from "./shared-helpers.js";
+import { HYPER_DRIVER } from "./tokens.js";
 
-const HYPER_DRIVER = "AMX028";
 const BANK_BREAKER = "AMX022B";
 
 function wrenches(ctx: ScriptCtx) {
@@ -59,18 +62,10 @@ export const amx: Record<string, CardScript> = {
       return ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      const items = ctx
-        .player(ctx.seat)
-        .board.filter((card) => hasCardSubtype(ctx, card, "item") && ctx.hasCrank(card));
-      if (items.length)
-        ctx.requestCardChoice(
-          "banksy-steam",
-          decisionPrompt("Put a steam counter on an item with crank", "card.amx.crankitem.steam"),
-          items.map((card) => card.instanceId),
-        );
+      requestCrankSteam(ctx, "banksy-steam");
     },
     onChoose(ctx, hook, option) {
-      if (hook === "banksy-steam") ctx.addCounter(Number(option), "steam", 1);
+      if (hook === "banksy-steam") resolveCrankSteam(ctx, option);
     },
   },
 
@@ -137,7 +132,7 @@ export const amx: Record<string, CardScript> = {
         .flatMap((player) => player.banish)
         .filter((card) => {
           const cardData = ctx.cardData(card.cardId);
-          return !card.faceDown && hasCardSubtype(ctx, card, "item") && (cardData.cost ?? 0) <= 1;
+          return !card.faceDown && isItem(ctx, card) && (cardData.cost ?? 0) <= 1;
         });
       if (choices.length)
         ctx.requestCardChoice(

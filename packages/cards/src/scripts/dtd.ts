@@ -14,6 +14,7 @@ import {
   hasCardSubtype,
   isAttackAction,
   isAura,
+  isLight,
   isNonAttackAction,
   isOwnAttack,
   leviaRedeemedAbility,
@@ -23,11 +24,9 @@ import {
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { dtdHighRarity } from "./dtd/high-rarity.js";
+import { COURAGE, RUNECHANT, SPECTRAL_SHIELD } from "./tokens.js";
 
 // Dusk till Dawn — commons, rares, young heroes, and required tokens.
-const RUNECHANT = "DTD214";
-const COURAGE = "DTD232";
-const SPECTRAL_SHIELD = "DTD220";
 
 function isHerald(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return isAttackAction(ctx, card) && cardNameContains(ctx, card, "herald");
@@ -403,7 +402,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
         effect(ctx) {
           ctx.requestCardChoice(
             "vynnset-banish",
-            decisionPrompt("Banish a card from your hand", "card.dtd.hand.card.banish"),
+            decisionPrompt("Banish a card from your hand", "card.common.hand.card.banish"),
             ctx.player(ctx.seat).hand.map((card) => card.instanceId),
           );
         },
@@ -462,7 +461,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
     onChoose(ctx, hook, option) {
       if (hook !== "nasreth") return;
       const card = ctx.player(opponentSeat(ctx)).soul.find((candidate) => candidate.instanceId === Number(option));
-      if (card && ctx.banish(card.instanceId) && hasCardSubtype(ctx, card, "light")) ctx.gainLife(ctx.seat, 1);
+      if (card && ctx.banish(card.instanceId) && isLight(ctx, card)) ctx.gainLife(ctx.seat, 1);
     },
   },
   "rugged roller|0": {
@@ -571,7 +570,7 @@ for (const [pitch, power] of [
     });
   dtd[`resounding courage|${pitch}`] = {
     canPlay: (ctx) =>
-      isOwnAttack(ctx) && hasCardSubtype(ctx, ctx.link!.attackingCard, "light") &&
+      isOwnAttack(ctx) && isLight(ctx, ctx.link!.attackingCard) &&
         hasCardSubtype(ctx, ctx.link!.attackingCard, "warrior"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: power });
