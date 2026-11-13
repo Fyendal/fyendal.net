@@ -12577,12 +12577,6 @@
       "value": "Elige 3 traps para hacer banish boca abajo"
     }
   ],
-  "card.mst.option.yourhero": [
-    {
-      "type": 0,
-      "value": "Tu héroe"
-    }
-  ],
   "card.mst.remaining.bottommost.choose": [
     {
       "type": 0,
@@ -14479,12 +14473,6 @@
     {
       "type": 0,
       "value": "¿Hacer untap a un bow que controlas?"
-    }
-  ],
-  "card.sea.cog.maintenance.choose": [
-    {
-      "type": 0,
-      "value": "¿Quitar un contador de steam o destruir esta carta?"
     }
   ],
   "card.sea.cog.steam.add": [

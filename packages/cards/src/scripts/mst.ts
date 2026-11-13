@@ -16,6 +16,7 @@ import {
   evoEquipment,
   faceUpGraveyard,
   hasCardSubtype,
+  heroChoiceSeat,
   hitHookLabel,
   hyperDrivers,
   isAttackAction,
@@ -31,6 +32,7 @@ import {
   previousAttackHasName,
   reactionCount,
   requestDiscardChoice,
+  requestHeroChoice,
   resolveDiscardChoice,
   sharesName,
   transcendIfBlue,
@@ -922,20 +924,20 @@ export const mst: Record<string, CardScript> = {
   "desires of flesh|3": topBanishDesire((ctx, card) => isAttackAction(ctx, card)),
   "impulsive desire|1": topBanishDesire(
     (ctx, card) =>
-      hasPrintedType(ctx.cardData(card.cardId), "attack-reaction") ||
-      hasPrintedType(ctx.cardData(card.cardId), "defense-reaction") ||
+      ctx.hasCardType(card, "attack-reaction") ||
+      ctx.hasCardType(card, "defense-reaction") ||
       ctx.hasCardType(card, "instant"),
   ),
   "impulsive desire|2": topBanishDesire(
     (ctx, card) =>
-      hasPrintedType(ctx.cardData(card.cardId), "attack-reaction") ||
-      hasPrintedType(ctx.cardData(card.cardId), "defense-reaction") ||
+      ctx.hasCardType(card, "attack-reaction") ||
+      ctx.hasCardType(card, "defense-reaction") ||
       ctx.hasCardType(card, "instant"),
   ),
   "impulsive desire|3": topBanishDesire(
     (ctx, card) =>
-      hasPrintedType(ctx.cardData(card.cardId), "attack-reaction") ||
-      hasPrintedType(ctx.cardData(card.cardId), "defense-reaction") ||
+      ctx.hasCardType(card, "attack-reaction") ||
+      ctx.hasCardType(card, "defense-reaction") ||
       ctx.hasCardType(card, "instant"),
   ),
   "mind's desire|1": topBanishDesire((ctx, card) => isNonAttackAction(ctx, card)),
@@ -1923,24 +1925,15 @@ Object.assign(mst, {
   "evo shortcircuit|3": evoEquipment({
     triggers: [
       entersArenaTrigger("Deal 1 damage", decisionMessage("card.trigger.common.damage.deal", { amount: 1 }), (ctx) =>
-        ctx.requestChoice(
-          "shortcircuit-target",
-          decisionPrompt("Deal 1 damage to which hero?", "card.mst.hero.damage.choose", {
-            values: { amount: 1 },
-            optionMessages: {
-              "opposing hero": decisionMessage("common.option.opponent"),
-              "your hero": decisionMessage("card.mst.option.yourhero"),
-            },
-          }),
-          ["opposing hero", "your hero"],
-          undefined,
-          undefined,
-          "opposing hero",
-        ),
+        requestHeroChoice(ctx, "shortcircuit-target", "Deal 1 damage to which hero?", "card.mst.hero.damage.choose", {
+          values: { amount: 1 },
+          defaultOption: "opposing hero",
+        }),
       ),
     ],
     onChoose(ctx, hook, option) {
-      if (hook === "shortcircuit-target") ctx.dealDamage(option === "your hero" ? ctx.seat : opponentSeat(ctx), 1);
+      const seat = hook === "shortcircuit-target" ? heroChoiceSeat(ctx, option) : undefined;
+      if (seat !== undefined) ctx.dealDamage(seat, 1);
     },
   }),
   "evo speedslip|3": evoEquipment({

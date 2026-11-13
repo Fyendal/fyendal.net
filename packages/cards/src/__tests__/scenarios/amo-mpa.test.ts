@@ -816,6 +816,29 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
     expect(boardNames(game, 0)).toEqual(["Silver"]);
   });
 
+  it("Cadaver Handlers doesn't count Silver tokens whose names are suppressed", () => {
+    const game = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          graveyard: [CADAVER],
+          board: ["silver|0", "silver|0"],
+          weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+    game.state.players[0]!.hero.scriptState = { namesSuppressedUntilTurn: 99 };
+
+    game.endTurn();
+
+    expect(game.state.pendingDecision).toBeNull();
+    game.expectInZone(0, CADAVER, "graveyard");
+    expect(boardNames(game, 0)).toEqual(["Silver", "Silver"]);
+  });
+
   it("Cadaver Handlers still destroys Silver but stays in the graveyard while its controller has arms equipped", () => {
     const game = scenario({
       active: 1,

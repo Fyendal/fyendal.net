@@ -22,7 +22,6 @@ import {
   targetHeroSeat,
 } from "../shared-helpers.js";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "../aha/warrior-sharpen.js";
-import { hasType } from "@fyendal/shared";
 
 const EMBODIMENT = "ROS026";
 const FLOW = "OMN203";
@@ -503,7 +502,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   "tempt over|2": {
     onAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId !== undefined) return;
-      const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card) && hasType(ctx.cardData(card.cardId), "token"));
+      const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card) && ctx.hasCardType(card, "token"));
       if (auras.length)
         ctx.requestCardChoice(
           "tempt-steal",
@@ -554,7 +553,7 @@ export const omnHighRarity: Record<string, CardScript> = {
     canBeDefendedBy(ctx, defending) {
       return (
         ctx.link?.attackingCard.instanceId !== ctx.self.instanceId ||
-        (!hasType(ctx.cardData(defending.cardId), "attack-reaction") && !hasType(ctx.cardData(defending.cardId), "defense-reaction"))
+        (!ctx.hasCardType(defending, "attack-reaction") && !ctx.hasCardType(defending, "defense-reaction"))
       );
     },
   }),
@@ -677,7 +676,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   "crash site salvage|2": {
     declareAdditionalCost(ctx) {
       const choices = faceUpGraveyard(ctx)
-        .filter((card) => hasCardSubtype(ctx, card, "item") || hasType(ctx.cardData(card.cardId), "equipment"));
+        .filter((card) => hasCardSubtype(ctx, card, "item") || ctx.hasCardType(card, "equipment"));
       if (choices.length)
         ctx.requestCardChoice(
           "salvage-scrap",
@@ -692,7 +691,7 @@ export const omnHighRarity: Record<string, CardScript> = {
       const card = faceUpGraveyard(ctx).find(
           (candidate) =>
             candidate.instanceId === Number(option) &&
-            (hasCardSubtype(ctx, candidate, "item") || hasType(ctx.cardData(candidate.cardId), "equipment")),
+            (hasCardSubtype(ctx, candidate, "item") || ctx.hasCardType(candidate, "equipment")),
         );
       if (card && ctx.banish(card.instanceId)) {
         ctx.setState("scrapped", 1);

@@ -14,7 +14,6 @@ import type {
 } from "@fyendal/engine";
 import type { GameLogEvent, GameLogPayload, GameMessage } from "@fyendal/shared";
 import { functionalKey, functionalKeyOf } from "../functional.js";
-import { hasType } from "@fyendal/shared";
 
 export interface DecisionPromptOptions {
   values?: GameMessage["values"];
@@ -1258,7 +1257,7 @@ export function tokenContractWithSilver(
  * destroy N Silver you control. If you do, equip this." */
 export function equipWithSilver(amount: number): TriggerDef {
   const silverControlled = (ctx: ScriptCtx) =>
-    ctx.player(ctx.seat).board.filter((card) => ctx.cardData(card.cardId).name === "Silver");
+    ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Silver"));
   return {
     event: "start-of-turn",
     sourceZone: "graveyard",
@@ -1347,6 +1346,12 @@ export function cardNamed(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name
   return ctx.cardNames(card).includes(name.trim().toLowerCase());
 }
 
+/** Printed name while the card still has it, else its first effective name; undefined when it has none. */
+export function effectiveCardName(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): string | undefined {
+  const printed = ctx.cardData(card.cardId).name;
+  return cardNamed(ctx, card, printed) ? printed : ctx.cardNames(card)[0];
+}
+
 /** Live Assassin attack action cards with contract on the chain. */
 export function assassinContractAttackTargets(ctx: ScriptCtx): number[] {
   return ctx.state.chain
@@ -1423,7 +1428,7 @@ function weaponHands(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): number {
 }
 
 function canEquipDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  if (card.faceDown || !ctx.cardTypes(card).includes("dagger") || !hasType(ctx.cardData(card.cardId), "weapon")) {
+  if (card.faceDown || !ctx.cardTypes(card).includes("dagger") || !ctx.hasCardType(card, "weapon")) {
     return false;
   }
   const occupiedHands = ctx.player(ctx.seat).weapons.reduce((total, weapon) => total + weaponHands(ctx, weapon), 0);
@@ -2077,6 +2082,7 @@ export function wizardActionAsInstant(ctx: ScriptCtx): boolean {
   const player = ctx.state.players[ctx.seat]!;
   if (
     ctx.cardData(player.heroCardId).name === "Iyslander" &&
+    !ctx.heroAbilitiesDisabled(ctx.seat) &&
     ctx.state.activePlayer !== ctx.seat &&
     ctx.cardColor(ctx.self) === 3 &&
     player.arsenal.some((card) => card.instanceId === ctx.self.instanceId)
@@ -2106,8 +2112,8 @@ export function dealArcane(ctx: ScriptCtx, targetSeat: number, n: number, target
  * choice is applied immediately, so the last card assigned to the top becomes
  * the top card and the last card assigned to the bottom becomes the bottom
  * card. A trailing "pass" option (the Space default) finishes the opt early,
- * leaving every remaining card on top in its current order. `chargeHero`
- * (Blaze, Firemind): when the opt finishes, the hero gets that many energy
+ * leaving every remaining card on top in its current order. Blaze, Firemind
+ * (abilities intact): when the opt finishes, the hero gets that many energy
  * counters. Every script using optN must delegate its onChoose to optOnChoose
  * (the choice re-requests itself until every looked card is assigned).
  */
@@ -2131,12 +2137,12 @@ function optOptionMessages(ids: number[]): Readonly<Record<string, GameMessage>>
   };
 }
 
-export function optN(ctx: ScriptCtx, n: number, chargeHero = false): void {
+export function optN(ctx: ScriptCtx, n: number): void {
   const p = ctx.player(ctx.seat);
   const looked = p.deck.slice(0, n).map((c) => c.instanceId);
   if (looked.length === 0) return;
   const { options, cardOptions } = optOptions(looked);
-  const chargesBlaze = chargeHero || ctx.cardData(p.heroCardId).name === "Blaze, Firemind";
+  const chargesBlaze = ctx.cardData(p.heroCardId).name === "Blaze, Firemind" && !ctx.heroAbilitiesDisabled(ctx.seat);
   ctx.requestChoice(
     `${chargesBlaze ? "optc" : "opt"}:${looked.length}:${looked.join(",")}`,
     decisionPrompt(`${ctx.data.name}: Opt ${looked.length}`, "card.common.opt", {
@@ -2330,7 +2336,7 @@ export function equippedCards(ctx: ScriptCtx, seat: number): Card[] {
   const player = ctx.player(seat);
   return [
     ...equipmentZoneCards(player),
-    ...player.weapons.filter((card) => hasType(ctx.cardData(card.cardId), "equipment")),
+    ...player.weapons.filter((card) => ctx.hasCardType(card, "equipment")),
   ];
 }
 
@@ -3105,7 +3111,12 @@ export function equippedEvos(ctx: ScriptCtx): number {
   return ctx.countEquipped("evo");
 }
 
-export function maintenanceItem(steam: number, extra: CardScript = {}): CardScript {
+const MAINTENANCE_OPTIONS = ["remove", "destroy"] as const;
+const MAINTENANCE_OPTION_MESSAGES = commonOptionMessages(...MAINTENANCE_OPTIONS);
+const LEGACY_MAINTENANCE_HOOKS = new Set(["evo-maintenance", "aio-maintenance"]);
+
+/** `hook` stays per-card where saved standing orders are keyed by an older hook. */
+export function maintenanceItem(steam: number, extra: CardScript = {}, hook = "maintenance"): CardScript {
   return {
     ...extra,
     onEnterArena(ctx) {
@@ -3118,31 +3129,29 @@ export function maintenanceItem(steam: number, extra: CardScript = {}): CardScri
         whose: "subject",
         label: "Remove a steam counter or destroy this",
         labelMessage: decisionMessage("card.trigger.steam.maintain"),
+        standingChoice: { hook, options: MAINTENANCE_OPTIONS, optionMessages: MAINTENANCE_OPTION_MESSAGES },
         effect(ctx) {
           if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
           else
             ctx.requestChoice(
-              "maintenance",
+              hook,
               decisionPrompt("Remove a steam counter or destroy this?", "card.evo.maintenance.choose", {
-                optionMessages: {
-                  remove: decisionMessage("common.option.remove"),
-                  destroy: decisionMessage("common.option.destroy"),
-                },
+                optionMessages: MAINTENANCE_OPTION_MESSAGES,
               }),
-              ["remove", "destroy"],
+              [...MAINTENANCE_OPTIONS],
             );
         },
       },
       ...(extra.triggers ?? []),
     ],
-    onChoose(ctx, hook, option) {
+    onChoose(ctx, chosenHook, option) {
       // AIO/EVO used prefixed hooks; pending decisions in stored games may still carry them.
-      if (hook === "maintenance" || hook === "evo-maintenance" || hook === "aio-maintenance") {
+      if (chosenHook === hook || LEGACY_MAINTENANCE_HOOKS.has(chosenHook)) {
         if (option === "remove") ctx.setCounter("steam", Math.max(0, ctx.getCounter("steam") - 1));
         else ctx.destroySelf();
         return;
       }
-      extra.onChoose?.(ctx, hook, option);
+      extra.onChoose?.(ctx, chosenHook, option);
     },
   };
 }

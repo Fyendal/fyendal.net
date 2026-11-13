@@ -143,6 +143,24 @@ describe("WTR Guardian — crush attacks", () => {
     expect(g.state.players[1]!.weapons[0]?.defCounters).toBe(1);
   });
 
+  it("Buckling Blow reads a flipped weapon's back-face types", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["buckling blow|3"], resources: 4 },
+        {
+          hero: "rhinar",
+          hand: [],
+          equipment: { head: null, chest: null, arms: null, legs: null },
+          weapons: ["construct nitro mechanoid|2"],
+        },
+      ],
+    });
+    // Back face Nitro Mechanoid is a weapon and equipment; the printed front is an action.
+    g.state.players[1]!.weapons[0]!.flipped = true;
+    g.play("buckling blow|3").blockWith().settle();
+    expect(g.state.pendingDecision?.options).toEqual([`off-hand:${g.state.players[1]!.weapons[0]!.instanceId}`]);
+  });
+
   it("Cartilage Crush crush taxes the opponent's next action", () => {
     const g = scenario({
       seats: [

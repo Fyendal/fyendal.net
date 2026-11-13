@@ -20,7 +20,6 @@ import {
   previousAttackHasName,
   yesNoPrompt,
 } from "../shared-helpers.js";
-import { hasType as hasPrintedType } from "@fyendal/shared";
 
 const SEISMIC_SURGE = "CRU044";
 const FROSTBITE = "SIY035";
@@ -75,7 +74,7 @@ function scourCandidates(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
     .board.filter(
       (card) =>
         isAura(ctx, card) &&
-        (hasPrintedType(ctx.cardData(card.cardId), "token") || ctx.cardData(card.cardId).cost === 0),
+        (ctx.hasCardType(card, "token") || ctx.cardData(card.cardId).cost === 0),
     );
 }
 

@@ -30,13 +30,6 @@ import {
 
 const PONDER = "SBZ033";
 
-/** Opt wrapper for the set: charges Blaze, Firemind with energy counters when
- *  the opting player is Blaze (her "Whenever you opt, …" trigger). */
-function opt(ctx: ScriptCtx, n: number): void {
-  const heroIsBlaze = ctx.cardData(ctx.player(ctx.seat).heroCardId).name === "Blaze, Firemind";
-  optN(ctx, n, heroIsBlaze);
-}
-
 /** True while this card may be played as an instant via Blaze, Firemind's
  *  ability (per-turn flag set when the counters are removed). */
 function viaBlaze(ctx: ScriptCtx): boolean {
@@ -87,7 +80,7 @@ function arcaneBolt(damage: number, extra: CardScript = {}, anyTarget = false): 
 /** Whisper of the Oracle: "Opt N / Go again" (go again is native). */
 function whisperScript(n: number): CardScript {
   return {
-    onPlay: (ctx) => opt(ctx, n),
+    onPlay: (ctx) => optN(ctx, n),
     onChoose(ctx, hook, option) {
       optOnChoose(ctx, hook, option);
     },
@@ -101,7 +94,7 @@ function cinderingScript(n: number): CardScript {
     playAsInstant: (ctx) => ctx.state.activePlayer !== ctx.seat,
     onPlay(ctx) {
       buffNextArcaneDamageCard(ctx, 1);
-      opt(ctx, n);
+      optN(ctx, n);
     },
     onChoose(ctx, hook, option) {
       optOnChoose(ctx, hook, option);
@@ -135,7 +128,7 @@ function spindleScript(damage: number): CardScript {
     playAsInstant: viaBlaze,
     onPlay: (ctx) => dealArcane(ctx, opponentSeat(ctx), damage),
     onDamageDealt(ctx, _target, amount, arcane) {
-      if (arcane && amount > 0) opt(ctx, amount);
+      if (arcane && amount > 0) optN(ctx, amount);
     },
     onChoose(ctx, hook, option) {
       optOnChoose(ctx, hook, option);
@@ -241,7 +234,7 @@ export const sbz: Record<string, CardScript> = {
       destroySelfCost: true,
       label: "Destroy: Opt 2",
       onActivate(ctx) {
-        opt(ctx, 2);
+        optN(ctx, 2);
       },
     },
     onChoose(ctx, hook, option) {
@@ -279,7 +272,7 @@ export const sbz: Record<string, CardScript> = {
       label: "Destroy: prevent 1, Opt 1",
       onActivate(ctx) {
         ctx.preventNextDamage(ctx.seat, 1);
-        opt(ctx, 1);
+        optN(ctx, 1);
       },
     },
     onChoose(ctx, hook, option) {

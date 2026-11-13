@@ -24,7 +24,6 @@ import {
   revealTopSixPlusStays,
 } from "./shared-helpers.js";
 import { hvyHighRarity, wagerAttack } from "./hvy/high-rarity.js";
-import { hasType } from "@fyendal/shared";
 
 // Heavy Hitters — commons, rares, young heroes, and required wager tokens.
 const AGILITY = "SBL034";
@@ -506,7 +505,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
   },
   "lay down the law|1": {
     modifyDefendingDefense(ctx, defending) {
-      return ctx.currentAttackPower() >= 13 && !hasType(ctx.cardData(defending.cardId), "equipment") ? -1 : 0;
+      return ctx.currentAttackPower() >= 13 && !ctx.hasCardType(defending, "equipment") ? -1 : 0;
     },
   },
   "smack of reality|1": {

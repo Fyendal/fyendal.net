@@ -6,11 +6,13 @@ import {
   createRunechants,
   decisionPrompt,
   dealArcane,
+  heroChoiceSeat,
   isWizardNonAttack,
   localizedCardLog,
   opponentSeat,
   optN,
   optOnChoose,
+  requestHeroChoice,
   runeCount,
   spellbladeAssault,
   wizardActionAsInstant,
@@ -117,26 +119,21 @@ function targetHeroArcaneSpell(damage: number): CardScript {
     arcaneDamageEffectAmounts: [damage],
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      ctx.requestChoice(
+      requestHeroChoice(
+        ctx,
         `arc-target:${damage}`,
-        decisionPrompt(
-          `${ctx.data.name}: deal ${ctx.previewArcaneDamage(damage)} arcane damage to which hero?`,
-          "card.arc.arcane.hero.choose",
-          {
-            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(damage) },
-            optionMessages: commonOptionMessages("opposing hero", "your hero"),
-          },
-        ),
-        ["opposing hero", "your hero"],
-        undefined,
-        undefined,
-        "opposing hero",
+        `${ctx.data.name}: deal ${ctx.previewArcaneDamage(damage)} arcane damage to which hero?`,
+        "card.arc.arcane.hero.choose",
+        {
+          values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(damage) },
+          defaultOption: "opposing hero",
+        },
       );
     },
     onChoose(ctx, hook, option) {
       const match = /^arc-target:(\d+)$/.exec(hook);
-      if (!match) return;
-      dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), Number(match[1]));
+      const seat = match ? heroChoiceSeat(ctx, option) : undefined;
+      if (match && seat !== undefined) dealArcane(ctx, seat, Number(match[1]));
     },
   };
 }

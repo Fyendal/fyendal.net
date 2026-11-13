@@ -34,7 +34,6 @@ import {
   sharesName,
   yesNoPrompt,
 } from "../shared-helpers.js";
-import { hasType } from "@fyendal/shared";
 
 const QUICKEN = "EVO250";
 const RUNECHANT = "DTD214";
@@ -50,7 +49,7 @@ function emboldenedBladeReveal(ctx: ScriptCtx, instanceId: number): void {
   const card = ctx.state.players
     .flatMap((player) => player.arsenal)
     .find((candidate) => candidate.instanceId === instanceId);
-  if (card && hasType(ctx.cardData(card.cardId), "defense-reaction") && ctx.moveToGraveyard(instanceId, "arsenal"))
+  if (card && ctx.hasCardType(card, "defense-reaction") && ctx.moveToGraveyard(instanceId, "arsenal"))
     buffNextAttack(ctx, { attack: 1, appliesTo: "weapon" });
 }
 const FABRICATE_MODES = ["equip", "defense", "under", "hand"] as const;
@@ -112,7 +111,7 @@ function suppressTargetEquipmentAbilities(ctx: ScriptCtx): void {
 function steelSoulTriggerCount(ctx: ScriptCtx, other: DeepReadonly<CardInstance>): number {
   if (!ctx.cardTypes(other).some((type) => type.toLowerCase() === "evo")) return 0;
   if (sharesName(ctx, other, ctx.self)) return 0;
-  return hasType(ctx.cardData(other.cardId), "hero") ? 2 : 1;
+  return ctx.hasCardType(other, "hero") ? 2 : 1;
 }
 function steelControllerTargets(ctx: ScriptCtx) {
   return faceUpGraveyard(ctx).filter(
@@ -132,7 +131,7 @@ function requestSteelControllerChoice(ctx: ScriptCtx) {
 }
 function scrap(extra: CardScript = {}, count = 1): CardScript {
   const scrappable = (ctx: ScriptCtx, card: DeepReadonly<CardInstance>) =>
-    isItem(ctx, card) || hasType(ctx.cardData(card.cardId), "equipment");
+    isItem(ctx, card) || ctx.hasCardType(card, "equipment");
   return {
     ...extra,
     declareAdditionalCost(ctx) {

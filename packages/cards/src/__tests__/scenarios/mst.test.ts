@@ -419,6 +419,24 @@ describe("MST — Mechanologist", () => {
     }
   });
 
+  it("Evo Shortcircuit asks for its hero with the shared hero options", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["evo shortcircuit|3"], equipment: { arms: "cogwerx base arms|0" } },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.play("evo shortcircuit|3", { settle: false });
+    for (let guard = 0; guard < 6 && g.state.pendingDecision?.chooseHook !== "shortcircuit-target"; guard++) {
+      g.passPriority();
+    }
+    const decision = projectStateFor(g.state, 0).pendingDecision;
+    expect(decision?.options).toEqual(["opposing hero", "your hero"]);
+    expect(decision?.optionMessages?.map((message) => message?.id))
+      .toEqual(["common.option.opposinghero", "common.option.yourhero"]);
+    g.chooseOption("your hero").expectLife(0, 19).expectLife(1, 20);
+  });
+
   it("Evo Heartdrive reduces the next attack action card, not a non-attack action", () => {
     const g = scenario({
       seats: [

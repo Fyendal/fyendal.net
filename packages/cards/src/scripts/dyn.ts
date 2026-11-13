@@ -15,9 +15,9 @@ import {
   dealToAnyTarget,
   equippedCards,
   faceUpGraveyard,
+  heroChoiceSeat,
   hyperDriver,
   isAttackAction,
-  type DecisionPromptOptions,
   decisionMessage,
   decisionPrompt,
   destroyedTrigger,
@@ -31,6 +31,7 @@ import {
   optN,
   optOnChoose,
   previousAttackHasName,
+  requestHeroChoice,
   targetHeroSeat,
   ongoingLabel,
   hasCardSubtype,
@@ -39,7 +40,6 @@ import {
   isNonAttackAction,
 } from "./shared-helpers.js";
 import { dynHighRarity } from "./dyn/high-rarity.js";
-import { hasType as hasPrintedType } from "@fyendal/shared";
 
 const CROUCHING_TIGER = "DYN065";
 const RUNECHANT = "DYN191";
@@ -55,31 +55,6 @@ function logDeckTopReveal(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): voi
       { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
     ),
   );
-}
-
-function chooseHero(
-  ctx: ScriptCtx,
-  hook: string,
-  fallback: string,
-  id: string,
-  values?: DecisionPromptOptions["values"],
-  defaultOption?: "opposing hero" | "your hero",
-): void {
-  ctx.requestChoice(
-    hook,
-    decisionPrompt(fallback, id, {
-      values,
-      optionMessages: commonOptionMessages("opposing hero", "your hero"),
-    }),
-    ["opposing hero", "your hero"],
-    undefined,
-    undefined,
-    defaultOption,
-  );
-}
-
-function heroSeat(ctx: ScriptCtx, option: string): number {
-  return option === "your hero" ? ctx.seat : opponentSeat(ctx);
 }
 
 function blessing(effect: (ctx: ScriptCtx) => void, extra: Partial<TriggerDef> = {}): CardScript {
@@ -273,7 +248,7 @@ function contractAttack(test: ContractTest): CardScript {
 const contractAttackAction: ContractTest = (ctx, card) => isAttackAction(ctx, card);
 const contractLowDefense: ContractTest = (ctx, card) => (ctx.cardData(card.cardId).defense ?? Infinity) <= 2;
 const contractReaction: ContractTest = (ctx, card) =>
-  hasPrintedType(ctx.cardData(card.cardId), "attack-reaction") || hasPrintedType(ctx.cardData(card.cardId), "defense-reaction");
+  ctx.hasCardType(card, "attack-reaction") || ctx.hasCardType(card, "defense-reaction");
 const contractLowCost: ContractTest = (ctx, card) => {
   const cardData = ctx.cardData(card.cardId);
   if (cardData.cost !== undefined) return cardData.cost <= 1;
@@ -291,9 +266,10 @@ function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" 
     arcaneDamageEffectAmounts: [amount],
     onPlay(ctx) {
       const preview = ctx.previewArcaneDamage(amount);
-      chooseHero(ctx, "arcane-target", `Deal ${preview} arcane damage to a hero`, "card.dyn.arcane.hero.choose", {
-        amount: preview,
-      }, "opposing hero");
+      requestHeroChoice(ctx, "arcane-target", `Deal ${preview} arcane damage to a hero`, "card.dyn.arcane.hero.choose", {
+        values: { amount: preview },
+        defaultOption: "opposing hero",
+      });
     },
     onDamageDealt(ctx, target, dealt, arcane) {
       if (!arcane || dealt <= amount || surge === null) return;
@@ -320,7 +296,10 @@ function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" 
       }
     },
     onChoose(ctx, hook, option) {
-      if (hook === "arcane-target") dealArcane(ctx, heroSeat(ctx, option), amount);
+      if (hook === "arcane-target") {
+        const seat = heroChoiceSeat(ctx, option);
+        if (seat !== undefined) dealArcane(ctx, seat, amount);
+      }
       else if (hook === "sap-energy" && option !== "pass") ctx.addCounter(Number(option), "energy", -1);
       else optOnChoose(ctx, hook, option);
     },

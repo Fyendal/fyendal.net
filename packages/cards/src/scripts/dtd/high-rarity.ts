@@ -33,7 +33,6 @@ import {
   isAttackAction,
   isAura,
 } from "../shared-helpers.js";
-import { hasType } from "@fyendal/shared";
 
 const COURAGE = "DTD232";
 const EARTH = "ELE109";
@@ -923,7 +922,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     onFriendlyDestroyed(ctx, card) {
       if (
         ctx.getPlayerFlag(ctx.seat, "diademTriggered") === true ||
-        hasType(ctx.cardData(card.cardId), "token") ||
+        ctx.hasCardType(card, "token") ||
         !ctx.cardData(card.cardId).text.toLowerCase().includes("ward")
       )
         return;
@@ -1024,7 +1023,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
         .board.filter(
           (card) =>
             isAura(ctx, card) &&
-            !hasType(ctx.cardData(card.cardId), "token") &&
+            !ctx.hasCardType(card, "token") &&
             (ctx.cardData(card.cardId).cost ?? 0) <= (ctx.link?.damage ?? 0),
         );
       if (auras.length)

@@ -11762,12 +11762,6 @@
       "value": "选择 3 张 trap 牌面朝下放逐"
     }
   ],
-  "card.mst.option.yourhero": [
-    {
-      "type": 0,
-      "value": "你的英雄"
-    }
-  ],
   "card.mst.remaining.bottommost.choose": [
     {
       "type": 0,
@@ -13486,12 +13480,6 @@
     {
       "type": 0,
       "value": "重置一把由你操控的弓？"
-    }
-  ],
-  "card.sea.cog.maintenance.choose": [
-    {
-      "type": 0,
-      "value": "移除一个 steam 指示物，或摧毁此牌？"
     }
   ],
   "card.sea.cog.steam.add": [

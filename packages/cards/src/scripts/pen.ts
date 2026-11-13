@@ -443,7 +443,7 @@ function freezeGalciaTarget(ctx: ScriptCtx): void {
 function tendenciesTargets(ctx: ScriptCtx, subtype: "item" | "aura"): Card[] {
   return ctx.state.players
     .flatMap((player) => player.board)
-    .filter((card) => hasCardSubtype(ctx, card, subtype) && hasType(ctx.cardData(card.cardId), "token"));
+    .filter((card) => hasCardSubtype(ctx, card, subtype) && ctx.hasCardType(card, "token"));
 }
 
 /** Ask for Destructive Tendencies' aura token; without one, resolve the item. */
@@ -761,7 +761,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "speed demon|1": {
     declareAdditionalCost(ctx) {
       const choices = faceUpGraveyard(ctx)
-        .filter((card) => hasCardSubtype(ctx, card, "item") || hasType(ctx.cardData(card.cardId), "equipment"));
+        .filter((card) => hasCardSubtype(ctx, card, "item") || ctx.hasCardType(card, "equipment"));
       if (choices.length)
         ctx.requestCardChoice(
           "pen-scrap",
@@ -777,7 +777,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       const target = faceUpGraveyard(ctx).find(
           (card) =>
             card.instanceId === Number(option) &&
-            (hasCardSubtype(ctx, card, "item") || hasType(ctx.cardData(card.cardId), "equipment")),
+            (hasCardSubtype(ctx, card, "item") || ctx.hasCardType(card, "equipment")),
         );
       if (!target) return;
       const driver = cardNamed(ctx, target, "Hyper Driver");
@@ -993,7 +993,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
             options: (ctx) =>
               ctx.state.players
                 .flatMap((player) => player.board)
-                .filter((card) => isAura(ctx, card) && hasType(ctx.cardData(card.cardId), "token"))
+                .filter((card) => isAura(ctx, card) && ctx.hasCardType(card, "token"))
                 .map((card) => card.instanceId),
             prompt: () => decisionPrompt("Destroy an aura token", "card.pen.auratoken.destroy"),
           },

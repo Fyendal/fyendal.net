@@ -22,6 +22,7 @@ import {
   faceUpGraveyard,
   hasCardSubtype,
   hasLiveTurnEffect,
+  heroChoiceSeat,
   heroDamage,
   hitHookLabel,
   isAttackAction,
@@ -42,7 +43,6 @@ import {
   resourceAbility,
   splitScript,
 } from "./shared-helpers.js";
-import { hasType } from "@fyendal/shared";
 
 // Rosetta (ROS) — commons, rares, young heroes, and their required tokens.
 
@@ -385,9 +385,8 @@ function glyphOverlay(base: number): CardScript {
       requestAnyTargetChoice(ctx, "glyph-hero", amount, { heroesOnly: true });
     },
     onChoose(ctx, hook, option) {
-      if (hook === "glyph-hero") {
-        dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), base + sigils(ctx).length);
-      }
+      const seat = hook === "glyph-hero" ? heroChoiceSeat(ctx, option) : undefined;
+      if (seat !== undefined) dealArcane(ctx, seat, base + sigils(ctx).length);
     },
     onDamageDealt(ctx, _target, dealt, arcane) {
       if (!arcane || dealt <= base) return;
@@ -860,7 +859,7 @@ for (const pitch of [1, 2, 3]) {
               .flatMap((player) => player.board)
               .filter(
                 (card) =>
-                  isAura(ctx, card) && ((ctx.cardData(card.cardId).cost ?? 0) <= 1 || hasType(ctx.cardData(card.cardId), "token")),
+                  isAura(ctx, card) && ((ctx.cardData(card.cardId).cost ?? 0) <= 1 || ctx.hasCardType(card, "token")),
               )
               .map((card) => card.instanceId),
           prompt: () =>
@@ -977,7 +976,7 @@ Object.assign(ros, {
         const auras = ctx.state.players
           .flatMap((player) => player.board)
           .filter(
-            (card) => isAura(ctx, card) && ((ctx.cardData(card.cardId).cost ?? 0) <= x || hasType(ctx.cardData(card.cardId), "token")),
+            (card) => isAura(ctx, card) && ((ctx.cardData(card.cardId).cost ?? 0) <= x || ctx.hasCardType(card, "token")),
           );
         if (auras.length)
           ctx.requestCardChoice(

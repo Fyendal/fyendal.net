@@ -890,9 +890,9 @@ export const mpa: Record<string, CardScript> = {
         condition(ctx, left, event) {
           if (!left || event?.destroyed !== true || event.controllerSeat === undefined) return false;
           if (!isDiseaseToken(ctx, left)) return false;
-          const name = ctx.cardData(left.cardId).name.trim().toLowerCase().replace(/\s+/g, " ");
-          return ctx.state.players.every(
-            (player) => Number(player.flags[`destroyedNameCount:${name}`] ?? 0) === 0,
+          const names = ctx.cardNames(left).map((name) => name.replace(/\s+/g, " "));
+          return names.length > 0 && names.every((name) =>
+            ctx.state.players.every((player) => Number(player.flags[`destroyedNameCount:${name}`] ?? 0) === 0),
           );
         },
         onTrigger(ctx, left, event) {

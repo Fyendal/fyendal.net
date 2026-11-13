@@ -8,6 +8,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   hasCardSubtype,
+  heroChoiceSeat,
   isAttackAction,
   isNonAttackAction,
   localizedCardLog,
@@ -16,6 +17,7 @@ import {
   optN,
   optOnChoose,
   reload,
+  requestHeroChoice,
   resolveReload,
   runeCount,
   wizardActionAsInstant,
@@ -490,39 +492,26 @@ export const arcHighRarity: Record<string, CardScript> = {
     arcaneDamageEffectAmounts: [2],
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      ctx.requestChoice(
+      requestHeroChoice(
+        ctx,
         "fork-first",
-        decisionPrompt(
-          `Forked Lightning: choose the first hero for ${ctx.previewArcaneDamage(2)} arcane damage`,
-          "card.arc.fork.hero.first",
-          {
-            values: { amount: ctx.previewArcaneDamage(2) },
-            optionMessages: commonOptionMessages("opposing hero", "your hero"),
-          },
-        ),
-        ["opposing hero", "your hero"],
-        undefined,
-        undefined,
-        "opposing hero",
+        `Forked Lightning: choose the first hero for ${ctx.previewArcaneDamage(2)} arcane damage`,
+        "card.arc.fork.hero.first",
+        { values: { amount: ctx.previewArcaneDamage(2) }, defaultOption: "opposing hero" },
       );
     },
     onChoose(ctx, hook, option) {
+      const seat = heroChoiceSeat(ctx, option);
+      if (seat === undefined) return;
       if (hook === "fork-first") {
-        ctx.setState("forkFirst", option === "your hero" ? ctx.seat : opponentSeat(ctx));
-        ctx.requestChoice(
-          "fork-second",
-          decisionPrompt("Choose the second hero for 2 arcane damage", "card.arc.fork.hero.second", {
-            values: { amount: 2 },
-            optionMessages: commonOptionMessages("opposing hero", "your hero"),
-          }),
-          ["opposing hero", "your hero"],
-          undefined,
-          undefined,
-          "opposing hero",
-        );
+        ctx.setState("forkFirst", seat);
+        requestHeroChoice(ctx, "fork-second", "Choose the second hero for 2 arcane damage", "card.arc.fork.hero.second", {
+          values: { amount: 2 },
+          defaultOption: "opposing hero",
+        });
       } else if (hook === "fork-second") {
         dealArcane(ctx, ctx.getState("forkFirst"), 2);
-        dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), 2);
+        dealArcane(ctx, seat, 2);
       }
     },
   },

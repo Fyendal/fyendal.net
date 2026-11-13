@@ -44,6 +44,39 @@ describe("standing choices declared on turn triggers", () => {
     });
   });
 
+  it.each(["penetration script|2", "cerebellum processor|3"])(
+    "projects %s's maintenance choice like the SEA cogs",
+    (item) => {
+      const g = scenario({
+        active: 1,
+        seats: [
+          { hero: "rhinar", board: [item] },
+          { hero: "dorinthea" },
+        ],
+      });
+      g.state.players[0]!.board[0]!.counters = { steam: 1 };
+
+      const choice = cogView(g, 0).turnTriggers?.[0]?.choices?.[0];
+      expect(choice).toEqual({
+        hook: "maintenance",
+        options: [
+          { value: "remove", message: { id: "common.option.remove" } },
+          { value: "destroy", message: { id: "common.option.destroy" } },
+        ],
+      });
+
+      g.endTurn();
+      expect(g.state.pendingDecision).toMatchObject({
+        player: 0,
+        chooseHook: choice!.hook,
+        options: ["remove", "destroy"],
+        sourceInstanceId: g.state.players[0]!.board[0]!.instanceId,
+      });
+      g.chooseOption("remove");
+      expect(g.state.players[0]!.board[0]!.counters?.steam).toBe(0);
+    },
+  );
+
   it("implies a yes/no trigger-choice for Fyendal's Spring Tunic's optional trigger", () => {
     const g = scenario({
       active: 1,

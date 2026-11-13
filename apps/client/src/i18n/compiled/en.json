@@ -12577,12 +12577,6 @@
       "value": "Choose 3 traps to banish face down"
     }
   ],
-  "card.mst.option.yourhero": [
-    {
-      "type": 0,
-      "value": "Your hero"
-    }
-  ],
   "card.mst.remaining.bottommost.choose": [
     {
       "type": 0,
@@ -14385,12 +14379,6 @@
     {
       "type": 0,
       "value": "Untap a bow you control?"
-    }
-  ],
-  "card.sea.cog.maintenance.choose": [
-    {
-      "type": 0,
-      "value": "Remove a steam counter or destroy this?"
     }
   ],
   "card.sea.cog.steam.add": [

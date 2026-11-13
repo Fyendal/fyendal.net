@@ -99,6 +99,23 @@ describe("card script layout", () => {
     ]);
   });
 
+  it("reads printed card types only for bare card ids", () => {
+    const printedTypeReads = scriptSources(scriptsDir).flatMap(({ path, source }) =>
+      source.split("\n").flatMap((line) =>
+        /\b(?:hasType|hasPrintedType)\(/.test(line) && !line.trim().startsWith("import")
+          ? [`${path}:${line.trim()}`]
+          : [],
+      ),
+    );
+
+    expect(printedTypeReads).toEqual([
+      "hvy/high-rarity.ts:return cause.sourceCardId && hasType(ctx.cardData(cause.sourceCardId), \"action\") && count > 0",
+      "mst.ts:ctx.cardIdsNamed(name).find((cardId) => hasPrintedType(ctx.cardData(cardId), \"token\"));",
+      "pen.ts:const heroId = ctx.cardIdsNamed(name).find((cardId) => hasType(ctx.cardData(cardId), \"hero\"));",
+      "pen.ts:const heroId = ctx.cardIdsNamed(option).find((cardId) => hasType(ctx.cardData(cardId), \"hero\"));",
+    ]);
+  });
+
   it("uses effective keywords whenever a card instance is available", () => {
     const rawKeywordReads = scriptSources(scriptsDir).flatMap(({ path, source }) =>
       source.split("\n").flatMap((line) =>

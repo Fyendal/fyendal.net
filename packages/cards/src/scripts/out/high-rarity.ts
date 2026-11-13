@@ -22,7 +22,6 @@ import {
   sharesName,
   yesNoPrompt,
 } from "../shared-helpers.js";
-import { hasType } from "@fyendal/shared";
 
 const PONDER = "DYN244";
 function dagger(extra: CardScript = {}): CardScript {
@@ -776,7 +775,7 @@ export const outHighRarity: Record<string, CardScript> = {
         ),
       });
       const count = faceUpGraveyard(ctx, target)
-        .filter((card) => hasType(ctx.cardData(card.cardId), "defense-reaction")).length;
+        .filter((card) => ctx.hasCardType(card, "defense-reaction")).length;
       if (count >= 10) ctx.drawCards(ctx.seat, 1);
     },
   },

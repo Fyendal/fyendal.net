@@ -29,7 +29,6 @@ import {
   isNonAttackAction,
   isSword,
 } from "../shared-helpers.js";
-import { hasType } from "@fyendal/shared";
 
 const COURAGE = "DTD232";
 const EMBODIMENT_LIGHTNING = "DTD195";
@@ -121,7 +120,7 @@ function seismicAuraTokens(ctx: ScriptCtx): Card[] {
   );
   return ctx.state.players
     .flatMap((player) => player.board)
-    .filter((card) => isAura(ctx, card) && hasType(ctx.cardData(card.cardId), "token") && !chosen.has(card.instanceId));
+    .filter((card) => isAura(ctx, card) && ctx.hasCardType(card, "token") && !chosen.has(card.instanceId));
 }
 
 function continueSeismicChoices(ctx: ScriptCtx): void {
@@ -709,7 +708,7 @@ export const penHighRarity: Record<string, CardScript> = {
         onActivate(ctx) {
           const aura = ctx.state.players
             .flatMap((p) => p.board)
-            .find((card) => isAura(ctx, card) && hasType(ctx.cardData(card.cardId), "token"));
+            .find((card) => isAura(ctx, card) && ctx.hasCardType(card, "token"));
           if (aura) ctx.destroyPermanent(aura.instanceId);
         },
       },

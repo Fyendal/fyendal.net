@@ -12933,12 +12933,6 @@
       "value": "Escolha 3 traps para fazer banish com a face para baixo"
     }
   ],
-  "card.mst.option.yourhero": [
-    {
-      "type": 0,
-      "value": "Seu herói"
-    }
-  ],
   "card.mst.remaining.bottommost.choose": [
     {
       "type": 0,
@@ -14870,12 +14864,6 @@
     {
       "type": 0,
       "value": "Desvirar (untap) um bow que você controla?"
-    }
-  ],
-  "card.sea.cog.maintenance.choose": [
-    {
-      "type": 0,
-      "value": "Remover um marcador de steam ou destruir esta carta?"
     }
   ],
   "card.sea.cog.steam.add": [

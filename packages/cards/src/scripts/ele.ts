@@ -31,7 +31,6 @@ import {
   withFusion,
 } from "./shared-helpers.js";
 import { eleHighRarity } from "./ele/high-rarity.js";
-import { hasType as hasPrintedType } from "@fyendal/shared";
 
 // Tales of Aria commons, rares, and young heroes. Fusion is paid by revealing
 // a matching talent card from hand; the revealed card never leaves the hand.
@@ -124,7 +123,7 @@ function controlsAnotherNonTokenAura(ctx: ScriptCtx): boolean {
     .board.some(
       (card) =>
         card.instanceId !== ctx.self.instanceId &&
-        !hasPrintedType(ctx.cardData(card.cardId), "token") &&
+        !ctx.hasCardType(card, "token") &&
         isAura(ctx, card),
     );
 }

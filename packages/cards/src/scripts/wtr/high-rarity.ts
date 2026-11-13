@@ -16,7 +16,6 @@ import {
   reprise,
   resourceAbility,
 } from "../shared-helpers.js";
-import { hasType as hasPrintedType } from "@fyendal/shared";
 
 const SEISMIC_SURGE = "WTR075B";
 
@@ -352,7 +351,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
           "singing-search",
           "Singing Steelblade: choose an attack reaction",
           "card.wtr.singing.reaction.choose",
-          (card) => hasPrintedType(ctx.cardData(card.cardId), "attack-reaction"),
+          (card) => ctx.hasCardType(card, "attack-reaction"),
         );
     },
     onChoose(ctx, hook, option) {

@@ -16,7 +16,6 @@ import {
   wagerReaction,
   yesNoPrompt,
 } from "./shared-helpers.js";
-import { hasType } from "@fyendal/shared";
 
 const COURAGE = "SBL035";
 const VIGOR = "SDO036";
@@ -170,10 +169,10 @@ export const aol: Record<string, CardScript> = {
     canPlay: (ctx) =>
       ctx.link?.attacker === ctx.seat &&
       ctx.getFlag("link", "wagered") === true &&
-      ctx.link.defendingCards.some((card) => !hasType(ctx.cardData(card.cardId), "equipment")),
+      ctx.link.defendingCards.some((card) => !ctx.hasCardType(card, "equipment")),
     onPlay(ctx) {
       const defenders = (ctx.link?.defendingCards ?? []).filter(
-        (card) => !hasType(ctx.cardData(card.cardId), "equipment"),
+        (card) => !ctx.hasCardType(card, "equipment"),
       );
       if (defenders.length === 1) ctx.banish(defenders[0]!.instanceId);
       else if (defenders.length > 1)
@@ -334,7 +333,7 @@ export const aol: Record<string, CardScript> = {
     ...nextWarriorWager(2, "sword", false, "Winner may equip an equipment card from their graveyard", (ctx, winner) => {
       const equipment =
         winner >= 0
-          ? faceUpGraveyard(ctx, winner).filter((card) => hasType(ctx.cardData(card.cardId), "equipment"))
+          ? faceUpGraveyard(ctx, winner).filter((card) => ctx.hasCardType(card, "equipment"))
           : [];
       if (equipment.length) {
         ctx.setState("decisionSeat", winner);

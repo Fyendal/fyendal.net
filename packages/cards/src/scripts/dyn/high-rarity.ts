@@ -32,7 +32,6 @@ import {
   withdrawNextArcaneDamageCard,
   yesNoPrompt,
 } from "../shared-helpers.js";
-import { hasType } from "@fyendal/shared";
 
 const CROUCHING_TIGER = "DYN065";
 const SILVER = "DYN245";
@@ -630,7 +629,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       const sourceTypes = ctx.cardTypes(source);
       return (
         hasCardSubtype(ctx, source, "gun") ||
-        (hasType(ctx.cardData(source.cardId), "weapon") &&
+        (ctx.hasCardType(source, "weapon") &&
           sourceTypes.includes("mechanologist") &&
           sourceTypes.includes("pistol"))
       );

@@ -38,7 +38,6 @@ import {
   isSuspenseAura,
   isSword,
 } from "./shared-helpers.js";
-import { hasType } from "@fyendal/shared";
 
 const CONFIDENCE = "SLY034";
 const MIGHT = "SLY035";
@@ -52,7 +51,7 @@ function controlsAny(ctx: ScriptCtx, names: string[]): boolean {
   return names.some((name) => controlsNamed(ctx, name));
 }
 function tokenAura(ctx: ScriptCtx, card: Card): boolean {
-  return hasType(ctx.cardData(card.cardId), "token") && isAura(ctx, card);
+  return ctx.hasCardType(card, "token") && isAura(ctx, card);
 }
 
 type CharmMode = { readonly option: string; readonly bit: number; readonly message: string };

@@ -18,12 +18,11 @@ import {
   opponentSeat,
   sharesName,
 } from "./shared-helpers.js";
-import { hasType as hasPrintedType } from "@fyendal/shared";
 
 const SEISMIC_SURGE = "SBR035";
 
 function isAuraToken(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasPrintedType(ctx.cardData(card.cardId), "token") && isAura(ctx, card);
+  return ctx.hasCardType(card, "token") && isAura(ctx, card);
 }
 
 function isGuardianAttack(ctx: ScriptCtx): boolean {
@@ -722,7 +721,7 @@ Object.assign(mpg, {
   "clash of bravado|2": clashAndDestroyAura(),
   "headbutt|3": {
     canBeDefendedBy(ctx: ScriptCtx, defending: DeepReadonly<CardInstance>) {
-      return !hasPrintedType(ctx.cardData(defending.cardId), "equipment") || hasCardSubtype(ctx, defending, "head");
+      return !ctx.hasCardType(defending, "equipment") || hasCardSubtype(ctx, defending, "head");
     },
     modifyAttack(ctx: ScriptCtx) {
       const ownHead = ctx.player(ctx.seat).equipment.head !== undefined;

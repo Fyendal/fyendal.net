@@ -107,6 +107,25 @@ describe("SBZ — Blaze, Firemind", () => {
     expect(s.state.players[0]!.hero.counters?.energy).toBe(4);
   });
 
+  it("gains no energy counters from opting while her abilities are disabled", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: BLAZE,
+          weapons: [],
+          hand: ["whisper of the oracle|1"],
+          deck: ["voltic bolt|1", "snapback|1", "emeritus scolding|1", "look tuff|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.flags.disableHeroAbilities = true;
+    s.play("whisper of the oracle|1");
+    s.chooseOption("top").chooseOption("top").chooseOption("top").chooseOption("top");
+    expect(s.state.players[0]!.hero.counters?.energy ?? 0).toBe(0);
+  });
+
   it("removes X counters to let a matching Wizard action be played as an instant on the opponent's turn", () => {
     const s = scenario({
       seats: [

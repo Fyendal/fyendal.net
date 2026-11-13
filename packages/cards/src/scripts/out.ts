@@ -33,7 +33,6 @@ import {
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { outHighRarity, uzuriAbility } from "./out/high-rarity.js";
-import { hasType } from "@fyendal/shared";
 
 // OUT — Outsiders common/rare cards and young heroes.
 const PONDER = "DYN244";
@@ -258,7 +257,7 @@ function wreckHavoc(): CardScript {
       const card = ctx.player(opponentSeat(ctx)).arsenal[0];
       if (!card) return;
       ctx.setCardFaceDown(card.instanceId, false);
-      if (hasType(ctx.cardData(card.cardId), "defense-reaction") && !ctx.destroyPermanent(card.instanceId)) {
+      if (ctx.hasCardType(card, "defense-reaction") && !ctx.destroyPermanent(card.instanceId)) {
         ctx.moveToGraveyard(card.instanceId, "arsenal");
       }
     },

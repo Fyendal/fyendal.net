@@ -4,6 +4,7 @@ import {
   controlsVox,
   crushTriggered,
   decay,
+  effectiveCardName,
   equipmentZoneCards,
   faceUpGraveyard,
   hasBloodDebt,
@@ -44,7 +45,6 @@ import {
   isDagger,
   isNonAttackAction,
 } from "./shared-helpers.js";
-import { hasType as hasPrintedType } from "@fyendal/shared";
 
 const RUNECHANT = "SBA036";
 const GATE = "IAR222";
@@ -300,7 +300,8 @@ function violentGusto(): CardScript {
         .player(opponentSeat(ctx))
         .board.find((card) => card.instanceId === Number(option) && isAura(ctx, card));
       if (!aura) return;
-      ctx.setChosenName(ctx.cardData(aura.cardId).name);
+      const name = effectiveCardName(ctx, aura);
+      if (name) ctx.setChosenName(name);
       ctx.moveToHand(aura.instanceId);
     },
   };
@@ -2085,7 +2086,7 @@ export const iar: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       const ponders = ctx
         .player(ctx.seat)
-        .board.filter((card) => cardNamed(ctx, card, "Ponder") && hasPrintedType(ctx.cardData(card.cardId), "token"));
+        .board.filter((card) => cardNamed(ctx, card, "Ponder") && ctx.hasCardType(card, "token"));
       if (ponders.length > 0) {
         ctx.requestCardChoice(
           "iar-rush-ponder",
@@ -2104,7 +2105,7 @@ export const iar: Record<string, CardScript> = {
           (card) =>
             card.instanceId === Number(option) &&
             cardNamed(ctx, card, "Ponder") &&
-            hasPrintedType(ctx.cardData(card.cardId), "token"),
+            ctx.hasCardType(card, "token"),
         );
       if (!target || !ctx.destroyPermanent(target.instanceId)) return;
       ctx.drawCards(ctx.seat, 1);

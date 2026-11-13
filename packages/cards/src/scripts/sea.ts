@@ -23,6 +23,7 @@ import {
   isItem,
   isPirate,
   localizedCardLog,
+  maintenanceItem,
   nextAllyAttack,
   nextAttack,
   ongoingLabel,
@@ -82,43 +83,8 @@ function attackAbilityForAlly(cost: number, goAgain = false): CardScript {
   return { activated: attackAbility(cost, { tap: true, goAgain, oncePerTurn: false }) };
 }
 
-const COG_MAINTENANCE = {
-  hook: "sea-cog-maintenance",
-  options: ["remove", "destroy"],
-  optionMessages: commonOptionMessages("remove", "destroy"),
-} as const;
-
-function maintenanceCog(steam: number): CardScript {
-  return {
-    onEnterArena(ctx) {
-      ctx.setCounter("steam", steam);
-    },
-    triggers: [
-      {
-        event: "start-of-turn",
-        label: "Remove a steam counter or destroy this",
-        labelMessage: decisionMessage("card.trigger.steam.maintain"),
-        standingChoice: COG_MAINTENANCE,
-        effect(ctx) {
-          if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
-          else
-            ctx.requestChoice(
-              COG_MAINTENANCE.hook,
-              decisionPrompt("Remove a steam counter or destroy this?", "card.sea.cog.maintenance.choose", {
-                optionMessages: COG_MAINTENANCE.optionMessages,
-              }),
-              [...COG_MAINTENANCE.options],
-            );
-        },
-      },
-    ],
-    onChoose(ctx, hook, option) {
-      if (hook !== COG_MAINTENANCE.hook) return;
-      if (option === "remove") ctx.setCounter("steam", Math.max(0, ctx.getCounter("steam") - 1));
-      else ctx.destroySelf();
-    },
-  };
-}
+/** Cogs keep their original hook so saved standing orders still match. */
+const cogMaintenance = (steam: number): CardScript => maintenanceItem(steam, {}, "sea-cog-maintenance");
 
 function tapChoice(ctx: ScriptCtx, hook: string, fallback: string, id: string, cards: readonly Card[]): void {
   if (cards.length)
@@ -568,7 +534,7 @@ function crashDownTheGates(): CardScript {
 }
 
 export const sea: Record<string, CardScript> = {
-  "golden cog|0": maintenanceCog(1),
+  "golden cog|0": cogMaintenance(1),
   "goldfin harpoon|0": { graveyardReplacement: "cease-to-exist" },
   "goldkiss rum|0": {
     activated: {
@@ -657,7 +623,7 @@ export const sea: Record<string, CardScript> = {
       if (hook === "unicycle") ctx.untap(Number(option));
     },
   },
-  "copper cog|3": maintenanceCog(2),
+  "copper cog|3": cogMaintenance(2),
   "lubricate|3": {
     onPlay(ctx) {
       const cogs = controlledCogs(ctx, true);

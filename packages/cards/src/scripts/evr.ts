@@ -11,6 +11,7 @@ import {
   decisionPrompt,
   destroyedTrigger,
   discardSixPlusPayoff,
+  effectiveCardName,
   equipmentZoneCards,
   faceUpGraveyard,
   heroChoiceSeat,
@@ -36,7 +37,6 @@ import {
   isNonAttackAction,
   isSword,
 } from "./shared-helpers.js";
-import { hasType as hasPrintedType } from "@fyendal/shared";
 
 const COPPER = "EVR194";
 const SILVER = "EVR195";
@@ -631,7 +631,7 @@ function hazeBending(): CardScript {
         undefined,
         (ctx, destroyed) =>
           destroyed.instanceId !== ctx.self.instanceId &&
-          !hasPrintedType(ctx.cardData(destroyed.cardId), "token") &&
+          !ctx.hasCardType(destroyed, "token") &&
           hasCardSubtype(ctx, destroyed, "illusionist") &&
           isAura(ctx, destroyed),
       ),
@@ -771,7 +771,7 @@ function pickACard(repeats: number): CardScript {
       const hand = ctx.player(target).hand;
       if (hand.length === 0) return;
       hand.forEach((card) => ctx.lookAt(card.instanceId));
-      const names = [...new Set(hand.map((card) => ctx.cardData(card.cardId).name))];
+      const names = [...new Set(hand.flatMap((card) => effectiveCardName(ctx, card) ?? []))];
       ctx.requestChoice(
         "pick-name",
         decisionPrompt(`${ctx.data.name}: name a card`, "card.evr.card.name", {
@@ -1203,7 +1203,7 @@ const talismanCremation: CardScript = {
           ...new Set(
             ctx.state.players
               .filter((player) => player.seat !== ctx.seat)
-              .flatMap((player) => faceUpGraveyard(ctx, player.seat).map((card) => ctx.cardData(card.cardId).name)),
+              .flatMap((player) => faceUpGraveyard(ctx, player.seat).flatMap((card) => effectiveCardName(ctx, card) ?? [])),
           ),
         ];
         if (names.length > 0)

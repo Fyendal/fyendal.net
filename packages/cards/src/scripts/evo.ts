@@ -29,7 +29,6 @@ import {
   upToOneTargetAttack,
 } from "./shared-helpers.js";
 import { evoHighRarity, isMechAttack } from "./evo/high-rarity.js";
-import { hasType } from "@fyendal/shared";
 
 const HYPER_DRIVER = "EVO234";
 const QUICKEN = "DVR028";
@@ -51,7 +50,7 @@ function initializeCogwerx(ctx: ScriptCtx): void {
 }
 
 function scrapCards(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return faceUpGraveyard(ctx).filter((card) => isItem(ctx, card) || hasType(ctx.cardData(card.cardId), "equipment"));
+  return faceUpGraveyard(ctx).filter((card) => isItem(ctx, card) || ctx.hasCardType(card, "equipment"));
 }
 
 function addSteamToChoice(ctx: ScriptCtx, hook: string): void {
@@ -215,7 +214,7 @@ function boostedItemOrEquipment(ctx: ScriptCtx): boolean {
   if (ctx.link?.flags.boosted !== true) return false;
   const id = Number(ctx.getPlayerFlag(ctx.seat, "lastBoostedCardInstanceId"));
   const card = ctx.player(ctx.seat).banish.find((candidate) => candidate.instanceId === id);
-  return !!card && (isItem(ctx, card) || hasType(ctx.cardData(card.cardId), "equipment"));
+  return !!card && (isItem(ctx, card) || ctx.hasCardType(card, "equipment"));
 }
 
 function itemFromHandOnHit(): CardScript {
@@ -364,13 +363,13 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   "evo engine room|2": {
     ...destroyUnderAbility((ctx) => ctx.setPlayerFlag(ctx.seat, "nextWeaponCostReduction", true)),
     modifyAttackActivationCost(ctx, attacker, baseCost) {
-      return hasType(ctx.cardData(attacker.cardId), "weapon") &&
+      return ctx.hasCardType(attacker, "weapon") &&
         ctx.getPlayerFlag(ctx.seat, "nextWeaponCostReduction") === true
         ? Math.max(0, baseCost - 1)
         : baseCost;
     },
     onFriendlyActivate(ctx, activated) {
-      if (hasType(ctx.cardData(activated.cardId), "weapon")) ctx.setPlayerFlag(ctx.seat, "nextWeaponCostReduction", false);
+      if (ctx.hasCardType(activated, "weapon")) ctx.setPlayerFlag(ctx.seat, "nextWeaponCostReduction", false);
     },
   },
   "evo smoothbore|2": destroyUnderAbility((ctx) => buffNextAttack(ctx, { attack: 1, appliesTo: "weapon" })),
@@ -609,7 +608,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   "big shot|1": { modifyAttack: (ctx) => (boostedCount(ctx) >= 2 ? 2 : 0) },
   "burn rubber|1": {
     modifyAttack: (ctx) => (boostedCount(ctx) >= 2 ? 2 : 0),
-    canBeDefendedBy: (ctx, card) => boostedCount(ctx) < 2 || !hasType(ctx.cardData(card.cardId), "equipment"),
+    canBeDefendedBy: (ctx, card) => boostedCount(ctx) < 2 || !ctx.hasCardType(card, "equipment"),
   },
   "smash and grab|1": {
     modifyAttack: (ctx) => (boostedCount(ctx) >= 2 ? 2 : 0),
