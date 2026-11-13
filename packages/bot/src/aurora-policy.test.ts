@@ -154,6 +154,8 @@ describe("Aurora policy", () => {
   it("converts the rest of the hand through Enlightened Strike's go again instead of a weapon swing", () => {
     // Bug 37AB80: after Fry it swung Scorpio and held Enlightened Strike, Quick Succession and Snatch.
     let state = newGame(4255, 0);
+    // Without Snapdragon Scalers, only Enlightened Strike's own mode can carry the turn on.
+    delete state.players[0]!.equipment.legs;
     replaceHand(state, 0, ["LGS368", "WTR159", "OMN083", "ANQ031"]);
     state = playFromHand(state, 0, "LGS368");
     state = passUntil(state, (next) => next.phase === "action" && next.priorityPlayer === 0);
@@ -214,6 +216,36 @@ describe("Aurora policy", () => {
       root.intent.kind === "activate-ability" && root.intent.sourceInstanceId === scorpio.instanceId
     );
     expect(swing?.evaluation.damage).toBe(0);
+  });
+
+  /** Bug 2748D9: Quick Succession then Skyzyk, leaving Skyzyk and Lightning Surge beside Scorpio. */
+  function afterFirstSkyzyk(seed: number, snapdragon: boolean): Game {
+    let state = newGame(seed, 0);
+    if (snapdragon) expect(state.players[0]!.equipment.legs?.cardId).toBe("WTR154");
+    else delete state.players[0]!.equipment.legs;
+    replaceHand(state, 0, ["OMN083", "AST013", "AST013", "ELE190"]);
+    const ready = (next: Game) => next.phase === "action" && next.priorityPlayer === 0 && next.stack.length === 0;
+    state = passUntil(playFromHand(state, 0, "OMN083"), ready);
+    return passUntil(playFromHand(state, 0, "AST013"), ready);
+  }
+
+  it("plays a cheap attack Snapdragon Scalers can give go again over a Scorpio swing", () => {
+    // It swung Scorpio and held Skyzyk and Lightning Surge.
+    const state = afterFirstSkyzyk(4257, true);
+    const intent = choose(state, 0);
+    expect(intent.kind).toBe("play-card");
+    expect(state.players[0]!.hand.find((card) => intent.kind === "play-card" && card.instanceId === intent.instanceId)?.cardId)
+      .toBe("AST013");
+  });
+
+  it("explores the hand's attacks instead of two payments for one Grasp activation", () => {
+    // Grasp pitching one card and Grasp pitching two filled both root slots.
+    const state = afterFirstSkyzyk(4258, false);
+    const legal = legalIntents(state, 0).filter((intent) => intent.kind !== "concede" && !intent.kind.endsWith("-draw"));
+    const { plan } = chooseAuroraIntentWithTrace({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state });
+    const hand = new Set(state.players[0]!.hand.map((card) => card.instanceId));
+    expect(plan?.rootResults.some((root) => root.intent.kind === "play-card" && hand.has(root.intent.instanceId)))
+      .toBe(true);
   });
 
   it("leads with Arc Lightning ahead of a Burn Up meld", () => {

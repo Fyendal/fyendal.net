@@ -222,6 +222,34 @@ describe("Hala policy", () => {
     expect(applyIntent(state, 0, decision.intent).ok).toBe(true);
   });
 
+  it("attacks with Zenith Blade instead of passing while holding Toe the Line", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9403,
+      startPlayer: 0,
+    });
+    state.turn = 8;
+    replaceHand(state, 0, ["MPW028", "MPW074", "MPW074", "PEN048"]);
+    state.players[0]!.resources = 0;
+    const blade = state.players[0]!.weapons[0]!;
+    blade.scriptState = { sharpenedTurn: 6 };
+
+    const decision = chooseHalaIntentWithTrace({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal: legalIntents(state, 0),
+      cards: cardData,
+      state,
+    });
+    expect(decision.intent).toMatchObject({
+      kind: "activate-ability",
+      sourceInstanceId: blade.instanceId,
+    });
+    expect(decision.plan?.evaluation.damage).toBeGreaterThan(0);
+  });
+
   it("preserves its opening hand and prioritizes a Flurry generator for arsenal", () => {
     let state = createGame({
       decklists: [halaDeck(), decklists.dorinthea],

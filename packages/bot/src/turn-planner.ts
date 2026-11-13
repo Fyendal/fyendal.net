@@ -326,6 +326,7 @@ export interface TurnPlannerConfig<Evaluation extends TurnEvaluation> {
     input: BotPolicyInput,
     context: { root: TurnPlannerRoot; depth: number },
   ): readonly GameIntent[];
+  /** Added to a line's score; `-Infinity` vetoes the intent so it is never searched. */
   scoreIntent?(intent: GameIntent, input: BotPolicyInput): number;
   /** Root ordering before the strict candidate cap. Higher values are searched
    * first; omitted policies use a generic public card/action priority. */
@@ -772,7 +773,11 @@ function plannerCandidates<Evaluation extends TurnEvaluation>(
   ) ?? strategic;
   const legalCandidates = new Set(strategic);
   const prepared = [...new Set(requested)].filter((intent) => legalCandidates.has(intent));
-  const selectedBeforeRootLimit = prepared.length > 0 ? prepared : strategic;
+  // A vetoed candidate explored first would spend the node's budget and leave
+  // its -Infinity line as the node's best, sinking every line through it.
+  const selectedBeforeRootLimit = (prepared.length > 0 ? prepared : strategic).filter((intent) =>
+    context.config.scoreIntent?.(intent, input) !== Number.NEGATIVE_INFINITY
+  );
   const rootLimit = Math.min(
     context.config.maxRootCandidates ?? MAX_ROOT_CANDIDATES,
     Math.max(1, context.config.maxSearchNodes ?? DEFAULT_MAX_SEARCH_NODES),

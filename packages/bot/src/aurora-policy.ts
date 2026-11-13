@@ -2,6 +2,7 @@ import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import { activeArcLightnings, auroraSolverRules } from "./aurora-rules.js";
 import { auroraMatchupForHeroName, type AuroraMatchup } from "./aurora-strategy.js";
 import { planBriarTurn, type BriarTurnPlan } from "./briar-turn-planner.js";
+import { cardUses } from "./card-model.js";
 import { nextTurnLandingRate } from "./turn-planner.js";
 import {
   arsenalValuer,
@@ -184,6 +185,12 @@ function hasReliableGoAgain(data: CardData, fromArsenal: boolean): boolean {
   return data.keywords?.includes("Go again") === true && !CONDITIONAL_GO_AGAIN.has(key(data));
 }
 
+function holdsSnapdragon(input: BotPolicyInput): boolean {
+  return Object.values(input.view.players[input.seat].equipment).some((card) =>
+    !!card && key(input.cards[card.cardId]) === "snapdragon scalers|0"
+  );
+}
+
 /** Snapdragon unbricks a second attack without go again or opens an Arc
  * Lightning turn; a go-again follow-up should have attacked first, and a
  * weapon swing is not worth the legs. */
@@ -235,6 +242,28 @@ function shouldMeldBurnUp(intent: GameIntent, input: BotPolicyInput, own: Readon
 }
 
 function prepareCandidates(candidates: readonly GameIntent[], input: BotPolicyInput): readonly GameIntent[] {
+  return cheapestPayments(selectCandidates(candidates, input), input);
+}
+
+/** Payment variants of one play would fill the root cap; keep the best-ranked of each. */
+function cheapestPayments(candidates: readonly GameIntent[], input: BotPolicyInput): readonly GameIntent[] {
+  const own = ownCards(input);
+  const best = new Map<string, { intent: GameIntent; score: number }>();
+  for (const intent of candidates) {
+    const { pitchInstanceIds: _pitch, pitchRequired: _required, ...play } = intent as GameIntent & {
+      pitchInstanceIds?: number[];
+      pitchRequired?: number;
+    };
+    const variant = JSON.stringify(play);
+    const score = scorePlay(intent, input, own);
+    const current = best.get(variant);
+    if (!current || score > current.score) best.set(variant, { intent, score });
+  }
+  const kept = new Set([...best.values()].map(({ intent }) => intent));
+  return candidates.filter((intent) => kept.has(intent));
+}
+
+function selectCandidates(candidates: readonly GameIntent[], input: BotPolicyInput): readonly GameIntent[] {
   const own = ownCards(input);
   // The rollout would otherwise trade equipment for any extra damage this turn.
   const keeping = candidates.filter((intent) => !spendsSavedEquipment(intent, input, own));
@@ -370,7 +399,9 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   if (intent.kind === "activate-ability") {
     if (hasType(data, "weapon")) {
       if (wastesPendingSetup(card, input, own)) return -100;
-      score = 12 + pendingSetups(input).length * 10;
+      // Scorpio is a terminal swing, so it ranks by its damage like an attack card.
+      score = (card.attack ?? data.attack ?? 0) + cardUses(data, input, card).onHit +
+        pendingSetups(input).length * 10;
     } else if (functional === "aether ironweave|0") {
       score = ironweaveWorthUsing(input) ? 20 : -100;
     } else if (functional === "grasp of the arknight|0" || functional === "vexing quillhand|0") {
@@ -407,7 +438,13 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     // Enlightened Strike picks go again when a card remains past its bottomed cost.
     const enlightenedGoAgain = functional === "enlightened strike|1" &&
       followups(intent, input, own, () => true) >= 2 && followups(intent, input, own, isAttack) >= 1;
-    if (hasReliableGoAgain(data, intent.kind === "play-from-arsenal") || conditionalGoAgain || enlightenedGoAgain) {
+    // Unused Snapdragon Scalers give a cost-1-or-less attack go again for the card after it.
+    const snapdragonGoAgain = (data.cost ?? 0) <= 1 && holdsSnapdragon(input) &&
+      followups(intent, input, own, (other) => hasType(other, "action")) >= 1;
+    if (
+      hasReliableGoAgain(data, intent.kind === "play-from-arsenal") || conditionalGoAgain ||
+      enlightenedGoAgain || snapdragonGoAgain
+    ) {
       score += 13;
     }
     if (functional === "snatch|1") score += 3;
