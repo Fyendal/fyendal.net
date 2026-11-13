@@ -1,8 +1,7 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, ScriptDecisionPrompt } from "@fyendal/engine";
 import {
   anyDamageTarget,
   attackingWeapon,
-  bottomOrKeepPrompt,
   buffNextArcaneDamageCard,
   buffNextAttack,
   cardNamed,
@@ -34,6 +33,13 @@ import {
   silverEquipment,
 } from "../shared-helpers.js";
 import { COPPER, CROUCHING_TIGER, GOLD, PONDER, SILVER, SPELLBANE_AEGIS } from "../tokens.js";
+
+/** "Put the looked-at card on the bottom?" with bottom/keep options. */
+export function bottomOrKeepPrompt(fallback = "Put the looked-at card on the bottom?"): ScriptDecisionPrompt {
+  return decisionPrompt(fallback, "card.common.lookedcard.bottom", {
+    optionMessages: commonOptionMessages("bottom", "keep"),
+  });
+}
 
 function discardChoice(ctx: ScriptCtx, hook: string, seat = opponentSeat(ctx)): void {
   const hand = ctx.player(seat).hand;

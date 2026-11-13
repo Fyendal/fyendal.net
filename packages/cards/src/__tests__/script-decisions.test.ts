@@ -77,7 +77,7 @@ const localizedSets = [
   "sen",
   "sfa",
   "sgb",
-  "shared-helpers",
+  "shared",
   "siy",
   "ska",
   "sly",
@@ -102,7 +102,7 @@ function rawDecisionPrompts(set: string): string[] {
   const raw: string[] = [];
   const partitionDirectory = `${scriptsDirectory}/${set}`;
   const paths = [
-    `${scriptsDirectory}/${set}.ts`,
+    ...(existsSync(`${scriptsDirectory}/${set}.ts`) ? [`${scriptsDirectory}/${set}.ts`] : []),
     ...(existsSync(partitionDirectory)
       ? readdirSync(partitionDirectory)
         .filter((name) => name.endsWith(".ts"))
@@ -152,7 +152,7 @@ function rawLogMessages(set: string): string[] {
   const raw: string[] = [];
   const partitionDirectory = `${scriptsDirectory}/${set}`;
   const paths = [
-    `${scriptsDirectory}/${set}.ts`,
+    ...(existsSync(`${scriptsDirectory}/${set}.ts`) ? [`${scriptsDirectory}/${set}.ts`] : []),
     ...(existsSync(partitionDirectory)
       ? readdirSync(partitionDirectory)
         .filter((name) => name.endsWith(".ts"))

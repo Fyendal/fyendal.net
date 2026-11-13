@@ -7,7 +7,6 @@ import {
   cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
-  contractCompletionCount,
   controlledPermanents,
   decisionMessage,
   decisionPrompt,
@@ -26,6 +25,11 @@ import {
 } from "../shared-helpers.js";
 import { hasType } from "@fyendal/shared";
 import { AGILITY, CINTARI_SELLSWORD, GOLD, MIGHT, PONDER, VIGOR } from "../tokens.js";
+
+/** Number of Contracts this player has completed during the current turn. */
+function contractCompletionCount(ctx: ScriptCtx): number {
+  return Number(ctx.getFlag("player", "contractCompletionsThisTurn"));
+}
 
 // Options must stay enumerable for legalIntents; no single hit realistically reaches 100.
 const TALK_A_BIG_GAME_MAX_NUMBER = 99;

@@ -24,13 +24,10 @@ import {
   markedStealthHeroScript,
   heroHasMoniker,
   localizedCardLog,
-  offerRetrieveDagger,
   opponentSeat,
   pendingDelayedEffect,
   playedAnotherRed,
   previousAttackNameContains,
-  resolveRetrieveDagger,
-  retrievableDaggerIds,
   yesNoPrompt,
   ongoingLabel,
   hasCardSubtype,
@@ -41,8 +38,61 @@ import {
 } from "./shared-helpers.js";
 import { FEALTY, GRAPHENE_CHELICERA, RUNECHANT } from "./tokens.js";
 
-// HNT — The Hunted. Mark/Contract (CR 8.4.7, 8.5.39, 8.5.50, 9.3),
-// Retrieve (CR 8.5.51), and Draconic chain-link counting are shared mechanics.
+// HNT — The Hunted. Mark/Contract (CR 8.4.7, 8.5.39, 8.5.50, 9.3) and
+// Draconic chain-link counting are shared mechanics.
+
+function weaponHands(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): number {
+  return hasCardSubtype(ctx, card, "2h") ? 2 : 1;
+}
+
+function canEquipDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  if (card.faceDown || !isDagger(ctx, card) || !ctx.hasCardType(card, "weapon")) {
+    return false;
+  }
+  const occupiedHands = ctx.player(ctx.seat).weapons.reduce((total, weapon) => total + weaponHands(ctx, weapon), 0);
+  return occupiedHands + weaponHands(ctx, card) <= 2;
+}
+
+function retrievableDaggerIds(ctx: ScriptCtx): number[] {
+  return faceUpGraveyard(ctx)
+    .filter((card) => canEquipDagger(ctx, card))
+    .map((card) => card.instanceId);
+}
+
+/** Retrieve (CR 8.5.51): offer only dagger weapons that can currently be
+ * equipped, then let the player pay the equip cost from resources or pitch. */
+function offerRetrieveDagger(ctx: ScriptCtx, hook: string): void {
+  const ids = retrievableDaggerIds(ctx);
+  if (ids.length === 0) return;
+  ctx.requestCardChoice(
+    hook,
+    decisionPrompt("Retrieve a dagger from your graveyard?", "card.common.retrieve.dagger", {
+      optionMessages: commonOptionMessages("pass"),
+    }),
+    ["pass", ...ids],
+  );
+}
+
+function resolveRetrieveDagger(ctx: ScriptCtx, hook: string, option: string, expected: string): boolean {
+  if (hook === expected) {
+    if (option === "pass") return true;
+    const id = Number(option);
+    if (!retrievableDaggerIds(ctx).includes(id)) return true;
+    ctx.requestPayment(
+      `retrieve-pay:${expected}:${id}`,
+      decisionPrompt("Retrieve: pay {r} to equip this dagger?", "card.common.retrieve.dagger.pay", {
+        values: { amount: 1 },
+      }),
+      1,
+    );
+    return true;
+  }
+  const prefix = `retrieve-pay:${expected}:`;
+  if (!hook.startsWith(prefix)) return false;
+  if (option === "paid") ctx.equipFromGraveyard(Number(hook.slice(prefix.length)));
+  return true;
+}
+
 const SPUR_NUMBERS = ["1", "2", "3", "4", "5", "6"];
 
 function spurNumberPrompt() {

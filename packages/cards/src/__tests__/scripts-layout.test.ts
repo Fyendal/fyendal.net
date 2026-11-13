@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import { cardData } from "../catalog.js";
 import { mergeSetScripts } from "../scripts/shared-helpers.js";
@@ -30,7 +31,7 @@ describe("card script layout", () => {
     .filter((name) => name !== "index" && name !== "shared-helpers" && name !== "tokens")
     .sort();
   const setDirectories = rootEntries
-    .filter((entry) => entry.isDirectory())
+    .filter((entry) => entry.isDirectory() && entry.name !== "shared")
     .map((entry) => entry.name)
     .sort();
   const dataSets = new Set(
@@ -133,6 +134,101 @@ describe("card script layout", () => {
     expect(registeredCodes).toEqual(setEntryPoints.map((set) => set.toUpperCase()));
   });
 
+  it("keeps every shared export used by more than one set or by other shared code", () => {
+    // Single-set helpers that stay shared, each with why.
+    const singleSetAllowlist: Record<string, string> = {
+      galvanize: "Galvanize keyword mechanic, with its stored-decision hook",
+      beatenChest: "reads the flag beatChest sets",
+      withdrawNextArcaneDamageCard: "undoes buffNextArcaneDamageCard's pool bookkeeping",
+    };
+    const sources = scriptSources(scriptsDir);
+    const sharedModules = sources.filter(({ path }) => path.startsWith("shared/"));
+    const owner = new Map<string, { module: string; localUse: boolean }>();
+    for (const { path, source } of sharedModules) {
+      const file = ts.createSourceFile(path, source, ts.ScriptTarget.Latest, true);
+      const exported = file.statements.flatMap((statement) => {
+        if (!ts.canHaveModifiers(statement)) return [];
+        if (!ts.getModifiers(statement)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)) return [];
+        if (ts.isVariableStatement(statement))
+          return statement.declarationList.declarations.map((declaration) => (declaration.name as ts.Identifier).text);
+        const name = (statement as ts.DeclarationStatement).name;
+        return name && ts.isIdentifier(name) ? [name.text] : [];
+      });
+      const uses = new Map<string, number>();
+      const visit = (node: ts.Node): void => {
+        if (ts.isIdentifier(node)) uses.set(node.text, (uses.get(node.text) ?? 0) + 1);
+        ts.forEachChild(node, visit);
+      };
+      visit(file);
+      for (const name of exported) owner.set(name, { module: path, localUse: (uses.get(name) ?? 0) > 1 });
+    }
+    const setUsers = new Map<string, Set<string>>();
+    const sharedUsers = new Map<string, Set<string>>();
+    for (const { path, source } of sources) {
+      if (path === "shared-helpers.ts") continue;
+      for (const match of source.matchAll(/import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+"([^"]+)"/g)) {
+        const from = match[2]!;
+        const fromShared = /(?:^|\/)(?:shared-helpers|shared\/[a-z-]+)\.js$/.test(from) ||
+          (path.startsWith("shared/") && /^\.\/[a-z-]+\.js$/.test(from));
+        if (!fromShared) continue;
+        for (const specifier of match[1]!.split(",")) {
+          const name = specifier.trim().replace(/^type\s+/, "").split(/\s+as\s+/)[0]!;
+          if (!name) continue;
+          const users = path.startsWith("shared/") ? sharedUsers : setUsers;
+          const user = path.startsWith("shared/") ? path : path.split("/")[0]!.replace(/\.ts$/, "");
+          users.set(name, (users.get(name) ?? new Set()).add(user));
+        }
+      }
+    }
+    const unused: string[] = [];
+    const singleSet: string[] = [];
+    for (const [name, { module, localUse }] of owner) {
+      const sets = setUsers.get(name) ?? new Set();
+      const shared = sharedUsers.get(name) ?? new Set();
+      if (sets.size === 0 && shared.size === 0) unused.push(`${module}:${name}`);
+      else if (sets.size === 1 && shared.size === 0 && !localUse && !(name in singleSetAllowlist))
+        singleSet.push(`${module}:${name} (only ${[...sets][0]})`);
+    }
+    expect(unused, "shared exports nothing imports; make them private or delete them").toEqual([]);
+    expect(singleSet, "shared exports one set uses; move them into that set").toEqual([]);
+    for (const name of Object.keys(singleSetAllowlist)) expect(owner.has(name), `${name} is still shared`).toBe(true);
+  });
+
+  it("references set-scoped message ids from shared code only where several sets share them", () => {
+    // Kept unchanged because prompts in stored games still carry these ids.
+    const SET_SCOPED_MESSAGE_IDS = [
+      "card.ele.fusion.multiple",
+      "card.ele.fusion.option.both",
+      "card.ele.fusion.option.both.single",
+      "card.ele.fusion.option.single",
+      "card.ele.fusion.reveal.named",
+      "card.ele.pitch.card.bottom",
+      "card.evo.maintenance.choose",
+      "card.hvy.beatchest.discard",
+      "card.log.sbr.chokeslam.suppressed",
+      "card.log.sda.hyperdriver.counter",
+      "card.log.sfa.banished.discount",
+      "card.log.sfa.banished.power",
+      "card.omn.attack.target.upto",
+      "card.ros.decompose.action",
+      "card.ros.decompose.earth.first",
+      "card.ros.decompose.earth.second",
+      "card.saz.spire.order.next",
+      "card.sbr.hand.card.top",
+      "card.sfa.attack.banish.discount",
+      "card.sfa.attack.banish.power",
+      "card.siy.discard.pay",
+      "card.trigger.hyperdriver.boost",
+      "card.trigger.steam.maintain",
+      "card.upr.attack.banish",
+    ];
+    const used = scriptSources(scriptsDir)
+      .filter(({ path }) => path.startsWith("shared/"))
+      .flatMap(({ source }) => Array.from(source.matchAll(/"(card\.[a-z0-9.]+)"/g), (match) => match[1]!))
+      .filter((id) => !/^card\.(?:common|trigger\.common|log\.common)\./.test(id));
+    expect([...new Set(used)].sort()).toEqual(SET_SCOPED_MESSAGE_IDS);
+  });
+
   it("uses computed types whenever a card instance is available", () => {
     const rawTypeReads = scriptSources(scriptsDir).flatMap(({ path, source }) =>
       source.split("\n").flatMap((line) =>
@@ -175,7 +271,7 @@ describe("card script layout", () => {
     );
 
     expect(rawKeywordReads).toEqual([
-      "shared-helpers.ts:return (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase().includes(\"specialization\"));",
+      "shared/arsenal.ts:return (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase().includes(\"specialization\"));",
     ]);
   });
 });

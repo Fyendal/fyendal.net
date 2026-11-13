@@ -149,6 +149,7 @@ const scanScriptFile = (p) => {
 };
 for (const f of readdirSync(scriptsDir, { withFileTypes: true })) {
   if (f.isDirectory()) {
+    if (f.name === "shared") continue;
     for (const g of readdirSync(join(scriptsDir, f.name))) {
       if (g.endsWith(".ts")) scanScriptFile(join(scriptsDir, f.name, g));
     }

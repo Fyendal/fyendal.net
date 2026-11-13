@@ -2,7 +2,6 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } fr
 import {
   anyDamageTarget,
   attackAbility,
-  bottomOrKeepPrompt,
   buffNextArcaneDamageCard,
   buffNextAttack,
   cardNamed,
@@ -40,7 +39,7 @@ import {
   isNonAttackAction,
   isItem,
 } from "./shared-helpers.js";
-import { dynHighRarity } from "./dyn/high-rarity.js";
+import { bottomOrKeepPrompt, dynHighRarity } from "./dyn/high-rarity.js";
 import { CROUCHING_TIGER, PONDER, RUNECHANT, SPECTRAL_SHIELD } from "./tokens.js";
 
 function logDeckTopReveal(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): void {

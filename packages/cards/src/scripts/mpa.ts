@@ -39,11 +39,23 @@ import {
   requestDiseaseTokenChoice,
   sharesName,
   targetsHero,
-  tokenContractWithSilver,
   isDagger,
   hasCardSubtype,
 } from "./shared-helpers.js";
 import { BLOODROT_POX, FRAILTY, INERTIA, SILVER } from "./tokens.js";
+
+/** `contractWithSilver` for tokens created under an opposing hero's control. */
+function tokenContractWithSilver(
+  condition: (ctx: ScriptCtx, token: DeepReadonly<CardInstance>) => boolean,
+): CardScript {
+  return {
+    onFriendlyCreatesOpponentToken(ctx, token) {
+      if (!condition(ctx, token)) return;
+      ctx.completeContract();
+      ctx.createToken(SILVER);
+    },
+  };
+}
 
 function seedDisease(tokenId: string): CardScript {
   return {
