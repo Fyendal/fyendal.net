@@ -548,6 +548,34 @@ function drewPrivately(before: GameState, after: GameState, intent: GameIntent, 
   );
 }
 
+/** After a simulated private draw, pass until the layers already committed
+ * (another on-hit trigger) resolve, so the horizon counts their damage
+ * without any decision reading the drawn card. */
+function settleAfterPrivateDraw<Evaluation extends TurnEvaluation>(
+  state: GameState,
+  context: SearchContext<Evaluation>,
+): AdvancedState {
+  let current = state;
+  const { root, config } = context;
+  for (let step = 0; step < (config.maxForcedSteps ?? DEFAULT_MAX_FORCED_STEPS); step++) {
+    if (
+      current.phase === "game-over" || current.turn !== root.turn ||
+      (current.stack.length === 0 && !current.pendingTriggeredLayers?.length) ||
+      context.transitions >= context.transitionLimit
+    ) break;
+    const actor = (current.pendingDecision?.player ?? current.priorityPlayer) as 0 | 1;
+    const intent = actor === root.seat
+      ? legalIntents(current, actor).find((candidate) => candidate.kind === "pass")
+      : opponentRolloutIntent(current);
+    if (!intent) break;
+    context.transitions++;
+    const applied = applySimulationIntent(current, actor, intent);
+    if (!applied.ok) break;
+    current = applied.state;
+  }
+  return { kind: "terminal", state: current, complete: current.phase === "game-over" };
+}
+
 function advanceForced<Evaluation extends TurnEvaluation>(
   state: GameState,
   context: SearchContext<Evaluation>,
@@ -555,9 +583,7 @@ function advanceForced<Evaluation extends TurnEvaluation>(
 ): AdvancedState {
   let current = state;
   const { root, config } = context;
-  if (drewPrivately(entry.before, state, entry.intent, root)) {
-    return { kind: "terminal", state, complete: false };
-  }
+  if (drewPrivately(entry.before, state, entry.intent, root)) return settleAfterPrivateDraw(state, context);
   for (let step = 0; step < (config.maxForcedSteps ?? DEFAULT_MAX_FORCED_STEPS); step++) {
     if (current.phase === "game-over" || current.turn !== root.turn) {
       return { kind: "terminal", state: current, complete: true };
@@ -589,7 +615,7 @@ function advanceForced<Evaluation extends TurnEvaluation>(
     const before = current;
     current = applied.state;
     // Stop before a simulated private draw can influence another action.
-    if (drewPrivately(before, current, intent, root)) return { kind: "terminal", state: current, complete: false };
+    if (drewPrivately(before, current, intent, root)) return settleAfterPrivateDraw(current, context);
   }
   return { kind: "terminal", state: current, complete: false };
 }

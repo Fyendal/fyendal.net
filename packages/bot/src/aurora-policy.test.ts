@@ -150,6 +150,53 @@ describe("Aurora policy", () => {
     return state.players[0]!.hand.find((card) => card.instanceId === intent.instanceId)?.cardId;
   }
 
+  it("converts the rest of the hand through Enlightened Strike's go again instead of a weapon swing", () => {
+    // Bug 37AB80: after Fry it swung Scorpio and held Enlightened Strike, Quick Succession and Snatch.
+    let state = newGame(4255, 0);
+    replaceHand(state, 0, ["LGS368", "WTR159", "OMN083", "ANQ031"]);
+    state = playFromHand(state, 0, "LGS368");
+    state = passUntil(state, (next) => next.phase === "action" && next.priorityPlayer === 0);
+    const played: string[] = [];
+    let weaponSwings = 0;
+    for (let step = 0; step < 80 && state.turn === 2 && state.winner === null; step++) {
+      const seat = actor(state);
+      const intent = seat === 0 ? choose(state, 0) : passive(state, 1);
+      if (seat === 0 && intent.kind === "play-card") {
+        const card = state.players[0]!.hand.find((candidate) => candidate.instanceId === intent.instanceId);
+        if (card) played.push(card.cardId);
+      }
+      if (seat === 0 && intent.kind === "activate-ability" &&
+        state.players[0]!.weapons.some((weapon) => weapon.instanceId === intent.sourceInstanceId)) weaponSwings++;
+      state = apply(state, seat, intent);
+    }
+    expect(played).toEqual(["WTR159", "ANQ031"]);
+    expect(weaponSwings).toBe(0);
+    expect(state.players[0]!.deck.at(-1)?.cardId).toBe("OMN083");
+  });
+
+  it("counts Burn Up's arcane behind Snatch's on-hit draw over a Scorpio swing", () => {
+    // Bug 37AB80: the rollout stopped at Snatch's draw before Burn Up resolved.
+    let state = newGame(4256, 0);
+    state.players[1]!.life = 39;
+    replaceHand(state, 0, ["ROS012", "LGS368", "OMN083", "ANQ031"]);
+    const ready = (next: Game) => next.phase === "action" && next.priorityPlayer === 0 && next.stack.length === 0;
+    const meld = legalIntents(state, 0).find((intent) =>
+      intent.kind === "play-card" && "meldSide" in intent && intent.meldSide === "both"
+    );
+    state = passUntil(apply(state, 0, meld!), ready);
+    state = playFromHand(state, 0, "LGS368");
+    // Fry is blocked, so Burn Up still waits for the next hit.
+    state = passUntil(state, (next) => next.pendingDecision?.kind === "defend");
+    const blocker = state.players[1]!.hand.find((card) => (cardData[card.cardId]?.defense ?? 0) >= 3)!;
+    state = apply(state, 1, { kind: "stage-defenders", instanceIds: [blocker.instanceId] });
+    state = apply(state, 1, { kind: "defend", instanceIds: [blocker.instanceId] });
+    state = passUntil(state, ready);
+    const intent = choose(state, 0);
+    expect(intent.kind).toBe("play-card");
+    expect(state.players[0]!.hand.find((card) => intent.kind === "play-card" && card.instanceId === intent.instanceId)?.cardId)
+      .toBe("ANQ031");
+  });
+
   it("leads with Arc Lightning ahead of a Burn Up meld", () => {
     expect(firstPlay(["ROS012", "AST022", "LGS368"], 4248)).toBe("AST022");
   });

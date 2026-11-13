@@ -345,8 +345,12 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   const binary = scoreBinaryChoice(intent.optionId, 5, -2);
   if (binary !== undefined) return binary;
   const card = optionCard(intent, input);
-  // Card choices (Enlightened Strike, Crown of Providence, Sink Below) give up
-  // the least valuable card.
+  if (card && key(input.cards[decision.preStackSource?.card.cardId ?? ""]) === "enlightened strike|1") {
+    // Keep the card the go-again mode can follow up with; the +2 mode is the floor.
+    const rest = [...me.hand, ...me.arsenal].filter((held) => held.instanceId !== card.instanceId);
+    return 20 - cardOpportunity(card, input) + Math.max(2, handDamage(rest, input, auroraSolverRules));
+  }
+  // Card choices (Crown of Providence, Sink Below) give up the least valuable card.
   return card ? 20 - cardOpportunity(card, input) : 1;
 }
 
@@ -400,7 +404,12 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       functional === "path of same ends|1" ||
       (functional === "current funnel|3" &&
         input.view.turnFacts?.players[input.seat].playedSubtypes.includes("lightning") === true);
-    if (hasReliableGoAgain(data, intent.kind === "play-from-arsenal") || conditionalGoAgain) score += 13;
+    // Enlightened Strike picks go again when a card remains past its bottomed cost.
+    const enlightenedGoAgain = functional === "enlightened strike|1" &&
+      followups(intent, input, own, () => true) >= 2 && followups(intent, input, own, isAttack) >= 1;
+    if (hasReliableGoAgain(data, intent.kind === "play-from-arsenal") || conditionalGoAgain || enlightenedGoAgain) {
+      score += 13;
+    }
     if (functional === "snatch|1") score += 3;
   } else if (hasType(data, "instant")) {
     const ownAttack = currentLink(input)?.attackingCard.owner === input.seat;
