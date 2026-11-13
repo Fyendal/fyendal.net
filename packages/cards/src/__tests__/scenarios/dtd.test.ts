@@ -1061,6 +1061,35 @@ describe("DTD — registration and core mechanics", () => {
   });
 });
 
+describe("DTD — Northern Winds", () => {
+  it("freezes up to 1 chosen equipment, item and ally per hero until the start of your next turn", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "oldhim|0", weapons: [], hand: ["northern winds|3"], equipment: NO_EQUIPMENT },
+        {
+          hero: "dorinthea",
+          weapons: ["parry blade|0"],
+          equipment: NO_EQUIPMENT,
+          board: ["gold|0", "chum, friendly first mate|2"],
+        },
+      ],
+    });
+    const turn = g.state.turn;
+    g.play("northern winds|3")
+      .chooseCard("parry blade|0")
+      .chooseOption("pass")
+      .chooseCard("chum, friendly first mate|2");
+    const frozenUntil = (key: string) => {
+      const opponent = g.state.players[1]!;
+      const card = [...opponent.weapons, ...opponent.board].find((c) => c.cardId === printingId(key))!;
+      return card.scriptState?.frozenUntilTurn;
+    };
+    expect(frozenUntil("parry blade|0")).toBe(turn + 2);
+    expect(frozenUntil("chum, friendly first mate|2")).toBe(turn + 2);
+    expect(frozenUntil("gold|0")).toBeUndefined();
+  });
+});
+
 describe("DTD — Prism and Figments", () => {
   it("Empyrean Rapture passively discounts only the first hero activation after a Herald hit", () => {
     const heroKey = "prism, sculptor of arc light|0";

@@ -1,6 +1,9 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import type { CounterKind } from "@fyendal/shared";
 import {
+  BLOODROT_POX,
+  FRAILTY,
+  INERTIA,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   cardNameContains,
@@ -17,6 +20,7 @@ import {
   entersArenaTrigger,
   equipWithSilver,
   equipmentZoneCards,
+  equippedCards,
   faceUpGraveyard,
   heroChoiceSeat,
   heroDamage,
@@ -55,15 +59,12 @@ import { hasType } from "@fyendal/shared";
 // Compendium of Rathe (PEN) — complete set and required tokens.
 
 const AGILITY = "SBL034";
-const BLOODROT = "SAZ034";
 const COURAGE = "DTD232";
 const EARTH = "DTD194";
 const FANG_STRIKE = "MST023";
-const FRAILTY = "SAZ035";
 const FROSTBITE = "EVR197";
 const GOLD = "DYN243";
 const HYPER_DRIVER = "EVO234";
-const INERTIA = "SAZ036";
 const LIGHTNING = "DTD195";
 const MIGHT = "SKA035";
 const PONDER = "DYN244";
@@ -429,7 +430,7 @@ const GALCIA_FREEZE_TARGET: NonNullable<TriggerDef["target"]> = {
     ctx.state.players
       .flatMap((player) => [
         ...player.board.filter((card) => ["ally", "aura", "item"].some((tag) => hasCardSubtype(ctx, card, tag))),
-        ...equipmentZoneCards(player),
+        ...equippedCards(ctx, player.seat),
       ])
       .map((card) => card.instanceId),
   prompt: () => decisionPrompt("Freeze a permanent", "card.pen.permanent.freeze"),
@@ -837,7 +838,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
 
   "concealed nerve gas|0": concealedHitTrap(FRAILTY, "Frailty", (ctx) => ctx.currentAttackHasGoAgain()),
   "concealed pathogen|0": concealedHitTrap(
-    BLOODROT,
+    BLOODROT_POX,
     "Bloodrot Pox",
     (ctx) => !!ctx.link && ctx.link.flags[`reactionBySeat:${ctx.link.attacker}`] === true,
   ),
@@ -1484,10 +1485,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "monolith of galcia|3": {
     onPlay(ctx) {
       const frozen = ctx.state.players
-        .flatMap((player) => [
-          ...player.board,
-          ...equipmentZoneCards(player),
-        ])
+        .flatMap((player) => [...player.board, ...equippedCards(ctx, player.seat)])
         .filter((card) => ctx.isFrozen(card));
       if (frozen.length)
         ctx.requestCardChoice(
@@ -1571,11 +1569,9 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
           target,
         )
       ) {
-        const frozen = [
-          ...ctx.player(target).arsenal,
-          ...ctx.player(target).board,
-          ...equipmentZoneCards(ctx.player(target)),
-        ].filter((card) => ctx.isFrozen(card));
+        const frozen = [...ctx.player(target).arsenal, ...controlledPermanents(ctx, target)].filter((card) =>
+          ctx.isFrozen(card),
+        );
         if (frozen.length)
           ctx.requestCardChoice(
             "pen-conquer-destroy",
@@ -1589,11 +1585,9 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     onChoose(ctx, hook, option) {
       if (hook === "pen-conquer-pay" && option === "declined") {
         const target = opponentSeat(ctx);
-        const frozen = [
-          ...ctx.player(target).arsenal,
-          ...ctx.player(target).board,
-          ...equipmentZoneCards(ctx.player(target)),
-        ].filter((card) => ctx.isFrozen(card));
+        const frozen = [...ctx.player(target).arsenal, ...controlledPermanents(ctx, target)].filter((card) =>
+          ctx.isFrozen(card),
+        );
         if (frozen.length)
           ctx.requestCardChoice(
             "pen-conquer-destroy",

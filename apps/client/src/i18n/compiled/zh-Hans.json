@@ -2985,6 +2985,58 @@
       "value": "+2 力量"
     }
   ],
+  "card.dtd.northernwinds.freeze": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：冻结 "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 控制的至多 1 个"
+    },
+    {
+      "type": 5,
+      "value": "kind",
+      "options": {
+        "equipment": {
+          "value": [
+            {
+              "type": 0,
+              "value": "装备"
+            }
+          ]
+        },
+        "item": {
+          "value": [
+            {
+              "type": 0,
+              "value": "物品"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "盟友"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "？"
+    }
+  ],
   "card.dtd.option.peace": [
     {
       "type": 0,

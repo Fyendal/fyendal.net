@@ -18,7 +18,7 @@ import {
   decisionPrompt,
   decompose,
   entersArenaTrigger,
-  equipmentZoneCards,
+  equippedCards,
   faceUpGraveyard,
   hasCardSubtype,
   hasLiveTurnEffect,
@@ -1351,11 +1351,9 @@ Object.assign(ros, {
   },
   "arcanite fortress|0": {
     modifyDefense: (ctx: ScriptCtx) =>
-      equipmentZoneCards(ctx.player(ctx.seat)).filter((card) => cardNameContains(ctx, card, "Arcanite"))
-        .length,
+      equippedCards(ctx, ctx.seat).filter((card) => cardNameContains(ctx, card, "Arcanite")).length,
     spellvoidValue: (ctx: ScriptCtx) =>
-      equipmentZoneCards(ctx.player(ctx.seat)).filter((card) => cardNameContains(ctx, card, "Arcanite"))
-        .length,
+      equippedCards(ctx, ctx.seat).filter((card) => cardNameContains(ctx, card, "Arcanite")).length,
   },
   "cut through the facade|1": {
     canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined,

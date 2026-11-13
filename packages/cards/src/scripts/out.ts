@@ -1,5 +1,8 @@
 import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal/engine";
 import {
+  BLOODROT_POX,
+  FRAILTY,
+  INERTIA,
   armGrantedHitRider,
   buffNextAttack,
   cardNamed,
@@ -33,9 +36,6 @@ import { outHighRarity, uzuriAbility } from "./out/high-rarity.js";
 import { hasType } from "@fyendal/shared";
 
 // OUT — Outsiders common/rare cards and young heroes.
-const BLOODROT = "SAZ034";
-const FRAILTY = "SAZ035";
-const INERTIA = "SAZ036";
 const PONDER = "DYN244";
 
 function tokenOnHit(tokenId: string): CardScript {
@@ -194,7 +194,7 @@ function infectiousHost(): CardScript {
       if (ctx.link?.targetAllyId !== undefined) return;
       const owned = ctx.player(ctx.seat).board;
       // Created tokens use the canonical printing, so match by name.
-      for (const [token, name] of [[FRAILTY, "Frailty"], [INERTIA, "Inertia"], [BLOODROT, "Bloodrot Pox"]] as const)
+      for (const [token, name] of [[FRAILTY, "Frailty"], [INERTIA, "Inertia"], [BLOODROT_POX, "Bloodrot Pox"]] as const)
         if (owned.some((card) => cardNamed(ctx, card, name))) ctx.createToken(token, opponentSeat(ctx));
     },
   };
@@ -273,7 +273,7 @@ function deathTouch(): CardScript {
       return ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      requestDiseaseTokenChoice(ctx, "disease", [BLOODROT, FRAILTY, INERTIA]);
+      requestDiseaseTokenChoice(ctx, "disease", [BLOODROT_POX, FRAILTY, INERTIA]);
     },
     onChoose(ctx, hook, option) {
       if (hook === "disease") ctx.createToken(option, opponentSeat(ctx));
@@ -282,7 +282,7 @@ function deathTouch(): CardScript {
 }
 function virulentTouch(): CardScript {
   const resolve = (ctx: ScriptCtx) => {
-    if (ctx.link?.flags.defendedFromHand === true) ctx.createToken(BLOODROT, opponentSeat(ctx));
+    if (ctx.link?.flags.defendedFromHand === true) ctx.createToken(BLOODROT_POX, opponentSeat(ctx));
   };
   return {
     canPlay(ctx) {
@@ -615,8 +615,8 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "sneak attack|3": { modifyAttack: (ctx) => (ctx.link?.flags.reactionPlayedOrActivated === true ? 4 : 0) },
   "spike with frailty|1": stealthReaction(3, FRAILTY),
   "spike with inertia|1": stealthReaction(3, INERTIA),
-  "infect|2": stealthToken(BLOODROT),
-  "infect|3": stealthToken(BLOODROT),
+  "infect|2": stealthToken(BLOODROT_POX),
+  "infect|3": stealthToken(BLOODROT_POX),
   "malign|1": {
     combatDamageUnpreventableAtLeast: 1,
   },
@@ -729,7 +729,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "falcon wing|1": aimOnly(),
   "falcon wing|2": aimOnly(),
   "falcon wing|3": aimOnly(),
-  "infecting shot|3": aimAttack(BLOODROT),
+  "infecting shot|3": aimAttack(BLOODROT_POX),
   "murkmire grapnel|2": aimAttack(undefined, true),
   "murkmire grapnel|3": aimAttack(undefined, true),
   "sedation shot|1": aimAttack(INERTIA),
@@ -871,7 +871,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
         (m) => m.sourceInstanceId === ctx.self.instanceId && m.scope === "chain-link",
       )!;
       ctx.consumeModifier(linked.id);
-      requestDiseaseTokenChoice(ctx, "disease", [BLOODROT, FRAILTY, INERTIA]);
+      requestDiseaseTokenChoice(ctx, "disease", [BLOODROT_POX, FRAILTY, INERTIA]);
     },
     onChoose(ctx, h, o) {
       if (h === "disease") ctx.createToken(o, opponentSeat(ctx));
@@ -886,7 +886,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "virulent touch|1": virulentTouch(),
   "virulent touch|2": virulentTouch(),
   "virulent touch|3": virulentTouch(),
-  "bloodrot trap|1": trap(trapReaction(), (ctx) => ctx.createToken(BLOODROT, ctx.link!.attacker)),
+  "bloodrot trap|1": trap(trapReaction(), (ctx) => ctx.createToken(BLOODROT_POX, ctx.link!.attacker)),
 
   "seeker's hood|0": seeker(),
   "seeker's gilet|0": seeker(),

@@ -869,6 +869,7 @@
   "card.dtd.yellow.action.top": "将一张黄色行动牌置于牌库顶部",
   "card.dtd.yellow.card.top": "将一张黄色牌置于牌库顶部",
   "card.dtd.yellow.soul": "将已展示的黄色牌放入你的 soul？",
+  "card.dtd.northernwinds.freeze": "{card}：冻结 {player} 控制的至多 1 个{kind, select, equipment {装备} item {物品} other {盟友}}？",
   "card.upr.action.bottom": "{card}：将一张行动牌置于牌库底部",
   "card.upr.alluvion.counter": "在 Alluvion Constellas 上放置一个能量指示物？",
   "card.upr.arcane.allies.upto": "对至多 {count} 名盟友各造成 {amount} 点奥术伤害",

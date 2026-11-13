@@ -1,5 +1,8 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
+  BLOODROT_POX,
+  FRAILTY,
+  INERTIA,
   armedBySelf,
   buffNextAttack,
   commonOptionMessages,
@@ -49,9 +52,6 @@ import {
 // - Reload (CR 8.5.23): optional "hand card → arsenal if arsenal is empty".
 // - Aim counters ride the generic named counters on the card instance.
 //
-const BLOODROT_POX = "SAZ034";
-const FRAILTY = "SAZ035";
-const INERTIA = "SAZ036";
 
 function hasAimCounter(ctx: ScriptCtx): boolean {
   return (ctx.self.counters?.aim ?? 0) > 0;

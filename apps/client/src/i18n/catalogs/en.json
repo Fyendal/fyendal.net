@@ -869,6 +869,7 @@
   "card.dtd.yellow.action.top": "Put a yellow action on top",
   "card.dtd.yellow.card.top": "Put a yellow card on top",
   "card.dtd.yellow.soul": "Put the revealed yellow card into your soul?",
+  "card.dtd.northernwinds.freeze": "{card}: freeze up to 1 {kind, select, equipment {equipment} item {item} other {ally}} controlled by {player}?",
   "card.upr.action.bottom": "{card}: put an action on the bottom",
   "card.upr.alluvion.counter": "Put an energy counter on Alluvion Constellas?",
   "card.upr.arcane.allies.upto": "Deal {amount} arcane damage to up to {count, plural, one {# ally} other {# allies}}",

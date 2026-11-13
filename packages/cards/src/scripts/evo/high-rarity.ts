@@ -16,6 +16,7 @@ import {
   entersArenaTrigger,
   equipWithSilver,
   equipmentZoneCards,
+  equippedCards,
   equippedEvos,
   evoEquipment,
   faceUpGraveyard,
@@ -84,16 +85,16 @@ function requestFabricateHandBanish(ctx: ScriptCtx): void {
     ["no", ...evos.map((card) => card.instanceId)],
   );
 }
-function equipmentInZones(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return ctx.state.players.flatMap((player) => equipmentZoneCards(player));
+function allEquippedCards(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
+  return ctx.state.players.flatMap((player) => equippedCards(ctx, player.seat));
 }
 function equipmentController(ctx: ScriptCtx, instanceId: number): number | undefined {
   return ctx.state.players.find((player) =>
-    equipmentZoneCards(player).some((card) => card.instanceId === instanceId),
+    equippedCards(ctx, player.seat).some((card) => card.instanceId === instanceId),
   )?.seat;
 }
 const STASIS_EQUIPMENT_TARGET: TriggerDef["target"] = {
-  options: (ctx) => equipmentInZones(ctx).map((card) => card.instanceId),
+  options: (ctx) => allEquippedCards(ctx).map((card) => card.instanceId),
   prompt: () =>
     decisionPrompt("Choose equipment whose abilities can't be activated", "card.evo.equipment.abilities.disable"),
 };
@@ -622,7 +623,7 @@ export const evoHighRarity: Record<string, CardScript> = {
       putSelfOnDeckBottomCost: true,
       label: "Disable equipment defense",
       onActivate(ctx) {
-        const equipment = equipmentInZones(ctx);
+        const equipment = allEquippedCards(ctx);
         if (equipment.length)
           ctx.requestCardChoice(
             "stasis-defense",
@@ -771,14 +772,14 @@ export const evoHighRarity: Record<string, CardScript> = {
       stateKey: "lockwaveX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum(ctx) {
-        return equipmentZoneCards(ctx.player(opponentSeat(ctx))).length;
+        return equippedCards(ctx, opponentSeat(ctx)).length;
       },
     },
     playTargetOptions(ctx) {
       return [ctx.player(opponentSeat(ctx)).hero.instanceId];
     },
     onPlay(ctx) {
-      const equipment = equipmentZoneCards(ctx.player(opponentSeat(ctx)));
+      const equipment = equippedCards(ctx, opponentSeat(ctx));
       const count = Math.min(ctx.getState("lockwaveX"), equipment.length);
       if (count <= 0) return;
       ctx.requestCardChoices(

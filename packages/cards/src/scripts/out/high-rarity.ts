@@ -1,5 +1,8 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  BLOODROT_POX,
+  FRAILTY,
+  INERTIA,
   bothHeroSeats,
   buffNextAttack,
   cardNamed,
@@ -21,9 +24,6 @@ import {
 } from "../shared-helpers.js";
 import { hasType } from "@fyendal/shared";
 
-const BLOODROT = "SAZ034";
-const FRAILTY = "SAZ035";
-const INERTIA = "SAZ036";
 const PONDER = "DYN244";
 function dagger(extra: CardScript = {}): CardScript {
   return {
@@ -91,7 +91,7 @@ function codexBloodrotChoice(ctx: ScriptCtx, index: number): void {
   const seat = bothHeroSeats(ctx)[index];
   if (seat === undefined) {
     ctx.createToken(PONDER);
-    ctx.createToken(BLOODROT, opponentSeat(ctx));
+    ctx.createToken(BLOODROT_POX, opponentSeat(ctx));
     return;
   }
   const player = ctx.player(seat);
@@ -178,7 +178,7 @@ export const outHighRarity: Record<string, CardScript> = {
         label: "Create a random disease token",
         condition: (ctx, pitched) => pitched?.instanceId === ctx.self.instanceId,
         effect(ctx) {
-          const tokens = [BLOODROT, FRAILTY, INERTIA];
+          const tokens = [BLOODROT_POX, FRAILTY, INERTIA];
           ctx.createToken(tokens[ctx.randomInt(tokens.length)]!, opponentSeat(ctx));
         },
       },
@@ -311,7 +311,7 @@ export const outHighRarity: Record<string, CardScript> = {
   "spreading plague|2": {
     onPlay(ctx) {
       const count = (ctx.link?.defendingCards.length ?? 0) + (ctx.link?.defendingEquipment.length ?? 0);
-      ctx.createTokens(BLOODROT, count, opponentSeat(ctx));
+      ctx.createTokens(BLOODROT_POX, count, opponentSeat(ctx));
     },
   },
   "cyclone roundhouse|2": {

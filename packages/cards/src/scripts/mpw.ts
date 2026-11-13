@@ -9,7 +9,7 @@ import {
   controlledPermanents,
   decisionMessage,
   decisionPrompt,
-  equipmentZoneCards,
+  equippedCards,
   faceUpGraveyard,
   isSwordAttack,
   isWeaponAttack,
@@ -653,7 +653,7 @@ export const mpw: Record<string, CardScript> = {
       );
     },
     onHit(ctx) {
-      const equipment = equipmentZoneCards(ctx.player(opponentSeat(ctx))).filter(
+      const equipment = equippedCards(ctx, opponentSeat(ctx)).filter(
         (card) => (ctx.cardData(card.cardId).defense ?? 0) - (card.defCounters ?? 0) <= 0,
       );
       if (equipment.length)

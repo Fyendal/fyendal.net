@@ -1,11 +1,12 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import type { GameMessage } from "@fyendal/shared";
 import {
+  bothHeroSeats,
   chargedThisTurn,
   crushTriggered,
   defendsTogetherWithCardFromHand,
   duringActionPhase,
-  equipmentZoneCards,
+  equippedCards,
   faceUpGraveyard,
   hasBloodDebt,
   armDelayedEffect,
@@ -241,6 +242,40 @@ function requestSkullChoice(ctx: ScriptCtx): void {
       decisionPrompt("Choose a differently named banished action", "card.dtd.banished.action.different"),
       actions.map((card) => card.instanceId),
     );
+}
+
+const NORTHERN_WINDS_HOOK = "northern-winds";
+const NORTHERN_WINDS_STEP = "northernWindsStep";
+type NorthernWindsKind = "equipment" | "item" | "ally";
+
+/** Each hero in turn order, then equipment, item and ally. */
+function northernWindsSteps(ctx: ScriptCtx): [number, NorthernWindsKind][] {
+  return bothHeroSeats(ctx).flatMap((seat) =>
+    (["equipment", "item", "ally"] as const).map((kind): [number, NorthernWindsKind] => [seat, kind]));
+}
+
+function northernWindsCandidates(ctx: ScriptCtx, seat: number, kind: NorthernWindsKind): DeepReadonly<CardInstance>[] {
+  if (kind === "equipment") return equippedCards(ctx, seat);
+  return ctx.player(seat).board.filter((card) => hasCardSubtype(ctx, card, kind));
+}
+
+function continueNorthernWinds(ctx: ScriptCtx, from: number): void {
+  const steps = northernWindsSteps(ctx);
+  for (let step = from; step < steps.length; step++) {
+    const [seat, kind] = steps[step]!;
+    const candidates = northernWindsCandidates(ctx, seat, kind);
+    if (candidates.length === 0) continue;
+    ctx.setState(NORTHERN_WINDS_STEP, step);
+    ctx.requestCardChoice(
+      NORTHERN_WINDS_HOOK,
+      decisionPrompt(`${ctx.data.name}: freeze up to 1 ${kind}?`, "card.dtd.northernwinds.freeze", {
+        values: { card: { kind: "card", cardId: ctx.self.cardId }, kind, player: { kind: "player", seat } },
+        optionMessages: commonOptionMessages("pass"),
+      }),
+      ["pass", ...candidates.map((card) => card.instanceId)],
+    );
+    return;
+  }
 }
 
 export const dtdHighRarity: Record<string, CardScript> = {
@@ -740,12 +775,17 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
   },
   "northern winds|3": {
-    onPlay(ctx) {
-      for (const player of ctx.state.players)
-        for (const card of [...equipmentZoneCards(player), ...player.board]
-          .filter((c): c is DeepReadonly<CardInstance> => !!c)
-          .slice(0, 3))
-          ctx.setCardState(card.instanceId, "frozenUntilTurn", ctx.state.turn + 1);
+    onPlay: (ctx) => continueNorthernWinds(ctx, 0),
+    onChoose(ctx, hook, option) {
+      if (hook !== NORTHERN_WINDS_HOOK) return;
+      const step = ctx.getState(NORTHERN_WINDS_STEP);
+      const [seat, kind] = northernWindsSteps(ctx)[step] ?? [];
+      if (seat !== undefined && kind !== undefined && option !== "pass") {
+        const card = northernWindsCandidates(ctx, seat, kind).find((c) => c.instanceId === Number(option));
+        // Played on your turn, so "until the start of your next turn" is two turns away.
+        if (card) ctx.setCardState(card.instanceId, "frozenUntilTurn", ctx.state.turn + 2);
+      }
+      continueNorthernWinds(ctx, step + 1);
     },
     canTriggerOnDefend: defendsTogetherWithCardFromHand,
     onDefend(ctx) {

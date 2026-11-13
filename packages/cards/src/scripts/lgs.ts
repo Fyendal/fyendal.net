@@ -3,7 +3,7 @@ import {
   crushTriggered,
   discardSixPlusPayoff,
   decisionPrompt,
-  equipmentZoneCards,
+  equippedCards,
   isSixPlus,
   lessonCounter,
   localizedCardLog,
@@ -52,8 +52,8 @@ export const lgs: Record<string, CardScript> = {
     combatDamageUnpreventableAtLeast: 4,
     canTriggerOnHit: crushTriggered,
     onHit(ctx) {
-      const equipment = equipmentZoneCards(ctx.player(opponentSeat(ctx))).filter(
-        (card) => card !== undefined && (ctx.cardData(card.cardId).defense ?? 0) === 0,
+      const equipment = equippedCards(ctx, opponentSeat(ctx)).filter(
+        (card) => (ctx.cardData(card.cardId).defense ?? 0) === 0,
       );
       if (equipment.length) {
         ctx.requestCardChoice(

@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   cardNamed,
   commonOptionMessages,
+  controlledPermanents,
   currentAttackDraconic,
   dealArcane,
   decisionPrompt,
@@ -353,11 +354,9 @@ export const uprHighRarity: Record<string, CardScript> = {
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
       const opp = ctx.player(opponentSeat(ctx));
-      const frozen = [
-        ...opp.arsenal,
-        ...opp.board,
-        ...equipmentZoneCards(opp),
-      ].filter((card) => ctx.isFrozen(card)).length;
+      const frozen = [...opp.arsenal, ...controlledPermanents(ctx, opp.seat)].filter((card) =>
+        ctx.isFrozen(card),
+      ).length;
       const ice = opp.board.filter((card) =>
         hasCardSubtype(ctx, card, "ice") && hasCardSubtype(ctx, card, "affliction")).length;
       dealArcane(

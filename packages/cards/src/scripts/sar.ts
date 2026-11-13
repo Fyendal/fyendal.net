@@ -1,5 +1,8 @@
 import type { ActivatedAbility, CardScript, ScriptCtx } from "@fyendal/engine";
 import {
+  BLOODROT_POX,
+  FRAILTY,
+  INERTIA,
   armGrantedHitRider,
   armedBySelf,
   attackAbility,
@@ -58,9 +61,6 @@ const TRAP_DOOR = "SAR039";
 /** The brood — the Agents of Chaos Web of Deceit randomly becomes. */
 const AGENTS = [BLACK_WIDOW, FUNNEL_WEB, ORB_WEAVER, REDBACK, TARANTULA, TRAP_DOOR];
 
-const BLOODROT_POX = "SAZ034";
-const FRAILTY = "SAZ035";
-const INERTIA = "SAZ036";
 
 function requestHuntsmanMark(ctx: ScriptCtx): void {
   ctx.requestChoice(

@@ -869,6 +869,7 @@
   "card.dtd.yellow.action.top": "Pon una carta de action amarilla en la parte superior",
   "card.dtd.yellow.card.top": "Pon una carta amarilla en la parte superior",
   "card.dtd.yellow.soul": "¿Poner la carta amarilla revelada en tu soul?",
+  "card.dtd.northernwinds.freeze": "{card}: ¿aplicar freeze a hasta 1 {kind, select, equipment {equipment} item {item} other {ally}} controlado por {player}?",
   "card.upr.action.bottom": "{card}: pon una carta de action en la parte inferior",
   "card.upr.alluvion.counter": "¿Poner un contador de energy en Alluvion Constellas?",
   "card.upr.arcane.allies.upto": "Aplica {amount} de daño arcane a hasta {count, plural, one {# ally} other {# allies}}",

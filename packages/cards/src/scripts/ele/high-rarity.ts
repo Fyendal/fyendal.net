@@ -6,7 +6,7 @@ import {
   dealtByThis,
   decisionMessage,
   decisionPrompt,
-  equipmentZoneCards,
+  equippedCards,
   faceUpGraveyard,
   hasCardSubtype,
   heroTarget,
@@ -416,7 +416,7 @@ export const eleHighRarity: Record<string, CardScript> = {
       return isFused(ctx) && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      const count = equipmentZoneCards(ctx.player(opponentSeat(ctx))).length;
+      const count = equippedCards(ctx, opponentSeat(ctx)).length;
       for (let i = 0; i < count; i++) ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.self.instanceId });
     },
   }),

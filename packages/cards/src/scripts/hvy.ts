@@ -11,7 +11,6 @@ import {
   consumeDelayedEffect,
   controlsNamed,
   decisionPrompt,
-  equipmentZoneCards,
   equippedCards,
   faceUpGraveyard,
   isAttackAction,
@@ -189,7 +188,7 @@ function dynamicDefense(): CardScript {
 
 function equipmentAndTokens(ctx: ScriptCtx, seat: number): number {
   const player = ctx.player(seat);
-  const equipment = equipmentZoneCards(player).length;
+  const equipment = equippedCards(ctx, seat).length;
   const tokens = player.board.filter((card) => ctx.hasCardType(card, "token")).length;
   return equipment + tokens;
 }

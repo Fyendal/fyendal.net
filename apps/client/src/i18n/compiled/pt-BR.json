@@ -3072,6 +3072,58 @@
       "value": "+2 de poder"
     }
   ],
+  "card.dtd.northernwinds.freeze": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": aplicar freeze em até 1 "
+    },
+    {
+      "type": 5,
+      "value": "kind",
+      "options": {
+        "equipment": {
+          "value": [
+            {
+              "type": 0,
+              "value": "equipment"
+            }
+          ]
+        },
+        "item": {
+          "value": [
+            {
+              "type": 0,
+              "value": "item"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "ally"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " controlado por "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "?"
+    }
+  ],
   "card.dtd.option.peace": [
     {
       "type": 0,
