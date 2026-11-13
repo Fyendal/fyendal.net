@@ -11,6 +11,8 @@ import {
   decisionPrompt,
   faceUpGraveyard,
   isAttackAction,
+  isAura,
+  isSword,
   localizedCardLog,
   mergeSetScripts,
   ongoingLabel,
@@ -28,12 +30,6 @@ const GOLD = "SGB035";
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
-}
-
-function hasTag(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, tag: string): boolean {
-  const d = data(ctx, card);
-  if (tag.toLowerCase() === "token" && hasType(d, "token")) return true;
-  return ctx.cardTypes(card).includes(tag.toLowerCase());
 }
 
 function controls(ctx: ScriptCtx, name: string): boolean {
@@ -244,7 +240,7 @@ function dynamicDefense(): CardScript {
 function equipmentAndTokens(ctx: ScriptCtx, seat: number): number {
   const player = ctx.player(seat);
   const equipment = Object.values(player.equipment).filter(Boolean).length;
-  const tokens = player.board.filter((card) => hasTag(ctx, card, "token")).length;
+  const tokens = player.board.filter((card) => ctx.hasCardType(card, "token")).length;
   return equipment + tokens;
 }
 
@@ -568,7 +564,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
     canTriggerOnHit: (ctx) => ctx.currentAttackPower() >= 13 && ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
       for (const card of [...ctx.player(opponentSeat(ctx)).board]) {
-        if (hasTag(ctx, card, "aura") && hasTag(ctx, card, "token")) ctx.destroyPermanent(card.instanceId);
+        if (isAura(ctx, card) && ctx.hasCardType(card, "token")) ctx.destroyPermanent(card.instanceId);
       }
     },
   },
@@ -627,7 +623,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
   // Warrior
   "kassai|0": {
     modifyAttackActivationCost(ctx, attacker, baseCost) {
-      return drawnThisTurn(ctx) && hasTag(ctx, attacker, "sword") ? Math.max(0, baseCost - 1) : baseCost;
+      return drawnThisTurn(ctx) && isSword(ctx, attacker) ? Math.max(0, baseCost - 1) : baseCost;
     },
     activated: {
       cost: 0,
@@ -732,7 +728,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
           !!ctx.link &&
           !ctx.link.resolved &&
           ctx.link.attacker === ctx.seat &&
-          hasTag(ctx, ctx.link.attackingCard, "sword") &&
+          isSword(ctx, ctx.link.attackingCard) &&
           findPitchedGraveCards(ctx, 1, 1).length === 1 &&
           findPitchedGraveCards(ctx, 2, 1).length === 1
         );

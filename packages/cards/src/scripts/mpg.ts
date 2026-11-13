@@ -9,6 +9,9 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
+  hasCardSubtype,
+  isAttackAction,
+  isAura,
   localizedCardLog,
   opponentSeat,
   sharesName,
@@ -21,21 +24,13 @@ function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
 }
 
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasType(ctx, card, "aura");
-}
-
 function isAuraToken(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return hasPrintedType(data(ctx, card), "token") && isAura(ctx, card);
 }
 
 function isGuardianAttack(ctx: ScriptCtx): boolean {
   const link = ctx.link;
-  return !!link && hasType(ctx, link.attackingCard, "guardian");
+  return !!link && hasCardSubtype(ctx, link.attackingCard, "guardian");
 }
 
 function applyFearlessConfrontation(ctx: ScriptCtx, attackInstanceId: number): void {
@@ -56,7 +51,7 @@ function crushTriggered(ctx: ScriptCtx): boolean {
 }
 
 function guardianCrushTriggered(ctx: ScriptCtx): boolean {
-  return crushTriggered(ctx) && hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "guardian");
+  return crushTriggered(ctx) && hasCardSubtype(ctx, ctx.player(opponentSeat(ctx)).hero, "guardian");
 }
 
 function controlsSeismicSurge(ctx: ScriptCtx, seat = ctx.seat): boolean {
@@ -77,10 +72,11 @@ function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance
 
 function canEquip(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   const controller = ctx.player(ctx.seat);
-  const ordinarySlot = (["head", "chest", "arms", "legs"] as const).find((slot) => hasType(ctx, card, slot));
+  const ordinarySlot = (["head", "chest", "arms", "legs"] as const).find((slot) => hasCardSubtype(ctx, card, slot));
   if (ordinarySlot) return ctx.equipmentZoneEmpty(ctx.seat, ordinarySlot);
-  const occupiedHands = controller.weapons.reduce((total, weapon) => total + (hasType(ctx, weapon, "2h") ? 2 : 1), 0);
-  const requiredHands = hasType(ctx, card, "2h") ? 2 : 1;
+  const occupiedHands = controller.weapons.reduce((total, weapon) =>
+    total + (hasCardSubtype(ctx, weapon, "2h") ? 2 : 1), 0);
+  const requiredHands = hasCardSubtype(ctx, card, "2h") ? 2 : 1;
   return occupiedHands + requiredHands <= 2;
 }
 
@@ -386,7 +382,7 @@ const clashSlotMessageIds: Record<ClashSlot, string> = {
 function clashEquipment(slot: ClashSlot): CardScript {
   const equippedInSlot = (ctx: ScriptCtx, seat: number): readonly DeepReadonly<CardInstance>[] => {
     if (slot === "off-hand") {
-      return ctx.player(seat).weapons.filter((card) => hasType(ctx, card, "off-hand"));
+      return ctx.player(seat).weapons.filter((card) => hasCardSubtype(ctx, card, "off-hand"));
     }
     const card = ctx.player(seat).equipment[slot];
     return card ? [card] : [];
@@ -529,7 +525,7 @@ function crashAndBash(): CardScript {
     onDefend(ctx) {
       const crush = ctx
         .player(ctx.seat)
-        .hand.filter((card) => (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "crush"));
+        .hand.filter((card) => ctx.hasKeyword(card, "crush"));
       if (crush.length) {
         ctx.requestCardChoice(
           "crash-reveal",
@@ -740,7 +736,7 @@ Object.assign(mpg, {
   "clash of bravado|2": clashAndDestroyAura(),
   "headbutt|3": {
     canBeDefendedBy(ctx: ScriptCtx, defending: DeepReadonly<CardInstance>) {
-      return !hasPrintedType(data(ctx, defending), "equipment") || hasType(ctx, defending, "head");
+      return !hasPrintedType(data(ctx, defending), "equipment") || hasCardSubtype(ctx, defending, "head");
     },
     modifyAttack(ctx: ScriptCtx) {
       const ownHead = ctx.player(ctx.seat).equipment.head !== undefined;
@@ -800,7 +796,7 @@ Object.assign(mpg, {
       maximum(ctx: ScriptCtx) {
         return ctx
           .player(ctx.seat)
-          .weapons.filter((card) => hasType(ctx, card, "off-hand"))
+          .weapons.filter((card) => hasCardSubtype(ctx, card, "off-hand"))
           .reduce((maximum, card) => Math.max(maximum, card.defCounters ?? 0), 0);
       },
     },
@@ -808,7 +804,7 @@ Object.assign(mpg, {
       const x = ctx.getState("anvilheimX");
       const offHands = ctx
         .player(ctx.seat)
-        .weapons.filter((card) => hasType(ctx, card, "off-hand") && (card.defCounters ?? 0) >= x);
+        .weapons.filter((card) => hasCardSubtype(ctx, card, "off-hand") && (card.defCounters ?? 0) >= x);
       if (x > 0 && offHands.length)
         ctx.requestCardChoice(
           "anvilheim",
@@ -918,7 +914,7 @@ Object.assign(mpg, {
   "call for backup|1": {
     onDefend(ctx: ScriptCtx) {
       const attacks = faceUpGraveyard(ctx)
-        .filter((card) => ctx.hasCardType(card, "action") && hasType(ctx, card, "attack"));
+        .filter((card) => isAttackAction(ctx, card));
       if (attacks.length === 0) return;
       // With a single name only one card can be chosen, so the opponent's pick is forced.
       const single = attacks.every((card) => sharesName(ctx, card, attacks[0]!));
@@ -958,7 +954,7 @@ Object.assign(mpg, {
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (!hook.startsWith("backup-banish:")) return;
       const attacks = faceUpGraveyard(ctx).filter(
-        (card) => ctx.hasCardType(card, "action") && hasType(ctx, card, "attack"),
+        (card) => isAttackAction(ctx, card),
       );
       const [firstId, secondId] = hook.slice("backup-banish:".length).split(":").map(Number);
       const chosenId = Number(option);

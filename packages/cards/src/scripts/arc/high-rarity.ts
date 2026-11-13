@@ -6,6 +6,9 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  hasCardSubtype,
+  isAttackAction,
+  isNonAttackAction,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
@@ -15,18 +18,6 @@ import {
 } from "../shared-helpers.js";
 
 const RUNECHANT = "ARC112";
-
-function isType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type);
-}
-
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && isType(ctx, card, "attack");
-}
-
-function isNonAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && !isType(ctx, card, "attack");
-}
 
 function runeCount(ctx: ScriptCtx): number {
   return ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length;
@@ -71,8 +62,8 @@ function chooseFromDeck(
 function mechanologistItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, exactCost?: number): boolean {
   const data = ctx.cardData(card.cardId);
   return (
-    isType(ctx, card, "mechanologist") &&
-    isType(ctx, card, "item") &&
+    hasCardSubtype(ctx, card, "mechanologist") &&
+    hasCardSubtype(ctx, card, "item") &&
     (exactCost === undefined || (data.cost ?? 0) === exactCost)
   );
 }
@@ -143,7 +134,7 @@ const becomeTheArknight: CardScript = {
       if (option === "pass") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      const discardedAttack = isAttack(ctx, card);
+      const discardedAttack = isAttackAction(ctx, card);
       ctx.discardCard(ctx.seat, card.instanceId);
       chooseFromDeck(
         ctx,
@@ -151,8 +142,8 @@ const becomeTheArknight: CardScript = {
         "Become the Arknight: choose a Runeblade action",
         "card.arc.become.runeblade.choose",
         (candidate) =>
-          isType(ctx, candidate, "runeblade") &&
-          (discardedAttack ? isNonAttack(ctx, candidate) : isAttack(ctx, candidate)),
+          hasCardSubtype(ctx, candidate, "runeblade") &&
+          (discardedAttack ? isNonAttackAction(ctx, candidate) : isAttackAction(ctx, candidate)),
       );
       return;
     }
@@ -179,7 +170,7 @@ const sonicBoom: CardScript = {
     const top = ctx.player(ctx.seat).deck[0];
     if (!top) return;
     ctx.lookAt(top.instanceId);
-    if (isType(ctx, top, "wizard") && isNonAttack(ctx, top)) {
+    if (hasCardSubtype(ctx, top, "wizard") && isNonAttackAction(ctx, top)) {
       ctx.requestCardChoice(
         `sonic-banish:${amount}`,
         decisionPrompt("Sonic Boom: banish the top card?", "card.arc.sonic.banish", {
@@ -208,7 +199,7 @@ const lessonInLava: CardScript = {
       `lesson-search:${amount}`,
       "Lesson in Lava: choose a Wizard card",
       "card.arc.lesson.wizard.choose",
-      (card) => isType(ctx, card, "wizard") && (ctx.cardData(card.cardId).cost ?? 0) <= amount,
+      (card) => hasCardSubtype(ctx, card, "wizard") && (ctx.cardData(card.cardId).cost ?? 0) <= amount,
       true,
     );
   },
@@ -267,7 +258,7 @@ function artMode(ctx: ScriptCtx, option: string): void {
     ctx.addModifier({ scope: "until-end-of-turn", attack: 1, defense: 1, appliesTo: "attack-action" });
   else if (option === "go again") ctx.addModifier({ scope: "next-attack", goAgain: true, appliesTo: "attack-action" });
   else if (option === "banish") {
-    const attacks = ctx.player(ctx.seat).hand.filter((card) => isAttack(ctx, card));
+    const attacks = ctx.player(ctx.seat).hand.filter((card) => isAttackAction(ctx, card));
     if (attacks.length > 0)
       ctx.requestCardChoice(
         "art-banish-card",
@@ -346,7 +337,7 @@ export const arcHighRarity: Record<string, CardScript> = {
         const top = ctx.player(ctx.seat).deck.slice(0, 2);
         let gained = 0;
         for (const card of top) {
-          if (isType(ctx, card, "mechanologist")) gained++;
+          if (hasCardSubtype(ctx, card, "mechanologist")) gained++;
           ctx.banish(card.instanceId);
         }
         ctx.gainResources(ctx.seat, gained);
@@ -388,7 +379,7 @@ export const arcHighRarity: Record<string, CardScript> = {
         label: "Give pistol attack go again",
         removeCounterCost: { key: "steam", amount: 1 },
         canActivate: (ctx) =>
-          ctx.link?.attackCardType === "weapon" && isType(ctx, ctx.link.attackingCard, "mechanologist"),
+          ctx.link?.attackCardType === "weapon" && hasCardSubtype(ctx, ctx.link.attackingCard, "mechanologist"),
         onActivate(ctx) {
           ctx.grantGoAgain();
         },
@@ -479,7 +470,11 @@ export const arcHighRarity: Record<string, CardScript> = {
             { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
           ),
         );
-      if (top.length === 2 && top.some((card) => isAttack(ctx, card)) && top.some((card) => isNonAttack(ctx, card)))
+      if (
+        top.length === 2 &&
+        top.some((card) => isAttackAction(ctx, card)) &&
+        top.some((card) => isNonAttackAction(ctx, card))
+      )
         for (const card of top) ctx.moveToHand(card.instanceId);
     },
   },

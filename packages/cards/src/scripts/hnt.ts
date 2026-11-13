@@ -24,6 +24,11 @@ import {
   retrievableDaggerIds,
   yesNoPrompt,
   ongoingLabel,
+  hasCardSubtype,
+  isArrow,
+  isAura,
+  isDagger,
+  isNonAttackAction,
 } from "./shared-helpers.js";
 import { hasType } from "@fyendal/shared";
 
@@ -37,10 +42,6 @@ function spurNumberPrompt() {
   return decisionPrompt("Secretly choose a number between 1 and 6", "card.hnt.spurlocked.number.choose");
 }
 
-function dataTags(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): readonly string[] {
-  return ctx.cardTypes(card);
-}
-
 function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
   const player = ctx.player(seat);
   return [
@@ -49,20 +50,8 @@ function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance
   ];
 }
 
-function isDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return dataTags(ctx, card).includes("dagger");
-}
-
 function isDraconic(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return dataTags(ctx, card).includes("draconic");
-}
-
-function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: string): boolean {
-  const normalized = keyword.toLowerCase();
-  if ((card.suppressedKeywords ?? []).some((entry) => entry.toLowerCase() === normalized)) return false;
-  return [...(ctx.cardData(card.cardId).keywords ?? []), ...(card.grantedKeywords ?? [])].some(
-    (entry) => entry.toLowerCase() === normalized,
-  );
+  return hasCardSubtype(ctx, card, "draconic");
 }
 
 function attacksHero(ctx: ScriptCtx): boolean {
@@ -314,7 +303,7 @@ function stealthPump(pump: number): CardScript {
   return {
     modifyPlayCost: (ctx, base) => (isMarked(ctx, opponentSeat(ctx)) ? base - 1 : base),
     canPlay: (ctx) =>
-      !!ctx.link && ctx.link.attacker === ctx.seat && hasKeyword(ctx, ctx.link.attackingCard, "stealth"),
+      !!ctx.link && ctx.link.attacker === ctx.seat && ctx.hasKeyword(ctx.link.attackingCard, "stealth"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: pump });
       ctx.grantGoAgain();
@@ -1218,7 +1207,7 @@ export const hnt: Record<string, CardScript> = {
       destroySelfCost: true,
       onActivate(ctx) {
         ctx.setPlayerFlag(ctx.seat, "noDefenseReactionsThisTurn", true);
-        if (dataTags(ctx, ctx.player(ctx.seat).hero).includes("royal"))
+        if (hasCardSubtype(ctx, ctx.player(ctx.seat).hero, "royal"))
           armDelayedEffect(
             ctx,
             ongoingLabel(
@@ -1337,7 +1326,7 @@ Object.assign(hnt, {
       timing: "instant",
       fromHand: true,
       onActivate(ctx) {
-        const traps = faceUpGraveyard(ctx).filter((card) => dataTags(ctx, card).includes("trap"));
+        const traps = faceUpGraveyard(ctx).filter((card) => hasCardSubtype(ctx, card, "trap"));
         if (traps.length)
           ctx.requestCardChoice(
             "trap-door",
@@ -1356,7 +1345,7 @@ Object.assign(hnt, {
       if (!ctx.link || ctx.link.attacker !== ctx.seat) return false;
       const daggerMode = isDagger(ctx, ctx.link.attackingCard);
       const defenseMode =
-        hasKeyword(ctx, ctx.link.attackingCard, "stealth") &&
+        ctx.hasKeyword(ctx.link.attackingCard, "stealth") &&
         [...ctx.link.defendingCards, ...ctx.link.defendingEquipment].length > 0;
       return daggerMode || defenseMode;
     },
@@ -1364,7 +1353,7 @@ Object.assign(hnt, {
       if (!ctx.link) return;
       const daggerMode = isDagger(ctx, ctx.link.attackingCard);
       const defenseMode =
-        hasKeyword(ctx, ctx.link.attackingCard, "stealth") &&
+        ctx.hasKeyword(ctx.link.attackingCard, "stealth") &&
         [...ctx.link.defendingCards, ...ctx.link.defendingEquipment].length > 0;
       if (daggerMode && defenseMode) {
         ctx.requestChoice(
@@ -1384,7 +1373,7 @@ Object.assign(hnt, {
       if (!ctx.link) return;
       const daggerMode = isDagger(ctx, ctx.link.attackingCard);
       const defenseMode =
-        hasKeyword(ctx, ctx.link.attackingCard, "stealth") &&
+        ctx.hasKeyword(ctx.link.attackingCard, "stealth") &&
         [...ctx.link.defendingCards, ...ctx.link.defendingEquipment].length > 0;
       const selectedMode = ctx.getState("tarantulaMode");
       if (daggerMode && (!defenseMode || selectedMode === 1 || selectedMode === 3)) {
@@ -1855,7 +1844,7 @@ Object.assign(hnt, {
       const x = ctx.getState("fissureX");
       const aura = ctx.state.players
         .flatMap((player) => player.board)
-        .find((card) => dataTags(ctx, card).includes("aura") && (ctx.cardData(card.cardId).cost ?? 0) <= x);
+        .find((card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= x);
       if (aura) ctx.destroyPermanent(aura.instanceId);
     },
   },
@@ -1925,7 +1914,7 @@ Object.assign(hnt, {
       onActivate(ctx) {
         const arrow = ctx
           .player(ctx.seat)
-          .arsenal.some((card) => !card.faceDown && dataTags(ctx, card).includes("arrow"));
+          .arsenal.some((card) => !card.faceDown && isArrow(ctx, card));
         ctx.preventNextArcaneDamage(ctx.seat, arrow ? 2 : 1);
       },
     },
@@ -1935,7 +1924,7 @@ Object.assign(hnt, {
     onDefend(ctx) {
       const cards = ctx
         .player(ctx.seat)
-        .arsenal.filter((card) => ctx.hasCardType(card, "action") && !dataTags(ctx, card).includes("attack"));
+        .arsenal.filter((card) => isNonAttackAction(ctx, card));
       if (cards.length)
         ctx.requestCardChoice(
           "chain-arsenal",

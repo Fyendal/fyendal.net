@@ -6,6 +6,7 @@ import {
   decisionMessage,
   decisionPrompt,
   faceUpGraveyard,
+  hasCardSubtype,
 } from "./shared-helpers.js";
 import { hasType } from "@fyendal/shared";
 
@@ -16,16 +17,12 @@ function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
 }
 
-function hasSubtype(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, subtype: string): boolean {
-  return ctx.cardTypes(card).includes(subtype.toLowerCase());
-}
-
 function hyperDrivers(ctx: ScriptCtx) {
   return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Hyper Driver"));
 }
 
 function wrenches(ctx: ScriptCtx) {
-  return ctx.player(ctx.seat).weapons.filter((card) => hasSubtype(ctx, card, "wrench"));
+  return ctx.player(ctx.seat).weapons.filter((card) => hasCardSubtype(ctx, card, "wrench"));
 }
 
 function hyperDriver(steam: number): CardScript {
@@ -101,7 +98,7 @@ export const amx: Record<string, CardScript> = {
     onHit(ctx) {
       const items = ctx
         .player(ctx.seat)
-        .board.filter((card) => hasSubtype(ctx, card, "item") && ctx.hasCrank(card));
+        .board.filter((card) => hasCardSubtype(ctx, card, "item") && ctx.hasCrank(card));
       if (items.length)
         ctx.requestCardChoice(
           "banksy-steam",
@@ -177,7 +174,7 @@ export const amx: Record<string, CardScript> = {
         .flatMap((player) => player.banish)
         .filter((card) => {
           const cardData = data(ctx, card);
-          return !card.faceDown && hasSubtype(ctx, card, "item") && (cardData.cost ?? 0) <= 1;
+          return !card.faceDown && hasCardSubtype(ctx, card, "item") && (cardData.cost ?? 0) <= 1;
         });
       if (choices.length)
         ctx.requestCardChoice(
@@ -299,7 +296,7 @@ export const amx: Record<string, CardScript> = {
       else ctx.destroySelf();
     },
     modifyFriendlyAttack(ctx, attacking) {
-      return hasSubtype(ctx, attacking, "wrench") ? 2 : 0;
+      return hasCardSubtype(ctx, attacking, "wrench") ? 2 : 0;
     },
   },
 

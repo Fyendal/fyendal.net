@@ -3,11 +3,16 @@ import {
   buffNextAttack,
   canHeave,
   cardNameContains,
+  cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  hasCardSubtype,
   heroDamage,
+  isArrow,
+  isAttackAction,
+  isAura,
   ongoingLabel,
   opponentSeat,
   previousAttackHasName,
@@ -21,19 +26,11 @@ const RUNECHANT = "EVR119";
 const SILVER = "EVR195";
 const QUICKEN = "EVR196";
 
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
-}
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
 function elementalRevealOptions(ctx: ScriptCtx): string[] {
   const hand = ctx.player(ctx.seat).hand;
-  const earth = hand.filter((card) => hasType(ctx, card, "earth"));
-  const ice = hand.filter((card) => hasType(ctx, card, "ice"));
-  const lightning = hand.filter((card) => hasType(ctx, card, "lightning"));
+  const earth = hand.filter((card) => hasCardSubtype(ctx, card, "earth"));
+  const ice = hand.filter((card) => hasCardSubtype(ctx, card, "ice"));
+  const lightning = hand.filter((card) => hasCardSubtype(ctx, card, "lightning"));
   const options = new Set<string>();
   for (const a of earth)
     for (const b of ice)
@@ -75,7 +72,7 @@ function scourCandidates(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
     .player(opponentSeat(ctx))
     .board.filter(
       (card) =>
-        hasType(ctx, card, "aura") &&
+        isAura(ctx, card) &&
         (hasPrintedType(ctx.cardData(card.cardId), "token") || ctx.cardData(card.cardId).cost === 0),
     );
 }
@@ -99,7 +96,7 @@ function illusionistAttacksOnChain(ctx: ScriptCtx): DeepReadonly<CardInstance>[]
     .flatMap((link) => [link.attackingCard, ...link.defendingCards])
     .filter((card) => {
       if (card.instanceId === ctx.self.instanceId) return false;
-      return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack") && hasType(ctx, card, "illusionist");
+      return isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "illusionist");
     });
 }
 
@@ -134,10 +131,6 @@ const fractalReplication: CardScript = {
   },
 };
 
-function named(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string): boolean {
-  return ctx.cardNames(card).includes(name.toLowerCase());
-}
-
 function aurasPlayedOrCreated(ctx: ScriptCtx): number {
   return Number(ctx.getFlag("player", "playedSubtypeCount:aura")) +
     Number(ctx.getFlag("player", "createdSubtypeCount:aura"));
@@ -147,7 +140,7 @@ const BLOOD_MODES =["power", "go-again", "extra-attack"] as const;
 type BloodMode = (typeof BLOOD_MODES)[number];
 
 function bloodWeapons(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "1h"));
+  return ctx.player(ctx.seat).weapons.filter((card) => hasCardSubtype(ctx, card, "1h"));
 }
 
 function bloodAllocationKey(mode: BloodMode, weaponId: number): string {
@@ -233,7 +226,7 @@ function applyBloodAllocation(ctx: ScriptCtx): void {
 
 const bloodOnHerHands: CardScript = {
   additionalCost(ctx) {
-    const totalCopper = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Copper")).length;
+    const totalCopper = ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Copper")).length;
     const maximum = bloodWeapons(ctx).length > 0 ? Math.min(totalCopper, BLOOD_MODES.length * 2) : 0;
     ctx.requestChoice(
       "blood-count",
@@ -246,7 +239,7 @@ const bloodOnHerHands: CardScript = {
   },
   onChoose(ctx, hook, option) {
     if (hook === "blood-count") {
-      const coppers = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Copper"));
+      const coppers = ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Copper"));
       const maximum = bloodWeapons(ctx).length > 0 ? Math.min(coppers.length, BLOOD_MODES.length * 2) : 0;
       const count = Number(option);
       if (!Number.isSafeInteger(count) || count < 0 || count > maximum) return;
@@ -293,9 +286,9 @@ const bloodOnHerHands: CardScript = {
 };
 
 function moneyValue(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): number {
-  if (named(ctx, card, "Gold")) return 4;
-  if (named(ctx, card, "Silver")) return 2;
-  return named(ctx, card, "Copper") ? 1 : 0;
+  if (cardNamed(ctx, card, "Gold")) return 4;
+  if (cardNamed(ctx, card, "Silver")) return 2;
+  return cardNamed(ctx, card, "Copper") ? 1 : 0;
 }
 
 function knickMoney(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
@@ -425,9 +418,9 @@ export const evrHighRarity: Record<string, CardScript> = {
         !cards[0] ||
         !cards[1] ||
         !cards[2] ||
-        !hasType(ctx, cards[0], "earth") ||
-        !hasType(ctx, cards[1], "ice") ||
-        !hasType(ctx, cards[2], "lightning")
+        !hasCardSubtype(ctx, cards[0], "earth") ||
+        !hasCardSubtype(ctx, cards[1], "ice") ||
+        !hasCardSubtype(ctx, cards[2], "lightning")
       )
         return;
       ctx.revealCards([cards[0].instanceId, cards[1].instanceId, cards[2].instanceId]);
@@ -486,7 +479,7 @@ export const evrHighRarity: Record<string, CardScript> = {
       const x = ctx.getState("visageX");
       const cards = ctx
         .player(ctx.seat)
-        .deck.filter((card) => hasType(ctx, card, "aura") && (ctx.cardData(card.cardId).cost ?? -1) <= x);
+        .deck.filter((card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? -1) <= x);
       if (cards.length) {
         ctx.requestCardChoice(
           "visage-search",
@@ -502,7 +495,7 @@ export const evrHighRarity: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "visage-search") return;
       const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option));
-      if (!card || !hasType(ctx, card, "aura") || (ctx.cardData(card.cardId).cost ?? -1) > ctx.getState("visageX"))
+      if (!card || !isAura(ctx, card) || (ctx.cardData(card.cardId).cost ?? -1) > ctx.getState("visageX"))
         return;
       ctx.settleCard(card.instanceId);
       ctx.shuffleDeck();
@@ -548,7 +541,7 @@ export const evrHighRarity: Record<string, CardScript> = {
         ctx.destroySelf();
         const cards = ctx
           .player(ctx.seat)
-          .deck.filter((card) => isAttack(ctx, card) && (ctx.cardData(card.cardId).attack ?? 99) <= 2);
+          .deck.filter((card) => isAttackAction(ctx, card) && (ctx.cardData(card.cardId).attack ?? 99) <= 2);
         if (cards.length) {
           ctx.requestCardChoice(
             "lynx-search",
@@ -602,7 +595,7 @@ export const evrHighRarity: Record<string, CardScript> = {
       const hundredWinds = ctx.state.chain
         .filter((link) => link.flags.attackGone !== true)
         .map((link) => link.attackingCard)
-        .filter((card) => card.owner === ctx.seat && named(ctx, card, "hundred winds"));
+        .filter((card) => card.owner === ctx.seat && cardNamed(ctx, card, "hundred winds"));
       let moved = false;
       for (const card of hundredWinds) moved = ctx.putOnDeckBottom(card.instanceId) || moved;
       if (moved) ctx.shuffleDeck();
@@ -630,7 +623,7 @@ export const evrHighRarity: Record<string, CardScript> = {
     playTargetOptions(ctx) {
       const attacking = ctx.link?.attackingCard;
       if (!attacking || ctx.link?.attacker !== ctx.seat || ctx.link.attackCardType !== "weapon") return [];
-      return hasType(ctx, attacking, "2h") ? [attacking.instanceId] : [];
+      return hasCardSubtype(ctx, attacking, "2h") ? [attacking.instanceId] : [];
     },
     onPlay(ctx) {
       if (ctx.playTargetInstanceId === undefined) return;
@@ -779,7 +772,7 @@ export const evrHighRarity: Record<string, CardScript> = {
       oncePerTurn: true,
       onActivate(ctx) {
         if (!ctx.hasArsenalSpace()) return;
-        const arrows = ctx.player(ctx.seat).hand.filter((card) => hasType(ctx, card, "arrow"));
+        const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
         if (!arrows.length) return;
         ctx.requestCardChoice(
           "dreadbore-load",
@@ -798,7 +791,7 @@ export const evrHighRarity: Record<string, CardScript> = {
       }
     },
     onFriendlyAttackDeclared(ctx) {
-      if (ctx.link && hasType(ctx, ctx.link.attackingCard, "arrow")) {
+      if (ctx.link && isArrow(ctx, ctx.link.attackingCard)) {
         ctx.addModifier({ scope: "chain-link", noDefenseReactionsFromHand: true });
       }
     },
@@ -818,7 +811,7 @@ export const evrHighRarity: Record<string, CardScript> = {
   },
   "tri-shot|3": {
     onPlay(ctx) {
-      const bows = ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "bow"));
+      const bows = ctx.player(ctx.seat).weapons.filter((card) => hasCardSubtype(ctx, card, "bow"));
       for (const bow of bows) ctx.setPlayerFlag(ctx.seat, `additionalActivations:${bow.instanceId}:0`, 2);
     },
   },
@@ -843,7 +836,7 @@ export const evrHighRarity: Record<string, CardScript> = {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHitTarget: {
       options: (ctx) =>
-        ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "aura")).map((card) => card.instanceId),
+        ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card)).map((card) => card.instanceId),
       prompt: () => decisionPrompt("Choose an aura to destroy", "card.evr.aura.destroy"),
     },
     onHit(ctx) {
@@ -961,7 +954,7 @@ export const evrHighRarity: Record<string, CardScript> = {
       targetCardOptions: (ctx) =>
         ctx
           .player(ctx.seat)
-          .board.filter((card) => hasType(ctx, card, "illusionist") && hasType(ctx, card, "aura"))
+          .board.filter((card) => hasCardSubtype(ctx, card, "illusionist") && isAura(ctx, card))
           .map((card) => card.instanceId),
       canActivate: (ctx) => ctx.state.activePlayer === ctx.seat && duringActionPhase(ctx),
       onActivate(ctx) {
@@ -973,7 +966,7 @@ export const evrHighRarity: Record<string, CardScript> = {
           .player(ctx.seat)
           .hand.filter(
             (card) =>
-              hasType(ctx, card, "illusionist") && hasType(ctx, card, "aura") && (ctx.cardCost(card) ?? 0) <= maxCost,
+              hasCardSubtype(ctx, card, "illusionist") && isAura(ctx, card) && (ctx.cardCost(card) ?? 0) <= maxCost,
           );
         if (auras.length)
           ctx.requestCardChoice(
@@ -1021,7 +1014,7 @@ export const evrHighRarity: Record<string, CardScript> = {
       const card = ctx.player(opponentSeat(ctx)).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
       ctx.lookAt(card.instanceId);
-      if (isAttack(ctx, card)) ctx.grantGoAgain();
+      if (isAttackAction(ctx, card)) ctx.grantGoAgain();
       else ctx.drawCards(ctx.seat, 1);
     },
   },

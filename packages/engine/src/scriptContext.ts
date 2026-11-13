@@ -28,6 +28,7 @@ import {
   dataOf,
   grantedBaseAbilityCardIds,
   hasWardKeyword,
+  instanceHasKeyword,
   isClassOrTalentSupertype,
   scriptOf,
   veilBlocksDefender,
@@ -2511,6 +2512,9 @@ export function makeCtx(
       const target = found?.card ?? card as CardInstance;
       const controller = state.players[found?.seat ?? seat] as PlayerState;
       return hasCrank(state, runtime, controller, target);
+    },
+    hasKeyword(card, keyword) {
+      return instanceHasKeyword(state, findCardAnywhere(state, card.instanceId)?.card ?? card as CardInstance, keyword);
     },
     hasWard(card) {
       return hasWardKeyword(state, findCardAnywhere(state, card.instanceId)?.card ?? card as CardInstance);

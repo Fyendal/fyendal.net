@@ -5,6 +5,7 @@ import {
   commonOptionMessages,
   decisionPrompt,
   faceUpGraveyard,
+  isSword,
   localizedLog,
 } from "../shared-helpers.js";
 import { hasType } from "@fyendal/shared";
@@ -35,10 +36,6 @@ export type SharpenFollowupKind = (typeof SHARPEN_FOLLOWUP)[keyof typeof SHARPEN
 export interface SharpenFollowup {
   threshold: number;
   kind: SharpenFollowupKind;
-}
-
-function isSword(ctx: ScriptCtx, card: Card): boolean {
-  return ctx.cardTypes(card).some((type) => type.toLowerCase() === "sword");
 }
 
 function controlledSword(ctx: ScriptCtx, instanceId: number): Card | undefined {

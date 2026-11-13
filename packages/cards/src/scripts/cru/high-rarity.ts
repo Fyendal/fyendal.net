@@ -17,6 +17,10 @@ import {
   wizardActionAsInstant,
   yesNoPrompt,
   hasLiveTurnEffect,
+  hasCardSubtype,
+  isArrow,
+  isAttackAction,
+  isNonAttackAction,
 } from "../shared-helpers.js";
 import { hasType as hasPrintedType } from "@fyendal/shared";
 
@@ -27,22 +31,6 @@ const ZEN_STATE = "CRU075";
 
 function stampAuthorityPitched(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).pitch.filter((card) => (ctx.cardData(card.cardId).cost ?? 0) >= 3).length >= 2;
-}
-
-function types(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): readonly string[] {
-  return ctx.cardTypes(card);
-}
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return types(ctx, card).includes(type);
-}
-
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
-}
-
-function isNonAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack");
 }
 
 function previousNamed(ctx: ScriptCtx, name: string): boolean {
@@ -139,7 +127,7 @@ const floodOfForce: CardScript = {
         { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
       ),
     );
-    if ((ctx.cardData(top.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "combo")) {
+    if (ctx.hasKeyword(top, "combo")) {
       ctx.moveToHand(top.instanceId);
       ctx.addModifier({ scope: "chain-link", attack: 3 });
       ctx.grantGoAgain();
@@ -165,7 +153,7 @@ const heronsFlight: CardScript = {
   canBeDefendedBy(ctx, defending) {
     const mode = ctx.getState("heronMode");
     if (mode === 0) return true;
-    return mode === 1 ? isAttack(ctx, defending) : isNonAttack(ctx, defending);
+    return mode === 1 ? isAttackAction(ctx, defending) : isNonAttackAction(ctx, defending);
   },
   onChoose(ctx, hook, option) {
     if (hook === "heron-mode") ctx.setState("heronMode", option === "attack actions" ? 1 : 2);
@@ -268,11 +256,11 @@ const plasmaPurifier: CardScript = {
       canActivate: (ctx) =>
         ctx
           .player(ctx.seat)
-          .weapons.some((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "pistol")),
+          .weapons.some((card) => hasCardSubtype(ctx, card, "mechanologist") && hasCardSubtype(ctx, card, "pistol")),
       onActivate(ctx) {
         const pistols = ctx
           .player(ctx.seat)
-          .weapons.filter((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "pistol"));
+          .weapons.filter((card) => hasCardSubtype(ctx, card, "mechanologist") && hasCardSubtype(ctx, card, "pistol"));
         ctx.requestCardChoice(
           "purifier-pistol",
           decisionPrompt("Plasma Purifier: choose a pistol", "card.cru.purifier.pistol.choose"),
@@ -315,7 +303,7 @@ const poisonTheTips: CardScript = {
     reload(ctx);
   },
   canTriggerOnHit(ctx) {
-    return !!ctx.link && hasType(ctx, ctx.link.attackingCard, "arrow") && ctx.link.targetAllyId === undefined;
+    return !!ctx.link && isArrow(ctx, ctx.link.attackingCard) && ctx.link.targetAllyId === undefined;
   },
   onHit(ctx) {
     const target = opponentSeat(ctx);
@@ -355,7 +343,8 @@ function reloadChoice(ctx: ScriptCtx, hook: string, option: string): boolean {
 const rattleBones: CardScript = {
   playAsInstant: (ctx) => ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true,
   onPlay(ctx) {
-    const cards = faceUpGraveyard(ctx).filter((card) => isAttack(ctx, card) && hasType(ctx, card, "runeblade"));
+    const cards = faceUpGraveyard(ctx).filter((card) =>
+      isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "runeblade"));
     if (cards.length > 0)
       ctx.requestCardChoice(
         "rattle-banish",
@@ -471,7 +460,7 @@ export const cruHighRarity: Record<string, CardScript> = {
     onDieRollResolved(ctx, hook, roll) {
       if (hook !== "argh-smash") return;
       const count = Math.floor(roll / 2);
-      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "item"));
+      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasCardSubtype(ctx, card, "item"));
       if (count > 0 && items.length > 0)
         ctx.requestCardChoices(
           "smash-item",
@@ -524,7 +513,7 @@ export const cruHighRarity: Record<string, CardScript> = {
 
   "breeze rider boots|0": {
     canTriggerOnHit(ctx) {
-      return ctx.link?.attackCardType === "action" && hasType(ctx, ctx.link.attackingCard, "ninja");
+      return ctx.link?.attackCardType === "action" && hasCardSubtype(ctx, ctx.link.attackingCard, "ninja");
     },
     onHit(ctx) {
       ctx.requestChoice("breeze-destroy", yesNoPrompt("Destroy Breeze Rider Boots?", "card.cru.breeze.boots.destroy"), [
@@ -546,9 +535,7 @@ export const cruHighRarity: Record<string, CardScript> = {
         if (
           ctx.link?.attackCardType === "action" &&
           ctx.link.attacker === ctx.seat &&
-          (ctx.cardData(ctx.link.attackingCard.cardId).keywords ?? []).some(
-            (keyword) => keyword.toLowerCase() === "combo",
-          )
+          ctx.hasKeyword(ctx.link.attackingCard, "combo")
         ) ctx.grantGoAgain();
       }
     },

@@ -15,9 +15,11 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
+  hasCardSubtype,
   heroDamage,
   heroTarget,
   isAttackAction,
+  isAura,
   leavesArenaTrigger,
   mergeSetScripts,
   ongoingLabel,
@@ -42,12 +44,6 @@ type Card = DeepReadonly<CardInstance>;
 function data(ctx: ScriptCtx, card: Card) {
   return ctx.cardData(card.cardId);
 }
-function hasTag(ctx: ScriptCtx, card: Card, tag: string): boolean {
-  return ctx.cardTypes(card).includes(tag.toLowerCase());
-}
-function isAura(ctx: ScriptCtx, card: Card): boolean {
-  return hasTag(ctx, card, "aura");
-}
 function isInstant(ctx: ScriptCtx, card: Card): boolean {
   return ctx.hasCardType(card, "instant");
 }
@@ -70,7 +66,7 @@ function requestAnyTarget(ctx: ScriptCtx, hook: string, prompt: string, amount: 
   if (!heroesOnly) {
     for (const player of ctx.state.players) {
       for (const card of player.board) {
-        if (!hasTag(ctx, card, "ally")) continue;
+        if (!hasCardSubtype(ctx, card, "ally")) continue;
         options.push(`ally:${player.seat}:${card.instanceId}`);
         cardOptions.push(card.instanceId);
       }
@@ -199,7 +195,7 @@ function holoBlink(): CardScript {
       const auras = ctx
         .player(ctx.seat)
         .board.filter(
-          (card) => hasTag(ctx, card, "lightning") && isAura(ctx, card) && (card.counters?.holo ?? 0) === 0,
+          (card) => hasCardSubtype(ctx, card, "lightning") && isAura(ctx, card) && (card.counters?.holo ?? 0) === 0,
         );
       if (auras.length)
         ctx.requestCardChoice(
@@ -252,7 +248,7 @@ function auraEnterAttack(opts: {
     ? decisionMessage("card.trigger.common.attack.target.goagain")
     : decisionMessage("card.trigger.common.attack.target.power.gain", { amount: opts.attack ?? 0 });
   const target = upToOneTargetAttack((ctx, attack) =>
-    !opts.fragmentOnly || (data(ctx, attack).keywords ?? []).some((kw) => kw.toLowerCase() === "fragment"),
+    !opts.fragmentOnly || ctx.hasKeyword(attack, "fragment"),
   );
 
   return {
@@ -504,7 +500,7 @@ function chainAttackTargets(ctx: ScriptCtx, type?: string): number[] {
   return ctx.state.chain
     .filter((link) => link.flags.attackGone !== true)
     .map((link) => link.attackingCard)
-    .filter((attack) => !type || hasTag(ctx, attack, type))
+    .filter((attack) => !type || hasCardSubtype(ctx, attack, type))
     .map((attack) => attack.instanceId);
 }
 
@@ -608,8 +604,8 @@ function mercurialSkies(amount: number): CardScript {
       if (
         !attack ||
         ctx.link?.attackCardType !== "action" ||
-        !hasTag(ctx, attack, "attack") ||
-        !(hasTag(ctx, attack, "runeblade") || hasTag(ctx, attack, "lightning"))
+        !hasCardSubtype(ctx, attack, "attack") ||
+        !(hasCardSubtype(ctx, attack, "runeblade") || hasCardSubtype(ctx, attack, "lightning"))
       )
         return;
       const consumed = consumeDelayedEffect(ctx, { match: (modifier) => modifier.goAgain === true });
@@ -1074,7 +1070,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       firstDamage: {
         label: "Tap the Lightning hero or a weapon they control",
         labelMessage: { id: "card.trigger.common.lightninghero.tap" },
-        to: (ctx, targetSeat) => hasTag(ctx, ctx.player(targetSeat).hero, "lightning"),
+        to: (ctx, targetSeat) => hasCardSubtype(ctx, ctx.player(targetSeat).hero, "lightning"),
         effect(ctx, targetSeat) {
           const enemy = ctx.player(targetSeat);
           const options = [enemy.hero, ...enemy.weapons].filter((card) => !card.tapped);
@@ -1185,7 +1181,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   "constella uplift|2": {
     ...constellaStarfall(),
     onPlay(ctx) {
-      const staffs = ctx.player(ctx.seat).weapons.filter((card) => hasTag(ctx, card, "staff") && card.tapped);
+      const staffs = ctx.player(ctx.seat).weapons.filter((card) => hasCardSubtype(ctx, card, "staff") && card.tapped);
       if (staffs.length) ctx.untap(staffs[0]!.instanceId);
       if (starfall(ctx)) {
         const preview = ctx.previewArcaneDamage(1);

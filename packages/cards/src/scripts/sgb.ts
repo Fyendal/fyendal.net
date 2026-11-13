@@ -40,17 +40,13 @@ function isPirate(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.cardTypes(card).includes("pirate");
 }
 
-function hasWateryGrave(ctx: ScriptCtx, cardId: string): boolean {
-  return (ctx.cardData(cardId).keywords ?? []).some((k) => k.toLowerCase() === "watery grave");
-}
-
 /** High Tide: 2 or more blue cards in your pitch zone. */
 function highTide(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).pitch.filter((c) => ctx.cardColor(c) === 3).length >= 2;
 }
 
 /** "Destroy the top card of your deck": it goes to the graveyard (face up). */
-function destroyDeckTop(ctx: ScriptCtx): { readonly instanceId: number; readonly cardId: string } | undefined {
+function destroyDeckTop(ctx: ScriptCtx): DeepReadonly<CardInstance> | undefined {
   const p = ctx.player(ctx.seat);
   const top = p.deck[0];
   if (!top) return undefined;
@@ -154,7 +150,7 @@ function discardOrMillChoice(hook: string, name: string) {
         options,
       );
     },
-    resolve(ctx: ScriptCtx, option: string): { readonly instanceId: number; readonly cardId: string } | undefined {
+    resolve(ctx: ScriptCtx, option: string): DeepReadonly<CardInstance> | undefined {
       if (option === "deck-top") return destroyDeckTop(ctx);
       return ctx.discardCard(ctx.seat, Number(option));
     },
@@ -202,7 +198,7 @@ export const sgb: Record<string, CardScript> = {
       // "If a blue card has been put into your graveyard this turn, you may
       // play cards with watery grave from your graveyard."
       for (const c of faceUpGraveyard(ctx)) {
-        if (hasWateryGrave(ctx, c.cardId)) ctx.allowPlayFrom(c.instanceId, "graveyard");
+        if (ctx.hasKeyword(c, "watery grave")) ctx.allowPlayFrom(c.instanceId, "graveyard");
       }
     },
     onChoose(ctx, hook, option) {
@@ -267,7 +263,7 @@ export const sgb: Record<string, CardScript> = {
       },
     },
     onFriendlyPlay(ctx, card, from) {
-      if (from !== "graveyard" || !hasWateryGrave(ctx, card.cardId)) return;
+      if (from !== "graveyard" || !ctx.hasKeyword(card, "watery grave")) return;
       if (ctx.getFlag("player", "compassGoAgain")) return;
       ctx.setFlag("player", "compassGoAgain", true);
       ctx.grantCardKeyword(card.instanceId, "go again");
@@ -321,7 +317,7 @@ export const sgb: Record<string, CardScript> = {
       onChoose(ctx, hook, option) {
         if (hook !== "wuw-discard-or-mill" || option === "pass") return;
         const card = choice.resolve(ctx, option);
-        if (card && hasWateryGrave(ctx, card.cardId)) {
+        if (card && ctx.hasKeyword(card, "watery grave")) {
           ctx.addModifier({ scope: "chain-link", defense: 2 });
           ctx.logPublic(
             localizedCardLog(
@@ -528,7 +524,7 @@ export const sgb: Record<string, CardScript> = {
       onChoose(ctx, hook, option) {
         if (hook !== "jb-discard-or-mill" || option === "pass") return;
         const card = choice.resolve(ctx, option);
-        if (card && hasWateryGrave(ctx, card.cardId)) {
+        if (card && ctx.hasKeyword(card, "watery grave")) {
           ctx.grantGoAgain();
           ctx.logPublic(
             localizedCardLog(

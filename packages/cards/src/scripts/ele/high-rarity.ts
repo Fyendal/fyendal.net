@@ -1,4 +1,4 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackArcaneHeroTrigger,
   buffNextAttack,
@@ -7,7 +7,9 @@ import {
   decisionMessage,
   decisionPrompt,
   faceUpGraveyard,
+  hasCardSubtype,
   heroTarget,
+  isAttackAction,
   ongoingLabel,
   opponentSeat,
   opposingHeroDamage,
@@ -19,14 +21,6 @@ const SEISMIC_SURGE = "CRU044";
 const EMBODIMENT_OF_EARTH = "ELE109";
 const EMBODIMENT_OF_LIGHTNING = "ELE110";
 
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
-}
-
 function playedAttackAndNonAttack(ctx: ScriptCtx): boolean {
   return (
     Number(ctx.getFlag("player", "attackActionsPlayedThisTurn")) > 0 &&
@@ -37,7 +31,7 @@ function playedAttackAndNonAttack(ctx: ScriptCtx): boolean {
 function fusion(type: "earth" | "ice" | "lightning"): Pick<CardScript, "additionalCost" | "onChoose"> {
   return {
     additionalCost(ctx) {
-      const cards = ctx.player(ctx.seat).hand.filter((card) => hasType(ctx, card, type));
+      const cards = ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, type));
       if (cards.length)
         ctx.requestCardChoice(
           `high-fuse:${type}`,
@@ -67,13 +61,13 @@ function elementalFusion(
   return {
     additionalCost(ctx) {
       const hand = ctx.player(ctx.seat).hand;
-      const first = hand.filter((card) => hasType(ctx, card, firstType));
-      const second = hand.filter((card) => hasType(ctx, card, secondType));
+      const first = hand.filter((card) => hasCardSubtype(ctx, card, firstType));
+      const second = hand.filter((card) => hasCardSubtype(ctx, card, secondType));
       const options = new Set<string>(["no"]);
       for (const card of first) options.add(`${firstType}:${card.instanceId}`);
       for (const card of second) options.add(`${secondType}:${card.instanceId}`);
       for (const card of hand)
-        if (hasType(ctx, card, firstType) && hasType(ctx, card, secondType))
+        if (hasCardSubtype(ctx, card, firstType) && hasCardSubtype(ctx, card, secondType))
           options.add(`both:${card.instanceId}:${card.instanceId}`);
       for (const a of first)
         for (const b of second) if (a.instanceId !== b.instanceId) options.add(`both:${a.instanceId}:${b.instanceId}`);
@@ -122,8 +116,8 @@ function elementalFusion(
       const second = ctx.player(ctx.seat).hand.find((card) => card.instanceId === Number(secondId));
       const firstCard = kind === firstType ? first : kind === "both" ? first : undefined;
       const secondCard = kind === secondType ? first : kind === "both" ? second : undefined;
-      if (firstCard && hasType(ctx, firstCard, firstType)) ctx.setState(`fused:${firstType}`, 1);
-      if (secondCard && hasType(ctx, secondCard, secondType)) ctx.setState(`fused:${secondType}`, 1);
+      if (firstCard && hasCardSubtype(ctx, firstCard, firstType)) ctx.setState(`fused:${firstType}`, 1);
+      if (secondCard && hasCardSubtype(ctx, secondCard, secondType)) ctx.setState(`fused:${secondType}`, 1);
       if (!firstCard && !secondCard) return;
       ctx.setState("fused", 1);
       ctx.setFlag("player", "fusedThisTurn", true);
@@ -140,8 +134,8 @@ function oakenOldFusion(): Pick<CardScript, "additionalCost" | "onChoose"> {
   return {
     additionalCost(ctx) {
       const hand = ctx.player(ctx.seat).hand;
-      const iceCards = hand.filter((card) => hasType(ctx, card, "ice"));
-      const earthCards = hand.filter((card) => hasType(ctx, card, "earth"));
+      const iceCards = hand.filter((card) => hasCardSubtype(ctx, card, "ice"));
+      const earthCards = hand.filter((card) => hasCardSubtype(ctx, card, "earth"));
       if (!iceCards.length || !earthCards.length) return;
       ctx.requestCardChoice(
         "oaken-fuse-ice",
@@ -156,9 +150,9 @@ function oakenOldFusion(): Pick<CardScript, "additionalCost" | "onChoose"> {
         if (option === "no") return;
         const iceCard = ctx
           .player(ctx.seat)
-          .hand.find((card) => card.instanceId === Number(option) && hasType(ctx, card, "ice"));
+          .hand.find((card) => card.instanceId === Number(option) && hasCardSubtype(ctx, card, "ice"));
         if (!iceCard) return;
-        const earthCards = ctx.player(ctx.seat).hand.filter((card) => hasType(ctx, card, "earth"));
+        const earthCards = ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, "earth"));
         if (!earthCards.length) return;
         ctx.setState("oakenFuseIce", iceCard.instanceId);
         ctx.requestCardChoice(
@@ -173,8 +167,8 @@ function oakenOldFusion(): Pick<CardScript, "additionalCost" | "onChoose"> {
       if (hook !== "oaken-fuse-earth") return;
       const iceId = ctx.getState("oakenFuseIce");
       const hand = ctx.player(ctx.seat).hand;
-      const iceCard = hand.find((card) => card.instanceId === iceId && hasType(ctx, card, "ice"));
-      const earthCard = hand.find((card) => card.instanceId === Number(option) && hasType(ctx, card, "earth"));
+      const iceCard = hand.find((card) => card.instanceId === iceId && hasCardSubtype(ctx, card, "ice"));
+      const earthCard = hand.find((card) => card.instanceId === Number(option) && hasCardSubtype(ctx, card, "earth"));
       ctx.setState("oakenFuseIce", 0);
       if (!iceCard || !earthCard) return;
       ctx.setState("fused:ice", 1);
@@ -205,7 +199,7 @@ function withFusionChoices(
 const fused = (ctx: ScriptCtx) => ctx.getState("fused") > 0;
 
 function blossomingBanishChoice(ctx: ScriptCtx): void {
-  const cards = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "action") && !isAttack(ctx, card));
+  const cards = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "action") && !isAttackAction(ctx, card));
   if (cards.length)
     ctx.requestCardChoice(
       "blossoming-banish",
@@ -220,7 +214,7 @@ function channel(type: "earth" | "ice" | "lightning", extra: CardScript): CardSc
   function maintain(ctx: ScriptCtx): void {
     const remaining = ctx.getState("channelRemaining");
     if (remaining <= 0) return;
-    const cards = ctx.player(ctx.seat).pitch.filter((card) => hasType(ctx, card, type));
+    const cards = ctx.player(ctx.seat).pitch.filter((card) => hasCardSubtype(ctx, card, type));
     if (cards.length < remaining) {
       ctx.destroySelf();
       return;
@@ -269,8 +263,8 @@ const oldhim: CardScript = {
     timing: "defense-reaction",
     oncePerTurn: true,
     onCostPaid(ctx, cards) {
-      ctx.setState("oldhimEarth", cards.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
-      ctx.setState("oldhimIce", cards.some((card) => hasType(ctx, card, "ice")) ? 1 : 0);
+      ctx.setState("oldhimEarth", cards.some((card) => hasCardSubtype(ctx, card, "earth")) ? 1 : 0);
+      ctx.setState("oldhimIce", cards.some((card) => hasCardSubtype(ctx, card, "ice")) ? 1 : 0);
     },
     onActivate(ctx) {
       if (ctx.getState("oldhimEarth")) ctx.preventNextDamage(ctx.seat, 2);
@@ -310,8 +304,8 @@ const lexi: CardScript = {
     if (hook !== "adult-lexi-flip") return;
     const card = ctx.player(ctx.seat).arsenal.find((candidate) => candidate.instanceId === Number(option));
     if (!card) return;
-    const ice = hasType(ctx, card, "ice");
-    const lightning = hasType(ctx, card, "lightning");
+    const ice = hasCardSubtype(ctx, card, "ice");
+    const lightning = hasCardSubtype(ctx, card, "lightning");
     ctx.turnArsenalFaceUp(card.instanceId);
     if (ice) ctx.createToken(FROSTBITE, opponentSeat(ctx));
     if (lightning) buffNextAttack(ctx, { goAgain: true });
@@ -341,7 +335,7 @@ const briar: CardScript = {
       condition: (ctx, played) =>
         !!played &&
         ctx.hasCardType(played, "action") &&
-        !hasType(ctx, played, "attack") &&
+        !hasCardSubtype(ctx, played, "attack") &&
         Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) === 2,
       effect: (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING),
     },
@@ -403,7 +397,7 @@ export const eleHighRarity: Record<string, CardScript> = {
       goAgain: false,
       oncePerTurn: true,
       onCostPaid(ctx, cards) {
-        ctx.setState("icePitched", cards.some((card) => hasType(ctx, card, "ice")) ? 1 : 0);
+        ctx.setState("icePitched", cards.some((card) => hasCardSubtype(ctx, card, "ice")) ? 1 : 0);
       },
     },
     canTriggerOnHit(ctx) {
@@ -485,7 +479,8 @@ export const eleHighRarity: Record<string, CardScript> = {
         .player(ctx.seat)
         .deck.filter(
           (card) =>
-            hasType(ctx, card, "guardian") && isAttack(ctx, card) && (ctx.cardData(card.cardId).cost ?? 99) <= count,
+            hasCardSubtype(ctx, card, "guardian") && isAttackAction(ctx, card) &&
+              (ctx.cardData(card.cardId).cost ?? 99) <= count,
         );
       if (cards.length)
         ctx.requestCardChoice(
@@ -702,7 +697,9 @@ export const eleHighRarity: Record<string, CardScript> = {
   "pulse of candlehold|2": {
     onPlay(ctx) {
       const cards = faceUpGraveyard(ctx).filter(
-          (card) => isAttack(ctx, card) && ["earth", "lightning", "elemental"].some((type) => hasType(ctx, card, type)),
+          (card) =>
+            isAttackAction(ctx, card) &&
+            ["earth", "lightning", "elemental"].some((type) => hasCardSubtype(ctx, card, type)),
         );
       if (cards.length)
         ctx.requestCardChoice(

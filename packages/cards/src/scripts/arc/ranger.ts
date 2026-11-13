@@ -1,17 +1,14 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  isArrow,
   localizedCardLog,
   opponentSeat,
   optN,
   optOnChoose,
 } from "../shared-helpers.js";
-
-function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("arrow");
-}
 
 /** Reload: if the arsenal is empty, optionally put a hand card there face down. */
 function reload(ctx: ScriptCtx): void {

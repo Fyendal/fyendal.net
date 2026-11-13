@@ -4,6 +4,7 @@ import {
   attackAbility,
   buffNextAttack,
   cardNameContains,
+  cardNamed,
   chargeDeclineMessages,
   commonOptionMessages,
   consumeDelayedEffect,
@@ -13,6 +14,8 @@ import {
   entersArenaTrigger,
   equipWithSilver,
   faceUpGraveyard,
+  hasCardSubtype,
+  isAttackAction,
   isChargeDecline,
   leavesArenaTrigger,
   ongoingLabel,
@@ -32,20 +35,14 @@ const SEISMIC = "DTD204";
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
 }
-function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string) {
-  return ctx.cardTypes(card).some((candidate) => candidate.toLowerCase() === type.toLowerCase());
-}
-function named(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string) {
-  return ctx.cardNames(card).some((candidate) => candidate.toLowerCase() === name.toLowerCase());
-}
 function isItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return has(ctx, card, "item");
+  return hasCardSubtype(ctx, card, "item");
 }
 
 const TICK_TOCK_ITEM = "tick-tock-item";
 
 function isMechAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.hasCardType(card, "action") && has(ctx, card, "attack") && has(ctx, card, "mechanologist");
+  return isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "mechanologist");
 }
 function equippedEvos(ctx: ScriptCtx) {
   return ctx.countEquipped("evo");
@@ -80,7 +77,7 @@ function recordFabricateMode(ctx: ScriptCtx, mode: string) {
 }
 function requestFabricateHandBanish(ctx: ScriptCtx): void {
   if (ctx.getState("fabricate-mode:hand") <= 0) return;
-  const evos = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "evo"));
+  const evos = ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, "evo"));
   if (evos.length === 0) return;
   ctx.requestCardChoice(
     "fabricate-hand",
@@ -94,7 +91,7 @@ function evoEquipment(extra: CardScript = {}): CardScript {
   return {
     ...extra,
     playableEquipment: true,
-    transformsEquipment: (ctx, equipped) => has(ctx, equipped, "base"),
+    transformsEquipment: (ctx, equipped) => hasCardSubtype(ctx, equipped, "base"),
     playAsInstant(ctx) {
       return ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true || (extra.playAsInstant?.(ctx) ?? false);
     },
@@ -133,7 +130,7 @@ function steelSoulTriggerCount(ctx: ScriptCtx, other: DeepReadonly<CardInstance>
 }
 function steelControllerTargets(ctx: ScriptCtx) {
   return faceUpGraveyard(ctx).filter(
-      (card) => ctx.hasCardType(card, "action") && has(ctx, card, "attack") && ctx.basePower(card) >= 6,
+      (card) => isAttackAction(ctx, card) && ctx.basePower(card) >= 6,
     );
 }
 function requestSteelControllerChoice(ctx: ScriptCtx) {
@@ -211,7 +208,7 @@ function breakerEvo(extra: CardScript = {}): CardScript {
   return evoEquipment({
     ...extra,
     additionalCost(ctx) {
-      const drivers = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver"));
+      const drivers = ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "hyper driver"));
       if (drivers.length)
         ctx.requestCardChoices(
           "breaker-driver",
@@ -339,7 +336,7 @@ export const evoHighRarity: Record<string, CardScript> = {
     },
   },
   "teklovossen, esteemed magnate|0": {
-    allowsFriendlyCardPlayFrom: (ctx, card, zone) => zone === "banish" && has(ctx, card, "evo"),
+    allowsFriendlyCardPlayFrom: (ctx, card, zone) => zone === "banish" && hasCardSubtype(ctx, card, "evo"),
     activated: {
       cost: 3,
       isAttack: false,
@@ -357,7 +354,7 @@ export const evoHighRarity: Record<string, CardScript> = {
         event: "card-played",
         label: "Draw a card",
         condition: (ctx, card) =>
-          !!card && has(ctx, card, "evo") && ctx.getPlayerFlag(ctx.seat, "teklovossenNextEvoDraw") === true,
+          !!card && hasCardSubtype(ctx, card, "evo") && ctx.getPlayerFlag(ctx.seat, "teklovossenNextEvoDraw") === true,
         onTrigger(ctx) {
           ctx.setPlayerFlag(ctx.seat, "teklovossenNextEvoDraw", false);
         },
@@ -383,7 +380,7 @@ export const evoHighRarity: Record<string, CardScript> = {
     onPlay(ctx) {
       const player = ctx.player(ctx.seat);
       const evos = Object.values(player.equipment)
-        .filter((card): card is DeepReadonly<CardInstance> => !!card && has(ctx, card, "evo"))
+        .filter((card): card is DeepReadonly<CardInstance> => !!card && hasCardSubtype(ctx, card, "evo"))
         .slice(0, 4);
       const weapon = player.weapons[0];
       if (weapon && evos.length === 4)
@@ -416,9 +413,9 @@ export const evoHighRarity: Record<string, CardScript> = {
   },
   "hyper-x3|0": {
     onBoosted(ctx, _boosted, banished) {
-      if (!named(ctx, banished, "Hyper Driver") ||
+      if (!cardNamed(ctx, banished, "Hyper Driver") ||
           !ctx.putBanishedUnder(banished.instanceId, ctx.self.instanceId)) return;
-      const driverCount = ctx.self.subcards?.filter((card) => named(ctx, card, "Hyper Driver")).length ?? 0;
+      const driverCount = ctx.self.subcards?.filter((card) => cardNamed(ctx, card, "Hyper Driver")).length ?? 0;
       if (driverCount >= 3 && !ctx.oncePerTurnEffectUsed()) {
         ctx.markOncePerTurnEffectUsed();
         ctx.drawCards(ctx.seat, 1);
@@ -758,7 +755,7 @@ export const evoHighRarity: Record<string, CardScript> = {
         const card = faceUpGraveyard(ctx).find((candidate) => candidate.instanceId === Number(option));
         if (!card || !ctx.banish(card.instanceId)) continue;
         ctx.addCardState(ctx.self.instanceId, "scrapped", 1);
-        if (named(ctx, card, "hyper driver")) ctx.addCardState(ctx.self.instanceId, "scrappedDrivers", 1);
+        if (cardNamed(ctx, card, "hyper driver")) ctx.addCardState(ctx.self.instanceId, "scrappedDrivers", 1);
       }
     },
     modifyAttack: (ctx) => ctx.getState("scrapperX"),
@@ -784,12 +781,12 @@ export const evoHighRarity: Record<string, CardScript> = {
       stateKey: "moonshotX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum(ctx) {
-        return ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver")).length;
+        return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "hyper driver")).length;
       },
     },
     canPlay: (ctx) => ctx.getPlayerFlag(ctx.seat, "boostedThisTurn") === true,
     additionalCost(ctx) {
-      const drivers = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver"));
+      const drivers = ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "hyper driver"));
       const count = Math.min(ctx.getState("moonshotX"), drivers.length);
       if (count <= 0) return;
       ctx.requestCardChoices(
@@ -896,7 +893,8 @@ export const evoHighRarity: Record<string, CardScript> = {
         return ctx
           .player(ctx.seat)
           .board.filter(
-            (card) => isItem(ctx, card) && has(ctx, card, "mechanologist") && (data(ctx, card).cost ?? 0) <= 1,
+            (card) => isItem(ctx, card) && hasCardSubtype(ctx, card, "mechanologist") &&
+              (data(ctx, card).cost ?? 0) <= 1,
           ).length;
       },
     },
@@ -904,7 +902,7 @@ export const evoHighRarity: Record<string, CardScript> = {
       const items = ctx
         .player(ctx.seat)
         .board.filter(
-          (card) => isItem(ctx, card) && has(ctx, card, "mechanologist") && (data(ctx, card).cost ?? 0) <= 1,
+          (card) => isItem(ctx, card) && hasCardSubtype(ctx, card, "mechanologist") && (data(ctx, card).cost ?? 0) <= 1,
         );
       const count = Math.min(ctx.getState("systemResetX"), items.length);
       if (count <= 0) return;
@@ -941,7 +939,7 @@ export const evoHighRarity: Record<string, CardScript> = {
       if (ctx.getState("fabricate-mode:equip") > 0) {
         const base = ctx
           .player(ctx.seat)
-          .inventory?.find((card) => has(ctx, card, "base") && cardNameContains(ctx, card, "Proto"));
+          .inventory?.find((card) => hasCardSubtype(ctx, card, "base") && cardNameContains(ctx, card, "Proto"));
         if (base) ctx.equipFromInventory(base.instanceId);
       }
       if (ctx.getState("fabricate-mode:defense") > 0) {
@@ -954,7 +952,7 @@ export const evoHighRarity: Record<string, CardScript> = {
       }
       if (ctx.getState("fabricate-mode:under") > 0) {
         const evos = Object.values(ctx.player(ctx.seat).equipment).filter(
-          (card): card is DeepReadonly<CardInstance> => !!card && has(ctx, card, "evo"),
+          (card): card is DeepReadonly<CardInstance> => !!card && hasCardSubtype(ctx, card, "evo"),
         );
         if (evos.length) {
           ctx.requestCardChoice(
@@ -992,7 +990,7 @@ export const evoHighRarity: Record<string, CardScript> = {
       label: "Give a defender -1 power",
       onActivate(ctx) {
         const defender = ctx.link?.defendingCards.find(
-          (card) => ctx.hasCardType(card, "action") && has(ctx, card, "attack"),
+          (card) => isAttackAction(ctx, card),
         );
         if (defender) ctx.addCardTempDefense(defender.instanceId, -1);
       },
@@ -1126,13 +1124,13 @@ export const evoHighRarity: Record<string, CardScript> = {
   },
   "phantom tidemaw|3": {
     onFriendlyDestroyed(ctx, card) {
-      if (has(ctx, card, "illusionist")) ctx.addCounter(ctx.self.instanceId, "power", 1);
+      if (hasCardSubtype(ctx, card, "illusionist")) ctx.addCounter(ctx.self.instanceId, "power", 1);
     },
     modifyAttack: (ctx) => ctx.getCounter("power"),
   },
   "tome of imperial flame|1": {
     onPlay(ctx) {
-      ctx.drawCards(ctx.seat, has(ctx, ctx.player(ctx.seat).hero, "royal") ? 2 : 1);
+      ctx.drawCards(ctx.seat, hasCardSubtype(ctx, ctx.player(ctx.seat).hero, "royal") ? 2 : 1);
       const reds = ctx.player(ctx.seat).hand.filter((card) => ctx.cardColor(card) === 1 && (ctx.cardData(card.cardId).pitch ?? 0) > 0);
       if (reds.length >= 2)
         ctx.requestChoice("tome-pitch", yesNoPrompt("Pitch 2 red cards?", "card.evo.red.pitch.optional", { count: 2 }), [
@@ -1200,7 +1198,7 @@ export const evoHighRarity: Record<string, CardScript> = {
     playTargetOptions(ctx) {
       return ctx.state.players
         .flatMap((player) => player.board)
-        .filter((card) => has(ctx, card, "angel"))
+        .filter((card) => hasCardSubtype(ctx, card, "angel"))
         .map((card) => card.instanceId);
     },
     onPlay(ctx) {

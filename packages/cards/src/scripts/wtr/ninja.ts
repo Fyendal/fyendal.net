@@ -19,10 +19,6 @@ function comboWith(ctx: ScriptCtx, name: string): boolean {
   return previousAttackHasName(ctx, nameKey(name));
 }
 
-function hasCombo(ctx: ScriptCtx, cardId: string): boolean {
-  return (ctx.cardData(cardId).keywords ?? []).some((k) => k.toLowerCase() === "combo");
-}
-
 function hitsThisChain(ctx: ScriptCtx): number {
   return ctx.state.chain.filter((l) => l.resolved && l.hit).length;
 }
@@ -101,7 +97,7 @@ const breakingScales: CardScript = {
     canActivate(ctx) {
       const link = ctx.state.chain[ctx.state.chain.length - 1];
       if (!link || link.resolved) return false;
-      return isAttackAction(ctx, link.attackingCard) && hasCombo(ctx, link.attackingCard.cardId);
+      return isAttackAction(ctx, link.attackingCard) && ctx.hasKeyword(link.attackingCard, "combo");
     },
     onActivate(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
@@ -162,7 +158,7 @@ const katsu: CardScript = {
       if (option === "pass") return;
       const discarded = ctx.discardCard(ctx.seat, Number(option));
       if (!discarded) return;
-      const comboCards = p.deck.filter((c) => hasCombo(ctx, c.cardId));
+      const comboCards = p.deck.filter((c) => ctx.hasKeyword(c, "combo"));
       if (comboCards.length === 0) {
         ctx.shuffleDeck();
         ctx.logPublic(

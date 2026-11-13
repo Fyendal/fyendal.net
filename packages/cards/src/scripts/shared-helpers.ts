@@ -487,8 +487,38 @@ export const FRAILTY = "OUT235";
 export const INERTIA = "OUT236";
 export const NAMED_DISEASE_TOKENS: readonly string[] = [FRAILTY, INERTIA, BLOODROT_POX];
 
+/** Effective class, talent or subtype (case-insensitive). Card types use `ctx.hasCardType`. */
+export function hasCardSubtype(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
+  return ctx.cardTypes(card).includes(type.trim().toLowerCase());
+}
+
 export function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
+  return ctx.hasCardType(card, "action") && hasCardSubtype(ctx, card, "attack");
+}
+
+export function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return ctx.hasCardType(card, "action") && !hasCardSubtype(ctx, card, "attack");
+}
+
+export function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return hasCardSubtype(ctx, card, "aura");
+}
+
+/** An aura of suspense: an aura with Suspense. */
+export function isSuspenseAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return isAura(ctx, card) && ctx.hasKeyword(card, "suspense");
+}
+
+export function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return hasCardSubtype(ctx, card, "arrow");
+}
+
+export function isSword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return hasCardSubtype(ctx, card, "sword");
+}
+
+export function isDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+  return hasCardSubtype(ctx, card, "dagger");
 }
 
 export function isDisease(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
@@ -964,7 +994,7 @@ export function assassinContractAttackTargets(ctx: ScriptCtx): number[] {
       link.flags.attackGone !== true &&
       link.attackCardType === "action" &&
       ctx.cardTypes(link.attackingCard).includes("assassin") &&
-      (ctx.cardData(link.attackingCard.cardId).keywords ?? []).includes("Contract")
+      ctx.hasKeyword(link.attackingCard, "contract")
     )
     .map((link) => link.attackingCard.instanceId);
 }
@@ -997,18 +1027,10 @@ export function cardNameContains(
 
 /** Shared printed ability of Arakni, Marionette and Arakni, Web of Deceit. */
 export function markedStealthHeroScript(agentCardIds: readonly string[]): CardScript {
-  const hasStealth = (ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean => {
-    if ((card.suppressedKeywords ?? []).some((keyword) => keyword.toLowerCase() === "stealth")) {
-      return false;
-    }
-    return [...(ctx.cardData(card.cardId).keywords ?? []), ...(card.grantedKeywords ?? [])].some(
-      (keyword) => keyword.toLowerCase() === "stealth",
-    );
-  };
   return {
     modifyAttack(ctx) {
       const link = ctx.link;
-      if (!link || link.targetAllyId !== undefined || !hasStealth(ctx, link.attackingCard)) return 0;
+      if (!link || link.targetAllyId !== undefined || !ctx.hasKeyword(link.attackingCard, "stealth")) return 0;
       return (ctx.player(opponentSeat(ctx)).hero.scriptState?.marked ?? 0) > 0 ? 1 : 0;
     },
     canTriggerOnHit(ctx) {
@@ -1016,7 +1038,7 @@ export function markedStealthHeroScript(agentCardIds: readonly string[]): CardSc
       return (
         !!link &&
         link.targetAllyId === undefined &&
-        hasStealth(ctx, link.attackingCard) &&
+        ctx.hasKeyword(link.attackingCard, "stealth") &&
         link.flags.targetWasMarkedOnHit === true
       );
     },
@@ -1100,10 +1122,9 @@ const BLOOD_DEBT = {
   redeemedName: "levia, redeemed",
 } as const;
 
-/** Printed Blood Debt, unless the owner is Levia, Redeemed (her cards lose it). */
+/** Blood Debt, unless the owner is Levia, Redeemed (her cards lose it). */
 export function hasBloodDebt(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  if (!(ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.trim().toLowerCase() === "blood debt"))
-    return false;
+  if (!ctx.hasKeyword(card, "blood debt")) return false;
   const ownerHero = ctx.cardData(ctx.player(card.owner).hero.cardId).name.toLowerCase();
   return ownerHero !== BLOOD_DEBT.redeemedName || ctx.heroAbilitiesDisabled(card.owner);
 }
@@ -1525,7 +1546,7 @@ export function isWeaponAttack(ctx: ScriptCtx): boolean {
 export function isSwordAttack(ctx: ScriptCtx): boolean {
   const link = ctx.link;
   if (!link || link.attackCardType !== "weapon") return false;
-  return ctx.cardTypes(link.attackingCard).includes("sword");
+  return isSword(ctx, link.attackingCard);
 }
 
 export function attackedWithWeapon(ctx: ScriptCtx): boolean {

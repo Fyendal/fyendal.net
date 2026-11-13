@@ -5,6 +5,7 @@ import {
   cardNamed,
   decisionMessage,
   decisionPrompt,
+  isSword,
   isSwordAttack,
   localizedCardLog,
   resourceAbility,
@@ -21,10 +22,6 @@ import {
 const FLURRY = "SBL036";
 
 type Card = DeepReadonly<CardInstance>;
-
-function isSword(ctx: ScriptCtx, card: Card): boolean {
-  return ctx.cardTypes(card).some((type) => type.toLowerCase() === "sword");
-}
 
 function swords(ctx: ScriptCtx): readonly Card[] {
   return ctx.player(ctx.seat).weapons.filter((card) => isSword(ctx, card));

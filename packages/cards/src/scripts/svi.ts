@@ -1,4 +1,4 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
   buffNextAttack,
@@ -9,7 +9,9 @@ import {
   entersArenaTrigger,
   faceUpGraveyard,
   isAttackAction,
+  isAura,
   isCard,
+  isNonAttackAction,
   leavesArenaTrigger,
   localizedCardLog,
   opponentSeat,
@@ -22,14 +24,6 @@ import {
 // Silphidae and Mauvrion Skies therefore use their printed timing directly.
 
 const RUNECHANT = "SVI034";
-
-function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("aura");
-}
-
-function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack");
-}
 
 function runeCount(ctx: ScriptCtx): number {
   return ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length;

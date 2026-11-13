@@ -13,6 +13,9 @@ import {
   resourceAbility,
   yesNoPrompt,
   hasLiveTurnEffect,
+  hasCardSubtype,
+  isAura,
+  isSword,
 } from "./shared-helpers.js";
 import {
   addNextSharpenBonus,
@@ -29,12 +32,6 @@ type Card = DeepReadonly<CardInstance>;
 
 function data(ctx: ScriptCtx, card: Card) {
   return ctx.cardData(card.cardId);
-}
-function hasType(ctx: ScriptCtx, card: Card, type: string): boolean {
-  return ctx.cardTypes(card).some((candidate) => candidate.toLowerCase() === type.toLowerCase());
-}
-function isSword(ctx: ScriptCtx, card: Card): boolean {
-  return hasType(ctx, card, "sword");
 }
 function isWeaponAttack(ctx: ScriptCtx): boolean {
   return ctx.link?.attackCardType === "weapon";
@@ -566,7 +563,7 @@ export const mpw: Record<string, CardScript> = {
     canTriggerOnHit(ctx) {
       return (
         ctx.link?.targetAllyId === undefined &&
-        hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "warrior") &&
+        hasCardSubtype(ctx, ctx.player(opponentSeat(ctx)).hero, "warrior") &&
         ctx.state.modifiers.some(
           (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link",
         )
@@ -692,7 +689,7 @@ export const mpw: Record<string, CardScript> = {
     canTriggerOnHit(ctx) {
       return (
         ctx.link?.targetAllyId === undefined &&
-        hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "warrior") &&
+        hasCardSubtype(ctx, ctx.player(opponentSeat(ctx)).hero, "warrior") &&
         ctx.state.modifiers.some(
           (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link",
         )
@@ -725,7 +722,7 @@ export const mpw: Record<string, CardScript> = {
     canTriggerOnHit(ctx) {
       return (
         ctx.link?.targetAllyId === undefined &&
-        hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "warrior") &&
+        hasCardSubtype(ctx, ctx.player(opponentSeat(ctx)).hero, "warrior") &&
         ctx.state.modifiers.some(
           (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link",
         )
@@ -769,7 +766,7 @@ export const mpw: Record<string, CardScript> = {
       ctx.addModifier({ scope: "chain-link", onHitCreateToken: { cardId: FLURRY, count: 1 } });
   }),
   "dice up|3": onHitRemoveCounter((ctx, target) => {
-    const auras = ctx.player(target).board.filter((card) => hasType(ctx, card, "aura"));
+    const auras = ctx.player(target).board.filter((card) => isAura(ctx, card));
     if (auras.length)
       ctx.requestCardChoice(
         "dice-aura",
@@ -805,7 +802,7 @@ export const mpw: Record<string, CardScript> = {
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     modifyAttack(ctx) {
-      return ctx.link?.defendingCards.some((card) => hasType(ctx, card, "warrior")) ? 1 : 0;
+      return ctx.link?.defendingCards.some((card) => hasCardSubtype(ctx, card, "warrior")) ? 1 : 0;
     },
   },
   "engage steel|2": {
@@ -818,7 +815,7 @@ export const mpw: Record<string, CardScript> = {
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     modifyAttack(ctx) {
-      return ctx.link?.defendingCards.some((card) => hasType(ctx, card, "warrior")) ? 1 : 0;
+      return ctx.link?.defendingCards.some((card) => hasCardSubtype(ctx, card, "warrior")) ? 1 : 0;
     },
   },
   "engage steel|3": {
@@ -831,7 +828,7 @@ export const mpw: Record<string, CardScript> = {
       ctx.addModifier({ scope: "until-end-of-turn" });
     },
     modifyAttack(ctx) {
-      return ctx.link?.defendingCards.some((card) => hasType(ctx, card, "warrior")) ? 1 : 0;
+      return ctx.link?.defendingCards.some((card) => hasCardSubtype(ctx, card, "warrior")) ? 1 : 0;
     },
   },
   "gutshot|1": nextWager(3, "Winner creates Blade Dance", (ctx, winner) => {

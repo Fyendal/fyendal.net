@@ -20,6 +20,7 @@ import {
   opponentSeat,
   requestHeroChoice,
   targetsHero,
+  isArrow,
 } from "./shared-helpers.js";
 
 // Disease token names offered when an effect names a disease token.
@@ -27,17 +28,6 @@ const DISEASE_TOKEN_NAMES: readonly string[] = ["Bloodrot Pox", "Exertion", "Fra
 const EXERTION = "SLV035";
 const PONDER = "DYN244";
 const EXTINCTION_WIN_THRESHOLD = 33;
-
-function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: string): boolean {
-  const key = keyword.toLowerCase();
-  if ((card.suppressedKeywords ?? []).includes(key)) return false;
-  return [...(ctx.cardData(card.cardId).keywords ?? []), ...(card.grantedKeywords ?? [])]
-    .some((candidate) => candidate.toLowerCase() === key);
-}
-
-function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("arrow");
-}
 
 /** Each hero, in turn order, puts their deck top face-up into their arsenal;
  * returns the cards actually moved. */
@@ -133,7 +123,7 @@ const huxley: CardScript = {
       label: "Tap this hero to play the banished card as though it were an instant this turn",
       labelMessage: decisionMessage("card.trigger.obk.huxley.instant"),
       condition: (ctx, banished) =>
-        !!banished && !ctx.self.tapped && ctx.hasCardType(banished, "action") && hasKeyword(ctx, banished, "stealth"),
+        !!banished && !ctx.self.tapped && ctx.hasCardType(banished, "action") && ctx.hasKeyword(banished, "stealth"),
       canAccept: (ctx) => !ctx.self.tapped,
       effect(ctx, banished) {
         if (!banished || !ctx.tap(ctx.self.instanceId)) return;
@@ -184,7 +174,7 @@ const azalea: CardScript = {
       if (!top || !ctx.putIntoArsenal(top.instanceId, "deck")) return;
       const target = { kind: "card", cardId: top.cardId } as const;
       const name = ctx.cardData(top.cardId).name;
-      if (hasKeyword(ctx, top, "stealth")) {
+      if (ctx.hasKeyword(top, "stealth")) {
         ctx.addCardTempPower(top.instanceId, 1);
         ctx.grantCardKeyword(top.instanceId, "go again");
         ctx.logPublic(

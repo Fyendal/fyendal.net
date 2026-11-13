@@ -15,20 +15,14 @@ import {
   targetHeroSeat,
   weaponAttackCount,
   warnIfNoActionPoint,
+  isAttackAction,
+  isNonAttackAction,
 } from "../shared-helpers.js";
 
 const SPECTRAL_SHIELD = "MON104";
 const SOUL_SHACKLE = "MON186";
 const BLASMOPHET = "MON219";
 const URSUR = "MON220";
-
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
-}
-
-function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack");
-}
 
 function weapon(cost: number, extra: CardScript = {}): CardScript {
   return { ...extra, activated: { cost, isAttack: true, goAgain: false, oncePerTurn: true } };
@@ -142,7 +136,7 @@ function finishSonata(ctx: ScriptCtx): void {
 function requestSonataAttack(ctx: ScriptCtx): void {
   const attacks = ctx
     .player(ctx.seat)
-    .deck.filter((card) => ctx.getState(`sonata:${card.instanceId}`) > 0 && isAttack(ctx, card));
+    .deck.filter((card) => ctx.getState(`sonata:${card.instanceId}`) > 0 && isAttackAction(ctx, card));
   if (ctx.getState("sonataRemaining") <= 0 || attacks.length === 0) {
     finishSonata(ctx);
     return;
@@ -167,7 +161,7 @@ const sonataArcanix: CardScript = {
     const revealed = ctx.player(ctx.seat).deck.slice(0, ctx.getState("sonataX") + 3);
     ctx.revealCards(revealed.map((card) => card.instanceId));
     for (const card of revealed) ctx.setState(`sonata:${card.instanceId}`, 1);
-    ctx.setState("sonataRemaining", revealed.filter((card) => !isAttack(ctx, card)).length);
+    ctx.setState("sonataRemaining", revealed.filter((card) => !isAttackAction(ctx, card)).length);
     ctx.setState("sonataChosen", 0);
     requestSonataAttack(ctx);
   },
@@ -189,7 +183,7 @@ const sonataArcanix: CardScript = {
 };
 
 function rouseRevealOptions(ctx: ScriptCtx): string[] {
-  const attacks = ctx.player(ctx.seat).hand.filter((card) => isAttack(ctx, card));
+  const attacks = ctx.player(ctx.seat).hand.filter((card) => isAttackAction(ctx, card));
   const options: string[] = [];
   const visit = (index: number, selected: DeepReadonly<CardInstance>[], power: number): void => {
     if (power >= 13) {
@@ -587,7 +581,7 @@ export const monHighRarity: Record<string, CardScript> = {
           const card = faceUpGraveyard(ctx, opponentSeat(ctx))
             .find((candidate) => candidate.instanceId === Number(option));
           if (!card) continue;
-          const isAttackCard = isAttack(ctx, card);
+          const isAttackCard = isAttackAction(ctx, card);
           const isNonAttackCard = isNonAttackAction(ctx, card);
           if (!ctx.banish(card.instanceId)) continue;
           attack ||= isAttackCard;
@@ -741,9 +735,9 @@ export const monHighRarity: Record<string, CardScript> = {
     },
   },
   "nourishing emptiness|1": {
-    hasConditionalDominate: (ctx) => !faceUpGraveyard(ctx).some((card) => isAttack(ctx, card)),
+    hasConditionalDominate: (ctx) => !faceUpGraveyard(ctx).some((card) => isAttackAction(ctx, card)),
     onHit(ctx) {
-      if (!faceUpGraveyard(ctx).some((card) => isAttack(ctx, card))) {
+      if (!faceUpGraveyard(ctx).some((card) => isAttackAction(ctx, card))) {
         ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1);
       }
     },

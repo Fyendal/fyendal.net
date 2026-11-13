@@ -1,4 +1,4 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
+import type { CardScript, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
   armDelayedEffect,
   attackArcaneHeroTrigger,
@@ -11,8 +11,12 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
+  hasCardSubtype,
   heroChoiceSeat,
   heroTarget,
+  isAttackAction,
+  isAura,
+  isNonAttackAction,
   localizedCardLog,
   mergeSetScripts,
   ongoingLabel,
@@ -28,18 +32,6 @@ import { hasType as hasPrintedType } from "@fyendal/shared";
 
 const FROSTBITE = "SIY035";
 const SEISMIC_SURGE = "CRU044";
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
-}
-
-function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack");
-}
 
 function isFused(ctx: ScriptCtx): boolean {
   return ctx.getState("fused") > 0;
@@ -57,7 +49,7 @@ const explosiveGrowthDamage: TriggerDef = {
 
 function fusionAdditionalCost(type: "earth" | "ice" | "lightning") {
   return (ctx: ScriptCtx) => {
-    const matches = ctx.player(ctx.seat).hand.filter((card) => hasType(ctx, card, type));
+    const matches = ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, type));
     if (matches.length === 0) return;
     ctx.requestCardChoice(
       `${type}-fusion`,
@@ -229,7 +221,7 @@ function controlsAnotherNonTokenAura(ctx: ScriptCtx): boolean {
       (card) =>
         card.instanceId !== ctx.self.instanceId &&
         !hasPrintedType(ctx.cardData(card.cardId), "token") &&
-        hasType(ctx, card, "aura"),
+        isAura(ctx, card),
     );
 }
 
@@ -370,7 +362,7 @@ function ritesOfLightning(): CardScript {
 
 function requestRitesAttack(ctx: ScriptCtx): void {
   if (!ctx.getState("ritesAttack")) return;
-  const attacks = faceUpGraveyard(ctx).filter((card) => isAttack(ctx, card));
+  const attacks = faceUpGraveyard(ctx).filter((card) => isAttackAction(ctx, card));
   if (attacks.length > 0) {
     ctx.requestCardChoice(
       "rites-attack",
@@ -482,7 +474,7 @@ function weave(type: "earth" | "ice", attack: number): CardScript {
     onFriendlyAttackDeclared(ctx) {
       if (!ctx.getState("weaveArmed") || ctx.link?.attackCardType !== "action") return;
       const attackCard = ctx.link.attackingCard;
-      if (!hasType(ctx, attackCard, type) && !hasType(ctx, attackCard, "elemental")) return;
+      if (!hasCardSubtype(ctx, attackCard, type) && !hasCardSubtype(ctx, attackCard, "elemental")) return;
       ctx.setState("weaveArmed", 0);
       ctx.addModifier({ scope: "chain-link", attack, appliesTo: "attack-action" });
       if (type === "earth" && (attackCard.scriptState?.fused ?? 0) > 0) {
@@ -509,7 +501,7 @@ function weaveLightning(attack: number): CardScript {
     onFriendlyAttackDeclared(ctx) {
       if (ctx.link?.attackCardType !== "action") return;
       const card = ctx.link.attackingCard;
-      if (!hasType(ctx, card, "lightning") && !hasType(ctx, card, "elemental")) return;
+      if (!hasCardSubtype(ctx, card, "lightning") && !hasCardSubtype(ctx, card, "elemental")) return;
       if (!consumeDelayedEffect(ctx)) return;
       if ((card.scriptState?.fused ?? 0) > 0) ctx.grantGoAgain();
     },
@@ -629,7 +621,7 @@ function sowTomorrow(minCost: number): CardScript {
         return (
           ctx.hasCardType(card, "action") &&
           (data.cost ?? 0) >= minCost &&
-          (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental"))
+          (hasCardSubtype(ctx, card, "earth") || hasCardSubtype(ctx, card, "elemental"))
         );
       });
       if (cards.length > 0) {
@@ -653,7 +645,7 @@ function snapShot(): CardScript {
     onAttackDeclared(ctx) {
       if (!isFused(ctx)) return;
       for (const weapon of ctx.player(ctx.seat).weapons) {
-        if (hasType(ctx, weapon, "bow")) ctx.grantAdditionalActivation(weapon.instanceId);
+        if (hasCardSubtype(ctx, weapon, "bow")) ctx.grantAdditionalActivation(weapon.instanceId);
       }
       ctx.allowAbilitiesAsInstant("bow");
     },
@@ -670,8 +662,8 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       timing: "defense-reaction",
       oncePerTurn: true,
       onCostPaid(ctx, cards) {
-        ctx.setState("oldhimEarth", cards.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
-        ctx.setState("oldhimIce", cards.some((card) => hasType(ctx, card, "ice")) ? 1 : 0);
+        ctx.setState("oldhimEarth", cards.some((card) => hasCardSubtype(ctx, card, "earth")) ? 1 : 0);
+        ctx.setState("oldhimIce", cards.some((card) => hasCardSubtype(ctx, card, "ice")) ? 1 : 0);
       },
       onActivate(ctx) {
         if (ctx.getState("oldhimEarth")) ctx.preventNextDamage(ctx.seat, 2);
@@ -794,8 +786,8 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       if (hook === "lexi-flip") {
         const card = ctx.player(ctx.seat).arsenal.find((candidate) => candidate.instanceId === Number(option));
         if (!card) return;
-        const lightning = hasType(ctx, card, "lightning");
-        const ice = hasType(ctx, card, "ice");
+        const lightning = hasCardSubtype(ctx, card, "lightning");
+        const ice = hasCardSubtype(ctx, card, "ice");
         ctx.turnArsenalFaceUp(card.instanceId);
         if (lightning) buffNextAttack(ctx, { goAgain: true });
         if (ice)
@@ -1056,12 +1048,14 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       destroySelfCost: true,
       canActivate(ctx) {
         return faceUpGraveyard(ctx).some((card) => {
-          return hasType(ctx, card, "earth") && (ctx.hasCardType(card, "action") || ctx.hasCardType(card, "instant"));
+          return hasCardSubtype(ctx, card, "earth") &&
+            (ctx.hasCardType(card, "action") || ctx.hasCardType(card, "instant"));
         });
       },
       onActivate(ctx) {
         const cards = faceUpGraveyard(ctx).filter((card) => {
-          return hasType(ctx, card, "earth") && (ctx.hasCardType(card, "action") || ctx.hasCardType(card, "instant"));
+          return hasCardSubtype(ctx, card, "earth") &&
+            (ctx.hasCardType(card, "action") || ctx.hasCardType(card, "instant"));
         });
         ctx.requestCardChoice(
           "plume-return",
@@ -1099,7 +1093,8 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     onPlay(ctx) {
       const cards =
         ctx.link?.defendingCards.filter(
-          (card) => ctx.hasCardType(card, "action") && (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental")),
+          (card) => ctx.hasCardType(card, "action") &&
+            (hasCardSubtype(ctx, card, "earth") || hasCardSubtype(ctx, card, "elemental")),
         ) ?? [];
       if (cards.length > 0)
         ctx.requestCardChoice(
@@ -1119,7 +1114,8 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     onPlay(ctx) {
       const cards =
         ctx.link?.defendingCards.filter(
-          (card) => ctx.hasCardType(card, "action") && (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental")),
+          (card) => ctx.hasCardType(card, "action") &&
+            (hasCardSubtype(ctx, card, "earth") || hasCardSubtype(ctx, card, "elemental")),
         ) ?? [];
       if (cards.length > 0)
         ctx.requestCardChoice(
@@ -1139,7 +1135,8 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
     onPlay(ctx) {
       const cards =
         ctx.link?.defendingCards.filter(
-          (card) => ctx.hasCardType(card, "action") && (hasType(ctx, card, "earth") || hasType(ctx, card, "elemental")),
+          (card) => ctx.hasCardType(card, "action") &&
+            (hasCardSubtype(ctx, card, "earth") || hasCardSubtype(ctx, card, "elemental")),
         ) ?? [];
       if (cards.length > 0)
         ctx.requestCardChoice(

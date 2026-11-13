@@ -82,6 +82,29 @@ describe("SEA — High Seas heroes and cogs", () => {
       .expectInZone(0, "enigma chimera|3", "graveyard");
   });
 
+  it("Burn Bare cannot destroy an attack that lost phantasm to Semblance", () => {
+    const burnBareId = printingId("burn bare|0");
+    const canBurnAfter = (semblance: boolean) => {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", weapons: [], resources: 6, hand: ["enigma chimera|3", "semblance|3"] },
+          { hero: "dorinthea", hand: ["burn bare|0"] },
+        ],
+      });
+      g.play("enigma chimera|3").blockWith();
+      if (semblance) g.react("semblance|3", { settle: false }).passPriority().passPriority();
+      g.passPriority();
+      return legalIntents(g.state, 1).some(
+        (intent) =>
+          intent.kind === "activate-ability" &&
+          g.state.players[1]!.hand.find((card) => card.instanceId === intent.sourceInstanceId)?.cardId === burnBareId,
+      );
+    };
+
+    expect(canBurnAfter(false)).toBe(true);
+    expect(canBurnAfter(true)).toBe(false);
+  });
+
   it("Burn Bare previews and deals a bound next-card arcane bonus", () => {
     const g = scenario({
       seats: [

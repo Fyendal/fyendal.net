@@ -4,13 +4,18 @@ import {
   attackAbility,
   buffNextAttack,
   cardNameContains,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   contractCompletionCount,
   decisionMessage,
   decisionPrompt,
+  hasCardSubtype,
   heroDamage,
   hitHookLabel,
+  isAttackAction,
+  isAura,
+  isSword,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
@@ -34,12 +39,6 @@ const isDoubleDownAttack = (modifier: DeepReadonly<Modifier>) =>
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
 }
-function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string) {
-  return ctx.cardTypes(card).some((candidate) => candidate.toLowerCase() === type.toLowerCase());
-}
-function named(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string) {
-  return ctx.cardNames(card).some((candidate) => candidate.toLowerCase() === name.toLowerCase());
-}
 function controlledPermanents(ctx: ScriptCtx, seat = ctx.seat): DeepReadonly<CardInstance>[] {
   const player = ctx.player(seat);
   return [
@@ -47,9 +46,6 @@ function controlledPermanents(ctx: ScriptCtx, seat = ctx.seat): DeepReadonly<Car
     ...player.weapons,
     ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
   ];
-}
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.hasCardType(card, "action") && has(ctx, card, "attack");
 }
 function isSix(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.basePower(card) >= 6;
@@ -86,7 +82,7 @@ function evoEquipment(extra: CardScript = {}): CardScript {
   return {
     ...extra,
     playableEquipment: true,
-    transformsEquipment: (ctx, equipped) => has(ctx, equipped, "base"),
+    transformsEquipment: (ctx, equipped) => hasCardSubtype(ctx, equipped, "base"),
     playAsInstant(ctx) {
       return ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true || (extra.playAsInstant?.(ctx) ?? false);
     },
@@ -165,7 +161,8 @@ export const hvyHighRarity: Record<string, CardScript> = {
       const order: DeepReadonly<CardInstance>[] = [];
       while (cards.length) order.push(cards.splice(ctx.randomInt(cards.length), 1)[0]!);
       for (const card of [...order].reverse()) ctx.putOnDeckTop(card.instanceId);
-      if (ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "might")).length >= 6) ctx.createToken(AGILITY);
+      const mights = ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "might")).length;
+      if (mights >= 6) ctx.createToken(AGILITY);
     },
     onChoose() {},
   },
@@ -252,7 +249,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
   "victor goldmane, high and mighty|0": {
     firstFailedClashReplacement: { costPermanentName: "Gold", choiceHook: "victor-adult-reclash" },
     onFriendlyTokenCreated(ctx, token) {
-      if (named(ctx, token, "gold") && ctx.getPlayerFlag(ctx.seat, "victorGoldDrawn") !== true) {
+      if (cardNamed(ctx, token, "gold") && ctx.getPlayerFlag(ctx.seat, "victorGoldDrawn") !== true) {
         ctx.setPlayerFlag(ctx.seat, "victorGoldDrawn", true);
         ctx.drawCards(ctx.seat, 1);
       }
@@ -273,12 +270,12 @@ export const hvyHighRarity: Record<string, CardScript> = {
   "primed to fight|1": {
     modifyPlayCost(ctx, base) {
       const controlled =
-        ctx.player(ctx.seat).board.some((card) => named(ctx, card, "vigor")) ||
+        ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, "vigor")) ||
         ctx.getPlayerFlag(ctx.seat, "createdName:vigor") === true;
       return controlled ? Math.max(0, base - 1) : base;
     },
     modifyAttack(ctx) {
-      return ctx.player(ctx.seat).board.some((card) => named(ctx, card, "might")) ||
+      return ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, "might")) ||
         ctx.getPlayerFlag(ctx.seat, "createdName:might") === true
         ? 1
         : 0;
@@ -315,7 +312,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
   },
   "kassai of the golden sand|0": {
     modifyAttackActivationCost(ctx, attacker, base) {
-      return has(ctx, attacker, "sword") && Number(ctx.getPlayerFlag(ctx.seat, "cardsDrawnThisTurn")) > 0
+      return isSword(ctx, attacker) && Number(ctx.getPlayerFlag(ctx.seat, "cardsDrawnThisTurn")) > 0
         ? Math.max(0, base - 1)
         : base;
     },
@@ -383,7 +380,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
   "shift the tide of battle|2": {
     canPlay: (ctx) =>
       !!ctx.link &&
-      has(ctx, ctx.link.attackingCard, "warrior") &&
+      hasCardSubtype(ctx, ctx.link.attackingCard, "warrior") &&
       ctx.currentAttackPower() > ctx.basePower(ctx.link.attackingCard),
     onPlay(ctx) {
       ctx.grantGoAgain();
@@ -437,7 +434,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
           const link = ctx.link;
           if (!link || link.attacker !== ctx.seat || !ctx.currentAttackHasType("warrior")) return false;
           const added = new Set(event?.defenderInstanceIds ?? []);
-          return link.defendingCards.some((card) => added.has(card.instanceId) && isAttack(ctx, card));
+          return link.defendingCards.some((card) => added.has(card.instanceId) && isAttackAction(ctx, card));
         },
         effect(ctx) {
           const arsenal = ctx.player(opponentSeat(ctx)).arsenal;
@@ -460,7 +457,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
   },
   "raise an army|2": {
     additionalCost(ctx) {
-      const totalGold = controlledPermanents(ctx).filter((card) => named(ctx, card, "gold")).length;
+      const totalGold = controlledPermanents(ctx).filter((card) => cardNamed(ctx, card, "gold")).length;
       if (totalGold > 0)
         ctx.requestChoice(
           "army-gold-count",
@@ -470,7 +467,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "army-gold-count") return;
-      const gold = controlledPermanents(ctx).filter((card) => named(ctx, card, "gold"));
+      const gold = controlledPermanents(ctx).filter((card) => cardNamed(ctx, card, "gold"));
       const count = Number(option);
       if (!Number.isSafeInteger(count) || count < 0 || count > gold.length) return;
       let destroyed = 0;
@@ -606,12 +603,12 @@ export const hvyHighRarity: Record<string, CardScript> = {
   },
   "pay up|1": {
     onAttackDeclared(ctx) {
-      if (controlledPermanents(ctx, opponentSeat(ctx)).some((card) => named(ctx, card, "gold")))
+      if (controlledPermanents(ctx, opponentSeat(ctx)).some((card) => cardNamed(ctx, card, "gold")))
         ctx.setFlag("link", "overpower", true);
     },
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
-      const gold = controlledPermanents(ctx, opponentSeat(ctx)).find((card) => named(ctx, card, "gold"));
+      const gold = controlledPermanents(ctx, opponentSeat(ctx)).find((card) => cardNamed(ctx, card, "gold"));
       if (gold) ctx.steal(gold.instanceId, { duration: "indefinite" });
       else ctx.dealDamage(opponentSeat(ctx), 1);
     },
@@ -734,7 +731,8 @@ export const hvyHighRarity: Record<string, CardScript> = {
       if (top) ctx.banish(top.instanceId);
       if (contractCompletionCount(ctx) > completions) {
         ctx.addModifier({ scope: "combat-chain", goAgain: true, appliesTo: "attack", appliesToClass: "assassin" });
-        if (ctx.link?.attacker === ctx.seat && has(ctx, ctx.link.attackingCard, "assassin")) ctx.grantGoAgain();
+        if (ctx.link?.attacker === ctx.seat &&
+          hasCardSubtype(ctx, ctx.link.attackingCard, "assassin")) ctx.grantGoAgain();
       }
     },
   },
@@ -745,7 +743,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
       if (
         top &&
         ctx.banish(top.instanceId) &&
-        (data(ctx, top).keywords ?? []).some((keyword) => keyword.toLowerCase() === "combo")
+        ctx.hasKeyword(top, "combo")
       )
         ctx.allowPlayFrom(top.instanceId, "banish");
     },
@@ -756,7 +754,8 @@ export const hvyHighRarity: Record<string, CardScript> = {
         const items = ctx
           .player(opponentSeat(ctx))
           .board.filter(
-            (card) => isAttack(ctx, card) === false && has(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= 1,
+            (card) => !isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "item") &&
+              (data(ctx, card).cost ?? 0) <= 1,
           );
         if (items.length)
           ctx.requestCardChoice(
@@ -797,7 +796,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
     onPlay(ctx) {
       const looked = topCards(ctx, ctx.getState("reelX") + 1);
       for (const card of looked) ctx.lookAt(card.instanceId);
-      const cards = looked.filter((card) => has(ctx, card, "trap")).slice(0, 4);
+      const cards = looked.filter((card) => hasCardSubtype(ctx, card, "trap")).slice(0, 4);
       ctx.revealCards(cards.map((card) => card.instanceId));
       for (const card of cards) ctx.moveToHand(card.instanceId);
       ctx.shuffleDeck();
@@ -819,7 +818,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
       const cards = ctx
         .player(ctx.seat)
         .deck.filter(
-          (card) => has(ctx, card, "runeblade") && has(ctx, card, "aura") && (data(ctx, card).cost ?? 0) <= x,
+          (card) => hasCardSubtype(ctx, card, "runeblade") && isAura(ctx, card) && (data(ctx, card).cost ?? 0) <= x,
         );
       if (cards.length) {
         ctx.requestCardChoice(
@@ -839,8 +838,8 @@ export const hvyHighRarity: Record<string, CardScript> = {
       const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === Number(option));
       if (
         card &&
-        has(ctx, card, "runeblade") &&
-        has(ctx, card, "aura") &&
+        hasCardSubtype(ctx, card, "runeblade") &&
+        isAura(ctx, card) &&
         (data(ctx, card).cost ?? 0) <= ctx.getState("galaxiaX")
       )
         ctx.settleCard(card.instanceId);
@@ -874,7 +873,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
   },
   "luminaris, angel's glow|0": {
     onFriendlyPlay(ctx, card) {
-      if (!isAttack(ctx, card) || !ctx.player(ctx.seat).pitch.some((pitch) => ctx.cardColor(pitch) === 2)) return;
+      if (!isAttackAction(ctx, card) || !ctx.player(ctx.seat).pitch.some((pitch) => ctx.cardColor(pitch) === 2)) return;
       if (cardNameContains(ctx, card, "Herald") && ctx.getPlayerFlag(ctx.seat, "luminarisHerald") !== true) {
         ctx.setPlayerFlag(ctx.seat, "luminarisHerald", true);
         ctx.grantCardKeyword(card.instanceId, "go again");
@@ -882,7 +881,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
     },
     onFriendlyActivate(ctx, card) {
       if (
-        !has(ctx, card, "angel") ||
+        !hasCardSubtype(ctx, card, "angel") ||
         !ctx.player(ctx.seat).pitch.some((pitch) => ctx.cardColor(pitch) === 2) ||
         ctx.getPlayerFlag(ctx.seat, "luminarisAngel") === true
       )

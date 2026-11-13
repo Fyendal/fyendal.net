@@ -6,6 +6,7 @@ import {
   dealArcane,
   decisionMessage,
   decisionPrompt,
+  isAura,
   leavesArenaTrigger,
   opponentSeat,
 } from "./shared-helpers.js";
@@ -14,10 +15,6 @@ const FLOW = "OMN203";
 const EMBODIMENT = "ROS026";
 
 type Card = DeepReadonly<CardInstance>;
-
-function isAura(ctx: ScriptCtx, card: Card): boolean {
-  return ctx.cardTypes(card).includes("aura");
-}
 
 function isLightningAura(ctx: ScriptCtx, card: Card): boolean {
   const types = ctx.cardTypes(card);

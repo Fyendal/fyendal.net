@@ -1,11 +1,16 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
   equipWithSilver,
   faceUpGraveyard,
+  hasCardSubtype,
+  isArrow,
+  isAttackAction,
+  isDagger,
   localizedLog,
   ongoingLabel,
   opponentSeat,
@@ -19,15 +24,6 @@ const BLOODROT = "SAZ034";
 const FRAILTY = "SAZ035";
 const INERTIA = "SAZ036";
 const PONDER = "DYN244";
-function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type);
-}
-function namedCard(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string): boolean {
-  return ctx.cardNames(card).includes(name.toLowerCase());
-}
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && has(ctx, card, "attack");
-}
 function dagger(extra: CardScript = {}): CardScript {
   return {
     ...extra,
@@ -65,9 +61,6 @@ function graveyardChest(extra: CardScript = {}): CardScript {
     triggers: [equipWithSilver(2)],
   };
 }
-function combo(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "combo");
-}
 function flickKnivesDaggers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
   const activeAttackId = ctx.link?.attackingCard.instanceId;
   const candidates = [
@@ -86,7 +79,7 @@ function flickKnivesDaggers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
   return candidates.filter(
     (card, index) =>
       card.instanceId !== activeAttackId &&
-      has(ctx, card, "dagger") &&
+      isDagger(ctx, card) &&
       candidates.findIndex((candidate) => candidate.instanceId === card.instanceId) === index,
   );
 }
@@ -126,7 +119,7 @@ function codexFrailtyDiscard(ctx: ScriptCtx, fromIndex: number): void {
 function codexFrailtyChoice(ctx: ScriptCtx, index: number): void {
   const seat = codexHeroes(ctx)[index];
   if (seat === undefined) return codexFrailtyDiscard(ctx, 0);
-  const attacks = faceUpGraveyard(ctx, seat).filter((card) => isAttack(ctx, card));
+  const attacks = faceUpGraveyard(ctx, seat).filter((card) => isAttackAction(ctx, card));
   if (!attacks.length || !ctx.hasArsenalSpace(seat)) return codexFrailtyChoice(ctx, index + 1);
   ctx.requestCardChoice(
     `codex-frailty:${seat}`,
@@ -159,9 +152,7 @@ export const uzuriAbility: CardScript = {
       !!ctx.link &&
       ctx.link.attacker === ctx.seat &&
       ctx.link.flags.attackGone !== true &&
-      (ctx.cardData(ctx.link.attackingCard.cardId).keywords ?? []).some(
-        (keyword) => keyword.toLowerCase() === "stealth",
-      ) &&
+      ctx.hasKeyword(ctx.link.attackingCard, "stealth") &&
       ctx.player(ctx.seat).hand.length > 0,
     onCostPaid(ctx, paidCards) {
       ctx.setFlag("player", UZURI_BANISHED_CARD, paidCards.at(-1)?.instanceId ?? 0);
@@ -380,7 +371,7 @@ export const outHighRarity: Record<string, CardScript> = {
         const combos = ctx
           .player(ctx.seat)
           .deck.filter((card) =>
-            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "combo"),
+            ctx.hasKeyword(card, "combo"),
           );
         if (combos.length)
           ctx.requestCardChoice(
@@ -401,9 +392,7 @@ export const outHighRarity: Record<string, CardScript> = {
       destroySelfCost: true,
       canActivate: (ctx) =>
         !!ctx.link &&
-        (ctx.cardData(ctx.link.attackingCard.cardId).keywords ?? []).some(
-          (keyword) => keyword.toLowerCase() === "combo",
-        ),
+        ctx.hasKeyword(ctx.link.attackingCard, "combo"),
       onActivate(ctx) {
         ctx.addModifier({ scope: "chain-link", attack: 1 });
       },
@@ -411,7 +400,7 @@ export const outHighRarity: Record<string, CardScript> = {
   },
   "visit the floating dojo|3": {
     onPlay(ctx) {
-      const strikes = faceUpGraveyard(ctx).filter((card) => namedCard(ctx, card, "surging strike"));
+      const strikes = faceUpGraveyard(ctx).filter((card) => cardNamed(ctx, card, "surging strike"));
       if (strikes.length)
         ctx.requestCardChoice(
           "dojo-strike",
@@ -419,7 +408,7 @@ export const outHighRarity: Record<string, CardScript> = {
           strikes.map((card) => card.instanceId),
         );
       else {
-        const combos = faceUpGraveyard(ctx).filter((card) => combo(ctx, card));
+        const combos = faceUpGraveyard(ctx).filter((card) => ctx.hasKeyword(card, "combo"));
         if (combos.length)
           ctx.requestCardChoice(
             "dojo-combo",
@@ -444,7 +433,7 @@ export const outHighRarity: Record<string, CardScript> = {
         if (option === "top") ctx.putOnDeckTop(id);
         else ctx.putOnDeckBottom(id);
         if (isStrike) {
-          const combos = faceUpGraveyard(ctx).filter((card) => combo(ctx, card) && card.instanceId !== id);
+          const combos = faceUpGraveyard(ctx).filter((card) => ctx.hasKeyword(card, "combo") && card.instanceId !== id);
           if (combos.length)
             ctx.requestCardChoice(
               "dojo-combo",
@@ -465,7 +454,7 @@ export const outHighRarity: Record<string, CardScript> = {
         oncePerTurn: true,
         label: "Load an arrow",
         onActivate(ctx) {
-          arsenalFromHand(ctx, "castaway-load", (card) => has(ctx, card, "arrow"));
+          arsenalFromHand(ctx, "castaway-load", (card) => isArrow(ctx, card));
         },
       },
       {
@@ -475,11 +464,11 @@ export const outHighRarity: Record<string, CardScript> = {
         timing: "instant",
         oncePerTurn: true,
         label: "Turn an arrow face up",
-        canActivate: (ctx) => ctx.player(ctx.seat).arsenal.some((card) => card.faceDown && has(ctx, card, "arrow")),
+        canActivate: (ctx) => ctx.player(ctx.seat).arsenal.some((card) => card.faceDown && isArrow(ctx, card)),
         onActivate(ctx) {
           const card = ctx
             .player(ctx.seat)
-            .arsenal.find((candidate) => candidate.faceDown && has(ctx, candidate, "arrow"));
+            .arsenal.find((candidate) => candidate.faceDown && isArrow(ctx, candidate));
           if (card) {
             ctx.turnArsenalFaceUp(card.instanceId);
             ctx.addCounter(card.instanceId, "aim", 1);
@@ -520,7 +509,7 @@ export const outHighRarity: Record<string, CardScript> = {
       timing: "instant",
       destroySelfCost: true,
       onActivate(ctx) {
-        const arrows = faceUpGraveyard(ctx).filter((card) => has(ctx, card, "arrow"));
+        const arrows = faceUpGraveyard(ctx).filter((card) => isArrow(ctx, card));
         if (!arrows.length) {
           ctx.shuffleDeck();
           return;
@@ -557,7 +546,7 @@ export const outHighRarity: Record<string, CardScript> = {
       onActivate(ctx) {
         const top = ctx.player(ctx.seat).deck[0];
         if (top) ctx.lookAt(top.instanceId);
-        if (top && has(ctx, top, "arrow") && ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: true }))
+        if (top && isArrow(ctx, top) && ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: true }))
           ctx.destroySelf();
       },
     },
@@ -661,12 +650,12 @@ export const outHighRarity: Record<string, CardScript> = {
   "concealed blade|3": {
     canPlay: (ctx) =>
       ctx.link?.attackCardType === "action" &&
-      (has(ctx, ctx.link.attackingCard, "assassin") || has(ctx, ctx.link.attackingCard, "ninja")),
+      (hasCardSubtype(ctx, ctx.link.attackingCard, "assassin") || hasCardSubtype(ctx, ctx.link.attackingCard, "ninja")),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
     },
     onHit(ctx) {
-      const daggers = (ctx.player(ctx.seat).inventory ?? []).filter((card) => has(ctx, card, "dagger"));
+      const daggers = (ctx.player(ctx.seat).inventory ?? []).filter((card) => isDagger(ctx, card));
       if (daggers.length)
         ctx.requestCardChoice(
           "concealed-dagger",
@@ -769,7 +758,7 @@ export const outHighRarity: Record<string, CardScript> = {
   "gore belching|1": {
     onAttackDeclared(ctx) {
       const deck = ctx.player(ctx.seat).deck;
-      const card = deck.find((candidate) => isAttack(ctx, candidate));
+      const card = deck.find((candidate) => isAttackAction(ctx, candidate));
       if (card) {
         ctx.banish(card.instanceId);
         ctx.addModifier({ scope: "chain-link", attack: -(ctx.cardData(card.cardId).attack ?? 0) });

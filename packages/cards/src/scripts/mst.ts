@@ -12,9 +12,12 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
+  hasCardSubtype,
   hitHookLabel,
   isAttackAction,
+  isAura,
   isCard,
+  isNonAttackAction,
   leavesArenaTrigger,
   localizedCardLog,
   ongoingLabel,
@@ -50,7 +53,7 @@ function pitchedChiThisTurn(ctx: ScriptCtx): boolean {
  * play this"; a Chi pitched earlier in the turn does not count. */
 const recordsChiPitched: Pick<CardScript, "onPlayCostPaid"> = {
   onPlayCostPaid(ctx, paid) {
-    ctx.setState("chiPitched", paid.filter((card) => hasType(ctx, card, "chi")).length);
+    ctx.setState("chiPitched", paid.filter((card) => hasCardSubtype(ctx, card, "chi")).length);
   },
 };
 
@@ -66,33 +69,15 @@ function transcended(ctx: ScriptCtx): boolean {
   return ctx.getFlag("player", "transcendedThisTurn") === true;
 }
 
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: string): boolean {
-  const normalized = keyword.toLowerCase();
-  if ((card.suppressedKeywords ?? []).some((candidate) => candidate.toLowerCase() === normalized)) {
-    return false;
-  }
-  return [...(data(ctx, card).keywords ?? []), ...(card.grantedKeywords ?? [])].some(
-    (candidate) => candidate.toLowerCase() === normalized,
-  );
-}
-
-function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasType(ctx, card, "aura");
-}
-
 function isIllusionistAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return isAura(ctx, card) && hasType(ctx, card, "illusionist");
+  return isAura(ctx, card) && hasCardSubtype(ctx, card, "illusionist");
 }
 
 function evoEquipment(extra: CardScript = {}): CardScript {
   return {
     ...extra,
     playableEquipment: true,
-    transformsEquipment: (ctx, equipped) => hasType(ctx, equipped, "base"),
+    transformsEquipment: (ctx, equipped) => hasCardSubtype(ctx, equipped, "base"),
   };
 }
 
@@ -100,7 +85,7 @@ function requestEvoRecall(ctx: ScriptCtx): void {
   const cards = ctx
     .player(ctx.seat)
     .banish.filter(
-      (card) => !card.faceDown && hasType(ctx, card, "mechanologist") && ctx.hasCardType(card, "action"),
+      (card) => !card.faceDown && hasCardSubtype(ctx, card, "mechanologist") && ctx.hasCardType(card, "action"),
     );
   if (cards.length)
     ctx.requestCardChoice(
@@ -182,7 +167,8 @@ function createTigerInBanish(ctx: ScriptCtx, power = 0): void {
 
 function currentAttackIs(ctx: ScriptCtx, ...types: string[]): boolean {
   return (
-    !!ctx.link && ctx.link.attacker === ctx.seat && types.some((type) => hasType(ctx, ctx.link!.attackingCard, type))
+    !!ctx.link && ctx.link.attacker === ctx.seat && types.some((type) =>
+      hasCardSubtype(ctx, ctx.link!.attackingCard, type))
   );
 }
 
@@ -345,7 +331,7 @@ function topBanishDesire(matches: (ctx: ScriptCtx, card: DeepReadonly<CardInstan
 }
 
 function murkyWaterTraps(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return faceUpGraveyard(ctx).filter((card) => hasType(ctx, card, "trap") && (data(ctx, card).cost ?? -1) >= 0);
+  return faceUpGraveyard(ctx).filter((card) => hasCardSubtype(ctx, card, "trap") && (data(ctx, card).cost ?? -1) >= 0);
 }
 
 function resolveMurkyWater(ctx: ScriptCtx, instanceIds: readonly number[]): void {
@@ -572,7 +558,7 @@ function aspectTiger(pitch: number): CardScript {
       if (
         !previous ||
         !ctx.hasCardType(previous, "action") ||
-        !hasType(ctx, previous, "attack") ||
+        !hasCardSubtype(ctx, previous, "attack") ||
         ctx.cardColor(previous) !== pitch
       )
         return;
@@ -701,7 +687,7 @@ function factFinding(): CardScript {
 export const mst: Record<string, CardScript> = {
   "nuu|0": {
     onAttackResolved(ctx) {
-      if (!ctx.link || !hasKeyword(ctx, ctx.link.attackingCard, "stealth")) return;
+      if (!ctx.link || !ctx.hasKeyword(ctx.link.attackingCard, "stealth")) return;
       const defenders = [...ctx.link.defendingCards, ...ctx.link.defendingEquipment];
       for (const defender of defenders) {
         if (ctx.hasCardType(defender, "action")) ctx.banish(defender.instanceId, { asAttackingCard: true });
@@ -972,9 +958,9 @@ export const mst: Record<string, CardScript> = {
       hasPrintedType(data(ctx, card), "defense-reaction") ||
       ctx.hasCardType(card, "instant"),
   ),
-  "mind's desire|1": topBanishDesire((ctx, card) => ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack")),
-  "mind's desire|2": topBanishDesire((ctx, card) => ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack")),
-  "mind's desire|3": topBanishDesire((ctx, card) => ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack")),
+  "mind's desire|1": topBanishDesire((ctx, card) => isNonAttackAction(ctx, card)),
+  "mind's desire|2": topBanishDesire((ctx, card) => isNonAttackAction(ctx, card)),
+  "mind's desire|3": topBanishDesire((ctx, card) => isNonAttackAction(ctx, card)),
   "pick to pieces|1": pickToPieces(),
   "pick to pieces|2": pickToPieces(),
   "pick to pieces|3": pickToPieces(),
@@ -1134,7 +1120,7 @@ function zen(): CardScript {
       oncePerTurn: true,
       onActivate(ctx) {
         createInHand(ctx, CROUCHING_TIGER);
-        const combo = ctx.player(ctx.seat).deck.filter((card) => hasKeyword(ctx, card, "combo"));
+        const combo = ctx.player(ctx.seat).deck.filter((card) => ctx.hasKeyword(card, "combo"));
         if (combo.length)
           ctx.requestCardChoice(
             "zen-combo",
@@ -1238,7 +1224,7 @@ function artSoul(): CardScript {
 function maskWhiskers(): CardScript {
   return {
     onDefend(ctx) {
-      const combo = faceUpGraveyard(ctx).filter((card) => hasKeyword(ctx, card, "combo"));
+      const combo = faceUpGraveyard(ctx).filter((card) => ctx.hasKeyword(card, "combo"));
       if (combo.length)
         ctx.requestCardChoice(
           "whiskers",
@@ -1472,7 +1458,7 @@ Object.assign(mst, {
       ctx.createTokens(SPECTRAL_SHIELD, 2);
       for (const aura of ctx
         .player(ctx.seat)
-        .board.filter((card) => isAura(ctx, card) && hasKeyword(ctx, card, "ward")))
+        .board.filter((card) => isAura(ctx, card) && ctx.hasKeyword(card, "ward")))
         ctx.addCounter(aura.instanceId, "power", 1);
       ctx.transcend();
     },
@@ -1674,13 +1660,13 @@ Object.assign(mst, {
       if (!ctx.link || ctx.link.attacker !== ctx.seat) return false;
       return (
         (ctx.link.attackCardType === "action" && ctx.basePower(ctx.link.attackingCard) <= 1) ||
-        hasKeyword(ctx, ctx.link.attackingCard, "stealth")
+        ctx.hasKeyword(ctx.link.attackingCard, "stealth")
       );
     },
     additionalCost(ctx) {
       if (!ctx.link) return;
       const powerMode = ctx.link.attackCardType === "action" && ctx.basePower(ctx.link.attackingCard) <= 1;
-      const banishMode = hasKeyword(ctx, ctx.link.attackingCard, "stealth");
+      const banishMode = ctx.hasKeyword(ctx.link.attackingCard, "stealth");
       if (powerMode && banishMode) {
         ctx.requestChoice(
           "just-a-nick-mode",
@@ -1698,7 +1684,7 @@ Object.assign(mst, {
     onPlay(ctx) {
       if (!ctx.link) return;
       const powerMode = ctx.link.attackCardType === "action" && ctx.basePower(ctx.link.attackingCard) <= 1;
-      const banishMode = hasKeyword(ctx, ctx.link.attackingCard, "stealth");
+      const banishMode = ctx.hasKeyword(ctx.link.attackingCard, "stealth");
       const selectedMode = ctx.getState("justANickMode");
       if (powerMode && (!banishMode || selectedMode === 1 || selectedMode === 3)) {
         ctx.addModifier({ scope: "chain-link", attack: 5 });

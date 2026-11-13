@@ -10,6 +10,7 @@ import {
   optN,
   optOnChoose,
   wizardActionAsInstant,
+  isNonAttackAction,
 } from "../shared-helpers.js";
 
 const COPPER = "CRU197";
@@ -17,10 +18,6 @@ const RUNECHANT = "CRU157";
 
 function createRunechants(ctx: ScriptCtx, count: number): void {
   ctx.createTokens(RUNECHANT, count);
-}
-
-function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack");
 }
 
 function isRunebladeAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {

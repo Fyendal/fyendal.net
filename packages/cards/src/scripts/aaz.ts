@@ -1,18 +1,15 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  isArrow,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
   yesNoPrompt,
 } from "./shared-helpers.js";
-
-function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("arrow");
-}
 
 function hasAim(card: { readonly counters?: Readonly<Record<string, number>> }): boolean {
   return (card.counters?.aim ?? 0) > 0;

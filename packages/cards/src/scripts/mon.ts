@@ -1,4 +1,4 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   faceUpGraveyard,
   hasBloodDebt,
@@ -31,6 +31,8 @@ import {
   optionalChargeOptions,
   resourceAbility,
   warnIfNoActionPoint,
+  hasCardSubtype,
+  isAura,
 } from "./shared-helpers.js";
 import { monHighRarity } from "./mon/high-rarity.js";
 import { hasType as hasPrintedType } from "@fyendal/shared";
@@ -74,14 +76,6 @@ function invigoratingLight(): CardScript {
   };
 }
 
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function hasKeyword(ctx: ScriptCtx, cardId: string, keyword: string): boolean {
-  return (ctx.cardData(cardId).keywords ?? []).some((candidate) => candidate.toLowerCase() === keyword.toLowerCase());
-}
-
 function blindingBeamTargets(ctx: ScriptCtx) {
   return [ctx.link?.attackingCard, ...(ctx.link?.defendingCards ?? [])].filter(
     (card): card is NonNullable<typeof card> => !!card && isAttackAction(ctx, card),
@@ -95,9 +89,7 @@ function blindingBeam(powerReduction: number): CardScript {
     },
     modifyPlayCost(ctx, baseCost) {
       const target = blindingBeamTargets(ctx).find((card) => card.instanceId === ctx.playTargetInstanceId);
-      const shadow =
-        target &&
-        (hasType(ctx, target, "shadow") || (target.grantedTypes ?? []).some((type) => type.toLowerCase() === "shadow"));
+      const shadow = target && hasCardSubtype(ctx, target, "shadow");
       return shadow ? baseCost - 1 : baseCost;
     },
     onPlay(ctx) {
@@ -361,8 +353,8 @@ function dimenxxionalGateway(opt: number): CardScript {
         { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
       ),
     );
-    const runeblade = hasType(ctx, top, "runeblade");
-    const shadow = hasType(ctx, top, "shadow");
+    const runeblade = hasCardSubtype(ctx, top, "runeblade");
+    const shadow = hasCardSubtype(ctx, top, "shadow");
     if (runeblade && shadow) ctx.setState("gatewayShadowCard", top.instanceId);
     if (runeblade) {
       dealArcane(ctx, opponentSeat(ctx), 1);
@@ -795,11 +787,12 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         condition: (ctx, destroyed) =>
           !!destroyed &&
           destroyed.instanceId !== ctx.self.instanceId &&
-          (hasType(ctx, destroyed, "aura") || isAttackAction(ctx, destroyed)),
+          (isAura(ctx, destroyed) || isAttackAction(ctx, destroyed)),
         target: heroTarget(),
         effect(ctx, destroyed) {
           dealArcaneToTargetHero(ctx);
-          if (destroyed && !hasPrintedType(ctx.cardData(destroyed.cardId), "token") && hasType(ctx, destroyed, "light")) {
+          if (destroyed && !hasPrintedType(ctx.cardData(destroyed.cardId), "token") &&
+            hasCardSubtype(ctx, destroyed, "light")) {
             ctx.putIntoSoul(destroyed.instanceId);
           }
         },
@@ -808,7 +801,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   },
   "ode to wrath|2": {
     onFriendlyPlay(ctx, played) {
-      if (isAttackAction(ctx, played) && hasType(ctx, played, "illusionist")) {
+      if (isAttackAction(ctx, played) && hasCardSubtype(ctx, played, "illusionist")) {
         ctx.grantCardKeyword(played.instanceId, "go again");
       }
     },
@@ -854,7 +847,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   }),
   "herald of rebirth|1": putAttackIntoSoulOnHit({
     onHit(ctx) {
-      const cards = faceUpGraveyard(ctx).filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
+      const cards = faceUpGraveyard(ctx).filter((card) => ctx.hasKeyword(card, "phantasm"));
       if (cards.length > 0)
         ctx.requestCardChoice(
           "herald-rebirth",
@@ -871,7 +864,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   }),
   "herald of rebirth|2": putAttackIntoSoulOnHit({
     onHit(ctx) {
-      const cards = faceUpGraveyard(ctx).filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
+      const cards = faceUpGraveyard(ctx).filter((card) => ctx.hasKeyword(card, "phantasm"));
       if (cards.length > 0)
         ctx.requestCardChoice(
           "herald-rebirth",
@@ -888,7 +881,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   }),
   "herald of rebirth|3": putAttackIntoSoulOnHit({
     onHit(ctx) {
-      const cards = faceUpGraveyard(ctx).filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
+      const cards = faceUpGraveyard(ctx).filter((card) => ctx.hasKeyword(card, "phantasm"));
       if (cards.length > 0)
         ctx.requestCardChoice(
           "herald-rebirth",
@@ -981,7 +974,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesToTargetType: "shadow" });
       if (
         ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0 &&
-        hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "shadow")
+        hasCardSubtype(ctx, ctx.player(opponentSeat(ctx)).hero, "shadow")
       ) {
         ctx.putIntoSoul(ctx.self.instanceId);
       }
@@ -1149,14 +1142,14 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     onFriendlyPlay(ctx, played) {
       if (ctx.getFlag("player", "chaneNextActionGoAgain") !== true) return;
       if (!ctx.hasCardType(played, "action")) return;
-      if (!hasType(ctx, played, "runeblade") && !hasType(ctx, played, "shadow")) return;
+      if (!hasCardSubtype(ctx, played, "runeblade") && !hasCardSubtype(ctx, played, "shadow")) return;
       ctx.setFlag("player", "chaneNextActionGoAgain", false);
       ctx.grantCardKeyword(played.instanceId, "go again");
     },
     onFriendlyActivate(ctx, activated, timing) {
       if (ctx.getFlag("player", "chaneNextActionGoAgain") !== true) return;
       if (timing !== "action") return;
-      if (!hasType(ctx, activated, "runeblade") && !hasType(ctx, activated, "shadow")) return;
+      if (!hasCardSubtype(ctx, activated, "runeblade") && !hasCardSubtype(ctx, activated, "shadow")) return;
       ctx.setFlag("player", "chaneNextActionGoAgain", false);
       ctx.setFlag("player", "nextActionGoAgain", true);
     },
@@ -1183,7 +1176,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         const cards = faceUpGraveyard(ctx).filter((card) => {
           return (
             ctx.hasCardType(card, "action") &&
-            !hasType(ctx, card, "attack") &&
+            !hasCardSubtype(ctx, card, "attack") &&
             hasBloodDebt(ctx, card)
           );
         });
@@ -1217,7 +1210,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         const cards = faceUpGraveyard(ctx).filter((card) => {
           return (
             ctx.hasCardType(card, "action") &&
-            !hasType(ctx, card, "attack") &&
+            !hasCardSubtype(ctx, card, "attack") &&
             hasBloodDebt(ctx, card)
           );
         });
@@ -1251,7 +1244,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         const cards = faceUpGraveyard(ctx).filter((card) => {
           return (
             ctx.hasCardType(card, "action") &&
-            !hasType(ctx, card, "attack") &&
+            !hasCardSubtype(ctx, card, "attack") &&
             hasBloodDebt(ctx, card)
           );
         });
@@ -1324,7 +1317,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       if (hook !== "ebon-fold-banish") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      const shadow = hasType(ctx, card, "shadow");
+      const shadow = hasCardSubtype(ctx, card, "shadow");
       if (ctx.banish(card.instanceId) && shadow) ctx.drawCards(ctx.seat, 1);
     },
   },
@@ -1344,7 +1337,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     onChoose(ctx, hook, option) {
       if (hook !== "aftermath-banish" || option === "no") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
-      if (card && hasType(ctx, card, "shadow") && ctx.banish(card.instanceId))
+      if (card && hasCardSubtype(ctx, card, "shadow") && ctx.banish(card.instanceId))
         ctx.grantCardKeyword(ctx.self.instanceId, "dominate");
       else if (card) ctx.banish(card.instanceId);
     },
@@ -1366,7 +1359,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       if (hook !== "aftermath-banish" || option === "no") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      const shadow = hasType(ctx, card, "shadow");
+      const shadow = hasCardSubtype(ctx, card, "shadow");
       if (ctx.banish(card.instanceId) && shadow) ctx.grantCardKeyword(ctx.self.instanceId, "dominate");
     },
   },
@@ -1387,7 +1380,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       if (hook !== "aftermath-banish" || option === "no") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      const shadow = hasType(ctx, card, "shadow");
+      const shadow = hasCardSubtype(ctx, card, "shadow");
       if (ctx.banish(card.instanceId) && shadow) ctx.grantCardKeyword(ctx.self.instanceId, "dominate");
     },
   },
@@ -1593,7 +1586,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       }
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "light");
+      return ctx.link?.targetAllyId === undefined && hasCardSubtype(ctx, ctx.player(opponentSeat(ctx)).hero, "light");
     },
     onHit(ctx) {
       const soul = ctx.player(opponentSeat(ctx)).soul;
@@ -1814,16 +1807,16 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "surging militia|2": { modifyAttack: (ctx) => ctx.link?.defendingCards.length ?? 0 },
   "surging militia|3": { modifyAttack: (ctx) => ctx.link?.defendingCards.length ?? 0 },
   "yinti yanti|1": {
-    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
-    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
+    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => isAura(ctx, card)) ? 1 : 0),
+    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => isAura(ctx, card)) ? 1 : 0),
   },
   "yinti yanti|2": {
-    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
-    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
+    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => isAura(ctx, card)) ? 1 : 0),
+    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => isAura(ctx, card)) ? 1 : 0),
   },
   "yinti yanti|3": {
-    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
-    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
+    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => isAura(ctx, card)) ? 1 : 0),
+    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => isAura(ctx, card)) ? 1 : 0),
   },
   "zealous belting|2": {
     hasConditionalGoAgain: (ctx) => {

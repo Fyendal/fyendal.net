@@ -16,6 +16,8 @@ import {
   suspenseAura,
   suspenseNextAttackBuff,
   yesNoPrompt,
+  isAura,
+  isSuspenseAura,
 } from "./shared-helpers.js";
 
 // ── SLY (Silver Age: Lyath Goldmane precon) ─────────────────────────────────
@@ -43,18 +45,14 @@ const BOO = crowdTrigger("boo");
 
 /** ctx.state is typed without the internal side tables; the runtime object has them. */
 
-function hasKeyword(ctx: ScriptCtx, cardId: string, keyword: string): boolean {
-  return (ctx.cardData(cardId).keywords ?? []).some((k) => k.toLowerCase() === keyword.toLowerCase());
-}
-
 /** Auras you control (aura-subtype board cards: Suspense auras, Booze!, tokens). */
 function countAuras(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).board.filter((c) => ctx.cardTypes(c).includes("aura")).length;
+  return ctx.player(ctx.seat).board.filter((c) => isAura(ctx, c)).length;
 }
 
 /** An "aura of suspense" is an aura with the Suspense keyword (SUP notes). */
 function controlsSuspenseAura(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).board.some((c) => hasKeyword(ctx, c.cardId, "suspense"));
+  return ctx.player(ctx.seat).board.some((c) => isSuspenseAura(ctx, c));
 }
 
 function crushTriggered(ctx: ScriptCtx): boolean {

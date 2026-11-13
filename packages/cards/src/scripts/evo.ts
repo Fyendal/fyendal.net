@@ -7,6 +7,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
+  hasCardSubtype,
   hyperDriverCounterFromBoostBanish,
   isAttackAction,
   localizedCardLog,
@@ -27,20 +28,16 @@ function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
 }
 
-function hasTag(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, tag: string): boolean {
-  return ctx.cardTypes(card).includes(tag.toLowerCase());
-}
-
 function isMechAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasTag(ctx, card, "mechanologist") && hasTag(ctx, card, "attack");
+  return isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "mechanologist");
 }
 
 function isItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasTag(ctx, card, "item");
+  return hasCardSubtype(ctx, card, "item");
 }
 
 function isEvo(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasTag(ctx, card, "evo");
+  return hasCardSubtype(ctx, card, "evo");
 }
 
 function controlsNamed(ctx: ScriptCtx, name: string): boolean {
@@ -104,7 +101,7 @@ function evoEquipment(extra: CardScript = {}): CardScript {
   return {
     ...extra,
     playableEquipment: true,
-    transformsEquipment: (ctx, equipped) => hasTag(ctx, equipped, "base"),
+    transformsEquipment: (ctx, equipped) => hasCardSubtype(ctx, equipped, "base"),
     playAsInstant(ctx) {
       return ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true || (extra.playAsInstant?.(ctx) ?? false);
     },
@@ -381,7 +378,7 @@ const dashDatabase: CardScript = {
     return (
       zone === "deck" &&
       isItem(ctx, card) &&
-      hasTag(ctx, card, "mechanologist") &&
+      hasCardSubtype(ctx, card, "mechanologist") &&
       (d.cost ?? 0) <= 1 &&
       ctx.player(ctx.seat).deck[0]?.instanceId === card.instanceId
     );
@@ -391,7 +388,8 @@ const dashDatabase: CardScript = {
   },
   allowsFriendlyCardPlayAsInstant(ctx, card, zone) {
     return (
-      zone === "deck" && isItem(ctx, card) && hasTag(ctx, card, "mechanologist") && (data(ctx, card).cost ?? 0) <= 1
+      zone === "deck" && isItem(ctx, card) && hasCardSubtype(ctx, card, "mechanologist") &&
+        (data(ctx, card).cost ?? 0) <= 1
     );
   },
 };

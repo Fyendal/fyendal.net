@@ -95,8 +95,21 @@ describe("card script layout", () => {
 
     expect(rawTypeReads).toEqual([
       "cru/high-rarity.ts:const heroClass = heroData.classes?.[0];",
-      "pen.ts:return [...(d.classes ?? []), ...(d.subtypes ?? [])].some((value) => value.toLowerCase() === wanted);",
-      "sea.ts:return [...(d.classes ?? []), ...(d.subtypes ?? [])].some((value) => value.toLowerCase() === wanted);",
+      "pen.ts:return [...(d.classes ?? []), ...(d.subtypes ?? [])].includes(tag);",
+    ]);
+  });
+
+  it("uses effective keywords whenever a card instance is available", () => {
+    const rawKeywordReads = scriptSources(scriptsDir).flatMap(({ path, source }) =>
+      source.split("\n").flatMap((line) =>
+        /\.(?:keywords|grantedKeywords|suppressedKeywords)\b/.test(line) && !line.trim().startsWith("//")
+          ? [`${path}:${line.trim()}`]
+          : [],
+      ),
+    );
+
+    expect(rawKeywordReads).toEqual([
+      "shared-helpers.ts:return (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase().includes(\"specialization\"));",
     ]);
   });
 });

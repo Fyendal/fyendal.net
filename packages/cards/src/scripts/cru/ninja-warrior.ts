@@ -1,30 +1,21 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   commonOptionMessages,
   decisionPrompt,
   isAttackAction,
+  isSword,
   localizedCardLog,
   opponentSeat,
   previousAttackHasName,
 } from "../shared-helpers.js";
 
 const COPPER = "CRU197";
-type CardRef = DeepReadonly<CardInstance>;
-
 function comboWith(ctx: ScriptCtx, name: string): boolean {
   return previousAttackHasName(ctx, name);
 }
 
-function hasCombo(ctx: ScriptCtx, card: CardRef): boolean {
-  return (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "combo");
-}
-
 function isWeaponAttack(ctx: ScriptCtx): boolean {
   return ctx.link?.attackCardType === "weapon";
-}
-
-function isSword(ctx: ScriptCtx, card: CardRef): boolean {
-  return ctx.cardTypes(card).includes("sword");
 }
 
 function attackedWithWeapon(ctx: ScriptCtx): boolean {
@@ -196,7 +187,7 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook === "katsu-discard") {
         if (option === "pass" || !ctx.discardCard(ctx.seat, Number(option))) return;
-        const combo = ctx.state.players[ctx.seat]!.deck.filter((card) => hasCombo(ctx, card));
+        const combo = ctx.state.players[ctx.seat]!.deck.filter((card) => ctx.hasKeyword(card, "combo"));
         if (combo.length === 0) {
           ctx.shuffleDeck(ctx.seat);
           return;

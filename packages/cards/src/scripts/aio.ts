@@ -7,22 +7,19 @@ import {
   ongoingLabel,
   yesNoPrompt,
   hasLiveTurnEffect,
+  hasCardSubtype,
 } from "./shared-helpers.js";
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
 }
 
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
 function isItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasType(ctx, card, "item");
+  return hasCardSubtype(ctx, card, "item");
 }
 
 function isMech(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasType(ctx, card, "mechanologist");
+  return hasCardSubtype(ctx, card, "mechanologist");
 }
 
 function crankItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {

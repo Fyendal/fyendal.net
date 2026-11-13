@@ -11,17 +11,14 @@ import {
   hitHookLabel,
   ongoingLabel,
   hasLiveTurnEffect,
+  hasCardSubtype,
 } from "./shared-helpers.js";
 
 const CORRUPTED_CORPSE = "IAR090";
 const GATE = "IAR222";
 
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
 function zombies(ctx: ScriptCtx, zone: readonly DeepReadonly<CardInstance>[]) {
-  return zone.filter((card) => !card.faceDown && hasType(ctx, card, "zombie"));
+  return zone.filter((card) => !card.faceDown && hasCardSubtype(ctx, card, "zombie"));
 }
 
 function controlsVox(ctx: ScriptCtx): boolean {
@@ -43,7 +40,7 @@ function destroyingZombieAttack(
   return {
     onFriendlyAttackDeclared(ctx) {
       const link = ctx.link;
-      if (!link || link.attacker !== ctx.seat || !hasType(ctx, link.attackingCard, "zombie")) return;
+      if (!link || link.attacker !== ctx.seat || !hasCardSubtype(ctx, link.attackingCard, "zombie")) return;
       if (!consumeDelayedEffect(ctx)) return;
       ctx.setFlag("link", marker, (Number(ctx.getFlag("link", marker)) || 0) + 1);
     },
@@ -119,7 +116,7 @@ export const ama: Record<string, CardScript> = {
       if (hook === "ama-malice-zombie") ctx.allowPlayFrom(Number(option), "graveyard");
     },
     onFriendlyDestroyed(ctx, destroyed) {
-      if (!hasType(ctx, destroyed, "zombie") || !hasType(ctx, destroyed, "ally")) return;
+      if (!hasCardSubtype(ctx, destroyed, "zombie") || !hasCardSubtype(ctx, destroyed, "ally")) return;
       ctx.banish(destroyed.instanceId, { faceDown: true });
       ctx.createCardInBanish(CORRUPTED_CORPSE);
     },
@@ -130,7 +127,7 @@ export const ama: Record<string, CardScript> = {
       if (
         ctx.state.phase !== "action" ||
         (from !== "graveyard" && from !== "banish") ||
-        !hasType(ctx, played, "zombie")
+        !hasCardSubtype(ctx, played, "zombie")
       )
         return;
       ctx.setCardState(played.instanceId, "voxAttackOnEnter", 1);
@@ -189,7 +186,7 @@ export const ama: Record<string, CardScript> = {
         condition: (ctx, card) =>
           !!card &&
           card.owner === ctx.seat &&
-          hasType(ctx, card, "zombie") &&
+          hasCardSubtype(ctx, card, "zombie") &&
           hasLiveTurnEffect(ctx),
         effect(ctx) {
           ctx.gainResources(ctx.seat, 1);
@@ -313,7 +310,7 @@ export const ama: Record<string, CardScript> = {
       if (hook !== "ama-clambering-discard" || option === "no") return;
       const zombie = ctx
         .player(ctx.seat)
-        .hand.find((card) => card.instanceId === Number(option) && hasType(ctx, card, "zombie"));
+        .hand.find((card) => card.instanceId === Number(option) && hasCardSubtype(ctx, card, "zombie"));
       if (!zombie || !ctx.discardCard(ctx.seat, zombie.instanceId)) return;
       ctx.addCardTempPower(ctx.self.instanceId, 3);
       ctx.grantGoAgain();
@@ -358,7 +355,7 @@ export const ama: Record<string, CardScript> = {
       if (hook !== "ama-solace-graveyard" || option === "no") return;
       const selected = ctx.player(ctx.seat).banish.find((card) => card.instanceId === Number(option) && !card.faceDown);
       if (!selected) return;
-      const isZombie = hasType(ctx, selected, "zombie");
+      const isZombie = hasCardSubtype(ctx, selected, "zombie");
       if (ctx.moveToGraveyard(selected.instanceId, "banish") && isZombie) {
         ctx.gainLife(ctx.seat, 1);
       }

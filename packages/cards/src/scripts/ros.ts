@@ -28,6 +28,9 @@ import {
   resolveDiscardChoice,
   resourceAbility,
   hasLiveTurnEffect,
+  hasCardSubtype,
+  isAura,
+  isNonAttackAction,
 } from "./shared-helpers.js";
 import { hasType } from "@fyendal/shared";
 
@@ -41,10 +44,6 @@ const SPECTRAL_SHIELD = "MST158";
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
-}
-
-function hasTag(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, tag: string): boolean {
-  return ctx.cardTypes(card).includes(tag.toLowerCase());
 }
 
 function requestPlanForWorstHandShuffle(ctx: ScriptCtx): void {
@@ -65,16 +64,8 @@ function requestPlanForWorstHandShuffle(ctx: ScriptCtx): void {
   );
 }
 
-function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasTag(ctx, card, "aura");
-}
-
-function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && !hasTag(ctx, card, "attack");
-}
-
 function earthBanished(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && hasTag(ctx, card, "earth")).length;
+  return ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && hasCardSubtype(ctx, card, "earth")).length;
 }
 
 function fourEarthBanished(ctx: ScriptCtx): boolean {
@@ -135,7 +126,7 @@ function requestAnyTarget(
   for (const player of ctx.state.players) {
     if (opposingOnly && player.seat === ctx.seat) continue;
     for (const card of player.board) {
-      if (!hasTag(ctx, card, "ally")) continue;
+      if (!hasCardSubtype(ctx, card, "ally")) continue;
       options.push(`ally:${player.seat}:${card.instanceId}`);
       cardOptions.push(card.instanceId);
     }
@@ -201,11 +192,11 @@ function decompose(trigger: "attack" | "play", payoff: DecomposePayoff): CardScr
     const grave = faceUpGraveyard(ctx);
     const firstEarth = grave.filter(
       (first) =>
-        hasTag(ctx, first, "earth") &&
+        hasCardSubtype(ctx, first, "earth") &&
         grave.some(
           (second) =>
             second.instanceId !== first.instanceId &&
-            hasTag(ctx, second, "earth") &&
+            hasCardSubtype(ctx, second, "earth") &&
             grave.some(
               (action) =>
                 action.instanceId !== first.instanceId &&
@@ -231,12 +222,12 @@ function decompose(trigger: "attack" | "play", payoff: DecomposePayoff): CardScr
       if (hook === "decompose-earth-1") {
         if (option === "no") return;
         const first = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
-        if (!first || !hasTag(ctx, first, "earth")) return;
+        if (!first || !hasCardSubtype(ctx, first, "earth")) return;
         ctx.setState("decomposeEarth1", first.instanceId);
         const secondEarth = faceUpGraveyard(ctx).filter(
             (second) =>
               second.instanceId !== first.instanceId &&
-              hasTag(ctx, second, "earth") &&
+              hasCardSubtype(ctx, second, "earth") &&
               faceUpGraveyard(ctx).some(
                   (action) =>
                     action.instanceId !== first.instanceId &&
@@ -258,7 +249,7 @@ function decompose(trigger: "attack" | "play", payoff: DecomposePayoff): CardScr
       if (hook === "decompose-earth-2") {
         const firstId = ctx.getState("decomposeEarth1");
         const second = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
-        if (!second || second.instanceId === firstId || !hasTag(ctx, second, "earth")) return;
+        if (!second || second.instanceId === firstId || !hasCardSubtype(ctx, second, "earth")) return;
         ctx.setState("decomposeEarth2", second.instanceId);
         const actions = faceUpGraveyard(ctx).filter(
             (card) =>
@@ -280,8 +271,8 @@ function decompose(trigger: "attack" | "play", payoff: DecomposePayoff): CardScr
       const chosen = ids.map((id) => grave.find((card) => card.instanceId === id));
       if (
         !chosen.every(Boolean) ||
-        !hasTag(ctx, chosen[0]!, "earth") ||
-        !hasTag(ctx, chosen[1]!, "earth") ||
+        !hasCardSubtype(ctx, chosen[0]!, "earth") ||
+        !hasCardSubtype(ctx, chosen[1]!, "earth") ||
         !ctx.hasCardType(chosen[2]!, "action")
       )
         return;
@@ -749,8 +740,8 @@ function arsenalHit(required: "attack" | "non-attack" | "instant"): CardScript {
       if (facedown) ctx.turnArsenalFaceUp(facedown.instanceId);
       const matches = ctx.player(target).arsenal.filter((card) => {
         if (required === "instant") return ctx.hasCardType(card, "instant");
-        if (required === "attack") return ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack");
-        return ctx.hasCardType(card, "action") && !hasTag(ctx, card, "attack");
+        if (required === "attack") return isAttackAction(ctx, card);
+        return isNonAttackAction(ctx, card);
       });
       if (matches.length)
         ctx.requestCardChoice(
@@ -768,7 +759,7 @@ function arsenalHit(required: "attack" | "non-attack" | "instant"): CardScript {
 export const ros: Record<string, CardScript> = {
   "florian|0": {
     replaceFriendlyTokenCreation(ctx, cardId, count) {
-      return fourEarthBanished(ctx) && hasTag(ctx, { cardId, owner: ctx.seat, instanceId: -1 }, "aura")
+      return fourEarthBanished(ctx) && hasCardSubtype(ctx, { cardId, owner: ctx.seat, instanceId: -1 }, "aura")
         ? count + 1
         : count;
     },
@@ -793,7 +784,7 @@ export const ros: Record<string, CardScript> = {
       goAgain: true,
       oncePerTurn: true,
       onCostPaid(ctx, paid) {
-        if (paid.some((card) => hasTag(ctx, card, "earth"))) ctx.setState("earthPitchedTurn", ctx.state.turn);
+        if (paid.some((card) => hasCardSubtype(ctx, card, "earth"))) ctx.setState("earthPitchedTurn", ctx.state.turn);
       },
       onActivate(ctx) {
         ampNextArcane(ctx, 1);
@@ -867,7 +858,7 @@ export const ros: Record<string, CardScript> = {
   },
   "flash of brilliance|0": {
     onDefend(ctx) {
-      const lightning = ctx.player(ctx.seat).hand.filter((card) => hasTag(ctx, card, "lightning"));
+      const lightning = ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, "lightning"));
       if (lightning.length)
         ctx.requestCardChoice(
           "brilliance-discard",
@@ -1737,7 +1728,7 @@ Object.assign(ros, {
       // end-phase wipe consumed in endTurn()
       ctx.setCardState(target.hero.instanceId, "clearHandAndArsenalAtEndPhaseTurn", ctx.state.turn + 1);
       const deck = ctx.player(ctx.seat).deck;
-      const traps = ctx.canSearchDeck() ? deck.filter((card) => hasTag(ctx, card, "trap")) : [];
+      const traps = ctx.canSearchDeck() ? deck.filter((card) => hasCardSubtype(ctx, card, "trap")) : [];
       if (traps.length) {
         ctx.requestCardChoices(
           "plan-for-worst-traps",
@@ -1756,7 +1747,7 @@ Object.assign(ros, {
     onChooseMany(ctx: ScriptCtx, hook: string, options: readonly string[]) {
       if (hook === "plan-for-worst-traps") {
         const chosen = options.map(Number).filter((instanceId) =>
-          ctx.player(ctx.seat).deck.some((card) => card.instanceId === instanceId && hasTag(ctx, card, "trap")),
+          ctx.player(ctx.seat).deck.some((card) => card.instanceId === instanceId && hasCardSubtype(ctx, card, "trap")),
         );
         if (chosen.length) ctx.revealCards(chosen);
         for (const instanceId of chosen) ctx.moveToHand(instanceId);

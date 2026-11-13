@@ -528,6 +528,9 @@ export interface ScriptCtx {
   /** Whether an item currently has Crank, including continuous grants from
    * active sources and suppression of its printed abilities. */
   hasCrank(card: DeepReadonly<CardInstance>): boolean;
+  /** Whether an object currently has a keyword, honoring grants, suppression
+   * and ability loss. Use `cardData(...).keywords` only for printed text. */
+  hasKeyword(card: DeepReadonly<CardInstance>, keyword: string): boolean;
   /** Whether an object currently has Ward (Ward N or Ward X), printed or granted. */
   hasWard(card: DeepReadonly<CardInstance>): boolean;
   /** Count equipped cards with this effective class/subtype, including active

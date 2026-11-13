@@ -8,6 +8,9 @@ import {
   decisionMessage,
   decisionPrompt,
   faceUpGraveyard,
+  hasCardSubtype,
+  isAura,
+  isSuspenseAura,
   opponentSeat,
   suspenseAura as suspense,
   type SuspenseTrigger,
@@ -18,20 +21,8 @@ const CONFIDENCE = "APS031";
 const TOUGHNESS = "APS032";
 type Card = DeepReadonly<CardInstance>;
 
-function data(ctx: ScriptCtx, card: Card) {
-  return ctx.cardData(card.cardId);
-}
-function hasTag(ctx: ScriptCtx, card: Card, tag: string): boolean {
-  return ctx.cardTypes(card).some((value) => value.toLowerCase() === tag.toLowerCase());
-}
-function suspenseAura(ctx: ScriptCtx, card: Card): boolean {
-  return (
-    hasTag(ctx, card, "aura") &&
-    (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "suspense")
-  );
-}
 function suspenseTargets(ctx: ScriptCtx): Card[] {
-  return ctx.player(ctx.seat).board.filter((card) => suspenseAura(ctx, card));
+  return ctx.player(ctx.seat).board.filter((card) => isSuspenseAura(ctx, card));
 }
 function removeSuspenseChoice(ctx: ScriptCtx, hook: string, prompt: string): void {
   const targets = suspenseTargets(ctx).filter((card) => (card.counters?.suspense ?? 0) > 0);
@@ -102,7 +93,7 @@ function returnAttackToTop(ctx: ScriptCtx): void {
       (card) =>
         ctx.hasCardType(card, "action") &&
         ctx.cardTypes(card).includes("attack") &&
-        (hasTag(ctx, card, "revered") || hasTag(ctx, card, "guardian")),
+        (hasCardSubtype(ctx, card, "revered") || hasCardSubtype(ctx, card, "guardian")),
     );
   if (attacks.length)
     ctx.requestCardChoice(
@@ -127,7 +118,7 @@ function beginThespianCheer(ctx: ScriptCtx): void {
   ]);
 }
 function beginThespianReturn(ctx: ScriptCtx): void {
-  const auras = ctx.player(ctx.seat).board.filter((card) => hasTag(ctx, card, "aura"));
+  const auras = ctx.player(ctx.seat).board.filter((card) => isAura(ctx, card));
   if (auras.length)
     ctx.requestCardChoice(
       "aps-thespian-return",

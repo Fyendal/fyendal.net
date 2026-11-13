@@ -12,7 +12,9 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
+  hasCardSubtype,
   heroDamage,
+  isAttackAction,
   localizedCardLog,
   mergeSetScripts,
   ongoingLabel,
@@ -52,10 +54,6 @@ function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
 }
 
-function hasSubtype(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, subtype: string): boolean {
-  return ctx.cardTypes(card).includes(subtype.toLowerCase());
-}
-
 function ashCards(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
   return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Ash"));
 }
@@ -77,7 +75,7 @@ function livingTargets(ctx: ScriptCtx): number[] {
     ...ctx.state.players.map((player) => player.hero.instanceId),
     ...ctx.state.players.flatMap((player) =>
       player.board
-        .filter((card) => hasSubtype(ctx, card, "ally") && card.life !== undefined)
+        .filter((card) => hasCardSubtype(ctx, card, "ally") && card.life !== undefined)
         .map((card) => card.instanceId),
     ),
   ];
@@ -225,7 +223,7 @@ function invocation(backId: string): CardScript {
 }
 
 function fusionAdditionalCost(ctx: ScriptCtx): void {
-  const ice = ctx.player(ctx.seat).hand.filter((card) => hasSubtype(ctx, card, "ice"));
+  const ice = ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, "ice"));
   if (ice.length === 0) return;
   ctx.requestCardChoice(
     "ice-fusion",
@@ -362,7 +360,7 @@ function banishAttackOnHit(hook: string, reward: "power" | "discount" | "go-agai
       const count = draconicLinks(ctx);
       const choices = ctx.player(ctx.seat).hand.filter((card) => {
         const cardData = data(ctx, card);
-        return ctx.hasCardType(card, "action") && hasSubtype(ctx, card, "attack") && (cardData.cost ?? 0) < count;
+        return isAttackAction(ctx, card) && (cardData.cost ?? 0) < count;
       });
       if (choices.length > 0) {
         ctx.requestCardChoice(
@@ -525,7 +523,7 @@ function singe(maxAllyTargets: number): CardScript {
       const target = option === "you" ? ctx.seat : opponentSeat(ctx);
       ctx.setState("singeTarget", target);
       dealArcane(ctx, target, 1);
-      const allies = ctx.player(target).board.filter((card) => hasSubtype(ctx, card, "ally"));
+      const allies = ctx.player(target).board.filter((card) => hasCardSubtype(ctx, card, "ally"));
       if (!allies.length) return;
       const amount = ctx.previewArcaneDamage(1);
       ctx.requestCardChoices(
@@ -563,7 +561,7 @@ function transmogrify(power: number): CardScript {
     onFriendlyAttackDeclared(ctx) {
       if (ctx.getPlayerFlag(ctx.seat, "transmogrifyPending") !== true) return;
       if (ctx.link?.attackCardType !== "action") return;
-      if (!hasSubtype(ctx, ctx.link.attackingCard, "attack")) return;
+      if (!hasCardSubtype(ctx, ctx.link.attackingCard, "attack")) return;
       const target = Number(ctx.getPlayerFlag(ctx.seat, "transmogrifyPower"));
       ctx.addModifier({ scope: "chain-link", attack: target - ctx.basePower(ctx.link.attackingCard) });
       ctx.setPlayerFlag(ctx.seat, "transmogrifyPending", false);
@@ -593,14 +591,14 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     onFriendlyAttackDeclared(ctx) {
       if (
         ctx.link &&
-        hasSubtype(ctx, ctx.link.attackingCard, "dragon") &&
+        hasCardSubtype(ctx, ctx.link.attackingCard, "dragon") &&
         ctx.playedThisTurn("red") > 0
       )
         ctx.grantGoAgain();
     },
     onFriendlyPlay(ctx, played) {
       if (ctx.cardColor(played) !== 1 || !ctx.link) return;
-      if (hasSubtype(ctx, ctx.link.attackingCard, "dragon")) ctx.grantGoAgain();
+      if (hasCardSubtype(ctx, ctx.link.attackingCard, "dragon")) ctx.grantGoAgain();
     },
   },
 
@@ -642,7 +640,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     activated: dragonAttack(),
     canTriggerOnHit: (ctx) => !!ctx.link && ctx.link.targetAllyId === undefined,
     onHit(ctx) {
-      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasSubtype(ctx, card, "item"));
+      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasCardSubtype(ctx, card, "item"));
       if (items.length === 0) {
         ctx.drawCards(ctx.seat, 1);
         return;
@@ -661,7 +659,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "miragai|0": {
     activated: dragonAttack(),
     onFriendlyAttackDeclared(ctx) {
-      if (!ctx.link || !hasSubtype(ctx, ctx.link.attackingCard, "dragon")) return;
+      if (!ctx.link || !hasCardSubtype(ctx, ctx.link.attackingCard, "dragon")) return;
       if (ctx.getPlayerFlag(ctx.seat, "dragonAttackedThisTurn") === true) return;
       ctx.setPlayerFlag(ctx.seat, "dragonAttackedThisTurn", true);
       ctx.suppressCardKeyword(ctx.link.attackingCard.instanceId, "phantasm");
@@ -947,7 +945,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "engulfing flamewave|1": {
     onHit(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
-      if (top && hasSubtype(ctx, top, "attack") && (data(ctx, top).cost ?? 0) < draconicLinks(ctx)) {
+      if (top && hasCardSubtype(ctx, top, "attack") && (data(ctx, top).cost ?? 0) < draconicLinks(ctx)) {
         ctx.banish(top.instanceId);
         ctx.allowPlayFrom(top.instanceId, "banish");
       }
@@ -956,7 +954,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "engulfing flamewave|2": {
     onHit(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
-      if (top && hasSubtype(ctx, top, "attack") && (data(ctx, top).cost ?? 0) < draconicLinks(ctx)) {
+      if (top && hasCardSubtype(ctx, top, "attack") && (data(ctx, top).cost ?? 0) < draconicLinks(ctx)) {
         ctx.banish(top.instanceId);
         ctx.allowPlayFrom(top.instanceId, "banish");
       }
@@ -965,7 +963,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "engulfing flamewave|3": {
     onHit(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
-      if (top && hasSubtype(ctx, top, "attack") && (data(ctx, top).cost ?? 0) < draconicLinks(ctx)) {
+      if (top && hasCardSubtype(ctx, top, "attack") && (data(ctx, top).cost ?? 0) < draconicLinks(ctx)) {
         ctx.banish(top.instanceId);
         ctx.allowPlayFrom(top.instanceId, "banish");
       }
@@ -1315,7 +1313,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         ) {
           const choices = [
             ...ctx.player(target).arsenal,
-            ...ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally")),
+            ...ctx.player(target).board.filter((c) => hasCardSubtype(ctx, c, "ally")),
           ];
           if (choices.length)
             ctx.requestCardChoice(
@@ -1328,7 +1326,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         const target = ctx.getState("coldTarget");
         const choices = [
           ...ctx.player(target).arsenal,
-          ...ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally")),
+          ...ctx.player(target).board.filter((c) => hasCardSubtype(ctx, c, "ally")),
         ];
         if (choices.length)
           ctx.requestCardChoice(
@@ -1365,7 +1363,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         ) {
           const choices = [
             ...ctx.player(target).arsenal,
-            ...ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally")),
+            ...ctx.player(target).board.filter((c) => hasCardSubtype(ctx, c, "ally")),
           ];
           if (choices.length)
             ctx.requestCardChoice(
@@ -1378,7 +1376,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         const target = ctx.getState("coldTarget");
         const choices = [
           ...ctx.player(target).arsenal,
-          ...ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally")),
+          ...ctx.player(target).board.filter((c) => hasCardSubtype(ctx, c, "ally")),
         ];
         if (choices.length)
           ctx.requestCardChoice(
@@ -1499,7 +1497,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
             "no",
           ]);
         else {
-          const allies = ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally"));
+          const allies = ctx.player(target).board.filter((c) => hasCardSubtype(ctx, c, "ally"));
           if (allies.length)
             ctx.requestCardChoice(
               "horns-ally",
@@ -1513,7 +1511,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         const target = ctx.getState("hornsTarget");
         const arsenalCard = ctx.player(target).arsenal[0];
         if (o === "yes" && arsenalCard) freeze(ctx, arsenalCard);
-        const allies = ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally"));
+        const allies = ctx.player(target).board.filter((c) => hasCardSubtype(ctx, c, "ally"));
         if (allies.length)
           ctx.requestCardChoice(
             "horns-ally",

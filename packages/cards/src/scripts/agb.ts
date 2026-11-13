@@ -2,14 +2,6 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import { attackAbility, commonOptionMessages, decisionPrompt } from "./shared-helpers.js";
 import { sgb } from "./sgb.js";
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-
-function wateryGrave(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "watery grave");
-}
-
 function pirateAlly(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   const types = ctx.cardTypes(card);
   return types.includes("ally") && types.includes("pirate");
@@ -22,7 +14,7 @@ export const agb: Record<string, CardScript> = {
 
   "tricorn of saltwater death|0": {
     onDefend(ctx) {
-      const choices = ctx.player(ctx.seat).hand.filter((card) => wateryGrave(ctx, card));
+      const choices = ctx.player(ctx.seat).hand.filter((card) => ctx.hasKeyword(card, "watery grave"));
       if (choices.length)
         ctx.requestCardChoice(
           "tricorn-discard",

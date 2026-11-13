@@ -42,6 +42,7 @@ import {
   sharesName,
   targetsHero,
   tokenContractWithSilver,
+  isDagger,
 } from "./shared-helpers.js";
 
 const SILVER = "DYN245";
@@ -87,10 +88,6 @@ const FREE_OF_BURDENS: CardScript = {
 
 function isReaction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.hasCardType(card, "attack-reaction") || ctx.hasCardType(card, "defense-reaction");
-}
-
-function isDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("dagger");
 }
 
 /** Every dagger in play: weapons, dagger permanents, and dagger attack cards
@@ -966,7 +963,7 @@ export const mpa: Record<string, CardScript> = {
           !!attack &&
           ctx.link?.attacker === ctx.seat &&
           attack.instanceId !== ctx.self.instanceId &&
-          (ctx.cardData(attack.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "stealth")
+          ctx.hasKeyword(attack, "stealth")
         );
       },
       onCostPaid(ctx) {

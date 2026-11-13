@@ -26,6 +26,11 @@ import {
   weaponAttackCount,
   opposingHeroDamage,
   ongoingLabel,
+  hasCardSubtype,
+  isAura,
+  isDagger,
+  isNonAttackAction,
+  isSword,
 } from "./shared-helpers.js";
 import { hasType as hasPrintedType } from "@fyendal/shared";
 
@@ -36,14 +41,6 @@ const SEISMIC_SURGE = "EVR036";
 const RUNECHANT = "EVR119";
 const SPECTRAL_SHIELD = "EVR153";
 
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasType(ctx, card, "aura");
-}
-
 function auraActivity(ctx: ScriptCtx): boolean {
   return ctx.getFlag("player", "playedSubtype:aura") === true || ctx.getFlag("player", "createdSubtype:aura") === true;
 }
@@ -53,14 +50,14 @@ function makeCopies(ctx: ScriptCtx, cardId: string, count: number): void {
 }
 
 function currentWeaponIsOneHanded(ctx: ScriptCtx): boolean {
-  return isWeaponAttack(ctx) && !!ctx.link && hasType(ctx, ctx.link.attackingCard, "1h");
+  return isWeaponAttack(ctx) && !!ctx.link && hasCardSubtype(ctx, ctx.link.attackingCard, "1h");
 }
 
 function currentWeaponIsSwordOrDagger(ctx: ScriptCtx): boolean {
   return (
     isWeaponAttack(ctx) &&
     !!ctx.link &&
-    (hasType(ctx, ctx.link.attackingCard, "sword") || hasType(ctx, ctx.link.attackingCard, "dagger"))
+    (isSword(ctx, ctx.link.attackingCard) || isDagger(ctx, ctx.link.attackingCard))
   );
 }
 
@@ -442,7 +439,7 @@ function drowningDire(): CardScript {
     },
     onHit(ctx) {
       const options = faceUpGraveyard(ctx).filter((card) => {
-        return ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack");
+        return isNonAttackAction(ctx, card);
       });
       if (options.length === 0) return;
       ctx.requestCardChoice(
@@ -639,7 +636,7 @@ function hazeBending(): CardScript {
         (ctx, destroyed) =>
           destroyed.instanceId !== ctx.self.instanceId &&
           !hasPrintedType(ctx.cardData(destroyed.cardId), "token") &&
-          hasType(ctx, destroyed, "illusionist") &&
+          hasCardSubtype(ctx, destroyed, "illusionist") &&
           isAura(ctx, destroyed),
       ),
       trigger("self", (ctx, destroyed) => destroyed.instanceId === ctx.self.instanceId),
@@ -654,7 +651,8 @@ function coalescenceMirage(): CardScript {
         .player(ctx.seat)
         .hand.filter(
           (card) =>
-            hasType(ctx, card, "illusionist") && isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === 0,
+            hasCardSubtype(ctx, card, "illusionist") && isAura(ctx, card) &&
+              (ctx.cardData(card.cardId).cost ?? 0) === 0,
         );
       if (auras.length > 0) {
         ctx.requestCardChoice(
@@ -834,7 +832,7 @@ function smashingGoodTime(amount: number): CardScript {
       ctx.setState("smashingReady", 0);
       const items = ctx
         .player(opponentSeat(ctx))
-        .board.filter((card) => hasType(ctx, card, "item") && (ctx.cardData(card.cardId).cost ?? 0) <= 2);
+        .board.filter((card) => hasCardSubtype(ctx, card, "item") && (ctx.cardData(card.cardId).cost ?? 0) <= 2);
       if (items.length > 0) {
         ctx.requestCardChoice(
           "smashing-item",
@@ -1427,7 +1425,7 @@ export const evr: Record<string, CardScript> = mergeSetScripts("EVR", evrHighRar
   "haze bending|3": hazeBending(),
   "passing mirage|3": {
     onFriendlyPlay(ctx, played) {
-      if (!isAttackAction(ctx, played) || !hasType(ctx, played, "illusionist")) return;
+      if (!isAttackAction(ctx, played) || !hasCardSubtype(ctx, played, "illusionist")) return;
       const key = `passingMirage:${ctx.self.instanceId}`;
       if (ctx.getFlag("player", key) === true) return;
       ctx.setFlag("player", key, true);
@@ -1436,7 +1434,7 @@ export const evr: Record<string, CardScript> = mergeSetScripts("EVR", evrHighRar
   },
   "pierce reality|3": {
     onFriendlyPlay(ctx, played) {
-      if (!isAttackAction(ctx, played) || !hasType(ctx, played, "illusionist")) return;
+      if (!isAttackAction(ctx, played) || !hasCardSubtype(ctx, played, "illusionist")) return;
       const key = `pierceReality:${ctx.self.instanceId}`;
       if (ctx.getFlag("player", key) === true) return;
       ctx.setFlag("player", key, true);

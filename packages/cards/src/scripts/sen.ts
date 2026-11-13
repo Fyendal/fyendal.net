@@ -1,9 +1,10 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   decisionMessage,
   decisionPrompt,
   destroyedTrigger,
   faceUpGraveyard,
+  isAura,
   isCard,
   leavesArenaTrigger,
   localizedCardLog,
@@ -39,10 +40,6 @@ import {
 //   optional seat param on ctx.createToken).
 const SPECTRAL_SHIELD = "SEN037";
 const GOLD = "SEN036";
-
-function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("aura");
-}
 
 /** Auras with ward on the controller's board (Spectral Shield, Waning/Waxing, …). */
 function wardAuras(ctx: ScriptCtx) {

@@ -6,6 +6,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
+  hasCardSubtype,
   isAttackAction,
   isSixPlus,
   localizedCardLog,
@@ -20,10 +21,6 @@ const SEISMIC_SURGE = "WTR075B";
 
 function namedAny(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, names: readonly string[]): boolean {
   return names.some((name) => cardNamed(ctx, card, name));
-}
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type);
 }
 
 function previousAttackNamed(ctx: ScriptCtx, name: string): boolean {
@@ -124,7 +121,7 @@ const showTime: CardScript = {
           "show-time-search",
           "Show Time!: choose a Guardian attack action",
           "card.wtr.showtime.attack.choose",
-          (card) => isAttackAction(ctx, card) && hasType(ctx, card, "guardian"),
+          (card) => isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "guardian"),
         ),
     ),
     {
@@ -282,7 +279,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
   "mask of momentum|0": maskOfMomentum,
   "lord of wind|3": lordOfWind,
   "ancestral empowerment|1": {
-    canPlay: (ctx) => ctx.link?.attackCardType === "action" && hasType(ctx, ctx.link.attackingCard, "ninja"),
+    canPlay: (ctx) => ctx.link?.attackCardType === "action" && hasCardSubtype(ctx, ctx.link.attackingCard, "ninja"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
       ctx.drawCards(ctx.seat, 1);

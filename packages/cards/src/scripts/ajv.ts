@@ -7,6 +7,7 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  hasCardSubtype,
   localizedCardLog,
   opponentSeat,
 } from "./shared-helpers.js";
@@ -19,10 +20,6 @@ const SLOTS = ["head", "chest", "arms", "legs"] as const;
 
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
-}
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
 }
 
 function exposed(ctx: ScriptCtx, seat: number): string[] {
@@ -72,13 +69,13 @@ function elementalFusion(): Pick<CardScript, "additionalCost" | "onChoose"> {
   return {
     additionalCost(ctx) {
       const hand = ctx.player(ctx.seat).hand;
-      const earth = hand.filter((card) => hasType(ctx, card, "earth"));
-      const ice = hand.filter((card) => hasType(ctx, card, "ice"));
+      const earth = hand.filter((card) => hasCardSubtype(ctx, card, "earth"));
+      const ice = hand.filter((card) => hasCardSubtype(ctx, card, "ice"));
       const options = new Set<string>(["no"]);
       for (const card of earth) options.add(`earth:${card.instanceId}`);
       for (const card of ice) options.add(`ice:${card.instanceId}`);
       for (const card of hand)
-        if (hasType(ctx, card, "earth") && hasType(ctx, card, "ice"))
+        if (hasCardSubtype(ctx, card, "earth") && hasCardSubtype(ctx, card, "ice"))
           options.add(`both:${card.instanceId}:${card.instanceId}`);
       for (const e of earth)
         for (const i of ice) if (e.instanceId !== i.instanceId) options.add(`both:${e.instanceId}:${i.instanceId}`);
@@ -118,8 +115,8 @@ function elementalFusion(): Pick<CardScript, "additionalCost" | "onChoose"> {
       const second = ctx.player(ctx.seat).hand.find((card) => card.instanceId === Number(secondText));
       const earthCard = kind === "earth" ? first : kind === "both" ? first : undefined;
       const iceCard = kind === "ice" ? first : kind === "both" ? second : undefined;
-      if (earthCard && hasType(ctx, earthCard, "earth")) ctx.setState("fusedEarth", 1);
-      if (iceCard && hasType(ctx, iceCard, "ice")) ctx.setState("fusedIce", 1);
+      if (earthCard && hasCardSubtype(ctx, earthCard, "earth")) ctx.setState("fusedEarth", 1);
+      if (iceCard && hasCardSubtype(ctx, iceCard, "ice")) ctx.setState("fusedIce", 1);
       const revealed = [
         ...new Map(
           [earthCard, iceCard]
@@ -151,7 +148,8 @@ function elementalFusion(): Pick<CardScript, "additionalCost" | "onChoose"> {
 
 function defendedWith(ctx: ScriptCtx, type: string): boolean {
   return (
-    ctx.link?.defendingCards.some((card) => card.instanceId !== ctx.self.instanceId && hasType(ctx, card, type)) ===
+    ctx.link?.defendingCards.some((card) =>
+      card.instanceId !== ctx.self.instanceId && hasCardSubtype(ctx, card, type)) ===
     true
   );
 }
@@ -162,7 +160,7 @@ export const ajv: Record<string, CardScript> = {
       {
         event: "card-played",
         label: "Create a Frostbite in an exposed equipment zone",
-        condition: (ctx, played) => !!played && hasType(ctx, played, "ice"),
+        condition: (ctx, played) => !!played && hasCardSubtype(ctx, played, "ice"),
         effect: (ctx) => offerExposedFrostbite(ctx, "jarl-frostbite", opponentSeat(ctx)),
       },
     ],
@@ -202,8 +200,8 @@ export const ajv: Record<string, CardScript> = {
       goAgain: true,
       oncePerTurn: true,
       onCostPaid(ctx, paid) {
-        ctx.setState("earthPaid", paid.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
-        ctx.setState("icePaid", paid.some((card) => hasType(ctx, card, "ice")) ? 1 : 0);
+        ctx.setState("earthPaid", paid.some((card) => hasCardSubtype(ctx, card, "earth")) ? 1 : 0);
+        ctx.setState("icePaid", paid.some((card) => hasCardSubtype(ctx, card, "ice")) ? 1 : 0);
       },
       onActivate(ctx) {
         if (ctx.getState("earthPaid"))
@@ -255,7 +253,7 @@ export const ajv: Record<string, CardScript> = {
         effect(ctx) {
           const flow = ctx.getCounter("flow") + 1;
           ctx.setCounter("flow", flow);
-          const ice = ctx.player(ctx.seat).pitch.filter((card) => hasType(ctx, card, "ice"));
+          const ice = ctx.player(ctx.seat).pitch.filter((card) => hasCardSubtype(ctx, card, "ice"));
           if (ice.length < flow) ctx.destroySelf();
           else
             ctx.requestCardChoices(

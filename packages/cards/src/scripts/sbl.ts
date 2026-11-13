@@ -7,6 +7,7 @@ import {
   decisionMessage,
   decisionPrompt,
   isChargeDecline,
+  isSword,
   localizedCardLog,
   optionalChargeOptions,
   solflareTrigger,
@@ -43,10 +44,6 @@ const FLURRY = "SBL036";
 
 function isLight(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.cardTypes(card).includes("light");
-}
-
-function isSword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("sword");
 }
 
 function sharpenForEdict(ctx: ScriptCtx, instanceId: number): void {

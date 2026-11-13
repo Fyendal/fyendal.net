@@ -6,6 +6,7 @@ import {
   faceUpGraveyard,
   heroChoiceSeat,
   heroTarget,
+  isArrow,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
@@ -58,10 +59,6 @@ function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance
 }
 
 /** ctx.state is typed without the internal side tables; the runtime object has them. */
-
-function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("arrow");
-}
 
 function hasAimCounter(ctx: ScriptCtx): boolean {
   return (ctx.self.counters?.aim ?? 0) > 0;

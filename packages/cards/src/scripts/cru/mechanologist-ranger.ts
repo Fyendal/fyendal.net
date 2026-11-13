@@ -3,6 +3,7 @@ import {
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  isArrow,
   localizedCardLog,
   opponentSeat,
   optN,
@@ -137,10 +138,6 @@ function teklovossensWorkshop(maxCost: number): CardScript {
       if (finalChoice) finishWorkshop(ctx, maxCost);
     },
   };
-}
-
-function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("arrow");
 }
 
 function requestArrow(ctx: ScriptCtx, hook: string, fallback: string, id: string): void {

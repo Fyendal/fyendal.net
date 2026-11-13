@@ -1,4 +1,4 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
   buffNextAttack,
@@ -6,6 +6,8 @@ import {
   decisionMessage,
   decisionPrompt,
   faceUpGraveyard,
+  hasCardSubtype,
+  isAttackAction,
   opponentSeat,
   payForDefenseBoost,
   previousAttackHasName,
@@ -16,10 +18,6 @@ const CROUCHING_TIGER = "TCC104";
 const MIGHT = "TCC105";
 const QUICKEN = "TCC106";
 const VIGOR = "TCC107";
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).some((candidate) => candidate.toLowerCase() === type);
-}
 
 function equippedEvos(ctx: ScriptCtx): number {
   return ctx.countEquipped("evo");
@@ -154,9 +152,9 @@ function tigerEyeReflex(): CardScript {
 
 export const tcc: Record<string, CardScript> = {
   "professor teklovossen|0": {
-    allowsFriendlyCardPlayFrom: (ctx, card, zone) => zone === "banish" && hasType(ctx, card, "evo"),
+    allowsFriendlyCardPlayFrom: (ctx, card, zone) => zone === "banish" && hasCardSubtype(ctx, card, "evo"),
     modifyFriendlyCardPlayCost(ctx, card, _zone, base) {
-      return hasType(ctx, card, "evo") ? Math.max(0, base - (ctx.state.players.length - 1)) : base;
+      return hasCardSubtype(ctx, card, "evo") ? Math.max(0, base - (ctx.state.players.length - 1)) : base;
     },
   },
   "teklo blaster|0": { activated: attackAbility(3) },
@@ -191,7 +189,7 @@ export const tcc: Record<string, CardScript> = {
       {
         event: "card-played",
         label: "Create Copper tokens",
-        condition: (ctx, played) => !!played && hasType(ctx, played, "song"),
+        condition: (ctx, played) => !!played && hasCardSubtype(ctx, played, "song"),
         effect: (ctx) => ctx.createTokens(COPPER, ctx.state.players.length - 1),
       },
     ],
@@ -241,7 +239,7 @@ export const tcc: Record<string, CardScript> = {
   "encore|2": {
     onPlay(ctx) {
       const cards = faceUpGraveyard(ctx).filter((card) => {
-        return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack") && hasType(ctx, card, "bard");
+        return isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "bard");
       });
       if (cards.length) {
         ctx.requestCardChoice(
@@ -313,7 +311,7 @@ export const tcc: Record<string, CardScript> = {
   "song of yesteryears|3": {
     ...song((ctx, target) => {
       const attacks = faceUpGraveyard(ctx, target).filter((card) => {
-        return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
+        return isAttackAction(ctx, card);
       });
       if (attacks.length)
         ctx.requestCardChoice(

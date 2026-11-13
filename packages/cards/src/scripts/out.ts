@@ -10,6 +10,8 @@ import {
   faceUpGraveyard,
   heroChoiceSeat,
   heroTarget,
+  isAttackAction,
+  isDagger,
   mergeSetScripts,
   ongoingLabel,
   opponentSeat,
@@ -37,25 +39,12 @@ const PONDER = "DYN244";
 function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.cardData(card.cardId);
 }
-function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, tag: string): boolean {
-  const key = tag.toLowerCase();
-  return ctx.cardTypes(card).includes(key) || (data(ctx, card).keywords ?? []).some((x) => x.toLowerCase() === key);
-}
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && has(ctx, card, "attack");
-}
 function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
   const player = ctx.player(seat);
   return [
     ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
     ...player.weapons.filter((card) => hasType(data(ctx, card), "equipment")),
   ];
-}
-function isDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return has(ctx, card, "dagger");
-}
-function isStealth(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return has(ctx, card, "stealth");
 }
 function comboWith(ctx: ScriptCtx, ...names: string[]): boolean {
   return previousAttackHasName(ctx, ...names);
@@ -104,7 +93,8 @@ function noDefenseReactions(): CardScript {
 function stealthReaction(pump: number, token?: string): CardScript {
   return {
     canPlay(ctx) {
-      return myAttack(ctx) && ctx.link!.attackCardType === "action" && isStealth(ctx, ctx.link!.attackingCard);
+      return myAttack(ctx) && ctx.link!.attackCardType === "action" &&
+        ctx.hasKeyword(ctx.link!.attackingCard, "stealth");
     },
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: pump });
@@ -433,7 +423,7 @@ function bonds(pitch: number): CardScript {
     onAttackDeclared(ctx) {
       if (!previousAttackNameContains(ctx, "gustwave")) return;
       ctx.grantGoAgain();
-      const combo = faceUpGraveyard(ctx).filter((card) => has(ctx, card, "combo"));
+      const combo = faceUpGraveyard(ctx).filter((card) => ctx.hasKeyword(card, "combo"));
       if (combo.length)
         ctx.requestCardChoice(
           `bonds-grave:${pitch}`,
@@ -625,7 +615,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "uzuri|0": uzuriAbility,
   "arakni, solitary confinement|0": {
     onFriendlyAttackDeclared(ctx) {
-      if (isStealth(ctx, ctx.link!.attackingCard) && ctx.getPlayerFlag(ctx.seat, "arakniStealth") !== true) {
+      if (ctx.hasKeyword(ctx.link!.attackingCard, "stealth") && ctx.getPlayerFlag(ctx.seat, "arakniStealth") !== true) {
         ctx.setPlayerFlag(ctx.seat, "arakniStealth", true);
         ctx.grantGoAgain();
       }
@@ -860,7 +850,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
     },
     onChoose(ctx, h, o) {
       if (h !== "malicious-bottom" || !ctx.putOnDeckBottom(Number(o))) return;
-      const found = ctx.player(ctx.seat).deck.find((card) => isAttack(ctx, card));
+      const found = ctx.player(ctx.seat).deck.find((card) => isAttackAction(ctx, card));
       if (found) ctx.moveToHand(found.instanceId);
       ctx.shuffleDeck();
     },

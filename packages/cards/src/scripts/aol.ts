@@ -7,6 +7,7 @@ import {
   decisionPrompt,
   faceUpGraveyard,
   grantEndPhaseIntellect,
+  isSword,
   ongoingLabel,
   opponentSeat,
   pendingDelayedEffect,
@@ -19,10 +20,6 @@ const VIGOR = "SDO036";
 const GOLD = "SGB035";
 
 type Card = DeepReadonly<CardInstance>;
-
-function isSword(ctx: ScriptCtx, card: Card): boolean {
-  return ctx.cardTypes(card).some((type) => type.toLowerCase() === "sword");
-}
 
 function attached(ctx: ScriptCtx): boolean {
   return ctx.state.modifiers.some(
