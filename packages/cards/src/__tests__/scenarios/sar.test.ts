@@ -209,6 +209,28 @@ describe("SAR — daggers", () => {
     expect(s.state.players[1]!.life).toBe(18); // 1 (Huntsman hit) + 1 (Danger Digits)
   });
 
+  it("a destroyed Graphene Chelicera ceases to exist instead of entering the graveyard", () => {
+    const s = scenario({
+      seats: [
+        arakniSeat({
+          weapons: [HUNTSMAN, GRAPHENE],
+          equipment: { ...NO_EQUIPMENT, arms: "danger digits|0" },
+          hand: [BLUE, BLUE],
+        }),
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    s.attackWithWeapon(HUNTSMAN, { pitch: [BLUE] })
+      .blockWith()
+      .activate("danger digits|0")
+      .chooseCard(GRAPHENE)
+      .chooseOption("no");
+    expect(s.state.players[0]!.weapons.map((card) => card.cardId)).toEqual([printingId(HUNTSMAN)]);
+    s.expectLog("Graphene Chelicera is destroyed")
+      .expectNotInZone(0, GRAPHENE, "graveyard")
+      .expectNotInZone(0, GRAPHENE, "banish");
+  });
+
   it("Danger Digits lets a destroyed Mark of the Huntsman mark the hero it hit", () => {
     const s = scenario({
       seats: [

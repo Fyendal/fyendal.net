@@ -5,7 +5,6 @@ import type { CardScript } from "./scripts.js";
 import {
   cardAbilitiesSuppressed,
   cardColorOf,
-  cardHasType,
   cardNamesOf,
   cardTypesOf,
   currentWardValue,
@@ -1186,10 +1185,15 @@ export function stagedDefenderPreview(
   link: ChainLinkState,
   staged: readonly CardInstance[],
 ): { state: GameStateInternal; link: ChainLinkState } {
+  // Keyed on zone: an Evo defending from hand is a card, not equipment.
+  const fromArena = new Set(state.players.flatMap((player) => [
+    ...Object.values(player.equipment),
+    ...player.weapons,
+  ]).flatMap((card) => card ? [card.instanceId] : []));
   const stagedLink: ChainLinkState = {
     ...link,
-    defendingCards: [...link.defendingCards, ...staged.filter((card) => !cardHasType(state, card, "equipment"))],
-    defendingEquipment: [...link.defendingEquipment, ...staged.filter((card) => cardHasType(state, card, "equipment"))],
+    defendingCards: [...link.defendingCards, ...staged.filter((card) => !fromArena.has(card.instanceId))],
+    defendingEquipment: [...link.defendingEquipment, ...staged.filter((card) => fromArena.has(card.instanceId))],
   };
   const stagedIds = new Set(staged.map((card) => card.instanceId));
   const withoutStaged = (player: PlayerState): PlayerState => ({
@@ -1231,11 +1235,11 @@ export function stagedDefenseTotal(
   link: ChainLinkState,
   staged: CardInstance[],
 ): number {
-  const equipment = staged.filter((card) => cardHasType(state, card, "equipment"));
   const { state: stagedState, link: stagedLink } = stagedDefenderPreview(state, link, staged);
+  const equipment = staged.filter((card) => stagedLink.defendingEquipment.includes(card));
   // A Mirage defender is destroyed before damage, so it adds no defense.
   const cards = staged.filter((card) =>
-    !cardHasType(state, card, "equipment") && !mirageConditionMet(stagedState, runtime, stagedLink, card)
+    !equipment.includes(card) && !mirageConditionMet(stagedState, runtime, stagedLink, card)
   );
   // Preview the attachments that applyOneShotDefenseModifiers would create
   // if this staged set became the next defend event, without consuming the

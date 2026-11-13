@@ -6,7 +6,8 @@ Fyendal is a TypeScript/pnpm monorepo for playing Flesh and Blood. Read
 
 ## Folder structure
 
-- `packages/shared` — types and stable protocol error codes only.
+- `packages/shared` — types, stable protocol error codes, and small runtime
+  helpers.
 - `packages/protocol` — exhaustive runtime decoders for wire, HTTP, `GameView`,
   replay, and database JSON. Parse untrusted JSON as `unknown` and decode it
   here; never cast.

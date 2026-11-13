@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { actionCandidates, legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, scripts } from "../../index.js";
-import { printingId, scenario } from "../harness.js";
+import { printingId, scenario, type SeatSpec } from "../harness.js";
 import { hasType, objectKind } from "@fyendal/shared";
 
 const BLUE = "wrecker romp|3";
@@ -86,6 +86,47 @@ describe("EVO — registration and core mechanics", () => {
     }).play(evo, { pitch: [BLUE] })
       .expectAP(0, 0)
       .expectEquipped(0, "head", evo);
+  });
+
+  it("an Action Evo counts toward a non-attack action limit", () => {
+    const evo = "evo sentry base head|1";
+    const seat = (board: string[]) => scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "teklovossen|0", board, hand: ["nimblism|1", evo, BLUE], equipment: { head: "teklo base head|0" } },
+        { hero: "dorinthea" },
+      ],
+    });
+    const evoPlays = (g: ReturnType<typeof seat>) => legalIntents(g.state, 0).filter((intent) =>
+      intent.kind === "play-card" &&
+      g.state.players[0]!.hand.some((card) => card.instanceId === intent.instanceId && card.cardId === printingId(evo)));
+
+    const capped = seat(["signal jammer|3"]).play("nimblism|1");
+    expect(evoPlays(capped)).toEqual([]);
+    expect(evoPlays(seat([]).play("nimblism|1")).length).toBeGreaterThan(0);
+
+    const counted = seat([]).play(evo, { pitch: [BLUE] });
+    expect(counted.state.players[0]!.flags.nonAttackActionsPlayedThisTurn).toBe(1);
+  });
+
+  it("an Instant Evo is played in the reaction step unless the attack prohibits opposing instants", () => {
+    const evo = "evo circuit breaker|1";
+    const seats = (attack: string): [SeatSpec, SeatSpec] => [
+      { hero: "rhinar", hand: [evo], equipment: { ...NO_EQUIPMENT, head: "proto base head|0" } },
+      { hero: "dorinthea", hand: [attack], resources: 3, equipment: NO_EQUIPMENT },
+    ];
+
+    scenario({ active: 1, seats: seats("head jab|1") })
+      .play("head jab|1")
+      .blockWith()
+      .passPriority()
+      .react(evo)
+      .expectEquipped(0, "head", evo);
+
+    const prohibited = scenario({ active: 1, seats: seats("step between|1") })
+      .play("step between|1")
+      .blockWith()
+      .passPriority();
+    expect(() => prohibited.react(evo)).toThrow("no legal intent");
   });
 
   it("Parry Blade and Nitro Mechanoid are weapons and equipment", () => {

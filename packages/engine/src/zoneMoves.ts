@@ -596,17 +596,17 @@ function findAndRemoveCard(
   state: GameStateInternal,
   instanceId: number,
   opts?: { includeEquipment?: boolean; includeBanish?: boolean },
-): { owner: PlayerState; card: CardInstance; fromArena: boolean; fromZone: string } | undefined {
+): { owner: PlayerState; card: CardInstance; fromArena: boolean; fromZone: string; arenaZone?: "equipment" | "weapon" } | undefined {
   for (const p of state.players as PlayerState[]) {
     if (opts?.includeEquipment) {
       const eqSlot = Object.entries(p.equipment).find(([, c]) => c?.instanceId === instanceId);
       if (eqSlot) {
         const card = p.equipment[eqSlot[0] as keyof typeof p.equipment] as CardInstance;
         delete p.equipment[eqSlot[0] as keyof typeof p.equipment];
-        return { owner: p, card, fromArena: true, fromZone: "arena" };
+        return { owner: p, card, fromArena: true, fromZone: "arena", arenaZone: "equipment" };
       }
       const weapon = removeFromArray(p.weapons, instanceId);
-      if (weapon) return { owner: p, card: weapon, fromArena: true, fromZone: "arena" };
+      if (weapon) return { owner: p, card: weapon, fromArena: true, fromZone: "arena", arenaZone: "weapon" };
     }
     const zones: { arr: CardInstance[]; name: string; arena?: boolean }[] = [
       { arr: p.hand, name: "hand" }, { arr: p.deck, name: "deck" },
@@ -897,7 +897,7 @@ export function removeFromStackResolution(
 /** Remove a card from its resolving stack object or any of its owner's zones;
  * returns the card's owner. Effects may explicitly move their own source while
  * it is resolving, before the engine performs the default leave-stack move. */
-export function removeFromOwnerZones(state: GameStateInternal, instanceId: number): { owner: PlayerState; card: CardInstance; fromArena: boolean; fromZone: string } | undefined {
+export function removeFromOwnerZones(state: GameStateInternal, instanceId: number): { owner: PlayerState; card: CardInstance; fromArena: boolean; fromZone: string; arenaZone?: "equipment" | "weapon" } | undefined {
   return removeFromStackResolution(state, instanceId)
     ?? findAndRemoveCard(state, instanceId, { includeEquipment: true, includeBanish: true });
 }
@@ -1010,11 +1010,9 @@ function moveCardIntoOwnerDeck(
     || (found.fromZone === "arsenal" && found.card.faceDown === true)
     || (found.fromZone === "banish" && found.card.faceDown === true);
   const sourceWasFaceDown = found.card.faceDown === true;
-  const source = found.fromArena && hasType(dataOf(state, found.card.cardId), "weapon")
-    ? transitionZone("weapon", found.owner.seat)
-    : found.fromArena && hasType(dataOf(state, found.card.cardId), "equipment")
-      ? transitionZone("equipment", found.owner.seat)
-      : transitionZoneFromEngineZone(found.fromZone, found.owner.seat);
+  const source = found.arenaZone
+    ? transitionZone(found.arenaZone, found.owner.seat)
+    : transitionZoneFromEngineZone(found.fromZone, found.owner.seat);
   if (found.fromArena && cardHasType(state, found.card, "token")) {
     runtime.transitions.move(found.card, source, null, { from: false });
     fireLeaveArena(state, runtime, found.owner.seat, found.card, "cease-to-exist", asActivationCost);

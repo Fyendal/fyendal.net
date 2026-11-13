@@ -160,13 +160,13 @@ export function hasStaticGoAgain(data: CardData): boolean {
   return STATIC_GO_AGAIN.test(data.text);
 }
 
-/** Non-action kinds in canonical type order, so an Instant Evo stays equipment. */
+/** Non-action kinds in canonical type order, so every Evo stays equipment. */
 const PRINTED_USE_KINDS = ["weapon", "equipment", "attack-reaction", "defense-reaction", "instant", "block"] as const;
 
 /** Default uses parsed from printed data. Hero rules refine conditional cards. */
 export function defaultCardUses(data: CardData, power = data.attack ?? 0, defense = data.defense ?? 0): CardUses {
   const subtypes = (data.subtypes ?? []).map((subtype) => subtype.toLowerCase());
-  const kind: CardUses["kind"] = hasType(data, "action")
+  const kind: CardUses["kind"] = hasType(data, "action") && !hasType(data, "equipment")
     ? subtypes.includes("attack") ? "attack" : "action"
     : PRINTED_USE_KINDS.find((type) => hasType(data, type)) ?? "other";
   const prevented = handPrevention(data);

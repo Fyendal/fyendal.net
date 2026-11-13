@@ -1,11 +1,12 @@
 import type { CardData, EquipmentSlot } from "@fyendal/shared";
-import { objectKind } from "@fyendal/shared";
+import { hasType, objectKind } from "@fyendal/shared";
 
 /** Whether a card may begin the game equipped to a weapon zone. Off-hands and
  * quivers are identified by subtype rather than card type (for example, Polly
  * Cranka is an action card with the off-hand subtype). */
 export function isWeaponZoneCard(card: CardData | undefined): boolean {
-  return (card !== undefined && objectKind(card) === "weapon") ||
+  if (card === undefined || hasType(card, "token")) return false;
+  return objectKind(card) === "weapon" ||
     card?.subtypes?.some((subtype) => subtype === "off-hand" || subtype === "quiver") === true;
 }
 

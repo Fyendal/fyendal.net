@@ -19,19 +19,15 @@ export function requiredEquipmentStageIntent(
   const staged = decision.stagedCards?.map((card) => card.instanceId) ?? [];
   const stagedIds = new Set(staged);
   const me = input.view.players[input.seat];
-  const ownCards = new Map([
-    ...me.hand,
-    ...me.arsenal,
+  // Keyed on zone: a hand or arsenal Evo is not equipment until equipped.
+  const arenaEquipment = new Set([
     ...Object.values(me.equipment).filter((card) => card !== undefined),
     ...me.weapons,
-  ].map((card) => [card.instanceId, card]));
+  ].filter((card) => hasType(input.cards[card.cardId], "equipment")).map((card) => card.instanceId));
 
   for (const intent of input.legal) {
     if (intent.kind !== "stage-defenders") continue;
-    const equipmentId = intent.instanceIds.find((id) => {
-      const card = ownCards.get(id);
-      return !stagedIds.has(id) && hasType(input.cards[card?.cardId ?? ""], "equipment");
-    });
+    const equipmentId = intent.instanceIds.find((id) => !stagedIds.has(id) && arenaEquipment.has(id));
     if (equipmentId !== undefined) {
       return { kind: "stage-defenders", instanceIds: [...staged, equipmentId] };
     }

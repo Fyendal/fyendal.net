@@ -90,6 +90,16 @@ describe("card values", () => {
     expect(arsenalValue(tigerEye, 0)).toBeGreaterThan(0);
   });
 
+  it("models every Evo as equipment, not as an action-point play", () => {
+    for (const name of ["Evo Smoothbore", "Evo Engine Room", "Evo Command Center"]) {
+      const data = findPrinting(name, 2)!;
+      expect(data.types).toEqual(["equipment", "action"]);
+      expect(defaultCardUses(data).kind).toBe("equipment");
+    }
+    expect(defaultCardUses(findPrinting("Evo Recall", 3)!).kind).toBe("equipment");
+    expect(defaultCardUses(findPrinting("Parry Blade")!).kind).toBe("weapon");
+  });
+
   it("charges blue cards that cannot defend from arsenal", () => {
     // Ripple Away (blue, 4 power) would pitch for 3 or block from hand.
     const ripple = defaultCardUses(findPrinting("Ripple Away", 3)!);

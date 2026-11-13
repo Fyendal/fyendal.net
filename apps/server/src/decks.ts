@@ -201,6 +201,11 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
       unimplemented.add(card.name);
       continue;
     }
+    // Before the weapon branch: Graphene Chelicera is a weapon token.
+    if (hasType(card, "token")) {
+      errors.push(`${card.name} is a token and cannot be in a deck`);
+      continue;
+    }
     if (objectKind(card) === "hero") {
       if (isInventoryHero(card)) {
         for (let i = 0; i < line.qty; i++) inventoryPool.push(poolCardId(card));
@@ -226,10 +231,6 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
         continue;
       }
       for (let i = 0; i < line.qty; i++) equipmentPool.push(card.id);
-      continue;
-    }
-    if (objectKind(card) === "token") {
-      errors.push(`${card.name} is a token and cannot be in a deck`);
       continue;
     }
     const target = line.section === "sideboard" ? sideboard : deck;

@@ -389,6 +389,23 @@ describe("validateDeck", () => {
     expect(r.decklist.deck).not.toContain(polly.id);
   });
 
+  it("rejects a weapon token such as Graphene Chelicera", () => {
+    const chelicera = printings.find((c) => c.name === "Graphene Chelicera")!;
+    expect(hasType(chelicera, "weapon")).toBe(true);
+    const lines = parseDecklistText(
+      [
+        `Hero: ${hero.name}`,
+        `1x ${chelicera.name}`,
+        ...legalCcDeckCards.slice(0, 20).map((c) => deckLine(c)),
+      ].join("\n"),
+    );
+
+    const r = validateDeck(lines, "cc");
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.errors).toContain("Graphene Chelicera is a token and cannot be in a deck");
+  });
+
   it("registers Modular cards as equipment without a fixed slot subtype", () => {
     const adaptivePlating = printings.find((c) => c.name === "Adaptive Plating")!;
     const lines = parseDecklistText(

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { legalIntents } from "@fyendal/engine";
 import { cardData, isImplemented, scripts } from "../../index.js";
 import { functionalKeyOf } from "../../functional.js";
-import { scenario } from "../harness.js";
+import { printingId, scenario } from "../harness.js";
 
 const valda = {
   hero: "rhinar" as const,
@@ -648,6 +648,26 @@ describe("MPG — import and Guardian pressure", () => {
       .chooseCard("ironrot helm|0")
       .expectEquipped(0, "head", "ironrot helm|0")
       .expectNoEquipment(1, "head");
+  });
+
+  it("Annexation of the Forge equips an opposing Parry Blade from its weapon zone", () => {
+    const g = scenario({
+      seats: [
+        {
+          ...valda,
+          hand: ["annexation of the forge|2", "thunder quake|3", "thunder quake|3"],
+          equipment: { head: null, chest: null, arms: null, legs: null },
+        },
+        { ...valda, hand: [], weapons: ["parry blade|0"], equipment: { head: null, chest: null, arms: null, legs: null } },
+      ],
+    });
+
+    g.play("annexation of the forge|2", { pitch: ["thunder quake|3", "thunder quake|3"] })
+      .blockWith()
+      .settle()
+      .chooseCard("parry blade|0");
+    expect(g.state.players[0]!.weapons.map((card) => card.cardId)).toEqual([printingId("parry blade|0")]);
+    expect(g.state.players[1]!.weapons).toEqual([]);
   });
 
   it("Annexation of the Forge does not crush a non-Guardian hero", () => {
