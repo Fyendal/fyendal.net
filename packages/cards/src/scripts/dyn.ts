@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } fr
 import {
   anyDamageTarget,
   attackAbility,
+  boostsThisChain,
   buffNextArcaneDamageCard,
   buffNextAttack,
   cardNamed,
@@ -843,7 +844,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "blessing of ingenuity|3": blessingIngenuity(1),
   "urgent delivery|1": {
     onHit(ctx) {
-      const boosts = ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted).length;
+      const boosts = boostsThisChain(ctx);
       const items = ctx
         .player(ctx.seat)
         .hand.filter(
@@ -866,7 +867,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "urgent delivery|2": {
     onHit(ctx) {
-      const boosts = ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted).length;
+      const boosts = boostsThisChain(ctx);
       const items = ctx
         .player(ctx.seat)
         .hand.filter(
@@ -889,7 +890,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "urgent delivery|3": {
     onHit(ctx) {
-      const boosts = ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted).length;
+      const boosts = boostsThisChain(ctx);
       const items = ctx
         .player(ctx.seat)
         .hand.filter(

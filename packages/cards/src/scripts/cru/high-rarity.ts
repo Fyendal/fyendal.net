@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  boostsThisChain,
   cardNamed,
   commonOptionMessages,
   controlledPermanents,
@@ -598,7 +599,7 @@ export const cruHighRarity: Record<string, CardScript> = {
   "viziertronic model i|0": viziertronic,
   "meganetic shockwave|3": {
     onAttackDeclared(ctx) {
-      ctx.setFlag("link", "mustDefendWithEquipmentCount", Number(ctx.getFlag("player", "boostCountThisTurn")) || 0);
+      ctx.setFlag("link", "mustDefendWithEquipmentCount", boostsThisChain(ctx));
     },
   },
   "absorption dome|2": {

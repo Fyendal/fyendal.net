@@ -33,6 +33,8 @@ import {
   resourceAbility,
   warnIfNoActionPoint,
   yesNoPrompt,
+  hasLessLife,
+  hasMoreLife,
 } from "./shared-helpers.js";
 import { monHighRarity } from "./mon/high-rarity.js";
 import { SOUL_SHACKLE, SPECTRAL_SHIELD } from "./tokens.js";
@@ -46,7 +48,7 @@ function lessLifePlayTrigger(effect: { attack?: number; keyword?: string }): Car
         event: "card-played",
         sourceZone: "self",
         label: effect.attack ? `Gain +${effect.attack} power` : `Gain ${effect.keyword}`,
-        condition: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0,
+        condition: (ctx) => hasLessLife(ctx),
         effect(ctx, played) {
           if (!played) return;
           if (effect.attack) ctx.addCardTempPower(played.instanceId, effect.attack);
@@ -934,7 +936,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     onPlay(ctx) {
       ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesToTargetType: "shadow" });
       if (
-        ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0 &&
+        hasLessLife(ctx) &&
         hasCardSubtype(ctx, ctx.player(opponentSeat(ctx)).hero, "shadow")
       ) {
         ctx.putIntoSoul(ctx.self.instanceId);
@@ -1533,7 +1535,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
           "card.effect.mon.eclipseexistence",
         ),
       });
-      if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0) {
+      if (hasMoreLife(ctx)) {
         const actions = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "action"));
         if (actions.length > 0)
           ctx.requestCardChoice(

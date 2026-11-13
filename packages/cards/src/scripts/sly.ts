@@ -20,6 +20,7 @@ import {
   suspenseNextAttackBuff,
   yesNoPrompt,
   isSuspenseAura,
+  hasMoreLife,
 } from "./shared-helpers.js";
 import { CONFIDENCE, MIGHT } from "./tokens.js";
 
@@ -142,7 +143,7 @@ function slySuspenseBuff(n: number): CardScript {
 function mockingBlow(n: number): CardScript {
   return {
     onAttackDeclared(ctx) {
-      if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0) ctx.crowdBoo(ctx.seat);
+      if (hasMoreLife(ctx)) ctx.crowdBoo(ctx.seat);
     },
     modifyAttack(ctx) {
       return ctx.getFlag("player", "booedThisTurn") ? n : 0;

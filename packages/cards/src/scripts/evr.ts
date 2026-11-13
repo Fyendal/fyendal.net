@@ -1,8 +1,8 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import { evrHighRarity } from "./evr/high-rarity.js";
 import {
-  boostedLinks,
   boostedThisTurn,
+  boostsThisChain,
   buffNextAttack,
   canHeave,
   cardNamed,
@@ -288,10 +288,14 @@ function outlandSkirmish(amount: number): CardScript {
   };
 }
 
+function controlsBoostedLink(ctx: ScriptCtx): boolean {
+  return ctx.state.chain.some((link) => link.attacker === ctx.seat && link.flags.boosted === true);
+}
+
 function payload(): CardScript {
   return {
     onAttackDeclared(ctx) {
-      if (boostedLinks(ctx) > 0) ctx.addModifier({ scope: "chain-link", dominate: true });
+      if (boostsThisChain(ctx) > 0) ctx.addModifier({ scope: "chain-link", dominate: true });
     },
   };
 }
@@ -299,7 +303,7 @@ function payload(): CardScript {
 function zoomIn(): CardScript {
   return {
     onAttackDeclared(ctx) {
-      const count = boostedLinks(ctx);
+      const count = boostsThisChain(ctx);
       if (count > 0) optN(ctx, count);
     },
     onChoose(ctx, hook, option) {
@@ -1359,17 +1363,17 @@ export const evr: Record<string, CardScript> = mergeSetScripts("EVR", evrHighRar
 
   "t-bone|1": {
     onAttackDeclared(ctx) {
-      if (boostedLinks(ctx) > 0) ctx.setFlag("link", "mustDefendWithEquipment", true);
+      if (controlsBoostedLink(ctx)) ctx.setFlag("link", "mustDefendWithEquipment", true);
     },
   },
   "t-bone|2": {
     onAttackDeclared(ctx) {
-      if (boostedLinks(ctx) > 0) ctx.setFlag("link", "mustDefendWithEquipment", true);
+      if (controlsBoostedLink(ctx)) ctx.setFlag("link", "mustDefendWithEquipment", true);
     },
   },
   "t-bone|3": {
     onAttackDeclared(ctx) {
-      if (boostedLinks(ctx) > 0) ctx.setFlag("link", "mustDefendWithEquipment", true);
+      if (controlsBoostedLink(ctx)) ctx.setFlag("link", "mustDefendWithEquipment", true);
     },
   },
   "payload|1": payload(),

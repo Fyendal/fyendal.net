@@ -38,6 +38,8 @@ import {
   isSuspenseAura,
   isSword,
   isTokenAura,
+  hasLessLife,
+  hasMoreLife,
 } from "./shared-helpers.js";
 import { AGILITY, BAIT, CINTARI_SELLSWORD, CONFIDENCE, COURAGE, MIGHT, TOUGHNESS, VIGOR } from "./tokens.js";
 
@@ -769,7 +771,7 @@ export const sup: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       destroySelfCost: true,
-      canActivate: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0,
+      canActivate: (ctx) => hasLessLife(ctx),
       onActivate(ctx) {
         createMany(ctx, TOUGHNESS, 3);
       },
@@ -925,7 +927,7 @@ export const sup: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       destroySelfCost: true,
-      canActivate: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0,
+      canActivate: (ctx) => hasMoreLife(ctx),
       onActivate(ctx) {
         createMany(ctx, MIGHT, 3);
       },
@@ -1278,7 +1280,7 @@ Object.assign(sup, {
   },
   "jaws of victory|1": {
     onAttackDeclared(ctx: ScriptCtx) {
-      if (ctx.link?.targetAllyId === undefined && ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0)
+      if (ctx.link?.targetAllyId === undefined && hasLessLife(ctx))
         ctx.crowdCheer(ctx.seat);
     },
     hasConditionalGoAgain: (ctx: ScriptCtx) => ctx.getFlag("player", "cheeredThisTurn") === true,
@@ -1334,7 +1336,7 @@ Object.assign(sup, {
   },
   "cries of encore|1": {
     onAttackDeclared(ctx: ScriptCtx) {
-      if (ctx.link?.targetAllyId === undefined && ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0)
+      if (ctx.link?.targetAllyId === undefined && hasLessLife(ctx))
         ctx.crowdCheer(ctx.seat);
     },
     canTriggerOnHit(ctx: ScriptCtx) {
@@ -1448,7 +1450,7 @@ Object.assign(sup, {
   },
   "big bully|1": {
     onAttackDeclared(ctx: ScriptCtx) {
-      if (ctx.link?.targetAllyId === undefined && ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0) {
+      if (ctx.link?.targetAllyId === undefined && hasMoreLife(ctx)) {
         ctx.crowdBoo(ctx.seat);
       }
     },

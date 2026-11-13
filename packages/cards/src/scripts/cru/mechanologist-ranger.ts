@@ -1,6 +1,6 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
-  boostedLinks,
+  boostsThisChain,
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
@@ -356,8 +356,8 @@ export const cruMechanologistRanger: Record<string, CardScript> = {
   "combustible courier|1": combustibleCourier(),
   "combustible courier|2": combustibleCourier(),
   "combustible courier|3": combustibleCourier(),
-  "overblast|2": { modifyAttack: boostedLinks },
-  "overblast|3": { modifyAttack: boostedLinks },
+  "overblast|2": { modifyAttack: boostsThisChain },
+  "overblast|3": { modifyAttack: boostsThisChain },
   "teklovossen's workshop|1": teklovossensWorkshop(2),
   "teklovossen's workshop|2": teklovossensWorkshop(1),
   "teklovossen's workshop|3": teklovossensWorkshop(0),

@@ -280,28 +280,6 @@ export const sbz: Record<string, CardScript> = {
     },
   },
 
-  // Fyendal's Fighting Spirit — "When this attacks or defends, if you have
-  // less {h} than an opposing hero, gain 1{h}."
-  "fyendal's fighting spirit|1": {
-    onAttackDeclared(ctx) {
-      if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) === -1) {
-        ctx.gainLife(ctx.seat, 1);
-        ctx.logPublic(
-          localizedCardLog(ctx, `${ctx.data.name}: gained 1{h}`, "card.log.common.life.gained", { amount: 1 }),
-        );
-      }
-    },
-    canTriggerOnDefend: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) === -1,
-    onDefend(ctx) {
-      if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) === -1) {
-        ctx.gainLife(ctx.seat, 1);
-        ctx.logPublic(
-          localizedCardLog(ctx, `${ctx.data.name}: gained 1{h}`, "card.log.common.life.gained", { amount: 1 }),
-        );
-      }
-    },
-  },
-
   // Look Tuff — "When this attacks, it gets -1{p} unless you pay {r}."
   "look tuff|1": {
     onAttackDeclared(ctx) {

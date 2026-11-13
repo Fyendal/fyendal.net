@@ -1,7 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
-  boostedLinks,
   boostedThisTurn,
+  boostsThisChain,
   cardNamed,
   decisionMessage,
   decisionPrompt,
@@ -123,7 +123,7 @@ export const sda: Record<string, CardScript> = {
     ],
     modifyAttack(ctx) {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return 0;
-      return 1 + boostedLinks(ctx);
+      return 1 + boostsThisChain(ctx);
     },
   },
 
@@ -175,7 +175,7 @@ export const sda: Record<string, CardScript> = {
   "jump start|3": jumpStart,
   "rev up|1": jumpStart,
   "out pace|1": { cannotBeDefendedByEquipment: true },
-  "overblast|1": { modifyAttack: boostedLinks },
+  "overblast|1": { modifyAttack: boostsThisChain },
   "under loop|1": {
     onHit(ctx) {
       ctx.setFlag("link", "attackToBottom", true);

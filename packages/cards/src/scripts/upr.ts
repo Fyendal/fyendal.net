@@ -23,6 +23,7 @@ import {
   isenhowlFrostbitesKey,
   isFused,
   isItem,
+  hasLessLife,
   localizedCardLog,
   mergeSetScripts,
   ongoingLabel,
@@ -262,9 +263,11 @@ function defensePay(): CardScript {
 
 function fightingSpirit(): CardScript {
   const gain = (ctx: ScriptCtx) => {
-    if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0) ctx.gainLife(ctx.seat, 1);
+    if (!hasLessLife(ctx)) return;
+    ctx.gainLife(ctx.seat, 1);
+    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gained 1{h}`, "card.log.common.life.gained", { amount: 1 }));
   };
-  return { onAttackDeclared: gain, onDefend: gain };
+  return { onAttackDeclared: gain, canTriggerOnDefend: (ctx) => hasLessLife(ctx), onDefend: gain };
 }
 
 function quelling(): CardScript {
@@ -1388,6 +1391,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   // Generic
   "brothers in arms|1": defensePay(),
   "brothers in arms|2": defensePay(),
+  "fyendal's fighting spirit|1": fightingSpirit(),
   "fyendal's fighting spirit|2": fightingSpirit(),
   "fyendal's fighting spirit|3": fightingSpirit(),
   "healing balm|1": {

@@ -12,6 +12,7 @@ import {
   requestDiscardChoice,
   resolveDiscardChoice,
   resourceAbility,
+  hasLessLife,
 } from "../shared-helpers.js";
 import { QUICKEN } from "../tokens.js";
 
@@ -547,7 +548,7 @@ const scarForAScarScript = (): CardScript => ({
       event: "card-played",
       sourceZone: "self",
       label: "Gain go again",
-      condition: (ctx) => ctx.player(ctx.seat).life < ctx.player(opponentSeat(ctx)).life,
+      condition: (ctx) => hasLessLife(ctx),
       effect(ctx, played) {
         if (!played) return;
         ctx.grantGoAgain(played.instanceId);
@@ -726,7 +727,7 @@ const woundedBullScript = (): CardScript => ({
       event: "card-played",
       sourceZone: "self",
       label: "Gain +1 power",
-      condition: (ctx) => ctx.player(ctx.seat).life < ctx.player(opponentSeat(ctx)).life,
+      condition: (ctx) => hasLessLife(ctx),
       effect(ctx, played) {
         if (played) ctx.addCardTempPower(played.instanceId, 1);
       },

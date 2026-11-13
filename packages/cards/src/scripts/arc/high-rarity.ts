@@ -22,6 +22,7 @@ import {
   resolveReload,
   runeCount,
   wizardActionAsInstant,
+  hasLessLife,
 } from "../shared-helpers.js";
 import { RUNECHANT } from "../tokens.js";
 
@@ -519,8 +520,8 @@ export const arcHighRarity: Record<string, CardScript> = {
   "tome of aetherwind|1": tomeOfAetherwind,
 
   "arcanite skullcap|0": {
-    modifyDefense: (ctx) => (ctx.player(ctx.seat).life < ctx.player(opponentSeat(ctx)).life ? 1 : 0),
-    arcaneBarrierValue: (ctx) => (ctx.player(ctx.seat).life < ctx.player(opponentSeat(ctx)).life ? 3 : 0),
+    modifyDefense: (ctx) => (hasLessLife(ctx) ? 1 : 0),
+    arcaneBarrierValue: (ctx) => (hasLessLife(ctx) ? 3 : 0),
   },
   "command and conquer|1": {
     defenseReactionsProhibited: true,

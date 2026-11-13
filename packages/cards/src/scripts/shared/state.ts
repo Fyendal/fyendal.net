@@ -18,6 +18,16 @@ export function opponentSeat(ctx: ScriptCtx): number {
   return ctx.seat === 0 ? 1 : 0;
 }
 
+/** "Less {h} than an opponent"; goes through compareLife so life tiebreaks (Line Crossers) apply. */
+export function hasLessLife(ctx: ScriptCtx, seat = ctx.seat): boolean {
+  return ctx.compareLife(seat, seat === 0 ? 1 : 0) < 0;
+}
+
+/** "More {h} than an opponent"; see `hasLessLife`. */
+export function hasMoreLife(ctx: ScriptCtx, seat = ctx.seat): boolean {
+  return ctx.compareLife(seat, seat === 0 ? 1 : 0) > 0;
+}
+
 /** Graveyard cards an effect may refer to; face-down ones are private (CR 3.0.4e). */
 export function faceUpGraveyard(ctx: ScriptCtx, seat = ctx.seat): DeepReadonly<CardInstance>[] {
   return ctx.player(seat).graveyard.filter((card) => !card.faceDown);
@@ -220,8 +230,9 @@ export function boostedThisTurn(ctx: ScriptCtx): boolean {
   return ctx.getFlag("player", "boostedThisTurn") === true;
 }
 
-export function boostedLinks(ctx: ScriptCtx): number {
-  return ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted === true).length;
+/** "The number of times you have boosted this combat chain." */
+export function boostsThisChain(ctx: ScriptCtx): number {
+  return Number(ctx.getFlag("player", "boostCountThisChain")) || 0;
 }
 
 export function pitchedBlue(ctx: ScriptCtx): boolean {

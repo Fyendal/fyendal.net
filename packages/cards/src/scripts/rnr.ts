@@ -1,5 +1,5 @@
 import type { CardScript } from "@fyendal/engine";
-import { discardRandomCost, isSixPlus, nextAttack, queueIntimidate } from "./shared-helpers.js";
+import { discardRandomCost, hasLessLife, isSixPlus, nextAttack, queueIntimidate } from "./shared-helpers.js";
 
 // ── Rhinar (hero / deck cards present in RNR) ──
 export const rnr: Record<string, CardScript> = {
@@ -41,11 +41,7 @@ export const rnr: Record<string, CardScript> = {
         event: "card-played",
         sourceZone: "self",
         label: "Gain +1 power",
-        condition(ctx) {
-          const me = ctx.state.players[ctx.seat]!;
-          const opp = ctx.state.players[ctx.seat === 0 ? 1 : 0]!;
-          return me.life < opp.life;
-        },
+        condition: (ctx) => hasLessLife(ctx),
         effect(ctx, played) {
           if (played) ctx.addCardTempPower(played.instanceId, 1);
         },

@@ -15,6 +15,7 @@ import {
   previousAttackHasName,
   reprise,
   resourceAbility,
+  hasLessLife,
 } from "../shared-helpers.js";
 import { SEISMIC_SURGE } from "../tokens.js";
 
@@ -73,7 +74,7 @@ const heartOfFyendal: CardScript = {
       label: "Gain 1 life if behind",
       condition: (ctx, pitched) => pitched?.instanceId === ctx.self.instanceId,
       effect(ctx) {
-        if (ctx.player(ctx.seat).life < ctx.player(opponentSeat(ctx)).life) ctx.gainLife(ctx.seat, 1);
+        if (hasLessLife(ctx)) ctx.gainLife(ctx.seat, 1);
       },
     },
   ],

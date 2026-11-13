@@ -241,6 +241,34 @@ describe("WTR generic — attacks", () => {
       .expectLife(1, 16);
   });
 
+  it("Scar for a Scar gains go again at tied life against Line Crossers", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", life: 8, hand: ["scar for a scar|1"] },
+        { hero: "dorinthea", life: 8, hand: [], equipment: { arms: "line crossers|0" } },
+      ],
+    });
+    g.play("scar for a scar|1")
+      .expectLog("gains go again (less life than opponent)")
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
+  });
+
+  it("Scar for a Scar has no go again at tied life", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", life: 8, hand: ["scar for a scar|1"] },
+        { hero: "dorinthea", life: 8, hand: [] },
+      ],
+    });
+    g.play("scar for a scar|1")
+      .expectNoLog("gains go again")
+      .blockWith()
+      .settle()
+      .expectAP(0, 0);
+  });
+
   it("Scour the Battlescape bottoms a card and draws, and gains go again from arsenal", () => {
     const g = scenario({
       seats: [

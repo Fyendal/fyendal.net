@@ -48,6 +48,8 @@ import {
   isSword,
   isAlly,
   isItem,
+  hasLessLife,
+  hasMoreLife,
 } from "./shared-helpers.js";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 import { penHighRarity } from "./pen/high-rarity.js";
@@ -171,14 +173,6 @@ function concealedHitTrap(token: string, tokenName: string, attackMatches: (ctx:
       },
     ],
   };
-}
-
-function lowerLife(ctx: ScriptCtx): boolean {
-  return ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0;
-}
-
-function higherLife(ctx: ScriptCtx): boolean {
-  return ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0;
 }
 
 function penArcaneSpell(
@@ -1922,17 +1916,17 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
 
   "tough as a rok|3": {
-    modifyBasePower: (ctx, card, base) => (card.instanceId === ctx.self.instanceId ? (lowerLife(ctx) ? 6 : 0) : base),
+    modifyBasePower: (ctx, card, base) => (card.instanceId === ctx.self.instanceId ? (hasLessLife(ctx) ? 6 : 0) : base),
   },
   "energy of the audience|2": {
     modifyAttack: (ctx) =>
-      lowerLife(ctx) ? ctx.player(ctx.seat).board.filter((card) =>
+      hasLessLife(ctx) ? ctx.player(ctx.seat).board.filter((card) =>
         isAura(ctx, card) && ctx.hasKeyword(card, "suspense"))
             .length : 0,
   },
   "comeback kicks|0": {
     onCheered(ctx) {
-      if (lowerLife(ctx))
+      if (hasLessLife(ctx))
         ctx.requestChoice(
           "pen-comeback",
           warnIfNoActionPoint(
@@ -1952,7 +1946,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "emboldened by the crowd|2": {
     modifyPlayCost: (ctx, base) => (ctx.getFlag("player", "cheeredThisTurn") === true ? Math.max(0, base - 3) : base),
   },
-  ...pitches("hulk up", () => ({ modifyPlayCost: (ctx, base) => (lowerLife(ctx) ? Math.max(0, base - 1) : base) })),
+  ...pitches("hulk up", () => ({ modifyPlayCost: (ctx, base) => (hasLessLife(ctx) ? Math.max(0, base - 1) : base) })),
   ...pitches("stadium security", () => ({
     canDefendFromArsenal: (ctx) => ctx.getFlag("player", "controlledName:toughness") === true,
   })),
@@ -1994,7 +1988,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   },
   ...pitches("insult to injury", () => ({
     onAttackDeclared(ctx) {
-      if (higherLife(ctx)) ctx.grantGoAgain();
+      if (hasMoreLife(ctx)) ctx.grantGoAgain();
     },
   })),
   ...pitches("bad breath", (pitch) => ({
