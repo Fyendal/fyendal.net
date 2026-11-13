@@ -2,7 +2,7 @@
  {
   "id": "BET001",
   "name": "Betsy",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever an attack you control wagers, you may pay {r}{r}. If you do, the attack gets +1{p} and overpower.",
   "classes": [
    "guardian"
@@ -14,7 +14,7 @@
  {
   "id": "BET002",
   "name": "High Riser",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf you've drawn a card this turn, this gets +1{p}.",
   "attack": 3,
   "classes": [
@@ -29,7 +29,7 @@
  {
   "id": "BET003",
   "name": "Bloodied Oval",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Bloodied Oval's {d} is equal to the number of opposing heroes with greater {h} than you.\nBlade Break",
   "classes": [
    "generic"
@@ -45,7 +45,7 @@
  {
   "id": "BET004",
   "name": "Good Time Chapeau",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Betsy Specialization\nAction - Destroy a Gold you control: Your next attack this turn gets \"When this attacks a hero, wager a Might and a Vigor token with them.\" Go again\nTemper",
   "defense": 2,
   "classes": [
@@ -63,7 +63,7 @@
  {
   "id": "BET005",
   "name": "Vigor Girth",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Create a Vigor token. Go again\nBlade Break",
   "defense": 1,
   "classes": [
@@ -81,7 +81,7 @@
  {
   "id": "BET006",
   "name": "Gauntlet of Might",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Create a Might token. Go again\nBlade Break",
   "defense": 1,
   "classes": [
@@ -99,7 +99,7 @@
  {
   "id": "BET007",
   "name": "Stand Ground",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If you control a Might token, this gets +1{d}.\nIf you control a Vigor token, this gets +1{d}.\nTemper",
   "defense": 0,
   "classes": [
@@ -116,7 +116,7 @@
  {
   "id": "BET008",
   "name": "Command Respect",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, if this has {p} greater than its base, destroy a card in their arsenal.",
   "pitch": 1,
   "cost": 3,
@@ -133,7 +133,7 @@
  {
   "id": "BET009",
   "name": "Concuss",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, if this has {p} greater than its base, they discard a card.",
   "pitch": 1,
   "cost": 3,
@@ -150,7 +150,7 @@
  {
   "id": "BET010",
   "name": "Over the Top",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this has {p} greater than its base, it gets overpower.",
   "pitch": 1,
   "cost": 3,
@@ -170,7 +170,7 @@
  {
   "id": "BET011",
   "name": "Smack of Reality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Tower - If this has 13 or more {p}, it gets \"When this hits a hero, destroy all aura tokens they control.\"",
   "pitch": 1,
   "cost": 5,
@@ -190,7 +190,7 @@
  {
   "id": "BET012",
   "name": "Wage Gold",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Universal\nWhen this attacks a hero, you may wager a Gold token with them.",
   "pitch": 1,
   "cost": 3,
@@ -211,7 +211,7 @@
  {
   "id": "BET013",
   "name": "Wage Might",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a hero, you may wager a Might token with them.",
   "pitch": 1,
   "cost": 3,
@@ -232,7 +232,7 @@
  {
   "id": "BET014",
   "name": "Wage Vigor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a hero, you may wager a Vigor token with them.",
   "pitch": 1,
   "cost": 3,
@@ -253,7 +253,7 @@
  {
   "id": "BET015",
   "name": "Big Bop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the start of your turn, destroy this, then your next Guardian attack this turn gets +5{p} and \"When this attacks a hero, you may wager a Vigor token with them.\"",
   "pitch": 1,
   "cost": 3,
@@ -269,7 +269,7 @@
  {
   "id": "BET016",
   "name": "Bigger Than Big",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the start of your turn, destroy this, then your next Guardian attack this turn gets +5{p} and \"When this attacks a hero, you may wager a Might token with them.\"",
   "pitch": 1,
   "cost": 3,
@@ -285,7 +285,7 @@
  {
   "id": "BET017",
   "name": "Money Where Ya Mouth Is",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack this turn gets +3{p} and \"When this attacks a hero, you may wager with them. The winner creates a Gold token.\"\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -301,7 +301,7 @@
  {
   "id": "BET018",
   "name": "Money Where Ya Mouth Is",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack this turn gets +2{p} and \"When this attacks a hero, you may wager with them. The winner creates a Gold token.\"\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -317,7 +317,7 @@
  {
   "id": "BET019",
   "name": "Command Respect",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, if this has {p} greater than its base, destroy a card in their arsenal.",
   "pitch": 3,
   "cost": 3,
@@ -334,7 +334,7 @@
  {
   "id": "BET020",
   "name": "Concuss",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, if this has {p} greater than its base, they discard a card.",
   "pitch": 3,
   "cost": 3,
@@ -351,7 +351,7 @@
  {
   "id": "BET021",
   "name": "Over the Top",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this has {p} greater than its base, it gets overpower.",
   "pitch": 3,
   "cost": 3,
@@ -371,7 +371,7 @@
  {
   "id": "BET022",
   "name": "Lunging Press",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target attack action card gains +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -384,7 +384,7 @@
  {
   "id": "BET023",
   "name": "Big Bop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the start of your turn, destroy this, then your next Guardian attack this turn gets +3{p} and \"When this attacks a hero, you may wager a Vigor token with them.\"",
   "pitch": 3,
   "cost": 3,
@@ -400,7 +400,7 @@
  {
   "id": "BET024",
   "name": "Bigger Than Big",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the start of your turn, destroy this, then your next Guardian attack this turn gets +3{p} and \"When this attacks a hero, you may wager a Might token with them.\"",
   "pitch": 3,
   "cost": 3,
@@ -416,7 +416,7 @@
  {
   "id": "BET025",
   "name": "Money Where Ya Mouth Is",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack this turn gets +1{p} and \"When this attacks a hero, you may wager with them. The winner creates a Gold token.\"\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -432,7 +432,7 @@
  {
   "id": "BET026",
   "name": "Pint of Strong and Stout",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Might and a Vigor token.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -448,7 +448,7 @@
  {
   "id": "BET027",
   "name": "Stacked in Your Favor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nYour attack action cards get +1{d} while defending.\nAt the start of your turn, destroy this, draw a card, then put a card from your hand on top of your deck.",
   "pitch": 3,
   "cost": 2,
@@ -467,7 +467,7 @@
  {
   "id": "BET028",
   "name": "Might",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
   "classes": [
    "generic"
@@ -480,7 +480,7 @@
  {
   "id": "BET029",
   "name": "Vigor",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then gain {r}.",
   "classes": [
    "generic"
@@ -493,7 +493,7 @@
  {
   "id": "BET030",
   "name": "Gold",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
   "classes": [
    "generic"

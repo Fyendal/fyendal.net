@@ -24,6 +24,7 @@ import { attackBasePowerRestricted } from "./combatRestrictions.js";
 import {
   actionKindRestrictionApplies, consumeFirstActionExtraCost, firstActionExtraCost,
 } from "./ruleQueries.js";
+import { hasType } from "@fyendal/shared";
 
 /** Printed abilities plus temporary abilities granted to this owned card.
  * The returned functions are process definitions only; they are never stored
@@ -91,7 +92,7 @@ export function discardCostOptions(
     if (dc.classes && !cardTypesOf(state, c).some((type) => dc.classes!.includes(type))) {
       return false;
     }
-    if (dc.cardTypes && !dc.cardTypes.includes(data.cardType.toLowerCase())) return false;
+    if (dc.cardTypes && !data.types.some((type) => dc.cardTypes!.includes(type))) return false;
     if (dc.types && !cardTypesOf(state, c).some((type) => dc.types!.includes(type))) return false;
     return true;
   });
@@ -393,7 +394,7 @@ function effectCardCostCandidates(
         !!cost.counter && (card.counters?.[cost.counter.key] ?? 0) >= cost.counter.amount
       )) &&
       (cost.pitch === undefined || cardColorOf(state, card) === cost.pitch) &&
-      (cost.tokenOnly !== true || data.cardType === "token") &&
+      (cost.tokenOnly !== true || hasType(data, "token")) &&
       (cost.class === undefined || types.includes(cost.class.toLowerCase())) &&
       (cost.subtype === undefined || (data.subtypes ?? []).some(
         (subtype) => subtype.toLowerCase() === cost.subtype!.toLowerCase(),

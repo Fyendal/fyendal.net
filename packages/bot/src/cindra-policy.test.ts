@@ -214,7 +214,7 @@ function ordinaryDefenseChoice(options: {
     TEST_EXPENDABLE_BLOCKER: {
       id: "TEST_EXPENDABLE_BLOCKER",
       name: "Test Expendable Blocker",
-      cardType: "action" as const,
+      types: ["action" as const],
       text: "",
       pitch: 1 as const,
       cost: 0,
@@ -223,7 +223,7 @@ function ordinaryDefenseChoice(options: {
     TEST_ARSENAL: {
       id: "TEST_ARSENAL",
       name: "Test Arsenal",
-      cardType: "action" as const,
+      types: ["action" as const],
       text: "",
       pitch: 1 as const,
       cost: 0,
@@ -734,7 +734,7 @@ describe("Cindra Head Jabs policy", () => {
       TEST_EXPENDABLE_BLOCKER: {
         id: "TEST_EXPENDABLE_BLOCKER",
         name: "Test Expendable Blocker",
-        cardType: "action" as const,
+        types: ["action" as const],
         text: "",
         pitch: 1 as const,
         cost: 0,
@@ -775,7 +775,7 @@ describe("Cindra Head Jabs policy", () => {
       TEST_EXPENDABLE_BLOCKER: {
         id: "TEST_EXPENDABLE_BLOCKER",
         name: "Test Expendable Blocker",
-        cardType: "action" as const,
+        types: ["action" as const],
         text: "",
         pitch: 1 as const,
         cost: 0,

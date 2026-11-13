@@ -4,6 +4,7 @@ import { functionalKeyOf } from "../functional.js";
 import { cardData } from "../index.js";
 import { registry } from "../scripts/index.js";
 import vanilla from "../data/vanilla.json" with { type: "json" };
+import { hasType } from "@fyendal/shared";
 
 /**
  * Completeness gate: every functional card in the data pool must be accounted
@@ -137,7 +138,7 @@ describe("script completeness", () => {
   it("every scripted Wizard non-attack arcane action declares its printed effect amounts", () => {
     const missing = [...functionalCards]
       .filter(([, card]) =>
-        card.cardType === "action" &&
+        hasType(card, "action") &&
         card.attack === undefined &&
         (card.classes ?? []).includes("wizard")
       )
@@ -163,7 +164,7 @@ describe("script completeness", () => {
   it("marks every printed direct Wizard action arcane-damage effect", () => {
     const missing = [...functionalCards]
       .filter(([, card]) =>
-        card.cardType === "action" &&
+        hasType(card, "action") &&
         card.attack === undefined &&
         (card.classes ?? []).includes("wizard") &&
         hasPrintedDirectArcaneDamageEffect(card)

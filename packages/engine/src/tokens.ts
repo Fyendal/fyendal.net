@@ -15,6 +15,7 @@ import { currentLink, findCardAnywhere } from "./zoneQueries.js";
 import { contractObserverSources, controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 
 import { offerCrankDecision, stampControlledName, stampEnteringLife } from "./cardLifecycle.js";
+import { hasType } from "@fyendal/shared";
 
 /** Create a token/aura on a player's board without applying creation-count replacements. */
 function createTokenRaw(
@@ -538,13 +539,13 @@ function beginTokenCreation(
 ): CardInstance[] {
   const tokenData = dataOf(state, cardId);
   const auraTokensProhibited =
-    tokenData.cardType === "token" &&
+    hasType(tokenData, "token") &&
     (tokenData.subtypes ?? []).includes("aura") &&
     state.players.some((candidate) => controlledPermanents(state, candidate.seat, {
       faceDownEquipment: false,
     }).some((source) => scriptOf(state, source.cardId, source)?.prohibitsAuraTokenCreation === true));
   if (
-    tokenData.cardType === "token" &&
+    hasType(tokenData, "token") &&
     (tokenData.subtypes ?? []).includes("aura") &&
     (auraTokensProhibited || Number(player.hero.scriptState?.auraTokenCreationLockedUntilTurn ?? 0) === state.turn)
   ) {
@@ -582,12 +583,12 @@ function beginTokenCreation(
  * or printing ID. */
 function canonicalTokenCardId(state: GameStateInternal, requestedCardId: string): string {
   const requested = dataOf(state, requestedCardId);
-  if (requested.cardType !== "token") return requestedCardId;
+  if (!hasType(requested, "token")) return requestedCardId;
   const normalizedName = requested.name.trim().toLowerCase().replace(/\s+/g, " ");
   const pitch = requested.pitch ?? 0;
   for (const candidate of Object.values(state.cardsRef)) {
     if (
-      candidate.cardType === "token" &&
+      hasType(candidate, "token") &&
       (candidate.pitch ?? 0) === pitch &&
       candidate.name.trim().toLowerCase().replace(/\s+/g, " ") === normalizedName
     ) {

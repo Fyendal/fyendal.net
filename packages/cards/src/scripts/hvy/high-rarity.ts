@@ -16,6 +16,7 @@ import {
   opponentSeat,
   pendingDelayedEffect,
 } from "../shared-helpers.js";
+import { hasType } from "@fyendal/shared";
 
 const AGILITY = "HVY240";
 const CINTARI_SELLSWORD = "HVY134";
@@ -634,7 +635,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
       label: "Ripple Away removes one of each token",
       labelMessage: decisionMessage("card.hvy.rippleaway.replacement"),
       replace(ctx, _creatingSeat, _cardId, count, cause) {
-        return cause.sourceCardId && ctx.cardData(cause.sourceCardId).cardType === "action" && count > 0
+        return cause.sourceCardId && hasType(ctx.cardData(cause.sourceCardId), "action") && count > 0
           ? Math.max(0, count - 1)
           : undefined;
       },

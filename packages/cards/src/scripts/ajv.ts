@@ -10,6 +10,7 @@ import {
   localizedCardLog,
   opponentSeat,
 } from "./shared-helpers.js";
+import { hasType as hasPrintedType } from "@fyendal/shared";
 
 const FROSTBITE = "AJV029";
 const EARTH = "AJV028";
@@ -57,7 +58,7 @@ function allEquipment(ctx: ScriptCtx, seat?: number): DeepReadonly<CardInstance>
     .filter((player) => seat === undefined || player.seat === seat)
     .flatMap((player) => [
       ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-      ...player.weapons.filter((card) => data(ctx, card).cardType === "equipment"),
+      ...player.weapons.filter((card) => hasPrintedType(data(ctx, card), "equipment")),
     ]);
 }
 

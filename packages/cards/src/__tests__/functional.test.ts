@@ -7,7 +7,7 @@ import { registry } from "../scripts/index.js";
 import { localizedCardLog, localizedLog } from "../scripts/shared-helpers.js";
 
 function fakeCard(id: string, name: string, pitch?: number): CardData {
-  return { id, name, cardType: "action", text: "", ...(pitch !== undefined ? { pitch: pitch as 1 | 2 | 3 } : {}) };
+  return { id, name, types: ["action"], text: "", ...(pitch !== undefined ? { pitch: pitch as 1 | 2 | 3 } : {}) };
 }
 
 describe("functional keys", () => {

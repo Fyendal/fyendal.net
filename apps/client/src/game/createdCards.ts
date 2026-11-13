@@ -1,6 +1,7 @@
 import { cardData } from "@fyendal/cards/client";
 import { isHalfCardSheetPrinting, resolveCardImageUrl } from "./cardImageUrl.js";
 import { cardPreviewFaceIds } from "./cardPreviewFaces.js";
+import { hasType } from "@fyendal/shared";
 
 export const CREATED_PANEL_GAP = 12;
 export const CREATED_PANEL_WIDTH = 272;
@@ -90,7 +91,7 @@ function prefer(ids: readonly string[], keep: (id: string) => boolean): readonly
 /** A name can have many printings; prefer a token with a full single-face
  * image, then the source's own set. */
 function createdPrinting(name: string, sourceSet: string | undefined): string | undefined {
-  let pool = prefer(getNameIndex().ids.get(name) ?? [], (id) => cardData[id]?.cardType === "token");
+  let pool = prefer(getNameIndex().ids.get(name) ?? [], (id) => hasType(cardData[id], "token"));
   pool = prefer(pool, (id) => cardPreviewFaceIds(id).length === 1);
   pool = prefer(pool, (id) => !isHalfCardSheetPrinting(id));
   return pool.find((id) => cardData[id]?.set === sourceSet) ?? pool[0];

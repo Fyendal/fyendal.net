@@ -28,6 +28,7 @@ import { GameMessageText } from "../i18n/GameMessage.js";
 import { BackgroundMatchSearch } from "../matchmaking/BackgroundMatchSearch.js";
 import { MAX_REPLAY_NOTE_LENGTH } from "@fyendal/protocol";
 import { SocialMenuButton, UnreadMessageBadge } from "../social/MobileSocialControls.js";
+import { hasType } from "@fyendal/shared";
 
 type StructuredLogEntry = Extract<GameLogViewEntry, { message: unknown }>;
 
@@ -86,7 +87,7 @@ function LogLines({
                       ? " log-card-ref-friendly"
                       : friendlyHeroName !== opponentHeroName && name === opponentHeroName
                         ? " log-card-ref-opponent"
-                        : card?.cardType === "token"
+                        : hasType(card, "token")
                           ? " log-card-ref-token"
                           : ""
                   }`}

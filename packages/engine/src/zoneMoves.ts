@@ -45,6 +45,7 @@ import {
   transitionZoneFromEngineZone,
   transitionZoneIsPrivate,
 } from "./transitions.js";
+import { hasType } from "@fyendal/shared";
 
 /**
  * Put a card into its owner's graveyard: record per-turn facts in the owner's
@@ -65,7 +66,7 @@ function enterGraveyard(
   defending = false,
 ): void {
   const owner = state.players[card.owner] as PlayerState;
-  if (dataOf(state, card.cardId).cardType === "token") return;
+  if (hasType(dataOf(state, card.cardId), "token")) return;
   // Ephemeral (CR 8.3.21): "If this would be put into a graveyard from
   //  anywhere, instead it ceases to exist" — no graveyard, no graveyard flags
   //  or triggers
@@ -129,7 +130,7 @@ function enterGraveyard(
         ...(card.meldSide !== "right" ? [meld.leftCardType] : []),
         ...(card.meldSide !== "left" ? [meld.rightCardType] : []),
       ]
-    : [d.cardType];
+    : d.types;
   for (const type of movedTypes) owner.flags[`graveCardType:${type.toLowerCase()}`] = true;
   for (const s of d.subtypes ?? []) {
     owner.flags[`graveSubtype:${s.toLowerCase()}`] = true;
@@ -214,7 +215,7 @@ export function moveToGraveyard(state: GameStateInternal,
     logPublic(state, cardCeasesToExistLogMessage(state, card.cardId));
     return;
   }
-  const ceases = dataOf(state, card.cardId).cardType === "token"
+  const ceases = hasType(dataOf(state, card.cardId), "token")
     || (!cardAbilitiesSuppressed(state, card)
       && (dataOf(state, card.cardId).keywords ?? []).some(
         (keyword) => keyword.trim().toLowerCase() === "ephemeral",
@@ -676,7 +677,7 @@ export function enterBanish(
         Number(resolving.scriptState?.payingAdditionalCost ?? 0) !== 1
       ) return false;
       const resolvingData = dataOf(state, resolving.cardId);
-      return resolvingData.cardType === "action" &&
+      return hasType(resolvingData, "action") &&
         (resolvingData.subtypes ?? []).includes("attack");
     },
   );
@@ -698,7 +699,7 @@ export function enterBanish(
   }
   // Observers historically see ordinary cards already present in banish.
   // Tokens still fire the move event, but cease instead of remaining there.
-  if (dataOf(state, card.cardId).cardType !== "token") owner.banish.push(card);
+  if (!hasType(dataOf(state, card.cardId), "token")) owner.banish.push(card);
   const origin = from === "deck"
     ? " from deck"
     : from === "graveyard"
@@ -1009,9 +1010,9 @@ function moveCardIntoOwnerDeck(
     || (found.fromZone === "arsenal" && found.card.faceDown === true)
     || (found.fromZone === "banish" && found.card.faceDown === true);
   const sourceWasFaceDown = found.card.faceDown === true;
-  const source = found.fromArena && dataOf(state, found.card.cardId).cardType === "weapon"
+  const source = found.fromArena && hasType(dataOf(state, found.card.cardId), "weapon")
     ? transitionZone("weapon", found.owner.seat)
-    : found.fromArena && dataOf(state, found.card.cardId).cardType === "equipment"
+    : found.fromArena && hasType(dataOf(state, found.card.cardId), "equipment")
       ? transitionZone("equipment", found.owner.seat)
       : transitionZoneFromEngineZone(found.fromZone, found.owner.seat);
   if (found.fromArena && cardHasType(state, found.card, "token")) {

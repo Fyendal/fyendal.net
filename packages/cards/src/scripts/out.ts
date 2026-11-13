@@ -26,6 +26,7 @@ import {
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { outHighRarity, uzuriAbility } from "./out/high-rarity.js";
+import { hasType } from "@fyendal/shared";
 
 // OUT — Outsiders common/rare cards and young heroes.
 const BLOODROT = "SAZ034";
@@ -47,7 +48,7 @@ function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance
   const player = ctx.player(seat);
   return [
     ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-    ...player.weapons.filter((card) => data(ctx, card).cardType === "equipment"),
+    ...player.weapons.filter((card) => hasType(data(ctx, card), "equipment")),
   ];
 }
 function isDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
@@ -281,7 +282,7 @@ function wreckHavoc(): CardScript {
       const card = ctx.player(opponentSeat(ctx)).arsenal[0];
       if (!card) return;
       ctx.setCardFaceDown(card.instanceId, false);
-      if (data(ctx, card).cardType === "defense-reaction" && !ctx.destroyPermanent(card.instanceId)) {
+      if (hasType(data(ctx, card), "defense-reaction") && !ctx.destroyPermanent(card.instanceId)) {
         ctx.moveToGraveyard(card.instanceId, "arsenal");
       }
     },

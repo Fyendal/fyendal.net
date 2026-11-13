@@ -51,7 +51,11 @@ export interface CardData {
   color?: CardColor;
   pitch?: Pitch;
   cost?: number;
-  cardType: CardType;
+  /** Every printed card type, in `CARD_TYPE_ORDER` (e.g. ["equipment",
+   *  "instant"] for an Equipment - Instant Evo). Read with `hasType`, or
+   *  `objectKind` for zone placement. Meld cards keep their printed side
+   *  types in their script. */
+  types: CardType[];
   /** e.g. ["attack"], ["sword","1h"], ["head"], ["club","2h"] */
   subtypes?: string[];
   /** e.g. ["warrior"], ["brute"], ["generic"] */

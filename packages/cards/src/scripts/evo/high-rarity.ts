@@ -23,6 +23,7 @@ import {
   sharesName,
   yesNoPrompt,
 } from "../shared-helpers.js";
+import { hasType } from "@fyendal/shared";
 
 const QUICKEN = "EVO250";
 const RUNECHANT = "DTD214";
@@ -54,7 +55,7 @@ function emboldenedBladeReveal(ctx: ScriptCtx, instanceId: number): void {
   const card = ctx.state.players
     .flatMap((player) => player.arsenal)
     .find((candidate) => candidate.instanceId === instanceId);
-  if (card && data(ctx, card).cardType === "defense-reaction" && ctx.moveToGraveyard(instanceId, "arsenal"))
+  if (card && hasType(data(ctx, card), "defense-reaction") && ctx.moveToGraveyard(instanceId, "arsenal"))
     buffNextAttack(ctx, { attack: 1, appliesTo: "weapon" });
 }
 const FABRICATE_MODES = ["equip", "defense", "under", "hand"] as const;
@@ -128,7 +129,7 @@ function suppressTargetEquipmentAbilities(ctx: ScriptCtx): void {
 function steelSoulTriggerCount(ctx: ScriptCtx, other: DeepReadonly<CardInstance>): number {
   if (!ctx.cardTypes(other).some((type) => type.toLowerCase() === "evo")) return 0;
   if (sharesName(ctx, other, ctx.self)) return 0;
-  return ctx.cardData(other.cardId).cardType === "hero" ? 2 : 1;
+  return hasType(ctx.cardData(other.cardId), "hero") ? 2 : 1;
 }
 function steelControllerTargets(ctx: ScriptCtx) {
   return faceUpGraveyard(ctx).filter(
@@ -174,7 +175,7 @@ function galvanize(extra: CardScript = {}): CardScript {
 }
 function scrap(extra: CardScript = {}, count = 1): CardScript {
   const scrappable = (ctx: ScriptCtx, card: DeepReadonly<CardInstance>) =>
-    isItem(ctx, card) || data(ctx, card).cardType === "equipment";
+    isItem(ctx, card) || hasType(data(ctx, card), "equipment");
   return {
     ...extra,
     declareAdditionalCost(ctx) {
@@ -209,8 +210,6 @@ function scrap(extra: CardScript = {}, count = 1): CardScript {
 function breakerEvo(extra: CardScript = {}): CardScript {
   return evoEquipment({
     ...extra,
-    additionalCardTypes: ["instant"],
-    playAsInstant: () => true,
     additionalCost(ctx) {
       const drivers = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver"));
       if (drivers.length)
@@ -397,7 +396,6 @@ export const evoHighRarity: Record<string, CardScript> = {
     onChoose() {},
   },
   "teklovossen, the mechropotent|0": {
-    additionalCardTypes: ["equipment"],
     countsAsEquipped: { evo: 4 },
     activated: { cost: 3, banishSoulCost: 2, isAttack: true, goAgain: false, label: "Attack" },
     onAttackDeclared(ctx) {

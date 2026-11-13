@@ -31,6 +31,7 @@ import {
 } from "./value.js";
 import { chooseUpkeepPayment, lethalUpkeepReserve, strandsLethalUpkeep } from "./upkeep.js";
 import { BLOCK_USE_RATE } from "./card-ev.js";
+import { hasType } from "@fyendal/shared";
 
 export interface BotPolicyInput {
   seat: 0 | 1;
@@ -108,13 +109,13 @@ function bestDefenderStageIntent(
     if (link?.overpower) {
       const actionDefenders = ids.filter((id) => {
         if (equipmentIds.has(id)) return false;
-        return input.cards[own.get(id)?.cardId ?? ""]?.cardType === "action";
+        return hasType(input.cards[own.get(id)?.cardId ?? ""], "action");
       }).length;
       if (actionDefenders > 1) return false;
     }
     if (link?.maxNonBlockDefenders !== undefined) {
       const nonBlockDefenders = ids.filter((id) =>
-        input.cards[own.get(id)?.cardId ?? ""]?.cardType !== "block"
+        !hasType(input.cards[own.get(id)?.cardId ?? ""], "block")
       ).length;
       if (nonBlockDefenders > link.maxNonBlockDefenders) return false;
     }
@@ -295,7 +296,7 @@ function isOffensivePlayIntent(
 ): boolean {
   const card = intentCard(intent, own);
   const data = card ? input.cards[card.cardId] : undefined;
-  return isAttack(data) || data?.cardType === "weapon";
+  return isAttack(data) || hasType(data, "weapon");
 }
 
 function preservesArsenalCard(
@@ -441,7 +442,7 @@ export function strategicPitchIntents(
 }
 
 export function isAttack(data: CardData | undefined): boolean {
-  return data?.cardType === "action" && !!data.subtypes?.includes("attack");
+  return data !== undefined && hasType(data, "action") && !!data.subtypes?.includes("attack");
 }
 
 export function isOpeningTurn(input: BotPolicyInput): boolean {
@@ -454,7 +455,7 @@ const OPENING_ATTACK_INSTANT_SHARE = 0.15;
 function opponentRunsManyInstants(input: BotPolicyInput): boolean {
   const deck = input.decklists?.opponent;
   if (!deck?.length) return false;
-  const instants = deck.filter((id) => input.cards[id]?.cardType === "instant").length;
+  const instants = deck.filter((id) => hasType(input.cards[id], "instant")).length;
   return instants / deck.length >= OPENING_ATTACK_INSTANT_SHARE;
 }
 
@@ -904,7 +905,7 @@ export function plannedDefenseReactionPlan(
     ...((link.dominate && blockedFromHand) || link.defenseReactionsBlockedFromHand ? [] : me.hand),
     ...(link.defenseReactionsBlockedFromArsenal ? [] : me.arsenal),
   ].filter((card) =>
-    !spent.has(card.instanceId) && input.cards[card.cardId]?.cardType === "defense-reaction" &&
+    !spent.has(card.instanceId) && hasType(input.cards[card.cardId], "defense-reaction") &&
     !mirageNullifiesDefense(input.cards[card.cardId], input)
   );
 
@@ -967,7 +968,7 @@ export function pendingDefenseReactionValue(input: BotPolicyInput): number {
   return input.view.stack.reduce((total, layer) => {
     if (layer.seat !== input.seat || !layer.card) return total;
     const data = input.cards[layer.card.cardId];
-    if (data?.cardType !== "defense-reaction" || mirageNullifiesDefense(data, input)) return total;
+    if (!data || !hasType(data, "defense-reaction") || mirageNullifiesDefense(data, input)) return total;
     return total + Math.max(0, layer.card.defense ?? data.defense ?? 0);
   }, 0);
 }
@@ -1246,7 +1247,7 @@ export function defenderDefense(card: CardView, input: BotPolicyInput): number {
   const data = input.cards[card.cardId];
   if (
     isBladeBeckoner(card, input) &&
-    input.cards[link?.attackingCard.cardId ?? ""]?.cardType === "weapon"
+    hasType(input.cards[link?.attackingCard.cardId ?? ""], "weapon")
   ) {
     // CardView.defense has already clamped printed defense minus counters to
     // zero. Blade Beckoner's continuous bonus is applied before that clamp,
@@ -1475,7 +1476,7 @@ function defendTriggerDiscards(
   link: NonNullable<ReturnType<typeof currentLink>>,
   chosen: readonly CardView[],
 ): number {
-  const weaponAttack = input.cards[link.attackingCard.cardId]?.cardType === "weapon";
+  const weaponAttack = hasType(input.cards[link.attackingCard.cardId], "weapon");
   const discards = chosen.reduce((total, card) => {
     const match = DEFEND_DISCARD.exec(input.cards[card.cardId]?.text ?? "");
     if (!match || (match[1] && !weaponAttack)) return total;
@@ -1592,7 +1593,7 @@ function bestContinuationResponse(
   const candidates = input.view.players[input.seat].hand.filter((card) => {
     if (consumedIds.has(card.instanceId)) return false;
     const data = input.cards[card.cardId];
-    return data?.cardType !== "defense-reaction" && Math.max(0, card.defense ?? data?.defense ?? 0) > 0;
+    return !hasType(data, "defense-reaction") && Math.max(0, card.defense ?? data?.defense ?? 0) > 0;
   });
   const evaluate = (defenders: readonly CardView[]): ContinuationEvaluation => {
     const defenderIds = defenders.map((card) => card.instanceId);
@@ -1737,7 +1738,7 @@ function hasSpareHandBlocker(
   const candidates = input.view.players[input.seat].hand.filter((card) =>
     !chosenIds.has(card.instanceId) && !spentIds.has(card.instanceId) &&
     (stageable.size === 0 || stageable.has(card.instanceId)) &&
-    input.cards[card.cardId]?.cardType !== "defense-reaction" &&
+    !hasType(input.cards[card.cardId], "defense-reaction") &&
     defenderDefense(card, input) > 0 &&
     (model.canUseDefender?.(card, input) ?? true)
   );
@@ -1913,7 +1914,7 @@ export function scoreDefenseIntentWithTrace(
       onHit,
     };
   }
-  const attackIsWeapon = input.cards[link.attackingCard.cardId]?.cardType === "weapon";
+  const attackIsWeapon = hasType(input.cards[link.attackingCard.cardId], "weapon");
   const swingLeft = opponentWeaponAttackLeft(input);
   // Kabuto's lock pays only while a weapon swing remains to deny.
   const locksWeapons = (card: CardView) => swingLeft && isWeaponLock(card, input);
@@ -2302,7 +2303,7 @@ export function enforceAllyTargetPolicy(
   const own = ownCards(input);
   const card = intentCard(selected, own);
   const data = card ? input.cards[card.cardId] : undefined;
-  if (!card || (!isAttack(data) && data?.cardType !== "weapon")) return selected;
+  if (!card || (!isAttack(data) && !hasType(data, "weapon"))) return selected;
 
   const allies = opponentAllies(input);
   if (allies.length === 0) return selected;

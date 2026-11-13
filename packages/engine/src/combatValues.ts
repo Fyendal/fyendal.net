@@ -28,6 +28,7 @@ import type { BasePowerSource, CardInstance, ChainLinkState, CombatValueModifier
 import { defendingSeatOf, findCardAnywhere, opponent } from "./zoneQueries.js";
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
+import { hasType } from "@fyendal/shared";
 
 function matchingOneShotDefenseCards(
   state: GameStateInternal,
@@ -225,7 +226,7 @@ export function attackNonBlockDefenderCount(
   link: ChainLinkState,
 ): number {
   return [...link.defendingCards, ...link.defendingEquipment].filter(
-    (card) => dataOf(state, card.cardId).cardType !== "block",
+    (card) => !hasType(dataOf(state, card.cardId), "block"),
   ).length;
 }
 
@@ -730,7 +731,7 @@ export function defenseValueModifiers(
 }
 
 function isAttackActionData(data: CardData): boolean {
-  return data.cardType === "action" && (data.subtypes ?? []).includes("attack");
+  return hasType(data, "action") && (data.subtypes ?? []).includes("attack");
 }
 
 /**
@@ -1091,7 +1092,7 @@ export function noteAttackDefendedBy(
       (Number(defender.flags[`defendedPitch:${defendingColor}`]) || 0) + 1;
   }
   if (
-    defendingData.cardType === "action" &&
+    hasType(defendingData, "action") &&
     (defendingData.subtypes ?? []).includes("attack")
   ) {
     defender.flags.defendedWithAttackActionThisTurn = true;

@@ -2,7 +2,7 @@
  {
   "id": "EVO000",
   "name": "Master Cog",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "Legendary\nWhen this is pitched, you may put a steam counter on an item you control with crank.",
   "pitch": 2,
   "classes": [
@@ -19,7 +19,7 @@
  {
   "id": "EVO001",
   "name": "Dash I/O",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may look at the top card of your deck at any time.\nOnce per turn, you may play a Mechanologist item with cost 0 or 1 from the top of your deck as though it were an instant. It costs an additional {r} to play.",
   "classes": [
    "mechanologist"
@@ -31,7 +31,7 @@
  {
   "id": "EVO002",
   "name": "Dash, Database",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may look at the top card of your deck at any time.\nOnce per turn, you may play a Mechanologist item with cost 0 or 1 from the top of your deck as though it were an instant. It costs an additional {r} to play.",
   "classes": [
    "mechanologist"
@@ -43,7 +43,7 @@
  {
   "id": "EVO003",
   "name": "Symbiosis Shot",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Dash Specialization\nAction - Remove a steam counter from this: Attack\nWhenever a Mechanologist item enters the arena under your control, if this has fewer than 6 steam counters, you may put a steam counter on this.",
   "attack": 2,
   "classes": [
@@ -61,7 +61,7 @@
  {
   "id": "EVO004",
   "name": "Maxx 'The Hype' Nitro",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - {r}{r}: Create a Hyper Driver token with 2 steam counters.  Activate this ability only if you've boosted this turn.\nHyper Drivers you control get crank.",
   "classes": [
    "mechanologist"
@@ -73,7 +73,7 @@
  {
   "id": "EVO005",
   "name": "Maxx Nitro",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - {r}{r}: Create a Hyper Driver token with 2 steam counters.  Activate this ability only if you've boosted this turn.\nHyper Drivers you control get crank.",
   "classes": [
    "mechanologist"
@@ -85,7 +85,7 @@
  {
   "id": "EVO006",
   "name": "Banksy",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Maxx Specialization\nOnce per Turn Action - {r}: Attack. Activate this ability only if you've cranked this turn.\nWhen this hits a hero, put a steam counter on an item you control with crank.",
   "attack": 3,
   "classes": [
@@ -103,7 +103,7 @@
  {
   "id": "EVO007",
   "name": "Teklovossen, Esteemed Magnate",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may play Evos from your banished zone.\nOnce per Turn Instant - {r}{r}{r}: You may play your next Evo this turn as though it were an instant. When you do, draw a card.",
   "classes": [
    "mechanologist"
@@ -115,7 +115,7 @@
  {
   "id": "EVO008",
   "name": "Teklovossen",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may play Evos from your banished zone.\nOnce per Turn Instant - {r}{r}{r}: You may play your next Evo this turn as though it were an instant. When you do, draw a card.",
   "classes": [
    "mechanologist"
@@ -127,7 +127,7 @@
  {
   "id": "EVO009",
   "name": "Teklo Leveler",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "If you have 1 or more Evos equipped, this gets \"Once per Turn Action - {r}{r}{r}: Attack,\"\n\n2 or more, this costs {r}{r} less to activate,\n3 or more, this gets go again,\n4 or more, this gets +1{p}.",
   "attack": 2,
   "classes": [
@@ -142,7 +142,7 @@
  {
   "id": "EVO010",
   "name": "Singularity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Legendary Teklovossen Specialization\nTransform your hero, your weapon, and 4 Evos you have equipped into Teklovossen, the Mechropotent. It enters the arena with {h} equal to the hero it transformed from.",
   "pitch": 1,
   "cost": 6,
@@ -164,7 +164,7 @@
  {
   "id": "EVO010B",
   "name": "Teklovossen, the Mechropotent",
-  "cardType": "hero",
+  "types": ["hero", "equipment"],
   "text": "Action - {r}{r}{r}, banish 2 cards from your soul: Attack\nWhenever this attacks a hero, they discard a card.\nYour Mechanologist attack action cards get go again.\nThis counts as having 4 Evos equipped.\nBattleworn",
   "attack": 6,
   "defense": 6,
@@ -184,7 +184,7 @@
  {
   "id": "EVO011",
   "name": "Hyper-X3",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever you banish a Hyper Driver from boosting, put it under this.\nOnce per turn, when a Hyper Driver is put under this, if there are 3 or more Hyper Drivers under this, draw a card.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -201,7 +201,7 @@
  {
   "id": "EVO012",
   "name": "Teklo Foundry Heart",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Once per Turn Action - {r}: Banish the top 2 cards of your deck. Gain {r} for each Mechanologist card banished this way. Activate this ability only if you've boosted this turn. Go again\nBattleworn",
   "defense": 2,
   "classes": [
@@ -218,7 +218,7 @@
  {
   "id": "EVO013",
   "name": "Adaptive Plating",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Modular\nAction - 0: Equip this to another equipment zone.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d} until end of turn.\nBlade Break",
   "defense": 1,
   "classes": [
@@ -234,7 +234,7 @@
  {
   "id": "EVO014",
   "name": "Cogwerx Base Head",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this is equipped, put a steam counter on it.\nOnce per Turn Instant - {r}, remove a steam counter from this: Shuffle a Mechanologist attack action card from your banished zone into your deck. Activate this ability only if you've boosted this turn.",
   "classes": [
    "mechanologist"
@@ -248,7 +248,7 @@
  {
   "id": "EVO015",
   "name": "Cogwerx Base Chest",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this is equipped, put a steam counter on it.\nOnce per Turn Instant - {r}, remove a steam counter from this: Gain {r}{r}. Activate this ability only if you've boosted this turn.",
   "classes": [
    "mechanologist"
@@ -262,7 +262,7 @@
  {
   "id": "EVO016",
   "name": "Cogwerx Base Arms",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this is equipped, put a steam counter on it.\nOnce per Turn Instant - {r}, remove a steam counter from this: Your next Mechanologist attack this turn gets +1{p}. Activate this ability only if you've boosted this turn.",
   "classes": [
    "mechanologist"
@@ -276,7 +276,7 @@
  {
   "id": "EVO017",
   "name": "Cogwerx Base Legs",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this is equipped, put a steam counter on it.\nOnce per Turn Instant - {r}, remove a steam counter from this: Gain 1 action point. Activate this ability only if you've boosted this turn.",
   "classes": [
    "mechanologist"
@@ -290,7 +290,7 @@
  {
   "id": "EVO018",
   "name": "Teklo Base Head",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -308,7 +308,7 @@
  {
   "id": "EVO019",
   "name": "Teklo Base Chest",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -326,7 +326,7 @@
  {
   "id": "EVO020",
   "name": "Teklo Base Arms",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -344,7 +344,7 @@
  {
   "id": "EVO021",
   "name": "Teklo Base Legs",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -362,7 +362,7 @@
  {
   "id": "EVO022",
   "name": "Proto Base Head",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "",
   "classes": [
    "mechanologist"
@@ -376,7 +376,7 @@
  {
   "id": "EVO023",
   "name": "Proto Base Chest",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "",
   "classes": [
    "mechanologist"
@@ -390,7 +390,7 @@
  {
   "id": "EVO024",
   "name": "Proto Base Arms",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "",
   "classes": [
    "mechanologist"
@@ -404,7 +404,7 @@
  {
   "id": "EVO025",
   "name": "Proto Base Legs",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "",
   "classes": [
    "mechanologist"
@@ -418,7 +418,7 @@
  {
   "id": "EVO026",
   "name": "Evo Steel Soul Memory",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base head equipped, transform it into this, then equip this.\nWhen this transforms from or into an Evo with a different name, your hero gets +1{i} until end of turn. If that Evo is a hero, instead this triggers twice.\nTemper",
   "pitch": 3,
   "cost": 4,
@@ -440,7 +440,7 @@
  {
   "id": "EVO027",
   "name": "Evo Steel Soul Processor",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base chest equipped, transform it into this, then equip this.\nWhen this transforms from or into an Evo with a different name, gain {r}{r}{r}. If that Evo is a hero, instead this triggers twice.\nTemper",
   "pitch": 3,
   "cost": 4,
@@ -462,7 +462,7 @@
  {
   "id": "EVO028",
   "name": "Evo Steel Soul Controller",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have base arms equipped, transform it into this, then equip this.\nWhen this transforms from or into an Evo with a different name, you may put an attack action card with 6{p} from your graveyard into your deck fifth from the top. If that Evo is a hero, instead this triggers twice.\nTemper",
   "pitch": 3,
   "cost": 4,
@@ -484,7 +484,7 @@
  {
   "id": "EVO029",
   "name": "Evo Steel Soul Tower",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base legs equipped, transform it into this, then equip this.\nWhen this transforms from or into an Evo with a different name, gain 1 action point. If that Evo is a hero, instead this triggers twice.\nTemper",
   "pitch": 3,
   "cost": 4,
@@ -506,7 +506,7 @@
  {
   "id": "EVO030",
   "name": "Evo Circuit Breaker",
-  "cardType": "equipment",
+  "types": ["equipment", "instant"],
   "text": "If you have a base head equipped, transform it and X Hyper Drivers you control into this, then equip this. If you do, the next time you would be dealt damage this turn, prevent twice X of that damage.\nWhenever you boost, you may destroy a card under this. If you do, shuffle 2 attack action cards from your banished zone into your deck.",
   "pitch": 1,
   "cost": 0,
@@ -526,7 +526,7 @@
  {
   "id": "EVO031",
   "name": "Evo Atom Breaker",
-  "cardType": "equipment",
+  "types": ["equipment", "instant"],
   "text": "If you have a base chest equipped, transform it and X Hyper Drivers you control into this, then equip this. If you do, the next time you would be dealt damage this turn, prevent twice X of that damage.\nWhenever you boost, you may destroy a card under this. If you do, gain {r}{r}.",
   "pitch": 1,
   "cost": 0,
@@ -546,7 +546,7 @@
  {
   "id": "EVO032",
   "name": "Evo Face Breaker",
-  "cardType": "equipment",
+  "types": ["equipment", "instant"],
   "text": "If you have a base arms equipped, transform it and X Hyper Drivers you control into this, then equip this. If you do, the next time you would be dealt damage this turn, prevent twice X of that damage.\nWhenever you boost an attack action card, you may destroy a card under this. If you do, the attack gets +2{p}.",
   "pitch": 1,
   "cost": 0,
@@ -566,7 +566,7 @@
  {
   "id": "EVO033",
   "name": "Evo Mach Breaker",
-  "cardType": "equipment",
+  "types": ["equipment", "instant"],
   "text": "If you have a base legs equipped, transform it and X Hyper Drivers you control into this, then equip this. If you do, the next time you would be dealt damage this turn, prevent twice X of that damage.\nWhenever you boost, you may destroy a card under this. If you do, create a Quicken token.",
   "pitch": 1,
   "cost": 0,
@@ -586,7 +586,7 @@
  {
   "id": "EVO034",
   "name": "Evo Command Center",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base head equipped, transform it into this, then equip this.\nOnce per Turn Instant - Destroy a card under this: Your next weapon attack this turn gets \"When this hits, draw a card.\"\nBlade Break",
   "pitch": 2,
   "cost": 3,
@@ -607,7 +607,7 @@
  {
   "id": "EVO035",
   "name": "Evo Engine Room",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base chest equipped, transform it into this, then equip this.\nOnce per Turn Instant - Destroy a card under this: Your next weapon attack this turn costs {r} less to activate.\nBlade Break",
   "pitch": 2,
   "cost": 3,
@@ -628,7 +628,7 @@
  {
   "id": "EVO036",
   "name": "Evo Smoothbore",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base arms equipped, transform it into this, then equip this.\nOnce per Turn Instant - Destroy a card under this: Your next weapon attack this turn gets +1{p}.\nBlade Break",
   "pitch": 2,
   "cost": 3,
@@ -649,7 +649,7 @@
  {
   "id": "EVO037",
   "name": "Evo Thruster",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base legs equipped, transform it into this, then equip this.\nOnce per Turn Instant - Destroy a card under this: You may attack an additional time with target weapon this turn.\nBlade Break",
   "pitch": 2,
   "cost": 3,
@@ -670,7 +670,7 @@
  {
   "id": "EVO038",
   "name": "Evo Tekloscope",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base head equipped, transform it into this, then equip this.\nYour Teklo Blaster attacks can target any opposing hero.\nBattleworn",
   "pitch": 3,
   "cost": 3,
@@ -691,7 +691,7 @@
  {
   "id": "EVO039",
   "name": "Evo Energy Matrix",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base chest equipped, transform it into this, then equip this.\nYour Teklo Blaster costs {r} less to activate for each opposing hero.\nBattleworn",
   "pitch": 3,
   "cost": 3,
@@ -712,7 +712,7 @@
  {
   "id": "EVO040",
   "name": "Evo Scatter Shot",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base arms equipped, transform it into this, then equip this.\nYour Teklo Blaster gets +1{p} for each opposing hero.\nBattleworn",
   "pitch": 3,
   "cost": 3,
@@ -733,7 +733,7 @@
  {
   "id": "EVO041",
   "name": "Evo Rapid Fire",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base legs equipped, transform it into this, then equip this.\nYour Teklo Blaster attacks get go again.\nBattleworn",
   "pitch": 3,
   "cost": 3,
@@ -754,7 +754,7 @@
  {
   "id": "EVO042",
   "name": "Evo Sentry Base Head",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base head equipped, transform it into this, then equip this.\nBattleworn",
   "pitch": 1,
   "cost": 2,
@@ -776,7 +776,7 @@
  {
   "id": "EVO043",
   "name": "Evo Sentry Base Chest",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base chest equipped, transform it into this, then equip this.\nBattleworn",
   "pitch": 1,
   "cost": 2,
@@ -798,7 +798,7 @@
  {
   "id": "EVO044",
   "name": "Evo Sentry Base Arms",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base arms equipped, transform it into this, then equip this.\nBattleworn",
   "pitch": 1,
   "cost": 2,
@@ -820,7 +820,7 @@
  {
   "id": "EVO045",
   "name": "Evo Sentry Base Legs",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base legs equipped, transform it into this, then equip this.\nBattleworn",
   "pitch": 1,
   "cost": 2,
@@ -842,7 +842,7 @@
  {
   "id": "EVO046",
   "name": "Evo Data Mine",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base head equipped, transform it into this, then equip this.\nOnce per Turn Instant - Destroy a card under this: Draw a card, then put a card from your hand on top of your deck.\nBlade Break",
   "pitch": 2,
   "cost": 0,
@@ -863,7 +863,7 @@
  {
   "id": "EVO047",
   "name": "Evo Battery Pack",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base chest equipped, transform it into this, then equip this.\nOnce per Turn Instant - Destroy a card under this: Put a steam counter on an item you control with crank.\nBlade Break",
   "pitch": 2,
   "cost": 0,
@@ -884,7 +884,7 @@
  {
   "id": "EVO048",
   "name": "Evo Cogspitter",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base arms equipped, transform it into this, then equip this.\nOnce per Turn Instant - Destroy a card under this: Put an item with cost 0 or 1 from your hand into the arena.\nBlade Break",
   "pitch": 2,
   "cost": 0,
@@ -905,7 +905,7 @@
  {
   "id": "EVO049",
   "name": "Evo Charging Rods",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base legs equipped, transform it into this, then equip this.\nOnce per Turn Instant - Destroy a card under this: Create a Quicken token.\nBlade Break",
   "pitch": 2,
   "cost": 0,
@@ -926,7 +926,7 @@
  {
   "id": "EVO050",
   "name": "Evo Zoom Call",
-  "cardType": "equipment",
+  "types": ["equipment", "instant"],
   "text": "If you have a base head equipped, transform it into this, then equip this.\nWhen this is equipped, you may banish a card from you hand. If you do, draw a card.",
   "pitch": 2,
   "cost": 0,
@@ -946,7 +946,7 @@
  {
   "id": "EVO051",
   "name": "Evo Buzz Hive",
-  "cardType": "equipment",
+  "types": ["equipment", "instant"],
   "text": "If you have a base chest equipped, transform it into this, then equip this.\nWhen this is equipped, gain {r}.",
   "pitch": 2,
   "cost": 0,
@@ -966,7 +966,7 @@
  {
   "id": "EVO052",
   "name": "Evo Whizz Bang",
-  "cardType": "equipment",
+  "types": ["equipment", "instant"],
   "text": "If you have a base head equipped, transform it into this, then equip this.\nWhen this is equipped, up to 1 target attack gets +1{p}.",
   "pitch": 2,
   "cost": 0,
@@ -986,7 +986,7 @@
  {
   "id": "EVO053",
   "name": "Evo Zip Line",
-  "cardType": "equipment",
+  "types": ["equipment", "instant"],
   "text": "If you have a base legs equipped, transform it into this, then equip this.\nWhen this is equipped, up to 1 target attack gets go again.",
   "pitch": 2,
   "cost": 0,
@@ -1006,7 +1006,7 @@
  {
   "id": "EVO054",
   "name": "Annihilator Engine",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have 1 or more Evos equipped, this gets \"When this hits a hero, destroy all cards defending this,\"\n\n2 or more, this costs {r}{r}{r} less to play,\n3 or more, this gets overpower,\n4 or more, this gets +3{p}.",
   "pitch": 1,
   "cost": 6,
@@ -1026,7 +1026,7 @@
  {
   "id": "EVO055",
   "name": "Terminator Tank",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have 1 or more Evos equipped, this gets \"When this hits a hero, they discard a card,\"\n\n2 or more, this costs {r}{r}{r} less to play,\n3 or more, this gets overpower,\n4 or more, this gets +3{p}.",
   "pitch": 1,
   "cost": 6,
@@ -1046,7 +1046,7 @@
  {
   "id": "EVO056",
   "name": "War Machine",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have 1 or more Evos equipped, this gets \"When this hits a hero, destroy all cards in their arsenal,\"\"\n\n2 or more, this costs {r}{r}{r} less to play,\n3 or more, this gets overpower,\n4 or more, this gets +3{p}.",
   "pitch": 1,
   "cost": 6,
@@ -1066,7 +1066,7 @@
  {
   "id": "EVO057",
   "name": "Demolition Protocol",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - When this attacks a hero, remove all steam counters from up to X equipment, items, and/or weapons they control, where X is the number of Evos you have equipped.",
   "pitch": 1,
   "cost": 3,
@@ -1086,7 +1086,7 @@
  {
   "id": "EVO058",
   "name": "Pulsewave Protocol",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - When this attacks a hero, they reveal X cards from their hand, where X is the number of Evos you have equipped. Choose an action card with {d} less than X, then add it to this chain link as a defending card.",
   "pitch": 2,
   "cost": 3,
@@ -1106,7 +1106,7 @@
  {
   "id": "EVO059",
   "name": "Meganetic Protocol",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - The defending hero must defend this with X equipment they control with -1{d} counters if able, where X is the number of Evos you have equipped.",
   "pitch": 3,
   "cost": 3,
@@ -1126,7 +1126,7 @@
  {
   "id": "EVO060",
   "name": "Steel Street Enforcement",
-  "cardType": "block",
+  "types": ["block"],
   "text": "Evo Upgrade - While this is defending, it gets +X{d}, where X is the number of Evos you have equipped.",
   "pitch": 3,
   "defense": 1,
@@ -1141,7 +1141,7 @@
  {
   "id": "EVO061",
   "name": "Heavy Artillery",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - The defending hero can't defend this with attack action cards with cost less than X, where X is the number of Evos you have equipped.",
   "pitch": 1,
   "cost": 3,
@@ -1161,7 +1161,7 @@
  {
   "id": "EVO062",
   "name": "Heavy Artillery",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - The defending hero can't defend this with attack action cards with cost less than X, where X is the number of Evos you have equipped.",
   "pitch": 2,
   "cost": 3,
@@ -1181,7 +1181,7 @@
  {
   "id": "EVO063",
   "name": "Heavy Artillery",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - The defending hero can't defend this with attack action cards with cost less than X, where X is the number of Evos you have equipped.",
   "pitch": 3,
   "cost": 3,
@@ -1201,7 +1201,7 @@
  {
   "id": "EVO064",
   "name": "Liquid-Cooled Mayhem",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - This costs {r} less to play for each Evo you have equipped.",
   "pitch": 1,
   "cost": 4,
@@ -1221,7 +1221,7 @@
  {
   "id": "EVO065",
   "name": "Liquid-Cooled Mayhem",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - This costs {r} less to play for each Evo you have equipped.",
   "pitch": 2,
   "cost": 4,
@@ -1241,7 +1241,7 @@
  {
   "id": "EVO066",
   "name": "Liquid-Cooled Mayhem",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - This costs {r} less to play for each Evo you have equipped.",
   "pitch": 3,
   "cost": 4,
@@ -1261,7 +1261,7 @@
  {
   "id": "EVO067",
   "name": "Mechanical Strength",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - This gets +X{p}, where X is the number of Evos you have equipped.",
   "pitch": 1,
   "cost": 3,
@@ -1281,7 +1281,7 @@
  {
   "id": "EVO068",
   "name": "Mechanical Strength",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - This gets +X{p}, where X is the number of Evos you have equipped.",
   "pitch": 2,
   "cost": 3,
@@ -1301,7 +1301,7 @@
  {
   "id": "EVO069",
   "name": "Mechanical Strength",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - This gets +X{p}, where X is the number of Evos you have equipped.",
   "pitch": 3,
   "cost": 3,
@@ -1321,7 +1321,7 @@
  {
   "id": "EVO070",
   "name": "Grinding Gears",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nAction - 0: Target hero destroys the top card of their deck.",
   "pitch": 3,
   "cost": 0,
@@ -1339,7 +1339,7 @@
  {
   "id": "EVO071",
   "name": "Prismatic Lens",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nOnce per Turn Instant - 0: Reveal the top card of your deck. Put a Mechanologist item of the same color from your banished zone on top of your deck.",
   "pitch": 2,
   "cost": 1,
@@ -1357,7 +1357,7 @@
  {
   "id": "EVO072",
   "name": "Quantum Processor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nOnce per Turn Instant - 0: Put a Mechanologist item with cost 0 or 1 from your hand into the arena.",
   "pitch": 2,
   "cost": 1,
@@ -1375,7 +1375,7 @@
  {
   "id": "EVO073",
   "name": "Stasis Cell",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this enters or leaves the arena, activated abilities of target equipment can't be activated until the end of its controller's next turn.\nAction - Put this on the bottom of its owner's deck: Choose an equipment. It can't defend this turn. Go again",
   "pitch": 3,
   "cost": 0,
@@ -1390,7 +1390,7 @@
  {
   "id": "EVO074",
   "name": "Tick Tock Clock",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this and it deals 1 damage to you unless you remove a steam counter from it.\nWhen a Mechanologist attack action card you control hits a hero, destroy this and up to 2 other items in the arena. Then deal X damage to them, where X is the number of items destroyed this way.",
   "pitch": 1,
   "cost": 0,
@@ -1408,7 +1408,7 @@
  {
   "id": "EVO075",
   "name": "Fuel Injector",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Put this on the bottom of its owner's deck: Gain {r}",
   "pitch": 3,
   "cost": 0,
@@ -1423,7 +1423,7 @@
  {
   "id": "EVO076",
   "name": "Medkit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Action - Put this on the bottom of its owner's deck: Gain 2{h}",
   "pitch": 3,
   "cost": 0,
@@ -1438,7 +1438,7 @@
  {
   "id": "EVO077",
   "name": "Steam Canister",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Put this on the bottom of its owner's deck: Put a steam counter on an item you control with crank.",
   "pitch": 3,
   "cost": 0,
@@ -1453,7 +1453,7 @@
  {
   "id": "EVO078",
   "name": "Polarity Reversal Script",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nAction cards get -1{d} while defending your Mechanologist attack action cards.",
   "pitch": 1,
   "cost": 1,
@@ -1471,7 +1471,7 @@
  {
   "id": "EVO079",
   "name": "Penetration Script",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nYour Mechanologist attack action cards get +1{p}.",
   "pitch": 2,
   "cost": 1,
@@ -1489,7 +1489,7 @@
  {
   "id": "EVO080",
   "name": "Security Script",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nYour Mechanologist attack action cards get +1{d}.",
   "pitch": 3,
   "cost": 1,
@@ -1507,7 +1507,7 @@
  {
   "id": "EVO081",
   "name": "Backup Protocol: RED",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nInstant - {r}{r}, destroy this: Return a red Mechanologist attack action card from your graveyard to your hand.",
   "pitch": 1,
   "cost": 0,
@@ -1525,7 +1525,7 @@
  {
   "id": "EVO082",
   "name": "Backup Protocol: YEL",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nInstant - {r}{r}, destroy this: Return a yellow Mechanologist attack action card from your graveyard to your hand.",
   "pitch": 2,
   "cost": 0,
@@ -1543,7 +1543,7 @@
  {
   "id": "EVO083",
   "name": "Backup Protocol: BLU",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nInstant - {r}{r}, destroy this: Return a blue Mechanologist attack action card from your graveyard to your hand.",
   "pitch": 3,
   "cost": 0,
@@ -1561,7 +1561,7 @@
  {
   "id": "EVO084",
   "name": "Boom Grenade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nWhen a Mechanologist attack action card you control hits a hero, destroy this and deal 4 damage to them.",
   "pitch": 1,
   "cost": 0,
@@ -1579,7 +1579,7 @@
  {
   "id": "EVO085",
   "name": "Boom Grenade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nWhen a Mechanologist attack action card you control hits a hero, destroy this and deal 3 damage to them.",
   "pitch": 2,
   "cost": 0,
@@ -1597,7 +1597,7 @@
  {
   "id": "EVO086",
   "name": "Boom Grenade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nWhen a Mechanologist attack action card you control hits a hero, destroy this and deal 2 damage to them.",
   "pitch": 3,
   "cost": 0,
@@ -1615,7 +1615,7 @@
  {
   "id": "EVO087",
   "name": "Dissolving Shield",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with 3 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.\nInstant - Remove a steam counter from this: Prevent the next 1 damage that would be dealt to you this turn. If this has no steam counters, destroy it.",
   "pitch": 1,
   "cost": 0,
@@ -1633,7 +1633,7 @@
  {
   "id": "EVO088",
   "name": "Dissolving Shield",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with 2 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.\nInstant - Remove a steam counter from this: Prevent the next 1 damage that would be dealt to you this turn. If this has no steam counters, destroy it.",
   "pitch": 2,
   "cost": 0,
@@ -1651,7 +1651,7 @@
  {
   "id": "EVO089",
   "name": "Dissolving Shield",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nInstant - Remove a steam counter from this: Prevent the next 1 damage that would be dealt to you this turn. If this has no steam counters, destroy it.",
   "pitch": 3,
   "cost": 0,
@@ -1669,7 +1669,7 @@
  {
   "id": "EVO090",
   "name": "Hadron Collider",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with 4 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.\nWhen you boost an attack, destroy this. If you do, the attack gets +X{p}, where X is the number of steam counters on this.",
   "pitch": 1,
   "cost": 1,
@@ -1687,7 +1687,7 @@
  {
   "id": "EVO091",
   "name": "Hadron Collider",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with 3 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.\nWhen you boost an attack, destroy this. If you do, the attack gets +X{p}, where X is the number of steam counters on this.",
   "pitch": 2,
   "cost": 1,
@@ -1705,7 +1705,7 @@
  {
   "id": "EVO092",
   "name": "Hadron Collider",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with 2 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.\nWhen you boost an attack, destroy this. If you do, the attack gets +X{p}, where X is the number of steam counters on this.",
   "pitch": 3,
   "cost": 1,
@@ -1723,7 +1723,7 @@
  {
   "id": "EVO093",
   "name": "Mini Forcefield",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with 4 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.\nWard X, where X is the number of steam counters on this.",
   "pitch": 1,
   "cost": 1,
@@ -1742,7 +1742,7 @@
  {
   "id": "EVO094",
   "name": "Mini Forcefield",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with 3 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.\nWard X, where X is the number of steam counters on this.",
   "pitch": 2,
   "cost": 1,
@@ -1761,7 +1761,7 @@
  {
   "id": "EVO095",
   "name": "Mini Forcefield",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with 2 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.\nWard X, where X is the number of steam counters on this.",
   "pitch": 3,
   "cost": 1,
@@ -1780,7 +1780,7 @@
  {
   "id": "EVO096",
   "name": "Overload Script",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nYour Mechanologist attack action cards get overpower.",
   "pitch": 1,
   "cost": 0,
@@ -1798,7 +1798,7 @@
  {
   "id": "EVO097",
   "name": "MHz Script",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nYour Mechanologist attack action cards get go again.",
   "pitch": 2,
   "cost": 0,
@@ -1816,7 +1816,7 @@
  {
   "id": "EVO098",
   "name": "Autosave Script",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nYour Mechanologist attack action cards get \"When this hits, put it on the bottom of its owner's deck.\"",
   "pitch": 3,
   "cost": 0,
@@ -1834,7 +1834,7 @@
  {
   "id": "EVO099",
   "name": "Hyper Driver",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This enters the arena with 3 steam counters. When it has none, destroy it.\nOnce per turn, when you boost a card, remove a steam counter from this and gain {r}.",
   "pitch": 1,
   "cost": 1,
@@ -1849,7 +1849,7 @@
  {
   "id": "EVO100",
   "name": "Hyper Scrapper",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish X items from your graveyard.\nWhen this attacks it gets +X{p}. If 3 or more Hyper Drivers were banished to play this, gain {r}{r}{r} {r}{r}{r} and this gets go again.",
   "pitch": 3,
   "attack": 2,
@@ -1868,7 +1868,7 @@
  {
   "id": "EVO101",
   "name": "Scrap Trader",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nScrap\nGain {r}{r} for each card this scrapped.",
   "pitch": 1,
   "cost": 0,
@@ -1884,7 +1884,7 @@
  {
   "id": "EVO102",
   "name": "Hydraulic Press",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, this gets overpower.",
   "pitch": 1,
   "cost": 3,
@@ -1905,7 +1905,7 @@
  {
   "id": "EVO103",
   "name": "Hydraulic Press",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, this gets overpower.",
   "pitch": 2,
   "cost": 3,
@@ -1926,7 +1926,7 @@
  {
   "id": "EVO104",
   "name": "Hydraulic Press",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, this gets overpower.",
   "pitch": 3,
   "cost": 3,
@@ -1947,7 +1947,7 @@
  {
   "id": "EVO105",
   "name": "Ratchet Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an item you control has been destroyed this turn, action cards get -1{d} while defending this.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 1,
   "cost": 1,
@@ -1967,7 +1967,7 @@
  {
   "id": "EVO106",
   "name": "Ratchet Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an item you control has been destroyed this turn, action cards get -1{d} while defending this.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 2,
   "cost": 1,
@@ -1987,7 +1987,7 @@
  {
   "id": "EVO107",
   "name": "Ratchet Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an item you control has been destroyed this turn, action cards get -1{d} while defending this.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 3,
   "cost": 1,
@@ -2007,7 +2007,7 @@
  {
   "id": "EVO108",
   "name": "Scrap Hopper",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, create a Quicken token.",
   "pitch": 1,
   "cost": 0,
@@ -2027,7 +2027,7 @@
  {
   "id": "EVO109",
   "name": "Scrap Hopper",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, create a Quicken token.",
   "pitch": 2,
   "cost": 0,
@@ -2047,7 +2047,7 @@
  {
   "id": "EVO110",
   "name": "Scrap Hopper",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, create a Quicken token.",
   "pitch": 3,
   "cost": 0,
@@ -2067,7 +2067,7 @@
  {
   "id": "EVO111",
   "name": "Soup Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an item you control has been destroyed this turn, this gets go again.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 1,
   "cost": 0,
@@ -2088,7 +2088,7 @@
  {
   "id": "EVO112",
   "name": "Soup Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an item you control has been destroyed this turn, this gets go again.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 2,
   "cost": 0,
@@ -2109,7 +2109,7 @@
  {
   "id": "EVO113",
   "name": "Soup Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an item you control has been destroyed this turn, this gets go again.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 3,
   "cost": 0,
@@ -2130,7 +2130,7 @@
  {
   "id": "EVO114",
   "name": "Torque Tuned",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an item you control has been destroyed this turn, this gets overpower.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 1,
   "cost": 2,
@@ -2151,7 +2151,7 @@
  {
   "id": "EVO115",
   "name": "Torque Tuned",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an item you control has been destroyed this turn, this gets overpower.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 2,
   "cost": 2,
@@ -2172,7 +2172,7 @@
  {
   "id": "EVO116",
   "name": "Torque Tuned",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an item you control has been destroyed this turn, this gets overpower.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 3,
   "cost": 2,
@@ -2193,7 +2193,7 @@
  {
   "id": "EVO117",
   "name": "Cognition Field",
-  "cardType": "block",
+  "types": ["block"],
   "text": "Galvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 1,
   "defense": 3,
@@ -2208,7 +2208,7 @@
  {
   "id": "EVO118",
   "name": "Cognition Field",
-  "cardType": "block",
+  "types": ["block"],
   "text": "Galvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 2,
   "defense": 2,
@@ -2223,7 +2223,7 @@
  {
   "id": "EVO119",
   "name": "Cognition Field",
-  "cardType": "block",
+  "types": ["block"],
   "text": "Galvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 3,
   "defense": 1,
@@ -2238,7 +2238,7 @@
  {
   "id": "EVO120",
   "name": "Infuse Alloy",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Galvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 1,
   "cost": 0,
@@ -2258,7 +2258,7 @@
  {
   "id": "EVO121",
   "name": "Infuse Alloy",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Galvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 2,
   "cost": 0,
@@ -2278,7 +2278,7 @@
  {
   "id": "EVO122",
   "name": "Infuse Alloy",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Galvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 3,
   "cost": 0,
@@ -2298,7 +2298,7 @@
  {
   "id": "EVO123",
   "name": "Infuse Titanium",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Galvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 1,
   "cost": 3,
@@ -2318,7 +2318,7 @@
  {
   "id": "EVO124",
   "name": "Infuse Titanium",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Galvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 2,
   "cost": 3,
@@ -2338,7 +2338,7 @@
  {
   "id": "EVO125",
   "name": "Infuse Titanium",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Galvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 3,
   "cost": 3,
@@ -2358,7 +2358,7 @@
  {
   "id": "EVO126",
   "name": "Junkyard Dogg",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, this gets +1{p}.",
   "pitch": 1,
   "cost": 3,
@@ -2378,7 +2378,7 @@
  {
   "id": "EVO127",
   "name": "Junkyard Dogg",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, this gets +1{p}.",
   "pitch": 2,
   "cost": 3,
@@ -2398,7 +2398,7 @@
  {
   "id": "EVO128",
   "name": "Junkyard Dogg",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, this gets +1{p}.",
   "pitch": 3,
   "cost": 3,
@@ -2418,7 +2418,7 @@
  {
   "id": "EVO129",
   "name": "Scrap Compactor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, you may play your next Evo this turn as though it were an instant.",
   "pitch": 1,
   "cost": 0,
@@ -2438,7 +2438,7 @@
  {
   "id": "EVO130",
   "name": "Scrap Compactor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, you may play your next Evo this turn as though it were an instant.",
   "pitch": 2,
   "cost": 0,
@@ -2458,7 +2458,7 @@
  {
   "id": "EVO131",
   "name": "Scrap Compactor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, you may play your next Evo this turn as though it were an instant.",
   "pitch": 3,
   "cost": 0,
@@ -2478,7 +2478,7 @@
  {
   "id": "EVO132",
   "name": "Scrap Harvester",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, put a steam counter on an item you control with crank.",
   "pitch": 1,
   "cost": 3,
@@ -2498,7 +2498,7 @@
  {
   "id": "EVO133",
   "name": "Scrap Harvester",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, put a steam counter on an item you control with crank.",
   "pitch": 2,
   "cost": 3,
@@ -2518,7 +2518,7 @@
  {
   "id": "EVO134",
   "name": "Scrap Harvester",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, put a steam counter on an item you control with crank.",
   "pitch": 3,
   "cost": 3,
@@ -2538,7 +2538,7 @@
  {
   "id": "EVO135",
   "name": "Scrap Prospector",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, gain {r}.",
   "pitch": 1,
   "cost": 0,
@@ -2558,7 +2558,7 @@
  {
   "id": "EVO136",
   "name": "Scrap Prospector",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, gain {r}.",
   "pitch": 2,
   "cost": 0,
@@ -2578,7 +2578,7 @@
  {
   "id": "EVO137",
   "name": "Scrap Prospector",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Scrap\nWhen this attacks, if it scrapped a card, gain {r}.",
   "pitch": 3,
   "cost": 0,
@@ -2598,7 +2598,7 @@
  {
   "id": "EVO138",
   "name": "Heist",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits a hero, you may put an item with cost 0 or 1 from any banished zone into the arena under your control.",
   "pitch": 1,
   "cost": 2,
@@ -2618,7 +2618,7 @@
  {
   "id": "EVO139",
   "name": "Maximum Velocity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Play this only if you've boosted 3 or more times this turn.",
   "pitch": 1,
   "cost": 2,
@@ -2635,7 +2635,7 @@
  {
   "id": "EVO140",
   "name": "Moonshot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Play this only if you've boosted this turn. As an additional cost to play this, destroy X Hyper Drivers you control.\nWhen this attacks, it gets +3{p} for each Hyper Driver destroyed this way.\nIf this has 10 or more {p}, it gets overpower.",
   "pitch": 2,
   "attack": 3,
@@ -2654,7 +2654,7 @@
  {
   "id": "EVO141",
   "name": "Steel Street Hoons",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nIf an item you control has been destroyed this turn, this gets +2{p}.\nGalvanize - When this defends, you may destroy an item you control. If you do, this gets +2{d}.",
   "pitch": 3,
   "cost": 3,
@@ -2675,7 +2675,7 @@
  {
   "id": "EVO142",
   "name": "Twin Drive",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nBoost",
   "pitch": 1,
   "cost": 2,
@@ -2695,7 +2695,7 @@
  {
   "id": "EVO143",
   "name": "Meganetic Lockwave",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Target hero chooses X equipment they control, then you choose 1 from among them. That hero must defend your attacks this turn with that equipment if able. \nGo again",
   "pitch": 3,
   "defense": 3,
@@ -2710,7 +2710,7 @@
  {
   "id": "EVO144",
   "name": "System Failure",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Remove all steam counters from target equipment, item, or weapon. If 2 or more steam counters are removed this way, deal 2 damage to its controler.",
   "pitch": 2,
   "cost": 1,
@@ -2723,7 +2723,7 @@
  {
   "id": "EVO145",
   "name": "System Reset",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Banish X Mechanologist items you control with cost 0 or 1, then return them to the arena under their owners' control.",
   "pitch": 2,
   "defense": 3,
@@ -2735,7 +2735,7 @@
  {
   "id": "EVO146",
   "name": "Fabricate",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Choose 2;\n\nEquip a base equipment with Proto in its name from your inventory.\nEvo permanents you control get +1{d} this turn.\nPut this under an Evo permanent you control.\nYou may banish an Evo from your hand. If you do, draw a card.",
   "pitch": 1,
   "cost": 0,
@@ -2747,7 +2747,7 @@
  {
   "id": "EVO147",
   "name": "Bull Bar",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nIf you control a Hyper Driver, this gets overpower.",
   "pitch": 1,
   "cost": 2,
@@ -2768,7 +2768,7 @@
  {
   "id": "EVO148",
   "name": "Bull Bar",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nIf you control a Hyper Driver, this gets overpower.",
   "pitch": 2,
   "cost": 2,
@@ -2789,7 +2789,7 @@
  {
   "id": "EVO149",
   "name": "Bull Bar",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nIf you control a Hyper Driver, this gets overpower.",
   "pitch": 3,
   "cost": 2,
@@ -2810,7 +2810,7 @@
  {
   "id": "EVO150",
   "name": "Spring a Leak",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits a hero, remove all steam counters from an equipment, item, or weapon they control.",
   "pitch": 1,
   "cost": 2,
@@ -2830,7 +2830,7 @@
  {
   "id": "EVO151",
   "name": "Spring a Leak",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits a hero, remove all steam counters from an equipment, item, or weapon they control.",
   "pitch": 2,
   "cost": 2,
@@ -2850,7 +2850,7 @@
  {
   "id": "EVO152",
   "name": "Spring a Leak",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits a hero, remove all steam counters from an equipment, item, or weapon they control.",
   "pitch": 3,
   "cost": 2,
@@ -2870,7 +2870,7 @@
  {
   "id": "EVO153",
   "name": "Big Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've boosted 2 or more times this turn, this gets +2{p}.",
   "pitch": 1,
   "cost": 3,
@@ -2887,7 +2887,7 @@
  {
   "id": "EVO154",
   "name": "Burn Rubber",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've boosted 2 or more times this turn, this gets +2{p} and can't be defended by equipment.",
   "pitch": 1,
   "cost": 3,
@@ -2904,7 +2904,7 @@
  {
   "id": "EVO155",
   "name": "Smash and Grab",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've boosted 2 or more times this turn, this gets +2{p} and \"When this hits a hero, gain control of an item they control.\"",
   "pitch": 1,
   "cost": 3,
@@ -2921,7 +2921,7 @@
  {
   "id": "EVO156",
   "name": "Gigawatt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Mechanologist attack this turn gets +4{p}.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -2937,7 +2937,7 @@
  {
   "id": "EVO157",
   "name": "Gigawatt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Mechanologist attack this turn gets +3{p}.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -2953,7 +2953,7 @@
  {
   "id": "EVO158",
   "name": "Gigawatt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Mechanologist attack this turn gets +2{p}.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -2969,7 +2969,7 @@
  {
   "id": "EVO159",
   "name": "Firewall",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, reveal the top card of your deck. If it's an Evo, put it on top of your deck. Otherwise, put it on the bottom.",
   "pitch": 1,
   "defense": 4,
@@ -2981,7 +2981,7 @@
  {
   "id": "EVO160",
   "name": "Firewall",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, reveal the top card of your deck. If it's an Evo, put it on top of your deck. Otherwise, put it on the bottom.",
   "pitch": 2,
   "defense": 3,
@@ -2993,7 +2993,7 @@
  {
   "id": "EVO161",
   "name": "Firewall",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, reveal the top card of your deck. If it's an Evo, put it on top of your deck. Otherwise, put it on the bottom.",
   "pitch": 3,
   "defense": 2,
@@ -3005,7 +3005,7 @@
  {
   "id": "EVO162",
   "name": "Zero to Fifty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 1,
   "cost": 0,
@@ -3025,7 +3025,7 @@
  {
   "id": "EVO163",
   "name": "Zero to Fifty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 2,
   "cost": 0,
@@ -3045,7 +3045,7 @@
  {
   "id": "EVO164",
   "name": "Zero to Fifty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 3,
   "cost": 0,
@@ -3065,7 +3065,7 @@
  {
   "id": "EVO165",
   "name": "Razzle Dazzle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 1,
   "cost": 1,
@@ -3085,7 +3085,7 @@
  {
   "id": "EVO166",
   "name": "Razzle Dazzle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 2,
   "cost": 1,
@@ -3105,7 +3105,7 @@
  {
   "id": "EVO167",
   "name": "Razzle Dazzle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 3,
   "cost": 1,
@@ -3125,7 +3125,7 @@
  {
   "id": "EVO168",
   "name": "Full Tilt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 1,
   "cost": 2,
@@ -3145,7 +3145,7 @@
  {
   "id": "EVO169",
   "name": "Full Tilt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 2,
   "cost": 2,
@@ -3165,7 +3165,7 @@
  {
   "id": "EVO170",
   "name": "Full Tilt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 3,
   "cost": 2,
@@ -3185,7 +3185,7 @@
  {
   "id": "EVO171",
   "name": "Gas Guzzler",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 1,
   "cost": 3,
@@ -3205,7 +3205,7 @@
  {
   "id": "EVO172",
   "name": "Gas Guzzler",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 2,
   "cost": 3,
@@ -3225,7 +3225,7 @@
  {
   "id": "EVO173",
   "name": "Gas Guzzler",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 3,
   "cost": 3,
@@ -3245,7 +3245,7 @@
  {
   "id": "EVO174",
   "name": "Crankshaft",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
   "pitch": 1,
   "cost": 2,
@@ -3265,7 +3265,7 @@
  {
   "id": "EVO175",
   "name": "Crankshaft",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
   "pitch": 2,
   "cost": 2,
@@ -3285,7 +3285,7 @@
  {
   "id": "EVO176",
   "name": "Crankshaft",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
   "pitch": 3,
   "cost": 2,
@@ -3305,7 +3305,7 @@
  {
   "id": "EVO177",
   "name": "Big Bertha",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
   "pitch": 1,
   "cost": 3,
@@ -3325,7 +3325,7 @@
  {
   "id": "EVO178",
   "name": "Big Bertha",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
   "pitch": 2,
   "cost": 3,
@@ -3345,7 +3345,7 @@
  {
   "id": "EVO179",
   "name": "Big Bertha",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this is banished from boosting, put a steam counter on a Hyper Driver you control.",
   "pitch": 3,
   "cost": 3,
@@ -3365,7 +3365,7 @@
  {
   "id": "EVO180",
   "name": "Jump Start",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control a Hyper Driver, this costs {r} less to play.\nBoost",
   "pitch": 1,
   "cost": 2,
@@ -3385,7 +3385,7 @@
  {
   "id": "EVO181",
   "name": "Jump Start",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control a Hyper Driver, this costs {r} less to play.\nBoost",
   "pitch": 2,
   "cost": 2,
@@ -3405,7 +3405,7 @@
  {
   "id": "EVO182",
   "name": "Jump Start",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control a Hyper Driver, this costs {r} less to play.\nBoost",
   "pitch": 3,
   "cost": 2,
@@ -3425,7 +3425,7 @@
  {
   "id": "EVO183",
   "name": "Rev Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control a Hyper Driver, this costs {r} less to play.\nBoost",
   "pitch": 1,
   "cost": 3,
@@ -3445,7 +3445,7 @@
  {
   "id": "EVO184",
   "name": "Rev Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control a Hyper Driver, this costs {r} less to play.\nBoost",
   "pitch": 2,
   "cost": 3,
@@ -3465,7 +3465,7 @@
  {
   "id": "EVO185",
   "name": "Rev Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control a Hyper Driver, this costs {r} less to play.\nBoost",
   "pitch": 3,
   "cost": 3,
@@ -3485,7 +3485,7 @@
  {
   "id": "EVO186",
   "name": "Data Link",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, opt 1.",
   "pitch": 1,
   "cost": 0,
@@ -3506,7 +3506,7 @@
  {
   "id": "EVO187",
   "name": "Data Link",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, opt 1.",
   "pitch": 2,
   "cost": 0,
@@ -3527,7 +3527,7 @@
  {
   "id": "EVO188",
   "name": "Data Link",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, opt 1.",
   "pitch": 3,
   "cost": 0,
@@ -3548,7 +3548,7 @@
  {
   "id": "EVO189",
   "name": "Dive Through Data",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, opt 1.",
   "pitch": 1,
   "cost": 1,
@@ -3569,7 +3569,7 @@
  {
   "id": "EVO190",
   "name": "Dive Through Data",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, opt 1.",
   "pitch": 2,
   "cost": 1,
@@ -3590,7 +3590,7 @@
  {
   "id": "EVO191",
   "name": "Dive Through Data",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, opt 1.",
   "pitch": 3,
   "cost": 1,
@@ -3611,7 +3611,7 @@
  {
   "id": "EVO192",
   "name": "Sprocket Rocket",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nIf an item or equipment was banished from boosting this, this gets +1{p}.",
   "pitch": 1,
   "cost": 0,
@@ -3631,7 +3631,7 @@
  {
   "id": "EVO193",
   "name": "Sprocket Rocket",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nIf an item or equipment was banished from boosting this, this gets +1{p}.",
   "pitch": 2,
   "cost": 0,
@@ -3651,7 +3651,7 @@
  {
   "id": "EVO194",
   "name": "Sprocket Rocket",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nIf an item or equipment was banished from boosting this, this gets +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -3671,7 +3671,7 @@
  {
   "id": "EVO195",
   "name": "Dumpster Dive",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nIf an item or equipment was banished from boosting this, this gets +1{p}.",
   "pitch": 1,
   "cost": 1,
@@ -3691,7 +3691,7 @@
  {
   "id": "EVO196",
   "name": "Dumpster Dive",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nIf an item or equipment was banished from boosting this, this gets +1{p}.",
   "pitch": 2,
   "cost": 1,
@@ -3711,7 +3711,7 @@
  {
   "id": "EVO197",
   "name": "Dumpster Dive",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nIf an item or equipment was banished from boosting this, this gets +1{p}.",
   "pitch": 3,
   "cost": 1,
@@ -3731,7 +3731,7 @@
  {
   "id": "EVO198",
   "name": "Expedite",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, you may put an item with cost 0 or 1 from your hand into the arena.",
   "pitch": 1,
   "cost": 0,
@@ -3751,7 +3751,7 @@
  {
   "id": "EVO199",
   "name": "Expedite",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, you may put an item with cost 0 or 1 from your hand into the arena.",
   "pitch": 2,
   "cost": 0,
@@ -3771,7 +3771,7 @@
  {
   "id": "EVO200",
   "name": "Expedite",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, you may put an item with cost 0 or 1 from your hand into the arena.",
   "pitch": 3,
   "cost": 0,
@@ -3791,7 +3791,7 @@
  {
   "id": "EVO201",
   "name": "MetEx",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, you may put an item with cost 0 or 1 from your hand into the arena.",
   "pitch": 1,
   "cost": 1,
@@ -3811,7 +3811,7 @@
  {
   "id": "EVO202",
   "name": "MetEx",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, you may put an item with cost 0 or 1 from your hand into the arena.",
   "pitch": 2,
   "cost": 1,
@@ -3831,7 +3831,7 @@
  {
   "id": "EVO203",
   "name": "MetEx",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, you may put an item with cost 0 or 1 from your hand into the arena.",
   "pitch": 3,
   "cost": 1,
@@ -3851,7 +3851,7 @@
  {
   "id": "EVO204",
   "name": "Out Pace",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nThis can't be defended by equipment.",
   "pitch": 1,
   "cost": 1,
@@ -3871,7 +3871,7 @@
  {
   "id": "EVO205",
   "name": "Out Pace",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nThis can't be defended by equipment.",
   "pitch": 2,
   "cost": 1,
@@ -3891,7 +3891,7 @@
  {
   "id": "EVO206",
   "name": "Out Pace",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nThis can't be defended by equipment.",
   "pitch": 3,
   "cost": 1,
@@ -3911,7 +3911,7 @@
  {
   "id": "EVO207",
   "name": "Lay Waste",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nThis can't be defended by equipment.",
   "pitch": 1,
   "cost": 2,
@@ -3931,7 +3931,7 @@
  {
   "id": "EVO208",
   "name": "Lay Waste",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nThis can't be defended by equipment.",
   "pitch": 2,
   "cost": 2,
@@ -3951,7 +3951,7 @@
  {
   "id": "EVO209",
   "name": "Lay Waste",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nThis can't be defended by equipment.",
   "pitch": 3,
   "cost": 2,
@@ -3971,7 +3971,7 @@
  {
   "id": "EVO210",
   "name": "Fender Bender",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nThis gets +X{p}, where X is the number of equipment defending it.",
   "pitch": 1,
   "cost": 1,
@@ -3991,7 +3991,7 @@
  {
   "id": "EVO211",
   "name": "Fender Bender",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nThis gets +X{p}, where X is the number of equipment defending it.",
   "pitch": 2,
   "cost": 1,
@@ -4011,7 +4011,7 @@
  {
   "id": "EVO212",
   "name": "Fender Bender",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nThis gets +X{p}, where X is the number of equipment defending it.",
   "pitch": 3,
   "cost": 1,
@@ -4031,7 +4031,7 @@
  {
   "id": "EVO213",
   "name": "Panel Beater",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nThis gets +X{p}, where X is the number of equipment defending it.",
   "pitch": 1,
   "cost": 2,
@@ -4051,7 +4051,7 @@
  {
   "id": "EVO214",
   "name": "Panel Beater",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nThis gets +X{p}, where X is the number of equipment defending it.",
   "pitch": 2,
   "cost": 2,
@@ -4071,7 +4071,7 @@
  {
   "id": "EVO215",
   "name": "Panel Beater",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nThis gets +X{p}, where X is the number of equipment defending it.",
   "pitch": 3,
   "cost": 2,
@@ -4091,7 +4091,7 @@
  {
   "id": "EVO216",
   "name": "Under Loop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
   "pitch": 1,
   "cost": 1,
@@ -4111,7 +4111,7 @@
  {
   "id": "EVO217",
   "name": "Under Loop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
   "pitch": 2,
   "cost": 1,
@@ -4131,7 +4131,7 @@
  {
   "id": "EVO218",
   "name": "Under Loop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
   "pitch": 3,
   "cost": 1,
@@ -4151,7 +4151,7 @@
  {
   "id": "EVO219",
   "name": "Over Loop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
   "pitch": 1,
   "cost": 2,
@@ -4171,7 +4171,7 @@
  {
   "id": "EVO220",
   "name": "Over Loop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
   "pitch": 2,
   "cost": 2,
@@ -4191,7 +4191,7 @@
  {
   "id": "EVO221",
   "name": "Over Loop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
   "pitch": 3,
   "cost": 2,
@@ -4211,7 +4211,7 @@
  {
   "id": "EVO222",
   "name": "Gas Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack you boost this turn gets +4{p}.\nYou may put a Hyper Driver from your banished zone into the arena.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -4227,7 +4227,7 @@
  {
   "id": "EVO223",
   "name": "Gas Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack you boost this turn gets +3{p}.\nYou may put a Hyper Driver from your banished zone into the arena.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -4243,7 +4243,7 @@
  {
   "id": "EVO224",
   "name": "Gas Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack you boost this turn gets +2{p}.\nYou may put a Hyper Driver from your banished zone into the arena.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -4259,7 +4259,7 @@
  {
   "id": "EVO225",
   "name": "Quickfire",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This costs {r} less to play for each Hyper Driver you control.\nThe next attack you boost this turn gets +4{p}.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -4275,7 +4275,7 @@
  {
   "id": "EVO226",
   "name": "Quickfire",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This costs {r} less to play for each Hyper Driver you control.\nThe next attack you boost this turn gets +3{p}.\nGo again",
   "pitch": 2,
   "cost": 2,
@@ -4291,7 +4291,7 @@
  {
   "id": "EVO227",
   "name": "Quickfire",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This costs {r} less to play for each Hyper Driver you control.\nThe next attack you boost this turn gets +2{p}.\nGo again",
   "pitch": 3,
   "cost": 2,
@@ -4307,7 +4307,7 @@
  {
   "id": "EVO228",
   "name": "Re-Charge!",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put a steam counter on a Hyper Driver you control.\nThe next attack you boost this turn gets +4{p}.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -4323,7 +4323,7 @@
  {
   "id": "EVO229",
   "name": "Re-Charge!",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put a steam counter on a Hyper Driver you control.\nThe next attack you boost this turn gets +3{p}.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -4339,7 +4339,7 @@
  {
   "id": "EVO230",
   "name": "Re-Charge!",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put a steam counter on a Hyper Driver you control.\nThe next attack you boost this turn gets +2{p}.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -4355,7 +4355,7 @@
  {
   "id": "EVO231",
   "name": "Teklonetic Force Field",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends an attack with overpower, this gets +2{d}.",
   "pitch": 1,
   "defense": 3,
@@ -4367,7 +4367,7 @@
  {
   "id": "EVO232",
   "name": "Teklonetic Force Field",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends an attack with overpower, this gets +2{d}.",
   "pitch": 2,
   "defense": 2,
@@ -4379,7 +4379,7 @@
  {
   "id": "EVO233",
   "name": "Teklonetic Force Field",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends an attack with overpower, this gets +2{d}.",
   "pitch": 3,
   "defense": 1,
@@ -4391,7 +4391,7 @@
  {
   "id": "EVO234",
   "name": "Hyper Driver",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When this has no steam counters, destroy it.\nOnce per turn, when you boost a card, remove a steam counter from this and gain {r}.",
   "classes": [
    "mechanologist"
@@ -4404,7 +4404,7 @@
  {
   "id": "EVO235",
   "name": "Shriek Razors",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silvers you control. If you do, equip this.\nAttack Reaction - {r}{r}, destroy this: Target attack action card defending an Assassin attack gets -1{d}.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -4421,7 +4421,7 @@
  {
   "id": "EVO236",
   "name": "Already Dead",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Contract - You are contracted to banish opponents' non-action cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck and a defending card.",
   "pitch": 1,
   "cost": 2,
@@ -4441,7 +4441,7 @@
  {
   "id": "EVO237",
   "name": "Smashing Performance",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks draw a card, then discard a random card. If a card with 6 or more {p} is discarded this way, destroy a random item in the arena.",
   "pitch": 2,
   "cost": 3,
@@ -4457,7 +4457,7 @@
  {
   "id": "EVO238",
   "name": "Tectonic Rift",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create X Seismic Surge tokens.\nGo again",
   "pitch": 3,
   "defense": 2,
@@ -4472,7 +4472,7 @@
  {
   "id": "EVO239",
   "name": "Wax Off",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "If you've played Wax On this turn, create a Zen State token.",
   "pitch": 3,
   "cost": 0,
@@ -4485,7 +4485,7 @@
  {
   "id": "EVO240",
   "name": "Emboldened Blade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Turn a face-down card in any arsenal face-up. If it's a defense reaction, destroy it and your next weapon attack this turn gets +1{p}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -4501,7 +4501,7 @@
  {
   "id": "EVO241",
   "name": "Intoxicating Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Riptide Specialization\nWhen this hits a hero, they create a Courage and Quicken token.",
   "pitch": 3,
   "cost": 0,
@@ -4522,7 +4522,7 @@
  {
   "id": "EVO242",
   "name": "Sonata Fantasmia",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Viserai Specialization\nCreate X Runechant tokens.\nIf X is 6 or greater, target hero discards 3 random cards.",
   "pitch": 3,
   "defense": 3,
@@ -4537,7 +4537,7 @@
  {
   "id": "EVO243",
   "name": "Contest the Mindfield",
-  "cardType": "action",
+  "types": ["action"],
   "text": "All heroes get -1{i}.\nAt the start of your turn, destroy this.",
   "pitch": 3,
   "cost": 2,
@@ -4553,7 +4553,7 @@
  {
   "id": "EVO244",
   "name": "Phantom Tidemaw",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Whenever an Illusionist card you control is destroyed, put a +1{p} counter on this.\nPhantasm\nWard 1",
   "pitch": 3,
   "cost": 0,
@@ -4572,7 +4572,7 @@
  {
   "id": "EVO245",
   "name": "Tome of Imperial Flame",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Draw a card. If you are Royal, instead draw 2 cards.\nYou may pitch 2 red cards. If you don't, banish your hand.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -4587,7 +4587,7 @@
  {
   "id": "EVO246",
   "name": "Dust from the Chrome Caverns",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Material - While this is under a permanent other than Cromai, that permanent has phantasm.",
   "pitch": 1,
   "cost": 0,
@@ -4607,7 +4607,7 @@
  {
   "id": "EVO247",
   "name": "Warband of Bellona",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}{r}, destroy this: The next time you attack this turn, you may charge your hero's soul. If a yellow card is charged this way, draw a card. Go again\nTemper",
   "defense": 2,
   "classes": [
@@ -4625,7 +4625,7 @@
  {
   "id": "EVO248",
   "name": "Slay",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Destroy target angel ally.",
   "pitch": 1,
   "cost": 0,
@@ -4637,7 +4637,7 @@
  {
   "id": "EVO249",
   "name": "Fyendal's Spring Tunic",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "At the start of your turn, if this has fewer than 3 energy counters, you may put an energy counter on it.\nInstant - Remove 3 energy counters from this: Gain {r}\nBlade Break",
   "defense": 1,
   "classes": [
@@ -4654,7 +4654,7 @@
  {
   "id": "EVO250",
   "name": "Quicken",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gains go again.",
   "classes": [
    "generic"

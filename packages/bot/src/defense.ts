@@ -1,5 +1,6 @@
 import type { GameIntent } from "@fyendal/shared";
 import type { BotPolicyInput } from "./policy.js";
+import { hasType } from "@fyendal/shared";
 
 /**
  * The shared policy normally chooses the complete staged defense set. Some
@@ -29,7 +30,7 @@ export function requiredEquipmentStageIntent(
     if (intent.kind !== "stage-defenders") continue;
     const equipmentId = intent.instanceIds.find((id) => {
       const card = ownCards.get(id);
-      return !stagedIds.has(id) && input.cards[card?.cardId ?? ""]?.cardType === "equipment";
+      return !stagedIds.has(id) && hasType(input.cards[card?.cardId ?? ""], "equipment");
     });
     if (equipmentId !== undefined) {
       return { kind: "stage-defenders", instanceIds: [...staged, equipmentId] };

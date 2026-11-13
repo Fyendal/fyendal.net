@@ -44,6 +44,7 @@ import {
   opportunityValuer,
   solveHand,
 } from "./hand-value.js";
+import { hasType } from "@fyendal/shared";
 
 const CARD = {
   ancestralEmpowerment: "ancestral empowerment|1",
@@ -121,7 +122,7 @@ function consecutiveHits(input: BotPolicyInput): number {
 }
 
 function isDagger(data: CardData | undefined): boolean {
-  return data?.cardType === "weapon" && data.subtypes?.includes("dagger") === true;
+  return data !== undefined && hasType(data, "weapon") && data.subtypes?.includes("dagger") === true;
 }
 
 function isDraconicCard(card: CardView, input: BotPolicyInput): boolean {
@@ -201,7 +202,7 @@ function isCindraTurn(input: BotPolicyInput): boolean {
 }
 
 function isProactiveInstant(intent: GameIntent, data: CardData): boolean {
-  return data.cardType === "instant" ||
+  return hasType(data, "instant") ||
     (intent.kind === "activate-ability" && /\binstant\s*[-—:]/i.test(data.text ?? ""));
 }
 
@@ -297,7 +298,7 @@ function currentAttackHasOnHitDraw(input: BotPolicyInput): boolean {
 
 function isAttackAction(card: CardView, input: BotPolicyInput): boolean {
   const data = input.cards[card.cardId];
-  return data?.cardType === "action" && isAttack(data);
+  return hasType(data, "action") && isAttack(data);
 }
 
 function maskCanStillTrigger(input: BotPolicyInput): boolean {
@@ -387,7 +388,7 @@ function daggerConvertsReactionHand(
   const spentIds = new Set(pitchIds(intent));
   const remaining = handAfterPitch(intent, input);
   const preservesAttackReaction = remaining.some((card) =>
-    input.cards[card.cardId]?.cardType === "attack-reaction"
+    hasType(input.cards[card.cardId], "attack-reaction")
   );
   const hasNaturalContinuingAttack = remaining.some((card) => {
     const data = input.cards[card.cardId];
@@ -1119,7 +1120,7 @@ function vestResourceFundsHandCard(input: BotPolicyInput): boolean {
   if (!me.hand.some((card) => {
     const data = input.cards[card.cardId];
     const cost = estimatedPlayCost(card, input);
-    return data?.cardType === "action" && cost > me.resources &&
+    return hasType(data, "action") && cost > me.resources &&
       (cost <= me.resources + 1 || key(data) === CARD.bloodRunsDeep);
   })) return false;
   const link = currentLink(input);
@@ -1423,7 +1424,7 @@ function scoreNonAttackCard(
   context: PlayScoreContext,
 ): number {
   const { data, excludedIds, functional, hasFollowup, hits, links } = context;
-  if (data.cardType === "attack-reaction") {
+  if (hasType(data, "attack-reaction")) {
     const link = currentLink(input);
     if (link?.attackingCard.owner !== input.seat || input.view.pendingDecision?.kind !== "attack-reaction") {
       return -1_000;
@@ -1435,7 +1436,7 @@ function scoreNonAttackCard(
     if (functional === CARD.ancestralEmpowerment) return 500 + (hits >= 1 ? 80 : 0);
     return 100;
   }
-  if (data.cardType === "defense-reaction") {
+  if (hasType(data, "defense-reaction")) {
     const reactionScore = defenseReactionWorthSpending(context.card, input, cindraSolverRules, excludedIds)
       ? scoreDefenseReaction(data, input)
       : -100;
@@ -1553,7 +1554,7 @@ function lethalAllyAttacks(
     if (!ally || !card) return [];
     const data = input.cards[card.cardId];
     const attackAction = isAttack(data);
-    if (!attackAction && data?.cardType !== "weapon") return [];
+    if (!attackAction && !hasType(data, "weapon")) return [];
     const damage = guaranteedAttackDamage(card, input);
     return damage >= allyLethalThreshold(ally, input)
       ? [{ intent, card, ally, damage, attackAction }]
@@ -1629,7 +1630,7 @@ function cumulativeLethalAllyAttacks(
     if (!ally || !card) return [];
     const data = input.cards[card.cardId];
     const attackAction = isAttack(data);
-    if (!attackAction && data?.cardType !== "weapon") return [];
+    if (!attackAction && !hasType(data, "weapon")) return [];
     const damage = guaranteedAttackDamage(card, input);
     if (damage >= allyLethalThreshold(ally, input)) {
       return [{ intent, card, ally, damage, attackAction }];
@@ -1668,7 +1669,7 @@ function enforceCindraAllyPolicy(input: BotPolicyInput, selected: GameIntent): G
   const selectedCard = intentCard(selected, own);
   if (!selectedCard) return selected;
   const selectedData = input.cards[selectedCard.cardId];
-  if (!isAttack(selectedData) && selectedData?.cardType !== "weapon") return selected;
+  if (!isAttack(selectedData) && !hasType(selectedData, "weapon")) return selected;
 
   const lethal = lethalAllyAttacks(input, allies);
   const heroAttack = matchingHeroAttack(input, selected);

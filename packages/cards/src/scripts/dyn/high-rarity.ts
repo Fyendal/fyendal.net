@@ -25,6 +25,7 @@ import {
   withdrawNextArcaneDamageCard,
   yesNoPrompt,
 } from "../shared-helpers.js";
+import { hasType } from "@fyendal/shared";
 
 const CROUCHING_TIGER = "DYN065";
 const SILVER = "DYN245";
@@ -239,7 +240,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       const player = ctx.player(opponentSeat(ctx));
       const equipment = [
         ...Object.values(player.equipment),
-        ...player.weapons.filter((card) => ctx.cardData(card.cardId).cardType === "equipment"),
+        ...player.weapons.filter((card) => hasType(ctx.cardData(card.cardId), "equipment")),
       ].filter((card): card is DeepReadonly<CardInstance> => card !== undefined && (card.defCounters ?? 0) > 0);
       if (equipment.length === 1) ctx.destroyPermanent(equipment[0]!.instanceId);
       else if (equipment.length > 1)
@@ -571,7 +572,6 @@ export const dynHighRarity: Record<string, CardScript> = {
     };
   })(),
   "nitro mechanoid|0": {
-    additionalCardTypes: ["equipment"],
     activated: {
       cost: 0,
       isAttack: true,
@@ -640,7 +640,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       const sourceTypes = ctx.cardTypes(source);
       return (
         has(ctx, source, "gun") ||
-        (ctx.cardData(source.cardId).cardType === "weapon" &&
+        (hasType(ctx.cardData(source.cardId), "weapon") &&
           sourceTypes.includes("mechanologist") &&
           sourceTypes.includes("pistol"))
       );

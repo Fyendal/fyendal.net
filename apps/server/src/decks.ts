@@ -15,6 +15,7 @@ import { deckArt, type FabraryMatchup } from "@fyendal/protocol";
 export { validatePresentation } from "@fyendal/cards";
 import { withTransaction, type Queryable } from "./db.js";
 import { parseFabraryDeckUrl, type FabraryClient, type FabraryDeckResult, type FabraryPin } from "./fabrary.js";
+import { hasType, objectKind } from "@fyendal/shared";
 
 /**
  * Saved user decks ("cc" / "silver-age" formats). Users import Fabrary export
@@ -144,7 +145,7 @@ const INVENTORY_FRONT_ID_BY_BACK_ID = new Map(
 // type. Fabrary lists Levia, Redeemed among arena cards alongside Levia's
 // starting hero, so it must not be mistaken for a second hero.
 function isInventoryHero(card: CardData): boolean {
-  return card.cardType === "hero" && /\bwhile this is in your inventory\b/i.test(card.text);
+  return hasType(card, "hero") && /\bwhile this is in your inventory\b/i.test(card.text);
 }
 
 /** The printing id a deck stores for a card its list names. Fabrary may
@@ -200,7 +201,7 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
       unimplemented.add(card.name);
       continue;
     }
-    if (card.cardType === "hero") {
+    if (objectKind(card) === "hero") {
       if (isInventoryHero(card)) {
         for (let i = 0; i < line.qty; i++) inventoryPool.push(poolCardId(card));
         continue;
@@ -217,10 +218,8 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
       for (let i = 0; i < line.qty; i++) weaponIds.push(card.id);
       continue;
     }
-    // Evos are playable equipment cards: they begin in the main deck and are
-    // equipped only after being played. Arena equipment has no `evo` subtype
-    // and belongs in the registered equipment pool.
-    if (card.cardType === "equipment" && !card.subtypes?.includes("evo")) {
+    // Evos are deck cards (objectKind "deck") equipped only after being played.
+    if (objectKind(card) === "equipment") {
       const slot = EQUIPMENT_SLOTS.find((s) => equipmentFitsSlot(card, s));
       if (!slot) {
         errors.push(`${card.name}: unknown equipment slot`);
@@ -229,7 +228,7 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
       for (let i = 0; i < line.qty; i++) equipmentPool.push(card.id);
       continue;
     }
-    if (card.cardType === "token") {
+    if (objectKind(card) === "token") {
       errors.push(`${card.name} is a token and cannot be in a deck`);
       continue;
     }

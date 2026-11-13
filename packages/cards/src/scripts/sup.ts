@@ -26,6 +26,7 @@ import {
   yesNoPrompt,
   ongoingLabel,
 } from "./shared-helpers.js";
+import { hasType } from "@fyendal/shared";
 
 const CONFIDENCE = "SLY034";
 const MIGHT = "SLY035";
@@ -63,7 +64,7 @@ function aura(ctx: ScriptCtx, card: Card): boolean {
   return hasTag(ctx, card, "aura");
 }
 function tokenAura(ctx: ScriptCtx, card: Card): boolean {
-  return data(ctx, card).cardType === "token" && aura(ctx, card);
+  return hasType(data(ctx, card), "token") && aura(ctx, card);
 }
 
 type CharmMode = { readonly option: string; readonly bit: number; readonly message: string };
@@ -2187,7 +2188,6 @@ Object.assign(sup, {
     },
   },
   "adaptive alpha mold|0": {
-    playableEquipment: true,
     activated: {
       cost: 0,
       isAttack: false,

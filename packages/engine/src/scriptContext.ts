@@ -68,6 +68,7 @@ import {
   transitionZoneFromEngineZone,
   transitionZoneIsPrivate,
 } from "./transitions.js";
+import { hasType } from "@fyendal/shared";
 
 /** Reveal a group as one event. Reveals make the selected identities public
  * for the event but do not move or otherwise mutate the cards. */
@@ -681,7 +682,7 @@ export function makeCtx(
         Number(m.attack ?? 0) > 0 &&
         targetLink?.attackCardType === "action" &&
         state.players.some((candidate) => candidate.flags.suppressAttackPowerEffectGains === true) &&
-        (origin.instanceId === targetLink.attackingCard.instanceId || originData.cardType === "attack-reaction");
+        (origin.instanceId === targetLink.attackingCard.instanceId || hasType(originData, "attack-reaction"));
       const attack =
         Number(m.attack ?? 0) > 0 &&
         targetLink &&
@@ -1160,7 +1161,7 @@ export function makeCtx(
           }
         : undefined);
       if (!found) return false;
-      if (found.fromArena && dataOf(state, found.card.cardId).cardType === "token") {
+      if (found.fromArena && hasType(dataOf(state, found.card.cardId), "token")) {
         runtime.commands.fireLeaveArena(state, found.owner.seat, found.card, "cease-to-exist");
         logPublic(state, cardCeasesToExistLogMessage(state, found.card.cardId));
         return true;
@@ -1291,7 +1292,7 @@ export function makeCtx(
         (active.flags.cannotGainPower === true ||
           (state.players[active.attacker] as PlayerState).flags.attacksCannotGainPower === true ||
           (state.players.some((candidate) => candidate.flags.suppressAttackPowerEffectGains === true) &&
-            (self.instanceId === instanceId || dataOf(state, self.cardId).cardType === "attack-reaction")));
+            (self.instanceId === instanceId || hasType(dataOf(state, self.cardId), "attack-reaction"))));
       let adjusted =
         suppressGain
           ? 0
@@ -2118,7 +2119,7 @@ export function makeCtx(
       }
       const card = removed?.card ?? attackingCard ?? chainCard;
       if (!card) return false;
-      if (removed?.fromArena && dataOf(state, card.cardId).cardType === "token") {
+      if (removed?.fromArena && hasType(dataOf(state, card.cardId), "token")) {
         runtime.commands.fireLeaveArena(state, removed.owner.seat, card, "cease-to-exist");
         logPublic(state, cardCeasesToExistLogMessage(state, card.cardId));
         return true;
@@ -2876,7 +2877,7 @@ export function makeCtx(
       ) as PlayerState | undefined;
       if (!owner || owner.seat === current.attacker) return false;
       const card = owner.arsenal.find((candidate) => candidate.instanceId === instanceId);
-      if (!card || dataOf(state, card.cardId).cardType !== "action") return false;
+      if (!card || !hasType(dataOf(state, card.cardId), "action")) return false;
       if (veilBlocksDefender(state, current, card)) return false;
       removeFromArray(owner.arsenal, instanceId);
       delete card.faceDown;
@@ -2972,7 +2973,7 @@ export function makeCtx(
       const live = Object.values(owner.equipment).find(
         (candidate) => candidate?.instanceId === self.instanceId,
       );
-      if (!live || dataOf(state, live.cardId).cardType !== "equipment") return false;
+      if (!live || !hasType(dataOf(state, live.cardId), "equipment")) return false;
       if (current.defendingEquipment.some((candidate) => candidate.instanceId === live.instanceId)) {
         return false;
       }
@@ -3172,7 +3173,7 @@ export function makeCtx(
       const target =
         tokenSeat === undefined ? player : (state.players[tokenSeat] as PlayerState);
       const d = dataOf(state, cardId);
-      if (d.cardType === "weapon") {
+      if (hasType(d, "weapon")) {
         const occupiedZones = target.weapons.reduce(
           (total, weapon) => total + weaponHands(state, target, weapon.cardId),
           0,
@@ -3197,7 +3198,7 @@ export function makeCtx(
         ));
         return token;
       }
-      if (d.cardType === "equipment") {
+      if (hasType(d, "equipment")) {
         const slot = (["head", "chest", "arms", "legs"] as const).find((s) =>
           (d.subtypes ?? []).includes(s),
         );
@@ -3235,7 +3236,7 @@ export function makeCtx(
       if (!owner || !card) return false;
       const d = dataOf(state, card.cardId);
       // Off-hands are equipment permanents equipped in a weapon zone.
-      if (d.cardType === "weapon" || (d.cardType === "equipment" && (d.subtypes ?? []).includes("off-hand"))) {
+      if (hasType(d, "weapon") || (hasType(d, "equipment") && (d.subtypes ?? []).includes("off-hand"))) {
         const hands = weaponHands(state, owner, card.cardId);
         const occupied = owner.weapons.reduce((total, weapon) =>
           total + weaponHands(state, owner, weapon.cardId), 0);
@@ -3253,7 +3254,7 @@ export function makeCtx(
         runtime.events.fireFriendlyEnterArena(state, owner.seat, card, "graveyard");
         return true;
       }
-      if (d.cardType === "equipment") {
+      if (hasType(d, "equipment")) {
         const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
           (d.subtypes ?? []).includes(candidate),
         );
@@ -3277,14 +3278,14 @@ export function makeCtx(
       const card = player.banish.find((candidate) => candidate.instanceId === instanceId);
       if (!card) return false;
       const d = dataOf(state, card.cardId);
-      if (d.cardType === "weapon") {
+      if (hasType(d, "weapon")) {
         const hands = weaponHands(state, player, card.cardId);
         const occupied = player.weapons.reduce((total, weapon) =>
           total + weaponHands(state, player, weapon.cardId), 0);
         if (occupied + hands > 2) return false;
         removeFromArray(player.banish, instanceId);
         player.weapons.push(card);
-      } else if (d.cardType === "equipment") {
+      } else if (hasType(d, "equipment")) {
         const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
           (d.subtypes ?? []).includes(candidate),
         );
@@ -3308,14 +3309,14 @@ export function makeCtx(
       const card = inventory.find((candidate) => candidate.instanceId === instanceId);
       if (!card) return false;
       const d = dataOf(state, card.cardId);
-      if (d.cardType === "weapon") {
+      if (hasType(d, "weapon")) {
         const hands = weaponHands(state, player, card.cardId);
         const occupied = player.weapons.reduce((total, weapon) =>
           total + weaponHands(state, player, weapon.cardId), 0);
         if (occupied + hands > 2) return false;
         removeFromArray(inventory, instanceId);
         player.weapons.push(card);
-      } else if (d.cardType === "equipment") {
+      } else if (hasType(d, "equipment")) {
         const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
           (d.subtypes ?? []).includes(candidate),
         );
@@ -3363,7 +3364,7 @@ export function makeCtx(
       if (weaponIndex < 0) return false;
       const card = opposing.weapons[weaponIndex] as CardInstance;
       const d = dataOf(state, card.cardId);
-      if (d.cardType !== "equipment") return false;
+      if (!hasType(d, "equipment")) return false;
       const hands = weaponHands(state, player, card.cardId);
       const occupiedHands = player.weapons.reduce((total, weapon) =>
         total + weaponHands(state, player, weapon.cardId), 0);
@@ -3433,7 +3434,7 @@ export function makeCtx(
         (nextCardId !== registeredCardId && registered.backId !== nextCardId)
       ) return false;
       const next = state.cardsRef[nextCardId];
-      if (!next || next.cardType !== "hero") return false;
+      if (!next || !hasType(next, "hero")) return false;
       removeFromArray(inventory, instanceId);
       const oldHero = player.hero;
       const oldHeroCardId = player.heroCardId;
@@ -3460,7 +3461,7 @@ export function makeCtx(
     },
     becomeHeroUntilNextTurn(cardId) {
       const next = state.cardsRef[cardId];
-      if (!next || next.cardType !== "hero") return;
+      if (!next || !hasType(next, "hero")) return;
       player.hero.originalHeroCardId ??= player.heroCardId;
       player.hero.temporaryHeroOriginalCardId ??= player.hero.cardId;
       player.hero.temporaryHeroUntilTurn = state.turn +
@@ -3819,7 +3820,7 @@ export function fireOnDiscard(
   const payingBruteAttackCost = state.resolving.some((card) => {
     if (Number(card.scriptState?.payingAdditionalCost ?? 0) !== 1) return false;
     const resolvingData = dataOf(state, card.cardId);
-    return resolvingData.cardType === "action" &&
+    return hasType(resolvingData, "action") &&
       (resolvingData.subtypes ?? []).includes("attack") &&
       cardTypesOf(state, card).includes("brute");
   });

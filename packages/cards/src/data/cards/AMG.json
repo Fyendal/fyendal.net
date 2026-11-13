@@ -2,7 +2,7 @@
   {
     "id": "AMG002",
     "name": "Unstable Plasma Pistol",
-    "cardType": "weapon",
+    "types": ["weapon"],
     "text": "Action - {r}{r}: Attack\nIf you've banished a card an opponent owns from boosting this turn, this gets +2{p}.",
     "attack": 2,
     "classes": ["chaos", "mechanologist"],
@@ -12,7 +12,7 @@
   {
     "id": "AMG003",
     "name": "Brainwave Reformer",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Instant - Destroy this: Flip your hero.\nTemper",
     "defense": 2,
     "classes": ["chaos", "mechanologist"],
@@ -23,7 +23,7 @@
   {
     "id": "AMG004",
     "name": "Syncopated Heart Pump",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Instant - {t}: Until end of turn, whenever 1 or more cards are banished from an opponent's deck, gain {r}. At the beginning of the end phase, destroy this.\nArcane Barrier 1",
     "defense": 0,
     "classes": ["chaos", "mechanologist"],
@@ -34,7 +34,7 @@
   {
     "id": "AMG005",
     "name": "Quickdigit Assemblers",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "When this defends, you may put an item with cost 0 from your hand into the arena. If you do, this gets +1{d}.\nBlade Break",
     "defense": 1,
     "classes": ["mechanologist"],
@@ -45,7 +45,7 @@
   {
     "id": "AMG023",
     "name": "Madness Spiral",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Boost\nIf you would banish this from boosting, instead banish it and the top card of each other hero's deck to boost.",
     "pitch": 3,
     "cost": 2,
@@ -59,7 +59,7 @@
   {
     "id": "AMG027",
     "name": "Revere the Copper Idol",
-    "cardType": "instant",
+    "types": ["instant"],
     "text": "Legendary\nWhen this is banished from boosting, shuffle this into its owner's deck.\nShuffle up to 3 Mechanologist action cards with different names from your banished zone into your deck.",
     "pitch": 3,
     "cost": 0,

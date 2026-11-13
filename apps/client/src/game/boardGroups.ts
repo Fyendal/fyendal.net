@@ -1,6 +1,7 @@
 import type { CardView, EquipmentSlot } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { EQUIPMENT_SLOTS } from "../domain.js";
+import { hasType } from "@fyendal/shared";
 
 export interface BoardCardGroup {
   card: CardView;
@@ -84,7 +85,7 @@ function sortedRecordEntries(record: Record<string, number> | undefined): [strin
  * arts. They are one arena object type and should share a visual stack. */
 function boardCardIdentity(card: CardView): string {
   const data = cardData[card.cardId];
-  if (data?.cardType !== "token") return card.cardId;
+  if (!data || !hasType(data, "token")) return card.cardId;
   const name = data.name.trim().toLowerCase().replace(/\s+/g, " ");
   return `token:${name}|${data.pitch ?? 0}`;
 }
@@ -94,7 +95,7 @@ function boardCardIdentity(card: CardView): string {
 function boardCardStatusKey(card: CardView, activatable: boolean): string {
   // A token ceases to exist when it leaves the arena, so its owner is never
   // visible; tokens that changed control stack with their controller's copies.
-  const isToken = cardData[card.cardId]?.cardType === "token";
+  const isToken = hasType(cardData[card.cardId], "token");
   return JSON.stringify([
     boardCardIdentity(card),
     isToken ? null : card.owner,

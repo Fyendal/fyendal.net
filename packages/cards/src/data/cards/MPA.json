@@ -2,7 +2,7 @@
   {
     "id": "MPA001",
     "name": "Arakni",
-    "cardType": "hero",
+    "types": ["hero"],
     "text": "Whenever you play a card with contract, you may look at the top card of target opponent's deck. You may put it on the bottom.",
     "classes": ["assassin"],
     "life": 20,
@@ -12,7 +12,7 @@
   {
     "id": "MPA002",
     "name": "Dr. Mortimer, Blight of the Pits",
-    "cardType": "hero",
+    "types": ["hero"],
     "text": "Instant - {t}: Cure a disease an opponent controls. If you do, create a Silver token.\nAttack Reaction - {t}, destroy 2 Silver you control: Target Assassin attack gets go again.",
     "classes": ["assassin"],
     "keywords": ["Cure", "Go again"],
@@ -23,7 +23,7 @@
   {
     "id": "MPA003",
     "name": "Dr. Mortimer",
-    "cardType": "hero",
+    "types": ["hero"],
     "text": "Instant - {t}: Cure a disease an opponent controls. If you do, create a Silver token.\nAttack Reaction - {t}, destroy 2 Silver you control: Target Assassin attack gets go again.",
     "classes": ["assassin"],
     "keywords": ["Cure", "Go again"],
@@ -34,7 +34,7 @@
   {
     "id": "MPA004",
     "name": "Uzuri",
-    "cardType": "hero",
+    "types": ["hero"],
     "text": "Once per Turn Attack Reaction - Banish a card from your hand face down: Turn the card banished this way face up. If it's an attack action card with cost 2 or less, put target attacking card with stealth from the active chain link on the bottom of its owner's deck, then put the banished card onto the active chain link as the attacking card.",
     "classes": ["assassin"],
     "life": 20,
@@ -44,7 +44,7 @@
   {
     "id": "MPA006",
     "name": "Phial of Calamity",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nAttack Reaction - {r}, destroy this: Until end of turn, target dagger gets \"When this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.\"",
     "classes": ["assassin"],
     "subtypes": ["off-hand"],
@@ -53,7 +53,7 @@
   {
     "id": "MPA007",
     "name": "Cadaver Handlers",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nAttack Reaction - Destroy this: Cards defending target Assassin attack get -1{d} this chain link. Activate this only if the defending hero is infected.\nBattleworn",
     "defense": 1,
     "classes": ["assassin"],
@@ -64,7 +64,7 @@
   {
     "id": "MPA008",
     "name": "Blacktek Whisperers",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "While Blacktek Whisperers is in your graveyard, at the start of your turn, you may destroy 2 Silvers you control. If you do, equip Blacktek Whisperers.\nAttack Reaction - Destroy Blacktek Whisperers: Target Assassin attack action card gains \"When this hits a hero, it gains go again.\"\nBattleworn",
     "defense": 1,
     "classes": ["assassin"],
@@ -75,7 +75,7 @@
   {
     "id": "MPA009",
     "name": "Mask of One Million Eyes",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nAttack Reaction - Destroy this: Draw a card, then put a card from your hand on the bottom of your deck.",
     "defense": 0,
     "classes": ["assassin"],
@@ -85,7 +85,7 @@
   {
     "id": "MPA010",
     "name": "Scouting Cloak",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nAttack Reaction - Destroy this: Until end of turn, whenever you complete a contract, gain 1{h}.",
     "defense": 0,
     "classes": ["assassin"],
@@ -95,7 +95,7 @@
   {
     "id": "MPA011",
     "name": "Plaguewarden's Wraps",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nAttack Reaction - Destroy this: Target Assassin attack action card gets \"When this hits a hero, give them a disease you control.\"",
     "defense": 0,
     "classes": ["assassin"],
@@ -105,7 +105,7 @@
   {
     "id": "MPA012",
     "name": "Step Overs",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nAttack Reaction - Destroy this: Target Assassin attack action card gets go again. Activate this only if the defending hero has played a defense reaction this chain link.",
     "defense": 0,
     "classes": ["assassin"],
@@ -115,7 +115,7 @@
   {
     "id": "MPA013",
     "name": "Bounty Brim",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Action - Destroy this: Until end of turn, whenever you complete a contract, create a Silver token. Activate this only if you are Arakni. Go again\nBlade Break",
     "defense": 1,
     "classes": ["assassin"],
@@ -126,7 +126,7 @@
   {
     "id": "MPA014",
     "name": "Stimtek Vest",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "When you complete a contract, if you are Uzuri, you may destroy this. If you do, gain {r}{r}.\nBlade Break",
     "defense": 1,
     "classes": ["assassin"],
@@ -137,7 +137,7 @@
   {
     "id": "MPA015",
     "name": "Wristcuff Injectors",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Action - Destroy this: The next Assassin attack action card you play this turn gets \"When this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.\" Activate this only if you are Mortimer. Go again\nBlade Break",
     "defense": 1,
     "classes": ["assassin"],
@@ -148,7 +148,7 @@
   {
     "id": "MPA016",
     "name": "Murder Sprees",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Action - Destroy this: The next time you complete a contract this turn, gain an action point. Go again\nBlade Break",
     "defense": 1,
     "classes": ["assassin"],
@@ -159,7 +159,7 @@
   {
     "id": "MPA017",
     "name": "Bribe the Guards",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nInstant - Destroy a Silver you control: Target card defending this gets -1{d} this combat chain.",
     "pitch": 3,
     "cost": 0,
@@ -173,7 +173,7 @@
   {
     "id": "MPA018",
     "name": "Concoct Agony",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nIf you've played or activated 3 or more attack reactions this chain link, this gets +3{p} and \"When this hits a hero, banish all cards in their arsenal.\"",
     "pitch": 2,
     "cost": 0,
@@ -187,7 +187,7 @@
   {
     "id": "MPA019",
     "name": "Continued Coercion",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nWhen this leaves the combat chain, attacks get go again this chain link.",
     "pitch": 2,
     "cost": 0,
@@ -201,7 +201,7 @@
   {
     "id": "MPA020",
     "name": "Demoralize the Dracai",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to banish opponents' red cards. Whenever you complete this contract, create a Silver token.\nWhenever an attack action card you control hits a hero, banish the top card of their deck.",
     "pitch": 1,
     "cost": 1,
@@ -215,7 +215,7 @@
   {
     "id": "MPA021",
     "name": "Flip the Script",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nWhen this leaves the combat chain, attacks get +1{p} this chain link.",
     "pitch": 3,
     "cost": 0,
@@ -229,7 +229,7 @@
   {
     "id": "MPA022",
     "name": "Mutually Assured Destruction",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to banish infected opponents' cards. Whenever you complete this contract, create a Silver token.\nThe first time each hero plays a reaction card this chain link, create a Bloodrot Pox token under each hero's control, then banish the top card of each hero's deck.",
     "pitch": 1,
     "cost": 2,
@@ -243,7 +243,7 @@
   {
     "id": "MPA023",
     "name": "Painful Choice",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nWhen this attacks, you may put a card from your hand on the bottom of your deck. If you do, this gets +4{p} unless the defending hero chooses a card in their hand. Banish the chosen card.",
     "pitch": 1,
     "cost": 0,
@@ -257,7 +257,7 @@
   {
     "id": "MPA024",
     "name": "Prey on Insecurity",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nAttack Reaction - Put a card from your hand on the bottom of your deck, destroy this: Another target attack with stealth gets +3{p}.",
     "pitch": 1,
     "cost": 0,
@@ -271,7 +271,7 @@
   {
     "id": "MPA026",
     "name": "Remember the Mists",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits a hero, look at their hand and banish a card. They may play the banished card until the end of their next turn.\nIf this wasn't played from hand or arsenal, it gets +2{p}.",
     "pitch": 3,
     "cost": 2,
@@ -284,7 +284,7 @@
   {
     "id": "MPA027",
     "name": "Sick Intent",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to create disease tokens under opponents' control. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.",
     "pitch": 1,
     "cost": 2,
@@ -298,7 +298,7 @@
   {
     "id": "MPA028",
     "name": "Spike Slasher",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nWhen this attacks, attack reaction cards cost {r} less to play this chain link.",
     "pitch": 1,
     "cost": 0,
@@ -312,7 +312,7 @@
   {
     "id": "MPA029",
     "name": "Tailored Targeting",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, name a card.\nContract - You are contracted to banish opponents' cards with the chosen name. Whenever you complete this contract, create a Silver token.\nWhenever you hit an opposing hero this chain link, banish the top card of their deck. If it's the named card, repeat this process.",
     "pitch": 1,
     "cost": 0,
@@ -326,7 +326,7 @@
   {
     "id": "MPA030",
     "name": "Expense Not Spared",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "As an additional cost to play this, destroy 2 Silver you control.\nTarget Assassin attack action card gets +5{p}.",
     "pitch": 2,
     "cost": 0,
@@ -337,7 +337,7 @@
   {
     "id": "MPA031",
     "name": "Outbreak",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Target Assassin attack action card gets +3{p} and \"When this hits a hero, create a Frailty, Inertia, and Bloodrot Pox token under their control.\"",
     "pitch": 3,
     "cost": 3,
@@ -348,7 +348,7 @@
   {
     "id": "MPA032",
     "name": "Prolonged Illness",
-    "cardType": "instant",
+    "types": ["instant"],
     "text": "Until end of turn, whenever a disease token is destroyed, if it's the first disease token with that name that's been destroyed this turn, create a token copy of it under the same hero's control.",
     "pitch": 3,
     "cost": 0,
@@ -359,7 +359,7 @@
   {
     "id": "MPA033",
     "name": "Decapitate the Disloyal",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to banish opponents' cards with no class or talent. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
     "pitch": 1,
     "cost": 2,
@@ -373,7 +373,7 @@
   {
     "id": "MPA034",
     "name": "Decapitate the Disloyal",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to banish opponents' cards with no class or talent. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
     "pitch": 2,
     "cost": 2,
@@ -387,7 +387,7 @@
   {
     "id": "MPA035",
     "name": "Decapitate the Disloyal",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to banish opponents' cards with no class or talent. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
     "pitch": 3,
     "cost": 2,
@@ -401,7 +401,7 @@
   {
     "id": "MPA036",
     "name": "Feverish Strike",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If you are infected, this gets +1{p}.",
     "pitch": 1,
     "cost": 2,
@@ -414,7 +414,7 @@
   {
     "id": "MPA037",
     "name": "Feverish Strike",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If you are infected, this gets +1{p}.",
     "pitch": 2,
     "cost": 2,
@@ -427,7 +427,7 @@
   {
     "id": "MPA038",
     "name": "Feverish Strike",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If you are infected, this gets +1{p}.",
     "pitch": 3,
     "cost": 2,
@@ -440,7 +440,7 @@
   {
     "id": "MPA039",
     "name": "Kill Confirmed",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, name a card, then the defending hero reveals the top card of their deck. If it's the named card, banish it and create a Silver token.",
     "pitch": 1,
     "cost": 2,
@@ -453,7 +453,7 @@
   {
     "id": "MPA040",
     "name": "Lab Rat",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If the defending hero is infected, this gets +1{p}.",
     "pitch": 1,
     "cost": 2,
@@ -466,7 +466,7 @@
   {
     "id": "MPA041",
     "name": "Lab Rat",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If the defending hero is infected, this gets +1{p}.",
     "pitch": 2,
     "cost": 2,
@@ -479,7 +479,7 @@
   {
     "id": "MPA042",
     "name": "Lab Rat",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If the defending hero is infected, this gets +1{p}.",
     "pitch": 3,
     "cost": 2,
@@ -492,7 +492,7 @@
   {
     "id": "MPA043",
     "name": "Sneaking Exhaustion",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If you've played or activated an attack reaction this chain link, this gets \"When this hits a hero, create an Inertia token under their control.\"",
     "pitch": 1,
     "cost": 2,
@@ -505,7 +505,7 @@
   {
     "id": "MPA045",
     "name": "Sneaking Weakness",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If you've played or activated an attack reaction this chain link, this gets \"When this hits a hero, create a Frailty token under their control.\"",
     "pitch": 1,
     "cost": 2,
@@ -518,7 +518,7 @@
   {
     "id": "MPA046",
     "name": "The Spider's Cut",
-    "cardType": "action",
+    "types": ["action"],
     "text": "As an additional cost to play this, destroy a Silver you control.\nWhen this hits a hero, create 2 Silver tokens.",
     "pitch": 1,
     "cost": 1,
@@ -531,7 +531,7 @@
   {
     "id": "MPA047",
     "name": "The Spider's Cut",
-    "cardType": "action",
+    "types": ["action"],
     "text": "As an additional cost to play this, destroy a Silver you control.\nWhen this hits a hero, create 2 Silver tokens.",
     "pitch": 2,
     "cost": 1,
@@ -544,7 +544,7 @@
   {
     "id": "MPA048",
     "name": "The Spider's Cut",
-    "cardType": "action",
+    "types": ["action"],
     "text": "As an additional cost to play this, destroy a Silver you control.\nWhen this hits a hero, create 2 Silver tokens.",
     "pitch": 3,
     "cost": 1,
@@ -557,7 +557,7 @@
   {
     "id": "MPA049",
     "name": "Wound Excavation",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If you've hit with a dagger this combat chain, this gets \"When this hits a hero, they lose 1{h}.\"",
     "pitch": 1,
     "cost": 1,
@@ -570,7 +570,7 @@
   {
     "id": "MPA050",
     "name": "Wound Excision",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If you've hit with a dagger this combat chain, this gets \"When this hits a hero, banish the top 2 cards of their deck.\"",
     "pitch": 1,
     "cost": 1,
@@ -583,7 +583,7 @@
   {
     "id": "MPA052",
     "name": "Act on Intel: Haunts",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Target Assassin attack action card with contract gets +1{p} and \"When this hits a hero, banish the top card of their deck.\"",
     "pitch": 3,
     "cost": 1,
@@ -594,7 +594,7 @@
   {
     "id": "MPA053",
     "name": "Act on Intel: Plans",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Target Assassin attack action card with contract gets +1{p} and \"When this hits a hero, they choose a card in their arsenal. Banish it.\"",
     "pitch": 2,
     "cost": 1,
@@ -605,7 +605,7 @@
   {
     "id": "MPA055",
     "name": "Pinpoint Elimination",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Name a card, then the defending hero reveals the top card of their deck. If it's the named card, banish it and create a Silver token.",
     "pitch": 3,
     "cost": 0,
@@ -616,7 +616,7 @@
   {
     "id": "MPA057",
     "name": "Sickening Exhaustion",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "If the defending hero is infected, put all cards in their arsenal on the bottom of their deck. (A hero is infected if they control a disease.)",
     "pitch": 3,
     "cost": 1,
@@ -627,7 +627,7 @@
   {
     "id": "MPA058",
     "name": "Sickening Rot",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "If the defending hero is infected, deal 2 damage to them unless they pay {r}{r}{r}. (A hero is infected if they control a disease.)",
     "pitch": 3,
     "cost": 1,
@@ -638,7 +638,7 @@
   {
     "id": "MPA059",
     "name": "Sickening Weakness",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "If the defending hero is infected, defending cards get -1{d} this chain link. (A hero is infected if they control a disease.)",
     "pitch": 3,
     "cost": 1,
@@ -649,7 +649,7 @@
   {
     "id": "MPA063",
     "name": "Viral Accelerant",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "For each disease token you control with a different name, create a token copy of it under the defending hero's control.",
     "pitch": 3,
     "cost": 0,
@@ -660,7 +660,7 @@
   {
     "id": "MPA064",
     "name": "Just My Type",
-    "cardType": "defense-reaction",
+    "types": ["defense-reaction"],
     "text": "When this defends, name a card, then the attacking hero reveals the top card of their deck. If it's the named card, banish it and create a Silver token.",
     "pitch": 1,
     "cost": 0,
@@ -671,7 +671,7 @@
   {
     "id": "MPA065",
     "name": "Patron's Lockbox: Carriers",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Go again\nWhen you complete a contract, destroy this. If you do, create a Frailty, Inertia, or Bloodrot Pox token under an opposing hero's control.",
     "pitch": 3,
     "cost": 0,
@@ -684,7 +684,7 @@
   {
     "id": "MPA066",
     "name": "Patron's Lockbox: Serums",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Go again\nWhen you complete a contract, destroy this. If you do, gain 1 action point.",
     "pitch": 3,
     "cost": 0,
@@ -697,7 +697,7 @@
   {
     "id": "MPA067",
     "name": "Patron's Lockbox: Valuables",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Go again\nWhen you complete a contract, destroy this. If you do, create 2 Silver tokens.",
     "pitch": 3,
     "cost": 0,
@@ -710,7 +710,7 @@
   {
     "id": "MPA068",
     "name": "Funded Research",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If you've completed a contract this turn, create a Frailty, Inertia, and Bloodrot Pox token under each opposing hero's control.",
     "pitch": 3,
     "cost": 0,
@@ -721,7 +721,7 @@
   {
     "id": "MPA069",
     "name": "Emergency Services",
-    "cardType": "instant",
+    "types": ["instant"],
     "text": "Cure any number of diseases with different names an opponent controls.\nCreate twice that many Silver tokens.",
     "pitch": 3,
     "cost": 0,
@@ -733,7 +733,7 @@
   {
     "id": "MPA070",
     "name": "Break Down the Bloodline",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - If you are Arakni, you are contracted to banish opponents' Assassin cards. Whenever you complete this contract, create a Silver token.\nIf you are Arakni, this gets \"When this hits a hero, banish the top card of their deck.\"",
     "pitch": 1,
     "cost": 2,
@@ -747,7 +747,7 @@
   {
     "id": "MPA071",
     "name": "Break Down the Bloodline",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - If you are Arakni, you are contracted to banish opponents' Assassin cards. Whenever you complete this contract, create a Silver token.\nIf you are Arakni, this gets \"When this hits a hero, banish the top card of their deck.\"",
     "pitch": 2,
     "cost": 2,
@@ -761,7 +761,7 @@
   {
     "id": "MPA072",
     "name": "Break Down the Bloodline",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - If you are Arakni, you are contracted to banish opponents' Assassin cards. Whenever you complete this contract, create a Silver token.\nIf you are Arakni, this gets \"When this hits a hero, banish the top card of their deck.\"",
     "pitch": 3,
     "cost": 2,
@@ -775,7 +775,7 @@
   {
     "id": "MPA073",
     "name": "Desperate Drive",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nIf you are infected, this gets go again.",
     "pitch": 1,
     "cost": 0,
@@ -789,7 +789,7 @@
   {
     "id": "MPA074",
     "name": "Desperate Drive",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nIf you are infected, this gets go again.",
     "pitch": 2,
     "cost": 0,
@@ -803,7 +803,7 @@
   {
     "id": "MPA075",
     "name": "Desperate Drive",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nIf you are infected, this gets go again.",
     "pitch": 3,
     "cost": 0,
@@ -817,7 +817,7 @@
   {
     "id": "MPA077",
     "name": "Escaped Subject",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If the defending hero is infected, this gets go again.",
     "pitch": 2,
     "cost": 0,
@@ -830,7 +830,7 @@
   {
     "id": "MPA078",
     "name": "Escaped Subject",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If the defending hero is infected, this gets go again.",
     "pitch": 3,
     "cost": 0,
@@ -843,7 +843,7 @@
   {
     "id": "MPA080",
     "name": "Eviscerate the Enervated",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to banish infected opponents' cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
     "pitch": 2,
     "cost": 1,
@@ -857,7 +857,7 @@
   {
     "id": "MPA081",
     "name": "Eviscerate the Enervated",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to banish infected opponents' cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
     "pitch": 3,
     "cost": 1,
@@ -871,7 +871,7 @@
   {
     "id": "MPA082",
     "name": "In the Hot Zone",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, create a Bloodrot Pox token under your control.",
     "pitch": 1,
     "cost": 1,
@@ -884,7 +884,7 @@
   {
     "id": "MPA083",
     "name": "In the Hot Zone",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, create a Bloodrot Pox token under your control.",
     "pitch": 2,
     "cost": 1,
@@ -897,7 +897,7 @@
   {
     "id": "MPA084",
     "name": "In the Hot Zone",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, create a Bloodrot Pox token under your control.",
     "pitch": 3,
     "cost": 1,
@@ -910,7 +910,7 @@
   {
     "id": "MPA089",
     "name": "Professional Rivalry",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nContract - You are contracted to hit an Assassin hero. Whenever you complete this contract, create a Silver token.",
     "pitch": 3,
     "cost": 0,
@@ -924,7 +924,7 @@
   {
     "id": "MPA090",
     "name": "Repeat Reconnaissance",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nIf you are Uzuri, this gets \"When this is defended by 2 or more cards, you may put an attack action card with cost 2 from your graveyard on the bottom of your deck.\"",
     "pitch": 1,
     "cost": 0,
@@ -938,7 +938,7 @@
   {
     "id": "MPA091",
     "name": "Repeat Reconnaissance",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nIf you are Uzuri, this gets \"When this is defended by 2 or more cards, you may put an attack action card with cost 2 from your graveyard on the bottom of your deck.\"",
     "pitch": 2,
     "cost": 0,
@@ -952,7 +952,7 @@
   {
     "id": "MPA092",
     "name": "Repeat Reconnaissance",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nIf you are Uzuri, this gets \"When this is defended by 2 or more cards, you may put an attack action card with cost 2 from your graveyard on the bottom of your deck.\"",
     "pitch": 3,
     "cost": 0,
@@ -966,7 +966,7 @@
   {
     "id": "MPA096",
     "name": "Slice the Sickly",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to banish infected opponents' cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
     "pitch": 1,
     "cost": 0,
@@ -980,7 +980,7 @@
   {
     "id": "MPA097",
     "name": "Slice the Sickly",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to banish infected opponents' cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
     "pitch": 2,
     "cost": 0,
@@ -994,7 +994,7 @@
   {
     "id": "MPA098",
     "name": "Slice the Sickly",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to banish infected opponents' cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
     "pitch": 3,
     "cost": 0,
@@ -1008,7 +1008,7 @@
   {
     "id": "MPA100",
     "name": "Spawn Bloodrot",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits an Assassin hero, create a Bloodrot Pox token under their control.",
     "pitch": 1,
     "cost": 1,
@@ -1021,7 +1021,7 @@
   {
     "id": "MPA101",
     "name": "Spawn Frailty",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits an Assassin hero, create a Frailty token under their control.",
     "pitch": 1,
     "cost": 1,
@@ -1034,7 +1034,7 @@
   {
     "id": "MPA102",
     "name": "Spawn Inertia",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits an Assassin hero, create an Inertia token under their control.",
     "pitch": 1,
     "cost": 1,
@@ -1047,7 +1047,7 @@
   {
     "id": "MPA103",
     "name": "Triple Blind",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If you are Mortimer, this gets \"When this hits a hero, they choose Frailty, Inertia, or Bloodrot Pox. Create that token under their control.\"",
     "pitch": 1,
     "cost": 1,
@@ -1060,7 +1060,7 @@
   {
     "id": "MPA104",
     "name": "Triple Blind",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If you are Mortimer, this gets \"When this hits a hero, they choose Frailty, Inertia, or Bloodrot Pox. Create that token under their control.\"",
     "pitch": 2,
     "cost": 1,
@@ -1073,7 +1073,7 @@
   {
     "id": "MPA105",
     "name": "Triple Blind",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If you are Mortimer, this gets \"When this hits a hero, they choose Frailty, Inertia, or Bloodrot Pox. Create that token under their control.\"",
     "pitch": 3,
     "cost": 1,
@@ -1086,7 +1086,7 @@
   {
     "id": "MPA106",
     "name": "Viral Sampling",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nContract - You are contracted to hit an infected opposing hero. Whenever you complete this contract, create a Silver token.",
     "pitch": 1,
     "cost": 0,
@@ -1100,7 +1100,7 @@
   {
     "id": "MPA107",
     "name": "Viral Sampling",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nContract - You are contracted to hit an infected opposing hero. Whenever you complete this contract, create a Silver token.",
     "pitch": 2,
     "cost": 0,
@@ -1114,7 +1114,7 @@
   {
     "id": "MPA115",
     "name": "Easy Prey",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Target Assassin attack gets +3{p} while it's attacking an infected hero.",
     "pitch": 1,
     "cost": 0,
@@ -1125,7 +1125,7 @@
   {
     "id": "MPA116",
     "name": "Easy Prey",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Target Assassin attack gets +2{p} while it's attacking an infected hero.",
     "pitch": 2,
     "cost": 0,
@@ -1136,7 +1136,7 @@
   {
     "id": "MPA117",
     "name": "Easy Prey",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Target Assassin attack gets +1{p} while it's attacking an infected hero.",
     "pitch": 3,
     "cost": 0,
@@ -1147,7 +1147,7 @@
   {
     "id": "MPA118",
     "name": "Festering Exhaustion",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Target Assassin attack action card gets go again and \"When this hits a hero, create an Inertia token under their control.\"",
     "pitch": 2,
     "cost": 1,
@@ -1158,7 +1158,7 @@
   {
     "id": "MPA119",
     "name": "Festering Rot",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Target Assassin attack action card gets go again and \"When this hits a hero, create a Bloodrot Pox token under their control.\"",
     "pitch": 2,
     "cost": 1,
@@ -1169,7 +1169,7 @@
   {
     "id": "MPA120",
     "name": "Festering Weakness",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Target Assassin attack action card gets go again and \"When this hits a hero, create a Frailty token under their control.\"",
     "pitch": 2,
     "cost": 1,
@@ -1180,7 +1180,7 @@
   {
     "id": "MPA124",
     "name": "Pick Your Poison",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Each opposing hero chooses Frailty, Inertia, or Bloodrot Pox. Create the 2 tokens they didn't choose under their control.\nGo again",
     "pitch": 2,
     "cost": 0,
@@ -1192,7 +1192,7 @@
   {
     "id": "MPA125",
     "name": "Seed Bloodrot",
-    "cardType": "instant",
+    "types": ["instant"],
     "text": "Create a Bloodrot Pox token under each hero's control.",
     "pitch": 3,
     "cost": 0,
@@ -1202,7 +1202,7 @@
   {
     "id": "MPA126",
     "name": "Seed Frailty",
-    "cardType": "instant",
+    "types": ["instant"],
     "text": "Create a Frailty token under each hero's control.",
     "pitch": 3,
     "cost": 0,
@@ -1212,7 +1212,7 @@
   {
     "id": "MPA127",
     "name": "Seed Inertia",
-    "cardType": "instant",
+    "types": ["instant"],
     "text": "Create an Inertia token under each hero's control.",
     "pitch": 3,
     "cost": 0,
@@ -1222,7 +1222,7 @@
   {
     "id": "MPA132",
     "name": "Puredew Panacea",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Action - Destroy this: Cure a disease you control. If you do, gain 1{h}. Go again",
     "classes": ["generic"],
     "subtypes": ["off-hand"],
@@ -1232,7 +1232,7 @@
   {
     "id": "MPA137",
     "name": "Needlebane Cowl",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "When this defends a dagger, this gets +1{d}.\nBlade Break",
     "defense": 1,
     "classes": ["generic"],
@@ -1243,7 +1243,7 @@
   {
     "id": "MPA138",
     "name": "Needlebane Coat",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "When this defends a dagger, this gets +1{d}.\nBlade Break",
     "defense": 1,
     "classes": ["generic"],
@@ -1254,7 +1254,7 @@
   {
     "id": "MPA139",
     "name": "Needlebane Gauntlets",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "When this defends a dagger, this gets +1{d}.\nBlade Break",
     "defense": 1,
     "classes": ["generic"],
@@ -1265,7 +1265,7 @@
   {
     "id": "MPA140",
     "name": "Needlebane Steppers",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "When this defends a dagger, this gets +1{d}.\nBlade Break",
     "defense": 1,
     "classes": ["generic"],
@@ -1276,7 +1276,7 @@
   {
     "id": "MPA141",
     "name": "Banger!",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If this is defended, it gets +6{p}.\nInstant - Discard this: Create a Silver token.",
     "pitch": 3,
     "cost": 2,
@@ -1289,7 +1289,7 @@
   {
     "id": "MPA142",
     "name": "Self-determination",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Instant - Discard this: Until end of turn, opponents can't create tokens under your control.",
     "pitch": 3,
     "cost": 2,
@@ -1302,7 +1302,7 @@
   {
     "id": "MPA147",
     "name": "Free of Burdens",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Once per Turn Instant - Destroy an aura token you control: This gets +1{p}.",
     "pitch": 1,
     "cost": 2,
@@ -1315,7 +1315,7 @@
   {
     "id": "MPA148",
     "name": "Free of Burdens",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Once per Turn Instant - Destroy an aura token you control: This gets +1{p}.",
     "pitch": 2,
     "cost": 2,
@@ -1328,7 +1328,7 @@
   {
     "id": "MPA149",
     "name": "Free of Burdens",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Once per Turn Instant - Destroy an aura token you control: This gets +1{p}.",
     "pitch": 3,
     "cost": 2,

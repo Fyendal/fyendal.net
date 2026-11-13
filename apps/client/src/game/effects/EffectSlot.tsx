@@ -16,6 +16,7 @@ import {
 } from "./effectModel.js";
 import { effectSourceHero, useEffectHeroes } from "./effectHeroes.js";
 import { effectHint, effectHintAttributes } from "./effectHint.js";
+import { primaryType } from "@fyendal/shared";
 
 const ARENA_FRAME_TYPES = new Set(["hero", "weapon", "equipment", "token"]);
 
@@ -23,7 +24,8 @@ const ARENA_FRAME_TYPES = new Set(["hero", "weapon", "equipment", "token"]);
  *  window. Mirrors the square-card presentation in Card.tsx. */
 function artFrame(cardId: string, imageUrl: string): string {
   if (isMarvelCardImageUrl(imageUrl)) return "marvel";
-  const arena = ARENA_FRAME_TYPES.has(cardData[cardId]?.cardType ?? "");
+  const data = cardData[cardId];
+  const arena = data !== undefined && ARENA_FRAME_TYPES.has(primaryType(data));
   const legacy = hasLegacySquareCardFrame(imageUrl);
   return `${arena ? "arena" : "standard"}${legacy ? "-legacy" : ""}`;
 }

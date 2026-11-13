@@ -18,6 +18,7 @@ import {
   yesNoPrompt,
   hasLiveTurnEffect,
 } from "../shared-helpers.js";
+import { hasType as hasPrintedType } from "@fyendal/shared";
 
 const COPPER = "CRU197";
 const QUICKEN = "CRU196";
@@ -179,7 +180,7 @@ const unifiedDecree: CardScript = {
     const top = ctx.player(ctx.seat).deck[0];
     if (!top) return;
     ctx.lookAt(top.instanceId);
-    if (ctx.cardData(top.cardId).cardType === "attack-reaction")
+    if (hasPrintedType(ctx.cardData(top.cardId), "attack-reaction"))
       ctx.requestCardChoice(
         "decree-banish",
         decisionPrompt("Unified Decree: banish the top card?", "card.cru.decree.banish", {

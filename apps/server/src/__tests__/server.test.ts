@@ -12,6 +12,7 @@ import type { Queryable } from "../db.js";
 import { getDeck, importDeck, listDeckPlays } from "../decks.js";
 import { PgRoomStore } from "../store.js";
 import { freshDb } from "./testdb.js";
+import { hasType, objectKind } from "@fyendal/shared";
 
 const PORT = 18901;
 let wss: ReturnType<typeof createGameServer>;
@@ -1555,16 +1556,16 @@ describe("lobby and matchmaking", () => {
 
 describe("cc prep room", () => {
   const printings = Object.values(cardData);
-  const hero = printings.find((c) => c.cardType === "hero" && c.name.includes("Rhinar"))!;
+  const hero = printings.find((c) => hasType(c, "hero") && c.name.includes("Rhinar"))!;
   const ccIssuesFor = (id: string) => formatLegalityIssues(
     cardData,
     { heroId: hero.id, weaponIds: [], equipmentPool: [], deck: [id], sideboard: [] },
     "cc",
   );
-  const weapon = printings.find((c) => c.cardType === "weapon" && ccIssuesFor(c.id).length === 0)!;
+  const weapon = printings.find((c) => hasType(c, "weapon") && ccIssuesFor(c.id).length === 0)!;
   const deckCards = printings.filter(
     (c) =>
-      !["hero", "weapon", "equipment", "token"].includes(c.cardType) &&
+      objectKind(c) === "deck" &&
       ccIssuesFor(c.id).length === 0,
   );
 

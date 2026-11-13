@@ -2,7 +2,7 @@
  {
   "id": "ROS000",
   "name": "Will of Arcana",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "Legendary\nWhen this is pitched, amp 1.",
   "pitch": 3,
   "classes": [
@@ -20,7 +20,7 @@
  {
   "id": "ROS001",
   "name": "Florian, Rotwood Harbinger",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If there are 8 or more Earth cards in your banished zone, Florian gets \"If you would create 1 or more aura tokens, instead create that many plus 1 of each of those tokens.\"\nEssence of Earth",
   "classes": [
    "runeblade"
@@ -38,7 +38,7 @@
  {
   "id": "ROS002",
   "name": "Florian",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If there are 4 or more Earth cards in your banished zone, Florian gets \"If you would create 1 or more aura tokens, instead create that many plus 1 of each of those tokens.\"\nEssence of Earth",
   "classes": [
    "runeblade"
@@ -56,7 +56,7 @@
  {
   "id": "ROS003",
   "name": "Rotwood Reaper",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nIf you've played or created an aura this turn, this gets +2{p}.",
   "attack": 2,
   "classes": [
@@ -72,7 +72,7 @@
  {
   "id": "ROS004",
   "name": "Germinate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Florian Specialization\nCreate a Runechant or Embodiment of Earth token. Repeat this process X more times.\nGain X+1{h}",
   "pitch": 3,
   "defense": 3,
@@ -90,7 +90,7 @@
  {
   "id": "ROS005",
   "name": "Thistle Bloom // Life",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Meld\nCreate X Runechant tokens, where X is the total {h} you've gained this turn.\n//\nGain 1{h}",
   "pitch": 2,
   "cost": 0,
@@ -109,7 +109,7 @@
  {
   "id": "ROS006",
   "name": "Arcane Seeds // Life",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Meld\nCreate a Runechant token. Create a Runechant token.\nGo again\n//\nGain 1{h}",
   "pitch": 1,
   "cost": 0,
@@ -129,7 +129,7 @@
  {
   "id": "ROS007",
   "name": "Aurora, Shooting Star",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {r}{r}: Create an Embodiment of Lightning token. Activate this only if you've played a Lightning card this turn.\nEssence of Lightning",
   "classes": [
    "runeblade"
@@ -147,7 +147,7 @@
  {
   "id": "ROS008",
   "name": "Aurora",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {r}{r}: Create an Embodiment of Lightning token. Activate this only if you've played a Lightning card this turn.\nEssence of Lightning",
   "classes": [
    "runeblade"
@@ -165,7 +165,7 @@
  {
   "id": "ROS009",
   "name": "Star Fall",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nIf you've played a Lightning card this turn, this card's attacks get +1{p} and go again.",
   "attack": 1,
   "classes": [
@@ -184,7 +184,7 @@
  {
   "id": "ROS010",
   "name": "Arc Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Aurora Specialization\nWhenever you go again this turn, deal 1 arcane damage to any target.\nThe next action card you play this turn gets go again.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -204,7 +204,7 @@
  {
   "id": "ROS011",
   "name": "Vaporize // Shock",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Meld\nDestroy an aura permanent with cost X or less and/or up to X aura tokens, where X is the total arcane damage you've dealt to opposing heroes this turn.\n//\nDeal 1 arcane damage to any target.",
   "pitch": 2,
   "cost": 0,
@@ -222,7 +222,7 @@
  {
   "id": "ROS012",
   "name": "Burn Up // Shock",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Meld\nThe next time an attack you control hits a hero this turn, deal 4 arcane damage to them.\nGo again\n//\nDeal 1 arcane damage to any target.",
   "pitch": 1,
   "cost": 0,
@@ -242,7 +242,7 @@
  {
   "id": "ROS013",
   "name": "Verdance, Thorn of the Rose",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If there are 8 or more Earth cards in your banished zone, Verdance gets \"Whenever you gain {h} during your turn, you may deal 1 arcane damage to any opposing target.\"\nEssence of Earth",
   "classes": [
    "wizard"
@@ -260,7 +260,7 @@
  {
   "id": "ROS014",
   "name": "Verdance",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If there are 4 or more Earth cards in your banished zone, Verdance gets \"Whenever you gain {h} during your turn, you may deal 1 arcane damage to any opposing target.\"\nEssence of Earth",
   "classes": [
    "wizard"
@@ -278,7 +278,7 @@
  {
   "id": "ROS015",
   "name": "Staff of Verdant Shoots",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}{r}: Amp 1. Go again\nWhen one or more Earth cards are pitched this way, the next time you deal arcane damage this turn, create an Embodiment of Earth token.",
   "classes": [
    "wizard"
@@ -293,7 +293,7 @@
  {
   "id": "ROS016",
   "name": "Heartbeat of Candlehold",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Verdance Specialization\nGain 1{h}. Gain 1{h}. Gain 1{h}.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -313,7 +313,7 @@
  {
   "id": "ROS017",
   "name": "Rampant Growth // Life",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Meld\nAmp X, where X is the total {h} you've gained this turn.\n//\nGain 1{h}",
   "pitch": 2,
   "cost": 0,
@@ -332,7 +332,7 @@
  {
   "id": "ROS018",
   "name": "Pulsing Aether // Life",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Meld\nDeal 4 arcane damage to any target.\n//\nGain 1{h}",
   "pitch": 1,
   "cost": 1,
@@ -351,7 +351,7 @@
  {
   "id": "ROS019",
   "name": "Oscilio, Constella Intelligence",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - Discard an instant: Draw a card.\nEssence of Lightning",
   "classes": [
    "wizard"
@@ -369,7 +369,7 @@
  {
   "id": "ROS020",
   "name": "Oscilio",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - Discard an instant: Draw a card.\nEssence of Lightning",
   "classes": [
    "wizard"
@@ -387,7 +387,7 @@
  {
   "id": "ROS021",
   "name": "Volzar, the Lightning Rod",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "If you control an aura permanent with Sigil in its name, this costs {r} less to activate.\nOnce per Turn Instant - {r}: Amp X, where X is the number of Lightning cards you've played this turn.",
   "classes": [
    "wizard"
@@ -402,7 +402,7 @@
  {
   "id": "ROS022",
   "name": "Sigil of Brilliance",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Oscilio Specialization\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, draw a card.",
   "pitch": 2,
   "cost": 0,
@@ -421,7 +421,7 @@
  {
   "id": "ROS023",
   "name": "Null // Shock",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Meld\nIf target instant card has cost less than the total arcane damage you've dealt to opposing heroes this turn, negate it.\n//\nDeal 1 arcane damage to any target.",
   "pitch": 2,
   "cost": 1,
@@ -440,7 +440,7 @@
  {
   "id": "ROS024",
   "name": "Comet Storm // Shock",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Meld\nDeal 5 arcane damage to any target.\n//\nDeal 1 arcane damage to any target.",
   "pitch": 1,
   "cost": 2,
@@ -459,7 +459,7 @@
  {
   "id": "ROS025",
   "name": "Embodiment of Earth",
-  "cardType": "token",
+  "types": ["token"],
   "text": "'Non-attack' action cards you control have +1{d} while defending.\nAt the beginning of your action phase, destroy Embodiment of Earth.",
   "subtypes": [
    "elemental",
@@ -470,7 +470,7 @@
  {
   "id": "ROS026",
   "name": "Embodiment of Lightning",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card, destroy this, then the attack gets go again.",
   "subtypes": [
    "elemental",
@@ -481,7 +481,7 @@
  {
   "id": "ROS027",
   "name": "Sanctuary of Aria",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Instant - {r}{r}: Prevent the next 1 damage that would be dealt to you this turn by a source of your choice. Destroy this at the beginning of the end phase.",
   "subtypes": [
    "rosetta",
@@ -492,7 +492,7 @@
  {
   "id": "ROS028",
   "name": "Barkskin of the Millennium Tree",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, if there are 4 or more Earth cards in your banished zone, create an Embodiment of Earth token.\nTemper",
   "defense": 2,
   "subtypes": [
@@ -507,7 +507,7 @@
  {
   "id": "ROS029",
   "name": "Helm of Lignum Vitae",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If there are 4 or more Earth cards in your banished zone, this gets +1{d}.\nBlade Break",
   "defense": 1,
   "subtypes": [
@@ -522,7 +522,7 @@
  {
   "id": "ROS030",
   "name": "Well Grounded",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Prevent the next 2 damage that would be dealt to you this turn. Activate this only if there are 4 or more Earth cards in your banished zone.",
   "defense": 0,
   "subtypes": [
@@ -534,7 +534,7 @@
  {
   "id": "ROS031",
   "name": "Felling of the Crown",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If there are 4 or more Earth cards in your banished zone, this gets +4{p}.\nDecompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, each hero puts a card from their hand on the bottom of their deck.",
   "pitch": 1,
   "cost": 3,
@@ -552,7 +552,7 @@
  {
   "id": "ROS032",
   "name": "Plow Under",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If there are 4 or more Earth cards in your banished zone, this gets +4{p}.\nDecompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, each hero puts a card from their arsenal on the bottom of their deck.",
   "pitch": 2,
   "cost": 2,
@@ -570,7 +570,7 @@
  {
   "id": "ROS033",
   "name": "Channel the Millennium Tree",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen this enters the arena and at the beginning of your action phase, amp 3.\nChannel Earth - At the beginning of your end phase, put a flow counter on this, then destroy it unless you put an Earth card from your pitch zone on the bottom of your deck for each flow counter on it.",
   "pitch": 1,
   "cost": 3,
@@ -589,7 +589,7 @@
  {
   "id": "ROS034",
   "name": "Earth's Embrace",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your end phase, create an Embodiment of Earth token. Then, if you haven't banished an Earth card this turn, destroy this.",
   "pitch": 3,
   "cost": 1,
@@ -606,7 +606,7 @@
  {
   "id": "ROS035",
   "name": "Seeds of Tomorrow",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "As an additional cost to play this, put a card from your arsenal on the bottom of your deck.\nPrevent the next 5 damage that would be dealt to you this turn.",
   "pitch": 3,
   "cost": 0,
@@ -618,7 +618,7 @@
  {
   "id": "ROS036",
   "name": "Earth Form",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create an Embodiment of Earth token.",
   "pitch": 1,
   "cost": 3,
@@ -633,7 +633,7 @@
  {
   "id": "ROS037",
   "name": "Earth Form",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create an Embodiment of Earth token.",
   "pitch": 2,
   "cost": 3,
@@ -648,7 +648,7 @@
  {
   "id": "ROS038",
   "name": "Earth Form",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create an Embodiment of Earth token.",
   "pitch": 3,
   "cost": 3,
@@ -663,7 +663,7 @@
  {
   "id": "ROS039",
   "name": "Summer's Fall",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, put up to 1 target aura on the bottom of its owner's deck.",
   "pitch": 1,
   "cost": 2,
@@ -681,7 +681,7 @@
  {
   "id": "ROS040",
   "name": "Summer's Fall",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, put up to 1 target aura on the bottom of its owner's deck.",
   "pitch": 2,
   "cost": 2,
@@ -699,7 +699,7 @@
  {
   "id": "ROS041",
   "name": "Summer's Fall",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, put up to 1 target aura on the bottom of its owner's deck.",
   "pitch": 3,
   "cost": 2,
@@ -717,7 +717,7 @@
  {
   "id": "ROS042",
   "name": "Rootbound Carapace",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Decompose - You may banish 2 Earth cards and an action card from your graveyard. If you do, this gets +1{d}.",
   "pitch": 1,
   "cost": 0,
@@ -733,7 +733,7 @@
  {
   "id": "ROS043",
   "name": "Rootbound Carapace",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Decompose - You may banish 2 Earth cards and an action card from your graveyard. If you do, this gets +1{d}.",
   "pitch": 2,
   "cost": 0,
@@ -749,7 +749,7 @@
  {
   "id": "ROS044",
   "name": "Rootbound Carapace",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Decompose - You may banish 2 Earth cards and an action card from your graveyard. If you do, this gets +1{d}.",
   "pitch": 3,
   "cost": 0,
@@ -765,7 +765,7 @@
  {
   "id": "ROS045",
   "name": "Sigil of Sanctuary",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Arcane Shelter 1\nWhen this leaves the arena, create an Embodiment of Earth token.",
   "pitch": 3,
   "cost": 0,
@@ -781,7 +781,7 @@
  {
   "id": "ROS046",
   "name": "Autumn's Touch",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 1,
   "cost": 3,
@@ -796,7 +796,7 @@
  {
   "id": "ROS047",
   "name": "Autumn's Touch",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 2,
   "cost": 3,
@@ -811,7 +811,7 @@
  {
   "id": "ROS048",
   "name": "Autumn's Touch",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 3,
   "cost": 3,
@@ -826,7 +826,7 @@
  {
   "id": "ROS049",
   "name": "Blossoming Decay",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, gain 1{h}.",
   "pitch": 1,
   "cost": 2,
@@ -844,7 +844,7 @@
  {
   "id": "ROS050",
   "name": "Blossoming Decay",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, gain 1{h}.",
   "pitch": 2,
   "cost": 2,
@@ -862,7 +862,7 @@
  {
   "id": "ROS051",
   "name": "Blossoming Decay",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, gain 1{h}.",
   "pitch": 3,
   "cost": 2,
@@ -880,7 +880,7 @@
  {
   "id": "ROS052",
   "name": "Cadaverous Tilling",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, this gets +2{p}.",
   "pitch": 1,
   "cost": 3,
@@ -898,7 +898,7 @@
  {
   "id": "ROS053",
   "name": "Cadaverous Tilling",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, this gets +2{p}.",
   "pitch": 2,
   "cost": 3,
@@ -916,7 +916,7 @@
  {
   "id": "ROS054",
   "name": "Cadaverous Tilling",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, this gets +2{p}.",
   "pitch": 3,
   "cost": 3,
@@ -934,7 +934,7 @@
  {
   "id": "ROS055",
   "name": "Fruits of the Forest",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Gain 2{h}",
   "pitch": 1,
   "cost": 3,
@@ -949,7 +949,7 @@
  {
   "id": "ROS056",
   "name": "Fruits of the Forest",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Gain 2{h}",
   "pitch": 2,
   "cost": 3,
@@ -964,7 +964,7 @@
  {
   "id": "ROS057",
   "name": "Fruits of the Forest",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Gain 2{h}",
   "pitch": 3,
   "cost": 3,
@@ -979,7 +979,7 @@
  {
   "id": "ROS058",
   "name": "Strength of Four Seasons",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If there are 4 or more Earth cards in your banished zone, this gets +4{p}.",
   "pitch": 1,
   "cost": 2,
@@ -994,7 +994,7 @@
  {
   "id": "ROS059",
   "name": "Strength of Four Seasons",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If there are 4 or more Earth cards in your banished zone, this gets +4{p}.",
   "pitch": 2,
   "cost": 2,
@@ -1009,7 +1009,7 @@
  {
   "id": "ROS060",
   "name": "Strength of Four Seasons",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If there are 4 or more Earth cards in your banished zone, this gets +4{p}.",
   "pitch": 3,
   "cost": 2,
@@ -1024,7 +1024,7 @@
  {
   "id": "ROS061",
   "name": "Harvest Season",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this, then gain 3{h}.",
   "pitch": 1,
   "cost": 1,
@@ -1041,7 +1041,7 @@
  {
   "id": "ROS062",
   "name": "Harvest Season",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this, then gain 2{h}.",
   "pitch": 2,
   "cost": 1,
@@ -1058,7 +1058,7 @@
  {
   "id": "ROS063",
   "name": "Harvest Season",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this, then gain 1{h}.",
   "pitch": 3,
   "cost": 1,
@@ -1075,7 +1075,7 @@
  {
   "id": "ROS064",
   "name": "Strong Yield",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this, then your next attack this turn gets +3{p}.",
   "pitch": 1,
   "cost": 1,
@@ -1092,7 +1092,7 @@
  {
   "id": "ROS065",
   "name": "Strong Yield",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this, then your next attack this turn gets +2{p}.",
   "pitch": 2,
   "cost": 1,
@@ -1109,7 +1109,7 @@
  {
   "id": "ROS066",
   "name": "Strong Yield",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this, then your next attack this turn gets +1{p}.",
   "pitch": 3,
   "cost": 1,
@@ -1126,7 +1126,7 @@
  {
   "id": "ROS067",
   "name": "Fertile Ground",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Gain 2{h}\nIf there are 4 or more Earth cards in your banished zone, instead gain 5{h}.",
   "pitch": 1,
   "cost": 2,
@@ -1138,7 +1138,7 @@
  {
   "id": "ROS068",
   "name": "Fertile Ground",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Gain 2{h}\nIf there are 4 or more Earth cards in your banished zone, instead gain 4{h}.",
   "pitch": 2,
   "cost": 2,
@@ -1150,7 +1150,7 @@
  {
   "id": "ROS069",
   "name": "Fertile Ground",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Gain 2{h}\nIf there are 4 or more Earth cards in your banished zone, instead gain 3{h}.",
   "pitch": 3,
   "cost": 2,
@@ -1162,7 +1162,7 @@
  {
   "id": "ROS070",
   "name": "Sigil of Earth",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, create an Embodiment of Earth token.",
   "pitch": 3,
   "cost": 0,
@@ -1179,7 +1179,7 @@
  {
   "id": "ROS071",
   "name": "Lightning Greaves",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - {r}, destroy this: Instant cards you play this turn get go again.\nArcane Barrier 1\nBattleworn",
   "defense": 1,
   "subtypes": [
@@ -1195,7 +1195,7 @@
  {
   "id": "ROS072",
   "name": "Flash of Brilliance",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, you may discard a Lightning card. If you do, return an aura you control to its owner's hand.\nBlade Break",
   "defense": 1,
   "subtypes": [
@@ -1210,7 +1210,7 @@
  {
   "id": "ROS073",
   "name": "Twinkle Toes",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Prevent the next 2 damage that would be dealt to you this turn. Activate this only if you've played an instant card this turn.",
   "defense": 0,
   "subtypes": [
@@ -1222,7 +1222,7 @@
  {
   "id": "ROS074",
   "name": "Current Funnel",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, if the last action card you played this turn was Lightning, this and the next action card you play this turn get go again.",
   "pitch": 3,
   "cost": 0,
@@ -1240,7 +1240,7 @@
  {
   "id": "ROS075",
   "name": "Eclectic Magnetism",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, you may play a non-attack action card this chain link as though it were an instant.",
   "pitch": 1,
   "cost": 1,
@@ -1255,7 +1255,7 @@
  {
   "id": "ROS076",
   "name": "Gone in a Flash",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, the next time you play an instant card this chain link, you may return this to it's owner's hand.",
   "pitch": 1,
   "cost": 0,
@@ -1270,7 +1270,7 @@
  {
   "id": "ROS077",
   "name": "Channel Lightning Valley",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The first time you deal damage to an opposing hero each turn, draw a card.\nChannel Lightning - At the beginning of your end phase, put a flow counter on this, then destroy it unless you put a Lightning card from your pitch zone on the bottom of your deck for each flow counter on it.",
   "pitch": 2,
   "cost": 0,
@@ -1286,7 +1286,7 @@
  {
   "id": "ROS078",
   "name": "High Voltage",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Amp 1",
   "pitch": 3,
   "cost": 0,
@@ -1301,7 +1301,7 @@
  {
   "id": "ROS079",
   "name": "Blast to Oblivion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, the next time you play an instant card this chain link, you may return target aura permanent with cost 1 or less or target aura token to it's owner's hand.",
   "pitch": 1,
   "cost": 0,
@@ -1316,7 +1316,7 @@
  {
   "id": "ROS080",
   "name": "Blast to Oblivion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, the next time you play an instant card this chain link, you may return target aura permanent with cost 1 or less or target aura token to it's owner's hand.",
   "pitch": 2,
   "cost": 0,
@@ -1331,7 +1331,7 @@
  {
   "id": "ROS081",
   "name": "Blast to Oblivion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, the next time you play an instant card this chain link, you may return target aura permanent with cost 1 or less or target aura token to it's owner's hand.",
   "pitch": 3,
   "cost": 0,
@@ -1346,7 +1346,7 @@
  {
   "id": "ROS082",
   "name": "Lightning Form",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create an Embodiment of Lightning token.",
   "pitch": 1,
   "cost": 1,
@@ -1361,7 +1361,7 @@
  {
   "id": "ROS083",
   "name": "Lightning Form",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create an Embodiment of Lightning token.",
   "pitch": 2,
   "cost": 1,
@@ -1376,7 +1376,7 @@
  {
   "id": "ROS084",
   "name": "Lightning Form",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create an Embodiment of Lightning token.",
   "pitch": 3,
   "cost": 1,
@@ -1391,7 +1391,7 @@
  {
   "id": "ROS085",
   "name": "Electromagnetic Somersault",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Choose up to 2 attack action cards with cost 0 or more on the active chain link. Return them to their owner's hand when the chain link resolves.",
   "pitch": 1,
   "cost": 0,
@@ -1403,7 +1403,7 @@
  {
   "id": "ROS086",
   "name": "Electromagnetic Somersault",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Choose up to 2 attack action cards with cost 1 or more on the active chain link. Return them to their owner's hand when the chain link resolves.",
   "pitch": 2,
   "cost": 0,
@@ -1415,7 +1415,7 @@
  {
   "id": "ROS087",
   "name": "Electromagnetic Somersault",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Choose up to 2 attack action cards with cost 2 or more on the active chain link. Return them to their owner's hand when the chain link resolves.",
   "pitch": 3,
   "cost": 0,
@@ -1427,7 +1427,7 @@
  {
   "id": "ROS088",
   "name": "Sigil of Conductivity",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Arcane Shelter 1\nWhen this leaves the arena, create an Embodiment of Lightning token.",
   "pitch": 3,
   "cost": 0,
@@ -1443,7 +1443,7 @@
  {
   "id": "ROS089",
   "name": "Flittering Charge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played an instant card this chain link, this gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -1461,7 +1461,7 @@
  {
   "id": "ROS090",
   "name": "Flittering Charge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played an instant card this chain link, this gets go again.",
   "pitch": 2,
   "cost": 0,
@@ -1479,7 +1479,7 @@
  {
   "id": "ROS091",
   "name": "Flittering Charge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played an instant card this chain link, this gets go again.",
   "pitch": 3,
   "cost": 0,
@@ -1497,7 +1497,7 @@
  {
   "id": "ROS092",
   "name": "Fry",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 1,
   "cost": 0,
@@ -1515,7 +1515,7 @@
  {
   "id": "ROS093",
   "name": "Fry",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 2,
   "cost": 0,
@@ -1533,7 +1533,7 @@
  {
   "id": "ROS094",
   "name": "Fry",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 3,
   "cost": 0,
@@ -1551,7 +1551,7 @@
  {
   "id": "ROS095",
   "name": "Heaven's Claws",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 1,
   "cost": 1,
@@ -1566,7 +1566,7 @@
  {
   "id": "ROS096",
   "name": "Heaven's Claws",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 2,
   "cost": 1,
@@ -1581,7 +1581,7 @@
  {
   "id": "ROS097",
   "name": "Heaven's Claws",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 3,
   "cost": 1,
@@ -1596,7 +1596,7 @@
  {
   "id": "ROS098",
   "name": "Lightning Surge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played from arsenal, it gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -1614,7 +1614,7 @@
  {
   "id": "ROS099",
   "name": "Lightning Surge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played from arsenal, it gets go again.",
   "pitch": 2,
   "cost": 0,
@@ -1632,7 +1632,7 @@
  {
   "id": "ROS100",
   "name": "Lightning Surge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played from arsenal, it gets go again.",
   "pitch": 3,
   "cost": 0,
@@ -1650,7 +1650,7 @@
  {
   "id": "ROS101",
   "name": "Second Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, if you've dealt damage this turn, this gets +1{p} and go again.",
   "pitch": 1,
   "cost": 0,
@@ -1668,7 +1668,7 @@
  {
   "id": "ROS102",
   "name": "Second Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, if you've dealt damage this turn, this gets +1{p} and go again.",
   "pitch": 2,
   "cost": 0,
@@ -1686,7 +1686,7 @@
  {
   "id": "ROS103",
   "name": "Second Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, if you've dealt damage this turn, this gets +1{p} and go again.",
   "pitch": 3,
   "cost": 0,
@@ -1704,7 +1704,7 @@
  {
   "id": "ROS104",
   "name": "Trip the Light Fantastic",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Prevent the next 2 damage that would be dealt to you this turn.",
   "pitch": 1,
   "cost": 1,
@@ -1719,7 +1719,7 @@
  {
   "id": "ROS105",
   "name": "Trip the Light Fantastic",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Prevent the next 2 damage that would be dealt to you this turn.",
   "pitch": 2,
   "cost": 1,
@@ -1734,7 +1734,7 @@
  {
   "id": "ROS106",
   "name": "Trip the Light Fantastic",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Prevent the next 2 damage that would be dealt to you this turn.",
   "pitch": 3,
   "cost": 1,
@@ -1749,7 +1749,7 @@
  {
   "id": "ROS107",
   "name": "Flash",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next action card you play this turn with cost 0 or greater gets go again.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1765,7 +1765,7 @@
  {
   "id": "ROS108",
   "name": "Flash",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next action card you play this turn with cost 1 or greater gets go again.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1781,7 +1781,7 @@
  {
   "id": "ROS109",
   "name": "Flash",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next action card you play this turn with cost 2 or greater gets go again.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1797,7 +1797,7 @@
  {
   "id": "ROS110",
   "name": "Electrostatic Discharge",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next attack action card you play this turn with cost 1 or less gets +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -1809,7 +1809,7 @@
  {
   "id": "ROS111",
   "name": "Electrostatic Discharge",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next attack action card you play this turn with cost 1 or less gets +2{p}.",
   "pitch": 2,
   "cost": 0,
@@ -1821,7 +1821,7 @@
  {
   "id": "ROS112",
   "name": "Electrostatic Discharge",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next attack action card you play this turn with cost 1 or less gets +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -1833,7 +1833,7 @@
  {
   "id": "ROS113",
   "name": "Sigil of Lightning",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "At the beginning of your action phase, destroy this.\nWhen this leaves the arena, create an Embodiment of Lightning token.",
   "pitch": 3,
   "cost": 0,
@@ -1846,7 +1846,7 @@
  {
   "id": "ROS114",
   "name": "Face Purgatory",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends together with an attack action card and a non-attack action card, the attacking hero discards a card and you draw a card.\nBlade Break",
   "defense": 2,
   "classes": [
@@ -1863,7 +1863,7 @@
  {
   "id": "ROS115",
   "name": "Bloodtorn Bodice",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this and an aura you control: Gain {r}. Go again",
   "defense": 0,
   "classes": [
@@ -1877,7 +1877,7 @@
  {
   "id": "ROS116",
   "name": "Runehold Release",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Create a Runechant token. Go again",
   "defense": 0,
   "classes": [
@@ -1891,7 +1891,7 @@
  {
   "id": "ROS117",
   "name": "Snuff Out",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, you may destroy an aura you control. If you do, they discard a card.",
   "pitch": 1,
   "cost": 1,
@@ -1908,7 +1908,7 @@
  {
   "id": "ROS118",
   "name": "Machinations of Dominion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Runeblade attack action card you play this turn gets overpower and \"If you've played or created an aura this turn, this gets go again.\"\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1924,7 +1924,7 @@
  {
   "id": "ROS119",
   "name": "Succumb to Temptation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've dealt arcane damage this turn, you may play this as though it were an instant.\nThe next time a Runeblade attack action card you control hits a hero this turn, look at their hand and choose a card. They discard it.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1940,7 +1940,7 @@
  {
   "id": "ROS120",
   "name": "Haunting Rendition",
-  "cardType": "block",
+  "types": ["block"],
   "text": "Instant - Discard this: Prevent the next 2 damage that would be dealt to you this turn. The first time you prevent damage this way, create a Runechant token.",
   "pitch": 1,
   "defense": 4,
@@ -1952,7 +1952,7 @@
  {
   "id": "ROS121",
   "name": "Splintering Deadwood",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or hits, you may destroy an aura you control. If you do, create a Runechant token.",
   "pitch": 1,
   "cost": 3,
@@ -1969,7 +1969,7 @@
  {
   "id": "ROS122",
   "name": "Splintering Deadwood",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or hits, you may destroy an aura you control. If you do, create a Runechant token.",
   "pitch": 2,
   "cost": 3,
@@ -1986,7 +1986,7 @@
  {
   "id": "ROS123",
   "name": "Splintering Deadwood",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or hits, you may destroy an aura you control. If you do, create a Runechant token.",
   "pitch": 3,
   "cost": 3,
@@ -2003,7 +2003,7 @@
  {
   "id": "ROS124",
   "name": "Vantage Point",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played or created an aura this turn, this gets overpower.",
   "pitch": 1,
   "cost": 3,
@@ -2023,7 +2023,7 @@
  {
   "id": "ROS125",
   "name": "Vantage Point",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played or created an aura this turn, this gets overpower.",
   "pitch": 2,
   "cost": 3,
@@ -2043,7 +2043,7 @@
  {
   "id": "ROS126",
   "name": "Vantage Point",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played or created an aura this turn, this gets overpower.",
   "pitch": 3,
   "cost": 3,
@@ -2063,7 +2063,7 @@
  {
   "id": "ROS127",
   "name": "Condemn to Slaughter",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Runeblade attack this turn gets +3{p}.\nYou may destroy an aura you control. If you do, each opponent destroys an aura permanent they control.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -2079,7 +2079,7 @@
  {
   "id": "ROS128",
   "name": "Condemn to Slaughter",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Runeblade attack this turn gets +2{p}.\nYou may destroy an aura you control. If you do, each opponent destroys an aura permanent they control.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -2095,7 +2095,7 @@
  {
   "id": "ROS129",
   "name": "Condemn to Slaughter",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Runeblade attack this turn gets +1{p}.\nYou may destroy an aura you control. If you do, each opponent destroys an aura permanent they control.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -2111,7 +2111,7 @@
  {
   "id": "ROS130",
   "name": "Malefic Incantation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nThis enters the arena with 3 verse counters. When it has none, destroy it.\nOnce per turn, when you play an attack action card, remove a verse counter from this. If you do, create a Runechant token.",
   "pitch": 1,
   "cost": 0,
@@ -2130,7 +2130,7 @@
  {
   "id": "ROS131",
   "name": "Malefic Incantation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nThis enters the arena with 2 verse counters. When it has none, destroy it.\nOnce per turn, when you play an attack action card, remove a verse counter from this. If you do, create a Runechant token.",
   "pitch": 2,
   "cost": 0,
@@ -2149,7 +2149,7 @@
  {
   "id": "ROS132",
   "name": "Malefic Incantation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nThis enters the arena with a verse counter. When it has none, destroy it.\nOnce per turn, when you play an attack action card, remove a verse counter from this. If you do, create a Runechant token.",
   "pitch": 3,
   "cost": 0,
@@ -2168,7 +2168,7 @@
  {
   "id": "ROS133",
   "name": "Sigil of the Arknight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, reveal the top card of your deck. If it's an attack action card, put it into your hand.",
   "pitch": 3,
   "cost": 0,
@@ -2187,7 +2187,7 @@
  {
   "id": "ROS134",
   "name": "Arcanic Spike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've dealt arcane damage this turn, this gets +2{p}.",
   "pitch": 1,
   "cost": 2,
@@ -2204,7 +2204,7 @@
  {
   "id": "ROS135",
   "name": "Arcanic Spike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've dealt arcane damage this turn, this gets +2{p}.",
   "pitch": 2,
   "cost": 2,
@@ -2221,7 +2221,7 @@
  {
   "id": "ROS136",
   "name": "Arcanic Spike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've dealt arcane damage this turn, this gets +2{p}.",
   "pitch": 3,
   "cost": 2,
@@ -2238,7 +2238,7 @@
  {
   "id": "ROS137",
   "name": "Consuming Volition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've dealt arcane damage this turn, this gets \"When this hits a hero, they discard a card.\"",
   "pitch": 1,
   "cost": 1,
@@ -2255,7 +2255,7 @@
  {
   "id": "ROS138",
   "name": "Consuming Volition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've dealt arcane damage this turn, this gets \"When this hits a hero, they discard a card.\"",
   "pitch": 2,
   "cost": 1,
@@ -2272,7 +2272,7 @@
  {
   "id": "ROS139",
   "name": "Consuming Volition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've dealt arcane damage this turn, this gets \"When this hits a hero, they discard a card.\"",
   "pitch": 3,
   "cost": 1,
@@ -2289,7 +2289,7 @@
  {
   "id": "ROS140",
   "name": "Hit the High Notes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played or created an aura this turn, this gets +2{p}.",
   "pitch": 1,
   "cost": 1,
@@ -2306,7 +2306,7 @@
  {
   "id": "ROS141",
   "name": "Hit the High Notes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played or created an aura this turn, this gets +2{p}.",
   "pitch": 2,
   "cost": 1,
@@ -2323,7 +2323,7 @@
  {
   "id": "ROS142",
   "name": "Hit the High Notes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played or created an aura this turn, this gets +2{p}.",
   "pitch": 3,
   "cost": 1,
@@ -2340,7 +2340,7 @@
  {
   "id": "ROS143",
   "name": "Hocus Pocus",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, create a Runechant token.",
   "pitch": 1,
   "cost": 0,
@@ -2357,7 +2357,7 @@
  {
   "id": "ROS144",
   "name": "Hocus Pocus",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, create a Runechant token.",
   "pitch": 2,
   "cost": 0,
@@ -2374,7 +2374,7 @@
  {
   "id": "ROS145",
   "name": "Hocus Pocus",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, create a Runechant token.",
   "pitch": 3,
   "cost": 0,
@@ -2391,7 +2391,7 @@
  {
   "id": "ROS146",
   "name": "Meat and Greet",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create a Runechant token.\nIf you've dealt arcane damage to an opposing hero this turn, this gets go again.",
   "pitch": 1,
   "cost": 1,
@@ -2411,7 +2411,7 @@
  {
   "id": "ROS147",
   "name": "Meat and Greet",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create a Runechant token.\nIf you've dealt arcane damage to an opposing hero this turn, this gets go again.",
   "pitch": 2,
   "cost": 1,
@@ -2431,7 +2431,7 @@
  {
   "id": "ROS148",
   "name": "Meat and Greet",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create a Runechant token.\nIf you've dealt arcane damage to an opposing hero this turn, this gets go again.",
   "pitch": 3,
   "cost": 1,
@@ -2451,7 +2451,7 @@
  {
   "id": "ROS149",
   "name": "Runerager Swarm",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played or created an aura this turn, this gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -2471,7 +2471,7 @@
  {
   "id": "ROS150",
   "name": "Runerager Swarm",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played or created an aura this turn, this gets go again.",
   "pitch": 2,
   "cost": 0,
@@ -2491,7 +2491,7 @@
  {
   "id": "ROS151",
   "name": "Runerager Swarm",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played or created an aura this turn, this gets go again.",
   "pitch": 3,
   "cost": 0,
@@ -2511,7 +2511,7 @@
  {
   "id": "ROS152",
   "name": "Arcane Cussing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen you deal or are dealt damage, destroy this.\nWhen this leaves the arena during your turn, create 3 Runechant tokens.",
   "pitch": 1,
   "cost": 1,
@@ -2530,7 +2530,7 @@
  {
   "id": "ROS153",
   "name": "Arcane Cussing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen you deal or are dealt damage, destroy this.\nWhen this leaves the arena during your turn, create 2 Runechant tokens.",
   "pitch": 2,
   "cost": 1,
@@ -2549,7 +2549,7 @@
  {
   "id": "ROS154",
   "name": "Arcane Cussing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen you deal or are dealt damage, destroy this.\nWhen this leaves the arena during your turn, create a Runechant token.",
   "pitch": 3,
   "cost": 1,
@@ -2568,7 +2568,7 @@
  {
   "id": "ROS155",
   "name": "Deadwood Dirge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Destroy an aura you control. If you do, create 3 Runechant tokens.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -2584,7 +2584,7 @@
  {
   "id": "ROS156",
   "name": "Deadwood Dirge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Destroy an aura you control. If you do, create 2 Runechant tokens.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -2600,7 +2600,7 @@
  {
   "id": "ROS157",
   "name": "Deadwood Dirge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Destroy an aura you control. If you do, create a Runechant token.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -2616,7 +2616,7 @@
  {
   "id": "ROS158",
   "name": "Oath of the Arknight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Runeblade attack this turn gains +3{p}.\nCreate a Runechant token.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -2632,7 +2632,7 @@
  {
   "id": "ROS159",
   "name": "Oath of the Arknight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Runeblade attack this turn gains +2{p}.\nCreate a Runechant token.\nGo again",
   "pitch": 2,
   "cost": 2,
@@ -2648,7 +2648,7 @@
  {
   "id": "ROS160",
   "name": "Oath of the Arknight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Runeblade attack this turn gains +1{p}.\nCreate a Runechant token.\nGo again",
   "pitch": 3,
   "cost": 2,
@@ -2664,7 +2664,7 @@
  {
   "id": "ROS161",
   "name": "Sigil of Deadwood",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, create a Runechant token.",
   "pitch": 3,
   "cost": 0,
@@ -2683,7 +2683,7 @@
  {
   "id": "ROS162",
   "name": "Runechant",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
   "classes": [
    "runeblade"
@@ -2696,7 +2696,7 @@
  {
   "id": "ROS163",
   "name": "Aether Bindings of the Third Age",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Until end of turn, whenever an aura permanent you control with Sigil in its name leaves the arena, amp 1.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -2713,7 +2713,7 @@
  {
   "id": "ROS164",
   "name": "Ink-lined Cloak",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Gain {r}. Activate this only if you control an aura permanent with Sigil in its name.",
   "defense": 0,
   "classes": [
@@ -2727,7 +2727,7 @@
  {
   "id": "ROS165",
   "name": "Hold Focus",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Amp 1. Go again",
   "defense": 0,
   "classes": [
@@ -2741,7 +2741,7 @@
  {
   "id": "ROS166",
   "name": "Destructive Aethertide",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to any target.\nSurge - If this deals more than 1 damage to a hero, destroy a card in their arsenal.",
   "pitch": 3,
   "cost": 0,
@@ -2757,7 +2757,7 @@
  {
   "id": "ROS167",
   "name": "Eternal Inferno",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to any target.\nSurge - If this deals more than 4 damage, banish it. You may play it this turn.",
   "pitch": 1,
   "cost": 1,
@@ -2773,7 +2773,7 @@
  {
   "id": "ROS168",
   "name": "Sigil of Aether",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "At the beginning of your action phase, destroy this.\nWhen this leaves the arena, deal 1 arcane damage to any target. If damage is dealt this way, amp 1.",
   "pitch": 3,
   "cost": 0,
@@ -2791,7 +2791,7 @@
  {
   "id": "ROS169",
   "name": "Mental Block",
-  "cardType": "block",
+  "types": ["block"],
   "text": "Instant - Discard this: Prevent the next 2 damage that would be dealt to you this turn. The first time you prevent damage this way, create a Ponder token.",
   "pitch": 3,
   "defense": 2,
@@ -2803,7 +2803,7 @@
  {
   "id": "ROS170",
   "name": "Chorus of the Amphitheater",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to any target.\nInstant - Discard this: If an action or instant card you control would deal arcane damage this turn, instead it deals that much plus 1.",
   "pitch": 1,
   "cost": 2,
@@ -2816,7 +2816,7 @@
  {
   "id": "ROS171",
   "name": "Chorus of the Amphitheater",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to any target.\nInstant - Discard this: If an action or instant card you control would deal arcane damage this turn, instead it deals that much plus 1.",
   "pitch": 2,
   "cost": 2,
@@ -2829,7 +2829,7 @@
  {
   "id": "ROS172",
   "name": "Chorus of the Amphitheater",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to any target.\nInstant - Discard this: If an action or instant card you control would deal arcane damage this turn, instead it deals that much plus 1.",
   "pitch": 3,
   "cost": 2,
@@ -2842,7 +2842,7 @@
  {
   "id": "ROS173",
   "name": "Glyph Overlay",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal X+3 arcane damage to target hero, where X is the number of aura permanents you control with Sigil in their name.\nSurge - If this deals more than 3 damage, gain 1{h}, then shuffle all aura permanents you control with Sigil in their name into their owner's deck.",
   "pitch": 1,
   "cost": 1,
@@ -2858,7 +2858,7 @@
  {
   "id": "ROS174",
   "name": "Glyph Overlay",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal X+2 arcane damage to target hero, where X is the number of aura permanents you control with Sigil in their name.\nSurge - If this deals more than 2 damage, gain 1{h}, then shuffle all aura permanents you control with Sigil in their name into their owner's deck.",
   "pitch": 2,
   "cost": 1,
@@ -2874,7 +2874,7 @@
  {
   "id": "ROS175",
   "name": "Glyph Overlay",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal X+1 arcane damage to target hero, where X is the number of aura permanents you control with Sigil in their name.\nSurge - If this deals more than 1 damage, gain 1{h}, then shuffle all aura permanents you control with Sigil in their name into their owner's deck.",
   "pitch": 3,
   "cost": 1,
@@ -2890,7 +2890,7 @@
  {
   "id": "ROS176",
   "name": "Pop the Bubble",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to any target.\nSurge - If this deals more than 3 damage to a hero, destroy an aura permanent they control.",
   "pitch": 1,
   "cost": 0,
@@ -2906,7 +2906,7 @@
  {
   "id": "ROS177",
   "name": "Pop the Bubble",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to any target.\nSurge - If this deals more than 2 damage to a hero, destroy an aura permanent they control.",
   "pitch": 2,
   "cost": 0,
@@ -2922,7 +2922,7 @@
  {
   "id": "ROS178",
   "name": "Pop the Bubble",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to any target.\nSurge - If this deals more than 1 damage to a hero, destroy an aura permanent they control.",
   "pitch": 3,
   "cost": 0,
@@ -2938,7 +2938,7 @@
  {
   "id": "ROS179",
   "name": "Save the Thought",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Shuffle up to 3 non-attack action cards from your graveyard into your deck.\nCreate a Ponder token.",
   "pitch": 1,
   "cost": 2,
@@ -2950,7 +2950,7 @@
  {
   "id": "ROS180",
   "name": "Save the Thought",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Shuffle up to 2 non-attack action cards from your graveyard into your deck.\nCreate a Ponder token.",
   "pitch": 2,
   "cost": 2,
@@ -2962,7 +2962,7 @@
  {
   "id": "ROS181",
   "name": "Save the Thought",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Shuffle up to 1 non-attack action card from your graveyard into your deck.\nCreate a Ponder token.",
   "pitch": 3,
   "cost": 2,
@@ -2974,7 +2974,7 @@
  {
   "id": "ROS182",
   "name": "Sigil of Temporal Manipulation",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "At the beginning of your action phase, destroy this.\nWhen this leaves the arena, banish the top card of your deck. If it's a non-attack action card, you may play it this turn as though it were an instant.",
   "pitch": 3,
   "cost": 0,
@@ -2989,7 +2989,7 @@
  {
   "id": "ROS183",
   "name": "Aether Quickening",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to target hero.\nSurge - If this deals more than 4 damage, it gets go again.",
   "pitch": 1,
   "cost": 1,
@@ -3006,7 +3006,7 @@
  {
   "id": "ROS184",
   "name": "Aether Quickening",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero.\nSurge - If this deals more than 3 damage, it gets go again.",
   "pitch": 2,
   "cost": 1,
@@ -3023,7 +3023,7 @@
  {
   "id": "ROS185",
   "name": "Aether Quickening",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero.\nSurge - If this deals more than 2 damage, it gets go again.",
   "pitch": 3,
   "cost": 1,
@@ -3040,7 +3040,7 @@
  {
   "id": "ROS186",
   "name": "Arcane Twining",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to any target.\nInstant - Discard this: Amp 1",
   "pitch": 1,
   "cost": 0,
@@ -3053,7 +3053,7 @@
  {
   "id": "ROS187",
   "name": "Arcane Twining",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to any target.\nInstant - Discard this: Amp 1",
   "pitch": 2,
   "cost": 0,
@@ -3066,7 +3066,7 @@
  {
   "id": "ROS188",
   "name": "Arcane Twining",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to any target.\nInstant - Discard this: Amp 1",
   "pitch": 3,
   "cost": 0,
@@ -3079,7 +3079,7 @@
  {
   "id": "ROS189",
   "name": "Etchings of Arcana",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero.\nSurge - If this deals more than 3 damage, you may return an aura with Sigil in its name from your graveyard to your hand.",
   "pitch": 1,
   "cost": 0,
@@ -3095,7 +3095,7 @@
  {
   "id": "ROS190",
   "name": "Etchings of Arcana",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero.\nSurge - If this deals more than 2 damage, you may return an aura with Sigil in its name from your graveyard to your hand.",
   "pitch": 2,
   "cost": 0,
@@ -3111,7 +3111,7 @@
  {
   "id": "ROS191",
   "name": "Etchings of Arcana",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero.\nSurge - If this deals more than 1 damage, you may return an aura with Sigil in its name from your graveyard to your hand.",
   "pitch": 3,
   "cost": 0,
@@ -3127,7 +3127,7 @@
  {
   "id": "ROS192",
   "name": "Exploding Aether",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Amp 3\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -3144,7 +3144,7 @@
  {
   "id": "ROS193",
   "name": "Exploding Aether",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Amp 2\nGo again",
   "pitch": 2,
   "cost": 2,
@@ -3161,7 +3161,7 @@
  {
   "id": "ROS194",
   "name": "Exploding Aether",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Amp 1\nGo again",
   "pitch": 3,
   "cost": 2,
@@ -3178,7 +3178,7 @@
  {
   "id": "ROS195",
   "name": "Open the Flood Gates",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero.\nSurge - If this deals more than 3 damage, draw 2 cards.",
   "pitch": 1,
   "cost": 2,
@@ -3194,7 +3194,7 @@
  {
   "id": "ROS196",
   "name": "Open the Flood Gates",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero.\nSurge - If this deals more than 2 damage, draw 2 cards.",
   "pitch": 2,
   "cost": 2,
@@ -3210,7 +3210,7 @@
  {
   "id": "ROS197",
   "name": "Open the Flood Gates",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero.\nSurge - If this deals more than 1 damage, draw 2 cards.",
   "pitch": 3,
   "cost": 2,
@@ -3226,7 +3226,7 @@
  {
   "id": "ROS198",
   "name": "Overflow the Aetherwell",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero.\nSurge - If this deals more than 3 damage, gain {r}{r}.",
   "pitch": 1,
   "cost": 0,
@@ -3242,7 +3242,7 @@
  {
   "id": "ROS199",
   "name": "Overflow the Aetherwell",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero.\nSurge - If this deals more than 2 damage, gain {r}{r}.",
   "pitch": 2,
   "cost": 0,
@@ -3258,7 +3258,7 @@
  {
   "id": "ROS200",
   "name": "Overflow the Aetherwell",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero.\nSurge - If this deals more than 1 damage, gain {r}{r}.",
   "pitch": 3,
   "cost": 0,
@@ -3274,7 +3274,7 @@
  {
   "id": "ROS201",
   "name": "Perennial Aetherbloom",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero.\nSurge - If this deals more than 3 damage, put it on the bottom of its owner's deck.",
   "pitch": 1,
   "cost": 0,
@@ -3290,7 +3290,7 @@
  {
   "id": "ROS202",
   "name": "Perennial Aetherbloom",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero.\nSurge - If this deals more than 2 damage, put it on the bottom of its owner's deck.",
   "pitch": 2,
   "cost": 0,
@@ -3306,7 +3306,7 @@
  {
   "id": "ROS203",
   "name": "Perennial Aetherbloom",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero.\nSurge - If this deals more than 1 damage, put it on the bottom of its owner's deck.",
   "pitch": 3,
   "cost": 0,
@@ -3322,7 +3322,7 @@
  {
   "id": "ROS204",
   "name": "Photon Splicing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to any target.\nInstant - Discard this: Amp 1",
   "pitch": 1,
   "cost": 1,
@@ -3335,7 +3335,7 @@
  {
   "id": "ROS205",
   "name": "Photon Splicing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to any target.\nInstant - Discard this: Amp 1",
   "pitch": 2,
   "cost": 1,
@@ -3348,7 +3348,7 @@
  {
   "id": "ROS206",
   "name": "Photon Splicing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to any target.\nInstant - Discard this: Amp 1",
   "pitch": 3,
   "cost": 1,
@@ -3361,7 +3361,7 @@
  {
   "id": "ROS207",
   "name": "Trailblazing Aether",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero.\nSurge - If this deals more than 3 damage, it gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -3377,7 +3377,7 @@
  {
   "id": "ROS208",
   "name": "Trailblazing Aether",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero.\nSurge - If this deals more than 2 damage, it gets go again.",
   "pitch": 2,
   "cost": 0,
@@ -3393,7 +3393,7 @@
  {
   "id": "ROS209",
   "name": "Trailblazing Aether",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero.\nSurge - If this deals more than 1 damage, it gets go again.",
   "pitch": 3,
   "cost": 0,
@@ -3409,7 +3409,7 @@
  {
   "id": "ROS210",
   "name": "Sigil of Forethought",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "At the beginning of your action phase, destroy this.\nWhen this leaves the arena, create a Ponder token.",
   "pitch": 3,
   "cost": 0,
@@ -3424,7 +3424,7 @@
  {
   "id": "ROS211",
   "name": "Arcanite Fortress",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This card's {d} is equal to the number of equipment you control with Arcanite in their name.\nSpellvoid X, where X is the number of equipment you control with Arcanite in their name.\nGuardwell",
   "classes": [
    "generic"
@@ -3441,7 +3441,7 @@
  {
   "id": "ROS212",
   "name": "Hood of Second Thoughts",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this only if you've been dealt damage this turn.",
   "defense": 0,
   "classes": [
@@ -3455,7 +3455,7 @@
  {
   "id": "ROS213",
   "name": "Bruised Leather",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this only if you've been dealt damage this turn.",
   "defense": 0,
   "classes": [
@@ -3469,7 +3469,7 @@
  {
   "id": "ROS214",
   "name": "Four Finger Gloves",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this only if you've been dealt damage this turn.",
   "defense": 0,
   "classes": [
@@ -3483,7 +3483,7 @@
  {
   "id": "ROS215",
   "name": "Runaways",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Runaways: Prevent the next 1 damage that would be dealt to your hero this turn. Activate this ability only if your hero has been dealt damage this turn.",
   "defense": 0,
   "classes": [
@@ -3497,7 +3497,7 @@
  {
   "id": "ROS216",
   "name": "Cut Through the Facade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This can't be defended by auras.\nWhen this hits a hero, you may destroy an aura they control.",
   "pitch": 1,
   "cost": 3,
@@ -3514,7 +3514,7 @@
  {
   "id": "ROS217",
   "name": "Ten Foot Tall and Bulletproof",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or defends, your hero gets -2{i} during your next end phase.",
   "pitch": 1,
   "cost": 3,
@@ -3531,7 +3531,7 @@
  {
   "id": "ROS218",
   "name": "Call to the Grave",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Search your deck for a card, put it into your graveyard, then shuffle.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -3547,7 +3547,7 @@
  {
   "id": "ROS219",
   "name": "Truce",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this enters the arena, choose an opponent.\nAt the beginning of their end phase, destroy this and you each gain 3{h}.\nWhen you or a card you control is the target of an attack they control, destroy this and draw a card.",
   "pitch": 3,
   "cost": 2,
@@ -3563,7 +3563,7 @@
  {
   "id": "ROS220",
   "name": "Hand Behind the Pen",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, turn a card in their arsenal face-up, then banish a non-attack action card from their arsenal.",
   "pitch": 1,
   "cost": 2,
@@ -3580,7 +3580,7 @@
  {
   "id": "ROS221",
   "name": "Smash Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, turn a card in their arsenal face-up, then banish an attack action card from their arsenal.",
   "pitch": 1,
   "cost": 1,
@@ -3597,7 +3597,7 @@
  {
   "id": "ROS222",
   "name": "Tongue Tied",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, turn a card in their arsenal face-up, then banish an instant card from their arsenal.",
   "pitch": 1,
   "cost": 3,
@@ -3614,7 +3614,7 @@
  {
   "id": "ROS223",
   "name": "Count Your Blessings",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Gain X{h}, where X is 3 plus the number of Count Your Blessings in your graveyard.",
   "pitch": 1,
   "cost": 2,
@@ -3626,7 +3626,7 @@
  {
   "id": "ROS224",
   "name": "Count Your Blessings",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Gain X{h}, where X is 2 plus the number of Count Your Blessings in your graveyard.",
   "pitch": 2,
   "cost": 2,
@@ -3638,7 +3638,7 @@
  {
   "id": "ROS225",
   "name": "Count Your Blessings",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Gain X{h}, where X is 1 plus the number of Count Your Blessings in your graveyard.",
   "pitch": 3,
   "cost": 2,
@@ -3650,7 +3650,7 @@
  {
   "id": "ROS226",
   "name": "Sigil of Cycles",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, discard a card then draw a card.",
   "pitch": 3,
   "cost": 0,
@@ -3669,7 +3669,7 @@
  {
   "id": "ROS227",
   "name": "Fyendal's Fighting Spirit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}.",
   "pitch": 1,
   "cost": 3,
@@ -3686,7 +3686,7 @@
  {
   "id": "ROS228",
   "name": "Fyendal's Fighting Spirit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}.",
   "pitch": 2,
   "cost": 3,
@@ -3703,7 +3703,7 @@
  {
   "id": "ROS229",
   "name": "Fyendal's Fighting Spirit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}.",
   "pitch": 3,
   "cost": 3,
@@ -3720,7 +3720,7 @@
  {
   "id": "ROS230",
   "name": "Sigil of Fyendal",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, gain 1{h}.",
   "pitch": 3,
   "cost": 0,
@@ -3739,7 +3739,7 @@
  {
   "id": "ROS231",
   "name": "Arcane Polarity",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Gain 1{h}\nIf you've been dealt arcane damage this turn, instead gain 4{h}.",
   "pitch": 1,
   "cost": 0,
@@ -3751,7 +3751,7 @@
  {
   "id": "ROS232",
   "name": "Arcane Polarity",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Gain 1{h}\nIf you've been dealt arcane damage this turn, instead gain 3{h}.",
   "pitch": 2,
   "cost": 0,
@@ -3763,7 +3763,7 @@
  {
   "id": "ROS233",
   "name": "Arcane Polarity",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Gain 1{h}\nIf you've been dealt arcane damage this turn, instead gain 2{h}.",
   "pitch": 3,
   "cost": 0,
@@ -3775,7 +3775,7 @@
  {
   "id": "ROS234",
   "name": "Brush Off",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next time you would be dealt 3 or less damage this turn, prevent it.",
   "pitch": 1,
   "cost": 0,
@@ -3787,7 +3787,7 @@
  {
   "id": "ROS235",
   "name": "Brush Off",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next time you would be dealt 2 or less damage this turn, prevent it.",
   "pitch": 2,
   "cost": 0,
@@ -3799,7 +3799,7 @@
  {
   "id": "ROS236",
   "name": "Brush Off",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next time you would be dealt 1 damage this turn, prevent it.",
   "pitch": 3,
   "cost": 0,
@@ -3811,7 +3811,7 @@
  {
   "id": "ROS237",
   "name": "Ponder",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the beginning of your end phase, destroy Ponder and draw a card.",
   "classes": [
    "generic"
@@ -3824,7 +3824,7 @@
  {
   "id": "ROS238",
   "name": "Cracked Bauble",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
   "pitch": 2,
   "classes": [
@@ -3835,7 +3835,7 @@
  {
   "id": "ROS239",
   "name": "Widow Veil Respirator",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1\nSpellvoid 1",
   "classes": [
    "assassin"
@@ -3852,7 +3852,7 @@
  {
   "id": "ROS240",
   "name": "Widow Back Abdomen",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1\nSpellvoid 1",
   "classes": [
    "assassin"
@@ -3869,7 +3869,7 @@
  {
   "id": "ROS241",
   "name": "Widow Claw Tarsus",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1\nSpellvoid 1",
   "classes": [
    "assassin"
@@ -3886,7 +3886,7 @@
  {
   "id": "ROS242",
   "name": "Widow Web Crawler",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1\nSpellvoid 1",
   "classes": [
    "assassin"
@@ -3903,7 +3903,7 @@
  {
   "id": "ROS243",
   "name": "Splatter Skull",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, choose a face-down card in their banished zone that was banished by intimidate this turn. Put it into their graveyard.",
   "pitch": 1,
   "cost": 2,
@@ -3920,7 +3920,7 @@
  {
   "id": "ROS244",
   "name": "Drink 'Em Under the Table",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Betsy Specialization\nWhen this attacks a hero, you may wager with them. The winner draws a card, and the other hero discards a card.",
   "pitch": 1,
   "cost": 4,
@@ -3941,7 +3941,7 @@
  {
   "id": "ROS245",
   "name": "Gustwave of the Second Wind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Surging Strike was the last attack this combat chain, this gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -3962,7 +3962,7 @@
  {
   "id": "ROS246",
   "name": "Adaptive Dissolver",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Modular\nAction - 0: Equip this to another equipment zone.\nArcane Barrier 1",
   "classes": [
    "mechanologist"
@@ -3979,7 +3979,7 @@
  {
   "id": "ROS247",
   "name": "Plan for the Worst",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Look at target hero's hand and arsenal. At the beginning of their next end phase, they discard all cards in their hand and destroy all cards in their arsenal.\nSearch your deck for up to 3 traps, reveal them, put them into your hand, then shuffle 2 cards from your hand into your deck.",
   "pitch": 3,
   "cost": 0,
@@ -3992,7 +3992,7 @@
  {
   "id": "ROS248",
   "name": "Unsheathed",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next sword attack this turn gets +3{p} and \"When this attacks, if its {p} is greater than twice its base, it gets go again.\"\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -4008,7 +4008,7 @@
  {
   "id": "ROS249",
   "name": "Calming Cloak",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - {r}: destroy this: The next aura you play this turn costs {r}{r} less to play.\nArcane Barrier 1",
   "classes": [
    "illusionist"
@@ -4024,7 +4024,7 @@
  {
   "id": "ROS250",
   "name": "Calming Gesture",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - {r}, destroy this: Create a Spectral Shield token.\nArcane Barrier 1",
   "classes": [
    "illusionist"
@@ -4040,7 +4040,7 @@
  {
   "id": "ROS251",
   "name": "Fluttersteps",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this is destroyed, you may play your next aura this turn as though it were an instant.\nWard 1",
   "classes": [
    "illusionist"
@@ -4056,7 +4056,7 @@
  {
   "id": "ROS252",
   "name": "Dust from the Fertile Fields",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Material - While this is under a permanent other than Ouvia, that permanent gets phantasm.",
   "pitch": 1,
   "cost": 0,
@@ -4076,7 +4076,7 @@
  {
   "id": "ROS253",
   "name": "Regrowth // Shock",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Meld\nReturn an attack action card with cost less than X from your graveyard to your hand, where X is the total arcane damage you've dealt to opposing heroes this turn. Go again\n//\nDeal 1 arcane damage to any target.",
   "pitch": 3,
   "cost": 0,
@@ -4097,7 +4097,7 @@
  {
   "id": "ROS254",
   "name": "Briar, Warden of Thorns",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Earth and Lightning\nThe first time an attack action card you control deals damage to an opposing hero, create an Embodiment of Earth token.\nWhenever you play your second 'non-attack' action card each turn, create an Embodiment of Lightning token.",
   "classes": [
    "runeblade"
@@ -4115,7 +4115,7 @@
  {
   "id": "ROS255",
   "name": "Briar",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Earth and Lightning\nThe first time an attack action card you control deals damage to an opposing hero, create an Embodiment of Earth token.\nWhenever you play your second 'non-attack' action card each turn, create an Embodiment of Lightning token.",
   "classes": [
    "runeblade"
@@ -4133,7 +4133,7 @@
  {
   "id": "ROS256",
   "name": "Rosetta Thorn",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nWhenever you attack with Rosetta Thorn, if you've played an attack action card and a 'non-attack' action card this turn, deal 2 arcane damage to target hero.",
   "attack": 2,
   "classes": [
@@ -4148,7 +4148,7 @@
  {
   "id": "ROS257",
   "name": "Embodiment of Earth",
-  "cardType": "token",
+  "types": ["token"],
   "text": "'Non-attack' action cards you control have +1{d} while defending.\nAt the beginning of your action phase, destroy Embodiment of Earth.",
   "subtypes": [
    "elemental",

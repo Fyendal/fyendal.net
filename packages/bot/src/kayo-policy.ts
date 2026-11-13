@@ -23,6 +23,7 @@ import {
 import { arsenalValuer, defenseReactionWorthSpending, handResponse, opportunityValuer } from "./hand-value.js";
 import { kayoSolverRules } from "./kayo-rules.js";
 import { planTacticalTurn, type TacticalIntentDecision } from "./tactical-turn-planner.js";
+import { hasType } from "@fyendal/shared";
 
 function named(data: CardData | undefined, name: string): boolean {
   return data?.name.trim().toLowerCase() === name;
@@ -111,14 +112,14 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     }
     if (named(data, "unflinching foothold")) return footholdUnlocksBlock(input, own) ? 100 : -100;
     if (named(data, "knucklehead")) return -100;
-    if (data.cardType !== "weapon") return -100;
+    if (!hasType(data, "weapon")) return -100;
   }
-  if (data.cardType === "defense-reaction") {
+  if (hasType(data, "defense-reaction")) {
     return defenseReactionWorthSpending(card, input, kayoSolverRules, pitchIds(intent))
       ? scoreDefenseReaction(data, input)
       : -100;
   }
-  if (!isAttack(data) && data.cardType !== "weapon") return -100;
+  if (!isAttack(data) && !hasType(data, "weapon")) return -100;
   if (isOpeningTurn(input) && !/briar|kayo|fai/i.test(input.view.players[1 - input.seat]!.heroName)) return -100;
   // Once the boots are gone, reserve the high attack for next turn's Agility.
   if (me.arsenal.length === 0 && me.board.some((token) => named(input.cards[token.cardId], "agility")) &&
@@ -128,7 +129,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   if (likelyGoAgain(data, intent, input) && attacks.length > 0) score += 40;
   // Claw belongs between the draw/discard opener and the finisher. A fresh
   // Might token also records useful setup, without inspecting engine flags.
-  if (data.cardType === "weapon" && attacks.length > 0 &&
+  if (hasType(data, "weapon") && attacks.length > 0 &&
       me.board.some((token) => named(input.cards[token.cardId], "might"))) score += 40;
   if (named(data, "rough up") && pitchHasSix(intent, input)) score++;
   if (named(data, "bare fangs")) score += 2;
@@ -165,7 +166,7 @@ function footholdUnlocksBlock(input: BotPolicyInput, own: ReadonlyMap<number, Ca
     },
   };
   const blockers = input.view.players[input.seat].hand.filter((card) =>
-    input.cards[card.cardId]?.cardType !== "defense-reaction" && defenderDefense(card, input) > 0
+    !hasType(input.cards[card.cardId], "defense-reaction") && defenderDefense(card, input) > 0
   );
   let allowed = Number.NEGATIVE_INFINITY;
   let unlocked = Number.NEGATIVE_INFINITY;

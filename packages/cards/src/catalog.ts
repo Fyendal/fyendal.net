@@ -897,7 +897,7 @@ export function warnOnInconsistentPrintings(printings: CardData[]): void {
     if (group) group.push(c);
     else groups.set(key, [c]);
   }
-  const FIELDS = ["color", "pitch", "cost", "attack", "defense", "cardType", "classes", "subtypes", "keywords"] as const;
+  const FIELDS = ["color", "pitch", "cost", "attack", "defense", "types", "classes", "subtypes", "keywords"] as const;
   for (const [key, group] of groups) {
     if (group.length < 2) continue;
     const first = group[0]!;

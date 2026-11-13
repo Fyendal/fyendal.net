@@ -2,7 +2,7 @@
   {
     "id": "MPB002",
     "name": "Babaza, Bloodbeat Heartfather",
-    "cardType": "hero",
+    "types": ["hero"],
     "text": "Instant - {t}: Choose 1. Activate this only if you've beaten chest this turn;\n- Create an Agility token.\n- Create a Might token.\n- Intimidate target hero.",
     "classes": ["brute"],
     "keywords": ["Intimidate"],
@@ -13,7 +13,7 @@
   {
     "id": "MPB003",
     "name": "Babaza",
-    "cardType": "hero",
+    "types": ["hero"],
     "text": "Instant - {t}: Choose 1. Activate this only if you've beaten chest this turn;\n- Create an Agility token.\n- Create a Might token.\n- Intimidate target hero.",
     "classes": ["brute"],
     "keywords": ["Intimidate"],
@@ -24,7 +24,7 @@
   {
     "id": "MPB004",
     "name": "Zuul, Clubcaste",
-    "cardType": "hero",
+    "types": ["hero"],
     "text": "Your club attacks with 6 or more {p} get go again.\nInstant - {t}: Create a Might token. Activate this only if you've hit with a club this turn.",
     "classes": ["brute"],
     "keywords": ["Go again"],
@@ -35,7 +35,7 @@
   {
     "id": "MPB005",
     "name": "Zuul",
-    "cardType": "hero",
+    "types": ["hero"],
     "text": "Your club attacks with 6 or more {p} get go again.\nInstant - {t}: Create a Might token. Activate this only if you've hit with a club this turn.",
     "classes": ["brute"],
     "keywords": ["Go again"],
@@ -46,7 +46,7 @@
   {
     "id": "MPB006",
     "name": "Deathbeat Bludgeon",
-    "cardType": "weapon",
+    "types": ["weapon"],
     "text": "Action - {r}{r}, {t}: Attack\nIf you've discarded a card with 6 or more {p} this turn, this gets +1{p}.",
     "attack": 4,
     "classes": ["brute"],
@@ -56,7 +56,7 @@
   {
     "id": "MPB034",
     "name": "Tenderized",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits a hero, they lose X{h}, where X is the total damage dealt to them by clubs this turn.",
     "pitch": 2,
     "cost": 3,
@@ -69,7 +69,7 @@
   {
     "id": "MPB117",
     "name": "Beat of Savagery",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Beat Chest\nIf you've beaten chest this turn, gain {r}{r}{r}{r}.\nGo again",
     "pitch": 3,
     "cost": 0,
@@ -81,7 +81,7 @@
   {
     "id": "MPB131",
     "name": "Fury",
-    "cardType": "token",
+    "types": ["token"],
     "text": "At the start of your turn, destroy this and you've beaten chest this turn.",
     "classes": ["brute"],
     "subtypes": ["aura"],

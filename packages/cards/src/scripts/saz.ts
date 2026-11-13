@@ -14,6 +14,7 @@ import {
   requestHeroChoice,
   spireSnipingScript,
 } from "./shared-helpers.js";
+import { hasType } from "@fyendal/shared";
 
 // ── SAZ (Silver Age: Azalea precon, Chapter 2) ──────────────────────────────
 //
@@ -52,7 +53,7 @@ function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance
   const player = ctx.player(seat);
   return [
     ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-    ...player.weapons.filter((card) => ctx.cardData(card.cardId).cardType === "equipment"),
+    ...player.weapons.filter((card) => hasType(ctx.cardData(card.cardId), "equipment")),
   ];
 }
 

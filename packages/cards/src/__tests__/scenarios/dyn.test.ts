@@ -3,6 +3,7 @@ import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, scripts } from "../../index.js";
 import { functionalKeyOf } from "../../functional.js";
 import { scenario } from "../harness.js";
+import { hasType } from "@fyendal/shared";
 
 const BLUE = "wrecker romp|3";
 const RED = "wrecker romp|1";
@@ -92,7 +93,7 @@ describe("DYN — registration and heroes", () => {
   });
 
   it.each(CONTRACT_PRINTINGS)("$id triggers Arakni, Huntsman when played", (contract) => {
-    if (contract.cardType === "action") {
+    if (hasType(contract, "action")) {
       const g = scenario({
         seats: [
           {
@@ -113,7 +114,7 @@ describe("DYN — registration and heroes", () => {
       return;
     }
 
-    if (contract.cardType === "defense-reaction") {
+    if (hasType(contract, "defense-reaction")) {
       const g = scenario({
         seats: [
           { hero: "rhinar", hand: ["head jab|1"] },
@@ -137,7 +138,7 @@ describe("DYN — registration and heroes", () => {
       return;
     }
 
-    throw new Error(`add a Huntsman play scenario for Contract ${contract.cardType} ${contract.id}`);
+    throw new Error(`add a Huntsman play scenario for Contract ${contract.types.join("/")} ${contract.id}`);
   });
 
   it("puts Reincarnate on the deck bottom when it is discarded at random", () => {
@@ -563,7 +564,7 @@ describe("DYN — rules regression coverage", () => {
     cardData.ARC159 = {
       id: "ARC159",
       name: "Command and Conquer",
-      cardType: "action",
+      types: ["action"],
       text: "Defense reactions can't be played this chain link. When this hits a hero, destroy all cards in their arsenal.",
       pitch: 1,
       cost: 2,

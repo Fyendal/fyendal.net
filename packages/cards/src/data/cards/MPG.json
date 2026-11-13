@@ -2,7 +2,7 @@
  {
   "id": "MPG000",
   "name": "Jarl Vetreiði",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play an Ice card, create a Frostbite token in an opponent's exposed head, chest, arms, or legs zone.\nEssence of Earth and Ice",
   "classes": [
    "guardian"
@@ -20,7 +20,7 @@
  {
   "id": "MPG001",
   "name": "Valda, Seismic Impact",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever an opponent draws 1 or more cards during an action phase, create that many Seismic Surge tokens.\nAt the start of your turn, if you control 3 or more Siesmic Surge tokens, cards you own with crush get dominate this turn.",
   "classes": [
    "guardian"
@@ -32,7 +32,7 @@
  {
   "id": "MPG002",
   "name": "Valda Brightaxe",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever an opponent draws a card during an action phase, create a Seismic Surge token for each card drawn this way.\nAt the start of your turn, if you control 3 or more Seismic Surge tokens, cards you own with crush gain dominate this turn.",
   "classes": [
    "guardian"
@@ -44,7 +44,7 @@
  {
   "id": "MPG003",
   "name": "High Riser",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf you've drawn a card this turn, this gets +1{p}.",
   "attack": 3,
   "classes": [
@@ -59,7 +59,7 @@
  {
   "id": "MPG004",
   "name": "Testament of Valahai",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If you control three or more Seismic Surge tokens, this gets +2{d}. If you control six or more, instead this gets +4{d}.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -76,7 +76,7 @@
  {
   "id": "MPG005",
   "name": "Helm of Isen's Peak",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}, destroy this: Your hero gains +1{i} this turn.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -93,7 +93,7 @@
  {
   "id": "MPG006",
   "name": "Richter Scale",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Create 2 Seismic Surge tokens.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -110,7 +110,7 @@
  {
   "id": "MPG007",
   "name": "Gauntlet of Boulderhold",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}{r}{r}, destroy this: The next Guardian attack action card you play from arsenal this turn gets +2{p}. Go again\nBattleworn",
   "defense": 1,
   "classes": [
@@ -127,7 +127,7 @@
  {
   "id": "MPG008",
   "name": "Craterhoof",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}{r}{r}, destroy this: The next Guardian attack action card you play from arsenal this turn gets dominate. Go again\nBattleworn",
   "defense": 1,
   "classes": [
@@ -144,7 +144,7 @@
  {
   "id": "MPG009",
   "name": "Hoarding of Denial",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +X{d} while defending, where X is the number of cards with cost 3 or more defending this combat chain.\nBlade Break",
   "defense": 0,
   "classes": [
@@ -161,7 +161,7 @@
  {
   "id": "MPG010",
   "name": "Rotten Old Buckler",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -178,7 +178,7 @@
  {
   "id": "MPG011",
   "name": "Steelbraid Buckler",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Temper",
   "defense": 2,
   "classes": [
@@ -195,7 +195,7 @@
  {
   "id": "MPG012",
   "name": "Tremor of Resistance",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If you control a Seismic Surge token, this gets +2{d}.\nBlade Break",
   "defense": 0,
   "classes": [
@@ -212,7 +212,7 @@
  {
   "id": "MPG013",
   "name": "Ley Line of the Old Ones",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nWhen this enters the arena and whenever you deal damage, create a Seismic Surge token. At the beginning of your end phase, if you control no Seismic Surge tokens, destroy this.",
   "pitch": 3,
   "cost": 0,
@@ -230,7 +230,7 @@
  {
   "id": "MPG014",
   "name": "Break Stature",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, destroy an aura token they control. They can't create auras with that token's name until the end of their next turn.",
   "pitch": 2,
   "cost": 5,
@@ -250,7 +250,7 @@
  {
   "id": "MPG015",
   "name": "Clash of Bravado",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends, clash with the attacking hero. The winner destroys an aura the other hero controls.",
   "pitch": 2,
   "cost": 4,
@@ -270,7 +270,7 @@
  {
   "id": "MPG016",
   "name": "Headbutt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This can't be defended by non-head equipment.\nIf you have a head equipped and the defending hero doesn't, this gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, put a -1{d} counter on a head they have equipped, then if it has 0{d}, destroy it.",
   "pitch": 3,
   "cost": 4,
@@ -290,7 +290,7 @@
  {
   "id": "MPG017",
   "name": "Pec Perfect",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Whenever a card defends this, clash with the defending hero. The winner destroys the top card of the other hero's deck.",
   "pitch": 1,
   "cost": 5,
@@ -310,7 +310,7 @@
  {
   "id": "MPG018",
   "name": "Put 'Em In Their Place",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Valda Specialization\nCrush - When this deals 4 or more damage to a hero, they discard their hand, then they draw that many cards.",
   "pitch": 1,
   "cost": 6,
@@ -331,7 +331,7 @@
  {
   "id": "MPG019",
   "name": "Solid Ground",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "This costs {r} less to play for each Seismic Surge you control.",
   "pitch": 3,
   "cost": 3,
@@ -344,7 +344,7 @@
  {
   "id": "MPG020",
   "name": "Leave a Dent",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Guardian attack this turn gets \"Crush - When this deals 4 or more damage to a hero, destroy the top 4 cards of their deck.\"\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -360,7 +360,7 @@
  {
   "id": "MPG021",
   "name": "Visit Anvilheim",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Remove X -1{d} counters from a Guardian off-hand you have equipped.",
   "pitch": 3,
   "defense": 3,
@@ -372,7 +372,7 @@
  {
   "id": "MPG022",
   "name": "Daily Grind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Attack action cards you control get \"When this defends, clash with the attacking hero. The winner destroys the top card of the other hero's deck.\"\nAt the start of your turn, destroy this.",
   "pitch": 3,
   "cost": 0,
@@ -388,7 +388,7 @@
  {
   "id": "MPG023",
   "name": "Seismic Shelter",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAttack action cards you control get +X{d} while defending, where X is the number of Seismic Surge tokens you control.\nAt the start of your turn, destroy this.",
   "pitch": 3,
   "cost": 0,
@@ -407,7 +407,7 @@
  {
   "id": "MPG024",
   "name": "Seismic Eruption",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Create 3 Seismic Surge tokens.",
   "pitch": 2,
   "cost": 0,
@@ -419,7 +419,7 @@
  {
   "id": "MPG025",
   "name": "Test of Iron Grip",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, clash with the attacking hero. If there is a winner, the other hero discards a card.",
   "pitch": 1,
   "defense": 4,
@@ -434,7 +434,7 @@
  {
   "id": "MPG026",
   "name": "Blinding of the Old Ones",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a Guardian hero, cards they own lose all abilities during their next turn.\nHeave 2",
   "pitch": 1,
   "cost": 6,
@@ -455,7 +455,7 @@
  {
   "id": "MPG027",
   "name": "Disenchantment of the Old Ones",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a Guardian hero, destroy all auras they control.\nHeave 2",
   "pitch": 1,
   "cost": 6,
@@ -476,7 +476,7 @@
  {
   "id": "MPG028",
   "name": "Smelting of the Old Ones",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a Guardian hero, destroy all equipment they control with -1{d} counters.\nHeave 2",
   "pitch": 1,
   "cost": 6,
@@ -497,7 +497,7 @@
  {
   "id": "MPG029",
   "name": "Annexation of All Things Known",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a Guardian hero, until the end of your next turn, they can't play face-up cards from arsenal, and you may play face-up cards from their arsenal.",
   "pitch": 2,
   "cost": 5,
@@ -517,7 +517,7 @@
  {
   "id": "MPG030",
   "name": "Annexation of Grandeur",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a Guardian hero, gain control of an aura they control.",
   "pitch": 2,
   "cost": 5,
@@ -537,7 +537,7 @@
  {
   "id": "MPG031",
   "name": "Annexation of the Forge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a Guardian hero, equip an equipment they have equipped.",
   "pitch": 2,
   "cost": 5,
@@ -557,7 +557,7 @@
  {
   "id": "MPG032",
   "name": "Fault Line",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have a card in your arsenal, this gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, put all cards in all arsenals on bottom of their owner's deck.",
   "pitch": 1,
   "cost": 3,
@@ -577,7 +577,7 @@
  {
   "id": "MPG033",
   "name": "Hostile Encroachment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a hero, they draw a card.\nCrush - When this deals 4 or more damage to a hero, they discard a card.",
   "pitch": 1,
   "cost": 3,
@@ -597,7 +597,7 @@
  {
   "id": "MPG034",
   "name": "Renounce Grandeur",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If the defending hero controls an aura token, this gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, they can't create aura tokens during their next turn.",
   "pitch": 1,
   "cost": 3,
@@ -617,7 +617,7 @@
  {
   "id": "MPG035",
   "name": "Aftershock",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, if you've controlled a Seismic Surge token this turn, create a Seismic Surge token.",
   "pitch": 1,
   "cost": 4,
@@ -634,7 +634,7 @@
  {
   "id": "MPG036",
   "name": "Aftershock",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, if you've controlled a Seismic Surge token this turn, create a Seismic Surge token.",
   "pitch": 2,
   "cost": 4,
@@ -651,7 +651,7 @@
  {
   "id": "MPG037",
   "name": "Aftershock",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, if you've controlled a Seismic Surge token this turn, create a Seismic Surge token.",
   "pitch": 3,
   "cost": 4,
@@ -668,7 +668,7 @@
  {
   "id": "MPG038",
   "name": "Little Big Foot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If there are two or more cards with cost 3 or more in your pitch zone, this gets +6{p}.",
   "pitch": 1,
   "cost": 4,
@@ -685,7 +685,7 @@
  {
   "id": "MPG039",
   "name": "Little Big Foot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If there are two or more cards with cost 3 or more in your pitch zone, this gets +5{p}.",
   "pitch": 2,
   "cost": 4,
@@ -702,7 +702,7 @@
  {
   "id": "MPG040",
   "name": "Little Big Foot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If there are two or more cards with cost 3 or more in your pitch zone, this gets +4{p}.",
   "pitch": 3,
   "cost": 4,
@@ -719,7 +719,7 @@
  {
   "id": "MPG041",
   "name": "Macho Grande",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate",
   "pitch": 1,
   "cost": 7,
@@ -739,7 +739,7 @@
  {
   "id": "MPG042",
   "name": "Macho Grande",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate",
   "pitch": 2,
   "cost": 7,
@@ -759,7 +759,7 @@
  {
   "id": "MPG043",
   "name": "Macho Grande",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate",
   "pitch": 3,
   "cost": 7,
@@ -779,7 +779,7 @@
  {
   "id": "MPG044",
   "name": "Draw a Crowd",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen this enters the arena, each hero draws a card.\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +3{p}.",
   "pitch": 3,
   "cost": 2,
@@ -798,7 +798,7 @@
  {
   "id": "MPG045",
   "name": "Promising Terrain",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nIf you would create 1 or more Seismic Surge tokens, instead create that many plus 1.\nAt the beginning of your action phase, destroy this, then if you control 3 or more Seismic Surge tokens, draw a card and gain 1{h}.",
   "pitch": 3,
   "cost": 0,
@@ -817,7 +817,7 @@
  {
   "id": "MPG046",
   "name": "Tectonic Instability",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Each hero puts a card from their arsenal on the bottom of their deck. If they do, they draw a card.\nCreate Seismic Surge tokens equal to the number of cards drawn this way.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -833,7 +833,7 @@
  {
   "id": "MPG047",
   "name": "Clash of Heads",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends a Guardian attack, clash with the attacking hero. If there is a winner, the other hero puts a -1{d} counter on a head they have equipped. If they don't, they lose 1{h}.",
   "pitch": 2,
   "defense": 4,
@@ -848,7 +848,7 @@
  {
   "id": "MPG048",
   "name": "Clash of Chests",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends a Guardian attack, clash with the attacking hero. If there is a winner, the other hero puts a -1{d} counter on a chest they have equipped. If they don't, they lose 1{h}.",
   "pitch": 2,
   "defense": 4,
@@ -863,7 +863,7 @@
  {
   "id": "MPG049",
   "name": "Clash of Arms",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends a Guardian attack, clash with the attacking hero. If there is a winner, the other hero puts a -1{d} counter on an arms they have equipped. If they don't, they lose 1{h}.",
   "pitch": 2,
   "defense": 4,
@@ -878,7 +878,7 @@
  {
   "id": "MPG050",
   "name": "Clash of Legs",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends a Guardian attack, clash with the attacking hero. If there is a winner, the other hero puts a -1{d} counter on a legs they have equipped. If they don't, they lose 1{h}.",
   "pitch": 2,
   "defense": 4,
@@ -893,7 +893,7 @@
  {
   "id": "MPG051",
   "name": "Clash of Shields",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends a Guardian attack, clash with the attacking hero. If there is a winner, the other hero puts a -1{d} counter on an off-hand they have equipped. If they don't, they lose 1{h}.",
   "pitch": 2,
   "defense": 4,
@@ -908,7 +908,7 @@
  {
   "id": "MPG052",
   "name": "Buckling Blow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, put a -1{d} counter on an equipment they control.",
   "pitch": 1,
   "cost": 4,
@@ -928,7 +928,7 @@
  {
   "id": "MPG053",
   "name": "Buckling Blow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, put a -1{d} counter on an equipment they control.",
   "pitch": 2,
   "cost": 4,
@@ -948,7 +948,7 @@
  {
   "id": "MPG054",
   "name": "Buckling Blow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, put a -1{d} counter on an equipment they control.",
   "pitch": 3,
   "cost": 4,
@@ -968,7 +968,7 @@
  {
   "id": "MPG055",
   "name": "Cartilage Crush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, their first action during their next turn costs an additional {r} to play or activate.",
   "pitch": 1,
   "cost": 3,
@@ -988,7 +988,7 @@
  {
   "id": "MPG056",
   "name": "Cartilage Crush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, their first action during their next turn costs an additional {r} to play or activate.",
   "pitch": 2,
   "cost": 3,
@@ -1008,7 +1008,7 @@
  {
   "id": "MPG057",
   "name": "Cartilage Crush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, their first action during their next turn costs an additional {r} to play or activate.",
   "pitch": 3,
   "cost": 3,
@@ -1028,7 +1028,7 @@
  {
   "id": "MPG058",
   "name": "Chokeslam",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, attack action cards they control can't gain {p} during their next action phase.",
   "pitch": 1,
   "cost": 4,
@@ -1048,7 +1048,7 @@
  {
   "id": "MPG059",
   "name": "Chokeslam",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, attack action cards they control can't gain {p} during their next action phase.",
   "pitch": 2,
   "cost": 4,
@@ -1068,7 +1068,7 @@
  {
   "id": "MPG060",
   "name": "Chokeslam",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, attack action cards they control can't gain {p} during their next action phase.",
   "pitch": 3,
   "cost": 4,
@@ -1088,7 +1088,7 @@
  {
   "id": "MPG061",
   "name": "Clash of Mountains",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends a Guardian attack, clash with the attacking hero. The winner creates a Seismic Surge token.",
   "pitch": 1,
   "cost": 4,
@@ -1108,7 +1108,7 @@
  {
   "id": "MPG062",
   "name": "Clash of Mountains",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends a Guardian attack, clash with the attacking hero. The winner creates a Seismic Surge token.",
   "pitch": 2,
   "cost": 4,
@@ -1128,7 +1128,7 @@
  {
   "id": "MPG063",
   "name": "Clash of Mountains",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends a Guardian attack, clash with the attacking hero. The winner creates a Seismic Surge token.",
   "pitch": 3,
   "cost": 4,
@@ -1148,7 +1148,7 @@
  {
   "id": "MPG064",
   "name": "Crush Confidence",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, they lose all hero card abilities until the end of their next turn.",
   "pitch": 1,
   "cost": 3,
@@ -1168,7 +1168,7 @@
  {
   "id": "MPG065",
   "name": "Crush Confidence",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, they lose all hero card abilities until the end of their next turn.",
   "pitch": 2,
   "cost": 3,
@@ -1188,7 +1188,7 @@
  {
   "id": "MPG066",
   "name": "Crush Confidence",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, they lose all hero card abilities until the end of their next turn.",
   "pitch": 3,
   "cost": 3,
@@ -1208,7 +1208,7 @@
  {
   "id": "MPG067",
   "name": "Crush the Weak",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, they can't play attack action cards with 3 or less base {p} during their next action phase.",
   "pitch": 1,
   "cost": 3,
@@ -1228,7 +1228,7 @@
  {
   "id": "MPG068",
   "name": "Crush the Weak",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, they can't play attack action cards with 3 or less base {p} during their next action phase.",
   "pitch": 2,
   "cost": 3,
@@ -1248,7 +1248,7 @@
  {
   "id": "MPG069",
   "name": "Crush the Weak",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, they can't play attack action cards with 3 or less base {p} during their next action phase.",
   "pitch": 3,
   "cost": 3,
@@ -1268,7 +1268,7 @@
  {
   "id": "MPG070",
   "name": "Debilitate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, their first attack during their next turn gets -2{p}.",
   "pitch": 1,
   "cost": 4,
@@ -1288,7 +1288,7 @@
  {
   "id": "MPG071",
   "name": "Debilitate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, their first attack during their next turn gets -2{p}.",
   "pitch": 2,
   "cost": 4,
@@ -1308,7 +1308,7 @@
  {
   "id": "MPG072",
   "name": "Debilitate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, their first attack during their next turn gets -2{p}.",
   "pitch": 3,
   "cost": 4,
@@ -1328,7 +1328,7 @@
  {
   "id": "MPG073",
   "name": "Disable",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
   "pitch": 1,
   "cost": 5,
@@ -1348,7 +1348,7 @@
  {
   "id": "MPG074",
   "name": "Disable",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
   "pitch": 2,
   "cost": 5,
@@ -1368,7 +1368,7 @@
  {
   "id": "MPG075",
   "name": "Disable",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
   "pitch": 3,
   "cost": 5,
@@ -1388,7 +1388,7 @@
  {
   "id": "MPG076",
   "name": "Flatten the Field",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, destroy a Seismic Surge token they control.",
   "pitch": 1,
   "cost": 4,
@@ -1408,7 +1408,7 @@
  {
   "id": "MPG077",
   "name": "Flatten the Field",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, destroy a Seismic Surge token they control.",
   "pitch": 2,
   "cost": 4,
@@ -1428,7 +1428,7 @@
  {
   "id": "MPG078",
   "name": "Flatten the Field",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, destroy a Seismic Surge token they control.",
   "pitch": 3,
   "cost": 4,
@@ -1448,7 +1448,7 @@
  {
   "id": "MPG079",
   "name": "Grind Them Down",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, destroy the top card of their deck.",
   "pitch": 1,
   "cost": 3,
@@ -1468,7 +1468,7 @@
  {
   "id": "MPG080",
   "name": "Grind Them Down",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, destroy the top card of their deck.",
   "pitch": 2,
   "cost": 3,
@@ -1488,7 +1488,7 @@
  {
   "id": "MPG081",
   "name": "Grind Them Down",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, destroy the top card of their deck.",
   "pitch": 3,
   "cost": 3,
@@ -1508,7 +1508,7 @@
  {
   "id": "MPG082",
   "name": "Rubble Raiser",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Heave 2",
   "pitch": 1,
   "cost": 4,
@@ -1528,7 +1528,7 @@
  {
   "id": "MPG083",
   "name": "Rubble Raiser",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Heave 2",
   "pitch": 2,
   "cost": 4,
@@ -1548,7 +1548,7 @@
  {
   "id": "MPG084",
   "name": "Rubble Raiser",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Heave 2",
   "pitch": 3,
   "cost": 4,
@@ -1568,7 +1568,7 @@
  {
   "id": "MPG085",
   "name": "Thump",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While Thump's {p} is greater than its base {p}, it gains dominate and \"If this hits a hero, they discard a card.\"",
   "pitch": 1,
   "cost": 4,
@@ -1588,7 +1588,7 @@
  {
   "id": "MPG086",
   "name": "Thump",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While Thump's {p} is greater than its base {p}, it gains dominate and \"If this hits a hero, they discard a card.\"",
   "pitch": 2,
   "cost": 4,
@@ -1608,7 +1608,7 @@
  {
   "id": "MPG087",
   "name": "Thump",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While Thump's {p} is greater than its base {p}, it gains dominate and \"If this hits a hero, they discard a card.\"",
   "pitch": 3,
   "cost": 4,
@@ -1628,7 +1628,7 @@
  {
   "id": "MPG088",
   "name": "Thunder Quake",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Heave 3",
   "pitch": 1,
   "cost": 6,
@@ -1648,7 +1648,7 @@
  {
   "id": "MPG089",
   "name": "Thunder Quake",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Heave 3",
   "pitch": 2,
   "cost": 6,
@@ -1668,7 +1668,7 @@
  {
   "id": "MPG090",
   "name": "Thunder Quake",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Heave 3",
   "pitch": 3,
   "cost": 6,
@@ -1688,7 +1688,7 @@
  {
   "id": "MPG091",
   "name": "Overswing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Guardian attack action card you play this turn gets +3{p}.\nGo again\nHeave 2",
   "pitch": 1,
   "cost": 2,
@@ -1705,7 +1705,7 @@
  {
   "id": "MPG092",
   "name": "Overswing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Guardian attack action card you play this turn gets +2{p}.\nGo again\nHeave 2",
   "pitch": 2,
   "cost": 2,
@@ -1722,7 +1722,7 @@
  {
   "id": "MPG093",
   "name": "Overswing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Guardian attack action card you play this turn gets +1{p}.\nGo again\nHeave 2",
   "pitch": 3,
   "cost": 2,
@@ -1739,7 +1739,7 @@
  {
   "id": "MPG094",
   "name": "Seismic Stir",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create 3 Seismic Surge tokens.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -1755,7 +1755,7 @@
  {
   "id": "MPG095",
   "name": "Seismic Stir",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create 2 Seismic Surge tokens.\nGo again",
   "pitch": 2,
   "cost": 2,
@@ -1771,7 +1771,7 @@
  {
   "id": "MPG096",
   "name": "Seismic Stir",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Seismic Surge token.\nGo again",
   "pitch": 3,
   "cost": 2,
@@ -1787,7 +1787,7 @@
  {
   "id": "MPG097",
   "name": "Embolden",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen this enters the arena, if you control another non-token aura, draw a card.\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +5{p}.",
   "pitch": 1,
   "cost": 4,
@@ -1806,7 +1806,7 @@
  {
   "id": "MPG098",
   "name": "Embolden",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen this enters the arena, if you control another non-token aura, draw a card.\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +4{p}.",
   "pitch": 2,
   "cost": 4,
@@ -1825,7 +1825,7 @@
  {
   "id": "MPG099",
   "name": "Embolden",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen this enters the arena, if you control another non-token aura, draw a card.\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +3{p}.",
   "pitch": 3,
   "cost": 4,
@@ -1844,7 +1844,7 @@
  {
   "id": "MPG100",
   "name": "Emerging Power",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +3{p}.",
   "pitch": 1,
   "cost": 2,
@@ -1863,7 +1863,7 @@
  {
   "id": "MPG101",
   "name": "Emerging Power",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +2{p}.",
   "pitch": 2,
   "cost": 2,
@@ -1882,7 +1882,7 @@
  {
   "id": "MPG102",
   "name": "Emerging Power",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn gets +1{p}.",
   "pitch": 3,
   "cost": 2,
@@ -1901,7 +1901,7 @@
  {
   "id": "MPG103",
   "name": "Geyser of Seismic Stirrings",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nThis enters the arena with 3 energy counters. When it has none, destroy it.\nAt the beginning of your end phase, remove an energy counter from this and create a Seismic Surge token.",
   "pitch": 1,
   "cost": 2,
@@ -1920,7 +1920,7 @@
  {
   "id": "MPG104",
   "name": "Geyser of Seismic Stirrings",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nThis enters the arena with 2 energy counters. When it has none, destroy it.\nAt the beginning of your end phase, remove an energy counter from this and create a Seismic Surge token.",
   "pitch": 2,
   "cost": 2,
@@ -1939,7 +1939,7 @@
  {
   "id": "MPG105",
   "name": "Geyser of Seismic Stirrings",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nThis enters the arena with an energy counter. When it has none, destroy it.\nAt the beginning of your end phase, remove an energy counter from this and create a Seismic Surge token.",
   "pitch": 3,
   "cost": 2,
@@ -1958,7 +1958,7 @@
  {
   "id": "MPG106",
   "name": "Stonewall Confidence",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nCards you control with cost 3 or more get +4{d} while defending.\nAt the beginning of your action phase, destroy this.",
   "pitch": 1,
   "cost": 2,
@@ -1977,7 +1977,7 @@
  {
   "id": "MPG107",
   "name": "Stonewall Confidence",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nCards you control with cost 3 or more get +3{d} while defending.\nAt the beginning of your action phase, destroy this.",
   "pitch": 2,
   "cost": 2,
@@ -1996,7 +1996,7 @@
  {
   "id": "MPG108",
   "name": "Stonewall Confidence",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nCards you control with cost 3 or more get +2{d} while defending.\nAt the beginning of your action phase, destroy this.",
   "pitch": 3,
   "cost": 2,
@@ -2015,7 +2015,7 @@
  {
   "id": "MPG109",
   "name": "Crash and Bash",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, you may reveal a card with crush from your hand. If you do, create a Seismic Surge token.",
   "pitch": 1,
   "defense": 4,
@@ -2027,7 +2027,7 @@
  {
   "id": "MPG110",
   "name": "Crash and Bash",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, you may reveal a card with crush from your hand. If you do, create a Seismic Surge token.",
   "pitch": 2,
   "defense": 3,
@@ -2039,7 +2039,7 @@
  {
   "id": "MPG111",
   "name": "Crash and Bash",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, you may reveal a card with crush from your hand. If you do, create a Seismic Surge token.",
   "pitch": 3,
   "defense": 2,
@@ -2051,7 +2051,7 @@
  {
   "id": "MPG112",
   "name": "Seismic Surge",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn costs {r} less to play.",
   "classes": [
    "guardian"
@@ -2064,7 +2064,7 @@
  {
   "id": "MPG113",
   "name": "Base of the Mountain",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, banish any number of action cards from your hand, then add them to the chain link as defending cards.\nThis card's {d} is equal to the number of action cards defending on the active chain link.\nBlade Break",
   "classes": [
    "generic"
@@ -2080,7 +2080,7 @@
  {
   "id": "MPG114",
   "name": "Sunkwater Lookout",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, put a face-up card from your arsenal on the bottom of your deck. If you do, draw a card and this gets +1{d} until end of turn.\nBlade Break",
   "defense": 0,
   "classes": [
@@ -2097,7 +2097,7 @@
  {
   "id": "MPG115",
   "name": "Sunkwater Exoshell",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, put a face-up card from your arsenal on the bottom of your deck. If you do, draw a card and this gets +1{d} until end of turn.\nBlade Break",
   "defense": 0,
   "classes": [
@@ -2114,7 +2114,7 @@
  {
   "id": "MPG116",
   "name": "Sunkwater Pincers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, put a face-up card from your arsenal on the bottom of your deck. If you do, draw a card and this gets +1{d} until end of turn.\nBlade Break",
   "defense": 0,
   "classes": [
@@ -2131,7 +2131,7 @@
  {
   "id": "MPG117",
   "name": "Sunkwater Scalers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, put a face-up card from your arsenal on the bottom of your deck. If you do, draw a card and this gets +1{d} until end of turn.\nBlade Break",
   "defense": 0,
   "classes": [
@@ -2148,7 +2148,7 @@
  {
   "id": "MPG118",
   "name": "Hope Merchant's Hood",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Shuffle any number of cards from your hand into your deck, then draw that many cards.",
   "defense": 0,
   "classes": [
@@ -2162,7 +2162,7 @@
  {
   "id": "MPG119",
   "name": "Heartened Cross Strap",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: The next attack action card you play this turn costs {r}{r} less to play. Go again",
   "defense": 0,
   "classes": [
@@ -2176,7 +2176,7 @@
  {
   "id": "MPG120",
   "name": "Goliath Gauntlet",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: The next attack action card with cost 2 or more you play this turn gets +2{p}. Go again",
   "defense": 0,
   "classes": [
@@ -2190,7 +2190,7 @@
  {
   "id": "MPG121",
   "name": "Time Skippers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}{r}{r}, destroy this: Gain 2 action points.",
   "defense": 0,
   "classes": [
@@ -2204,7 +2204,7 @@
  {
   "id": "MPG122",
   "name": "Ironrot Helm",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -2221,7 +2221,7 @@
  {
   "id": "MPG123",
   "name": "Ironrot Plate",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -2238,7 +2238,7 @@
  {
   "id": "MPG124",
   "name": "Ironrot Gauntlet",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -2255,7 +2255,7 @@
  {
   "id": "MPG125",
   "name": "Ironrot Legs",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -2272,7 +2272,7 @@
  {
   "id": "MPG126",
   "name": "Call for Backup",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends, choose 2 attack action cards with different names in your graveyard. An opponent chooses 1 of them. Banish that card and put the other on top of your deck.",
   "pitch": 1,
   "cost": 3,
@@ -2289,7 +2289,7 @@
  {
   "id": "MPG127",
   "name": "Captain of the Guard",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While this is defending, cards with {p} greater than the attack they are defending get +1{d}.",
   "pitch": 3,
   "cost": 3,
@@ -2306,7 +2306,7 @@
  {
   "id": "MPG128",
   "name": "Fearless Confrontation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Target attack gets -1{p} and loses and can't gain dominate.",
   "pitch": 3,
   "cost": 3,
@@ -2323,7 +2323,7 @@
  {
   "id": "MPG129",
   "name": "Bravo",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Action - {r}{r}: Until end of turn, your attack action cards with cost 3 or more get dominate. Go again",
   "classes": [
    "guardian"

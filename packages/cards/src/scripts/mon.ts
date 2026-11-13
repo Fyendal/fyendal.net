@@ -33,6 +33,7 @@ import {
   warnIfNoActionPoint,
 } from "./shared-helpers.js";
 import { monHighRarity } from "./mon/high-rarity.js";
+import { hasType as hasPrintedType } from "@fyendal/shared";
 
 // ── Monarch (commons, rares, young heroes, and required tokens) ────────────
 
@@ -798,7 +799,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         target: heroTarget(),
         effect(ctx, destroyed) {
           dealArcaneToTargetHero(ctx);
-          if (destroyed && ctx.cardData(destroyed.cardId).cardType !== "token" && hasType(ctx, destroyed, "light")) {
+          if (destroyed && !hasPrintedType(ctx.cardData(destroyed.cardId), "token") && hasType(ctx, destroyed, "light")) {
             ctx.putIntoSoul(destroyed.instanceId);
           }
         },

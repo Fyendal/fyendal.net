@@ -20,6 +20,7 @@ import {
 } from "./ruleQueries.js";
 import { cardProhibitedByChosenName } from "./restrictions.js";
 import { recordPlayed } from "./turnRecords.js";
+import { hasType } from "@fyendal/shared";
 
 export /** Static taxes imposed by opposing arena objects. */
 function opposingStaticCostIncrease(state: GameStateInternal, seat: number): number {
@@ -337,7 +338,7 @@ function modifierMatchesPlayedCard(
   const data = instanceDataOf(state, card);
   const cost = data.cost ?? 0;
   const color = cardColorOf(state, card);
-  if (mod.appliesToCardType && data.cardType !== mod.appliesToCardType) return false;
+  if (mod.appliesToCardType && !data.types.some((type) => type === mod.appliesToCardType)) return false;
   if (mod.appliesToPitch !== undefined && color !== mod.appliesToPitch) return false;
   if (mod.minCost !== undefined && cost < mod.minCost) return false;
   if (mod.maxCost !== undefined && cost > mod.maxCost) return false;
@@ -347,12 +348,12 @@ function modifierMatchesPlayedCard(
     !(data.keywords ?? []).some((keyword) => keyword.toLowerCase() === mod.appliesToKeyword!.toLowerCase())
   ) return false;
   const tags = cardTypesOf(state, card);
-  const attackAction = data.cardType === "action" && tags.includes("attack");
+  const attackAction = hasType(data, "action") && tags.includes("attack");
   const appliesTo = mod.appliesTo ?? "any";
   if (appliesTo === "attack-action" && !attackAction) return false;
-  if (appliesTo === "attack" && !attackAction && data.cardType !== "weapon") return false;
-  if (appliesTo === "weapon" && data.cardType !== "weapon") return false;
-  if (appliesTo === "sword" && (data.cardType !== "weapon" || !tags.includes("sword"))) return false;
+  if (appliesTo === "attack" && !attackAction && !hasType(data, "weapon")) return false;
+  if (appliesTo === "weapon" && !hasType(data, "weapon")) return false;
+  if (appliesTo === "sword" && (!hasType(data, "weapon") || !tags.includes("sword"))) return false;
   if (mod.minBasePower !== undefined && (data.attack ?? 0) < mod.minBasePower) return false;
   if (mod.maxBasePower !== undefined && (data.attack ?? 0) > mod.maxBasePower) return false;
   if (mod.appliesToClass && !tags.includes(mod.appliesToClass.toLowerCase())) return false;
@@ -472,7 +473,9 @@ export function noteCardPlayed(
   for (const cardType of ["action", "instant"] as const) {
     if (cardHasType(state, card, cardType)) player.flags[`playedCardType:${cardType}`] = true;
   }
-  if (!isAction && !isInstant) player.flags[`playedCardType:${d.cardType.toLowerCase()}`] = true;
+  if (!isAction && !isInstant) {
+    for (const type of d.types) player.flags[`playedCardType:${type}`] = true;
+  }
   if (isAction) noteActionPlayedOrActivated(player);
   const activeLink = currentLink(state);
   if (isInstant && activeLink) activeLink.flags.playedInstant = true;
@@ -744,9 +747,7 @@ export function canPlayAsInstant(
     ? meldSide !== undefined && meldSideHasType(state, card, meldSide, "instant")
     : cardHasType(state, card, "instant");
   if (isInstant && !isAction) return true;
-  const playableEquipment =
-    data.cardType === "equipment" && scriptOf(state, card.cardId, card)?.playableEquipment === true;
-  if (!playableEquipment && !isAction) return false;
+  if (!isAction) return false;
   if (isAction && (data.subtypes ?? []).includes("attack")) {
     // CR 8.1.1d: an attack action played as though it were an instant is
     // still an attack. On an empty stack outside combat steps it is declared
@@ -803,7 +804,7 @@ function validateDiscardCost(
     ) {
       return `${nameOf(state, c.cardId)} is not a valid discard for this ability`;
     }
-    if (dc.cardTypes && !dc.cardTypes.includes(dataOf(state, c.cardId).cardType.toLowerCase())) {
+    if (dc.cardTypes && !dataOf(state, c.cardId).types.some((type) => dc.cardTypes!.includes(type))) {
       return `${nameOf(state, c.cardId)} is not a valid discard for this ability`;
     }
     if (dc.types && !cardTypesOf(state, c).some((type) => dc.types!.includes(type))) {
@@ -954,8 +955,8 @@ export function cardPlayRestrictedByModifier(
   const temporalCaps = state.modifiers.filter((modifier) => modifier.seat === seat && !modifier.consumed);
   const attackCap = temporalCaps.reduce((cap, modifier) => Math.min(cap, modifier.attackActionCardCap ?? Infinity), Infinity);
   const nonAttackCap = temporalCaps.reduce((cap, modifier) => Math.min(cap, modifier.nonAttackActionCardCap ?? Infinity), Infinity);
-  const isAttackAction = data.cardType === "action" && (data.subtypes ?? []).includes("attack");
-  if (data.cardType === "action" && temporalCaps.some((modifier) =>
+  const isAttackAction = hasType(data, "action") && (data.subtypes ?? []).includes("attack");
+  if (hasType(data, "action") && temporalCaps.some((modifier) =>
     actionKindRestrictionApplies(state, modifier, seat) && (
       (modifier.restrictActionsToWeaponOrAttack === true && !isAttackAction) ||
       (modifier.restrictActionsToNonWeaponNonAttack === true && isAttackAction)
@@ -963,23 +964,23 @@ export function cardPlayRestrictedByModifier(
   )) return true;
   if (isAttackAction &&
     Number(player.flags.attackActionsPlayedThisTurn ?? 0) >= attackCap) return true;
-  if (data.cardType === "action" && !(data.subtypes ?? []).includes("attack") &&
+  if (hasType(data, "action") && !(data.subtypes ?? []).includes("attack") &&
     Number(player.flags.nonAttackActionsPlayedThisTurn ?? 0) >= nonAttackCap) return true;
-  if (data.cardType === "defense-reaction" && temporalCaps.some((modifier) =>
+  if (hasType(data, "defense-reaction") && temporalCaps.some((modifier) =>
     modifier.prohibitsDefenseReactionNamesInGraveyard === true &&
     player.graveyard.some((grave) => cardNamesOf(state, grave).some((name) => cardNamesOf(state, card).includes(name)))
   )) return true;
   if (
-    data.cardType === "action" && (data.subtypes ?? []).includes("attack") &&
+    hasType(data, "action") && (data.subtypes ?? []).includes("attack") &&
     Number(player.hero.scriptState?.actionCardCapsTurn ?? 0) === state.turn &&
     Number(player.flags.attackActionsPlayedThisTurn ?? 0) >= Number(player.hero.scriptState?.attackActionCardCap ?? 0)
   ) return true;
   if (
-    data.cardType === "action" && !(data.subtypes ?? []).includes("attack") &&
+    hasType(data, "action") && !(data.subtypes ?? []).includes("attack") &&
     Number(player.hero.scriptState?.actionCardCapsTurn ?? 0) === state.turn &&
     Number(player.flags.nonAttackActionsPlayedThisTurn ?? 0) >= Number(player.hero.scriptState?.nonAttackActionCardCap ?? 0)
   ) return true;
-  if (data.cardType === "action" && actionLimitReached(state, state.players[seat] as PlayerState)) {
+  if (hasType(data, "action") && actionLimitReached(state, state.players[seat] as PlayerState)) {
     return true;
   }
   const tags = announcedCardTypes(state, seat, card);
@@ -1042,7 +1043,7 @@ export function cardPlayCost(
     ? meldSideHasType(state, card, opts.meldSide, "action")
     : cardHasType(state, card, "action");
   if (isAction) cost += firstActionExtraCost(state, player);
-  if (data.cardType === "defense-reaction") {
+  if (hasType(data, "defense-reaction")) {
     cost += Number(player.flags.nextDefenseReactionExtraCost || 0);
   }
   cost += Number(opts?.extraCost || 0);
@@ -1073,7 +1074,7 @@ export function cardPlayCost(
     }
   }
   const attackReduction =
-    data.cardType === "action" && (data.subtypes ?? []).includes("attack")
+    hasType(data, "action") && (data.subtypes ?? []).includes("attack")
       ? attackCostReductionForTarget(state, seat, card, opts?.targetAllyId)
       : 0;
   for (const modifier of state.modifiers) {

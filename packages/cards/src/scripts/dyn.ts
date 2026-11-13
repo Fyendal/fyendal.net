@@ -31,6 +31,7 @@ import {
   ongoingLabel,
 } from "./shared-helpers.js";
 import { dynHighRarity } from "./dyn/high-rarity.js";
+import { hasType as hasPrintedType } from "@fyendal/shared";
 
 const CROUCHING_TIGER = "DYN065";
 const RUNECHANT = "DYN191";
@@ -48,7 +49,7 @@ function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance
   const player = ctx.player(seat);
   return [
     ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-    ...player.weapons.filter((card) => data(ctx, card).cardType === "equipment"),
+    ...player.weapons.filter((card) => hasPrintedType(data(ctx, card), "equipment")),
   ];
 }
 
@@ -322,7 +323,7 @@ function contractAttack(test: ContractTest): CardScript {
 const contractAttackAction: ContractTest = (ctx, card) => isAttackAction(ctx, card);
 const contractLowDefense: ContractTest = (ctx, card) => (data(ctx, card).defense ?? Infinity) <= 2;
 const contractReaction: ContractTest = (ctx, card) =>
-  ["attack-reaction", "defense-reaction"].includes(data(ctx, card).cardType);
+  hasPrintedType(data(ctx, card), "attack-reaction") || hasPrintedType(data(ctx, card), "defense-reaction");
 const contractLowCost: ContractTest = (ctx, card) => {
   const cardData = data(ctx, card);
   if (cardData.cost !== undefined) return cardData.cost <= 1;

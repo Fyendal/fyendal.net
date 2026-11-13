@@ -9,6 +9,7 @@
 import { chromium } from "playwright";
 import WebSocket from "ws";
 import { cardData } from "../packages/cards/src/index.js";
+import { hasType, objectKind } from "../packages/shared/src/index.js";
 
 const API = "http://localhost:8080/api";
 
@@ -42,10 +43,10 @@ async function makeUser(prefix: string) {
 /** import a legal 60-card cc deck; returns the deck id */
 async function importCcDeck(token: string, name: string): Promise<string> {
   const printings = Object.values(cardData);
-  const hero = printings.find((c) => c.cardType === "hero" && c.name.includes("Rhinar"))!;
-  const weapon = printings.find((c) => c.cardType === "weapon")!;
+  const hero = printings.find((c) => hasType(c, "hero") && c.name.includes("Rhinar"))!;
+  const weapon = printings.find((c) => hasType(c, "weapon"))!;
   const deckCards = printings.filter(
-    (c) => !["hero", "weapon", "equipment", "token"].includes(c.cardType),
+    (c) => objectKind(c) === "deck",
   );
   const text = [
     `Hero: ${hero.name}`,

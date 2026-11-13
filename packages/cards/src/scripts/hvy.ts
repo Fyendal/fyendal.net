@@ -18,6 +18,7 @@ import {
   revealTopSixPlusStays,
 } from "./shared-helpers.js";
 import { hvyHighRarity } from "./hvy/high-rarity.js";
+import { hasType } from "@fyendal/shared";
 
 // Heavy Hitters — commons, rares, young heroes, and required wager tokens.
 const AGILITY = "SBL034";
@@ -31,7 +32,7 @@ function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
 
 function hasTag(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, tag: string): boolean {
   const d = data(ctx, card);
-  if (tag.toLowerCase() === "token" && d.cardType === "token") return true;
+  if (tag.toLowerCase() === "token" && hasType(d, "token")) return true;
   return ctx.cardTypes(card).includes(tag.toLowerCase());
 }
 
@@ -48,7 +49,7 @@ function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance
   const player = ctx.player(seat);
   return [
     ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-    ...player.weapons.filter((card) => data(ctx, card).cardType === "equipment"),
+    ...player.weapons.filter((card) => hasType(data(ctx, card), "equipment")),
   ];
 }
 
@@ -560,7 +561,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
   },
   "lay down the law|1": {
     modifyDefendingDefense(ctx, defending) {
-      return ctx.currentAttackPower() >= 13 && data(ctx, defending).cardType !== "equipment" ? -1 : 0;
+      return ctx.currentAttackPower() >= 13 && !hasType(data(ctx, defending), "equipment") ? -1 : 0;
     },
   },
   "smack of reality|1": {

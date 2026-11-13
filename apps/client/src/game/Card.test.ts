@@ -29,7 +29,7 @@ describe("cardImageUrl", () => {
       const imageUrl = cardImageUrl(card.id);
       const equivalentArtUrls = originals
         .filter((original) => original.name === card.name
-          && original.pitch === card.pitch && original.cardType === card.cardType)
+          && original.pitch === card.pitch && original.types.join() === card.types.join())
         .map((original) => cardImageUrl(original.id));
       expect(imageUrl, `${card.id} (${card.name})`).toMatch(/\/cards\/(?:WTR|ARC|CRU)/);
       expect(equivalentArtUrls, `${card.id} (${card.name})`).toContain(imageUrl);

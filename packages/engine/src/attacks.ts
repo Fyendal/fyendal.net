@@ -54,6 +54,7 @@ import {
 import type { CardPlayOrigin } from "./stackCore.js";
 import { transitionZone } from "./transitions.js";
 import { ATTACKS_QUEUED_ABOVE_LAYER, dequeueAttack, enqueueAttack, type DeferredAttackLayer, type QueuedAttack } from "./attackQueue.js";
+import { hasType } from "@fyendal/shared";
 
 function replacePowerGain(
   state: GameStateInternal,
@@ -465,7 +466,7 @@ export function attackFromDeck(
   if (index < 0) return false;
   const card = player.deck[index] as CardInstance;
   const data = dataOf(state, card.cardId);
-  if (data.cardType !== "action" || !(data.subtypes ?? []).includes("attack")) return false;
+  if (!hasType(data, "action") || !(data.subtypes ?? []).includes("attack")) return false;
   player.deck.splice(index, 1);
   declareAttack(state, runtime, seat, card, "action");
   return true;
@@ -799,7 +800,7 @@ function replaceAttackFromPlayerZone(
   const replacementData = dataOf(state, replacement.cardId);
   if (
     replacement.faceDown === true ||
-    replacementData.cardType !== "action" ||
+    !hasType(replacementData, "action") ||
     !(replacementData.subtypes ?? []).includes("attack") ||
     (replacementData.cost ?? 0) > maximumCost
   ) return false;

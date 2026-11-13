@@ -1,5 +1,6 @@
 import type { GameState } from "@fyendal/engine";
 import type { BotDecklists, CardData, CardView, GameView } from "@fyendal/shared";
+import { objectKind } from "@fyendal/shared";
 import type { BotPolicyInput } from "./policy.js";
 
 /**
@@ -10,12 +11,11 @@ import type { BotPolicyInput } from "./policy.js";
  */
 export type CardCounts = ReadonlyMap<string, number>;
 
-const NON_DECK_TYPES = new Set(["hero", "token", "weapon", "equipment"]);
 /** Presentation data and inventory (outside the game until redeemed). */
 const SKIPPED_STATE_KEYS = new Set(["cardsRef", "scriptsRef", "log", "gameStats", "inventory", "globalCardIds"]);
 
 function isDeckCard(data: CardData | undefined): boolean {
-  return !!data && !NON_DECK_TYPES.has(data.cardType);
+  return !!data && objectKind(data) === "deck";
 }
 
 /** Main-deck card ids owned by each seat, recovered from authoritative state.

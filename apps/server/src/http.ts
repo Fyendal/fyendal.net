@@ -86,6 +86,7 @@ import {
   requestPasswordReset,
   resetPassword,
 } from "./recovery.js";
+import { hasType } from "@fyendal/shared";
 
 const BODY_LIMIT = 16 * 1024; // 16kb cap on JSON bodies (decklist exports)
 const RATE_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
@@ -592,7 +593,7 @@ export function createApiServer(deps: ApiDeps): http.Server {
       // A public preview does not validate playability or save account data.
       const lines = parseDecklistText(fetched.deck.text);
       const hero = lines.map((line) => findPrinting(line.name, line.pitch)).find((card) =>
-        card?.cardType === "hero" && !/\bwhile this is in your inventory\b/i.test(card.text));
+        card !== undefined && hasType(card, "hero") && !/\bwhile this is in your inventory\b/i.test(card.text));
       const heroName = hero?.name ?? lines.find((line) => line.section === "hero")?.name ?? null;
       return { status: 200, body: { ok: true, deck: { name: fetched.deck.name, heroName } } };
     },

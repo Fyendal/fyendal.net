@@ -18,6 +18,7 @@ import {
   upToOneTargetAttack,
 } from "./shared-helpers.js";
 import { evoHighRarity } from "./evo/high-rarity.js";
+import { hasType } from "@fyendal/shared";
 
 const HYPER_DRIVER = "EVO234";
 const QUICKEN = "DVR028";
@@ -67,7 +68,7 @@ function initializeCogwerx(ctx: ScriptCtx): void {
 }
 
 function scrapCards(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return faceUpGraveyard(ctx).filter((card) => isItem(ctx, card) || data(ctx, card).cardType === "equipment");
+  return faceUpGraveyard(ctx).filter((card) => isItem(ctx, card) || hasType(data(ctx, card), "equipment"));
 }
 
 function addSteamToChoice(ctx: ScriptCtx, hook: string): void {
@@ -108,10 +109,6 @@ function evoEquipment(extra: CardScript = {}): CardScript {
       return ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true || (extra.playAsInstant?.(ctx) ?? false);
     },
   };
-}
-
-function instantEvoEquipment(extra: CardScript = {}): CardScript {
-  return evoEquipment({ ...extra, additionalCardTypes: ["instant"], playAsInstant: () => true });
 }
 
 function destroyUnderAbility(effect: (ctx: ScriptCtx) => void): CardScript {
@@ -321,7 +318,7 @@ function boostedItemOrEquipment(ctx: ScriptCtx): boolean {
   if (ctx.link?.flags.boosted !== true) return false;
   const id = Number(ctx.getPlayerFlag(ctx.seat, "lastBoostedCardInstanceId"));
   const card = ctx.player(ctx.seat).banish.find((candidate) => candidate.instanceId === id);
-  return !!card && (isItem(ctx, card) || data(ctx, card).cardType === "equipment");
+  return !!card && (isItem(ctx, card) || hasType(data(ctx, card), "equipment"));
 }
 
 function itemFromHandOnHit(): CardScript {
@@ -469,13 +466,13 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   "evo engine room|2": {
     ...destroyUnderAbility((ctx) => ctx.setPlayerFlag(ctx.seat, "nextWeaponCostReduction", true)),
     modifyAttackActivationCost(ctx, attacker, baseCost) {
-      return data(ctx, attacker).cardType === "weapon" &&
+      return hasType(data(ctx, attacker), "weapon") &&
         ctx.getPlayerFlag(ctx.seat, "nextWeaponCostReduction") === true
         ? Math.max(0, baseCost - 1)
         : baseCost;
     },
     onFriendlyActivate(ctx, activated) {
-      if (data(ctx, activated).cardType === "weapon") ctx.setPlayerFlag(ctx.seat, "nextWeaponCostReduction", false);
+      if (hasType(data(ctx, activated), "weapon")) ctx.setPlayerFlag(ctx.seat, "nextWeaponCostReduction", false);
     },
   },
   "evo smoothbore|2": destroyUnderAbility((ctx) => buffNextAttack(ctx, { attack: 1, appliesTo: "weapon" })),
@@ -528,7 +525,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   "evo charging rods|2": destroyUnderAbility((ctx) => {
     ctx.createToken(QUICKEN);
   }),
-  "evo zoom call|2": instantEvoEquipment({
+  "evo zoom call|2": evoEquipment({
     triggers: [
       entersArenaTrigger(
         "You may banish a card from your hand to draw a card",
@@ -546,14 +543,14 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
       ),
     ],
   }),
-  "evo buzz hive|2": instantEvoEquipment({
+  "evo buzz hive|2": evoEquipment({
     triggers: [
       entersArenaTrigger("Gain 1 resource", decisionMessage("card.trigger.common.resource.gain", { amount: 1 }), (ctx) =>
         ctx.gainResources(ctx.seat, 1),
       ),
     ],
   }),
-  "evo whizz bang|2": instantEvoEquipment({
+  "evo whizz bang|2": evoEquipment({
     triggers: [
       entersArenaTrigger(
         "Up to 1 target attack gets +1 power",
@@ -566,7 +563,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
       ),
     ],
   }),
-  "evo zip line|2": instantEvoEquipment({
+  "evo zip line|2": evoEquipment({
     triggers: [
       entersArenaTrigger(
         "Up to 1 target attack gets go again",
@@ -714,7 +711,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   "big shot|1": { modifyAttack: (ctx) => (boostedCount(ctx) >= 2 ? 2 : 0) },
   "burn rubber|1": {
     modifyAttack: (ctx) => (boostedCount(ctx) >= 2 ? 2 : 0),
-    canBeDefendedBy: (ctx, card) => boostedCount(ctx) < 2 || data(ctx, card).cardType !== "equipment",
+    canBeDefendedBy: (ctx, card) => boostedCount(ctx) < 2 || !hasType(data(ctx, card), "equipment"),
   },
   "smash and grab|1": {
     modifyAttack: (ctx) => (boostedCount(ctx) >= 2 ? 2 : 0),

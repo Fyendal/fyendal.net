@@ -2,7 +2,7 @@
  {
   "id": "BRI001",
   "name": "Briar",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Earth and Lightning\nThe first time an attack action card you control deals damage to an opposing hero, create an Embodiment of Earth token.\nWhenever you play your second 'non-attack' action card each turn, create an Embodiment of Lightning token.",
   "classes": [
    "runeblade"
@@ -20,7 +20,7 @@
  {
   "id": "BRI002",
   "name": "Embodiment of Lightning",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card, destroy this, then the attack gets go again.",
   "subtypes": [
    "elemental",
@@ -31,7 +31,7 @@
  {
   "id": "BRI003",
   "name": "Embodiment of Earth",
-  "cardType": "token",
+  "types": ["token"],
   "text": "'Non-attack' action cards you control have +1{d} while defending.\nAt the beginning of your action phase, destroy Embodiment of Earth.",
   "subtypes": [
    "elemental",
@@ -42,7 +42,7 @@
  {
   "id": "BRI004",
   "name": "Rosetta Thorn",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nWhenever you attack with Rosetta Thorn, if you've played an attack action card and a 'non-attack' action card this turn, deal 2 arcane damage to target hero.",
   "attack": 2,
   "classes": [
@@ -57,7 +57,7 @@
  {
   "id": "BRI005",
   "name": "Plume of Evergrowth",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - {r}{r}{r}, destroy Plume of Evergrowth: Return target Earth action card or Earth instant card from your graveyard to your hand.",
   "defense": 0,
   "subtypes": [
@@ -69,7 +69,7 @@
  {
   "id": "BRI006",
   "name": "Heartened Cross Strap",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: The next attack action card you play this turn costs {r}{r} less to play. Go again",
   "defense": 0,
   "classes": [
@@ -83,7 +83,7 @@
  {
   "id": "BRI007",
   "name": "Ironrot Gauntlet",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -100,7 +100,7 @@
  {
   "id": "BRI008",
   "name": "Sutcliffe's Suede Hides",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Attack Reaction - {r}, destroy this: Target attack action card gets go again. Activate this only if you've played a non-attack action card this turn.",
   "defense": 0,
   "classes": [
@@ -114,7 +114,7 @@
  {
   "id": "BRI009",
   "name": "Explosive Growth",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Earth Fusion\nIf Explosive Growth was fused, whenever it deals damage, attacks gain +1{p} this combat chain.\nWhen you attack with Explosive Growth, deal 1 arcane damage to target hero.",
   "pitch": 1,
   "cost": 1,
@@ -135,7 +135,7 @@
  {
   "id": "BRI010",
   "name": "Rites of Replenishment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Earth Fusion\nWhen you attack with Rites of Replenishment, if you have dealt arcane damage this turn, you may put a 'non-attack' action card from your graveyard on the bottom of your deck.\nWhen you attack with Rites of Replenishment, if it was fused, you may put an attack action card from your graveyard on the bottom of your deck.",
   "pitch": 1,
   "cost": 2,
@@ -156,7 +156,7 @@
  {
   "id": "BRI011",
   "name": "Stir the Wildwood",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Earth Fusion\nIf you have dealt arcane damage to an opposing hero this turn, Stir the Wildwood gains +2{p}.\nIf Stir the Wildwood was fused, it gains +2{p}.",
   "pitch": 1,
   "cost": 2,
@@ -177,7 +177,7 @@
  {
   "id": "BRI012",
   "name": "Bramble Spark",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Earth Fusion\nThe next attack action card you play this turn gains \"When you attack with this, deal 1 arcane damage to target hero.\"\nIf Bramble Spark was fused, the next attack action card you play this turn gains +3{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -197,7 +197,7 @@
  {
   "id": "BRI013",
   "name": "Stir the Wildwood",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Earth Fusion\nIf you have dealt arcane damage to an opposing hero this turn, Stir the Wildwood gains +2{p}.\nIf Stir the Wildwood was fused, it gains +2{p}.",
   "pitch": 2,
   "cost": 2,
@@ -218,7 +218,7 @@
  {
   "id": "BRI014",
   "name": "Rites of Replenishment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Earth Fusion\nWhen you attack with Rites of Replenishment, if you have dealt arcane damage this turn, you may put a 'non-attack' action card from your graveyard on the bottom of your deck.\nWhen you attack with Rites of Replenishment, if it was fused, you may put an attack action card from your graveyard on the bottom of your deck.",
   "pitch": 3,
   "cost": 2,
@@ -239,7 +239,7 @@
  {
   "id": "BRI015",
   "name": "Bramble Spark",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Earth Fusion\nThe next attack action card you play this turn gains \"When you attack with this, deal 1 arcane damage to target hero.\"\nIf Bramble Spark was fused, the next attack action card you play this turn gains +1{p}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -259,7 +259,7 @@
  {
   "id": "BRI016",
   "name": "Entwine Earth",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Earth Fusion\nIf Entwine Earth was fused, it gains +2{p}.",
   "pitch": 1,
   "cost": 2,
@@ -277,7 +277,7 @@
  {
   "id": "BRI017",
   "name": "Burgeoning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played from arsenal, it gains +1{p}.",
   "pitch": 1,
   "cost": 2,
@@ -292,7 +292,7 @@
  {
   "id": "BRI018",
   "name": "Evergreen",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Evergreen is played from arsenal, put it on the bottom of its owner's deck when the combat chain closes.",
   "pitch": 1,
   "cost": 3,
@@ -307,7 +307,7 @@
  {
   "id": "BRI019",
   "name": "Earthlore Surge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +5{p}.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -323,7 +323,7 @@
  {
   "id": "BRI020",
   "name": "Sow Tomorrow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put target Earth or Elemental action card with cost 0 or greater from your graveyard on the bottom of your deck. Banish Sow Tomorrow.\nIf Sow Tomorrow is played from arsenal, draw a card.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -339,7 +339,7 @@
  {
   "id": "BRI021",
   "name": "Weave Earth",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Earth or Elemental attack action card you play this turn gains +3{p}.\nIf it's fused, instead it gains +4{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -355,7 +355,7 @@
  {
   "id": "BRI022",
   "name": "Autumn's Touch",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 2,
   "cost": 3,
@@ -370,7 +370,7 @@
  {
   "id": "BRI023",
   "name": "Summerwood Shelter",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target defending Earth or Elemental action card gains +3{d}.",
   "pitch": 2,
   "cost": 0,
@@ -382,7 +382,7 @@
  {
   "id": "BRI024",
   "name": "Earthlore Surge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +3{p}.\nGo again",
   "pitch": 3,
   "cost": 2,
@@ -398,7 +398,7 @@
  {
   "id": "BRI025",
   "name": "Sow Tomorrow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put target Earth or Elemental action card with cost 2 or greater from your graveyard on the bottom of your deck. Banish Sow Tomorrow.\nIf Sow Tomorrow is played from arsenal, draw a card.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -414,7 +414,7 @@
  {
   "id": "BRI026",
   "name": "Amulet of Earth",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nInstant - Destroy Amulet of Earth: Attack action cards you control gain +1{p} and +1{d} this turn. Activate this ability only if you have Earth fused this turn.",
   "pitch": 3,
   "cost": 0,
@@ -430,7 +430,7 @@
  {
   "id": "BRI027",
   "name": "Rites of Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Fusion\nWhen you attack with Rites of Lightning, if it was fused, deal 1 arcane damage to target hero.\nIf you have dealt arcane damage this turn, Rites of Lightning gains go again.",
   "pitch": 1,
   "cost": 1,
@@ -452,7 +452,7 @@
  {
   "id": "BRI028",
   "name": "Entwine Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Fusion\nIf Entwine Lightning was fused, it gains go again.",
   "pitch": 1,
   "cost": 0,
@@ -471,7 +471,7 @@
  {
   "id": "BRI029",
   "name": "Lightning Surge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played from arsenal, it gets go again.",
   "pitch": 2,
   "cost": 0,
@@ -489,7 +489,7 @@
  {
   "id": "BRI030",
   "name": "Electrify",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time an attack action card hits a hero this turn, it deals 2 damage to them.\nIf Electrify is played from arsenal, draw a card.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -505,7 +505,7 @@
  {
   "id": "BRI031",
   "name": "Flash",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next action card you play this turn with cost 1 or greater gets go again.\nGo again",
   "pitch": 2,
   "cost": 0,

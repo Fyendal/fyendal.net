@@ -27,6 +27,7 @@ import {
   type ResponseModel,
 } from "./policy.js";
 import { threatenedAttackDamage } from "./public-threat.js";
+import { hasType } from "@fyendal/shared";
 
 const NON_ATTACK_PRIORITIES: Record<string, number> = {
   "nimblism|1": 27,
@@ -48,7 +49,7 @@ const CONDITIONAL_GO_AGAIN = new Set([
 ]);
 
 function isNonAttack(data: CardData | undefined): boolean {
-  return data?.cardType === "action" && !data.subtypes?.includes("attack");
+  return data !== undefined && hasType(data, "action") && !data.subtypes?.includes("attack");
 }
 
 function hasSubtype(data: CardData, subtype: string): boolean {
@@ -162,7 +163,7 @@ function hasSetupFollowup(
     const data = input.cards[followup.cardId];
     if (!data) return false;
     const attackAction = isAttack(data);
-    const attack = attackAction || data.cardType === "weapon";
+    const attack = attackAction || hasType(data, "weapon");
     if (
       pitchIds(candidate).some((id) => consumed.has(id)) &&
       !(frostbiteCount > 0 && attackAction && (data.cost ?? 0) <= setupResources)
@@ -222,7 +223,7 @@ function pendingAttackSetups(input: BotPolicyInput): Set<string> {
 function attackConsumesPendingSetup(data: CardData, input: BotPolicyInput): boolean {
   const pending = pendingAttackSetups(input);
   const attackAction = isAttack(data);
-  const attack = attackAction || data.cardType === "weapon";
+  const attack = attackAction || hasType(data, "weapon");
   const elemental = hasSubtype(data, "lightning") || hasSubtype(data, "elemental");
   if ([...pending].some((functional) => functional.startsWith("weave lightning|")) && !(attackAction && elemental)) {
     return false;
@@ -250,7 +251,7 @@ function hasPendingSetupConsumer(
     ) return false;
     const card = intentCard(candidate, own);
     const data = card ? input.cards[card.cardId] : undefined;
-    return !!data && (isAttack(data) || data.cardType === "weapon") &&
+    return !!data && (isAttack(data) || hasType(data, "weapon")) &&
       attackConsumesPendingSetup(data, input);
   });
 }
@@ -336,7 +337,7 @@ function arcaneSeedsLifeIsLastSurvivalOption(
     const card = intentCard(candidate, own);
     if (!card || card.instanceId === sourceInstanceId) return false;
     const data = input.cards[card.cardId];
-    return data?.cardType === "defense-reaction" || key(data) === "cloud cover|1";
+    return hasType(data, "defense-reaction") || key(data) === "cloud cover|1";
   });
   if (alternativeCard) return false;
 
@@ -441,7 +442,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   if (spendsOpeningArsenalReserve(intent, input, own)) return -100;
 
   if (intent.kind === "activate-ability") {
-    if (data.cardType === "weapon" && !attackConsumesPendingSetup(data, input)) return -100;
+    if (hasType(data, "weapon") && !attackConsumesPendingSetup(data, input)) return -100;
     if (functional === "scorpio, comet tail|0") score = 12;
     else if (functional === "swiftstrike bracers|0" || functional === "quick clicks|0") {
       score = hasSetupFollowup(functional, intent, input, own) ? 18 : -100;
@@ -463,7 +464,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       score = me.deckCount <= 6 && runebladeAttack && runebladeNonAttack ? 14 : -10;
     }
     else score = 4;
-    if (data.cardType === "weapon") score += pendingAttackSetups(input).size * 10;
+    if (hasType(data, "weapon")) score += pendingAttackSetups(input).size * 10;
   } else if (isNonAttack(data)) {
     const requiresAttackFollowup =
       functional.startsWith("nimblism|") ||
@@ -497,7 +498,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     if (functional === "snatch|1") score += 3;
     if (functional === "static shock|1" && playedLightningThisTurn(input)) score += 4;
     if (functional === "rush of power|1" && input.view.players[input.seat].board.some((c) => input.cards[c.cardId]?.name === "Embodiment of Lightning")) score += 5;
-  } else if (data.cardType === "instant") {
+  } else if (hasType(data, "instant")) {
     if (functional === "arcane seeds // life|1" && "meldSide" in intent) {
       const survival = intent.meldSide === "right" &&
         arcaneSeedsLifeIsLastSurvivalOption(input, own, card?.instanceId ?? -1);
@@ -540,7 +541,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     ) {
       score += intent.meldSide === "both" ? 8 : intent.meldSide === "left" ? 3 : 2;
     }
-  } else if (data.cardType === "defense-reaction") {
+  } else if (hasType(data, "defense-reaction")) {
     score = card && defenseReactionWorthSpending(card, input, briarSolverRules, pitchIds(intent))
       ? scoreDefenseReaction(data, input)
       : -100;

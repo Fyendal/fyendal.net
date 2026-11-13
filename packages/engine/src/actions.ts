@@ -7,7 +7,6 @@ import { activateFromHandAbility } from "./activation.js";
 import {
   activatedAbilitiesSuppressed,
   cardHasType,
-  isNonActionInstant,
   cardNamesOf,
   cardTypesOf,
   dataOf,
@@ -91,6 +90,7 @@ import { actionLimitReached, consumeFirstActionExtraCost, controlsBow, firstActi
 import { nonAttackActionCardLimitReached } from "./restrictions.js";
 import { attackActionPlayRestricted, weaponAttacksProhibited } from "./combatRestrictions.js";
 import { recordAnnouncedAttackTarget, pushAbilityLayer, pushCardLayer } from "./stackCore.js";
+import { hasType } from "@fyendal/shared";
 
 export function playCard(
   state: GameStateInternal,
@@ -137,9 +137,7 @@ export function playCard(
   }
   const data = instanceDataOf(state, card);
   if (isFrozen(state, card)) return `${nameOf(state, card.cardId)} is frozen`;
-  const playableEquipment =
-    data.cardType === "equipment" && scriptOf(state, card.cardId, card)?.playableEquipment === true;
-  if (data.cardType !== "action" && data.cardType !== "instant" && !playableEquipment) {
+  if (!hasType(data, "action") && !hasType(data, "instant")) {
     return "only action and instant cards can be played in the action phase";
   }
   const script = scriptOf(state, card.cardId, card);
@@ -157,7 +155,7 @@ export function playCard(
     if (!controlsBow(state, player)) return "arrow cards can only be played while you control a bow";
   }
   const instantPermission = canPlayAsInstant(state, runtime, seat, card, undefined, from);
-  if (asInstant === true && (selectedMeldAction || (data.cardType !== "instant" && !instantPermission))) {
+  if (asInstant === true && (selectedMeldAction || (!hasType(data, "instant") && !instantPermission))) {
     return `${nameOf(state, card.cardId)} cannot be played as an instant`;
   }
   if (
@@ -173,8 +171,7 @@ export function playCard(
   // action method is impossible because the player has no action point.
   const isInstant =
     !selectedMeldAction && (
-      data.cardType === "instant" ||
-      isNonActionInstant(state, card) ||
+      hasType(data, "instant") ||
       asInstant === true ||
       (asInstant === undefined && player.actionPoints < 1 && instantPermission)
     );
@@ -208,7 +205,7 @@ export function playCard(
   // Meld (CR 8.3.38): "both" sets the asset-cost to twice the base cost
   // before increases and decreases. The side announcement was validated and
   // stamped above so it could also determine the play method and AP cost.
-  const isAttackAction = data.cardType === "action" && (data.subtypes ?? []).includes("attack");
+  const isAttackAction = hasType(data, "action") && (data.subtypes ?? []).includes("attack");
   if (targetAllyId !== undefined && !isAttackAction) return "only attacks declare an attack target";
   if (isAttackAction && !attackTargetIsLegal(state, runtime, seat, targetAllyId)) return "not a legal attack target";
   const targetErr = preparePlayTarget(
@@ -429,8 +426,7 @@ export function finishPlayCard(
     meldSideHasType(state, card, card.meldSide, "action");
   const isInstant =
     !selectedMeldAction && (
-      data.cardType === "instant" ||
-      isNonActionInstant(state, card) ||
+      hasType(data, "instant") ||
       asInstant === true ||
       (asInstant === undefined && player.actionPoints < 1 && instantPermission)
     );

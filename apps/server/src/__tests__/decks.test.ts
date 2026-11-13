@@ -18,19 +18,19 @@ import { register } from "../auth.js";
 import { freshDb } from "./testdb.js";
 import { cardArtVariants } from "@fyendal/cards/art";
 import type { FabraryPin } from "../fabrary.js";
-import { STANDARD_CARD_ART } from "@fyendal/shared";
+import { hasType, objectKind, STANDARD_CARD_ART } from "@fyendal/shared";
 
 const printings = Object.values(cardData) as CardData[];
-const hero = printings.find((c) => c.cardType === "hero" && c.name.includes("Rhinar"))!;
-const legalCcWeapons = printings.filter((c) => c.cardType === "weapon" && formatLegalityIssues(
+const hero = printings.find((c) => hasType(c, "hero") && c.name.includes("Rhinar"))!;
+const legalCcWeapons = printings.filter((c) => hasType(c, "weapon") && formatLegalityIssues(
   cardData,
   { heroId: hero.id, weaponIds: [c.id], equipmentPool: [], deck: [], sideboard: [] },
   "cc",
 ).length === 0);
 const weapon = legalCcWeapons[0]!;
-const chest = printings.find((c) => c.cardType === "equipment" && c.subtypes?.includes("chest"))!;
+const chest = printings.find((c) => hasType(c, "equipment") && c.subtypes?.includes("chest"))!;
 const deckCards = printings.filter(
-  (c) => !["hero", "weapon", "equipment", "token"].includes(c.cardType),
+  (c) => objectKind(c) === "deck",
 );
 const legalCcDeckCards = deckCards.filter((candidate) =>
   formatLegalityIssues(
@@ -336,8 +336,8 @@ describe("validateDeck", () => {
   });
 
   it("allows multiple weapons and equipment per slot in the registered pool", () => {
-    const weapons = printings.filter((c) => c.cardType === "weapon");
-    const heads = printings.filter((c) => c.cardType === "equipment" && c.subtypes?.includes("head"));
+    const weapons = printings.filter((c) => hasType(c, "weapon"));
+    const heads = printings.filter((c) => hasType(c, "equipment") && c.subtypes?.includes("head"));
     const lines = parseDecklistText(
       [
         `Hero: ${hero.name}`,
@@ -356,7 +356,7 @@ describe("validateDeck", () => {
 
   it("registers off-hand equipment in the weapon slots (CR)", () => {
     const offhand = printings.find(
-      (c) => c.cardType === "equipment" && c.subtypes?.includes("off-hand"),
+      (c) => hasType(c, "equipment") && c.subtypes?.includes("off-hand"),
     )!;
     const lines = parseDecklistText(
       [

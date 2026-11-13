@@ -2,7 +2,7 @@
  {
   "id": "FNG001",
   "name": "Fang",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you hit a marked hero, create a Fealty token.\nIf you control 3 or more Fealty tokens, dagger attacks cost you {r} less to activate.",
   "classes": [
    "royal",
@@ -18,7 +18,7 @@
  {
   "id": "FNG002",
   "name": "Obsidian Fire Vein",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack. If you've played a Draconic card this chain link, this attack gets +1{p} and go again.",
   "attack": 1,
   "classes": [
@@ -34,7 +34,7 @@
  {
   "id": "FNG003",
   "name": "Vow of Vengeance",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Attack Reaction - Destroy this: Mark target Arakni.\nBlade Break",
   "defense": 1,
   "subtypes": [
@@ -49,7 +49,7 @@
  {
   "id": "FNG004",
   "name": "Coat of Allegiance",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Gain {r}. Until end of turn, you may only play cards that are Draconic. Go again",
   "defense": 0,
   "subtypes": [
@@ -61,7 +61,7 @@
  {
   "id": "FNG005",
   "name": "Blade Beckoner Gauntlets",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -78,7 +78,7 @@
  {
   "id": "FNG006",
   "name": "Red Alert Boots",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If an attack reaction has been played or activated this chain link, this gets +1{d}.\nBlade Break",
   "defense": 1,
   "classes": [
@@ -96,7 +96,7 @@
  {
   "id": "FNG007",
   "name": "Hunt to the Ends of Rathe",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks Arakni, mark them.\nIf this is attacking a marked hero, this gets +2{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -115,7 +115,7 @@
  {
   "id": "FNG008",
   "name": "For the Dracai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a marked hero, create a Fealty token.",
   "pitch": 1,
   "cost": 0,
@@ -130,7 +130,7 @@
  {
   "id": "FNG009",
   "name": "Affirm Loyalty",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target dagger attack gets +2{p}. If you control 2 or more Draconic chain links, create a Fealty token.",
   "pitch": 1,
   "cost": 0,
@@ -146,7 +146,7 @@
  {
   "id": "FNG010",
   "name": "Blistering Blade",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target dagger attack gets +2{p}. If you control 2 or more Draconic chain links, instead it gets +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -162,7 +162,7 @@
  {
   "id": "FNG011",
   "name": "Dynastic Dedication",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "This costs {r} less to play for each Draconic chain link you control.\nTarget dagger attack gets +3{p}.",
   "pitch": 1,
   "cost": 2,
@@ -178,7 +178,7 @@
  {
   "id": "FNG012",
   "name": "Endear Devotion",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target dagger attack gets +3{p}. If you control 2 or more Draconic chain links, create a Fealty token.",
   "pitch": 1,
   "cost": 1,
@@ -194,7 +194,7 @@
  {
   "id": "FNG013",
   "name": "Fire and Brimstone",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Legendary\nThis costs {r} less to play for each Draconic chain link you control.\nDaggers you control get +1{p} and you may attack with each of them an additional time this turn.",
   "pitch": 1,
   "cost": 2,
@@ -213,7 +213,7 @@
  {
   "id": "FNG014",
   "name": "Incision",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target dagger attack gets +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -227,7 +227,7 @@
  {
   "id": "FNG015",
   "name": "Scar Tissue",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target dagger attack gets +3{p} and \"When this hits a hero, mark them.\"",
   "pitch": 1,
   "cost": 0,
@@ -241,7 +241,7 @@
  {
   "id": "FNG016",
   "name": "Searing Gaze",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target dagger attack gets +2{p}. If you control 2 or more Draconic chain links, it gets \"When this hits a hero, mark them.\"",
   "pitch": 1,
   "cost": 0,
@@ -257,7 +257,7 @@
  {
   "id": "FNG017",
   "name": "Stabbing Pain",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target dagger attack gets +3{p}. If you control 2 or more Draconic chain links, it gets \"When this hits a hero, mark them.\"",
   "pitch": 1,
   "cost": 1,
@@ -273,7 +273,7 @@
  {
   "id": "FNG018",
   "name": "Smoke Out",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "When this defends a red card, mark the attacking hero.",
   "pitch": 1,
   "cost": 0,
@@ -289,7 +289,7 @@
  {
   "id": "FNG019",
   "name": "Sworn Vengeance",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next dagger attack this turn gets +3{p} and \"When this hits a hero, mark them.\"\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -305,7 +305,7 @@
  {
   "id": "FNG020",
   "name": "Pledge Fealty",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Create a Fealty token.",
   "pitch": 1,
   "cost": 0,
@@ -317,7 +317,7 @@
  {
   "id": "FNG021",
   "name": "Tooth of the Dragon",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Your next Draconic attack this turn gets +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -329,7 +329,7 @@
  {
   "id": "FNG022",
   "name": "Sworn Vengeance",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next dagger attack this turn gets +2{p} and \"When this hits a hero, mark them.\"\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -345,7 +345,7 @@
  {
   "id": "FNG023",
   "name": "Cut Deep",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next dagger attack this turn gets +2{p}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -361,7 +361,7 @@
  {
   "id": "FNG024",
   "name": "Hunt a Killer",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next dagger attack this turn gets +2{p} and \"When this hits a hero, mark them.\"\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -377,7 +377,7 @@
  {
   "id": "FNG025",
   "name": "Point of Engagement",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next dagger attack this turn gets +1{p}.\nUntil end of turn, your attacks get +1{p} while attacking a marked hero.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -393,7 +393,7 @@
  {
   "id": "FNG026",
   "name": "Sworn Vengeance",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next dagger attack this turn gets +1{p} and \"When this hits a hero, mark them.\"\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -409,7 +409,7 @@
  {
   "id": "FNG027",
   "name": "Twist and Turn",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next dagger attack this turn gets +2{p} and \"When this hits, you may attack with it an additional time this turn.\"\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -425,7 +425,7 @@
  {
   "id": "FNG028",
   "name": "Fealty",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Instant - Destroy this: The next card you play this turn is Draconic. At the beginning of your end phase, if you haven't created a Fealty token or played a Dragonic card this turn, destroy this.",
   "subtypes": [
    "draconic",
@@ -436,7 +436,7 @@
  {
   "id": "FNG029",
   "name": "Marked",
-  "cardType": "token",
+  "types": ["token"],
   "text": "You are marked until an opponent hits you",
   "keywords": [
    "Mark"

@@ -20,6 +20,7 @@ import {
   queueIntimidate,
   targetHeroSeat,
 } from "../shared-helpers.js";
+import { hasType } from "@fyendal/shared";
 
 const COURAGE = "DTD232";
 const EMBODIMENT_LIGHTNING = "DTD195";
@@ -134,7 +135,7 @@ function seismicAuraTokens(ctx: ScriptCtx): Card[] {
   );
   return ctx.state.players
     .flatMap((player) => player.board)
-    .filter((card) => has(ctx, card, "aura") && data(ctx, card).cardType === "token" && !chosen.has(card.instanceId));
+    .filter((card) => has(ctx, card, "aura") && hasType(data(ctx, card), "token") && !chosen.has(card.instanceId));
 }
 
 function continueSeismicChoices(ctx: ScriptCtx): void {
@@ -720,7 +721,7 @@ export const penHighRarity: Record<string, CardScript> = {
         onActivate(ctx) {
           const aura = ctx.state.players
             .flatMap((p) => p.board)
-            .find((card) => has(ctx, card, "aura") && data(ctx, card).cardType === "token");
+            .find((card) => has(ctx, card, "aura") && hasType(data(ctx, card), "token"));
           if (aura) ctx.destroyPermanent(aura.instanceId);
         },
       },

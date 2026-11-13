@@ -2,7 +2,7 @@
  {
   "id": "ZEN001",
   "name": "Zen",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {c}{c}{c}: Create a Crouching Tiger in your hand. Search your deck for a card with combo, banish it, then shuffle. You may play it this turn.",
   "classes": [
    "mystic",
@@ -15,7 +15,7 @@
  {
   "id": "ZEN002",
   "name": "Tiger Taming Khakkara",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this attacks, the next Crouching Tiger you play this combat chain gets +1{p}.",
   "attack": 2,
   "classes": [
@@ -30,7 +30,7 @@
  {
   "id": "ZEN003",
   "name": "Mask of Wizened Whiskers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, put a card with combo from your graveyard on the bottom of your deck.\nBlade Break",
   "defense": 1,
   "classes": [
@@ -47,7 +47,7 @@
  {
   "id": "ZEN004",
   "name": "Heirloom of Tiger Hide",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Cloaked\nWhile this is equipped face-down, at the start of your turn, if you have exactly 1{h}, you may turn this face-up.\nBlade Break",
   "defense": 3,
   "classes": [
@@ -66,7 +66,7 @@
  {
   "id": "ZEN005",
   "name": "Waves of Aqua Marine",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Cloaked\nAttack Reaction - {r}, turn this face-up: Target attack gets +1{p}.\nAt the start of your turn, destroy this.",
   "defense": 1,
   "classes": [
@@ -83,7 +83,7 @@
  {
   "id": "ZEN006",
   "name": "Stride of Reprisal",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, create a Crouching Tiger in your hand.\nBlade Break",
   "defense": 1,
   "classes": [
@@ -101,7 +101,7 @@
  {
   "id": "ZEN007",
   "name": "Biting Breeze",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -121,7 +121,7 @@
  {
   "id": "ZEN008",
   "name": "Companion of the Claw",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, if you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -142,7 +142,7 @@
  {
   "id": "ZEN009",
   "name": "Flex Claws",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -162,7 +162,7 @@
  {
   "id": "ZEN010",
   "name": "Harmony of the Hunt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, if you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -183,7 +183,7 @@
  {
   "id": "ZEN011",
   "name": "Pouncing Qi",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +1{p} and go again.",
   "pitch": 1,
   "cost": 0,
@@ -204,7 +204,7 @@
  {
   "id": "ZEN012",
   "name": "Qi Unleashed",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +4{p}.",
   "pitch": 1,
   "cost": 2,
@@ -224,7 +224,7 @@
  {
   "id": "ZEN013",
   "name": "Untamed",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, the next Crouching Tiger you play this combat chain gets +1{p}.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -244,7 +244,7 @@
  {
   "id": "ZEN014",
   "name": "Water the Seeds",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, your next attack this combat chain with 1 or less base {p} gets +1{p}.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -264,7 +264,7 @@
  {
   "id": "ZEN015",
   "name": "Tiger Form Incantation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Crouching Tiger you play this turn gets +3{p}.\nIf you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -281,7 +281,7 @@
  {
   "id": "ZEN016",
   "name": "Wind Chakra",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Crouching Tiger you play this turn gets +3{p}. If you've transcended this turn, instead it gets +5{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -298,7 +298,7 @@
  {
   "id": "ZEN017",
   "name": "Biting Breeze",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -318,7 +318,7 @@
  {
   "id": "ZEN018",
   "name": "Tiger Form Incantation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Crouching Tiger you play this turn gets +2{p}.\nIf you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -335,7 +335,7 @@
  {
   "id": "ZEN019",
   "name": "Aspect of Tiger: Mind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - When this attacks, if a blue attack action card was the last attack this combat chain, this gets go again and create a Crouching Tiger in your banished zone. You may play it this turn.",
   "pitch": 3,
   "cost": 0,
@@ -356,7 +356,7 @@
  {
   "id": "ZEN020",
   "name": "Biting Breeze",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -376,7 +376,7 @@
  {
   "id": "ZEN021",
   "name": "Flex Claws",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -396,7 +396,7 @@
  {
   "id": "ZEN022",
   "name": "Harmony of the Hunt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, if you've pitched a blue card this turn, create a Crouching Tiger in your hand.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -417,7 +417,7 @@
  {
   "id": "ZEN023",
   "name": "Pouncing Qi",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +1{p} and go again.",
   "pitch": 3,
   "cost": 0,
@@ -438,7 +438,7 @@
  {
   "id": "ZEN024",
   "name": "Untamed",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, the next Crouching Tiger you play this combat chain gets +1{p}.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -458,7 +458,7 @@
  {
   "id": "ZEN025",
   "name": "Preserve Tradition",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nPut target action card from your graveyard on the bottom of your deck.\nIf you've played another blue card this turn, transcend.",
   "pitch": 3,
   "cost": 0,
@@ -475,7 +475,7 @@
  {
   "id": "ZEN025B",
   "name": "Inner Chi",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "",
   "pitch": 3,
   "classes": [
@@ -489,7 +489,7 @@
  {
   "id": "ZEN026",
   "name": "Rising Sun, Setting Moon",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nDraw a card, then put a card from your hand on the bottom of your deck.\nIf you've played another blue card this turn, transcend.",
   "pitch": 3,
   "cost": 0,
@@ -506,7 +506,7 @@
  {
   "id": "ZEN026B",
   "name": "Inner Chi",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "",
   "pitch": 3,
   "classes": [
@@ -520,7 +520,7 @@
  {
   "id": "ZEN027",
   "name": "Stir the Pot",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nShuffle.\nIf you've played another blue card this turn, transcend.",
   "pitch": 3,
   "cost": 0,
@@ -537,7 +537,7 @@
  {
   "id": "ZEN027B",
   "name": "Inner Chi",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "",
   "pitch": 3,
   "classes": [
@@ -551,7 +551,7 @@
  {
   "id": "ZEN028",
   "name": "The Grain that Tips the Scale",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nTarget attack gets +1{p}.\nIf you've played another blue card this turn, transcend.",
   "pitch": 3,
   "cost": 0,
@@ -568,7 +568,7 @@
  {
   "id": "ZEN028B",
   "name": "Inner Chi",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "",
   "pitch": 3,
   "classes": [
@@ -582,7 +582,7 @@
  {
   "id": "ZEN029",
   "name": "Crouching Tiger",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ephemeral\nGo again",
   "cost": 0,
   "attack": 0,

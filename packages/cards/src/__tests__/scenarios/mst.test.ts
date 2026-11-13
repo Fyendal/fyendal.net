@@ -372,11 +372,11 @@ describe("MST — Mechanologist", () => {
     expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
       kind: "play-card",
       instanceId: recall.instanceId,
-      asInstant: true,
     }));
 
-    g.play("evo recall|3", { asInstant: true })
+    g.play("evo recall|3")
       .chooseCard("zero to sixty|1")
+      .expectAP(0, 1)
       .expectEquipped(0, "head", "evo recall|3");
     expect(g.state.players[0]!.equipment.head?.subcards?.[0]?.cardId)
       .toBe(printingId("cogwerx base head|0"));
@@ -400,7 +400,6 @@ describe("MST — Mechanologist", () => {
       expect(legalIntents(withBase.state, 0)).toContainEqual(expect.objectContaining({
         kind: "play-card",
         instanceId: playableCard.instanceId,
-        asInstant: true,
       }));
 
       const withoutBase = scenario({
@@ -413,7 +412,6 @@ describe("MST — Mechanologist", () => {
       expect(legalIntents(withoutBase.state, 0), evo).toContainEqual(expect.objectContaining({
         kind: "play-card",
         instanceId: unbasedCard.instanceId,
-        asInstant: true,
       }));
       const slot = Object.keys(equipment)[0] as keyof typeof equipment;
       withoutBase.play(evo).expectInZone(0, evo, "graveyard");
@@ -434,7 +432,7 @@ describe("MST — Mechanologist", () => {
       ],
     });
 
-    g.play("evo heartdrive|3", { asInstant: true })
+    g.play("evo heartdrive|3")
       .play("sloggism|1")
       .expectResources(0, 2)
       .play("raging onslaught|1")
@@ -455,7 +453,7 @@ describe("MST — Mechanologist", () => {
       ],
     });
 
-    g.play("evo speedslip|3", { asInstant: true });
+    g.play("evo speedslip|3");
 
     const twinDrive = g.state.players[0]!.hand.find(
       (card) => card.cardId === printingId("twin drive|1"),

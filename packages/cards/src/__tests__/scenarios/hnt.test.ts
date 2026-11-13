@@ -48,9 +48,9 @@ describe("HNT — Sound the Alarm", () => {
     const offered = g.state.players[0]!.deck.filter((card) =>
       g.state.pendingDecision?.options?.includes(String(card.instanceId))
     );
-    expect(offered.map((card) => cardData[card.cardId]!.cardType)).toEqual([
-      "defense-reaction",
-      "defense-reaction",
+    expect(offered.map((card) => cardData[card.cardId]!.types)).toEqual([
+      ["defense-reaction"],
+      ["defense-reaction"],
     ]);
     // the revealed hand stays on the decision, so undo back to it shows it again
     expect(revealedView.pendingDecision?.revealedCards?.map((card) => card.cardId).sort()).toEqual(

@@ -7,6 +7,7 @@ import {
   unseenCounts,
 } from "./deck-knowledge.js";
 import type { BotPolicyInput } from "./policy.js";
+import { hasType } from "@fyendal/shared";
 
 /**
  * Per-card expressed value (EV) in damage equivalents, following the FaBrain
@@ -159,15 +160,15 @@ export function hasStaticGoAgain(data: CardData): boolean {
   return STATIC_GO_AGAIN.test(data.text);
 }
 
+/** Non-action kinds in canonical type order, so an Instant Evo stays equipment. */
+const PRINTED_USE_KINDS = ["weapon", "equipment", "attack-reaction", "defense-reaction", "instant", "block"] as const;
+
 /** Default uses parsed from printed data. Hero rules refine conditional cards. */
 export function defaultCardUses(data: CardData, power = data.attack ?? 0, defense = data.defense ?? 0): CardUses {
   const subtypes = (data.subtypes ?? []).map((subtype) => subtype.toLowerCase());
-  const kind: CardUses["kind"] = data.cardType === "action"
+  const kind: CardUses["kind"] = hasType(data, "action")
     ? subtypes.includes("attack") ? "attack" : "action"
-    : data.cardType === "weapon" || data.cardType === "attack-reaction" || data.cardType === "instant" ||
-        data.cardType === "defense-reaction" || data.cardType === "block" || data.cardType === "equipment"
-    ? data.cardType
-    : "other";
+    : PRINTED_USE_KINDS.find((type) => hasType(data, type)) ?? "other";
   const prevented = handPrevention(data);
   const pumpMatch = /\+(\d+)\{p\}/.exec(data.text);
   const pumpCount = (data.text.match(/next attack[^.]*\+(\d+)\{p\}/gi) ?? []).length;
@@ -198,7 +199,7 @@ const HAND_INSTANT_PREVENT = /Instant - [^:]*\b(?:discard|banish) this(?: from y
 function handPrevention(data: CardData): number {
   const mode = HAND_INSTANT_PREVENT.exec(data.text);
   if (mode) return Number(mode[1]);
-  return data.cardType === "instant" ? Number(PREVENT_AMOUNT.exec(data.text)?.[1] ?? 0) : 0;
+  return hasType(data, "instant") ? Number(PREVENT_AMOUNT.exec(data.text)?.[1] ?? 0) : 0;
 }
 
 const ARSENAL_DISRUPTION = new RegExp(

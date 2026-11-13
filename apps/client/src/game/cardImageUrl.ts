@@ -2,6 +2,7 @@ import { cardData, cardList } from "@fyendal/cards/client";
 import marvelArt from "./marvelArt.json" with { type: "json" };
 import marvelArtFaces from "./marvelArtFaces.json" with { type: "json" };
 import marvelFramedFronts from "./marvelFramedFronts.json" with { type: "json" };
+import { hasType, primaryType, type CardData } from "@fyendal/shared";
 
 const IMG_BASE = "https://content.fabrary.net/cards";
 
@@ -10,7 +11,7 @@ const IMG_BASE = "https://content.fabrary.net/cards";
 const BLACK_BORDER_ART_FOR_1HP = new Map<string, string>();
 const originalArtByCard = new Map<string, string>();
 const artKey = (card: CardImageData) =>
-  `${card.cardType}|${card.name.trim().toLowerCase().replace(/\s+/g, " ")}|${card.pitch ?? 0}`;
+  `${primaryType(card)}|${card.name.trim().toLowerCase().replace(/\s+/g, " ")}|${card.pitch ?? 0}`;
 const MARVEL_ART_BY_CARD: Readonly<Record<string, string>> = marvelArt;
 const MARVEL_IMAGE_IDS = new Set(Object.values(MARVEL_ART_BY_CARD));
 /** Hero Marvel objects whose back is a textless art face (audited offline). */
@@ -197,14 +198,10 @@ const FABRARY_BACK_FACE_AT_BASE_ID: ReadonlySet<string> = new Set([
   "WTR225B",
 ]);
 
-export interface CardImageData {
-  cardType: string;
-  name: string;
-  pitch?: number;
-}
+export type CardImageData = Pick<CardData, "types" | "name" | "pitch">;
 
 function standardCardImageUrl(cardId: string, data?: CardImageData): string {
-  const tokenKey = data?.cardType === "token"
+  const tokenKey = data && hasType(data, "token")
     ? `${data.name.trim().toLowerCase().replace(/\s+/g, " ")}|${data.pitch ?? 0}`
     : undefined;
   const canonicalCardId = tokenKey ? CANONICAL_TOKEN_ART_IDS[tokenKey] ?? cardId : cardId;

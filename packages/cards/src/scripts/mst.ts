@@ -25,6 +25,7 @@ import {
   sharesName,
   yesNoPrompt,
 } from "./shared-helpers.js";
+import { hasType as hasPrintedType } from "@fyendal/shared";
 
 // Part the Mistveil. Reprints reuse their existing functional-key scripts;
 // this module contains only identities first introduced by MST.
@@ -87,13 +88,11 @@ function isIllusionistAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): bo
   return isAura(ctx, card) && hasType(ctx, card, "illusionist");
 }
 
-function instantEvoEquipment(extra: CardScript = {}): CardScript {
+function evoEquipment(extra: CardScript = {}): CardScript {
   return {
     ...extra,
-    additionalCardTypes: ["instant"],
     playableEquipment: true,
     transformsEquipment: (ctx, equipped) => hasType(ctx, equipped, "base"),
-    playAsInstant: () => true,
   };
 }
 
@@ -957,15 +956,21 @@ export const mst: Record<string, CardScript> = {
   "desires of flesh|3": topBanishDesire((ctx, card) => isAttackAction(ctx, card)),
   "impulsive desire|1": topBanishDesire(
     (ctx, card) =>
-      ["attack-reaction", "defense-reaction"].includes(data(ctx, card).cardType) || ctx.hasCardType(card, "instant"),
+      hasPrintedType(data(ctx, card), "attack-reaction") ||
+      hasPrintedType(data(ctx, card), "defense-reaction") ||
+      ctx.hasCardType(card, "instant"),
   ),
   "impulsive desire|2": topBanishDesire(
     (ctx, card) =>
-      ["attack-reaction", "defense-reaction"].includes(data(ctx, card).cardType) || ctx.hasCardType(card, "instant"),
+      hasPrintedType(data(ctx, card), "attack-reaction") ||
+      hasPrintedType(data(ctx, card), "defense-reaction") ||
+      ctx.hasCardType(card, "instant"),
   ),
   "impulsive desire|3": topBanishDesire(
     (ctx, card) =>
-      ["attack-reaction", "defense-reaction"].includes(data(ctx, card).cardType) || ctx.hasCardType(card, "instant"),
+      hasPrintedType(data(ctx, card), "attack-reaction") ||
+      hasPrintedType(data(ctx, card), "defense-reaction") ||
+      ctx.hasCardType(card, "instant"),
   ),
   "mind's desire|1": topBanishDesire((ctx, card) => ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack")),
   "mind's desire|2": topBanishDesire((ctx, card) => ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack")),
@@ -1311,7 +1316,7 @@ mst["nuu, alluring desire|0"] = mst["nuu|0"]!;
 mst["zen, tamer of purpose|0"] = mst["zen|0"]!;
 
 const tokenNamed = (ctx: ScriptCtx, name: string): string | undefined =>
-  ctx.cardIdsNamed(name).find((cardId) => ctx.cardData(cardId).cardType === "token");
+  ctx.cardIdsNamed(name).find((cardId) => hasPrintedType(ctx.cardData(cardId), "token"));
 const createNamed = (ctx: ScriptCtx, name: string, count = 1): void => {
   const id = tokenNamed(ctx, name);
   if (id) ctx.createTokens(id, count);
@@ -1927,7 +1932,7 @@ Object.assign(mst, {
       if (construct && ctx.putOnDeckBottom(construct.instanceId)) ctx.shuffleDeck();
     },
   },
-  "evo recall|3": instantEvoEquipment({
+  "evo recall|3": evoEquipment({
     triggers: [
       entersArenaTrigger(
         "Put up to 1 Mechanologist action card from your banished zone on top of your deck",
@@ -1939,7 +1944,7 @@ Object.assign(mst, {
       if (hook === "recall-card" && option !== "no") ctx.putOnDeckTop(Number(option));
     },
   }),
-  "evo heartdrive|3": instantEvoEquipment({
+  "evo heartdrive|3": evoEquipment({
     triggers: [
       entersArenaTrigger(
         "The next attack action card you play this turn costs 1 less to play",
@@ -1954,7 +1959,7 @@ Object.assign(mst, {
       ),
     ],
   }),
-  "evo shortcircuit|3": instantEvoEquipment({
+  "evo shortcircuit|3": evoEquipment({
     triggers: [
       entersArenaTrigger("Deal 1 damage", decisionMessage("card.trigger.common.damage.deal", { amount: 1 }), (ctx) =>
         ctx.requestChoice(
@@ -1977,7 +1982,7 @@ Object.assign(mst, {
       if (hook === "shortcircuit-target") ctx.dealDamage(option === "your hero" ? ctx.seat : opponentSeat(ctx), 1);
     },
   }),
-  "evo speedslip|3": instantEvoEquipment({
+  "evo speedslip|3": evoEquipment({
     triggers: [
       entersArenaTrigger(
         "The next attack action card you play this turn gets boost",

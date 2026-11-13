@@ -86,6 +86,7 @@ import {
   isLight,
   isYellow,
 } from "./boltyn-rules.js";
+import { hasType } from "@fyendal/shared";
 
 /** Pivot-turn payoffs: blocking with them is a last resort. */
 const POWER_CARDS = new Set([
@@ -225,7 +226,7 @@ function aggressorStance(input: BotPolicyInput): boolean {
 
 function resourceCost(data: CardData | undefined): number {
   if (!data) return 0;
-  return data.cardType === "weapon" ? weaponCost(data) : Math.max(0, data.cost ?? 0);
+  return hasType(data, "weapon") ? weaponCost(data) : Math.max(0, data.cost ?? 0);
 }
 
 /** Hand cards left to charge once this intent has spent its card and pitch. */
@@ -359,7 +360,7 @@ function scoreDefend(intent: DefendIntent, input: BotPolicyInput, own: ReadonlyM
       if (chosenKeys.includes(SOULBOND_RESOLVE) && anyLeft) adjustment += SOUL_VALUE + 0.5;
       if (chosenKeys.includes(CIRCLET)) {
         const opponent = observed.view.players[1 - observed.seat]!;
-        if (opponent.banish.some((card) => !card.faceDown && observed.cards[card.cardId]?.cardType === "action")) {
+        if (opponent.banish.some((card) => !card.faceDown && hasType(observed.cards[card.cardId], "action"))) {
           adjustment += 1.5;
         }
       }
@@ -619,7 +620,7 @@ function resourceWants(input: BotPolicyInput): { card: CardView; cost: number }[
   return reserve(input).flatMap((card) => {
     const data = input.cards[card.cardId];
     // A defense reaction only spends resources in the opponent's reaction step.
-    const usable = ourTurn ? data?.cardType !== "defense-reaction" : reacting && data?.cardType === "defense-reaction";
+    const usable = ourTurn ? !hasType(data, "defense-reaction") : reacting && hasType(data, "defense-reaction");
     return usable ? [{ card, cost: resourceCost(data) }] : [];
   });
 }
@@ -870,9 +871,9 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     const banished = soulBanishedThisChain(input);
     score = 3 + 2 * Math.min(3, banished) +
       (banished === 0 && soul >= 3 && holds(input, CELESTIAL_CATACLYSM) ? -3 : 0);
-  } else if (data.cardType === "attack-reaction") {
+  } else if (hasType(data, "attack-reaction")) {
     score = scoreAttackReaction(data, input, own);
-  } else if (data.cardType === "defense-reaction") {
+  } else if (hasType(data, "defense-reaction")) {
     score = boltynDefenseReactionWorthSpending(intent, card, data, input, chargeable)
       ? scoreDefenseReaction(data, input) + (functional === SAVING_GRACE && chargeable.length > 0 ? 4 : 0)
       : -100;

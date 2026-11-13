@@ -1,11 +1,10 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import type { CardCostSelection, CardData, GameIntent, MeldSide, PlayableZone } from "@fyendal/shared";
+import type { CardCostSelection, CardData, CardType, GameIntent, MeldSide, PlayableZone } from "@fyendal/shared";
 import type { CardInstance, PlayerState } from "./state.js";
 import {
   activatedAbilitiesSuppressed,
   cardHasType,
-  isNonActionInstant,
   cardNamesOf,
   cardTypesOf,
   dataOf,
@@ -49,6 +48,7 @@ import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, controlsBow, firstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { nonAttackActionCardLimitReached, opposingActionsProhibited, ownedCardActionProhibited } from "./restrictions.js";
 import { attackActionPlayRestricted, defendingHeroCannotRespondBelowPower, defenseReactionRestriction, weaponAttacksProhibited } from "./combatRestrictions.js";
+import { hasType } from "@fyendal/shared";
 
 /** Valid subsets, smallest first, capped for search and the wire; the greedy
  *  largest set survives the cap. */
@@ -432,9 +432,7 @@ function playIntentsForCard(
   if (card.faceDown && from !== "arsenal") return [];
   if (isFrozen(state, card)) return [];
   const data = instanceDataOf(state, card);
-  const playableEquipment =
-    data.cardType === "equipment" && scriptOf(state, card.cardId, card)?.playableEquipment === true;
-  if (data.cardType !== "action" && data.cardType !== "instant" && !playableEquipment) return [];
+  if (!hasType(data, "action") && !hasType(data, "instant")) return [];
   if (player.actionPoints < 1 && !canPlayAsInstant(state, runtime, player.seat, card, undefined, from)) return [];
   if (attackActionPlayRestricted(state, runtime, player, card)) return [];
   if (nonAttackActionCardLimitReached(state, player, card)) return [];
@@ -449,10 +447,10 @@ function playIntentsForCard(
   // mirror playCard's effective cost so the offered pitches match what
   // applyIntent will accept (extra cost from Debilitate, reduction from
   // Heartened Cross Strap, ...); Meld "both" doubles the base cost first
-  const isAttackAction = data.cardType === "action" && (data.subtypes ?? []).includes("attack");
+  const isAttackAction = hasType(data, "action") && (data.subtypes ?? []).includes("attack");
   const withPlayMethods = (intents: GameIntent[]): GameIntent[] => {
     const presented = withPreStackPresentation(script, intents);
-    if (data.cardType === "instant") return presented;
+    if (hasType(data, "instant")) return presented;
     if (!canPlayAsInstant(state, runtime, player.seat, card, undefined, from)) return presented;
     const instantIntents = presented.flatMap((intent): GameIntent[] => {
       if (
@@ -463,11 +461,9 @@ function playIntentsForCard(
       return [{ ...intent, asInstant: true }];
     });
     if (
-      isNonActionInstant(state, card) || (
-        from !== "hand"
-        && from !== "arsenal"
-        && playFromZoneRequiresInstant(state, runtime, card, from, player.seat)
-      )
+      from !== "hand"
+      && from !== "arsenal"
+      && playFromZoneRequiresInstant(state, runtime, card, from, player.seat)
     ) return instantIntents;
     return player.actionPoints > 0 ? [...presented, ...instantIntents] : instantIntents;
   };
@@ -898,7 +894,7 @@ function reactionIntents(
   const instantsProhibited = opposingInstantsProhibited(state, player.seat);
   // an attack targeting a non-hero object can't be answered with defense
   // reactions (CR 8.2.8d / 8.3.14a) — instants are still fine
-  const wanted: CardData["cardType"][] = isAttacker
+  const wanted: CardType[] = isAttacker
     ? ["attack-reaction", "instant"]
     : link.targetAllyId !== undefined
       ? ["instant"]
@@ -929,7 +925,7 @@ function reactionIntents(
       const data = instanceDataOf(state, card);
       const script = scriptOf(state, card.cardId, card);
       const asInstant = canPlayAsInstant(state, runtime, player.seat, card, link, fromZone ?? (fromArsenal ? "arsenal" : "hand"));
-      if (instantsProhibited && (data.cardType === "instant" || asInstant)) continue;
+      if (instantsProhibited && (hasType(data, "instant") || asInstant)) continue;
       // Arsenal is a private zone, but its owner may play cards from it (CR
       // 3.3.4 / 5.1.1a). Face-down cards in other zones remain inert unless an
       // explicit permission makes them playable (such as a banished trap).
@@ -937,16 +933,16 @@ function reactionIntents(
       if (isFrozen(state, card)) continue;
       if (cardPlayRestrictedByModifier(state, player.seat, card)) continue;
       if (playOriginRestricted(player, fromZone ?? (fromArsenal ? "arsenal" : "hand"))) continue;
-      if (!wanted.includes(data.cardType)) {
+      if (!data.types.some((type) => wanted.includes(type))) {
         // an action playable "as though it were an instant" counts as an instant here
         if (!asInstant) continue;
       }
       const fromHand = !fromArsenal && !fromZone;
-      if (blockHandDefReacts && fromHand && data.cardType === "defense-reaction") continue;
-      if (nonBlockDefenderLimitReached && data.cardType === "defense-reaction") continue;
-      if (data.cardType === "defense-reaction" && veilBlocksDefender(state, link, card)) continue;
+      if (blockHandDefReacts && fromHand && hasType(data, "defense-reaction")) continue;
+      if (nonBlockDefenderLimitReached && hasType(data, "defense-reaction")) continue;
+      if (hasType(data, "defense-reaction") && veilBlocksDefender(state, link, card)) continue;
       // "defense reactions can't be played to this chain link" / "...from arsenal"
-      if (!isAttacker && data.cardType === "defense-reaction") {
+      if (!isAttacker && hasType(data, "defense-reaction")) {
         if (
           drRestriction.all ||
           (fromArsenal && drRestriction.fromArsenal) ||
@@ -959,7 +955,7 @@ function reactionIntents(
       ) continue;
       // scripted defend legality ("only defend an attack with 3 or less base
       // {p}") also gates playing a defense reaction onto the link
-      if (!isAttacker && data.cardType === "defense-reaction") {
+      if (!isAttacker && hasType(data, "defense-reaction")) {
         const canDefend = script?.canDefend;
         if (canDefend && !canDefend(runtime.makeCtx(state, player.seat, card, link))) continue;
         if (!attackAllowsDefender(state, runtime, link, card, fromHand)) continue;
@@ -985,7 +981,7 @@ function reactionIntents(
         : [undefined];
       const allyTargets = isAttackActionData(data) ? attackTargets(state, runtime, player) : [undefined];
       const markInstantMethod = (candidates: GameIntent[]): GameIntent[] =>
-        markInstantPlayMethod(candidates, data.cardType === "action" && asInstant);
+        markInstantPlayMethod(candidates, hasType(data, "action") && asInstant);
       const firstCardIntent = intents.length;
       const boosts = boostChoices(state, player, card);
       for (const meldSide of meldSides) {
@@ -1429,7 +1425,7 @@ function enumerateIntents(
           const markInstantMethod = (candidates: GameIntent[]): GameIntent[] =>
             markInstantPlayMethod(
               candidates,
-              instanceDataOf(state, card).cardType === "action",
+              hasType(instanceDataOf(state, card), "action"),
             );
           const meldSides: Array<MeldSide | undefined> = script?.meld
             ? (["left", "right", "both"] as MeldSide[]).filter(

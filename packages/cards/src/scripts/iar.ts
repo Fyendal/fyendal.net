@@ -33,6 +33,7 @@ import {
   resourceAbility,
   solflareTrigger,
 } from "./shared-helpers.js";
+import { hasType as hasPrintedType } from "@fyendal/shared";
 
 const RUNECHANT = "SBA036";
 const GATE = "IAR222";
@@ -2121,7 +2122,7 @@ export const iar: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       const ponders = ctx
         .player(ctx.seat)
-        .board.filter((card) => cardNamed(ctx, card, "Ponder") && ctx.cardData(card.cardId).cardType === "token");
+        .board.filter((card) => cardNamed(ctx, card, "Ponder") && hasPrintedType(ctx.cardData(card.cardId), "token"));
       if (ponders.length > 0) {
         ctx.requestCardChoice(
           "iar-rush-ponder",
@@ -2140,7 +2141,7 @@ export const iar: Record<string, CardScript> = {
           (card) =>
             card.instanceId === Number(option) &&
             cardNamed(ctx, card, "Ponder") &&
-            ctx.cardData(card.cardId).cardType === "token",
+            hasPrintedType(ctx.cardData(card.cardId), "token"),
         );
       if (!target || !ctx.destroyPermanent(target.instanceId)) return;
       ctx.drawCards(ctx.seat, 1);

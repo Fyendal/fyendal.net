@@ -6,6 +6,7 @@ import {
   localizedCardLog,
   optionalChargeOptions,
 } from "./shared-helpers.js";
+import { hasType } from "@fyendal/shared";
 
 const COURAGE = "ASB027";
 const QUICKEN = "ASB028";
@@ -97,7 +98,7 @@ export const asb: Record<string, CardScript> = {
       }
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.attackingCard !== undefined && ctx.cardData(ctx.link.attackingCard.cardId).cardType === "weapon";
+      return ctx.link?.attackingCard !== undefined && hasType(ctx.cardData(ctx.link.attackingCard.cardId), "weapon");
     },
     onHit(ctx) {
       const top = ctx.player(ctx.seat).deck[0];

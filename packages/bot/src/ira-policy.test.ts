@@ -6,6 +6,7 @@ import { ClientBotPolicy } from "./client-task.js";
 import { isAdvertisedBotIntent } from "./intents.js";
 import { chooseIraIntent, chooseIraIntentWithTrace } from "./ira-policy.js";
 import { iraPresentation, iraSagePresentationFor, kayoPresentationFor } from "./sideboard.js";
+import { hasType } from "@fyendal/shared";
 
 function iraDeck(): Decklist {
   const pool = precon("precon-asr")!.pool;
@@ -431,7 +432,7 @@ describe("Ira policy", () => {
     });
     const view = projectStateFor(state, 0);
     const equipment = Object.values(view.players[0].equipment).find((card) =>
-      card && cardData[card.cardId]?.cardType === "equipment"
+      card && hasType(cardData[card.cardId], "equipment")
     )!;
     const handCard = view.players[0].hand[0]!;
     view.priorityPlayer = 0;

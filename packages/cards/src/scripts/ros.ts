@@ -29,6 +29,7 @@ import {
   resourceAbility,
   hasLiveTurnEffect,
 } from "./shared-helpers.js";
+import { hasType } from "@fyendal/shared";
 
 // Rosetta (ROS) — commons, rares, young heroes, and their required tokens.
 
@@ -1119,7 +1120,7 @@ for (const pitch of [1, 2, 3]) {
               .flatMap((player) => player.board)
               .filter(
                 (card) =>
-                  isAura(ctx, card) && ((data(ctx, card).cost ?? 0) <= 1 || data(ctx, card).cardType === "token"),
+                  isAura(ctx, card) && ((data(ctx, card).cost ?? 0) <= 1 || hasType(data(ctx, card), "token")),
               )
               .map((card) => card.instanceId),
           prompt: () =>
@@ -1236,7 +1237,7 @@ Object.assign(ros, {
         const auras = ctx.state.players
           .flatMap((player) => player.board)
           .filter(
-            (card) => isAura(ctx, card) && ((data(ctx, card).cost ?? 0) <= x || data(ctx, card).cardType === "token"),
+            (card) => isAura(ctx, card) && ((data(ctx, card).cost ?? 0) <= x || hasType(data(ctx, card), "token")),
           );
         if (auras.length)
           ctx.requestCardChoice(

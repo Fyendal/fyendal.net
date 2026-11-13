@@ -14,6 +14,7 @@ import {
   yesNoPrompt,
 } from "../shared-helpers.js";
 import { dragonAttack } from "./dragon-attack.js";
+import { hasType } from "@fyendal/shared";
 
 const ASH = "UPR043";
 const FROSTBITE = "SIY035";
@@ -150,7 +151,7 @@ const iyslander: CardScript = {
 function equippedCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
   return [
     ...Object.values(ctx.player(seat).equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
-    ...ctx.player(seat).weapons.filter((card) => ctx.cardData(card.cardId).cardType === "equipment"),
+    ...ctx.player(seat).weapons.filter((card) => hasType(ctx.cardData(card.cardId), "equipment")),
   ];
 }
 

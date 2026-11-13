@@ -2,7 +2,7 @@
  {
   "id": "AAC001",
   "name": "Arakni, 5L!p3d 7hRu 7h3 cR4X",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first attack with stealth each turn gets go again.",
   "classes": [
    "chaos",
@@ -15,7 +15,7 @@
  {
   "id": "AAC002",
   "name": "Hunter's Klaive",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits a hero, mark them.\nPiercing 1",
   "attack": 1,
   "classes": [
@@ -34,7 +34,7 @@
  {
   "id": "AAC003",
   "name": "Spider's Bite",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more attack action cards this turn, those cards have -1{d} while defending.",
   "attack": 1,
   "classes": [
@@ -52,7 +52,7 @@
  {
   "id": "AAC004",
   "name": "Prey Spotters",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Attack Reaction - Destroy this: Mark target opposing hero.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -69,7 +69,7 @@
  {
   "id": "AAC005",
   "name": "Inverter's Nightcowl",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Until end of turn, whenever you play an attack action card with stealth, gain {r}. Go again\nBattleworn",
   "defense": 1,
   "classes": [
@@ -86,7 +86,7 @@
  {
   "id": "AAC006",
   "name": "Rage Baiters",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Attack Reaction - {r}, {t}: Target attack with stealth gets \"When this hits a hero, mark them.\"\nBlade Break",
   "defense": 1,
   "classes": [
@@ -103,7 +103,7 @@
  {
   "id": "AAC007",
   "name": "Stalker's Steps",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Attack Reaction - Destroy this: Target attack with stealth gets go again\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -120,7 +120,7 @@
  {
   "id": "AAC008",
   "name": "Art of Desire: Body",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a red card, draw a card and gain 1{h}.",
   "pitch": 1,
   "cost": 0,
@@ -140,7 +140,7 @@
  {
   "id": "AAC009",
   "name": "Creep",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this attacks, the next attack with stealth you play this combat chain gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -160,7 +160,7 @@
  {
   "id": "AAC010",
   "name": "Infect",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
   "pitch": 1,
   "cost": 0,
@@ -180,7 +180,7 @@
  {
   "id": "AAC011",
   "name": "Infiltrate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, banish the top card of their deck. You may play it until the end of your next turn.",
   "pitch": 1,
   "cost": 0,
@@ -200,7 +200,7 @@
  {
   "id": "AAC012",
   "name": "Mark of the Black Widow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a marked hero, they banish a card from their hand.",
   "pitch": 1,
   "cost": 0,
@@ -220,7 +220,7 @@
  {
   "id": "AAC013",
   "name": "Mark of the Funnel Web",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a marked hero, banish a card in their arsenal.",
   "pitch": 1,
   "cost": 0,
@@ -240,7 +240,7 @@
  {
   "id": "AAC014",
   "name": "Meet Madness",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, choose 1 at random;\n- They choose a card in their hand. Banish it.\n- They choose a card in their arsenal. Banish it.\n- Banish the top card of their deck.",
   "pitch": 1,
   "cost": 0,
@@ -261,7 +261,7 @@
  {
   "id": "AAC015",
   "name": "Pick to Pieces",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nIf you've played or activated an attack reaction this chain link, this gets +1{p} and \"Damage that would be dealt by this can't be prevented.\"",
   "pitch": 1,
   "cost": 0,
@@ -281,7 +281,7 @@
  {
   "id": "AAC016",
   "name": "Prowl",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nThe next attack with stealth you play this combat chain gains +1{p}.",
   "pitch": 1,
   "cost": 0,
@@ -301,7 +301,7 @@
  {
   "id": "AAC017",
   "name": "Scuttle the Canal",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this attacks a marked hero, this gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -322,7 +322,7 @@
  {
   "id": "AAC018",
   "name": "Undercover Acquisition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, steal an item they control.",
   "pitch": 1,
   "cost": 0,
@@ -343,7 +343,7 @@
  {
   "id": "AAC019",
   "name": "Razor's Edge",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target attack action card with stealth gets +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -356,7 +356,7 @@
  {
   "id": "AAC020",
   "name": "Spike with Bloodrot",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target attack action card with stealth gains +3{p} and \"When this hits a hero, create a Bloodrot Pox token under their control.\"",
   "pitch": 1,
   "cost": 1,
@@ -369,7 +369,7 @@
  {
   "id": "AAC021",
   "name": "Stains of the Redback",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "If the defending hero is marked, this costs {r} less to play.\nTarget attack with stealth gets +3{p} and go again.",
   "pitch": 1,
   "cost": 1,
@@ -382,7 +382,7 @@
  {
   "id": "AAC022",
   "name": "Horrors of the Past",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this attacks, it gets the base abilities of the last attack action card with stealth you control on the combat chain.",
   "pitch": 2,
   "cost": 0,
@@ -402,7 +402,7 @@
  {
   "id": "AAC023",
   "name": "Shred",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target card defending an Assassin attack gets -3{d} this combat chain.",
   "pitch": 2,
   "cost": 0,
@@ -415,7 +415,7 @@
  {
   "id": "AAC024",
   "name": "Take Up the Mantle",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target attack action card with stealth gets +2{p}. If it's attacking a marked hero, instead it gets +3{p} and you may banish an attack action card with stealth from your graveyard. If you do, the target becomes a copy of the banished card.",
   "pitch": 2,
   "cost": 0,
@@ -428,7 +428,7 @@
  {
   "id": "AAC025",
   "name": "Mark of the Black Widow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a marked hero, they banish a card from their hand.",
   "pitch": 3,
   "cost": 0,
@@ -448,7 +448,7 @@
  {
   "id": "AAC026",
   "name": "Mark of the Funnel Web",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a marked hero, banish a card in their arsenal.",
   "pitch": 3,
   "cost": 0,
@@ -468,7 +468,7 @@
  {
   "id": "AAC027",
   "name": "Reaper's Call",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nInstant - Discard this: Mark target opposing hero.",
   "pitch": 3,
   "cost": 0,
@@ -488,7 +488,7 @@
  {
   "id": "AAC028",
   "name": "Night's Embrace",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Your attacks with stealth get +1{p} this turn.",
   "pitch": 3,
   "defense": 3,
@@ -500,7 +500,7 @@
  {
   "id": "AAC029",
   "name": "Shred",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target card defending an Assassin attack gets -2{d} this combat chain.",
   "pitch": 3,
   "cost": 0,
@@ -513,7 +513,7 @@
  {
   "id": "AAC030",
   "name": "Bloodrot Pox",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the beginning of your end phase, destroy Bloodrot Pox, then it deals 2 damage to you unless you pay {r}{r}{r}.",
   "classes": [
    "generic"
@@ -526,7 +526,7 @@
  {
   "id": "AAC031",
   "name": "Marked",
-  "cardType": "token",
+  "types": ["token"],
   "text": "You are marked until an opponent hits you",
   "keywords": [
    "Mark"

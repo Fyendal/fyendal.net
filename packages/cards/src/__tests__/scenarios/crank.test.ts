@@ -2,11 +2,12 @@ import { describe, expect, it } from "vitest";
 import { functionalKeyOf } from "../../functional.js";
 import { cardData } from "../../index.js";
 import { scenario } from "../harness.js";
+import { hasType } from "@fyendal/shared";
 
 const standardCrankEntries = [...new Map(
   Object.values(cardData)
     .filter((card) =>
-      card.cardType !== "token" &&
+      !hasType(card, "token") &&
       card.keywords?.some((keyword) => keyword.trim().toLowerCase() === "crank") &&
       /this enters the arena with (?:a|\d+) str?eam counters?/i.test(card.text)
     )

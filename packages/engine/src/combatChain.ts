@@ -39,6 +39,7 @@ import { controlledPermanents, hookSources, lingeringModifierSources } from "./s
 import { transitionZone } from "./transitions.js";
 
 import { checkWin } from "./win.js";
+import { hasType } from "@fyendal/shared";
 
 /** The link stays on the chain until the chain closes; closeChain moves the
  *  cards to the graveyard and destroys blade-break / battleworn equipment.
@@ -95,7 +96,7 @@ export function finishLinkResolution(state: GameStateInternal,
   beginLinkResolutionStep(state, runtime, link);
   const defendedByAttackAction = link.defendingCards.some((card) => {
     const data = dataOf(state, card.cardId);
-    return data.cardType === "action" && (data.subtypes ?? []).includes("attack");
+    return hasType(data, "action") && (data.subtypes ?? []).includes("attack");
   });
   if (defendedByAttackAction) {
     const counters = activeModifiers(state, link, ["chain-link"])

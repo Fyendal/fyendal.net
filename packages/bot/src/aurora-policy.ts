@@ -36,6 +36,7 @@ import {
   type BotPolicyInput,
   type ResponseModel,
 } from "./policy.js";
+import { hasType } from "@fyendal/shared";
 
 /** Below this life after an unblocked hit, Aurora stops racing and blocks. */
 const BLOCKING_LIFE = 5;
@@ -71,7 +72,7 @@ const CONDITIONAL_GO_AGAIN = new Set([
 ]);
 
 function isNonAttack(data: CardData | undefined): boolean {
-  return data?.cardType === "action" && !data.subtypes?.includes("attack");
+  return data !== undefined && hasType(data, "action") && !data.subtypes?.includes("attack");
 }
 
 function isLightning(data: CardData): boolean {
@@ -93,8 +94,8 @@ function consumesSetup(setup: string, followup: CardData): boolean {
     return isAttack(followup) && (followup.classes?.includes("runeblade") === true || isLightning(followup));
   }
   // Arc Lightning's grant reaches the next action card of any kind.
-  if (setup === "arc lightning|2") return followup.cardType === "action";
-  return isAttack(followup) || followup.cardType === "weapon";
+  if (setup === "arc lightning|2") return hasType(followup, "action");
+  return isAttack(followup) || hasType(followup, "weapon");
 }
 
 /** Another playable attack (or action, for Arc Lightning) can follow the setup. */
@@ -143,7 +144,7 @@ function followups(
 /** Arc Lightning grants the next action card go again, so each other action
  * card, or go-again instant, left after paying pings. */
 const pingsUnderArc = (data: CardData) =>
-  data.cardType === "action" || data.keywords?.some((keyword) => keyword.toLowerCase() === "go again") === true;
+  hasType(data, "action") || data.keywords?.some((keyword) => keyword.toLowerCase() === "go again") === true;
 
 function isArcLightning(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): boolean {
   if (intent.kind !== "play-card" && intent.kind !== "play-from-arsenal") return false;
@@ -173,7 +174,7 @@ function wastesPendingSetup(card: CardView, input: BotPolicyInput, own: Readonly
   return input.legal.some((candidate) => {
     const other = intentCard(candidate, own);
     const otherData = other && other.instanceId !== card.instanceId ? input.cards[other.cardId] : undefined;
-    return !!otherData && (isAttack(otherData) || otherData.cardType === "weapon") &&
+    return !!otherData && (isAttack(otherData) || hasType(otherData, "weapon")) &&
       pending.every((setup) => consumesSetup(setup, otherData));
   });
 }
@@ -363,7 +364,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   if (spendsOpeningArsenalReserve(intent, input, own)) return -100;
 
   if (intent.kind === "activate-ability") {
-    if (data.cardType === "weapon") {
+    if (hasType(data, "weapon")) {
       if (wastesPendingSetup(card, input, own)) return -100;
       score = 12 + pendingSetups(input).length * 10;
     } else if (functional === "aether ironweave|0") {
@@ -401,7 +402,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
         input.view.turnFacts?.players[input.seat].playedSubtypes.includes("lightning") === true);
     if (hasReliableGoAgain(data, intent.kind === "play-from-arsenal") || conditionalGoAgain) score += 13;
     if (functional === "snatch|1") score += 3;
-  } else if (data.cardType === "instant") {
+  } else if (hasType(data, "instant")) {
     const ownAttack = currentLink(input)?.attackingCard.owner === input.seat;
     if (functional === "burn up // shock|1" && "meldSide" in intent) {
       score = shouldMeldBurnUp(intent, input, own)
@@ -414,7 +415,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     } else {
       score = myTurn ? 14 : 2;
     }
-  } else if (data.cardType === "defense-reaction") {
+  } else if (hasType(data, "defense-reaction")) {
     score = defenseReactionWorthSpending(card, input, auroraSolverRules, pitchIds(intent))
       ? scoreDefenseReaction(data, input)
       : -100;

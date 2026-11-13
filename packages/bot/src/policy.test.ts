@@ -505,7 +505,7 @@ describe("opening-turn aggression", () => {
     const { input, allIn, preserving } = openingInput();
     input.view.players[1].handCount = 4;
     const actions = Array.from({ length: 34 }, () => "ANQ031");
-    expect(cardData.WTR163?.cardType).toBe("instant");
+    expect(cardData.WTR163?.types).toEqual(["instant"]);
 
     expect(shouldPreserveOpeningHand(input)).toBe(true);
     input.decklists = { opponent: [...actions, ...Array.from({ length: 4 }, () => "WTR163")] };
@@ -716,7 +716,7 @@ function equipmentDefenseScores(options: {
     [equipmentCardId]: {
       id: equipmentCardId,
       name: options.equipmentName ?? "Test Durable Armor",
-      cardType: "equipment",
+      types: ["equipment"],
       text: (options.equipmentKeywords ?? ["Battleworn"]).join(". "),
       defense: options.equipmentDefense ?? 2,
       subtypes: ["head"],
@@ -725,7 +725,7 @@ function equipmentDefenseScores(options: {
     [attackCardId]: {
       id: attackCardId,
       name: "Test Attack",
-      cardType: options.attackType ?? "action",
+      types: [options.attackType ?? "action"],
       text: options.onHit ? "When this hits, draw a card." : "",
       ...(options.attackType === "weapon" ? {} : { subtypes: ["attack"] }),
       attack: 2,
@@ -789,7 +789,7 @@ function cycleDefenseFixture(
     TEST_CYCLE_ATTACK: {
       id: "TEST_CYCLE_ATTACK",
       name: "Test Cycle Attack",
-      cardType: "action",
+      types: ["action"],
       text: "",
       attack: options.attackValue ?? 3,
       subtypes: ["attack"],
@@ -799,7 +799,7 @@ function cycleDefenseFixture(
     cards[spec.id] = {
       id: spec.id,
       name: spec.id,
-      cardType: "action",
+      types: ["action"],
       text: "",
       attack: spec.attack,
       defense: spec.defense,
@@ -1102,7 +1102,7 @@ describe("shared turn-cycle defense value", () => {
       TEST_VALUE_BLOCKER: {
         id: "TEST_VALUE_BLOCKER",
         name: "Test Value Blocker",
-        cardType: "action",
+        types: ["action"],
         text: "",
         pitch: 1,
         cost: 0,
@@ -1113,7 +1113,7 @@ describe("shared turn-cycle defense value", () => {
       TEST_VALUE_ATTACK: {
         id: "TEST_VALUE_ATTACK",
         name: "Test Value Attack",
-        cardType: "action",
+        types: ["action"],
         text: "",
         attack: 4,
         subtypes: ["attack"],
@@ -1251,7 +1251,7 @@ describe("shared turn-cycle defense value", () => {
     const [defender, reaction, reactionPitch] = fixture.held;
     fixture.cards.PLANNED_REACTION = {
       ...fixture.cards.PLANNED_REACTION!,
-      cardType: "defense-reaction",
+      types: ["defense-reaction"],
       cost: 1,
       defense: 2,
     };
@@ -1264,7 +1264,7 @@ describe("shared turn-cycle defense value", () => {
     fixture.cards.CYCLE_EQUIPMENT = {
       id: "CYCLE_EQUIPMENT",
       name: "Cycle Equipment",
-      cardType: "equipment",
+      types: ["equipment"],
       text: "Battleworn",
       defense: 1,
       keywords: ["Battleworn"],
@@ -1436,14 +1436,14 @@ describe("planned prevention", () => {
       TEST_MIRAGE: {
         id: "TEST_MIRAGE",
         name: "Test Mirage",
-        cardType: "defense-reaction" as const,
+        types: ["defense-reaction" as const],
         keywords: ["Mirage"],
         text: "Mirage",
         cost: 0,
         defense: 4,
       },
-      TEST_ATTACK: { id: "TEST_ATTACK", name: "Test Attack", cardType: "action" as const, subtypes: ["attack"], text: "", classes: [] },
-      TEST_ILLUSION: { id: "TEST_ILLUSION", name: "Test Illusion", cardType: "action" as const, subtypes: ["attack"], text: "", classes: ["illusionist"] },
+      TEST_ATTACK: { id: "TEST_ATTACK", name: "Test Attack", types: ["action" as const], subtypes: ["attack"], text: "", classes: [] },
+      TEST_ILLUSION: { id: "TEST_ILLUSION", name: "Test Illusion", types: ["action" as const], subtypes: ["attack"], text: "", classes: ["illusionist"] },
     } as BotPolicyInput["cards"];
     const evaluate = (cardId: string, attackValue: number) => {
       view.chain = [{
@@ -1499,7 +1499,7 @@ describe("planned prevention", () => {
       TEST_REACTION: {
         id: "TEST_REACTION",
         name: "Test Reaction",
-        cardType: "defense-reaction" as const,
+        types: ["defense-reaction" as const],
         text: "",
         cost: 1,
         defense: 4,
@@ -1507,7 +1507,7 @@ describe("planned prevention", () => {
       TEST_BLUE: {
         id: "TEST_BLUE",
         name: "Test Blue",
-        cardType: "action" as const,
+        types: ["action" as const],
         subtypes: ["attack"],
         text: "",
         pitch: 3 as const,
@@ -1724,7 +1724,7 @@ describe("public pump lethal", () => {
   it("plans defense reactions against the pumped total", () => {
     const fixture = pumpFixture({ cogs: 2 });
     for (const id of ["FIRST_BLOCKER", "SECOND_BLOCKER"]) {
-      fixture.cards[id] = { ...fixture.cards[id]!, cardType: "defense-reaction" };
+      fixture.cards[id] = { ...fixture.cards[id]!, types: ["defense-reaction"] };
     }
     // One 3-defense reaction survives the printed 4 at 2 life; the pumped 6
     // needs both.

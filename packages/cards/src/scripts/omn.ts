@@ -28,6 +28,7 @@ import {
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { omnHighRarity } from "./omn/high-rarity.js";
+import { hasType } from "@fyendal/shared";
 
 // Omens of the Third Age (OMN) — complete set and tokens.
 
@@ -51,7 +52,7 @@ function isInstant(ctx: ScriptCtx, card: Card): boolean {
   return ctx.hasCardType(card, "instant");
 }
 function isTokenAura(ctx: ScriptCtx, card: Card): boolean {
-  return data(ctx, card).cardType === "token" && isAura(ctx, card);
+  return hasType(data(ctx, card), "token") && isAura(ctx, card);
 }
 function flows(ctx: ScriptCtx, seat = ctx.seat): Card[] {
   return ctx.player(seat).board.filter((card) => cardNamed(ctx, card, "Lightning Flow"));

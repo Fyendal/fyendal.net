@@ -5,6 +5,7 @@ import type { CardScript } from "./scripts.js";
 import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { currentLink, findCardAnywhere } from "./zoneQueries.js";
+import { hasType } from "@fyendal/shared";
 
 // Card data currently stores talent supertypes beside ordinary subtypes.
 // Keep this aligned with CR 2.11.6b so effects such as Erase Face can remove
@@ -105,7 +106,7 @@ function abilitiesLostToChosenName(state: GameStateInternal, card: CardInstance)
       if (!filter || !chosen || source.instanceId === card.instanceId) continue;
       if (ownAbilitiesSuppressed(state, source)) continue;
       data ??= instanceDataOf(state, card);
-      if (filter.cardType !== undefined && data.cardType !== filter.cardType) continue;
+      if (filter.cardType !== undefined && !hasType(data, filter.cardType)) continue;
       if (filter.subtype !== undefined && !(data.subtypes ?? []).includes(filter.subtype)) continue;
       names ??= [data.name, ...(card.grantedNames ?? [])].map((name) => name.trim().toLowerCase());
       if (names.includes(chosen)) return true;
@@ -224,16 +225,10 @@ export function meldSideHasType(
   cardType: CardType,
 ): boolean {
   const meld = scriptOf(state, card.cardId, card)?.meld;
-  if (!meld) return instanceDataOf(state, card).cardType === cardType;
+  if (!meld) return hasType(instanceDataOf(state, card), cardType);
   if (side === "left") return meld.leftCardType === cardType;
   if (side === "right") return meld.rightCardType === cardType;
   return meld.leftCardType === cardType || meld.rightCardType === cardType;
-}
-
-/** A non-meld card with the instant type and no action type, such as an Equipment - Instant Evo. */
-export function isNonActionInstant(state: GameStateInternal, card: CardInstance): boolean {
-  return !scriptOf(state, card.cardId, card)?.meld &&
-    cardHasType(state, card, "instant") && !cardHasType(state, card, "action");
 }
 
 export function cardHasType(
@@ -241,12 +236,9 @@ export function cardHasType(
   card: CardInstance,
   cardType: CardType,
 ): boolean {
-  const script = state.scriptsRef[card.cardId];
-  // Playable equipment is an action unless it is printed Equipment - Instant.
-  if (cardType === "action" && script?.playableEquipment && !script.additionalCardTypes?.includes("instant")) return true;
-  if (script?.additionalCardTypes?.includes(cardType)) return true;
+  if (state.scriptsRef[card.cardId]?.additionalCardTypes?.includes(cardType)) return true;
   const meld = scriptOf(state, card.cardId, card)?.meld;
-  if (!meld) return instanceDataOf(state, card).cardType === cardType;
+  if (!meld) return hasType(instanceDataOf(state, card), cardType);
   const declaredObjectExists = state.stack.some(
     (layer) => layer.card?.instanceId === card.instanceId,
   ) || state.resolving.some((resolving) => resolving.instanceId === card.instanceId);
@@ -383,7 +375,7 @@ export function isChiCard(state: GameStateInternal, card: CardInstance): boolean
 
 /** An attack action card: playing it creates an attack, not resolution effects. */
 export function isAttackActionData(data: CardData): boolean {
-  return data.cardType === "action" && (data.subtypes ?? []).includes("attack");
+  return hasType(data, "action") && (data.subtypes ?? []).includes("attack");
 }
 
 /** CR 8.2.6a: arrows can only be played from arsenal while controlling a bow. */

@@ -110,7 +110,7 @@ describe("authoritative match stats", () => {
     state.cardsRef = {
       ...state.cardsRef,
       TEST_ALLY: {
-        id: "TEST_ALLY", name: "Test Ally", cardType: "action",
+        id: "TEST_ALLY", name: "Test Ally", types: ["action"],
         subtypes: ["ally"], classes: ["generic"], life: 10, text: "",
       },
     };
@@ -144,7 +144,7 @@ describe("authoritative match stats", () => {
     state.cardsRef = {
       ...state.cardsRef,
       TEST_ALLY: {
-        id: "TEST_ALLY", name: "Test Ally", cardType: "action",
+        id: "TEST_ALLY", name: "Test Ally", types: ["action"],
         subtypes: ["ally"], classes: ["generic"], life: 6, text: "",
       },
     };

@@ -17,6 +17,7 @@ import {
   targetHeroSeat,
 } from "../shared-helpers.js";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "../aha/warrior-sharpen.js";
+import { hasType } from "@fyendal/shared";
 
 const EMBODIMENT = "ROS026";
 const FLOW = "OMN203";
@@ -511,7 +512,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   "tempt over|2": {
     onAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId !== undefined) return;
-      const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card) && data(ctx, card).cardType === "token");
+      const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card) && hasType(data(ctx, card), "token"));
       if (auras.length)
         ctx.requestCardChoice(
           "tempt-steal",
@@ -561,7 +562,7 @@ export const omnHighRarity: Record<string, CardScript> = {
     canBeDefendedBy(ctx, defending) {
       return (
         ctx.link?.attackingCard.instanceId !== ctx.self.instanceId ||
-        (data(ctx, defending).cardType !== "attack-reaction" && data(ctx, defending).cardType !== "defense-reaction")
+        (!hasType(data(ctx, defending), "attack-reaction") && !hasType(data(ctx, defending), "defense-reaction"))
       );
     },
   }),
@@ -610,9 +611,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   },
   "arcbane grasp|3": {
     playableEquipment: true,
-    additionalCardTypes: ["instant"],
     transformsEquipment: (ctx, equipped) => has(ctx, equipped, "base"),
-    playAsInstant: () => true,
     triggers: [
       entersArenaTrigger(
         "Create a Spellbane Aegis token",
@@ -686,7 +685,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   "crash site salvage|2": {
     declareAdditionalCost(ctx) {
       const choices = faceUpGraveyard(ctx)
-        .filter((card) => has(ctx, card, "item") || data(ctx, card).cardType === "equipment");
+        .filter((card) => has(ctx, card, "item") || hasType(data(ctx, card), "equipment"));
       if (choices.length)
         ctx.requestCardChoice(
           "salvage-scrap",
@@ -701,7 +700,7 @@ export const omnHighRarity: Record<string, CardScript> = {
       const card = faceUpGraveyard(ctx).find(
           (candidate) =>
             candidate.instanceId === Number(option) &&
-            (has(ctx, candidate, "item") || data(ctx, candidate).cardType === "equipment"),
+            (has(ctx, candidate, "item") || hasType(data(ctx, candidate), "equipment")),
         );
       if (card && ctx.banish(card.instanceId)) {
         ctx.setState("scrapped", 1);

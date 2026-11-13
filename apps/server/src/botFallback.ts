@@ -1,5 +1,6 @@
 import { requiredEquipmentStageIntent, type BotPolicyInput } from "@fyendal/bot";
 import type { GameIntent } from "@fyendal/shared";
+import { hasType } from "@fyendal/shared";
 /** Conservative progress fallback for a failed policy. Selection stays within
  * the authoritative observation and never reads a hidden zone. */
 export function fallbackBotIntent(input: BotPolicyInput): GameIntent | undefined {
@@ -32,13 +33,13 @@ export function fallbackBotIntent(input: BotPolicyInput): GameIntent | undefined
       if (link?.overpower) {
         const actions = ids.filter((candidate) =>
           !equipmentIds.has(candidate) &&
-          input.cards[visible.get(candidate)?.cardId ?? ""]?.cardType === "action"
+          hasType(input.cards[visible.get(candidate)?.cardId ?? ""], "action")
         ).length;
         if (actions > 1) return false;
       }
       if (link?.maxNonBlockDefenders !== undefined) {
         const nonBlockDefenders = ids.filter((candidate) =>
-          input.cards[visible.get(candidate)?.cardId ?? ""]?.cardType !== "block"
+          !hasType(input.cards[visible.get(candidate)?.cardId ?? ""], "block")
         ).length;
         if (nonBlockDefenders > link.maxNonBlockDefenders) return false;
       }

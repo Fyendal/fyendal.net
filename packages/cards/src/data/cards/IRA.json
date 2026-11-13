@@ -2,7 +2,7 @@
  {
   "id": "IRA001",
   "name": "Ira, Crimson Haze",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your second attack each turn gets +1{p}.",
   "classes": [
    "ninja"
@@ -14,7 +14,7 @@
  {
   "id": "IRA002",
   "name": "Edge of Autumn",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack. Go again",
   "attack": 1,
   "classes": [
@@ -29,7 +29,7 @@
  {
   "id": "IRA003",
   "name": "Whirling Mist Blossom",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ira Specialization\nWhen this hits and it's the second or higher chain link in a row to hit, draw 2 cards.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -50,7 +50,7 @@
  {
   "id": "IRA004",
   "name": "Salt the Wound",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This gets +1{p} for each attack that has hit this combat chain.",
   "pitch": 2,
   "cost": 0,
@@ -67,7 +67,7 @@
  {
   "id": "IRA005",
   "name": "Bittering Thorns",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, your next attack this turn gets +1{p}.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -87,7 +87,7 @@
  {
   "id": "IRA006",
   "name": "Torrent of Tempo",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, it gets go again.",
   "pitch": 1,
   "cost": 1,
@@ -107,7 +107,7 @@
  {
   "id": "IRA007",
   "name": "Flying Kick",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played as chain link 3 or higher, it gets +2{p}.",
   "pitch": 1,
   "cost": 2,
@@ -124,7 +124,7 @@
  {
   "id": "IRA008",
   "name": "Head Jab",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 3,
   "cost": 0,
@@ -144,7 +144,7 @@
  {
   "id": "IRA009",
   "name": "Scar for a Scar",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -164,7 +164,7 @@
  {
   "id": "IRA010",
   "name": "Brutal Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 3,
   "cost": 2,
@@ -181,7 +181,7 @@
  {
   "id": "IRA011",
   "name": "Lunging Press",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target attack action card gains +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -194,7 +194,7 @@
  {
   "id": "IRA012",
   "name": "Springboard Somersault",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "If Springboard Somersault is played from arsenal, it gains +2{d}.",
   "pitch": 2,
   "cost": 0,

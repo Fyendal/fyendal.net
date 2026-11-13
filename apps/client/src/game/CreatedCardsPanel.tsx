@@ -44,7 +44,7 @@ function CreatedCardRow({ cardId }: { cardId: string }) {
   const data = cardData[cardId];
   if (!data) return null;
   // The printed type line: "Generic Token - Aura", "Assassin Action - Attack".
-  const typeLine = [...(data.classes ?? []), data.cardType.replace("-", " ")].join(" ") +
+  const typeLine = [...(data.classes ?? []), ...data.types.map((type) => type.replace("-", " "))].join(" ") +
     (data.subtypes?.length ? ` - ${data.subtypes.join(" ")}` : "");
   return (
     <li className="created-card-row">

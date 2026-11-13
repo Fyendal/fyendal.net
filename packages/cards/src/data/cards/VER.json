@@ -2,7 +2,7 @@
  {
   "id": "VER001",
   "name": "Verdance",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If there are 4 or more Earth cards in your banished zone, Verdance gets \"Whenever you gain {h} during your turn, you may deal 1 arcane damage to any opposing target.\"\nEssence of Earth",
   "classes": [
    "wizard"
@@ -20,7 +20,7 @@
  {
   "id": "VER002",
   "name": "Staff of Verdant Shoots",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}{r}: Amp 1. Go again\nWhen one or more Earth cards are pitched this way, the next time you deal arcane damage this turn, create an Embodiment of Earth token.",
   "classes": [
    "wizard"
@@ -35,7 +35,7 @@
  {
   "id": "VER003",
   "name": "Helm of Lignum Vitae",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If there are 4 or more Earth cards in your banished zone, this gets +1{d}.\nBlade Break",
   "defense": 1,
   "subtypes": [
@@ -50,7 +50,7 @@
  {
   "id": "VER004",
   "name": "Bruised Leather",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Prevent the next 1 damage that would be dealt to you this turn. Activate this only if you've been dealt damage this turn.",
   "defense": 0,
   "classes": [
@@ -64,7 +64,7 @@
  {
   "id": "VER005",
   "name": "Hold Focus",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Amp 1. Go again",
   "defense": 0,
   "classes": [
@@ -78,7 +78,7 @@
  {
   "id": "VER006",
   "name": "Well Grounded",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Prevent the next 2 damage that would be dealt to you this turn. Activate this only if there are 4 or more Earth cards in your banished zone.",
   "defense": 0,
   "subtypes": [
@@ -90,7 +90,7 @@
  {
   "id": "VER007",
   "name": "Autumn's Touch",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 1,
   "cost": 3,
@@ -105,7 +105,7 @@
  {
   "id": "VER008",
   "name": "Blossoming Decay",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, gain 1{h}.",
   "pitch": 1,
   "cost": 2,
@@ -123,7 +123,7 @@
  {
   "id": "VER009",
   "name": "Fruits of the Forest",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Gain 2{h}",
   "pitch": 1,
   "cost": 3,
@@ -138,7 +138,7 @@
  {
   "id": "VER010",
   "name": "Fyendal's Fighting Spirit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}.",
   "pitch": 1,
   "cost": 3,
@@ -155,7 +155,7 @@
  {
   "id": "VER011",
   "name": "Rootbound Carapace",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Decompose - You may banish 2 Earth cards and an action card from your graveyard. If you do, this gets +1{d}.",
   "pitch": 1,
   "cost": 0,
@@ -171,7 +171,7 @@
  {
   "id": "VER012",
   "name": "Aether Quickening",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to target hero.\nSurge - If this deals more than 4 damage, it gets go again.",
   "pitch": 1,
   "cost": 1,
@@ -188,7 +188,7 @@
  {
   "id": "VER013",
   "name": "Harvest Season",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this, then gain 3{h}.",
   "pitch": 1,
   "cost": 1,
@@ -205,7 +205,7 @@
  {
   "id": "VER014",
   "name": "Perennial Aetherbloom",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero.\nSurge - If this deals more than 3 damage, put it on the bottom of its owner's deck.",
   "pitch": 1,
   "cost": 0,
@@ -221,7 +221,7 @@
  {
   "id": "VER015",
   "name": "Pulsing Aether // Life",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Meld\nDeal 4 arcane damage to any target.\n//\nGain 1{h}",
   "pitch": 1,
   "cost": 1,
@@ -240,7 +240,7 @@
  {
   "id": "VER016",
   "name": "Fertile Ground",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Gain 2{h}\nIf there are 4 or more Earth cards in your banished zone, instead gain 5{h}.",
   "pitch": 1,
   "cost": 2,
@@ -252,7 +252,7 @@
  {
   "id": "VER017",
   "name": "Blossoming Decay",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, gain 1{h}.",
   "pitch": 2,
   "cost": 2,
@@ -270,7 +270,7 @@
  {
   "id": "VER018",
   "name": "Autumn's Touch",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 3,
   "cost": 3,
@@ -285,7 +285,7 @@
  {
   "id": "VER019",
   "name": "Blossoming Decay",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, gain 1{h}.",
   "pitch": 3,
   "cost": 2,
@@ -303,7 +303,7 @@
  {
   "id": "VER020",
   "name": "Fruits of the Forest",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Gain 2{h}",
   "pitch": 3,
   "cost": 3,
@@ -318,7 +318,7 @@
  {
   "id": "VER021",
   "name": "Fyendal's Fighting Spirit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}.",
   "pitch": 3,
   "cost": 3,
@@ -335,7 +335,7 @@
  {
   "id": "VER022",
   "name": "Summer's Fall",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, put up to 1 target aura on the bottom of its owner's deck.",
   "pitch": 3,
   "cost": 2,
@@ -353,7 +353,7 @@
  {
   "id": "VER023",
   "name": "Arcane Twining",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to any target.\nInstant - Discard this: Amp 1",
   "pitch": 3,
   "cost": 0,
@@ -366,7 +366,7 @@
  {
   "id": "VER024",
   "name": "Harvest Season",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this, then gain 1{h}.",
   "pitch": 3,
   "cost": 1,
@@ -383,7 +383,7 @@
  {
   "id": "VER025",
   "name": "Pop the Bubble",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to any target.\nSurge - If this deals more than 3 damage to a hero, destroy an aura permanent they control.",
   "pitch": 3,
   "cost": 0,
@@ -399,7 +399,7 @@
  {
   "id": "VER026",
   "name": "Sigil of Fyendal",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this.\nWhen this leaves the arena, gain 1{h}.",
   "pitch": 3,
   "cost": 0,
@@ -418,7 +418,7 @@
  {
   "id": "VER027",
   "name": "Embodiment of Earth",
-  "cardType": "token",
+  "types": ["token"],
   "text": "'Non-attack' action cards you control have +1{d} while defending.\nAt the beginning of your action phase, destroy Embodiment of Earth.",
   "subtypes": [
    "elemental",
@@ -429,7 +429,7 @@
  {
   "id": "VER028",
   "name": "Sanctuary of Aria",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Instant - {r}{r}: Prevent the next 1 damage that would be dealt to you this turn by a source of your choice. Destroy this at the beginning of the end phase.",
   "subtypes": [
    "rosetta",

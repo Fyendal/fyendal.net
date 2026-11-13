@@ -3,6 +3,7 @@ import { expectedTopPitch } from "./card-ev.js";
 import { combineEffects, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
 import type { PendingEffect, SolverCard, SolverView } from "./hand-solver.js";
 import type { BotPolicyInput } from "./policy.js";
+import { hasType } from "@fyendal/shared";
 
 const named = (data: CardData | undefined): string => data?.name.trim().toLowerCase() ?? "";
 
@@ -166,7 +167,7 @@ export function briarSolverRules(input: BotPolicyInput): HeroSolverRules {
     },
     card(data, card) {
       const patch = cardPatch(data, card);
-      if (data.cardType !== "action" || (data.subtypes ?? []).some((subtype) => subtype.toLowerCase() === "attack")) {
+      if (!hasType(data, "action") || (data.subtypes ?? []).some((subtype) => subtype.toLowerCase() === "attack")) {
         return patch;
       }
       // Briar: the second 'non-attack' action card each turn creates an

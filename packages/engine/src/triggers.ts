@@ -65,6 +65,7 @@ import {
   passPriorityWindow,
   type PriorityWindow,
 } from "./priority.js";
+import { hasType } from "@fyendal/shared";
 
 /**
  * The layer/priority machine. Triggered abilities are queued as stack layers;
@@ -594,7 +595,7 @@ export function playWindowInstant(
     return "only instants can be played in a priority window";
   }
   if (meldSide) card.meldSide = meldSide;
-  if (data.cardType !== "instant") {
+  if (!hasType(data, "instant")) {
     // an action whose script allows it may be played as though it were an instant
     const asInstant = canPlayAsInstant(
       state,
@@ -1519,7 +1520,7 @@ export function resolveTopStackCard(state: GameStateInternal, runtime: EngineRun
     continueStack(state, runtime, state.activePlayer);
     return;
   }
-  const isDefReact = dataOf(state, card.cardId).cardType === "defense-reaction";
+  const isDefReact = hasType(dataOf(state, card.cardId), "defense-reaction");
   if (layer.meldStage !== 1 && isDefReact && !link) {
     logPublic(state, gameLogMessage(
       `${nameOf(state, card.cardId)} fails to resolve (it cannot defend this attack)`,
@@ -1658,9 +1659,9 @@ export function finishStackCardResolution(
   const resolvedCard = layer?.card;
   if (resolvedCard) {
     const link = currentLink(state);
-    const cardType = dataOf(state, resolvedCard.cardId).cardType;
+    const resolvedData = dataOf(state, resolvedCard.cardId);
     if (
-      resolvedSuccessfully && link && cardType === "defense-reaction" &&
+      resolvedSuccessfully && link && hasType(resolvedData, "defense-reaction") &&
       // CR 7.0.5b: a card that cannot become a defending card stays off the link.
       !veilBlocksDefender(state, link, resolvedCard)
     ) {
@@ -1681,7 +1682,7 @@ export function finishStackCardResolution(
         [{ card: resolvedCard, fragmentTriggered }],
         layer.fromHand === true,
       );
-    } else if (resolvedSuccessfully && link && cardType === "attack-reaction") {
+    } else if (resolvedSuccessfully && link && hasType(resolvedData, "attack-reaction")) {
       // The card clears to graveyard (CR 8.1.2b), but retain last-known
       // presentation data so the resolved reaction remains visible beside the
       // chain link without being treated as an object on the combat chain.

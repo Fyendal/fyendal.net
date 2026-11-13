@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { CardData, DeckPool, Format, PresentedDeck } from "@fyendal/shared";
+import type { CardData, CardType, DeckPool, Format, PresentedDeck } from "@fyendal/shared";
 import {
   arenaWeaponIssue,
   validateArenaAgainstCards,
   validatePresentationAgainstCards,
 } from "../presentation.js";
 
-const card = (id: string, cardType: CardData["cardType"], subtypes: string[] = []): CardData => ({
+const card = (id: string, type: CardType, subtypes: string[] = []): CardData => ({
   id,
   name: id,
-  cardType,
+  types: [type],
   subtypes,
   text: "",
 });

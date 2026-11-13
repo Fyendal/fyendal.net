@@ -46,6 +46,7 @@ import type { PendingEffect, SolverCard, SolverView } from "./hand-solver.js";
 import { arsenalValuer, defenseReactionWorthSpending, handResponse, opportunityValuer } from "./hand-value.js";
 import { evaluateOnHit } from "./on-hit.js";
 import { adjustValueBreakdown } from "./value.js";
+import { hasType } from "@fyendal/shared";
 
 export interface StarvoIntentDecision {
   intent: GameIntent;
@@ -97,7 +98,7 @@ function hasSubtype(data: CardData | undefined, subtype: string): boolean {
 }
 
 function attackCost(data: CardData): number {
-  return data.cardType === "weapon" ? 3 : Math.max(0, data.cost ?? 0);
+  return hasType(data, "weapon") ? 3 : Math.max(0, data.cost ?? 0);
 }
 
 function isEligibleStarvoAttack(data: CardData | undefined): boolean {
@@ -105,7 +106,7 @@ function isEligibleStarvoAttack(data: CardData | undefined): boolean {
 }
 
 function isCompatiblePulseAttack(data: CardData | undefined): boolean {
-  return !!data && (isAttack(data) || data.cardType === "weapon") &&
+  return !!data && (isAttack(data) || hasType(data, "weapon")) &&
     ["ice", "lightning", "elemental"].some((subtype) => hasSubtype(data, subtype));
 }
 
@@ -127,7 +128,7 @@ function canDecompose(input: BotPolicyInput): boolean {
     graveyard.some((second) => second.instanceId !== first.instanceId &&
       hasSubtype(input.cards[second.cardId], "earth") && graveyard.some((action) =>
         action.instanceId !== first.instanceId && action.instanceId !== second.instanceId &&
-        input.cards[action.cardId]?.cardType === "action"
+        hasType(input.cards[action.cardId], "action")
       )
     )
   );
@@ -232,7 +233,7 @@ function awakeningValue(input: BotPolicyInput, card: CardView, context: ModelCon
   for (const cardId of counts.keys()) {
     const data = input.cards[cardId];
     if (
-      !data || !isAttack(data) || data.cardType !== "action" ||
+      !data || !isAttack(data) || !hasType(data, "action") ||
       !data.classes?.some((cardClass) => cardClass.toLowerCase() === "guardian")
     ) continue;
     const cost = Math.max(0, data.cost ?? 0);
@@ -273,7 +274,7 @@ function starvoSolverRules(input: BotPolicyInput): HeroSolverRules {
     card(data, card, context) {
       const patch = guardianPatch(data, card, input);
       const disruption = disruptionValue(data, input);
-      if (disruption > 0 && (isAttack(data) || data.cardType === "weapon")) {
+      if (disruption > 0 && (isAttack(data) || hasType(data, "weapon"))) {
         patch.onHit = disruption;
         patch.uses = { ...patch.uses, onHit: disruption };
       } else if (disruption > 0) {
@@ -560,7 +561,7 @@ function scorePlay(
       score = shockCharmersIsSurplus(input, intent) ? 38 : -100;
     } else if (functional === HEART_OF_ICE) {
       score = input.view.activePlayer === input.seat ? 28 : -100;
-    } else if (data.cardType === "weapon") {
+    } else if (hasType(data, "weapon")) {
       const icePitched = pitchIds(intent).some((id) => {
         const pitched = own.get(id);
         return hasSubtype(input.cards[pitched?.cardId ?? ""], "ice");
@@ -574,7 +575,7 @@ function scorePlay(
     score = awakeningIsLive(intent, input) ? 58 : -100;
   } else if (functional === CHANNEL_LAKE) {
     score = aggressiveOpponent(input) ? 58 : 18;
-  } else if (data.cardType === "defense-reaction") {
+  } else if (hasType(data, "defense-reaction")) {
     score = defenseReactionWorthSpending(card, input, starvoSolverRules, pitchIds(intent))
       ? scoreDefenseReaction(data, input)
       : -100;
@@ -585,7 +586,7 @@ function scorePlay(
     if (isEligibleStarvoAttack(data) && starvoBonusActive(input)) score += 40;
     if (canFundWailAfter(intent, data, input)) score += 30;
     if (intent.kind === "play-from-arsenal") score += 4;
-  } else if (data.cardType === "instant") score = 5;
+  } else if (hasType(data, "instant")) score = 5;
   else score = 8;
 
   const pitched = pitchIds(intent).flatMap((id) => own.get(id) ?? []);
@@ -937,7 +938,7 @@ function starvoTacticalConfig(): TacticalIntentConfig {
       const functional = key(data);
       if (functional === PULSE_VOLTHAVEN) return 18;
       if (functional === CHANNEL_LAKE) return aggressiveOpponent(observed) ? 18 : 4;
-      if (isAttack(data) || data.cardType === "weapon") {
+      if (isAttack(data) || hasType(data, "weapon")) {
         return disruptionValue(data, observed) * 14 +
           (isEligibleStarvoAttack(data) && starvoBonusActive(observed) ? 22 : 0) +
           (functional === WINTERS_WAIL &&

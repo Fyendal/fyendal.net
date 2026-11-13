@@ -48,7 +48,7 @@ describe("Classic Constructed shared decks", () => {
   it("registers complete 60-card pools containing only implemented cards", () => {
     for (const deck of precons.filter((candidate) => candidate.format === "cc")) {
       expect(deck.pool.deck, `${deck.id} main deck`).toHaveLength(60);
-      expect(cardData[deck.pool.heroId]?.cardType, `${deck.id} hero`).toBe("hero");
+      expect(cardData[deck.pool.heroId]?.types, `${deck.id} hero`).toContain("hero");
       for (const id of [
         ...deck.pool.weaponIds,
         ...deck.pool.equipmentPool,

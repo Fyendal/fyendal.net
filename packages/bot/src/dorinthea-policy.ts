@@ -38,6 +38,7 @@ import {
   solveHand,
 } from "./hand-value.js";
 import { chooseTacticalIntentWithTrace, type TacticalTurnPlan } from "./tactical-turn-planner.js";
+import { hasType } from "@fyendal/shared";
 
 const HALVE_DEFENSE_PROMPT = "card.dtd.defender.defense.halve";
 const BOLTERS_PROMPT = "card.wtr.bolters.destroy";
@@ -73,13 +74,13 @@ function weaponAttacksThisTurn(input: BotPolicyInput): number {
 function currentAttackIsOurWeapon(input: BotPolicyInput): boolean {
   const link = currentLink(input);
   return !!link && link.attackingCard.owner === input.seat &&
-    input.cards[link.attackingCard.cardId]?.cardType === "weapon";
+    hasType(input.cards[link.attackingCard.cardId], "weapon");
 }
 
 /** Reprise: the defending hero defended this link with a card from hand. */
 function reprise(input: BotPolicyInput): boolean {
   return currentLink(input)?.defendingCards.some((card) =>
-    input.cards[card.cardId]?.cardType !== "equipment"
+    !hasType(input.cards[card.cardId], "equipment")
   ) === true;
 }
 
@@ -150,7 +151,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
 
   let score: number;
   if (intent.kind === "activate-ability") {
-    if (data.cardType === "weapon") {
+    if (hasType(data, "weapon")) {
       score = mine ? 30 + (card.attack ?? data.attack ?? 0) : -100;
     } else if (named(data) === "gold") {
       // Cash floating resources only; never pitch a card for the draw.
@@ -158,9 +159,9 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     } else {
       score = -100;
     }
-  } else if (data.cardType === "attack-reaction") {
+  } else if (hasType(data, "attack-reaction")) {
     score = scoreAttackReaction(data, input);
-  } else if (data.cardType === "defense-reaction") {
+  } else if (hasType(data, "defense-reaction")) {
     score = scoreDefenseReactionPlay(card, data, intent, input);
   } else if (functional === "oasis respite|1") {
     const damage = damageWorthOasis(input);
@@ -182,7 +183,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     if (!pitched) continue;
     score -= 2 + cardOpportunity(pitched, input) * 0.5;
     // A defense reaction pitched on the opponent's turn is a block thrown away.
-    if (!mine && input.cards[pitched.cardId]?.cardType === "defense-reaction") score -= 20;
+    if (!mine && hasType(input.cards[pitched.cardId], "defense-reaction")) score -= 20;
   }
   return score - Math.max(0, pitchIds(intent).length - 1) * 10;
 }
@@ -285,7 +286,7 @@ function chooseDefenseReaction(input: BotPolicyInput): GameIntent | undefined {
   let best: { intent: GameIntent; score: number } | undefined;
   for (const intent of input.legal) {
     const card = intentCard(intent, own);
-    if (!card || input.cards[card.cardId]?.cardType !== "defense-reaction") continue;
+    if (!card || !hasType(input.cards[card.cardId], "defense-reaction")) continue;
     const score = scorePlay(intent, input, own);
     if (score > (best?.score ?? 0)) best = { intent, score };
   }

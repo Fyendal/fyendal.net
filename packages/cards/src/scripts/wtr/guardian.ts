@@ -8,6 +8,7 @@ import {
   opponentSeat,
   payForDefenseBoost,
 } from "../shared-helpers.js";
+import { hasType } from "@fyendal/shared";
 
 // ── WTR Guardian cards ──────────────────────────────────────────────────────
 //
@@ -25,7 +26,7 @@ function opponentEquipmentOptions(ctx: ScriptCtx): string[] {
     if (eq) options.push(`${slot}:${eq.instanceId}`);
   }
   for (const eq of opp.weapons) {
-    if (ctx.cardData(eq.cardId).cardType === "equipment") options.push(`off-hand:${eq.instanceId}`);
+    if (hasType(ctx.cardData(eq.cardId), "equipment")) options.push(`off-hand:${eq.instanceId}`);
   }
   return options;
 }
@@ -38,7 +39,7 @@ function findOpponentEquipment(
   const instanceId = Number(optionId.split(":")[1]);
   return [
     ...Object.values(opp.equipment),
-    ...opp.weapons.filter((eq) => ctx.cardData(eq.cardId).cardType === "equipment"),
+    ...opp.weapons.filter((eq) => hasType(ctx.cardData(eq.cardId), "equipment")),
   ].find((eq) => eq?.instanceId === instanceId);
 }
 

@@ -8,14 +8,14 @@ import type { CardInstance, PlayerState } from "../state.js";
 import { startTurn } from "../turn.js";
 
 const cards: Record<string, CardData> = {
-  HERO: { id: "HERO", name: "Hero", cardType: "hero", classes: ["generic"], intellect: 4, life: 20, text: "" },
-  PAYER: { id: "PAYER", name: "Payer", cardType: "hero", classes: ["generic"], intellect: 4, life: 20, text: "" },
-  FILLER: { id: "FILLER", name: "Filler", cardType: "action", subtypes: [], classes: ["generic"], pitch: 3, cost: 0, defense: 3, text: "" },
-  AURA_TOKEN: { id: "AURA_TOKEN", name: "Aura Token", cardType: "token", subtypes: ["aura"], text: "" },
-  ITEM_TOKEN: { id: "ITEM_TOKEN", name: "Item Token", cardType: "token", subtypes: ["item"], text: "" },
-  AURA_CARD: { id: "AURA_CARD", name: "Aura Card", cardType: "action", subtypes: ["aura"], classes: ["generic"], pitch: 3, cost: 0, text: "" },
-  CONTRACT: { id: "CONTRACT", name: "Contract", cardType: "instant", classes: ["generic"], pitch: 3, cost: 0, text: "" },
-  WATCHER: { id: "WATCHER", name: "Watcher", cardType: "action", subtypes: ["item"], classes: ["generic"], pitch: 3, cost: 0, text: "" },
+  HERO: { id: "HERO", name: "Hero", types: ["hero"], classes: ["generic"], intellect: 4, life: 20, text: "" },
+  PAYER: { id: "PAYER", name: "Payer", types: ["hero"], classes: ["generic"], intellect: 4, life: 20, text: "" },
+  FILLER: { id: "FILLER", name: "Filler", types: ["action"], subtypes: [], classes: ["generic"], pitch: 3, cost: 0, defense: 3, text: "" },
+  AURA_TOKEN: { id: "AURA_TOKEN", name: "Aura Token", types: ["token"], subtypes: ["aura"], text: "" },
+  ITEM_TOKEN: { id: "ITEM_TOKEN", name: "Item Token", types: ["token"], subtypes: ["item"], text: "" },
+  AURA_CARD: { id: "AURA_CARD", name: "Aura Card", types: ["action"], subtypes: ["aura"], classes: ["generic"], pitch: 3, cost: 0, text: "" },
+  CONTRACT: { id: "CONTRACT", name: "Contract", types: ["instant"], classes: ["generic"], pitch: 3, cost: 0, text: "" },
+  WATCHER: { id: "WATCHER", name: "Watcher", types: ["action"], subtypes: ["item"], classes: ["generic"], pitch: 3, cost: 0, text: "" },
 };
 
 const scripts: Record<string, CardScript> = {

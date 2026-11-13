@@ -2,7 +2,7 @@
  {
   "id": "AST001",
   "name": "Aurora, Shooting Star",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {r}{r}: Create an Embodiment of Lightning token. Activate this only if you've played a Lightning card this turn.\nEssence of Lightning",
   "classes": [
    "runeblade"
@@ -20,7 +20,7 @@
  {
   "id": "AST002",
   "name": "Star Fall",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nIf you've played a Lightning card this turn, this card's attacks get +1{p} and go again.",
   "attack": 1,
   "classes": [
@@ -39,7 +39,7 @@
  {
   "id": "AST003",
   "name": "Cap of Quick Thinking",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: If you would be dealt damage by a source an opponent controls this turn, you may discard an instant card to prevent 1 of that damage and draw a card.",
   "subtypes": [
    "lightning",
@@ -50,7 +50,7 @@
  {
   "id": "AST004",
   "name": "Shock Frock",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Gain {r}. Activate this only if you've played a Lightning card this turn. Go again\nBattleworn",
   "defense": 1,
   "subtypes": [
@@ -65,7 +65,7 @@
  {
   "id": "AST005",
   "name": "Zap Clappers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, you may reveal an instant card from your hand. If you do, deal 1 arcane damage to the attacking hero.\nBlade Break",
   "defense": 2,
   "classes": [
@@ -83,7 +83,7 @@
  {
   "id": "AST006",
   "name": "Starlight Striders",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, you may reveal an instant card from your hand. If you do, create an Embodiment of Lightning token.\nBlade Break",
   "defense": 1,
   "classes": [
@@ -101,7 +101,7 @@
  {
   "id": "AST007",
   "name": "Arcanic Crackle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero.",
   "pitch": 1,
   "cost": 0,
@@ -118,7 +118,7 @@
  {
   "id": "AST008",
   "name": "Arcanic Shockwave",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Fusion\nWhen you attack with Arcanic Shockwave, if it was fused, deal 1 arcane damage to target hero.",
   "pitch": 1,
   "cost": 0,
@@ -139,7 +139,7 @@
  {
   "id": "AST009",
   "name": "Entwine Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Fusion\nIf Entwine Lightning was fused, it gains go again.",
   "pitch": 1,
   "cost": 0,
@@ -158,7 +158,7 @@
  {
   "id": "AST010",
   "name": "Flittering Charge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played an instant card this chain link, this gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -176,7 +176,7 @@
  {
   "id": "AST011",
   "name": "Lightning Surge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played from arsenal, it gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -194,7 +194,7 @@
  {
   "id": "AST012",
   "name": "Photon Rush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Flow - If you've played a Lightning card this turn, this gets go again",
   "pitch": 1,
   "cost": 0,
@@ -216,7 +216,7 @@
  {
   "id": "AST013",
   "name": "Skyzyk",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this has go again, it gets +1{p}.",
   "pitch": 1,
   "cost": 0,
@@ -231,7 +231,7 @@
  {
   "id": "AST014",
   "name": "Snatch",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, draw a card.",
   "pitch": 1,
   "cost": 0,
@@ -248,7 +248,7 @@
  {
   "id": "AST015",
   "name": "Spark Spray",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is defended by 1 or more cards, you may pay {r}. If you do, this gets +1{p}.",
   "pitch": 1,
   "cost": 0,
@@ -263,7 +263,7 @@
  {
   "id": "AST016",
   "name": "Static Shock",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Flow - When this hits a hero, if you've played a Lightning card this turn, deal 1 arcane damage to them.",
   "pitch": 1,
   "cost": 0,
@@ -284,7 +284,7 @@
  {
   "id": "AST017",
   "name": "Burn Up // Shock",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Meld\nThe next time an attack you control hits a hero this turn, deal 4 arcane damage to them.\nGo again\n//\nDeal 1 arcane damage to any target.",
   "pitch": 1,
   "cost": 0,
@@ -304,7 +304,7 @@
  {
   "id": "AST018",
   "name": "Sizzle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Lightning or Elemental attack this turn gets +3{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -320,7 +320,7 @@
  {
   "id": "AST019",
   "name": "Electromagnetic Somersault",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Choose up to 2 attack action cards with cost 0 or more on the active chain link. Return them to their owner's hand when the chain link resolves.",
   "pitch": 1,
   "cost": 0,
@@ -332,7 +332,7 @@
  {
   "id": "AST020",
   "name": "Electrostatic Discharge",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next attack action card you play this turn with cost 1 or less gets +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -344,7 +344,7 @@
  {
   "id": "AST021",
   "name": "Lightning Press",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target attack action card with cost 1 or less gains +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -356,7 +356,7 @@
  {
   "id": "AST022",
   "name": "Arc Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Aurora Specialization\nWhenever you go again this turn, deal 1 arcane damage to any target.\nThe next action card you play this turn gets go again.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -376,7 +376,7 @@
  {
   "id": "AST023",
   "name": "Skyward Serenade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose 2;\n- Create an Embodiment of Lightning token.\n- Search your deck for a Skyzyk, banish it, then shuffle. You may play it this turn.\n- Your next attack this turn gets +1{p}.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -395,7 +395,7 @@
  {
   "id": "AST024",
   "name": "Arcanic Crackle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero.",
   "pitch": 3,
   "cost": 0,
@@ -412,7 +412,7 @@
  {
   "id": "AST025",
   "name": "Heaven's Claws",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 3,
   "cost": 1,
@@ -427,7 +427,7 @@
  {
   "id": "AST026",
   "name": "Captain's Call",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose 1;\nThe next attack action card with cost 0 you play this turn gains +2{p}.\nThe next attack action card with cost 0 you play this turn gains go again.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -443,7 +443,7 @@
  {
   "id": "AST027",
   "name": "Written in the Stars",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create an Embodiment of Lightning token.\nIf you've dealt arcane damage this turn, draw a card.",
   "pitch": 3,
   "cost": 0,
@@ -459,7 +459,7 @@
  {
   "id": "AST028",
   "name": "Embodiment of Lightning",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card, destroy this, then the attack gets go again.",
   "subtypes": [
    "elemental",

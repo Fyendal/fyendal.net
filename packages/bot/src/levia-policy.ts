@@ -69,6 +69,7 @@ import {
   leviaSashEnablesPair,
   type LeviaBanishAccess,
 } from "./levia-turn.js";
+import { hasType } from "@fyendal/shared";
 
 function name(data: CardData | undefined): string {
   return data?.name.toLowerCase() ?? "";
@@ -228,7 +229,7 @@ function actionPointsUsable(input: BotPolicyInput): boolean {
   const me = input.view.players[input.seat];
   const sash = leviaEffectActive(input, "savage sash");
   const actions = [
-    ...[...me.hand, ...me.arsenal].filter((card) => input.cards[card.cardId]?.cardType === "action"),
+    ...[...me.hand, ...me.arsenal].filter((card) => hasType(input.cards[card.cardId], "action")),
     ...playableBanishAttacks(input, new Set()),
   ];
   return actions.some((card) => {
@@ -834,7 +835,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     score = hexGauntletValue(input, card);
   } else if (named === "embraforged gauntlet") {
     score = followups() > 0 ? 35 : -35;
-  } else if (data.cardType === "defense-reaction") {
+  } else if (hasType(data, "defense-reaction")) {
     score = defenseReactionWorthSpending(card, input, leviaSolverRules, pitchIds(intent))
       ? scoreDefenseReaction(data, input)
       : -100;
@@ -842,7 +843,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn !== true) {
     // Zero power until a six is banished this turn.
     score = -30;
-  } else if (isAttack(data) || data.cardType === "weapon") {
+  } else if (isAttack(data) || hasType(data, "weapon")) {
     score = attackScore(card, input, own, new Set([card.instanceId, ...pitchIds(intent)]));
   } else {
     score = -30;

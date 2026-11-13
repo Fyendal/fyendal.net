@@ -2,7 +2,6 @@ import { fallbackBotIntent } from "./botFallback.js";
 import { isAdvertisedBotIntent } from "@fyendal/bot/intents";
 import { randomBytes } from "node:crypto";
 import {
-  IDLE_VICTORY_MS,
   type BackgroundMatchmakingStatus,
   type BotOpponent,
   type BotRematch,
@@ -10,28 +9,30 @@ import {
   type Decklist,
   type EquipmentSlot,
   type Format,
+  type GameIntent,
   type GameLogPayload,
   type GameView,
-  type GameIntent,
+  hasType,
+  IDLE_VICTORY_MS,
   type MatchPrepPhase,
+  type PassUntilMode,
   type PendingDecision,
-  type PresentedDeck,
-  type PresentedArena,
-  type PrepPhase,
-  type RevealedArena,
   type PlayerBadge,
+  type PrepPhase,
   type PrepSeatView,
   type PrepView,
+  type PresentedArena,
+  type PresentedDeck,
   type PriorityWindowMode,
   type QueuePoolCounts,
+  type RevealedArena,
+  type RoomClock,
   type RoomInvite,
   type RoomSummary,
-  type ServerMessage,
   type SeatStandingOrders,
+  type ServerMessage,
   type TokenSkipKind,
-  type PassUntilMode,
   type UndoTarget,
-  type RoomClock,
 } from "@fyendal/shared";
 import {
   botDefinition,
@@ -2822,7 +2823,7 @@ export class PgRoomStore {
   /** Skip a hero for the rest of the caller's background search. Only the
    * caller's own pairing is affected, so the hero needs no offer to prove it. */
   async avoidBackgroundHero(userId: number, heroId: string): Promise<boolean> {
-    if (cardData[heroId]?.cardType !== "hero") return false;
+    if (!hasType(cardData[heroId], "hero")) return false;
     return withTransaction(this.db, async (db) => {
       const located = await db.query(
         "SELECT format FROM matchmaking_entries WHERE user_id = $1 AND mode = 'background'",

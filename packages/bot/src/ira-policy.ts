@@ -47,6 +47,7 @@ import {
   solveHand,
 } from "./hand-value.js";
 import { iraPresentation } from "./sideboard.js";
+import { hasType } from "@fyendal/shared";
 
 const BLOSSOM_KEY = "whirling mist blossom|2";
 const EDGE_KEY = "edge of autumn|0";
@@ -115,7 +116,7 @@ function previousAttackKey(input: BotPolicyInput): string {
 
 /** Aspect of Tiger's Combo: a red attack action card was the last attack. */
 function isRedAttackAction(data: CardData | undefined): boolean {
-  return data?.cardType === "action" && isAttack(data) && data.pitch === 1;
+  return data !== undefined && hasType(data, "action") && isAttack(data) && data.pitch === 1;
 }
 
 function isTigerCombo(functional: string): boolean {
@@ -138,7 +139,7 @@ function currentAttackHasOrWillGetGoAgain(input: BotPolicyInput): boolean {
 }
 
 function likelyGoAgain(functional: string, data: CardData, previous: string, input: BotPolicyInput): boolean {
-  if (data.cardType === "weapon") return functional === "edge of autumn|0";
+  if (hasType(data, "weapon")) return functional === "edge of autumn|0";
   if (data.keywords?.includes("Go again")) return true;
   if (functional.startsWith("scar for a scar|")) {
     return input.view.players[input.seat].life < input.view.players[1 - input.seat]!.life;
@@ -156,7 +157,7 @@ function likelyGoAgain(functional: string, data: CardData, previous: string, inp
 
 function resourceCost(data: CardData | undefined): number {
   if (!data) return 0;
-  return data.cardType === "weapon" ? weaponCost(data) : Math.max(0, data.cost ?? 0);
+  return hasType(data, "weapon") ? weaponCost(data) : Math.max(0, data.cost ?? 0);
 }
 
 function isAttackSource(candidate: GameIntent, own: ReadonlyMap<number, CardView>, input: BotPolicyInput): boolean {
@@ -165,7 +166,7 @@ function isAttackSource(candidate: GameIntent, own: ReadonlyMap<number, CardView
     candidate.kind !== "play-from-zone" && candidate.kind !== "activate-ability"
   ) return false;
   const data = input.cards[intentCard(candidate, own)?.cardId ?? ""];
-  return isAttack(data) || data?.cardType === "weapon";
+  return isAttack(data) || hasType(data, "weapon");
 }
 
 /** Whether another attack stays legal and affordable once this intent spends
@@ -595,7 +596,7 @@ function scorePlay(
   let score = 0;
 
   if (intent.kind === "activate-ability") {
-    if (data.cardType === "weapon") {
+    if (hasType(data, "weapon")) {
       // A weapon swing that cannot continue the chain is only a fallback;
       // a competing attack for the last action point is scored on power.
       score = furtherAttack ? 30 : alternativeAttackNow(intent, input, own) ? data.attack ?? 0 : 7;
@@ -677,7 +678,7 @@ function scorePlay(
     }
     if (functional.startsWith("snatch|")) score += 4;
     if (intent.kind === "play-from-arsenal") score += 2;
-  } else if (data.cardType === "attack-reaction") {
+  } else if (hasType(data, "attack-reaction")) {
     if (!currentAttackIsOurs(input) || input.view.pendingDecision?.kind !== "attack-reaction") {
       score = -100;
     } else if (functional.startsWith("razor reflex|")) {
@@ -695,7 +696,7 @@ function scorePlay(
     } else {
       score = 8;
     }
-  } else if (data.cardType === "defense-reaction") {
+  } else if (hasType(data, "defense-reaction")) {
     score = defenseReactionWorthSpending(card, input, iraSolverRules, pitchIds(intent))
       ? scoreDefenseReaction(data, input)
       : -100;
@@ -710,7 +711,7 @@ function scorePlay(
     const link = currentLink(input);
     const target = link?.defendingCards.some((defender) => {
       const defending = input.cards[defender.cardId];
-      return defender.owner === input.seat && defending?.cardType === "action" && isAttack(defending);
+      return defender.owner === input.seat && hasType(defending, "action") && isAttack(defending);
     }) === true;
     score = !currentAttackIsOurs(input) && target
       ? defenseReactionWorthSpending(card, input, iraSolverRules, pitchIds(intent), 4)

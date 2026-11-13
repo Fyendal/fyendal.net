@@ -1,5 +1,5 @@
 import type { CardData, DeckArt, DeckPool } from "@fyendal/shared";
-import { STANDARD_CARD_ART } from "@fyendal/shared";
+import { primaryType, STANDARD_CARD_ART } from "@fyendal/shared";
 import { cardData } from "./catalog.js";
 import catalogJson from "./data/cardArt.json" with { type: "json" };
 
@@ -27,8 +27,8 @@ const VARIATION_RANK: Readonly<Record<string, number>> = { FA: 5, EA: 4, AA: 3, 
 const FOIL_RANK: Readonly<Record<string, number>> = { G: 3, C: 2, R: 1 };
 
 /** Functional identity shared by every printing of one card. */
-export function cardArtKey(card: Pick<CardData, "cardType" | "name" | "pitch">): string {
-  return `${card.cardType}|${card.name.trim().toLowerCase().replace(/\s+/g, " ")}|${card.pitch ?? 0}`;
+export function cardArtKey(card: Pick<CardData, "types" | "name" | "pitch">): string {
+  return `${primaryType(card)}|${card.name.trim().toLowerCase().replace(/\s+/g, " ")}|${card.pitch ?? 0}`;
 }
 
 export function cardArtVariants(cardId: string): readonly CardArtVariant[] {

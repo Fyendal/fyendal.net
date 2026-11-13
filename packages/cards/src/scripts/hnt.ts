@@ -25,6 +25,7 @@ import {
   yesNoPrompt,
   ongoingLabel,
 } from "./shared-helpers.js";
+import { hasType } from "@fyendal/shared";
 
 // HNT — The Hunted. Mark/Contract (CR 8.4.7, 8.5.39, 8.5.50, 9.3),
 // Retrieve (CR 8.5.51), and Draconic chain-link counting are shared mechanics.
@@ -44,7 +45,7 @@ function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance
   const player = ctx.player(seat);
   return [
     ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-    ...player.weapons.filter((card) => ctx.cardData(card.cardId).cardType === "equipment"),
+    ...player.weapons.filter((card) => hasType(ctx.cardData(card.cardId), "equipment")),
   ];
 }
 
@@ -391,10 +392,10 @@ function soundTheAlarm(ctx: ScriptCtx): void {
     )
   )
     return;
-  if (!hand.some((card) => ctx.cardData(card.cardId).cardType === "attack-reaction")) return;
+  if (!hand.some((card) => hasType(ctx.cardData(card.cardId), "attack-reaction"))) return;
   const reactions = ctx
     .player(ctx.seat)
-    .deck.filter((card) => ctx.cardData(card.cardId).cardType === "defense-reaction");
+    .deck.filter((card) => hasType(ctx.cardData(card.cardId), "defense-reaction"));
   if (reactions.length)
     ctx.requestCardChoice(
       "sound-alarm",
@@ -1154,7 +1155,7 @@ export const hnt: Record<string, CardScript> = {
           hand.map((card) => card.instanceId),
           target,
         );
-      if (revealed && hand.some((card) => ctx.cardData(card.cardId).cardType === "attack-reaction")) {
+      if (revealed && hand.some((card) => hasType(ctx.cardData(card.cardId), "attack-reaction"))) {
         markHero(ctx, target);
       }
       buffNextAttack(ctx, { attack: 5 - pitch, appliesToSubtype: "dagger" });

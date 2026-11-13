@@ -33,9 +33,10 @@ import {
   chooseTacticalIntentWithTrace,
   type TacticalTurnPlan,
 } from "./tactical-turn-planner.js";
+import { hasType } from "@fyendal/shared";
 
 function attackCost(data: CardData): number {
-  return data.cardType === "weapon" ? 3 : Math.max(0, data.cost ?? 0);
+  return hasType(data, "weapon") ? 3 : Math.max(0, data.cost ?? 0);
 }
 
 function isWizardFatigueMatchup(input: BotPolicyInput): boolean {
@@ -63,7 +64,7 @@ export function lifeGainAlternative(
   input: BotPolicyInput,
   arcaneTaken = input.view.turnFacts?.players[input.seat].arcaneDamageTaken === true,
 ): number {
-  if (data.cardType !== "instant") return 0;
+  if (!hasType(data, "instant")) return 0;
   return Number(
     (arcaneTaken ? /if you've been dealt arcane damage this turn, instead gain (\d+)\{h\}/i : /^gain (\d+)\{h\}/im)
       .exec(data.text)?.[1] ?? 0,
@@ -273,7 +274,7 @@ function scorePlay(
       const canAttack = attackData !== undefined &&
         floating + remainingSingleCardPitch(intent, input) >= attackCost(attackData);
       score = canAttack ? 40 + attackValue(attackData, input) : -100;
-    } else if (data.cardType === "weapon") {
+    } else if (hasType(data, "weapon")) {
       score = 8 + (data.attack ?? 0);
     } else {
       score = 2;
@@ -281,7 +282,7 @@ function scorePlay(
   } else if (isAttack(data)) {
     score = 20 + attackValue(data, input);
     if (intent.kind === "play-from-arsenal") score += 3;
-  } else if (data.cardType === "attack-reaction") {
+  } else if (hasType(data, "attack-reaction")) {
     const link = currentLink(input);
     if (!currentAttackIsOurs(input) || input.view.pendingDecision?.kind !== "attack-reaction") {
       score = -100;
@@ -293,7 +294,7 @@ function scorePlay(
     } else {
       score = 8;
     }
-  } else if (data.cardType === "defense-reaction") {
+  } else if (hasType(data, "defense-reaction")) {
     score = defenseReactionWorthSpending(card, input, bravoSolverRules, pitchIds(intent))
       ? scoreDefenseReaction(data, input)
       : -100;

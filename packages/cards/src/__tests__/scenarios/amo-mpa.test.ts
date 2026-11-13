@@ -2897,7 +2897,7 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       expect(findPrinting("Escaped Subject", 3)?.id).toBe("MPA078");
       expect(findPrinting("Viral Sampling", 1)?.id).toBe("MPA106");
       expect(findPrinting("Lab Rat", 2)?.attack).toBe(5);
-      expect(findPrinting("Festering Weakness", 2)?.cardType).toBe("attack-reaction");
+      expect(findPrinting("Festering Weakness", 2)?.types).toContain("attack-reaction");
       expect(findPrinting("Professional Rivalry", 3)?.keywords).toEqual(["Stealth", "Contract"]);
     });
 

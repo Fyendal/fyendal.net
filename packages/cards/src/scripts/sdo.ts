@@ -9,6 +9,7 @@ import {
   opponentSeat,
   reprise,
 } from "./shared-helpers.js";
+import { hasType } from "@fyendal/shared";
 
 // ── SDO (Silver Age: Dorinthea precon, Chapter 2) ───────────────────────────
 //
@@ -145,7 +146,7 @@ export const sdo: Record<string, CardScript> = {
           { result: { kind: "card", cardId: card.cardId }, target: { kind: "player", seat: opponentSeat(ctx) } },
         ),
       );
-      if (ctx.cardData(card.cardId).cardType !== "defense-reaction") return;
+      if (!hasType(ctx.cardData(card.cardId), "defense-reaction")) return;
       ctx.moveToGraveyard(card.instanceId, "arsenal");
       ctx.logPublic(
         localizedCardLog(

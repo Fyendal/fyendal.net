@@ -3,6 +3,7 @@ import { projectStateFor } from "@fyendal/engine";
 import { functionalKeyOf } from "../functional.js";
 import { cardData, scripts } from "../index.js";
 import { scenario } from "./harness.js";
+import { hasType } from "@fyendal/shared";
 
 export interface SweptEffect {
   /** Functional key of the card whose play left the effect. */
@@ -29,7 +30,7 @@ function scriptSource(value: unknown, seen = new Set<unknown>()): string {
 export function sweepPlayedCardEffects(): SweptEffect[] {
   const keys = [...new Set(
     Object.values(cardData)
-      .filter((card) => (card.cardType === "action" || card.cardType === "instant") &&
+      .filter((card) => (hasType(card, "action") || hasType(card, "instant")) &&
         LINGERING_SOURCE.test(scriptSource(scripts[card.id])))
       .map(functionalKeyOf),
   )].sort();

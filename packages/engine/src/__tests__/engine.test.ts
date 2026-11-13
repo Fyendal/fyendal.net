@@ -1442,7 +1442,7 @@ describe("game setup & turn structure", () => {
       RUNE_AURA: {
         id: "RUNE_AURA",
         name: "Runechant of Testing",
-        cardType: "instant",
+        types: ["instant"],
         subtypes: ["aura"],
         classes: ["runeblade"],
         cost: 0,
@@ -4040,7 +4040,7 @@ describe("projection", () => {
       FIXED_PREVENTION: {
         id: "FIXED_PREVENTION",
         name: "Fixed Prevention",
-        cardType: "token",
+        types: ["token"],
         classes: ["generic"],
         subtypes: ["aura"],
         text: "Prevent 2 damage.",
@@ -4048,7 +4048,7 @@ describe("projection", () => {
       WARD_THREE: {
         id: "WARD_THREE",
         name: "Ward Three",
-        cardType: "token",
+        types: ["token"],
         classes: ["generic"],
         subtypes: ["aura"],
         keywords: ["Ward 3"],

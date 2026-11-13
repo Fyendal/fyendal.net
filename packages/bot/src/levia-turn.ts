@@ -1,5 +1,6 @@
 import type { CardData, CardView } from "@fyendal/shared";
 import { isAttack, type BotPolicyInput } from "./policy.js";
+import { hasType } from "@fyendal/shared";
 
 export function leviaEffectActive(input: BotPolicyInput, name: string): boolean {
   return input.view.activePlayer === input.seat && input.view.ongoing.some((effect) =>
@@ -220,7 +221,7 @@ export function leviaBloodDebt(cards: readonly CardView[], input: BotPolicyInput
 }
 
 export function leviaBloodDebtAction(card: CardView, input: BotPolicyInput): boolean {
-  return input.cards[card.cardId]?.cardType === "action" && carriesBloodDebt(card, input);
+  return hasType(input.cards[card.cardId], "action") && carriesBloodDebt(card, input);
 }
 
 /** Open once-per-turn Blasmophet banish plays: the ally's and, next turn, Consumed's.

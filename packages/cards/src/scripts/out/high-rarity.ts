@@ -13,6 +13,7 @@ import {
   sharesName,
   yesNoPrompt,
 } from "../shared-helpers.js";
+import { hasType } from "@fyendal/shared";
 
 const BLOODROT = "SAZ034";
 const FRAILTY = "SAZ035";
@@ -789,7 +790,7 @@ export const outHighRarity: Record<string, CardScript> = {
         ),
       });
       const count = faceUpGraveyard(ctx, target)
-        .filter((card) => ctx.cardData(card.cardId).cardType === "defense-reaction").length;
+        .filter((card) => hasType(ctx.cardData(card.cardId), "defense-reaction")).length;
       if (count >= 10) ctx.drawCards(ctx.seat, 1);
     },
   },

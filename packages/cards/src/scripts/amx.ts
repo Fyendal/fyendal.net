@@ -7,6 +7,7 @@ import {
   decisionPrompt,
   faceUpGraveyard,
 } from "./shared-helpers.js";
+import { hasType } from "@fyendal/shared";
 
 const HYPER_DRIVER = "AMX028";
 const BANK_BREAKER = "AMX022B";
@@ -135,7 +136,7 @@ export const amx: Record<string, CardScript> = {
 
   "puffer jacket|0": {
     onFriendlyEnterArena(ctx, entered) {
-      if (data(ctx, entered).cardType !== "token" && cardNamed(ctx, entered, "Hyper Driver")) {
+      if (!hasType(data(ctx, entered), "token") && cardNamed(ctx, entered, "Hyper Driver")) {
         ctx.addCounter(entered.instanceId, "steam", 1);
       }
     },

@@ -1,4 +1,5 @@
 import type { CardData, CardPoolMode, DeckPool, Format } from "@fyendal/shared";
+import { hasType } from "@fyendal/shared";
 
 /**
  * Product codes whose spoiled cards are implemented but not tournament-legal
@@ -245,7 +246,7 @@ export function formatLegalityIssues(
       });
       continue;
     }
-    if (mode !== "open" && format === "cc" && card.cardType === "weapon" && LIVING_LEGEND_WEAPONS.has(name)) {
+    if (mode !== "open" && format === "cc" && hasType(card, "weapon") && LIVING_LEGEND_WEAPONS.has(name)) {
       issues.push({
         kind: "living-legend-weapon",
         cardId: id,

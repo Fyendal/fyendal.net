@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { actionCandidates, legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, scripts } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
+import { hasType, objectKind } from "@fyendal/shared";
 
 const BLUE = "wrecker romp|3";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
@@ -10,14 +11,14 @@ describe("EVO — registration and core mechanics", () => {
   it("registers the complete set", () => {
     expect(Object.keys(cardData).filter((id) => id.startsWith("EVO"))).toHaveLength(252);
     for (const id of ["EVO001", "EVO002", "EVO004", "EVO005", "EVO007", "EVO008", "EVO010B"]) {
-      expect(cardData[id]?.cardType).toBe("hero");
+      expect(cardData[id]?.types).toContain("hero");
       expect(scripts[id]).toBeDefined();
     }
   });
 
-  it("all playable Evo equipment supports next-Evo instant permissions", () => {
+  it("all playable Action Evos support next-Evo instant permissions", () => {
     const playableEvos = Object.values(cardData).filter((card) =>
-      card.cardType === "equipment" &&
+      hasType(card, "action") &&
       (card.subtypes ?? []).includes("evo") &&
       scripts[card.id]?.playableEquipment === true
     );
@@ -45,9 +46,71 @@ describe("EVO — registration and core mechanics", () => {
       (intent) => intent.kind === "play-card" && s.state.players[0]!.hand[0]?.instanceId === intent.instanceId,
     );
     expect(plays.length).toBeGreaterThan(0);
-    expect(plays.every((intent) => intent.kind === "play-card" && intent.asInstant === true)).toBe(true);
 
     s.play(key).expectAP(0, 1).expectEquipped(0, slot, key);
+  });
+
+  it("an Instant Evo can be played on the opponent's turn", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", hand: ["evo circuit breaker|1"], equipment: { ...NO_EQUIPMENT, head: "proto base head|0" } },
+        { hero: "dorinthea", hand: ["sigil of solace|1"], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    s.play("sigil of solace|1", { settle: false })
+      .passPriority()
+      .react("evo circuit breaker|1")
+      .expectEquipped(0, "head", "evo circuit breaker|1");
+  });
+
+  it("an Action Evo costs an action point and cannot be played on the opponent's turn", () => {
+    const evo = "evo sentry base head|1";
+    expect(cardData[printingId(evo)]?.types).toEqual(["equipment", "action"]);
+    const opponentTurn = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", heroKey: "teklovossen|0", hand: [evo, BLUE], equipment: { head: "teklo base head|0" } },
+        { hero: "dorinthea", hand: ["sigil of solace|1"] },
+      ],
+    });
+    opponentTurn.play("sigil of solace|1", { settle: false }).passPriority();
+    expect(() => opponentTurn.react(evo)).toThrow("no legal intent");
+
+    scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "teklovossen|0", hand: [evo, BLUE], equipment: { head: "teklo base head|0" } },
+        { hero: "dorinthea" },
+      ],
+    }).play(evo, { pitch: [BLUE] })
+      .expectAP(0, 0)
+      .expectEquipped(0, "head", evo);
+  });
+
+  it("Parry Blade and Nitro Mechanoid are weapons and equipment", () => {
+    for (const key of ["parry blade|0", "nitro mechanoid|0"]) {
+      const card = cardData[printingId(key)]!;
+      expect(objectKind(card), key).toBe("weapon");
+      expect(hasType(card, "equipment"), key).toBe(true);
+    }
+
+    const s = scenario({
+      seats: [
+        { hero: "dorinthea", weapons: ["parry blade|0"], resources: 1 },
+        { hero: "rhinar" },
+      ],
+    });
+    s.attackWithWeapon("parry blade|0").blockWith().settle().expectLife(1, 18);
+
+    const scrap = scenario({
+      seats: [
+        { hero: "rhinar", resources: 3, hand: ["junkyard dogg|1"], graveyard: ["parry blade|0"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    scrap.play("junkyard dogg|1").chooseCard("parry blade|0")
+      .expectInZone(0, "parry blade|0", "banish");
   });
 
   it("Dash, Database sees and plays an eligible top-deck item as an instant with the tax", () => {
@@ -618,6 +681,7 @@ describe("EVO — registration and core mechanics", () => {
       instanceId: evo.instanceId,
       pitchInstanceIds: [],
       pitchRequired: 0,
+      asInstant: true,
     });
 
     s.react("evo beta base legs|3", { settle: false });
@@ -710,7 +774,7 @@ describe("EVO — registration and core mechanics", () => {
       .expectAP(0, 1);
 
     s.activate("teklovossen, esteemed magnate|0")
-      .play("evo face breaker|1", { asInstant: true })
+      .play("evo face breaker|1")
       .expectAP(0, 1)
       .expectEquipped(0, "arms", "evo face breaker|1");
   });

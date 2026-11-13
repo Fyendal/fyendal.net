@@ -64,6 +64,7 @@ import {
   type TurnPlan,
   type TurnPlannerRoot,
 } from "./turn-planner.js";
+import { hasType } from "@fyendal/shared";
 
 const CHUM = "chum, friendly first mate|2";
 const SAWBONES = "sawbones, dock hand|2";
@@ -73,7 +74,7 @@ function weaponAttacksThisTurn(input: BotPolicyInput): number {
   if (projected !== undefined) return projected;
   return input.view.chain.filter((link) =>
     link.attackingCard.owner === input.seat &&
-    input.cards[link.attackingCard.cardId]?.cardType === "weapon"
+    hasType(input.cards[link.attackingCard.cardId], "weapon")
   ).length;
 }
 
@@ -186,7 +187,7 @@ function hasActionPointAfterCurrentLink(input: BotPolicyInput): boolean {
 }
 
 function reactionCreatesFlurry(data: CardData | undefined): boolean {
-  return data?.cardType === "attack-reaction" &&
+  return data !== undefined && hasType(data, "attack-reaction") &&
     data.text.split("\n").some((line) => !/^instant\b/i.test(line) && CREATES_FLURRY.test(line));
 }
 
@@ -208,7 +209,7 @@ function wastesFlurryReaction(data: CardData | undefined, input: BotPolicyInput)
 function currentAttackIsOurWeapon(input: BotPolicyInput): boolean {
   const link = currentLink(input);
   return !!link && link.attackingCard.owner === input.seat &&
-    input.cards[link.attackingCard.cardId]?.cardType === "weapon";
+    hasType(input.cards[link.attackingCard.cardId], "weapon");
 }
 
 function currentAttackHits(input: BotPolicyInput): boolean {
@@ -247,7 +248,7 @@ function shouldActivateRippleAway(input: BotPolicyInput, rippleId: number): bool
   const layer = input.view.stack[0];
   if (!layer?.card || layer.seat === input.seat) return false;
   const source = input.cards[layer.card.cardId];
-  if (source?.cardType !== "action") return false;
+  if (!source || !hasType(source, "action")) return false;
   // A modal card's stack label carries only its declared modes.
   return hasDeterministicTokenCreation(/^choose \d/i.test(source.text) ? layer.label : source.text);
 }
@@ -290,7 +291,7 @@ function resourcesAfter(
 ): number {
   const functional = key(data);
   const cost = intent.kind === "activate-ability"
-    ? data.cardType === "weapon"
+    ? hasType(data, "weapon")
       ? 1
       : functional === "hala, bladesaint of the vow|0" || functional === "hala|0"
       ? 3
@@ -491,7 +492,7 @@ function twoCostAttackAfterSwordIntent(input: BotPolicyInput): GameIntent | unde
 }
 
 function isPreferredPreSwordSharpener(data: CardData | undefined): boolean {
-  return data?.cardType === "action" && !isAttack(data) && Number(data.pitch ?? 0) <= 2 &&
+  return data !== undefined && hasType(data, "action") && !isAttack(data) && Number(data.pitch ?? 0) <= 2 &&
     /\bsharpen target sword\b/i.test(data.text) && /\bgo again\b/i.test(data.text);
 }
 
@@ -1056,7 +1057,7 @@ function sharpenMultiplierSwordTurnIntent(input: BotPolicyInput): GameIntent | u
   const visible = [...me.hand, ...me.arsenal];
   const sharpeners = visible.filter((card) => {
     const data = input.cards[card.cardId];
-    return data?.cardType === "action" &&
+    return data !== undefined && hasType(data, "action") &&
       /\bsharpen target (?:attacking )?sword\b/i.test(data.text) &&
       /\bgo again\b/i.test(data.text);
   });
@@ -1286,7 +1287,7 @@ function enforceHalaAllyPolicy(input: BotPolicyInput, selected: GameIntent): Gam
   const own = ownCards(input);
   const card = intentCard(selected, own);
   const data = card ? input.cards[card.cardId] : undefined;
-  if (!card || (!isAttack(data) && data?.cardType !== "weapon")) return selected;
+  if (!card || (!isAttack(data) && !hasType(data, "weapon"))) return selected;
 
   const allies = opponentAllies(input);
   if (allies.length === 0) return selected;
@@ -1371,7 +1372,7 @@ function estimateHalaConversion(
   options: { includeFlurry?: boolean } = {},
 ): HalaConversionEstimate {
   const unique = [...new Map(cards.map((card) => [card.instanceId, card])).values()]
-    .filter((card) => input.cards[card.cardId]?.cardType !== "weapon");
+    .filter((card) => !hasType(input.cards[card.cardId], "weapon"));
   const handIds = new Set(input.view.players[input.seat].hand.map((card) => card.instanceId));
   const nextTurnVigor = input.view.players[input.seat].board.filter((card) =>
     key(input.cards[card.cardId]) === "vigor|0"
@@ -1428,7 +1429,7 @@ function estimateHalaConversion(
       if (grantsDirectSwordAttack(data)) directAttackThresholds.push(sharpenThreshold(data));
       if (functional === "swordmaster's shine|1") reactionPower += 5;
       else if (functional === "point of escalation|2") pointOfEscalation = true;
-      else if (data.cardType === "attack-reaction") {
+      else if (hasType(data, "attack-reaction")) {
         reactionPower += Number(/\+(\d+)\{p\}/.exec(data.text)?.[1] ?? 0);
       }
       if (isAttack(data)) attackAction = Math.max(attackAction, data.attack ?? 0);
@@ -1524,12 +1525,12 @@ function openingHandCoversIncomingDamage(
   }
   if (link.overpower) {
     const actionDefense = hand.reduce((best, card) =>
-      input.cards[card.cardId]?.cardType === "action"
+      hasType(input.cards[card.cardId], "action")
         ? Math.max(best, defenseOf(card))
         : best,
     0);
     const otherDefense = hand.reduce((total, card) =>
-      input.cards[card.cardId]?.cardType === "action" ? total : total + defenseOf(card),
+      hasType(input.cards[card.cardId], "action") ? total : total + defenseOf(card),
     0);
     return actionDefense + otherDefense >= defenseNeeded;
   }
@@ -1990,7 +1991,7 @@ function scorePlay(
   let score: number;
 
   if (intent.kind === "activate-ability") {
-    if (data.cardType === "weapon") {
+    if (hasType(data, "weapon")) {
       const attackNumber = weaponAttacksThisTurn(input) + 1;
       score = 34 + (data.attack ?? card.attack ?? 0) + sharpenCount(input) * 3;
       if (attackNumber === 1 && sharpenedThisTurn(input)) score += 18;
@@ -2020,7 +2021,7 @@ function scorePlay(
     } else {
       score = 2;
     }
-  } else if (data.cardType === "attack-reaction") {
+  } else if (hasType(data, "attack-reaction")) {
     score = scoreAttackReaction(data, input);
     if (zenithCanAttackAgain(input)) {
       const effectiveCost = functional === "swordmaster's shine|1"
@@ -2031,7 +2032,7 @@ function scorePlay(
         remainingPitchValue(input, excluded);
       if (continuationResources < 1) score = -100;
     }
-  } else if (data.cardType === "defense-reaction") {
+  } else if (hasType(data, "defense-reaction")) {
     score = !toeTheLineCoversAttack(input) &&
         defenseReactionWorthSpending(card, input, halaSolverRules, pitchIds(intent))
       ? scoreDefenseReaction(data, input)
@@ -2059,7 +2060,7 @@ function scorePlay(
   }
 
   const after = resourcesAfter(intent, data, input, own);
-  if (data.cardType === "action" && !isAttack(data) && hasFlurry(input)) {
+  if (hasType(data, "action") && !isAttack(data) && hasFlurry(input)) {
     score += Math.min(2, after) * 5;
   }
   for (const id of pitchIds(intent)) {

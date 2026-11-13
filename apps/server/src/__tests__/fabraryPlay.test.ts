@@ -9,6 +9,7 @@ import { getDeck, listDecks, updateDeck } from "../decks.js";
 import type { Queryable } from "../db.js";
 import type { FabraryClient } from "../fabrary.js";
 import { freshDb } from "./testdb.js";
+import { objectKind } from "@fyendal/shared";
 
 const source = "https://fabrary.net/decks/01M1WZTPC64GDCMN2GX752E3R7";
 const line = (id: string) => {
@@ -101,7 +102,7 @@ describe("Fabrary play deck resolution", () => {
 
   it("imports banned and implemented future cards without stripping them", async () => {
     const future = Object.values(cardData).find((card) => card.set && FUTURE_SET_CODES.has(card.set)
-      && isImplemented(card) && !["hero", "weapon", "equipment", "token"].includes(card.cardType)
+      && isImplemented(card) && objectKind(card) === "deck"
       && findPrinting(card.name, card.pitch)?.id === card.id)!;
     expect(future).toBeDefined();
     latestText = text.replace(line(pool.deck[0]!), "1x Art of War (2)")

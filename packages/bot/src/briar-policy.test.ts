@@ -4,6 +4,7 @@ import type { Decklist, GameIntent } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import { chooseBriarIntent, chooseBriarIntentWithTrace } from "./briar-policy.js";
 import { briarPresentationFor } from "./sideboard.js";
+import { hasType } from "@fyendal/shared";
 
 function briarDeck(opponent: Decklist): Decklist {
   const pool = precon("bot-briar-broccoli")!.pool;
@@ -728,7 +729,7 @@ describe("Briar policy", () => {
     });
     const view = projectStateFor(state, 0);
     const equipment = Object.values(view.players[0].equipment).find((card) =>
-      card && cardData[card.cardId]?.cardType === "equipment"
+      card && hasType(cardData[card.cardId], "equipment")
     )!;
     const handCard = view.players[0].hand[0]!;
     view.priorityPlayer = 0;
@@ -1060,7 +1061,7 @@ describe("Briar policy", () => {
       reactions: [],
     }];
 
-    expect(cardData.WTR115?.cardType).toBe("weapon");
+    expect(cardData.WTR115?.types).toEqual(["weapon"]);
     expect(chooseBriarIntent({
       seat: 0,
       view,

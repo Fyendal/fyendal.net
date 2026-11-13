@@ -4,6 +4,7 @@ import type { GameStateInternal } from "./runtimeState.js";
 import type { CardScript } from "./scripts.js";
 import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
 import { defendingSeatOf, findCardAnywhere, globalCardInstances } from "./zoneQueries.js";
+import { hasType } from "@fyendal/shared";
 
 /** Permanents controlled by `seat` in the standard iteration order: hero,
  *  weapons, equipment, board. Used for untap, ability enumeration, and
@@ -146,7 +147,7 @@ export function contractObserverSources(state: GameStateInternal, seat: number):
     for (const reaction of [...defending, ...link.reactions.filter((card) => card.owner === seat)]) {
       if (
         !reaction.faceDown &&
-        dataOf(state, reaction.cardId).cardType === "defense-reaction"
+        hasType(dataOf(state, reaction.cardId), "defense-reaction")
       ) sources.set(reaction.instanceId, reaction);
     }
   }

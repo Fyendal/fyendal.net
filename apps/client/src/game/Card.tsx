@@ -13,6 +13,7 @@ import {
 } from "./cardImageUrl.js";
 import { cardFrontFaceId } from "./cardPreviewFaces.js";
 import { MARKED_TOKEN_ID, cardBadges, registerCardBadges } from "./cardBadges.js";
+import { hasType, primaryType } from "@fyendal/shared";
 
 const PITCH_CLASS: Record<number, string> = {
   1: "pitch-red",
@@ -341,9 +342,9 @@ export function CardFace({
   const tallEquipmentFrame = imageUrl !== undefined && !fullBleedArt && hasTallEquipmentCardFrame(imageUrl);
   const attack = card.attack ?? data?.attack;
   const defense = card.defense ?? data?.defense;
-  const squareHero = data?.cardType === "hero";
-  const printedArenaFrame = squareHero || data?.cardType === "weapon" ||
-    data?.cardType === "equipment" || data?.cardType === "token";
+  const squareHero = data !== undefined && hasType(data, "hero");
+  const printedArenaFrame = squareHero || hasType(data, "weapon") ||
+    hasType(data, "equipment") || hasType(data, "token");
   // A transformed back face (Nitro Mechanoid) has no pitch; show its front's.
   const frontFaceId = cardFrontFaceId(card.cardId);
   const stripPitch = data?.pitch ?? (frontFaceId ? cardData[frontFaceId]?.pitch : undefined);
@@ -406,7 +407,7 @@ export function CardFace({
         <>
           <span
             className={`board-square-media${legacySquareFrame ? " board-square-media-legacy" : ""}`}
-            data-card-type={!marvelArt ? data?.cardType : undefined}
+            data-card-type={!marvelArt && data ? primaryType(data) : undefined}
             aria-hidden="true"
           >
             {showImg ? (
@@ -452,8 +453,8 @@ export function CardFace({
             <span className="board-square-accessible-name">{name}</span>
           ) : (
             <div
-              className={`board-square-name${data?.cardType === "hero" ? " board-square-name-hero" : ""}`}
-              data-card-type={data?.cardType}
+              className={`board-square-name${hasType(data, "hero") ? " board-square-name-hero" : ""}`}
+              data-card-type={data ? primaryType(data) : undefined}
               data-pitch={squarePitch}
               title={name}
             >
@@ -515,7 +516,7 @@ export function CardFace({
           <div className="c-name">{name}</div>
           {size === "preview" && data && (
             <div className="c-type">
-              {data.cardType}
+              {data.types.join(" ")}
               {data.pitch ? ` · pitch ${data.pitch}` : ""}
             </div>
           )}

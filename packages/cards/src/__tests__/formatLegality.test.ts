@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
-import type { CardData, DeckPool } from "@fyendal/shared";
+import type { CardData, CardType, DeckPool } from "@fyendal/shared";
 import { formatLegalityIssues } from "../formatLegality.js";
 
 const card = (
   id: string,
   name: string,
-  cardType: CardData["cardType"] = "action",
+  type: CardType = "action",
   pitch?: CardData["pitch"],
   set?: string,
-): CardData => ({ id, name, cardType, ...(pitch ? { pitch } : {}), ...(set ? { set } : {}), text: "" });
+): CardData => ({ id, name, types: [type], ...(pitch ? { pitch } : {}), ...(set ? { set } : {}), text: "" });
 
 const SILVER_AGE_BANNED_NAMES = [
   "Aether Flare",

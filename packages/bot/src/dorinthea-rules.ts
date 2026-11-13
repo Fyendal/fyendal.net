@@ -3,6 +3,7 @@ import { lifeGainAlternative } from "./bravo-policy.js";
 import type { HeroSolverRules, SolverCardPatch } from "./card-model.js";
 import type { PendingEffect, SolverCard } from "./hand-solver.js";
 import type { BotPolicyInput } from "./policy.js";
+import { hasType } from "@fyendal/shared";
 
 const named = (data: CardData | undefined): string => data?.name.trim().toLowerCase() ?? "";
 
@@ -43,7 +44,7 @@ export function dorintheaSolverRules(input: BotPolicyInput): HeroSolverRules {
         patch.replaceAfter = true;
         patch.after = () => ({ pending: [{ key: `${card.cardId}#${card.instanceId}`, uses: 1, ...effect }] });
       };
-      if (data.cardType === "weapon") {
+      if (hasType(data, "weapon")) {
         if (!heroAbility) return patch;
         const power = card.attack ?? data.attack ?? 0;
         // The second swing exists only if the first one hit.

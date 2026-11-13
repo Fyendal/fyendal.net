@@ -37,6 +37,7 @@ import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 import { penHighRarity } from "./pen/high-rarity.js";
 import { concoctDisorder } from "./sar.js";
 import { LIVING_LEGEND_HEROES } from "../formatLegality.js";
+import { hasType } from "@fyendal/shared";
 
 // Compendium of Rathe (PEN) — complete set and required tokens.
 
@@ -565,7 +566,7 @@ function freezeGalciaTarget(ctx: ScriptCtx): void {
 function tendenciesTargets(ctx: ScriptCtx, subtype: "item" | "aura"): Card[] {
   return ctx.state.players
     .flatMap((player) => player.board)
-    .filter((card) => hasTag(ctx, card, subtype) && data(ctx, card).cardType === "token");
+    .filter((card) => hasTag(ctx, card, subtype) && hasType(data(ctx, card), "token"));
 }
 
 /** Ask for Destructive Tendencies' aura token; without one, resolve the item. */
@@ -883,7 +884,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "speed demon|1": {
     declareAdditionalCost(ctx) {
       const choices = faceUpGraveyard(ctx)
-        .filter((card) => hasTag(ctx, card, "item") || data(ctx, card).cardType === "equipment");
+        .filter((card) => hasTag(ctx, card, "item") || hasType(data(ctx, card), "equipment"));
       if (choices.length)
         ctx.requestCardChoice(
           "pen-scrap",
@@ -899,7 +900,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       const target = faceUpGraveyard(ctx).find(
           (card) =>
             card.instanceId === Number(option) &&
-            (hasTag(ctx, card, "item") || data(ctx, card).cardType === "equipment"),
+            (hasTag(ctx, card, "item") || hasType(data(ctx, card), "equipment")),
         );
       if (!target) return;
       const driver = named(ctx, target, "Hyper Driver");
@@ -1115,7 +1116,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
             options: (ctx) =>
               ctx.state.players
                 .flatMap((player) => player.board)
-                .filter((card) => hasTag(ctx, card, "aura") && data(ctx, card).cardType === "token")
+                .filter((card) => hasTag(ctx, card, "aura") && hasType(data(ctx, card), "token"))
                 .map((card) => card.instanceId),
             prompt: () => decisionPrompt("Destroy an aura token", "card.pen.auratoken.destroy"),
           },
@@ -1153,7 +1154,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "embody greatness|2": {
     additionalCost(ctx) {
       const available = [...LIVING_LEGEND_HEROES].flatMap((name) => {
-        const heroId = ctx.cardIdsNamed(name).find((cardId) => ctx.cardData(cardId).cardType === "hero");
+        const heroId = ctx.cardIdsNamed(name).find((cardId) => hasType(ctx.cardData(cardId), "hero"));
         return heroId ? [ctx.cardData(heroId).name] : [];
       });
       if (available.length) {
@@ -1166,7 +1167,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
     onChoose(ctx, hook, option) {
       if (hook !== "pen-embody-hero") return;
-      const heroId = ctx.cardIdsNamed(option).find((cardId) => ctx.cardData(cardId).cardType === "hero");
+      const heroId = ctx.cardIdsNamed(option).find((cardId) => hasType(ctx.cardData(cardId), "hero"));
       if (heroId) ctx.becomeHeroUntilNextTurn(heroId);
     },
   },

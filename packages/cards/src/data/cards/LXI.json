@@ -2,7 +2,7 @@
  {
   "id": "LXI001",
   "name": "Lexi",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Ice and Lightning\nOnce per Turn Action - Turn a face down card in your arsenal face up: If it's a Lightning card, your next attack this turn gains go again. If it's an Ice card, create a Frostbite token under target hero's control. Go again",
   "classes": [
    "ranger"
@@ -20,7 +20,7 @@
  {
   "id": "LXI002",
   "name": "Shiver",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Instant - {r}: You may put an arrow card from your hand face up into an empty arsenal zone you control. If you do, choose 1;\n\nIt gains +1{p} until end of turn.\nIt gains dominate until end of turn.",
   "classes": [
    "ranger"
@@ -35,7 +35,7 @@
  {
   "id": "LXI003",
   "name": "Honing Hood",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Honing Hood: Return all cards in your arsenal to your hand, then put a card from your hand face down into your arsenal.",
   "cost": 0,
   "defense": 0,
@@ -50,7 +50,7 @@
  {
   "id": "LXI004",
   "name": "Deep Blue",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Put a card from your hand on the bottom of your deck, destroy this: Gain {r}{r}{r}. Go again",
   "defense": 0,
   "classes": [
@@ -64,7 +64,7 @@
  {
   "id": "LXI005",
   "name": "Mark of Lightning",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever a Lightning or Elemental attack you control is defended by a card from hand, you may destroy Mark of Lightning. If you do, the attack deals 1 damage to the defending hero.",
   "defense": 0,
   "subtypes": [
@@ -76,7 +76,7 @@
  {
   "id": "LXI006",
   "name": "Ironrot Legs",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -93,7 +93,7 @@
  {
   "id": "LXI007",
   "name": "Buzz Bolt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Fusion\nIf Buzz Bolt was fused, whenever an attack hits a hero this turn, it deals 1 damage to them.",
   "pitch": 1,
   "cost": 1,
@@ -115,7 +115,7 @@
  {
   "id": "LXI008",
   "name": "Dazzling Crescendo",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Fusion\nIf Dazzling Crescendo was fused, it gains go again.",
   "pitch": 1,
   "cost": 0,
@@ -138,7 +138,7 @@
  {
   "id": "LXI009",
   "name": "Frazzle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Fusion\nIf Frazzle was fused, whenever an attack would deal damage this turn, instead it deals that much damage plus 1.",
   "pitch": 1,
   "cost": 1,
@@ -160,7 +160,7 @@
  {
   "id": "LXI010",
   "name": "Snap Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Fusion\nIf Snap Shot was fused, you may activate abilities of bows you control an additional time this turn and as though they were an instant.",
   "pitch": 1,
   "cost": 0,
@@ -182,7 +182,7 @@
  {
   "id": "LXI011",
   "name": "Buzz Bolt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Fusion\nIf Buzz Bolt was fused, whenever an attack hits a hero this turn, it deals 1 damage to them.",
   "pitch": 2,
   "cost": 1,
@@ -204,7 +204,7 @@
  {
   "id": "LXI012",
   "name": "Frazzle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Fusion\nIf Frazzle was fused, whenever an attack would deal damage this turn, instead it deals that much damage plus 1.",
   "pitch": 2,
   "cost": 1,
@@ -226,7 +226,7 @@
  {
   "id": "LXI013",
   "name": "Entwine Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Fusion\nIf Entwine Lightning was fused, it gains go again.",
   "pitch": 1,
   "cost": 0,
@@ -245,7 +245,7 @@
  {
   "id": "LXI014",
   "name": "Heaven's Claws",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 1,
   "cost": 1,
@@ -260,7 +260,7 @@
  {
   "id": "LXI015",
   "name": "Shock Striker",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per Turn Instant - {r}{r}: Shock Striker gains \"If Shock Striker hits a hero, deal 1 damage to them.\"",
   "pitch": 1,
   "cost": 1,
@@ -275,7 +275,7 @@
  {
   "id": "LXI016",
   "name": "Electrify",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time an attack action card hits a hero this turn, it deals 3 damage to them.\nIf Electrify is played from arsenal, draw a card.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -291,7 +291,7 @@
  {
   "id": "LXI017",
   "name": "Weave Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Lightning or Elemental attack action card you play this turn gains +3{p}. If it's fused, it gains go again.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -307,7 +307,7 @@
  {
   "id": "LXI018",
   "name": "Lightning Press",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target attack action card with cost 1 or less gains +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -319,7 +319,7 @@
  {
   "id": "LXI019",
   "name": "Heaven's Claws",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 2,
   "cost": 1,
@@ -334,7 +334,7 @@
  {
   "id": "LXI020",
   "name": "Electrify",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time an attack action card hits a hero this turn, it deals 1 damage to them.\nIf Electrify is played from arsenal, draw a card.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -350,7 +350,7 @@
  {
   "id": "LXI021",
   "name": "Amulet of Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nInstant - Destroy Amulet of Lightning: Target action card gains go again. Activate this ability only if you have Lightning fused this turn.",
   "pitch": 3,
   "cost": 0,
@@ -366,7 +366,7 @@
  {
   "id": "LXI022",
   "name": "Blizzard Bolt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nIf Blizzard Bolt was fused, whenever an attack deals damage to a hero this turn, create a Frostbite token under their control.",
   "pitch": 1,
   "cost": 1,
@@ -388,7 +388,7 @@
  {
   "id": "LXI023",
   "name": "Chilling Icevein",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nIf Chilling Icevein was fused, whenever an attack deals damage to a hero this turn, they discard a card unless they pay {r}.",
   "pitch": 2,
   "cost": 1,
@@ -410,7 +410,7 @@
  {
   "id": "LXI024",
   "name": "Chill to the Bone",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time an Ice or Elemental attack hits a hero this turn, create 2 Frostbite tokens under their control.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -426,7 +426,7 @@
  {
   "id": "LXI025",
   "name": "Winter's Bite",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Target hero discards a card unless they pay {r}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -442,7 +442,7 @@
  {
   "id": "LXI026",
   "name": "Bolt'n' Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Bolt'n' Shot's {p} is greater than its base {p}, it has go again and \"If this hits, reload.\"",
   "pitch": 1,
   "cost": 0,
@@ -464,7 +464,7 @@
  {
   "id": "LXI027",
   "name": "Over Flex",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next arrow attack this turn gains +4{p}.\nReload\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -481,7 +481,7 @@
  {
   "id": "LXI028",
   "name": "Take Aim",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Ranger attack action card you play this turn, gains +3{p}.\nReload\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -498,7 +498,7 @@
  {
   "id": "LXI029",
   "name": "Pitfall Trap",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Pitfall Trap can only be played from arsenal.\nWhen this defends, deal 2 damage to the attacking hero unless they pay {r}.",
   "pitch": 2,
   "cost": 0,
@@ -514,7 +514,7 @@
  {
   "id": "LXI030",
   "name": "Frostbite",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Cards and abilities cost you an additional {r} to play or activate.\nAt the beginning of your end phase or when you play a card or activate an ability, destroy Frostbite.",
   "subtypes": [
    "elemental",

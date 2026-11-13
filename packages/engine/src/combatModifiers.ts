@@ -27,7 +27,7 @@ function modifierMatches(
   granted: (tag: string) => boolean = () => false,
   names: readonly string[],
   keywordAbilitiesActive = true,
-  effectiveCardTypes: readonly string[] = [data.cardType],
+  effectiveCardTypes: readonly string[] = data.types,
   effectiveTags: readonly string[] = [
     ...(data.classes ?? []),
     ...(data.subtypes ?? []),
@@ -127,7 +127,7 @@ export function modifierAppliesTo(
     granted,
     cardNamesOf(state, card),
     !cardAbilitiesSuppressed(state, card),
-    [data.cardType],
+    data.types,
     cardTypesOf(state, card),
     basePower,
   );
@@ -149,7 +149,7 @@ export function modifierAppliesToDefense(
   const meld = state.scriptsRef[card.cardId]?.meld;
   const effectiveCardTypes = meld
     ? [meld.leftCardType, meld.rightCardType]
-    : [data.cardType];
+    : data.types;
   return modifierMatches(
     modifier,
     data,

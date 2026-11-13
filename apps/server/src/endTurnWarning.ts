@@ -1,5 +1,6 @@
 import { cardData } from "@fyendal/cards";
 import type { CardView, GameIntent, GameView } from "@fyendal/shared";
+import { hasType } from "@fyendal/shared";
 
 /** True when passing would give up an unused action point on the seat's own
  *  action-phase turn while an action card or weapon could still be used. The
@@ -30,6 +31,6 @@ export function forfeitsActionPoint(view: GameView, seat: number, candidates: re
     ) return false;
     if (intent.asInstant) return false;
     const card = cards.get(intent.instanceId);
-    return card !== undefined && cardData[card.cardId]?.cardType === "action";
+    return card !== undefined && hasType(cardData[card.cardId], "action");
   });
 }

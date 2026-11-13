@@ -11,6 +11,7 @@ import { applyIntent, createGame, legalIntents as engineLegalIntents, projectSta
 import type { GameState } from "@fyendal/engine";
 import type { Decklist } from "@fyendal/shared";
 import { cardData, decklists, scripts } from "../index.js";
+import { hasType } from "@fyendal/shared";
 
 // Golden playouts exercise card play, not voluntary player draw agreements.
 const legalIntents = (state: GameState, seat: number) =>
@@ -298,7 +299,7 @@ describe("Rhinar vs Dorinthea box decks full match", () => {
       expect(dl.deck).toHaveLength(40);
       for (const id of dl.deck) expect(cardData[id], id).toBeTruthy();
       // the mentor is an ordinary deck card, shuffled in with the rest
-      expect(dl.deck.some((id) => cardData[id]!.cardType === "mentor")).toBe(true);
+      expect(dl.deck.some((id) => hasType(cardData[id]!, "mentor"))).toBe(true);
     }
   });
 

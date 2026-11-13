@@ -5,6 +5,7 @@ import type { GameStateInternal } from "./runtimeState.js";
 import { activeModifiers } from "./combatModifiers.js";
 import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
 import { currentLink, opponent } from "./zoneQueries.js";
+import { hasType } from "@fyendal/shared";
 
 /** Whether a turn-scoped effect prohibits this player from attacking with
  * weapons. Callers still identify whether the proposed attack source is a
@@ -23,7 +24,7 @@ export function attackActionPlayRestricted(
   card: CardInstance,
 ): boolean {
   const data = instanceDataOf(state, card);
-  if (data.cardType !== "action" || !(data.subtypes ?? []).includes("attack")) return false;
+  if (!hasType(data, "action") || !(data.subtypes ?? []).includes("attack")) return false;
   if (attackBasePowerRestricted(state, runtime, player.seat, card)) return true;
   const until = Number(player.hero.scriptState?.attackActionBasePowerLimitUntilTurn ?? 0);
   if (until !== state.turn) return false;

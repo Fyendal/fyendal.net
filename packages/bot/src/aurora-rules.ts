@@ -4,6 +4,7 @@ import { combineEffects, type HeroSolverRules, type SolverCardPatch } from "./ca
 import { embodimentOfLightning, lightningCardPatcher, runechantPending } from "./briar-rules.js";
 import type { PendingEffect, SolverCard, SolverEffect, SolverView } from "./hand-solver.js";
 import type { BotPolicyInput } from "./policy.js";
+import { hasType } from "@fyendal/shared";
 
 const named = (data: CardData | undefined): string => data?.name.trim().toLowerCase() ?? "";
 
@@ -64,7 +65,7 @@ function playedThisTurn(input: BotPolicyInput): { attack: boolean; nonAttack: bo
   );
   const nonAttackEffect = input.view.ongoing.some((effect) => {
     const data = input.cards[effect.cardId];
-    return effect.seat === input.seat && data?.cardType === "action" &&
+    return effect.seat === input.seat && data !== undefined && hasType(data, "action") &&
       !data.subtypes?.some((subtype) => subtype.toLowerCase() === "attack");
   });
   return {
@@ -171,7 +172,7 @@ export function auroraSolverRules(input: BotPolicyInput): HeroSolverRules {
     },
     card(data, card, context) {
       const patch = cardPatch(data, card, context.averageDraw, context.hitChance);
-      if (data.cardType !== "action") return patch;
+      if (!hasType(data, "action")) return patch;
       const attack = data.subtypes?.some((subtype) => subtype.toLowerCase() === "attack") === true;
       const staticGoAgain = data.keywords?.some((keyword) => keyword.toLowerCase() === "go again") === true;
       const own = patch.after;

@@ -2,7 +2,7 @@
   {
     "id": "IAR000",
     "name": "Soul of Existence",
-    "cardType": "resource",
+    "types": ["resource"],
     "subtypes": [
       "shadow",
       "gem"
@@ -17,7 +17,7 @@
   {
     "id": "IAR001",
     "name": "Arknight Shard",
-    "cardType": "resource",
+    "types": ["resource"],
     "classes": [
       "runeblade"
     ],
@@ -35,7 +35,7 @@
   {
     "id": "IAR002",
     "name": "Levia",
-    "cardType": "hero",
+    "types": ["hero"],
     "classes": [
       "brute"
     ],
@@ -50,7 +50,7 @@
   {
     "id": "IAR003",
     "name": "Hell Hammer",
-    "cardType": "weapon",
+    "types": ["weapon"],
     "classes": [
       "brute"
     ],
@@ -69,7 +69,7 @@
   {
     "id": "IAR004",
     "name": "Hex Gauntlet",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "classes": [
       "brute"
     ],
@@ -87,7 +87,7 @@
   {
     "id": "IAR005",
     "name": "Blood Harvest",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -107,7 +107,7 @@
   {
     "id": "IAR006",
     "name": "Devouring Doomwake",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -128,7 +128,7 @@
   {
     "id": "IAR007",
     "name": "Ingest the Unknown",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -149,7 +149,7 @@
   {
     "id": "IAR008",
     "name": "Consuming Appetite",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -170,7 +170,7 @@
   {
     "id": "IAR009",
     "name": "Consuming Lash",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -191,7 +191,7 @@
   {
     "id": "IAR010",
     "name": "Consuming Strength",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -212,7 +212,7 @@
   {
     "id": "IAR011",
     "name": "Hellbound Assault",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -233,7 +233,7 @@
   {
     "id": "IAR012",
     "name": "Hellbound Assault",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -254,7 +254,7 @@
   {
     "id": "IAR013",
     "name": "Hellbound Assault",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -275,7 +275,7 @@
   {
     "id": "IAR014",
     "name": "Rumbling Hunger",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits, if you've banished a card with 6 or more {p} this turn, create a Blasmophet, the Insatiable Hunger token and this gets go again.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 1,
     "cost": 2,
@@ -296,7 +296,7 @@
   {
     "id": "IAR015",
     "name": "Rumbling Hunger",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits, if you've banished a card with 6 or more {p} this turn, create a Blasmophet, the Insatiable Hunger token and this gets go again.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 2,
     "cost": 2,
@@ -317,7 +317,7 @@
   {
     "id": "IAR016",
     "name": "Rumbling Hunger",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits, if you've banished a card with 6 or more {p} this turn, create a Blasmophet, the Insatiable Hunger token and this gets go again.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 3,
     "cost": 2,
@@ -338,7 +338,7 @@
   {
     "id": "IAR017",
     "name": "Beckoning Hunger",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -359,7 +359,7 @@
   {
     "id": "IAR018",
     "name": "Beckoning Hunger",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -380,7 +380,7 @@
   {
     "id": "IAR019",
     "name": "Beckoning Hunger",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -401,7 +401,7 @@
   {
     "id": "IAR020",
     "name": "Cleave the Heavens",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -422,7 +422,7 @@
   {
     "id": "IAR021",
     "name": "Cleave the Heavens",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -443,7 +443,7 @@
   {
     "id": "IAR022",
     "name": "Cleave the Heavens",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -464,7 +464,7 @@
   {
     "id": "IAR023",
     "name": "Feasting Shadowbeast",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, banish the top card of your deck.\nIf you've banished a card with 6 or more {p} this turn, this gets +2{p}.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 1,
     "cost": 2,
@@ -485,7 +485,7 @@
   {
     "id": "IAR024",
     "name": "Feasting Shadowbeast",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, banish the top card of your deck.\nIf you've banished a card with 6 or more {p} this turn, this gets +2{p}.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 2,
     "cost": 2,
@@ -506,7 +506,7 @@
   {
     "id": "IAR025",
     "name": "Feasting Shadowbeast",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, banish the top card of your deck.\nIf you've banished a card with 6 or more {p} this turn, this gets +2{p}.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 3,
     "cost": 2,
@@ -527,7 +527,7 @@
   {
     "id": "IAR026",
     "name": "Feeding Frenzy",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, banish the top card of your deck.\nIf you've banished a card with 6 or more {p} this turn, this gets go again.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 1,
     "cost": 2,
@@ -548,7 +548,7 @@
   {
     "id": "IAR027",
     "name": "Feeding Frenzy",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, banish the top card of your deck.\nIf you've banished a card with 6 or more {p} this turn, this gets go again.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 2,
     "cost": 2,
@@ -569,7 +569,7 @@
   {
     "id": "IAR028",
     "name": "Feeding Frenzy",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, banish the top card of your deck.\nIf you've banished a card with 6 or more {p} this turn, this gets go again.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 3,
     "cost": 2,
@@ -590,7 +590,7 @@
   {
     "id": "IAR029",
     "name": "Gorging Shadowbeast",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, banish the top card of your deck.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 1,
     "cost": 2,
@@ -611,7 +611,7 @@
   {
     "id": "IAR030",
     "name": "Gorging Shadowbeast",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, banish the top card of your deck.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 2,
     "cost": 2,
@@ -632,7 +632,7 @@
   {
     "id": "IAR031",
     "name": "Gorging Shadowbeast",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, banish the top card of your deck.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 3,
     "cost": 2,
@@ -653,7 +653,7 @@
   {
     "id": "IAR032",
     "name": "Satiate Bloodthirst",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Instant - Banish this from your hand: Gain 1{h}\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 1,
     "cost": 3,
@@ -674,7 +674,7 @@
   {
     "id": "IAR033",
     "name": "Satiate Bloodthirst",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Instant - Banish this from your hand: Gain 1{h}\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 2,
     "cost": 3,
@@ -695,7 +695,7 @@
   {
     "id": "IAR034",
     "name": "Satiate Bloodthirst",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Instant - Banish this from your hand: Gain 1{h}\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 3,
     "cost": 3,
@@ -716,7 +716,7 @@
   {
     "id": "IAR035",
     "name": "Blasmophet's Boon",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If you control a Blasmophet, this card's {p} is 6. Otherwise, it's 0.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 3,
     "cost": 1,
@@ -736,7 +736,7 @@
   {
     "id": "IAR036",
     "name": "Consuming Command",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Until end of turn, Blasmophet, the Insatiable Hunger tokens you control get \"Action - {t}: Attack.Go again\"\nGo again\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 3,
     "cost": 1,
@@ -756,7 +756,7 @@
   {
     "id": "IAR037",
     "name": "Goremass Summoning",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If you've banished a card with 6 or more {p} this turn, create a Blasmophet, the Insatiable Hunger token.\nGo again",
     "pitch": 3,
     "cost": 2,
@@ -775,7 +775,7 @@
   {
     "id": "IAR038",
     "name": "Boneseer Skullcap",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "classes": [
       "brute"
     ],
@@ -792,7 +792,7 @@
   {
     "id": "IAR039",
     "name": "Apex Buster",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -809,7 +809,7 @@
   {
     "id": "IAR040",
     "name": "Battle Clearing Bellow",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -825,7 +825,7 @@
   {
     "id": "IAR041",
     "name": "Peak Power",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -842,7 +842,7 @@
   {
     "id": "IAR042",
     "name": "Peak Power",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -859,7 +859,7 @@
   {
     "id": "IAR043",
     "name": "Peak Power",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -876,7 +876,7 @@
   {
     "id": "IAR044",
     "name": "Rocktop Bellow",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Reveal the top card of your deck. If the revealed card has 6 or more base {p}, your next attack this turn gets overpower. Otherwise, put the revealed card on the bottom. (It can't be defended by more than 1 action card.)\nYour next attack this turn gets +4{p}. Go again",
     "pitch": 1,
     "cost": 2,
@@ -892,7 +892,7 @@
   {
     "id": "IAR045",
     "name": "Rocktop Bellow",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Reveal the top card of your deck. If the revealed card has 6 or more base {p}, your next attack this turn gets overpower. Otherwise, put the revealed card on the bottom. (It can't be defended by more than 1 action card.)\nYour next attack this turn gets +3{p}. Go again",
     "pitch": 2,
     "cost": 2,
@@ -908,7 +908,7 @@
   {
     "id": "IAR046",
     "name": "Rocktop Bellow",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Reveal the top card of your deck. If the revealed card has 6 or more base {p}, your next attack this turn gets overpower. Otherwise, put the revealed card on the bottom. (It can't be defended by more than 1 action card.)\nYour next attack this turn gets +2{p}. Go again",
     "pitch": 3,
     "cost": 2,
@@ -924,7 +924,7 @@
   {
     "id": "IAR047",
     "name": "Headstrong Stampede",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -941,7 +941,7 @@
   {
     "id": "IAR048",
     "name": "Headstrong Stampede",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -958,7 +958,7 @@
   {
     "id": "IAR049",
     "name": "Headstrong Stampede",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "brute"
     ],
@@ -975,7 +975,7 @@
   {
     "id": "IAR050",
     "name": "Rise to the Challenge",
-    "cardType": "block",
+    "types": ["block"],
     "text": "When this defends, reveal the top card of your deck. If the revealed card has 6 or more base {p}, this gets +2{d}. Otherwise, put the revealed card on the bottom.\nInstant - Discard this: Your next attack this turn gets +2{p}.",
     "pitch": 1,
     "defense": 3,
@@ -987,7 +987,7 @@
   {
     "id": "IAR051",
     "name": "Rise to the Challenge",
-    "cardType": "block",
+    "types": ["block"],
     "text": "When this defends, reveal the top card of your deck. If the revealed card has 6 or more base {p}, this gets +2{d}. Otherwise, put the revealed card on the bottom.\nInstant - Discard this: Your next attack this turn gets +2{p}.",
     "pitch": 2,
     "defense": 2,
@@ -999,7 +999,7 @@
   {
     "id": "IAR052",
     "name": "Rise to the Challenge",
-    "cardType": "block",
+    "types": ["block"],
     "text": "When this defends, reveal the top card of your deck. If the revealed card has 6 or more base {p}, this gets +2{d}. Otherwise, put the revealed card on the bottom.\nInstant - Discard this: Your next attack this turn gets +2{p}.",
     "pitch": 3,
     "defense": 1,
@@ -1011,7 +1011,7 @@
   {
     "id": "IAR053",
     "name": "Malice, Domina of the Dead",
-    "cardType": "hero",
+    "types": ["hero"],
     "classes": [
       "necromancer"
     ],
@@ -1026,7 +1026,7 @@
   {
     "id": "IAR054",
     "name": "Malice",
-    "cardType": "hero",
+    "types": ["hero"],
     "classes": [
       "necromancer"
     ],
@@ -1044,7 +1044,7 @@
   {
     "id": "IAR055",
     "name": "Vox Necropolis",
-    "cardType": "weapon",
+    "types": ["weapon"],
     "classes": [
       "necromancer"
     ],
@@ -1059,7 +1059,7 @@
   {
     "id": "IAR056",
     "name": "Appalling Bearers",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "classes": [
       "necromancer"
     ],
@@ -1074,7 +1074,7 @@
   {
     "id": "IAR057",
     "name": "Forsaken Strike",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1092,7 +1092,7 @@
   {
     "id": "IAR058",
     "name": "Bridge of Damnation",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1112,7 +1112,7 @@
   {
     "id": "IAR059",
     "name": "Restless Templar",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1134,7 +1134,7 @@
   {
     "id": "IAR060",
     "name": "Commit to Corruption",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Your next attack this turn gets +3{p} and \"When this hits, create a Corrupted Corpse in your banished zone.\"\nGo again",
     "pitch": 1,
     "cost": 0,
@@ -1153,7 +1153,7 @@
   {
     "id": "IAR061",
     "name": "Commit to Corruption",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Your next attack this turn gets +2{p} and \"When this hits, create a Corrupted Corpse in your banished zone.\"\nGo again",
     "pitch": 2,
     "cost": 0,
@@ -1172,7 +1172,7 @@
   {
     "id": "IAR062",
     "name": "Commit to Corruption",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Your next attack this turn gets +1{p} and \"When this hits, create a Corrupted Corpse in your banished zone.\"\nGo again",
     "pitch": 3,
     "cost": 0,
@@ -1191,7 +1191,7 @@
   {
     "id": "IAR063",
     "name": "Restless Looter",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1213,7 +1213,7 @@
   {
     "id": "IAR064",
     "name": "Restless Magister",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1235,7 +1235,7 @@
   {
     "id": "IAR065",
     "name": "Restless Quartermaster",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1257,7 +1257,7 @@
   {
     "id": "IAR066",
     "name": "Mark of Neverest",
-    "cardType": "instant",
+    "types": ["instant"],
     "classes": [
       "necromancer"
     ],
@@ -1276,7 +1276,7 @@
   {
     "id": "IAR067",
     "name": "Mark of Pathstone",
-    "cardType": "instant",
+    "types": ["instant"],
     "classes": [
       "necromancer"
     ],
@@ -1295,7 +1295,7 @@
   {
     "id": "IAR068",
     "name": "Mark of Ushering",
-    "cardType": "instant",
+    "types": ["instant"],
     "classes": [
       "necromancer"
     ],
@@ -1314,7 +1314,7 @@
   {
     "id": "IAR069",
     "name": "Acrid Stench",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1335,7 +1335,7 @@
   {
     "id": "IAR070",
     "name": "Acrid Stench",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1356,7 +1356,7 @@
   {
     "id": "IAR071",
     "name": "Acrid Stench",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1377,7 +1377,7 @@
   {
     "id": "IAR072",
     "name": "Bone Mass",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1398,7 +1398,7 @@
   {
     "id": "IAR073",
     "name": "Bone Mass",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1419,7 +1419,7 @@
   {
     "id": "IAR074",
     "name": "Bone Mass",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1440,7 +1440,7 @@
   {
     "id": "IAR075",
     "name": "Malignant Migration",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1461,7 +1461,7 @@
   {
     "id": "IAR076",
     "name": "Malignant Migration",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1482,7 +1482,7 @@
   {
     "id": "IAR077",
     "name": "Malignant Migration",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1503,7 +1503,7 @@
   {
     "id": "IAR078",
     "name": "Ominous Toll",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1524,7 +1524,7 @@
   {
     "id": "IAR079",
     "name": "Ominous Toll",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1545,7 +1545,7 @@
   {
     "id": "IAR080",
     "name": "Ominous Toll",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1566,7 +1566,7 @@
   {
     "id": "IAR081",
     "name": "Shadowrealm Solace",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may put a card from your banished zone into your graveyard. If it's a zombie, gain 1{h}.\nGo again",
     "pitch": 3,
     "cost": 0,
@@ -1585,7 +1585,7 @@
   {
     "id": "IAR082",
     "name": "Shadowrealm Strength",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may put a card from your banished zone into your graveyard. If it's a zombie, your next attack this turn gets +3{p}.\nGo again",
     "pitch": 1,
     "cost": 0,
@@ -1604,7 +1604,7 @@
   {
     "id": "IAR083",
     "name": "Shadowrealm Swiftness",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may put a card from your banished zone into your graveyard. If it's a zombie, your next attack this turn gets go again.\nGo again",
     "pitch": 2,
     "cost": 0,
@@ -1623,7 +1623,7 @@
   {
     "id": "IAR084",
     "name": "Restless Cleric",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1645,7 +1645,7 @@
   {
     "id": "IAR085",
     "name": "Restless Corporal",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1667,7 +1667,7 @@
   {
     "id": "IAR086",
     "name": "Restless Outlaw",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1689,7 +1689,7 @@
   {
     "id": "IAR087",
     "name": "Restless Plowman",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Action - {t}: Gain {r}. Go again\nDecay (At the beginning of your end phase, put a -1{h} counter on this.)",
     "pitch": 1,
     "cost": 0,
@@ -1712,7 +1712,7 @@
   {
     "id": "IAR088",
     "name": "Restless Shieldmaiden",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Shadow Resist 1 (If you would be dealt damage by a Shadow hero, you may destroy this to prevent 1 of that damage.)\nDecay (At the beginning of your end phase, put a -1{h} counter on this.)",
     "pitch": 1,
     "cost": 0,
@@ -1735,7 +1735,7 @@
   {
     "id": "IAR089",
     "name": "Restless Steed",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits, the attack gets go again.\nDecay (At the beginning of your end phase, put a -1{h} counter on this.)",
     "pitch": 1,
     "cost": 0,
@@ -1757,7 +1757,7 @@
   {
     "id": "IAR090",
     "name": "Corrupted Corpse",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1779,7 +1779,7 @@
   {
     "id": "IAR091",
     "name": "Danse Macabre",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "classes": [
       "necromancer"
     ],
@@ -1796,7 +1796,7 @@
   {
     "id": "IAR092",
     "name": "Tome of Necrosis",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "necromancer"
     ],
@@ -1812,7 +1812,7 @@
   {
     "id": "IAR093",
     "name": "Bone Barrier",
-    "cardType": "defense-reaction",
+    "types": ["defense-reaction"],
     "classes": [
       "necromancer"
     ],
@@ -1825,7 +1825,7 @@
   {
     "id": "IAR094",
     "name": "Skeletal Puppetry",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may discard an ally rather than pay this card's {r} cost.\nYour next ally attack this turn gets +3{p} and go again.\nGo again",
     "pitch": 1,
     "cost": 2,
@@ -1841,7 +1841,7 @@
   {
     "id": "IAR095",
     "name": "Skeletal Puppetry",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may discard an ally rather than pay this card's {r} cost.\nYour next ally attack this turn gets +2{p} and go again.\nGo again",
     "pitch": 2,
     "cost": 2,
@@ -1857,7 +1857,7 @@
   {
     "id": "IAR096",
     "name": "Skeletal Puppetry",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may discard an ally rather than pay this card's {r} cost.\nYour next ally attack this turn gets +1{p} and go again.\nGo again",
     "pitch": 3,
     "cost": 2,
@@ -1873,7 +1873,7 @@
   {
     "id": "IAR097",
     "name": "Corpse Cover",
-    "cardType": "block",
+    "types": ["block"],
     "text": "Once per Turn Instant - Destroy an ally you control or discard an ally: Prevent the next 2 damage that would be dealt to you this turn. Activate this only while this card is defending.",
     "pitch": 1,
     "defense": 3,
@@ -1885,7 +1885,7 @@
   {
     "id": "IAR098",
     "name": "Corpse Cover",
-    "cardType": "block",
+    "types": ["block"],
     "text": "Once per Turn Instant - Destroy an ally you control or discard an ally: Prevent the next 2 damage that would be dealt to you this turn. Activate this only while this card is defending.",
     "pitch": 2,
     "defense": 2,
@@ -1897,7 +1897,7 @@
   {
     "id": "IAR099",
     "name": "Corpse Cover",
-    "cardType": "block",
+    "types": ["block"],
     "text": "Once per Turn Instant - Destroy an ally you control or discard an ally: Prevent the next 2 damage that would be dealt to you this turn. Activate this only while this card is defending.",
     "pitch": 3,
     "defense": 1,
@@ -1909,7 +1909,7 @@
   {
     "id": "IAR100",
     "name": "Bonded Burial",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits a hero, you may destroy an ally you control or discard an ally. If you do, they discard a card.",
     "pitch": 1,
     "cost": 1,
@@ -1926,7 +1926,7 @@
   {
     "id": "IAR101",
     "name": "Bonded Burial",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits a hero, you may destroy an ally you control or discard an ally. If you do, they discard a card.",
     "pitch": 2,
     "cost": 1,
@@ -1943,7 +1943,7 @@
   {
     "id": "IAR102",
     "name": "Bonded Burial",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits a hero, you may destroy an ally you control or discard an ally. If you do, they discard a card.",
     "pitch": 3,
     "cost": 1,
@@ -1960,7 +1960,7 @@
   {
     "id": "IAR103",
     "name": "Mutual Sacrifice",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits a hero, you may destroy an ally you control or discard an ally. If you do, they lose 2{h}.",
     "pitch": 1,
     "cost": 1,
@@ -1977,7 +1977,7 @@
   {
     "id": "IAR104",
     "name": "Mutual Sacrifice",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits a hero, you may destroy an ally you control or discard an ally. If you do, they lose 2{h}.",
     "pitch": 2,
     "cost": 1,
@@ -1994,7 +1994,7 @@
   {
     "id": "IAR105",
     "name": "Mutual Sacrifice",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits a hero, you may destroy an ally you control or discard an ally. If you do, they lose 2{h}.",
     "pitch": 3,
     "cost": 1,
@@ -2011,7 +2011,7 @@
   {
     "id": "IAR106",
     "name": "Viserai, the Forsaken",
-    "cardType": "hero",
+    "types": ["hero"],
     "classes": [
       "runeblade"
     ],
@@ -2027,7 +2027,7 @@
   {
     "id": "IAR106B",
     "name": "Viserai, Usurper",
-    "cardType": "hero",
+    "types": ["hero"],
     "text": "The first attack action card with blood debt you play each turn gets go again.\nAt the beginning of each end phase, if you've created or activated a Gate to i'Arathael this turn, you may traverse.",
     "classes": [
       "runeblade"
@@ -2045,7 +2045,7 @@
   {
     "id": "IAR107",
     "name": "Viserai, Between Worlds",
-    "cardType": "hero",
+    "types": ["hero"],
     "classes": [
       "runeblade"
     ],
@@ -2061,7 +2061,7 @@
   {
     "id": "IAR107B",
     "name": "Viserai, Usurper",
-    "cardType": "hero",
+    "types": ["hero"],
     "text": "The first attack action card with blood debt you play each turn gets go again.\nAt the beginning of each end phase, if you've created or activated a Gate to i'Arathael this turn, you may traverse.",
     "classes": [
       "runeblade"
@@ -2079,7 +2079,7 @@
   {
     "id": "IAR108",
     "name": "Seven Sin Nebula",
-    "cardType": "weapon",
+    "types": ["weapon"],
     "classes": [
       "runeblade"
     ],
@@ -2095,7 +2095,7 @@
   {
     "id": "IAR109",
     "name": "Grasp of the Darknight",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "classes": [
       "runeblade"
     ],
@@ -2114,7 +2114,7 @@
   {
     "id": "IAR110",
     "name": "Usurp the Shadow Throne",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2136,7 +2136,7 @@
   {
     "id": "IAR111",
     "name": "Arknight Descendancy",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2158,7 +2158,7 @@
   {
     "id": "IAR112",
     "name": "Sinspeaker Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2180,7 +2180,7 @@
   {
     "id": "IAR113",
     "name": "Become the Shadow Lord",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2199,7 +2199,7 @@
   {
     "id": "IAR114",
     "name": "Bloodsong Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2221,7 +2221,7 @@
   {
     "id": "IAR115",
     "name": "Cullingsong Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2243,7 +2243,7 @@
   {
     "id": "IAR116",
     "name": "Plundersong Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2265,7 +2265,7 @@
   {
     "id": "IAR117",
     "name": "Vexing Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2287,7 +2287,7 @@
   {
     "id": "IAR118",
     "name": "Vexing Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2309,7 +2309,7 @@
   {
     "id": "IAR119",
     "name": "Vexing Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2331,7 +2331,7 @@
   {
     "id": "IAR120",
     "name": "Embrace Sin",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2350,7 +2350,7 @@
   {
     "id": "IAR121",
     "name": "Forbidden Harvest",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2369,7 +2369,7 @@
   {
     "id": "IAR122",
     "name": "Promise of Power",
-    "cardType": "action",
+    "types": ["action"],
     "text": "The next time you play an attack action card from your banished zone this turn, create 2 Runechant tokens.\nGo again",
     "pitch": 2,
     "cost": 1,
@@ -2388,7 +2388,7 @@
   {
     "id": "IAR123",
     "name": "Bloodfrenzy Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2410,7 +2410,7 @@
   {
     "id": "IAR124",
     "name": "Bloodfrenzy Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2432,7 +2432,7 @@
   {
     "id": "IAR125",
     "name": "Bloodfrenzy Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2454,7 +2454,7 @@
   {
     "id": "IAR126",
     "name": "Demonbound Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2476,7 +2476,7 @@
   {
     "id": "IAR127",
     "name": "Demonbound Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2498,7 +2498,7 @@
   {
     "id": "IAR128",
     "name": "Demonbound Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2520,7 +2520,7 @@
   {
     "id": "IAR129",
     "name": "Embrace Ursur",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2538,7 +2538,7 @@
   {
     "id": "IAR130",
     "name": "Embrace Ursur",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2556,7 +2556,7 @@
   {
     "id": "IAR131",
     "name": "Embrace Ursur",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2574,7 +2574,7 @@
   {
     "id": "IAR132",
     "name": "Murmuring Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2596,7 +2596,7 @@
   {
     "id": "IAR133",
     "name": "Murmuring Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2618,7 +2618,7 @@
   {
     "id": "IAR134",
     "name": "Murmuring Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2640,7 +2640,7 @@
   {
     "id": "IAR135",
     "name": "Shadowake Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nUsurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nWhen this hits, create a Gate to i'Arathael token.\nBlood Debt",
     "pitch": 1,
     "cost": 2,
@@ -2662,7 +2662,7 @@
   {
     "id": "IAR136",
     "name": "Shadowake Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nUsurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nWhen this hits, create a Gate to i'Arathael token.\nBlood Debt",
     "pitch": 2,
     "cost": 2,
@@ -2684,7 +2684,7 @@
   {
     "id": "IAR137",
     "name": "Shadowake Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nUsurp (As an additional cost to play this, destroy a Runechant if able. If you do, this gets +2{p}.)\nWhen this hits, create a Gate to i'Arathael token.\nBlood Debt",
     "pitch": 3,
     "cost": 2,
@@ -2706,7 +2706,7 @@
   {
     "id": "IAR138",
     "name": "Enshrine Sin",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone. If you do, it costs an additional {r} to play.\nOpt 1, then create a Runechant token. Go again (Look at the top card of your deck. Put it on the top or bottom.)\nBlood Debt",
     "pitch": 1,
     "cost": 0,
@@ -2727,7 +2727,7 @@
   {
     "id": "IAR139",
     "name": "Enshrine Sin",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone. If you do, it costs an additional {r}{r} to play.\nOpt 1, then create a Runechant token. Go again (Look at the top card of your deck. Put it on the top or bottom.)\nBlood Debt",
     "pitch": 2,
     "cost": 0,
@@ -2748,7 +2748,7 @@
   {
     "id": "IAR140",
     "name": "Enshrine Sin",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone. If you do, it costs an additional {r}{r}{r} to play.\nOpt 1, then create a Runechant token. Go again (Look at the top card of your deck. Put it on the top or bottom.)\nBlood Debt",
     "pitch": 3,
     "cost": 0,
@@ -2769,7 +2769,7 @@
   {
     "id": "IAR141",
     "name": "Otherworldly Sins",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Your next Runeblade or Shadow attack this turn gets +3{p}.\nCreate a Runechant token.\nGo again",
     "pitch": 1,
     "cost": 1,
@@ -2788,7 +2788,7 @@
   {
     "id": "IAR142",
     "name": "Otherworldly Sins",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Your next Runeblade or Shadow attack this turn gets +2{p}.\nCreate a Runechant token.\nGo again",
     "pitch": 2,
     "cost": 1,
@@ -2807,7 +2807,7 @@
   {
     "id": "IAR143",
     "name": "Otherworldly Sins",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Your next Runeblade or Shadow attack this turn gets +1{p}.\nCreate a Runechant token.\nGo again",
     "pitch": 3,
     "cost": 1,
@@ -2826,7 +2826,7 @@
   {
     "id": "IAR144",
     "name": "Sonata Dystopia",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2841,7 +2841,7 @@
   {
     "id": "IAR145",
     "name": "Runechant of Greed",
-    "cardType": "instant",
+    "types": ["instant"],
     "classes": [
       "runeblade"
     ],
@@ -2856,7 +2856,7 @@
   {
     "id": "IAR146",
     "name": "Runic Disposition",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2876,7 +2876,7 @@
   {
     "id": "IAR147",
     "name": "Runic Disposition",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2896,7 +2896,7 @@
   {
     "id": "IAR148",
     "name": "Runic Disposition",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2916,7 +2916,7 @@
   {
     "id": "IAR149",
     "name": "Runic Reaving",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2936,7 +2936,7 @@
   {
     "id": "IAR150",
     "name": "Runic Reaving",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2956,7 +2956,7 @@
   {
     "id": "IAR151",
     "name": "Runic Reaving",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "runeblade"
     ],
@@ -2976,7 +2976,7 @@
   {
     "id": "IAR152",
     "name": "Runechant of Envy",
-    "cardType": "instant",
+    "types": ["instant"],
     "classes": [
       "runeblade"
     ],
@@ -2991,7 +2991,7 @@
   {
     "id": "IAR153",
     "name": "Runechant of Gluttony",
-    "cardType": "instant",
+    "types": ["instant"],
     "classes": [
       "runeblade"
     ],
@@ -3006,7 +3006,7 @@
   {
     "id": "IAR154",
     "name": "Runechant of Lust",
-    "cardType": "instant",
+    "types": ["instant"],
     "classes": [
       "runeblade"
     ],
@@ -3021,7 +3021,7 @@
   {
     "id": "IAR155",
     "name": "Runechant of Pride",
-    "cardType": "instant",
+    "types": ["instant"],
     "classes": [
       "runeblade"
     ],
@@ -3036,7 +3036,7 @@
   {
     "id": "IAR156",
     "name": "Runechant of Sloth",
-    "cardType": "instant",
+    "types": ["instant"],
     "classes": [
       "runeblade"
     ],
@@ -3051,7 +3051,7 @@
   {
     "id": "IAR157",
     "name": "Runechant of Wrath",
-    "cardType": "instant",
+    "types": ["instant"],
     "classes": [
       "runeblade"
     ],
@@ -3066,7 +3066,7 @@
   {
     "id": "IAR159",
     "name": "Baalghor, Omen of the End",
-    "cardType": "hero",
+    "types": ["hero"],
     "subtypes": [
       "shadow",
       "demon"
@@ -3079,7 +3079,7 @@
   {
     "id": "IAR160",
     "name": "Reach of the Abyss",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "subtypes": [
       "shadow",
       "arms"
@@ -3091,7 +3091,7 @@
   {
     "id": "IAR161",
     "name": "Grille of Repentance",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "subtypes": [
       "shadow",
       "head"
@@ -3103,7 +3103,7 @@
   {
     "id": "IAR162",
     "name": "Robe of Repentance",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "subtypes": [
       "shadow",
       "chest"
@@ -3115,7 +3115,7 @@
   {
     "id": "IAR163",
     "name": "Path of Repentance",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "subtypes": [
       "shadow",
       "legs"
@@ -3127,7 +3127,7 @@
   {
     "id": "IAR164",
     "name": "Corrupt and Conquer",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3145,7 +3145,7 @@
   {
     "id": "IAR165",
     "name": "Fallen Herald",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Instant - Banish this from your hand: Prevent the next 4 damage that would be dealt to you this turn.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 2,
     "cost": 2,
@@ -3162,7 +3162,7 @@
   {
     "id": "IAR166",
     "name": "Open the Gate to i'Arathael",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3180,7 +3180,7 @@
   {
     "id": "IAR167",
     "name": "Countdown to Extinction",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3198,7 +3198,7 @@
   {
     "id": "IAR168",
     "name": "Countdown to Extinction",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3216,7 +3216,7 @@
   {
     "id": "IAR169",
     "name": "Countdown to Extinction",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3234,7 +3234,7 @@
   {
     "id": "IAR170",
     "name": "Harbinger of Destruction",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3252,7 +3252,7 @@
   {
     "id": "IAR171",
     "name": "Rally the Shadow Horde",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Once per Turn Instant - Banish a card from your hand: This gets +2{d}. Activate this only while this card is defending.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 1,
     "cost": 3,
@@ -3270,7 +3270,7 @@
   {
     "id": "IAR172",
     "name": "Rally the Shadow Horde",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Once per Turn Instant - Banish a card from your hand: This gets +2{d}. Activate this only while this card is defending.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 2,
     "cost": 3,
@@ -3288,7 +3288,7 @@
   {
     "id": "IAR173",
     "name": "Rally the Shadow Horde",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Once per Turn Instant - Banish a card from your hand: This gets +2{d}. Activate this only while this card is defending.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 3,
     "cost": 3,
@@ -3306,7 +3306,7 @@
   {
     "id": "IAR174",
     "name": "Shadowrealm Harrower",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3324,7 +3324,7 @@
   {
     "id": "IAR175",
     "name": "Shadowrealm Harvester",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3342,7 +3342,7 @@
   {
     "id": "IAR176",
     "name": "Shadowrealm Reaper",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3360,7 +3360,7 @@
   {
     "id": "IAR177",
     "name": "Tribute to Greater Power",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3379,7 +3379,7 @@
   {
     "id": "IAR178",
     "name": "Unbound by Shadow",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3397,7 +3397,7 @@
   {
     "id": "IAR179",
     "name": "Dimenxxional Ferryman",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow"
     ],
@@ -3413,7 +3413,7 @@
   {
     "id": "IAR180",
     "name": "Planar Chaos",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow"
     ],
@@ -3429,7 +3429,7 @@
   {
     "id": "IAR181",
     "name": "Rites of Nightfall",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Create a Gate to i'Arathael token.\nGo again",
     "pitch": 3,
     "cost": 1,
@@ -3445,7 +3445,7 @@
   {
     "id": "IAR182",
     "name": "Breach Flesh",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3463,7 +3463,7 @@
   {
     "id": "IAR183",
     "name": "Breach Flesh",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3481,7 +3481,7 @@
   {
     "id": "IAR184",
     "name": "Breach Flesh",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3499,7 +3499,7 @@
   {
     "id": "IAR185",
     "name": "Corporeal Chasm",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3517,7 +3517,7 @@
   {
     "id": "IAR186",
     "name": "Corporeal Chasm",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3535,7 +3535,7 @@
   {
     "id": "IAR187",
     "name": "Corporeal Chasm",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3553,7 +3553,7 @@
   {
     "id": "IAR188",
     "name": "Ghostly Visit",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 1,
     "cost": 1,
@@ -3571,7 +3571,7 @@
   {
     "id": "IAR189",
     "name": "Ghostly Visit",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 2,
     "cost": 1,
@@ -3589,7 +3589,7 @@
   {
     "id": "IAR190",
     "name": "Ghostly Visit",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 3,
     "cost": 1,
@@ -3607,7 +3607,7 @@
   {
     "id": "IAR191",
     "name": "Permanent Interment",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, you may pay up to {r}{r}{r}. Turn that many Shadow cards in your banished zone face-down. This gets +1{p} for each card turned face-down this way.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 1,
     "cost": 0,
@@ -3625,7 +3625,7 @@
   {
     "id": "IAR192",
     "name": "Permanent Interment",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, you may pay up to {r}{r}{r}. Turn that many Shadow cards in your banished zone face-down. This gets +1{p} for each card turned face-down this way.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 2,
     "cost": 0,
@@ -3643,7 +3643,7 @@
   {
     "id": "IAR193",
     "name": "Permanent Interment",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, you may pay up to {r}{r}{r}. Turn that many Shadow cards in your banished zone face-down. This gets +1{p} for each card turned face-down this way.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 3,
     "cost": 0,
@@ -3661,7 +3661,7 @@
   {
     "id": "IAR194",
     "name": "Shadowrealm Bloodhound",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3679,7 +3679,7 @@
   {
     "id": "IAR195",
     "name": "Shadowrealm Bloodhound",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3697,7 +3697,7 @@
   {
     "id": "IAR196",
     "name": "Shadowrealm Bloodhound",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3715,7 +3715,7 @@
   {
     "id": "IAR197",
     "name": "Shadowrealm Ripper",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3733,7 +3733,7 @@
   {
     "id": "IAR198",
     "name": "Shadowrealm Ripper",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3751,7 +3751,7 @@
   {
     "id": "IAR199",
     "name": "Shadowrealm Ripper",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3769,7 +3769,7 @@
   {
     "id": "IAR200",
     "name": "Shadowrealm Walker",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3787,7 +3787,7 @@
   {
     "id": "IAR201",
     "name": "Shadowrealm Walker",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3805,7 +3805,7 @@
   {
     "id": "IAR202",
     "name": "Shadowrealm Walker",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow",
       "attack"
@@ -3823,7 +3823,7 @@
   {
     "id": "IAR203",
     "name": "Void Wraith",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 1,
     "cost": 2,
@@ -3841,7 +3841,7 @@
   {
     "id": "IAR204",
     "name": "Void Wraith",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 2,
     "cost": 2,
@@ -3859,7 +3859,7 @@
   {
     "id": "IAR205",
     "name": "Void Wraith",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 3,
     "cost": 2,
@@ -3877,7 +3877,7 @@
   {
     "id": "IAR206",
     "name": "Abyssal Bite",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nYour next Shadow attack this turn gets +1{p}. Go again\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 3,
     "cost": 1,
@@ -3894,7 +3894,7 @@
   {
     "id": "IAR207",
     "name": "Abyssal Force",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nYour next Shadow attack this turn gets overpower. (It can't be defended by more than 1 action card.)\nGo again\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 3,
     "cost": 1,
@@ -3911,7 +3911,7 @@
   {
     "id": "IAR208",
     "name": "Abyssal Rush",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nYour next Shadow attack this turn gets \"When this hits, it gets go again.\" Go again\nBlood Debt (While this is banished, at the beginning of your end phase, lose 1{h}.)",
     "pitch": 3,
     "cost": 1,
@@ -3928,7 +3928,7 @@
   {
     "id": "IAR209",
     "name": "Darkest Hour",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow"
     ],
@@ -3945,7 +3945,7 @@
   {
     "id": "IAR210",
     "name": "Darkest Hour",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow"
     ],
@@ -3962,7 +3962,7 @@
   {
     "id": "IAR211",
     "name": "Darkest Hour",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow"
     ],
@@ -3979,7 +3979,7 @@
   {
     "id": "IAR212",
     "name": "Pull from Beyond",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow"
     ],
@@ -3996,7 +3996,7 @@
   {
     "id": "IAR213",
     "name": "Pull from Beyond",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow"
     ],
@@ -4013,7 +4013,7 @@
   {
     "id": "IAR214",
     "name": "Pull from Beyond",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "shadow"
     ],
@@ -4030,7 +4030,7 @@
   {
     "id": "IAR215",
     "name": "Step through Realms",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Your next Shadow attack this turn gets +4{p} and \"When this hits, create a Gate to i'Arathael token.\"\nGo again",
     "pitch": 1,
     "cost": 2,
@@ -4046,7 +4046,7 @@
   {
     "id": "IAR216",
     "name": "Step through Realms",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Your next Shadow attack this turn gets +3{p} and \"When this hits, create a Gate to i'Arathael token.\"\nGo again",
     "pitch": 2,
     "cost": 2,
@@ -4062,7 +4062,7 @@
   {
     "id": "IAR217",
     "name": "Step through Realms",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Your next Shadow attack this turn gets +2{p} and \"When this hits, create a Gate to i'Arathael token.\"\nGo again",
     "pitch": 3,
     "cost": 2,
@@ -4078,7 +4078,7 @@
   {
     "id": "IAR218",
     "name": "Dam the Shadowake",
-    "cardType": "block",
+    "types": ["block"],
     "text": "When this defends a Shadow hero's attack, create a Gate to i'Arathael token.",
     "pitch": 1,
     "defense": 4,
@@ -4090,7 +4090,7 @@
   {
     "id": "IAR219",
     "name": "Dam the Shadowake",
-    "cardType": "block",
+    "types": ["block"],
     "text": "When this defends a Shadow hero's attack, create a Gate to i'Arathael token.",
     "pitch": 2,
     "defense": 3,
@@ -4102,7 +4102,7 @@
   {
     "id": "IAR220",
     "name": "Dam the Shadowake",
-    "cardType": "block",
+    "types": ["block"],
     "text": "When this defends a Shadow hero's attack, create a Gate to i'Arathael token.",
     "pitch": 3,
     "defense": 2,
@@ -4114,7 +4114,7 @@
   {
     "id": "IAR221",
     "name": "Blasmophet, the Insatiable Hunger",
-    "cardType": "token",
+    "types": ["token"],
     "subtypes": [
       "shadow",
       "demon",
@@ -4131,7 +4131,7 @@
   {
     "id": "IAR222",
     "name": "Gate to i'Arathael",
-    "cardType": "token",
+    "types": ["token"],
     "subtypes": [
       "shadow",
       "aura"
@@ -4142,7 +4142,7 @@
   {
     "id": "IAR223",
     "name": "Circlet of Eternal End",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "classes": [
       "generic"
     ],
@@ -4159,7 +4159,7 @@
   {
     "id": "IAR224",
     "name": "Dark Arcanite Helm",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Shadow Resist 1 (If you would be dealt damage by a Shadow hero, you may destroy this to prevent 1 of that damage.)",
     "defense": 0,
     "classes": [
@@ -4176,7 +4176,7 @@
   {
     "id": "IAR225",
     "name": "Dark Arcanite Plating",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Shadow Resist 1 (If you would be dealt damage by a Shadow hero, you may destroy this to prevent 1 of that damage.)",
     "defense": 0,
     "classes": [
@@ -4193,7 +4193,7 @@
   {
     "id": "IAR226",
     "name": "Dark Arcanite Gloves",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Shadow Resist 1 (If you would be dealt damage by a Shadow hero, you may destroy this to prevent 1 of that damage.)",
     "defense": 0,
     "classes": [
@@ -4210,7 +4210,7 @@
   {
     "id": "IAR227",
     "name": "Dark Arcanite Boots",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Shadow Resist 1 (If you would be dealt damage by a Shadow hero, you may destroy this to prevent 1 of that damage.)",
     "defense": 0,
     "classes": [
@@ -4227,7 +4227,7 @@
   {
     "id": "IAR228",
     "name": "Violent Gusto",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "generic"
     ],
@@ -4244,7 +4244,7 @@
   {
     "id": "IAR229",
     "name": "Exorcism",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "generic"
     ],
@@ -4260,7 +4260,7 @@
   {
     "id": "IAR230",
     "name": "Murmur of i'Arathael",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If a card has been put into your banished zone this turn, this gets go again.",
     "pitch": 1,
     "cost": 1,
@@ -4277,7 +4277,7 @@
   {
     "id": "IAR231",
     "name": "Rumbling of i'Arathael",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If a card has been put into your banished zone this turn, this gets overpower. (This can't be defended by more than 1 action card.)",
     "pitch": 1,
     "cost": 2,
@@ -4294,7 +4294,7 @@
   {
     "id": "IAR232",
     "name": "Tremor of i'Arathael",
-    "cardType": "action",
+    "types": ["action"],
     "text": "If a card has been put into your banished zone this turn, this gets +2{p}.",
     "pitch": 1,
     "cost": 1,
@@ -4311,7 +4311,7 @@
   {
     "id": "IAR233",
     "name": "Battle Prep",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "generic"
     ],
@@ -4328,7 +4328,7 @@
   {
     "id": "IAR234",
     "name": "Battle Prep",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "generic"
     ],
@@ -4345,7 +4345,7 @@
   {
     "id": "IAR235",
     "name": "Battle Prep",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "generic"
     ],
@@ -4362,7 +4362,7 @@
   {
     "id": "IAR236",
     "name": "Seek Horizon",
-    "cardType": "action",
+    "types": ["action"],
     "text": "As an additional cost to play this, you may put a card from your hand on top of your deck. If you do, this gets go again.",
     "pitch": 1,
     "cost": 0,
@@ -4379,7 +4379,7 @@
   {
     "id": "IAR237",
     "name": "Seek Horizon",
-    "cardType": "action",
+    "types": ["action"],
     "text": "As an additional cost to play this, you may put a card from your hand on top of your deck. If you do, this gets go again.",
     "pitch": 2,
     "cost": 0,
@@ -4396,7 +4396,7 @@
   {
     "id": "IAR238",
     "name": "Seek Horizon",
-    "cardType": "action",
+    "types": ["action"],
     "text": "As an additional cost to play this, you may put a card from your hand on top of your deck. If you do, this gets go again.",
     "pitch": 3,
     "cost": 0,
@@ -4413,7 +4413,7 @@
   {
     "id": "IAR239",
     "name": "Whispers Within",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this defends, opt 1. (Look at the top card of your deck. Put it on the top or bottom.)",
     "pitch": 1,
     "cost": 3,
@@ -4433,7 +4433,7 @@
   {
     "id": "IAR240",
     "name": "Whispers Within",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this defends, opt 1. (Look at the top card of your deck. Put it on the top or bottom.)",
     "pitch": 2,
     "cost": 3,
@@ -4453,7 +4453,7 @@
   {
     "id": "IAR241",
     "name": "Whispers Within",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this defends, opt 1. (Look at the top card of your deck. Put it on the top or bottom.)",
     "pitch": 3,
     "cost": 3,
@@ -4473,7 +4473,7 @@
   {
     "id": "IAR242",
     "name": "Cracked Bauble",
-    "cardType": "resource",
+    "types": ["resource"],
     "text": "(You may add any number of Cracked Baubles to your card-pool in a limited format.)",
     "pitch": 2,
     "classes": [
@@ -4484,7 +4484,7 @@
   {
     "id": "IAR243",
     "name": "Deadly Spinneret",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "assassin"
     ],
@@ -4504,7 +4504,7 @@
   {
     "id": "IAR244",
     "name": "Crushing Headache",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "guardian"
     ],
@@ -4524,7 +4524,7 @@
   {
     "id": "IAR245",
     "name": "Stoke Vengeance",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "ninja"
     ],
@@ -4544,7 +4544,7 @@
   {
     "id": "IAR246",
     "name": "Wind Slicer",
-    "cardType": "instant",
+    "types": ["instant"],
     "text": "Legendary (You may only have 1 Wind Slicer in your deck.)\nAction - {r}, {t}, destroy this when the combat chain closes: Attack. Go again\nWhen this hits a hero, they lose all hero card abilities during their next action phase.",
     "pitch": 3,
     "cost": 0,
@@ -4566,7 +4566,7 @@
   {
     "id": "IAR247",
     "name": "Cogwerx Prong Bot",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this hits a hero, you may put a steam counter on an item you control with crank.\nInstant - {r}, discard this: Create a Golden Cog token.",
     "pitch": 2,
     "cost": 3,
@@ -4583,7 +4583,7 @@
   {
     "id": "IAR248",
     "name": "Echoing Trap",
-    "cardType": "block",
+    "types": ["block"],
     "classes": [
       "ranger"
     ],
@@ -4601,7 +4601,7 @@
   {
     "id": "IAR249",
     "name": "Sigil of the Muse",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "wizard"
     ],
@@ -4617,7 +4617,7 @@
   {
     "id": "IAR250",
     "name": "Astral Ambience",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "illusionist"
     ],
@@ -4637,7 +4637,7 @@
   {
     "id": "IAR251",
     "name": "Favorable Winds",
-    "cardType": "action",
+    "types": ["action"],
     "text": "As an additional cost to play this, discard a Goldfin Harpoon.\nDraw 2 cards.\nGo again",
     "pitch": 2,
     "cost": 1,
@@ -4654,7 +4654,7 @@
   {
     "id": "IAR252",
     "name": "Rush of Knowledge",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "illusionist",
       "wizard"
@@ -4675,7 +4675,7 @@
   {
     "id": "IAR253",
     "name": "Banneret of Swordsmanship",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Solflare - When this is charged to your soul, create a Flurry token.",
     "pitch": 2,
     "cost": 1,
@@ -4696,7 +4696,7 @@
   {
     "id": "IAR254",
     "name": "Bravery of the Blade",
-    "cardType": "action",
+    "types": ["action"],
     "classes": [
       "warrior"
     ],
@@ -4717,7 +4717,7 @@
   {
     "id": "IAR255",
     "name": "Fresh from the Forge",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Sharpen each dagger you control. (Put a +1{p} counter on them. Remove all +1{p} counters from them at the end of turn.)\nThe next time a dagger you control hits a hero this turn, you may remove a +1{p} counter from it. If you do, mark them.",
     "pitch": 1,
     "cost": 0,
@@ -4737,7 +4737,7 @@
   {
     "id": "IAR256",
     "name": "Head Banging Chorus",
-    "cardType": "instant",
+    "types": ["instant"],
     "classes": [
       "guardian"
     ],
@@ -4757,7 +4757,7 @@
   {
     "id": "IAR257",
     "name": "Channel Stormgarden",
-    "cardType": "instant",
+    "types": ["instant"],
     "subtypes": [
       "lightning",
       "aura"
@@ -4774,7 +4774,7 @@
   {
     "id": "IAR258",
     "name": "Blessing of Suraya",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "light",
       "aura"
@@ -4791,7 +4791,7 @@
   {
     "id": "IAR259",
     "name": "Chains of Consecration",
-    "cardType": "instant",
+    "types": ["instant"],
     "subtypes": [
       "light"
     ],
@@ -4803,7 +4803,7 @@
   {
     "id": "IAR260",
     "name": "Ice Aged Oak",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "earth",
       "attack"
@@ -4822,7 +4822,7 @@
   {
     "id": "IAR261",
     "name": "Ancient Earth Oak",
-    "cardType": "action",
+    "types": ["action"],
     "subtypes": [
       "ice",
       "attack"
@@ -4840,7 +4840,7 @@
   {
     "id": "IAR262",
     "name": "Hoodwink",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Instant - Discard this and any number of other cards: Prevent the next X arcane damage that would be dealt to you this turn, where X is the total base {d} of cards discarded this way.",
     "pitch": 3,
     "cost": 0,
@@ -4855,7 +4855,7 @@
   {
     "id": "IAR666",
     "name": "Soul of Existence",
-    "cardType": "resource",
+    "types": ["resource"],
     "subtypes": [
       "shadow",
       "gem"

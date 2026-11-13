@@ -7,6 +7,7 @@ import {
   faceUpGraveyard,
   localizedLog,
 } from "../shared-helpers.js";
+import { hasType } from "@fyendal/shared";
 
 type Card = DeepReadonly<CardInstance>;
 
@@ -79,7 +80,7 @@ export function resolveSharpenFollowup(
       );
       break;
     case SHARPEN_FOLLOWUP.TOP_ATTACK_REACTION: {
-      const reactions = faceUpGraveyard(ctx).filter((card) => ctx.cardData(card.cardId).cardType === "attack-reaction");
+      const reactions = faceUpGraveyard(ctx).filter((card) => hasType(ctx.cardData(card.cardId), "attack-reaction"));
       if (reactions.length) {
         ctx.requestCardChoice(
           SHARPEN_TOP_ATTACK_REACTION_HOOK,

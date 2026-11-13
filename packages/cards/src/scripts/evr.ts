@@ -27,6 +27,7 @@ import {
   opposingHeroDamage,
   ongoingLabel,
 } from "./shared-helpers.js";
+import { hasType as hasPrintedType } from "@fyendal/shared";
 
 const COPPER = "EVR194";
 const SILVER = "EVR195";
@@ -637,7 +638,7 @@ function hazeBending(): CardScript {
         undefined,
         (ctx, destroyed) =>
           destroyed.instanceId !== ctx.self.instanceId &&
-          ctx.cardData(destroyed.cardId).cardType !== "token" &&
+          !hasPrintedType(ctx.cardData(destroyed.cardId), "token") &&
           hasType(ctx, destroyed, "illusionist") &&
           isAura(ctx, destroyed),
       ),

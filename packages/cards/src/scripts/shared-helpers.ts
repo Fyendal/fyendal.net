@@ -14,6 +14,7 @@ import type {
 } from "@fyendal/engine";
 import type { GameLogEvent, GameLogPayload, GameMessage } from "@fyendal/shared";
 import { functionalKey, functionalKeyOf } from "../functional.js";
+import { hasType } from "@fyendal/shared";
 
 export interface DecisionPromptOptions {
   values?: GameMessage["values"];
@@ -1040,7 +1041,7 @@ function weaponHands(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): number {
 }
 
 function canEquipDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  if (card.faceDown || !ctx.cardTypes(card).includes("dagger") || ctx.cardData(card.cardId).cardType !== "weapon") {
+  if (card.faceDown || !ctx.cardTypes(card).includes("dagger") || !hasType(ctx.cardData(card.cardId), "weapon")) {
     return false;
   }
   const occupiedHands = ctx.player(ctx.seat).weapons.reduce((total, weapon) => total + weaponHands(ctx, weapon), 0);

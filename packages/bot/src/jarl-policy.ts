@@ -41,6 +41,7 @@ import {
   chooseTacticalIntentWithTrace,
   type TacticalTurnPlan,
 } from "./tactical-turn-planner.js";
+import { hasType } from "@fyendal/shared";
 
 const AGGRO_HERO_NAMES = [
   "arakni, marionette",
@@ -95,7 +96,7 @@ function breaksOakenFusion(input: BotPolicyInput, spent: ReadonlySet<number>): b
 }
 
 function attackCost(data: CardData): number {
-  return Math.max(0, data.cost ?? (data.cardType === "weapon" ? 3 : 0));
+  return Math.max(0, data.cost ?? (hasType(data, "weapon") ? 3 : 0));
 }
 
 function attackValue(data: CardData, input: BotPolicyInput): number {
@@ -329,7 +330,7 @@ function opponentEquipment(input: BotPolicyInput): CardView[] {
   const opponent = input.view.players[1 - input.seat]!;
   return [
     ...Object.values(opponent.equipment).filter((card): card is CardView => card !== undefined),
-    ...opponent.weapons.filter((card) => input.cards[card.cardId]?.cardType === "equipment"),
+    ...opponent.weapons.filter((card) => hasType(input.cards[card.cardId], "equipment")),
   ];
 }
 
@@ -381,7 +382,7 @@ function gravyAttackTargetAdjustment(
   const allies = input.view.players[1 - input.seat]!.board.filter((candidate) =>
     hasSubtype(input.cards[candidate.cardId], "ally")
   );
-  if (allies.length === 0) return data.cardType === "weapon" ? 0 : -45;
+  if (allies.length === 0) return hasType(data, "weapon") ? 0 : -45;
   if (intent.targetAllyId === undefined) return -120;
 
   const target = allies.find((candidate) => candidate.instanceId === intent.targetAllyId);
@@ -424,7 +425,7 @@ function hasAffordableAttack(input: BotPolicyInput, spent: ReadonlySet<number>, 
     isAttack(input.cards[card.cardId]) && canPay(card, false));
   const weaponAttack = me.weapons.some((card) => {
     const data = input.cards[card.cardId];
-    return data?.cardType === "weapon" && (data.attack ?? 0) > 0 &&
+    return data !== undefined && hasType(data, "weapon") && (data.attack ?? 0) > 0 &&
       !(card.usedAbilityIndexes ?? []).includes(0) && canPay(card, false);
   });
   return handAttack || arsenalAttack || weaponAttack;
@@ -480,17 +481,17 @@ function shouldActivateOmnisBoots(input: BotPolicyInput, boots: CardView): boole
 
 function wastesStackedDefenseReaction(data: CardData, input: BotPolicyInput): boolean {
   const link = currentLink(input);
-  if (!link || data.cardType !== "defense-reaction" ||
+  if (!link || !hasType(data, "defense-reaction") ||
     input.view.pendingDecision?.kind !== "defense-reaction") return false;
 
   // Let committed reactions finish their choices and defense bonuses before
   // spending another card. Passing with a layer pending resolves that layer;
   // Jarl gets another reaction window before combat damage, even at low life.
   if (input.view.stack.some((layer) => layer.seat === input.seat && layer.card &&
-    input.cards[layer.card.cardId]?.cardType === "defense-reaction")) return true;
+    hasType(input.cards[layer.card.cardId], "defense-reaction"))) return true;
 
   const alreadyReacted = link.reactions.some((card) => card.owner === input.seat &&
-    input.cards[card.cardId]?.cardType === "defense-reaction");
+    hasType(input.cards[card.cardId], "defense-reaction"));
   if (!alreadyReacted) return false;
 
   const incoming = incomingAttackDamage(input);
@@ -501,7 +502,7 @@ function wastesStackedDefenseReaction(data: CardData, input: BotPolicyInput): bo
 }
 
 function shouldSaveDefenseReaction(data: CardData, input: BotPolicyInput): boolean {
-  if (data.cardType !== "defense-reaction" ||
+  if (!hasType(data, "defense-reaction") ||
     input.view.pendingDecision?.kind !== "defense-reaction") return false;
 
   const link = currentLink(input);
@@ -522,7 +523,7 @@ function shouldActivateRippleAway(input: BotPolicyInput): boolean {
   const layer = input.view.stack[0];
   if (!layer?.card || layer.seat === input.seat) return false;
   const source = input.cards[layer.card.cardId];
-  if (source?.cardType !== "action") return false;
+  if (!source || !hasType(source, "action")) return false;
   if (/\b(wager|clash)\b/i.test(layer.label)) return false;
 
   // A queued token trigger is already committed, even if its printed ability
@@ -595,7 +596,7 @@ function scorePlay(
         ? 90 : -100;
     } else if (functional === "ripple away|3") {
       score = shouldActivateRippleAway(input) ? 80 : -100;
-    } else if (data.cardType === "weapon") {
+    } else if (hasType(data, "weapon")) {
       score = 24 + (data.attack ?? 0);
     } else {
       score = -100;
@@ -649,7 +650,7 @@ function scorePlay(
     score = 5;
   } else if (functional === "blizzard|3") {
     score = scoreBlizzard(intent, input);
-  } else if (data.cardType === "defense-reaction") {
+  } else if (hasType(data, "defense-reaction")) {
     score = defenseReactionWorthSpending(card, input, jarlSolverRules, pitchIds(intent))
       ? scoreDefenseReaction(data, input)
       : -100;
@@ -660,7 +661,7 @@ function scorePlay(
     if (functional === "ancient earth oak|1") score += 8;
     if (functional === "ice aged oak|3") score += 6;
     if (functional === "glacial footsteps|3") score += 7;
-  } else if (data.cardType === "instant") {
+  } else if (hasType(data, "instant")) {
     score = 8;
   } else {
     score = 10;
@@ -691,7 +692,7 @@ function scorePlay(
     if (keys.has("oaken old|1") &&
       (keys.has("crumble to eternity|3") || keys.has("pulse of isenloft|3"))) score += 8;
   }
-  if (isAttack(data) || data.cardType === "weapon") {
+  if (isAttack(data) || hasType(data, "weapon")) {
     score += gravyAttackTargetAdjustment(intent, card, data, input);
   }
   return score;

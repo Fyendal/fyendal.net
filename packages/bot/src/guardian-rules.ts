@@ -4,6 +4,7 @@ import type { SolverCardPatch } from "./card-model.js";
 import type { SolverCard, SolverView } from "./hand-solver.js";
 import { evaluateOnHit } from "./on-hit.js";
 import type { BotPolicyInput } from "./policy.js";
+import { hasType } from "@fyendal/shared";
 
 /**
  * Card rules shared by the Guardian and Earth/Ice decks (Bravo, Jarl,
@@ -25,7 +26,7 @@ export function canDecompose(input: BotPolicyInput): boolean {
   const graveyard = input.view.players[input.seat].graveyard;
   const earth = graveyard.filter((card) => hasSubtype(input.cards[card.cardId], "earth"));
   return earth.length >= 2 && graveyard.some((card) =>
-    input.cards[card.cardId]?.cardType === "action" &&
+    hasType(input.cards[card.cardId], "action") &&
     earth.filter((other) => other.instanceId !== card.instanceId).length >= 2
   );
 }

@@ -26,7 +26,7 @@ describe("DTD — registration and core mechanics", () => {
   it("registers the complete set", () => {
     expect(Object.keys(cardData).filter((id) => id.startsWith("DTD"))).toHaveLength(245);
     for (const id of ["DTD001", "DTD002", "DTD044", "DTD045", "DTD103", "DTD104", "DTD133", "DTD134"]) {
-      expect(cardData[id]?.cardType).toBe("hero");
+      expect(cardData[id]?.types).toContain("hero");
       expect(scripts[id]).toBeDefined();
     }
   });

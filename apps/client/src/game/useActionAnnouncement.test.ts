@@ -17,6 +17,7 @@ import {
   shouldSkipPlayConfirmation,
   shouldAutoCommitAnnouncement,
 } from "./useActionAnnouncement.js";
+import { hasType } from "@fyendal/shared";
 
 describe("announcement payment readiness", () => {
   it("keeps a staged exact card cost open until the player confirms it", () => {
@@ -416,9 +417,9 @@ describe("combat-chain close confirmation", () => {
 
   it("classifies non-attack action cards without including attack actions", () => {
     const nonAttack = Object.values(cardData).find((data) =>
-      data.cardType === "action" && !(data.subtypes ?? []).includes("attack"));
+      hasType(data, "action") && !(data.subtypes ?? []).includes("attack"));
     const attack = Object.values(cardData).find((data) =>
-      data.cardType === "action" && (data.subtypes ?? []).includes("attack"));
+      hasType(data, "action") && (data.subtypes ?? []).includes("attack"));
     expect(nonAttack).toBeDefined();
     expect(attack).toBeDefined();
 

@@ -2,7 +2,7 @@
   {
     "id": "SBW001",
     "name": "Viserai, Between Worlds",
-    "cardType": "hero",
+    "types": ["hero"],
     "text": "Whenever you create 1 or more Runechants, banish the top card of your deck. Then if you've created 3 or more Runechants this turn, traverse.",
     "intellect": 4,
     "life": 20,
@@ -18,7 +18,7 @@
   {
     "id": "SBW001B",
     "name": "Viserai, Usurper",
-    "cardType": "hero",
+    "types": ["hero"],
     "text": "The first attack action card with blood debt you play each turn gets go again.\nAt the beginning of each end phase, if you've created or activated a Gate to i'Arathael this turn, you may traverse.",
     "intellect": 4,
     "classes": [
@@ -36,7 +36,7 @@
   {
     "id": "SBW002",
     "name": "Galaxxi Black",
-    "cardType": "weapon",
+    "types": ["weapon"],
     "text": "Once per Turn Action - {r}: Attack\nIf you've played a card from your banished zone this turn, this gets +2{p}.\nWhen this hits a hero, deal 1 arcane damage to them.",
     "attack": 1,
     "classes": [
@@ -52,7 +52,7 @@
   {
     "id": "SBW003",
     "name": "Seven Sin Nebula",
-    "cardType": "weapon",
+    "types": ["weapon"],
     "text": "Action - {r}, {t}: Attack. Activate this only if you've played a card from a banished zone this turn.\nWhen this hits a hero, create a Runechant token.",
     "attack": 3,
     "classes": [
@@ -68,7 +68,7 @@
   {
     "id": "SBW004",
     "name": "Corrupted Crown",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "When this defends, you may banish a card from your hand. If you do, this gets +1{d}.\nBlade Break",
     "defense": 1,
     "subtypes": [
@@ -83,7 +83,7 @@
   {
     "id": "SBW005",
     "name": "Crown of Dichotomy",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Action - {r}, destroy this: Put target Runeblade attack action card and target Runeblade non-attack action card from your graveyard on top of your deck in any order.\nArcane Barrier 1",
     "defense": 0,
     "classes": [
@@ -100,7 +100,7 @@
   {
     "id": "SBW006",
     "name": "Blossom of Spring",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Action - Destroy this: Gain {r}. Go again",
     "defense": 0,
     "classes": [
@@ -114,7 +114,7 @@
   {
     "id": "SBW007",
     "name": "Runehold Release",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Action - Destroy this: Create a Runechant token. Go again",
     "defense": 0,
     "classes": [
@@ -128,7 +128,7 @@
   {
     "id": "SBW008",
     "name": "Nullrune Boots",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Arcane Barrier 1",
     "defense": 0,
     "classes": [
@@ -145,7 +145,7 @@
   {
     "id": "SBW009",
     "name": "Olde Leather Boots",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "If you've been attacked 2 or more times this turn, this gets +2{d}.\nBlade Break",
     "defense": 0,
     "classes": [
@@ -162,7 +162,7 @@
   {
     "id": "SBW010",
     "name": "Bloodfrenzy Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nUsurp\nIf you've dealt damage to the defending hero this turn, this gets go again.\nBlood Debt",
     "pitch": 1,
     "cost": 1,
@@ -184,7 +184,7 @@
   {
     "id": "SBW011",
     "name": "Cullingsong Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nUsurp\nWhen this hits a hero, they banish a card from their hand.\nBlood Debt",
     "pitch": 1,
     "cost": 0,
@@ -206,7 +206,7 @@
   {
     "id": "SBW012",
     "name": "Demonbound Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nUsurp\nBlood Debt",
     "pitch": 1,
     "cost": 0,
@@ -228,7 +228,7 @@
   {
     "id": "SBW013",
     "name": "Embrace Ursur",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, you may banish a card from your hand. If it's Runeblade, create a Runechant token. If it's Shadow, this gets go again.",
     "pitch": 1,
     "cost": 1,
@@ -246,7 +246,7 @@
   {
     "id": "SBW014",
     "name": "Looking for a Scrap",
-    "cardType": "action",
+    "types": ["action"],
     "text": "As an additional cost to play this, you may banish a card with 1{p} from your graveyard. If you do, this gets +1{p} and go again.",
     "pitch": 1,
     "cost": 1,
@@ -266,7 +266,7 @@
   {
     "id": "SBW015",
     "name": "Murmuring Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nUsurp\nWhen this attacks or hits, create a Runechant token.\nBlood Debt",
     "pitch": 1,
     "cost": 2,
@@ -288,7 +288,7 @@
   {
     "id": "SBW016",
     "name": "Plundersong Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nUsurp\nWhen this hits a hero, they banish a card in their arsenal.\nBlood Debt",
     "pitch": 1,
     "cost": 0,
@@ -310,7 +310,7 @@
   {
     "id": "SBW017",
     "name": "Runic Disposition",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Usurp\nInstant - Discard this: Create a Runechant token.",
     "pitch": 1,
     "cost": 2,
@@ -330,7 +330,7 @@
   {
     "id": "SBW018",
     "name": "Vexing Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nUsurp\nWhen this hits a hero, deal 2 arcane damage to any target.\nBlood Debt",
     "pitch": 1,
     "cost": 3,
@@ -352,7 +352,7 @@
   {
     "id": "SBW019",
     "name": "Weeping Battleground",
-    "cardType": "defense-reaction",
+    "types": ["defense-reaction"],
     "text": "You may banish an aura from your graveyard. If you do, deal 1 arcane damage to target hero.",
     "pitch": 1,
     "cost": 0,
@@ -365,7 +365,7 @@
   {
     "id": "SBW020",
     "name": "Malefic Incantation",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Go again\nThis enters the arena with 3 verse counters. When it has none, destroy it.\nOnce per turn, when you play an attack action card, remove a verse counter from this. If you do, create a Runechant token.",
     "pitch": 1,
     "cost": 0,
@@ -384,7 +384,7 @@
   {
     "id": "SBW021",
     "name": "Otherworldly Sins",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Your next Runeblade or Shadow attack this turn gets +3{p}.\nCreate a Runechant token.\nGo again",
     "pitch": 1,
     "cost": 1,
@@ -403,7 +403,7 @@
   {
     "id": "SBW022",
     "name": "Pull From Beyond",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Opt 2\nBanish the top card of your deck. If it's red, create a Gate to i'Arathael token. Go again",
     "pitch": 1,
     "cost": 0,
@@ -420,7 +420,7 @@
   {
     "id": "SBW023",
     "name": "Arcane Polarity",
-    "cardType": "instant",
+    "types": ["instant"],
     "text": "Gain 1{h}\nIf you've been dealt arcane damage this turn, instead gain 4{h}.",
     "pitch": 1,
     "cost": 0,
@@ -432,7 +432,7 @@
   {
     "id": "SBW024",
     "name": "Embrace Ursur",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, you may banish a card from your hand. If it's Runeblade, create a Runechant token. If it's Shadow, this gets go again.",
     "pitch": 2,
     "cost": 1,
@@ -450,7 +450,7 @@
   {
     "id": "SBW025",
     "name": "Malefic Incantation",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Go again\nThis enters the arena with 2 verse counters. When it has none, destroy it.\nOnce per turn, when you play an attack action card, remove a verse counter from this. If you do, create a Runechant token.",
     "pitch": 2,
     "cost": 0,
@@ -469,7 +469,7 @@
   {
     "id": "SBW026",
     "name": "Runechant of Lust",
-    "cardType": "instant",
+    "types": ["instant"],
     "text": "This counts as a Runechant. When an attack usurps this, create a Runechant token.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
     "pitch": 2,
     "cost": 0,
@@ -484,7 +484,7 @@
   {
     "id": "SBW027",
     "name": "Runechant of Sloth",
-    "cardType": "instant",
+    "types": ["instant"],
     "text": "This counts as a Runechant. When an attack usurps this, it gets go again.\nWhen this is destroyed, create a Runechant token.\nAt the beginning of your action phase or when you play an attack action card, destroy this.",
     "pitch": 2,
     "cost": 0,
@@ -499,7 +499,7 @@
   {
     "id": "SBW028",
     "name": "Bloodfrenzy Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nUsurp\nIf you've dealt damage to the defending hero this turn, this gets go again.\nBlood Debt",
     "pitch": 3,
     "cost": 1,
@@ -521,7 +521,7 @@
   {
     "id": "SBW029",
     "name": "Demonbound Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nUsurp\nBlood Debt",
     "pitch": 3,
     "cost": 0,
@@ -543,7 +543,7 @@
   {
     "id": "SBW030",
     "name": "Embrace Ursur",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, you may banish a card from your hand. If it's Runeblade, create a Runechant token. If it's Shadow, this gets go again.",
     "pitch": 3,
     "cost": 1,
@@ -561,7 +561,7 @@
   {
     "id": "SBW031",
     "name": "Murmuring Gloomblade",
-    "cardType": "action",
+    "types": ["action"],
     "text": "You may play this from your banished zone.\nUsurp\nWhen this attacks or hits, create a Runechant token.\nBlood Debt",
     "pitch": 3,
     "cost": 2,
@@ -583,7 +583,7 @@
   {
     "id": "SBW032",
     "name": "Vexing Malice",
-    "cardType": "action",
+    "types": ["action"],
     "text": "When this attacks, deal 2 arcane damage to target hero.",
     "pitch": 3,
     "cost": 1,
@@ -600,7 +600,7 @@
   {
     "id": "SBW033",
     "name": "Pull From Beyond",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Opt 2\nBanish the top card of your deck. If it's blue, create a Gate to i'Arathael token. Go again",
     "pitch": 3,
     "cost": 0,
@@ -617,7 +617,7 @@
   {
     "id": "SBW034",
     "name": "Gate to i'Arathael",
-    "cardType": "token",
+    "types": ["token"],
     "text": "Instant - {r}, destroy this: You may play target action card with blood debt from your banished zone this turn.",
     "subtypes": [
       "shadow",
@@ -628,7 +628,7 @@
   {
     "id": "SBW035",
     "name": "Runechant",
-    "cardType": "token",
+    "types": ["token"],
     "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
     "classes": [
       "runeblade"

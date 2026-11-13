@@ -19,31 +19,42 @@ export const TYPE_WORDS = new Set([
   "Young", "Adult", "Block", "Demi-Hero",
 ]);
 
-export function cardTypeOf(types, keywords = []) {
+// Upstream type words -> CardType, in CARD_TYPE_ORDER (packages/shared).
+const TYPE_MAP = [
   // a demi-hero is the player's hero in-game when they control no other hero
   // (CR 8.1.11b) — imported as a hero (Arakni, Web of Deceit)
-  if (types.includes("Hero") || types.includes("Demi-Hero")) return "hero";
-  if (types.includes("Weapon")) return "weapon";
-  if (types.includes("Equipment")) return "equipment";
-  if (types.includes("Attack Reaction")) return "attack-reaction";
-  if (types.includes("Defense Reaction")) return "defense-reaction";
-  if (types.includes("Instant")) return "instant";
-  if (types.includes("Resource")) return "resource";
-  if (types.includes("Block")) return "block";
-  if (types.includes("Mentor")) return "mentor";
-  if (types.includes("Token")) return "token";
+  [["Hero", "Demi-Hero"], "hero"],
+  [["Weapon"], "weapon"],
+  [["Equipment"], "equipment"],
+  [["Attack Reaction"], "attack-reaction"],
+  [["Defense Reaction"], "defense-reaction"],
+  [["Instant"], "instant"],
+  [["Resource"], "resource"],
+  [["Block"], "block"],
+  [["Mentor"], "mentor"],
   // Macro cards are shared arena objects supplied by a limited environment,
-  // not deck cards. Represent them as tokens so they can live in the card
-  // registry without being mistaken for playable actions.
-  if (types.includes("Macro")) return "token";
-  // Allies are arena permanents represented by the engine as action cards
-  // with the "ally" subtype.
-  if (types.includes("Ally")) return "action";
-  if (types.includes("Action")) return "action";
+  // not deck cards; tokens keep them out of the playable deck pool.
+  [["Token", "Macro"], "token"],
+  // Allies are arena permanents represented as action cards with the "ally"
+  // subtype.
+  [["Action", "Ally"], "action"],
+];
+
+/** Every printed type of an upstream card, in canonical order. */
+export function cardTypesOf(types, keywords = []) {
+  const result = TYPE_MAP
+    .filter(([words]) => words.some((word) => types.includes(word)))
+    .map(([, type]) => type);
+  if (result.length) return result;
   // Some reminder/marker cards in the upstream dataset (for example Marked)
   // omit their printed type line entirely. They are non-deck token cards.
-  if (types.length === 0 && keywords.includes("Mark")) return "token";
+  if (types.length === 0 && keywords.includes("Mark")) return ["token"];
   throw new Error(`no card type in ${types}`);
+}
+
+/** The primary type that keys card art (the first canonical type). */
+export function primaryTypeOf(types, keywords = []) {
+  return cardTypesOf(types, keywords)[0];
 }
 
 const num = (v) => {
@@ -57,7 +68,7 @@ export function toCardData(c, printing) {
   const data = {
     id: printing?.id ?? c.unique_id,
     name: c.name,
-    cardType: cardTypeOf(types, c.card_keywords ?? []),
+    types: cardTypesOf(types, c.card_keywords ?? []),
     text: c.functional_text_plain ?? "",
   };
   const pitch = num(c.pitch);

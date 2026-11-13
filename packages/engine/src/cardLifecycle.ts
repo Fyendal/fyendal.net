@@ -19,6 +19,7 @@ import type { CardInstance, PendingDecisionState, PlayerState } from "./state.js
 import { currentLink, findCardAnywhere, findPermanent, severDefendingEquipment } from "./zoneQueries.js";
 import type { CardData } from "@fyendal/shared";
 import { transitionZone } from "./transitions.js";
+import { hasType } from "@fyendal/shared";
 
 /** Count a successfully paid action play or action-ability activation. */
 export function noteActionPlayedOrActivated(player: PlayerState): void {
@@ -402,7 +403,7 @@ export function entersArena(data: CardData): boolean {
 export function settlesInArena(state: GameStateInternal, card: CardInstance): boolean {
   const data = dataOf(state, card.cardId);
   return entersArena(data) ||
-    (data.cardType === "equipment" && scriptOf(state, card.cardId, card)?.playableEquipment === true);
+    (hasType(data, "equipment") && scriptOf(state, card.cardId, card)?.playableEquipment === true);
 }
 
 export function settlePlayedCard(
@@ -419,7 +420,7 @@ export function settlePlayedCard(
     card.grantedKeywords = card.grantedKeywords.filter((keyword) => keyword !== "go again");
     if (card.grantedKeywords.length === 0) delete card.grantedKeywords;
   }
-  if (data.cardType === "equipment" && script?.playableEquipment === true) {
+  if (hasType(data, "equipment") && script?.playableEquipment === true) {
     const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
       (data.subtypes ?? []).includes(candidate),
     );

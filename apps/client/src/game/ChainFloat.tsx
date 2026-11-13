@@ -15,6 +15,7 @@ import { chainTimelineRevision } from "./chainTimeline.js";
 import type { FloatVisibilityController } from "./floatVisibility.js";
 import { motionLocationKey, motionPresentationKey } from "./motion/motionTypes.js";
 import { useFloatDrag } from "./useFloatDrag.js";
+import { hasType } from "@fyendal/shared";
 
 function ChainStat({
   kind,
@@ -408,7 +409,7 @@ export function ChainFloat({
   // Arena equipment is activated from its slot, even when another presentation
   // of the same card appears on the combat chain.
   const cardIsActivatable = (card: CardView) =>
-    cardData[card.cardId]?.cardType !== "equipment" &&
+    !hasType(cardData[card.cardId], "equipment") &&
     chainCardIsActivatable(links, chainIdx, card.instanceId, activatableCardIds);
   const attackActivatable = chain?.attackingCard
     ? cardIsActivatable(chain.attackingCard) : false;

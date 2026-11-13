@@ -66,6 +66,7 @@ import {
   passPriorityWindow,
   type PriorityWindow,
 } from "./priority.js";
+import { hasType } from "@fyendal/shared";
 
 /** Enter the reaction step: attacker holds priority first. */
 export function beginReactionStep(state: GameStateInternal): void {
@@ -541,23 +542,23 @@ export function playReaction(
   if (state.phase !== "reaction" || !link) return "no active reaction window";
   if (state.priorityPlayer !== seat) return "not your priority";
   const data = instanceDataOf(state, card);
-  const playedAsInstant = data.cardType === "instant" ||
-    (data.cardType !== "attack-reaction" && data.cardType !== "defense-reaction" &&
+  const playedAsInstant = hasType(data, "instant") ||
+    (!hasType(data, "attack-reaction") && !hasType(data, "defense-reaction") &&
       canPlayAsInstant(state, runtime, seat, card, link, fromZone ?? (fromArsenal ? "arsenal" : "hand")));
   if (playedAsInstant && opposingInstantsProhibited(state, seat)) {
     return "opposing effect prohibits instants";
   }
   const isAttacker = seat === link.attacker;
-  if (data.cardType === "attack-reaction" && !isAttacker)
+  if (hasType(data, "attack-reaction") && !isAttacker)
     return "only the attacker can play attack reactions";
-  if (data.cardType === "defense-reaction" && isAttacker)
+  if (hasType(data, "defense-reaction") && isAttacker)
     return "only the defender can play defense reactions";
   const player = state.players[seat] as PlayerState;
   const script = scriptOf(state, card.cardId, card);
   if (
-    data.cardType !== "attack-reaction" &&
-    data.cardType !== "defense-reaction" &&
-    data.cardType !== "instant"
+    !hasType(data, "attack-reaction") &&
+    !hasType(data, "defense-reaction") &&
+    !hasType(data, "instant")
   ) {
     // an action playable "as though it were an instant" counts as an instant here
     const asInstant = canPlayAsInstant(state, runtime, seat, card, link, fromZone ?? (fromArsenal ? "arsenal" : "hand"));
@@ -594,7 +595,7 @@ export function playReaction(
   if (cardPlayRestrictedByModifier(state, seat, card)) {
     return `${nameOf(state, card.cardId)} cannot be played due to a card-type restriction`;
   }
-  const isDefReact = data.cardType === "defense-reaction";
+  const isDefReact = hasType(data, "defense-reaction");
   const fromHand = !fromZone && source === player.hand;
   const maxNonBlock = attackMaxNonBlockDefenders(state, link);
   if (
@@ -851,12 +852,12 @@ export function finishReactionPlay(
   origin: "hand" | "arsenal" | PlayableZone,
 ): void {
   const link = currentLink(state);
-  if (link && dataOf(state, removed.cardId).cardType === "attack-reaction") {
+  if (link && hasType(dataOf(state, removed.cardId), "attack-reaction")) {
     link.flags.reactionPlayedOrActivated = true;
     link.flags[`reactionBySeat:${seat}`] = true;
     link.flags.reactionCount = Number(link.flags.reactionCount ?? 0) + 1;
   }
-  if (link && dataOf(state, removed.cardId).cardType === "defense-reaction") {
+  if (link && hasType(dataOf(state, removed.cardId), "defense-reaction")) {
     link.flags[`defenseReactionBySeat:${seat}`] = true;
   }
   const { goAgain, layers: playedTriggers } = runtime.dispatchFlow("announceCardPlayed", state, seat, removed, origin);
@@ -881,7 +882,7 @@ export function finishReactionPlay(
     });
   }
   state.stack.unshift(...playedTriggers);
-  if (dataOf(state, removed.cardId).cardType === "attack-reaction") {
+  if (hasType(dataOf(state, removed.cardId), "attack-reaction")) {
     runtime.dispatchFlow("queueReactionEventTriggers", state, seat);
   }
   // Triggers from paying its cost (e.g. a pitch trigger) go above the reaction (CR 6.6.6).

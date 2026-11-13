@@ -1125,8 +1125,8 @@ type AlternativePlayCost = (
  * Hooks receive the engine's mutable working copy and are called synchronously.
  */
 export interface CardScript {
-  /** Additional primary card types this object has in every zone. Used for
-   * double-faced objects whose characteristics include more than one type. */
+  /** Card types an effect grants this object in every zone, beyond its
+   * printed `CardData.types`. */
   additionalCardTypes?: CardType[];
   /** Additional names this face-up object has in every zone. */
   allZoneNames?: string[];
@@ -1158,8 +1158,8 @@ export interface CardScript {
   activeWhileFaceUpInArsenal?: boolean;
   /** Hero: 2H weapons with this subtype are equipped as though they were 1H. */
   equipsTwoHandedAsOneHanded?: string;
-  /** This equipment is a deck-playable action object (Evo, CR 8.3.26). On
-   * resolution it transforms the occupant if `transformsEquipment` is set,
+  /** This deck-played equipment (Evo, CR 8.3.26) enters an equipment zone on
+   * resolution: it transforms the occupant if `transformsEquipment` is set,
    * otherwise it equips to its empty zone. */
   playableEquipment?: boolean;
   /** Whether resolving playable equipment transforms `equipped` and retains it

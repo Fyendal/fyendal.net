@@ -53,6 +53,7 @@ import { declaredLayerTargetLegal } from "./layerTargets.js";
 import { cardProhibitedByChosenName } from "./restrictions.js";
 import { transitionZone } from "./transitions.js";
 import { ATTACKS_QUEUED_ABOVE_LAYER } from "./attackQueue.js";
+import { hasType } from "@fyendal/shared";
 
 /** The attack becomes a chain link and is now attacking: intimidate, then the defend decision. */
 export function proceedWithAttack(state: GameStateInternal, runtime: EngineRuntime): void {
@@ -213,7 +214,7 @@ export function legalDefenderCards(
     (!link || attackAllowsDefender(state, runtime, link, c, fromHand));
   const hand = player.hand.filter((c) => {
     const d = instanceDataOf(state, c);
-    if (d.cardType === "defense-reaction" || !cardHasDefenseProperty(state, c)) return false;
+    if (hasType(d, "defense-reaction") || !cardHasDefenseProperty(state, c)) return false;
     return allowed(c, true);
   });
   const arsenal = player.arsenal.filter((c) => {
@@ -227,7 +228,7 @@ export function legalDefenderCards(
         : scriptedPermission === true
       : instanceHasKeyword(state, c, "ambush");
     const attackActionPermission = player.flags.attackActionsDefendFromArsenal === true &&
-      d.cardType === "action" && (d.subtypes ?? []).includes("attack");
+      hasType(d, "action") && (d.subtypes ?? []).includes("attack");
     return (attackActionPermission || ambush) &&
       cardHasDefenseProperty(state, c) && allowed(c, false);
   });
@@ -301,8 +302,7 @@ export function defenderSelectionError(
     }
     staged.push(card);
 
-    const cardType = dataOf(state, card.cardId).cardType;
-    if (cardType !== "block") {
+    if (!hasType(dataOf(state, card.cardId), "block")) {
       nonBlockCount++;
       if (maxNonBlock !== undefined && nonBlockCount > maxNonBlock) {
         return `this attack can't be defended by more than ${maxNonBlock} non-block cards`;
@@ -356,7 +356,7 @@ export function cardTriggersPhantasm(state: GameStateInternal, runtime: EngineRu
   link: ChainLinkState, card: CardInstance): boolean {
   if (!instanceHasKeyword(state, link.attackingCard, "phantasm")) return false;
   const d = dataOf(state, card.cardId);
-  if (d.cardType !== "action" || !(d.subtypes ?? []).includes("attack")) return false;
+  if (!hasType(d, "action") || !(d.subtypes ?? []).includes("attack")) return false;
   if (cardTypesOf(state, card).includes("illusionist")) return false;
   return currentPowerOf(state, runtime, card, link) >= 6;
 }
@@ -814,7 +814,7 @@ export function assignDefenders(
   if (
     link.defendingCards.some((card) => {
       const data = dataOf(state, card.cardId);
-      return data.cardType === "action" && (data.subtypes ?? []).includes("attack");
+      return hasType(data, "action") && (data.subtypes ?? []).includes("attack");
     }) &&
     activeModifiers(state, link, ["chain-link"]).some(
       (modifier) => modifier.goAgainIfDefendedByAttackAction === true,

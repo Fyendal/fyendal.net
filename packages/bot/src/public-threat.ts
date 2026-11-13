@@ -1,6 +1,7 @@
 import type { CardData, CardView, ChainLinkView, PlayerView } from "@fyendal/shared";
 import { unseenCounts } from "./deck-knowledge.js";
 import type { BotPolicyInput } from "./policy.js";
+import { hasType as hasPrintedType } from "@fyendal/shared";
 
 /**
  * Damage the attacker can still add to the current opposing attack from
@@ -254,8 +255,9 @@ function instantUnits(context: Context, data: CardData): Unit[] {
 /** A face-up arsenal instant or attack reaction that pumps the current attack. */
 function arsenalUnits(context: Context, card: CardView): Unit[] {
   const data = context.input.cards[card.cardId];
-  if (data?.cardType === "instant") return instantUnits(context, data);
-  if (data?.cardType !== "attack-reaction") return [];
+  if (!data) return [];
+  if (hasPrintedType(data, "instant")) return instantUnits(context, data);
+  if (!hasPrintedType(data, "attack-reaction")) return [];
   const sentence = (data.text ?? "").toLowerCase().split(/[.\n]/).find((part) =>
     /attack[^.]*\b(?:gets|gains) \+\d+\{p\}/.test(part) && !/next attack|counter/.test(part)
   );
@@ -310,7 +312,7 @@ function computeThreat(input: BotPolicyInput, defended: boolean): PublicCombatTh
     input,
     link,
     attacker,
-    attackIsAction: input.cards[attackingCard.cardId]?.cardType === "action",
+    attackIsAction: hasPrintedType(input.cards[attackingCard.cardId], "action"),
     permanents,
   };
   const sources = [

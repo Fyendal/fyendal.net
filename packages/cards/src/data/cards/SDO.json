@@ -2,7 +2,7 @@
  {
   "id": "SDO001",
   "name": "Dorinthea",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per turn Effect - When a weapon you control hits, you may attack an additional time with that weapon this turn.",
   "classes": [
    "warrior"
@@ -14,7 +14,7 @@
  {
   "id": "SDO002",
   "name": "Dawnblade",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nThe second time this hits each turn, put a +1{p} counter on it.\nAt the beginning of your end phase, if this hasn't hit this turn, remove all +1{p} counters from it.",
   "attack": 3,
   "classes": [
@@ -29,7 +29,7 @@
  {
   "id": "SDO003",
   "name": "Helm of Unity",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Unity - When this defends together with a card from hand, this gets +1{d} until end of turn.\nTemper",
   "defense": 1,
   "classes": [
@@ -47,7 +47,7 @@
  {
   "id": "SDO004",
   "name": "Nullrune Hood",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -64,7 +64,7 @@
  {
   "id": "SDO005",
   "name": "Blossom of Spring",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Gain {r}. Go again",
   "defense": 0,
   "classes": [
@@ -78,7 +78,7 @@
  {
   "id": "SDO006",
   "name": "Nullrune Robe",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -95,7 +95,7 @@
  {
   "id": "SDO007",
   "name": "Gauntlets of Unity",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Unity - When this defends together with a card from hand, this gets +1{d} until end of turn.\nTemper",
   "defense": 1,
   "classes": [
@@ -113,7 +113,7 @@
  {
   "id": "SDO008",
   "name": "Nullrune Gloves",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -130,7 +130,7 @@
  {
   "id": "SDO009",
   "name": "Refraction Bolters",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When a weapon attack you control hits, you may destroy this. If you do, the attack gets go again.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -147,7 +147,7 @@
  {
   "id": "SDO010",
   "name": "Wreck Havoc",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Defense reactions can't be played to this chain link.\nWhen this hits a hero, you may turn a card in their arsenal face up, then destroy a defense reaction in their arsenal.",
   "pitch": 1,
   "cost": 2,
@@ -164,7 +164,7 @@
  {
   "id": "SDO011",
   "name": "Scar for a Scar",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -184,7 +184,7 @@
  {
   "id": "SDO012",
   "name": "Agile Engagement",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target Warrior attack gets +3{p}. If it's defended by an attack action card, create an Agility token.",
   "pitch": 1,
   "cost": 1,
@@ -197,7 +197,7 @@
  {
   "id": "SDO013",
   "name": "Ironsong Response",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -213,7 +213,7 @@
  {
   "id": "SDO014",
   "name": "Out for Blood",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target weapon attack gains +3{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, your next attack this turn gains +1{p}.",
   "pitch": 1,
   "cost": 1,
@@ -229,7 +229,7 @@
  {
   "id": "SDO015",
   "name": "Overpower",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target weapon attack gains +4{p}\nReprise - If the defending hero has defended with a card from their hand this chain link, instead it gains +6{p}.",
   "pitch": 1,
   "cost": 3,
@@ -245,7 +245,7 @@
  {
   "id": "SDO016",
   "name": "Puncture",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target sword or dagger attack gains +3{p} and piercing 1.",
   "pitch": 1,
   "cost": 1,
@@ -258,7 +258,7 @@
  {
   "id": "SDO017",
   "name": "Stroke of Foresight",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target weapon attack gains +3{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, draw a card, then put a card from your hand on the top or bottom of your deck.",
   "pitch": 1,
   "cost": 1,
@@ -274,7 +274,7 @@
  {
   "id": "SDO018",
   "name": "Lead with Speed",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Brute or Warrior attack this turn gets +3{p}.\nCreate an Agility token.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -291,7 +291,7 @@
  {
   "id": "SDO019",
   "name": "Sharpen Steel",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +3{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -307,7 +307,7 @@
  {
   "id": "SDO020",
   "name": "Warrior's Valor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +3{p} and \"When this hits, it gets go again.\"\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -323,7 +323,7 @@
  {
   "id": "SDO021",
   "name": "Oasis Respite",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Prevent the next 4 damage that would be dealt to target hero this turn by a source of your choice. If they have less life than each other hero, they may gain 1{h}.",
   "pitch": 1,
   "cost": 1,
@@ -335,7 +335,7 @@
  {
   "id": "SDO022",
   "name": "Run Through",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target sword attack gains go again.\nYour next sword attack this turn gets +2{p}.",
   "pitch": 2,
   "cost": 1,
@@ -348,7 +348,7 @@
  {
   "id": "SDO023",
   "name": "Springboard Somersault",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "If Springboard Somersault is played from arsenal, it gains +2{d}.",
   "pitch": 2,
   "cost": 0,
@@ -361,7 +361,7 @@
  {
   "id": "SDO024",
   "name": "Warrior's Valor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +2{p} and \"When this hits, it gets go again.\"\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -377,7 +377,7 @@
  {
   "id": "SDO025",
   "name": "Ironsong Response",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -393,7 +393,7 @@
  {
   "id": "SDO026",
   "name": "Nip at the Heels",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target attack with 3 or less base {p} gets +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -406,7 +406,7 @@
  {
   "id": "SDO027",
   "name": "Overpower",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target weapon attack gains +2{p}\nReprise - If the defending hero has defended with a card from their hand this chain link, instead it gains +4{p}.",
   "pitch": 3,
   "cost": 3,
@@ -422,7 +422,7 @@
  {
   "id": "SDO028",
   "name": "Puncture",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target sword or dagger attack gains +1{p} and piercing 1.",
   "pitch": 3,
   "cost": 1,
@@ -435,7 +435,7 @@
  {
   "id": "SDO029",
   "name": "Put in Context",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "This can only defend an attack with 3 or less base {p}.",
   "pitch": 3,
   "cost": 0,
@@ -448,7 +448,7 @@
  {
   "id": "SDO030",
   "name": "Energy Potion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Destroy this: Gain {r}{r}",
   "pitch": 3,
   "cost": 0,
@@ -463,7 +463,7 @@
  {
   "id": "SDO031",
   "name": "Goblet of Bloodrun Wine",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create an Agility and a Vigor token.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -479,7 +479,7 @@
  {
   "id": "SDO032",
   "name": "Hit and Run",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets go again.\nIf you've attacked with a weapon this turn, your next attack this turn gets +1{p}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -495,7 +495,7 @@
  {
   "id": "SDO033",
   "name": "Trot Along",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack with 3 or less base {p} this turn gets go again.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -511,7 +511,7 @@
  {
   "id": "SDO034",
   "name": "Warrior's Valor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +1{p} and \"When this hits, it gets go again.\"\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -527,7 +527,7 @@
  {
   "id": "SDO035",
   "name": "Agility",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then your next attack this turn gets go again.",
   "classes": [
    "generic"
@@ -537,7 +537,7 @@
  {
   "id": "SDO036",
   "name": "Vigor",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then gain {r}.",
   "classes": [
    "generic"

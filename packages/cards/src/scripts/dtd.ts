@@ -18,6 +18,7 @@ import {
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { dtdHighRarity } from "./dtd/high-rarity.js";
+import { hasType } from "@fyendal/shared";
 
 // Dusk till Dawn — commons, rares, young heroes, and required tokens.
 const RUNECHANT = "DTD214";
@@ -528,7 +529,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
         return (
           ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
           ctx.getState("usedTurn") !== ctx.state.turn &&
-          defenders.some((card) => ctx.cardData(card.cardId).cardType !== "equipment")
+          defenders.some((card) => !hasType(ctx.cardData(card.cardId), "equipment"))
         );
       },
     },

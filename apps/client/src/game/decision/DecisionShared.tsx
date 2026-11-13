@@ -3,6 +3,7 @@ import type { CardView, GameMessage } from "@fyendal/shared";
 import type { ReactNode } from "react";
 import { useIntl, type IntlShape } from "react-intl";
 import { GameMessageText } from "../../i18n/GameMessage.js";
+import { hasType } from "@fyendal/shared";
 
 export function PitchPaymentProgress({ selected, required }: { selected: number; required: number }) {
   const intl = useIntl();
@@ -96,9 +97,12 @@ export function chooseWithoutFocus(
   button.blur();
 }
 
+const PLAY_MODE_TYPES = ["action", "attack-reaction", "defense-reaction", "instant"] as const;
+
 /** Describe a card's normal play mode when it also exposes an activated ability. */
 export function handCardPlayLabel(intl: IntlShape, cardId: string | undefined): string {
-  switch (cardId ? cardData[cardId]?.cardType : undefined) {
+  const data = cardId ? cardData[cardId] : undefined;
+  switch (PLAY_MODE_TYPES.find((type) => hasType(data, type))) {
     case "action":
       return intl.formatMessage({ id: "game.decision.playAs.action" });
     case "attack-reaction":

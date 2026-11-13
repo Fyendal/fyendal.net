@@ -1,6 +1,6 @@
 import { memo, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useIntl } from "react-intl";
-import type { CardData, DeckPool, EquipmentSlot } from "@fyendal/shared";
+import type { CardData, CardType, DeckPool, EquipmentSlot } from "@fyendal/shared";
 import { cardData, equipmentFitsSlot } from "@fyendal/cards/client";
 import {
   CardArtwork,
@@ -20,6 +20,7 @@ import {
   type PrepViewMode,
 } from "../storage.js";
 import type { PrepSelection } from "./selection.js";
+import { hasType } from "@fyendal/shared";
 
 const PREP_CARD_WIDTH = 105;
 const PREP_CARD_HEIGHT = Math.round(
@@ -46,7 +47,7 @@ const PITCH_NAME_MESSAGES: Record<1 | 2 | 3, string> = {
   3: "prep.pitch.blue",
 };
 
-const CARD_TYPE_MESSAGES: Partial<Record<CardData["cardType"], string>> = {
+const CARD_TYPE_MESSAGES: Partial<Record<CardType, string>> = {
   action: "prep.presentation.type.action",
   "attack-reaction": "prep.presentation.type.attackReaction",
   "defense-reaction": "prep.presentation.type.defenseReaction",
@@ -61,8 +62,8 @@ function cardTypeMessage(data: CardData | undefined): string | null {
   if (!data) return null;
   const subtypes = data.subtypes ?? [];
   if (subtypes.includes("item")) return "prep.presentation.type.item";
-  if (data.cardType === "action" && subtypes.includes("attack")) return null;
-  return CARD_TYPE_MESSAGES[data.cardType] ?? null;
+  if (hasType(data, "action") && subtypes.includes("attack")) return null;
+  return data.types.map((type) => CARD_TYPE_MESSAGES[type]).find((message) => message !== undefined) ?? null;
 }
 
 /** Touch screens get whole-card targets; a fine pointer gets the denser ledger. */

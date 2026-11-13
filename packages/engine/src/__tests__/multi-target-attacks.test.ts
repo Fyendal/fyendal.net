@@ -11,7 +11,7 @@ function multiTargetGame(seed: number): { state: GameStateInternal; attackId: nu
     ALLY: {
       id: "ALLY",
       name: "Test Ally",
-      cardType: "action",
+      types: ["action"],
       subtypes: ["ally"],
       classes: ["generic"],
       attack: 1,

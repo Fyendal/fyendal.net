@@ -4,6 +4,7 @@ import { cardList } from "./catalog.js";
 import { functionalKeyOf } from "./functional.js";
 import { registry } from "./scripts/index.js";
 import rawVanilla from "./data/vanilla.json" with { type: "json" };
+import { hasType } from "@fyendal/shared";
 
 export * from "./catalog.js";
 
@@ -25,7 +26,7 @@ function attackTargetFlags(
 ): Pick<CardScript, "targetsAttackingCard" | "abilityTargetsAttackingCard"> {
   const lines = (printing.text ?? "").split("\n");
   const abilities = lines.map((line) => ABILITY_LINE.exec(line)?.[1]).filter((line) => line !== undefined);
-  const played = printing.cardType === "attack-reaction" || printing.cardType === "instant"
+  const played = hasType(printing, "attack-reaction") || hasType(printing, "instant")
     ? lines.filter((line) => !ANY_ABILITY_LINE.test(line) && !line.startsWith("When this enters the arena"))
     : [];
   const declaresAbilityTarget = [script.activated].flat().some((ability) => ability?.targetCardOptions);

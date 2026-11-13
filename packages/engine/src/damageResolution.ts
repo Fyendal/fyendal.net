@@ -27,6 +27,7 @@ import { queuedAttackObjects } from "./attackQueue.js";
 import { takeAttackLayerOrigin } from "./stackCore.js";
 import { notePitch, payFromPools, pitchIntoPool, pitchProhibitedByEffect, pitchValueOfInstance } from "./resources.js";
 import { removeMarkOnOpponentHit, snapshotSerializable } from "./ruleQueries.js";
+import { hasType } from "@fyendal/shared";
 
 /** Locate a card instance anywhere in the game (zones, permanents, chain, resolving). */
 /** Reduce source-aware lingering-effect records alongside their authoritative
@@ -914,7 +915,7 @@ function discardDamagePreventionPieces(
       amount <= 0
     ) return [];
     const cards = player.hand.filter(
-      (card) => instanceDataOf(state, card).cardType.toLowerCase() === cardType.toLowerCase(),
+      (card) => instanceDataOf(state, card).types.some((type) => type === cardType.toLowerCase()),
     );
     return cards.length > 0 ? [{
       modifierId: modifier.id,
@@ -1411,14 +1412,14 @@ export function effectDamageBonus(state: GameStateInternal, packet: PendingArcan
     if (mod.appliesTo === "weapon" || mod.appliesTo === "sword") return sum;
     if (
       mod.appliesTo === "attack" &&
-      data.cardType !== "weapon" &&
-      (data.cardType !== "action" || !(data.subtypes ?? []).includes("attack"))
+      !hasType(data, "weapon") &&
+      (!hasType(data, "action") || !(data.subtypes ?? []).includes("attack"))
     ) return sum;
     if (
       mod.appliesTo === "attack-action" &&
-      (data.cardType !== "action" || !(data.subtypes ?? []).includes("attack"))
+      (!hasType(data, "action") || !(data.subtypes ?? []).includes("attack"))
     ) return sum;
-    if (mod.appliesToCardType && data.cardType !== mod.appliesToCardType) return sum;
+    if (mod.appliesToCardType && !data.types.some((type) => type === mod.appliesToCardType)) return sum;
     if (mod.appliesToPitch !== undefined && cardColorOf(state, source) !== mod.appliesToPitch) return sum;
     if (mod.appliesToClass && !tags.has(mod.appliesToClass.toLowerCase())) return sum;
     if (mod.appliesToSubtype) {

@@ -2,6 +2,7 @@ import { cardAbilitiesSuppressed, cardNamesOf, instanceDataOf, scriptOf } from "
 import type { GameStateInternal } from "./runtimeState.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import type { CardInstance, PlayerState } from "./state.js";
+import { hasType } from "@fyendal/shared";
 
 /** Whether the opposing turn player's active permanents prohibit `seat` from
  * playing cards or activating abilities. This is checked by both intent
@@ -45,7 +46,7 @@ export function nonAttackActionCardLimitReached(
   card: CardInstance,
 ): boolean {
   const data = instanceDataOf(state, card);
-  if (data.cardType !== "action" || (data.subtypes ?? []).includes("attack")) return false;
+  if (!hasType(data, "action") || (data.subtypes ?? []).includes("attack")) return false;
   const limits = (state.players as PlayerState[]).flatMap((controller) =>
     controlledPermanents(state, controller.seat, { faceDownEquipment: false })
       .map((source) => scriptOf(state, source.cardId, source)?.nonAttackActionCardLimit)

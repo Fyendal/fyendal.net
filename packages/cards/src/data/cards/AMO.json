@@ -2,7 +2,7 @@
   {
     "id": "AMO001",
     "name": "Dr. Mortimer, Blight of the Pits",
-    "cardType": "hero",
+    "types": ["hero"],
     "text": "Instant - {t}: Cure a disease an opponent controls. If you do, create a Silver token.\nAttack Reaction - {t}, destroy 2 Silver you control: Target Assassin attack gets go again.",
     "classes": ["assassin"],
     "keywords": ["Cure", "Go again"],
@@ -13,7 +13,7 @@
   {
     "id": "AMO002",
     "name": "Humour Plunge",
-    "cardType": "weapon",
+    "types": ["weapon"],
     "text": "Action - {r}{r}, {t}: Attack. Go again\nIf this is attacking an infected hero, this gets +1{p}. (A hero is infected if they control a disease.)\nPiercing 1",
     "attack": 1,
     "classes": ["assassin"],
@@ -24,7 +24,7 @@
   {
     "id": "AMO003",
     "name": "Plague Mask",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Instant - Destroy this: Disease tokens can't be created under your control this turn.\nBlade Break",
     "defense": 2,
     "classes": ["assassin"],
@@ -35,7 +35,7 @@
   {
     "id": "AMO004",
     "name": "Isolation Vestment",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Action - Destroy this: Assassin attack action cards that target an infected hero cost you {r} less to play this turn. Go again (A hero is infected if they control a disease.)\nBlade Break",
     "defense": 1,
     "classes": ["assassin"],
@@ -46,7 +46,7 @@
   {
     "id": "AMO005",
     "name": "Surgical Gloves",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "Instant - Cure a disease an opponent controls: Target attack they control gets -1{p}. Destroy this at the beginning of the end phase.\nArcane Barrier 1",
     "defense": 0,
     "classes": ["assassin"],
@@ -57,7 +57,7 @@
   {
     "id": "AMO006",
     "name": "Second Salvos",
-    "cardType": "equipment",
+    "types": ["equipment"],
     "text": "While this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, equip this.\nInstant - Destroy this: {u} your hero.\nBlade Break",
     "defense": 1,
     "classes": ["assassin"],
@@ -68,7 +68,7 @@
   {
     "id": "AMO007",
     "name": "Annihilate the Armed",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to banish opponents' attack action cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
     "pitch": 1,
     "cost": 1,
@@ -82,7 +82,7 @@
   {
     "id": "AMO008",
     "name": "Escaped Subject",
-    "cardType": "action",
+    "types": ["action"],
     "classes": ["assassin"],
     "subtypes": ["attack"],
     "text": "If the defending hero is infected, this gets go again. (A hero is infected if they control a disease.)",
@@ -95,7 +95,7 @@
   {
     "id": "AMO009",
     "name": "Eviscerate the Enervated",
-    "cardType": "action",
+    "types": ["action"],
     "classes": ["assassin"],
     "subtypes": ["attack"],
     "text": "Contract - You are contracted to banish infected opponents' cards. Whenever you complete this contract, create a Silver token. (A hero is infected if they control a disease.)\nWhen this hits a hero, banish the top card of their deck.",
@@ -109,7 +109,7 @@
   {
     "id": "AMO010",
     "name": "Excessive Bloodloss",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to banish opponents' red cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck. If it's red, repeat this process once.",
     "pitch": 1,
     "cost": 1,
@@ -123,7 +123,7 @@
   {
     "id": "AMO011",
     "name": "Plunder the Poor",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to banish opponents' cards with cost 1 or less. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
     "pitch": 1,
     "cost": 0,
@@ -137,7 +137,7 @@
   {
     "id": "AMO012",
     "name": "Sneaking Rot",
-    "cardType": "action",
+    "types": ["action"],
     "classes": ["assassin"],
     "subtypes": ["attack"],
     "text": "If you've played or activated an attack reaction this chain link, this gets \"When this hits a hero, create a Bloodrot Pox token under their control.\"",
@@ -150,7 +150,7 @@
   {
     "id": "AMO013",
     "name": "Wound Extraction",
-    "cardType": "action",
+    "types": ["action"],
     "classes": ["assassin"],
     "subtypes": ["attack"],
     "text": "If you've hit with a dagger this combat chain, this gets \"When this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.\"",
@@ -163,7 +163,7 @@
   {
     "id": "AMO014",
     "name": "Act on Intel: Whereabouts",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Target Assassin attack action card with contract gets +1{p} and \"When this hits a hero, they choose a card in their hand. Banish it.\"",
     "pitch": 1,
     "cost": 1,
@@ -174,7 +174,7 @@
   {
     "id": "AMO015",
     "name": "Cut to the Chase",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Target Assassin attack action card with contract gains +3{p}.\nLook at the top card of the defending hero's deck. You may put it on the bottom.",
     "pitch": 1,
     "cost": 0,
@@ -185,7 +185,7 @@
   {
     "id": "AMO016",
     "name": "Bloodrot Trap",
-    "cardType": "defense-reaction",
+    "types": ["defense-reaction"],
     "text": "When this defends and the attacking hero has played or activated a reaction this chain link, create a Bloodrot Pox token under their control.",
     "pitch": 1,
     "cost": 0,
@@ -197,7 +197,7 @@
   {
     "id": "AMO017",
     "name": "Frailty Trap",
-    "cardType": "defense-reaction",
+    "types": ["defense-reaction"],
     "text": "When this defends an attack with go again, create a Frailty token under the attacking hero's control.",
     "pitch": 1,
     "cost": 0,
@@ -209,7 +209,7 @@
   {
     "id": "AMO018",
     "name": "Inertia Trap",
-    "cardType": "defense-reaction",
+    "types": ["defense-reaction"],
     "text": "When this defends an attack with {p} greater than its base, create an Inertia token under the attacking hero's control.",
     "pitch": 1,
     "cost": 0,
@@ -221,7 +221,7 @@
   {
     "id": "AMO019",
     "name": "Viral Diffusion",
-    "cardType": "defense-reaction",
+    "types": ["defense-reaction"],
     "text": "Mortimer Specialization\nWhen this defends, create a Frailty, Inertia, and Bloodrot Pox token under the attacking hero's control.",
     "pitch": 1,
     "cost": 3,
@@ -234,7 +234,7 @@
   {
     "id": "AMO020",
     "name": "Seeker Kunai",
-    "cardType": "instant",
+    "types": ["instant"],
     "text": "Attack Reaction - {r}, destroy this: Target Assassin attack action card gets +1{p}.\nWhile this is in your graveyard, at the start of your turn, you may destroy 2 Silver you control. If you do, return this to the arena.",
     "pitch": 1,
     "cost": 0,
@@ -245,7 +245,7 @@
   {
     "id": "AMO021",
     "name": "Spreading Plague",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Create X Bloodrot Pox tokens under the defending hero's control, where X is the number of defending cards this chain link.",
     "pitch": 2,
     "cost": 1,
@@ -256,7 +256,7 @@
   {
     "id": "AMO022",
     "name": "Codex of Bloodrot",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Each hero puts a card from their hand face-down into their arsenal.\nCreate a Ponder token under your control and a Bloodrot Pox token under each opponent's control.\nGo again",
     "pitch": 2,
     "cost": 0,
@@ -268,7 +268,7 @@
   {
     "id": "AMO023",
     "name": "Pick Your Poison",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Each opposing hero chooses Frailty, Inertia, or Bloodrot Pox. Create the 2 tokens they didn't choose under their control.\nGo again",
     "pitch": 2,
     "cost": 0,
@@ -280,7 +280,7 @@
   {
     "id": "AMO024",
     "name": "Annihilate the Armed",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Contract - You are contracted to banish opponents' attack action cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck.",
     "pitch": 3,
     "cost": 1,
@@ -294,7 +294,7 @@
   {
     "id": "AMO025",
     "name": "Languid Pace",
-    "cardType": "action",
+    "types": ["action"],
     "classes": ["assassin"],
     "subtypes": ["attack"],
     "text": "When this attacks or defends, create an Inertia token under each hero's control.",
@@ -307,7 +307,7 @@
   {
     "id": "AMO026",
     "name": "Under the Trap-Door",
-    "cardType": "action",
+    "types": ["action"],
     "text": "Stealth\nInstant - Discard this: Banish target trap from your graveyard. If you do, you may play it this turn and if it would be put into the graveyard this turn, instead banish it.",
     "pitch": 3,
     "cost": 0,
@@ -321,7 +321,7 @@
   {
     "id": "AMO027",
     "name": "Viral Sampling",
-    "cardType": "action",
+    "types": ["action"],
     "classes": ["assassin"],
     "subtypes": ["attack"],
     "text": "Stealth\nContract - You are contracted to hit an infected opposing hero. Whenever you complete this contract, create a Silver token. (A hero is infected if they control a disease.)",
@@ -335,7 +335,7 @@
   {
     "id": "AMO028",
     "name": "Shred",
-    "cardType": "attack-reaction",
+    "types": ["attack-reaction"],
     "text": "Target card defending an Assassin attack gets -2{d} this combat chain.",
     "pitch": 3,
     "cost": 0,
@@ -346,7 +346,7 @@
   {
     "id": "AMO029",
     "name": "Seed Inertia",
-    "cardType": "instant",
+    "types": ["instant"],
     "text": "Create an Inertia token under each hero's control.",
     "pitch": 3,
     "cost": 0,

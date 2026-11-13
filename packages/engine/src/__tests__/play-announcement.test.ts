@@ -161,7 +161,7 @@ describe("card-play announcement", () => {
       MODE_ACTION: {
         id: "MODE_ACTION",
         name: "Modal Action",
-        cardType: "action",
+        types: ["action"],
         classes: ["generic"],
         pitch: 3,
         cost: 0,
@@ -307,7 +307,7 @@ describe("card-play announcement", () => {
       ALT_INSTANT: {
         id: "ALT_INSTANT",
         name: "Alternative Instant",
-        cardType: "instant",
+        types: ["instant"],
         classes: ["generic"],
         pitch: 3,
         cost: 2,
@@ -316,7 +316,7 @@ describe("card-play announcement", () => {
       GOLD: {
         id: "GOLD",
         name: "Gold",
-        cardType: "token",
+        types: ["token"],
         subtypes: ["item"],
         text: "",
       },
@@ -390,7 +390,7 @@ describe("card-play announcement", () => {
       STRIKE: {
         id: "STRIKE",
         name: "Test Strike",
-        cardType: "action",
+        types: ["action"],
         classes: ["generic"],
         subtypes: ["attack"],
         pitch: 1,
@@ -402,7 +402,7 @@ describe("card-play announcement", () => {
       TEST_ALLY: {
         id: "TEST_ALLY",
         name: "Test Ally",
-        cardType: "action",
+        types: ["action"],
         classes: ["generic"],
         subtypes: ["test-ally", "ally"],
         pitch: 1,
@@ -487,7 +487,7 @@ describe("card-play announcement", () => {
       ALT_ACTION: {
         id: "ALT_ACTION",
         name: "Alternative Action",
-        cardType: "action",
+        types: ["action"],
         classes: ["generic"],
         pitch: 1,
         cost: 2,
@@ -497,7 +497,7 @@ describe("card-play announcement", () => {
       TEST_ALLY: {
         id: "TEST_ALLY",
         name: "Test Ally",
-        cardType: "action",
+        types: ["action"],
         classes: ["generic"],
         subtypes: ["ally"],
         pitch: 1,

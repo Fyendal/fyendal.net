@@ -27,7 +27,7 @@ describe("OUT — registration and core mechanics", () => {
   it("registers every printing and all heroes", () => {
     expect(Object.keys(cardData).filter((id) => id.startsWith("OUT"))).toHaveLength(239);
     for (const id of ["OUT002", "OUT003", "OUT046", "OUT047", "OUT090", "OUT092"]) {
-      expect(cardData[id]?.cardType).toBe("hero");
+      expect(cardData[id]?.types).toContain("hero");
       expect(scripts[id]).toBeDefined();
     }
   });

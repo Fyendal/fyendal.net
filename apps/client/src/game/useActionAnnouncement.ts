@@ -8,6 +8,7 @@ import {
   actionPaymentProgress,
   selectedActionIntent,
 } from "./legalSelection.js";
+import { hasType } from "@fyendal/shared";
 
 export type Sel =
   | { kind: "none" }
@@ -270,7 +271,7 @@ export function blockingEquipmentByPlay(
   const blockers = new Map<number, string | null>();
   for (const card of cards) {
     const data = cardData[card.cardId];
-    if (data?.cardType !== "equipment") continue;
+    if (!data || !hasType(data, "equipment")) continue;
     const slot = EQUIPMENT_SLOTS.find((candidate) => (data.subtypes ?? []).includes(candidate));
     const occupant = slot ? equipment[slot] : undefined;
     if (occupant && !(cardData[occupant.cardId]?.subtypes ?? []).includes("base")) {
@@ -286,7 +287,7 @@ export function nonAttackActionPlayIds(cards: readonly CardView[]): ReadonlySet<
   const instanceIds = new Set<number>();
   for (const card of cards) {
     const data = cardData[card.cardId];
-    if (data?.cardType === "action" && !(data.subtypes ?? []).includes("attack")) {
+    if (data !== undefined && hasType(data, "action") && !(data.subtypes ?? []).includes("attack")) {
       instanceIds.add(card.instanceId);
     }
   }
