@@ -1,9 +1,11 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
+  alternativeGold,
   buffNextAttack,
   cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
+  controlledPermanents,
   decisionPrompt,
   faceUpGraveyard,
   grantEndPhaseIntellect,
@@ -11,6 +13,7 @@ import {
   ongoingLabel,
   opponentSeat,
   pendingDelayedEffect,
+  wagerReaction,
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { hasType } from "@fyendal/shared";
@@ -19,24 +22,13 @@ const COURAGE = "SBL035";
 const VIGOR = "SDO036";
 const GOLD = "SGB035";
 
-type Card = DeepReadonly<CardInstance>;
-
 function attached(ctx: ScriptCtx): boolean {
   return ctx.state.modifiers.some(
     (modifier) => modifier.sourceInstanceId === ctx.self.instanceId && modifier.scope === "chain-link",
   );
 }
 
-function controlledPermanents(ctx: ScriptCtx): Card[] {
-  const player = ctx.player(ctx.seat);
-  return [
-    ...player.board,
-    ...player.weapons,
-    ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
-  ];
-}
-
-function nextWager(
+function nextWarriorWager(
   power: number,
   appliesTo: "sword" | "warrior",
   optional: boolean,
@@ -77,24 +69,6 @@ function nextWager(
   };
 }
 
-function wagerReaction(
-  power: number,
-  rewardLabel: string,
-  reward: (ctx: ScriptCtx, winner: number) => void,
-): CardScript {
-  return {
-    canPlay: (ctx) =>
-      ctx.link?.attacker === ctx.seat && ctx.link.attackCardType === "weapon" && isSword(ctx, ctx.link.attackingCard),
-    onPlay(ctx) {
-      ctx.addModifier({ scope: "chain-link", attack: power });
-      ctx.wager(opponentSeat(ctx), [], rewardLabel);
-    },
-    onWagerResolved(ctx, winner) {
-      reward(ctx, winner);
-    },
-  };
-}
-
 function prizeworn(token: string): CardScript {
   return {
     triggers: [
@@ -121,10 +95,6 @@ function prizeworn(token: string): CardScript {
       ctx.createToken(token);
     },
   };
-}
-
-function alternativeGold(): CardScript["alternativePlayCost"] {
-  return { kind: "destroy-controlled-named", options: [{ name: "Gold", count: 1 }] };
 }
 
 const checkRaiseLabel = (wagerAttack: number) =>
@@ -217,13 +187,13 @@ export const aol: Record<string, CardScript> = {
       if (hook === "muck") ctx.banish(Number(option));
     },
   },
-  "belly buster|1": nextWager(3, "warrior", true, "Winner creates Courage", (ctx, winner) => {
+  "belly buster|1": nextWarriorWager(3, "warrior", true, "Winner creates Courage", (ctx, winner) => {
     if (winner >= 0) ctx.heroCreatesTokens(winner, COURAGE);
   }),
-  "belly buster|3": nextWager(1, "warrior", true, "Winner creates Courage", (ctx, winner) => {
+  "belly buster|3": nextWarriorWager(1, "warrior", true, "Winner creates Courage", (ctx, winner) => {
     if (winner >= 0) ctx.heroCreatesTokens(winner, COURAGE);
   }),
-  "big slick|1": nextWager(5, "sword", false, "Winner draws a card", (ctx, winner) => {
+  "big slick|1": nextWarriorWager(5, "sword", false, "Winner draws a card", (ctx, winner) => {
     if (winner >= 0) ctx.drawCards(winner, 1);
   }),
   "check-raise|1": {
@@ -302,7 +272,7 @@ export const aol: Record<string, CardScript> = {
   }),
   "bluff catcher|2": {
     alternativePlayCost: alternativeGold(),
-    ...nextWager(3, "sword", false, "Winner gets +1 intellect during their next end phase", (ctx, winner) => {
+    ...nextWarriorWager(3, "sword", false, "Winner gets +1 intellect during their next end phase", (ctx, winner) => {
       if (winner < 0) return;
       grantEndPhaseIntellect(ctx, winner, winner === ctx.state.activePlayer ? ctx.state.turn : ctx.state.turn + 1);
     }),
@@ -341,7 +311,7 @@ export const aol: Record<string, CardScript> = {
     },
   },
   "golden company|3": { alternativePlayCost: alternativeGold() },
-  "odds on favorite|3": nextWager(
+  "odds on favorite|3": nextWarriorWager(
     0,
     "sword",
     false,
@@ -361,7 +331,7 @@ export const aol: Record<string, CardScript> = {
   ),
   "rake back|3": {
     alternativePlayCost: alternativeGold(),
-    ...nextWager(2, "sword", false, "Winner may equip an equipment card from their graveyard", (ctx, winner) => {
+    ...nextWarriorWager(2, "sword", false, "Winner may equip an equipment card from their graveyard", (ctx, winner) => {
       const equipment =
         winner >= 0
           ? faceUpGraveyard(ctx, winner).filter((card) => hasType(ctx.cardData(card.cardId), "equipment"))

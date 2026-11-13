@@ -1,5 +1,6 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
+  createdThisTurn,
   decisionMessage,
   decisionPrompt,
   destroyedTrigger,
@@ -9,6 +10,8 @@ import {
   leavesArenaTrigger,
   localizedCardLog,
   opponentSeat,
+  pitchedBlue,
+  transcendIfBlue,
   warnIfNoActionPoint,
 } from "./shared-helpers.js";
 
@@ -48,21 +51,6 @@ function wardAuras(ctx: ScriptCtx) {
 
 function controlsSpectralShield(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).board.some((c) => isCard(ctx, c.cardId, "Spectral Shield"));
-}
-
-function createdThisTurn(ctx: ScriptCtx): boolean {
-  return (Number(ctx.getFlag("player", "createdThisTurn")) || 0) > 0;
-}
-
-function pitchedBlue(ctx: ScriptCtx): boolean {
-  return ctx.pitchedThisTurn({ color: "blue" }) > 0;
-}
-
-/** "If you've played another blue card this turn, transcend." The resolving
- *  card is blue and noteCardPlayed has already counted it, so >= 2 means
- *  another blue card was played this turn. */
-function transcendIfBlue(ctx: ScriptCtx): void {
-  if (ctx.playedThisTurn("blue") >= 2) ctx.transcend();
 }
 
 /** A transcend instant: the printed effect, then the conditional transcend.

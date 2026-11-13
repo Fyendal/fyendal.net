@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  bothHeroSeats,
   buffNextAttack,
   cardNamed,
   commonOptionMessages,
@@ -83,15 +84,11 @@ function flickKnivesDaggers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
       candidates.findIndex((candidate) => candidate.instanceId === card.instanceId) === index,
   );
 }
-// Hooks carry the hero's seat; heroes act in turn order from the controller (CR 1.9.2c).
-function codexHeroes(ctx: ScriptCtx): number[] {
-  return [ctx.seat, opponentSeat(ctx)];
-}
 function codexHeroIndex(ctx: ScriptCtx, hook: string): number {
-  return codexHeroes(ctx).indexOf(Number(hook.split(":")[1]));
+  return bothHeroSeats(ctx).indexOf(Number(hook.split(":")[1]));
 }
 function codexBloodrotChoice(ctx: ScriptCtx, index: number): void {
-  const seat = codexHeroes(ctx)[index];
+  const seat = bothHeroSeats(ctx)[index];
   if (seat === undefined) {
     ctx.createToken(PONDER);
     ctx.createToken(BLOODROT, opponentSeat(ctx));
@@ -107,7 +104,7 @@ function codexBloodrotChoice(ctx: ScriptCtx, index: number): void {
   );
 }
 function codexFrailtyDiscard(ctx: ScriptCtx, fromIndex: number): void {
-  const seat = codexHeroes(ctx).slice(fromIndex).find(
+  const seat = bothHeroSeats(ctx).slice(fromIndex).find(
     (target) => ctx.getState(`codexFrailtyMoved:${target}`) > 0 && ctx.player(target).hand.length,
   );
   if (seat !== undefined) chooseDiscard(ctx, `codex-frailty-discard:${seat}`, seat);
@@ -117,7 +114,7 @@ function codexFrailtyDiscard(ctx: ScriptCtx, fromIndex: number): void {
   }
 }
 function codexFrailtyChoice(ctx: ScriptCtx, index: number): void {
-  const seat = codexHeroes(ctx)[index];
+  const seat = bothHeroSeats(ctx)[index];
   if (seat === undefined) return codexFrailtyDiscard(ctx, 0);
   const attacks = faceUpGraveyard(ctx, seat).filter((card) => isAttackAction(ctx, card));
   if (!attacks.length || !ctx.hasArsenalSpace(seat)) return codexFrailtyChoice(ctx, index + 1);
@@ -685,7 +682,7 @@ export const outHighRarity: Record<string, CardScript> = {
   "codex of frailty|2": {
     onPlay(ctx) {
       // Script state survives zone moves, so clear a previous play's marks.
-      for (const seat of codexHeroes(ctx)) ctx.setState(`codexFrailtyMoved:${seat}`, 0);
+      for (const seat of bothHeroSeats(ctx)) ctx.setState(`codexFrailtyMoved:${seat}`, 0);
       codexFrailtyChoice(ctx, 0);
     },
     onChoose(ctx, hook, option) {
@@ -703,7 +700,7 @@ export const outHighRarity: Record<string, CardScript> = {
   },
   "codex of inertia|2": {
     onPlay(ctx) {
-      for (const seat of codexHeroes(ctx)) {
+      for (const seat of bothHeroSeats(ctx)) {
         const top = ctx.player(seat).deck[0];
         if (top && ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: false }))
           chooseDiscard(ctx, `codex-discard:${seat}`, seat);

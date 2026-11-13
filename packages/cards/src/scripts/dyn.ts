@@ -9,9 +9,13 @@ import {
   commonOptionMessages,
   consumeDelayedEffect,
   contractWithSilver,
+  controlledPermanents,
+  controlsNamed,
   dealArcane,
   dealToAnyTarget,
+  equippedCards,
   faceUpGraveyard,
+  hyperDriver,
   isAttackAction,
   type DecisionPromptOptions,
   decisionMessage,
@@ -41,36 +45,16 @@ const CROUCHING_TIGER = "DYN065";
 const RUNECHANT = "DYN191";
 const SPECTRAL_SHIELD = "DYN233";
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-
-function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
-  const player = ctx.player(seat);
-  return [
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-    ...player.weapons.filter((card) => hasPrintedType(data(ctx, card), "equipment")),
-  ];
-}
-
 function logDeckTopReveal(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): void {
   ctx.logPublic(
     localizedCardLog(
       ctx,
-      `${ctx.data.name} reveals ${data(ctx, card).name}`,
+      `${ctx.data.name} reveals ${ctx.cardData(card.cardId).name}`,
       "card.log.common.decktop.revealed",
       { revealed: { kind: "card", cardId: card.cardId } },
       { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
     ),
   );
-}
-
-function controlsNamed(ctx: ScriptCtx, name: string): boolean {
-  return ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, name));
-}
-
-function createTokens(ctx: ScriptCtx, id: string, count: number): void {
-  ctx.createTokens(id, count);
 }
 
 function chooseHero(
@@ -246,36 +230,6 @@ function spectralRider(): CardScript {
   };
 }
 
-function hyperDriver(steam: number): CardScript {
-  return {
-    destroyAtZeroCounter: "steam",
-    onEnterArena(ctx) {
-      ctx.setCounter("steam", steam);
-    },
-    triggers: [
-      {
-        event: "card-boosted",
-        label: "Remove a steam counter and gain 1 resource",
-        labelMessage: decisionMessage("card.trigger.hyperdriver.boost"),
-        condition(ctx) {
-          return (
-            ctx.getFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`) !== true && ctx.getCounter("steam") > 0
-          );
-        },
-        onTrigger(ctx) {
-          ctx.setFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`, true);
-        },
-        effect(ctx) {
-          const steam = ctx.getCounter("steam");
-          if (steam <= 0) return;
-          ctx.setCounter("steam", steam - 1);
-          ctx.gainResources(ctx.seat, 1);
-        },
-      },
-    ],
-  };
-}
-
 function aimCounter(ctx: ScriptCtx): boolean {
   return Number(ctx.self.counters?.aim ?? 0) > 0;
 }
@@ -289,7 +243,7 @@ function drillShot(): CardScript {
       return ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      const equipment = equipmentCards(ctx, opponentSeat(ctx));
+      const equipment = equippedCards(ctx, opponentSeat(ctx));
       if (equipment.length)
         ctx.requestCardChoice(
           "drill",
@@ -317,16 +271,16 @@ function contractAttack(test: ContractTest): CardScript {
 }
 
 const contractAttackAction: ContractTest = (ctx, card) => isAttackAction(ctx, card);
-const contractLowDefense: ContractTest = (ctx, card) => (data(ctx, card).defense ?? Infinity) <= 2;
+const contractLowDefense: ContractTest = (ctx, card) => (ctx.cardData(card.cardId).defense ?? Infinity) <= 2;
 const contractReaction: ContractTest = (ctx, card) =>
-  hasPrintedType(data(ctx, card), "attack-reaction") || hasPrintedType(data(ctx, card), "defense-reaction");
+  hasPrintedType(ctx.cardData(card.cardId), "attack-reaction") || hasPrintedType(ctx.cardData(card.cardId), "defense-reaction");
 const contractLowCost: ContractTest = (ctx, card) => {
-  const cardData = data(ctx, card);
+  const cardData = ctx.cardData(card.cardId);
   if (cardData.cost !== undefined) return cardData.cost <= 1;
   // An undeclared X is 0; cards with no cost property do not match.
   return ctx.hasVariablePlayCost(card);
 };
-const contractHighCost: ContractTest = (ctx, card) => (data(ctx, card).cost ?? -1) >= 2;
+const contractHighCost: ContractTest = (ctx, card) => (ctx.cardData(card.cardId).cost ?? -1) >= 2;
 const contractGoAgain: ContractTest = (ctx, card) =>
   ctx.hasKeyword(card, "go again");
 const contractNonAttack: ContractTest = (ctx, card) => isNonAttackAction(ctx, card);
@@ -352,11 +306,7 @@ function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" 
         ctx.drawCards(target, Math.max(0, hand.length - 1));
       } else {
         const permanents = [
-          ...ctx.player(target).board,
-          ...ctx.player(target).weapons,
-          ...Object.values(ctx.player(target).equipment).filter(
-            (card): card is DeepReadonly<CardInstance> => card !== undefined,
-          ),
+          ...controlledPermanents(ctx, target),
           ctx.player(target).hero,
         ].filter((card) => Number(card.counters?.energy ?? 0) > 0);
         if (permanents.length)
@@ -409,7 +359,7 @@ function deathlyDuet(): CardScript {
     },
     onAttackDeclared(ctx) {
       if (ctx.getState("attackPitched")) ctx.addModifier({ scope: "chain-link", attack: 2 });
-      if (ctx.getState("nonAttackPitched")) createTokens(ctx, RUNECHANT, 2);
+      if (ctx.getState("nonAttackPitched")) ctx.createTokens(RUNECHANT, 2);
     },
   };
 }
@@ -450,7 +400,7 @@ function tranquilPassing(maxCost: number): CardScript {
             options: (ctx) =>
               ctx
                 .player(opponentSeat(ctx))
-                .board.filter((card) => isAura(ctx, card) && (data(ctx, card).cost ?? 0) <= maxCost)
+                .board.filter((card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= maxCost)
                 .map((card) => card.instanceId),
             prompt: () =>
               decisionPrompt("Banish an opposing aura until this leaves", "card.dyn.tranquil.aura.banish", {
@@ -662,32 +612,32 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "shield wall|1": {
     modifyDefense: (ctx) =>
-      equipmentCards(ctx, ctx.seat).some((card) =>
+      equippedCards(ctx, ctx.seat).some((card) =>
         hasCardSubtype(ctx, card, "guardian") && hasCardSubtype(ctx, card, "off-hand"))
         ? 4
         : 0,
   },
   "shield wall|2": {
     modifyDefense: (ctx) =>
-      equipmentCards(ctx, ctx.seat).some((card) =>
+      equippedCards(ctx, ctx.seat).some((card) =>
         hasCardSubtype(ctx, card, "guardian") && hasCardSubtype(ctx, card, "off-hand"))
         ? 4
         : 0,
   },
   "shield wall|3": {
     modifyDefense: (ctx) =>
-      equipmentCards(ctx, ctx.seat).some((card) =>
+      equippedCards(ctx, ctx.seat).some((card) =>
         hasCardSubtype(ctx, card, "guardian") && hasCardSubtype(ctx, card, "off-hand"))
         ? 4
         : 0,
   },
   "reinforce steel|1": {
     onPlay(ctx) {
-      const choices = equipmentCards(ctx, ctx.seat).filter(
+      const choices = equippedCards(ctx, ctx.seat).filter(
         (card) =>
           hasCardSubtype(ctx, card, "guardian") &&
           hasCardSubtype(ctx, card, "off-hand") &&
-          (data(ctx, card).defense ?? 0) <= 3 &&
+          (ctx.cardData(card.cardId).defense ?? 0) <= 3 &&
           (card.defCounters ?? 0) > 0,
       );
       if (choices.length)
@@ -703,11 +653,11 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "reinforce steel|2": {
     onPlay(ctx) {
-      const choices = equipmentCards(ctx, ctx.seat).filter(
+      const choices = equippedCards(ctx, ctx.seat).filter(
         (card) =>
           hasCardSubtype(ctx, card, "guardian") &&
           hasCardSubtype(ctx, card, "off-hand") &&
-          (data(ctx, card).defense ?? 0) <= 2 &&
+          (ctx.cardData(card.cardId).defense ?? 0) <= 2 &&
           (card.defCounters ?? 0) > 0,
       );
       if (choices.length)
@@ -723,11 +673,11 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "reinforce steel|3": {
     onPlay(ctx) {
-      const choices = equipmentCards(ctx, ctx.seat).filter(
+      const choices = equippedCards(ctx, ctx.seat).filter(
         (card) =>
           hasCardSubtype(ctx, card, "guardian") &&
           hasCardSubtype(ctx, card, "off-hand") &&
-          (data(ctx, card).defense ?? 0) <= 1 &&
+          (ctx.cardData(card.cardId).defense ?? 0) <= 1 &&
           (card.defCounters ?? 0) > 0,
       );
       if (choices.length)
@@ -743,7 +693,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "withstand|1": {
     onPlay(ctx) {
-      const choices = equipmentCards(ctx, ctx.seat).filter(
+      const choices = equippedCards(ctx, ctx.seat).filter(
         (card) => hasCardSubtype(ctx, card, "guardian") && hasCardSubtype(ctx, card, "off-hand"),
       );
       if (choices.length)
@@ -759,7 +709,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "withstand|2": {
     onPlay(ctx) {
-      const choices = equipmentCards(ctx, ctx.seat).filter(
+      const choices = equippedCards(ctx, ctx.seat).filter(
         (card) => hasCardSubtype(ctx, card, "guardian") && hasCardSubtype(ctx, card, "off-hand"),
       );
       if (choices.length)
@@ -775,7 +725,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "withstand|3": {
     onPlay(ctx) {
-      const choices = equipmentCards(ctx, ctx.seat).filter(
+      const choices = equippedCards(ctx, ctx.seat).filter(
         (card) => hasCardSubtype(ctx, card, "guardian") && hasCardSubtype(ctx, card, "off-hand"),
       );
       if (choices.length)
@@ -923,7 +873,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
         .hand.filter(
           (card) =>
             hasCardSubtype(ctx, card, "mechanologist") && hasCardSubtype(ctx, card, "item") &&
-              (data(ctx, card).cost ?? 0) <= boosts,
+              (ctx.cardData(card.cardId).cost ?? 0) <= boosts,
         );
       if (items.length)
         ctx.requestCardChoice(
@@ -946,7 +896,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
         .hand.filter(
           (card) =>
             hasCardSubtype(ctx, card, "mechanologist") && hasCardSubtype(ctx, card, "item") &&
-              (data(ctx, card).cost ?? 0) <= boosts,
+              (ctx.cardData(card.cardId).cost ?? 0) <= boosts,
         );
       if (items.length)
         ctx.requestCardChoice(
@@ -969,7 +919,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
         .hand.filter(
           (card) =>
             hasCardSubtype(ctx, card, "mechanologist") && hasCardSubtype(ctx, card, "item") &&
-              (data(ctx, card).cost ?? 0) <= boosts,
+              (ctx.cardData(card.cardId).cost ?? 0) <= boosts,
         );
       if (items.length)
         ctx.requestCardChoice(
@@ -1256,9 +1206,9 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "runic reaping|1": runicReaping(3),
   "runic reaping|2": runicReaping(2),
   "runic reaping|3": runicReaping(1),
-  "blessing of occult|1": blessing((ctx) => createTokens(ctx, RUNECHANT, 3)),
-  "blessing of occult|2": blessing((ctx) => createTokens(ctx, RUNECHANT, 2)),
-  "blessing of occult|3": blessing((ctx) => createTokens(ctx, RUNECHANT, 1)),
+  "blessing of occult|1": blessing((ctx) => ctx.createTokens(RUNECHANT, 3)),
+  "blessing of occult|2": blessing((ctx) => ctx.createTokens(RUNECHANT, 2)),
+  "blessing of occult|3": blessing((ctx) => ctx.createTokens(RUNECHANT, 1)),
   "sky fire lanterns|1": {
     onPlay(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
@@ -1308,8 +1258,8 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
     onFriendlyPlay(ctx, played) {
       if (
         ctx.getState("auroraMax") < 0 ||
-        (data(ctx, played).cost ?? 0) > ctx.getState("auroraMax") ||
-        !data(ctx, played).text.toLowerCase().includes("arcane damage")
+        (ctx.cardData(played.cardId).cost ?? 0) > ctx.getState("auroraMax") ||
+        !ctx.cardData(played.cardId).text.toLowerCase().includes("arcane damage")
       )
         return;
       ctx.addCardState(played.instanceId, "arcaneBonus", 1);
@@ -1325,8 +1275,8 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
     onFriendlyPlay(ctx, played) {
       if (
         ctx.getState("auroraMax") < 0 ||
-        (data(ctx, played).cost ?? 0) > ctx.getState("auroraMax") ||
-        !data(ctx, played).text.toLowerCase().includes("arcane damage")
+        (ctx.cardData(played.cardId).cost ?? 0) > ctx.getState("auroraMax") ||
+        !ctx.cardData(played.cardId).text.toLowerCase().includes("arcane damage")
       )
         return;
       ctx.addCardState(played.instanceId, "arcaneBonus", 1);
@@ -1342,8 +1292,8 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
     onFriendlyPlay(ctx, played) {
       if (
         ctx.getState("auroraMax") < 0 ||
-        (data(ctx, played).cost ?? 0) > ctx.getState("auroraMax") ||
-        !data(ctx, played).text.toLowerCase().includes("arcane damage")
+        (ctx.cardData(played.cardId).cost ?? 0) > ctx.getState("auroraMax") ||
+        !ctx.cardData(played.cardId).text.toLowerCase().includes("arcane damage")
       )
         return;
       ctx.addCardState(played.instanceId, "arcaneBonus", 1);
@@ -1374,9 +1324,9 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
 
   // Illusionist
-  "blessing of spirits|1": blessing((ctx) => createTokens(ctx, SPECTRAL_SHIELD, 3)),
-  "blessing of spirits|2": blessing((ctx) => createTokens(ctx, SPECTRAL_SHIELD, 2)),
-  "blessing of spirits|3": blessing((ctx) => createTokens(ctx, SPECTRAL_SHIELD, 1)),
+  "blessing of spirits|1": blessing((ctx) => ctx.createTokens(SPECTRAL_SHIELD, 3)),
+  "blessing of spirits|2": blessing((ctx) => ctx.createTokens(SPECTRAL_SHIELD, 2)),
+  "blessing of spirits|3": blessing((ctx) => ctx.createTokens(SPECTRAL_SHIELD, 1)),
   "spectral prowler|1": spectralProwler(),
   "spectral prowler|2": spectralProwler(),
   "spectral prowler|3": spectralProwler(),

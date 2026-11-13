@@ -1,6 +1,7 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
+  attackTypes,
   buffNextAttack,
   decisionMessage,
   decisionPrompt,
@@ -32,8 +33,6 @@ import { hasType } from "@fyendal/shared";
 const AGILITY = "SDO035";
 const VIGOR = "SDO036";
 
-/** ctx.state is typed without the internal side tables; the runtime object has them. */
-
 /** Attack-reaction legality: my unresolved attack is on the chain and matches
  *  `target` — then pump it by `pump`. */
 function targetMyAttack(
@@ -54,11 +53,6 @@ function targetMyAttack(
       onPlayExtra?.(ctx);
     },
   };
-}
-
-function attackTypes(ctx: ScriptCtx): readonly string[] {
-  if (!ctx.link) return [];
-  return ctx.cardTypes(ctx.link.attackingCard);
 }
 
 export const sdo: Record<string, CardScript> = {

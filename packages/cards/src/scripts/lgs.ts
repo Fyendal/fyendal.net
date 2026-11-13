@@ -1,7 +1,9 @@
 import type { CardScript } from "@fyendal/engine";
 import {
+  crushTriggered,
   discardSixPlusPayoff,
   decisionPrompt,
+  equipmentZoneCards,
   isSixPlus,
   lessonCounter,
   localizedCardLog,
@@ -48,11 +50,9 @@ export const lgs: Record<string, CardScript> = {
   },
   "batter to a pulp|1": {
     combatDamageUnpreventableAtLeast: 4,
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-    },
+    canTriggerOnHit: crushTriggered,
     onHit(ctx) {
-      const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment).filter(
+      const equipment = equipmentZoneCards(ctx.player(opponentSeat(ctx))).filter(
         (card) => card !== undefined && (ctx.cardData(card.cardId).defense ?? 0) === 0,
       );
       if (equipment.length) {

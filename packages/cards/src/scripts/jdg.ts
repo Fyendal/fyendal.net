@@ -1,17 +1,14 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { cardNameContains, decisionPrompt, grantEndPhaseIntellect, opponentSeat } from "./shared-helpers.js";
+import {
+  cardNameContains,
+  controlledPermanents,
+  decisionPrompt,
+  grantEndPhaseIntellect,
+  opponentSeat,
+} from "./shared-helpers.js";
 
 function isTome(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return cardNameContains(ctx, card, "tome");
-}
-
-function nonHeroPermanents(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
-  const player = ctx.player(seat);
-  return [
-    ...player.board,
-    ...player.weapons,
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-  ];
 }
 
 export const jdg: Record<string, CardScript> = {
@@ -73,7 +70,7 @@ export const jdg: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook === "theryon-pay" && option === "paid") {
         const destroyingSeat = ctx.getState("theryonDestroyingSeat");
-        const permanents = nonHeroPermanents(ctx, destroyingSeat);
+        const permanents = controlledPermanents(ctx, destroyingSeat);
         if (permanents.length) {
           ctx.requestCardChoice(
             "theryon-destroy",

@@ -1,40 +1,26 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextArcaneDamageCard,
   buffNextAttack,
   commonOptionMessages,
+  createRunechants,
   decisionPrompt,
   dealArcane,
+  isWizardNonAttack,
   localizedCardLog,
   opponentSeat,
   optN,
   optOnChoose,
+  runeCount,
+  spellbladeAssault,
   wizardActionAsInstant,
   heroDamage,
 } from "../shared-helpers.js";
-
-const RUNECHANT = "SVI034";
-
-function isRunechant(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.isRunechant(card);
-}
-
-function runeCount(ctx: ScriptCtx): number {
-  return ctx.state.players[ctx.seat]!.board.filter((card) => isRunechant(ctx, card)).length;
-}
-
-function createRunechants(ctx: ScriptCtx, count: number): void {
-  ctx.createTokens(RUNECHANT, count);
-}
 
 function runeDiscount(): CardScript {
   return {
     modifyPlayCost: (ctx, base) => Math.max(0, base - runeCount(ctx)),
   };
-}
-
-function spellbladeAssault(): CardScript {
-  return { onAttackDeclared: (ctx) => createRunechants(ctx, 2) };
 }
 
 function reduceToRunechant(): CardScript {
@@ -172,12 +158,6 @@ function aetherSpindle(damage: number): CardScript {
       optOnChoose(ctx, hook, option);
     },
   });
-}
-
-function isWizardNonAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return (
-    ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack") && ctx.cardTypes(card).includes("wizard")
-  );
 }
 
 function reverberate(damage: number): CardScript {

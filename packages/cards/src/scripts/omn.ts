@@ -3,6 +3,7 @@ import {
   ampNextArcane,
   anyDamageTarget,
   anyTargetChoice,
+  arcaneHero,
   attackArcaneHeroTrigger,
   buffNextAttack,
   cardNamed,
@@ -27,6 +28,7 @@ import {
   opponentSeat,
   optN,
   optOnChoose,
+  pitches,
   requestAnyTargetChoice,
   upToOneTargetAttack,
   yesNoPrompt,
@@ -43,23 +45,14 @@ const OMENS = "OMN227";
 
 type Card = DeepReadonly<CardInstance>;
 
-function data(ctx: ScriptCtx, card: Card) {
-  return ctx.cardData(card.cardId);
-}
-function isInstant(ctx: ScriptCtx, card: Card): boolean {
-  return ctx.hasCardType(card, "instant");
-}
 function isTokenAura(ctx: ScriptCtx, card: Card): boolean {
-  return hasType(data(ctx, card), "token") && isAura(ctx, card);
+  return hasType(ctx.cardData(card.cardId), "token") && isAura(ctx, card);
 }
 function flows(ctx: ScriptCtx, seat = ctx.seat): Card[] {
   return ctx.player(seat).board.filter((card) => cardNamed(ctx, card, "Lightning Flow"));
 }
 function starfall(ctx: ScriptCtx): boolean {
   return ctx.getFlag("player", "graveCardType:instant") === true;
-}
-function pitches(name: string, make: (pitch: 1 | 2 | 3) => CardScript): Record<string, CardScript> {
-  return Object.fromEntries(([1, 2, 3] as const).map((pitch) => [`${name}|${pitch}`, make(pitch)]));
 }
 
 function dealToChoice(ctx: ScriptCtx, option: string, amount: number, sourceInstanceId?: number): number {
@@ -85,19 +78,6 @@ function arcaneAny(
     },
     onChoose(ctx, hook, option) {
       if (hook === "arcane-target") dealToChoice(ctx, option, typeof amount === "function" ? amount(ctx) : amount);
-    },
-  };
-}
-
-function arcaneHero(amount: number): CardScript {
-  return {
-    arcaneDamageEffect: true,
-    arcaneDamageEffectAmounts: [amount],
-    onPlay(ctx) {
-      requestAnyTargetChoice(ctx, "arcane-hero", amount, { heroesOnly: true });
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "arcane-hero") dealToChoice(ctx, option, amount);
     },
   };
 }
@@ -322,7 +302,7 @@ function quickstrike(opts: {
 }
 
 function chooseGraveInstantBottom(ctx: ScriptCtx, hook: string, optional = true): void {
-  const instants = faceUpGraveyard(ctx).filter((card) => isInstant(ctx, card));
+  const instants = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "instant"));
   if (instants.length)
     ctx.requestCardChoice(
       hook,
@@ -347,7 +327,6 @@ function chooseGraveAttackBottom(ctx: ScriptCtx, hook: string): void {
     );
   }
 }
-
 
 /** The rider marker this source granted to `attackInstanceId`, if live. */
 function riderMarker(ctx: ScriptCtx, attackInstanceId: number | undefined): DeepReadonly<Modifier> | undefined {
@@ -1073,7 +1052,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       if (hook !== "oscilio-scion-discard") return;
       const discarded = ctx.discardCard(ctx.seat, Number(option));
       ctx.createToken(PONDER);
-      if (discarded && isInstant(ctx, discarded)) ctx.allowPlayFrom(discarded.instanceId, "graveyard");
+      if (discarded && ctx.hasCardType(discarded, "instant")) ctx.allowPlayFrom(discarded.instanceId, "graveyard");
     },
   },
   "constella waves|0": {
@@ -1174,7 +1153,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   },
   "flowshard elemental|1": {
     onAttackDeclared(ctx) {
-      const instants = ctx.player(ctx.seat).hand.filter((card) => isInstant(ctx, card));
+      const instants = ctx.player(ctx.seat).hand.filter((card) => ctx.hasCardType(card, "instant"));
       if (instants.length)
         ctx.requestCardChoice(
           "flowshard-discard",
@@ -1326,7 +1305,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
   }),
   "ominous excavation|3": {
     onPlay(ctx) {
-      const instants = faceUpGraveyard(ctx).filter((card) => isInstant(ctx, card));
+      const instants = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "instant"));
       if (instants.length)
         ctx.requestCardChoice(
           "excavate",

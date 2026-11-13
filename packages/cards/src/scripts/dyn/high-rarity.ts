@@ -1,6 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   anyDamageTarget,
+  attackingWeapon,
   bottomOrKeepPrompt,
   buffNextArcaneDamageCard,
   buffNextAttack,
@@ -15,6 +16,7 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   equipWithSilver,
+  equippedCards,
   hasCardSubtype,
   heroDamage,
   hitHookLabel,
@@ -36,14 +38,6 @@ const CROUCHING_TIGER = "DYN065";
 const SILVER = "DYN245";
 const PONDER = "DYN244";
 
-function weapon(cost: number, extra: CardScript = {}): CardScript {
-  const base = { cost, isAttack: true, goAgain: false, oncePerTurn: true } as const;
-  const activated = extra.activated;
-  return {
-    ...extra,
-    activated: !activated || Array.isArray(activated) ? (activated ?? base) : { ...base, ...activated },
-  };
-}
 function discardChoice(ctx: ScriptCtx, hook: string, seat = opponentSeat(ctx)): void {
   const hand = ctx.player(seat).hand;
   if (hand.length)
@@ -156,7 +150,7 @@ export const dynHighRarity: Record<string, CardScript> = {
   "dust from the golden plains|1": { materialKeywords: ["phantasm"] },
   "dust from the red desert|1": { materialKeywords: ["phantasm"] },
   "dust from the shadow crypts|1": { materialKeywords: ["phantasm"] },
-  "rok|0": weapon(3, {
+  "rok|0": attackingWeapon(3, {
     activated: {
       cost: 3,
       isAttack: true,
@@ -237,10 +231,7 @@ export const dynHighRarity: Record<string, CardScript> = {
     onGrantedHit(ctx, hook) {
       if (hook !== "buckle-hit") return;
       const player = ctx.player(opponentSeat(ctx));
-      const equipment = [
-        ...Object.values(player.equipment),
-        ...player.weapons.filter((card) => hasType(ctx.cardData(card.cardId), "equipment")),
-      ].filter((card): card is DeepReadonly<CardInstance> => card !== undefined && (card.defCounters ?? 0) > 0);
+      const equipment = equippedCards(ctx, player.seat).filter((card) => (card.defCounters ?? 0) > 0);
       if (equipment.length === 1) ctx.destroyPermanent(equipment[0]!.instanceId);
       else if (equipment.length > 1)
         ctx.requestCardChoice(
@@ -316,7 +307,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       return cardNamed(ctx, card, "lumina ascension");
     },
   },
-  "jubeel, spellbane|0": weapon(1, {
+  "jubeel, spellbane|0": attackingWeapon(1, {
     canTriggerOnHit: (ctx) =>
       ctx.link?.targetAllyId === undefined &&
       !ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, "spellbane aegis")),
@@ -324,7 +315,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       ctx.createToken("DYN246");
     },
   }),
-  "merciless battleaxe|0": weapon(3, {
+  "merciless battleaxe|0": attackingWeapon(3, {
     onAttackDeclared(ctx) {
       if ((ctx.link?.attackingCard.tempPower ?? 0) + (ctx.data.attack ?? 0) > 2 * (ctx.data.attack ?? 0))
         ctx.setFlag("link", "overpower", true);

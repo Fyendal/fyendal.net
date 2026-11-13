@@ -1,6 +1,8 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import { evrHighRarity } from "./evr/high-rarity.js";
 import {
+  boostedLinks,
+  boostedThisTurn,
   buffNextAttack,
   canHeave,
   cardNamed,
@@ -9,6 +11,7 @@ import {
   decisionPrompt,
   destroyedTrigger,
   discardSixPlusPayoff,
+  equipmentZoneCards,
   faceUpGraveyard,
   heroChoiceSeat,
   isAttackAction,
@@ -19,6 +22,7 @@ import {
   opponentSeat,
   optN,
   optOnChoose,
+  playedOrCreatedAura,
   previousAttackHasName,
   requestHeroChoice,
   resolveDiscardChoice,
@@ -40,10 +44,6 @@ const QUICKEN = "EVR196";
 const SEISMIC_SURGE = "EVR036";
 const RUNECHANT = "EVR119";
 const SPECTRAL_SHIELD = "EVR153";
-
-function auraActivity(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "playedSubtype:aura") === true || ctx.getFlag("player", "createdSubtype:aura") === true;
-}
 
 function makeCopies(ctx: ScriptCtx, cardId: string, count: number): void {
   ctx.createTokens(cardId, count);
@@ -138,7 +138,7 @@ function steadfast(amount: number): CardScript {
       const publicSources = ctx.state.players.flatMap((player) => [
         player.hero,
         ...player.weapons,
-        ...Object.values(player.equipment).filter((card) => card !== undefined),
+        ...equipmentZoneCards(player),
         ...player.board,
       ]);
       const options = [
@@ -293,10 +293,6 @@ function outlandSkirmish(amount: number): CardScript {
   };
 }
 
-function boostedLinks(ctx: ScriptCtx): number {
-  return ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted === true).length;
-}
-
 function payload(): CardScript {
   return {
     onAttackDeclared(ctx) {
@@ -321,7 +317,7 @@ function rotaryRam(amount: number): CardScript {
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: amount, appliesTo: "attack-action", appliesToClass: "mechanologist" });
-      if (ctx.getFlag("player", "boostedThisTurn") === true) ctx.putOnDeckBottom(ctx.self.instanceId);
+      if (boostedThisTurn(ctx)) ctx.putOnDeckBottom(ctx.self.instanceId);
     },
   };
 }
@@ -435,7 +431,7 @@ function runebloodIncantation(verses: number): CardScript {
 function drowningDire(): CardScript {
   return {
     onAttackDeclared(ctx) {
-      if (auraActivity(ctx)) ctx.addModifier({ scope: "chain-link", dominate: true });
+      if (playedOrCreatedAura(ctx)) ctx.addModifier({ scope: "chain-link", dominate: true });
     },
     onHit(ctx) {
       const options = faceUpGraveyard(ctx).filter((card) => {
@@ -461,7 +457,7 @@ function drowningDire(): CardScript {
 function reekOfCorruption(): CardScript {
   return {
     canTriggerOnHit(ctx) {
-      return auraActivity(ctx) && ctx.link?.targetAllyId === undefined;
+      return playedOrCreatedAura(ctx) && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
       const target = opponentSeat(ctx);

@@ -86,7 +86,7 @@ describe("shared fusion", () => {
       ],
     });
 
-    g.play("isenhowl weathervane|3").chooseOption("opponent");
+    g.play("isenhowl weathervane|3").chooseOption("opposing hero");
     expect(frostbites(g, 1)).toBe(0);
     g.play("AJV020", { settle: false }).chooseCard("AJV018");
 

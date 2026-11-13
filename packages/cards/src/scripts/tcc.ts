@@ -1,10 +1,12 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
+  boulderDrop,
   buffNextAttack,
   cardNamed,
   decisionMessage,
   decisionPrompt,
+  equippedEvos,
   faceUpGraveyard,
   hasCardSubtype,
   isAttackAction,
@@ -18,10 +20,6 @@ const CROUCHING_TIGER = "TCC104";
 const MIGHT = "TCC105";
 const QUICKEN = "TCC106";
 const VIGOR = "TCC107";
-
-function equippedEvos(ctx: ScriptCtx): number {
-  return ctx.countEquipped("evo");
-}
 
 function guardianAura(power: number, reduction = 0): CardScript {
   return {
@@ -41,33 +39,6 @@ function guardianAura(power: number, reduction = 0): CardScript {
         },
       },
     ],
-  };
-}
-
-function boulderDrop(): CardScript {
-  return {
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-    },
-    onHit(ctx) {
-      const target = opponentSeat(ctx);
-      const hand = ctx.player(target).hand;
-      if (hand.length) {
-        ctx.requestCardChoice(
-          "boulder-drop-top",
-          decisionPrompt(
-            `${ctx.data.name}: put a card from your hand on top of your deck`,
-            "card.tcc.boulder.hand.top",
-            { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
-          ),
-          hand.map((card) => card.instanceId),
-          target,
-        );
-      }
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "boulder-drop-top") ctx.putOnDeckTop(Number(option));
-    },
   };
 }
 

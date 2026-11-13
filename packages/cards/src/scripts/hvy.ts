@@ -6,9 +6,13 @@ import {
   beatChest,
   buffNextAttack,
   cardNamed,
+  clashForToken,
   commonOptionMessages,
   consumeDelayedEffect,
+  controlsNamed,
   decisionPrompt,
+  equipmentZoneCards,
+  equippedCards,
   faceUpGraveyard,
   isAttackAction,
   isAura,
@@ -17,9 +21,10 @@ import {
   mergeSetScripts,
   ongoingLabel,
   opponentSeat,
+  pitches,
   revealTopSixPlusStays,
 } from "./shared-helpers.js";
-import { hvyHighRarity } from "./hvy/high-rarity.js";
+import { hvyHighRarity, wagerAttack } from "./hvy/high-rarity.js";
 import { hasType } from "@fyendal/shared";
 
 // Heavy Hitters — commons, rares, young heroes, and required wager tokens.
@@ -28,41 +33,12 @@ const MIGHT = "SLY035";
 const VIGOR = "SDO036";
 const GOLD = "SGB035";
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-
-function controls(ctx: ScriptCtx, name: string): boolean {
-  const player = ctx.player(ctx.seat);
-  return [
-    ...player.board,
-    ...player.weapons,
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-  ].some((card) => ctx.cardNames(card).includes(name.toLowerCase()));
-}
-
-function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
-  const player = ctx.player(seat);
-  return [
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-    ...player.weapons.filter((card) => hasType(data(ctx, card), "equipment")),
-  ];
-}
-
 function drawnThisTurn(ctx: ScriptCtx): boolean {
   return Number(ctx.getPlayerFlag(ctx.seat, "cardsDrawnThisTurn")) > 0;
 }
 
 function defendedByAttackAction(ctx: ScriptCtx): boolean {
   return (ctx.link?.defendingCards ?? []).some((card) => isAttackAction(ctx, card));
-}
-
-function pitches(name: string, factory: (pitch: 1 | 2 | 3) => CardScript): Record<string, CardScript> {
-  return {
-    [`${name}|1`]: factory(1),
-    [`${name}|2`]: factory(2),
-    [`${name}|3`]: factory(3),
-  };
 }
 
 function tokenAction(token: string): CardScript {
@@ -95,38 +71,12 @@ function windup(token: string): CardScript {
   };
 }
 
-function clashForToken(token: string): CardScript {
-  return {
-    onDefend(ctx) {
-      ctx.requestClash(opponentSeat(ctx), "create-token");
-    },
-    onClashResult(ctx, hook, winner) {
-      if (hook === "create-token" && winner >= 0) ctx.heroCreatesTokens(winner, token);
-    },
-  };
-}
-
 function preventionToken(token: string): CardScript {
   return {
     onPlay(ctx) {
       ctx.preventNextDamage(ctx.seat, 2);
       ctx.addModifier({ scope: "until-end-of-turn", onPreventCreateToken: token });
     },
-  };
-}
-
-function wagerAttack(rewards: readonly string[]): CardScript {
-  return {
-    triggers: [
-      {
-        event: "attack-declared",
-        sourceZone: "self",
-        optional: true,
-        label: "Wager with the defending hero?",
-        condition: (ctx) => ctx.link?.targetAllyId === undefined,
-        effect: (ctx) => ctx.wager(opponentSeat(ctx), rewards),
-      },
-    ],
   };
 }
 
@@ -239,7 +189,7 @@ function dynamicDefense(): CardScript {
 
 function equipmentAndTokens(ctx: ScriptCtx, seat: number): number {
   const player = ctx.player(seat);
-  const equipment = Object.values(player.equipment).filter(Boolean).length;
+  const equipment = equipmentZoneCards(player).length;
   const tokens = player.board.filter((card) => ctx.hasCardType(card, "token")).length;
   return equipment + tokens;
 }
@@ -373,7 +323,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
     },
   },
   "raw meat|0": {
-    modifyDefense: (ctx) => Number(controls(ctx, "Agility")) + Number(controls(ctx, "Might")),
+    modifyDefense: (ctx) => Number(controlsNamed(ctx, "Agility")) + Number(controlsNamed(ctx, "Might")),
   },
   ...pitches("beast mode", () => ({
     modifyAttack: (ctx) => (ctx.getFlag("player", "intimidatedThisTurn") === true ? 2 : 0),
@@ -492,7 +442,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
       cost: 0,
       isAttack: false,
       goAgain: true,
-      canActivate: (ctx) => controls(ctx, "Gold"),
+      canActivate: (ctx) => controlsNamed(ctx, "Gold"),
       effectCardCosts: [
         {
           zone: "arena",
@@ -534,13 +484,13 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
     ],
   },
   "stand ground|0": {
-    modifyDefense: (ctx) => Number(controls(ctx, "Might")) + Number(controls(ctx, "Vigor")),
+    modifyDefense: (ctx) => Number(controlsNamed(ctx, "Might")) + Number(controlsNamed(ctx, "Vigor")),
   },
   "colossal bearing|1": {
     canTriggerOnHit: (ctx) => ctx.currentAttackPower() >= 13 && ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
-      const targets = equipmentCards(ctx, opponentSeat(ctx)).filter(
-        (card) => Math.max(0, (data(ctx, card).defense ?? 0) - (card.defCounters ?? 0)) <= 1,
+      const targets = equippedCards(ctx, opponentSeat(ctx)).filter(
+        (card) => Math.max(0, (ctx.cardData(card.cardId).defense ?? 0) - (card.defCounters ?? 0)) <= 1,
       );
       if (targets.length)
         ctx.requestCardChoice(
@@ -557,7 +507,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
   },
   "lay down the law|1": {
     modifyDefendingDefense(ctx, defending) {
-      return ctx.currentAttackPower() >= 13 && !hasType(data(ctx, defending), "equipment") ? -1 : 0;
+      return ctx.currentAttackPower() >= 13 && !hasType(ctx.cardData(defending.cardId), "equipment") ? -1 : 0;
     },
   },
   "smack of reality|1": {
@@ -762,7 +712,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
     },
   },
   "beckon applause|0": {
-    modifyDefense: (ctx) => Number(controls(ctx, "Agility")) + Number(controls(ctx, "Vigor")),
+    modifyDefense: (ctx) => Number(controlsNamed(ctx, "Agility")) + Number(controlsNamed(ctx, "Vigor")),
   },
   ...pitches("cut the deck", (pitch) => cutTheDeck(4 - pitch)),
   ...pitches("fatal engagement", (pitch) => ({
@@ -825,9 +775,9 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
   "agile windup|1": windup(AGILITY),
   "agile windup|2": windup(AGILITY),
   "wall of meat and muscle|1": {
-    canTriggerOnDefend: (ctx) => controls(ctx, "Might"),
+    canTriggerOnDefend: (ctx) => controlsNamed(ctx, "Might"),
     onDefend(ctx) {
-      if (!controls(ctx, "Might")) return;
+      if (!controlsNamed(ctx, "Might")) return;
       const attacks = faceUpGraveyard(ctx).filter((card) => isAttackAction(ctx, card));
       if (attacks.length)
         ctx.requestCardChoice(
@@ -843,15 +793,15 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
     },
   },
   "run into trouble|1": {
-    canTriggerOnDefend: (ctx) => controls(ctx, "Agility"),
+    canTriggerOnDefend: (ctx) => controlsNamed(ctx, "Agility"),
     onDefend(ctx) {
-      if (controls(ctx, "Agility") && ctx.link) ctx.dealDamage(ctx.link.attacker, 1);
+      if (controlsNamed(ctx, "Agility") && ctx.link) ctx.dealDamage(ctx.link.attacker, 1);
     },
   },
   "hearty block|1": {
-    canTriggerOnDefend: (ctx) => controls(ctx, "Vigor"),
+    canTriggerOnDefend: (ctx) => controlsNamed(ctx, "Vigor"),
     onDefend(ctx) {
-      if (controls(ctx, "Vigor")) ctx.gainLife(ctx.seat, 1);
+      if (controlsNamed(ctx, "Vigor")) ctx.gainLife(ctx.seat, 1);
     },
   },
   ...pitches("rising power", () => ({ modifyAttack: (ctx) => (drawnThisTurn(ctx) ? 1 : 0) })),
@@ -924,7 +874,7 @@ export const hvy: Record<string, CardScript> = mergeSetScripts("HVY", hvyHighRar
   ...pitches("money where ya mouth is", (pitch) => nextAttackWager(4 - pitch, [GOLD], WAGER_GOLD_LABEL)),
   "starting stake|2": {
     onPlay(ctx) {
-      if (!controls(ctx, "Gold")) ctx.createToken(GOLD);
+      if (!controlsNamed(ctx, "Gold")) ctx.createToken(GOLD);
     },
   },
 

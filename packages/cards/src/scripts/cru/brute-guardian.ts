@@ -1,13 +1,5 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { localizedCardLog } from "../shared-helpers.js";
-
-function opponentSeat(ctx: ScriptCtx): number {
-  return ctx.seat === 0 ? 1 : 0;
-}
-
-function discardRandomCost(ctx: ScriptCtx): void {
-  ctx.discardRandom(ctx.seat, 1);
-}
+import { chokeslam, crushTriggered, discardRandomCost, localizedCardLog, opponentSeat } from "../shared-helpers.js";
 
 function barragingBigHorn(): CardScript {
   const grantConditionalGoAgain = (ctx: ScriptCtx): void => {
@@ -67,10 +59,6 @@ function delayedGuardianAura(attack: number, dominate = false): CardScript {
   };
 }
 
-function crushTriggered(ctx: ScriptCtx): boolean {
-  return !!ctx.link && ctx.link?.targetAllyId === undefined && ctx.link.hit === true && (ctx.link.damage ?? 0) >= 4;
-}
-
 function crushTheWeak(): CardScript {
   return {
     canTriggerOnHit: crushTriggered,
@@ -84,23 +72,6 @@ function crushTheWeak(): CardScript {
           "Crush the Weak: the opponent can't play attack actions with 3 or less base {p} next action phase",
           "card.log.sbr.crushtheweak.restricted",
           { amount: 3 },
-        ),
-      );
-    },
-  };
-}
-
-function chokeslam(): CardScript {
-  return {
-    canTriggerOnHit: crushTriggered,
-    onHit(ctx) {
-      const opponent = ctx.state.players[opponentSeat(ctx)]!;
-      ctx.setCardState(opponent.hero.instanceId, "attackActionNoPowerGainUntilTurn", ctx.state.turn + 1);
-      ctx.logPublic(
-        localizedCardLog(
-          ctx,
-          "Chokeslam: opposing attack action cards can't gain {p} during their next action phase",
-          "card.log.sbr.chokeslam.suppressed",
         ),
       );
     },

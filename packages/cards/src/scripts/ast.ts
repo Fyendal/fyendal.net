@@ -11,13 +11,10 @@ import {
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
+  playedLightning,
 } from "./shared-helpers.js";
 
 const LIGHTNING = "AST028";
-
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
 
 function instantCards(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
   return ctx.player(ctx.seat).hand.filter((card) => ctx.hasCardType(card, "instant"));
@@ -44,7 +41,7 @@ function revealInstantEquipment(effect: (ctx: ScriptCtx) => void): CardScript {
       ctx.logPublic(
         localizedCardLog(
           ctx,
-          `${ctx.data.name} reveals ${data(ctx, card).name}`,
+          `${ctx.data.name} reveals ${ctx.cardData(card.cardId).name}`,
           "card.log.common.card.revealed",
           { revealed: { kind: "card", cardId: card.cardId } },
           { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
@@ -99,7 +96,7 @@ export const ast: Record<string, CardScript> = {
       goAgain: false,
       timing: "instant",
       oncePerTurn: true,
-      canActivate: (ctx) => ctx.getFlag("player", "playedSubtype:lightning") === true,
+      canActivate: (ctx) => playedLightning(ctx),
       onActivate: (ctx) => {
         ctx.createToken(LIGHTNING);
       },
@@ -128,7 +125,7 @@ export const ast: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       destroySelfCost: true,
-      canActivate: (ctx) => ctx.getFlag("player", "playedSubtype:lightning") === true,
+      canActivate: (ctx) => playedLightning(ctx),
       onActivate(ctx) {
         ctx.gainResources(ctx.seat, 1);
       },
@@ -142,7 +139,7 @@ export const ast: Record<string, CardScript> = {
   }),
   "photon rush|1": {
     onAttackDeclared(ctx) {
-      if (ctx.getFlag("player", "playedSubtype:lightning") === true) ctx.grantGoAgain();
+      if (playedLightning(ctx)) ctx.grantGoAgain();
     },
   },
   "arc lightning|2": {
@@ -229,7 +226,7 @@ export const ast: Record<string, CardScript> = {
         ctx.logPublic(
           localizedCardLog(
             ctx,
-            `${ctx.data.name} reveals ${data(ctx, card).name} and banishes it`,
+            `${ctx.data.name} reveals ${ctx.cardData(card.cardId).name} and banishes it`,
             "card.log.ast.search.banished",
             { result: { kind: "card", cardId: card.cardId } },
             { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "deck", to: "banish" },

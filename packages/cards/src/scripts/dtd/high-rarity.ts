@@ -1,6 +1,11 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import type { GameMessage } from "@fyendal/shared";
 import {
+  chargedThisTurn,
+  crushTriggered,
+  defendsTogetherWithCardFromHand,
+  duringActionPhase,
+  equipmentZoneCards,
   faceUpGraveyard,
   hasBloodDebt,
   armDelayedEffect,
@@ -52,9 +57,6 @@ const UNITY_TOKEN_BY_HERO = [
   ["shiyana", ELOQUENCE],
 ] as const;
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
 function requestWidespreadBanish(ctx: ScriptCtx, zone: "hand" | "arsenal", startSeat = 0): void {
   for (let seat = startSeat; seat < ctx.state.players.length; seat++) {
     const player = ctx.player(seat);
@@ -90,14 +92,8 @@ function widespreadBanish(zone: "hand" | "arsenal"): CardScript {
     }),
   };
 }
-function defendsTogetherWithCardFromHand(ctx: ScriptCtx): boolean {
-  if (!ctx.link) return false;
-  const handDefenders = Number(ctx.link.flags.defendedFromHandCount ?? 0);
-  const selfWasFromHand = ctx.link.flags[`defendedFromHand:${ctx.self.instanceId}`] === true ? 1 : 0;
-  return handDefenders > selfWasFromHand;
-}
 function createUnityToken(ctx: ScriptCtx): void {
-  const heroName = data(ctx, ctx.player(ctx.seat).hero).name.toLowerCase();
+  const heroName = ctx.cardData(ctx.player(ctx.seat).hero.cardId).name.toLowerCase();
   const match = UNITY_TOKEN_BY_HERO.find(([name]) => heroName.includes(name));
   if (match) ctx.createToken(match[1]);
 }
@@ -126,17 +122,9 @@ function angel(effect: (ctx: ScriptCtx) => void): CardScript {
 function figment(label: string, labelMessage: GameMessage, effect: (ctx: ScriptCtx) => void): CardScript {
   return { triggers: [entersArenaTrigger(label, labelMessage, effect)] };
 }
-function duringActionPhase(ctx: ScriptCtx): boolean {
-  if (ctx.state.phase === "action" || ctx.state.phase === "defend" || ctx.state.phase === "reaction") return true;
-  return (
-    ctx.state.phase === "layer" &&
-    ctx.state.stackResume !== "begin-action-phase" &&
-    ctx.state.stackResume !== "end-phase"
-  );
-}
 function awakenFigment(ctx: ScriptCtx) {
   const choices = ctx.player(ctx.seat).board.filter((card) =>
-    hasCardSubtype(ctx, card, "figment") && data(ctx, card).backId);
+    hasCardSubtype(ctx, card, "figment") && ctx.cardData(card.cardId).backId);
   if (choices.length)
     ctx.requestCardChoice(
       "prism-awaken",
@@ -167,7 +155,7 @@ function prismAdult(): CardScript {
       oncePerTurn: true,
       label: "Awaken a Figment",
       canActivate: (ctx) =>
-        ctx.player(ctx.seat).board.some((card) => hasCardSubtype(ctx, card, "figment") && !!data(ctx, card).backId),
+        ctx.player(ctx.seat).board.some((card) => hasCardSubtype(ctx, card, "figment") && !!ctx.cardData(card.cardId).backId),
       onActivate: awakenFigment,
     },
     onChoose(ctx, hook, option) {
@@ -177,7 +165,7 @@ function prismAdult(): CardScript {
       }
       if (hook === "prism-awaken") {
         const card = ctx.player(ctx.seat).board.find((candidate) => candidate.instanceId === Number(option));
-        const back = card ? data(ctx, card).backId : undefined;
+        const back = card ? ctx.cardData(card.cardId).backId : undefined;
         if (card && back) ctx.transformInto(back, [], card.instanceId);
       }
     },
@@ -383,7 +371,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
       amount: 1,
       oncePerTurn: true,
       firstDamageEventEachTurn: true,
-      condition: (ctx) => ctx.getFlag("player", "chargedThisTurn") === true,
+      condition: (ctx) => chargedThisTurn(ctx),
     },
     onDefend(ctx) {
       const hand = ctx.player(ctx.seat).hand;
@@ -754,7 +742,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
   "northern winds|3": {
     onPlay(ctx) {
       for (const player of ctx.state.players)
-        for (const card of [...Object.values(player.equipment), ...player.board]
+        for (const card of [...equipmentZoneCards(player), ...player.board]
           .filter((c): c is DeepReadonly<CardInstance> => !!c)
           .slice(0, 3))
           ctx.setCardState(card.instanceId, "frozenUntilTurn", ctx.state.turn + 1);
@@ -788,9 +776,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
   },
   "star struck|2": {
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-    },
+    canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       ctx.addModifier({
         scope: "until-end-of-turn",
@@ -897,8 +883,8 @@ export const dtdHighRarity: Record<string, CardScript> = {
     onFriendlyDestroyed(ctx, card) {
       if (
         ctx.getPlayerFlag(ctx.seat, "diademTriggered") === true ||
-        hasType(data(ctx, card), "token") ||
-        !data(ctx, card).text.toLowerCase().includes("ward")
+        hasType(ctx.cardData(card.cardId), "token") ||
+        !ctx.cardData(card.cardId).text.toLowerCase().includes("ward")
       )
         return;
       ctx.setPlayerFlag(ctx.seat, "diademTriggered", true);
@@ -955,7 +941,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     onHit(ctx) {
       const items = ctx
         .player(opponentSeat(ctx))
-        .board.filter((card) => hasCardSubtype(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= 2);
+        .board.filter((card) => hasCardSubtype(ctx, card, "item") && (ctx.cardData(card.cardId).cost ?? 0) <= 2);
       if (items.length)
         ctx.requestCardChoice(
           "meeps",
@@ -998,8 +984,8 @@ export const dtdHighRarity: Record<string, CardScript> = {
         .board.filter(
           (card) =>
             isAura(ctx, card) &&
-            !hasType(data(ctx, card), "token") &&
-            (data(ctx, card).cost ?? 0) <= (ctx.link?.damage ?? 0),
+            !hasType(ctx.cardData(card.cardId), "token") &&
+            (ctx.cardData(card.cardId).cost ?? 0) <= (ctx.link?.damage ?? 0),
         );
       if (auras.length)
         ctx.requestCardChoice(

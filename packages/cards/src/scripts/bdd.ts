@@ -1,14 +1,9 @@
 import type { CardScript } from "@fyendal/engine";
-import { buffNextAttack, opponentSeat } from "./shared-helpers.js";
-
-function crushed(ctx: Parameters<NonNullable<CardScript["onHit"]>>[0]): boolean {
-  const link = ctx.link;
-  return !!link && link.targetAllyId === undefined && link.hit && link.damage >= 4;
-}
+import { buffNextAttack, crushTriggered, opponentSeat } from "./shared-helpers.js";
 
 export const bdd: Record<string, CardScript> = {
   "knock 'em off their feet|1": {
-    canTriggerOnHit: crushed,
+    canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       ctx.tap(ctx.player(opponentSeat(ctx)).hero.instanceId);
     },

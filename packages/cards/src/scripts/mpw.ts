@@ -1,21 +1,29 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  alternativeGold,
   attackAbility,
   buffNextAttack,
   cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
+  controlledPermanents,
   decisionMessage,
   decisionPrompt,
+  equipmentZoneCards,
   faceUpGraveyard,
+  isSwordAttack,
+  isWeaponAttack,
   ongoingLabel,
   opponentSeat,
   resourceAbility,
+  swordReaction,
+  swords,
+  wagerReaction,
+  weaponReaction,
   yesNoPrompt,
   hasLiveTurnEffect,
   hasCardSubtype,
   isAura,
-  isSword,
 } from "./shared-helpers.js";
 import {
   addNextSharpenBonus,
@@ -30,25 +38,9 @@ const FLURRY = "MPW135";
 
 type Card = DeepReadonly<CardInstance>;
 
-function data(ctx: ScriptCtx, card: Card) {
-  return ctx.cardData(card.cardId);
-}
-function isWeaponAttack(ctx: ScriptCtx): boolean {
-  return ctx.link?.attackCardType === "weapon";
-}
-function isSwordAttack(ctx: ScriptCtx): boolean {
-  return isWeaponAttack(ctx) && !!ctx.link && isSword(ctx, ctx.link.attackingCard);
-}
-function swords(ctx: ScriptCtx): readonly Card[] {
-  return ctx.player(ctx.seat).weapons.filter((card) => isSword(ctx, card));
-}
 function controlledNamed(ctx: ScriptCtx, name: string): readonly Card[] {
   const player = ctx.player(ctx.seat);
-  return [
-    ...player.board,
-    ...player.weapons,
-    ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
-  ].filter((card) => ctx.cardNames(card).includes(name.toLowerCase()));
+  return controlledPermanents(ctx, player.seat).filter((card) => ctx.cardNames(card).includes(name.toLowerCase()));
 }
 
 function chooseSword(
@@ -67,28 +59,6 @@ function chooseSword(
       choices.map((card) => card.instanceId),
     );
   }
-}
-
-function weaponReaction(power: number, effect?: (ctx: ScriptCtx, weapon: Card) => void): CardScript {
-  return {
-    canPlay: (ctx) => ctx.link?.attacker === ctx.seat && isWeaponAttack(ctx),
-    onPlay(ctx) {
-      const weapon = ctx.link?.attackingCard;
-      if (!weapon) return;
-      if (power) ctx.addModifier({ scope: "chain-link", attack: power });
-      effect?.(ctx, weapon);
-    },
-  };
-}
-
-function swordReaction(power: number, effect?: (ctx: ScriptCtx, weapon: Card) => void): CardScript {
-  const base = weaponReaction(power, effect);
-  return { ...base, canPlay: (ctx) => ctx.link?.attacker === ctx.seat && isSwordAttack(ctx) };
-}
-
-
-function alternativeGold(): CardScript["alternativePlayCost"] {
-  return { kind: "destroy-controlled-named", options: [{ name: "Gold", count: 1 }] };
 }
 
 function nextWager(power: number, rewardLabel: string, reward: (ctx: ScriptCtx, winner: number) => void): CardScript {
@@ -112,19 +82,6 @@ function nextWager(power: number, rewardLabel: string, reward: (ctx: ScriptCtx, 
         effect: (ctx) => ctx.wager(opponentSeat(ctx), [], rewardLabel),
       },
     ],
-    onWagerResolved(ctx, winner) {
-      reward(ctx, winner);
-    },
-  };
-}
-
-function wagerReaction(
-  power: number,
-  rewardLabel: string,
-  reward: (ctx: ScriptCtx, winner: number) => void,
-): CardScript {
-  return {
-    ...swordReaction(power, (ctx) => ctx.wager(opponentSeat(ctx), [], rewardLabel)),
     onWagerResolved(ctx, winner) {
       reward(ctx, winner);
     },
@@ -221,7 +178,7 @@ export const mpw: Record<string, CardScript> = {
     modifyDefendingDefense(ctx, defending) {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return 0;
       if (Number(ctx.self.counters?.power ?? 0) < 1) return 0;
-      const defendingData = data(ctx, defending);
+      const defendingData = ctx.cardData(defending.cardId);
       return hasPrintedType(defendingData, "attack-reaction") || hasPrintedType(defendingData, "defense-reaction") ? -1 : 0;
     },
   },
@@ -296,7 +253,7 @@ export const mpw: Record<string, CardScript> = {
   "hot top|0": {
     canTriggerOnDefend: isWeaponAttack,
     onDefend(ctx) {
-      const reactions = faceUpGraveyard(ctx).filter((card) => hasPrintedType(data(ctx, card), "attack-reaction"));
+      const reactions = faceUpGraveyard(ctx).filter((card) => hasPrintedType(ctx.cardData(card.cardId), "attack-reaction"));
       if (reactions.length)
         ctx.requestCardChoice(
           "hot-top",
@@ -479,7 +436,7 @@ export const mpw: Record<string, CardScript> = {
           event?.causedBySeat !== ctx.seat &&
           ctx.link?.attacker === ctx.seat &&
           !!played &&
-          hasPrintedType(data(ctx, played), "defense-reaction"),
+          hasPrintedType(ctx.cardData(played.cardId), "defense-reaction"),
         effect: (ctx) => ctx.drawCards(ctx.seat, 1),
       },
     ],
@@ -489,7 +446,7 @@ export const mpw: Record<string, CardScript> = {
   },
   "lessons learned|3": {
     onPlay(ctx) {
-      const reactions = faceUpGraveyard(ctx).filter((card) => hasPrintedType(data(ctx, card), "attack-reaction"));
+      const reactions = faceUpGraveyard(ctx).filter((card) => hasPrintedType(ctx.cardData(card.cardId), "attack-reaction"));
       if (reactions.length)
         ctx.requestCardChoices(
           "lessons-learned",
@@ -696,8 +653,8 @@ export const mpw: Record<string, CardScript> = {
       );
     },
     onHit(ctx) {
-      const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment).filter(
-        (card): card is Card => !!card && (data(ctx, card).defense ?? 0) - (card.defCounters ?? 0) <= 0,
+      const equipment = equipmentZoneCards(ctx.player(opponentSeat(ctx))).filter(
+        (card) => (ctx.cardData(card.cardId).defense ?? 0) - (card.defCounters ?? 0) <= 0,
       );
       if (equipment.length)
         ctx.requestCardChoice(
@@ -895,9 +852,9 @@ export const mpw: Record<string, CardScript> = {
       goAgain: false,
       timing: "defense-reaction",
       destroySelfCost: true,
-      canActivate: (ctx) => ctx.player(ctx.seat).hand.some((card) => hasPrintedType(data(ctx, card), "attack-reaction")),
+      canActivate: (ctx) => ctx.player(ctx.seat).hand.some((card) => hasPrintedType(ctx.cardData(card.cardId), "attack-reaction")),
       onActivate(ctx) {
-        const reactions = ctx.player(ctx.seat).hand.filter((card) => hasPrintedType(data(ctx, card), "attack-reaction"));
+        const reactions = ctx.player(ctx.seat).hand.filter((card) => hasPrintedType(ctx.cardData(card.cardId), "attack-reaction"));
         if (reactions.length)
           ctx.requestCardChoice(
             "clip-defender",

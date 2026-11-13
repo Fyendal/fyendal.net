@@ -3,6 +3,7 @@ import {
   BLOODROT_POX,
   INERTIA,
   attackAbility,
+  bothHeroSeats,
   buffNextAttack,
   commonOptionMessages,
   controlledDiseases,
@@ -452,10 +453,6 @@ type CeremonyMode = (typeof CEREMONY_MODES)[number];
 
 const ceremonyModeKey = (mode: CeremonyMode) => `ceremonyMode:${mode}`;
 
-function ceremonyHeroes(ctx: ScriptCtx): number[] {
-  return [ctx.seat, opponentSeat(ctx)];
-}
-
 function cureForCeremony(ctx: ScriptCtx, seat: number, instanceId: number): void {
   if (ctx.destroyPermanent(instanceId, seat)) ctx.setState(CEREMONY_CURED, ctx.getState(CEREMONY_CURED) + 1);
 }
@@ -463,7 +460,7 @@ function cureForCeremony(ctx: ScriptCtx, seat: number, instanceId: number): void
 /** Each hero, in turn order, cures a disease they control if able, choosing
  * among several; then the controller picks one mode per cured disease. */
 function continueCeremony(ctx: ScriptCtx): void {
-  const heroes = ceremonyHeroes(ctx);
+  const heroes = bothHeroSeats(ctx);
   for (let index = ctx.getState(CEREMONY_HERO); index < heroes.length; index++) {
     const seat = heroes[index]!;
     const diseases = controlledDiseases(ctx, seat);
@@ -509,7 +506,7 @@ const curativeCeremony: CardScript = {
   onChoose(ctx, hook, option) {
     if (hook === CEREMONY_CURE_HOOK) {
       const index = ctx.getState(CEREMONY_HERO);
-      const seat = ceremonyHeroes(ctx)[index];
+      const seat = bothHeroSeats(ctx)[index];
       if (seat === undefined) return;
       const disease = controlledDiseases(ctx, seat).find((card) => card.instanceId === Number(option));
       if (disease) cureForCeremony(ctx, seat, disease.instanceId);
@@ -650,10 +647,6 @@ const CODEX_ARSENAL_HOOK = "obk-codex-arsenal";
 const CODEX_HERO = "codexHero";
 const codexMovedKey = (seat: number) => `codexMoved:${seat}`;
 
-function codexHeroes(ctx: ScriptCtx): number[] {
-  return [ctx.seat, opponentSeat(ctx)];
-}
-
 function codexMoveToHand(ctx: ScriptCtx, seat: number, instanceId: number): void {
   if (ctx.moveToHand(instanceId)) ctx.setState(codexMovedKey(seat), 1);
 }
@@ -661,7 +654,7 @@ function codexMoveToHand(ctx: ScriptCtx, seat: number, instanceId: number): void
 /** Each hero, in turn order, returns an arsenal card to hand (choosing among
  * several); then every hero that did draws, and the tokens are created. */
 function continueCodex(ctx: ScriptCtx): void {
-  const heroes = codexHeroes(ctx);
+  const heroes = bothHeroSeats(ctx);
   for (let index = ctx.getState(CODEX_HERO); index < heroes.length; index++) {
     const seat = heroes[index]!;
     const arsenal = ctx.player(seat).arsenal;
@@ -685,13 +678,13 @@ function continueCodex(ctx: ScriptCtx): void {
 const codexOfExertion: CardScript = {
   onPlay(ctx) {
     ctx.setState(CODEX_HERO, 0);
-    for (const seat of codexHeroes(ctx)) ctx.setState(codexMovedKey(seat), 0);
+    for (const seat of bothHeroSeats(ctx)) ctx.setState(codexMovedKey(seat), 0);
     continueCodex(ctx);
   },
   onChoose(ctx, hook, option) {
     if (hook !== CODEX_ARSENAL_HOOK) return;
     const index = ctx.getState(CODEX_HERO);
-    const seat = codexHeroes(ctx)[index];
+    const seat = bothHeroSeats(ctx)[index];
     if (seat === undefined) return;
     if (ctx.player(seat).arsenal.some((card) => card.instanceId === Number(option))) {
       codexMoveToHand(ctx, seat, Number(option));

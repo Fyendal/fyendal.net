@@ -4,6 +4,7 @@ import {
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   chargeAttack,
+  chargedThisTurn,
   commonOptionMessages,
   consumeDelayedEffect,
   dealArcane,
@@ -95,10 +96,6 @@ function blindingBeam(powerReduction: number): CardScript {
       if (target) ctx.addCardTempPower(target.instanceId, -powerReduction);
     },
   };
-}
-
-function chargedThisTurn(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "chargedThisTurn") === true;
 }
 
 function putAttackIntoSoulOnHit(extra: CardScript = {}): CardScript {

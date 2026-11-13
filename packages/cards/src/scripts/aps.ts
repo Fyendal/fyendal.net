@@ -5,6 +5,7 @@ import {
   cardNamed,
   commonOptionMessages,
   crowdTrigger,
+  crushTriggered,
   decisionMessage,
   decisionPrompt,
   faceUpGraveyard,
@@ -229,9 +230,7 @@ export const aps: Record<string, CardScript> = {
     },
   },
   "spinal crush|1": {
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-    },
+    canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       const target = ctx.player(opponentSeat(ctx));
       ctx.setCardState(target.hero.instanceId, "goAgainSuppressedPending", 1);

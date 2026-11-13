@@ -4,6 +4,7 @@ import {
   cardNamed,
   commonOptionMessages,
   decisionPrompt,
+  equipmentZoneCards,
   faceUpGraveyard,
   isSword,
   localizedLog,
@@ -146,8 +147,8 @@ export function sharpenSword(ctx: ScriptCtx, instanceId: number, count = 1, foll
   }
 
   const rerebrace = isZenithBlade
-    ? Object.values(ctx.player(ctx.seat).equipment).find(
-        (card) => card && cardNamed(ctx, card, "Reverent Rerebrace"),
+    ? equipmentZoneCards(ctx.player(ctx.seat)).find(
+        (card) => cardNamed(ctx, card, "Reverent Rerebrace"),
       )
     : undefined;
   if (rerebrace) {

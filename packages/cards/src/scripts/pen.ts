@@ -6,12 +6,17 @@ import {
   cardNameContains,
   commonOptionMessages,
   contractWithSilver,
+  controlledPermanents,
+  controlsNamed,
+  createdThisTurn,
   dealArcane,
   dealArcaneToTargetHero,
   decisionMessage,
   decisionPrompt,
+  decompose,
   entersArenaTrigger,
   equipWithSilver,
+  equipmentZoneCards,
   faceUpGraveyard,
   heroChoiceSeat,
   heroDamage,
@@ -26,10 +31,12 @@ import {
   opponentSeat,
   optN,
   optOnChoose,
+  pitches,
   queueIntimidate,
   requestDiscardChoice,
   requestHeroChoice,
   resolveDiscardChoice,
+  unityEquipment,
   yesNoPrompt,
   warnIfNoActionPoint,
   cardNamed,
@@ -69,10 +76,6 @@ const SPECTRAL_SHIELD = "DTD220";
 const VIGOR = "SBR036";
 
 type Card = DeepReadonly<CardInstance>;
-
-function data(ctx: ScriptCtx, card: Card | string) {
-  return ctx.cardData(typeof card === "string" ? card : card.cardId);
-}
 
 // Token replacements see a card id before any instance exists.
 function printedHasTag(ctx: ScriptCtx, cardId: string, tag: string): boolean {
@@ -124,24 +127,8 @@ function continuePoundOfFlesh(ctx: ScriptCtx, startIndex = 0): void {
   }
 }
 
-function pitches(name: string, factory: (pitch: 1 | 2 | 3) => CardScript): Record<string, CardScript> {
-  return Object.fromEntries([1, 2, 3].map((pitch) => [`${name}|${pitch}`, factory(pitch as 1 | 2 | 3)]));
-}
-
-function controls(ctx: ScriptCtx, name: string): boolean {
-  return [
-    ...ctx.player(ctx.seat).board,
-    ...ctx.player(ctx.seat).weapons,
-    ...Object.values(ctx.player(ctx.seat).equipment).filter((card): card is Card => card !== undefined),
-  ].some((card) => cardNamed(ctx, card, name));
-}
-
 function allPermanents(ctx: ScriptCtx): Card[] {
-  return ctx.state.players.flatMap((player) => [
-    ...player.board,
-    ...player.weapons,
-    ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
-  ]);
+  return ctx.state.players.flatMap((player) => controlledPermanents(ctx, player.seat));
 }
 
 function heroesAndAllies(ctx: ScriptCtx): Card[] {
@@ -189,7 +176,7 @@ function higherLife(ctx: ScriptCtx): boolean {
   return ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0;
 }
 
-function arcaneSpell(
+function penArcaneSpell(
   amount: number,
   createSigil = false,
   replacement?: { amount: number; when: (ctx: ScriptCtx) => boolean },
@@ -245,24 +232,10 @@ function bond(tag: "earth" | "ice" | "lightning", effect: (ctx: ScriptCtx) => vo
   };
 }
 
-function nextAttack(amount: number, extra: Partial<Parameters<typeof buffNextAttack>[1]> = {}): CardScript {
+function nextAttackPump(amount: number, extra: Partial<Parameters<typeof buffNextAttack>[1]> = {}): CardScript {
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: amount, ...extra });
-    },
-  };
-}
-
-function unityEquipment(): CardScript {
-  return {
-    canTriggerOnDefend(ctx) {
-      if (!ctx.link) return false;
-      const count = Number(ctx.link.flags.defendedFromHandCount ?? 0);
-      const selfWasFromHand = ctx.link.flags[`defendedFromHand:${ctx.self.instanceId}`] === true ? 1 : 0;
-      return count > selfWasFromHand;
-    },
-    onDefend(ctx) {
-      ctx.addCardTempDefense(ctx.self.instanceId, 1);
     },
   };
 }
@@ -381,90 +354,6 @@ function evoBeta(slot: "head" | "chest" | "arms" | "legs"): CardScript {
   };
 }
 
-function decompose(payoff: (ctx: ScriptCtx) => void): CardScript {
-  return {
-    onPlay(ctx) {
-      const grave = faceUpGraveyard(ctx);
-      const firstEarth = grave.filter(
-        (first) =>
-          hasCardSubtype(ctx, first, "earth") &&
-          grave.some(
-            (second) =>
-              second.instanceId !== first.instanceId &&
-              hasCardSubtype(ctx, second, "earth") &&
-              grave.some(
-                (action) =>
-                  action.instanceId !== first.instanceId &&
-                  action.instanceId !== second.instanceId &&
-                  ctx.hasCardType(action, "action"),
-              ),
-          ),
-      );
-      if (firstEarth.length)
-        ctx.requestCardChoice(
-          "pen-decompose-earth-1",
-          decisionPrompt(`${ctx.data.name}: decompose? Choose the first Earth card`, "card.pen.decompose.earth.first", {
-            values: { card: { kind: "card", cardId: ctx.self.cardId } },
-            optionMessages: commonOptionMessages("no"),
-          }),
-          ["no", ...firstEarth.map((card) => card.instanceId)],
-        );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "pen-decompose-earth-1") {
-        if (option === "no") return;
-        const first = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
-        if (!first || !hasCardSubtype(ctx, first, "earth")) return;
-        ctx.setState("decomposeEarth1", first.instanceId);
-        const secondEarth = faceUpGraveyard(ctx).filter(
-            (second) =>
-              second.instanceId !== first.instanceId &&
-              hasCardSubtype(ctx, second, "earth") &&
-              faceUpGraveyard(ctx).some(
-                  (action) =>
-                    action.instanceId !== first.instanceId &&
-                    action.instanceId !== second.instanceId &&
-                    ctx.hasCardType(action, "action"),
-                ),
-          );
-        ctx.requestCardChoice(
-          "pen-decompose-earth-2",
-          decisionPrompt("Choose the second Earth card", "card.pen.decompose.earth.second"),
-          secondEarth.map((card) => card.instanceId),
-        );
-      } else if (hook === "pen-decompose-earth-2") {
-        const firstId = ctx.getState("decomposeEarth1");
-        const second = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
-        if (!second || second.instanceId === firstId || !hasCardSubtype(ctx, second, "earth")) return;
-        ctx.setState("decomposeEarth2", second.instanceId);
-        const actions = faceUpGraveyard(ctx).filter(
-            (card) =>
-              card.instanceId !== firstId && card.instanceId !== second.instanceId && ctx.hasCardType(card, "action"),
-          );
-        ctx.requestCardChoice(
-          "pen-decompose-action",
-          decisionPrompt("Choose the action card", "card.pen.decompose.action"),
-          actions.map((card) => card.instanceId),
-        );
-      } else if (hook === "pen-decompose-action") {
-        const ids = [ctx.getState("decomposeEarth1"), ctx.getState("decomposeEarth2"), Number(option)];
-        const grave = faceUpGraveyard(ctx);
-        const chosen = ids.map((id) => grave.find((card) => card.instanceId === id));
-        if (
-          new Set(ids).size !== 3 ||
-          !chosen.every(Boolean) ||
-          !hasCardSubtype(ctx, chosen[0]!, "earth") ||
-          !hasCardSubtype(ctx, chosen[1]!, "earth") ||
-          !ctx.hasCardType(chosen[2]!, "action") ||
-          !ids.every((id) => ctx.banish(id))
-        )
-          return;
-        payoff(ctx);
-      }
-    },
-  };
-}
-
 function oathOfOak(count: number): CardScript {
   return {
     onPlay(ctx) {
@@ -510,10 +399,6 @@ function phoenixBannerman(token: string): CardScript {
   };
 }
 
-function createdThisTurn(ctx: ScriptCtx): boolean {
-  return Number(ctx.getFlag("player", "createdThisTurn")) > 0;
-}
-
 function chooseTokenToDestroy(ctx: ScriptCtx, hook: string, name: string): void {
   const choices = ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, name));
   if (choices.length)
@@ -544,7 +429,7 @@ const GALCIA_FREEZE_TARGET: NonNullable<TriggerDef["target"]> = {
     ctx.state.players
       .flatMap((player) => [
         ...player.board.filter((card) => ["ally", "aura", "item"].some((tag) => hasCardSubtype(ctx, card, tag))),
-        ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
+        ...equipmentZoneCards(player),
       ])
       .map((card) => card.instanceId),
   prompt: () => decisionPrompt("Freeze a permanent", "card.pen.permanent.freeze"),
@@ -557,7 +442,7 @@ function freezeGalciaTarget(ctx: ScriptCtx): void {
 function tendenciesTargets(ctx: ScriptCtx, subtype: "item" | "aura"): Card[] {
   return ctx.state.players
     .flatMap((player) => player.board)
-    .filter((card) => hasCardSubtype(ctx, card, subtype) && hasType(data(ctx, card), "token"));
+    .filter((card) => hasCardSubtype(ctx, card, subtype) && hasType(ctx.cardData(card.cardId), "token"));
 }
 
 /** Ask for Destructive Tendencies' aura token; without one, resolve the item. */
@@ -849,7 +734,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       removeCounter: { key: "steam", from: (ctx, permanent) => cardNamed(ctx, permanent, "Hyper Driver") },
     },
   },
-  "mbrio base cortex|0": { modifyDefense: (ctx) => (controls(ctx, "Hyper Driver") ? 2 : 0) },
+  "mbrio base cortex|0": { modifyDefense: (ctx) => (controlsNamed(ctx, "Hyper Driver") ? 2 : 0) },
   "mbrio base digits|0": {
     activated: {
       cost: 0,
@@ -875,7 +760,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "speed demon|1": {
     declareAdditionalCost(ctx) {
       const choices = faceUpGraveyard(ctx)
-        .filter((card) => hasCardSubtype(ctx, card, "item") || hasType(data(ctx, card), "equipment"));
+        .filter((card) => hasCardSubtype(ctx, card, "item") || hasType(ctx.cardData(card.cardId), "equipment"));
       if (choices.length)
         ctx.requestCardChoice(
           "pen-scrap",
@@ -885,13 +770,13 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
           ["no", ...choices.map((card) => card.instanceId)],
         );
     },
-    modifyAttack: (ctx) => (controls(ctx, "Hyper Driver") ? 1 : 0),
+    modifyAttack: (ctx) => (controlsNamed(ctx, "Hyper Driver") ? 1 : 0),
     onChoose(ctx, hook, option) {
       if (hook !== "pen-scrap" || option === "no") return;
       const target = faceUpGraveyard(ctx).find(
           (card) =>
             card.instanceId === Number(option) &&
-            (hasCardSubtype(ctx, card, "item") || hasType(data(ctx, card), "equipment")),
+            (hasCardSubtype(ctx, card, "item") || hasType(ctx.cardData(card.cardId), "equipment")),
         );
       if (!target) return;
       const driver = cardNamed(ctx, target, "Hyper Driver");
@@ -1107,7 +992,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
             options: (ctx) =>
               ctx.state.players
                 .flatMap((player) => player.board)
-                .filter((card) => isAura(ctx, card) && hasType(data(ctx, card), "token"))
+                .filter((card) => isAura(ctx, card) && hasType(ctx.cardData(card.cardId), "token"))
                 .map((card) => card.instanceId),
             prompt: () => decisionPrompt("Destroy an aura token", "card.pen.auratoken.destroy"),
           },
@@ -1115,17 +1000,13 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       ),
     ],
   },
-  "glyph power spell|1": arcaneSpell(4, false, {
+  "glyph power spell|1": penArcaneSpell(4, false, {
     amount: 6,
-    when: (ctx) => [
-      ...ctx.player(ctx.seat).board,
-      ...ctx.player(ctx.seat).weapons,
-      ...Object.values(ctx.player(ctx.seat).equipment).filter((card): card is Card => card !== undefined),
-    ].some((card) => !card.faceDown && ctx.cardNames(card).some((name) => name.includes("sigil"))),
+    when: (ctx) => controlledPermanents(ctx, ctx.seat).some((card) => !card.faceDown && ctx.cardNames(card).some((name) => name.includes("sigil"))),
   }),
-  "painful premonition|1": arcaneSpell(3, true),
-  "painful premonition|2": arcaneSpell(2, true),
-  "painful premonition|3": arcaneSpell(1, true),
+  "painful premonition|1": penArcaneSpell(3, true),
+  "painful premonition|2": penArcaneSpell(2, true),
+  "painful premonition|3": penArcaneSpell(1, true),
   "future sight|1": createSigils(3),
   "future sight|2": createSigils(2),
   "future sight|3": createSigils(1),
@@ -1573,20 +1454,20 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
   },
   "chorus of rotwood|1": {
-    ...decompose((ctx) => create(ctx, EARTH)),
+    ...decompose("play", (ctx) => create(ctx, EARTH)),
     onPlay(ctx) {
       create(ctx, RUNECHANT, 3);
-      decompose((inner) => create(inner, EARTH)).onPlay?.(ctx);
+      decompose("play", (inner) => create(inner, EARTH)).onPlay?.(ctx);
     },
-    onChoose: decompose((ctx) => create(ctx, EARTH)).onChoose,
+    onChoose: decompose("play", (ctx) => create(ctx, EARTH)).onChoose,
   },
   "sowing thorns|1": {
-    ...decompose(() => {}),
+    ...decompose("play", () => {}),
     onPlay(ctx) {
       ctx.gainLife(ctx.seat, 1);
-      decompose(() => {}).onPlay?.(ctx);
+      decompose("play", () => {}).onPlay?.(ctx);
     },
-    onChoose: decompose(() => {}).onChoose,
+    onChoose: decompose("play", () => {}).onChoose,
   },
   "limbs of lignum vitae|0": {
     modifyDefense: (ctx) =>
@@ -1597,15 +1478,15 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   "oath of oak|1": oathOfOak(3),
   "oath of oak|2": oathOfOak(2),
   "oath of oak|3": oathOfOak(1),
-  "sprout strength|2": nextAttack(2),
-  "sprout strength|3": nextAttack(1),
+  "sprout strength|2": nextAttackPump(2),
+  "sprout strength|3": nextAttackPump(1),
 
   "monolith of galcia|3": {
     onPlay(ctx) {
       const frozen = ctx.state.players
         .flatMap((player) => [
           ...player.board,
-          ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
+          ...equipmentZoneCards(player),
         ])
         .filter((card) => ctx.isFrozen(card));
       if (frozen.length)
@@ -1693,7 +1574,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
         const frozen = [
           ...ctx.player(target).arsenal,
           ...ctx.player(target).board,
-          ...Object.values(ctx.player(target).equipment).filter((card): card is Card => card !== undefined),
+          ...equipmentZoneCards(ctx.player(target)),
         ].filter((card) => ctx.isFrozen(card));
         if (frozen.length)
           ctx.requestCardChoice(
@@ -1711,7 +1592,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
         const frozen = [
           ...ctx.player(target).arsenal,
           ...ctx.player(target).board,
-          ...Object.values(ctx.player(target).equipment).filter((card): card is Card => card !== undefined),
+          ...equipmentZoneCards(ctx.player(target)),
         ].filter((card) => ctx.isFrozen(card));
         if (frozen.length)
           ctx.requestCardChoice(
@@ -1753,7 +1634,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     ],
   },
   "strike twice|1": {
-    ...arcaneSpell(3),
+    ...penArcaneSpell(3),
     playAsInstant: (ctx) => ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true,
   },
   "voltic vanguard|0": {
@@ -1973,7 +1854,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       stateKey: "recedeX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum(ctx) {
-        return Object.values(ctx.player(ctx.seat).equipment).filter(
+        return equipmentZoneCards(ctx.player(ctx.seat)).filter(
           (card) =>
             card &&
             !card.faceDown &&
@@ -1982,7 +1863,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       },
     },
     onPlay(ctx) {
-      const equipment = Object.values(ctx.player(ctx.seat).equipment).filter(
+      const equipment = equipmentZoneCards(ctx.player(ctx.seat)).filter(
         (card): card is DeepReadonly<CardInstance> =>
           !!card &&
           !card.faceDown &&
@@ -2136,7 +2017,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
   })),
 
   "myrkhellir helm|0": {
-    modifyDefense: (ctx) => (controls(ctx, "Gold") ? 1 : 0),
+    modifyDefense: (ctx) => (controlsNamed(ctx, "Gold") ? 1 : 0),
     activated: {
       cost: 2,
       isAttack: false,
@@ -2192,11 +2073,11 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
       maximum(ctx) {
         const target = ctx.globalCards().find((card) => card.instanceId === ctx.playTargetInstanceId);
-        return target ? (data(ctx, target).cost ?? 0) : 0;
+        return target ? (ctx.cardData(target.cardId).cost ?? 0) : 0;
       },
       canDeclareX(ctx, x) {
         const target = ctx.globalCards().find((card) => card.instanceId === ctx.playTargetInstanceId);
-        return !!target && (data(ctx, target).cost ?? 0) === x;
+        return !!target && (ctx.cardData(target.cardId).cost ?? 0) === x;
       },
     },
     playTargetOptions(ctx) {

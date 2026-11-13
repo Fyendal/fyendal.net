@@ -1,59 +1,23 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
+  boostedThisTurn,
   cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
   faceUpGraveyard,
   hasCardSubtype,
+  hyperDriver,
+  hyperDrivers,
 } from "./shared-helpers.js";
 import { hasType } from "@fyendal/shared";
 
 const HYPER_DRIVER = "AMX028";
 const BANK_BREAKER = "AMX022B";
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-
-function hyperDrivers(ctx: ScriptCtx) {
-  return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Hyper Driver"));
-}
-
 function wrenches(ctx: ScriptCtx) {
   return ctx.player(ctx.seat).weapons.filter((card) => hasCardSubtype(ctx, card, "wrench"));
-}
-
-function hyperDriver(steam: number): CardScript {
-  return {
-    destroyAtZeroCounter: "steam",
-    onEnterArena(ctx) {
-      if (steam > 0) ctx.setCounter("steam", steam);
-    },
-    triggers: [
-      {
-        event: "card-boosted",
-        label: "Remove a steam counter and gain 1 resource",
-        labelMessage: decisionMessage("card.trigger.hyperdriver.boost"),
-        condition(ctx) {
-          return (
-            ctx.getPlayerFlag(ctx.seat, `hyperDriverBoost:${ctx.self.instanceId}`) !== true &&
-            ctx.getCounter("steam") > 0
-          );
-        },
-        onTrigger(ctx) {
-          ctx.setPlayerFlag(ctx.seat, `hyperDriverBoost:${ctx.self.instanceId}`, true);
-        },
-        effect(ctx) {
-          const steam = ctx.getCounter("steam");
-          if (steam <= 0) return;
-          ctx.setCounter("steam", steam - 1);
-          ctx.gainResources(ctx.seat, 1);
-        },
-      },
-    ],
-  };
 }
 
 function requestConstructDriver(ctx: ScriptCtx): void {
@@ -81,7 +45,7 @@ export const amx: Record<string, CardScript> = {
       isAttack: false,
       goAgain: false,
       oncePerTurn: true,
-      canActivate: (ctx) => ctx.getPlayerFlag(ctx.seat, "boostedThisTurn") === true,
+      canActivate: (ctx) => boostedThisTurn(ctx),
       onActivate(ctx) {
         ctx.createToken(HYPER_DRIVER, undefined, { steam: 2 });
       },
@@ -133,7 +97,7 @@ export const amx: Record<string, CardScript> = {
 
   "puffer jacket|0": {
     onFriendlyEnterArena(ctx, entered) {
-      if (!hasType(data(ctx, entered), "token") && cardNamed(ctx, entered, "Hyper Driver")) {
+      if (!hasType(ctx.cardData(entered.cardId), "token") && cardNamed(ctx, entered, "Hyper Driver")) {
         ctx.addCounter(entered.instanceId, "steam", 1);
       }
     },
@@ -173,7 +137,7 @@ export const amx: Record<string, CardScript> = {
       const choices = ctx.state.players
         .flatMap((player) => player.banish)
         .filter((card) => {
-          const cardData = data(ctx, card);
+          const cardData = ctx.cardData(card.cardId);
           return !card.faceDown && hasCardSubtype(ctx, card, "item") && (cardData.cost ?? 0) <= 1;
         });
       if (choices.length)

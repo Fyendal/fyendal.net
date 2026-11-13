@@ -1,5 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  attackingWeapon,
+  controlledPermanents,
   faceUpGraveyard,
   hasBloodDebt,
   armDelayedEffect,
@@ -44,9 +46,6 @@ function createSkybreakerMight(ctx: ScriptCtx): void {
   ctx.createTokens(MIGHT, 2);
 }
 
-function data(ctx: ScriptCtx, card: Card) {
-  return ctx.cardData(card.cardId);
-}
 function isShurikenItem(ctx: ScriptCtx, card: Card): boolean {
   return hasCardSubtype(ctx, card, "shuriken") && hasCardSubtype(ctx, card, "item");
 }
@@ -56,14 +55,6 @@ function cardIdNamed(ctx: ScriptCtx, name: string): string | undefined {
 function weaponAttack(ctx: ScriptCtx): boolean {
   return ctx.link?.attackCardType === "weapon";
 }
-function nonHeroPermanents(ctx: ScriptCtx, seat: number): Card[] {
-  const player = ctx.player(seat);
-  return [
-    ...player.board,
-    ...player.weapons,
-    ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
-  ];
-}
 function attacksAboveBaseControlled(ctx: ScriptCtx, seat: number): number {
   return ctx.state.chain.filter((link) => {
     if (link.attacker !== seat) return false;
@@ -71,10 +62,7 @@ function attacksAboveBaseControlled(ctx: ScriptCtx, seat: number): number {
     return power > ctx.basePower(link.attackingCard);
   }).length;
 }
-function weapon(cost: number, extra: CardScript = {}): CardScript {
-  return { activated: attackAbility(cost), ...extra };
-}
-function nextWager(power: number): CardScript {
+function nextGoldWager(power: number): CardScript {
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, {
@@ -121,7 +109,7 @@ function nextWager(power: number): CardScript {
   };
 }
 
-function seismicSurges(ctx: ScriptCtx): Card[] {
+function untappedSeismicSurges(ctx: ScriptCtx): Card[] {
   return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Seismic Surge") && !card.tapped);
 }
 
@@ -133,7 +121,7 @@ function seismicAuraTokens(ctx: ScriptCtx): Card[] {
   );
   return ctx.state.players
     .flatMap((player) => player.board)
-    .filter((card) => isAura(ctx, card) && hasType(data(ctx, card), "token") && !chosen.has(card.instanceId));
+    .filter((card) => isAura(ctx, card) && hasType(ctx.cardData(card.cardId), "token") && !chosen.has(card.instanceId));
 }
 
 function continueSeismicChoices(ctx: ScriptCtx): void {
@@ -145,7 +133,7 @@ function continueSeismicChoices(ctx: ScriptCtx): void {
       decisionPrompt(`Tap Seismic Surge ${surgesChosen + 1} of ${x}`, "card.pen.seismicsurge.tap", {
         values: { current: surgesChosen + 1, total: x },
       }),
-      seismicSurges(ctx).map((card) => card.instanceId),
+      untappedSeismicSurges(ctx).map((card) => card.instanceId),
     );
     return;
   }
@@ -162,9 +150,9 @@ function continueSeismicChoices(ctx: ScriptCtx): void {
 }
 
 export const penHighRarity: Record<string, CardScript> = {
-  "savage claw|0": weapon(2, {
+  "savage claw|0": attackingWeapon(2, {
     modifyAttack(ctx) {
-      return ctx.player(ctx.seat).pitch.some((card) => (data(ctx, card).attack ?? 0) >= 6) ? 1 : 0;
+      return ctx.player(ctx.seat).pitch.some((card) => (ctx.cardData(card.cardId).attack ?? 0) >= 6) ? 1 : 0;
     },
   }),
   "reckless arithmetic|3": {
@@ -179,14 +167,14 @@ export const penHighRarity: Record<string, CardScript> = {
       if (ctx.player(opponentSeat(ctx)).hand.length > ctx.player(ctx.seat).hand.length) ctx.drawCards(ctx.seat, 1);
     },
   },
-  "shield beater|0": weapon(4, {
+  "shield beater|0": attackingWeapon(4, {
     onFriendlyPlay(ctx, played) {
       if (cardNamed(ctx, played, "Visit Anvilheim")) ctx.grantCardKeyword(played.instanceId, "go again");
     },
   }),
   "seismic shift|1": {
     additionalCost(ctx) {
-      const max = Math.min(seismicSurges(ctx).length, seismicAuraTokens(ctx).length);
+      const max = Math.min(untappedSeismicSurges(ctx).length, seismicAuraTokens(ctx).length);
       ctx.requestChoice(
         "seismic-x",
         decisionPrompt("Choose X for Seismic Shift", "card.pen.seismicshift.x.choose"),
@@ -375,7 +363,7 @@ export const penHighRarity: Record<string, CardScript> = {
       const equipped = ctx.countEquipped("evo");
       const evos = ctx
         .player(ctx.seat)
-        .deck.filter((card) => hasCardSubtype(ctx, card, "evo") && (data(ctx, card).cost ?? 0) <= equipped);
+        .deck.filter((card) => hasCardSubtype(ctx, card, "evo") && (ctx.cardData(card.cardId).cost ?? 0) <= equipped);
       if (evos.length) {
         ctx.requestCardChoice(
           "ghost-architect-evo",
@@ -396,7 +384,7 @@ export const penHighRarity: Record<string, CardScript> = {
         .deck.find(
           (card) =>
             card.instanceId === Number(option) && hasCardSubtype(ctx, card, "evo") &&
-              (data(ctx, card).cost ?? 0) <= equipped,
+              (ctx.cardData(card.cardId).cost ?? 0) <= equipped,
         );
       if (evo) ctx.banish(evo.instanceId);
       ctx.shuffleDeck();
@@ -529,7 +517,7 @@ export const penHighRarity: Record<string, CardScript> = {
         .flatMap((layer) => (layer.card ? [layer.card] : []))
         .filter(
           (card) =>
-            isNonAttackAction(ctx, card) && (data(ctx, card).cost ?? 0) < sigils,
+            isNonAttackAction(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) < sigils,
         )
         .map((card) => card.instanceId);
     },
@@ -721,7 +709,7 @@ export const penHighRarity: Record<string, CardScript> = {
         onActivate(ctx) {
           const aura = ctx.state.players
             .flatMap((p) => p.board)
-            .find((card) => isAura(ctx, card) && hasType(data(ctx, card), "token"));
+            .find((card) => isAura(ctx, card) && hasType(ctx.cardData(card.cardId), "token"));
           if (aura) ctx.destroyPermanent(aura.instanceId);
         },
       },
@@ -731,7 +719,7 @@ export const penHighRarity: Record<string, CardScript> = {
     modifyDefense: (ctx) =>
       ctx.player(ctx.seat).pitch.filter((card) => ctx.cardColor(card) === 3).length >= 2 ? 3 : 0,
   },
-  "cheating scoundrel|1": nextWager(3),
+  "cheating scoundrel|1": nextGoldWager(3),
   "solforge gauntlet|0": { settlesToSoulOnChainClose: true },
   "blessing of bellona|2": {
     onCardPutIntoSoul: (ctx) => {
@@ -1029,12 +1017,12 @@ export const penHighRarity: Record<string, CardScript> = {
   },
   "high current currency|3": {
     playTargetOptions(ctx) {
-      return nonHeroPermanents(ctx, opponentSeat(ctx))
+      return controlledPermanents(ctx, opponentSeat(ctx))
         .filter((card) => Number(card.counters?.energy ?? 0) > 0)
         .map((card) => card.instanceId);
     },
     onPlay(ctx) {
-      const target = nonHeroPermanents(ctx, opponentSeat(ctx))
+      const target = controlledPermanents(ctx, opponentSeat(ctx))
         .find((card) => card.instanceId === ctx.playTargetInstanceId);
       if (!target) return;
       const n = Number(target.counters?.energy ?? 0);

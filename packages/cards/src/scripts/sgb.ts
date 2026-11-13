@@ -1,15 +1,20 @@
-import type { CardInstance, CardScript, DeepReadonly, Modifier, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   armDelayedEffect,
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
   consumeDelayedEffect,
+  controlledPermanents,
+  createGold,
   decisionMessage,
   decisionPrompt,
   effectPutSelfFaceUpFromDeck,
   faceUpGraveyard,
+  highTide,
+  isAlly,
   localizedCardLog,
+  nextAllyAttack,
   nextAttack,
   ongoingLabel,
   opponentSeat,
@@ -29,21 +34,6 @@ import {
 // - Gold tokens (item with an activated ability).
 //
 const GOLD = "SGB035";
-
-/** ctx.state is typed without the internal side tables; the runtime object has them. */
-
-function isAlly(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("ally");
-}
-
-function isPirate(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("pirate");
-}
-
-/** High Tide: 2 or more blue cards in your pitch zone. */
-function highTide(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).pitch.filter((c) => ctx.cardColor(c) === 3).length >= 2;
-}
 
 /** "Destroy the top card of your deck": it goes to the graveyard (face up). */
 function destroyDeckTop(ctx: ScriptCtx): DeepReadonly<CardInstance> | undefined {
@@ -72,55 +62,6 @@ const goldOnHeroHit = ongoingLabel(
   "create a Gold token when it hits a hero",
   "card.effect.common.gold.create.hit.hero",
 );
-
-type NextAllyMod = Omit<Modifier, "id" | "sourceInstanceId" | "scope" | "defense" | "seat">;
-
-/** "Your next Pirate ally attack this turn gets <mod> and 'When this hits a
- *  hero, <onHitEffect>'" — the buff rides a next-attack modifier; the granted
- *  on-hit effect is dispatched via an until-end-of-turn marker (lingering
- *  onAttackDeclared/onHit); each copy consumes its own marker, so two copies
- *  stack. */
-function nextAllyAttack(key: string, mod: NextAllyMod, onHitEffect: (ctx: ScriptCtx) => void): CardScript {
-  return {
-    onPlay(ctx) {
-      buffNextAttack(ctx, {
-        appliesToSubtype: "ally",
-        appliesToClass: "pirate",
-        ...mod,
-      });
-      armDelayedEffect(ctx);
-    },
-    onFriendlyAttackDeclared(ctx) {
-      const link = ctx.link;
-      if (!link || link.attacker !== ctx.seat) return;
-      if (!isAlly(ctx, link.attackingCard) || !isPirate(ctx, link.attackingCard)) return;
-      // The on-hit dispatch below reads the link flag, not the consumed
-      // marker, so it still fires.
-      if (!consumeDelayedEffect(ctx)) return;
-      ctx.setFlag("link", key, (Number(ctx.getFlag("link", key)) || 0) + 1);
-    },
-    canTriggerOnHit(ctx) {
-      const link = ctx.link;
-      return (
-        !!link &&
-        link.attacker === ctx.seat &&
-        link.targetAllyId === undefined &&
-        (Number(ctx.getFlag("link", key)) || 0) > 0
-      );
-    },
-    onHit(ctx) {
-      const n = Number(ctx.getFlag("link", key)) || 0;
-      // two copies put two markers down, and the lingering dispatch calls this
-      // once per marker — the first dispatch fires for all of them
-      ctx.setFlag("link", key, 0);
-      for (let i = 0; i < n; i++) onHitEffect(ctx);
-    },
-  };
-}
-
-function createGold(ctx: ScriptCtx): void {
-  ctx.createToken(GOLD);
-}
 
 /** "When this attacks, you may discard a card or destroy the top card of your
  *  deck. If that card has watery grave, …" — shared choice plumbing. */
@@ -168,19 +109,11 @@ export const sgb: Record<string, CardScript> = {
       tap: true, // {t}
       canActivate: (ctx) => {
         const player = ctx.player(ctx.seat);
-        return [
-          ...player.board,
-          ...player.weapons,
-          ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-        ].some((card) => ctx.cardNames(card).includes("gold"));
+        return controlledPermanents(ctx, player.seat).some((card) => ctx.cardNames(card).includes("gold"));
       },
       onActivate(ctx) {
         const player = ctx.player(ctx.seat);
-        const golds = [
-          ...player.board,
-          ...player.weapons,
-          ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-        ].filter((card) => ctx.cardNames(card).includes("gold"));
+        const golds = controlledPermanents(ctx, player.seat).filter((card) => ctx.cardNames(card).includes("gold"));
         if (golds.length > 0) {
           ctx.requestCardChoice(
             "gravy-gold",
@@ -204,11 +137,7 @@ export const sgb: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook === "gravy-gold") {
         const player = ctx.player(ctx.seat);
-        const gold = [
-          ...player.board,
-          ...player.weapons,
-          ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-        ].find((card) => card.instanceId === Number(option));
+        const gold = controlledPermanents(ctx, player.seat).find((card) => card.instanceId === Number(option));
         if (gold) {
           ctx.destroyPermanent(gold.instanceId);
           ctx.logPublic(

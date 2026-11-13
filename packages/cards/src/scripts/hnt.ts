@@ -4,21 +4,30 @@ import {
   armDelayedEffect,
   attackAbility,
   bloodDebtScript as bloodDebt,
+  boostedThisTurn,
   buffNextAttack,
   cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
+  currentAttackDraconic,
   decisionMessage,
   decisionPrompt,
+  draconicLinks,
   entersArenaTrigger,
+  equipmentZoneCards,
+  equippedCards,
   faceUpGraveyard,
+  hitMarkedHero,
   hitWithDaggerThisChain,
+  isMarked,
+  markHero,
   markedStealthHeroScript,
   heroHasMoniker,
   localizedCardLog,
   offerRetrieveDagger,
   opponentSeat,
   pendingDelayedEffect,
+  playedAnotherRed,
   previousAttackNameContains,
   resolveRetrieveDagger,
   retrievableDaggerIds,
@@ -42,14 +51,6 @@ function spurNumberPrompt() {
   return decisionPrompt("Secretly choose a number between 1 and 6", "card.hnt.spurlocked.number.choose");
 }
 
-function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
-  const player = ctx.player(seat);
-  return [
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-    ...player.weapons.filter((card) => hasType(ctx.cardData(card.cardId), "equipment")),
-  ];
-}
-
 function isDraconic(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return hasCardSubtype(ctx, card, "draconic");
 }
@@ -69,21 +70,6 @@ function attackTrigger(
   return { event: "attack-declared", sourceZone: "self", label, labelMessage, condition, effect };
 }
 
-function isMarked(ctx: ScriptCtx, seat: number): boolean {
-  return (ctx.player(seat).hero.scriptState?.marked ?? 0) > 0;
-}
-
-function markHero(ctx: ScriptCtx, seat: number): void {
-  const hero = ctx.player(seat).hero;
-  if ((hero.scriptState?.marked ?? 0) > 0) return;
-  ctx.addCardState(hero.instanceId, "marked", 1);
-  ctx.logPublic(
-    localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
-      target: { kind: "card", cardId: hero.cardId },
-    }),
-  );
-}
-
 function loseLifeAndLog(ctx: ScriptCtx, targetSeat: number, amount: number): void {
   ctx.loseLife(targetSeat, amount);
   const target = ctx.player(targetSeat);
@@ -95,10 +81,6 @@ function loseLifeAndLog(ctx: ScriptCtx, targetSeat: number, amount: number): voi
       { target: { kind: "player", seat: targetSeat }, amount, life: target.life },
     ),
   );
-}
-
-function hitMarkedHero(ctx: ScriptCtx): boolean {
-  return ctx.link?.flags.targetWasMarkedOnHit === true;
 }
 
 function heroIs(ctx: ScriptCtx, seat: number, name: string): boolean {
@@ -121,10 +103,6 @@ function grantSharpenedSensesGoAgain(ctx: ScriptCtx): void {
   ) {
     ctx.grantGoAgain();
   }
-}
-
-function draconicLinks(ctx: ScriptCtx): number {
-  return ctx.chainLinksControlled(ctx.seat, "draconic");
 }
 
 const LONG_WHISKER_MODES = ["+2 attack", "additional attack", "mark on hit"] as const;
@@ -176,10 +154,6 @@ function longWhiskerTarget(ctx: ScriptCtx, stateKey: string): DeepReadonly<CardI
   return ctx.player(ctx.seat).weapons.find((card) => card.instanceId === targetId && isDagger(ctx, card));
 }
 
-function currentAttackDraconic(ctx: ScriptCtx): boolean {
-  return ctx.currentAttackHasType("draconic");
-}
-
 function draconicAttackLinkIndexes(ctx: ScriptCtx): number[] {
   return ctx.state.chain.flatMap((link, index) =>
     link.flags.attackGone !== true && ctx.chainLinkAttackHasType(index, "draconic") ? [index] : [],
@@ -187,7 +161,7 @@ function draconicAttackLinkIndexes(ctx: ScriptCtx): number[] {
 }
 
 function equippedSelf(ctx: ScriptCtx): DeepReadonly<CardInstance> | undefined {
-  return Object.values(ctx.player(ctx.seat).equipment).find((card) => card?.instanceId === ctx.self.instanceId);
+  return equipmentZoneCards(ctx.player(ctx.seat)).find((card) => card.instanceId === ctx.self.instanceId);
 }
 
 function offerBloodSplatteredVest(ctx: ScriptCtx): void {
@@ -221,10 +195,6 @@ function lastAttackWasDraconic(ctx: ScriptCtx): boolean {
   if (!previous) return false;
   if (previous.flags["grantedType:draconic"] === true) return true;
   return isDraconic(ctx, previous.attackingCard);
-}
-
-function playedAnotherRed(ctx: ScriptCtx): boolean {
-  return ctx.playedThisTurn("red") >= 2;
 }
 
 function daggerOptions(ctx: ScriptCtx): number[] {
@@ -660,7 +630,7 @@ export const hnt: Record<string, CardScript> = {
       return ctx.link?.targetAllyId === undefined && ctx.getFlag("link", "hntArtScale") === true;
     },
     onHit(ctx) {
-      const equipment = equipmentCards(ctx, opponentSeat(ctx));
+      const equipment = equippedCards(ctx, opponentSeat(ctx));
       if (equipment.length)
         ctx.requestCardChoice(
           "art-scale",
@@ -670,7 +640,7 @@ export const hnt: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "art-scale") return;
-      const card = equipmentCards(ctx, opponentSeat(ctx)).find((candidate) => candidate.instanceId === Number(option));
+      const card = equippedCards(ctx, opponentSeat(ctx)).find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
       const oldCounters = card.defCounters ?? 0;
       ctx.addCardDefenseCounters(card.instanceId, 1);
@@ -1878,7 +1848,7 @@ Object.assign(hnt, {
       timing: "instant",
       destroySelfCost: true,
       onActivate(ctx) {
-        ctx.preventNextArcaneDamage(ctx.seat, ctx.getPlayerFlag(ctx.seat, "boostedThisTurn") === true ? 2 : 1);
+        ctx.preventNextArcaneDamage(ctx.seat, boostedThisTurn(ctx) ? 2 : 1);
       },
     },
   },

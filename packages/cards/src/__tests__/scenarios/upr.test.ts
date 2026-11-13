@@ -630,7 +630,7 @@ describe("UPR — rules regression coverage", () => {
         { hero: "dorinthea", hand: ["singe|3", BLUE] },
       ],
     });
-    s.play("singe|3", { pitch: [BLUE] }).chooseOption("opponent");
+    s.play("singe|3", { pitch: [BLUE] }).chooseOption("opposing hero");
     const nekriaId = s.state.players[0]!.board.find((card) => card.cardId === printingId("nekria|0"))!.instanceId;
     s.chooseMany([String(nekriaId)]).endTurn();
     expect(s.state.players[0]!.board.find((card) => card.instanceId === nekriaId)!.life).toBe(6);
@@ -686,7 +686,7 @@ describe("UPR — rules regression coverage", () => {
         { hero: "dorinthea", hand: ["singe|3", BLUE] },
       ],
     });
-    s.play("singe|3", { pitch: [BLUE] }).chooseOption("opponent");
+    s.play("singe|3", { pitch: [BLUE] }).chooseOption("opposing hero");
     const yenduraiId = s.state.players[0]!.board.find((card) => card.cardId === printingId("yendurai|0"))!.instanceId;
     s.chooseMany([String(yenduraiId)]).settle();
     const yendurai = s.state.players[0]!.board.find((card) => card.instanceId === yenduraiId)!;
@@ -809,7 +809,7 @@ describe("UPR — bounded multi-card choices", () => {
         { hero: "dorinthea", board: ["aether ashwing|0", "aether ashwing|0", "barnacle|2"] },
       ],
     });
-    s.play("singe|2").chooseOption("opponent");
+    s.play("singe|2").chooseOption("opposing hero");
     const pd = s.state.pendingDecision!;
     expect(pd.chooseHook).toBe("singe-allies");
     expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);

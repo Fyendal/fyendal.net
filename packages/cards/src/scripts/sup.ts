@@ -6,16 +6,22 @@ import {
   cardDefendsThisTrigger,
   commonOptionMessages,
   contractWithSilver,
+  controlsNamed,
+  countAuras,
   crowdTrigger,
+  crushTriggered,
   decisionMessage,
   decisionPrompt,
+  defendsTogetherWithCardFromHand,
   entersArenaTrigger,
   faceUpGraveyard,
+  hasSixPlusInPitch,
   heroTarget,
   isSixPlus,
   leavesArenaTrigger,
   opponentSeat,
   payForDefenseBoost,
+  pitches,
   previousAttackHasName,
   requestDiscardChoice,
   resolveDiscardChoice,
@@ -42,26 +48,11 @@ const CHEER = crowdTrigger("cheer");
 
 type Card = DeepReadonly<CardInstance>;
 
-function pitches(name: string, make: (pitch: 1 | 2 | 3) => CardScript): Record<string, CardScript> {
-  return Object.fromEntries(([1, 2, 3] as const).map((pitch) => [`${name}|${pitch}`, make(pitch)]));
-}
-
-function data(ctx: ScriptCtx, card: Card) {
-  return ctx.cardData(card.cardId);
-}
-function controls(ctx: ScriptCtx, name: string): boolean {
-  const player = ctx.player(ctx.seat);
-  return [
-    ...player.board,
-    ...player.weapons,
-    ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
-  ].some((card) => cardNamed(ctx, card, name));
-}
 function controlsAny(ctx: ScriptCtx, names: string[]): boolean {
-  return names.some((name) => controls(ctx, name));
+  return names.some((name) => controlsNamed(ctx, name));
 }
 function tokenAura(ctx: ScriptCtx, card: Card): boolean {
-  return hasType(data(ctx, card), "token") && isAura(ctx, card);
+  return hasType(ctx.cardData(card.cardId), "token") && isAura(ctx, card);
 }
 
 type CharmMode = { readonly option: string; readonly bit: number; readonly message: string };
@@ -231,14 +222,8 @@ function resolveNumbskullCharm(ctx: ScriptCtx): void {
 function controlsSuspense(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).board.some((card) => isSuspenseAura(ctx, card));
 }
-function countAuras(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).board.filter((card) => isAura(ctx, card)).length;
-}
 function heroHas(ctx: ScriptCtx, seat: number, tag: string): boolean {
   return hasCardSubtype(ctx, ctx.player(seat).hero, tag);
-}
-function hasSixPlusInPitch(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).pitch.some((card) => isSixPlus(ctx, card));
 }
 function createMany(ctx: ScriptCtx, id: string, count: number): void {
   ctx.createTokens(id, count);
@@ -338,7 +323,7 @@ function requestSongOfSinewOrder(ctx: ScriptCtx, ids: number[]): void {
 }
 
 function tokenEquipment(a: string, b: string): CardScript {
-  return { modifyDefense: (ctx) => (controls(ctx, a) && controls(ctx, b) ? 2 : 0) };
+  return { modifyDefense: (ctx) => (controlsNamed(ctx, a) && controlsNamed(ctx, b) ? 2 : 0) };
 }
 
 function tokenAttack(a: string, b: string): CardScript {
@@ -479,7 +464,7 @@ function missCreates(tokenId: string): CardScript {
   };
 }
 
-function nextAttack(amount: number, kind?: "cheer" | "boo"): CardScript {
+function crowdNextAttackPump(amount: number, kind?: "cheer" | "boo"): CardScript {
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: amount });
@@ -497,13 +482,6 @@ function destroyOpposingToken(createId: string, targetName: string, heroTag: str
       if (token && ctx.destroyPermanent(token.instanceId)) ctx.createToken(createId);
     },
   };
-}
-
-function defendsTogetherWithCardFromHand(ctx: ScriptCtx): boolean {
-  if (!ctx.link) return false;
-  const count = Number(ctx.link.flags.defendedFromHandCount ?? 0);
-  const selfWasFromHand = ctx.link.flags[`defendedFromHand:${ctx.self.instanceId}`] === true ? 1 : 0;
-  return count > selfWasFromHand;
 }
 
 function suspense(
@@ -913,7 +891,7 @@ export const sup: Record<string, CardScript> = {
       });
     },
   },
-  ...pitches("heroic pose", (pitch) => nextAttack(4 - pitch, "cheer")),
+  ...pitches("heroic pose", (pitch) => crowdNextAttackPump(4 - pitch, "cheer")),
   "humble entrance|3": {
     onPlay(ctx) {
       createMany(ctx, TOUGHNESS, 3);
@@ -1021,8 +999,8 @@ export const sup: Record<string, CardScript> = {
       ctx.createToken(MIGHT);
     },
   },
-  "villainous pose|2": nextAttack(3, "boo"),
-  "villainous pose|3": nextAttack(2, "boo"),
+  "villainous pose|2": crowdNextAttackPump(3, "boo"),
+  "villainous pose|3": crowdNextAttackPump(2, "boo"),
   "disdainful delight|2": { modifyDefense: (ctx) => (ctx.getFlag("player", "booedThisTurn") ? 1 : 0) },
   "not so tuff|3": destroyOpposingToken(MIGHT, "Toughness", "revered"),
 
@@ -1110,9 +1088,7 @@ export const sup: Record<string, CardScript> = {
     modifyAttack(ctx) {
       return ctx.attackBonusAboveBase(ctx.self.instanceId) > 0 ? 1 : 0;
     },
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-    },
+    canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card));
       if (targets.length)
@@ -1423,7 +1399,7 @@ Object.assign(sup, {
   "a good clean fight|1": { suppressesAttackActionHitEffects: true },
   "escalate order|1": {
     onAttackDeclared(ctx: ScriptCtx) {
-      if (controls(ctx, "Toughness")) createMany(ctx, TOUGHNESS, 3);
+      if (controlsNamed(ctx, "Toughness")) createMany(ctx, TOUGHNESS, 3);
     },
   },
   "old favorite|2": {
@@ -1732,7 +1708,7 @@ Object.assign(sup, {
   },
   "escalate violence|3": {
     onAttackDeclared(ctx: ScriptCtx) {
-      if (controls(ctx, "Might")) createMany(ctx, MIGHT, 3);
+      if (controlsNamed(ctx, "Might")) createMany(ctx, MIGHT, 3);
     },
   },
   "gang robbery|2": {
@@ -2017,14 +1993,14 @@ Object.assign(sup, {
     modifyAttack(ctx: ScriptCtx) {
       return new Set(
         ctx.state.players.flatMap((p) =>
-          p.board.filter((card) => tokenAura(ctx, card)).map((card) => data(ctx, card).name),
+          p.board.filter((card) => tokenAura(ctx, card)).map((card) => ctx.cardData(card.cardId).name),
         ),
       ).size;
     },
     modifyDefense(ctx: ScriptCtx) {
       return new Set(
         ctx.state.players.flatMap((p) =>
-          p.board.filter((card) => tokenAura(ctx, card)).map((card) => data(ctx, card).name),
+          p.board.filter((card) => tokenAura(ctx, card)).map((card) => ctx.cardData(card.cardId).name),
         ),
       ).size;
     },

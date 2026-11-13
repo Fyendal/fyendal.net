@@ -1305,12 +1305,6 @@
       "value": " 点资源使防御力 +1？"
     }
   ],
-  "card.aio.maintenance.choose": [
-    {
-      "type": 0,
-      "value": "移除一个蒸汽指示物，或摧毁此牌？"
-    }
-  ],
   "card.aio.symbiosisshot.steam": [
     {
       "type": 0,
@@ -4852,24 +4846,6 @@
     {
       "type": 1,
       "value": "p"
-    }
-  ],
-  "card.ele.pay.or.discard": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：支付 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 点资源，否则弃置一张牌？"
     }
   ],
   "card.ele.pitch.card.bottom": [
@@ -12586,28 +12562,6 @@
       "value": "放逐牌库顶牌并将其作为 instant 打出？"
     }
   ],
-  "card.pen.decompose.action": [
-    {
-      "type": 0,
-      "value": "选择那张行动牌"
-    }
-  ],
-  "card.pen.decompose.earth.first": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：进行分解 (decompose)？选择第一张 Earth 牌"
-    }
-  ],
-  "card.pen.decompose.earth.second": [
-    {
-      "type": 0,
-      "value": "选择第二张 Earth 牌"
-    }
-  ],
   "card.pen.deeprecesses.banish": [
     {
       "type": 0,
@@ -14768,16 +14722,6 @@
     {
       "type": 0,
       "value": "将一张攻击行动牌置于你的牌库底部"
-    }
-  ],
-  "card.tcc.boulder.hand.top": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：将一张手牌置于你的牌库顶部"
     }
   ],
   "card.tcc.encore.attack.return": [
@@ -17938,12 +17882,6 @@
     {
       "type": 0,
       "value": "选择对方的一张手牌放逐"
-    }
-  ],
-  "card.upr.option.you": [
-    {
-      "type": 0,
-      "value": "你"
     }
   ],
   "card.upr.pay.or.discard": [

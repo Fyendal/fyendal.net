@@ -1,5 +1,10 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
+  chargedThisTurn,
+  controlsVox,
+  crushTriggered,
+  decay,
+  equipmentZoneCards,
   faceUpGraveyard,
   hasBloodDebt,
   ampNextArcane,
@@ -18,6 +23,7 @@ import {
   entersArenaTrigger,
   isAttackAction,
   localizedCardLog,
+  markHero,
   optN,
   optOnChoose,
   opponentSeat,
@@ -25,6 +31,7 @@ import {
   requestDiscardChoice,
   revealTopSixPlusStays,
   resolveDiscardChoice,
+  skeletalPuppetry,
   suspenseAura,
   hitHookLabel,
   isChargeDecline,
@@ -100,34 +107,8 @@ function grantHeadBangingHit(ctx: ScriptCtx, attackInstanceId: number): void {
   });
 }
 
-function controlsVox(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).weapons.some((card) => cardNamed(ctx, card, "Vox Necropolis"));
-}
-
 function controlsBlasmophet(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, "Blasmophet, the Insatiable Hunger"));
-}
-
-function decay(): Pick<CardScript, "triggers"> {
-  return {
-    triggers: [
-      {
-        event: "end-of-turn",
-        whose: "subject",
-        label: "Decay",
-        labelMessage: { id: "card.trigger.common.decay" },
-        effect(ctx) {
-          const life = ctx.self.life ?? 0;
-          if (life <= 1) {
-            ctx.destroySelf();
-            return;
-          }
-          ctx.setState("lifePenalty", ctx.getState("lifePenalty") + 1);
-          ctx.setPermanentLife(ctx.self.instanceId, life - 1);
-        },
-      },
-    ],
-  };
 }
 
 function zombieAttack() {
@@ -603,15 +584,6 @@ function commitToCorruption(attack: number): CardScript {
   };
 }
 
-function skeletalPuppetry(attack: number): CardScript {
-  return {
-    alternativePlayCost: { kind: "discard-hand-subtype", subtype: "ally" },
-    onPlay(ctx) {
-      buffNextAttack(ctx, { attack, appliesToSubtype: "ally", goAgain: true });
-    },
-  };
-}
-
 type AllyPaymentPayoff = "discard" | "life";
 
 function allyPaymentOnHit(payoff: AllyPaymentPayoff): CardScript {
@@ -890,15 +862,7 @@ function freshFromTheForge(): CardScript {
       }
       ctx.addCounter(dagger.instanceId, "power", -1);
       const target = opponentSeat(ctx);
-      const hero = ctx.player(target).hero;
-      if (Number(hero.scriptState?.marked ?? 0) === 0) {
-        ctx.addCardState(hero.instanceId, "marked", 1);
-        ctx.logPublic(
-          localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
-            target: { kind: "card", cardId: hero.cardId },
-          }),
-        );
-      }
+      markHero(ctx, target);
     },
   };
 }
@@ -2432,8 +2396,8 @@ export const iar: Record<string, CardScript> = {
         condition: (ctx, entered) => !!entered && hasCardSubtype(ctx, entered, "ally"),
         effect(ctx, entered) {
           if (!entered) return;
-          const liveAndUntapped = Object.values(ctx.player(ctx.seat).equipment).some(
-            (card) => card?.instanceId === ctx.self.instanceId && !card.tapped,
+          const liveAndUntapped = equipmentZoneCards(ctx.player(ctx.seat)).some(
+            (card) => card.instanceId === ctx.self.instanceId && !card.tapped,
           );
           if (!liveAndUntapped) return;
           ctx.setState("iarDanseAlly", entered.instanceId);
@@ -2515,7 +2479,7 @@ export const iar: Record<string, CardScript> = {
   },
 
   "crushing headache|1": {
-    canTriggerOnHit: (ctx) => selfHitsHero(ctx) && (ctx.link?.damage ?? 0) >= 4,
+    canTriggerOnHit: (ctx) => selfHits(ctx) && crushTriggered(ctx),
     onHit(ctx) {
       const target = opponentSeat(ctx);
       const hand = [...ctx.player(target).hand];
@@ -2570,8 +2534,8 @@ export const iar: Record<string, CardScript> = {
         if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
       }
     },
-    hasConditionalGoAgain: (ctx) => ctx.getFlag("player", "chargedThisTurn") === true,
-    canTriggerOnHit: (ctx) => selfHits(ctx) && ctx.getFlag("player", "chargedThisTurn") === true,
+    hasConditionalGoAgain: (ctx) => chargedThisTurn(ctx),
+    canTriggerOnHit: (ctx) => selfHits(ctx) && chargedThisTurn(ctx),
     onHit(ctx) {
       ctx.createToken(COURAGE);
     },

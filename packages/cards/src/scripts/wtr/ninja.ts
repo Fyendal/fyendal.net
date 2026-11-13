@@ -9,16 +9,6 @@ import {
 
 // ── WTR Ninja helpers ───────────────────────────────────────────────────────
 
-/** Normalised card name (no pitch). */
-function nameKey(name: string): string {
-  return name.trim().toLowerCase().replace(/\s+/g, " ");
-}
-
-/** True if the previous resolved attack matches the named card (any pitch). */
-function comboWith(ctx: ScriptCtx, name: string): boolean {
-  return previousAttackHasName(ctx, nameKey(name));
-}
-
 function hitsThisChain(ctx: ScriptCtx): number {
   return ctx.state.chain.filter((l) => l.resolved && l.hit).length;
 }
@@ -27,22 +17,22 @@ function hitsThisChain(ctx: ScriptCtx): number {
 
 const blackoutKick = ((): CardScript => ({
   modifyAttack(ctx) {
-    return comboWith(ctx, "rising knee thrust") ? 3 : 0;
+    return previousAttackHasName(ctx, "rising knee thrust") ? 3 : 0;
   },
 }))();
 
 const flusterFist = ((): CardScript => ({
   modifyAttack(ctx) {
-    return comboWith(ctx, "open the center") ? hitsThisChain(ctx) : 0;
+    return previousAttackHasName(ctx, "open the center") ? hitsThisChain(ctx) : 0;
   },
 }))();
 
 const openTheCenter = ((): CardScript => ({
   modifyAttack(ctx) {
-    return comboWith(ctx, "head jab") ? 1 : 0;
+    return previousAttackHasName(ctx, "head jab") ? 1 : 0;
   },
   onAttackDeclared(ctx) {
-    if (!comboWith(ctx, "head jab")) return;
+    if (!previousAttackHasName(ctx, "head jab")) return;
     ctx.grantGoAgain();
     ctx.addModifier({ scope: "chain-link", dominate: true });
     ctx.logPublic(
@@ -55,10 +45,10 @@ const openTheCenter = ((): CardScript => ({
 
 const risingKneeThrust = ((): CardScript => ({
   modifyAttack(ctx) {
-    return comboWith(ctx, "leg tap") ? 2 : 0;
+    return previousAttackHasName(ctx, "leg tap") ? 2 : 0;
   },
   onAttackDeclared(ctx) {
-    if (!comboWith(ctx, "leg tap")) return;
+    if (!previousAttackHasName(ctx, "leg tap")) return;
     ctx.grantGoAgain();
     ctx.logPublic(
       localizedLog("Rising Knee Thrust: +2 power and go again", "card.log.wtr.risingkneethrust.combo", {
@@ -70,10 +60,10 @@ const risingKneeThrust = ((): CardScript => ({
 
 const whelmingGustwave = ((): CardScript => ({
   modifyAttack(ctx) {
-    return comboWith(ctx, "surging strike") ? 1 : 0;
+    return previousAttackHasName(ctx, "surging strike") ? 1 : 0;
   },
   onAttackDeclared(ctx) {
-    if (!comboWith(ctx, "surging strike")) return;
+    if (!previousAttackHasName(ctx, "surging strike")) return;
     ctx.grantGoAgain();
     ctx.addModifier({ scope: "chain-link", onHitDraw: 1 });
     ctx.logPublic(

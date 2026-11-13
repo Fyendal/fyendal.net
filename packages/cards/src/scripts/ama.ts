@@ -3,15 +3,17 @@ import {
   armDelayedEffect,
   attackAbility,
   buffNextAttack,
-  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
+  controlsVox,
+  decay,
   decisionPrompt,
   faceUpGraveyard,
   hitHookLabel,
   ongoingLabel,
   hasLiveTurnEffect,
   hasCardSubtype,
+  skeletalPuppetry,
 } from "./shared-helpers.js";
 
 const CORRUPTED_CORPSE = "IAR090";
@@ -19,10 +21,6 @@ const GATE = "IAR222";
 
 function zombies(ctx: ScriptCtx, zone: readonly DeepReadonly<CardInstance>[]) {
   return zone.filter((card) => !card.faceDown && hasCardSubtype(ctx, card, "zombie"));
-}
-
-function controlsVox(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).weapons.some((card) => cardNamed(ctx, card, "Vox Necropolis"));
 }
 
 function grantDestroyingZombieAttack(ctx: ScriptCtx, power: number): void {
@@ -56,44 +54,6 @@ function destroyingZombieAttack(
 
 const undeadGraspAttack = destroyingZombieAttack("amaUndeadGrasp");
 const digForSoulsAttack = destroyingZombieAttack("amaDigForSouls");
-
-function decay(): Pick<CardScript, "triggers"> {
-  return {
-    triggers: [
-      {
-        event: "end-of-turn",
-        whose: "subject",
-        label: "Decay",
-        labelMessage: { id: "card.trigger.common.decay" },
-        effect(ctx) {
-          const life = ctx.self.life ?? 0;
-          if (life <= 1) {
-            ctx.destroySelf();
-            return;
-          }
-          ctx.setState("lifePenalty", ctx.getState("lifePenalty") + 1);
-          ctx.setPermanentLife(ctx.self.instanceId, life - 1);
-        },
-      },
-    ],
-  };
-}
-
-function skeletalPuppetry(power: number): CardScript {
-  return {
-    alternativePlayCost: {
-      kind: "discard-hand-subtype",
-      subtype: "ally",
-    },
-    onPlay(ctx) {
-      buffNextAttack(ctx, {
-        attack: power,
-        appliesToSubtype: "ally",
-        goAgain: true,
-      });
-    },
-  };
-}
 
 export const ama: Record<string, CardScript> = {
   "malice, domina of the dead|0": {

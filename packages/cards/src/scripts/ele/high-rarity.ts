@@ -6,6 +6,7 @@ import {
   dealtByThis,
   decisionMessage,
   decisionPrompt,
+  equipmentZoneCards,
   faceUpGraveyard,
   hasCardSubtype,
   heroTarget,
@@ -30,7 +31,6 @@ function playedAttackAndNonAttack(ctx: ScriptCtx): boolean {
     Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) > 0
   );
 }
-
 
 function blossomingBanishChoice(ctx: ScriptCtx): void {
   const cards = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "action") && !isAttackAction(ctx, card));
@@ -416,7 +416,7 @@ export const eleHighRarity: Record<string, CardScript> = {
       return isFused(ctx) && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      const count = Object.values(ctx.player(opponentSeat(ctx)).equipment).filter(Boolean).length;
+      const count = equipmentZoneCards(ctx.player(opponentSeat(ctx))).length;
       for (let i = 0; i < count; i++) ctx.dealDamage(opponentSeat(ctx), 1, { sourceInstanceId: ctx.self.instanceId });
     },
   }),

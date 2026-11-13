@@ -5,14 +5,17 @@ import {
   buffNextAttack,
   cardNameContains,
   chargeAttack,
+  chargedThisTurn,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  duringActionPhase,
   entersArenaTrigger,
   hasCardSubtype,
   isAttackAction,
   isAura,
   isNonAttackAction,
+  isOwnAttack,
   leviaRedeemedAbility,
   mergeSetScripts,
   opponentSeat,
@@ -27,32 +30,12 @@ const RUNECHANT = "DTD214";
 const COURAGE = "DTD232";
 const SPECTRAL_SHIELD = "DTD220";
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
 function isHerald(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return isAttackAction(ctx, card) && cardNameContains(ctx, card, "herald");
 }
-function duringActionPhase(ctx: ScriptCtx): boolean {
-  if (ctx.state.phase === "action" || ctx.state.phase === "defend" || ctx.state.phase === "reaction") return true;
-  return (
-    ctx.state.phase === "layer" &&
-    ctx.state.stackResume !== "begin-action-phase" &&
-    ctx.state.stackResume !== "end-phase"
-  );
-}
-function ownAttack(ctx: ScriptCtx): boolean {
-  return !!ctx.link && !ctx.link.resolved && ctx.link.attacker === ctx.seat;
-}
-function charged(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "chargedThisTurn") === true;
-}
-function createTokens(ctx: ScriptCtx, id: string, count: number): void {
-  ctx.createTokens(id, count);
-}
 function heraldInstant(effect: (ctx: ScriptCtx) => void): CardScript {
   return {
-    canPlay: (ctx) => ownAttack(ctx) && isHerald(ctx, ctx.link!.attackingCard),
+    canPlay: (ctx) => isOwnAttack(ctx) && isHerald(ctx, ctx.link!.attackingCard),
     onPlay: effect,
   };
 }
@@ -84,7 +67,7 @@ const boltynTargetLegal = (ctx: ScriptCtx) =>
 function boltynHero(): CardScript {
   return {
     modifyAttack(ctx) {
-      return charged(ctx) && (ctx.link?.defendingCards ?? []).some((card) => isAttackAction(ctx, card)) ? 1 : 0;
+      return chargedThisTurn(ctx) && (ctx.link?.defendingCards ?? []).some((card) => isAttackAction(ctx, card)) ? 1 : 0;
     },
     activated: {
       cost: 0,
@@ -93,7 +76,7 @@ function boltynHero(): CardScript {
       timing: "attack-reaction",
       banishSoulCost: 1,
       label: "Banish a soul card: grant go again",
-      canActivate: (ctx) => ownAttack(ctx) && boltynTargetLegal(ctx),
+      canActivate: (ctx) => isOwnAttack(ctx) && boltynTargetLegal(ctx),
       attackTargetLegal: boltynTargetLegal,
       onActivate(ctx) {
         ctx.grantGoAgain();
@@ -126,7 +109,7 @@ function vForValor(power: number): CardScript {
       goAgain: false,
       timing: "attack-reaction",
       destroySelfCost: true,
-      canActivate: (ctx) => ownAttack(ctx) && ctx.player(ctx.seat).hand.length > 0,
+      canActivate: (ctx) => isOwnAttack(ctx) && ctx.player(ctx.seat).hand.length > 0,
       label: `Destroy and charge: attack +${power}`,
       onActivate(ctx) {
         ctx.requestCardChoice(
@@ -188,7 +171,7 @@ function runeGateClose(kind?: "life" | "runechant"): CardScript {
     onCombatChainClosed(ctx) {
       const count = ctx.state.players.filter((player) => player.flags.lostLifeThisTurn === true).length;
       if (kind === "life") ctx.gainLife(ctx.seat, count);
-      if (kind === "runechant") createTokens(ctx, RUNECHANT, count);
+      if (kind === "runechant") ctx.createTokens(RUNECHANT, count);
     },
   });
 }
@@ -312,12 +295,12 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
       canActivate(ctx) {
         return ctx
           .player(ctx.seat)
-          .board.some((card) => hasCardSubtype(ctx, card, "figment") && data(ctx, card).backId !== undefined);
+          .board.some((card) => hasCardSubtype(ctx, card, "figment") && ctx.cardData(card.cardId).backId !== undefined);
       },
       onActivate(ctx) {
         const figments = ctx
           .player(ctx.seat)
-          .board.filter((card) => hasCardSubtype(ctx, card, "figment") && data(ctx, card).backId !== undefined);
+          .board.filter((card) => hasCardSubtype(ctx, card, "figment") && ctx.cardData(card.cardId).backId !== undefined);
         if (figments.length > 0) {
           ctx.requestCardChoice(
             "prism-awaken",
@@ -342,7 +325,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
       const figment = ctx
         .player(ctx.seat)
         .board.find((card) => card.instanceId === Number(option) && hasCardSubtype(ctx, card, "figment"));
-      const backId = figment ? data(ctx, figment).backId : undefined;
+      const backId = figment ? ctx.cardData(figment.cardId).backId : undefined;
       if (figment && backId) ctx.transformInto(backId, [], figment.instanceId);
     },
   },
@@ -374,7 +357,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
     },
     onChoose(ctx, hook, option) {
       if (hook !== "aegis-soul" || option === "no" || !ctx.banish(Number(option))) return;
-      createTokens(ctx, SPECTRAL_SHIELD, 2);
+      ctx.createTokens(SPECTRAL_SHIELD, 2);
     },
   },
   "luminaris, celestial fury|0": {
@@ -385,7 +368,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
       timing: "instant",
       oncePerTurn: true,
       canActivate: (ctx) =>
-        ownAttack(ctx) &&
+        isOwnAttack(ctx) &&
         (isHerald(ctx, ctx.link!.attackingCard) || hasCardSubtype(ctx, ctx.link!.attackingCard, "angel")),
       label: "Target Herald or angel attack gains go again",
       onActivate(ctx) {
@@ -515,7 +498,7 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
       const card = [...(ctx.link?.defendingCards ?? []), ...(ctx.link?.defendingEquipment ?? [])].find(
         (candidate) => candidate.instanceId === Number(option),
       );
-      if (card) ctx.addCardTempDefense(card.instanceId, -Math.floor((data(ctx, card).defense ?? 0) / 2));
+      if (card) ctx.addCardTempDefense(card.instanceId, -Math.floor((ctx.cardData(card.cardId).defense ?? 0) / 2));
     },
   },
   "scepter of pain|0": {
@@ -589,11 +572,11 @@ for (const [pitch, power] of [
     });
   dtd[`resounding courage|${pitch}`] = {
     canPlay: (ctx) =>
-      ownAttack(ctx) && hasCardSubtype(ctx, ctx.link!.attackingCard, "light") &&
+      isOwnAttack(ctx) && hasCardSubtype(ctx, ctx.link!.attackingCard, "light") &&
         hasCardSubtype(ctx, ctx.link!.attackingCard, "warrior"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: power });
-      if (charged(ctx)) ctx.createToken(COURAGE);
+      if (chargedThisTurn(ctx)) ctx.createToken(COURAGE);
     },
   };
   dtd[`charge of the light brigade|${pitch}`] = {

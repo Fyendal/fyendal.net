@@ -1,9 +1,11 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   chargeAttack,
   chargeDeclineMessages,
+  chargedThisTurn,
   decisionPrompt,
   isChargeDecline,
+  isLight,
   localizedCardLog,
   optionalChargeOptions,
 } from "./shared-helpers.js";
@@ -11,10 +13,6 @@ import { hasType } from "@fyendal/shared";
 
 const COURAGE = "ASB027";
 const QUICKEN = "ASB028";
-
-function isLight(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("light");
-}
 
 function graceEquipment(effect: (ctx: ScriptCtx) => void): CardScript {
   return {
@@ -58,7 +56,7 @@ export const asb: Record<string, CardScript> = {
   },
   "saving grace|2": chargeAttack({
     onPlay(ctx) {
-      if (ctx.getFlag("player", "chargedThisTurn") === true) {
+      if (chargedThisTurn(ctx)) {
         ctx.addModifier({ scope: "chain-link", attack: -2, seat: ctx.link?.attacker });
       }
     },
@@ -66,7 +64,7 @@ export const asb: Record<string, CardScript> = {
   "lumina ascension|2": {
     onPlay(ctx) {
       ctx.addModifier({ scope: "until-end-of-turn", appliesTo: "weapon", attack: 1 });
-      if (ctx.getFlag("player", "chargedThisTurn") === true) {
+      if (chargedThisTurn(ctx)) {
         for (const weapon of ctx.player(ctx.seat).weapons) ctx.grantAdditionalActivation(weapon.instanceId);
       }
     },

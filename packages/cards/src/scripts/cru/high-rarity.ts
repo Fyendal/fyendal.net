@@ -2,10 +2,13 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   cardNamed,
   commonOptionMessages,
+  controlledPermanents,
+  crushTriggered,
   dealArcane,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  equipmentZoneCards,
   faceUpGraveyard,
   hasCardSubtype,
   hasLiveTurnEffect,
@@ -20,6 +23,7 @@ import {
   previousAttackHasName,
   reload,
   resolveReload,
+  runeCount,
   sharesName,
   wizardActionAsInstant,
   yesNoPrompt,
@@ -39,10 +43,6 @@ function previousNamed(ctx: ScriptCtx, name: string): boolean {
   return previousAttackHasName(ctx, name);
 }
 
-function runeCount(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length;
-}
-
 function ownedCards(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
   const player = ctx.player(ctx.seat);
   return [
@@ -54,9 +54,7 @@ function ownedCards(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
     ...player.graveyard,
     ...player.banish,
     ...player.soul,
-    ...player.board,
-    ...player.weapons,
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
+    ...controlledPermanents(ctx, player.seat),
   ].filter((card) => card.owner === ctx.seat);
 }
 
@@ -74,9 +72,7 @@ function orderOnTop(ctx: ScriptCtx, ids: number[]): void {
 }
 
 const righteousCleansing: CardScript = {
-  canTriggerOnHit(ctx) {
-    return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-  },
+  canTriggerOnHit: crushTriggered,
   onHit(ctx) {
     const top = ctx.player(opponentSeat(ctx)).deck.slice(0, 5);
     for (const card of top) ctx.lookAt(card.instanceId);
@@ -510,7 +506,7 @@ export const cruHighRarity: Record<string, CardScript> = {
       // destroying the equipment when this choice resolves.
       if (
         hook === "breeze-destroy" && option === "yes" &&
-        Object.values(ctx.player(ctx.seat).equipment).some((card) => card?.instanceId === ctx.self.instanceId)
+        equipmentZoneCards(ctx.player(ctx.seat)).some((card) => card.instanceId === ctx.self.instanceId)
       ) {
         ctx.destroySelf();
         ctx.addModifier({ scope: "until-end-of-turn", goAgain: true, appliesToKeyword: "combo" });

@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  boostedThisTurn,
   buffNextArcaneDamageCard,
   commonOptionMessages,
   dealArcane,
@@ -16,14 +17,11 @@ import {
   optOnChoose,
   reload,
   resolveReload,
+  runeCount,
   wizardActionAsInstant,
 } from "../shared-helpers.js";
 
 const RUNECHANT = "ARC112";
-
-function runeCount(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length;
-}
 
 function chooseFromDeck(
   ctx: ScriptCtx,
@@ -80,7 +78,7 @@ const sparkOfGenius: CardScript = {
     if (!item || !mechanologistItem(ctx, item, ctx.getState("sparkX"))) return;
     ctx.settleCard(item.instanceId);
     ctx.shuffleDeck();
-    if (ctx.getFlag("player", "boostedThisTurn") === true) ctx.drawCards(ctx.seat, 1);
+    if (boostedThisTurn(ctx)) ctx.drawCards(ctx.seat, 1);
   },
   onPlay(ctx) {
     const x = ctx.getState("sparkX");
@@ -96,7 +94,7 @@ const sparkOfGenius: CardScript = {
       return;
     }
     ctx.shuffleDeck();
-    if (ctx.getFlag("player", "boostedThisTurn") === true) ctx.drawCards(ctx.seat, 1);
+    if (boostedThisTurn(ctx)) ctx.drawCards(ctx.seat, 1);
   },
 };
 
@@ -315,7 +313,7 @@ export const arcHighRarity: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       oncePerTurn: true,
-      canActivate: (ctx) => ctx.getFlag("player", "boostedThisTurn") === true,
+      canActivate: (ctx) => boostedThisTurn(ctx),
       onActivate(ctx) {
         const top = ctx.player(ctx.seat).deck.slice(0, 2);
         let gained = 0;

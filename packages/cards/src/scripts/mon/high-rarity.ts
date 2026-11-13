@@ -1,5 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  attackingWeapon,
+  chargedThisTurn,
   faceUpGraveyard,
   hasBloodDebt,
   bloodDebtScript as bloodDebt,
@@ -24,12 +26,8 @@ const SOUL_SHACKLE = "MON186";
 const BLASMOPHET = "MON219";
 const URSUR = "MON220";
 
-function weapon(cost: number, extra: CardScript = {}): CardScript {
-  return { ...extra, activated: { cost, isAttack: true, goAgain: false, oncePerTurn: true } };
-}
-
 function hatchet(otherCode: 1 | 2): CardScript {
-  return weapon(1, {
+  return attackingWeapon(1, {
     onAttackDeclared(ctx) {
       if (ctx.getPlayerFlag(ctx.seat, "lastHatchetObservedAttack") !== otherCode) return;
       const key = `hatchetPower:${ctx.self.instanceId}`;
@@ -82,7 +80,7 @@ const beaconOfVictory: CardScript = {
   onPlay(ctx) {
     const x = ctx.getState("beaconX");
     if (x > 0) ctx.addModifier({ scope: "chain-link", attack: x });
-    if (ctx.getFlag("player", "chargedThisTurn") !== true) return;
+    if (!chargedThisTurn(ctx)) return;
     const cards = ctx.player(ctx.seat).deck.filter((card) => {
       const data = ctx.cardData(card.cardId);
       return ctx.hasCardType(card, "action") && (data.cost ?? 0) <= x;
@@ -356,7 +354,7 @@ export const monHighRarity: Record<string, CardScript> = {
   },
   "tome of divinity|2": {
     onPlay(ctx) {
-      ctx.drawCards(ctx.seat, Number(ctx.getFlag("player", "chargedThisTurn")) ? 3 : 2);
+      ctx.drawCards(ctx.seat, chargedThisTurn(ctx) ? 3 : 2);
     },
   },
   "iris of reality|0": {
@@ -449,7 +447,7 @@ export const monHighRarity: Record<string, CardScript> = {
       ctx.addModifier({ scope: "until-end-of-turn", dominate: true, appliesTo: "weapon" });
     },
   },
-  "hexagore, the death hydra|0": weapon(2, {
+  "hexagore, the death hydra|0": attackingWeapon(2, {
     onAttackDeclared(ctx) {
       const blood = ctx
         .player(ctx.seat)
@@ -498,7 +496,7 @@ export const monHighRarity: Record<string, CardScript> = {
       },
     },
   },
-  "galaxxi black|0": weapon(1, {
+  "galaxxi black|0": attackingWeapon(1, {
     modifyAttack(ctx) {
       return ctx.getFlag("player", "playedFromBanishThisTurn") === true ? 2 : 0;
     },
@@ -703,7 +701,7 @@ export const monHighRarity: Record<string, CardScript> = {
       if (ctx.link?.targetAllyId === undefined && ctx.player(opponentSeat(ctx)).soul.length) ctx.grantGoAgain();
     },
   },
-  "ravenous meataxe|0": weapon(2, {
+  "ravenous meataxe|0": attackingWeapon(2, {
     onAttackDeclared(ctx) {
       ctx.drawCards(ctx.seat, 1);
       if (randomDiscardSix(ctx)) ctx.addModifier({ scope: "chain-link", attack: 2 });
@@ -715,7 +713,7 @@ export const monHighRarity: Record<string, CardScript> = {
       if (randomDiscardSix(ctx)) buffNextAttack(ctx, { attackFromBasePower: true, appliesTo: "attack-action", appliesToType: ["brute"] });
     },
   },
-  "dread scythe|0": weapon(3, {
+  "dread scythe|0": attackingWeapon(3, {
     onAttackDeclared(ctx) {
       ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId });
     },

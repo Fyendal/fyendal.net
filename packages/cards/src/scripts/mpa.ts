@@ -38,6 +38,7 @@ import {
   ongoingLabel,
   opponentSeat,
   pendingDelayedEffect,
+  reactionCount,
   requestDiseaseTokenChoice,
   sharesName,
   targetsHero,
@@ -172,8 +173,6 @@ function sickening(effect: (ctx: ScriptCtx, defender: number) => void): CardScri
     },
   };
 }
-
-const reactionCount = (ctx: ScriptCtx): number => Number(ctx.getFlag("link", "reactionCount"));
 
 function tailoredBanish(ctx: ScriptCtx): void {
   const named = ctx.self.chosenName;

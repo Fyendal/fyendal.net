@@ -1,10 +1,14 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
+  clashForToken,
   decisionMessage,
   decisionPrompt,
   discardSixPlusPayoff,
+  equipmentZoneCards,
+  hasSixPlusInPitch,
   isAttackAction,
+  isOnCombatChain,
   isSixPlus,
   localizedCardLog,
   opponentSeat,
@@ -19,31 +23,8 @@ const AGILITY = "SKA034";
 const MIGHT = "SKA035";
 const VIGOR = "SKA036";
 
-function isOnCombatChain(ctx: ScriptCtx, card: { readonly instanceId: number; readonly cardId: string }): boolean {
-  return ctx.state.chain.some((link) =>
-    [link.attackingCard, ...link.defendingCards, ...link.defendingEquipment, ...link.reactions].some(
-      (onChain) => onChain.instanceId === card.instanceId,
-    ),
-  );
-}
-
-function hasSixPlusInPitch(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).pitch.some((card) => isSixPlus(ctx, card));
-}
-
 function conditionalPitchGoAgain(): CardScript {
   return { hasConditionalGoAgain: hasSixPlusInPitch };
-}
-
-function clashForToken(tokenId: string): CardScript {
-  return {
-    onDefend(ctx) {
-      ctx.requestClash(opponentSeat(ctx), "create-token");
-    },
-    onClashResult(ctx, hook, winner) {
-      if (hook === "create-token" && winner >= 0) ctx.heroCreatesTokens(winner, tokenId);
-    },
-  };
 }
 
 function pulpingGoAgain(ctx: ScriptCtx): void {
@@ -138,7 +119,7 @@ const wildRide = discardSixPlusPayoff((ctx) => {
 export const ska: Record<string, CardScript> = {
   "kayo|0": {
     modifyBasePower(ctx, card, base) {
-      if (card.owner !== ctx.seat || !isAttackAction(ctx, card) || isOnCombatChain(ctx, card)) {
+      if (card.owner !== ctx.seat || !isAttackAction(ctx, card) || isOnCombatChain(ctx, card.instanceId)) {
         return base;
       }
       return base + 1;
@@ -209,7 +190,7 @@ export const ska: Record<string, CardScript> = {
         const controlled = [
           player.hero,
           ...player.weapons,
-          ...Object.values(player.equipment).filter((card) => card !== undefined),
+          ...equipmentZoneCards(player),
           ...player.board,
         ];
         return (

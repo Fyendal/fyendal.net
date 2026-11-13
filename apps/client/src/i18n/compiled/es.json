@@ -1305,12 +1305,6 @@
       "value": " de recurso para obtener +1 de defensa?"
     }
   ],
-  "card.aio.maintenance.choose": [
-    {
-      "type": 0,
-      "value": "¿Quitar un contador de steam o destruir esto?"
-    }
-  ],
   "card.aio.symbiosisshot.steam": [
     {
       "type": 0,
@@ -5047,52 +5041,6 @@
     {
       "type": 1,
       "value": "p"
-    }
-  ],
-  "card.ele.pay.or.discard": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": ¿pagar "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " "
-    },
-    {
-      "type": 6,
-      "value": "amount",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "recurso"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "recursos"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " o descartar una carta?"
     }
   ],
   "card.ele.pitch.card.bottom": [
@@ -13583,28 +13531,6 @@
       "value": "¿Hacer banish de la carta superior y jugarla como un instant?"
     }
   ],
-  "card.pen.decompose.action": [
-    {
-      "type": 0,
-      "value": "Elige la carta de action"
-    }
-  ],
-  "card.pen.decompose.earth.first": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": ¿hacer decompose? Elige la primera carta Earth"
-    }
-  ],
-  "card.pen.decompose.earth.second": [
-    {
-      "type": 0,
-      "value": "Elige la segunda carta Earth"
-    }
-  ],
   "card.pen.deeprecesses.banish": [
     {
       "type": 0,
@@ -15917,16 +15843,6 @@
     {
       "type": 0,
       "value": "Pon una carta de attack action en la parte inferior de tu mazo"
-    }
-  ],
-  "card.tcc.boulder.hand.top": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": pon una carta de tu mano en la parte superior de tu mazo"
     }
   ],
   "card.tcc.encore.attack.return": [
@@ -19232,12 +19148,6 @@
     {
       "type": 0,
       "value": "Elige una carta de la mano oponente para hacer banish"
-    }
-  ],
-  "card.upr.option.you": [
-    {
-      "type": 0,
-      "value": "Tú"
     }
   ],
   "card.upr.pay.or.discard": [

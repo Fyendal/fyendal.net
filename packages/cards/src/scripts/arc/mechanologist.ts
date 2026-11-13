@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  boostedThisTurn,
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
@@ -7,10 +8,6 @@ import {
   optN,
   optOnChoose,
 } from "../shared-helpers.js";
-
-function boostedThisTurn(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "boostedThisTurn") === true;
-}
 
 function mechanicItemAtMost(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, maxCost: number): boolean {
   const data = ctx.cardData(card.cardId);

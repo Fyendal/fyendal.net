@@ -2,7 +2,10 @@ import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
   buffNextAttack,
+  countAuras,
+  crushTriggered,
   decisionPrompt,
+  equipmentZoneCards,
   heroChoiceSeat,
   isWeaponAttack,
   localizedCardLog,
@@ -16,7 +19,6 @@ import {
   suspenseAura,
   suspenseNextAttackBuff,
   yesNoPrompt,
-  isAura,
   isSuspenseAura,
 } from "./shared-helpers.js";
 
@@ -43,20 +45,9 @@ const CONFIDENCE = "SLY034";
 const MIGHT = "SLY035";
 const BOO = crowdTrigger("boo");
 
-/** ctx.state is typed without the internal side tables; the runtime object has them. */
-
-/** Auras you control (aura-subtype board cards: Suspense auras, Booze!, tokens). */
-function countAuras(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).board.filter((c) => isAura(ctx, c)).length;
-}
-
 /** An "aura of suspense" is an aura with the Suspense keyword (SUP notes). */
 function controlsSuspenseAura(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).board.some((c) => isSuspenseAura(ctx, c));
-}
-
-function crushTriggered(ctx: ScriptCtx): boolean {
-  return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.hit && ctx.link.damage >= 4;
 }
 
 /** Nameable damage sources for Oasis Respite's "source of your choice":
@@ -69,7 +60,7 @@ function damageSourceCandidates(ctx: ScriptCtx): number[] {
   for (const layer of ctx.state.stack) ids.push(layer.sourceInstanceId);
   for (const p of ctx.state.players) {
     ids.push(p.hero.instanceId);
-    for (const c of [...p.weapons, ...p.board, ...Object.values(p.equipment).filter((card) => card !== undefined)]) {
+    for (const c of [...p.weapons, ...p.board, ...equipmentZoneCards(p)]) {
       if (!c.faceDown) ids.push(c.instanceId);
     }
   }
@@ -139,12 +130,12 @@ function aboveBase(ctx: ScriptCtx): boolean {
  * destroyAtZeroCounter marker adds the state-based "when this has no
  * suspense counters, destroy it" net for counters removed any other way.
  */
-function suspense(): CardScript {
+function slySuspense(): CardScript {
   return suspenseAura({ logCounterRemoval: true });
 }
 
 /** Suspense aura whose leave trigger buffs the next attack. */
-function suspenseBuff(n: number): CardScript {
+function slySuspenseBuff(n: number): CardScript {
   return suspenseAura({ leaves: suspenseNextAttackBuff(n), logCounterRemoval: true });
 }
 
@@ -327,13 +318,13 @@ export const sly: Record<string, CardScript> = {
     },
   },
 
-  "act of glory|1": suspenseBuff(6),
-  "edge of their seats|1": suspenseBuff(5),
-  "edge of their seats|3": suspenseBuff(3),
-  "tension in the air|1": suspenseBuff(4),
+  "act of glory|1": slySuspenseBuff(6),
+  "edge of their seats|1": slySuspenseBuff(5),
+  "edge of their seats|3": slySuspenseBuff(3),
+  "tension in the air|1": slySuspenseBuff(4),
 
   "the suspense is killing me|3": {
-    ...suspense(),
+    ...slySuspense(),
     modifyFriendlyAttack(ctx) {
       return Number(ctx.getFlag("player", "attacksDeclaredThisTurn")) === 1 ? 1 : 0;
     },

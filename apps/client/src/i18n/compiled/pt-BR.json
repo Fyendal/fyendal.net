@@ -1301,12 +1301,6 @@
       "value": " de recurso para +1 de defesa?"
     }
   ],
-  "card.aio.maintenance.choose": [
-    {
-      "type": 0,
-      "value": "Remover um marcador de steam ou destruir esta carta?"
-    }
-  ],
   "card.aio.symbiosisshot.steam": [
     {
       "type": 0,
@@ -5125,60 +5119,6 @@
     {
       "type": 1,
       "value": "p"
-    }
-  ],
-  "card.ele.pay.or.discard": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": pagar "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " "
-    },
-    {
-      "type": 6,
-      "value": "amount",
-      "options": {
-        "=0": {
-          "value": [
-            {
-              "type": 0,
-              "value": "recursos"
-            }
-          ]
-        },
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "recurso"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "recursos"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " ou descartar uma carta?"
     }
   ],
   "card.ele.pitch.card.bottom": [
@@ -13974,28 +13914,6 @@
       "value": "Fazer banish da carta do topo e jogá-la como uma instant?"
     }
   ],
-  "card.pen.decompose.action": [
-    {
-      "type": 0,
-      "value": "Escolha a carta de action"
-    }
-  ],
-  "card.pen.decompose.earth.first": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": fazer decompose? Escolha a primeira carta Earth"
-    }
-  ],
-  "card.pen.decompose.earth.second": [
-    {
-      "type": 0,
-      "value": "Escolha a segunda carta Earth"
-    }
-  ],
   "card.pen.deeprecesses.banish": [
     {
       "type": 0,
@@ -16313,16 +16231,6 @@
     {
       "type": 0,
       "value": "Coloque uma carta de attack action no fundo do seu deck"
-    }
-  ],
-  "card.tcc.boulder.hand.top": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": coloque uma carta da sua mão no topo do seu deck"
     }
   ],
   "card.tcc.encore.attack.return": [
@@ -19689,12 +19597,6 @@
     {
       "type": 0,
       "value": "Escolha uma carta da mão do oponente para fazer banish"
-    }
-  ],
-  "card.upr.option.you": [
-    {
-      "type": 0,
-      "value": "Você"
     }
   ],
   "card.upr.pay.or.discard": [

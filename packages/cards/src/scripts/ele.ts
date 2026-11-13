@@ -5,11 +5,14 @@ import {
   buffNextAttack,
   commonOptionMessages,
   consumeDelayedEffect,
+  createFrostbites,
   dealArcane,
   dealtByThis,
   decisionMessage,
   decisionPrompt,
+  discardUnlessPay,
   entersArenaTrigger,
+  equipmentZoneCards,
   faceUpGraveyard,
   hasCardSubtype,
   heroChoiceSeat,
@@ -33,7 +36,6 @@ import { hasType as hasPrintedType } from "@fyendal/shared";
 // Tales of Aria commons, rares, and young heroes. Fusion is paid by revealing
 // a matching talent card from hand; the revealed card never leaves the hand.
 
-const FROSTBITE = "SIY035";
 const SEISMIC_SURGE = "CRU044";
 
 /** Fused Explosive Growth: "whenever it deals damage" to any target. */
@@ -45,38 +47,6 @@ const explosiveGrowthDamage: TriggerDef = {
   condition: (ctx, eventCard) => dealtByThis(ctx, eventCard) && isFused(ctx),
   effect: (ctx) => ctx.addModifier({ scope: "combat-chain", attack: 1 }),
 };
-
-function createFrostbites(ctx: ScriptCtx, seat: number, count = 1): void {
-  ctx.createTokens(FROSTBITE, count, seat);
-}
-
-function discardUnlessPay(ctx: ScriptCtx, target: number, cost: number, key: string): void {
-  const hand = ctx.player(target).hand;
-  if (hand.length === 0) return;
-  if (
-    ctx.requestPayment(
-      `${key}:pay:${target}`,
-      decisionPrompt(
-        `${ctx.data.name}: pay ${cost} resource${cost === 1 ? "" : "s"} or discard a card?`,
-        "card.ele.pay.or.discard",
-        {
-          values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: cost },
-        },
-      ),
-      cost,
-      target,
-    )
-  )
-    return;
-  ctx.requestCardChoice(
-    `${key}:discard:${target}`,
-    decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.ele.discard.choose", {
-      values: { card: { kind: "card", cardId: ctx.self.cardId } },
-    }),
-    hand.map((card) => card.instanceId),
-    target,
-  );
-}
 
 function discardUnlessPayOnChoose(ctx: ScriptCtx, hook: string, option: string, key: string): boolean {
   const payment = new RegExp(`^${key}:pay:(\\d+)$`).exec(hook);
@@ -168,7 +138,7 @@ const emboldenDraw: TriggerDef = entersArenaTrigger(
   { condition: controlsAnotherNonTokenAura },
 );
 
-function delayedGuardianAura(type: "earth" | "ice", attack: number, creates?: "frostbite" | "seismic"): CardScript {
+function fusionGuardianAura(type: "earth" | "ice", attack: number, creates?: "frostbite" | "seismic"): CardScript {
   return withFusion(type, {
     triggers: [
       ...(creates === "frostbite"
@@ -642,12 +612,12 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "snow under|1": fusedHitFrostbite("ice"),
   "snow under|2": fusedHitFrostbite("ice"),
   "snow under|3": fusedHitFrostbite("ice"),
-  "emerging avalanche|1": delayedGuardianAura("ice", 3, "frostbite"),
-  "emerging avalanche|2": delayedGuardianAura("ice", 2, "frostbite"),
-  "emerging avalanche|3": delayedGuardianAura("ice", 1, "frostbite"),
-  "strength of sequoia|1": delayedGuardianAura("earth", 3, "seismic"),
-  "strength of sequoia|2": delayedGuardianAura("earth", 2, "seismic"),
-  "strength of sequoia|3": delayedGuardianAura("earth", 1, "seismic"),
+  "emerging avalanche|1": fusionGuardianAura("ice", 3, "frostbite"),
+  "emerging avalanche|2": fusionGuardianAura("ice", 2, "frostbite"),
+  "emerging avalanche|3": fusionGuardianAura("ice", 1, "frostbite"),
+  "strength of sequoia|1": fusionGuardianAura("earth", 3, "seismic"),
+  "strength of sequoia|2": fusionGuardianAura("earth", 2, "seismic"),
+  "strength of sequoia|3": fusionGuardianAura("earth", 1, "seismic"),
 
   // Elemental Ranger
   "lexi|0": {
@@ -1348,8 +1318,8 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
         },
         effect(ctx) {
           const link = ctx.link;
-          const stillControlled = Object.values(ctx.player(ctx.seat).equipment).some(
-            (card) => card?.instanceId === ctx.self.instanceId,
+          const stillControlled = equipmentZoneCards(ctx.player(ctx.seat)).some(
+            (card) => card.instanceId === ctx.self.instanceId,
           );
           if (!link || !stillControlled) return;
           ctx.destroySelf();

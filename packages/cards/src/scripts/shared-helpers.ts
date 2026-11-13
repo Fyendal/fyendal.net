@@ -698,8 +698,9 @@ export function requestHeroChoice(
 
 /** Seat named by a `requestHeroChoice` answer. */
 export function heroChoiceSeat(ctx: ScriptCtx, option: string): number | undefined {
-  if (option === "your hero") return ctx.seat;
-  if (option === "opposing hero") return opponentSeat(ctx);
+  // "you"/"opponent" were UPR's options; pending decisions in stored games may still carry them.
+  if (option === "your hero" || option === "you") return ctx.seat;
+  if (option === "opposing hero" || option === "opponent") return opponentSeat(ctx);
   return undefined;
 }
 
@@ -1390,7 +1391,7 @@ export function markedStealthHeroScript(agentCardIds: readonly string[]): CardSc
     modifyAttack(ctx) {
       const link = ctx.link;
       if (!link || link.targetAllyId !== undefined || !ctx.hasKeyword(link.attackingCard, "stealth")) return 0;
-      return (ctx.player(opponentSeat(ctx)).hero.scriptState?.marked ?? 0) > 0 ? 1 : 0;
+      return isMarked(ctx, opponentSeat(ctx)) ? 1 : 0;
     },
     canTriggerOnHit(ctx) {
       const link = ctx.link;
@@ -1407,7 +1408,7 @@ export function markedStealthHeroScript(agentCardIds: readonly string[]): CardSc
     triggers: [
       {
         event: "end-of-turn",
-        condition: (ctx) => (ctx.player(opponentSeat(ctx)).hero.scriptState?.marked ?? 0) > 0,
+        condition: (ctx) => isMarked(ctx, opponentSeat(ctx)),
         label: "Become a random Agent of Chaos",
         effect(ctx) {
           ctx.becomeHero(agentCardIds[ctx.randomInt(agentCardIds.length)]!);
@@ -2308,4 +2309,869 @@ export function hasLiveTurnEffect(ctx: ScriptCtx): boolean {
       modifier.scope === "until-end-of-turn" &&
       !modifier.consumed,
   );
+}
+
+// ── cross-set predicates and script factories ───────────────────────────────
+
+type Card = DeepReadonly<CardInstance>;
+
+/** Register one script under every pitch of a functional name. */
+export function pitches(name: string, factory: (pitch: 1 | 2 | 3) => CardScript): Record<string, CardScript> {
+  return Object.fromEntries(([1, 2, 3] as const).map((pitch) => [`${name}|${pitch}`, factory(pitch)]));
+}
+
+/** Cards in a player's equipment zones only; see `equippedCards` for "equipment you control". */
+export function equipmentZoneCards(player: Pick<ReturnType<ScriptCtx["player"]>, "equipment">): Card[] {
+  return Object.values(player.equipment).filter((card): card is Card => card !== undefined);
+}
+
+/** Equipment the seat controls: equipment zones plus equipment-typed weapons (Parry Blade, Nitro Mechanoid). */
+export function equippedCards(ctx: ScriptCtx, seat: number): Card[] {
+  const player = ctx.player(seat);
+  return [
+    ...equipmentZoneCards(player),
+    ...player.weapons.filter((card) => hasType(ctx.cardData(card.cardId), "equipment")),
+  ];
+}
+
+/** Non-hero permanents the seat controls: board, weapon zones and equipment zones. */
+export function controlledPermanents(ctx: ScriptCtx, seat = ctx.seat): Card[] {
+  const player = ctx.player(seat);
+  return [
+    ...player.board,
+    ...player.weapons,
+    ...equipmentZoneCards(player),
+  ];
+}
+
+export function controlsNamed(ctx: ScriptCtx, name: string): boolean {
+  return controlledPermanents(ctx).some((card) => cardNamed(ctx, card, name));
+}
+
+export function countAuras(ctx: ScriptCtx): number {
+  return ctx.player(ctx.seat).board.filter((card) => isAura(ctx, card)).length;
+}
+
+export function isOnCombatChain(ctx: ScriptCtx, instanceId: number): boolean {
+  return ctx.state.chain.some((link) =>
+    [link.attackingCard, ...link.defendingCards, ...link.defendingEquipment, ...link.reactions].some(
+      (card) => card.instanceId === instanceId,
+    ),
+  );
+}
+
+export function reactionCount(ctx: ScriptCtx): number {
+  return Number(ctx.getFlag("link", "reactionCount"));
+}
+
+/** Another card from hand defends alongside this one. */
+export function defendsTogetherWithCardFromHand(ctx: ScriptCtx): boolean {
+  if (!ctx.link) return false;
+  const count = Number(ctx.link.flags.defendedFromHandCount ?? 0);
+  const selfWasFromHand = ctx.link.flags[`defendedFromHand:${ctx.self.instanceId}`] === true ? 1 : 0;
+  return count > selfWasFromHand;
+}
+
+export function isItem(ctx: ScriptCtx, card: Card): boolean {
+  return hasCardSubtype(ctx, card, "item");
+}
+
+export function isAlly(ctx: ScriptCtx, card: Card): boolean {
+  return hasCardSubtype(ctx, card, "ally");
+}
+
+export function isPirate(ctx: ScriptCtx, card: Card): boolean {
+  return hasCardSubtype(ctx, card, "pirate");
+}
+
+export function isLight(ctx: ScriptCtx, card: Card): boolean {
+  return hasCardSubtype(ctx, card, "light");
+}
+
+/** Both heroes, controller first. */
+export function bothHeroSeats(ctx: ScriptCtx): number[] {
+  return [ctx.seat, opponentSeat(ctx)];
+}
+
+/** The active link is this seat's unresolved attack. */
+export function isOwnAttack(ctx: ScriptCtx): boolean {
+  return !!ctx.link && !ctx.link.resolved && ctx.link.attacker === ctx.seat;
+}
+
+export function attackTypes(ctx: ScriptCtx): readonly string[] {
+  if (!ctx.link) return [];
+  return ctx.cardTypes(ctx.link.attackingCard);
+}
+
+/** Crush: this attack hit a hero for 4 or more damage. */
+export function crushTriggered(ctx: ScriptCtx): boolean {
+  return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.hit && ctx.link.damage >= 4;
+}
+
+/** The action phase, including its combat steps and layers not resolving at a phase boundary. */
+export function duringActionPhase(ctx: ScriptCtx): boolean {
+  if (ctx.state.phase === "action" || ctx.state.phase === "defend" || ctx.state.phase === "reaction") return true;
+  return (
+    ctx.state.phase === "layer" &&
+    ctx.state.stackResume !== "begin-action-phase" &&
+    ctx.state.stackResume !== "end-phase"
+  );
+}
+
+export function chargedThisTurn(ctx: ScriptCtx): boolean {
+  return ctx.getFlag("player", "chargedThisTurn") === true;
+}
+
+export function boostedThisTurn(ctx: ScriptCtx): boolean {
+  return ctx.getFlag("player", "boostedThisTurn") === true;
+}
+
+export function boostedLinks(ctx: ScriptCtx): number {
+  return ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted === true).length;
+}
+
+export function pitchedBlue(ctx: ScriptCtx): boolean {
+  return ctx.pitchedThisTurn({ color: "blue" }) > 0;
+}
+
+export function playedLightning(ctx: ScriptCtx): boolean {
+  return ctx.getFlag("player", "playedSubtype:lightning") === true;
+}
+
+export function playedOrCreatedAura(ctx: ScriptCtx): boolean {
+  return ctx.getFlag("player", "playedSubtype:aura") === true || ctx.getFlag("player", "createdSubtype:aura") === true;
+}
+
+/** A token was created this turn. */
+export function createdThisTurn(ctx: ScriptCtx): boolean {
+  return Number(ctx.getFlag("player", "createdThisTurn")) > 0;
+}
+
+/** High tide: two or more blue cards in your pitch zone. */
+export function highTide(ctx: ScriptCtx): boolean {
+  return ctx.player(ctx.seat).pitch.filter((card) => ctx.cardColor(card) === 3).length >= 2;
+}
+
+export function hasSixPlusInPitch(ctx: ScriptCtx): boolean {
+  return ctx.player(ctx.seat).pitch.some((card) => isSixPlus(ctx, card));
+}
+
+/** Clash; the winner creates the token. */
+export function clashForToken(tokenId: string): CardScript {
+  return {
+    onDefend(ctx) {
+      ctx.requestClash(opponentSeat(ctx), "create-token");
+    },
+    onClashResult(ctx, hook, winner) {
+      if (hook === "create-token" && winner >= 0) ctx.heroCreatesTokens(winner, tokenId);
+    },
+  };
+}
+
+export interface SplitSides {
+  leftName: string;
+  rightName: string;
+  left(ctx: ScriptCtx): void;
+  right(ctx: ScriptCtx): void;
+}
+
+/** A split meld card: action on the left, instant on the right. */
+export function splitScript(sides: SplitSides): CardScript {
+  return {
+    meld: {
+      leftName: sides.leftName,
+      rightName: sides.rightName,
+      leftCardType: "action",
+      rightCardType: "instant",
+    },
+    onPlay(ctx) {
+      if (ctx.self.meldSide === "left") sides.left(ctx);
+      else if (ctx.self.meldSide === "right") sides.right(ctx);
+      else if (ctx.self.meldSide === "both") {
+        sides.right(ctx);
+        sides.left(ctx);
+      }
+    },
+  };
+}
+
+// Marked
+
+export function isMarked(ctx: ScriptCtx, seat: number): boolean {
+  return (ctx.player(seat).hero.scriptState?.marked ?? 0) > 0;
+}
+
+export function markHero(ctx: ScriptCtx, seat: number): void {
+  const hero = ctx.player(seat).hero;
+  if ((hero.scriptState?.marked ?? 0) > 0) return;
+  ctx.addCardState(hero.instanceId, "marked", 1);
+  ctx.logPublic(
+    localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
+      target: { kind: "card", cardId: hero.cardId },
+    }),
+  );
+}
+
+/** Mark is removed by the hit itself, so read the hit-event snapshot on the link. */
+export function hitMarkedHero(ctx: ScriptCtx): boolean {
+  return ctx.link?.flags.targetWasMarkedOnHit === true;
+}
+
+/** This source's next-attack modifier landed on the active link, so its granted riders apply. */
+export function armedBySelf(ctx: ScriptCtx): boolean {
+  return ctx.state.modifiers.some((m) => m.scope === "chain-link" && m.sourceInstanceId === ctx.self.instanceId);
+}
+
+// Draconic
+
+export function draconicLinks(ctx: ScriptCtx): number {
+  return ctx.chainLinksControlled(ctx.seat, "draconic");
+}
+
+export function currentAttackDraconic(ctx: ScriptCtx): boolean {
+  return ctx.currentAttackHasType("draconic");
+}
+
+/** The resolving card is already counted, so 2 means another red. */
+export function playedAnotherRed(ctx: ScriptCtx): boolean {
+  return ctx.playedThisTurn("red") >= 2;
+}
+
+/** The resolving card is already counted, so 2 means another blue. */
+export function playedAnotherBlue(ctx: ScriptCtx): boolean {
+  return ctx.playedThisTurn("blue") >= 2;
+}
+
+export function transcendIfBlue(ctx: ScriptCtx): void {
+  if (playedAnotherBlue(ctx)) ctx.transcend();
+}
+
+type BanishReward = "power" | "discount" | "go-again";
+
+function banishAttackPrompt(ctx: ScriptCtx, reward: BanishReward, links: number): ScriptDecisionPrompt {
+  if (reward === "go-again")
+    return decisionPrompt(`${ctx.data.name}: banish an eligible attack?`, "card.upr.attack.banish", {
+      values: { card: { kind: "card", cardId: ctx.self.cardId } },
+      optionMessages: commonOptionMessages("pass"),
+    });
+  return decisionPrompt(
+    `${ctx.data.name}: banish an attack action with cost less than ${links} — ` +
+      `it ${reward === "power" ? "gains +1{p}" : "costs {r} less to play"} and you may play it this turn`,
+    reward === "power" ? "card.sfa.attack.banish.power" : "card.sfa.attack.banish.discount",
+    {
+      values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: links },
+      optionMessages: commonOptionMessages("pass"),
+    },
+  );
+}
+
+/** Mounting Anger family: on hit, banish an attack action from hand costing less than your Draconic links;
+ * it gets `reward` and may be played from banish this turn. */
+export function banishAttackOnHit(hook: string, reward: BanishReward): CardScript {
+  return {
+    onHit(ctx) {
+      const links = draconicLinks(ctx);
+      const choices = ctx.player(ctx.seat).hand.filter(
+        (card) => isAttackAction(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) < links,
+      );
+      if (choices.length === 0) return;
+      ctx.requestCardChoice(hook, banishAttackPrompt(ctx, reward, links), [
+        "pass",
+        ...choices.map((card) => card.instanceId),
+      ]);
+    },
+    onChoose(ctx, chosenHook, option) {
+      if (chosenHook !== hook || option === "pass") return;
+      const id = Number(option);
+      const selected = ctx.player(ctx.seat).hand.find((card) => card.instanceId === id);
+      if (!selected || !ctx.banish(id)) return;
+      if (reward === "power") ctx.addCounter(id, "power", 1);
+      if (reward === "go-again") ctx.grantCardKeyword(id, "go again");
+      ctx.allowPlayFrom(id, "banish", reward === "discount" ? { costReduction: 1 } : undefined);
+      if (reward === "go-again") return;
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name}: the banished card ${reward === "power" ? "gains +1{p}" : "costs {r} less to play"} — ` +
+            "you may play it this turn",
+          reward === "power" ? "card.log.sfa.banished.power" : "card.log.sfa.banished.discount",
+          { result: { kind: "card", cardId: selected.cardId }, amount: 1 },
+          { kind: "card-moved", cardId: selected.cardId, ownerSeat: ctx.seat, from: "hand", to: "banish" },
+        ),
+      );
+    },
+  };
+}
+
+// Runeblade and Wizard
+
+// Token creation canonicalizes printings, so one id serves every set.
+const RUNECHANT = "SVI034";
+
+export function createRunechants(ctx: ScriptCtx, count: number): void {
+  ctx.createTokens(RUNECHANT, count);
+}
+
+export function runeCount(ctx: ScriptCtx): number {
+  return ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length;
+}
+
+export function spellbladeAssault(): CardScript {
+  return { onAttackDeclared: (ctx) => createRunechants(ctx, 2) };
+}
+
+export function mauvrionSkies(runechants: number): CardScript {
+  return {
+    onPlay(ctx) {
+      buffNextAttack(ctx, {
+        goAgain: true,
+        appliesTo: "attack-action",
+        appliesToClass: "runeblade",
+        onHitCreateToken: { cardId: RUNECHANT, count: runechants },
+      });
+    },
+  };
+}
+
+export function maleficIncantation(verses: number): CardScript {
+  return {
+    destroyAtZeroCounter: "verse",
+    onEnterArena(ctx) {
+      ctx.setCounter("verse", verses);
+    },
+    triggers: [
+      {
+        event: "card-played",
+        label: "Remove a verse counter and create a Runechant",
+        condition(ctx, played) {
+          const onceKey = `maleficUsed:${ctx.self.instanceId}`;
+          return (
+            !!played &&
+            isAttackAction(ctx, played) &&
+            ctx.getFlag("player", onceKey) !== true &&
+            ctx.getCounter("verse") > 0
+          );
+        },
+        onTrigger(ctx) {
+          ctx.setFlag("player", `maleficUsed:${ctx.self.instanceId}`, true);
+        },
+        effect(ctx) {
+          ctx.setCounter("verse", ctx.getCounter("verse") - 1);
+          createRunechants(ctx, 1);
+        },
+      },
+    ],
+  };
+}
+
+export function isWizardNonAttack(ctx: ScriptCtx, card: Card): boolean {
+  return isNonAttackAction(ctx, card) && hasCardSubtype(ctx, card, "wizard");
+}
+
+/** Instant-speed Wizard spell: deal arcane damage to any target. */
+export function arcaneSpell(damage: number): CardScript {
+  return {
+    arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [damage],
+    playAsInstant: wizardActionAsInstant,
+    onPlay(ctx) {
+      requestAnyTargetChoice(ctx, "arcane-target", damage);
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "arcane-target") {
+        const target = dealArcaneToAnyTargetChoice(ctx, option, damage);
+        ctx.setState("targetedAlly", target?.allyId === undefined ? 0 : 1);
+      } else if (hook === "arcane") {
+        // UPR asked with hero/ally instance ids; pending decisions in stored games may still carry them.
+        const id = Number(option);
+        const hero = ctx.state.players.find((player) => player.hero.instanceId === id);
+        const owner = ctx.state.players.find((player) => player.board.some((card) => card.instanceId === id));
+        if (hero) dealArcane(ctx, hero.seat, damage);
+        else if (owner) dealArcane(ctx, owner.seat, damage, id);
+      }
+    },
+  };
+}
+
+/** Deal arcane damage to a hero; `surge` runs when more than `amount` was dealt. */
+export function arcaneHero(
+  amount: number,
+  surge?: (ctx: ScriptCtx, target: number, dealt: number) => void,
+): CardScript {
+  return {
+    arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [amount],
+    onPlay(ctx) {
+      requestAnyTargetChoice(ctx, "arcane-hero", amount, { heroesOnly: true });
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "arcane-hero") dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), amount);
+    },
+    ...(surge
+      ? {
+          onDamageDealt(ctx, target, dealt, arcane) {
+            if (arcane && dealt > amount) surge(ctx, target, dealt);
+          },
+        }
+      : {}),
+  };
+}
+
+// Shadow
+
+export function controlsVox(ctx: ScriptCtx): boolean {
+  return ctx.player(ctx.seat).weapons.some((card) => cardNamed(ctx, card, "Vox Necropolis"));
+}
+
+export function decay(): Pick<CardScript, "triggers"> {
+  return {
+    triggers: [
+      {
+        event: "end-of-turn",
+        whose: "subject",
+        label: "Decay",
+        labelMessage: { id: "card.trigger.common.decay" },
+        effect(ctx) {
+          const life = ctx.self.life ?? 0;
+          if (life <= 1) {
+            ctx.destroySelf();
+            return;
+          }
+          ctx.setState("lifePenalty", ctx.getState("lifePenalty") + 1);
+          ctx.setPermanentLife(ctx.self.instanceId, life - 1);
+        },
+      },
+    ],
+  };
+}
+
+export function skeletalPuppetry(power: number): CardScript {
+  return {
+    alternativePlayCost: {
+      kind: "discard-hand-subtype",
+      subtype: "ally",
+    },
+    onPlay(ctx) {
+      buffNextAttack(ctx, {
+        attack: power,
+        appliesToSubtype: "ally",
+        goAgain: true,
+      });
+    },
+  };
+}
+
+// Weapons and Warrior
+
+/** A once-per-turn weapon attack ability; `extra.activated` fields override the base. */
+export function attackingWeapon(cost: number, extra: CardScript = {}): CardScript {
+  const base = { cost, isAttack: true, goAgain: false, oncePerTurn: true } as const;
+  const activated = extra.activated;
+  return {
+    ...extra,
+    activated: !activated || Array.isArray(activated) ? (activated ?? base) : { ...base, ...activated },
+  };
+}
+
+export function swords(ctx: ScriptCtx): readonly Card[] {
+  return ctx.player(ctx.seat).weapons.filter((card) => isSword(ctx, card));
+}
+
+export function weaponReaction(power: number, effect?: (ctx: ScriptCtx, weapon: Card) => void): CardScript {
+  return {
+    canPlay: (ctx) => ctx.link?.attacker === ctx.seat && isWeaponAttack(ctx),
+    onPlay(ctx) {
+      const weapon = ctx.link?.attackingCard;
+      if (!weapon) return;
+      if (power) ctx.addModifier({ scope: "chain-link", attack: power });
+      effect?.(ctx, weapon);
+    },
+  };
+}
+
+export function swordReaction(power: number, effect?: (ctx: ScriptCtx, weapon: Card) => void): CardScript {
+  const base = weaponReaction(power, effect);
+  return { ...base, canPlay: (ctx) => ctx.link?.attacker === ctx.seat && isSwordAttack(ctx) };
+}
+
+export function wagerReaction(
+  power: number,
+  rewardLabel: string,
+  reward: (ctx: ScriptCtx, winner: number) => void,
+): CardScript {
+  return {
+    ...swordReaction(power, (ctx) => ctx.wager(opponentSeat(ctx), [], rewardLabel)),
+    onWagerResolved(ctx, winner) {
+      reward(ctx, winner);
+    },
+  };
+}
+
+// Guardian
+
+/** Unity: +1{d} while another card from hand defends with this. */
+export function unityEquipment(): CardScript {
+  return {
+    canTriggerOnDefend: defendsTogetherWithCardFromHand,
+    onDefend(ctx) {
+      ctx.addCardTempDefense(ctx.self.instanceId, 1);
+    },
+  };
+}
+
+export function chokeslam(): CardScript {
+  return {
+    canTriggerOnHit: crushTriggered,
+    onHit(ctx) {
+      const hero = ctx.player(opponentSeat(ctx)).hero;
+      ctx.setCardState(hero.instanceId, "attackActionNoPowerGainUntilTurn", ctx.state.turn + 1);
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          "Chokeslam: opposing attack action cards can't gain {p} during their next action phase",
+          "card.log.sbr.chokeslam.suppressed",
+        ),
+      );
+    },
+  };
+}
+
+export function boulderDrop(): CardScript {
+  return {
+    canTriggerOnHit: crushTriggered,
+    onHit(ctx) {
+      const hand = ctx.player(opponentSeat(ctx)).hand;
+      if (hand.length === 0) return;
+      ctx.requestCardChoice(
+        "boulder-drop-top",
+        decisionPrompt(`${ctx.data.name}: put a card from your hand on top of your deck`, "card.sbr.hand.card.top", {
+          values: { card: { kind: "card", cardId: ctx.self.cardId } },
+        }),
+        hand.map((card) => card.instanceId),
+        opponentSeat(ctx),
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "boulder-drop-top") ctx.putOnDeckTop(Number(option));
+    },
+  };
+}
+
+// Elemental
+
+const FROSTBITE = "SIY035";
+
+export function createFrostbites(ctx: ScriptCtx, seat: number, count = 1): void {
+  ctx.createTokens(FROSTBITE, count, seat);
+}
+
+export function discardUnlessPay(ctx: ScriptCtx, target: number, cost: number, key: string): void {
+  const player = ctx.state.players[target]!;
+  if (player.hand.length === 0) return;
+  if (
+    ctx.requestPayment(
+      `${key}:pay:${target}`,
+      decisionPrompt(
+        `${ctx.data.name}: pay ${cost} resource${cost === 1 ? "" : "s"} or discard a card?`,
+        "card.siy.discard.pay",
+        {
+          values: {
+            card: { kind: "card", cardId: ctx.self.cardId },
+            amount: cost,
+          },
+          optionMessages: commonOptionMessages("no"),
+        },
+      ),
+      cost,
+      target,
+    )
+  )
+    return;
+  ctx.requestCardChoice(
+    `${key}:discard:${target}`,
+    decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.siy.discard.choose", {
+      values: { card: { kind: "card", cardId: ctx.self.cardId } },
+    }),
+    player.hand.map((card) => card.instanceId),
+    target,
+  );
+}
+
+/** Decompose: banish two Earth cards and an action card from your graveyard; if you do, `payoff`. */
+export function decompose(trigger: "attack" | "play", payoff: (ctx: ScriptCtx) => void): CardScript {
+  const offer = (ctx: ScriptCtx) => {
+    const grave = faceUpGraveyard(ctx);
+    const firstEarth = grave.filter(
+      (first) =>
+        hasCardSubtype(ctx, first, "earth") &&
+        grave.some(
+          (second) =>
+            second.instanceId !== first.instanceId &&
+            hasCardSubtype(ctx, second, "earth") &&
+            grave.some(
+              (action) =>
+                action.instanceId !== first.instanceId &&
+                action.instanceId !== second.instanceId &&
+                ctx.hasCardType(action, "action"),
+            ),
+        ),
+    );
+    if (firstEarth.length === 0) return;
+    ctx.requestCardChoice(
+      "decompose-earth-1",
+      decisionPrompt(
+        `${ctx.data.name}: decompose? Choose the first Earth card to banish`,
+        "card.ros.decompose.earth.first",
+        { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("no") },
+      ),
+      ["no", ...firstEarth.map((card) => card.instanceId)],
+    );
+  };
+  return {
+    ...(trigger === "attack" ? { onAttackDeclared: offer } : { onPlay: offer }),
+    onChoose(ctx, rawHook, option) {
+      // PEN used "pen-"-prefixed hooks; pending decisions in stored games may still carry them.
+      const hook = rawHook.replace(/^pen-/, "");
+      if (hook === "decompose-earth-1") {
+        if (option === "no") return;
+        const first = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
+        if (!first || !hasCardSubtype(ctx, first, "earth")) return;
+        ctx.setState("decomposeEarth1", first.instanceId);
+        const secondEarth = faceUpGraveyard(ctx).filter(
+          (second) =>
+            second.instanceId !== first.instanceId &&
+            hasCardSubtype(ctx, second, "earth") &&
+            faceUpGraveyard(ctx).some(
+              (action) =>
+                action.instanceId !== first.instanceId &&
+                action.instanceId !== second.instanceId &&
+                ctx.hasCardType(action, "action"),
+            ),
+        );
+        ctx.requestCardChoice(
+          "decompose-earth-2",
+          decisionPrompt(
+            `${ctx.data.name}: choose the second Earth card to banish`,
+            "card.ros.decompose.earth.second",
+            { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
+          ),
+          secondEarth.map((card) => card.instanceId),
+        );
+        return;
+      }
+      if (hook === "decompose-earth-2") {
+        const firstId = ctx.getState("decomposeEarth1");
+        const second = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
+        if (!second || second.instanceId === firstId || !hasCardSubtype(ctx, second, "earth")) return;
+        ctx.setState("decomposeEarth2", second.instanceId);
+        const actions = faceUpGraveyard(ctx).filter(
+          (card) =>
+            card.instanceId !== firstId && card.instanceId !== second.instanceId && ctx.hasCardType(card, "action"),
+        );
+        ctx.requestCardChoice(
+          "decompose-action",
+          decisionPrompt(`${ctx.data.name}: choose the action card to banish`, "card.ros.decompose.action", {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+          }),
+          actions.map((card) => card.instanceId),
+        );
+        return;
+      }
+      if (hook !== "decompose-action") return;
+      const ids = [ctx.getState("decomposeEarth1"), ctx.getState("decomposeEarth2"), Number(option)];
+      const grave = faceUpGraveyard(ctx);
+      const chosen = ids.map((id) => grave.find((card) => card.instanceId === id));
+      if (
+        new Set(ids).size !== 3 ||
+        !chosen.every(Boolean) ||
+        !hasCardSubtype(ctx, chosen[0]!, "earth") ||
+        !hasCardSubtype(ctx, chosen[1]!, "earth") ||
+        !ctx.hasCardType(chosen[2]!, "action") ||
+        !ids.every((id) => ctx.banish(id))
+      )
+        return;
+      payoff(ctx);
+    },
+  };
+}
+
+// Gold and Pirate
+
+const GOLD = "SGB035";
+
+export function createGold(ctx: ScriptCtx, count = 1): void {
+  ctx.createTokens(GOLD, count);
+}
+
+/** "You may destroy a Gold you control rather than pay this card's {r} cost." */
+export function alternativeGold(): CardScript["alternativePlayCost"] {
+  return { kind: "destroy-controlled-named", options: [{ name: "Gold", count: 1 }] };
+}
+
+export type NextAllyMod = Omit<Modifier, "id" | "sourceInstanceId" | "scope" | "defense" | "seat">;
+
+/** "Your next Pirate ally attack this turn gets <mod> and 'When this hits a
+ *  hero, <onHitEffect>'" — the buff rides a next-attack modifier; the granted
+ *  on-hit effect is dispatched via an until-end-of-turn marker (lingering
+ *  onAttackDeclared/onHit); each copy consumes its own marker, so two copies
+ *  stack. */
+export function nextAllyAttack(key: string, mod: NextAllyMod, onHitEffect: (ctx: ScriptCtx) => void): CardScript {
+  return {
+    onPlay(ctx) {
+      buffNextAttack(ctx, {
+        appliesToSubtype: "ally",
+        appliesToClass: "pirate",
+        ...mod,
+      });
+      armDelayedEffect(ctx);
+    },
+    onFriendlyAttackDeclared(ctx) {
+      const link = ctx.link;
+      if (!link || link.attacker !== ctx.seat) return;
+      if (!isAlly(ctx, link.attackingCard) || !isPirate(ctx, link.attackingCard)) return;
+      // The on-hit dispatch below reads the link flag, not the consumed
+      // marker, so it still fires.
+      if (!consumeDelayedEffect(ctx)) return;
+      ctx.setFlag("link", key, (Number(ctx.getFlag("link", key)) || 0) + 1);
+    },
+    canTriggerOnHit(ctx) {
+      const link = ctx.link;
+      return (
+        !!link &&
+        link.attacker === ctx.seat &&
+        link.targetAllyId === undefined &&
+        (Number(ctx.getFlag("link", key)) || 0) > 0
+      );
+    },
+    onHit(ctx) {
+      const n = Number(ctx.getFlag("link", key)) || 0;
+      // two copies put two markers down, and the lingering dispatch calls this
+      // once per marker — the first dispatch fires for all of them
+      ctx.setFlag("link", key, 0);
+      for (let i = 0; i < n; i++) onHitEffect(ctx);
+    },
+  };
+}
+
+// Mechanologist
+
+export function hyperDrivers(ctx: ScriptCtx): readonly Card[] {
+  return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Hyper Driver"));
+}
+
+export function hyperDriver(steam: number): CardScript {
+  return {
+    destroyAtZeroCounter: "steam",
+    onEnterArena(ctx) {
+      if (steam > 0) ctx.setCounter("steam", steam);
+    },
+    triggers: [
+      {
+        event: "card-boosted",
+        label: "Remove a steam counter and gain 1 resource",
+        labelMessage: decisionMessage("card.trigger.hyperdriver.boost"),
+        condition(ctx) {
+          return (
+            ctx.getFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`) !== true && ctx.getCounter("steam") > 0
+          );
+        },
+        onTrigger(ctx) {
+          ctx.setFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`, true);
+        },
+        effect(ctx) {
+          const steam = ctx.getCounter("steam");
+          if (steam <= 0) return;
+          ctx.setCounter("steam", steam - 1);
+          ctx.gainResources(ctx.seat, 1);
+        },
+      },
+    ],
+  };
+}
+
+/** Evo equipment: played from hand onto a Base, as an instant while a "next Evo" effect is live. */
+export function evoEquipment(extra: CardScript = {}): CardScript {
+  return {
+    ...extra,
+    playableEquipment: true,
+    transformsEquipment: (ctx, equipped) => hasCardSubtype(ctx, equipped, "base"),
+    playAsInstant(ctx) {
+      return ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true || (extra.playAsInstant?.(ctx) ?? false);
+    },
+  };
+}
+
+export function equippedEvos(ctx: ScriptCtx): number {
+  return ctx.countEquipped("evo");
+}
+
+export function maintenanceItem(steam: number, extra: CardScript = {}): CardScript {
+  return {
+    ...extra,
+    onEnterArena(ctx) {
+      ctx.setCounter("steam", steam);
+      extra.onEnterArena?.(ctx);
+    },
+    triggers: [
+      {
+        event: "start-of-turn",
+        whose: "subject",
+        label: "Remove a steam counter or destroy this",
+        labelMessage: decisionMessage("card.trigger.steam.maintain"),
+        effect(ctx) {
+          if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
+          else
+            ctx.requestChoice(
+              "maintenance",
+              decisionPrompt("Remove a steam counter or destroy this?", "card.evo.maintenance.choose", {
+                optionMessages: {
+                  remove: decisionMessage("common.option.remove"),
+                  destroy: decisionMessage("common.option.destroy"),
+                },
+              }),
+              ["remove", "destroy"],
+            );
+        },
+      },
+      ...(extra.triggers ?? []),
+    ],
+    onChoose(ctx, hook, option) {
+      // AIO/EVO used prefixed hooks; pending decisions in stored games may still carry them.
+      if (hook === "maintenance" || hook === "evo-maintenance" || hook === "aio-maintenance") {
+        if (option === "remove") ctx.setCounter("steam", Math.max(0, ctx.getCounter("steam") - 1));
+        else ctx.destroySelf();
+        return;
+      }
+      extra.onChoose?.(ctx, hook, option);
+    },
+  };
+}
+
+/** Galvanize: when this defends, you may destroy an item you control for +2{d}. */
+export function galvanize(extra: CardScript = {}): CardScript {
+  return {
+    ...extra,
+    onDefend(ctx) {
+      const items = ctx.player(ctx.seat).board.filter((card) => isItem(ctx, card));
+      if (items.length)
+        ctx.requestCardChoice(
+          "galvanize",
+          decisionPrompt("Destroy an item for +2 defense?", "card.evo.galvanize.item", {
+            values: { amount: 2 },
+            optionMessages: commonOptionMessages("none"),
+          }),
+          ["none", ...items.map((card) => card.instanceId)],
+        );
+      extra.onDefend?.(ctx);
+    },
+    onChoose(ctx, hook, option) {
+      // EVO high-rarity used "evo-galvanize" with a "no" option; stored games may still carry it.
+      const galvanizing = hook === "galvanize" || hook === "evo-galvanize";
+      if (galvanizing && option !== "none" && option !== "no" && ctx.destroyPermanent(Number(option))) {
+        ctx.addModifier({ scope: "chain-link", defense: 2 });
+        return;
+      }
+      extra.onChoose?.(ctx, hook, option);
+    },
+  };
 }

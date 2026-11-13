@@ -5,8 +5,10 @@ import {
   cardNameContains,
   cardNamed,
   commonOptionMessages,
+  controlledPermanents,
   decisionMessage,
   decisionPrompt,
+  duringActionPhase,
   entersArenaTrigger,
   hasCardSubtype,
   heroDamage,
@@ -80,15 +82,6 @@ function scourCandidates(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
 function scourDestroy(ctx: ScriptCtx, instanceIds: readonly number[]): void {
   const destroyed = instanceIds.filter((id) => ctx.destroyPermanent(id)).length;
   ctx.dealDamage(opponentSeat(ctx), destroyed, { arcane: true, sourceInstanceId: ctx.self.instanceId });
-}
-
-function duringActionPhase(ctx: ScriptCtx): boolean {
-  if (ctx.state.phase === "action" || ctx.state.phase === "defend" || ctx.state.phase === "reaction") return true;
-  return (
-    ctx.state.phase === "layer" &&
-    ctx.state.stackResume !== "begin-action-phase" &&
-    ctx.state.stackResume !== "end-phase"
-  );
 }
 
 function illusionistAttacksOnChain(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
@@ -293,11 +286,7 @@ function moneyValue(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): number {
 
 function knickMoney(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
   const player = ctx.player(ctx.seat);
-  return [
-    ...player.board,
-    ...player.weapons,
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-  ].filter((card) => moneyValue(ctx, card) > 0);
+  return controlledPermanents(ctx, player.seat).filter((card) => moneyValue(ctx, card) > 0);
 }
 
 function knickTargets(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {

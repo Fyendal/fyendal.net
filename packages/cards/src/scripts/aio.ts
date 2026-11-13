@@ -1,77 +1,32 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
-  commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  isItem,
   localizedCardLog,
+  maintenanceItem,
   ongoingLabel,
   yesNoPrompt,
   hasLiveTurnEffect,
   hasCardSubtype,
 } from "./shared-helpers.js";
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-
-function isItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasCardSubtype(ctx, card, "item");
-}
-
 function isMech(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return hasCardSubtype(ctx, card, "mechanologist");
 }
 
-function crankItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
+function isCrankItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return isItem(ctx, card) && ctx.hasCrank(card);
 }
 
 function addSteamChoice(ctx: ScriptCtx, hook: string): void {
-  const items = ctx.player(ctx.seat).board.filter((card) => crankItem(ctx, card));
+  const items = ctx.player(ctx.seat).board.filter((card) => isCrankItem(ctx, card));
   if (items.length)
     ctx.requestCardChoice(
       hook,
       decisionPrompt("Put a steam counter on an item with crank", "card.aio.crankitem.steam"),
       items.map((card) => card.instanceId),
     );
-}
-
-function maintenanceItem(steam: number, extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    onEnterArena(ctx) {
-      ctx.setCounter("steam", steam);
-      extra.onEnterArena?.(ctx);
-    },
-    triggers: [
-      {
-        event: "start-of-turn",
-        whose: "subject",
-        label: "Remove a steam counter or destroy this",
-        labelMessage: decisionMessage("card.trigger.steam.maintain"),
-        effect(ctx) {
-          if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
-          else
-            ctx.requestChoice(
-              "aio-maintenance",
-              decisionPrompt("Remove a steam counter or destroy this?", "card.aio.maintenance.choose", {
-                optionMessages: commonOptionMessages("remove", "destroy"),
-              }),
-              ["remove", "destroy"],
-            );
-        },
-      },
-      ...(extra.triggers ?? []),
-    ],
-    onChoose(ctx, hook, option) {
-      if (hook === "aio-maintenance") {
-        if (option === "remove") ctx.setCounter("steam", Math.max(0, ctx.getCounter("steam") - 1));
-        else ctx.destroySelf();
-        return;
-      }
-      extra.onChoose?.(ctx, hook, option);
-    },
-  };
 }
 
 export const aio: Record<string, CardScript> = {
@@ -84,7 +39,7 @@ export const aio: Record<string, CardScript> = {
         ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
         isItem(ctx, card) &&
         isMech(ctx, card) &&
-        (data(ctx, card).cost ?? 0) <= 1
+        (ctx.cardData(card.cardId).cost ?? 0) <= 1
       );
     },
     modifyFriendlyCardPlayCost(ctx, card, zone, baseCost) {
@@ -92,7 +47,7 @@ export const aio: Record<string, CardScript> = {
         ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
         isItem(ctx, card) &&
         isMech(ctx, card) &&
-        (data(ctx, card).cost ?? 0) <= 1
+        (ctx.cardData(card.cardId).cost ?? 0) <= 1
         ? baseCost + 1
         : baseCost;
     },
@@ -102,7 +57,7 @@ export const aio: Record<string, CardScript> = {
         ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
         isItem(ctx, card) &&
         isMech(ctx, card) &&
-        (data(ctx, card).cost ?? 0) <= 1
+        (ctx.cardData(card.cardId).cost ?? 0) <= 1
       );
     },
     requiresFriendlyCardPlayAsInstant(ctx, card, zone) {
@@ -111,11 +66,11 @@ export const aio: Record<string, CardScript> = {
         ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
         isItem(ctx, card) &&
         isMech(ctx, card) &&
-        (data(ctx, card).cost ?? 0) <= 1
+        (ctx.cardData(card.cardId).cost ?? 0) <= 1
       );
     },
     onFriendlyPlay(ctx, played, from) {
-      if (from === "deck" && isItem(ctx, played) && isMech(ctx, played) && (data(ctx, played).cost ?? 0) <= 1) {
+      if (from === "deck" && isItem(ctx, played) && isMech(ctx, played) && (ctx.cardData(played.cardId).cost ?? 0) <= 1) {
         ctx.setFlag("player", "dashTopItemPlayedThisTurn", true);
       }
     },

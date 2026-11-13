@@ -1,9 +1,12 @@
-import type { CardScript, ScriptCtx } from "@fyendal/engine";
+import type { CardScript } from "@fyendal/engine";
 import {
   attackAbility,
+  boulderDrop,
   canHeave,
   cardNamed,
+  chokeslam,
   commonOptionMessages,
+  crushTriggered,
   decisionPrompt,
   isAura,
   localizedCardLog,
@@ -15,48 +18,6 @@ import {
 
 const SEISMIC_SURGE = "SBR035";
 const VIGOR = "SBR036";
-
-function crushTriggered(ctx: ScriptCtx): boolean {
-  return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.hit && ctx.link.damage >= 4;
-}
-
-function boulderDrop(): CardScript {
-  return {
-    canTriggerOnHit: crushTriggered,
-    onHit(ctx) {
-      const hand = ctx.player(opponentSeat(ctx)).hand;
-      if (hand.length === 0) return;
-      ctx.requestCardChoice(
-        "boulder-drop-top",
-        decisionPrompt(`${ctx.data.name}: put a card from your hand on top of your deck`, "card.sbr.hand.card.top", {
-          values: { card: { kind: "card", cardId: ctx.self.cardId } },
-        }),
-        hand.map((card) => card.instanceId),
-        opponentSeat(ctx),
-      );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "boulder-drop-top") ctx.putOnDeckTop(Number(option));
-    },
-  };
-}
-
-function chokeslam(): CardScript {
-  return {
-    canTriggerOnHit: crushTriggered,
-    onHit(ctx) {
-      const hero = ctx.player(opponentSeat(ctx)).hero;
-      ctx.setCardState(hero.instanceId, "attackActionNoPowerGainUntilTurn", ctx.state.turn + 1);
-      ctx.logPublic(
-        localizedCardLog(
-          ctx,
-          "Chokeslam: opposing attack action cards can't gain {p} during their next action phase",
-          "card.log.sbr.chokeslam.suppressed",
-        ),
-      );
-    },
-  };
-}
 
 export const sbr: Record<string, CardScript> = {
   "bravo, flattering showman|0": {

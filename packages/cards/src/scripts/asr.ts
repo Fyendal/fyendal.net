@@ -12,10 +12,6 @@ import {
 } from "./shared-helpers.js";
 import { bitteringThorns, cruNinjaWarrior } from "./cru/ninja-warrior.js";
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-
 function previousWasEdge(ctx: ScriptCtx): boolean {
   return previousAttackHasName(ctx, "edge of autumn");
 }
@@ -32,7 +28,7 @@ function ninjaAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean 
 
 function offerGiveAndTake(ctx: ScriptCtx): void {
   const choices = faceUpGraveyard(ctx).filter(
-      (card) => ctx.hasCardType(card, "action") && (data(ctx, card).cost ?? 0) < ctx.currentAttackPower(),
+      (card) => ctx.hasCardType(card, "action") && (ctx.cardData(card.cardId).cost ?? 0) < ctx.currentAttackPower(),
     );
   if (choices.length)
     ctx.requestCardChoice(

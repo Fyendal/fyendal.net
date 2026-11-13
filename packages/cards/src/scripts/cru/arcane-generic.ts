@@ -1,12 +1,13 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextArcaneDamageCard,
-  buffNextAttack,
   commonOptionMessages,
+  createRunechants,
   dealArcane,
   decisionPrompt,
   heroChoiceSeat,
   isNonAttackAction,
+  mauvrionSkies,
   opponentSeat,
   optN,
   optOnChoose,
@@ -16,11 +17,6 @@ import {
 } from "../shared-helpers.js";
 
 const COPPER = "CRU197";
-const RUNECHANT = "CRU157";
-
-function createRunechants(ctx: ScriptCtx, count: number): void {
-  ctx.createTokens(RUNECHANT, count);
-}
 
 function isRunebladeAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return (
@@ -28,19 +24,6 @@ function isRunebladeAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): bo
     ctx.cardTypes(card).includes("attack") &&
     ctx.cardTypes(card).includes("runeblade")
   );
-}
-
-function mauvrionSkies(runechants: number): CardScript {
-  return {
-    onPlay(ctx) {
-      buffNextAttack(ctx, {
-        goAgain: true,
-        appliesTo: "attack-action",
-        appliesToClass: "runeblade",
-        onHitCreateToken: { cardId: RUNECHANT, count: runechants },
-      });
-    },
-  };
 }
 
 function consumingVolition(): CardScript {

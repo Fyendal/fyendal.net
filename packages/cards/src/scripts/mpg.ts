@@ -5,9 +5,11 @@ import {
   cardDefendsThisTrigger,
   cardNamed,
   commonOptionMessages,
+  crushTriggered,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  equippedCards,
   faceUpGraveyard,
   hasCardSubtype,
   isAttackAction,
@@ -20,12 +22,8 @@ import { hasType as hasPrintedType } from "@fyendal/shared";
 
 const SEISMIC_SURGE = "SBR035";
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-
 function isAuraToken(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasPrintedType(data(ctx, card), "token") && isAura(ctx, card);
+  return hasPrintedType(ctx.cardData(card.cardId), "token") && isAura(ctx, card);
 }
 
 function isGuardianAttack(ctx: ScriptCtx): boolean {
@@ -46,10 +44,6 @@ function applyFearlessConfrontation(ctx: ScriptCtx, attackInstanceId: number): v
   ctx.suppressCardKeyword(attack.instanceId, "dominate");
 }
 
-function crushTriggered(ctx: ScriptCtx): boolean {
-  return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.hit && ctx.link.damage >= 4;
-}
-
 function guardianCrushTriggered(ctx: ScriptCtx): boolean {
   return crushTriggered(ctx) && hasCardSubtype(ctx, ctx.player(opponentSeat(ctx)).hero, "guardian");
 }
@@ -60,14 +54,6 @@ function controlsSeismicSurge(ctx: ScriptCtx, seat = ctx.seat): boolean {
 
 function seismicSurges(ctx: ScriptCtx, seat = ctx.seat): readonly DeepReadonly<CardInstance>[] {
   return ctx.player(seat).board.filter((card) => cardNamed(ctx, card, "Seismic Surge"));
-}
-
-function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
-  const player = ctx.player(seat);
-  return [
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-    ...player.weapons.filter((card) => hasPrintedType(data(ctx, card), "equipment")),
-  ];
 }
 
 function canEquip(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
@@ -116,7 +102,7 @@ function oldOneSmeltEquipment(): CardScript {
   return {
     canTriggerOnHit: guardianCrushTriggered,
     onHit(ctx) {
-      for (const equipment of equipmentCards(ctx, opponentSeat(ctx))) {
+      for (const equipment of equippedCards(ctx, opponentSeat(ctx))) {
         if ((equipment.defCounters ?? 0) > 0) ctx.destroyPermanent(equipment.instanceId);
       }
     },
@@ -164,7 +150,7 @@ function annexEquipment(): CardScript {
   return {
     canTriggerOnHit: guardianCrushTriggered,
     onHit(ctx) {
-      const equipment = equipmentCards(ctx, opponentSeat(ctx)).filter((card) => canEquip(ctx, card));
+      const equipment = equippedCards(ctx, opponentSeat(ctx)).filter((card) => canEquip(ctx, card));
       if (equipment.length) {
         ctx.requestCardChoice(
           "annex-equipment",
@@ -240,13 +226,13 @@ function aftershock(): CardScript {
 function littleBigFoot(bonus: number): CardScript {
   return {
     modifyAttack(ctx) {
-      const bigPitch = ctx.player(ctx.seat).pitch.filter((card) => (data(ctx, card).cost ?? 0) >= 3);
+      const bigPitch = ctx.player(ctx.seat).pitch.filter((card) => (ctx.cardData(card.cardId).cost ?? 0) >= 3);
       return bigPitch.length >= 2 ? bonus : 0;
     },
   };
 }
 
-function delayedGuardianAura(attack: number): CardScript {
+function nextGuardianAttackAura(attack: number): CardScript {
   return {
     triggers: [
       {
@@ -266,7 +252,7 @@ function delayedGuardianAura(attack: number): CardScript {
 }
 
 function drawACrowd(): CardScript {
-  const delayed = delayedGuardianAura(3);
+  const delayed = nextGuardianAttackAura(3);
   return {
     ...delayed,
     triggers: [
@@ -543,7 +529,7 @@ function crashAndBash(): CardScript {
       ctx.logPublic(
         localizedCardLog(
           ctx,
-          `Crash and Bash reveals ${data(ctx, card).name} from hand`,
+          `Crash and Bash reveals ${ctx.cardData(card.cardId).name} from hand`,
           "card.log.sbr.crash.revealed",
           { revealed: { kind: "card", cardId: card.cardId } },
           { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
@@ -599,7 +585,7 @@ export const mpg: Record<string, CardScript> = {
   "hoarding of denial|0": {
     modifyDefense(ctx) {
       const defenders = ctx.state.chain.flatMap((link) => [...link.defendingCards, ...link.defendingEquipment]);
-      return new Set(defenders.filter((card) => (data(ctx, card).cost ?? 0) >= 3).map((card) => card.instanceId)).size;
+      return new Set(defenders.filter((card) => (ctx.cardData(card.cardId).cost ?? 0) >= 3).map((card) => card.instanceId)).size;
     },
   },
   "tremor of resistance|0": {
@@ -736,7 +722,7 @@ Object.assign(mpg, {
   "clash of bravado|2": clashAndDestroyAura(),
   "headbutt|3": {
     canBeDefendedBy(ctx: ScriptCtx, defending: DeepReadonly<CardInstance>) {
-      return !hasPrintedType(data(ctx, defending), "equipment") || hasCardSubtype(ctx, defending, "head");
+      return !hasPrintedType(ctx.cardData(defending.cardId), "equipment") || hasCardSubtype(ctx, defending, "head");
     },
     modifyAttack(ctx: ScriptCtx) {
       const ownHead = ctx.player(ctx.seat).equipment.head !== undefined;
@@ -748,7 +734,7 @@ Object.assign(mpg, {
       const head = ctx.player(opponentSeat(ctx)).equipment.head;
       if (!head) return;
       ctx.addCardDefenseCounters(head.instanceId, 1);
-      if ((data(ctx, head).defense ?? 0) - (head.defCounters ?? 0) <= 0) {
+      if ((ctx.cardData(head.cardId).defense ?? 0) - (head.defCounters ?? 0) <= 0) {
         ctx.destroyPermanent(head.instanceId);
       }
     },

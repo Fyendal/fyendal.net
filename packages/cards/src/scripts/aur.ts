@@ -1,9 +1,12 @@
-import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, decisionMessage, decisionPrompt, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
-
-function playedLightning(ctx: ScriptCtx): boolean {
-  return ctx.getPlayerFlag(ctx.seat, "playedSubtype:lightning") === true;
-}
+import type { CardScript } from "@fyendal/engine";
+import {
+  buffNextAttack,
+  decisionMessage,
+  decisionPrompt,
+  opponentSeat,
+  playedLightning,
+  yesNoPrompt,
+} from "./shared-helpers.js";
 
 function crackling(): CardScript {
   return {

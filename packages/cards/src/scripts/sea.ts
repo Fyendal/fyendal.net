@@ -7,16 +7,23 @@ import {
   cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
+  controlledPermanents,
+  createGold,
   dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
   hasCardSubtype,
+  highTide,
   hitHookLabel,
+  isAlly,
   isArrow,
   isAura,
+  isItem,
+  isPirate,
   localizedCardLog,
+  nextAllyAttack,
   nextAttack,
   ongoingLabel,
   opponentSeat,
@@ -36,48 +43,23 @@ const GOLDKISS_RUM = "SEA245";
 type Card = DeepReadonly<CardInstance>;
 type NextAttackMod = Omit<Modifier, "id" | "sourceInstanceId" | "scope" | "defense" | "seat">;
 
-function data(ctx: ScriptCtx, card: Card | string) {
-  return ctx.cardData(typeof card === "string" ? card : card.cardId);
-}
-
 function isCog(ctx: ScriptCtx, card: Card): boolean {
   return hasCardSubtype(ctx, card, "cog");
-}
-function isItem(ctx: ScriptCtx, card: Card): boolean {
-  return hasCardSubtype(ctx, card, "item");
-}
-function isAlly(ctx: ScriptCtx, card: Card): boolean {
-  return hasCardSubtype(ctx, card, "ally");
-}
-function isPirate(ctx: ScriptCtx, card: Card): boolean {
-  return hasCardSubtype(ctx, card, "pirate");
 }
 
 function isThief(ctx: ScriptCtx, seat = ctx.seat): boolean {
   return hasCardSubtype(ctx, ctx.player(seat).hero, "thief");
 }
 
-function highTide(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).pitch.filter((card) => ctx.cardColor(card) === 3).length >= 2;
-}
-
 function controlledGold(ctx: ScriptCtx, seat = ctx.seat): Card[] {
   const player = ctx.player(seat);
-  return [
-    ...player.board,
-    ...player.weapons,
-    ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
-  ].filter((card) => cardNamed(ctx, card, "Gold"));
+  return controlledPermanents(ctx, player.seat).filter((card) => cardNamed(ctx, card, "Gold"));
 }
 
 function controlledCogs(ctx: ScriptCtx, tapped?: boolean): Card[] {
   return ctx
     .player(ctx.seat)
     .board.filter((card) => isCog(ctx, card) && (tapped === undefined || (card.tapped === true) === tapped));
-}
-
-function createGold(ctx: ScriptCtx, count = 1): void {
-  ctx.createTokens(GOLD, count);
 }
 
 function createGoldenCog(ctx: ScriptCtx): void {
@@ -150,28 +132,6 @@ function tapChoice(ctx: ScriptCtx, hook: string, fallback: string, id: string, c
     );
 }
 
-function nextAllyAttack(flag: string, mod: NextAttackMod, onHit: (ctx: ScriptCtx) => void): CardScript {
-  return {
-    onPlay(ctx) {
-      buffNextAttack(ctx, { appliesToSubtype: "ally", appliesToClass: "pirate", ...mod });
-      armDelayedEffect(ctx);
-    },
-    onFriendlyAttackDeclared(ctx) {
-      if (!ctx.link || !isAlly(ctx, ctx.link.attackingCard) || !isPirate(ctx, ctx.link.attackingCard)) return;
-      if (!consumeDelayedEffect(ctx)) return;
-      ctx.setFlag("link", flag, (Number(ctx.getFlag("link", flag)) || 0) + 1);
-    },
-    canTriggerOnHit(ctx) {
-      return (Number(ctx.getFlag("link", flag)) || 0) > 0 && ctx.link?.targetAllyId === undefined;
-    },
-    onHit(ctx) {
-      const count = Number(ctx.getFlag("link", flag)) || 0;
-      ctx.setFlag("link", flag, 0);
-      for (let i = 0; i < count; i++) onHit(ctx);
-    },
-  };
-}
-
 function discardOrMill(hook: string, apply: (ctx: ScriptCtx) => void): CardScript {
   return {
     onAttackDeclared(ctx) {
@@ -210,7 +170,7 @@ function discardOrMill(hook: string, apply: (ctx: ScriptCtx) => void): CardScrip
         ctx.logPublic(
           localizedCardLog(
             ctx,
-            `${ctx.data.name} destroys ${data(ctx, chosen).name} from the top of the deck`,
+            `${ctx.data.name} destroys ${ctx.cardData(chosen.cardId).name} from the top of the deck`,
             "card.log.sea.decktop.destroyed",
             { result: { kind: "card", cardId: chosen.cardId } },
             { kind: "card-moved", cardId: chosen.cardId, ownerSeat: ctx.seat, from: "deck", to: "graveyard" },
@@ -468,7 +428,7 @@ function goFish(color: 1 | 2 | 3): CardScript {
       ctx.logPublic(
         localizedCardLog(
           ctx,
-          `Go Fish reveals ${data(ctx, card).name}`,
+          `Go Fish reveals ${ctx.cardData(card.cardId).name}`,
           "card.log.common.card.revealed",
           { revealed: { kind: "card", cardId: card.cardId } },
           { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: target }], sourceZone: "hand" },
@@ -591,7 +551,7 @@ function crashDownTheGates(): CardScript {
       ctx.logPublic(
         localizedCardLog(
           ctx,
-          `${data(ctx, top).name} is revealed from the top of the defending hero's deck`,
+          `${ctx.cardData(top.cardId).name} is revealed from the top of the defending hero's deck`,
           "card.log.sea.defender.decktop.revealed",
           { revealed: { kind: "card", cardId: top.cardId }, target: { kind: "player", seat: opponentSeat(ctx) } },
           { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: opponentSeat(ctx) }], sourceZone: "deck" },
@@ -1274,7 +1234,7 @@ export const sea: Record<string, CardScript> = {
       ctx.logPublic(
         localizedCardLog(
           ctx,
-          `${ctx.data.name} reveals ${data(ctx, top).name}`,
+          `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`,
           "card.log.common.decktop.revealed",
           { revealed: { kind: "card", cardId: top.cardId } },
           { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
@@ -1746,7 +1706,7 @@ Object.assign(
           ctx.logPublic(
             localizedCardLog(
               ctx,
-              `${ctx.data.name} reveals ${data(ctx, card).name}`,
+              `${ctx.data.name} reveals ${ctx.cardData(card.cardId).name}`,
               "card.log.sea.search.revealed",
               { result: { kind: "card", cardId: card.cardId } },
               { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "deck", to: "hand" },
@@ -2556,7 +2516,7 @@ Object.assign(sea, {
       );
       const target = controller?.board.find((card) => card.instanceId === ctx.playTargetInstanceId);
       if (!controller || !target) return;
-      const cost = data(ctx, target).cost ?? 0;
+      const cost = ctx.cardData(target.cardId).cost ?? 0;
       if (ctx.destroyPermanent(target.instanceId)) ctx.heroCreatesTokens(controller.seat, GOLD, cost);
     },
   },
@@ -2753,7 +2713,7 @@ Object.assign(sea, {
         const gained = Number(ctx.getPlayerFlag(ctx.seat, "lifeGainedThisTurn"));
         const cards = ctx.state.players
           .flatMap((player) => faceUpGraveyard(ctx, player.seat))
-          .filter((card) => ctx.hasCardType(card, "action") && (data(ctx, card).cost ?? 0) < gained);
+          .filter((card) => ctx.hasCardType(card, "action") && (ctx.cardData(card.cardId).cost ?? 0) < gained);
         if (cards.length)
           ctx.requestCardChoice(
             "everbloom",

@@ -1,7 +1,8 @@
-import type { CardScript, ScriptCtx } from "@fyendal/engine";
+import type { CardScript } from "@fyendal/engine";
 import {
   discardSixPlusPayoff,
   isAttackAction,
+  isOnCombatChain,
   isSixPlus,
   localizedCardLog,
   opponentSeat,
@@ -9,14 +10,6 @@ import {
 } from "./shared-helpers.js";
 
 const MIGHT = "AKO028";
-
-function isOnCombatChain(ctx: ScriptCtx, instanceId: number): boolean {
-  return ctx.state.chain.some((link) =>
-    [link.attackingCard, ...link.defendingCards, ...link.defendingEquipment, ...link.reactions].some(
-      (card) => card.instanceId === instanceId,
-    ),
-  );
-}
 
 export const ako: Record<string, CardScript> = {
   "kayo, armed and dangerous|0": {

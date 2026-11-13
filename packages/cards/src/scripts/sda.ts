@@ -1,5 +1,7 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  boostedLinks,
+  boostedThisTurn,
   cardNamed,
   decisionMessage,
   decisionPrompt,
@@ -22,7 +24,7 @@ function firstHyperDriver(ctx: ScriptCtx) {
   return ctx.player(ctx.seat).board.find((c) => isHyperDriver(ctx, c));
 }
 
-function addHyperSteam(ctx: ScriptCtx, instanceId: number): void {
+function addSteamToHyperDriver(ctx: ScriptCtx, instanceId: number): void {
   const driver = ctx.player(ctx.seat).board.find((c) => c.instanceId === instanceId && isHyperDriver(ctx, c));
   if (!driver) return;
   const steam = driver.counters?.steam ?? 0;
@@ -39,10 +41,6 @@ function addHyperSteam(ctx: ScriptCtx, instanceId: number): void {
 
 function controlsHyperDriver(ctx: ScriptCtx): boolean {
   return firstHyperDriver(ctx) !== undefined;
-}
-
-function boostedLinks(ctx: ScriptCtx): number {
-  return ctx.state.chain.filter((l) => l.attacker === ctx.seat && l.flags.boosted === true).length;
 }
 
 const hyperCounterFromBanish = hyperDriverCounterFromBoostBanish();
@@ -156,7 +154,7 @@ export const sda: Record<string, CardScript> = {
       timing: "instant",
       destroySelfCost: true,
       label: "Destroy: gain 1 action point",
-      canActivate: (ctx) => ctx.getFlag("player", "boostedThisTurn") === true,
+      canActivate: (ctx) => boostedThisTurn(ctx),
       onActivate(ctx) {
         ctx.gainActionPoint();
       },
@@ -186,7 +184,7 @@ export const sda: Record<string, CardScript> = {
     onPlay(ctx) {
       const drivers = ctx.player(ctx.seat).board.filter((card) => isHyperDriver(ctx, card));
       if (drivers.length === 1) {
-        addHyperSteam(ctx, drivers[0]!.instanceId);
+        addSteamToHyperDriver(ctx, drivers[0]!.instanceId);
       } else if (drivers.length > 1) {
         ctx.requestCardChoice(
           "re-charge-hyper-driver",
@@ -205,7 +203,7 @@ export const sda: Record<string, CardScript> = {
       );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "re-charge-hyper-driver") addHyperSteam(ctx, Number(option));
+      if (hook === "re-charge-hyper-driver") addSteamToHyperDriver(ctx, Number(option));
     },
   },
 

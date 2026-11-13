@@ -2,8 +2,12 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   cardNamed,
   commonOptionMessages,
+  currentAttackDraconic,
   dealArcane,
   decisionPrompt,
+  draconicLinks,
+  equipmentZoneCards,
+  equippedCards,
   faceUpGraveyard,
   hasCardSubtype,
   hitHookLabel,
@@ -19,7 +23,6 @@ import {
   yesNoPrompt,
 } from "../shared-helpers.js";
 import { dragonAttack } from "./dragon-attack.js";
-import { hasType } from "@fyendal/shared";
 
 const ASH = "UPR043";
 const FROSTBITE = "SIY035";
@@ -27,9 +30,6 @@ const FROSTBITE = "SIY035";
 function isIceAffliction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return cardNamed(ctx, card, "frostbite") || (hasCardSubtype(ctx, card, "ice") &&
     hasCardSubtype(ctx, card, "affliction"));
-}
-function equipped(player: ReturnType<ScriptCtx["player"]>): DeepReadonly<CardInstance>[] {
-  return Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card);
 }
 function ownIllusionistAttack(ctx: ScriptCtx): DeepReadonly<CardInstance> | undefined {
   const link = ctx.link;
@@ -99,7 +99,7 @@ const fai: CardScript = {
     timing: "instant",
     oncePerTurn: true,
     canActivate: (ctx) => faceUpGraveyard(ctx).some((card) => cardNamed(ctx, card, "phoenix flame")),
-    modifyCost: (ctx, base) => Math.max(0, base - ctx.chainLinksControlled(ctx.seat, "draconic")),
+    modifyCost: (ctx, base) => Math.max(0, base - draconicLinks(ctx)),
     onActivate(ctx) {
       const flame = faceUpGraveyard(ctx).find((card) => cardNamed(ctx, card, "phoenix flame"));
       if (flame) ctx.moveToHand(flame.instanceId);
@@ -126,13 +126,6 @@ const iyslander: CardScript = {
     },
   ],
 };
-
-function equippedCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
-  return [
-    ...Object.values(ctx.player(seat).equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
-    ...ctx.player(seat).weapons.filter((card) => hasType(ctx.cardData(card.cardId), "equipment")),
-  ];
-}
 
 export const uprHighRarity: Record<string, CardScript> = {
   "blood of the dracai|1": {
@@ -234,8 +227,8 @@ export const uprHighRarity: Record<string, CardScript> = {
     },
     modifyAttack(ctx) {
       const attacking = ctx.link?.attackingCard;
-      if (!attacking || !ctx.currentAttackHasType("draconic")) return 0;
-      return ctx.basePower(attacking) < ctx.chainLinksControlled(ctx.seat, "draconic") ? 1 : 0;
+      if (!attacking || !currentAttackDraconic(ctx)) return 0;
+      return ctx.basePower(attacking) < draconicLinks(ctx) ? 1 : 0;
     },
   },
   "combustion point|1": {
@@ -278,7 +271,7 @@ export const uprHighRarity: Record<string, CardScript> = {
           options: (ctx) =>
             ctx.state.players.flatMap((player) => [
               ...player.board.filter((card) => isIceAffliction(ctx, card) || ctx.isFrozen(card)),
-              ...[...player.weapons, ...player.arsenal, ...equipped(player)].filter((card) => ctx.isFrozen(card)),
+              ...[...player.weapons, ...player.arsenal, ...equipmentZoneCards(player)].filter((card) => ctx.isFrozen(card)),
             ]).map((card) => card.instanceId),
           prompt: () => decisionPrompt("Choose a frozen card or Ice permanent", "card.upr.frozen.ice.choose"),
         },
@@ -286,7 +279,7 @@ export const uprHighRarity: Record<string, CardScript> = {
           const id = ctx.playTargetInstanceId;
           if (id === undefined) return;
           const target = ctx.state.players
-            .flatMap((player) => [...player.board, ...player.weapons, ...player.arsenal, ...equipped(player)])
+            .flatMap((player) => [...player.board, ...player.weapons, ...player.arsenal, ...equipmentZoneCards(player)])
             .find((card) => card.instanceId === id);
           if (!target || !ctx.banish(ctx.self.instanceId)) return;
           if (isIceAffliction(ctx, target)) ctx.destroyPermanent(id);
@@ -340,7 +333,7 @@ export const uprHighRarity: Record<string, CardScript> = {
     },
   },
   "tome of firebrand|1": {
-    canPlay: (ctx) => ctx.chainLinksControlled(ctx.seat, "draconic") >= 4,
+    canPlay: (ctx) => draconicLinks(ctx) >= 4,
     onPlay(ctx) {
       ctx.drawCards(ctx.seat, 2);
     },
@@ -363,7 +356,7 @@ export const uprHighRarity: Record<string, CardScript> = {
       const frozen = [
         ...opp.arsenal,
         ...opp.board,
-        ...Object.values(opp.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
+        ...equipmentZoneCards(opp),
       ].filter((card) => ctx.isFrozen(card)).length;
       const ice = opp.board.filter((card) =>
         hasCardSubtype(ctx, card, "ice") && hasCardSubtype(ctx, card, "affliction")).length;

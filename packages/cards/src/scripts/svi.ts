@@ -3,18 +3,22 @@ import {
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
+  createRunechants,
   dealArcane,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
-  isAttackAction,
   isAura,
-  isCard,
   isNonAttackAction,
   leavesArenaTrigger,
   localizedCardLog,
+  maleficIncantation,
+  mauvrionSkies,
   opponentSeat,
+  playedOrCreatedAura,
+  runeCount,
+  spellbladeAssault,
 } from "./shared-helpers.js";
 
 // ── SVI (Silver Age Chapter 1: Viserai precon) ──────────────────────────────
@@ -23,57 +27,8 @@ import {
 // hooks, and granted on-hit riders for both hero and ally hits. Sigil of
 // Silphidae and Mauvrion Skies therefore use their printed timing directly.
 
-const RUNECHANT = "SVI034";
-
-function runeCount(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length;
-}
-
-function playedOrCreatedAura(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "playedSubtype:aura") === true || ctx.getFlag("player", "createdSubtype:aura") === true;
-}
-
-function createRunechants(ctx: ScriptCtx, count: number): void {
-  ctx.createTokens(RUNECHANT, count);
-}
-
 function auraActivityAttackBonus(amount: number): CardScript {
   return { modifyAttack: (ctx) => (playedOrCreatedAura(ctx) ? amount : 0) };
-}
-
-function spellbladeAssault(): CardScript {
-  return { onAttackDeclared: (ctx) => createRunechants(ctx, 2) };
-}
-
-function maleficIncantation(verses: number): CardScript {
-  return {
-    destroyAtZeroCounter: "verse",
-    onEnterArena(ctx) {
-      ctx.setCounter("verse", verses);
-    },
-    triggers: [
-      {
-        event: "card-played",
-        label: "Remove a verse counter and create a Runechant",
-        condition(ctx, played) {
-          const onceKey = `maleficUsed:${ctx.self.instanceId}`;
-          return (
-            !!played &&
-            isAttackAction(ctx, played) &&
-            ctx.getFlag("player", onceKey) !== true &&
-            ctx.getCounter("verse") > 0
-          );
-        },
-        onTrigger(ctx) {
-          ctx.setFlag("player", `maleficUsed:${ctx.self.instanceId}`, true);
-        },
-        effect(ctx) {
-          ctx.setCounter("verse", ctx.getCounter("verse") - 1);
-          createRunechants(ctx, 1);
-        },
-      },
-    ],
-  };
 }
 
 function condemnToSlaughter(amount: number): CardScript {
@@ -116,19 +71,6 @@ function condemnToSlaughter(amount: number): CardScript {
       if (aura && isAura(ctx, aura)) {
         ctx.destroyPermanent(aura.instanceId);
       }
-    },
-  };
-}
-
-function mauvrionSkies(runechants: number): CardScript {
-  return {
-    onPlay(ctx) {
-      buffNextAttack(ctx, {
-        goAgain: true,
-        appliesTo: "attack-action",
-        appliesToClass: "runeblade",
-        onHitCreateToken: { cardId: RUNECHANT, count: runechants },
-      });
     },
   };
 }

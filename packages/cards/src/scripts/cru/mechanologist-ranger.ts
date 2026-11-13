@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  boostedLinks,
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
@@ -101,10 +102,6 @@ function combustibleCourier(): CardScript {
       });
     },
   };
-}
-
-function boostedLinks(ctx: ScriptCtx): number {
-  return ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted === true).length;
 }
 
 function finishWorkshop(ctx: ScriptCtx, maxCost: number): void {

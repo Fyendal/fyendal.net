@@ -1,13 +1,16 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
+  arcaneSpell,
   cardNamed,
   commonOptionMessages,
   dealArcane,
   dealArcaneToAnyTargetChoice,
   decisionMessage,
   decisionPrompt,
+  discardUnlessPay,
   heroChoiceSeat,
   isFused,
+  isWizardNonAttack,
   localizedCardLog,
   opponentSeat,
   requestAnyTargetChoice,
@@ -23,61 +26,9 @@ import {
 
 const FROSTBITE = "SIY035";
 
-function isWizardNonAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return (
-    ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack") && ctx.cardTypes(card).includes("wizard")
-  );
-}
-
 function dealToChosenTarget(ctx: ScriptCtx, option: string, damage: number): void {
   const target = dealArcaneToAnyTargetChoice(ctx, option, damage);
   ctx.setState("targetedAlly", target?.allyId === undefined ? 0 : 1);
-}
-
-function arcaneSpell(damage: number): CardScript {
-  return {
-    arcaneDamageEffect: true,
-    arcaneDamageEffectAmounts: [damage],
-    playAsInstant: wizardActionAsInstant,
-    onPlay(ctx) {
-      requestAnyTargetChoice(ctx, "arcane-target", damage);
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "arcane-target") dealToChosenTarget(ctx, option, damage);
-    },
-  };
-}
-
-function discardUnlessPay(ctx: ScriptCtx, target: number, cost: number, key: string): void {
-  const player = ctx.state.players[target]!;
-  if (player.hand.length === 0) return;
-  if (
-    ctx.requestPayment(
-      `${key}:pay:${target}`,
-      decisionPrompt(
-        `${ctx.data.name}: pay ${cost} resource${cost === 1 ? "" : "s"} or discard a card?`,
-        "card.siy.discard.pay",
-        {
-          values: {
-            card: { kind: "card", cardId: ctx.self.cardId },
-            amount: cost,
-          },
-          optionMessages: commonOptionMessages("no"),
-        },
-      ),
-      cost,
-      target,
-    )
-  )
-    return;
-  ctx.requestCardChoice(
-    `${key}:discard:${target}`,
-    decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.siy.discard.choose", {
-      values: { card: { kind: "card", cardId: ctx.self.cardId } },
-    }),
-    player.hand.map((card) => card.instanceId),
-    target,
-  );
 }
 
 function handleDiscardUnlessPay(ctx: ScriptCtx, hook: string, option: string, key: string): boolean {

@@ -17,7 +17,9 @@ import {
   ongoingLabel,
   opponentSeat,
   pendingDelayedEffect,
+  playedLightning,
   requestAnyTargetChoice,
+  splitScript,
   withFusion,
 } from "./shared-helpers.js";
 
@@ -36,46 +38,6 @@ const EMBODIMENT_OF_LIGHTNING = "SBA035";
 const RUNECHANT = "SBA036";
 
 // dealArcane comes from shared-helpers (applies the "next arcane card +N" pool)
-
-/** "if you've played a Lightning card this turn" */
-function playedLightning(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "playedSubtype:lightning") === true;
-}
-
-// ── Meld split cards ────────────────────────────────────────────────────────
-
-interface SplitSides {
-  leftName: string;
-  rightName: string;
-  left(ctx: ScriptCtx): void;
-  right(ctx: ScriptCtx): void;
-}
-
-/** Split card with Meld: the side is announced when the card is played — the
- *  client asks left/right/both and the choice rides the play intent
- *  (`CardInstance.meldSide`); "both" costs twice the base cost (CR 8.3.38).
- *  A melded card is a single stack layer that resolves twice with priority
- *  between (Rules Reprise 21), so the engine runs onPlay per half ("right" at
- *  stage 1, "left" at stage 2). */
-function splitScript({ leftName, rightName, left, right }: SplitSides): CardScript {
-  return {
-    meld: {
-      leftName,
-      rightName,
-      leftCardType: "action",
-      rightCardType: "instant",
-    },
-    onPlay(ctx) {
-      const side = ctx.self.meldSide;
-      if (side === "left") return left(ctx);
-      if (side === "right") return right(ctx);
-      if (side === "both") {
-        right(ctx);
-        return left(ctx);
-      }
-    },
-  };
-}
 
 // ── Crown of Dichotomy helpers ──────────────────────────────────────────────
 

@@ -7,11 +7,13 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  equippedCards,
   faceUpGraveyard,
   heroChoiceSeat,
   heroTarget,
   isAttackAction,
   isDagger,
+  isOwnAttack,
   mergeSetScripts,
   ongoingLabel,
   opponentSeat,
@@ -36,22 +38,6 @@ const FRAILTY = "SAZ035";
 const INERTIA = "SAZ036";
 const PONDER = "DYN244";
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
-  const player = ctx.player(seat);
-  return [
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-    ...player.weapons.filter((card) => hasType(data(ctx, card), "equipment")),
-  ];
-}
-function comboWith(ctx: ScriptCtx, ...names: string[]): boolean {
-  return previousAttackHasName(ctx, ...names);
-}
-function myAttack(ctx: ScriptCtx): boolean {
-  return !!ctx.link && !ctx.link.resolved && ctx.link.attacker === ctx.seat;
-}
 function tokenOnHit(tokenId: string): CardScript {
   return {
     canTriggerOnHit(ctx) {
@@ -93,7 +79,7 @@ function noDefenseReactions(): CardScript {
 function stealthReaction(pump: number, token?: string): CardScript {
   return {
     canPlay(ctx) {
-      return myAttack(ctx) && ctx.link!.attackCardType === "action" &&
+      return isOwnAttack(ctx) && ctx.link!.attackCardType === "action" &&
         ctx.hasKeyword(ctx.link!.attackingCard, "stealth");
     },
     onPlay(ctx) {
@@ -115,17 +101,17 @@ function nextStealth(pump: number): CardScript {
 function comboPower(name: string, power: number, reduction = 0): CardScript {
   return {
     modifyPlayCost(ctx, base) {
-      return comboWith(ctx, name) ? Math.max(0, base - reduction) : base;
+      return previousAttackHasName(ctx, name) ? Math.max(0, base - reduction) : base;
     },
     modifyAttack(ctx) {
-      return comboWith(ctx, name) ? power : 0;
+      return previousAttackHasName(ctx, name) ? power : 0;
     },
   };
 }
 function comboHit(name: string, effect: (ctx: ScriptCtx) => void): CardScript {
   return {
     canTriggerOnHit(ctx) {
-      return comboWith(ctx, name) && ctx.link?.targetAllyId === undefined;
+      return previousAttackHasName(ctx, name) && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
       effect(ctx);
@@ -272,7 +258,7 @@ function wreckHavoc(): CardScript {
       const card = ctx.player(opponentSeat(ctx)).arsenal[0];
       if (!card) return;
       ctx.setCardFaceDown(card.instanceId, false);
-      if (hasType(data(ctx, card), "defense-reaction") && !ctx.destroyPermanent(card.instanceId)) {
+      if (hasType(ctx.cardData(card.cardId), "defense-reaction") && !ctx.destroyPermanent(card.instanceId)) {
         ctx.moveToGraveyard(card.instanceId, "arsenal");
       }
     },
@@ -380,10 +366,10 @@ function recoilChoose(ctx: ScriptCtx, hook: string, option: string): void {
 function spinningWheel(): CardScript {
   return {
     modifyAttack(ctx) {
-      return comboWith(ctx, "twin twisters", "spinning wheel kick") ? 1 : 0;
+      return previousAttackHasName(ctx, "twin twisters", "spinning wheel kick") ? 1 : 0;
     },
     canTriggerOnHit(ctx) {
-      return comboWith(ctx, "twin twisters", "spinning wheel kick");
+      return previousAttackHasName(ctx, "twin twisters", "spinning wheel kick");
     },
     onHit(ctx) {
       ctx.setFlag("link", "attackToBottom", true);
@@ -415,7 +401,7 @@ function beLikeWater(): CardScript {
     },
   };
 }
-function bonds(pitch: number): CardScript {
+function bondsOfAncestry(pitch: number): CardScript {
   return {
     modifyPlayCost(ctx, base) {
       return previousAttackNameContains(ctx, "gustwave") ? Math.max(0, base - 2) : base;
@@ -458,7 +444,7 @@ function bondsSearch(ctx: ScriptCtx, hook: string, option: string): void {
 function backHeel(): CardScript {
   return {
     replacePowerGain(ctx, amount) {
-      return amount > 0 && comboWith(ctx, "twin twisters") ? amount + 1 : amount;
+      return amount > 0 && previousAttackHasName(ctx, "twin twisters") ? amount + 1 : amount;
     },
   };
 }
@@ -525,7 +511,7 @@ function shortSharp(power: number): CardScript {
   return {
     canPlay(ctx) {
       return (
-        myAttack(ctx) &&
+        isOwnAttack(ctx) &&
         (isDagger(ctx, ctx.link!.attackingCard) ||
           (ctx.link!.attackCardType === "action" && ctx.basePower(ctx.link!.attackingCard) <= 2))
       );
@@ -655,23 +641,23 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
 
   "mask of many faces|0": maskManyFaces,
   "bonds of ancestry|1": {
-    ...bonds(1),
+    ...bondsOfAncestry(1),
     onChoose(ctx, h, o) {
-      bonds(1).onChoose?.(ctx, h, o);
+      bondsOfAncestry(1).onChoose?.(ctx, h, o);
       bondsSearch(ctx, h, o);
     },
   },
   "bonds of ancestry|2": {
-    ...bonds(2),
+    ...bondsOfAncestry(2),
     onChoose(ctx, h, o) {
-      bonds(2).onChoose?.(ctx, h, o);
+      bondsOfAncestry(2).onChoose?.(ctx, h, o);
       bondsSearch(ctx, h, o);
     },
   },
   "bonds of ancestry|3": {
-    ...bonds(3),
+    ...bondsOfAncestry(3),
     onChoose(ctx, h, o) {
-      bonds(3).onChoose?.(ctx, h, o);
+      bondsOfAncestry(3).onChoose?.(ctx, h, o);
       bondsSearch(ctx, h, o);
     },
   },
@@ -713,7 +699,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "boulder trap|2": {
     canTriggerOnDefend: trapPower(),
     onDefend(ctx) {
-      const eq = equipmentCards(ctx, ctx.link!.attacker);
+      const eq = equippedCards(ctx, ctx.link!.attacker);
       if (eq.length)
         ctx.requestCardChoice(
           "boulder",
@@ -942,7 +928,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
       timing: "attack-reaction",
       destroySelfCost: true,
       label: "Attack action +1",
-      canActivate: (ctx) => myAttack(ctx) && ctx.link!.attackCardType === "action",
+      canActivate: (ctx) => isOwnAttack(ctx) && ctx.link!.attackCardType === "action",
       onActivate(ctx) {
         ctx.addModifier({ scope: "chain-link", attack: 1 });
       },
@@ -956,7 +942,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
       timing: "attack-reaction",
       destroySelfCost: true,
       label: "Small attack gains go again",
-      canActivate: (ctx) => myAttack(ctx) && ctx.basePower(ctx.link!.attackingCard) <= 1,
+      canActivate: (ctx) => isOwnAttack(ctx) && ctx.basePower(ctx.link!.attackingCard) <= 1,
       onActivate(ctx) {
         ctx.grantGoAgain();
       },

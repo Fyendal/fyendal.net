@@ -4,26 +4,25 @@ import {
   buffNextAttack,
   cardNamed,
   commonOptionMessages,
+  crushTriggered,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  equippedCards,
   hasCardSubtype,
+  heroChoiceSeat,
   isFused,
   isFusedWith,
   localizedCardLog,
   opponentSeat,
+  requestHeroChoice,
   withFusion,
 } from "./shared-helpers.js";
-import { hasType as hasPrintedType } from "@fyendal/shared";
 
 const FROSTBITE = "AJV029";
 const EARTH = "AJV028";
 const SEISMIC = "AJV030";
 const SLOTS = ["head", "chest", "arms", "legs"] as const;
-
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
 
 function exposed(ctx: ScriptCtx, seat: number): string[] {
   return SLOTS.filter((slot) => ctx.equipmentZoneEmpty(seat, slot));
@@ -54,12 +53,8 @@ function createExposedFrostbite(ctx: ScriptCtx, seat: number, slot: string): voi
 }
 
 function allEquipment(ctx: ScriptCtx, seat?: number): DeepReadonly<CardInstance>[] {
-  return ctx.state.players
-    .filter((player) => seat === undefined || player.seat === seat)
-    .flatMap((player) => [
-      ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-      ...player.weapons.filter((card) => hasPrintedType(data(ctx, card), "equipment")),
-    ]);
+  if (seat !== undefined) return equippedCards(ctx, seat);
+  return ctx.state.players.flatMap((player) => equippedCards(ctx, player.seat));
 }
 
 function defendedWith(ctx: ScriptCtx, type: string): boolean {
@@ -134,9 +129,7 @@ export const ajv: Record<string, CardScript> = {
     },
   },
   "mangle|1": {
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-    },
+    canTriggerOnHit: crushTriggered,
     onHitTarget: {
       options: (ctx) =>
         allEquipment(ctx, opponentSeat(ctx))
@@ -270,37 +263,16 @@ export const ajv: Record<string, CardScript> = {
         }
       }
       if (isFusedWith(ctx, "ice"))
-        ctx.requestChoice(
-          "exposed-hero",
-          decisionPrompt("Choose the hero for the Ice fusion effect", "card.ajv.ice.hero.choose", {
-            optionMessages: Object.fromEntries(
-              ctx.state.players.map((player) => [
-                String(player.seat),
-                decisionMessage("card.common.target.card", { card: { kind: "card", cardId: player.heroCardId } }),
-              ]),
-            ),
-          }),
-          ctx.state.players.map((player) => String(player.seat)),
-        );
+        requestHeroChoice(ctx, "exposed-hero", "Choose the hero for the Ice fusion effect", "card.ajv.ice.hero.choose");
     },
     onChoose(ctx, hook, option) {
       if (hook === "exposed-counter") {
         ctx.addCardDefenseCounters(Number(option), 1);
         if (isFusedWith(ctx, "ice"))
-          ctx.requestChoice(
-            "exposed-hero",
-            decisionPrompt("Choose the hero for the Ice fusion effect", "card.ajv.ice.hero.choose", {
-              optionMessages: Object.fromEntries(
-                ctx.state.players.map((player) => [
-                  String(player.seat),
-                  decisionMessage("card.common.target.card", { card: { kind: "card", cardId: player.heroCardId } }),
-                ]),
-              ),
-            }),
-            ctx.state.players.map((player) => String(player.seat)),
-          );
+          requestHeroChoice(ctx, "exposed-hero", "Choose the hero for the Ice fusion effect", "card.ajv.ice.hero.choose");
       } else if (hook === "exposed-hero") {
-        const target = Number(option);
+        // Stored games may still carry the old seat-number options.
+        const target = heroChoiceSeat(ctx, option) ?? Number(option);
         ctx.setState("exposedTarget", target);
         if (
           !ctx.requestPayment(
@@ -313,7 +285,7 @@ export const ajv: Record<string, CardScript> = {
           )
         ) {
           const equipment = allEquipment(ctx, target).filter(
-            (card) => Math.max(0, (data(ctx, card).defense ?? 0) - (card.defCounters ?? 0)) === 0,
+            (card) => Math.max(0, (ctx.cardData(card.cardId).defense ?? 0) - (card.defCounters ?? 0)) === 0,
           );
           if (equipment.length)
             ctx.requestCardChoice(
@@ -325,7 +297,7 @@ export const ajv: Record<string, CardScript> = {
       } else if (hook === "exposed-pay" && option === "declined") {
         const target = ctx.getState("exposedTarget");
         const equipment = allEquipment(ctx, target).filter(
-          (card) => Math.max(0, (data(ctx, card).defense ?? 0) - (card.defCounters ?? 0)) === 0,
+          (card) => Math.max(0, (ctx.cardData(card.cardId).defense ?? 0) - (card.defCounters ?? 0)) === 0,
         );
         if (equipment.length)
           ctx.requestCardChoice(
@@ -361,7 +333,7 @@ export const ajv: Record<string, CardScript> = {
       ctx.logPublic(
         localizedCardLog(
           ctx,
-          `${ctx.data.name} reveals ${data(ctx, card).name} and banishes it`,
+          `${ctx.data.name} reveals ${ctx.cardData(card.cardId).name} and banishes it`,
           "card.log.ajv.search.banished",
           { result: { kind: "card", cardId: card.cardId } },
           { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "deck", to: "banish" },

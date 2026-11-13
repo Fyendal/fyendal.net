@@ -6,24 +6,12 @@ import {
   decisionPrompt,
   faceUpGraveyard,
   hasCardSubtype,
-  localizedCardLog,
+  isMarked,
+  markHero,
   ongoingLabel,
   opponentSeat,
 } from "./shared-helpers.js";
 
-function isMarked(ctx: ScriptCtx, seat: number): boolean {
-  return (ctx.player(seat).hero.scriptState?.marked ?? 0) > 0;
-}
-function markHero(ctx: ScriptCtx, seat: number): void {
-  const hero = ctx.player(seat).hero;
-  if ((hero.scriptState?.marked ?? 0) > 0) return;
-  ctx.addCardState(hero.instanceId, "marked", 1);
-  ctx.logPublic(
-    localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
-      target: { kind: "card", cardId: hero.cardId },
-    }),
-  );
-}
 function myStealthAttack(ctx: ScriptCtx): boolean {
   return !!ctx.link && !ctx.link.resolved && ctx.link.attacker === ctx.seat &&
     ctx.hasKeyword(ctx.link.attackingCard, "stealth");

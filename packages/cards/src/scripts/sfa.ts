@@ -2,15 +2,20 @@ import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   anyDamageTarget,
   attackAbility,
+  banishAttackOnHit,
   buffNextAttack,
   commonOptionMessages,
+  currentAttackDraconic,
   dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
+  draconicLinks,
   faceUpGraveyard,
   isCard,
   localizedCardLog,
+  markHero,
   opponentSeat,
+  playedAnotherRed,
   resourceAbility,
   yesNoPrompt,
 } from "./shared-helpers.js";
@@ -45,26 +50,8 @@ import {
 const CROUCHING_TIGER = "SFA036";
 const FEALTY = "SFA037";
 
-/** ctx.state is typed without the internal side tables; the runtime object has them. */
-
-/** "Draconic chain links you control" — incl. the current attacking card. */
-function draconicLinks(ctx: ScriptCtx): number {
-  return ctx.chainLinksControlled(ctx.seat, "draconic");
-}
-
-/** "If it is Draconic" — the current attack, printed or granted. */
-function currentAttackIsDraconic(ctx: ScriptCtx): boolean {
-  return ctx.currentAttackHasType("draconic");
-}
-
 function isPhoenixFlame(ctx: ScriptCtx, cardId: string): boolean {
   return isCard(ctx, cardId, "Phoenix Flame", 1);
-}
-
-/** "If you've played another red card this turn" — the resolving card is red
- *  and noteCardPlayed has already counted it, so >= 2 means another red. */
-function playedAnotherRed(ctx: ScriptCtx): boolean {
-  return ctx.playedThisTurn("red") >= 2;
 }
 
 /** Instant — Destroy this equipment: gain {r} (Blood Scent / Double Cross
@@ -90,58 +77,6 @@ function destroyGainResource(canActivate: (ctx: ScriptCtx) => boolean, label: st
         ),
       );
     }),
-  };
-}
-
-/** "When Mounting Anger / Rising Resentment hits, you may banish an attack
- *  action card from your hand with cost less than the number of Draconic
- *  chain links you control. If you do, … and you may play it this turn." */
-function banishAttackOnHit(hook: string, reward: string): CardScript {
-  return {
-    onHit(ctx) {
-      const n = draconicLinks(ctx);
-      if (n <= 0) return;
-      const targets = ctx.player(ctx.seat).hand.filter((c) => {
-        const d = ctx.cardData(c.cardId);
-        return ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack") && (d.cost ?? 0) < n;
-      });
-      if (targets.length === 0) return;
-      ctx.requestCardChoice(
-        hook,
-        decisionPrompt(
-          `${ctx.data.name}: banish an attack action with cost less than ${n} — ` +
-            `it ${reward} and you may play it this turn`,
-          reward === "gains +1{p}" ? "card.sfa.attack.banish.power" : "card.sfa.attack.banish.discount",
-          {
-            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: n },
-            optionMessages: commonOptionMessages("pass"),
-          },
-        ),
-        ["pass", ...targets.map((c) => c.instanceId)],
-      );
-    },
-    onChoose(ctx, h, option) {
-      if (h !== hook || option === "pass") return;
-      const id = Number(option);
-      const selected = ctx.player(ctx.seat).hand.find((card) => card.instanceId === id);
-      if (!selected) return;
-      if (!ctx.banish(id)) return;
-      if (reward === "gains +1{p}") {
-        ctx.addCounter(id, "power", 1);
-        ctx.allowPlayFrom(id, "banish");
-      } else {
-        ctx.allowPlayFrom(id, "banish", { costReduction: 1 });
-      }
-      ctx.logPublic(
-        localizedCardLog(
-          ctx,
-          `${ctx.data.name}: the banished card ${reward} — you may play it this turn`,
-          reward === "gains +1{p}" ? "card.log.sfa.banished.power" : "card.log.sfa.banished.discount",
-          { result: { kind: "card", cardId: selected.cardId }, amount: 1 },
-          { kind: "card-moved", cardId: selected.cardId, ownerSeat: ctx.seat, from: "hand", to: "banish" },
-        ),
-      );
-    },
   };
 }
 
@@ -328,14 +263,14 @@ export const sfa: Record<string, CardScript> = {
         sourceZone: "self",
         label: "Deal 2 damage to any target",
         labelMessage: decisionMessage("card.trigger.common.damage.anytarget", { amount: 2 }),
-        condition: currentAttackIsDraconic,
+        condition: currentAttackDraconic,
         target: anyDamageTarget(() =>
           decisionPrompt("Art of the Dragon: Fire — deal 2 damage to any target", "card.sfa.dragonfire.target", {
             values: { amount: 2 },
           }),
         ),
         effect(ctx) {
-          if (currentAttackIsDraconic(ctx)) dealToAnyTarget(ctx, ctx.playTargetInstanceId, 2);
+          if (currentAttackDraconic(ctx)) dealToAnyTarget(ctx, ctx.playTargetInstanceId, 2);
         },
       },
     ],
@@ -478,14 +413,7 @@ export const sfa: Record<string, CardScript> = {
       return ctx.link?.targetAllyId === undefined && draconicLinks(ctx) >= 2;
     },
     onHit(ctx) {
-      const hero = ctx.player(opponentSeat(ctx)).hero;
-      if ((hero.scriptState?.marked ?? 0) > 0) return;
-      ctx.addCardState(hero.instanceId, "marked", 1);
-      ctx.logPublic(
-        localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
-          target: { kind: "card", cardId: hero.cardId },
-        }),
-      );
+      markHero(ctx, opponentSeat(ctx));
     },
   },
 
@@ -495,7 +423,7 @@ export const sfa: Record<string, CardScript> = {
     modifyAttack: (ctx) => (ctx.currentChainLinkNumber() >= 4 ? 3 : 0),
   },
 
-  "mounting anger|1": banishAttackOnHit("mounting-anger", "gains +1{p}"),
+  "mounting anger|1": banishAttackOnHit("mounting-anger", "power"),
 
   "phoenix flame|1": {
     // "If you control 2 or more Draconic chain links, this gets +1{p}."
@@ -503,7 +431,7 @@ export const sfa: Record<string, CardScript> = {
     modifyAttack: (ctx) => (draconicLinks(ctx) >= 2 ? 1 : 0),
   },
 
-  "rising resentment|1": banishAttackOnHit("rising-resentment", "costs {r} less to play"),
+  "rising resentment|1": banishAttackOnHit("rising-resentment", "discount"),
 
   "salt the wound|2": {
     // "This gets +1{p} for each attack that has hit this combat chain."
@@ -520,7 +448,7 @@ export const sfa: Record<string, CardScript> = {
 
   "dragon power|3": {
     // "When this attacks, if it is Draconic, it gets +3{p}."
-    modifyAttack: (ctx) => (currentAttackIsDraconic(ctx) ? 3 : 0),
+    modifyAttack: (ctx) => (currentAttackDraconic(ctx) ? 3 : 0),
   },
 
   // ── Non-attack action ─────────────────────────────────────────────────────

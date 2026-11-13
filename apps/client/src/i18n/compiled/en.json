@@ -1301,12 +1301,6 @@
       "value": " resource for +1 defense?"
     }
   ],
-  "card.aio.maintenance.choose": [
-    {
-      "type": 0,
-      "value": "Remove a steam counter or destroy this?"
-    }
-  ],
   "card.aio.symbiosisshot.steam": [
     {
       "type": 0,
@@ -4864,11 +4858,41 @@
     },
     {
       "type": 0,
-      "value": ": reveal a "
+      "value": ": reveal "
     },
     {
-      "type": 1,
-      "value": "type"
+      "type": 5,
+      "value": "type",
+      "options": {
+        "Ice": {
+          "value": [
+            {
+              "type": 0,
+              "value": "an Ice"
+            }
+          ]
+        },
+        "Earth": {
+          "value": [
+            {
+              "type": 0,
+              "value": "an Earth"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a "
+            },
+            {
+              "type": 1,
+              "value": "type"
+            }
+          ]
+        }
+      }
     },
     {
       "type": 0,
@@ -5039,52 +5063,6 @@
     {
       "type": 1,
       "value": "p"
-    }
-  ],
-  "card.ele.pay.or.discard": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": pay "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " "
-    },
-    {
-      "type": 6,
-      "value": "amount",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "resource"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "resources"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " or discard a card?"
     }
   ],
   "card.ele.pitch.card.bottom": [
@@ -13459,28 +13437,6 @@
       "value": "Banish the top card and play it as an instant?"
     }
   ],
-  "card.pen.decompose.action": [
-    {
-      "type": 0,
-      "value": "Choose the action card"
-    }
-  ],
-  "card.pen.decompose.earth.first": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": decompose? Choose the first Earth card"
-    }
-  ],
-  "card.pen.decompose.earth.second": [
-    {
-      "type": 0,
-      "value": "Choose the second Earth card"
-    }
-  ],
   "card.pen.deeprecesses.banish": [
     {
       "type": 0,
@@ -15759,16 +15715,6 @@
     {
       "type": 0,
       "value": "Put an attack action on the bottom of your deck"
-    }
-  ],
-  "card.tcc.boulder.hand.top": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": put a card from your hand on top of your deck"
     }
   ],
   "card.tcc.encore.attack.return": [
@@ -19074,12 +19020,6 @@
     {
       "type": 0,
       "value": "Choose a card from the opposing hand to banish"
-    }
-  ],
-  "card.upr.option.you": [
-    {
-      "type": 0,
-      "value": "You"
     }
   ],
   "card.upr.pay.or.discard": [

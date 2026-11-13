@@ -1,8 +1,10 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
+  armedBySelf,
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  equippedCards,
   faceUpGraveyard,
   heroChoiceSeat,
   heroTarget,
@@ -17,7 +19,6 @@ import {
   resolveReload,
   spireSnipingScript,
 } from "./shared-helpers.js";
-import { hasType } from "@fyendal/shared";
 
 // ── SAZ (Silver Age: Azalea precon, Chapter 2) ──────────────────────────────
 //
@@ -52,24 +53,8 @@ const BLOODROT_POX = "SAZ034";
 const FRAILTY = "SAZ035";
 const INERTIA = "SAZ036";
 
-function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
-  const player = ctx.player(seat);
-  return [
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-    ...player.weapons.filter((card) => hasType(ctx.cardData(card.cardId), "equipment")),
-  ];
-}
-
-/** ctx.state is typed without the internal side tables; the runtime object has them. */
-
 function hasAimCounter(ctx: ScriptCtx): boolean {
   return (ctx.self.counters?.aim ?? 0) > 0;
-}
-
-/** The granted "when this hits a hero" effect rides the link that picked up
- *  this card's next-attack modifier (Lace with X / Drop the Anchor). */
-function armedBySelf(ctx: ScriptCtx): boolean {
-  return ctx.state.modifiers.some((m) => m.scope === "chain-link" && m.sourceInstanceId === ctx.self.instanceId);
 }
 
 /** "You may put an arrow card from your hand face up into your arsenal." */
@@ -293,7 +278,7 @@ export const saz: Record<string, CardScript> = {
       return ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      const equips = equipmentCards(ctx, opponentSeat(ctx));
+      const equips = equippedCards(ctx, opponentSeat(ctx));
       if (equips.length === 0) return;
       ctx.requestCardChoice(
         "drill-shot",
@@ -306,7 +291,7 @@ export const saz: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "drill-shot") return;
-      const eq = equipmentCards(ctx, opponentSeat(ctx)).find((c) => c.instanceId === Number(option));
+      const eq = equippedCards(ctx, opponentSeat(ctx)).find((c) => c.instanceId === Number(option));
       if (!eq) return;
       ctx.addCardDefenseCounters(eq.instanceId, 1);
       ctx.logPublic(

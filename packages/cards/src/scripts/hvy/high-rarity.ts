@@ -8,8 +8,10 @@ import {
   commonOptionMessages,
   consumeDelayedEffect,
   contractCompletionCount,
+  controlledPermanents,
   decisionMessage,
   decisionPrompt,
+  evoEquipment,
   hasCardSubtype,
   heroDamage,
   hitHookLabel,
@@ -36,21 +38,10 @@ const DOUBLE_DOWN_ATTACK = "card.effect.hvy.doubledown.attack";
 const isDoubleDownAttack = (modifier: DeepReadonly<Modifier>) =>
   modifier.ongoingLabelMessage?.id === DOUBLE_DOWN_ATTACK;
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-function controlledPermanents(ctx: ScriptCtx, seat = ctx.seat): DeepReadonly<CardInstance>[] {
-  const player = ctx.player(seat);
-  return [
-    ...player.board,
-    ...player.weapons,
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-  ];
-}
 function isSix(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
   return ctx.basePower(card) >= 6;
 }
-function wagerAttack(tokens: string[]): CardScript {
+export function wagerAttack(tokens: string[]): CardScript {
   return {
     triggers: [
       {
@@ -77,16 +68,6 @@ function chooseArsenalBottom(ctx: ScriptCtx, hook: string) {
       }),
       ["no", card.instanceId],
     );
-}
-function evoEquipment(extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    playableEquipment: true,
-    transformsEquipment: (ctx, equipped) => hasCardSubtype(ctx, equipped, "base"),
-    playAsInstant(ctx) {
-      return ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true || (extra.playAsInstant?.(ctx) ?? false);
-    },
-  };
 }
 const ANTE_MODES = ["agility", "gold", "vigor", "power"] as const;
 type AnteMode = (typeof ANTE_MODES)[number];
@@ -755,7 +736,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
           .player(opponentSeat(ctx))
           .board.filter(
             (card) => !isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "item") &&
-              (data(ctx, card).cost ?? 0) <= 1,
+              (ctx.cardData(card.cardId).cost ?? 0) <= 1,
           );
         if (items.length)
           ctx.requestCardChoice(
@@ -818,7 +799,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
       const cards = ctx
         .player(ctx.seat)
         .deck.filter(
-          (card) => hasCardSubtype(ctx, card, "runeblade") && isAura(ctx, card) && (data(ctx, card).cost ?? 0) <= x,
+          (card) => hasCardSubtype(ctx, card, "runeblade") && isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= x,
         );
       if (cards.length) {
         ctx.requestCardChoice(
@@ -840,7 +821,7 @@ export const hvyHighRarity: Record<string, CardScript> = {
         card &&
         hasCardSubtype(ctx, card, "runeblade") &&
         isAura(ctx, card) &&
-        (data(ctx, card).cost ?? 0) <= ctx.getState("galaxiaX")
+        (ctx.cardData(card.cardId).cost ?? 0) <= ctx.getState("galaxiaX")
       )
         ctx.settleCard(card.instanceId);
       ctx.shuffleDeck();

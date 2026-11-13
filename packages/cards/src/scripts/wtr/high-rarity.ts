@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   cardNamed,
   commonOptionMessages,
+  crushTriggered,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
@@ -21,10 +22,6 @@ const SEISMIC_SURGE = "WTR075B";
 
 function namedAny(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, names: readonly string[]): boolean {
   return names.some((name) => cardNamed(ctx, card, name));
-}
-
-function previousAttackNamed(ctx: ScriptCtx, name: string): boolean {
-  return previousAttackHasName(ctx, name);
 }
 
 function rememberRandomDiscard(ctx: ScriptCtx): void {
@@ -57,12 +54,12 @@ function finishSearchToHand(ctx: ScriptCtx, option: string): boolean {
 
 function comboAttack(previous: string, bonus: number, onHit?: (ctx: ScriptCtx) => void): CardScript {
   return {
-    modifyAttack: (ctx) => (previousAttackNamed(ctx, previous) ? bonus : 0),
+    modifyAttack: (ctx) => (previousAttackHasName(ctx, previous) ? bonus : 0),
     onAttackDeclared(ctx) {
-      if (previousAttackNamed(ctx, previous)) ctx.grantGoAgain();
+      if (previousAttackHasName(ctx, previous)) ctx.grantGoAgain();
     },
     canTriggerOnHit(ctx) {
-      return previousAttackNamed(ctx, previous);
+      return previousAttackHasName(ctx, previous);
     },
     onHit(ctx) {
       onHit?.(ctx);
@@ -157,7 +154,7 @@ const maskOfMomentum: CardScript = {
 
 const lordOfWind: CardScript = {
   additionalCost(ctx) {
-    if (previousAttackNamed(ctx, "mugenshi: release")) {
+    if (previousAttackHasName(ctx, "mugenshi: release")) {
       ctx.requestXPayment("lord-wind-x", decisionPrompt("Lord of Wind: choose X", "card.wtr.lordwind.x"), ctx.seat);
     }
   },
@@ -247,17 +244,13 @@ export const wtrHighRarity: Record<string, CardScript> = {
     },
   },
   "crippling crush|1": {
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-    },
+    canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       ctx.discardRandom(opponentSeat(ctx), 2);
     },
   },
   "cranial crush|3": {
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-    },
+    canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       const target = ctx.player(opponentSeat(ctx));
       ctx.setPlayerFlag(target.seat, "cannotDrawNextActionPhase", true);
@@ -288,7 +281,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
   "mugenshi: release|2": mugenshiRelease,
   "hurricane technique|2": hurricaneTechnique,
   "pounding gale|1": {
-    modifyCombatDamage: (ctx, amount) => (previousAttackNamed(ctx, "open the center") ? amount * 2 : amount),
+    modifyCombatDamage: (ctx, amount) => (previousAttackHasName(ctx, "open the center") ? amount * 2 : amount),
   },
 
   "braveforge bracers|0": {
