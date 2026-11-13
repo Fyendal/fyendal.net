@@ -1,10 +1,9 @@
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex, utf8ToBytes } from "@noble/hashes/utils.js";
 import { anyWindowAction, applyIntent, damageStepPriorityAttacker, legalIntents, projectStateFor, type GameState } from "@fyendal/engine";
-import type { CardData, GameIntent } from "@fyendal/shared";
-import { averageDrawValue, heldValue } from "./card-ev.js";
+import type { GameIntent } from "@fyendal/shared";
+import { averageDrawValue } from "./card-ev.js";
 import { cardUses } from "./card-model.js";
-import { averageOver, unseenCounts } from "./deck-knowledge.js";
 import {
   arsenalCardValue,
   equipmentValue,
@@ -379,7 +378,7 @@ interface SearchContext<Evaluation extends TurnEvaluation> {
   transitions: number;
   transitionLimit: number;
   publicGameId: string;
-  /** Held margin of an unseen card: what the horizon credits a simulated draw. */
+  /** Average draw value, credited per set-aside draw as card-ev prices a drawn card. */
   drawnCardValue: number;
   memo: Map<string, SearchResult<Evaluation>>;
   candidateTrace: TurnPlannerCandidateTrace;
@@ -454,8 +453,8 @@ function applySimulationIntent(
   const applied = applyIntent(state, seat, intent);
   if (applied.ok) {
     compactSimulationHistory(applied.state);
-    const risk = onHitRisk.get(state);
-    if (risk) onHitRisk.set(applied.state, risk);
+    const adjustment = lineAdjustment.get(state);
+    if (adjustment) lineAdjustment.set(applied.state, adjustment);
   }
   return applied;
 }
@@ -549,46 +548,32 @@ function opponentRolloutIntent(state: GameState): GameIntent | undefined {
   return legal.find((intent) => intent.kind === "choose");
 }
 
-/** A card left the deck for hand through a simulated draw rather than as the
- * option this intent chose: a search picks a known card, a draw does not. */
-function drewPrivately(before: GameState, after: GameState, intent: GameIntent, root: TurnPlannerRoot): boolean {
+/** Set aside cards a simulated draw put in hand: back to the deck bottom, so
+ * no decision reads them, credited at the average draw. A search picks a
+ * known card through its option and stays in hand. */
+function setAsideDraws<Evaluation extends TurnEvaluation>(
+  before: GameState,
+  after: GameState,
+  intent: GameIntent,
+  context: SearchContext<Evaluation>,
+): void {
+  const { root } = context;
   const held = new Set(before.players[root.seat].hand.map((card) => card.instanceId));
-  return after.players[root.seat].hand.some((card) =>
+  const player = after.players[root.seat];
+  const drawn = player.hand.filter((card) =>
     root.deckIds.has(card.instanceId) && !held.has(card.instanceId) &&
     !(intent.kind === "choose" && intent.optionId === String(card.instanceId))
   );
+  if (drawn.length === 0) return;
+  const ids = new Set(drawn.map((card) => card.instanceId));
+  player.hand = player.hand.filter((card) => !ids.has(card.instanceId));
+  player.deck.push(...drawn);
+  lineAdjustment.set(after, (lineAdjustment.get(after) ?? 0) + drawn.length * context.drawnCardValue);
 }
 
-/** After a simulated private draw, pass until the layers already committed
- * (another on-hit trigger) resolve, so the horizon counts their damage
- * without any decision reading the drawn card. */
-function settleAfterPrivateDraw<Evaluation extends TurnEvaluation>(
-  state: GameState,
-  context: SearchContext<Evaluation>,
-): AdvancedState {
-  let current = state;
-  const { root, config } = context;
-  for (let step = 0; step < (config.maxForcedSteps ?? DEFAULT_MAX_FORCED_STEPS); step++) {
-    if (
-      current.phase === "game-over" || current.turn !== root.turn ||
-      (current.stack.length === 0 && !current.pendingTriggeredLayers?.length) ||
-      context.transitions >= context.transitionLimit
-    ) break;
-    const actor = (current.pendingDecision?.player ?? current.priorityPlayer) as 0 | 1;
-    const intent = actor === root.seat
-      ? legalIntents(current, actor).find((candidate) => candidate.kind === "pass")
-      : opponentRolloutIntent(current);
-    if (!intent) break;
-    context.transitions++;
-    const applied = applySimulationIntent(current, actor, intent);
-    if (!applied.ok) break;
-    current = applied.state;
-  }
-  return { kind: "terminal", state: current, complete: current.phase === "game-over" };
-}
-
-/** Per line, the on-hit payoffs a real opponent's blocks would deny (damage equivalents). */
-const onHitRisk = new WeakMap<GameState, number>();
+/** Per line, damage equivalents added at scoring: set-aside draws, less the
+ * on-hit payoffs a real opponent's blocks would deny. */
+const lineAdjustment = new WeakMap<GameState, number>();
 
 /** Hit chance below which the simulated opponent blocks with armor. */
 const ARMOR_BLOCK_THRESHOLD = 0.5;
@@ -638,7 +623,7 @@ function rolloutDefense<Evaluation extends TurnEvaluation>(
     total + (effect.impact?.damage ?? 0) + (effect.impact?.delayedDamage ?? 0) +
     (effect.impact?.drawCards ?? 0) * context.drawnCardValue, 0);
   // Every rollout state belongs to one line, so the risk rides on it into the next transition.
-  if (credited > 0) onHitRisk.set(state, (onHitRisk.get(state) ?? 0) + (1 - chance) * credited);
+  if (credited > 0) lineAdjustment.set(state, (lineAdjustment.get(state) ?? 0) - (1 - chance) * credited);
   return undefined;
 }
 
@@ -649,7 +634,7 @@ function advanceForced<Evaluation extends TurnEvaluation>(
 ): AdvancedState {
   let current = state;
   const { root, config } = context;
-  if (drewPrivately(entry.before, state, entry.intent, root)) return settleAfterPrivateDraw(state, context);
+  setAsideDraws(entry.before, state, entry.intent, context);
   for (let step = 0; step < (config.maxForcedSteps ?? DEFAULT_MAX_FORCED_STEPS); step++) {
     if (current.phase === "game-over" || current.turn !== root.turn) {
       return { kind: "terminal", state: current, complete: true };
@@ -685,8 +670,7 @@ function advanceForced<Evaluation extends TurnEvaluation>(
     if (!applied.ok) return { kind: "terminal", state: current, complete: false };
     const before = current;
     current = applied.state;
-    // Stop before a simulated private draw can influence another action.
-    if (drewPrivately(before, current, intent, root)) return settleAfterPrivateDraw(current, context);
+    setAsideDraws(before, current, intent, context);
   }
   return { kind: "terminal", state: current, complete: false };
 }
@@ -733,16 +717,16 @@ function evaluateEnd<Evaluation extends TurnEvaluation>(
   context: SearchContext<Evaluation>,
   complete: boolean,
 ): Evaluation {
-  // A line cut short mid-turn (a tutor or draw, a budget) still holds its hand.
+  // A line the budget cut short still holds its hand.
   if (!complete) return evaluateHorizon(state, context);
   const input = observation(state, context.root, context.publicGameId);
-  return withOnHitRisk(state, context.config.evaluateEnd(state, input, context.root, true));
+  return withLineAdjustment(state, context.config.evaluateEnd(state, input, context.root, true));
 }
 
-function withOnHitRisk<Evaluation extends TurnEvaluation>(state: GameState, evaluation: Evaluation): Evaluation {
-  const risk = onHitRisk.get(state) ?? 0;
-  return risk > 0 && state.winner === null
-    ? { ...evaluation, score: evaluation.score - risk * POINTS_PER_DAMAGE }
+function withLineAdjustment<Evaluation extends TurnEvaluation>(state: GameState, evaluation: Evaluation): Evaluation {
+  const adjustment = lineAdjustment.get(state) ?? 0;
+  return adjustment !== 0 && state.winner === null
+    ? { ...evaluation, score: evaluation.score + adjustment * POINTS_PER_DAMAGE }
     : evaluation;
 }
 
@@ -751,7 +735,7 @@ function evaluateHorizon<Evaluation extends TurnEvaluation>(
   context: SearchContext<Evaluation>,
 ): Evaluation {
   const input = observation(state, context.root, context.publicGameId);
-  return withOnHitRisk(state, context.config.evaluateHorizon
+  return withLineAdjustment(state, context.config.evaluateHorizon
     ? context.config.evaluateHorizon(state, input, context.root)
     : context.config.evaluateEnd(state, input, context.root, false));
 }
@@ -834,6 +818,27 @@ function plannerCandidates<Evaluation extends TurnEvaluation>(
   return { selected, deferred: ordered.slice(selected.length) };
 }
 
+function endsTurn(intent: GameIntent): boolean {
+  return intent.kind === "pass" || intent.kind === "close-chain" || intent.kind === "concede" ||
+    intent.kind.endsWith("-draw");
+}
+
+/** The policy's top-ranked candidate, for greedy completion. */
+function bestRanked<Evaluation extends TurnEvaluation>(
+  candidates: readonly GameIntent[],
+  input: BotPolicyInput,
+  context: SearchContext<Evaluation>,
+): GameIntent[] {
+  let best: { intent: GameIntent; score: number } | undefined;
+  for (const intent of candidates) {
+    const score = context.config.rankCandidate?.(intent, input) ??
+      context.config.scoreIntent?.(intent, input) ??
+      genericCandidatePriority(intent, input);
+    if (!best || score > best.score) best = { intent, score };
+  }
+  return best ? [best.intent] : [];
+}
+
 /** Scores the line that starts with `intent`, searching on from a clean decision. */
 function lineResult<Evaluation extends TurnEvaluation>(
   advanced: AdvancedState,
@@ -870,27 +875,35 @@ function search<Evaluation extends TurnEvaluation>(
   depth: number,
 ): SearchResult<Evaluation> {
   const maxDepth = context.config.maxActionDepth ?? DEFAULT_MAX_ACTION_DEPTH;
-  if (context.nodes >= context.nodeLimit ||
-    context.transitions >= context.transitionLimit || depth >= maxDepth) {
-    const evaluation = evaluateHorizon(state, context);
-    return { score: evaluation.score, line: [], checkpoints: [], evaluation, lost: false };
-  }
   // Projection and legal-intent generation are among the planner's heavier
   // operations. Build the observation once and reuse it for both the memo key
   // and candidate preparation.
   const observed = observation(state, context.root, context.publicGameId);
-  const key = `${stateKey(observed, depth)}|${onHitRisk.get(state) ?? 0}`;
+  if (context.transitions >= context.transitionLimit || depth >= maxDepth) {
+    // With nothing left but to end the turn, the line is finished, not a horizon.
+    const evaluation = observed.legal.every(endsTurn)
+      ? withLineAdjustment(state, context.config.evaluateEnd(state, observed, context.root, true))
+      : evaluateHorizon(state, context);
+    return { score: evaluation.score, line: [], checkpoints: [], evaluation, lost: false };
+  }
+  const key = `${stateKey(observed, depth)}|${lineAdjustment.get(state) ?? 0}`;
   const cached = context.memo.get(key);
   if (cached) return cached;
   const observedKey = context.config.recordCheckpoints
     ? botObservationKey(observed)
     : undefined;
 
+  // Past the node budget a line finishes greedily, so it ends as a real turn
+  // instead of an optimistic horizon estimate that can outscore finished lines.
+  const greedy = context.nodes >= context.nodeLimit;
   const candidates = plannerCandidates(observed, context, depth).selected;
   let best: SearchResult<Evaluation> | undefined;
-  for (const intent of candidates) {
-    if (context.nodes >= context.nodeLimit || context.transitions >= context.transitionLimit) break;
-    context.nodes++;
+  for (const intent of greedy ? bestRanked(candidates, observed, context) : candidates) {
+    if (context.transitions >= context.transitionLimit) break;
+    if (!greedy) {
+      if (context.nodes >= context.nodeLimit) break;
+      context.nodes++;
+    }
     context.transitions++;
     const applied = applySimulationIntent(state, context.root.seat, intent);
     if (!applied.ok) continue;
@@ -905,19 +918,6 @@ function search<Evaluation extends TurnEvaluation>(
   })();
   context.memo.set(key, result);
   return result;
-}
-
-/** Expected held margin of the bot's next unseen card over the draw it displaces. */
-function unseenHeldMargin(input: BotPolicyInput): number {
-  const counts = unseenCounts(input, "own");
-  if (!counts) return 0;
-  const futureHit = hitChanceAgainst(input, true);
-  const usesOf = (data: CardData) => cardUses(data, input);
-  const averageDraw = averageDrawValue(input, usesOf, 1, futureHit);
-  return averageOver(counts, (cardId) => {
-    const data = input.cards[cardId];
-    return data ? heldValue(usesOf(data), averageDraw, futureHit) : 0;
-  }) ?? 0;
 }
 
 export function planTurn<Evaluation extends TurnEvaluation>(
@@ -953,7 +953,9 @@ export function planTurn<Evaluation extends TurnEvaluation>(
     transitions: 0,
     transitionLimit: config.maxTransitions ?? DEFAULT_MAX_SEARCH_TRANSITIONS,
     publicGameId: input.view.gameId,
-    drawnCardValue: unseenHeldMargin(input),
+    drawnCardValue: averageDrawValue(
+      input, (data) => cardUses(data, input), 1, hitChanceAgainst(input, true),
+    ),
     memo: new Map(),
     candidateTrace: {
       decisions: 0,

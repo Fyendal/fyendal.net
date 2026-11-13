@@ -386,7 +386,7 @@ describe("Levia Gates policy", () => {
     state.players[0]!.flags.banishedSixPlusThisTurn = true;
     const safe = chooseLeviaIntentWithTrace({ ...input, view: projectStateFor(state, 0) });
     expect(safe.macro.goal).not.toBe("stabilize");
-    expect(safe.plan?.transitions).toBeLessThanOrEqual(74);
+    expect(safe.plan?.transitions).toBeLessThanOrEqual(104);
   });
 
   it("values suppression and excludes face-down Blood Debt from the risk estimate", () => {
