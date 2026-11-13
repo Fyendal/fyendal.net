@@ -1175,12 +1175,6 @@
       "value": "选择一种防守英雄不能 pitch 的颜色"
     }
   ],
-  "card.aaz.reload.arsenal": [
-    {
-      "type": 0,
-      "value": "装填 (reload)：将一张手牌放入 arsenal？"
-    }
-  ],
   "card.agb.anka.card.discard": [
     {
       "type": 0,
@@ -1371,80 +1365,6 @@
     {
       "type": 0,
       "value": "选择一个未装备的装备区域来放置 Frostbite"
-    }
-  ],
-  "card.ajv.fusion.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：展示 Earth 和／或 Ice 牌以进行 fusion？"
-    }
-  ],
-  "card.ajv.fusion.option.both": [
-    {
-      "type": 0,
-      "value": "展示 "
-    },
-    {
-      "type": 1,
-      "value": "first"
-    },
-    {
-      "type": 0,
-      "value": " 和 "
-    },
-    {
-      "type": 1,
-      "value": "second"
-    },
-    {
-      "type": 0,
-      "value": " 作为 Earth 与 Ice"
-    }
-  ],
-  "card.ajv.fusion.option.both.single": [
-    {
-      "type": 0,
-      "value": "展示 "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " 同时作为 Earth 与 Ice"
-    }
-  ],
-  "card.ajv.fusion.option.earth": [
-    {
-      "type": 0,
-      "value": "展示 "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " 作为 Earth"
-    }
-  ],
-  "card.ajv.fusion.option.ice": [
-    {
-      "type": 0,
-      "value": "展示 "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " 作为 Ice"
     }
   ],
   "card.ajv.ice.hero.choose": [
@@ -2185,6 +2105,42 @@
       "value": "警告：现在不是你的行动阶段，你不会获得行动点。"
     }
   ],
+  "card.common.arcane.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一名英雄，造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
+  "card.common.arcane.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一个目标，造成 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点奥术伤害"
+    }
+  ],
   "card.common.arrow.arsenal": [
     {
       "type": 0,
@@ -2217,6 +2173,16 @@
     {
       "type": 0,
       "value": "指定一个牌名"
+    }
+  ],
+  "card.common.charge.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择一张手牌进行充能，或拒绝"
     }
   ],
   "card.common.cost.arsenalarrow.faceup": [
@@ -2589,24 +2555,6 @@
       "value": "选择墓地中的一个 zombie"
     }
   ],
-  "card.cru.arcane.hero.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：选择一名英雄，造成 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 点奥术伤害"
-    }
-  ],
   "card.cru.breeze.boots.destroy": [
     {
       "type": 0,
@@ -2799,12 +2747,6 @@
     {
       "type": 0,
       "value": "：选择一张正在防守的攻击行动牌"
-    }
-  ],
-  "card.cru.reload.card.choose": [
-    {
-      "type": 0,
-      "value": "Reload：将一张牌放入 arsenal？"
     }
   ],
   "card.cru.research.order.choose": [
@@ -4756,20 +4698,6 @@
       "value": "type"
     }
   ],
-  "card.ele.fusion.reveal": [
-    {
-      "type": 0,
-      "value": "展示一张 "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    },
-    {
-      "type": 0,
-      "value": " 牌以进行 fusion？"
-    }
-  ],
   "card.ele.fusion.reveal.named": [
     {
       "type": 1,
@@ -4892,18 +4820,6 @@
       "value": "：将一张非攻击行动牌置于牌库底部？"
     }
   ],
-  "card.ele.oaken.fusion.earth": [
-    {
-      "type": 0,
-      "value": "展示一张 Earth 牌以对 Oaken Old 进行 fusion？"
-    }
-  ],
-  "card.ele.oaken.fusion.ice": [
-    {
-      "type": 0,
-      "value": "展示一张 Ice 牌以对 Oaken Old 进行 fusion？"
-    }
-  ],
   "card.ele.oaken.order": [
     {
       "type": 0,
@@ -5022,12 +4938,6 @@
     {
       "type": 0,
       "value": "Ragamuffin's Hat：将一张牌置于牌库顶部或底部"
-    }
-  ],
-  "card.ele.reload": [
-    {
-      "type": 0,
-      "value": "Reload：将一张手牌放入你的 arsenal？"
     }
   ],
   "card.ele.shelter.defender.choose": [
@@ -7304,24 +7214,6 @@
     {
       "type": 0,
       "value": " 个）"
-    }
-  ],
-  "card.log.common.fusion.revealed": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " 完成融合 (fusion)（展示 "
-    },
-    {
-      "type": 1,
-      "value": "revealed"
-    },
-    {
-      "type": 0,
-      "value": "）"
     }
   ],
   "card.log.common.goagain.from.arsenal": [
@@ -10998,16 +10890,6 @@
       "value": "：为你的下一次符合条件的攻击选择 +2 力量或 go again"
     }
   ],
-  "card.mon.charge.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：选择一张手牌进行充能，或拒绝"
-    }
-  ],
   "card.mon.defending.hand.bottom": [
     {
       "type": 0,
@@ -12036,24 +11918,6 @@
       "value": "将一张行动防守牌返回手牌"
     }
   ],
-  "card.omn.arcane.target.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：对一个目标造成 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 点奥术伤害"
-    }
-  ],
   "card.omn.arrow.arsenal": [
     {
       "type": 0,
@@ -13072,42 +12936,6 @@
       "value": "弃置一张牌以改为赢得赌注 (wager)？"
     }
   ],
-  "card.ros.arcane.hero.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：对一位英雄造成 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 点奥术伤害"
-    }
-  ],
-  "card.ros.arcane.target.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：对一个目标造成 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 点奥术伤害"
-    }
-  ],
   "card.ros.arsenal.card.bottom": [
     {
       "type": 0,
@@ -13282,12 +13110,6 @@
       "value": "Runechant"
     }
   ],
-  "card.ros.option.yourhero": [
-    {
-      "type": 0,
-      "value": "你的英雄"
-    }
-  ],
   "card.ros.plan.hand.shuffle": [
     {
       "type": 0,
@@ -13434,24 +13256,6 @@
       "value": "Crown of Providence：选择哪张牌置于牌库顶"
     }
   ],
-  "card.sba.fusion.reveal": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：展示一张手牌中的 "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    },
-    {
-      "type": 0,
-      "value": " 牌以进行 fusion？"
-    }
-  ],
   "card.sba.jack.ally.steal": [
     {
       "type": 0,
@@ -13462,16 +13266,6 @@
     {
       "type": 0,
       "value": "Jack Be Quick：从墓地放逐一张 Nimblism，使攻击力 +1 并获得 go again？"
-    }
-  ],
-  "card.sbl.charge.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：选择一张手牌进行充能，或拒绝"
     }
   ],
   "card.sbl.charge.required": [
@@ -13544,24 +13338,6 @@
     {
       "type": 0,
       "value": "Thunder Quake：支付 3 点资源，将其正面朝上 heave 进 arsenal？"
-    }
-  ],
-  "card.sbz.arcane.target.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：选择一个目标，造成 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 点奥术伤害"
     }
   ],
   "card.sbz.blaze.action.banish": [
@@ -14222,24 +13998,6 @@
       "value": "Golden Tipple：弃置一张黄色牌，以抽一张牌并生成一个 Gold？"
     }
   ],
-  "card.siy.arcane.target.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：选择一个目标，造成 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 点奥术伤害"
-    }
-  ],
   "card.siy.brainfreeze.action.choose": [
     {
       "type": 0,
@@ -14310,16 +14068,6 @@
     {
       "type": 0,
       "value": "Frost Spike：选择一个未装备的装备区域"
-    }
-  ],
-  "card.siy.fusion.reveal": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：展示一张手牌中的 Ice 牌以进行 fusion？"
     }
   ],
   "card.siy.iceeternal.hero.choose": [
@@ -18166,22 +17914,6 @@
     {
       "type": 0,
       "value": " 张 Ice 牌置于牌库底部"
-    }
-  ],
-  "card.upr.ice.fusion.reveal": [
-    {
-      "type": 0,
-      "value": "展示一张 Ice 牌以进行 fusion？"
-    }
-  ],
-  "card.upr.ice.fusion.reveal.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：展示一张手牌中的 Ice 牌以进行 fusion？"
     }
   ],
   "card.upr.kyloria.item.control": [

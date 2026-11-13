@@ -193,6 +193,41 @@ export function isChargeDecline(option: string): boolean {
   return option === CHARGE_DECLINE || option === "no";
 }
 
+const CHARGE_COST_HOOK = "charge-cost";
+/** Hooks of charge-cost decisions persisted before the cost was shared. */
+const LEGACY_CHARGE_COST_HOOKS: ReadonlySet<string> = new Set(["asb-charge", "dtd-charge", "mon-charge"]);
+
+/** "As an additional cost, you may charge your hero's soul." The charged
+ * card's pitch is kept as `chargedPitch` (0 when nothing was charged);
+ * `extra`'s additional cost and choices follow the charge. */
+export function chargeAttack(extra: CardScript = {}): CardScript {
+  return {
+    ...extra,
+    additionalCost(ctx) {
+      if (ctx.player(ctx.seat).hand.length > 0)
+        ctx.requestCardChoice(
+          CHARGE_COST_HOOK,
+          decisionPrompt(
+            `${ctx.data.name}: choose a card from your hand to charge, or decline`,
+            "card.common.charge.choose",
+            { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: chargeDeclineMessages },
+          ),
+          optionalChargeOptions(ctx),
+        );
+      extra.additionalCost?.(ctx);
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== CHARGE_COST_HOOK && !LEGACY_CHARGE_COST_HOOKS.has(hook)) {
+        extra.onChoose?.(ctx, hook, option);
+        return;
+      }
+      if (isChargeDecline(option)) return;
+      const charged = ctx.charge(Number(option));
+      if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
+    },
+  };
+}
+
 /** Solflare: a triggered layer raised when this is charged to its hero's soul. */
 export function solflareTrigger(
   label: string,
@@ -668,6 +703,75 @@ export function heroChoiceSeat(ctx: ScriptCtx, option: string): number | undefin
   return undefined;
 }
 
+export interface AnyTargetChoiceOptions {
+  /** Heroes only ("target hero"). */
+  heroesOnly?: boolean;
+  /** Only targets the opponent controls. */
+  opposing?: boolean;
+  /** Offer "no" first, for "you may" effects. */
+  optional?: boolean;
+  /** Source whose arcane bonuses the previewed amount includes; this card by default. */
+  sourceInstanceId?: number;
+}
+
+/** Ask for the target of `amount` arcane damage as a text choice: "opposing
+ * hero", "your hero", then each ally from `anyTargetIds` as `ally:<seat>:<id>`.
+ * The prompt previews the amount. Resolve the answer with `anyTargetChoice`. */
+export function requestAnyTargetChoice(
+  ctx: ScriptCtx,
+  hook: string,
+  amount: number,
+  opts: AnyTargetChoiceOptions = {},
+): void {
+  const preview = ctx.previewArcaneDamage(
+    amount,
+    opts.sourceInstanceId === undefined ? undefined : { sourceInstanceId: opts.sourceInstanceId },
+  );
+  const heroes: HeroChoiceOption[] = opts.opposing ? ["opposing hero"] : ["opposing hero", "your hero"];
+  const allies = opts.heroesOnly
+    ? []
+    : anyTargetIds(ctx, { opposing: opts.opposing }).flatMap((id) => {
+        const controller = ctx.state.players.find((player) => player.board.some((card) => card.instanceId === id));
+        return controller ? [{ option: `ally:${controller.seat}:${id}`, id }] : [];
+      });
+  const options = [...(opts.optional ? ["no"] : []), ...heroes, ...allies.map((ally) => ally.option)];
+  ctx.requestChoice(
+    hook,
+    decisionPrompt(
+      `${ctx.data.name}: deal ${preview} arcane damage to a ${opts.heroesOnly ? "hero" : "target"}`,
+      opts.heroesOnly ? "card.common.arcane.hero.choose" : "card.common.arcane.target.choose",
+      {
+        values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: preview },
+        optionMessages: commonOptionMessages(...(opts.optional ? (["no"] as const) : []), ...heroes),
+      },
+    ),
+    options,
+    ctx.seat,
+    [...(opts.optional ? [null] : []), ...heroes.map(() => null), ...allies.map((ally) => ally.id)],
+    "opposing hero",
+  );
+}
+
+/** The hero seat and ally named by a `requestAnyTargetChoice` answer;
+ * undefined when the choice was declined. */
+export function anyTargetChoice(ctx: ScriptCtx, option: string): { seat: number; allyId?: number } | undefined {
+  const ally = /^ally:(\d+):(\d+)$/.exec(option);
+  if (ally) return { seat: Number(ally[1]), allyId: Number(ally[2]) };
+  const seat = heroChoiceSeat(ctx, option);
+  return seat === undefined ? undefined : { seat };
+}
+
+/** Deal `amount` arcane damage to the target a `requestAnyTargetChoice` named. */
+export function dealArcaneToAnyTargetChoice(
+  ctx: ScriptCtx,
+  option: string,
+  amount: number,
+): { seat: number; allyId?: number } | undefined {
+  const target = anyTargetChoice(ctx, option);
+  if (target) dealArcane(ctx, target.seat, amount, target.allyId);
+  return target;
+}
+
 /** "card-moved-from-deck-by-effect" condition for "when an activated ability
  * or action card effect puts this face-up into a zone from your deck". The
  * engine reports only face-up deck moves. */
@@ -753,6 +857,261 @@ export function channelLightning(
         ctx.setState(remainingKey, ctx.getState(remainingKey) - 1);
         payNext(ctx);
       }
+    },
+  };
+}
+
+// ── Reload ──────────────────────────────────────────────────────────────────
+
+const RELOAD_HOOK = "reload";
+/** Hooks of reload decisions persisted before reload was shared. */
+const LEGACY_RELOAD_HOOKS: ReadonlySet<string> = new Set([
+  "aaz-reload",
+  "arc-reload",
+  "cru-high-reload",
+  "ele-reload",
+  "high-reload",
+  "over-flex-reload",
+]);
+
+/** Reload (CR 8.5.23): if your arsenal is empty, you may put a card from your
+ * hand into it face down. Answer with `resolveReload`. */
+export function reload(ctx: ScriptCtx, hook = RELOAD_HOOK): void {
+  const player = ctx.player(ctx.seat);
+  if (player.arsenal.length > 0 || player.hand.length === 0) return;
+  ctx.requestCardChoice(
+    hook,
+    decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.common.reload", {
+      optionMessages: commonOptionMessages("pass"),
+    }),
+    ["pass", ...player.hand.map((card) => card.instanceId)],
+  );
+}
+
+/** Answers a `reload` choice; true when `hook` was it. */
+export function resolveReload(ctx: ScriptCtx, hook: string, option: string, expected = RELOAD_HOOK): boolean {
+  if (hook !== expected && !(expected === RELOAD_HOOK && LEGACY_RELOAD_HOOKS.has(hook))) return false;
+  if (option !== "pass") ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
+  return true;
+}
+
+// ── Fusion ──────────────────────────────────────────────────────────────────
+
+export type FusionType = "earth" | "ice" | "lightning";
+
+const FUSION_FROSTBITE = "SIY035";
+const ELEMENTAL_FUSION_HOOK = "elemental-fusion";
+/** Hooks of decisions persisted before fusion was shared. */
+const LEGACY_FUSION_HOOKS: Readonly<Record<string, string>> = {
+  fusion: "lightning-fusion",
+  "high-fuse:earth": "earth-fusion",
+  "high-fuse:ice": "ice-fusion",
+  "high-fuse:lightning": "lightning-fusion",
+  "upr-high-fuse": "ice-fusion",
+  "ajv-fusion": ELEMENTAL_FUSION_HOOK,
+  "oaken-fuse-ice": "ice-fusion",
+};
+
+function fusionLabel(type: FusionType): string {
+  return type[0]!.toUpperCase() + type.slice(1);
+}
+
+/** Whether this card was fused. */
+export function isFused(ctx: ScriptCtx): boolean {
+  return ctx.getState("fused") > 0;
+}
+
+/** Whether this card was fused with a card of `type`. */
+export function isFusedWith(ctx: ScriptCtx, type: FusionType): boolean {
+  return ctx.getState(`fused:${type}`) > 0;
+}
+
+/** Isenhowl Weathervane: "the next time you Ice fuse this turn". */
+export function isenhowlFrostbitesKey(targetSeat: number): string {
+  return `nextIceFusionFrostbites:${targetSeat}`;
+}
+
+function completeFusion(
+  ctx: ScriptCtx,
+  revealed: readonly { card: DeepReadonly<CardInstance>; type: FusionType }[],
+): void {
+  if (revealed.length === 0 || !ctx.revealCards([...new Set(revealed.map(({ card }) => card.instanceId))])) return;
+  ctx.setState("fused", 1);
+  ctx.setFlag("player", "fusedThisTurn", true);
+  for (const { type } of revealed) {
+    ctx.setState(`fused:${type}`, 1);
+    ctx.setFlag("player", `${type}FusedThisTurn`, true);
+  }
+  if (!revealed.some(({ type }) => type === "ice")) return;
+  for (const player of ctx.state.players) {
+    const key = isenhowlFrostbitesKey(player.seat);
+    const count = Number(ctx.getPlayerFlag(ctx.seat, key));
+    if (count > 0) ctx.createTokens(FUSION_FROSTBITE, count, player.seat);
+    ctx.setPlayerFlag(ctx.seat, key, 0);
+  }
+}
+
+function fusionCandidates(ctx: ScriptCtx, type: FusionType): DeepReadonly<CardInstance>[] {
+  return ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, type));
+}
+
+function handCard(ctx: ScriptCtx, option: string | number, type: FusionType): DeepReadonly<CardInstance> | undefined {
+  return fusionCandidates(ctx, type).find((card) => card.instanceId === Number(option));
+}
+
+function requestFusionReveal(ctx: ScriptCtx, type: FusionType): void {
+  const matches = fusionCandidates(ctx, type);
+  if (matches.length === 0) return;
+  const label = fusionLabel(type);
+  ctx.requestCardChoice(
+    `${type}-fusion`,
+    decisionPrompt(
+      `${ctx.data.name}: reveal ${type === "lightning" ? "a" : "an"} ${label} card to fuse?`,
+      "card.ele.fusion.reveal.named",
+      {
+        values: { card: { kind: "card", cardId: ctx.self.cardId }, type: label },
+        optionMessages: commonOptionMessages("no"),
+      },
+    ),
+    ["no", ...matches.map((card) => card.instanceId)],
+  );
+}
+
+function requestElementalFusion(ctx: ScriptCtx, first: FusionType, second: FusionType): void {
+  const hand = ctx.player(ctx.seat).hand;
+  const firstCards = fusionCandidates(ctx, first);
+  const secondCards = fusionCandidates(ctx, second);
+  const firstLabel = fusionLabel(first);
+  const secondLabel = fusionLabel(second);
+  const options = new Set<string>(["no"]);
+  for (const card of firstCards) options.add(`${first}:${card.instanceId}`);
+  for (const card of secondCards) options.add(`${second}:${card.instanceId}`);
+  for (const a of firstCards)
+    for (const b of secondCards) options.add(`both:${a.instanceId}:${b.instanceId}`);
+  if (options.size === 1) return;
+  const optionMessages: Record<string, GameMessage> = { ...commonOptionMessages("no") };
+  for (const option of options) {
+    const [kind, firstId, secondId] = option.split(":");
+    const a = hand.find((card) => card.instanceId === Number(firstId));
+    const b = hand.find((card) => card.instanceId === Number(secondId));
+    if (!a) continue;
+    optionMessages[option] =
+      kind !== "both"
+        ? decisionMessage("card.ele.fusion.option.single", {
+            card: { kind: "card", cardId: a.cardId },
+            type: kind === first ? firstLabel : secondLabel,
+          })
+        : a.instanceId === b?.instanceId
+          ? decisionMessage("card.ele.fusion.option.both.single", {
+              card: { kind: "card", cardId: a.cardId },
+              firstType: firstLabel,
+              secondType: secondLabel,
+            })
+          : decisionMessage("card.ele.fusion.option.both", {
+              first: { kind: "card", cardId: a.cardId },
+              second: { kind: "card", cardId: b!.cardId },
+              firstType: firstLabel,
+              secondType: secondLabel,
+            });
+  }
+  ctx.requestChoice(
+    ELEMENTAL_FUSION_HOOK,
+    decisionPrompt(`Reveal ${first} and/or ${second} cards to fuse?`, "card.ele.fusion.multiple", {
+      values: { firstType: firstLabel, secondType: secondLabel },
+      optionMessages,
+    }),
+    [...options],
+  );
+}
+
+type FusionChoice = Required<Pick<CardScript, "additionalCost">> & {
+  /** True when `hook` was this fusion's choice. */
+  onChoose(ctx: ScriptCtx, hook: string, option: string): boolean;
+};
+
+function fusionChoice(types: FusionType | readonly [FusionType, FusionType], mode: "and" | "and/or"): FusionChoice {
+  if (typeof types === "string") {
+    const type = types;
+    return {
+      additionalCost: (ctx) => requestFusionReveal(ctx, type),
+      onChoose(ctx, rawHook, option) {
+        if ((LEGACY_FUSION_HOOKS[rawHook] ?? rawHook) !== `${type}-fusion`) return false;
+        const card = option === "no" ? undefined : handCard(ctx, option, type);
+        if (card) completeFusion(ctx, [{ card, type }]);
+        return true;
+      },
+    };
+  }
+  const [first, second] = types;
+  if (mode === "and")
+    return {
+      additionalCost(ctx) {
+        if (fusionCandidates(ctx, second).length > 0) requestFusionReveal(ctx, first);
+      },
+      onChoose(ctx, rawHook, option) {
+        const hook = LEGACY_FUSION_HOOKS[rawHook] ?? rawHook;
+        if (hook === `${first}-fusion`) {
+          const card = option === "no" ? undefined : handCard(ctx, option, first);
+          ctx.setState("fusionFirstReveal", card?.instanceId ?? 0);
+          if (card) requestFusionReveal(ctx, second);
+          return true;
+        }
+        if (hook !== `${second}-fusion`) return false;
+        const firstCard = handCard(ctx, ctx.getState("fusionFirstReveal"), first);
+        const secondCard = option === "no" ? undefined : handCard(ctx, option, second);
+        ctx.setState("fusionFirstReveal", 0);
+        if (firstCard && secondCard)
+          completeFusion(ctx, [
+            { card: firstCard, type: first },
+            { card: secondCard, type: second },
+          ]);
+        return true;
+      },
+    };
+  return {
+    additionalCost: (ctx) => requestElementalFusion(ctx, first, second),
+    onChoose(ctx, rawHook, option) {
+      if ((LEGACY_FUSION_HOOKS[rawHook] ?? rawHook) !== ELEMENTAL_FUSION_HOOK) return false;
+      if (option === "no") return true;
+      const [kind, firstId, secondId] = option.split(":");
+      const revealed =
+        kind === "both"
+          ? [
+              { card: handCard(ctx, firstId!, first), type: first },
+              { card: handCard(ctx, secondId!, second), type: second },
+            ]
+          : kind === first || kind === second
+            ? [{ card: handCard(ctx, firstId!, kind), type: kind }]
+            : [];
+      completeFusion(
+        ctx,
+        revealed.filter((entry): entry is { card: DeepReadonly<CardInstance>; type: FusionType } => !!entry.card),
+      );
+      return true;
+    },
+  };
+}
+
+/** Fusion: an optional additional cost to reveal a card of each element from
+ * hand. `"ice"` is single-element fusion; a pair is "X and/or Y Fusion", or
+ * "X and Y Fusion" with `mode: "and"`, where both must be revealed (one card
+ * may count for both). Read the result with `isFused`/`isFusedWith`; revealing
+ * Ice consumes Isenhowl Weathervane's Frostbites. `script`'s additional cost
+ * and choices follow the fusion. */
+export function withFusion(
+  types: FusionType | readonly [FusionType, FusionType],
+  script: CardScript = {},
+  mode: "and" | "and/or" = "and/or",
+): CardScript {
+  const fuse = fusionChoice(types, mode);
+  return {
+    ...script,
+    additionalCost(ctx) {
+      fuse.additionalCost(ctx);
+      script.additionalCost?.(ctx);
+    },
+    onChoose(ctx, hook, option) {
+      if (!fuse.onChoose(ctx, hook, option)) script.onChoose?.(ctx, hook, option);
     },
   };
 }

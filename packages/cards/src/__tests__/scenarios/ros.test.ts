@@ -1269,7 +1269,7 @@ describe("ROS — Wizard and generic", () => {
 
     g.play("deadwood dirge|3")
       .chooseCard("sigil of aether|3");
-    expect(g.state.pendingDecision?.prompt).toBe("Deal 1 arcane damage to a target");
+    expect(g.state.pendingDecision?.prompt).toBe("Sigil of Aether: deal 1 arcane damage to a target");
     g.chooseOption("opposing hero")
       .expectLife(1, 19);
     expect(g.state.players[0]!.flags.nextArcaneBonus).toBe(1);
@@ -1301,7 +1301,7 @@ describe("ROS — Wizard and generic", () => {
     expect(g.state.players[0]!.flags.nextArcaneBonus).toBe(1);
 
     g.passPriority().passPriority();
-    expect(g.state.pendingDecision?.prompt).toBe("Deal 2 arcane damage to a target");
+    expect(g.state.pendingDecision?.prompt).toBe("Sigil of Aether: deal 2 arcane damage to a target");
     g.chooseOption("opposing hero")
       .expectLog("Sigil of Aether would deal 2 arcane damage to Dorinthea")
       .expectLife(1, 18);
@@ -1324,7 +1324,7 @@ describe("ROS — Wizard and generic", () => {
     g.play("deadwood dirge|3")
       .chooseCard("sigil of aether|3");
 
-    expect(g.state.pendingDecision?.prompt).toBe("Deal 1 arcane damage to a target");
+    expect(g.state.pendingDecision?.prompt).toBe("Sigil of Aether: deal 1 arcane damage to a target");
     expect(g.state.players[0]!.flags.nextArcaneBonus).toBeUndefined();
     g.chooseOption("opposing hero")
       .expectLog("Sigil of Aether would deal 1 arcane damage to Dorinthea")

@@ -10,27 +10,29 @@ import {
   commonOptionMessages,
   consumeDelayedEffect,
   dealArcane,
+  dealArcaneToAnyTargetChoice,
   dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
+  hasCardSubtype,
+  hasLiveTurnEffect,
   heroDamage,
   hitHookLabel,
   isAttackAction,
+  isAura,
+  isNonAttackAction,
   leavesArenaTrigger,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
   pendingDelayedEffect,
   previousAttackHasName,
+  requestAnyTargetChoice,
   requestDiscardChoice,
   resolveDiscardChoice,
   resourceAbility,
-  hasLiveTurnEffect,
-  hasCardSubtype,
-  isAura,
-  isNonAttackAction,
 } from "./shared-helpers.js";
 import { hasType } from "@fyendal/shared";
 
@@ -84,7 +86,7 @@ function verdance(earthCards: number): CardScript {
           (ctx) =>
             decisionPrompt(
               `Verdance: deal ${ctx.previewArcaneDamage(1)} arcane damage to an opposing target?`,
-              "card.ros.arcane.target.choose",
+              "card.common.arcane.target.choose",
               {
                 values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(1) },
                 optionMessages: commonOptionMessages("pass"),
@@ -112,51 +114,9 @@ function createRunechants(ctx: ScriptCtx, count: number): void {
   ctx.createTokens(RUNECHANT, count);
 }
 
-function requestAnyTarget(
-  ctx: ScriptCtx,
-  hook: string,
-  prompt: string,
-  amount: number,
-  opposingOnly = false,
-  optional = false,
-): void {
-  const options = opposingOnly ? ["opposing hero"] : ["opposing hero", "your hero"];
-  if (optional) options.unshift("no");
-  const cardOptions: (number | null)[] = options.map(() => null);
-  for (const player of ctx.state.players) {
-    if (opposingOnly && player.seat === ctx.seat) continue;
-    for (const card of player.board) {
-      if (!hasCardSubtype(ctx, card, "ally")) continue;
-      options.push(`ally:${player.seat}:${card.instanceId}`);
-      cardOptions.push(card.instanceId);
-    }
-  }
-  ctx.requestChoice(
-    hook,
-    decisionPrompt(prompt, "card.ros.arcane.target.choose", {
-      values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(amount) },
-      optionMessages: {
-        "opposing hero": decisionMessage("common.option.opponent"),
-        "your hero": decisionMessage("card.ros.option.yourhero"),
-        ...(optional ? commonOptionMessages("no") : {}),
-      },
-    }),
-    options,
-    ctx.seat,
-    cardOptions,
-    "opposing hero",
-  );
-}
-
 function dealToChoice(ctx: ScriptCtx, option: string, amount: number): void {
-  if (option === "no") return;
-  const ally = /^ally:(\d+):(\d+)$/.exec(option);
-  ctx.setState("lastTargetWasAlly", ally ? 1 : 0);
-  if (ally) {
-    dealArcane(ctx, Number(ally[1]), amount, Number(ally[2]));
-  } else {
-    dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), amount);
-  }
+  const target = dealArcaneToAnyTargetChoice(ctx, option, amount);
+  if (target) ctx.setState("lastTargetWasAlly", target.allyId === undefined ? 0 : 1);
 }
 
 interface SplitSides {
@@ -547,12 +507,7 @@ function arcaneAnyTarget(
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [amount],
     onPlay: (ctx) =>
-      requestAnyTarget(
-        ctx,
-        "arcane-target",
-        `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a target`,
-        amount,
-      ),
+      requestAnyTargetChoice(ctx, "arcane-target", amount),
     onChoose(ctx, hook, option) {
       if (hook === "arcane-target") dealToChoice(ctx, option, amount);
     },
@@ -565,24 +520,7 @@ function arcaneHero(amount: number, surge?: (ctx: ScriptCtx, target: number, dea
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [amount],
     onPlay(ctx) {
-      ctx.requestChoice(
-        "arcane-hero",
-        decisionPrompt(
-          `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a hero`,
-          "card.ros.arcane.hero.choose",
-          {
-            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(amount) },
-            optionMessages: {
-              "opposing hero": decisionMessage("common.option.opponent"),
-              "your hero": decisionMessage("card.ros.option.yourhero"),
-            },
-          },
-        ),
-        ["opposing hero", "your hero"],
-        undefined,
-        undefined,
-        "opposing hero",
-      );
+      requestAnyTargetChoice(ctx, "arcane-hero", amount, { heroesOnly: true });
     },
     onChoose(ctx, hook, option) {
       if (hook === "arcane-hero") dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), amount);
@@ -616,24 +554,7 @@ function glyphOverlay(base: number): CardScript {
     arcaneDamageEffectAmounts: [base],
     onPlay(ctx) {
       const amount = base + sigils(ctx).length;
-      ctx.requestChoice(
-        "glyph-hero",
-        decisionPrompt(
-          `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a hero`,
-          "card.ros.arcane.hero.choose",
-          {
-            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(amount) },
-            optionMessages: {
-              "opposing hero": decisionMessage("common.option.opponent"),
-              "your hero": decisionMessage("card.ros.option.yourhero"),
-            },
-          },
-        ),
-        ["opposing hero", "your hero"],
-        undefined,
-        undefined,
-        "opposing hero",
-      );
+      requestAnyTargetChoice(ctx, "glyph-hero", amount, { heroesOnly: true });
     },
     onChoose(ctx, hook, option) {
       if (hook === "glyph-hero") {
@@ -810,7 +731,7 @@ export const ros: Record<string, CardScript> = {
     leftName: "Pulsing Aether",
     rightName: "Life",
     left: (ctx) =>
-      requestAnyTarget(ctx, "pulsing-target", `Choose a target for ${ctx.previewArcaneDamage(4)} arcane damage`, 4),
+      requestAnyTargetChoice(ctx, "pulsing-target", 4),
     right: (ctx) => ctx.gainLife(ctx.seat, 1),
   }),
   "oscilio|0": {
@@ -839,9 +760,9 @@ export const ros: Record<string, CardScript> = {
     leftName: "Comet Storm",
     rightName: "Shock",
     left: (ctx) =>
-      requestAnyTarget(ctx, "comet-target", `Choose a target for ${ctx.previewArcaneDamage(5)} arcane damage`, 5),
+      requestAnyTargetChoice(ctx, "comet-target", 5),
     right: (ctx) =>
-      requestAnyTarget(ctx, "shock-target", `Choose a target for ${ctx.previewArcaneDamage(1)} arcane damage`, 1),
+      requestAnyTargetChoice(ctx, "shock-target", 1),
   }),
 
   "helm of lignum vitae|0": { modifyDefense: (ctx) => (fourEarthBanished(ctx) ? 1 : 0) },
@@ -1222,7 +1143,7 @@ Object.assign(ros, {
     arcaneDamageEffect: true,
     onPlay(ctx: ScriptCtx) {
       if (ctx.self.meldSide !== "left")
-        requestAnyTarget(ctx, "vaporize-shock", `Choose a target for ${ctx.previewArcaneDamage(1)} arcane damage`, 1);
+        requestAnyTargetChoice(ctx, "vaporize-shock", 1);
       if (ctx.self.meldSide === "left" || ctx.self.meldSide === "both") {
         const x = Number(ctx.getPlayerFlag(ctx.seat, `arcaneDamageAmountToSeat:${opponentSeat(ctx)}`));
         const auras = ctx.state.players
@@ -1275,7 +1196,7 @@ Object.assign(ros, {
     arcaneDamageEffect: true,
     onPlay(ctx: ScriptCtx) {
       if (ctx.self.meldSide !== "left")
-        requestAnyTarget(ctx, "null-shock", `Choose a target for ${ctx.previewArcaneDamage(1)} arcane damage`, 1);
+        requestAnyTargetChoice(ctx, "null-shock", 1);
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook === "null-shock") dealToChoice(ctx, option, 1);
@@ -1578,8 +1499,7 @@ Object.assign(ros, {
   },
   "sigil of aether|3": {
     ...beginningAura(undefined, (ctx) => {
-      const amount = ctx.previewArcaneDamage(1);
-      requestAnyTarget(ctx, "sigil-aether-target", `Deal ${amount} arcane damage to a target`, 1);
+      requestAnyTargetChoice(ctx, "sigil-aether-target", 1);
     }),
     onChoose(ctx, hook, option) {
       if (hook === "sigil-aether-target") dealToChoice(ctx, option, 1);
@@ -1825,7 +1745,7 @@ Object.assign(ros, {
     arcaneDamageEffect: true,
     onPlay(ctx: ScriptCtx) {
       if (ctx.self.meldSide !== "left")
-        requestAnyTarget(ctx, "regrowth-shock", `Choose a target for ${ctx.previewArcaneDamage(1)} arcane damage`, 1);
+        requestAnyTargetChoice(ctx, "regrowth-shock", 1);
       if (ctx.self.meldSide !== "right") {
         const x = Number(ctx.getPlayerFlag(ctx.seat, `arcaneDamageAmountToSeat:${opponentSeat(ctx)}`));
         const cards = faceUpGraveyard(ctx)

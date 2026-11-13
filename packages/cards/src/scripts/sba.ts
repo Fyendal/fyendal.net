@@ -7,14 +7,18 @@ import {
   commonOptionMessages,
   consumeDelayedEffect,
   dealArcane,
+  dealArcaneToAnyTargetChoice,
   decisionPrompt,
   faceUpGraveyard,
+  isFused,
   isWeaponAttack,
   localizedCardLog,
   nextAttack,
   ongoingLabel,
   opponentSeat,
   pendingDelayedEffect,
+  requestAnyTargetChoice,
+  withFusion,
 } from "./shared-helpers.js";
 
 // ── SBA (Silver Age: Briar precon) ──────────────────────────────────────────
@@ -36,92 +40,6 @@ const RUNECHANT = "SBA036";
 /** "if you've played a Lightning card this turn" */
 function playedLightning(ctx: ScriptCtx): boolean {
   return ctx.getFlag("player", "playedSubtype:lightning") === true;
-}
-
-function isFused(ctx: ScriptCtx): boolean {
-  return ctx.getState("fused") > 0;
-}
-
-/** Name-only identity check (any pitch variant — "a Nimblism"). */
-function requestAnyTarget(ctx: ScriptCtx, hook: string, amount: number): void {
-  const options = ["opposing hero", "your hero"];
-  const cardOptions: (number | null)[] = [null, null];
-  for (const player of ctx.state.players) {
-    for (const card of player.board) {
-      if (!ctx.cardTypes(card).includes("ally")) continue;
-      options.push(`ally:${player.seat}:${card.instanceId}`);
-      cardOptions.push(card.instanceId);
-    }
-  }
-  ctx.requestChoice(
-    hook,
-    decisionPrompt(
-      `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a target`,
-      "card.ros.arcane.target.choose",
-      {
-        values: {
-          card: { kind: "card", cardId: ctx.self.cardId },
-          amount: ctx.previewArcaneDamage(amount),
-        },
-        optionMessages: commonOptionMessages("opposing hero", "your hero"),
-      },
-    ),
-    options,
-    ctx.seat,
-    cardOptions,
-    "opposing hero",
-  );
-}
-
-function dealArcaneToTarget(ctx: ScriptCtx, option: string, amount: number): void {
-  const ally = /^ally:(\d+):(\d+)$/.exec(option);
-  if (ally) {
-    dealArcane(ctx, Number(ally[1]), amount, Number(ally[2]));
-    return;
-  }
-  dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), amount);
-}
-
-// ── Fusion ──────────────────────────────────────────────────────────────────
-
-/** Lightning Fusion: optional additional cost — reveal a Lightning card from
- *  hand; the played card becomes fused (8.3.17). The play pauses on the
- *  choice and resumes via finishPlayCard. */
-function fusionAdditionalCost(supertype: string) {
-  return (ctx: ScriptCtx) => {
-    const matches = ctx.player(ctx.seat).hand.filter((c) => ctx.cardTypes(c).includes(supertype.toLowerCase()));
-    if (matches.length === 0) return;
-    ctx.requestCardChoice(
-      "fusion",
-      decisionPrompt(`${ctx.data.name}: reveal a ${supertype} card from your hand to fuse?`, "card.sba.fusion.reveal", {
-        values: { card: { kind: "card", cardId: ctx.self.cardId }, type: supertype },
-        optionMessages: commonOptionMessages("no"),
-      }),
-      [...matches.map((c) => c.instanceId), "no"],
-    );
-  };
-}
-
-function fusionOnChoose(ctx: ScriptCtx, hook: string, option: string): void {
-  if (hook !== "fusion" || option === "no") return;
-  const card = ctx.player(ctx.seat).hand.find((c) => c.instanceId === Number(option));
-  if (!card) return;
-  ctx.setState("fused", 1);
-  ctx.setFlag("player", "fusedThisTurn", true);
-  for (const type of ["earth", "ice", "lightning"] as const) {
-    if (ctx.cardTypes(card).includes(type)) {
-      ctx.setFlag("player", `${type}FusedThisTurn`, true);
-    }
-  }
-  ctx.logPublic(
-    localizedCardLog(
-      ctx,
-      `${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`,
-      "card.log.common.fusion.revealed",
-      { revealed: { kind: "card", cardId: card.cardId } },
-      { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
-    ),
-  );
 }
 
 // ── Meld split cards ────────────────────────────────────────────────────────
@@ -354,22 +272,18 @@ export const sba: Record<string, CardScript> = {
   },
 
   // Arcanic Shockwave — fused: 1 arcane when it attacks
-  "arcanic shockwave|1": {
-    additionalCost: fusionAdditionalCost("lightning"),
-    onChoose: fusionOnChoose,
+  "arcanic shockwave|1": withFusion("lightning", {
     triggers: [attackArcaneHeroTrigger(1, isFused)],
-  },
+  }),
 
   // Entwine Lightning — fused: gains go again (keyword pruned in index.ts)
-  "entwine lightning|1": {
-    additionalCost: fusionAdditionalCost("lightning"),
-    onChoose: fusionOnChoose,
+  "entwine lightning|1": withFusion("lightning", {
     onAttackDeclared(ctx) {
       if (!isFused(ctx)) return;
       ctx.grantGoAgain();
       ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gains go again (fused)`, "card.log.sba.fused.goagain"));
     },
-  },
+  }),
 
   // Jack Be Quick — may banish a Nimblism from graveyard for +1{p} and go again
   "jack be quick|1": {
@@ -588,13 +502,13 @@ export const sba: Record<string, CardScript> = {
         );
       },
       right(ctx) {
-        requestAnyTarget(ctx, "burn-up-shock-target", 1);
+        requestAnyTargetChoice(ctx, "burn-up-shock-target", 1);
       },
     }),
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [4, 1],
     onChoose(ctx, hook, option) {
-      if (hook === "burn-up-shock-target") dealArcaneToTarget(ctx, option, 1);
+      if (hook === "burn-up-shock-target") dealArcaneToAnyTargetChoice(ctx, option, 1);
     },
     canTriggerOnHit(ctx) {
       return (

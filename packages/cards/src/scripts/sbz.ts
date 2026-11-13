@@ -2,13 +2,14 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   ampNextArcane,
   buffNextArcaneDamageCard,
-  commonOptionMessages,
   dealArcane,
+  dealArcaneToAnyTargetChoice,
   decisionPrompt,
   localizedCardLog,
   opponentSeat,
   optN,
   optOnChoose,
+  requestAnyTargetChoice,
   resourceAbility,
   wizardActionAsInstant,
   yesNoPrompt,
@@ -53,63 +54,28 @@ function blazeMatches(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, amount: 
 
 // ── "target hero" / "any target" choices ────────────────────────────────────
 
-function requestHeroTarget(ctx: ScriptCtx, damage: number): void {
-  const anyTarget = /any target/i.test(ctx.data.text ?? "");
-  const options = ["opposing hero", "your hero"];
-  const cardOptions: (number | null)[] = [null, null];
-  if (anyTarget) {
-    for (const player of ctx.state.players) {
-      for (const card of player.board) {
-        if (!ctx.cardTypes(card).includes("ally")) continue;
-        options.push(`ally:${player.seat}:${card.instanceId}`);
-        cardOptions.push(card.instanceId);
-      }
-    }
-  }
-  ctx.requestChoice(
-    `target:${damage}`,
-    decisionPrompt(
-      `${ctx.data.name}: deal ${ctx.previewArcaneDamage(damage)} arcane damage to which target?`,
-      "card.sbz.arcane.target.choose",
-      {
-        values: {
-          card: { kind: "card", cardId: ctx.self.cardId },
-          amount: ctx.previewArcaneDamage(damage),
-        },
-        optionMessages: {
-          ...commonOptionMessages("opposing hero", "your hero"),
-        },
-      },
-    ),
-    options,
-    ctx.seat,
-    cardOptions,
-    "opposing hero",
-  );
+/** "Deal N arcane damage to target hero", or to any target with `anyTarget`. */
+function requestTarget(ctx: ScriptCtx, damage: number, anyTarget = false): void {
+  requestAnyTargetChoice(ctx, `target:${damage}`, damage, { heroesOnly: !anyTarget });
 }
 
 /** Shared onChoose for the target:${n} hook; returns true when handled. */
 function targetOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
   const m = /^target:(\d+)$/.exec(hook);
   if (!m) return false;
-  const ally = /^ally:(\d+):(\d+)$/.exec(option);
-  if (ally) {
-    dealArcane(ctx, Number(ally[1]), Number(m[1]), Number(ally[2]));
-    return true;
-  }
-  dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), Number(m[1]));
+  dealArcaneToAnyTargetChoice(ctx, option, Number(m[1]));
   return true;
 }
 
 // ── factories ───────────────────────────────────────────────────────────────
 
-/** "Deal N arcane damage to target hero" + optional extra hooks. */
-function arcaneBolt(damage: number, extra: CardScript = {}): CardScript {
+/** "Deal N arcane damage to target hero" (or any target) + optional extra hooks. */
+function arcaneBolt(damage: number, extra: CardScript = {}, anyTarget = false): CardScript {
   return {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [damage],
     playAsInstant: viaBlaze,
-    onPlay: (ctx) => requestHeroTarget(ctx, damage),
+    onPlay: (ctx) => requestTarget(ctx, damage, anyTarget),
     ...extra,
     onChoose(ctx, hook, option) {
       if (targetOnChoose(ctx, hook, option)) return;
@@ -152,7 +118,7 @@ function emeritusScript(base: number): CardScript {
     playAsInstant: viaBlaze,
     onPlay(ctx) {
       const boosted = ctx.state.activePlayer !== ctx.seat;
-      requestHeroTarget(ctx, boosted ? base + 2 : base);
+      requestTarget(ctx, boosted ? base + 2 : base);
     },
     onChoose(ctx, hook, option) {
       targetOnChoose(ctx, hook, option);
@@ -390,7 +356,7 @@ export const sbz: Record<string, CardScript> = {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [3],
     playAsInstant: (ctx) => viaBlaze(ctx) || ctx.getFlag("player", "playedClassType:wizard:non-attack-action") === true,
-    onPlay: (ctx) => requestHeroTarget(ctx, 3),
+    onPlay: (ctx) => requestTarget(ctx, 3),
     onChoose(ctx, hook, option) {
       targetOnChoose(ctx, hook, option);
     },
@@ -402,7 +368,7 @@ export const sbz: Record<string, CardScript> = {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [5],
     playAsInstant: viaBlaze,
-    onPlay: (ctx) => requestHeroTarget(ctx, 5),
+    onPlay: (ctx) => requestTarget(ctx, 5, true),
     onDamageDealt(ctx, _target, amount, arcane) {
       if (!arcane || amount <= 0) return;
       ctx.requestChoice(
@@ -434,7 +400,7 @@ export const sbz: Record<string, CardScript> = {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [2],
     playAsInstant: viaBlaze,
-    onPlay: (ctx) => requestHeroTarget(ctx, 2),
+    onPlay: (ctx) => requestTarget(ctx, 2),
     onDamageDealt(ctx, _target, amount, arcane) {
       if (!arcane || amount <= 2) return;
       ctx.grantGoAgain();
@@ -450,7 +416,7 @@ export const sbz: Record<string, CardScript> = {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [1],
     playAsInstant: viaBlaze,
-    onPlay: (ctx) => requestHeroTarget(ctx, 1),
+    onPlay: (ctx) => requestTarget(ctx, 1),
     onDamageDealt(ctx, _target, amount, arcane) {
       if (!arcane || amount <= 1) return;
       ctx.drawCards(ctx.seat, 2);
@@ -475,7 +441,7 @@ export const sbz: Record<string, CardScript> = {
       label: "Discard: Amp 1",
       onActivate: (ctx) => ampNextArcane(ctx, 1),
     },
-  }),
+  }, true),
   "photon splicing|3": arcaneBolt(2, {
     activated: {
       cost: 0,
@@ -486,7 +452,7 @@ export const sbz: Record<string, CardScript> = {
       label: "Discard: Amp 1",
       onActivate: (ctx) => ampNextArcane(ctx, 1),
     },
-  }),
+  }, true),
 
   // Ponder token — "At the beginning of your end phase, destroy Ponder and
   // draw a card."

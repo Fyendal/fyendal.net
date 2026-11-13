@@ -15,6 +15,8 @@ import {
   hasCardSubtype,
   heroDamage,
   isAttackAction,
+  isenhowlFrostbitesKey,
+  isFused,
   localizedCardLog,
   mergeSetScripts,
   ongoingLabel,
@@ -23,6 +25,7 @@ import {
   optOnChoose,
   payForDefenseBoost,
   resourceAbility,
+  withFusion,
   wizardActionAsInstant,
   yesNoPrompt,
 } from "./shared-helpers.js";
@@ -222,53 +225,6 @@ function invocation(backId: string): CardScript {
   };
 }
 
-function fusionAdditionalCost(ctx: ScriptCtx): void {
-  const ice = ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, "ice"));
-  if (ice.length === 0) return;
-  ctx.requestCardChoice(
-    "ice-fusion",
-    decisionPrompt(`${ctx.data.name}: reveal an Ice card from your hand to fuse?`, "card.upr.ice.fusion.reveal.named", {
-      values: { card: { kind: "card", cardId: ctx.self.cardId } },
-      optionMessages: commonOptionMessages("no"),
-    }),
-    [...ice.map((card) => card.instanceId), "no"],
-  );
-}
-
-function consumeIsenhowl(ctx: ScriptCtx): void {
-  for (const target of [0, 1]) {
-    const key = `nextIceFusionFrostbites:${target}`;
-    const count = Number(ctx.getPlayerFlag(ctx.seat, key));
-    if (count > 0) createFrostbites(ctx, target, count);
-    ctx.setPlayerFlag(ctx.seat, key, 0);
-  }
-}
-
-function handleFusion(ctx: ScriptCtx, hook: string, option: string): boolean {
-  if (hook !== "ice-fusion") return false;
-  if (option === "no") return true;
-  const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
-  if (!card) return true;
-  ctx.setState("fused", 1);
-  ctx.setFlag("player", "fusedThisTurn", true);
-  ctx.setFlag("player", "iceFusedThisTurn", true);
-  consumeIsenhowl(ctx);
-  ctx.logPublic(
-    localizedCardLog(
-      ctx,
-      `${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`,
-      "card.log.common.fusion.revealed",
-      { revealed: { kind: "card", cardId: card.cardId } },
-      { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
-    ),
-  );
-  return true;
-}
-
-function fused(ctx: ScriptCtx): boolean {
-  return ctx.getState("fused") > 0;
-}
-
 function arcaneSpell(amount: number): CardScript {
   return {
     arcaneDamageEffect: true,
@@ -292,11 +248,10 @@ function fusedArcane(
   amount: number,
   afterDamage?: (ctx: ScriptCtx, target: number, dealt: number) => void,
 ): CardScript {
-  return {
+  return withFusion("ice", {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [amount],
     playAsInstant: wizardActionAsInstant,
-    additionalCost: fusionAdditionalCost,
     onPlay(ctx) {
       chooseDamageTarget(
         ctx,
@@ -309,7 +264,6 @@ function fusedArcane(
       if (arcane) afterDamage?.(ctx, target, dealt);
     },
     onChoose(ctx, hook, option) {
-      if (handleFusion(ctx, hook, option)) return;
       if (hook !== "fused-arcane") return;
       const id = Number(option);
       ctx.setState("target", id);
@@ -318,7 +272,7 @@ function fusedArcane(
       );
       dealToTarget(ctx, option, amount, true);
     },
-  };
+  });
 }
 
 function conditionalDraconicGoAgain(): CardScript {
@@ -1125,14 +1079,13 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       if (h === "arctic") createFrostbites(ctx, o === "you" ? ctx.seat : opponentSeat(ctx), 1);
     },
   },
-  "brain freeze|1": {
+  "brain freeze|1": withFusion("ice", {
     playAsInstant: wizardActionAsInstant,
-    additionalCost: fusionAdditionalCost,
     onPlay(ctx) {
       const hand = ctx.player(opponentSeat(ctx)).hand;
       const revealedIds = hand.map((card) => card.instanceId);
       if (!ctx.revealCards(revealedIds, opponentSeat(ctx))) return;
-      const choices = fused(ctx)
+      const choices = isFused(ctx)
         ? hand.filter((card) => ctx.hasCardType(card, "action") && (data(ctx, card).cost ?? 0) <= 2)
         : [];
       ctx.requestCardChoice(
@@ -1148,18 +1101,16 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       );
     },
     onChoose(ctx, h, o) {
-      if (handleFusion(ctx, h, o)) return;
       if (h === "brain" && o !== "Close") ctx.putOnDeckTop(Number(o));
     },
-  },
-  "brain freeze|2": {
+  }),
+  "brain freeze|2": withFusion("ice", {
     playAsInstant: wizardActionAsInstant,
-    additionalCost: fusionAdditionalCost,
     onPlay(ctx) {
       const hand = ctx.player(opponentSeat(ctx)).hand;
       const revealedIds = hand.map((card) => card.instanceId);
       if (!ctx.revealCards(revealedIds, opponentSeat(ctx))) return;
-      const choices = fused(ctx)
+      const choices = isFused(ctx)
         ? hand.filter((card) => ctx.hasCardType(card, "action") && (data(ctx, card).cost ?? 0) <= 1)
         : [];
       ctx.requestCardChoice(
@@ -1175,10 +1126,9 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       );
     },
     onChoose(ctx, h, o) {
-      if (handleFusion(ctx, h, o)) return;
       if (h === "brain" && o !== "Close") ctx.putOnDeckTop(Number(o));
     },
-  },
+  }),
   "dampen|1": {
     ...arcaneSpell(4),
     onDamageDealt(ctx, _target, amount, arcane) {
@@ -1198,31 +1148,31 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     },
   },
   "icebind|1": fusedArcane(3, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
+    if (isFused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
       const card = ctx.player(target).arsenal[0];
       if (card) freeze(ctx, card);
     }
   }),
   "icebind|2": fusedArcane(2, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
+    if (isFused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
       const card = ctx.player(target).arsenal[0];
       if (card) freeze(ctx, card);
     }
   }),
   "icebind|3": fusedArcane(1, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
+    if (isFused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
       const card = ctx.player(target).arsenal[0];
       if (card) freeze(ctx, card);
     }
   }),
   "polar cap|2": fusedArcane(3, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) ctx.createToken(FROSTBITE, target);
+    if (isFused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) ctx.createToken(FROSTBITE, target);
   }),
   "polar cap|3": fusedArcane(2, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) ctx.createToken(FROSTBITE, target);
+    if (isFused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) ctx.createToken(FROSTBITE, target);
   }),
   "succumb to winter|1": fusedArcane(5, (ctx, target) => {
-    if (!fused(ctx)) return;
+    if (!isFused(ctx)) return;
     if (ctx.getState("targetedAlly")) {
       const ally = ctx.state.players
         .flatMap((p) => p.board)
@@ -1234,7 +1184,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     }
   }),
   "succumb to winter|2": fusedArcane(4, (ctx, target) => {
-    if (!fused(ctx)) return;
+    if (!isFused(ctx)) return;
     if (ctx.getState("targetedAlly")) {
       const ally = ctx.state.players
         .flatMap((p) => p.board)
@@ -1246,7 +1196,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     }
   }),
   "succumb to winter|3": fusedArcane(3, (ctx, target) => {
-    if (!fused(ctx)) return;
+    if (!isFused(ctx)) return;
     if (ctx.getState("targetedAlly")) {
       const ally = ctx.state.players
         .flatMap((p) => p.board)
@@ -1264,7 +1214,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     onChoose(ctx, h, o) {
       if (h === "isenhowl") {
         const target = o === "you" ? ctx.seat : opponentSeat(ctx);
-        const key = `nextIceFusionFrostbites:${target}`;
+        const key = isenhowlFrostbitesKey(target);
         ctx.setPlayerFlag(ctx.seat, key, Number(ctx.getPlayerFlag(ctx.seat, key)) + 4);
       }
     },
@@ -1276,7 +1226,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     onChoose(ctx, h, o) {
       if (h === "isenhowl") {
         const target = o === "you" ? ctx.seat : opponentSeat(ctx);
-        const key = `nextIceFusionFrostbites:${target}`;
+        const key = isenhowlFrostbitesKey(target);
         ctx.setPlayerFlag(ctx.seat, key, Number(ctx.getPlayerFlag(ctx.seat, key)) + 3);
       }
     },
@@ -1288,7 +1238,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     onChoose(ctx, h, o) {
       if (h === "isenhowl") {
         const target = o === "you" ? ctx.seat : opponentSeat(ctx);
-        const key = `nextIceFusionFrostbites:${target}`;
+        const key = isenhowlFrostbitesKey(target);
         ctx.setPlayerFlag(ctx.seat, key, Number(ctx.getPlayerFlag(ctx.seat, key)) + 2);
       }
     },
@@ -1393,45 +1343,33 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       }
     },
   },
-  "sigil of permafrost|1": {
-    additionalCost: fusionAdditionalCost,
+  "sigil of permafrost|1": withFusion("ice", {
     onPlay(ctx) {
-      if (fused(ctx)) {
+      if (isFused(ctx)) {
         ctx.setState("sigilFrost", 1);
         ctx.addModifier({ scope: "until-end-of-turn", ...SIGIL_OF_PERMAFROST_LABEL });
       }
     },
     triggers: [permafrostFrostbites],
-    onChoose(ctx, h, o) {
-      handleFusion(ctx, h, o);
-    },
-  },
-  "sigil of permafrost|2": {
-    additionalCost: fusionAdditionalCost,
+  }),
+  "sigil of permafrost|2": withFusion("ice", {
     onPlay(ctx) {
-      if (fused(ctx)) {
+      if (isFused(ctx)) {
         ctx.setState("sigilFrost", 1);
         ctx.addModifier({ scope: "until-end-of-turn", ...SIGIL_OF_PERMAFROST_LABEL });
       }
     },
     triggers: [permafrostFrostbites],
-    onChoose(ctx, h, o) {
-      handleFusion(ctx, h, o);
-    },
-  },
-  "sigil of permafrost|3": {
-    additionalCost: fusionAdditionalCost,
+  }),
+  "sigil of permafrost|3": withFusion("ice", {
     onPlay(ctx) {
-      if (fused(ctx)) {
+      if (isFused(ctx)) {
         ctx.setState("sigilFrost", 1);
         ctx.addModifier({ scope: "until-end-of-turn", ...SIGIL_OF_PERMAFROST_LABEL });
       }
     },
     triggers: [permafrostFrostbites],
-    onChoose(ctx, h, o) {
-      handleFusion(ctx, h, o);
-    },
-  },
+  }),
   "conduit of frostburn|0": {
     activated: {
       cost: 0,

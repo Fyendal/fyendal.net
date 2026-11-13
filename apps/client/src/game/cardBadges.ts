@@ -72,7 +72,7 @@ function signedCounter(value: number): string {
 }
 
 function isFuseCounter(key: string): boolean {
-  return key === "fused" || key === "fusedEarth" || key === "fusedIce" || key.startsWith("fused:");
+  return key === "fused" || key.startsWith("fused:");
 }
 
 /** Counters that almost never stack read as a flag at 1; the number appears from 2 up. */

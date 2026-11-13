@@ -7,20 +7,22 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   faceUpGraveyard,
+  hasCardSubtype,
+  hasLiveTurnEffect,
+  isArrow,
+  isAttackAction,
+  isNonAttackAction,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
   optN,
   optOnChoose,
   previousAttackHasName,
+  reload,
+  resolveReload,
   sharesName,
   wizardActionAsInstant,
   yesNoPrompt,
-  hasLiveTurnEffect,
-  hasCardSubtype,
-  isArrow,
-  isAttackAction,
-  isNonAttackAction,
 } from "../shared-helpers.js";
 import { hasType as hasPrintedType } from "@fyendal/shared";
 
@@ -318,27 +320,9 @@ const poisonTheTips: CardScript = {
   },
   onChoose(ctx, hook, option) {
     if (hook === "poison-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
-    else reloadChoice(ctx, hook, option);
+    else resolveReload(ctx, hook, option);
   },
 };
-
-function reload(ctx: ScriptCtx): void {
-  const player = ctx.player(ctx.seat);
-  if (player.arsenal.length === 0 && player.hand.length > 0)
-    ctx.requestCardChoice(
-      "cru-high-reload",
-      decisionPrompt("Reload: put a card into arsenal?", "card.cru.reload.card.choose", {
-        optionMessages: commonOptionMessages("pass"),
-      }),
-      ["pass", ...player.hand.map((card) => card.instanceId)],
-    );
-}
-
-function reloadChoice(ctx: ScriptCtx, hook: string, option: string): boolean {
-  if (hook !== "cru-high-reload") return false;
-  if (option !== "pass") ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
-  return true;
-}
 
 const rattleBones: CardScript = {
   playAsInstant: (ctx) => ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true,

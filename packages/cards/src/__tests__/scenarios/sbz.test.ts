@@ -223,7 +223,7 @@ describe("SBZ — the next-arcane +N pool", () => {
     });
     s.activate("crucible of aetherweave|0", { pitch: [] });
     s.play("voltic bolt|1", { pitch: [] }); // stops at the target choice
-    expect(s.state.pendingDecision?.prompt).toBe("Voltic Bolt: deal 6 arcane damage to which target?");
+    expect(s.state.pendingDecision?.prompt).toBe("Voltic Bolt: deal 6 arcane damage to a hero");
     s.chooseOption("opposing hero");
     s.expectLog("Voltic Bolt would deal 6 arcane damage to Dorinthea")
       .expectLife(1, 20 - 6); // 5 + 1
@@ -245,7 +245,7 @@ describe("SBZ — the next-arcane +N pool", () => {
     s.play("voltic bolt|1", { pitch: [], settle: false }); // window opens (Amp is live)
     s.activate("photon splicing|3", { settle: false }); // discard: Amp 1
     s.settle(); // Amp resolves, then Voltic Bolt — stops at its target choice
-    expect(s.state.pendingDecision?.prompt).toBe("Voltic Bolt: deal 6 arcane damage to which target?");
+    expect(s.state.pendingDecision?.prompt).toBe("Voltic Bolt: deal 6 arcane damage to a hero");
     s.chooseOption("opposing hero");
     s.expectLog("Voltic Bolt would deal 6 arcane damage to Dorinthea")
       .expectLife(1, 20 - 6)

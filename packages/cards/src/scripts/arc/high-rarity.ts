@@ -14,6 +14,8 @@ import {
   opponentSeat,
   optN,
   optOnChoose,
+  reload,
+  resolveReload,
   wizardActionAsInstant,
 } from "../shared-helpers.js";
 
@@ -21,25 +23,6 @@ const RUNECHANT = "ARC112";
 
 function runeCount(ctx: ScriptCtx): number {
   return ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length;
-}
-
-function reload(ctx: ScriptCtx): void {
-  const player = ctx.player(ctx.seat);
-  if (player.arsenal.length === 0 && player.hand.length > 0) {
-    ctx.requestCardChoice(
-      "high-reload",
-      decisionPrompt("Reload: put a card from hand into arsenal?", "card.common.reload", {
-        optionMessages: commonOptionMessages("pass"),
-      }),
-      ["pass", ...player.hand.map((card) => card.instanceId)],
-    );
-  }
-}
-
-function reloadChoice(ctx: ScriptCtx, hook: string, option: string): boolean {
-  if (hook !== "high-reload") return false;
-  if (option !== "pass") ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
-  return true;
 }
 
 function chooseFromDeck(
@@ -419,7 +402,7 @@ export const arcHighRarity: Record<string, CardScript> = {
       reload(ctx);
     },
     onChoose(ctx, hook, option) {
-      reloadChoice(ctx, hook, option);
+      resolveReload(ctx, hook, option);
     },
   },
 

@@ -767,7 +767,6 @@ describe("CardFace counter icons", () => {
 
   it.each([
     "fused",
-    "fusedEarth",
     "fused:ice",
   ] as const)("renders any truthy %s state as one icon without a number", (counter) => {
     const html = renderToStaticMarkup(createElement(CardFace, {

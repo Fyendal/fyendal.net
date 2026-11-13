@@ -12,7 +12,9 @@ import {
   opponentSeat,
   optN,
   optOnChoose,
+  reload,
   requestHeroChoice,
+  resolveReload,
   spireSnipingScript,
 } from "./shared-helpers.js";
 import { hasType } from "@fyendal/shared";
@@ -68,29 +70,6 @@ function hasAimCounter(ctx: ScriptCtx): boolean {
  *  this card's next-attack modifier (Lace with X / Drop the Anchor). */
 function armedBySelf(ctx: ScriptCtx): boolean {
   return ctx.state.modifiers.some((m) => m.scope === "chain-link" && m.sourceInstanceId === ctx.self.instanceId);
-}
-
-/** Reload (CR 8.5.23): if the player's arsenal is empty, they may move a card
- *  from their hand to their arsenal. */
-function reload(ctx: ScriptCtx): void {
-  const p = ctx.player(ctx.seat);
-  if (p.arsenal.length > 0 || p.hand.length === 0) return;
-  ctx.requestCardChoice(
-    "reload",
-    decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.common.reload", {
-      optionMessages: commonOptionMessages("pass"),
-    }),
-    ["pass", ...p.hand.map((c) => c.instanceId)],
-  );
-}
-
-/** Handles the "reload" choice; returns true when the hook was a reload hook. */
-function reloadOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
-  if (hook !== "reload") return false;
-  if (option !== "pass") {
-    ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
-  }
-  return true;
 }
 
 /** "You may put an arrow card from your hand face up into your arsenal." */
@@ -298,7 +277,7 @@ export const saz: Record<string, CardScript> = {
       reload(ctx);
     },
     onChoose(ctx, hook, option) {
-      reloadOnChoose(ctx, hook, option);
+      resolveReload(ctx, hook, option);
     },
   },
 
@@ -561,7 +540,7 @@ export const saz: Record<string, CardScript> = {
       reload(ctx);
     },
     onChoose(ctx, hook, option) {
-      reloadOnChoose(ctx, hook, option);
+      resolveReload(ctx, hook, option);
     },
   },
 

@@ -1,38 +1,36 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
-  faceUpGraveyard,
-  hasBloodDebt,
   attackedWithWeapon,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
-  chargeDeclineMessages,
+  chargeAttack,
   commonOptionMessages,
   consumeDelayedEffect,
   dealArcane,
   dealArcaneToTargetHero,
   decisionMessage,
   decisionPrompt,
+  faceUpGraveyard,
+  hasBloodDebt,
+  hasCardSubtype,
   heroTarget,
   ironhideScript,
   isAttackAction,
+  isAura,
   isCard,
-  isChargeDecline,
   isSixPlus,
   leviaRedeemedAbility,
   localizedCardLog,
   mergeSetScripts,
+  ongoingLabel,
+  opponentSeat,
+  opposingHeroDamage,
   optN,
   optOnChoose,
-  opponentSeat,
   pendingDelayedEffect,
-  yesNoPrompt,
-  opposingHeroDamage,
-  ongoingLabel,
-  optionalChargeOptions,
   resourceAbility,
   warnIfNoActionPoint,
-  hasCardSubtype,
-  isAura,
+  yesNoPrompt,
 } from "./shared-helpers.js";
 import { monHighRarity } from "./mon/high-rarity.js";
 import { hasType as hasPrintedType } from "@fyendal/shared";
@@ -101,38 +99,6 @@ function blindingBeam(powerReduction: number): CardScript {
 
 function chargedThisTurn(ctx: ScriptCtx): boolean {
   return ctx.getFlag("player", "chargedThisTurn") === true;
-}
-
-function chargeAttack(extra: CardScript = {}): CardScript {
-  return {
-    additionalCost(ctx) {
-      const hand = ctx.player(ctx.seat).hand;
-      if (hand.length === 0) return;
-      ctx.requestCardChoice(
-        "mon-charge",
-        decisionPrompt(
-          `${ctx.data.name}: choose a card from your hand to charge, or decline`,
-          "card.mon.charge.choose",
-          {
-            values: { card: { kind: "card", cardId: ctx.self.cardId } },
-            optionMessages: chargeDeclineMessages,
-          },
-        ),
-        optionalChargeOptions(ctx),
-      );
-    },
-    ...extra,
-    onChoose(ctx, hook, option) {
-      if (hook === "mon-charge") {
-        if (!isChargeDecline(option)) {
-          const charged = ctx.charge(Number(option));
-          if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
-        }
-        return;
-      }
-      extra.onChoose?.(ctx, hook, option);
-    },
-  };
 }
 
 function putAttackIntoSoulOnHit(extra: CardScript = {}): CardScript {

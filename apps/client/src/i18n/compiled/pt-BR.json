@@ -1171,12 +1171,6 @@
       "value": "Escolha uma cor de que o herói defensor não pode fazer pitch"
     }
   ],
-  "card.aaz.reload.arsenal": [
-    {
-      "type": 0,
-      "value": "Reload: colocar uma carta da sua mão no seu arsenal?"
-    }
-  ],
   "card.agb.anka.card.discard": [
     {
       "type": 0,
@@ -1401,80 +1395,6 @@
     {
       "type": 0,
       "value": "Escolha uma zona de equipamento exposta para Frostbite"
-    }
-  ],
-  "card.ajv.fusion.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": revelar cartas Earth e/ou Ice para fusion?"
-    }
-  ],
-  "card.ajv.fusion.option.both": [
-    {
-      "type": 0,
-      "value": "Revelar "
-    },
-    {
-      "type": 1,
-      "value": "first"
-    },
-    {
-      "type": 0,
-      "value": " e "
-    },
-    {
-      "type": 1,
-      "value": "second"
-    },
-    {
-      "type": 0,
-      "value": " para Earth e Ice"
-    }
-  ],
-  "card.ajv.fusion.option.both.single": [
-    {
-      "type": 0,
-      "value": "Revelar "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " para Earth e Ice"
-    }
-  ],
-  "card.ajv.fusion.option.earth": [
-    {
-      "type": 0,
-      "value": "Revelar "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " para Earth"
-    }
-  ],
-  "card.ajv.fusion.option.ice": [
-    {
-      "type": 0,
-      "value": "Revelar "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " para Ice"
     }
   ],
   "card.ajv.ice.hero.choose": [
@@ -2242,6 +2162,42 @@
       "value": "Atenção: você não vai ganhar um Action Point porque não é a sua action phase."
     }
   ],
+  "card.common.arcane.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": escolha um herói para receber "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de dano arcane"
+    }
+  ],
+  "card.common.arcane.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": escolha um alvo para "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de dano arcane"
+    }
+  ],
   "card.common.arrow.arsenal": [
     {
       "type": 0,
@@ -2274,6 +2230,16 @@
     {
       "type": 0,
       "value": "Nomeie uma carta"
+    }
+  ],
+  "card.common.charge.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": escolha uma carta da sua mão para fazer charge, ou recuse"
     }
   ],
   "card.common.cost.arsenalarrow.faceup": [
@@ -2642,24 +2608,6 @@
       "value": "Escolha uma carta zombie no seu cemitério"
     }
   ],
-  "card.cru.arcane.hero.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha um herói para receber "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane"
-    }
-  ],
   "card.cru.breeze.boots.destroy": [
     {
       "type": 0,
@@ -2852,12 +2800,6 @@
     {
       "type": 0,
       "value": ": escolha uma carta de attack action defensora"
-    }
-  ],
-  "card.cru.reload.card.choose": [
-    {
-      "type": 0,
-      "value": "Reload: colocar uma carta no arsenal?"
     }
   ],
   "card.cru.research.order.choose": [
@@ -4993,20 +4935,6 @@
       "value": "type"
     }
   ],
-  "card.ele.fusion.reveal": [
-    {
-      "type": 0,
-      "value": "Revelar uma carta "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    },
-    {
-      "type": 0,
-      "value": " para fazer fuse?"
-    }
-  ],
   "card.ele.fusion.reveal.named": [
     {
       "type": 1,
@@ -5163,18 +5091,6 @@
     {
       "type": 0,
       "value": ": colocar uma carta de action que não é ataque no fundo?"
-    }
-  ],
-  "card.ele.oaken.fusion.earth": [
-    {
-      "type": 0,
-      "value": "Revelar uma carta Earth para fazer fuse de Oaken Old?"
-    }
-  ],
-  "card.ele.oaken.fusion.ice": [
-    {
-      "type": 0,
-      "value": "Revelar uma carta Ice para fazer fuse de Oaken Old?"
     }
   ],
   "card.ele.oaken.order": [
@@ -5367,12 +5283,6 @@
     {
       "type": 0,
       "value": "Ragamuffin's Hat: coloque uma carta no topo ou no fundo do seu deck"
-    }
-  ],
-  "card.ele.reload": [
-    {
-      "type": 0,
-      "value": "Reload: colocar uma carta da sua mão no seu arsenal?"
     }
   ],
   "card.ele.shelter.defender.choose": [
@@ -8205,24 +8115,6 @@
     {
       "type": 1,
       "value": "count"
-    },
-    {
-      "type": 0,
-      "value": ")"
-    }
-  ],
-  "card.log.common.fusion.revealed": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " recebe fusion (revela "
-    },
-    {
-      "type": 1,
-      "value": "revealed"
     },
     {
       "type": 0,
@@ -12139,16 +12031,6 @@
       "value": ": escolha +2 de poder ou go again para o seu próximo ataque elegível"
     }
   ],
-  "card.mon.charge.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha uma carta da sua mão para fazer charge, ou recuse"
-    }
-  ],
   "card.mon.defending.hand.bottom": [
     {
       "type": 0,
@@ -13274,24 +13156,6 @@
     {
       "type": 0,
       "value": "Devolva uma carta de action defensora"
-    }
-  ],
-  "card.omn.arcane.target.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": cause "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane a um alvo"
     }
   ],
   "card.omn.arrow.arsenal": [
@@ -14456,42 +14320,6 @@
       "value": "Descartar uma carta para vencer o wager em vez disso?"
     }
   ],
-  "card.ros.arcane.hero.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": cause "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane a um herói"
-    }
-  ],
-  "card.ros.arcane.target.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": cause "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane a um alvo"
-    }
-  ],
   "card.ros.arsenal.card.bottom": [
     {
       "type": 0,
@@ -14664,12 +14492,6 @@
     {
       "type": 0,
       "value": "Runechant"
-    }
-  ],
-  "card.ros.option.yourhero": [
-    {
-      "type": 0,
-      "value": "Seu herói"
     }
   ],
   "card.ros.plan.hand.shuffle": [
@@ -14854,24 +14676,6 @@
       "value": "Crown of Providence: escolha qual carta fica no topo"
     }
   ],
-  "card.sba.fusion.reveal": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": revelar uma carta "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    },
-    {
-      "type": 0,
-      "value": " da sua mão para fazer fuse?"
-    }
-  ],
   "card.sba.jack.ally.steal": [
     {
       "type": 0,
@@ -14882,16 +14686,6 @@
     {
       "type": 0,
       "value": "Jack Be Quick: fazer banish de um Nimblism do seu cemitério para +1 de poder e go again?"
-    }
-  ],
-  "card.sbl.charge.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha uma carta da sua mão para fazer charge ou recuse"
     }
   ],
   "card.sbl.charge.required": [
@@ -14964,24 +14758,6 @@
     {
       "type": 0,
       "value": "Thunder Quake: pagar 3 recursos para fazer heave dela com a face para cima no seu arsenal?"
-    }
-  ],
-  "card.sbz.arcane.target.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha um alvo para "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane"
     }
   ],
   "card.sbz.blaze.action.banish": [
@@ -15642,24 +15418,6 @@
       "value": "Golden Tipple: descartar uma carta amarela para comprar uma carta e criar um Gold?"
     }
   ],
-  "card.siy.arcane.target.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha um alvo para "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane"
-    }
-  ],
   "card.siy.brainfreeze.action.choose": [
     {
       "type": 0,
@@ -15766,16 +15524,6 @@
     {
       "type": 0,
       "value": "Frost Spike: escolha uma zona de equipamento exposta"
-    }
-  ],
-  "card.siy.fusion.reveal": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": revelar uma carta Ice da sua mão para fusion?"
     }
   ],
   "card.siy.iceeternal.hero.choose": [
@@ -19917,22 +19665,6 @@
     {
       "type": 0,
       "value": " no fundo do seu deck"
-    }
-  ],
-  "card.upr.ice.fusion.reveal": [
-    {
-      "type": 0,
-      "value": "Revelar uma carta Ice para fazer fuse?"
-    }
-  ],
-  "card.upr.ice.fusion.reveal.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": revelar uma carta Ice da sua mão para fazer fuse?"
     }
   ],
   "card.upr.kyloria.item.control": [

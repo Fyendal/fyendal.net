@@ -8,11 +8,13 @@ import {
   hasCardSubtype,
   hitHookLabel,
   isAttackAction,
+  isFused,
   isNonAttackAction,
   ongoingLabel,
   opponentSeat,
   requestDiscardChoice,
   resolveDiscardChoice,
+  withFusion,
   wizardActionAsInstant,
   yesNoPrompt,
 } from "../shared-helpers.js";
@@ -61,27 +63,6 @@ function revealRed(ctx: ScriptCtx, count: number): number {
   const cards = ctx.player(ctx.seat).deck.slice(0, count);
   ctx.revealCards(cards.map((card) => card.instanceId));
   return cards.filter((card) => ctx.cardData(card.cardId).pitch === 1).length;
-}
-function fusedIce(): Pick<CardScript, "additionalCost" | "onChoose"> {
-  return {
-    additionalCost(ctx) {
-      const ice = ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, "ice"));
-      if (ice.length)
-        ctx.requestCardChoice(
-          "upr-high-fuse",
-          decisionPrompt("Reveal an Ice card to fuse?", "card.upr.ice.fusion.reveal", {
-            optionMessages: commonOptionMessages("no"),
-          }),
-          ["no", ...ice.map((card) => card.instanceId)],
-        );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "upr-high-fuse" && option !== "no") {
-        ctx.setState("fused", 1);
-        ctx.setFlag("player", "fusedThisTurn", true);
-      }
-    },
-  };
 }
 const dromai: CardScript = {
   replacePitchResources(ctx, card, amount) {
@@ -365,17 +346,15 @@ export const uprHighRarity: Record<string, CardScript> = {
     },
   },
   "iyslander, stormbind|0": iyslander,
-  "encase|1": {
-    ...fusedIce(),
+  "encase|1": withFusion("ice", {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [3],
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
       dealArcane(ctx, opponentSeat(ctx), 3);
     },
-  },
-  "freezing point|1": {
-    ...fusedIce(),
+  }),
+  "freezing point|1": withFusion("ice", {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [5],
     playAsInstant: wizardActionAsInstant,
@@ -392,12 +371,12 @@ export const uprHighRarity: Record<string, CardScript> = {
         ctx,
         opp.seat,
         5 +
-          (ctx.getState("fused")
+          (isFused(ctx)
             ? frozen + ice + opp.board.filter((card) => cardNamed(ctx, card, "frostbite")).length
             : 0),
       );
     },
-  },
+  }),
   "frost hex|3": {},
   "coronet peak|0": {
     activated: {

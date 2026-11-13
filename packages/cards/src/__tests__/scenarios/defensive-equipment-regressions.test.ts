@@ -67,7 +67,7 @@ describe("Soulbond Resolve", () => {
     ] });
     s.play("IAR111").expectLife(1, 29 - runechants).blockWith().passPriority();
     s.react("saving grace|2");
-    expect(s.state.pendingDecision?.chooseHook).toBe("asb-charge");
+    expect(s.state.pendingDecision?.chooseHook).toBe("charge-cost");
     s.chooseCard("blessing of suraya|2");
     expect(s.state.players[1]!.flags.chargedThisTurn).toBe(true);
     // Six power, minus two from Saving Grace, minus its three defense:

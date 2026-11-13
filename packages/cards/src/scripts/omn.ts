@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, Modifier, ScriptCtx, Trigg
 import {
   ampNextArcane,
   anyDamageTarget,
+  anyTargetChoice,
   attackArcaneHeroTrigger,
   buffNextAttack,
   cardNamed,
@@ -26,6 +27,7 @@ import {
   opponentSeat,
   optN,
   optOnChoose,
+  requestAnyTargetChoice,
   upToOneTargetAttack,
   yesNoPrompt,
 } from "./shared-helpers.js";
@@ -60,49 +62,13 @@ function pitches(name: string, make: (pitch: 1 | 2 | 3) => CardScript): Record<s
   return Object.fromEntries(([1, 2, 3] as const).map((pitch) => [`${name}|${pitch}`, make(pitch)]));
 }
 
-function requestAnyTarget(ctx: ScriptCtx, hook: string, prompt: string, amount: number, heroesOnly = false): void {
-  const options = ["opposing hero", "your hero"];
-  const cardOptions: (number | null)[] = [null, null];
-  if (!heroesOnly) {
-    for (const player of ctx.state.players) {
-      for (const card of player.board) {
-        if (!hasCardSubtype(ctx, card, "ally")) continue;
-        options.push(`ally:${player.seat}:${card.instanceId}`);
-        cardOptions.push(card.instanceId);
-      }
-    }
-  }
-  ctx.requestChoice(
-    hook,
-    decisionPrompt(prompt, "card.omn.arcane.target.choose", {
-      values: { card: { kind: "card", cardId: ctx.self.cardId }, amount },
-      optionMessages: {
-        "opposing hero": decisionMessage("common.option.opposinghero"),
-        "your hero": decisionMessage("common.option.yourhero"),
-      },
-    }),
-    options,
-    ctx.seat,
-    cardOptions,
-    "opposing hero",
-  );
-}
-
-function dealToChoice(
-  ctx: ScriptCtx,
-  option: string,
-  amount: number,
-  opts: { arcane?: boolean; sourceInstanceId?: number } = { arcane: true },
-): number {
-  const ally = /^ally:(\d+):(\d+)$/.exec(option);
-  const targetSeat = ally ? Number(ally[1]) : option === "your hero" ? ctx.seat : opponentSeat(ctx);
-  if (opts.arcane !== false && opts.sourceInstanceId === undefined) {
-    return dealArcane(ctx, targetSeat, amount, ally ? Number(ally[2]) : undefined);
-  }
-  return ctx.dealDamage(targetSeat, amount, {
-    arcane: opts.arcane !== false,
-    ...(ally ? { targetAllyId: Number(ally[2]) } : {}),
-    ...(opts.sourceInstanceId !== undefined ? { sourceInstanceId: opts.sourceInstanceId } : {}),
+function dealToChoice(ctx: ScriptCtx, option: string, amount: number, sourceInstanceId?: number): number {
+  const target = anyTargetChoice(ctx, option);
+  if (!target) return 0;
+  return ctx.dealDamage(target.seat, amount, {
+    arcane: true,
+    targetAllyId: target.allyId,
+    ...(sourceInstanceId !== undefined ? { sourceInstanceId } : {}),
   });
 }
 
@@ -115,8 +81,7 @@ function arcaneAny(
     arcaneDamageEffectAmounts: [printedAmount],
     onPlay(ctx) {
       const base = typeof amount === "function" ? amount(ctx) : amount;
-      const preview = ctx.previewArcaneDamage(base);
-      requestAnyTarget(ctx, "arcane-target", `${ctx.data.name}: deal ${preview} arcane damage to a target`, preview);
+      requestAnyTargetChoice(ctx, "arcane-target", base);
     },
     onChoose(ctx, hook, option) {
       if (hook === "arcane-target") dealToChoice(ctx, option, typeof amount === "function" ? amount(ctx) : amount);
@@ -129,8 +94,7 @@ function arcaneHero(amount: number): CardScript {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [amount],
     onPlay(ctx) {
-      const preview = ctx.previewArcaneDamage(amount);
-      requestAnyTarget(ctx, "arcane-hero", `${ctx.data.name}: deal ${preview} arcane damage to a hero`, preview, true);
+      requestAnyTargetChoice(ctx, "arcane-hero", amount, { heroesOnly: true });
     },
     onChoose(ctx, hook, option) {
       if (hook === "arcane-hero") dealToChoice(ctx, option, amount);
@@ -286,14 +250,7 @@ function discardArcaneFlow(): CardScript {
       timing: "instant",
       fromHand: true,
       onActivate(ctx) {
-        const preview = ctx.previewArcaneDamage(1);
-        requestAnyTarget(
-          ctx,
-          "discard-bolt",
-          `${ctx.data.name}: deal ${preview} arcane damage to a hero`,
-          preview,
-          true,
-        );
+        requestAnyTargetChoice(ctx, "discard-bolt", 1, { heroesOnly: true });
       },
     },
     onChoose(ctx, hook, option) {
@@ -798,14 +755,7 @@ function cosmicSuture(amount: number): CardScript {
     onPlay(ctx) {
       ctx.preventNextDamage(ctx.seat, amount);
       if (starfall(ctx)) {
-        const preview = ctx.previewArcaneDamage(1);
-        requestAnyTarget(
-          ctx,
-          "suture-target",
-          `${ctx.data.name}: deal ${preview} arcane damage to a hero`,
-          preview,
-          true,
-        );
+        requestAnyTargetChoice(ctx, "suture-target", 1, { heroesOnly: true });
       }
     },
     onChoose(ctx, hook, option) {
@@ -820,14 +770,7 @@ function constellaStarfall(token?: string): CardScript {
     onPlay(ctx) {
       if (token) ctx.createToken(token);
       if (starfall(ctx)) {
-        const preview = ctx.previewArcaneDamage(1);
-        requestAnyTarget(
-          ctx,
-          "constella-target",
-          `${ctx.data.name}: deal ${preview} arcane damage to a hero`,
-          preview,
-          true,
-        );
+        requestAnyTargetChoice(ctx, "constella-target", 1, { heroesOnly: true });
       }
     },
     onChoose(ctx, hook, option) {
@@ -1154,7 +1097,7 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
           const preview = ctx.previewArcaneDamage(5 - pitch);
           return decisionPrompt(
             `${ctx.data.name}: deal ${preview} arcane damage to a target`,
-            "card.omn.arcane.target.choose",
+            "card.common.arcane.target.choose",
             { values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: preview } },
           );
         }),
@@ -1184,32 +1127,25 @@ export const omn: Record<string, CardScript> = mergeSetScripts("OMN", omnHighRar
       const staffs = ctx.player(ctx.seat).weapons.filter((card) => hasCardSubtype(ctx, card, "staff") && card.tapped);
       if (staffs.length) ctx.untap(staffs[0]!.instanceId);
       if (starfall(ctx)) {
-        const preview = ctx.previewArcaneDamage(1);
-        requestAnyTarget(
-          ctx,
-          "constella-target",
-          `${ctx.data.name}: deal ${preview} arcane damage to a hero`,
-          preview,
-          true,
-        );
+        requestAnyTargetChoice(ctx, "constella-target", 1, { heroesOnly: true });
       }
     },
   },
   "aethersling|1": damageThenTap(4, (ctx) => ctx.grantGoAgain()),
   "nucleus aetherbolt|1": {
     ...damageThenTap(3, (ctx) => {
-      const sourceInstanceId = ctx.player(ctx.seat).hero.instanceId;
-      const preview = ctx.previewArcaneDamage(1, { sourceInstanceId });
-      requestAnyTarget(ctx, "nucleus-target", `Your hero deals ${preview} arcane damage to a target`, preview);
+      requestAnyTargetChoice(ctx, "nucleus-target", 1, {
+        sourceInstanceId: ctx.player(ctx.seat).hero.instanceId,
+      });
     }),
     arcaneDamageEffectAmounts: [3, 1],
     onChoose(ctx, hook, option) {
       if (hook === "nucleus-target")
-        dealToChoice(ctx, option, 1, { arcane: true, sourceInstanceId: ctx.player(ctx.seat).hero.instanceId });
+        dealToChoice(ctx, option, 1, ctx.player(ctx.seat).hero.instanceId);
       else if (hook === "tap-payoff" && option === "yes" && ctx.tap(ctx.player(ctx.seat).hero.instanceId)) {
-        const sourceInstanceId = ctx.player(ctx.seat).hero.instanceId;
-        const preview = ctx.previewArcaneDamage(1, { sourceInstanceId });
-        requestAnyTarget(ctx, "nucleus-target", `Your hero deals ${preview} arcane damage to a target`, preview);
+        requestAnyTargetChoice(ctx, "nucleus-target", 1, {
+          sourceInstanceId: ctx.player(ctx.seat).hero.instanceId,
+        });
       } else if (hook === "arcane-target") dealToChoice(ctx, option, 3);
     },
   },

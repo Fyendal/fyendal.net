@@ -1,31 +1,19 @@
-import type { CardScript, ScriptCtx } from "@fyendal/engine";
+import type { CardScript } from "@fyendal/engine";
 import {
   buffNextAttack,
-  commonOptionMessages,
   decisionMessage,
   decisionPrompt,
   isArrow,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
+  reload,
+  resolveReload,
   yesNoPrompt,
 } from "./shared-helpers.js";
 
 function hasAim(card: { readonly counters?: Readonly<Record<string, number>> }): boolean {
   return (card.counters?.aim ?? 0) > 0;
-}
-
-function reload(ctx: ScriptCtx): void {
-  const player = ctx.player(ctx.seat);
-  if (player.arsenal.length === 0 && player.hand.length > 0) {
-    ctx.requestCardChoice(
-      "aaz-reload",
-      decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.aaz.reload.arsenal", {
-        optionMessages: commonOptionMessages("pass"),
-      }),
-      ["pass", ...player.hand.map((card) => card.instanceId)],
-    );
-  }
 }
 
 export const aaz: Record<string, CardScript> = {
@@ -223,8 +211,8 @@ export const aaz: Record<string, CardScript> = {
         ctx.shuffleDeck();
         ctx.putOnDeckTop(id);
         reload(ctx);
-      } else if (hook === "aaz-reload" && option !== "pass") {
-        ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
+      } else {
+        resolveReload(ctx, hook, option);
       }
     },
   },

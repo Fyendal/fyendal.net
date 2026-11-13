@@ -246,7 +246,7 @@ describe("ELE — Fusion and Elemental heroes", () => {
     g.play("oaken old|1");
 
     expect(g.state.pendingDecision).toMatchObject({
-      prompt: "Reveal an Ice card to fuse Oaken Old?",
+      prompt: "Oaken Old: reveal an Ice card to fuse?",
       options: ["no", String(iceId)],
       cardOptions: [null, iceId],
     });
@@ -257,7 +257,7 @@ describe("ELE — Fusion and Elemental heroes", () => {
     g.chooseCard(ICE);
 
     expect(g.state.pendingDecision).toMatchObject({
-      prompt: "Reveal an Earth card to fuse Oaken Old?",
+      prompt: "Oaken Old: reveal an Earth card to fuse?",
       options: ["no", String(earthId)],
       cardOptions: [null, earthId],
     });

@@ -125,8 +125,7 @@ function projectedAbilityLabels(
  * script state is private implementation detail and never projected. */
 function isPublicStatusKey(key: string): boolean {
   return key === "marked" || key === "attacked" || key === "arcaneBonus" || key === "sharpenedTurn" ||
-    key === "fused" || key === "fusedEarth" || key === "fusedIce" ||
-    key.startsWith("fused:") || key.startsWith("frostZone:");
+    key === "fused" || key.startsWith("fused:") || key.startsWith("frostZone:");
 }
 
 /** A card's rules counters plus its public statuses, as `CardView.counters`. */

@@ -8,8 +8,11 @@ import {
   decisionPrompt,
   entersArenaTrigger,
   hasCardSubtype,
+  isFused,
+  isFusedWith,
   localizedCardLog,
   opponentSeat,
+  withFusion,
 } from "./shared-helpers.js";
 import { hasType as hasPrintedType } from "@fyendal/shared";
 
@@ -57,93 +60,6 @@ function allEquipment(ctx: ScriptCtx, seat?: number): DeepReadonly<CardInstance>
       ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
       ...player.weapons.filter((card) => hasPrintedType(data(ctx, card), "equipment")),
     ]);
-}
-
-function fused(ctx: ScriptCtx, type?: "earth" | "ice"): boolean {
-  return type
-    ? ctx.getState(`fused${type === "earth" ? "Earth" : "Ice"}`) > 0
-    : ctx.getState("fusedEarth") > 0 || ctx.getState("fusedIce") > 0;
-}
-
-function elementalFusion(): Pick<CardScript, "additionalCost" | "onChoose"> {
-  return {
-    additionalCost(ctx) {
-      const hand = ctx.player(ctx.seat).hand;
-      const earth = hand.filter((card) => hasCardSubtype(ctx, card, "earth"));
-      const ice = hand.filter((card) => hasCardSubtype(ctx, card, "ice"));
-      const options = new Set<string>(["no"]);
-      for (const card of earth) options.add(`earth:${card.instanceId}`);
-      for (const card of ice) options.add(`ice:${card.instanceId}`);
-      for (const card of hand)
-        if (hasCardSubtype(ctx, card, "earth") && hasCardSubtype(ctx, card, "ice"))
-          options.add(`both:${card.instanceId}:${card.instanceId}`);
-      for (const e of earth)
-        for (const i of ice) if (e.instanceId !== i.instanceId) options.add(`both:${e.instanceId}:${i.instanceId}`);
-      const optionMessages: Record<string, ReturnType<typeof decisionMessage>> = { ...commonOptionMessages("no") };
-      for (const option of options) {
-        if (option === "no") continue;
-        const [kind, firstText, secondText] = option.split(":");
-        const first = hand.find((card) => card.instanceId === Number(firstText));
-        const second = hand.find((card) => card.instanceId === Number(secondText));
-        if (!first) continue;
-        optionMessages[option] =
-          kind === "both" && second
-            ? first.instanceId === second.instanceId
-              ? decisionMessage("card.ajv.fusion.option.both.single", { card: { kind: "card", cardId: first.cardId } })
-              : decisionMessage("card.ajv.fusion.option.both", {
-                  first: { kind: "card", cardId: first.cardId },
-                  second: { kind: "card", cardId: second.cardId },
-                })
-            : decisionMessage(kind === "earth" ? "card.ajv.fusion.option.earth" : "card.ajv.fusion.option.ice", {
-                card: { kind: "card", cardId: first.cardId },
-              });
-      }
-      if (options.size > 1)
-        ctx.requestChoice(
-          "ajv-fusion",
-          decisionPrompt(`${ctx.data.name}: reveal Earth and/or Ice cards to fuse?`, "card.ajv.fusion.choose", {
-            values: { card: { kind: "card", cardId: ctx.self.cardId } },
-            optionMessages,
-          }),
-          [...options],
-        );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook !== "ajv-fusion" || option === "no") return;
-      const [kind, firstText, secondText] = option.split(":");
-      const first = ctx.player(ctx.seat).hand.find((card) => card.instanceId === Number(firstText));
-      const second = ctx.player(ctx.seat).hand.find((card) => card.instanceId === Number(secondText));
-      const earthCard = kind === "earth" ? first : kind === "both" ? first : undefined;
-      const iceCard = kind === "ice" ? first : kind === "both" ? second : undefined;
-      if (earthCard && hasCardSubtype(ctx, earthCard, "earth")) ctx.setState("fusedEarth", 1);
-      if (iceCard && hasCardSubtype(ctx, iceCard, "ice")) ctx.setState("fusedIce", 1);
-      const revealed = [
-        ...new Map(
-          [earthCard, iceCard]
-            .filter((card): card is DeepReadonly<CardInstance> => !!card)
-            .map((card) => [card.instanceId, card]),
-        ).values(),
-      ];
-      if (revealed.length) {
-        ctx.setFlag("player", "fusedThisTurn", true);
-        if (earthCard) ctx.setFlag("player", "earthFusedThisTurn", true);
-        if (iceCard) ctx.setFlag("player", "iceFusedThisTurn", true);
-        ctx.logPublic(
-          localizedCardLog(
-            ctx,
-            `${ctx.data.name} is fused (reveals ${revealed.map((card) => data(ctx, card).name).join(" and ")})`,
-            "card.log.common.fusion.revealed",
-            { revealed: revealed.map((card) => data(ctx, card).name).join(", ") },
-            {
-              kind: "cards-revealed",
-              cards: revealed.map((card) => ({ cardId: card.cardId, ownerSeat: ctx.seat })),
-              sourceZone: "hand",
-            },
-          ),
-        );
-      }
-    },
-  };
 }
 
 function defendedWith(ctx: ScriptCtx, type: string): boolean {
@@ -315,10 +231,9 @@ export const ajv: Record<string, CardScript> = {
       if (hook === "crumble-counter" && option !== "none") ctx.addCardDefenseCounters(Number(option), 1);
     },
   },
-  "frozen to death|3": {
-    ...elementalFusion(),
+  "frozen to death|3": withFusion("ice", {
     onPlay(ctx) {
-      if (fused(ctx)) {
+      if (isFused(ctx)) {
         const equipment = allEquipment(ctx).filter((card) => (card.defCounters ?? 0) > 0);
         if (equipment.length) {
           ctx.requestCardChoice(
@@ -334,21 +249,16 @@ export const ajv: Record<string, CardScript> = {
       offerExposedFrostbite(ctx, "frozen-frostbite", opponentSeat(ctx), true);
     },
     onChoose(ctx, hook, option) {
-      if (hook === "ajv-fusion") {
-        elementalFusion().onChoose!(ctx, hook, option);
-        return;
-      }
       if (hook === "frozen-destroy") {
         if (option !== "none") ctx.destroyPermanent(Number(option));
         offerExposedFrostbite(ctx, "frozen-frostbite", opponentSeat(ctx), true);
       } else if (hook === "frozen-frostbite" && option !== "none")
         createExposedFrostbite(ctx, opponentSeat(ctx), option);
     },
-  },
-  "exposed to the elements|3": {
-    ...elementalFusion(),
+  }),
+  "exposed to the elements|3": withFusion(["earth", "ice"], {
     onPlay(ctx) {
-      if (fused(ctx, "earth")) {
+      if (isFusedWith(ctx, "earth")) {
         const equipment = allEquipment(ctx);
         if (equipment.length) {
           ctx.requestCardChoice(
@@ -359,7 +269,7 @@ export const ajv: Record<string, CardScript> = {
           return;
         }
       }
-      if (fused(ctx, "ice"))
+      if (isFusedWith(ctx, "ice"))
         ctx.requestChoice(
           "exposed-hero",
           decisionPrompt("Choose the hero for the Ice fusion effect", "card.ajv.ice.hero.choose", {
@@ -374,13 +284,9 @@ export const ajv: Record<string, CardScript> = {
         );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "ajv-fusion") {
-        elementalFusion().onChoose!(ctx, hook, option);
-        return;
-      }
       if (hook === "exposed-counter") {
         ctx.addCardDefenseCounters(Number(option), 1);
-        if (fused(ctx, "ice"))
+        if (isFusedWith(ctx, "ice"))
           ctx.requestChoice(
             "exposed-hero",
             decisionPrompt("Choose the hero for the Ice fusion effect", "card.ajv.ice.hero.choose", {
@@ -429,7 +335,7 @@ export const ajv: Record<string, CardScript> = {
           );
       } else if (hook === "exposed-destroy") ctx.destroyPermanent(Number(option));
     },
-  },
+  }),
   "unforgetting unforgiving|1": {
     canTriggerOnDefend(ctx) {
       const attacker = ctx.link?.attacker;

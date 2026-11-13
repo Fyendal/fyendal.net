@@ -3,13 +3,11 @@ import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 import {
   attackAbility,
   buffNextAttack,
-  chargeDeclineMessages,
+  chargeAttack,
   decisionMessage,
   decisionPrompt,
-  isChargeDecline,
   isSword,
   localizedCardLog,
-  optionalChargeOptions,
   solflareTrigger,
 } from "./shared-helpers.js";
 
@@ -60,45 +58,6 @@ function chargedThisTurn(ctx: ScriptCtx): boolean {
 /** The pitch of the card charged as this card's additional cost (0 = none). */
 function chargedPitchThisWay(ctx: ScriptCtx): number {
   return ctx.getState("chargedPitch");
-}
-
-// ── Charge as an optional additional cost ───────────────────────────────────
-
-const CHARGE_HOOK = "charge-cost";
-
-function chargeAdditionalCost(ctx: ScriptCtx): void {
-  const hand = ctx.player(ctx.seat).hand;
-  if (hand.length === 0) return;
-  ctx.requestCardChoice(
-    CHARGE_HOOK,
-    decisionPrompt(`${ctx.data.name}: choose a card from your hand to charge, or decline`, "card.sbl.charge.choose", {
-      values: { card: { kind: "card", cardId: ctx.self.cardId } },
-      optionMessages: chargeDeclineMessages,
-    }),
-    optionalChargeOptions(ctx),
-  );
-}
-
-/** Shared onChoose for the charge-cost hook; returns true when handled. */
-function chargeOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
-  if (hook !== CHARGE_HOOK) return false;
-  if (!isChargeDecline(option)) {
-    const charged = ctx.charge(Number(option));
-    if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
-  }
-  return true;
-}
-
-/** An attack action with "you may charge your hero's soul" as an additional cost. */
-function chargeAttack(extra: CardScript): CardScript {
-  return {
-    additionalCost: chargeAdditionalCost,
-    ...extra,
-    onChoose(ctx, hook, option) {
-      if (chargeOnChoose(ctx, hook, option)) return;
-      extra.onChoose?.(ctx, hook, option);
-    },
-  };
 }
 
 /** Unity equipment: "+1{d} while defending together with a card from hand". */

@@ -318,7 +318,7 @@ describe("SBA — Fusion", () => {
     g.play("arcanic shockwave|1")
       .chooseCard("fry|1") // reveal a Lightning card to fuse
       .declareTarget(1)
-      .expectLog("fused")
+      .expectLog("reveals Fry")
       .blockWith()
       .settle()
       .expectLife(1, 15); // 4 combat + 1 arcane
@@ -332,14 +332,12 @@ describe("SBA — Fusion", () => {
       },
     }));
     expect(projectStateFor(g.state, 1).logEntries).toContainEqual(expect.objectContaining({
-      message: {
-        id: "card.log.common.fusion.revealed",
-        values: {
-          revealed: { kind: "card", cardId: printingId("fry|1") },
-          card: { kind: "card", cardId: printingId("arcanic shockwave|1") },
-        },
-      },
-      event: expect.objectContaining({ kind: "cards-revealed", sourceZone: "hand" }),
+      message: expect.objectContaining({ id: "engine.log.cards.revealed.from.hand" }),
+      event: expect.objectContaining({
+        kind: "cards-revealed",
+        cards: [{ cardId: printingId("fry|1"), ownerSeat: 0 }],
+        sourceZone: "hand",
+      }),
     }));
   });
 

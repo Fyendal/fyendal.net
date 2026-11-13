@@ -1,5 +1,6 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  chargeAttack,
   chargeDeclineMessages,
   decisionPrompt,
   isChargeDecline,
@@ -10,33 +11,9 @@ import { hasType } from "@fyendal/shared";
 
 const COURAGE = "ASB027";
 const QUICKEN = "ASB028";
-const CHARGE_HOOK = "asb-charge";
 
 function isLight(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return ctx.cardTypes(card).includes("light");
-}
-
-function chargeAdditionalCost(ctx: ScriptCtx): void {
-  const hand = ctx.player(ctx.seat).hand;
-  if (hand.length) {
-    ctx.requestCardChoice(
-      CHARGE_HOOK,
-      decisionPrompt(`${ctx.data.name}: choose a card to charge, or decline`, "card.asb.charge.choose", {
-        values: { card: { kind: "card", cardId: ctx.self.cardId } },
-        optionMessages: chargeDeclineMessages,
-      }),
-      optionalChargeOptions(ctx),
-    );
-  }
-}
-
-function chargeOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
-  if (hook !== CHARGE_HOOK) return false;
-  if (!isChargeDecline(option)) {
-    const charged = ctx.charge(Number(option));
-    if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
-  }
-  return true;
 }
 
 function graceEquipment(effect: (ctx: ScriptCtx) => void): CardScript {
@@ -79,17 +56,13 @@ export const asb: Record<string, CardScript> = {
       },
     },
   },
-  "saving grace|2": {
-    additionalCost: chargeAdditionalCost,
+  "saving grace|2": chargeAttack({
     onPlay(ctx) {
       if (ctx.getFlag("player", "chargedThisTurn") === true) {
         ctx.addModifier({ scope: "chain-link", attack: -2, seat: ctx.link?.attacker });
       }
     },
-    onChoose(ctx, hook, option) {
-      chargeOnChoose(ctx, hook, option);
-    },
-  },
+  }),
   "lumina ascension|2": {
     onPlay(ctx) {
       ctx.addModifier({ scope: "until-end-of-turn", appliesTo: "weapon", attack: 1 });

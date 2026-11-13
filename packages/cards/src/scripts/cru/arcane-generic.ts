@@ -4,13 +4,15 @@ import {
   buffNextAttack,
   commonOptionMessages,
   dealArcane,
-  type DecisionPromptOptions,
   decisionPrompt,
+  heroChoiceSeat,
+  isNonAttackAction,
   opponentSeat,
   optN,
   optOnChoose,
+  requestAnyTargetChoice,
+  requestHeroChoice,
   wizardActionAsInstant,
-  isNonAttackAction,
 } from "../shared-helpers.js";
 
 const COPPER = "CRU197";
@@ -114,46 +116,22 @@ function researchNotes(count: number): CardScript {
   };
 }
 
-function requestHeroTarget(
-  ctx: ScriptCtx,
-  hook: string,
-  fallback: string,
-  id: string,
-  values?: DecisionPromptOptions["values"],
-): void {
-  ctx.requestChoice(
-    hook,
-    decisionPrompt(fallback, id, {
-      values,
-      optionMessages: commonOptionMessages("opposing hero", "your hero"),
-    }),
-    ["opposing hero", "your hero"],
-    undefined,
-    undefined,
-    "opposing hero",
-  );
-}
-
-function chosenHero(ctx: ScriptCtx, option: string): number {
-  return option === "your hero" ? ctx.seat : opponentSeat(ctx);
-}
-
 function forebodingBolt(damage: number): CardScript {
   return {
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      requestHeroTarget(
+      requestHeroChoice(
         ctx,
         `foreboding-target:${damage}`,
         `${ctx.data.name}: choose a hero`,
         "card.cru.foreboding.hero.choose",
-        { card: { kind: "card", cardId: ctx.self.cardId } },
+        { values: { card: { kind: "card", cardId: ctx.self.cardId } }, defaultOption: "opposing hero" },
       );
     },
     onChoose(ctx, hook, option) {
       const match = /^foreboding-target:(\d+)$/.exec(hook);
       if (match) {
-        ctx.dealDamage(chosenHero(ctx, option), Number(match[1]));
+        ctx.dealDamage(heroChoiceSeat(ctx, option)!, Number(match[1]));
         optN(ctx, 1);
         return;
       }
@@ -168,19 +146,12 @@ function rousingAether(damage: number): CardScript {
     arcaneDamageEffectAmounts: [damage],
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      const amount = ctx.previewArcaneDamage(damage);
-      requestHeroTarget(
-        ctx,
-        `rousing-target:${damage}`,
-        `${ctx.data.name}: deal ${amount} arcane damage to a hero`,
-        "card.cru.arcane.hero.choose",
-        { card: { kind: "card", cardId: ctx.self.cardId }, amount },
-      );
+      requestAnyTargetChoice(ctx, `rousing-target:${damage}`, damage, { heroesOnly: true });
     },
     onChoose(ctx, hook, option) {
       const match = /^rousing-target:(\d+)$/.exec(hook);
       if (!match) return;
-      dealArcane(ctx, chosenHero(ctx, option), Number(match[1]));
+      dealArcane(ctx, heroChoiceSeat(ctx, option)!, Number(match[1]));
       buffNextArcaneDamageCard(ctx, 1);
     },
   };
@@ -193,18 +164,11 @@ function snapback(damage: number): CardScript {
     playAsInstant: (ctx) =>
       wizardActionAsInstant(ctx) || ctx.getFlag("player", "playedClassType:wizard:non-attack-action") === true,
     onPlay(ctx) {
-      const amount = ctx.previewArcaneDamage(damage);
-      requestHeroTarget(
-        ctx,
-        `snapback-target:${damage}`,
-        `${ctx.data.name}: deal ${amount} arcane damage to a hero`,
-        "card.cru.arcane.hero.choose",
-        { card: { kind: "card", cardId: ctx.self.cardId }, amount },
-      );
+      requestAnyTargetChoice(ctx, `snapback-target:${damage}`, damage, { heroesOnly: true });
     },
     onChoose(ctx, hook, option) {
       const match = /^snapback-target:(\d+)$/.exec(hook);
-      if (match) dealArcane(ctx, chosenHero(ctx, option), Number(match[1]));
+      if (match) dealArcane(ctx, heroChoiceSeat(ctx, option)!, Number(match[1]));
     },
   };
 }
@@ -333,18 +297,11 @@ export const cruArcaneGeneric: Record<string, CardScript> = {
       oncePerTurn: true,
       label: "Deal 2 arcane damage",
       onActivate(ctx) {
-        const amount = ctx.previewArcaneDamage(2);
-        requestHeroTarget(
-          ctx,
-          "conduit-target",
-          `Aether Conduit: deal ${amount} arcane damage to a hero`,
-          "card.cru.arcane.hero.choose",
-          { card: { kind: "card", cardId: ctx.self.cardId }, amount },
-        );
+        requestAnyTargetChoice(ctx, "conduit-target", 2, { heroesOnly: true });
       },
     },
     onChoose(ctx, hook, option) {
-      if (hook === "conduit-target") dealArcane(ctx, chosenHero(ctx, option), 2);
+      if (hook === "conduit-target") dealArcane(ctx, heroChoiceSeat(ctx, option)!, 2);
     },
   },
 

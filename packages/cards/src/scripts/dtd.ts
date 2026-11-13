@@ -4,7 +4,7 @@ import {
   bloodDebtScript as bloodDebt,
   buffNextAttack,
   cardNameContains,
-  chargeDeclineMessages,
+  chargeAttack,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
@@ -12,12 +12,10 @@ import {
   hasCardSubtype,
   isAttackAction,
   isAura,
-  isChargeDecline,
   isNonAttackAction,
   leviaRedeemedAbility,
   mergeSetScripts,
   opponentSeat,
-  optionalChargeOptions,
   solflareTrigger,
   yesNoPrompt,
 } from "./shared-helpers.js";
@@ -51,33 +49,6 @@ function charged(ctx: ScriptCtx): boolean {
 }
 function createTokens(ctx: ScriptCtx, id: string, count: number): void {
   ctx.createTokens(id, count);
-}
-function chargeAttack(extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    additionalCost(ctx) {
-      const hand = ctx.player(ctx.seat).hand;
-      if (hand.length)
-        ctx.requestCardChoice(
-          "dtd-charge",
-          decisionPrompt("Charge your hero's soul?", "card.dtd.charge.soul.optional", {
-            optionMessages: chargeDeclineMessages,
-          }),
-          optionalChargeOptions(ctx),
-        );
-      extra.additionalCost?.(ctx);
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "dtd-charge") {
-        if (!isChargeDecline(option)) {
-          const card = ctx.charge(Number(option));
-          if (card) ctx.setState("chargedPitch", ctx.cardColor(card));
-        }
-        return;
-      }
-      extra.onChoose?.(ctx, hook, option);
-    },
-  };
 }
 function heraldInstant(effect: (ctx: ScriptCtx) => void): CardScript {
   return {

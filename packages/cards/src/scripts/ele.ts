@@ -16,13 +16,16 @@ import {
   heroTarget,
   isAttackAction,
   isAura,
+  isFused,
   isNonAttackAction,
-  localizedCardLog,
   mergeSetScripts,
   ongoingLabel,
   opponentSeat,
+  reload,
   requestHeroChoice,
+  resolveReload,
   targetHeroSeat,
+  withFusion,
 } from "./shared-helpers.js";
 import { eleHighRarity } from "./ele/high-rarity.js";
 import { hasType as hasPrintedType } from "@fyendal/shared";
@@ -33,10 +36,6 @@ import { hasType as hasPrintedType } from "@fyendal/shared";
 const FROSTBITE = "SIY035";
 const SEISMIC_SURGE = "CRU044";
 
-function isFused(ctx: ScriptCtx): boolean {
-  return ctx.getState("fused") > 0;
-}
-
 /** Fused Explosive Growth: "whenever it deals damage" to any target. */
 const explosiveGrowthDamage: TriggerDef = {
   event: "damage-dealt",
@@ -46,54 +45,6 @@ const explosiveGrowthDamage: TriggerDef = {
   condition: (ctx, eventCard) => dealtByThis(ctx, eventCard) && isFused(ctx),
   effect: (ctx) => ctx.addModifier({ scope: "combat-chain", attack: 1 }),
 };
-
-function fusionAdditionalCost(type: "earth" | "ice" | "lightning") {
-  return (ctx: ScriptCtx) => {
-    const matches = ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, type));
-    if (matches.length === 0) return;
-    ctx.requestCardChoice(
-      `${type}-fusion`,
-      decisionPrompt(
-        `${ctx.data.name}: reveal a ${type[0]!.toUpperCase()}${type.slice(1)} card to fuse?`,
-        "card.ele.fusion.reveal.named",
-        {
-          values: { card: { kind: "card", cardId: ctx.self.cardId }, type: type[0]!.toUpperCase() + type.slice(1) },
-          optionMessages: commonOptionMessages("no"),
-        },
-      ),
-      [...matches.map((card) => card.instanceId), "no"],
-    );
-  };
-}
-
-function fusionOnChoose(ctx: ScriptCtx, hook: string, option: string, type: "earth" | "ice" | "lightning"): boolean {
-  if (hook !== `${type}-fusion`) return false;
-  if (option === "no") return true;
-  const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
-  if (!card) return true;
-  ctx.setState("fused", 1);
-  ctx.setFlag("player", "fusedThisTurn", true);
-  ctx.setFlag("player", `${type}FusedThisTurn`, true);
-  ctx.logPublic(
-    localizedCardLog(
-      ctx,
-      `${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`,
-      "card.log.common.fusion.revealed",
-      { revealed: { kind: "card", cardId: card.cardId } },
-      { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
-    ),
-  );
-  return true;
-}
-
-function fusionOnly(type: "earth" | "ice" | "lightning"): Pick<CardScript, "additionalCost" | "onChoose"> {
-  return {
-    additionalCost: fusionAdditionalCost(type),
-    onChoose(ctx, hook, option) {
-      fusionOnChoose(ctx, hook, option, type);
-    },
-  };
-}
 
 function createFrostbites(ctx: ScriptCtx, seat: number, count = 1): void {
   ctx.createTokens(FROSTBITE, count, seat);
@@ -150,59 +101,42 @@ function discardUnlessPayOnChoose(ctx: ScriptCtx, hook: string, option: string, 
 }
 
 function fusedDominate(type: "ice" | "earth" | "lightning"): CardScript {
-  return {
-    additionalCost: fusionAdditionalCost(type),
+  return withFusion(type, {
     onAttackDeclared(ctx) {
       if (isFused(ctx)) ctx.addModifier({ scope: "chain-link", dominate: true });
     },
-    onChoose(ctx, hook, option) {
-      fusionOnChoose(ctx, hook, option, type);
-    },
-  };
+  });
 }
 
 function fusedPower(type: "earth" | "ice" | "lightning", attack: number): CardScript {
-  return {
-    additionalCost: fusionAdditionalCost(type),
+  return withFusion(type, {
     modifyAttack(ctx) {
       return isFused(ctx) ? attack : 0;
     },
-    onChoose(ctx, hook, option) {
-      fusionOnChoose(ctx, hook, option, type);
-    },
-  };
+  });
 }
 
 function fusedGoAgain(type: "earth" | "ice" | "lightning"): CardScript {
-  return {
-    additionalCost: fusionAdditionalCost(type),
+  return withFusion(type, {
     onAttackDeclared(ctx) {
       if (isFused(ctx)) ctx.grantGoAgain();
     },
-    onChoose(ctx, hook, option) {
-      fusionOnChoose(ctx, hook, option, type);
-    },
-  };
+  });
 }
 
 function fusedHitFrostbite(type: "ice", count = 1): CardScript {
-  return {
-    additionalCost: fusionAdditionalCost(type),
+  return withFusion(type, {
     canTriggerOnHit(ctx) {
       return isFused(ctx) && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
       createFrostbites(ctx, opponentSeat(ctx), count);
     },
-    onChoose(ctx, hook, option) {
-      fusionOnChoose(ctx, hook, option, type);
-    },
-  };
+  });
 }
 
 function entangle(): CardScript {
-  return {
-    ...fusionOnly("earth"),
+  return withFusion("earth", {
     canTriggerOnHit(ctx) {
       return isFused(ctx) && ctx.link?.targetAllyId === undefined;
     },
@@ -211,7 +145,7 @@ function entangle(): CardScript {
       ctx.setCardState(hero.instanceId, "nextAttackPowerPenalty", 2);
       ctx.setCardState(hero.instanceId, "nextAttackPowerPenaltyUntilTurn", ctx.state.turn + 1);
     },
-  };
+  });
 }
 
 function controlsAnotherNonTokenAura(ctx: ScriptCtx): boolean {
@@ -235,8 +169,7 @@ const emboldenDraw: TriggerDef = entersArenaTrigger(
 );
 
 function delayedGuardianAura(type: "earth" | "ice", attack: number, creates?: "frostbite" | "seismic"): CardScript {
-  return {
-    additionalCost: fusionAdditionalCost(type),
+  return withFusion(type, {
     triggers: [
       ...(creates === "frostbite"
         ? [
@@ -270,10 +203,7 @@ function delayedGuardianAura(type: "earth" | "ice", attack: number, creates?: "f
         },
       },
     ],
-    onChoose(ctx, hook, option) {
-      fusionOnChoose(ctx, hook, option, type);
-    },
-  };
+  });
 }
 
 const FROSTBITE_ON_HIT = ongoingLabel(
@@ -314,8 +244,7 @@ function fusedAttackWatcher(
   label: ReturnType<typeof ongoingLabel>,
   onHit: (ctx: ScriptCtx) => void,
 ): CardScript {
-  return {
-    additionalCost: fusionAdditionalCost(type),
+  return withFusion(type, {
     onAttackDeclared(ctx) {
       if (!isFused(ctx)) return;
       ctx.setState(key, 1);
@@ -328,36 +257,27 @@ function fusedAttackWatcher(
       onHit(ctx);
     },
     onChoose(ctx, hook, option) {
-      if (fusionOnChoose(ctx, hook, option, type)) return;
       discardUnlessPayOnChoose(ctx, hook, option, key);
     },
-  };
+  });
 }
 
 function arcanicShockwave(): CardScript {
-  return {
+  return withFusion("lightning", {
     arcaneDamageEffect: true,
-    additionalCost: fusionAdditionalCost("lightning"),
     triggers: [attackArcaneHeroTrigger(1, isFused)],
-    onChoose(ctx, hook, option) {
-      fusionOnChoose(ctx, hook, option, "lightning");
-    },
-  };
+  });
 }
 
 function ritesOfLightning(): CardScript {
-  return {
+  return withFusion("lightning", {
     arcaneDamageEffect: true,
-    additionalCost: fusionAdditionalCost("lightning"),
     triggers: [attackArcaneHeroTrigger(1, isFused)],
     hasConditionalGoAgain: (ctx) => ctx.getFlag("player", "arcaneDamageDealtThisTurn") === true,
     onDamageDealt(ctx, _target, amount, arcane) {
       if (arcane && amount > 0) ctx.grantGoAgain();
     },
-    onChoose(ctx, hook, option) {
-      fusionOnChoose(ctx, hook, option, "lightning");
-    },
-  };
+  });
 }
 
 function requestRitesAttack(ctx: ScriptCtx): void {
@@ -376,8 +296,7 @@ function requestRitesAttack(ctx: ScriptCtx): void {
 }
 
 function ritesOfReplenishment(): CardScript {
-  return {
-    additionalCost: fusionAdditionalCost("earth"),
+  return withFusion("earth", {
     onAttackDeclared(ctx) {
       ctx.setState("ritesAttack", isFused(ctx) ? 1 : 0);
       const nonAttacks = faceUpGraveyard(ctx).filter((card) => isNonAttackAction(ctx, card));
@@ -395,7 +314,6 @@ function ritesOfReplenishment(): CardScript {
       }
     },
     onChoose(ctx, hook, option) {
-      if (fusionOnChoose(ctx, hook, option, "earth")) return;
       if (hook === "rites-non-attack") {
         if (option !== "none") ctx.putOnDeckBottom(Number(option));
         requestRitesAttack(ctx);
@@ -403,12 +321,11 @@ function ritesOfReplenishment(): CardScript {
         ctx.putOnDeckBottom(Number(option));
       }
     },
-  };
+  });
 }
 
 function brambleSpark(attack: number): CardScript {
-  return {
-    additionalCost: fusionAdditionalCost("earth"),
+  return withFusion("earth", {
     onPlay(ctx) {
       ctx.setState("brambleArmed", 1);
       ctx.addModifier({
@@ -445,10 +362,7 @@ function brambleSpark(attack: number): CardScript {
         },
       },
     ],
-    onChoose(ctx, hook, option) {
-      fusionOnChoose(ctx, hook, option, "earth");
-    },
-  };
+  });
 }
 
 function weave(type: "earth" | "ice", attack: number): CardScript {
@@ -541,24 +455,6 @@ function lightningPress(attack: number): CardScript {
   };
 }
 
-function reload(ctx: ScriptCtx, hook = "ele-reload"): void {
-  const player = ctx.player(ctx.seat);
-  if (player.arsenal.length > 0 || player.hand.length === 0) return;
-  ctx.requestCardChoice(
-    hook,
-    decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.ele.reload", {
-      optionMessages: commonOptionMessages("pass"),
-    }),
-    ["pass", ...player.hand.map((card) => card.instanceId)],
-  );
-}
-
-function reloadOnChoose(ctx: ScriptCtx, hook: string, option: string, wanted = "ele-reload"): boolean {
-  if (hook !== wanted) return false;
-  if (option !== "pass") ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
-  return true;
-}
-
 function boltNShot(): CardScript {
   // The above-base condition is continuous: a buff gained after declaration
   // (e.g. Vyle in the reaction step) still grants go again and the reload.
@@ -570,7 +466,7 @@ function boltNShot(): CardScript {
       reload(ctx);
     },
     onChoose(ctx, hook, option) {
-      reloadOnChoose(ctx, hook, option);
+      resolveReload(ctx, hook, option);
     },
   };
 }
@@ -640,8 +536,7 @@ function sowTomorrow(minCost: number): CardScript {
 }
 
 function snapShot(): CardScript {
-  return {
-    ...fusionOnly("lightning"),
+  return withFusion("lightning", {
     onAttackDeclared(ctx) {
       if (!isFused(ctx)) return;
       for (const weapon of ctx.player(ctx.seat).weapons) {
@@ -649,7 +544,7 @@ function snapShot(): CardScript {
       }
       ctx.allowAbilitiesAsInstant("bow");
     },
-  };
+  });
 }
 
 export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRarity, {
@@ -684,47 +579,40 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       if (hook === "oldhim-top") ctx.putOnDeckTop(Number(option));
     },
   },
-  "biting gale|1": {
-    ...fusionOnly("ice"),
+  "biting gale|1": withFusion("ice", {
     onPlay(ctx) {
       if (isFused(ctx) && ctx.link) discardUnlessPay(ctx, ctx.link.attacker, 2, "biting-gale");
     },
     onChoose(ctx, hook, option) {
-      if (fusionOnChoose(ctx, hook, option, "ice")) return;
       discardUnlessPayOnChoose(ctx, hook, option, "biting-gale");
     },
-  },
-  "biting gale|2": {
-    ...fusionOnly("ice"),
+  }),
+  "biting gale|2": withFusion("ice", {
     onPlay(ctx) {
       if (isFused(ctx) && ctx.link) discardUnlessPay(ctx, ctx.link.attacker, 2, "biting-gale");
     },
     onChoose(ctx, hook, option) {
-      if (fusionOnChoose(ctx, hook, option, "ice")) return;
       discardUnlessPayOnChoose(ctx, hook, option, "biting-gale");
     },
-  },
-  "biting gale|3": {
-    ...fusionOnly("ice"),
+  }),
+  "biting gale|3": withFusion("ice", {
     onPlay(ctx) {
       if (isFused(ctx) && ctx.link) discardUnlessPay(ctx, ctx.link.attacker, 2, "biting-gale");
     },
     onChoose(ctx, hook, option) {
-      if (fusionOnChoose(ctx, hook, option, "ice")) return;
       discardUnlessPayOnChoose(ctx, hook, option, "biting-gale");
     },
-  },
-  "turn timber|1": { ...fusionOnly("earth"), modifyDefense: (ctx) => (isFused(ctx) ? 2 : 0) },
-  "turn timber|2": { ...fusionOnly("earth"), modifyDefense: (ctx) => (isFused(ctx) ? 2 : 0) },
-  "turn timber|3": { ...fusionOnly("earth"), modifyDefense: (ctx) => (isFused(ctx) ? 2 : 0) },
+  }),
+  "turn timber|1": withFusion("earth", { modifyDefense: (ctx) => (isFused(ctx) ? 2 : 0) }),
+  "turn timber|2": withFusion("earth", { modifyDefense: (ctx) => (isFused(ctx) ? 2 : 0) }),
+  "turn timber|3": withFusion("earth", { modifyDefense: (ctx) => (isFused(ctx) ? 2 : 0) }),
   "entangle|1": entangle(),
   "entangle|2": entangle(),
   "entangle|3": entangle(),
   "glacial footsteps|1": fusedDominate("ice"),
   "glacial footsteps|2": fusedDominate("ice"),
   "glacial footsteps|3": fusedDominate("ice"),
-  "mulch|1": {
-    ...fusionOnly("earth"),
+  "mulch|1": withFusion("earth", {
     canTriggerOnHit(ctx) {
       return isFused(ctx) && ctx.link?.targetAllyId === undefined;
     },
@@ -732,9 +620,8 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       const card = ctx.player(opponentSeat(ctx)).arsenal[0];
       if (card) ctx.putOnDeckBottom(card.instanceId);
     },
-  },
-  "mulch|2": {
-    ...fusionOnly("earth"),
+  }),
+  "mulch|2": withFusion("earth", {
     canTriggerOnHit(ctx) {
       return isFused(ctx) && ctx.link?.targetAllyId === undefined;
     },
@@ -742,9 +629,8 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       const card = ctx.player(opponentSeat(ctx)).arsenal[0];
       if (card) ctx.putOnDeckBottom(card.instanceId);
     },
-  },
-  "mulch|3": {
-    ...fusionOnly("earth"),
+  }),
+  "mulch|3": withFusion("earth", {
     canTriggerOnHit(ctx) {
       return isFused(ctx) && ctx.link?.targetAllyId === undefined;
     },
@@ -752,7 +638,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       const card = ctx.player(opponentSeat(ctx)).arsenal[0];
       if (card) ctx.putOnDeckBottom(card.instanceId);
     },
-  },
+  }),
   "snow under|1": fusedHitFrostbite("ice"),
   "snow under|2": fusedHitFrostbite("ice"),
   "snow under|3": fusedHitFrostbite("ice"),
@@ -806,8 +692,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
       }
     },
   },
-  "cold wave|1": {
-    ...fusionOnly("ice"),
+  "cold wave|1": withFusion("ice", {
     onAttackDeclared(ctx) {
       if (isFused(ctx))
         ctx.setPlayerFlag(
@@ -816,9 +701,8 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
           Number(ctx.getPlayerFlag(opponentSeat(ctx), "costMoreThisTurn")) + 1,
         );
     },
-  },
-  "cold wave|2": {
-    ...fusionOnly("ice"),
+  }),
+  "cold wave|2": withFusion("ice", {
     onAttackDeclared(ctx) {
       if (isFused(ctx))
         ctx.setPlayerFlag(
@@ -827,9 +711,8 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
           Number(ctx.getPlayerFlag(opponentSeat(ctx), "costMoreThisTurn")) + 1,
         );
     },
-  },
-  "cold wave|3": {
-    ...fusionOnly("ice"),
+  }),
+  "cold wave|3": withFusion("ice", {
     onAttackDeclared(ctx) {
       if (isFused(ctx))
         ctx.setPlayerFlag(
@@ -838,7 +721,7 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
           Number(ctx.getPlayerFlag(opponentSeat(ctx), "costMoreThisTurn")) + 1,
         );
     },
-  },
+  }),
   "snap shot|1": snapShot(),
   "snap shot|2": snapShot(),
   "snap shot|3": snapShot(),
@@ -875,115 +758,100 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "flake out|1": fusedDominate("ice"),
   "flake out|2": fusedDominate("ice"),
   "flake out|3": fusedDominate("ice"),
-  "frazzle|1": {
-    ...fusionOnly("lightning"),
+  "frazzle|1": withFusion("lightning", {
     onAttackDeclared(ctx) {
       if (isFused(ctx)) ctx.addModifier({ scope: "until-end-of-turn", damage: 1, appliesTo: "attack" });
     },
-  },
-  "frazzle|2": {
-    ...fusionOnly("lightning"),
+  }),
+  "frazzle|2": withFusion("lightning", {
     onAttackDeclared(ctx) {
       if (isFused(ctx)) ctx.addModifier({ scope: "until-end-of-turn", damage: 1, appliesTo: "attack" });
     },
-  },
-  "frazzle|3": {
-    ...fusionOnly("lightning"),
+  }),
+  "frazzle|3": withFusion("lightning", {
     onAttackDeclared(ctx) {
       if (isFused(ctx)) ctx.addModifier({ scope: "until-end-of-turn", damage: 1, appliesTo: "attack" });
     },
-  },
+  }),
 
   // Elemental Runeblade
-  "explosive growth|1": {
+  "explosive growth|1": withFusion("earth", {
     arcaneDamageEffect: true,
-    ...fusionOnly("earth"),
     triggers: [attackArcaneHeroTrigger(), explosiveGrowthDamage],
-  },
-  "explosive growth|2": {
+  }),
+  "explosive growth|2": withFusion("earth", {
     arcaneDamageEffect: true,
-    ...fusionOnly("earth"),
     triggers: [attackArcaneHeroTrigger(), explosiveGrowthDamage],
-  },
-  "explosive growth|3": {
+  }),
+  "explosive growth|3": withFusion("earth", {
     arcaneDamageEffect: true,
-    ...fusionOnly("earth"),
     triggers: [attackArcaneHeroTrigger(), explosiveGrowthDamage],
-  },
+  }),
   "rites of lightning|1": ritesOfLightning(),
   "rites of lightning|2": ritesOfLightning(),
   "rites of lightning|3": ritesOfLightning(),
   "arcanic shockwave|2": arcanicShockwave(),
   "arcanic shockwave|3": arcanicShockwave(),
-  "vela flash|1": {
-    ...fusionOnly("lightning"),
+  "vela flash|1": withFusion("lightning", {
     onAttackDeclared(ctx) {
       if (isFused(ctx)) ctx.setFlag("player", "nextNonAttackAsInstant", true);
     },
-  },
-  "vela flash|2": {
-    ...fusionOnly("lightning"),
+  }),
+  "vela flash|2": withFusion("lightning", {
     onAttackDeclared(ctx) {
       if (isFused(ctx)) ctx.setFlag("player", "nextNonAttackAsInstant", true);
     },
-  },
-  "vela flash|3": {
-    ...fusionOnly("lightning"),
+  }),
+  "vela flash|3": withFusion("lightning", {
     onAttackDeclared(ctx) {
       if (isFused(ctx)) ctx.setFlag("player", "nextNonAttackAsInstant", true);
     },
-  },
+  }),
   "rites of replenishment|1": ritesOfReplenishment(),
   "rites of replenishment|2": ritesOfReplenishment(),
   "rites of replenishment|3": ritesOfReplenishment(),
-  "stir the wildwood|1": {
-    ...fusionOnly("earth"),
+  "stir the wildwood|1": withFusion("earth", {
     modifyAttack(ctx) {
       return (
         (isFused(ctx) ? 2 : 0) + (ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true ? 2 : 0)
       );
     },
-  },
-  "stir the wildwood|2": {
-    ...fusionOnly("earth"),
+  }),
+  "stir the wildwood|2": withFusion("earth", {
     modifyAttack(ctx) {
       return (
         (isFused(ctx) ? 2 : 0) + (ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true ? 2 : 0)
       );
     },
-  },
-  "stir the wildwood|3": {
-    ...fusionOnly("earth"),
+  }),
+  "stir the wildwood|3": withFusion("earth", {
     modifyAttack(ctx) {
       return (
         (isFused(ctx) ? 2 : 0) + (ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true ? 2 : 0)
       );
     },
-  },
+  }),
   "bramble spark|1": brambleSpark(3),
   "bramble spark|2": brambleSpark(2),
   "bramble spark|3": brambleSpark(1),
-  "inspire lightning|1": {
+  "inspire lightning|1": withFusion("lightning", {
     arcaneDamageEffect: true,
-    ...fusionOnly("lightning"),
     onPlay(ctx) {
       if (isFused(ctx)) dealArcane(ctx, opponentSeat(ctx), 3);
     },
-  },
-  "inspire lightning|2": {
+  }),
+  "inspire lightning|2": withFusion("lightning", {
     arcaneDamageEffect: true,
-    ...fusionOnly("lightning"),
     onPlay(ctx) {
       if (isFused(ctx)) dealArcane(ctx, opponentSeat(ctx), 2);
     },
-  },
-  "inspire lightning|3": {
+  }),
+  "inspire lightning|3": withFusion("lightning", {
     arcaneDamageEffect: true,
-    ...fusionOnly("lightning"),
     onPlay(ctx) {
       if (isFused(ctx)) dealArcane(ctx, opponentSeat(ctx), 1);
     },
-  },
+  }),
 
   // Elemental and Earth
   "entwine earth|1": fusedPower("earth", 2),
@@ -1727,28 +1595,28 @@ export const ele: Record<string, CardScript> = mergeSetScripts("ELE", eleHighRar
   "over flex|1": {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 4, appliesTo: "attack-action", appliesToSubtype: "arrow" });
-      reload(ctx, "over-flex-reload");
+      reload(ctx);
     },
     onChoose(ctx, hook, option) {
-      reloadOnChoose(ctx, hook, option, "over-flex-reload");
+      resolveReload(ctx, hook, option);
     },
   },
   "over flex|2": {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3, appliesTo: "attack-action", appliesToSubtype: "arrow" });
-      reload(ctx, "over-flex-reload");
+      reload(ctx);
     },
     onChoose(ctx, hook, option) {
-      reloadOnChoose(ctx, hook, option, "over-flex-reload");
+      resolveReload(ctx, hook, option);
     },
   },
   "over flex|3": {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 2, appliesTo: "attack-action", appliesToSubtype: "arrow" });
-      reload(ctx, "over-flex-reload");
+      reload(ctx);
     },
     onChoose(ctx, hook, option) {
-      reloadOnChoose(ctx, hook, option, "over-flex-reload");
+      resolveReload(ctx, hook, option);
     },
   },
   "sutcliffe's suede hides|0": {
