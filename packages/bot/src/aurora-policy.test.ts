@@ -2,7 +2,8 @@ import { cardData, decklists, precon, scripts } from "@fyendal/cards";
 import { applyIntent, createGame, legalIntents, projectStateFor } from "@fyendal/engine";
 import type { Decklist, GameIntent, PendingDecision } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
-import { chooseAuroraIntent } from "./aurora-policy.js";
+import { chooseAuroraIntent, chooseAuroraIntentWithTrace } from "./aurora-policy.js";
+import { decklistsFromState } from "./deck-knowledge.js";
 import { auroraPresentationFor } from "./sideboard.js";
 
 type Game = ReturnType<typeof createGame>;
@@ -174,8 +175,8 @@ describe("Aurora policy", () => {
     expect(state.players[0]!.deck.at(-1)?.cardId).toBe("OMN083");
   });
 
-  it("counts Burn Up's arcane behind Snatch's on-hit draw over a Scorpio swing", () => {
-    // Bug 37AB80: the rollout stopped at Snatch's draw before Burn Up resolved.
+  /** Bug 37AB80: Burn Up melded, Fry blocked, then Quick Succession and Snatch beside Scorpio. */
+  function burnUpAfterBlockedFry(): Game {
     let state = newGame(4256, 0);
     state.players[1]!.life = 39;
     replaceHand(state, 0, ["ROS012", "LGS368", "OMN083", "ANQ031"]);
@@ -190,11 +191,29 @@ describe("Aurora policy", () => {
     const blocker = state.players[1]!.hand.find((card) => (cardData[card.cardId]?.defense ?? 0) >= 3)!;
     state = apply(state, 1, { kind: "stage-defenders", instanceIds: [blocker.instanceId] });
     state = apply(state, 1, { kind: "defend", instanceIds: [blocker.instanceId] });
-    state = passUntil(state, ready);
+    return passUntil(state, ready);
+  }
+
+  it("counts Burn Up's arcane behind Snatch's on-hit draw over a Scorpio swing", () => {
+    // The rollout stopped at Snatch's draw before Burn Up resolved.
+    const state = burnUpAfterBlockedFry();
     const intent = choose(state, 0);
     expect(intent.kind).toBe("play-card");
     expect(state.players[0]!.hand.find((card) => intent.kind === "play-card" && card.instanceId === intent.instanceId)?.cardId)
       .toBe("ANQ031");
+  });
+
+  it("expects armor to stop a one-power Scorpio swing carrying Burn Up", () => {
+    const state = burnUpAfterBlockedFry();
+    const scorpio = state.players[0]!.weapons[0]!;
+    const legal = legalIntents(state, 0).filter((intent) => intent.kind !== "concede" && !intent.kind.endsWith("-draw"));
+    const { plan } = chooseAuroraIntentWithTrace({
+      seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state, decklists: decklistsFromState(state, 0),
+    });
+    const swing = plan?.rootResults.find((root) =>
+      root.intent.kind === "activate-ability" && root.intent.sourceInstanceId === scorpio.instanceId
+    );
+    expect(swing?.evaluation.damage).toBe(0);
   });
 
   it("leads with Arc Lightning ahead of a Burn Up meld", () => {

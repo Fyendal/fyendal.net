@@ -1,7 +1,10 @@
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex, utf8ToBytes } from "@noble/hashes/utils.js";
 import { anyWindowAction, applyIntent, damageStepPriorityAttacker, legalIntents, projectStateFor, type GameState } from "@fyendal/engine";
-import type { GameIntent } from "@fyendal/shared";
+import type { CardData, GameIntent } from "@fyendal/shared";
+import { averageDrawValue, heldValue } from "./card-ev.js";
+import { cardUses } from "./card-model.js";
+import { averageOver, unseenCounts } from "./deck-knowledge.js";
 import {
   arsenalCardValue,
   equipmentValue,
@@ -9,6 +12,8 @@ import {
   heldCardValue,
   type HeroRulesFactory,
 } from "./hand-value.js";
+import { defenderProfile, hitChance, hitChanceAgainst } from "./hit-model.js";
+import { evaluateOnHit } from "./on-hit.js";
 import {
   isOpeningTurn,
   ownCards,
@@ -374,6 +379,8 @@ interface SearchContext<Evaluation extends TurnEvaluation> {
   transitions: number;
   transitionLimit: number;
   publicGameId: string;
+  /** Held margin of an unseen card: what the horizon credits a simulated draw. */
+  drawnCardValue: number;
   memo: Map<string, SearchResult<Evaluation>>;
   candidateTrace: TurnPlannerCandidateTrace;
 }
@@ -445,7 +452,11 @@ function applySimulationIntent(
   intent: GameIntent,
 ): ReturnType<typeof applyIntent> {
   const applied = applyIntent(state, seat, intent);
-  if (applied.ok) compactSimulationHistory(applied.state);
+  if (applied.ok) {
+    compactSimulationHistory(applied.state);
+    const risk = onHitRisk.get(state);
+    if (risk) onHitRisk.set(applied.state, risk);
+  }
   return applied;
 }
 
@@ -576,6 +587,61 @@ function settleAfterPrivateDraw<Evaluation extends TurnEvaluation>(
   return { kind: "terminal", state: current, complete: current.phase === "game-over" };
 }
 
+/** Per line, the on-hit payoffs a real opponent's blocks would deny (damage equivalents). */
+const onHitRisk = new WeakMap<GameState, number>();
+
+/** Hit chance below which the simulated opponent blocks with armor. */
+const ARMOR_BLOCK_THRESHOLD = 0.5;
+
+/** The rollout opponent blocks the bot's attack with its smallest covering armor
+ * when the hit model expects it; otherwise the line is charged the denied on-hits. */
+function rolloutDefense<Evaluation extends TurnEvaluation>(
+  state: GameState,
+  context: SearchContext<Evaluation>,
+): GameState | undefined {
+  const { root } = context;
+  const opponent = 1 - root.seat;
+  if (state.pendingDecision?.kind !== "defend" || state.pendingDecision.player !== opponent) return undefined;
+  const input: BotPolicyInput = {
+    seat: root.seat,
+    view: projectStateFor(state, root.seat, context.publicGameId),
+    legal: [],
+    cards: root.cards,
+    ...(root.decklists ? { decklists: root.decklists } : {}),
+  };
+  const link = input.view.chain.at(-1);
+  if (!link || link.attackingCard.owner !== root.seat || link.defendingCards.length > 0) return undefined;
+  const defender = input.view.players[opponent]!;
+  const effects = link.onHitEffects ?? [];
+  const onHit = evaluateOnHit({
+    effects,
+    attackerCanContinue: link.goAgain === true,
+    attackerCanArsenal: input.view.players[root.seat].arsenal.length === 0,
+    defenderHasHand: defender.handCount > 0,
+    defenderHasArsenal: defender.arsenalCount > 0,
+  }).value;
+  const chance = hitChance(link.attackValue, onHit, defenderProfile(input));
+  const armor = Object.values(defender.equipment)
+    .flatMap((card) => card && (card.defense ?? 0) >= link.attackValue ? [card] : [])
+    .sort((left, right) => (left.defense ?? 0) - (right.defense ?? 0))[0];
+  if (armor && chance < ARMOR_BLOCK_THRESHOLD) {
+    const staged = applySimulationIntent(state, opponent, { kind: "stage-defenders", instanceIds: [armor.instanceId] });
+    const blocked = staged.ok
+      ? applySimulationIntent(staged.state, opponent, { kind: "defend", instanceIds: [armor.instanceId] })
+      : staged;
+    if (blocked.ok) {
+      context.transitions += 2;
+      return blocked.state;
+    }
+  }
+  const credited = effects.reduce((total, effect) =>
+    total + (effect.impact?.damage ?? 0) + (effect.impact?.delayedDamage ?? 0) +
+    (effect.impact?.drawCards ?? 0) * context.drawnCardValue, 0);
+  // Every rollout state belongs to one line, so the risk rides on it into the next transition.
+  if (credited > 0) onHitRisk.set(state, (onHitRisk.get(state) ?? 0) + (1 - chance) * credited);
+  return undefined;
+}
+
 function advanceForced<Evaluation extends TurnEvaluation>(
   state: GameState,
   context: SearchContext<Evaluation>,
@@ -600,6 +666,11 @@ function advanceForced<Evaluation extends TurnEvaluation>(
       return { kind: "terminal", state: current, complete: false };
     }
     const actor = (current.pendingDecision?.player ?? current.priorityPlayer) as 0 | 1;
+    const defended = actor !== root.seat ? rolloutDefense(current, context) : undefined;
+    if (defended) {
+      current = defended;
+      continue;
+    }
     const intent = actor === root.seat
       ? config.chooseForced(observation(current, root, context.publicGameId))
       : opponentRolloutIntent(current);
@@ -665,7 +736,14 @@ function evaluateEnd<Evaluation extends TurnEvaluation>(
   // A line cut short mid-turn (a tutor or draw, a budget) still holds its hand.
   if (!complete) return evaluateHorizon(state, context);
   const input = observation(state, context.root, context.publicGameId);
-  return context.config.evaluateEnd(state, input, context.root, true);
+  return withOnHitRisk(state, context.config.evaluateEnd(state, input, context.root, true));
+}
+
+function withOnHitRisk<Evaluation extends TurnEvaluation>(state: GameState, evaluation: Evaluation): Evaluation {
+  const risk = onHitRisk.get(state) ?? 0;
+  return risk > 0 && state.winner === null
+    ? { ...evaluation, score: evaluation.score - risk * POINTS_PER_DAMAGE }
+    : evaluation;
 }
 
 function evaluateHorizon<Evaluation extends TurnEvaluation>(
@@ -673,9 +751,9 @@ function evaluateHorizon<Evaluation extends TurnEvaluation>(
   context: SearchContext<Evaluation>,
 ): Evaluation {
   const input = observation(state, context.root, context.publicGameId);
-  return context.config.evaluateHorizon
+  return withOnHitRisk(state, context.config.evaluateHorizon
     ? context.config.evaluateHorizon(state, input, context.root)
-    : context.config.evaluateEnd(state, input, context.root, false);
+    : context.config.evaluateEnd(state, input, context.root, false));
 }
 
 function keepOpeningArsenalReserve(candidates: GameIntent[], input: BotPolicyInput): GameIntent[] {
@@ -801,7 +879,7 @@ function search<Evaluation extends TurnEvaluation>(
   // operations. Build the observation once and reuse it for both the memo key
   // and candidate preparation.
   const observed = observation(state, context.root, context.publicGameId);
-  const key = stateKey(observed, depth);
+  const key = `${stateKey(observed, depth)}|${onHitRisk.get(state) ?? 0}`;
   const cached = context.memo.get(key);
   if (cached) return cached;
   const observedKey = context.config.recordCheckpoints
@@ -827,6 +905,19 @@ function search<Evaluation extends TurnEvaluation>(
   })();
   context.memo.set(key, result);
   return result;
+}
+
+/** Expected held margin of the bot's next unseen card over the draw it displaces. */
+function unseenHeldMargin(input: BotPolicyInput): number {
+  const counts = unseenCounts(input, "own");
+  if (!counts) return 0;
+  const futureHit = hitChanceAgainst(input, true);
+  const usesOf = (data: CardData) => cardUses(data, input);
+  const averageDraw = averageDrawValue(input, usesOf, 1, futureHit);
+  return averageOver(counts, (cardId) => {
+    const data = input.cards[cardId];
+    return data ? heldValue(usesOf(data), averageDraw, futureHit) : 0;
+  }) ?? 0;
 }
 
 export function planTurn<Evaluation extends TurnEvaluation>(
@@ -862,6 +953,7 @@ export function planTurn<Evaluation extends TurnEvaluation>(
     transitions: 0,
     transitionLimit: config.maxTransitions ?? DEFAULT_MAX_SEARCH_TRANSITIONS,
     publicGameId: input.view.gameId,
+    drawnCardValue: unseenHeldMargin(input),
     memo: new Map(),
     candidateTrace: {
       decisions: 0,
