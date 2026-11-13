@@ -1,4 +1,5 @@
 import type { CardData, CardView } from "@fyendal/shared";
+import { hitChanceAgainst, TYPICAL_ATTACK_POWER } from "./hit-model.js";
 import { expectedTopPitch } from "./card-ev.js";
 import { combineEffects, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
 import type { PendingEffect, SolverCard, SolverView } from "./hand-solver.js";
@@ -38,6 +39,7 @@ export function lightningCardPatcher(input: BotPolicyInput): (data: CardData, ca
     input.cards[card.cardId]?.keywords?.some((keyword) => keyword.toLowerCase() === "lightning fusion")
   ).map((card) => card.instanceId));
   const topPitch = expectedTopPitch(input);
+  const futureHit = hitChanceAgainst(input, true);
   const opponentHasItem = opponent.board.some((card) =>
     input.cards[card.cardId]?.subtypes?.some((subtype) => subtype.toLowerCase() === "item")
   );
@@ -56,7 +58,8 @@ export function lightningCardPatcher(input: BotPolicyInput): (data: CardData, ca
         return {
           bonusIn: () => 1,
           after: () => ({ pending: [{ key: `burn#${card.instanceId}`, uses: 1, onHit: 4 }] }),
-          uses: { pump: 1 + 4 * 0.6 },
+          // It pays off on whichever attack hits next, so no single attack draws the blocks.
+          uses: { pump: 1 + 4 * futureHit(TYPICAL_ATTACK_POWER, 0) },
         };
       case "lightning press":
         return {

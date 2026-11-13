@@ -3,12 +3,13 @@ import {
   arsenalValue,
   averageDrawValue,
   defaultCardUses,
-  DEFAULT_HIT_CHANCE,
   disruptionDiscount,
   hasStaticGoAgain,
   heldValue,
   type CardUses,
+  type HitChanceFor,
 } from "./card-ev.js";
+import { hitChanceAgainst, TYPICAL_ATTACK_POWER } from "./hit-model.js";
 import {
   HandSolver,
   type PendingEffect,
@@ -24,7 +25,12 @@ import { evaluateOnHit } from "./on-hit.js";
 /** Shared context for building solver cards for one decision. */
 export interface ModelContext {
   readonly input: BotPolicyInput;
+  /** Chance a typical attack hits this turn, for effects not tied to one attack. */
   readonly hitChance: number;
+  /** Per-attack chance against the opponent's defenses this turn. */
+  readonly hitChanceFor: HitChanceFor;
+  /** Per-attack chance once the opponent refills, for held and arsenal cards. */
+  readonly futureHitChanceFor: HitChanceFor;
   readonly discount: number;
   readonly averageDraw: number;
   readonly rules: HeroSolverRules;
@@ -169,17 +175,17 @@ export function cardUses(data: CardData, input: BotPolicyInput, card?: CardView)
   return { ...base, onHit };
 }
 
-export function modelContext(
-  input: BotPolicyInput,
-  rules: HeroSolverRules = NO_HERO_RULES,
-  hitChance = DEFAULT_HIT_CHANCE,
-): ModelContext {
+export function modelContext(input: BotPolicyInput, rules: HeroSolverRules = NO_HERO_RULES): ModelContext {
+  const hitChanceFor = hitChanceAgainst(input);
+  const futureHitChanceFor = hitChanceAgainst(input, true);
   return {
     input,
-    hitChance,
+    hitChance: hitChanceFor(TYPICAL_ATTACK_POWER, 0),
+    hitChanceFor,
+    futureHitChanceFor,
     rules,
     discount: disruptionDiscount(input),
-    averageDraw: averageDrawValue(input, (data) => cardUses(data, input)),
+    averageDraw: averageDrawValue(input, (data) => cardUses(data, input), 1, futureHitChanceFor),
   };
 }
 
@@ -225,8 +231,10 @@ export function solverCard(card: CardView, zone: SolverZone, context: ModelConte
     ...(uses.kind === "attack-reaction" ? { reactionPower: uses.pump } : {}),
     ...(filter ? { reactionTarget: filter } : {}),
     ...(after ? { after } : {}),
-    arsenalValue: zone === "hand" || zone === "arsenal" ? arsenalValue(uses, context.discount, context.hitChance) : 0,
-    heldValue: zone === "hand" ? heldValue(uses, context.averageDraw, context.hitChance) : 0,
+    arsenalValue: zone === "hand" || zone === "arsenal"
+      ? arsenalValue(uses, context.discount, context.futureHitChanceFor)
+      : 0,
+    heldValue: zone === "hand" ? heldValue(uses, context.averageDraw, context.futureHitChanceFor) : 0,
   };
   return { ...base, ...overrides };
 }
@@ -306,7 +314,7 @@ export function buildHandSolver(context: ModelContext): HandSolver {
   return new HandSolver(sources, {
     startResources: (nextTurn ? 0 : me.resources) + (rules.startResources?.(input, nextTurn) ?? 0),
     startActionPoints: nextTurn ? 1 : me.actionPoints + (rules.startActionPoints?.(input, nextTurn) ?? 0),
-    hitChance: context.hitChance,
+    hitChance: nextTurn ? context.futureHitChanceFor : context.hitChanceFor,
     ...(rules.trackedTraits ? { trackedTraits: rules.trackedTraits } : {}),
     startFlags: { ...(chain?.flags ?? {}), ...(rules.startFlags?.(input, nextTurn) ?? {}) },
     ...(chain ? { startLinks: chain.links } : {}),

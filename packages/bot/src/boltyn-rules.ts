@@ -1,5 +1,6 @@
 import type { CardData, CardView } from "@fyendal/shared";
 import { BLOCK_USE_RATE, DEFAULT_HIT_CHANCE } from "./card-ev.js";
+import { hitChanceAgainst, landedOnHit, TYPICAL_ATTACK_POWER } from "./hit-model.js";
 import { abilitySource, type HeroSolverRules, type ModelContext, type SolverCardPatch } from "./card-model.js";
 import type { SolverCard, SolverEffect, SolverView } from "./hand-solver.js";
 import { currentLink, functionalKey as key, isAttack, type BotPolicyInput } from "./policy.js";
@@ -228,6 +229,7 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
   const me = input.view.players[input.seat];
   const raydn = me.weapons.find((weapon) => key(input.cards[weapon.cardId]) === RAYDN);
   const context: AttackContext = { raydnId: raydn?.instanceId, heroAbilitiesLost: me.heroAbilitiesLost === true };
+  const hitChance = hitChanceAgainst(input)(TYPICAL_ATTACK_POWER, 0);
   const spiritInArena = boardCount(input, "spirit of eirina") > 0;
   const facts = input.view.turnFacts?.players[input.seat];
   const ourTurn = input.view.activePlayer === input.seat;
@@ -327,7 +329,7 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
             break;
           case "spirit of war":
             bonus = (view) => yellowCharge(view)
-              ? remainingAttackSources(view, self, context) * DEFAULT_HIT_CHANCE * COURAGE_TOKEN_VALUE
+              ? remainingAttackSources(view, self, context) * hitChance * COURAGE_TOKEN_VALUE
               : 0;
             break;
           case "bravery of the blade":
@@ -423,7 +425,7 @@ export function boltynSolverRules(input: BotPolicyInput): HeroSolverRules {
               lastAttackPumped: 1,
             },
           });
-          patch.uses = { pump: 1, pumpRider: BEACON_SEARCH_VALUE * DEFAULT_HIT_CHANCE };
+          patch.uses = { pump: 1, pumpRider: landedOnHit(input, BEACON_SEARCH_VALUE, true) };
           return patch;
         case ROARING_BEAM:
           patch.reactionPower = 0;

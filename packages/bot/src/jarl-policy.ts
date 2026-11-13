@@ -1,4 +1,5 @@
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
+import { landedOnHit } from "./hit-model.js";
 import {
   chooseScoredIntent,
   currentAllyAttackIsAlreadyLethal,
@@ -138,7 +139,7 @@ function jarlSolverRules(input: BotPolicyInput): HeroSolverRules {
             appliesTo: (target, view) => view.hasTrait(target, "guardian"),
           }],
         });
-        patch.uses = { pump: 1 + TEAR_ASUNDER_ON_HIT * 0.6 };
+        patch.uses = { pump: 1 + landedOnHit(input, TEAR_ASUNDER_ON_HIT, true) };
       }
       return patch;
     },

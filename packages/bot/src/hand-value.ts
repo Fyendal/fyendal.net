@@ -132,7 +132,7 @@ function averageDrawAt(entry: CachedHand, offenseRate: number): number {
   let value = entry.averageDraws.get(offenseRate);
   if (value === undefined) {
     const { input } = entry.context;
-    value = averageDrawValue(input, (data) => cardUses(data, input), offenseRate);
+    value = averageDrawValue(input, (data) => cardUses(data, input), offenseRate, entry.context.futureHitChanceFor);
     entry.averageDraws.set(offenseRate, value);
   }
   return value;
@@ -151,7 +151,7 @@ export function arsenalCardValue(
 ): number {
   const { context } = cachedHand(input, factory);
   const uses = heldCardUses(card, context);
-  return uses ? arsenalValue(uses, context.discount, context.hitChance, offenseRate) : 0;
+  return uses ? arsenalValue(uses, context.discount, context.futureHitChanceFor, offenseRate) : 0;
 }
 
 /** `arsenalCardValue` bound to one hero's rules, for arsenal choice scoring. */
@@ -169,7 +169,9 @@ export function heldCardValue(
 ): number {
   const entry = cachedHand(input, factory);
   const uses = heldCardUses(card, entry.context);
-  return uses ? heldValue(uses, averageDrawAt(entry, offenseRate), entry.context.hitChance, offenseRate) : 0;
+  return uses
+    ? heldValue(uses, averageDrawAt(entry, offenseRate), entry.context.futureHitChanceFor, offenseRate)
+    : 0;
 }
 
 /** Offense a held or arsenal card threatens on a later turn, before the
@@ -177,7 +179,7 @@ export function heldCardValue(
 export function heldCardOffense(card: CardView, input: BotPolicyInput, factory: HeroRulesFactory): number {
   const { context } = cachedHand(input, factory);
   const uses = heldCardUses(card, context);
-  return uses ? offenseValue(uses, context.hitChance) : 0;
+  return uses ? offenseValue(uses, context.futureHitChanceFor) : 0;
 }
 
 /** Cost of spending a hand card now (pitching, blocking, discarding): its
@@ -187,7 +189,7 @@ export function heldCardOffense(card: CardView, input: BotPolicyInput, factory: 
 export function cardOpportunity(card: CardView, input: BotPolicyInput, factory: HeroRulesFactory): number {
   const { context } = cachedHand(input, factory);
   const uses = heldCardUses(card, context);
-  return uses ? standaloneValue(uses, context.hitChance) - context.averageDraw : 0;
+  return uses ? standaloneValue(uses, context.futureHitChanceFor) - context.averageDraw : 0;
 }
 
 /** `cardOpportunity` bound to one hero's rules. */

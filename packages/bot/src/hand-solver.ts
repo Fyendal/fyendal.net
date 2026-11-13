@@ -126,11 +126,14 @@ export interface SolverConfig {
   /** Traits counted into `played:<trait>` / `links:<trait>` flags. Only the
    * traits hero rules read are tracked, keeping memo keys small. */
   trackedTraits?: readonly string[];
-  /** Probability used to scale on-hit value. */
-  hitChance?: number;
+  /** Probability used to scale on-hit value, flat or per attack. */
+  hitChance?: number | ((power: number, onHit: number) => number);
   /** Safety cap on explored states; the search is exact below it. */
   maxStates?: number;
 }
+
+/** Power assumed for the attack an attack reaction joins. */
+const REACTION_TARGET_POWER = 4;
 
 export type SolverStepKind = "play" | "weapon" | "activate" | "react";
 
@@ -247,7 +250,7 @@ export class HandSolver {
   private readonly startFlags: SolverFlags;
   private readonly startPending: readonly PendingEffect[];
   private readonly startLinks: number;
-  private readonly hitChance: number;
+  private readonly hitChance: (power: number, onHit: number) => number;
   private readonly maxStates: number;
   private readonly tracked: ReadonlySet<string> | undefined;
   private readonly memo = new Map<string, Outcome>();
@@ -271,7 +274,8 @@ export class HandSolver {
     this.startFlags = config.startFlags ?? EMPTY_FLAGS;
     this.startPending = config.startPending ?? [];
     this.startLinks = config.startLinks ?? 0;
-    this.hitChance = config.hitChance ?? 0.6;
+    const hitChance = config.hitChance ?? 0.6;
+    this.hitChance = typeof hitChance === "number" ? () => hitChance : hitChance;
     this.maxStates = config.maxStates ?? 200_000;
     this.tracked = config.trackedTraits ? new Set(config.trackedTraits) : undefined;
     this.arsenalIndex = cards.findIndex((card) => card.zone === "arsenal");
@@ -583,7 +587,8 @@ export class HandSolver {
         }
       }
       damage = Math.max(0, power);
-      onHit = ((card.onHitIn ? card.onHitIn(before) : card.onHit) + effectOnHit) * this.hitChance;
+      const landed = (card.onHitIn ? card.onHitIn(before) : card.onHit) + effectOnHit;
+      onHit = landed * this.hitChance(damage, landed);
       links++;
       lastAttack = index;
       counters.attacks = 1;
@@ -591,7 +596,8 @@ export class HandSolver {
     } else if (kind === "react") {
       damage = card.reactionPower ?? 0;
       // A granted on-hit rider pays off only if the current attack connects.
-      onHit = (card.onHitIn?.(before) ?? 0) * this.hitChance;
+      const rider = card.onHitIn?.(before) ?? 0;
+      onHit = rider * this.hitChance(REACTION_TARGET_POWER + damage, rider);
     } else {
       goAgain = card.goAgainIn ? card.goAgainIn(before) : card.goAgain;
       // An action-speed play happens after the previous link resolved, so

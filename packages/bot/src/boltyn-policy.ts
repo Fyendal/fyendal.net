@@ -1,4 +1,5 @@
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
+import { landedOnHit } from "./hit-model.js";
 import {
   chooseScoredIntent,
   currentAttackIsOurs,
@@ -412,9 +413,9 @@ function firstChargeValue(sourceKey: string, input: BotPolicyInput, raydnReachab
   if (charged(input)) return 0;
   let value = raydnReachable ? 3 : 0;
   if (raydnReachable && holds(input, LUMINA_ASCENSION)) value += 3;
-  if (sourceKey.startsWith("bolt of courage|")) value += CARD_DRAW_VALUE * 0.6;
-  if (sourceKey.startsWith("engulfing light|")) value += SOUL_VALUE * 0.6;
-  if (sourceKey === "bravery of the blade|1") value += 2 + COURAGE_TOKEN_VALUE * 0.6;
+  if (sourceKey.startsWith("bolt of courage|")) value += landedOnHit(input, CARD_DRAW_VALUE);
+  if (sourceKey.startsWith("engulfing light|")) value += landedOnHit(input, SOUL_VALUE);
+  if (sourceKey === "bravery of the blade|1") value += 2 + landedOnHit(input, COURAGE_TOKEN_VALUE);
   if (sourceKey === SAVING_GRACE) value += 2;
   if (holds(input, BEACON_OF_VICTORY) && soulCount(input) > 0) value += BEACON_SEARCH_VALUE * 0.5;
   if (holds(input, COURAGEOUS_STEELHAND)) value += 2;
