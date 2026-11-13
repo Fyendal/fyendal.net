@@ -1020,3 +1020,27 @@ describe("HVY — Warrior reactions that target any attack", () => {
       .expectAttackValue(12);
   });
 });
+
+describe("HVY — Slap-Happy", () => {
+  it("shows the damage it dealt, not the spent shield, during the Damage Step", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["romping club|0"], resources: 2 },
+        { hero: "dorinthea", hand: ["slap-happy|1"] },
+      ],
+    });
+    g.attackWithWeapon("romping club|0")
+      .blockWith()
+      .passPriority()
+      .react("slap-happy|1", { settle: false })
+      .passPriority().passPriority()
+      .expectDamageToPrevent(2, ["slap-happy|1"])
+      .passPriority().passPriority()
+      .expectLog("prevents 2 damage");
+    expect(g.state.chain[0]!.resolved).toBe(false);
+    const link = projectStateFor(g.state, 1).chain[0]!;
+    expect(link.damage).toBe(2);
+    expect(link.damageToPrevent).toBeUndefined();
+    g.expectLife(1, 18);
+  });
+});

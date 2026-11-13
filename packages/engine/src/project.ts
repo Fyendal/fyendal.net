@@ -1053,7 +1053,9 @@ function projectState(
         ? link.finalDefense
         : computeDefense(state, runtime, link);
     const onHitEffects = projectedOnHitEffects(state, runtime, link, revealAll ? undefined : seat);
-    const damage = link.resolved
+    // Once dealt, shields it spent are consumed, so recomputing would drop them.
+    const damageDealt = link.resolved || link.flags.combatDamageDealt === true;
+    const damage = damageDealt
       ? link.damage
       : computeCombatDamage(state, runtime, link, attack, defense);
     // Targets are damaged in the attacker's order (or primary first until
@@ -1066,7 +1068,7 @@ function projectState(
     const targetSeat = link.attacker === 0 ? 1 : 0;
     const primaryAlly = (state.players[targetSeat] as PlayerState).board
       .find((card) => card.instanceId === link.targetAllyId);
-    const prevention = i !== lastLink || link.resolved
+    const prevention = i !== lastLink || damageDealt
       ? undefined
       : primaryAlly
         ? projectedAllyPrevention(state, link, primaryAlly, targetSeat, damage, spentShields)
@@ -1120,7 +1122,7 @@ function projectState(
             ),
           }
         : {}),
-      ...(!link.resolved && combatDamageUnpreventable(state, link, damage)
+      ...(!damageDealt && combatDamageUnpreventable(state, link, damage)
         ? { damageUnpreventable: true as const }
         : {}),
       damage,

@@ -348,6 +348,7 @@ function applyCombatDamage(
   targetSeat = opponent(link.attacker),
 ): boolean {
   link.damage = damage;
+  link.flags.combatDamageDealt = true;
   // Effects such as Flick Knives can make the active chain link hit during
   // the Reaction Step even when the attack itself is fully defended. Preserve
   // that aggregate result while resolving the attack's combat damage.
@@ -453,6 +454,7 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
         { card: logCardValue(link.attackingCard.cardId) },
       ));
       link.damage = 0;
+      link.flags.combatDamageDealt = true;
       dealAdditionalTargetDamage(state, runtime, link, after);
       if ((link.additionalTargetHits?.length ?? 0) > 0) {
         link.hit = true;
@@ -470,6 +472,7 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
         combat: true,
       });
       link.damage = dealt;
+      link.flags.combatDamageDealt = true;
       dealAdditionalTargetDamage(state, runtime, link, after);
       link.hit = dealt > 0 || (link.additionalTargetHits?.length ?? 0) > 0;
       if (dealt > 0) {
