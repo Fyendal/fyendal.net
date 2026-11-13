@@ -1638,11 +1638,15 @@ export interface CardScript {
     condition?(ctx: ScriptCtx): boolean;
   };
   /** Optional prevention replacement offered whenever this source's
-   * controller would be dealt preventable damage. Applying it moves this
-   * source out of the arena as part of the replacement. */
+   * controller would be dealt preventable damage. Applying it either moves
+   * this source out of the arena or removes one counter from a matching
+   * permanent its controller controls (at most once per damage event). */
   optionalDamagePrevention?: {
     amount: number;
-    moveSource: "destroy" | "banish";
+    moveSource?: "destroy" | "banish";
+    /** Pay by removing one `key` counter from a controlled permanent
+     * matching `from` instead of moving this source. Must be pure. */
+    removeCounter?: { key: CounterKind; from(ctx: ScriptCtx, permanent: DeepReadonly<CardInstance>): boolean };
     /** Offer this replacement only for arcane damage (Arcane Shelter). */
     arcaneOnly?: boolean;
     /** Offer only when the damage is controlled by a hero with this class or

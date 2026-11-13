@@ -26,6 +26,7 @@ import {
   optionCard,
   ownCards,
   pitchIds,
+  pumpDamageAdded,
   scoreArsenalChoice,
   scoreBinaryChoice,
   scoreDefenseIntent,
@@ -407,7 +408,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
         ? 100
         : intent.meldSide === "right" && opponent.life <= 1 ? 100 : -100;
     } else if (functional === "lightning press|1") {
-      score = input.view.pendingDecision?.kind === "attack-reaction" && ownAttack ? 18 : -20;
+      score = input.view.pendingDecision?.kind === "attack-reaction" && pumpDamageAdded(input, 3) > 0 ? 18 : -20;
     } else if (functional === "electrostatic discharge|1") {
       score = myTurn && !ownAttack && hasSetupFollowup(functional, intent, input, own) ? 20 : -20;
     } else {

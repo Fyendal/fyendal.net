@@ -15,6 +15,7 @@ import {
   ownCards,
   pitchIds,
   preventableAttackDamage,
+  pumpDamageAdded,
   resourcesAfterCost,
   scoreArsenalChoice,
   scoreBinaryChoice,
@@ -517,8 +518,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
         ? 100
         : -100;
     } else if (functional === "lightning press|1") {
-      const ownAttack = [...input.view.chain].reverse().find((link) => !link.resolved)?.attackingCard.owner === input.seat;
-      score = input.view.pendingDecision?.kind === "attack-reaction" && ownAttack ? 18 : -20;
+      score = input.view.pendingDecision?.kind === "attack-reaction" && pumpDamageAdded(input, 3) > 0 ? 18 : -20;
     } else if (functional === "cloud cover|1") {
       const link = [...input.view.chain].reverse().find((candidate) => !candidate.resolved);
       const incoming = preventableAttackDamage(input);

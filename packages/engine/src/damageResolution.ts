@@ -1,3 +1,4 @@
+import type { CounterKind } from "@fyendal/shared";
 import type { EngineRuntime } from "./runtimePorts.js";
 import { cardAbilitiesSuppressed, cardColorOf, cardHasName, cardTypesOf, currentWardValue, dataOf, instanceDataOf, instanceKeywordValues, numberedKeywordValue, scriptOf } from "./cardProperties.js";
 
@@ -846,24 +847,52 @@ function openQuellDecision(state: GameStateInternal, packet: PendingArcane): boo
   return true;
 }
 
+interface OptionalDamagePreventionPiece {
+  option: string;
+  id: number;
+  amount: number;
+  moveSource?: "destroy" | "banish";
+  /** Permanent paying a removeCounter replacement, and the counter removed. */
+  payId?: number;
+  counter?: CounterKind;
+}
+
 function optionalDamagePreventionPieces(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   player: PlayerState,
   packet: PendingArcane,
-): { id: number; amount: number; moveSource: "destroy" | "banish" }[] {
-  return controlledPermanents(state, player.seat, { faceDownEquipment: false })
-    .flatMap((source) => {
-      const replacement = scriptOf(state, source.cardId, source)?.optionalDamagePrevention;
-      const sourceHeroMatches = !replacement?.damageSourceHeroType || (
-        packet.sourceSeat !== undefined &&
-        cardTypesOf(state, (state.players[packet.sourceSeat] as PlayerState).hero)
-          .includes(replacement.damageSourceHeroType.toLowerCase())
-      );
-      return replacement && replacement.amount > 0 &&
-          (!replacement.arcaneOnly || packet.arcane) && sourceHeroMatches
-        ? [{ id: source.instanceId, amount: replacement.amount, moveSource: replacement.moveSource }]
+): OptionalDamagePreventionPiece[] {
+  const used = new Set(packet.usedOptionalDamagePreventionSourceIds ?? []);
+  const permanents = controlledPermanents(state, player.seat, { faceDownEquipment: false });
+  return permanents.flatMap((source): OptionalDamagePreventionPiece[] => {
+    const replacement = scriptOf(state, source.cardId, source)?.optionalDamagePrevention;
+    const sourceHeroMatches = !replacement?.damageSourceHeroType || (
+      packet.sourceSeat !== undefined &&
+      cardTypesOf(state, (state.players[packet.sourceSeat] as PlayerState).hero)
+        .includes(replacement.damageSourceHeroType.toLowerCase())
+    );
+    if (!replacement || replacement.amount <= 0 || (replacement.arcaneOnly && !packet.arcane) || !sourceHeroMatches) {
+      return [];
+    }
+    const counterCost = replacement.removeCounter;
+    if (!counterCost) {
+      return replacement.moveSource
+        ? [{ option: `use ${source.instanceId}`, id: source.instanceId, amount: replacement.amount, moveSource: replacement.moveSource }]
         : [];
-    });
+    }
+    if (used.has(source.instanceId)) return [];
+    const ctx = runtime.makeCtx(state, player.seat, source);
+    return permanents
+      .filter((card) => (card.counters?.[counterCost.key] ?? 0) > 0 && counterCost.from(ctx, card))
+      .map((card) => ({
+        option: `use ${source.instanceId} ${card.instanceId}`,
+        id: source.instanceId,
+        amount: replacement.amount,
+        payId: card.instanceId,
+        counter: counterCost.key,
+      }));
+  });
 }
 
 function discardDamagePreventionPieces(
@@ -934,11 +963,12 @@ function openDiscardDamagePrevention(
  * event; applying one re-opens the choice if more remain. */
 function openOptionalDamagePrevention(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   packet: PendingArcane,
 ): boolean {
   if (packet.amount <= 0 || packet.unpreventable) return false;
   const target = state.players[packet.targetSeat] as PlayerState;
-  const pieces = optionalDamagePreventionPieces(state, target, packet);
+  const pieces = optionalDamagePreventionPieces(state, runtime, target, packet);
   if (pieces.length === 0) return false;
   state.pendingDecision = {
     player: target.seat,
@@ -948,9 +978,9 @@ function openOptionalDamagePrevention(
       id: "engine.decision.damage.prevent",
       values: { amount: packet.amount },
     },
-    options: [...pieces.map((piece) => `use ${piece.id}`), "decline"],
+    options: [...pieces.map((piece) => piece.option), "decline"],
     optionMessages: [...pieces.map(() => null), { id: "common.option.decline" }],
-    cardOptions: [...pieces.map((piece) => piece.id as number | null), null],
+    cardOptions: [...pieces.map((piece) => (piece.payId ?? piece.id) as number | null), null],
     sourceInstanceId: packet.sourceInstanceId,
     chooseHook: "optional-damage-prevention",
     arcane: packet,
@@ -1514,7 +1544,7 @@ function continueAfterOptionalDamagePrevention(
   packet: PendingArcane,
   offerAnother: boolean,
 ): void {
-  if (offerAnother && openOptionalDamagePrevention(state, packet)) return;
+  if (offerAnother && openOptionalDamagePrevention(state, runtime, packet)) return;
   if (openQuellDecision(state, packet)) return;
   continueHeroDamageAfterQuell(state, runtime, packet);
 }
@@ -1526,7 +1556,7 @@ function continueAfterSoulDamagePrevention(
 ): void {
   if (openSoulDamagePrevention(state, runtime, packet)) return;
   if (openDiscardDamagePrevention(state, packet)) return;
-  if (openOptionalDamagePrevention(state, packet)) return;
+  if (openOptionalDamagePrevention(state, runtime, packet)) return;
   if (openQuellDecision(state, packet)) return;
   continueHeroDamageAfterQuell(state, runtime, packet);
 }
@@ -1538,7 +1568,7 @@ function continueAfterDiscardDamagePrevention(
   offerAnother: boolean,
 ): void {
   if (offerAnother && openDiscardDamagePrevention(state, packet)) return;
-  if (openOptionalDamagePrevention(state, packet)) return;
+  if (openOptionalDamagePrevention(state, runtime, packet)) return;
   if (openQuellDecision(state, packet)) return;
   continueHeroDamageAfterQuell(state, runtime, packet);
 }
@@ -1642,7 +1672,7 @@ export function beginHeroDamage(state: GameStateInternal,
   }
   if (openSoulDamagePrevention(state, runtime, packet)) return 0;
   if (openDiscardDamagePrevention(state, packet)) return 0;
-  if (openOptionalDamagePrevention(state, packet)) return 0;
+  if (openOptionalDamagePrevention(state, runtime, packet)) return 0;
   if (openQuellDecision(state, packet)) return 0;
   return continueHeroDamageAfterQuell(state, runtime, packet);
 }
@@ -1848,15 +1878,17 @@ export function answerArcaneBarrier(
       continueAfterOptionalDamagePrevention(state, runtime, arc, false);
       return undefined;
     }
-    const id = Number(optionId.slice("use ".length));
-    const piece = optionalDamagePreventionPieces(state, player, arc)
-      .find((candidate) => candidate.id === id);
+    const piece = optionalDamagePreventionPieces(state, runtime, player, arc)
+      .find((candidate) => candidate.option === optionId);
     if (!piece) return "prevention source not found";
     const source = controlledPermanents(state, seat, { faceDownEquipment: false })
-      .find((candidate) => candidate.instanceId === id);
+      .find((candidate) => candidate.instanceId === piece.id);
     if (!source) return "prevention source not found";
     state.pendingDecision = null;
-    if (piece.moveSource === "destroy") destroyPermanent(state, runtime, seat, source);
+    if (piece.payId !== undefined && piece.counter) {
+      runtime.makeCtx(state, seat, source).addCounter(piece.payId, piece.counter, -1);
+      (arc.usedOptionalDamagePreventionSourceIds ??= []).push(piece.id);
+    } else if (piece.moveSource === "destroy") destroyPermanent(state, runtime, seat, source);
     else runtime.makeCtx(state, seat, source).banish(source.instanceId);
     const prevented = Math.min(piece.amount, arc.amount);
     arc.amount -= prevented;

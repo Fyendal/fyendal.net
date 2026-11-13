@@ -850,7 +850,13 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
     },
   })),
 
-  "mbrio base vizier|0": { preventArcaneDamage: 1 },
+  "mbrio base vizier|0": {
+    optionalDamagePrevention: {
+      amount: 1,
+      arcaneOnly: true,
+      removeCounter: { key: "steam", from: (ctx, permanent) => named(ctx, permanent, "Hyper Driver") },
+    },
+  },
   "mbrio base cortex|0": { modifyDefense: (ctx) => (controls(ctx, "Hyper Driver") ? 2 : 0) },
   "mbrio base digits|0": {
     activated: {

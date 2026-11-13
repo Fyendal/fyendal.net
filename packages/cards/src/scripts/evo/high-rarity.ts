@@ -209,6 +209,8 @@ function scrap(extra: CardScript = {}, count = 1): CardScript {
 function breakerEvo(extra: CardScript = {}): CardScript {
   return evoEquipment({
     ...extra,
+    additionalCardTypes: ["instant"],
+    playAsInstant: () => true,
     additionalCost(ctx) {
       const drivers = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "hyper driver"));
       if (drivers.length)

@@ -28,6 +28,28 @@ describe("EVO — registration and core mechanics", () => {
     }
   });
 
+  it.each([
+    ["evo circuit breaker|1", "head", "proto base head|0"],
+    ["evo atom breaker|1", "chest", "proto base chest|0"],
+    ["evo face breaker|1", "arms", "proto base arms|0"],
+    ["evo mach breaker|1", "legs", "proto base legs|0"],
+    ["arcbane grasp|3", "arms", "proto base arms|0"],
+  ] as const)("%s is an instant that spends no action point", (key, slot, base) => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: [key], equipment: { ...NO_EQUIPMENT, [slot]: base } },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    const plays = legalIntents(s.state, 0).filter(
+      (intent) => intent.kind === "play-card" && s.state.players[0]!.hand[0]?.instanceId === intent.instanceId,
+    );
+    expect(plays.length).toBeGreaterThan(0);
+    expect(plays.every((intent) => intent.kind === "play-card" && intent.asInstant === true)).toBe(true);
+
+    s.play(key).expectAP(0, 1).expectEquipped(0, slot, key);
+  });
+
   it("Dash, Database sees and plays an eligible top-deck item as an instant with the tax", () => {
     const s = scenario({
       seats: [

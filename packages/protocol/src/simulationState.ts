@@ -645,7 +645,7 @@ function validateModifier(value: unknown, code: string, path: string): void {
 
 function validateArcane(value: unknown, code: string, path: string, depth: number): void {
   if (depth > MAX_ARCANE_DEPTH) fail(code, path, "arcane queue nesting is too deep");
-  const arcane = exact(value, code, path, ["sourceInstanceId", "sourceSeat", "targetSeat", "amount", "arcane"], ["sourceIsAlly", "sourceIsRunechant", "sourceSnapshot", "countsAsHit", "destroySourceAfterDamage", "targetWasMarked", "targetAllyId", "combat", "combatDamageEquipmentReplacementIds", "unpreventable", "payTotal", "arcaneBarrierResolved", "spellvoidDeclined", "usedQuellSourceIds", "wardSourceIds", "usedDiscardDamagePreventionModifierIds", "usedSoulDamagePreventionSourceIds", "soulDamagePreventionSourceInstanceId", "lethalDamagePreventionModifierId", "quellSourceInstanceId", "queue"]);
+  const arcane = exact(value, code, path, ["sourceInstanceId", "sourceSeat", "targetSeat", "amount", "arcane"], ["sourceIsAlly", "sourceIsRunechant", "sourceSnapshot", "countsAsHit", "destroySourceAfterDamage", "targetWasMarked", "targetAllyId", "combat", "combatDamageEquipmentReplacementIds", "unpreventable", "payTotal", "arcaneBarrierResolved", "spellvoidDeclined", "usedQuellSourceIds", "wardSourceIds", "usedDiscardDamagePreventionModifierIds", "usedOptionalDamagePreventionSourceIds", "usedSoulDamagePreventionSourceIds", "soulDamagePreventionSourceInstanceId", "lethalDamagePreventionModifierId", "quellSourceInstanceId", "queue"]);
   for (const key of ["sourceInstanceId", "sourceSeat", "targetSeat", "amount"] as const) integer(arcane[key], code, `${path}.${key}`);
   bool(arcane.arcane, code, `${path}.arcane`);
   for (const key of ["sourceIsAlly", "sourceIsRunechant", "countsAsHit", "destroySourceAfterDamage", "targetWasMarked", "combat", "unpreventable", "arcaneBarrierResolved", "spellvoidDeclined"] as const) optional(arcane, key, (v, p) => { bool(v, code, p); }, path);
@@ -654,6 +654,7 @@ function validateArcane(value: unknown, code: string, path: string, depth: numbe
   optional(arcane, "usedQuellSourceIds", (v, p) => array(v, code, p, 64).forEach((entry, index) => integer(entry, code, `${p}[${index}]`)), path);
   optional(arcane, "wardSourceIds", (v, p) => array(v, code, p, 64).forEach((entry, index) => integer(entry, code, `${p}[${index}]`)), path);
   optional(arcane, "usedDiscardDamagePreventionModifierIds", (v, p) => array(v, code, p, 64).forEach((entry, index) => integer(entry, code, `${p}[${index}]`)), path);
+  optional(arcane, "usedOptionalDamagePreventionSourceIds", (v, p) => array(v, code, p, 64).forEach((entry, index) => integer(entry, code, `${p}[${index}]`)), path);
   optional(arcane, "usedSoulDamagePreventionSourceIds", (v, p) => array(v, code, p, 64).forEach((entry, index) => integer(entry, code, `${p}[${index}]`)), path);
   optional(arcane, "combatDamageEquipmentReplacementIds", (v, p) => array(v, code, p, 64).forEach((entry, index) => integer(entry, code, `${p}[${index}]`)), path);
   optional(arcane, "queue", (v, p) => array(v, code, p, 64).forEach((entry, index) => validateArcane(entry, code, `${p}[${index}]`, depth + 1)), path);

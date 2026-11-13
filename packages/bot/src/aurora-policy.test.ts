@@ -330,6 +330,22 @@ describe("Aurora policy", () => {
     return intent.kind === "activate-ability" && intent.sourceInstanceId === state.players[0]!.equipment.legs!.instanceId;
   };
 
+  it("plays Lightning Press only when its +3 gets damage past the defenders", () => {
+    const state = reactionWindowAfter("ANQ030", 4247, ["FAB262"]);
+    delete state.players[0]!.equipment.legs;
+    const press = state.players[0]!.hand.find((card) => card.cardId === "FAB262")!;
+    const view = projectStateFor(state, 0);
+    const legal = legalIntents(state, 0).filter((intent) => intent.kind !== "concede" && !intent.kind.endsWith("-draw"));
+    const playsPress = () => {
+      const intent = chooseAuroraIntent({ seat: 0, view, legal, cards: cardData });
+      return intent.kind === "play-card" && intent.instanceId === press.instanceId;
+    };
+    expect(playsPress()).toBe(true);
+
+    view.chain[0] = { ...view.chain[0]!, defenseValue: 7, damage: 0 };
+    expect(playsPress()).toBe(false);
+  });
+
   it("keeps Snapdragon Scalers when the attack already has go again", () => {
     expect(activatesSnapdragon(reactionWindowAfter("LGS368", 4246))).toBe(false);
   });

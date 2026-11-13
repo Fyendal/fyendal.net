@@ -5,6 +5,7 @@ import type { CardInstance, PlayerState } from "./state.js";
 import {
   activatedAbilitiesSuppressed,
   cardHasType,
+  isNonActionInstant,
   cardNamesOf,
   cardTypesOf,
   dataOf,
@@ -462,9 +463,11 @@ function playIntentsForCard(
       return [{ ...intent, asInstant: true }];
     });
     if (
-      from !== "hand"
-      && from !== "arsenal"
-      && playFromZoneRequiresInstant(state, runtime, card, from, player.seat)
+      isNonActionInstant(state, card) || (
+        from !== "hand"
+        && from !== "arsenal"
+        && playFromZoneRequiresInstant(state, runtime, card, from, player.seat)
+      )
     ) return instantIntents;
     return player.actionPoints > 0 ? [...presented, ...instantIntents] : instantIntents;
   };

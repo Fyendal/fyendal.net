@@ -483,6 +483,13 @@ export function currentAttackIsOurs(input: BotPolicyInput): boolean {
   return currentLink(input)?.attackingCard.owner === input.seat;
 }
 
+/** Damage a +`pump` power reaction adds to our current attack past its defenders. */
+export function pumpDamageAdded(input: BotPolicyInput, pump: number): number {
+  const link = currentLink(input);
+  if (!link || link.attackingCard.owner !== input.seat) return 0;
+  return Math.max(0, Math.min(pump, link.attackValue + pump - link.defenseValue));
+}
+
 export function currentAttackIsOpponents(input: BotPolicyInput): boolean {
   const link = currentLink(input);
   return !!link && link.attackingCard.owner !== input.seat;

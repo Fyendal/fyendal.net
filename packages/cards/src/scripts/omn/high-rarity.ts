@@ -610,8 +610,9 @@ export const omnHighRarity: Record<string, CardScript> = {
   },
   "arcbane grasp|3": {
     playableEquipment: true,
+    additionalCardTypes: ["instant"],
     transformsEquipment: (ctx, equipped) => has(ctx, equipped, "base"),
-    playAsInstant: (ctx) => ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true,
+    playAsInstant: () => true,
     triggers: [
       entersArenaTrigger(
         "Create a Spellbane Aegis token",

@@ -385,6 +385,7 @@ export interface PersistedPendingArcaneV1 {
   usedQuellSourceIds?: number[];
   wardSourceIds?: number[];
   usedDiscardDamagePreventionModifierIds?: number[];
+  usedOptionalDamagePreventionSourceIds?: number[];
   usedSoulDamagePreventionSourceIds?: number[];
   soulDamagePreventionSourceInstanceId?: number;
   lethalDamagePreventionModifierId?: number;

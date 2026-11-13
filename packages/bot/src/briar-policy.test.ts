@@ -1367,6 +1367,10 @@ describe("Briar policy", () => {
     view.phase = "reaction";
     view.pendingDecision = { player: 0, kind: "attack-reaction", prompt: "Play an attack reaction or pass" };
     expect(chooseBriarIntent({ seat: 0, view, legal, cards: cardData })).toEqual(play);
+
+    view.chain[0] = { ...view.chain[0]!, defenseValue: 6, damage: 0 };
+    expect(chooseBriarIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "pass" });
   });
 
   it("plays both halves of Burn Up // Shock before a large setup hand can expose Shock alone", () => {

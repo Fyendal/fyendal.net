@@ -879,6 +879,8 @@ export interface PendingArcane {
   wardSourceIds?: number[];
   /** Discard-prevention modifiers already applied during this damage event. */
   usedDiscardDamagePreventionModifierIds?: number[];
+  /** Counter-paid optional prevention sources already applied to this event. */
+  usedOptionalDamagePreventionSourceIds?: number[];
   /** Soul-banish prevention sources already applied to this original event. */
   usedSoulDamagePreventionSourceIds?: number[];
   /** Source currently awaiting its controller's soul-card selection. */

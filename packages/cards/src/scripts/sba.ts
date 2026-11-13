@@ -460,7 +460,7 @@ export const sba: Record<string, CardScript> = {
   // "Instant - {r}: This gets go again" while it attacks (keyword pruned).
   "path of same ends|1": {
     onAttackDeclared(ctx) {
-      dealArcane(ctx, opponentSeat(ctx), 1);
+      if (ctx.link?.targetAllyId === undefined) dealArcane(ctx, opponentSeat(ctx), 1);
     },
     onDamageDealt(ctx, _target, amount, arcane) {
       if (!arcane || amount <= 0) return;

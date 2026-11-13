@@ -2476,3 +2476,35 @@ describe("PEN — Shapeless Form", () => {
     g.chooseName("Pouncing Qi").expectLog("Crouching Tiger gains the name Pouncing Qi");
   });
 });
+
+describe("PEN — mBrio Base Vizier", () => {
+  const vizierScenario = (board: string[]) => scenario({
+    seats: [
+      { hero: "rhinar", hand: ["path of same ends|1"], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", board, life: 20, equipment: { ...NO_EQUIPMENT, head: "mbrio base vizier|0" } },
+    ],
+  });
+  const steam = (g: ReturnType<typeof scenario>) =>
+    g.state.players[1]!.board.find((card) => card.cardId === printingId("hyper driver|1"))?.counters?.steam;
+
+  it("removes a Hyper Driver steam counter to prevent 1 arcane damage", () => {
+    const g = vizierScenario(["hyper driver|1"]);
+    g.state.players[1]!.board[0]!.counters = { steam: 2 };
+    g.play("path of same ends|1");
+    expect(g.state.pendingDecision?.chooseHook).toBe("optional-damage-prevention");
+    g.chooseOption("use").expectLife(1, 20);
+    expect(steam(g)).toBe(1);
+  });
+
+  it("declining the Hyper Driver replacement takes the arcane damage", () => {
+    const g = vizierScenario(["hyper driver|1"]);
+    g.state.players[1]!.board[0]!.counters = { steam: 2 };
+    g.play("path of same ends|1").chooseOption("decline").expectLife(1, 19);
+    expect(steam(g)).toBe(2);
+  });
+
+  it("prevents nothing for free without a Hyper Driver", () => {
+    const g = vizierScenario([]);
+    g.play("path of same ends|1").expectLife(1, 19);
+  });
+});

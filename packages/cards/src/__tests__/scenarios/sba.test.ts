@@ -434,6 +434,19 @@ describe("SBA — Arcane Barrier", () => {
       .expectLog("gains go again"); // arcane dealt: Path of Same Ends gains go again
   });
 
+  it("Path of Same Ends deals no arcane and gains no go again when it attacks an ally", () => {
+    const g = scenario({
+      seats: [
+        { ...briar, hand: ["path of same ends|1"] },
+        { hero: "dorinthea", board: ["barnacle|2"] },
+      ],
+    });
+    g.play("path of same ends|1", { targetAlly: "barnacle|2" })
+      .expectLife(1, 20)
+      .expectNoLog("arcane damage")
+      .expectNoLog("gains go again");
+  });
+
   it("Path of Same Ends may activate its instant ability from the combat chain", () => {
     const g = scenario({
       seats: [

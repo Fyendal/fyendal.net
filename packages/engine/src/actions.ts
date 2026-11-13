@@ -7,6 +7,7 @@ import { activateFromHandAbility } from "./activation.js";
 import {
   activatedAbilitiesSuppressed,
   cardHasType,
+  isNonActionInstant,
   cardNamesOf,
   cardTypesOf,
   dataOf,
@@ -173,6 +174,7 @@ export function playCard(
   const isInstant =
     !selectedMeldAction && (
       data.cardType === "instant" ||
+      isNonActionInstant(state, card) ||
       asInstant === true ||
       (asInstant === undefined && player.actionPoints < 1 && instantPermission)
     );
@@ -428,6 +430,7 @@ export function finishPlayCard(
   const isInstant =
     !selectedMeldAction && (
       data.cardType === "instant" ||
+      isNonActionInstant(state, card) ||
       asInstant === true ||
       (asInstant === undefined && player.actionPoints < 1 && instantPermission)
     );

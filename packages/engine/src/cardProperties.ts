@@ -230,13 +230,21 @@ export function meldSideHasType(
   return meld.leftCardType === cardType || meld.rightCardType === cardType;
 }
 
+/** A non-meld card with the instant type and no action type, such as an Equipment - Instant Evo. */
+export function isNonActionInstant(state: GameStateInternal, card: CardInstance): boolean {
+  return !scriptOf(state, card.cardId, card)?.meld &&
+    cardHasType(state, card, "instant") && !cardHasType(state, card, "action");
+}
+
 export function cardHasType(
   state: GameStateInternal,
   card: CardInstance,
   cardType: CardType,
 ): boolean {
-  if (cardType === "action" && state.scriptsRef[card.cardId]?.playableEquipment) return true;
-  if (state.scriptsRef[card.cardId]?.additionalCardTypes?.includes(cardType)) return true;
+  const script = state.scriptsRef[card.cardId];
+  // Playable equipment is an action unless it is printed Equipment - Instant.
+  if (cardType === "action" && script?.playableEquipment && !script.additionalCardTypes?.includes("instant")) return true;
+  if (script?.additionalCardTypes?.includes(cardType)) return true;
   const meld = scriptOf(state, card.cardId, card)?.meld;
   if (!meld) return instanceDataOf(state, card).cardType === cardType;
   const declaredObjectExists = state.stack.some(
