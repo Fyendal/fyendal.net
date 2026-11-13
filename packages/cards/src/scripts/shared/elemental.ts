@@ -23,7 +23,7 @@ export function channelLightning(
     }
     ctx.requestCardChoice(
       hook,
-      decisionPrompt("Put a Lightning card from pitch on the bottom", "card.ele.pitch.card.bottom", {
+      decisionPrompt("Put a Lightning card from pitch on the bottom", "card.common.pitch.card.bottom", {
         values: { type: "Lightning" },
       }),
       lightning.map((card) => card.instanceId),
@@ -123,7 +123,7 @@ function requestFusionReveal(ctx: ScriptCtx, type: FusionType): void {
     `${type}-fusion`,
     decisionPrompt(
       `${ctx.data.name}: reveal ${type === "lightning" ? "a" : "an"} ${label} card to fuse?`,
-      "card.ele.fusion.reveal.named",
+      "card.common.fusion.reveal.named",
       {
         values: { card: { kind: "card", cardId: ctx.self.cardId }, type: label },
         optionMessages: commonOptionMessages("no"),
@@ -153,17 +153,17 @@ function requestElementalFusion(ctx: ScriptCtx, first: FusionType, second: Fusio
     if (!a) continue;
     optionMessages[option] =
       kind !== "both"
-        ? decisionMessage("card.ele.fusion.option.single", {
+        ? decisionMessage("card.common.fusion.option.single", {
             card: { kind: "card", cardId: a.cardId },
             type: kind === first ? firstLabel : secondLabel,
           })
         : a.instanceId === b?.instanceId
-          ? decisionMessage("card.ele.fusion.option.both.single", {
+          ? decisionMessage("card.common.fusion.option.both.single", {
               card: { kind: "card", cardId: a.cardId },
               firstType: firstLabel,
               secondType: secondLabel,
             })
-          : decisionMessage("card.ele.fusion.option.both", {
+          : decisionMessage("card.common.fusion.option.both", {
               first: { kind: "card", cardId: a.cardId },
               second: { kind: "card", cardId: b!.cardId },
               firstType: firstLabel,
@@ -172,7 +172,7 @@ function requestElementalFusion(ctx: ScriptCtx, first: FusionType, second: Fusio
   }
   ctx.requestChoice(
     ELEMENTAL_FUSION_HOOK,
-    decisionPrompt(`Reveal ${first} and/or ${second} cards to fuse?`, "card.ele.fusion.multiple", {
+    decisionPrompt(`Reveal ${first} and/or ${second} cards to fuse?`, "card.common.fusion.multiple", {
       values: { firstType: firstLabel, secondType: secondLabel },
       optionMessages,
     }),
@@ -302,7 +302,7 @@ export function decompose(
       "decompose-earth-1",
       decisionPrompt(
         `${ctx.data.name}: decompose? Choose the first Earth card to banish`,
-        "card.ros.decompose.earth.first",
+        "card.common.decompose.earth.first",
         { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("no") },
       ),
       ["no", ...firstEarth.map((card) => card.instanceId)],
@@ -333,7 +333,7 @@ export function decompose(
           "decompose-earth-2",
           decisionPrompt(
             `${ctx.data.name}: choose the second Earth card to banish`,
-            "card.ros.decompose.earth.second",
+            "card.common.decompose.earth.second",
             { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
           ),
           secondEarth.map((card) => card.instanceId),
@@ -351,7 +351,7 @@ export function decompose(
         );
         ctx.requestCardChoice(
           "decompose-action",
-          decisionPrompt(`${ctx.data.name}: choose the action card to banish`, "card.ros.decompose.action", {
+          decisionPrompt(`${ctx.data.name}: choose the action card to banish`, "card.common.decompose.action", {
             values: { card: { kind: "card", cardId: ctx.self.cardId } },
           }),
           actions.map((card) => card.instanceId),

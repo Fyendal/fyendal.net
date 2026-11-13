@@ -2123,6 +2123,52 @@
       "value": "Turn a face-down arsenal card face up"
     }
   ],
+  "card.common.attack.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish an eligible attack?"
+    }
+  ],
+  "card.common.attack.banish.discount": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish an attack action with cost less than "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "; it costs 1 less to play and you may play it this turn"
+    }
+  ],
+  "card.common.attack.banish.power": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": banish an attack action with cost less than "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "; it gains +1 power and you may play it this turn"
+    }
+  ],
   "card.common.attack.target.choose": [
     {
       "type": 1,
@@ -2131,6 +2177,16 @@
     {
       "type": 0,
       "value": ": choose target attack"
+    }
+  ],
+  "card.common.attack.target.upto": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose up to 1 target attack"
     }
   ],
   "card.common.aura.destroy": [
@@ -2163,6 +2219,24 @@
     {
       "type": 0,
       "value": "Steal an aura token"
+    }
+  ],
+  "card.common.beatchest.discard": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": discard a card with "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " or more power to beat chest?"
     }
   ],
   "card.common.bonus.choose": [
@@ -2466,10 +2540,86 @@
       "value": "Put a steam counter on an item with crank"
     }
   ],
+  "card.common.decompose.action": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose the action card to banish"
+    }
+  ],
+  "card.common.decompose.earth.first": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": decompose? Choose the first Earth card to banish"
+    }
+  ],
+  "card.common.decompose.earth.second": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": choose the second Earth card to banish"
+    }
+  ],
   "card.common.defending.card.choose": [
     {
       "type": 0,
       "value": "Choose a defending card"
+    }
+  ],
+  "card.common.discard.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": pay "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resource"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "resources"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " or discard a card?"
     }
   ],
   "card.common.discardormill.choose": [
@@ -2494,6 +2644,154 @@
       "value": "Put a -1 defense counter on equipment"
     }
   ],
+  "card.common.fusion.multiple": [
+    {
+      "type": 0,
+      "value": "Reveal "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " and/or "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    },
+    {
+      "type": 0,
+      "value": " cards to fuse?"
+    }
+  ],
+  "card.common.fusion.option.both": [
+    {
+      "type": 0,
+      "value": "Reveal "
+    },
+    {
+      "type": 1,
+      "value": "first"
+    },
+    {
+      "type": 0,
+      "value": " and "
+    },
+    {
+      "type": 1,
+      "value": "second"
+    },
+    {
+      "type": 0,
+      "value": " for "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " and "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    }
+  ],
+  "card.common.fusion.option.both.single": [
+    {
+      "type": 0,
+      "value": "Reveal "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " for both "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " and "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    }
+  ],
+  "card.common.fusion.option.single": [
+    {
+      "type": 0,
+      "value": "Reveal "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " for "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    }
+  ],
+  "card.common.fusion.reveal.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": reveal "
+    },
+    {
+      "type": 5,
+      "value": "type",
+      "options": {
+        "Ice": {
+          "value": [
+            {
+              "type": 0,
+              "value": "an Ice"
+            }
+          ]
+        },
+        "Earth": {
+          "value": [
+            {
+              "type": 0,
+              "value": "an Earth"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a "
+            },
+            {
+              "type": 1,
+              "value": "type"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " card to fuse?"
+    }
+  ],
   "card.common.hand.bottom": [
     {
       "type": 0,
@@ -2516,6 +2814,16 @@
     {
       "type": 0,
       "value": "Put a card from your hand on top of your deck"
+    }
+  ],
+  "card.common.hand.card.top.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": put a card from your hand on top of your deck"
     }
   ],
   "card.common.handorarsenal.bottom": [
@@ -2572,6 +2880,12 @@
     {
       "type": 0,
       "value": "Put the looked-at card on the bottom?"
+    }
+  ],
+  "card.common.maintenance.choose": [
+    {
+      "type": 0,
+      "value": "Remove a steam counter or destroy this?"
     }
   ],
   "card.common.mode.choose": [
@@ -2688,6 +3002,20 @@
       "value": "Yellow"
     }
   ],
+  "card.common.pitch.card.bottom": [
+    {
+      "type": 0,
+      "value": "Put a "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " card from pitch on the bottom"
+    }
+  ],
   "card.common.reload": [
     {
       "type": 0,
@@ -2728,6 +3056,12 @@
     {
       "type": 0,
       "value": ": choose a specialization card to put face up into arsenal"
+    }
+  ],
+  "card.common.spire.order.next": [
+    {
+      "type": 0,
+      "value": "Choose the next card to put back on top of your deck; the last card put back ends on top"
     }
   ],
   "card.common.suspense.counter.add": [
@@ -4885,154 +5219,6 @@
       "value": " or the attack gains dominate"
     }
   ],
-  "card.ele.fusion.multiple": [
-    {
-      "type": 0,
-      "value": "Reveal "
-    },
-    {
-      "type": 1,
-      "value": "firstType"
-    },
-    {
-      "type": 0,
-      "value": " and/or "
-    },
-    {
-      "type": 1,
-      "value": "secondType"
-    },
-    {
-      "type": 0,
-      "value": " cards to fuse?"
-    }
-  ],
-  "card.ele.fusion.option.both": [
-    {
-      "type": 0,
-      "value": "Reveal "
-    },
-    {
-      "type": 1,
-      "value": "first"
-    },
-    {
-      "type": 0,
-      "value": " and "
-    },
-    {
-      "type": 1,
-      "value": "second"
-    },
-    {
-      "type": 0,
-      "value": " for "
-    },
-    {
-      "type": 1,
-      "value": "firstType"
-    },
-    {
-      "type": 0,
-      "value": " and "
-    },
-    {
-      "type": 1,
-      "value": "secondType"
-    }
-  ],
-  "card.ele.fusion.option.both.single": [
-    {
-      "type": 0,
-      "value": "Reveal "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " for both "
-    },
-    {
-      "type": 1,
-      "value": "firstType"
-    },
-    {
-      "type": 0,
-      "value": " and "
-    },
-    {
-      "type": 1,
-      "value": "secondType"
-    }
-  ],
-  "card.ele.fusion.option.single": [
-    {
-      "type": 0,
-      "value": "Reveal "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " for "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    }
-  ],
-  "card.ele.fusion.reveal.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": reveal "
-    },
-    {
-      "type": 5,
-      "value": "type",
-      "options": {
-        "Ice": {
-          "value": [
-            {
-              "type": 0,
-              "value": "an Ice"
-            }
-          ]
-        },
-        "Earth": {
-          "value": [
-            {
-              "type": 0,
-              "value": "an Earth"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "a "
-            },
-            {
-              "type": 1,
-              "value": "type"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "type": 0,
-      "value": " card to fuse?"
-    }
-  ],
   "card.ele.goagain.give.pay": [
     {
       "type": 0,
@@ -5197,20 +5383,6 @@
     {
       "type": 1,
       "value": "p"
-    }
-  ],
-  "card.ele.pitch.card.bottom": [
-    {
-      "type": 0,
-      "value": "Put a "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    },
-    {
-      "type": 0,
-      "value": " card from pitch on the bottom"
     }
   ],
   "card.ele.plume.earth.return": [
@@ -5601,12 +5773,6 @@
     {
       "type": 0,
       "value": " to reset"
-    }
-  ],
-  "card.evo.maintenance.choose": [
-    {
-      "type": 0,
-      "value": "Remove a steam counter or destroy this?"
     }
   ],
   "card.evo.matching.item.top": [
@@ -6639,24 +6805,6 @@
       "value": "Put an attack action from your graveyard on top?"
     }
   ],
-  "card.hvy.beatchest.discard": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": discard a card with "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " or more power to beat chest?"
-    }
-  ],
   "card.hvy.betsy.pay": [
     {
       "type": 0,
@@ -7461,6 +7609,58 @@
       "value": " is banished"
     }
   ],
+  "card.log.common.banished.discount": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": the banished card "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " costs "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " less — you may play it this turn"
+    }
+  ],
+  "card.log.common.banished.power": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": the banished card "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " gains +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " power — you may play it this turn"
+    }
+  ],
   "card.log.common.blooddebt.triggered": [
     {
       "type": 0,
@@ -7547,6 +7747,16 @@
     {
       "type": 1,
       "value": "revealed"
+    }
+  ],
+  "card.log.common.chokeslam.suppressed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": opposing attack action cards can't gain power during their next action phase"
     }
   ],
   "card.log.common.damage.next.prevented": [
@@ -7841,6 +8051,32 @@
       },
       "offset": 0,
       "pluralType": "cardinal"
+    }
+  ],
+  "card.log.common.hyperdriver.counter": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": Hyper Driver gains a steam counter ("
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " → "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    },
+    {
+      "type": 0,
+      "value": ")"
     }
   ],
   "card.log.common.intimidate": [
@@ -12630,16 +12866,6 @@
       "value": "Put an arrow into arsenal?"
     }
   ],
-  "card.omn.attack.target.upto": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": choose up to 1 target attack"
-    }
-  ],
   "card.omn.aura.holo.counter": [
     {
       "type": 1,
@@ -13594,36 +13820,6 @@
       "value": "Return an eligible aura to its owner's hand?"
     }
   ],
-  "card.ros.decompose.action": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": choose the action card to banish"
-    }
-  ],
-  "card.ros.decompose.earth.first": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": decompose? Choose the first Earth card to banish"
-    }
-  ],
-  "card.ros.decompose.earth.second": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": choose the second Earth card to banish"
-    }
-  ],
   "card.ros.intimidated.card.graveyard": [
     {
       "type": 0,
@@ -13804,12 +14000,6 @@
       "value": "Scout the Periphery: look at the top card of target hero's deck"
     }
   ],
-  "card.saz.spire.order.next": [
-    {
-      "type": 0,
-      "value": "Choose the next card to put back on top of your deck; the last card put back ends on top"
-    }
-  ],
   "card.sba.crown.attack.top": [
     {
       "type": 0,
@@ -13894,16 +14084,6 @@
     {
       "type": 0,
       "value": "Crash and Bash: reveal a card with crush to create a Seismic Surge?"
-    }
-  ],
-  "card.sbr.hand.card.top": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": put a card from your hand on top of your deck"
     }
   ],
   "card.sbr.thunderquake.heave": [
@@ -14384,42 +14564,6 @@
       "value": " +1 power counters on an aura with ward you control"
     }
   ],
-  "card.sfa.attack.banish.discount": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": banish an attack action with cost less than "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": "; it costs 1 less to play and you may play it this turn"
-    }
-  ],
-  "card.sfa.attack.banish.power": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": banish an attack action with cost less than "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": "; it gains +1 power and you may play it this turn"
-    }
-  ],
   "card.sfa.dragonfire.target": [
     {
       "type": 0,
@@ -14548,52 +14692,6 @@
     {
       "type": 0,
       "value": "Cold Snap: choose a hero"
-    }
-  ],
-  "card.siy.discard.pay": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": pay "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " "
-    },
-    {
-      "type": 6,
-      "value": "amount",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "resource"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "resources"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " or discard a card?"
     }
   ],
   "card.siy.frostspike.zone.choose": [
@@ -16796,6 +16894,12 @@
       "value": "Each hero shuffles their deck and puts its top card into their arsenal"
     }
   ],
+  "card.trigger.common.hyperdriver.boost": [
+    {
+      "type": 0,
+      "value": "Remove a steam counter and gain 1 resource"
+    }
+  ],
   "card.trigger.common.illusionist.chain.abilities": [
     {
       "type": 0,
@@ -17700,6 +17804,12 @@
       "value": "Put a steam counter on this"
     }
   ],
+  "card.trigger.common.steam.maintain": [
+    {
+      "type": 0,
+      "value": "Remove a steam counter or destroy this"
+    }
+  ],
   "card.trigger.common.steam.remove": [
     {
       "type": 0,
@@ -18042,12 +18152,6 @@
       "value": "Remove a -1 defense counter from your chest equipment"
     }
   ],
-  "card.trigger.hyperdriver.boost": [
-    {
-      "type": 0,
-      "value": "Remove a steam counter and gain 1 resource"
-    }
-  ],
   "card.trigger.iar.mark.neverest": [
     {
       "type": 0,
@@ -18276,12 +18380,6 @@
       "value": "token"
     }
   ],
-  "card.trigger.steam.maintain": [
-    {
-      "type": 0,
-      "value": "Remove a steam counter or destroy this"
-    }
-  ],
   "card.trigger.sup.turnheads.tap": [
     {
       "type": 0,
@@ -18412,16 +18510,6 @@
     {
       "type": 0,
       "value": ": choose an Ash to transform"
-    }
-  ],
-  "card.upr.attack.banish": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": banish an eligible attack?"
     }
   ],
   "card.upr.azvolai.targets": [

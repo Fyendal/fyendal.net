@@ -16,7 +16,7 @@ export function upToOneTargetAttack(
         .filter((link) => link.flags.attackGone !== true && eligible(ctx, link.attackingCard))
         .map((link) => link.attackingCard.instanceId),
     prompt: (ctx) =>
-      decisionPrompt(`${ctx.data.name}: choose up to 1 target attack`, "card.omn.attack.target.upto", {
+      decisionPrompt(`${ctx.data.name}: choose up to 1 target attack`, "card.common.attack.target.upto", {
         values: { card: { kind: "card", cardId: ctx.self.cardId } },
         optionMessages: commonOptionMessages("pass"),
       }),

@@ -52,7 +52,7 @@ function channel(type: "earth" | "ice" | "lightning", extra: CardScript): CardSc
     }
     ctx.requestCardChoice(
       "channel-bottom",
-      decisionPrompt(`Put a ${type} card from pitch on the bottom`, "card.ele.pitch.card.bottom", {
+      decisionPrompt(`Put a ${type} card from pitch on the bottom`, "card.common.pitch.card.bottom", {
         values: { type: type[0]!.toUpperCase() + type.slice(1) },
       }),
       cards.map((card) => card.instanceId),

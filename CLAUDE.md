@@ -63,6 +63,11 @@ Fyendal is a TypeScript/pnpm monorepo for playing Flesh and Blood. Read
   the narrowest generic hook or `ScriptCtx` command instead.
 - Card scripts read deeply readonly state and mutate only through `ScriptCtx`.
   Scripts are keyed by `name lowercase|pitch`, so reprints reuse them.
+- Reuse before writing. Before scripting a mechanic, check `scripts/shared/`
+  (module map in `scripts/README.md`) and search other sets for it. A
+  mechanic a second set needs moves into `shared/` rather than being copied.
+  Query cards with `ctx.hasKeyword`/`ctx.hasCardType`/`ctx.cardNames`, never
+  printed data. Token ids come only from `scripts/tokens.ts`.
 - Played cards and abilities use the stack; go again grants its action point
   at resolution; resolved links stay until the chain closes.
 - Mechanics live in focused modules (combat in `attacks.ts`, `defense.ts`,

@@ -40,5 +40,7 @@ describe("created tokens", () => {
     });
     g.activate("imperial ledger|1").settle();
     expect(boardNames(g, 0)).toEqual(["Copper"]);
+    g.expectLog("Imperial Ledger is shuffled into").expectNoLog("put on the bottom");
+    expect(g.state.players[0]!.deck.some((card) => cardData[card.cardId]!.name === "Imperial Ledger")).toBe(true);
   });
 });

@@ -137,7 +137,12 @@ const LOCALIZED_CATALOGS: ReadonlyArray<readonly [string, Record<string, unknown
 ];
 
 describe("locale catalogs", () => {
-  it.each([["en", englishMessages], ...LOCALIZED_CATALOGS])("keeps %s keys sorted", (_, messages) => {
+  const allCatalogs: ReadonlyArray<readonly [string, Record<string, unknown>]> = [
+    ["en", englishMessages],
+    ...LOCALIZED_CATALOGS,
+  ];
+
+  it.each(allCatalogs)("keeps %s keys sorted", (_, messages) => {
     const ids = Object.keys(messages);
     expect(ids).toEqual([...ids].sort());
   });
@@ -224,7 +229,7 @@ describe("locale catalogs", () => {
       { card: "Regurgitating Slog" },
     )).toBe("Regurgitating Slog 获得压制 (dominate)");
     expect(intl.formatMessage({ id: "game.card.badge.steam" }, { count: 2 })).toBe("2 个 steam 指示物");
-    expect(intl.formatMessage({ id: "card.evo.maintenance.choose" })).toBe("移除一个 steam 指示物，或摧毁此牌？");
+    expect(intl.formatMessage({ id: "card.common.maintenance.choose" })).toBe("移除一个 steam 指示物，或摧毁此牌？");
     expect(intl.formatMessage({ id: "game.zone.pitch" })).toBe("Pitch");
     expect(intl.formatMessage({ id: "game.decision.choosePitch" })).toBe("选择要 pitch 以支付资源的手牌。");
   });

@@ -197,7 +197,7 @@ function requestSpireSnipingCard(ctx: ScriptCtx, hook: string, cards: readonly D
     hook,
     decisionPrompt(
       "Choose the next card to put back on top of your deck; the last card put back ends on top",
-      "card.saz.spire.order.next",
+      "card.common.spire.order.next",
     ),
     cards.map((card) => String(card.instanceId)),
     undefined,

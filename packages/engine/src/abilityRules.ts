@@ -743,6 +743,7 @@ export function payActivatedAbilityCost(
   if (ability.destroySelfCost) destroyPermanent(state, runtime, seat, card);
   else if (ability.banishSelfCost) runtime.makeCtx(state, seat, card).banish(card.instanceId);
   else if (ability.putSelfOnDeckBottomCost) putCardOnDeckBottom(state, runtime, card.instanceId, true);
+  else if (ability.shuffleSelfIntoDeckCost) runtime.makeCtx(state, seat, card).shuffleIntoDeck([card.instanceId]);
   else if (ability.returnSelfToHandCost) runtime.makeCtx(state, seat, card).moveToHand(card.instanceId);
   if (ability.destroySubcardCost) {
     runtime.makeCtx(state, seat, card).destroySubcard(card.instanceId, opts?.destroySubcardInstanceId);

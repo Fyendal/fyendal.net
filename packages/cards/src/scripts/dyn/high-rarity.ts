@@ -1146,8 +1146,8 @@ export const dynHighRarity: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       oncePerTurn: false,
+      shuffleSelfIntoDeckCost: true,
       onActivate(ctx) {
-        ctx.putOnDeckBottom(ctx.self.instanceId);
         ctx.createToken(hasCardSubtype(ctx, ctx.player(ctx.seat).hero, "royal") ? GOLD : COPPER);
       },
     },

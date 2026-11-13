@@ -799,7 +799,7 @@ export const pen: Record<string, CardScript> = mergeSetScripts("PEN", penHighRar
       {
         event: "start-of-turn",
         label: "Remove a steam counter or destroy this",
-        labelMessage: decisionMessage("card.trigger.steam.maintain"),
+        labelMessage: decisionMessage("card.trigger.common.steam.maintain"),
         effect(ctx) {
           if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
           else ctx.setCounter("steam", ctx.getCounter("steam") - 1);

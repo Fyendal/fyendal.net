@@ -2127,6 +2127,52 @@
       "value": "Pon boca arriba una carta boca abajo del arsenal"
     }
   ],
+  "card.common.attack.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": ¿hacer banish de un ataque válido?"
+    }
+  ],
+  "card.common.attack.banish.discount": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": haz banish de una carta de attack action de coste inferior a "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "; cuesta 1 menos jugarla y puedes jugarla este turno"
+    }
+  ],
+  "card.common.attack.banish.power": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": haz banish de una carta de attack action de coste inferior a "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "; obtiene +1 de poder y puedes jugarla este turno"
+    }
+  ],
   "card.common.attack.target.choose": [
     {
       "type": 1,
@@ -2135,6 +2181,16 @@
     {
       "type": 0,
       "value": ": elige el ataque objetivo"
+    }
+  ],
+  "card.common.attack.target.upto": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": elige hasta 1 ataque objetivo"
     }
   ],
   "card.common.aura.destroy": [
@@ -2167,6 +2223,24 @@
     {
       "type": 0,
       "value": "Roba un token de aura"
+    }
+  ],
+  "card.common.beatchest.discard": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": ¿descartar una carta con "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " o más de poder para hacer beat chest?"
     }
   ],
   "card.common.bonus.choose": [
@@ -2470,10 +2544,86 @@
       "value": "Pon un contador de steam en un item con crank"
     }
   ],
+  "card.common.decompose.action": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": elige la carta de action para hacer banish"
+    }
+  ],
+  "card.common.decompose.earth.first": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": ¿hacer decompose? Elige la primera carta Earth para hacer banish"
+    }
+  ],
+  "card.common.decompose.earth.second": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": elige la segunda carta Earth para hacer banish"
+    }
+  ],
   "card.common.defending.card.choose": [
     {
       "type": 0,
       "value": "Elige una carta defensora"
+    }
+  ],
+  "card.common.discard.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": ¿pagar "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "recurso"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "recursos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " o descartar una carta?"
     }
   ],
   "card.common.discardormill.choose": [
@@ -2498,6 +2648,128 @@
       "value": "Pon un contador de -1 de defensa en un equipo"
     }
   ],
+  "card.common.fusion.multiple": [
+    {
+      "type": 0,
+      "value": "¿Revelar cartas "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " y/o "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    },
+    {
+      "type": 0,
+      "value": " para hacer fuse?"
+    }
+  ],
+  "card.common.fusion.option.both": [
+    {
+      "type": 0,
+      "value": "Revelar "
+    },
+    {
+      "type": 1,
+      "value": "first"
+    },
+    {
+      "type": 0,
+      "value": " y "
+    },
+    {
+      "type": 1,
+      "value": "second"
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " y "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    }
+  ],
+  "card.common.fusion.option.both.single": [
+    {
+      "type": 0,
+      "value": "Revelar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " y "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    },
+    {
+      "type": 0,
+      "value": " a la vez"
+    }
+  ],
+  "card.common.fusion.option.single": [
+    {
+      "type": 0,
+      "value": "Revelar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    }
+  ],
+  "card.common.fusion.reveal.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": ¿revelar una carta "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " para hacer fuse?"
+    }
+  ],
   "card.common.hand.bottom": [
     {
       "type": 0,
@@ -2520,6 +2792,16 @@
     {
       "type": 0,
       "value": "Pon una carta de tu mano en la parte superior de tu mazo"
+    }
+  ],
+  "card.common.hand.card.top.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": pon una carta de tu mano en la parte superior de tu mazo"
     }
   ],
   "card.common.handorarsenal.bottom": [
@@ -2576,6 +2858,12 @@
     {
       "type": 0,
       "value": "¿Poner la carta mirada en la parte inferior?"
+    }
+  ],
+  "card.common.maintenance.choose": [
+    {
+      "type": 0,
+      "value": "¿Quitar un contador de steam o destruir esta carta?"
     }
   ],
   "card.common.mode.choose": [
@@ -2688,6 +2976,20 @@
       "value": "Amarillo"
     }
   ],
+  "card.common.pitch.card.bottom": [
+    {
+      "type": 0,
+      "value": "Pon una carta "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " de la zona de pitch en la parte inferior"
+    }
+  ],
   "card.common.reload": [
     {
       "type": 0,
@@ -2728,6 +3030,12 @@
     {
       "type": 0,
       "value": ": elige una carta de Specialization para poner boca arriba en el arsenal"
+    }
+  ],
+  "card.common.spire.order.next": [
+    {
+      "type": 0,
+      "value": "Elige la siguiente carta para devolver a la parte superior de tu mazo; la última que devuelvas quedará arriba"
     }
   ],
   "card.common.suspense.counter.add": [
@@ -4889,128 +5197,6 @@
       "value": " o el ataque obtiene dominate"
     }
   ],
-  "card.ele.fusion.multiple": [
-    {
-      "type": 0,
-      "value": "¿Revelar cartas "
-    },
-    {
-      "type": 1,
-      "value": "firstType"
-    },
-    {
-      "type": 0,
-      "value": " y/o "
-    },
-    {
-      "type": 1,
-      "value": "secondType"
-    },
-    {
-      "type": 0,
-      "value": " para hacer fuse?"
-    }
-  ],
-  "card.ele.fusion.option.both": [
-    {
-      "type": 0,
-      "value": "Revelar "
-    },
-    {
-      "type": 1,
-      "value": "first"
-    },
-    {
-      "type": 0,
-      "value": " y "
-    },
-    {
-      "type": 1,
-      "value": "second"
-    },
-    {
-      "type": 0,
-      "value": " para "
-    },
-    {
-      "type": 1,
-      "value": "firstType"
-    },
-    {
-      "type": 0,
-      "value": " y "
-    },
-    {
-      "type": 1,
-      "value": "secondType"
-    }
-  ],
-  "card.ele.fusion.option.both.single": [
-    {
-      "type": 0,
-      "value": "Revelar "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " para "
-    },
-    {
-      "type": 1,
-      "value": "firstType"
-    },
-    {
-      "type": 0,
-      "value": " y "
-    },
-    {
-      "type": 1,
-      "value": "secondType"
-    },
-    {
-      "type": 0,
-      "value": " a la vez"
-    }
-  ],
-  "card.ele.fusion.option.single": [
-    {
-      "type": 0,
-      "value": "Revelar "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " para "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    }
-  ],
-  "card.ele.fusion.reveal.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": ¿revelar una carta "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    },
-    {
-      "type": 0,
-      "value": " para hacer fuse?"
-    }
-  ],
   "card.ele.goagain.give.pay": [
     {
       "type": 0,
@@ -5175,20 +5361,6 @@
     {
       "type": 1,
       "value": "p"
-    }
-  ],
-  "card.ele.pitch.card.bottom": [
-    {
-      "type": 0,
-      "value": "Pon una carta "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    },
-    {
-      "type": 0,
-      "value": " de la zona de pitch en la parte inferior"
     }
   ],
   "card.ele.plume.earth.return": [
@@ -5605,12 +5777,6 @@
     {
       "type": 0,
       "value": " para reiniciar"
-    }
-  ],
-  "card.evo.maintenance.choose": [
-    {
-      "type": 0,
-      "value": "¿Quitar un contador de steam o destruir esta carta?"
     }
   ],
   "card.evo.matching.item.top": [
@@ -6647,24 +6813,6 @@
       "value": "¿Poner una carta de attack action de tu cementerio en la parte superior?"
     }
   ],
-  "card.hvy.beatchest.discard": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": ¿descartar una carta con "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " o más de poder para hacer beat chest?"
-    }
-  ],
   "card.hvy.betsy.pay": [
     {
       "type": 0,
@@ -7469,6 +7617,58 @@
       "value": "card"
     }
   ],
+  "card.log.common.banished.discount": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": la carta banished "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " cuesta "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " menos; puedes jugarla este turno"
+    }
+  ],
+  "card.log.common.banished.power": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": la carta banished "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " obtiene +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de poder; puedes jugarla este turno"
+    }
+  ],
   "card.log.common.blooddebt.triggered": [
     {
       "type": 0,
@@ -7555,6 +7755,16 @@
     {
       "type": 1,
       "value": "revealed"
+    }
+  ],
+  "card.log.common.chokeslam.suppressed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": las cartas de attack action rivales no pueden obtener poder durante su próxima action phase"
     }
   ],
   "card.log.common.damage.next.prevented": [
@@ -7857,6 +8067,32 @@
       },
       "offset": 0,
       "pluralType": "cardinal"
+    }
+  ],
+  "card.log.common.hyperdriver.counter": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": Hyper Driver recibe un contador de steam ("
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " → "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    },
+    {
+      "type": 0,
+      "value": ")"
     }
   ],
   "card.log.common.intimidate": [
@@ -12630,16 +12866,6 @@
       "value": "¿Poner una carta arrow en tu arsenal?"
     }
   ],
-  "card.omn.attack.target.upto": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": elige hasta 1 ataque objetivo"
-    }
-  ],
   "card.omn.aura.holo.counter": [
     {
       "type": 1,
@@ -13688,36 +13914,6 @@
       "value": "¿Devolver un aura válida a la mano de su propietario?"
     }
   ],
-  "card.ros.decompose.action": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": elige la carta de action para hacer banish"
-    }
-  ],
-  "card.ros.decompose.earth.first": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": ¿hacer decompose? Elige la primera carta Earth para hacer banish"
-    }
-  ],
-  "card.ros.decompose.earth.second": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": elige la segunda carta Earth para hacer banish"
-    }
-  ],
   "card.ros.intimidated.card.graveyard": [
     {
       "type": 0,
@@ -13898,12 +14094,6 @@
       "value": "Scout the Periphery: mira la carta superior del mazo del héroe objetivo"
     }
   ],
-  "card.saz.spire.order.next": [
-    {
-      "type": 0,
-      "value": "Elige la siguiente carta para devolver a la parte superior de tu mazo; la última que devuelvas quedará arriba"
-    }
-  ],
   "card.sba.crown.attack.top": [
     {
       "type": 0,
@@ -13988,16 +14178,6 @@
     {
       "type": 0,
       "value": "Crash and Bash: ¿revelar una carta con crush para crear un Seismic Surge?"
-    }
-  ],
-  "card.sbr.hand.card.top": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": pon una carta de tu mano en la parte superior de tu mazo"
     }
   ],
   "card.sbr.thunderquake.heave": [
@@ -14478,42 +14658,6 @@
       "value": " contadores de +1 de poder en un aura con ward que controles"
     }
   ],
-  "card.sfa.attack.banish.discount": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": haz banish de una carta de attack action de coste inferior a "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": "; cuesta 1 menos jugarla y puedes jugarla este turno"
-    }
-  ],
-  "card.sfa.attack.banish.power": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": haz banish de una carta de attack action de coste inferior a "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": "; obtiene +1 de poder y puedes jugarla este turno"
-    }
-  ],
   "card.sfa.dragonfire.target": [
     {
       "type": 0,
@@ -14642,52 +14786,6 @@
     {
       "type": 0,
       "value": "Cold Snap: elige un héroe"
-    }
-  ],
-  "card.siy.discard.pay": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": ¿pagar "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " "
-    },
-    {
-      "type": 6,
-      "value": "amount",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "recurso"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "recursos"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " o descartar una carta?"
     }
   ],
   "card.siy.frostspike.zone.choose": [
@@ -16924,6 +17022,12 @@
       "value": "Cada héroe baraja su mazo y pone la carta superior en su arsenal"
     }
   ],
+  "card.trigger.common.hyperdriver.boost": [
+    {
+      "type": 0,
+      "value": "Retira un contador de steam y obtén 1 recurso"
+    }
+  ],
   "card.trigger.common.illusionist.chain.abilities": [
     {
       "type": 0,
@@ -17828,6 +17932,12 @@
       "value": "Pon un contador de steam sobre esta carta"
     }
   ],
+  "card.trigger.common.steam.maintain": [
+    {
+      "type": 0,
+      "value": "Retira un contador de steam o destruye esta carta"
+    }
+  ],
   "card.trigger.common.steam.remove": [
     {
       "type": 0,
@@ -18170,12 +18280,6 @@
       "value": "Retira un contador de -1 de defensa de tu equipo de pecho"
     }
   ],
-  "card.trigger.hyperdriver.boost": [
-    {
-      "type": 0,
-      "value": "Retira un contador de steam y obtén 1 recurso"
-    }
-  ],
   "card.trigger.iar.mark.neverest": [
     {
       "type": 0,
@@ -18404,12 +18508,6 @@
       "value": "token"
     }
   ],
-  "card.trigger.steam.maintain": [
-    {
-      "type": 0,
-      "value": "Retira un contador de steam o destruye esta carta"
-    }
-  ],
   "card.trigger.sup.turnheads.tap": [
     {
       "type": 0,
@@ -18540,16 +18638,6 @@
     {
       "type": 0,
       "value": ": elige un Ash para transformar"
-    }
-  ],
-  "card.upr.attack.banish": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": ¿hacer banish de un ataque válido?"
     }
   ],
   "card.upr.azvolai.targets": [

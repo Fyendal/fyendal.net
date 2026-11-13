@@ -225,7 +225,7 @@ describe("SEA — High Seas heroes and cogs", () => {
       player: 0,
       chooseHook: "sea-cog-maintenance",
       options: ["remove", "destroy"],
-      promptMessage: { id: "card.evo.maintenance.choose" },
+      promptMessage: { id: "card.common.maintenance.choose" },
       optionMessages: [
         { id: "common.option.remove" },
         { id: "common.option.destroy" },

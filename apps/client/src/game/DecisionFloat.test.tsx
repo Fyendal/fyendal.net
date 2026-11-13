@@ -662,7 +662,7 @@ describe("priority guidance help", () => {
       optionLabels: ["Add an energy counter", "Remove a steam counter or destroy this"],
       optionMessages: [
         { id: "card.trigger.energycounter.add" },
-        { id: "card.trigger.steam.maintain" },
+        { id: "card.trigger.common.steam.maintain" },
       ],
       optionCounts: [null, null],
       optionCards: [null, null],

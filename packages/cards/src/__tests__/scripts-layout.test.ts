@@ -194,39 +194,12 @@ describe("card script layout", () => {
     for (const name of Object.keys(singleSetAllowlist)) expect(owner.has(name), `${name} is still shared`).toBe(true);
   });
 
-  it("references set-scoped message ids from shared code only where several sets share them", () => {
-    // Kept unchanged because prompts in stored games still carry these ids.
-    const SET_SCOPED_MESSAGE_IDS = [
-      "card.ele.fusion.multiple",
-      "card.ele.fusion.option.both",
-      "card.ele.fusion.option.both.single",
-      "card.ele.fusion.option.single",
-      "card.ele.fusion.reveal.named",
-      "card.ele.pitch.card.bottom",
-      "card.evo.maintenance.choose",
-      "card.hvy.beatchest.discard",
-      "card.log.sbr.chokeslam.suppressed",
-      "card.log.sda.hyperdriver.counter",
-      "card.log.sfa.banished.discount",
-      "card.log.sfa.banished.power",
-      "card.omn.attack.target.upto",
-      "card.ros.decompose.action",
-      "card.ros.decompose.earth.first",
-      "card.ros.decompose.earth.second",
-      "card.saz.spire.order.next",
-      "card.sbr.hand.card.top",
-      "card.sfa.attack.banish.discount",
-      "card.sfa.attack.banish.power",
-      "card.siy.discard.pay",
-      "card.trigger.hyperdriver.boost",
-      "card.trigger.steam.maintain",
-      "card.upr.attack.banish",
-    ];
+  it("uses only common message ids in shared code", () => {
     const used = scriptSources(scriptsDir)
       .filter(({ path }) => path.startsWith("shared/"))
       .flatMap(({ source }) => Array.from(source.matchAll(/"(card\.[a-z0-9.]+)"/g), (match) => match[1]!))
       .filter((id) => !/^card\.(?:common|trigger\.common|log\.common)\./.test(id));
-    expect([...new Set(used)].sort()).toEqual(SET_SCOPED_MESSAGE_IDS);
+    expect([...new Set(used)].sort()).toEqual([]);
   });
 
   it("uses computed types whenever a card instance is available", () => {

@@ -35,7 +35,7 @@ function addSteamToHyperDriver(ctx: ScriptCtx, instanceId: number): void {
     localizedCardLog(
       ctx,
       `${ctx.data.name}: Hyper Driver gains a steam counter (${steam} → ${steam + 1})`,
-      "card.log.sda.hyperdriver.counter",
+      "card.log.common.hyperdriver.counter",
       { from: steam, to: steam + 1 },
     ),
   );
@@ -247,7 +247,7 @@ export const sda: Record<string, CardScript> = {
       {
         event: "card-boosted",
         label: "Remove a steam counter and gain 1 resource",
-        labelMessage: decisionMessage("card.trigger.hyperdriver.boost"),
+        labelMessage: decisionMessage("card.trigger.common.hyperdriver.boost"),
         condition(ctx) {
           return (
             ctx.getFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`) !== true && ctx.getCounter("steam") > 0

@@ -2105,6 +2105,52 @@
       "value": "将一张面朝下的 arsenal 牌翻至面朝上"
     }
   ],
+  "card.common.attack.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐一张符合条件的攻击牌？"
+    }
+  ],
+  "card.common.attack.banish.discount": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐一张费用低于 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的攻击行动牌；其打出费用减少 1，且本回合可以打出"
+    }
+  ],
+  "card.common.attack.banish.power": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：放逐一张费用低于 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的攻击行动牌；其力量 +1，且本回合可以打出"
+    }
+  ],
   "card.common.attack.target.choose": [
     {
       "type": 1,
@@ -2113,6 +2159,16 @@
     {
       "type": 0,
       "value": "：选择目标攻击"
+    }
+  ],
+  "card.common.attack.target.upto": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择至多一个目标攻击"
     }
   ],
   "card.common.aura.destroy": [
@@ -2145,6 +2201,24 @@
     {
       "type": 0,
       "value": "夺取一个灵气 (Aura)衍生物的操控权"
+    }
+  ],
+  "card.common.beatchest.discard": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：弃置一张力量不低于 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 的牌以 beat chest？"
     }
   ],
   "card.common.bonus.choose": [
@@ -2425,10 +2499,58 @@
       "value": "在一个具有 crank 的物品上放置一个 steam 指示物"
     }
   ],
+  "card.common.decompose.action": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择要放逐的行动牌"
+    }
+  ],
+  "card.common.decompose.earth.first": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：进行分解 (decompose)？选择第一张要放逐的 Earth 牌"
+    }
+  ],
+  "card.common.decompose.earth.second": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：选择第二张要放逐的 Earth 牌"
+    }
+  ],
   "card.common.defending.card.choose": [
     {
       "type": 0,
       "value": "选择一张防守牌"
+    }
+  ],
+  "card.common.discard.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：支付 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源，否则弃置一张牌？"
     }
   ],
   "card.common.discardormill.choose": [
@@ -2453,6 +2575,124 @@
       "value": "选择一件装备，在其上放置一个 -1 防御指示物"
     }
   ],
+  "card.common.fusion.multiple": [
+    {
+      "type": 0,
+      "value": "展示 "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " 和／或 "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    },
+    {
+      "type": 0,
+      "value": " 牌以进行 fusion？"
+    }
+  ],
+  "card.common.fusion.option.both": [
+    {
+      "type": 0,
+      "value": "展示 "
+    },
+    {
+      "type": 1,
+      "value": "first"
+    },
+    {
+      "type": 0,
+      "value": " 和 "
+    },
+    {
+      "type": 1,
+      "value": "second"
+    },
+    {
+      "type": 0,
+      "value": " 作为 "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " 与 "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    }
+  ],
+  "card.common.fusion.option.both.single": [
+    {
+      "type": 0,
+      "value": "展示 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 同时作为 "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " 与 "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    }
+  ],
+  "card.common.fusion.option.single": [
+    {
+      "type": 0,
+      "value": "展示 "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 作为 "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    }
+  ],
+  "card.common.fusion.reveal.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：展示一张 "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " 牌以进行 fusion？"
+    }
+  ],
   "card.common.hand.bottom": [
     {
       "type": 0,
@@ -2475,6 +2715,16 @@
     {
       "type": 0,
       "value": "将一张手牌置于牌库顶部"
+    }
+  ],
+  "card.common.hand.card.top.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：将一张手牌置于你的牌库顶"
     }
   ],
   "card.common.handorarsenal.bottom": [
@@ -2531,6 +2781,12 @@
     {
       "type": 0,
       "value": "将查看的牌置于牌库底部？"
+    }
+  ],
+  "card.common.maintenance.choose": [
+    {
+      "type": 0,
+      "value": "移除一个 steam 指示物，或摧毁此牌？"
     }
   ],
   "card.common.mode.choose": [
@@ -2647,6 +2903,20 @@
       "value": "黄色"
     }
   ],
+  "card.common.pitch.card.bottom": [
+    {
+      "type": 0,
+      "value": "将资源区中的一张 "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " 牌置于牌库底部"
+    }
+  ],
   "card.common.reload": [
     {
       "type": 0,
@@ -2687,6 +2957,12 @@
     {
       "type": 0,
       "value": "：选择一张 specialization 牌正面朝上放入 arsenal"
+    }
+  ],
+  "card.common.spire.order.next": [
+    {
+      "type": 0,
+      "value": "选择下一张放回牌库顶的牌；最后放回的牌位于最上方"
     }
   ],
   "card.common.suspense.counter.add": [
@@ -4726,124 +5002,6 @@
       "value": " 点资源，否则该次攻击获得压制 (dominate)"
     }
   ],
-  "card.ele.fusion.multiple": [
-    {
-      "type": 0,
-      "value": "展示 "
-    },
-    {
-      "type": 1,
-      "value": "firstType"
-    },
-    {
-      "type": 0,
-      "value": " 和／或 "
-    },
-    {
-      "type": 1,
-      "value": "secondType"
-    },
-    {
-      "type": 0,
-      "value": " 牌以进行 fusion？"
-    }
-  ],
-  "card.ele.fusion.option.both": [
-    {
-      "type": 0,
-      "value": "展示 "
-    },
-    {
-      "type": 1,
-      "value": "first"
-    },
-    {
-      "type": 0,
-      "value": " 和 "
-    },
-    {
-      "type": 1,
-      "value": "second"
-    },
-    {
-      "type": 0,
-      "value": " 作为 "
-    },
-    {
-      "type": 1,
-      "value": "firstType"
-    },
-    {
-      "type": 0,
-      "value": " 与 "
-    },
-    {
-      "type": 1,
-      "value": "secondType"
-    }
-  ],
-  "card.ele.fusion.option.both.single": [
-    {
-      "type": 0,
-      "value": "展示 "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " 同时作为 "
-    },
-    {
-      "type": 1,
-      "value": "firstType"
-    },
-    {
-      "type": 0,
-      "value": " 与 "
-    },
-    {
-      "type": 1,
-      "value": "secondType"
-    }
-  ],
-  "card.ele.fusion.option.single": [
-    {
-      "type": 0,
-      "value": "展示 "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " 作为 "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    }
-  ],
-  "card.ele.fusion.reveal.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：展示一张 "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    },
-    {
-      "type": 0,
-      "value": " 牌以进行 fusion？"
-    }
-  ],
   "card.ele.goagain.give.pay": [
     {
       "type": 0,
@@ -4980,20 +5138,6 @@
     {
       "type": 1,
       "value": "p"
-    }
-  ],
-  "card.ele.pitch.card.bottom": [
-    {
-      "type": 0,
-      "value": "将资源区中的一张 "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    },
-    {
-      "type": 0,
-      "value": " 牌置于牌库底部"
     }
   ],
   "card.ele.plume.earth.return": [
@@ -5282,12 +5426,6 @@
     {
       "type": 0,
       "value": " 个要重置的物品"
-    }
-  ],
-  "card.evo.maintenance.choose": [
-    {
-      "type": 0,
-      "value": "移除一个 steam 指示物，或摧毁此牌？"
     }
   ],
   "card.evo.matching.item.top": [
@@ -6170,24 +6308,6 @@
       "value": "将墓地中的一张攻击行动牌置于牌库顶部？"
     }
   ],
-  "card.hvy.beatchest.discard": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：弃置一张力量不低于 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 的牌以 beat chest？"
-    }
-  ],
   "card.hvy.betsy.pay": [
     {
       "type": 0,
@@ -6930,6 +7050,58 @@
       "value": " 被放逐"
     }
   ],
+  "card.log.common.banished.discount": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：被放逐的 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 费用减少 "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 点资源——本回合可以打出该牌"
+    }
+  ],
+  "card.log.common.banished.power": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：被放逐的 "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " 获得 +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " 力量——本回合可以打出该牌"
+    }
+  ],
   "card.log.common.blooddebt.triggered": [
     {
       "type": 0,
@@ -7016,6 +7188,16 @@
     {
       "type": 1,
       "value": "revealed"
+    }
+  ],
+  "card.log.common.chokeslam.suppressed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：对方攻击行动牌在其下一个行动阶段不能获得力量加成"
     }
   ],
   "card.log.common.damage.next.prevented": [
@@ -7262,6 +7444,32 @@
       },
       "offset": 0,
       "pluralType": "cardinal"
+    }
+  ],
+  "card.log.common.hyperdriver.counter": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "：Hyper Driver 获得一个 steam 指示物（"
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " → "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    },
+    {
+      "type": 0,
+      "value": "）"
     }
   ],
   "card.log.common.intimidate": [
@@ -11816,16 +12024,6 @@
       "value": "将一张箭放入 arsenal？"
     }
   ],
-  "card.omn.attack.target.upto": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：选择至多一个目标攻击"
-    }
-  ],
   "card.omn.aura.holo.counter": [
     {
       "type": 1,
@@ -12746,36 +12944,6 @@
       "value": "将一个符合条件的灵气 (Aura)返回其拥有者手牌？"
     }
   ],
-  "card.ros.decompose.action": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：选择要放逐的行动牌"
-    }
-  ],
-  "card.ros.decompose.earth.first": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：进行分解 (decompose)？选择第一张要放逐的 Earth 牌"
-    }
-  ],
-  "card.ros.decompose.earth.second": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：选择第二张要放逐的 Earth 牌"
-    }
-  ],
   "card.ros.intimidated.card.graveyard": [
     {
       "type": 0,
@@ -12928,12 +13096,6 @@
       "value": "Scout the Periphery：选择一位英雄，查看其牌库顶牌"
     }
   ],
-  "card.saz.spire.order.next": [
-    {
-      "type": 0,
-      "value": "选择下一张放回牌库顶的牌；最后放回的牌位于最上方"
-    }
-  ],
   "card.sba.crown.attack.top": [
     {
       "type": 0,
@@ -13018,16 +13180,6 @@
     {
       "type": 0,
       "value": "Crash and Bash：展示一张具有 crush 的牌以创造 Seismic Surge？"
-    }
-  ],
-  "card.sbr.hand.card.top": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：将一张手牌置于你的牌库顶"
     }
   ],
   "card.sbr.thunderquake.heave": [
@@ -13508,42 +13660,6 @@
       "value": " 个 +1 力量指示物"
     }
   ],
-  "card.sfa.attack.banish.discount": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：放逐一张费用低于 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 的攻击行动牌；其打出费用减少 1，且本回合可以打出"
-    }
-  ],
-  "card.sfa.attack.banish.power": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：放逐一张费用低于 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 的攻击行动牌；其力量 +1，且本回合可以打出"
-    }
-  ],
   "card.sfa.dragonfire.target": [
     {
       "type": 0,
@@ -13672,24 +13788,6 @@
     {
       "type": 0,
       "value": "Cold Snap：选择一名英雄"
-    }
-  ],
-  "card.siy.discard.pay": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：支付 "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " 点资源，否则弃置一张牌？"
     }
   ],
   "card.siy.frostspike.zone.choose": [
@@ -15822,6 +15920,12 @@
       "value": "双方英雄各自洗牌，并将牌库顶牌置入 arsenal"
     }
   ],
+  "card.trigger.common.hyperdriver.boost": [
+    {
+      "type": 0,
+      "value": "移除一个 steam 指示物并获得 1 点资源"
+    }
+  ],
   "card.trigger.common.illusionist.chain.abilities": [
     {
       "type": 0,
@@ -16662,6 +16766,12 @@
       "value": "在此牌上放置一个 steam 指示物"
     }
   ],
+  "card.trigger.common.steam.maintain": [
+    {
+      "type": 0,
+      "value": "移除一个 steam 指示物，或摧毁此牌"
+    }
+  ],
   "card.trigger.common.steam.remove": [
     {
       "type": 0,
@@ -17000,12 +17110,6 @@
       "value": "从你的胸部装备上移除一个 -1 防御指示物"
     }
   ],
-  "card.trigger.hyperdriver.boost": [
-    {
-      "type": 0,
-      "value": "移除一个 steam 指示物并获得 1 点资源"
-    }
-  ],
   "card.trigger.iar.mark.neverest": [
     {
       "type": 0,
@@ -17206,12 +17310,6 @@
       "value": "token"
     }
   ],
-  "card.trigger.steam.maintain": [
-    {
-      "type": 0,
-      "value": "移除一个 steam 指示物，或摧毁此牌"
-    }
-  ],
   "card.trigger.sup.turnheads.tap": [
     {
       "type": 0,
@@ -17320,16 +17418,6 @@
     {
       "type": 0,
       "value": "：选择一个 Ash 进行转化"
-    }
-  ],
-  "card.upr.attack.banish": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：放逐一张符合条件的攻击牌？"
     }
   ],
   "card.upr.azvolai.targets": [

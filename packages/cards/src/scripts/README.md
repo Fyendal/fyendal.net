@@ -24,6 +24,10 @@ Card scripts import them only through the `shared-helpers.ts` barrel, so a
 helper can move between modules without touching any set. Shared modules
 import each other directly (`./cards.js`) and must stay acyclic.
 
+Before writing a helper for a new card, check the matching module below and
+search the other sets for the same mechanic. Extend or move an existing helper
+instead of adding another copy.
+
 | Module | Holds |
 | --- | --- |
 | `messages.ts` | `decisionMessage`, `decisionPrompt`, `yesNoPrompt`, `commonOptionMessages`, `localizedLog`, `localizedCardLog`, labels |

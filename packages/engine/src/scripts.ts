@@ -866,6 +866,7 @@ export interface ActivatedAbility {
   destroySelfCost?: boolean;
   banishSelfCost?: boolean;
   putSelfOnDeckBottomCost?: boolean;
+  shuffleSelfIntoDeckCost?: boolean;
   /** Return this source from its owner's banished zone to their hand as an
    * activation cost. */
   returnSelfToHandCost?: boolean;

@@ -61,6 +61,47 @@ behavior by printing ID. Before adding a key, search all existing scripts:
 rg '"<name>\|<pitch>"' packages/cards/src/scripts
 ```
 
+### Reuse before writing
+
+Before writing any helper, prompt, or token constant, look for an existing one:
+
+1. Read the module table in `packages/cards/src/scripts/README.md` and check
+   the matching module under `scripts/shared/` for the card's mechanics
+   (keywords, costs, targeting, tokens, triggers, card predicates).
+2. Search other sets for the same mechanic or rules phrase, because an earlier
+   set may already script it locally:
+
+   ```sh
+   rg -i '<keyword or rules phrase>' packages/cards/src/scripts
+   rg -i '<keyword or rules phrase>' packages/cards/src/data/cards
+   ```
+
+3. Check the card's other printings and functional variants for a script to
+   extend.
+
+Then apply these rules:
+
+- **One set already has the mechanic locally:** move it into the matching
+  `shared/` module and use it from both sets. Don't copy it.
+- **Several close variants exist:** extend the shared helper with an option
+  instead of adding another variant.
+- **Card queries:** use `ctx.hasKeyword`, `ctx.hasCardType`,
+  `ctx.cardTypes`, `ctx.cardNames` and the shared predicates in
+  `shared/cards.ts`. Never read printed `cardData(...).keywords`, `.types` or
+  `.name` on a card instance.
+- **Choices:** use `requestHeroChoice`, `requestAnyTargetChoice`,
+  `heroTarget` and `anyDamageTarget` instead of building hero or any-target
+  options by hand.
+- **Tokens:** import created-card ids from `scripts/tokens.ts`. Never declare a
+  token printing id in a set file, and identify tokens in play by name or
+  type.
+- **Prompts:** reuse an existing `card.common.*` message id when the text
+  matches. Shared code uses only `card.common.*`, `card.trigger.common.*` and
+  `card.log.common.*` ids.
+
+`scripts-layout.test.ts` rejects shared exports that are unused or used by only
+one set, set-scoped message ids in shared code, and printed type reads.
+
 Follow these constraints:
 
 - Keep the engine card-agnostic. Add generic mechanics, never card IDs or hero
@@ -71,8 +112,8 @@ Follow these constraints:
 - Use `logPublic`, `logPrivate`, or `logForSeats`. Never expose identities from
   hands, face-down arsenal, private deck positions, or unrevealed choices in
   public text.
-- Reuse an existing script pattern when semantics match. Extract a shared
-  helper after the third repetition.
+- Reuse an existing script pattern when semantics match. Make a mechanic
+  shared as soon as a second set needs it.
 - Keep pitch variants small and factor their shared behavior locally.
 
 Add the set module under `packages/cards/src/scripts/` and register it in

@@ -102,7 +102,7 @@ export function beatChest(
           hook,
           decisionPrompt(
             `${ctx.data.name}: discard a card with 6 or more power to beat chest?`,
-            opts.messageId ?? "card.hvy.beatchest.discard",
+            opts.messageId ?? "card.common.beatchest.discard",
             {
               values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: 6 },
               optionMessages: commonOptionMessages("no"),
@@ -198,7 +198,7 @@ export function discardUnlessPay(ctx: ScriptCtx, target: number, cost: number, k
       `${key}:pay:${target}`,
       decisionPrompt(
         `${ctx.data.name}: pay ${cost} resource${cost === 1 ? "" : "s"} or discard a card?`,
-        "card.siy.discard.pay",
+        "card.common.discard.pay",
         {
           values: {
             card: { kind: "card", cardId: ctx.self.cardId },

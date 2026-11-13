@@ -56,7 +56,7 @@ describe("stack popup visibility", () => {
         card: { instanceId: 8, cardId: "SEA042", owner: 0 },
         seat: 0,
         label: "Remove a steam counter or destroy this",
-        labelMessage: { id: "card.trigger.steam.maintain" },
+        labelMessage: { id: "card.trigger.common.steam.maintain" },
         optional: false,
       }],
     }, "zh-Hans");

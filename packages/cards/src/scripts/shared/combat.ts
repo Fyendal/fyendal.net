@@ -103,14 +103,14 @@ type BanishReward = "power" | "discount" | "go-again";
 
 function banishAttackPrompt(ctx: ScriptCtx, reward: BanishReward, links: number): ScriptDecisionPrompt {
   if (reward === "go-again")
-    return decisionPrompt(`${ctx.data.name}: banish an eligible attack?`, "card.upr.attack.banish", {
+    return decisionPrompt(`${ctx.data.name}: banish an eligible attack?`, "card.common.attack.banish", {
       values: { card: { kind: "card", cardId: ctx.self.cardId } },
       optionMessages: commonOptionMessages("pass"),
     });
   return decisionPrompt(
     `${ctx.data.name}: banish an attack action with cost less than ${links} — ` +
       `it ${reward === "power" ? "gains +1{p}" : "costs {r} less to play"} and you may play it this turn`,
-    reward === "power" ? "card.sfa.attack.banish.power" : "card.sfa.attack.banish.discount",
+    reward === "power" ? "card.common.attack.banish.power" : "card.common.attack.banish.discount",
     {
       values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: links },
       optionMessages: commonOptionMessages("pass"),
@@ -147,7 +147,7 @@ export function banishAttackOnHit(hook: string, reward: BanishReward): CardScrip
           ctx,
           `${ctx.data.name}: the banished card ${reward === "power" ? "gains +1{p}" : "costs {r} less to play"} — ` +
             "you may play it this turn",
-          reward === "power" ? "card.log.sfa.banished.power" : "card.log.sfa.banished.discount",
+          reward === "power" ? "card.log.common.banished.power" : "card.log.common.banished.discount",
           { result: { kind: "card", cardId: selected.cardId }, amount: 1 },
           { kind: "card-moved", cardId: selected.cardId, ownerSeat: ctx.seat, from: "hand", to: "banish" },
         ),
@@ -220,7 +220,7 @@ export function chokeslam(): CardScript {
         localizedCardLog(
           ctx,
           "Chokeslam: opposing attack action cards can't gain {p} during their next action phase",
-          "card.log.sbr.chokeslam.suppressed",
+          "card.log.common.chokeslam.suppressed",
         ),
       );
     },
@@ -235,7 +235,7 @@ export function boulderDrop(): CardScript {
       if (hand.length === 0) return;
       ctx.requestCardChoice(
         "boulder-drop-top",
-        decisionPrompt(`${ctx.data.name}: put a card from your hand on top of your deck`, "card.sbr.hand.card.top", {
+        decisionPrompt(`${ctx.data.name}: put a card from your hand on top of your deck`, "card.common.hand.card.top.named", {
           values: { card: { kind: "card", cardId: ctx.self.cardId } },
         }),
         hand.map((card) => card.instanceId),

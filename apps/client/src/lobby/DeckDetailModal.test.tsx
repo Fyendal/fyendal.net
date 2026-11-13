@@ -41,9 +41,10 @@ describe("DeckDetailModal", () => {
     const html = render({ href: "https://fabrary.net/decks/01M1WZTPC64GDCMN2GX752E3R7" });
     expect(html).toContain("Bravo Deck");
     expect(html).toContain("Bravo · 80 cards");
-    expect(html).toMatch(/aria-pressed="(true|false)"><span class="ui-icon"[^>]*><\/span>Player<\/button>/);
-    expect(html).toContain("Bot</button>");
-    expect(html).toMatch(/role="switch"[^>]*\/>.*Private<\/label>/);
+    expect(html).toContain('class="opponent-picker" role="group" aria-label="Opponent"');
+    expect(html).toMatch(/aria-pressed="true"><span class="ui-icon"[^>]*><\/span>Anyone<\/button>/);
+    expect(html).toMatch(/aria-pressed="false"><span class="ui-icon"[^>]*><\/span>Private<\/button>/);
+    expect(html).toMatch(/aria-pressed="false"><span class="ui-icon"[^>]*><\/span>Bot<\/button>/);
     expect(html).toMatch(/<select[^>]*>.*<option value="legal" selected="">Legal<\/option>/);
     expect(html).toMatch(/class="btn-cta deck-detail-start"[^>]*>(Find match|Create room|Play vs bot)<\/button>/);
     expect(html).toContain('href="https://fabrary.net/decks/01M1WZTPC64GDCMN2GX752E3R7" target="_blank" rel="noopener noreferrer"');

@@ -19,7 +19,7 @@ export function hyperDriverCounterFromBoostBanish(): CardScript {
       localizedCardLog(
         ctx,
         `${ctx.data.name}: Hyper Driver gains a steam counter (${steam} → ${steam + 1})`,
-        "card.log.sda.hyperdriver.counter",
+        "card.log.common.hyperdriver.counter",
         { from: steam, to: steam + 1 },
       ),
     );
@@ -84,7 +84,7 @@ export function hyperDriver(steam: number): CardScript {
       {
         event: "card-boosted",
         label: "Remove a steam counter and gain 1 resource",
-        labelMessage: decisionMessage("card.trigger.hyperdriver.boost"),
+        labelMessage: decisionMessage("card.trigger.common.hyperdriver.boost"),
         condition(ctx) {
           return (
             ctx.getFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`) !== true && ctx.getCounter("steam") > 0
@@ -139,14 +139,14 @@ export function maintenanceItem(steam: number, extra: CardScript = {}, hook = "m
         event: "start-of-turn",
         whose: "subject",
         label: "Remove a steam counter or destroy this",
-        labelMessage: decisionMessage("card.trigger.steam.maintain"),
+        labelMessage: decisionMessage("card.trigger.common.steam.maintain"),
         standingChoice: { hook, options: MAINTENANCE_OPTIONS, optionMessages: MAINTENANCE_OPTION_MESSAGES },
         effect(ctx) {
           if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
           else
             ctx.requestChoice(
               hook,
-              decisionPrompt("Remove a steam counter or destroy this?", "card.evo.maintenance.choose", {
+              decisionPrompt("Remove a steam counter or destroy this?", "card.common.maintenance.choose", {
                 optionMessages: MAINTENANCE_OPTION_MESSAGES,
               }),
               [...MAINTENANCE_OPTIONS],

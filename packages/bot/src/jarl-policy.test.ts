@@ -74,7 +74,7 @@ function apply(
 /** Lets Jarl answer Oaken Old's fusion prompts; returns the revealed ids. */
 function revealOakenFusion(state: ReturnType<typeof createGame>): number[] {
   const revealed: number[] = [];
-  while (state.pendingDecision?.prompt.includes("fuse Oaken Old")) {
+  while (/^Oaken Old: reveal an? \w+ card to fuse/.test(state.pendingDecision?.prompt ?? "")) {
     const chosen = chooseJarlIntent(inputFor(state));
     if (chosen.kind !== "choose") throw new Error(`expected a fusion choice, got ${chosen.kind}`);
     revealed.push(Number(chosen.optionId));
