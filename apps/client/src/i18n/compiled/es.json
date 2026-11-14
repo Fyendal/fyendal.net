@@ -30099,6 +30099,78 @@
       "pluralType": "cardinal"
     }
   ],
+  "game.hand.playableFrom.effect": [
+    {
+      "type": 0,
+      "value": "Un efecto de carta activo permite jugar esta carta desde tu "
+    },
+    {
+      "type": 5,
+      "value": "zone",
+      "options": {
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "cementerio"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "zona Banished"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "game.hand.playableFrom.source": [
+    {
+      "type": 0,
+      "value": "La habilidad de "
+    },
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " permite jugar esta carta desde tu "
+    },
+    {
+      "type": 5,
+      "value": "zone",
+      "options": {
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "cementerio"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "zona Banished"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
   "game.hand.reorderHint": [
     {
       "type": 0,
@@ -31647,16 +31719,6 @@
       "value": "LAYER STEP"
     }
   ],
-  "game.timing.namedChoosingBlocks": [
-    {
-      "type": 1,
-      "value": "player"
-    },
-    {
-      "type": 0,
-      "value": " ELIGE BLOQUEOS"
-    }
-  ],
   "game.timing.namedPriority": [
     {
       "type": 0,
@@ -31789,24 +31851,6 @@
       "value": "El oponente pasó para terminar su turno. Si actúas, recuperará la prioridad."
     }
   ],
-  "game.turn.endPassPending.solo": [
-    {
-      "type": 1,
-      "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": " pasó para terminar el turno. Si actúas ahora, "
-    },
-    {
-      "type": 1,
-      "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": " recupera la prioridad."
-    }
-  ],
   "game.turn.named": [
     {
       "type": 0,
@@ -31901,16 +31945,6 @@
     {
       "type": 0,
       "value": "Esperando al oponente…"
-    }
-  ],
-  "game.waiting.solo": [
-    {
-      "type": 0,
-      "value": "Turno de actuar de "
-    },
-    {
-      "type": 1,
-      "value": "hero"
     }
   ],
   "game.waiting.spectating": [

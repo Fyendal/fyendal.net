@@ -55,6 +55,7 @@ export function DecisionFloat({
   optionHotkeys = false,
   endTurnConfirmation = null,
   lethalConfirmation = null,
+  placement = "bottom",
 }: {
   pending: PendingDecisionModel;
   action: ActionAnnouncementModel;
@@ -70,6 +71,8 @@ export function DecisionFloat({
     onConfirm: () => void;
     onCancel: () => void;
   } | null;
+  /** Solo: the float sits by the hand of the seat that is choosing. */
+  placement?: "bottom" | "top";
 }) {
   const resetKey = lethalConfirmation
     ? "lethal-confirmation"
@@ -94,7 +97,7 @@ export function DecisionFloat({
 
   return (
     <div
-      className={`float decision-float${pitchFocused ? " decision-float-pitch" : ""}${
+      className={`float decision-float${placement === "top" ? " decision-float-top" : ""}${pitchFocused ? " decision-float-pitch" : ""}${
         minimized ? " decision-float-minimized" : ""
       }`}
       style={pitchFocused ? undefined : decisionFloat.style}

@@ -128,6 +128,7 @@ export function PlayerHalf({
   onOpenOverlay,
   onOpenEffects,
   standingOrders,
+  handOverEffects = false,
 }: {
   player: PlayerView;
   /** The viewer's own half: zone labels and the emote button. */
@@ -160,6 +161,8 @@ export function PlayerHalf({
   onOpenOverlay: (overlay: BoardOverlay) => void;
   onOpenEffects: (target: EffectLedgerTarget) => void;
   standingOrders?: StandingOrderBoard;
+  /** Solo's second hand rests over the effect slot, leaving it one row. */
+  handOverEffects?: boolean;
 }) {
   const intl = useIntl();
   const row = (value: number) => (mirrored ? 4 - value : value);
@@ -704,6 +707,7 @@ export function PlayerHalf({
         heroName={player.heroName}
         compact={mobileFloatViewport || mobileLandscapeViewport}
         avoidHand={!mirrored}
+        rowLimit={handOverEffects ? 1 : undefined}
         onOpen={() => onOpenEffects({ seat: player.seat })}
       />
       <MatZone

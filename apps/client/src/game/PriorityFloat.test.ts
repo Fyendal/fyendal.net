@@ -8,7 +8,6 @@ import {
   PriorityFloat,
   TurnTimingFloat,
   combatPriorityTimingLabel,
-  soloPriorityLabel,
 } from "./PriorityFloat.js";
 import { localizeTimingLabel } from "./timingLocalization.js";
 
@@ -133,34 +132,5 @@ describe("timing localization", () => {
     for (const [source, expected] of contexts) {
       expect(localizeTimingLabel(intl, source)).toBe(expected);
     }
-  });
-});
-
-describe("soloPriorityLabel", () => {
-  it("names the priority holder in solo and keeps you/opponent otherwise", () => {
-    expect(soloPriorityLabel(true, true, "Kayo")).toBe("KAYO'S PRIORITY");
-    expect(soloPriorityLabel(true, false, "Kayo")).toBe("KAYO'S PRIORITY");
-    expect(soloPriorityLabel(false, true, "Kayo")).toBe("YOUR PRIORITY");
-    expect(soloPriorityLabel(false, false, "Kayo")).toBe("OPPONENT'S PRIORITY");
-  });
-
-  it("localizes named priority and named blocking segments", () => {
-    const intl = createTestIntl("zh-Hans");
-    expect(localizeTimingLabel(intl, "ACTION PHASE · KAYO'S PRIORITY")).not.toContain("'S PRIORITY");
-    expect(localizeTimingLabel(createTestIntl("en"), "ACTION PHASE · DEFEND STEP · KAYO CHOOSING BLOCKS"))
-      .toBe("ACTION PHASE · DEFEND STEP · KAYO CHOOSING BLOCKS");
-    expect(localizeTimingLabel(intl, "DEFEND STEP · KAYO CHOOSING BLOCKS")).toContain("KAYO 正在选择防御牌");
-  });
-
-  it("styles a solo priority float as the viewer's own", () => {
-    const html = renderLocalized(createElement(PriorityFloat, {
-      turn: 2,
-      turnLabel: "Kayo's turn",
-      timingLabel: "ACTION PHASE",
-      priorityLabel: soloPriorityLabel(true, false, "Kayo"),
-      mine: true,
-    }));
-    expect(html).toContain("KAYO&#x27;S PRIORITY");
-    expect(html).toContain("priority-float-mine");
   });
 });

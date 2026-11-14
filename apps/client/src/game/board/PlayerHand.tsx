@@ -6,7 +6,6 @@ import type {
   GameIntent,
   GameView,
   PendingDecision,
-  PlayableZone,
   PlayerView,
 } from "@fyendal/shared";
 import { CardBack, CardFace } from "../Card.js";
@@ -27,7 +26,7 @@ import { handFanSlotStyle } from "./handFan.js";
 import { presentedHandCount } from "../defenderState.js";
 import type { MotionPreference } from "../../storage.js";
 import { useMotionPreference } from "../motion/useMotionPreference.js";
-import { handCardState } from "./handCardState.js";
+import { handCardState, handZoneCards } from "./handCardState.js";
 
 type ResourcePayment = NonNullable<PendingDecision["resourcePayment"]>;
 
@@ -175,30 +174,9 @@ export function PlayerHand({
   useEffect(() => {
     previousHandOrderRef.current = visibleCards.map((card) => card.instanceId);
   });
-  const playableZoneCards = spectating || inert
-    ? []
-    : [...interaction.legalState.playableZones]
-      .filter((entry): entry is [number, Exclude<PlayableZone, "deck">] => entry[1] !== "deck")
-      .flatMap(([instanceId, zone]) => {
-        if (interaction.optimisticallyHiddenIds.has(instanceId)) return [];
-        // Effects such as Red Lure Harpoon and Nuu let this player play an
-        // opponent-owned card. The legal intent is authoritative, so search
-        // every public inactive zone instead of assuming the card is owned by
-        // the player whose hand strip surfaces the action.
-        const card = view.players.flatMap((zoneOwner) => [
-          ...zoneOwner.banish,
-          ...zoneOwner.graveyard,
-        ])
-          .find((candidate) => candidate.instanceId === instanceId);
-        return card ? [{ card, zone }] : [];
-      });
-  const activatableZoneCards = spectating || inert
-    ? []
-    : [...player.graveyard, ...player.banish].filter((card) =>
-      !interaction.optimisticallyHiddenIds.has(card.instanceId) &&
-      interaction.legalState.activatable.has(card.instanceId) &&
-      !interaction.legalState.playableZones.has(card.instanceId)
-    );
+  const zoneCards = handZoneCards(view, player, spectating || inert ? null : interaction);
+  const playableZoneCards = zoneCards.playable;
+  const activatableZoneCards = zoneCards.activatable;
   const [scrollAvailability, setScrollAvailability] = useState<HandScrollAvailability>({
     left: false,
     right: false,
@@ -284,7 +262,7 @@ export function PlayerHand({
         document.body,
       ) : null}
       <div
-        className="hand"
+        className={`hand${inert ? " hand-solo-waiting" : ""}`}
         id="player-hand"
         ref={handRef}
         data-motion-zone={motionLocationKey(handMotionLocation)}
@@ -335,7 +313,7 @@ export function PlayerHand({
               card={card}
               style={handFanSlotStyle(handSlots + index)}
               ghost
-              explanation={playableZoneTooltip(card, zone)}
+              explanation={playableZoneTooltip(intl, card, zone)}
               onClick={() => {
                 if (interaction.selection.kind === "none") {
                   interaction.onSelect({ kind: "play-zone", instanceId: card.instanceId, zone });

@@ -28,16 +28,19 @@ export function PlayerNameplate({
   profile,
   name,
   actions,
+  acting = false,
 }: {
   placement: "opponent" | "self";
   profile: PlayerProfileView;
   name?: string;
+  /** Solo: this hero is the one acting. */
+  acting?: boolean;
   /** Interactive controls shown after the username, such as opponent actions. */
   actions?: ReactNode;
 }) {
   return (
     <PlayerIdentity
-      className={`player-nameplate player-nameplate-${placement}`}
+      className={`player-nameplate player-nameplate-${placement}${acting ? " player-nameplate-acting" : ""}`}
       profile={profile}
       name={name}
     >

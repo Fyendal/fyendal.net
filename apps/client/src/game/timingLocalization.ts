@@ -35,10 +35,6 @@ function localizeTimingSegment(intl: IntlShape, segment: string): string {
   }
   const toAct = /^(.+) TO ACT$/.exec(segment);
   if (toAct) return intl.formatMessage({ id: "game.timing.toAct" }, { player: toAct[1] });
-  const namedBlocks = /^(.+) CHOOSING BLOCKS$/.exec(segment);
-  if (namedBlocks) {
-    return intl.formatMessage({ id: "game.timing.namedChoosingBlocks" }, { player: namedBlocks[1] });
-  }
   const namedPriority = /^(.+)'S PRIORITY$/.exec(segment);
   if (namedPriority) {
     return intl.formatMessage({ id: "game.timing.namedPriority" }, { player: namedPriority[1] });

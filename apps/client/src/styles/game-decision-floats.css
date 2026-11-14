@@ -1068,6 +1068,10 @@
   pointer-events: none;
   animation: deck-card-toast-in 220ms ease-out;
 }
+/* Solo desktop: the second seat's hand rests at the top edge. */
+.table.solo-board .deck-card-toast {
+  top: max(18px, env(safe-area-inset-top), calc(var(--solo-top-hand-bottom, 0px) + 12px));
+}
 .deck-card-toast-heading {
   box-sizing: border-box;
   padding: 0 24px;

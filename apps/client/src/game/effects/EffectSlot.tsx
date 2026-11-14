@@ -167,6 +167,7 @@ export function EffectSlot({
   heroName,
   compact,
   avoidHand = false,
+  rowLimit,
   onOpen,
 }: {
   /** Effects on this seat only. */
@@ -178,12 +179,15 @@ export function EffectSlot({
   compact: boolean;
   /** Keep chips clear of the viewer's resting hand cards. */
   avoidHand?: boolean;
+  /** Rows left clear of a hand resting over the slot's top; chips sit at its bottom. */
+  rowLimit?: number;
   onOpen: () => void;
 }) {
   const intl = useIntl();
   const heroes = useEffectHeroes();
   const [slotElement, setSlotElement] = useState<HTMLButtonElement | null>(null);
-  const grid = useChipGrid(compact ? null : slotElement, avoidHand);
+  const measuredGrid = useChipGrid(compact ? null : slotElement, avoidHand);
+  const grid = rowLimit === undefined ? measuredGrid : { ...measuredGrid, rows: Math.min(measuredGrid.rows, rowLimit) };
   const tileCapacity = useTileCapacity(compact ? slotElement : null);
   const capacity = grid.columns * grid.rows;
   const { slot } = splitByPlacement(effects);
@@ -230,7 +234,7 @@ export function EffectSlot({
         gridArea: area,
         gridTemplateColumns: `repeat(${grid.columns}, minmax(0, ${CHIP_MAX_WIDTH}px))`,
         gridTemplateRows: `repeat(${grid.rows}, ${CHIP_HEIGHT}px)`,
-        ...(grid.obstructed ? { alignContent: "start" } : {}),
+        ...(rowLimit !== undefined ? { alignContent: "end" } : grid.obstructed ? { alignContent: "start" } : {}),
       }}
       aria-label={label}
       onClick={onOpen}

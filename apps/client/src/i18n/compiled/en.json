@@ -29231,6 +29231,74 @@
       "pluralType": "cardinal"
     }
   ],
+  "game.hand.playableFrom.effect": [
+    {
+      "type": 0,
+      "value": "An active card effect allows this card to be played from your "
+    },
+    {
+      "type": 5,
+      "value": "zone",
+      "options": {
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "graveyard"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "banished zone"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "game.hand.playableFrom.source": [
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": "’s ability allows this card to be played from your "
+    },
+    {
+      "type": 5,
+      "value": "zone",
+      "options": {
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "graveyard"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "banished zone"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
   "game.hand.reorderHint": [
     {
       "type": 0,
@@ -30763,16 +30831,6 @@
       "value": "LAYER STEP"
     }
   ],
-  "game.timing.namedChoosingBlocks": [
-    {
-      "type": 1,
-      "value": "player"
-    },
-    {
-      "type": 0,
-      "value": " CHOOSING BLOCKS"
-    }
-  ],
   "game.timing.namedPriority": [
     {
       "type": 1,
@@ -30905,24 +30963,6 @@
       "value": "Opponent passed to end their turn. If you act, they will regain priority."
     }
   ],
-  "game.turn.endPassPending.solo": [
-    {
-      "type": 1,
-      "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": " passed to end the turn. Acting now gives "
-    },
-    {
-      "type": 1,
-      "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": " priority again."
-    }
-  ],
   "game.turn.named": [
     {
       "type": 1,
@@ -31017,16 +31057,6 @@
     {
       "type": 0,
       "value": "Waiting for opponent…"
-    }
-  ],
-  "game.waiting.solo": [
-    {
-      "type": 1,
-      "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": " to act"
     }
   ],
   "game.waiting.spectating": [

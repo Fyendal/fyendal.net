@@ -1,4 +1,4 @@
-import type { CardView, PlayerView } from "@fyendal/shared";
+import type { CardView, GameView, PlayableZone, PlayerView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { canAddPaymentCard, canAddResourcePaymentPitch, isDiscardPayment } from "../legalSelection.js";
 import type { PlayerHandInteraction } from "./PlayerHand.js";
@@ -85,4 +85,39 @@ export function handCardState(
     actionable,
     dimmed: interaction.defending && !stageable,
   };
+}
+
+export interface HandZoneCards {
+  playable: { card: CardView; zone: Exclude<PlayableZone, "deck"> }[];
+  activatable: CardView[];
+}
+
+const NO_ZONE_CARDS: HandZoneCards = { playable: [], activatable: [] };
+
+/** Inactive-zone cards the acting hand surfaces as ghosts: plays an effect
+ * allows from a graveyard or banished zone, and activatable cards there. */
+export function handZoneCards(
+  view: GameView,
+  player: PlayerView,
+  interaction: PlayerHandInteraction | null,
+): HandZoneCards {
+  if (!interaction) return NO_ZONE_CARDS;
+  const hidden = interaction.optimisticallyHiddenIds;
+  const { playableZones, activatable } = interaction.legalState;
+  const playable = [...playableZones]
+    .filter((entry): entry is [number, Exclude<PlayableZone, "deck">] => entry[1] !== "deck")
+    .flatMap(([instanceId, zone]) => {
+      if (hidden.has(instanceId)) return [];
+      // Effects such as Red Lure Harpoon and Nuu let this player play an
+      // opponent-owned card. The legal intent is authoritative, so search
+      // every public inactive zone instead of assuming the card is owned by
+      // the player whose hand strip surfaces the action.
+      const card = view.players.flatMap((zoneOwner) => [...zoneOwner.banish, ...zoneOwner.graveyard])
+        .find((candidate) => candidate.instanceId === instanceId);
+      return card ? [{ card, zone }] : [];
+    });
+  const activatableCards = [...player.graveyard, ...player.banish].filter((card) =>
+    !hidden.has(card.instanceId) && activatable.has(card.instanceId) && !playableZones.has(card.instanceId)
+  );
+  return { playable, activatable: activatableCards };
 }

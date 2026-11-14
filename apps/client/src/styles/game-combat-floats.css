@@ -354,6 +354,17 @@
   box-shadow: none;
   cursor: grab;
 }
+/* Solo: while the top seat chooses, its prompt sits below that seat's hand. */
+.decision-float.decision-float-top {
+  top: calc(var(--solo-top-hand-bottom, 20vh) + 12px);
+  bottom: auto;
+}
+/* Solo: a brief pause after control changes seats; the prompt fades in. */
+.solo-board .decision-float { transition: opacity .18s ease-out; }
+.seat-input-locked .decision-float {
+  opacity: .55;
+  pointer-events: none;
+}
 .chain-float-bar {
   display: flex;
   align-items: center;

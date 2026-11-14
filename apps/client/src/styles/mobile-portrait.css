@@ -325,6 +325,15 @@
   }
   .waiting:not(.waiting-spectating),
   .stack-float { top: calc(58px + env(safe-area-inset-top)) !important; }
+  /* Solo: an open second-hand tray keeps the floats below it. */
+  .table {
+    --opp-tray-bottom: calc(54px + env(safe-area-inset-top) + 16px + var(--opp-tray-card-width) * 88 / 63);
+  }
+  .table:has(.opp-hand-phone.opp-hand-open) .waiting:not(.waiting-spectating),
+  .table:has(.opp-hand-phone.opp-hand-open) .stack-float { top: calc(var(--opp-tray-bottom) + 6px) !important; }
+  .table:has(.opp-hand-phone.opp-hand-open) .chain-float {
+    top: max(18dvh, calc(var(--opp-tray-bottom) + 6px)) !important;
+  }
   .waiting.waiting-spectating {
     top: calc(57px + env(safe-area-inset-top));
     left: 10px;

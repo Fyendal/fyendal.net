@@ -535,8 +535,10 @@
 }
 /* A horizontally scrolling hand must clip vertical overflow. Keep its card
    explanations available to assistive technology without rendering a clipped
-   tooltip edge that looks like a stray scrollbar above the cards. */
-.hand .card-explanation {
+   tooltip edge that looks like a stray scrollbar above the cards. The top
+   hand's tooltip would open off screen. */
+.hand .card-explanation,
+.opp-hand .card-explanation {
   position: fixed;
   width: 1px;
   height: 1px;

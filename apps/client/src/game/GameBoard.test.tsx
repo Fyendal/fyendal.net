@@ -557,13 +557,29 @@ describe("GameBoard solo play", () => {
   const render = () => renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
   const topHand = (html: string) => html.slice(html.indexOf('class="opp-hand'), html.indexOf("mat-half"));
 
+  it("speaks to the acting seat as you, with heroes only on the nameplates", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    gameStore.state = soloState(1);
+    const html = render();
+    expect(html).toContain("Your turn");
+    expect(html).toContain("YOUR PRIORITY");
+    expect(html).not.toContain("Hero 1&#x27;s turn");
+    expect(html).toContain('aria-label="Your life: 40"');
+    expect(html).toContain('aria-label="Opponent life: 40"');
+    expect(html).toContain("player-nameplate-opponent player-nameplate-acting");
+    expect(html).toContain('<span class="player-nameplate-username" translate="no">Hero 1</span>');
+    expect(html).toContain('<span class="player-nameplate-username" translate="no">Hero 0</span>');
+    expect(html).not.toContain(">alice</span>");
+  });
+
   it("keeps the owner's seat at the bottom whichever seat acts", () => {
     vi.stubGlobal("localStorage", { getItem: () => null });
     for (const acting of [0, 1] as const) {
       gameStore.state = soloState(acting);
       const html = render();
       expect(html.indexOf('data-motion-card="1:hero:2"')).toBeLessThan(html.indexOf('data-motion-card="0:hero:1"'));
-      expect(html).toMatch(/<div class="hand" id="player-hand" data-motion-zone="0:hand"/);
+      expect(html).toMatch(/<div class="hand( hand-solo-waiting)?" id="player-hand" data-motion-zone="0:hand"/);
+      expect(html.includes("hand hand-solo-waiting")).toBe(acting === 1);
       expect(topHand(html)).toContain('data-motion-card="1:hand:60"');
     }
   });
@@ -572,7 +588,7 @@ describe("GameBoard solo play", () => {
     vi.stubGlobal("localStorage", { getItem: () => null });
     gameStore.state = soloState(1);
     const topActing = render();
-    expect(topActing).toContain("opp-hand opp-hand-revealed opp-hand-solo opp-hand-interactive");
+    expect(topActing).toContain("opp-hand opp-hand-revealed opp-hand-solo opp-hand-acting opp-hand-interactive");
     expect(cardClasses(topActing, "TST-TOP-HAND")).toContain("card-clickable");
     expect(cardClasses(topActing, "TST-HAND")).not.toContain("card-clickable");
     expect(cardClasses(topActing, "TST-HAND")).not.toContain("card-highlight");
@@ -582,19 +598,6 @@ describe("GameBoard solo play", () => {
     expect(bottomActing).not.toContain("opp-hand-interactive");
     expect(cardClasses(bottomActing, "TST-HAND")).toContain("card-clickable");
     expect(cardClasses(bottomActing, "TST-TOP-HAND")).not.toContain("card-clickable");
-  });
-
-  it("names heroes instead of you and the opponent", () => {
-    vi.stubGlobal("localStorage", { getItem: () => null });
-    gameStore.state = soloState(1);
-    const html = render();
-    expect(html).toContain("Turn 1 · Hero 1&#x27;s turn");
-    expect(html).toContain("HERO 1&#x27;S PRIORITY");
-    expect(html).not.toContain("Your turn");
-    expect(html).not.toContain("OPPONENT&#x27;S PRIORITY");
-    expect(html).toContain('<span class="player-nameplate-username" translate="no">Hero 1</span>');
-    expect(html).toContain('<span class="player-nameplate-username" translate="no">Hero 0</span>');
-    expect(html).not.toContain(">alice</span>");
   });
 
   it("stages a top-hand blocker for the defending top seat", () => {

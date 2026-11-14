@@ -138,6 +138,16 @@
   .opp-hand .card-back + .card-back,
   .opp-hand-revealed .card-hand + .card-hand { margin-left: -18px; }
   .opp-hand .muted { display: none; }
+  .opp-hand-phone:not(.opp-hand-open) > .card-hand { width: 36px; height: 50px; }
+  .opp-hand-phone:not(.opp-hand-open) > .card-hand + .card-hand { margin-left: -18px; }
+  .table { --opp-tray-card-width: clamp(44px, 13vh, 64px); }
+  /* The combat floats share the top edge here; the acting hand stays on top. */
+  .opp-hand-phone.opp-hand-open {
+    left: 8px;
+    right: auto;
+    max-width: calc(100% - 16px);
+    z-index: 9;
+  }
 
   /* Hand strip over our far row, clear of the legs card. */
   .hand {

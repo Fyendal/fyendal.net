@@ -15,7 +15,6 @@ import {
   ChainPriorityStatus,
   ChainTimingStatus,
   PriorityFloat,
-  soloPriorityLabel,
   TurnTimingFloat,
 } from "./PriorityFloat.js";
 import { StackFloat } from "./StackFloat.js";
@@ -85,6 +84,7 @@ import { MobileHandToggle } from "./MobileHandToggle.js";
 import { useMobileCardLongPress } from "./mobileCardLongPress.js";
 import { EffectLedger, type EffectLedgerTarget } from "./effects/EffectLedger.js";
 import { EffectHeroesContext, effectHeroes } from "./effects/effectHeroes.js";
+import { splitByPlacement } from "./effects/effectModel.js";
 import { abilityLabelForSource, deriveBoardLegalState } from "./board/boardModel.js";
 import { useGameSettings } from "./board/useGameSettings.js";
 import { PlaymatArt } from "./PlaymatArt.js";
@@ -106,6 +106,8 @@ import { PlayerHalf } from "./board/PlayerHalf.js";
 import { PlayerHand, type PlayerHandInteraction } from "./board/PlayerHand.js";
 import { OpponentHand } from "./board/OpponentHand.js";
 import { boardSeats, seatInteractive } from "./board/boardSeats.js";
+import { boardFeedback, soloSides } from "./board/soloControl.js";
+import { useSoloSeatInputLock } from "./board/useSoloSeatInputLock.js";
 import { handPlayWindow } from "./board/handOrder.js";
 import { BoardOverlays, type BoardPreview } from "./board/BoardOverlays.js";
 import { GameClockPanel } from "./GameClockPanel.js";
@@ -203,11 +205,15 @@ export function GameBoard() {
   );
   const passHint = usePassUntilHint(connected && !spectating && screen !== "replay", passUntil !== null);
   const notePassHintIntent = passHint.noteIntent;
+  // Solo: input built for one seat never acts for the next.
+  const { locked: seatInputLocked, allows: seatInputAllows } =
+    useSoloSeatInputLock(soloGame && connected && !spectating && screen !== "replay", yourSeat);
   const sendIntent = useCallback((intent: GameIntent) => {
+    if (!seatInputAllows()) return false;
     const sent = sendStoreIntent(intent);
     if (sent) notePassHintIntent(intent);
     return sent;
-  }, [sendStoreIntent, notePassHintIntent]);
+  }, [sendStoreIntent, notePassHintIntent, seatInputAllows]);
   // Only a saved copy the account owns can be shared; replays opened from a
   // file, another player's link, or straight from the room have no saved id.
   const savedReplayShare = useStore(useShallow((state) => {
@@ -226,11 +232,12 @@ export function GameBoard() {
   const practiceGame = botGame || soloGame;
   // `yourSeat` is the acting seat; the board stays on `orientationSeat`.
   const { boardSeat: orientationSeat, actingSeat } = boardSeats({ soloGame, boardSeat: soloBoardSeat, yourSeat });
+  const feedback = boardFeedback({ soloGame, spectating, yourSeat });
   const { view, update: viewUpdate } = useOpponentPlayPresentation({
     view: authoritativeView,
     update: authoritativeViewUpdate,
     viewerSeat: spectating ? null : yourSeat,
-    enabled: connected && screen !== "replay",
+    enabled: connected && screen !== "replay" && feedback.opponentPlayBuffered,
     scope: `${roomCode}:${authUser}:${screen}:${spectating}`,
   });
   const tableRef = useRef<HTMLDivElement>(null);
@@ -349,7 +356,7 @@ export function GameBoard() {
   });
   const standingOrders = useStandingOrders({
     view: authoritativeView,
-    viewerSeat: spectating || yourSeat === null ? null : orientationSeat,
+    seats: spectating || yourSeat === null ? [] : soloGame ? [orientationSeat, 1 - orientationSeat] : [orientationSeat],
     orders: standingOrderSettings,
     updateStandingOrder,
   });
@@ -424,7 +431,7 @@ export function GameBoard() {
     viewUpdate,
     enabled: soundEffectsEnabled && screen !== "replay",
     volume: soundEffectsVolume,
-    seat: spectating ? null : yourSeat,
+    seat: feedback.priorityAlertSeat,
     priorityAlertMode,
     botGame: practiceGame,
     achievementToastVisible: matchAchievements.toast.length > 0,
@@ -459,8 +466,8 @@ export function GameBoard() {
   const { now, snoozedUntil: idleSnoozedUntil, snooze: snoozeIdleVictory } =
     useIdleVictoryPrompt();
   const derived = useMemo(
-    () => deriveBoardLegalState(actionCandidates, legal, roomCommandPending),
-    [actionCandidates, legal, roomCommandPending],
+    () => deriveBoardLegalState(actionCandidates, legal, roomCommandPending || seatInputLocked),
+    [actionCandidates, legal, roomCommandPending, seatInputLocked],
   );
 
   const playerView = view !== null && yourSeat !== null ? view.players[yourSeat] : undefined;
@@ -535,6 +542,10 @@ export function GameBoard() {
     toggleAdditionalCostCard,
     confirmAdditionalCost,
   } = announcement;
+  // Solo: a selection begun for one seat never carries to the next.
+  useEffect(() => {
+    if (soloGame) resetSel();
+  }, [actingSeat, resetSel, soloGame]);
   const undoAndDismissAnnouncement: typeof undo = (target) => {
     resetSel();
     undo(target);
@@ -582,6 +593,7 @@ export function GameBoard() {
   const passHotkeyEnabled =
     hotkeyIntent !== null &&
     !roomCommandPending &&
+    !seatInputLocked &&
     connected &&
     view !== null &&
     screen !== "replay" &&
@@ -608,7 +620,7 @@ export function GameBoard() {
     setConfirmEndTurn,
     onSend: sendIntent,
     onReset: resetSel,
-    actionShortcutEnabled: actionShortcutReady,
+    actionShortcutEnabled: actionShortcutReady && !seatInputLocked,
     actionStep,
     onSelectDefaultBoost: () => {
       if (defaultBoostCount !== null) selectBoost(defaultBoostCount);
@@ -664,7 +676,7 @@ export function GameBoard() {
   });
 
   if (!view || !presentedView || (yourSeat === null && !spectating)) return null;
-  const causal = causalStatus(view, spectating || soloGame ? null : yourSeat, { namedActors: soloGame });
+  const causal = causalStatus(view, spectating ? null : yourSeat);
   const seat = orientationSeat;
   const liveNoteFrame = !replaying && replayFrames > 0 ? replayFrames - 1 : null;
   const liveNoteRoomVersion = !replaying && viewUpdate.source === "live"
@@ -683,6 +695,15 @@ export function GameBoard() {
   const actorOpp = presentedView.players[actingSeat === 0 ? 1 : 0]!;
   const topInteractive = soloGame && seatInteractive(opp.seat, yourSeat, spectating || replaying);
   const bottomInert = soloGame && !seatInteractive(me.seat, yourSeat, spectating || replaying);
+  const sides = soloSides({
+    soloGame,
+    watching: spectating || replaying,
+    gameOver: view.phase === "game-over",
+    boardSeat: seat,
+    actingSeat: yourSeat,
+  });
+  const soloBoard = soloGame && !spectating;
+  const phoneBoard = mobileFloatViewport || mobileLandscapeViewport;
   const arenaPaymentCandidateIds = new Set(
     sel.kind !== "none" &&
       actionStep === "payment" &&
@@ -766,7 +787,7 @@ export function GameBoard() {
     : derived;
   const myTurn = view.activePlayer === actingSeat;
   const activeHeroName = view.players[view.activePlayer]?.heroName ?? "";
-  const turnLabel = spectating || soloGame
+  const turnLabel = spectating
     ? intl.formatMessage({ id: "game.turn.named" }, { player: activeHeroName })
     : myTurn
       ? intl.formatMessage({ id: "game.turn.yours" })
@@ -806,14 +827,7 @@ export function GameBoard() {
   const priorityHolderName = priorityHolder === null
     ? ""
     : (presentedView.players[priorityHolder]?.heroName ?? "");
-  const priorityLabel = soloPriorityLabel(
-    soloGame,
-    presentedPriority.priorityPlayer === actingSeat,
-    presentedPriority.priorityPlayer === null
-      ? ""
-      : (presentedView.players[presentedPriority.priorityPlayer]?.heroName ?? ""),
-  );
-  const priorityMine = soloGame || presentedPriority.priorityPlayer === actingSeat;
+  const priorityLabel = presentedPriority.priorityPlayer === actingSeat ? "YOUR PRIORITY" : "OPPONENT'S PRIORITY";
   const priorityTimingLabel = presentedPriority.timingLabel;
   const showEndTurnPassToast =
     !spectating &&
@@ -826,7 +840,6 @@ export function GameBoard() {
       turnLabel={turnLabel}
       timingLabel={priorityTimingLabel}
       priorityLabel={priorityLabel}
-      mine={priorityMine}
     />
   ) : !spectating && !replaying && pd ? (
     <TurnTimingFloat
@@ -839,7 +852,6 @@ export function GameBoard() {
     <ChainPriorityStatus
       timingLabel={priorityTimingLabel}
       priorityLabel={priorityLabel}
-      mine={priorityMine}
     />
   ) : pd ? (
     <ChainTimingStatus
@@ -884,7 +896,7 @@ export function GameBoard() {
     if (sendIntent(intent)) resetSel();
   };
   const requestPass = () => {
-    if (roomCommandPending) return;
+    if (roomCommandPending || !seatInputAllows()) return;
     const intent = { kind: "pass" } as const;
     if (shouldConfirmArsenalPass(pd, intent)) {
       setConfirmSkipArsenal(true);
@@ -937,6 +949,7 @@ export function GameBoard() {
   const unstage = (id: number) => stage([...stagedIds].filter((x) => x !== id));
 
   const onHandClick = (c: CardView) => {
+    if (!seatInputAllows()) return;
     if (defending) {
       stage([...stagedIds, c.instanceId]);
       return;
@@ -1219,6 +1232,7 @@ export function GameBoard() {
             : "pass";
   const primaryActionDisabled =
     roomCommandPending ||
+    seatInputLocked ||
     awaitingHandoff ||
     !connected ||
     (defending ? defendIntent === null : !derived.canPass);
@@ -1242,6 +1256,7 @@ export function GameBoard() {
       mode={passUntil}
       linkOpen={chainLinkOpen(view)}
       paused={passUntilWaiting}
+      disabled={seatInputLocked}
       hotkeys={placement === "hud" && !confirmLethalPass}
       spacePasses={hotkeyIntent !== null}
       placement={placement}
@@ -1399,6 +1414,7 @@ export function GameBoard() {
       placement="opponent"
       profile={playerProfiles[1 - seat]!}
       name={soloGame ? opp.heroName : undefined}
+      acting={sides?.top === "acting"}
       actions={authUser && roomCode && !spectating && !practiceGame && !replaying ? (
         <OpponentActions
           username={playerProfiles[1 - seat]!.username}
@@ -1413,6 +1429,7 @@ export function GameBoard() {
       placement="self"
       profile={playerProfiles[seat]!}
       name={soloGame ? me.heroName : undefined}
+      acting={sides?.bottom === "acting"}
       actions={authUser && !spectating && !replaying && !mobileFloatViewport && !mobileLandscapeViewport ? (
         <span ref={setSocialAnchor} className="nameplate-social-slot" />
       ) : null}
@@ -1444,10 +1461,15 @@ export function GameBoard() {
   };
   const oppHand = (
     <OpponentHand
+      view={presentedView}
       player={opp}
       presentedCount={presentedOppHandCount}
       revealed={view.phase === "game-over" || replaying}
       solo={soloGame && !spectating}
+      side={sides?.top ?? null}
+      wings={!phoneBoard}
+      effectsBelow={splitByPlacement(view.ongoing.filter((effect) => effect.seat === opp.seat)).slot.length > 0}
+      steadyLegalState={topInteractive ? deriveBoardLegalState(actionCandidates, legal, false) : null}
       interaction={topInteractive ? handInteraction : null}
     />
   );
@@ -1457,7 +1479,7 @@ export function GameBoard() {
     <SquareCardPresentation enabled={squareCardsEnabled}>
     <div
       ref={tableRef}
-      className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${compactHud ? " hud-is-compact" : ""}${hasPlaymat ? " has-playmat" : ""}`}
+      className={`table${soloBoard ? " solo-board" : ""}${seatInputLocked ? " seat-input-locked" : ""}${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${compactHud ? " hud-is-compact" : ""}${hasPlaymat ? " has-playmat" : ""}`}
       data-playability-cue={playabilityCuePreference}
       data-motion-preference={motionPreference}
       onMouseMove={onHoverCard}
@@ -1479,7 +1501,7 @@ export function GameBoard() {
         exiting={matchAchievements.toastExiting}
         onViewAchievements={() => { leave(); setLobbyRail("achievements"); }}
       />
-      <PriorityArrivalFlash hasOwnPriority={hasOwnPriority} />
+      <PriorityArrivalFlash hasOwnPriority={feedback.priorityAlertSeat !== null && hasOwnPriority} />
       {playmatHint.visible
         ? <PlaymatHintToast onChoose={playmatHint.choose} onDismiss={playmatHint.dismiss} />
         : null}
@@ -1513,6 +1535,7 @@ export function GameBoard() {
           mine={false}
           interactive={topInteractive}
           revealsFaceDown={soloGame && !spectating}
+          handOverEffects={soloBoard && !phoneBoard}
           mirrored
           holdsPriority={priorityHolder === opp.seat}
           priorityPulse={topInteractive && hasOwnPriority}
@@ -1533,6 +1556,7 @@ export function GameBoard() {
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
           onOpenEffects={openEffectLedger}
+          standingOrders={soloBoard ? standingOrders : undefined}
         />
 
         {/* center divider: a brass-inlay strip marking the seam */}
@@ -1544,7 +1568,7 @@ export function GameBoard() {
           ) : null}
           <div className="mat-divider-center">
             {showEndTurnPassToast && !mobileFloatViewport
-              ? <EndTurnPassToast placement="divider" passedHeroName={soloGame ? activeHeroName : undefined} />
+              ? <EndTurnPassToast placement="divider" />
               : null}
             {timingFloat}
             <div className="mat-divider-mini-dock" ref={setSplitLineMiniHost} />
@@ -1627,9 +1651,7 @@ export function GameBoard() {
           ? mobileFloatViewport
             ? intl.formatMessage({ id: "game.waiting.spectating.short" })
             : intl.formatMessage({ id: "game.waiting.spectating" }, { hero: activeHeroName })
-          : soloGame
-            ? intl.formatMessage({ id: "game.waiting.solo" }, { hero: priorityHolderName || activeHeroName })
-            : intl.formatMessage({ id: "game.waiting.opponent" })}
+          : intl.formatMessage({ id: "game.waiting.opponent" })}
       </div>
 
       <MobileHandToggle
@@ -1639,7 +1661,7 @@ export function GameBoard() {
       />
 
       {showEndTurnPassToast && mobileFloatViewport
-        ? <EndTurnPassToast placement="mobile-hand" passedHeroName={soloGame ? activeHeroName : undefined} />
+        ? <EndTurnPassToast placement="mobile-hand" />
         : null}
 
       {/* ── floating status window: life + remaining AP + pass.
@@ -1662,7 +1684,8 @@ export function GameBoard() {
         logEntries={view.logEntries}
         activeHeroName={activeHeroName}
         actionPoints={view.players[view.activePlayer]!.actionPoints}
-        myResources={me.resources + (me.chi ?? 0)}
+        // Floating resources belong to whoever is paying: the acting seat in solo.
+        myResources={actor.resources + (actor.chi ?? 0)}
         primaryAction={shownPrimaryAction}
         passDisabled={primaryAction === null || primaryActionDisabled}
         onPass={triggerPrimaryAction}
@@ -1728,6 +1751,7 @@ export function GameBoard() {
       {gameMotion.turnStartUiReady ? <DecisionFloat
         viewerSeat={actingSeat}
         optionHotkeys={optionHotkeys}
+        placement={sides?.top === "acting" && !phoneBoard ? "top" : "bottom"}
         lethalConfirmation={confirmLethalPass && lethalRisk
           ? {
               risk: lethalRisk,

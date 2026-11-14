@@ -67,19 +67,14 @@ function priorityOwner(view: GameView, seat: number | null): string {
   return seat === view.priorityPlayer ? "YOUR PRIORITY" : `${actor(view, seat, view.priorityPlayer).toUpperCase()}'S PRIORITY`;
 }
 
-function decisionStatus(
-  view: GameView,
-  seat: number | null,
-  pd: PendingDecision,
-  namedActors: boolean,
-): CausalStatus {
+function decisionStatus(view: GameView, seat: number | null, pd: PendingDecision): CausalStatus {
   const mine = seat === pd.player;
   const decider = actor(view, seat, pd.player);
   switch (pd.kind) {
     case "defend":
       return {
         kind: mine ? "decision" : "waiting",
-        heading: `ACTION PHASE · DEFEND STEP · ${mine ? "YOU" : namedActors ? decider.toUpperCase() : "OPPONENT"} CHOOSING BLOCKS`,
+        heading: `ACTION PHASE · DEFEND STEP · ${mine ? "YOU" : "OPPONENT"} CHOOSING BLOCKS`,
       };
     case "attack-reaction":
       return {
@@ -117,16 +112,11 @@ function decisionStatus(
   }
 }
 
-/** `namedActors` (solo) names the deciding hero instead of "opponent" when `seat` is null. */
-export function causalStatus(
-  view: GameView,
-  seat: number | null,
-  { namedActors = false }: { namedActors?: boolean } = {},
-): CausalStatus {
+export function causalStatus(view: GameView, seat: number | null): CausalStatus {
   if (view.phase === "game-over") {
     return { kind: "complete", heading: "GAME OVER" };
   }
-  if (view.pendingDecision) return decisionStatus(view, seat, view.pendingDecision, namedActors);
+  if (view.pendingDecision) return decisionStatus(view, seat, view.pendingDecision);
   if (view.phase === "action") {
     const latestLink = view.chain[view.chain.length - 1];
     if (latestLink?.resolved) {

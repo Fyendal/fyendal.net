@@ -1,11 +1,7 @@
 import { useIntl } from "react-intl";
 import { localizeTimingLabel } from "./timingLocalization.js";
 
-/** Solo names the priority holder instead of "you"/"opponent"; both seats are the viewer's. */
-export function soloPriorityLabel(solo: boolean, mine: boolean, heroName: string): string {
-  if (solo) return `${heroName.toUpperCase()}'S PRIORITY`;
-  return mine ? "YOUR PRIORITY" : "OPPONENT'S PRIORITY";
-}
+type PriorityLabel = "YOUR PRIORITY" | "OPPONENT'S PRIORITY";
 
 export function combatPriorityTimingLabel(timingLabel: string): string {
   return timingLabel.startsWith("ACTION PHASE · ")
@@ -59,14 +55,13 @@ export function PriorityFloat({
   turnLabel,
   timingLabel,
   priorityLabel,
-  mine = priorityLabel === "YOUR PRIORITY",
 }: {
   turn: number;
   turnLabel: string;
   timingLabel: string;
-  priorityLabel: string;
-  mine?: boolean;
+  priorityLabel: PriorityLabel;
 }) {
+  const mine = priorityLabel === "YOUR PRIORITY";
   return (
     <TurnTimingFloat
       turn={turn}
@@ -81,12 +76,11 @@ export function PriorityFloat({
 export function ChainPriorityStatus({
   timingLabel,
   priorityLabel,
-  mine = priorityLabel === "YOUR PRIORITY",
 }: {
   timingLabel: string;
-  priorityLabel: string;
-  mine?: boolean;
+  priorityLabel: PriorityLabel;
 }) {
+  const mine = priorityLabel === "YOUR PRIORITY";
   return (
     <span className={mine ? "chain-priority-status-mine" : undefined}>
       <ChainTimingStatus label={`${timingLabel} · ${priorityLabel}`} />

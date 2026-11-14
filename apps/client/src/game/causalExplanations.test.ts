@@ -76,10 +76,6 @@ describe("causalStatus", () => {
       kind: "waiting",
       heading: "ACTION PHASE · DEFEND STEP · OPPONENT CHOOSING BLOCKS",
     });
-    expect(causalStatus(state, null, { namedActors: true })).toMatchObject({
-      heading: "ACTION PHASE · DEFEND STEP · DORINTHEA CHOOSING BLOCKS",
-    });
-    expect(causalStatus(state, null).heading).toBe("ACTION PHASE · DEFEND STEP · OPPONENT CHOOSING BLOCKS");
   });
 
   it("keeps a stack priority label compact", () => {
