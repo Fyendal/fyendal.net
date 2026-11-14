@@ -3099,16 +3099,6 @@
       "value": "Unified Decree：放逐牌库顶牌？"
     }
   ],
-  "card.cru.foreboding.hero.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": "：选择一名英雄"
-    }
-  ],
   "card.cru.heron.defense.choose": [
     {
       "type": 0,

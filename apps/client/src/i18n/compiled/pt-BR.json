@@ -3192,16 +3192,6 @@
       "value": "Unified Decree: fazer banish da carta do topo?"
     }
   ],
-  "card.cru.foreboding.hero.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha um herói"
-    }
-  ],
   "card.cru.heron.defense.choose": [
     {
       "type": 0,

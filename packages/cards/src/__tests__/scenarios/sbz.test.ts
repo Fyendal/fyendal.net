@@ -216,6 +216,20 @@ describe("SBZ — Blaze, Firemind", () => {
     expect(enabled(1)).toBeUndefined();
   });
 
+  it("offers X for Foreboding Bolt", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: BLAZE, weapons: [], hand: ["foreboding bolt|1", FODDER] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.hero.counters = { energy: 3 };
+
+    s.activate(BLAZE);
+
+    expect(s.state.pendingDecision?.options).toEqual(["X = 3"]);
+  });
+
   it("cannot be activated when no X matches a hand card", () => {
     const s = scenario({
       seats: [

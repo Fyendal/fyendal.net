@@ -209,7 +209,7 @@ describe("CRU — Wizard", () => {
     s.activate("aether conduit|0").chooseOption("opposing hero").expectLife(1, 18);
   });
 
-  it("Foreboding Bolt deals non-arcane damage and opts", () => {
+  it("Foreboding Bolt deals arcane damage and opts", () => {
     const s = scenario({
       seats: [
         { hero: "rhinar", hand: ["foreboding bolt|3", BLUE], deck: ["brutal assault|3"] },
@@ -222,6 +222,22 @@ describe("CRU — Wizard", () => {
       .expectLife(1, 19)
       .chooseOption("top")
       .expectDeckTop(0, "brutal assault|3");
+  });
+
+  it("Foreboding Bolt is amplified as an arcane-damage card", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["rousing aether|3", "foreboding bolt|3", BLUE] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("rousing aether|3", { pitch: [BLUE] })
+      .chooseOption("opposing hero");
+    s.state.players[0]!.actionPoints = 1;
+    s.play("foreboding bolt|3")
+      .chooseOption("opposing hero")
+      .expectLife(1, 16);
   });
 
   it("Rousing Aether amplifies the next arcane-damage card", () => {

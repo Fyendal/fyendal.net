@@ -3198,16 +3198,6 @@
       "value": "Unified Decree: banish the top card?"
     }
   ],
-  "card.cru.foreboding.hero.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": choose a hero"
-    }
-  ],
   "card.cru.heron.defense.choose": [
     {
       "type": 0,

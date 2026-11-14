@@ -14,7 +14,6 @@ import {
   optN,
   optOnChoose,
   requestAnyTargetChoice,
-  requestHeroChoice,
   wizardActionAsInstant,
 } from "../shared-helpers.js";
 import { COPPER } from "../tokens.js";
@@ -102,20 +101,16 @@ function researchNotes(count: number): CardScript {
 
 function forebodingBolt(damage: number): CardScript {
   return {
+    arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [damage],
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      requestHeroChoice(
-        ctx,
-        `foreboding-target:${damage}`,
-        `${ctx.data.name}: choose a hero`,
-        "card.cru.foreboding.hero.choose",
-        { values: { card: { kind: "card", cardId: ctx.self.cardId } }, defaultOption: "opposing hero" },
-      );
+      requestAnyTargetChoice(ctx, `foreboding-target:${damage}`, damage, { heroesOnly: true });
     },
     onChoose(ctx, hook, option) {
       const match = /^foreboding-target:(\d+)$/.exec(hook);
       if (match) {
-        ctx.dealDamage(heroChoiceSeat(ctx, option)!, Number(match[1]));
+        dealArcane(ctx, heroChoiceSeat(ctx, option)!, Number(match[1]));
         optN(ctx, 1);
         return;
       }
