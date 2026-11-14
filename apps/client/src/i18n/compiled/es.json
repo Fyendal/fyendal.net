@@ -18382,6 +18382,20 @@
       "value": "Haz tap a este héroe para jugar la carta banished como si fuera un instant este turno"
     }
   ],
+  "card.trigger.obk.huxley.instant.card": [
+    {
+      "type": 0,
+      "value": "Haz tap a este héroe para jugar "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " como si fuera un instant este turno"
+    }
+  ],
   "card.trigger.obk.incubator.pox": [
     {
       "type": 0,

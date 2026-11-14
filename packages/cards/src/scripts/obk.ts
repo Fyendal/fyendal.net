@@ -121,8 +121,11 @@ const huxley: CardScript = {
       optional: true,
       label: "Tap this hero to play the banished card as though it were an instant this turn",
       labelMessage: decisionMessage("card.trigger.obk.huxley.instant"),
+      eventLabelMessage: (banished) =>
+        decisionMessage("card.trigger.obk.huxley.instant.card", { target: { kind: "card", cardId: banished.cardId } }),
+      // Triggers while tapped: the tap is paid on resolution, after a window to untap.
       condition: (ctx, banished) =>
-        !!banished && !ctx.self.tapped && ctx.hasCardType(banished, "action") && ctx.hasKeyword(banished, "stealth"),
+        !!banished && ctx.hasCardType(banished, "action") && ctx.hasKeyword(banished, "stealth"),
       canAccept: (ctx) => !ctx.self.tapped,
       effect(ctx, banished) {
         if (!banished || !ctx.tap(ctx.self.instanceId)) return;

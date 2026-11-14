@@ -18254,6 +18254,20 @@
       "value": "Tap this hero to play the banished card as though it were an instant this turn"
     }
   ],
+  "card.trigger.obk.huxley.instant.card": [
+    {
+      "type": 0,
+      "value": "Tap this hero to play "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " as though it were an instant this turn"
+    }
+  ],
   "card.trigger.obk.incubator.pox": [
     {
       "type": 0,

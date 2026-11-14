@@ -402,7 +402,7 @@
   "id": "HER032",
   "name": "Levia, Shadowborn Abomination",
   "types": ["hero"],
-  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, cards you own lose blood debt during the end phase.",
+  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, you don't lose {h} from blood debt during the end phase.",
   "classes": [
    "brute"
   ],
@@ -462,7 +462,7 @@
   "id": "HER036",
   "name": "Levia",
   "types": ["hero"],
-  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, cards you own lose blood debt during the end phase.",
+  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, you don't lose {h} from blood debt during the end phase.",
   "classes": [
    "brute"
   ],
@@ -522,7 +522,7 @@
   "id": "HER040",
   "name": "Levia, Shadowborn Abomination",
   "types": ["hero"],
-  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, cards you own lose blood debt during the end phase.",
+  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, you don't lose {h} from blood debt during the end phase.",
   "classes": [
    "brute"
   ],

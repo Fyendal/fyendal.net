@@ -572,8 +572,7 @@ export const cruHighRarity: Record<string, CardScript> = {
         event: "begin-action-phase",
         label: "Copy a hero with Shiyana",
         target: {
-          options: (ctx) =>
-            ctx.state.players.filter((player) => player.seat !== ctx.seat).map((player) => player.hero.instanceId),
+          options: (ctx) => ctx.state.players.map((player) => player.hero.instanceId),
           prompt: () => decisionPrompt("Shiyana: choose a hero to copy", "card.cru.shiyana.hero.choose"),
         },
         effect(ctx) {

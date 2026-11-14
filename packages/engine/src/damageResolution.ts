@@ -2,7 +2,7 @@ import type { CounterKind } from "@fyendal/shared";
 import type { EngineRuntime } from "./runtimePorts.js";
 import { cardAbilitiesSuppressed, cardColorOf, cardHasName, cardTypesOf, currentWardValue, dataOf, instanceDataOf, instanceKeywordValues, numberedKeywordValue, scriptOf } from "./cardProperties.js";
 
-import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
+import { controlledPermanents, functionalChainAttackLinks, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 
 import {
   cardDestroyedLogMessage,
@@ -568,8 +568,13 @@ function queueEffectHitTriggers(
     weapons: true,
   });
   const link = currentLink(state);
-  // The active attack observes hits "this chain link" by its controller's other sources.
-  const attack = link?.attacker === packet.sourceSeat ? [link.attackingCard] : [];
+  // Attacks stay functional on the combat chain, so earlier links observe the hit too.
+  const attack = [
+    ...(link?.attacker === packet.sourceSeat ? [link.attackingCard] : []),
+    ...functionalChainAttackLinks(state, packet.sourceSeat)
+      .filter((other) => other.flags.attackAbilitiesSuppressed !== true)
+      .map((other) => other.attackingCard),
+  ];
   const observers = [...active, ...lingeringModifierSources(state, packet.sourceSeat), ...attack].filter(
     (candidate, index, all) => all.findIndex((source) => source.instanceId === candidate.instanceId) === index,
   );

@@ -28,7 +28,7 @@ function isOriginalLevia(heroName: string): boolean {
   return heroName === BLOOD_DEBT.youngLeviaName || heroName === BLOOD_DEBT.adultLeviaName;
 }
 
-function leviaRemovesBloodDebt(ctx: ScriptCtx, heroName: string): boolean {
+function leviaIgnoresBloodDebt(ctx: ScriptCtx, heroName: string): boolean {
   return isOriginalLevia(heroName) && ctx.getFlag("player", "banishedSixPlusThisTurn") === true;
 }
 
@@ -116,7 +116,7 @@ export function bloodDebtScript(extra: CardScript = {}, playableFromBanish = fal
           if (ctx.heroAbilitiesDisabled()) return true;
           const heroName = activeHeroName(ctx);
           if (heroName === BLOOD_DEBT.redeemedName) return false;
-          return !leviaRemovesBloodDebt(ctx, heroName);
+          return !leviaIgnoresBloodDebt(ctx, heroName);
         },
         effect(ctx) {
           const player = ctx.player(ctx.seat);
@@ -126,6 +126,8 @@ export function bloodDebtScript(extra: CardScript = {}, playableFromBanish = fal
             if (top) ctx.banish(top.instanceId);
             return;
           }
+          // Checked again on resolution: a banish after the trigger still counts.
+          if (!ctx.heroAbilitiesDisabled() && leviaIgnoresBloodDebt(ctx, heroName)) return;
           const previousLife = player.life;
           ctx.loseLife(ctx.seat, 1);
           if (previousLife <= 13 || ctx.player(ctx.seat).life !== 13) return;

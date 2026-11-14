@@ -489,6 +489,26 @@ describe("HNT — marked heroes and daggers", () => {
     expect(g.state.players[0]!.flags.completedContractThisTurn).toBe(true);
   });
 
+  it("Defang the Dragon completes its Contract when Flick Knives hits a marked Fang", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["defang the dragon|1"],
+          deck: ["wrecker romp|3"],
+          weapons: ["kunai of retribution|0"],
+          equipment: { arms: "flick knives|0" },
+        },
+        { hero: "dorinthea", heroKey: "fang|0", hand: ["wounding blow|3", "wounding blow|3"] },
+      ],
+    });
+    g.state.players[1]!.hero.scriptState = { marked: 1 };
+
+    g.play("defang the dragon|1").blockWith("wounding blow|3", "wounding blow|3")
+      .activate("flick knives|0").chooseCard("kunai of retribution|0").settle().expectHandSize(0, 1);
+    expect(g.state.players[0]!.flags.completedContractThisTurn).toBe(true);
+  });
+
   it("War Cry of Bellona gives Raydn +2{p} for every attack this turn", () => {
     const g = scenario({
       seats: [

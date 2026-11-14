@@ -3,6 +3,7 @@ import {
   NAMED_DISEASE_TOKENS,
   assassinContractAttackTargets,
   attackAbility,
+  completeContractForSilver,
   contractWithSilver,
   controlledDiseases,
   createChosenDisease,
@@ -95,10 +96,9 @@ const EVISCERATE_THE_ENERVATED: CardScript = {
 
 const VIRAL_SAMPLING: CardScript = {
   canTriggerOnHit: defenderInfected,
-  onHit(ctx) {
-    ctx.completeContract();
-    ctx.createToken(SILVER);
-  },
+  onHit: completeContractForSilver,
+  onFriendlyEffectHitCondition: (ctx, _source, targetSeat) => targetSeat !== ctx.seat && isInfected(ctx, targetSeat),
+  onFriendlyEffectHit: completeContractForSilver,
 };
 
 function sneaking(tokenId: string): CardScript {

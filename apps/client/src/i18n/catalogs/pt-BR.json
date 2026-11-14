@@ -1867,6 +1867,7 @@
   "card.trigger.obk.extinction.name": "Nomeie um token de doença",
   "card.trigger.obk.extinction.win": "Vença o jogo se houver {amount} ou mais tokens de doença na arena",
   "card.trigger.obk.huxley.instant": "Vire (tap) este herói para jogar a carta banished como se fosse uma instant neste turno",
+  "card.trigger.obk.huxley.instant.card": "Vire (tap) este herói para jogar a carta {target} como se fosse uma instant neste turno",
   "card.trigger.obk.incubator.pox": "Crie um token {token} sob o controle do herói atingido",
   "card.trigger.obk.min.flip": "Vire este herói",
   "card.trigger.pen.distantrumbling.draw.fifth": "Compre uma carta e depois coloque uma carta da sua mão em quinto lugar a partir do topo",

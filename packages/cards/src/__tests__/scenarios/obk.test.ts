@@ -16,6 +16,8 @@ const PROWL = "prowl|1";
 const KISS_OF_DEATH = "kiss of death|1";
 const KICKBACK = "kickback|1";
 const FILLER = "raging onslaught|1";
+const GYROSTRIDERS = "cogwerx gyrostriders|0";
+const HUXLEY_TRIGGER = "Tap this hero to play the banished card as though it were an instant this turn";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 const BLOODROT_POX = "bloodrot pox|0";
 const FRAILTY = "frailty|0";
@@ -169,6 +171,61 @@ describe("Outbreak heroes", () => {
       game.play(ZERO_TO_SIXTY, { boost: true });
 
       expect(game.state.pendingDecision?.kind).not.toBe("optional-effect");
+    });
+
+    it("triggers while tapped, so an instant untap lets Huxley tap as the layer resolves", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar", heroKey: HUXLEY, heroTapped: true, hand: [ZERO_TO_SIXTY], deck: [PROWL], weapons: [],
+          equipment: { ...NO_EQUIPMENT, legs: GYROSTRIDERS },
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(ZERO_TO_SIXTY, { boost: true, settle: false });
+      expect(game.stackLabels()).toContain(HUXLEY_TRIGGER);
+      game.activate(GYROSTRIDERS, { ability: 0 });
+      expect(game.state.pendingDecision?.kind).toBe("optional-effect");
+      game.chooseOption("yes").blockWith();
+
+      expect(game.state.players[0]!.hero.tapped).toBe(true);
+      expect(banishedPlayIntents(game, 0, PROWL)).toContainEqual(expect.objectContaining({ asInstant: true }));
+    });
+
+    it("offers nothing when its trigger resolves while Huxley is still tapped", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar", heroKey: HUXLEY, heroTapped: true, hand: [ZERO_TO_SIXTY], deck: [PROWL], weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(ZERO_TO_SIXTY, { boost: true });
+
+      expect(game.state.pendingDecision?.kind).not.toBe("optional-effect");
+      expect(banishedPlayIntents(game, 0, PROWL)).toEqual([]);
+    });
+
+    it("names the banished card in each prompt of a double boost", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar", heroKey: HUXLEY, hand: ["twin drive|1"], deck: [PROWL, KICKBACK], resources: 2, weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+      const target = (key: string) => ({ kind: "card", cardId: printingId(key) });
+      const promptTarget = () => game.state.pendingDecision?.promptMessage?.values?.target;
+
+      game.play("twin drive|1", { boost: true, boostCount: 2, settle: false });
+      expect(projectStateFor(game.state, 1).stack.map((layer) => layer.labelMessage?.values?.target))
+        .toEqual([target(PROWL), target(KICKBACK)]);
+
+      game.settle();
+      expect(promptTarget()).toEqual(target(PROWL));
+      game.chooseOption("no");
+      expect(promptTarget()).toEqual(target(KICKBACK));
     });
 
     it("queues a stealth attack played during the boosted attack's reaction step behind that attack", () => {

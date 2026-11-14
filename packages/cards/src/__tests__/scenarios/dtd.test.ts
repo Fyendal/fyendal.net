@@ -506,7 +506,7 @@ describe("DTD — registration and core mechanics", () => {
       .expectFinalDefense(6);
   });
 
-  it("Levia does not erase Blood Debt already triggered before an end-phase six-power banish", () => {
+  it("Levia loses no life to Blood Debt already triggered before an end-phase six-power banish", () => {
     const s = scenario({
       seats: [
         {
@@ -536,7 +536,7 @@ describe("DTD — registration and core mechanics", () => {
 
     s.doRaw({ kind: "order-triggers", optionIds: [blasmophet!, bloodDebt!] })
       .chooseCard("shaden death hydra|2")
-      .expectLife(0, 19);
+      .expectLife(0, 20);
   });
 
   it("pauses a counted Blood Debt layer when Levia reaches exactly 13 life", () => {

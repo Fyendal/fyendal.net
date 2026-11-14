@@ -135,6 +135,21 @@ function heroIs(ctx: ScriptCtx, seat: number, name: string): boolean {
   return ctx.cardData(ctx.player(seat).heroCardId).name.toLowerCase() === name.toLowerCase();
 }
 
+/** Contract: "hit a marked <hero>", by the attack or by an effect hit while it is on the chain. */
+function markedHeroContract(hero: string): CardScript {
+  const complete = (ctx: ScriptCtx): void => {
+    ctx.completeContract();
+    ctx.drawCards(ctx.seat, 1);
+  };
+  return {
+    canTriggerOnHit: (ctx) => hitMarkedHero(ctx) && heroIs(ctx, opponentSeat(ctx), hero),
+    onHit: complete,
+    onFriendlyEffectHitCondition: (ctx, _source, targetSeat, targetWasMarked) =>
+      targetWasMarked && targetSeat !== ctx.seat && heroIs(ctx, targetSeat, hero),
+    onFriendlyEffectHit: complete,
+  };
+}
+
 function heroIsArakni(ctx: ScriptCtx, seat: number): boolean {
   return heroHasMoniker(ctx, seat, "Arakni");
 }
@@ -468,24 +483,8 @@ export const hnt: Record<string, CardScript> = {
       buffNextAttack(ctx, { attack: 1, appliesToKeyword: "stealth" });
     },
   },
-  "defang the dragon|1": {
-    canTriggerOnHit(ctx) {
-      return hitMarkedHero(ctx) && heroIs(ctx, opponentSeat(ctx), "Fang");
-    },
-    onHit(ctx) {
-      ctx.completeContract();
-      ctx.drawCards(ctx.seat, 1);
-    },
-  },
-  "extinguish the flames|1": {
-    canTriggerOnHit(ctx) {
-      return hitMarkedHero(ctx) && heroIs(ctx, opponentSeat(ctx), "Cindra");
-    },
-    onHit(ctx) {
-      ctx.completeContract();
-      ctx.drawCards(ctx.seat, 1);
-    },
-  },
+  "defang the dragon|1": markedHeroContract("Fang"),
+  "extinguish the flames|1": markedHeroContract("Cindra"),
   "mark of the black widow|2": {
     canTriggerOnHit: hitMarkedHero,
     onHit(ctx) {

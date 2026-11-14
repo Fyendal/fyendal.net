@@ -1024,7 +1024,7 @@ export interface TriggerDef {
     eventCard?: DeepReadonly<CardInstance>,
     eventContext?: TriggerEventContext,
   ): boolean;
-  /** If true, the controller chooses yes/no before the ability goes on the stack */
+  /** If true, the controller chooses yes/no as the layer resolves */
   optional?: boolean;
   /** A card target declared as the layer is added to the stack (CR 6.6.6a).
    * Without a legal target the layer ceases to exist; an optional targeted
@@ -1054,6 +1054,9 @@ export interface TriggerDef {
   /** Locale-independent counterpart to `label`. It is derived from the script
    * during decision/view projection and never persisted in room state. */
   labelMessage?: GameMessage;
+  /** Replaces `labelMessage` on a layer to name its public event card, telling
+   * same-source layers apart. Must read only `eventCard`; it runs at projection. */
+  eventLabelMessage?(eventCard: DeepReadonly<CardInstance>): GameMessage;
   /** Optional triggers: caveat shown beside the yes/no when accepting won't do what the label says. */
   warningMessage?(ctx: ScriptCtx): GameMessage | undefined;
   /** Exact public trigger announcement. Defaults to "<source> triggers: <label>". */

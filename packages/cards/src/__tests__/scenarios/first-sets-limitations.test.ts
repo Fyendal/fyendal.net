@@ -147,6 +147,17 @@ describe("first-set rules regression coverage", () => {
     expect(g.state.players[0]!.hand[0]!.grantedTypes).toContain("warrior");
   });
 
+  it("Shiyana may copy her own hero", () => {
+    const g = scenario({ active: 1, seats: [
+      { hero: "rhinar", heroKey: "shiyana, diamond gemini|0", hand: ["head jab|3"], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+    const shiyana = g.state.players[0]!.heroCardId;
+    g.endTurn().doRaw({ kind: "choose", optionId: String(g.state.players[0]!.hero.instanceId) }).settle();
+    expect(g.state.players[0]!.heroCardId).toBe(shiyana);
+    expect(g.state.players[0]!.hand[0]!.grantedTypes).toContain("shapeshifter");
+  });
+
   it("Meganetic Shockwave mandates equipment defenders", () => {
     const g = scenario({ seats: [
       { hero: "rhinar", heroKey: "dash, inventor extraordinaire|0", hand: ["meganetic shockwave|3"], resources: 20, equipment: NO_EQUIPMENT },

@@ -34,7 +34,9 @@ export function triggerLabelMessage(
   if (layer.triggerIndex < 0) return undefined;
   const source = findCardAnywhere(state, layer.sourceInstanceId)?.card ?? layer.triggerSource;
   if (!source) return undefined;
-  return scriptOf(state, source.cardId, source)?.triggers?.[layer.triggerIndex]?.labelMessage;
+  const trigger = scriptOf(state, source.cardId, source)?.triggers?.[layer.triggerIndex];
+  return (layer.triggerEventCard && trigger?.eventLabelMessage?.(layer.triggerEventCard)) ??
+    trigger?.labelMessage;
 }
 
 export interface TriggerAnnouncement {

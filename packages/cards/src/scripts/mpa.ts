@@ -8,6 +8,7 @@ import type {
   TriggerDef,
 } from "@fyendal/engine";
 import {
+  completeContractForSilver,
   faceUpGraveyard,
   isAttackAction,
   NAMED_DISEASE_TOKENS,
@@ -50,9 +51,7 @@ function tokenContractWithSilver(
 ): CardScript {
   return {
     onFriendlyCreatesOpponentToken(ctx, token) {
-      if (!condition(ctx, token)) return;
-      ctx.completeContract();
-      ctx.createToken(SILVER);
+      if (condition(ctx, token)) completeContractForSilver(ctx);
     },
   };
 }
@@ -676,10 +675,10 @@ export const mpa: Record<string, CardScript> = {
 
   "professional rivalry|3": {
     canTriggerOnHit: hitsAssassinHero,
-    onHit(ctx) {
-      ctx.completeContract();
-      ctx.createToken(SILVER);
-    },
+    onHit: completeContractForSilver,
+    onFriendlyEffectHitCondition: (ctx, _source, targetSeat) =>
+      targetSeat !== ctx.seat && hasCardSubtype(ctx, ctx.player(targetSeat).hero, "assassin"),
+    onFriendlyEffectHit: completeContractForSilver,
   },
 
   "act on intel: haunts|3": {

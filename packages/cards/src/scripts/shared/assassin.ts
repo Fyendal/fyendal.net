@@ -17,15 +17,19 @@ export function hitsHeroAfterDaggerHit(ctx: ScriptCtx): boolean {
   return targetsHero(ctx) && hitWithDaggerThisChain(ctx);
 }
 
+/** "Whenever you complete this contract, create a Silver token." */
+export function completeContractForSilver(ctx: ScriptCtx): void {
+  ctx.completeContract();
+  ctx.createToken(SILVER);
+}
+
 /** Contract: complete it and create a Silver whenever a banished opposing card meets `condition`. */
 export function contractWithSilver(
   condition: (ctx: ScriptCtx, card: DeepReadonly<CardInstance>) => boolean,
 ): CardScript {
   return {
     onFriendlyBanishesOpponentCard(ctx, card) {
-      if (!condition(ctx, card)) return;
-      ctx.completeContract();
-      ctx.createToken(SILVER);
+      if (condition(ctx, card)) completeContractForSilver(ctx);
     },
   };
 }

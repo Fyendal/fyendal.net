@@ -1867,6 +1867,7 @@
   "card.trigger.obk.extinction.name": "指定一个疾病衍生物的名称",
   "card.trigger.obk.extinction.win": "若场上有 {amount} 个或更多疾病衍生物，你赢得本局游戏",
   "card.trigger.obk.huxley.instant": "横置此英雄，使被放逐的牌本回合可以如同瞬间牌般打出",
+  "card.trigger.obk.huxley.instant.card": "横置此英雄，使 {target} 本回合可以如同瞬间牌般打出",
   "card.trigger.obk.incubator.pox": "在被命中的英雄的操控下生成一个 {token} 衍生物",
   "card.trigger.obk.min.flip": "翻转此英雄",
   "card.trigger.pen.distantrumbling.draw.fifth": "抽一张牌，然后将一张手牌置于牌库顶向下第五张",

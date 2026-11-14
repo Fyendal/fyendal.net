@@ -1925,6 +1925,53 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       game.play("lab rat|3").blockWith().settle();
       expect(boardNames(game, 0)).toEqual(Array(5).fill("Silver"));
     });
+
+    describe("Viral Sampling and Flick Knives", () => {
+      const knifeThrower = (spec: Partial<SeatSpec>): SeatSpec =>
+        assassinSeat({ weapons: [KUNAI], equipment: { ...NO_EQUIPMENT, arms: "flick knives|0" }, ...spec });
+      const INFECTED: SeatSpec = { ...VICTIM, board: ["frailty|0"] };
+
+      it("completes its contract when the dagger hits while it is fully defended", () => {
+        const game = scenario({ seats: [
+          knifeThrower({ hand: ["viral sampling|3"] }),
+          { ...INFECTED, hand: [WOUNDING_BLOW] },
+        ] });
+
+        game.play("viral sampling|3").blockWith(WOUNDING_BLOW).activate("flick knives|0").chooseCard(KUNAI).settle();
+
+        game.expectLife(1, 19);
+        expect(boardNames(game, 0)).toEqual(["Silver"]);
+        expect(game.state.players[0]!.flags.contractCompletionsThisTurn).toBe(1);
+      });
+
+      it("completes its contract from an earlier chain link", () => {
+        const game = scenario({ seats: [
+          knifeThrower({ hand: ["viral sampling|3", "lab rat|3"], resources: 2 }),
+          { ...INFECTED, hand: [WOUNDING_BLOW, WOUNDING_BLOW, WOUNDING_BLOW] },
+        ] });
+
+        game.play("viral sampling|3").blockWith(WOUNDING_BLOW).settle();
+        expect(boardNames(game, 0)).toEqual([]);
+
+        game.state.players[0]!.actionPoints = 1;
+        game.play("lab rat|3").blockWith(WOUNDING_BLOW, WOUNDING_BLOW)
+          .activate("flick knives|0").chooseCard(KUNAI).settle();
+
+        expect(boardNames(game, 0)).toEqual(["Silver"]);
+      });
+
+      it("ignores a dagger hit on a hero who is not infected", () => {
+        const game = scenario({ seats: [
+          knifeThrower({ hand: ["viral sampling|3"] }),
+          { ...VICTIM, hand: [WOUNDING_BLOW] },
+        ] });
+
+        game.play("viral sampling|3").blockWith(WOUNDING_BLOW).activate("flick knives|0").chooseCard(KUNAI).settle();
+
+        game.expectLife(1, 19);
+        expect(boardNames(game, 0)).toEqual([]);
+      });
+    });
   });
 
   describe("Mastery Pack Assassin batch 2", () => {
@@ -3067,6 +3114,22 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       const other = scenario({ seats: [attacker({ hand: ["professional rivalry|3"] }), VICTIM] });
       other.play("professional rivalry|3").blockWith().settle();
       expect(silverCount(other)).toBe(0);
+    });
+
+    it("Professional Rivalry completes its contract when Flick Knives hits an Assassin hero", () => {
+      const game = scenario({ seats: [
+        attacker({
+          hand: ["professional rivalry|3"],
+          weapons: [KUNAI],
+          equipment: { ...NO_EQUIPMENT, arms: "flick knives|0" },
+        }),
+        { ...ASSASSIN_VICTIM, hand: [WOUNDING_BLOW, WOUNDING_BLOW] },
+      ] });
+
+      game.play("professional rivalry|3").blockWith(WOUNDING_BLOW, WOUNDING_BLOW)
+        .activate("flick knives|0").chooseCard(KUNAI).settle();
+
+      expect(silverCount(game)).toBe(1);
     });
   });
 

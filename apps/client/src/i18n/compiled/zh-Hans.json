@@ -17208,6 +17208,20 @@
       "value": "横置此英雄，使被放逐的牌本回合可以如同瞬间牌般打出"
     }
   ],
+  "card.trigger.obk.huxley.instant.card": [
+    {
+      "type": 0,
+      "value": "横置此英雄，使 "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 本回合可以如同瞬间牌般打出"
+    }
+  ],
   "card.trigger.obk.incubator.pox": [
     {
       "type": 0,

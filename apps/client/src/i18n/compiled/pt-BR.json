@@ -18799,6 +18799,20 @@
       "value": "Vire (tap) este herói para jogar a carta banished como se fosse uma instant neste turno"
     }
   ],
+  "card.trigger.obk.huxley.instant.card": [
+    {
+      "type": 0,
+      "value": "Vire (tap) este herói para jogar a carta "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " como se fosse uma instant neste turno"
+    }
+  ],
   "card.trigger.obk.incubator.pox": [
     {
       "type": 0,
