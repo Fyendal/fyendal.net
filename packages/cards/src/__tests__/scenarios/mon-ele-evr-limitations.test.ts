@@ -165,6 +165,18 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
     unlocked.play("exude confidence|1").blockWith("raging onslaught|1").passPriority();
     expect(legalIntents(unlocked.state, 1).some((intent) => intent.kind === "play-card")).toBe(true);
   });
+  it("Exude Confidence keeps the defender locked out for later chain links", () => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", hand: ["exude confidence|1", "raging onslaught|1"], resources: 3, equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", hand: ["sink below|1", "oasis respite|1"], resources: 1, equipment: NO_EQUIPMENT },
+    ] });
+    g.play("exude confidence|1").blockWith().passPriority().settle();
+    g.state.players[0]!.actionPoints = 1;
+    g.play("raging onslaught|1");
+    expect(g.state.chain).toHaveLength(2);
+    g.blockWith();
+    expect(legalIntents(g.state, 1).some((intent) => intent.kind === "play-card")).toBe(false);
+  });
   it("Soul Shield settles into its hero's soul", () => {
     const g = scenario({ seats: [
       { hero: "rhinar", hand: ["head jab|1"], equipment: NO_EQUIPMENT },

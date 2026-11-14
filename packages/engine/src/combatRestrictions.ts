@@ -4,7 +4,7 @@ import { basePowerOf, computeAttack, currentPowerOf, grantsAuraAttackMarker } fr
 import type { GameStateInternal } from "./runtimeState.js";
 import { activeModifiers } from "./combatModifiers.js";
 import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
-import { currentLink, opponent } from "./zoneQueries.js";
+import { opponent } from "./zoneQueries.js";
 import { hasType } from "@fyendal/shared";
 
 /** Whether a turn-scoped effect prohibits this player from attacking with
@@ -61,13 +61,15 @@ export function defendingHeroCannotRespondBelowPower(
   runtime: EngineRuntime,
   seat: number,
 ): boolean {
-  const link = currentLink(state);
-  if (!link || seat !== opponent(link.attacker)) return false;
-  if (scriptOf(state, link.attackingCard.cardId, link.attackingCard)?.defendingHeroCannotRespondBelowPower !== true) {
-    return false;
-  }
-  const attackPower = computeAttack(state, runtime, link);
-  return !link.defendingCards.some((card) => currentPowerOf(state, runtime, card, link) >= attackPower);
+  // the lock covers every later link of the combat chain, not just the Exude link
+  return state.chain.some((link) => {
+    if (seat !== opponent(link.attacker)) return false;
+    if (scriptOf(state, link.attackingCard.cardId, link.attackingCard)?.defendingHeroCannotRespondBelowPower !== true) {
+      return false;
+    }
+    const attackPower = computeAttack(state, runtime, link);
+    return !link.defendingCards.some((card) => currentPowerOf(state, runtime, card, link) >= attackPower);
+  });
 }
 
 /** Defense-reaction restrictions on the link: "defense reactions can't be
