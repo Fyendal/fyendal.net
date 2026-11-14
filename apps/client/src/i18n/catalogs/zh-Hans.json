@@ -3357,7 +3357,7 @@
   "lobby.rooms.yours": "你的房间",
   "lobby.solo.bot": "对战机器人练习",
   "lobby.solo.bothSides": "操控双方",
-  "lobby.solo.bothSidesDescription": "在私人对局中操控双方玩家，测试打法、对阵与卡牌互动。",
+  "lobby.solo.bothSidesDescription": "在私人对局中操控双方玩家，测试打法与对阵。",
   "lobby.solo.importDeck": "导入其他牌组",
   "lobby.solo.opponentDeck": "对手牌组",
   "lobby.solo.start": "开始对局",

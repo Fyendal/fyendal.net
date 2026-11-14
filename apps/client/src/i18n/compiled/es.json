@@ -35794,7 +35794,7 @@
   "lobby.solo.bothSidesDescription": [
     {
       "type": 0,
-      "value": "Controla a ambos jugadores en una partida privada para probar jugadas, enfrentamientos e interacciones."
+      "value": "Controla a ambos jugadores en una partida privada para probar jugadas y enfrentamientos."
     }
   ],
   "lobby.solo.importDeck": [

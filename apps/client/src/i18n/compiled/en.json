@@ -34910,7 +34910,7 @@
   "lobby.solo.bothSidesDescription": [
     {
       "type": 0,
-      "value": "Control both players in a private game to test lines, matchups and interactions."
+      "value": "Control both players in a private game to test lines and matchups."
     }
   ],
   "lobby.solo.importDeck": [

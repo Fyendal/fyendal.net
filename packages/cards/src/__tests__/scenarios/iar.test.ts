@@ -2781,6 +2781,27 @@ describe("September 3 IAR spoilers", () => {
     expect(g.state.players[0]!.hero.tapped).toBeUndefined();
   });
 
+  it("a bound Mark does not trigger when an Incarnate ally is removed from the game", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["mark of ushering|3", "tome of necrosis|1"],
+        board: ["corrupted corpse|0"],
+        deck: ["snatch|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("mark of ushering|3")
+      .chooseCard("corrupted corpse|0")
+      .play("tome of necrosis|1", { alternativeCost: "corrupted corpse|0" });
+
+    expect(boardNames(g, 0)).not.toContain("Corrupted Corpse");
+    expect(boardNames(g, 0)).not.toContain("Gate to i'Arathael");
+    g.expectInZone(0, "mark of ushering|3", "graveyard");
+  });
+
   it("Restless Templar creates a Gate when another Decay zombie dies", () => {
     const g = scenario({ seats: [
       {

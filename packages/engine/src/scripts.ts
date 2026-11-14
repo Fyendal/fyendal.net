@@ -1383,7 +1383,7 @@ export interface CardScript {
   /** This permanent left the arena for another zone. */
   onLeaveArena?(
     ctx: ScriptCtx,
-    to: "graveyard" | "banish" | "soul" | "deck" | "hand" | "subcard" | "cease-to-exist",
+    to: "graveyard" | "banish" | "soul" | "deck" | "hand" | "subcard" | "cease-to-exist" | "removed-from-game",
   ): void;
   /** Effect damage this card dealt has been applied (after any prevention,
    *  including a deferred Arcane Barrier decision). `amount` is what was

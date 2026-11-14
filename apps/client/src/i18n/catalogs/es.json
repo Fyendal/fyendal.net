@@ -3357,7 +3357,7 @@
   "lobby.rooms.yours": "Tus salas",
   "lobby.solo.bot": "Practicar contra bot",
   "lobby.solo.bothSides": "Jugar ambos lados",
-  "lobby.solo.bothSidesDescription": "Controla a ambos jugadores en una partida privada para probar jugadas, enfrentamientos e interacciones.",
+  "lobby.solo.bothSidesDescription": "Controla a ambos jugadores en una partida privada para probar jugadas y enfrentamientos.",
   "lobby.solo.importDeck": "Importar otro mazo",
   "lobby.solo.opponentDeck": "Mazo del oponente",
   "lobby.solo.start": "Empezar partida",

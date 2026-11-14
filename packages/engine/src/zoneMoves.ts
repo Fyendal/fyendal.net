@@ -235,7 +235,7 @@ export function fireLeaveArena(
   runtime: EngineRuntime,
   seat: number,
   card: CardInstance,
-  to: "graveyard" | "banish" | "soul" | "deck" | "hand" | "subcard" | "cease-to-exist",
+  to: "graveyard" | "banish" | "soul" | "deck" | "hand" | "subcard" | "cease-to-exist" | "removed-from-game",
   asActivationCost = false,
   destroyed = false,
   combatRole?: TriggerEventContext["combatRole"],
@@ -415,7 +415,8 @@ export function destroyPermanent(state: GameStateInternal,
       transitionZone(sourceKind, controllerSeat),
       null,
     );
-    fireLeaveArena(state, runtime, controllerSeat, card, "cease-to-exist", false, true);
+    // CR 8.3.46b: removed from the game, so it is not considered to have died.
+    fireLeaveArena(state, runtime, controllerSeat, card, "removed-from-game", false, true);
     logPublic(state, gameLogMessage(
       `${nameOf(state, card.cardId)} ceases to exist (Incarnate)`,
       "engine.log.card.ceases.to.exist.incarnate",

@@ -3357,7 +3357,7 @@
   "lobby.rooms.yours": "Your Rooms",
   "lobby.solo.bot": "Practice vs bot",
   "lobby.solo.bothSides": "Play both sides",
-  "lobby.solo.bothSidesDescription": "Control both players in a private game to test lines, matchups and interactions.",
+  "lobby.solo.bothSidesDescription": "Control both players in a private game to test lines and matchups.",
   "lobby.solo.importDeck": "Import another deck",
   "lobby.solo.opponentDeck": "Opponent deck",
   "lobby.solo.start": "Start game",

@@ -33187,7 +33187,7 @@
   "lobby.solo.bothSidesDescription": [
     {
       "type": 0,
-      "value": "在私人对局中操控双方玩家，测试打法、对阵与卡牌互动。"
+      "value": "在私人对局中操控双方玩家，测试打法与对阵。"
     }
   ],
   "lobby.solo.importDeck": [

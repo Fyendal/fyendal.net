@@ -719,7 +719,6 @@
   translate: -50% -50%;
 }
 .solo-both-lead {
-  max-width: 44ch;
   margin: 0;
   color: var(--text-muted);
   font-size: 13px;
@@ -753,6 +752,6 @@
   .solo-matchup { --seat-h: 128px; grid-template-columns: minmax(0, 1fr); }
   .solo-matchup-versus { top: calc(var(--seat-h) + 6px); }
   .solo-matchup-name { font-size: 18px; }
-  .solo-both-lead { order: 1; max-width: none; }
+  .solo-both-lead { order: 1; }
   .solo-both-actions > .btn-cta { width: 100%; }
 }
