@@ -32915,6 +32915,12 @@
       "value": "Play vs bot"
     }
   ],
+  "lobby.action.playSolo": [
+    {
+      "type": 0,
+      "value": "Play solo"
+    }
+  ],
   "lobby.action.rejoin": [
     {
       "type": 0,
@@ -34391,18 +34397,6 @@
       "value": " Get matched with the next player searching."
     }
   ],
-  "lobby.home.opponentBot": [
-    {
-      "type": 0,
-      "value": "Bot"
-    }
-  ],
-  "lobby.home.opponentBotHint": [
-    {
-      "type": 0,
-      "value": "Choose a bot to practice against."
-    }
-  ],
   "lobby.home.opponentPrivate": [
     {
       "type": 0,
@@ -34413,6 +34407,18 @@
     {
       "type": 0,
       "value": "Only people with your link can join."
+    }
+  ],
+  "lobby.home.opponentSolo": [
+    {
+      "type": 0,
+      "value": "Solo"
+    }
+  ],
+  "lobby.home.opponentSoloHint": [
+    {
+      "type": 0,
+      "value": "Practice against a bot or play both sides yourself."
     }
   ],
   "lobby.home.othersSearchingNow": [
@@ -34813,6 +34819,60 @@
     {
       "type": 0,
       "value": "Your Rooms"
+    }
+  ],
+  "lobby.solo.bot": [
+    {
+      "type": 0,
+      "value": "Practice vs bot"
+    }
+  ],
+  "lobby.solo.botDescription": [
+    {
+      "type": 0,
+      "value": "Pick a bot opponent and play against it."
+    }
+  ],
+  "lobby.solo.bothSides": [
+    {
+      "type": 0,
+      "value": "Play both sides"
+    }
+  ],
+  "lobby.solo.bothSidesDescription": [
+    {
+      "type": 0,
+      "value": "Control both players in a private game to test lines, matchups and interactions."
+    }
+  ],
+  "lobby.solo.importDeck": [
+    {
+      "type": 0,
+      "value": "Import another deck"
+    }
+  ],
+  "lobby.solo.opponentDeck": [
+    {
+      "type": 0,
+      "value": "Opponent deck"
+    }
+  ],
+  "lobby.solo.start": [
+    {
+      "type": 0,
+      "value": "Start game"
+    }
+  ],
+  "lobby.solo.title": [
+    {
+      "type": 0,
+      "value": "Solo Practice"
+    }
+  ],
+  "lobby.solo.yourDeck": [
+    {
+      "type": 0,
+      "value": "Your deck"
     }
   ],
   "lobby.waiting.forOpponent": [
@@ -36121,6 +36181,118 @@
     {
       "type": 0,
       "value": "weapon"
+    }
+  ],
+  "prep.solo.arenaWaiting": [
+    {
+      "type": 0,
+      "value": "These arena cards are locked. Switch to the other player to lock theirs."
+    }
+  ],
+  "prep.solo.chooseFirst": [
+    {
+      "type": 0,
+      "value": "You play both sides: choose which player goes first."
+    }
+  ],
+  "prep.solo.firstPlayer": [
+    {
+      "type": 0,
+      "value": "Player "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " ("
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": ") goes "
+    },
+    {
+      "type": 8,
+      "value": "order",
+      "children": [
+        {
+          "type": 0,
+          "value": "first"
+        }
+      ]
+    }
+  ],
+  "prep.solo.goesFirst": [
+    {
+      "type": 0,
+      "value": "Player "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " ("
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": ") goes first"
+    }
+  ],
+  "prep.solo.player": [
+    {
+      "type": 0,
+      "value": "Player "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    }
+  ],
+  "prep.solo.seatsAria": [
+    {
+      "type": 0,
+      "value": "Players"
+    }
+  ],
+  "prep.solo.status.arena": [
+    {
+      "type": 0,
+      "value": "Choosing arena cards"
+    }
+  ],
+  "prep.solo.status.arena-locked": [
+    {
+      "type": 0,
+      "value": "Arena cards locked"
+    }
+  ],
+  "prep.solo.status.ready": [
+    {
+      "type": 0,
+      "value": "Ready"
+    }
+  ],
+  "prep.solo.status.sideboarding": [
+    {
+      "type": 0,
+      "value": "Sideboarding"
+    }
+  ],
+  "prep.solo.status.turn-order": [
+    {
+      "type": 0,
+      "value": "Choosing turn order"
     }
   ],
   "prep.status.ready": [

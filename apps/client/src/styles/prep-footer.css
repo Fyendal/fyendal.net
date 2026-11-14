@@ -34,6 +34,80 @@
 }
 .prep-opponent { text-align: center; }
 
+/* Self-play: one tab per seat above the prep content. */
+.solo-seat-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  max-width: var(--prep-content-width);
+  width: 100%;
+  margin: 16px auto 0;
+  padding: 0 var(--prep-content-gutter);
+}
+.solo-seat-tab {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  clip-path: none;
+  background: var(--surface-panel);
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+}
+.solo-seat-tab:hover { border-color: var(--border-strong); }
+.solo-seat-tab:focus-visible { outline: 2px solid var(--gold); outline-offset: -4px; }
+.solo-seat-tab.selected {
+  border-color: var(--bronze);
+  background: #33220f;
+  box-shadow: inset 0 -3px 0 var(--gold);
+}
+.solo-seat-tab > img,
+.solo-seat-tab-fallback {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.solo-seat-tab-fallback {
+  display: grid;
+  place-items: center;
+  background: var(--surface-control);
+  color: var(--gold);
+  font-family: var(--font-display);
+}
+.solo-seat-tab-copy { display: grid; min-width: 0; gap: 2px; }
+.solo-seat-tab-name {
+  overflow: hidden;
+  color: #f6e8c6;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.solo-seat-tab.selected .solo-seat-tab-name { color: var(--gold); }
+.solo-seat-tab-name > small {
+  margin-right: 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.solo-seat-tab-status {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.solo-seat-tab.ready .solo-seat-tab-status { color: #8fd48f; }
+
 /* Waiting bar before an opponent joins: deck, status, then ways to fill the seat. */
 .open-seat {
   display: flex;
@@ -910,6 +984,11 @@
 
 @media (max-width: 700px) {
   .prep-topbar { padding-inline: 14px; }
+  .solo-seat-tabs { margin-top: 12px; padding-inline: 10px; gap: 6px; }
+  .solo-seat-tab { gap: 8px; padding: 6px 8px; }
+  .solo-seat-tab > img,
+  .solo-seat-tab-fallback { width: 30px; height: 30px; }
+  .solo-seat-tab-name > small { display: block; margin-right: 0; }
   .open-seat-deck-picker { flex-basis: 100%; max-width: none; }
   .open-seat-status { flex-basis: 100%; }
   .open-seat-invite { flex-basis: 100%; }

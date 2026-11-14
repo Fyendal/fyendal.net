@@ -13,8 +13,10 @@ const PREP_SORT_STORAGE_KEY = "fyendal-prep-sort-v2";
 const PREP_VIEW_STORAGE_KEY = "fyendal-prep-view";
 const HOME_GAME_MODE_STORAGE_PREFIX = "fyendal-home-game-mode-";
 const HOME_FORMAT_STORAGE_PREFIX = "fyendal-home-format-";
-/** Stored values predate the Private switch: "invite-friend" is a private player game. */
-export type HomeGameMode = "find-match" | "invite-friend" | "bot";
+const HOME_SOLO_OPPONENT_DECK_STORAGE_PREFIX = "fyendal-home-solo-opponent-deck-";
+/** Stored values predate the Private switch: "invite-friend" is a private player game.
+ * "solo" was stored as "bot" before self-play joined bot practice under it. */
+export type HomeGameMode = "find-match" | "invite-friend" | "solo";
 /** Legacy browser-wide key. Read once to migrate it to the signed-in account. */
 export const LOBBY_SETTINGS_STORAGE_KEY = "fyendal-lobby-settings";
 const LOBBY_SETTINGS_STORAGE_PREFIX = `${LOBBY_SETTINGS_STORAGE_KEY}-`;
@@ -61,7 +63,8 @@ export function loadHomeGameMode(
   if (!username) return "find-match";
   try {
     const mode = storage.getItem(homeGameModeStorageKey(username));
-    return mode === "invite-friend" || mode === "bot" ? mode : "find-match";
+    if (mode === "bot" || mode === "solo") return "solo";
+    return mode === "invite-friend" ? mode : "find-match";
   } catch {
     return "find-match";
   }
@@ -77,6 +80,38 @@ export function saveHomeGameMode(
     storage.setItem(homeGameModeStorageKey(username), mode);
   } catch {
     // A blocked/full localStorage must not prevent changing the game mode.
+  }
+}
+
+function homeSoloOpponentDeckStorageKey(username: string, format: Format): string {
+  return `${HOME_SOLO_OPPONENT_DECK_STORAGE_PREFIX}${format}-${username.toLowerCase()}`;
+}
+
+/** The deck last chosen for the other seat of a self-play game in this format. */
+export function loadHomeSoloOpponentDeck(
+  storage: Pick<Storage, "getItem">,
+  username: string | null,
+  format: Format,
+): string | null {
+  if (!username) return null;
+  try {
+    return storage.getItem(homeSoloOpponentDeckStorageKey(username, format)) || null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveHomeSoloOpponentDeck(
+  storage: Pick<Storage, "setItem">,
+  username: string | null,
+  format: Format,
+  deckId: string,
+): void {
+  if (!username) return;
+  try {
+    storage.setItem(homeSoloOpponentDeckStorageKey(username, format), deckId);
+  } catch {
+    // A blocked/full localStorage must not prevent starting the game.
   }
 }
 

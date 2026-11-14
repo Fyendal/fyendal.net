@@ -44,9 +44,9 @@ describe("DeckDetailModal", () => {
     expect(html).toContain('class="opponent-picker" role="group" aria-label="Opponent"');
     expect(html).toMatch(/aria-pressed="true"><span class="ui-icon"[^>]*><\/span>Anyone<\/button>/);
     expect(html).toMatch(/aria-pressed="false"><span class="ui-icon"[^>]*><\/span>Private<\/button>/);
-    expect(html).toMatch(/aria-pressed="false"><span class="ui-icon"[^>]*><\/span>Bot<\/button>/);
+    expect(html).toMatch(/aria-pressed="false"><span class="ui-icon"[^>]*><\/span>Solo<\/button>/);
     expect(html).toMatch(/<select[^>]*>.*<option value="legal" selected="">Legal<\/option>/);
-    expect(html).toMatch(/class="btn-cta deck-detail-start"[^>]*>(Find match|Create room|Play vs bot)<\/button>/);
+    expect(html).toMatch(/class="btn-cta deck-detail-start"[^>]*>(Find match|Create room|Play solo)<\/button>/);
     expect(html).toContain('href="https://fabrary.net/decks/01M1WZTPC64GDCMN2GX752E3R7" target="_blank" rel="noopener noreferrer"');
     expect(html).toContain("View on Fabrary");
     expect(html).toContain("Edit deck");

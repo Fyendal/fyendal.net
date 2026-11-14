@@ -21,25 +21,29 @@ export function canReadyForGame({
 
 export function canChooseFirst({
   botGame,
+  soloGame = false,
   dieWinner,
   yourSeat,
 }: {
   botGame: boolean;
+  soloGame?: boolean;
   dieWinner: Seat | null;
   yourSeat: number;
 }): boolean {
-  return dieWinner !== null && (botGame || dieWinner === yourSeat);
+  return dieWinner !== null && (botGame || soloGame || dieWinner === yourSeat);
 }
 
 export function firstPlayerStatus({
   opponentPresent,
   botGame,
+  soloGame,
   dieWinner,
   startPlayer,
   yourSeat,
 }: {
   opponentPresent: boolean;
   botGame?: boolean;
+  soloGame?: boolean;
   dieWinner: Seat | null;
   startPlayer: Seat | null;
   yourSeat: number;
@@ -47,7 +51,7 @@ export function firstPlayerStatus({
   if (!opponentPresent) return "waiting-opponent";
   if (dieWinner === null) return "waiting-roll";
 
-  const youDecide = canChooseFirst({ botGame: botGame === true, dieWinner, yourSeat });
+  const youDecide = canChooseFirst({ botGame: botGame === true, soloGame: soloGame === true, dieWinner, yourSeat });
   if (startPlayer === null) {
     return youDecide ? null : "opponent-deciding";
   }

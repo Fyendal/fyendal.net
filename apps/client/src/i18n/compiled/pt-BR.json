@@ -34613,6 +34613,12 @@
       "value": "Jogar contra bot"
     }
   ],
+  "lobby.action.playSolo": [
+    {
+      "type": 0,
+      "value": "Jogar solo"
+    }
+  ],
   "lobby.action.rejoin": [
     {
       "type": 0,
@@ -36143,18 +36149,6 @@
       "value": " Você joga com a próxima pessoa na fila."
     }
   ],
-  "lobby.home.opponentBot": [
-    {
-      "type": 0,
-      "value": "Bot"
-    }
-  ],
-  "lobby.home.opponentBotHint": [
-    {
-      "type": 0,
-      "value": "Escolha um bot para treinar."
-    }
-  ],
   "lobby.home.opponentPrivate": [
     {
       "type": 0,
@@ -36165,6 +36159,18 @@
     {
       "type": 0,
       "value": "Só quem tiver seu link pode entrar."
+    }
+  ],
+  "lobby.home.opponentSolo": [
+    {
+      "type": 0,
+      "value": "Solo"
+    }
+  ],
+  "lobby.home.opponentSoloHint": [
+    {
+      "type": 0,
+      "value": "Treine contra um bot ou jogue pelos dois lados."
     }
   ],
   "lobby.home.othersSearchingNow": [
@@ -36581,6 +36587,60 @@
     {
       "type": 0,
       "value": "Suas salas"
+    }
+  ],
+  "lobby.solo.bot": [
+    {
+      "type": 0,
+      "value": "Treinar contra bot"
+    }
+  ],
+  "lobby.solo.botDescription": [
+    {
+      "type": 0,
+      "value": "Escolha um bot como oponente e jogue contra ele."
+    }
+  ],
+  "lobby.solo.bothSides": [
+    {
+      "type": 0,
+      "value": "Jogar pelos dois lados"
+    }
+  ],
+  "lobby.solo.bothSidesDescription": [
+    {
+      "type": 0,
+      "value": "Controle os dois jogadores em uma partida privada para testar jogadas, confrontos e interações."
+    }
+  ],
+  "lobby.solo.importDeck": [
+    {
+      "type": 0,
+      "value": "Importar outro deck"
+    }
+  ],
+  "lobby.solo.opponentDeck": [
+    {
+      "type": 0,
+      "value": "Deck do oponente"
+    }
+  ],
+  "lobby.solo.start": [
+    {
+      "type": 0,
+      "value": "Começar partida"
+    }
+  ],
+  "lobby.solo.title": [
+    {
+      "type": 0,
+      "value": "Treino solo"
+    }
+  ],
+  "lobby.solo.yourDeck": [
+    {
+      "type": 0,
+      "value": "Seu deck"
     }
   ],
   "lobby.waiting.forOpponent": [
@@ -37904,6 +37964,118 @@
     {
       "type": 0,
       "value": "arma"
+    }
+  ],
+  "prep.solo.arenaWaiting": [
+    {
+      "type": 0,
+      "value": "Estas cartas de arena estão travadas. Mude para o outro jogador para travar as dele."
+    }
+  ],
+  "prep.solo.chooseFirst": [
+    {
+      "type": 0,
+      "value": "Você joga pelos dois lados: escolha qual jogador começa."
+    }
+  ],
+  "prep.solo.firstPlayer": [
+    {
+      "type": 0,
+      "value": "Jogador "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " ("
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": ") joga "
+    },
+    {
+      "type": 8,
+      "value": "order",
+      "children": [
+        {
+          "type": 0,
+          "value": "primeiro"
+        }
+      ]
+    }
+  ],
+  "prep.solo.goesFirst": [
+    {
+      "type": 0,
+      "value": "Jogador "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " ("
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": ") começa"
+    }
+  ],
+  "prep.solo.player": [
+    {
+      "type": 0,
+      "value": "Jogador "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    }
+  ],
+  "prep.solo.seatsAria": [
+    {
+      "type": 0,
+      "value": "Jogadores"
+    }
+  ],
+  "prep.solo.status.arena": [
+    {
+      "type": 0,
+      "value": "Escolhendo cartas de arena"
+    }
+  ],
+  "prep.solo.status.arena-locked": [
+    {
+      "type": 0,
+      "value": "Cartas de arena travadas"
+    }
+  ],
+  "prep.solo.status.ready": [
+    {
+      "type": 0,
+      "value": "Tudo pronto"
+    }
+  ],
+  "prep.solo.status.sideboarding": [
+    {
+      "type": 0,
+      "value": "Ajustando o deck"
+    }
+  ],
+  "prep.solo.status.turn-order": [
+    {
+      "type": 0,
+      "value": "Escolhendo a ordem de turno"
     }
   ],
   "prep.status.ready": [

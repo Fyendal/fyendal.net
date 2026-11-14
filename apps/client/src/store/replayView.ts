@@ -43,6 +43,7 @@ export function replayViewerProjection(
     playerProfiles: null,
     cardArt: null,
     botGame: false,
+    soloGame: false,
     error: null,
   };
 }

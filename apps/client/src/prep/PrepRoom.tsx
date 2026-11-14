@@ -54,6 +54,7 @@ import {
 import { PrepPresentation, type PrepCardArt } from "./PrepPresentation.js";
 import { PrepArtPopover } from "./PrepArtPopover.js";
 import { OpenSeatPanel } from "./OpenSeatPanel.js";
+import { SOLO_SEAT_PANEL_ID, SoloSeatTabs, soloSeatTabId } from "./SoloSeatTabs.js";
 import { UiIcon } from "../components/UiIcon.js";
 import { hasCardArtChoices, shownCardArt } from "../components/CardArtVariants.js";
 import { useCardArtCatalog } from "../game/cardArtCatalog.js";
@@ -111,10 +112,15 @@ function plainMatchupNotes(notes: string): string {
 function FirstPlayerChoice({
   className,
   nudge,
+  soloHeroes,
+  yourSeat,
   onChoose,
 }: {
   className: string;
   nudge: boolean;
+  /** Self-play names each seat's hero instead of "you". */
+  soloHeroes?: [string, string];
+  yourSeat: number;
   onChoose: (first: boolean) => void;
 }) {
   const intl = useIntl();
@@ -124,12 +130,20 @@ function FirstPlayerChoice({
       role="group"
       aria-label={intl.formatMessage({ id: "prep.firstPlayer.choose" })}
     >
-      <button type="button" className="btn-primary" onClick={() => onChoose(true)}>
-        {intl.formatMessage({ id: "prep.firstPlayer.goFirst" })}
-      </button>
-      <button type="button" className="btn-primary" onClick={() => onChoose(false)}>
-        {intl.formatMessage({ id: "prep.firstPlayer.goSecond" })}
-      </button>
+      {soloHeroes ? soloHeroes.map((hero, seat) => (
+        <button key={seat} type="button" className="btn-primary" onClick={() => onChoose(seat === yourSeat)}>
+          {intl.formatMessage({ id: "prep.solo.goesFirst" }, { player: seat + 1, hero })}
+        </button>
+      )) : (
+        <>
+          <button type="button" className="btn-primary" onClick={() => onChoose(true)}>
+            {intl.formatMessage({ id: "prep.firstPlayer.goFirst" })}
+          </button>
+          <button type="button" className="btn-primary" onClick={() => onChoose(false)}>
+            {intl.formatMessage({ id: "prep.firstPlayer.goSecond" })}
+          </button>
+        </>
+      )}
     </div>
   );
 }
@@ -144,7 +158,7 @@ export function PrepRoom() {
     prepDeck, prep, roomCode, matchmakingActive, matchAcceptanceRole,
     acceptMatch, declineMatch, playBotFromPrep, presentArena, presentDeck, prepUnready,
     chooseFirst, leave, selectPrepMatchup, setDeckArt, betaTester,
-    deckSwitch, deckSwitchLocked, dismissDeckSwitchLocked,
+    deckSwitch, deckSwitchLocked, dismissDeckSwitchLocked, switchSoloSeat,
   } = useStore(useShallow((state) => ({
     prepDeck: state.prepDeck,
     prep: state.prep,
@@ -165,9 +179,16 @@ export function PrepRoom() {
     deckSwitch: state.deckSwitch,
     deckSwitchLocked: state.deckSwitchLocked,
     dismissDeckSwitchLocked: state.dismissDeckSwitchLocked,
+    switchSoloSeat: state.switchSoloSeat,
   })));
-  const [sel, setSel] = useState<PrepSelection | null>(null);
-  const [restoredPresentationRoom, setRestoredPresentationRoom] = useState<string | null>(null);
+  const solo = prep?.soloGame === true;
+  // Self-play keeps each seat's draft apart; other rooms only ever show one seat.
+  const selectionSeat = solo ? prep.yourSeat : 0;
+  const [selections, setSelections] = useState<Record<number, PrepSelection>>({});
+  const sel = selections[selectionSeat] ?? null;
+  const setSel = (next: PrepSelection) => setSelections((current) => ({ ...current, [selectionSeat]: next }));
+  const [shownSeat, setShownSeat] = useState(selectionSeat);
+  const [restoredPresentations, setRestoredPresentations] = useState<readonly string[]>([]);
   const [preview, setPreview] = useState<{
     id: string;
     x: number;
@@ -313,6 +334,14 @@ export function PrepRoom() {
     artEnabled, artCatalog, deckArt, artDeckId, artDeckName, artPool, artDefaults, artLocked, artSeat, setDeckArt, intl,
   ]);
 
+  if (shownSeat !== selectionSeat) {
+    setShownSeat(selectionSeat);
+    setErrors([]);
+    setConfirmingGaps(null);
+    setArtTarget(null);
+    setPreview(null);
+  }
+
   if (!prepDeck) return <PrepDeckLoading onCancel={leave} />;
   const roomKey = roomCode ?? "queue";
   const imagesPending = (!deckImages.done || !deckImageArt) && imageWaitSkippedFor !== deckImageKey;
@@ -335,16 +364,16 @@ export function PrepRoom() {
   const loadingPool = deckSwitch !== null || deckOutOfSync;
   const deckLoading = loadingPool || imagesPending;
   // adjust state during render when the pool (re)loads — React-sanctioned pattern
-  const roomSelectionKey = `${roomKey}:${prepDeck.id}`;
+  const roomSelectionKey = `${roomKey}${solo ? `:seat${selectionSeat}` : ""}:${prepDeck.id}`;
   const selectionKey = `${roomSelectionKey}:${prepDeck.updatedAt}:${prepDeck.selectedMatchupId ?? "default"}`;
   let selection = sel?.forDeck === selectionKey
     ? sel
     : defaultSelection(prepDeck.decklist, selectionKey);
   // The server presentation can arrive after the local pool on reconnect.
   // Restore it once per room so subsequent preset changes keep their main deck.
-  if (prep?.yourPresentedDeck && restoredPresentationRoom !== roomSelectionKey) {
+  if (prep?.yourPresentedDeck && !restoredPresentations.includes(roomSelectionKey)) {
     selection = restoreMainDeck(selection, prep.yourPresentedDeck);
-    setRestoredPresentationRoom(roomSelectionKey);
+    setRestoredPresentations([...restoredPresentations, roomSelectionKey]);
   }
   if (selection !== sel) setSel(selection);
 
@@ -511,6 +540,7 @@ export function PrepRoom() {
   const die = prep?.die ?? null;
   const iChooseFirst = canChooseFirst({
     botGame: prep?.botGame === true,
+    soloGame: solo,
     dieWinner: die?.winner ?? null,
     yourSeat,
   });
@@ -518,6 +548,7 @@ export function PrepRoom() {
   const decisionStatus = firstPlayerStatus({
     opponentPresent: opp !== null,
     botGame: prep?.botGame,
+    soloGame: solo,
     dieWinner: die?.winner ?? null,
     startPlayer: prep?.startPlayer ?? null,
     yourSeat,
@@ -626,6 +657,7 @@ export function PrepRoom() {
   // The desktop sheet already states lock progress; the grid only explains
   // why it is disabled. While you pick turn order it also stops presenting
   // itself as the current task.
+  const arenaWaitingId = solo ? "prep.solo.arenaWaiting" : "prep.arena.waiting";
   const arenaHeading = deckStage
     ? "prep.arena.revealed"
     : choosingTurnOrder ? "prep.arena.pending" : "prep.arena.select";
@@ -633,7 +665,7 @@ export function PrepRoom() {
     ? null
     : choosingTurnOrder
       ? "prep.arena.afterTurnOrder"
-      : mobilePrepLayout && me?.arenaLocked ? "prep.arena.waiting" : null;
+      : mobilePrepLayout && me?.arenaLocked ? arenaWaitingId : null;
   const draftArena = {
     weaponIds: selection.weaponIndexes.map((index) => pool.weaponIds[index]!),
     equipment: selection.equipment,
@@ -676,7 +708,7 @@ export function PrepRoom() {
       ) : null}
     </section>
   ) : null;
-  const dieNotice = die && opp && !prep?.botGame ? (
+  const dieNotice = die && opp && !prep?.botGame && !solo ? (
     <p className="prep-die">
       {intl.formatMessage(
         { id: "prep.dieRoll" },
@@ -719,16 +751,28 @@ export function PrepRoom() {
       {prep?.deadlineAt ? <> · <DeadlineCountdown deadlineAt={prep.deadlineAt} /></> : null}
     </button>
   );
+  const soloHeroes: [string, string] | undefined = solo && me && opp
+    ? [prep.seats[0]!.heroName, prep.seats[1]!.heroName]
+    : undefined;
   const turnOrderLine = prep?.startPlayer != null ? (
     <p className="prep-sheet-turn">
-      {intl.formatMessage(
-        { id: prep.startPlayer === yourSeat ? "prep.turnOrder.youFirst" : "prep.turnOrder.youSecond" },
-        { order: (chunks) => <strong>{chunks}</strong> },
-      )}
+      {soloHeroes
+        ? intl.formatMessage(
+          { id: "prep.solo.firstPlayer" },
+          {
+            player: prep.startPlayer + 1,
+            hero: soloHeroes[prep.startPlayer],
+            order: (chunks) => <strong>{chunks}</strong>,
+          },
+        )
+        : intl.formatMessage(
+          { id: prep.startPlayer === yourSeat ? "prep.turnOrder.youFirst" : "prep.turnOrder.youSecond" },
+          { order: (chunks) => <strong>{chunks}</strong> },
+        )}
     </p>
   ) : null;
   const choosePrompt = intl.formatMessage({
-    id: prep?.botGame ? "prep.practiceChooseFirst" : "prep.rollWonYou",
+    id: solo ? "prep.solo.chooseFirst" : prep?.botGame ? "prep.practiceChooseFirst" : "prep.rollWonYou",
   });
   const opponentState = opp && prep ? opponentPrepState(prep.phase, opp) : null;
   const sheetAction = (
@@ -740,6 +784,8 @@ export function PrepRoom() {
           <FirstPlayerChoice
             className="prep-pick"
             nudge={nudge === "first-player"}
+            soloHeroes={soloHeroes}
+            yourSeat={yourSeat}
             onChoose={chooseFirst}
           />
         </>
@@ -748,7 +794,7 @@ export function PrepRoom() {
       ) : arenaStage && !me?.arenaLocked ? (
         <div className={`prep-sheet-lock${nudge === "arena" ? " prep-nudge" : ""}`}>{arenaLockButton}</div>
       ) : arenaStage ? (
-        <p className="prep-sheet-prompt">{intl.formatMessage({ id: "prep.arena.waiting" })}</p>
+        <p className="prep-sheet-prompt">{intl.formatMessage({ id: arenaWaitingId })}</p>
       ) : deckStage ? (
         <div className="prep-sheet-ready">
           {mainCountMeter}
@@ -787,7 +833,15 @@ export function PrepRoom() {
         </div>
       </div>
 
-      <div className="prep-columns">
+      {solo && prep ? <SoloSeatTabs prep={prep} onSelect={switchSoloSeat} /> : null}
+      <div
+        className="prep-columns"
+        {...(solo ? {
+          id: SOLO_SEAT_PANEL_ID,
+          role: "tabpanel",
+          "aria-labelledby": soloSeatTabId(yourSeat as 0 | 1),
+        } : {})}
+      >
         {showAcceptPrompt ? null : deckLockedNotice}
         {!mobilePrepLayout && opp && prep ? (
           <PrepMatchSheet
@@ -923,6 +977,8 @@ export function PrepRoom() {
             <FirstPlayerChoice
               className="prep-float-pick"
               nudge={nudge === "first-player"}
+              soloHeroes={soloHeroes}
+              yourSeat={yourSeat}
               onChoose={chooseFirst}
             />
           ) : null}

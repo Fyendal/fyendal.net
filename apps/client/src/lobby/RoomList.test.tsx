@@ -141,7 +141,7 @@ describe("RoomList", () => {
     expect(html).toContain("Precon");
     expect(html).toContain(">Anyone</button>");
     expect(html).toContain(">Private</button>");
-    expect(html).toContain(">Bot</button>");
+    expect(html).toContain(">Solo</button>");
     expect(html).toMatch(/class="opponent-picker" role="group" aria-labelledby="[^"]+"/);
     expect(html).toContain("Get matched with the next player searching.");
     expect(html).not.toContain('role="switch"');
@@ -190,9 +190,9 @@ describe("RoomList", () => {
     });
     try {
       const html = renderLocalized(<Home />);
-      expect(html).toMatch(/<button[^>]*aria-pressed="true"[^>]*>(?:<span[^>]*><\/span>)?Bot<\/button>/);
-      expect(html).toContain("Choose a bot to practice against.");
-      expect(html).toContain('class="btn-cta">Play vs bot</button>');
+      expect(html).toMatch(/<button[^>]*aria-pressed="true"[^>]*>(?:<span[^>]*><\/span>)?Solo<\/button>/);
+      expect(html).toContain("Practice against a bot or play both sides yourself.");
+      expect(html).toContain('class="btn-cta">Play solo</button>');
       expect(html).toContain('<option value="cc" selected="">Classic Constructed</option>');
     } finally {
       vi.unstubAllGlobals();
@@ -216,7 +216,7 @@ describe("RoomList", () => {
     expect(html).toContain("对手");
     expect(html).toContain("寻找对局");
     expect(html).toContain("私密</button>");
-    expect(html).toContain("机器人</button>");
+    expect(html).toContain("单人</button>");
     expect(html).toContain("了解卡牌范围模式");
     expect(html).not.toContain("管理牌组");
   });

@@ -142,6 +142,7 @@ export function DeckDropdown({
   selected,
   cardPoolMode,
   deckPlayedAt,
+  ariaLabel,
   onOpen,
   onSelect,
 }: {
@@ -149,6 +150,7 @@ export function DeckDropdown({
   selected: DeckSummary | undefined;
   cardPoolMode: CardPoolMode;
   deckPlayedAt: Readonly<Record<string, number>>;
+  ariaLabel?: string;
   onOpen?: () => void;
   onSelect: (id: string) => void;
 }) {
@@ -167,7 +169,7 @@ export function DeckDropdown({
 
   return (
     <ListboxDropdown
-      ariaLabel={intl.formatMessage({ id: "common.deck" })}
+      ariaLabel={ariaLabel ?? intl.formatMessage({ id: "common.deck" })}
       sections={sections}
       trigger={selected
         ? <DeckOptionContent key={selected.id} deck={selected} />

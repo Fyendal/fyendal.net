@@ -6,7 +6,7 @@ import { UiIcon, type UiIconName } from "../components/UiIcon.js";
 const OPTIONS: readonly { mode: HomeGameMode; icon: UiIconName; label: string; hint: string }[] = [
   { mode: "find-match", icon: "friends", label: "lobby.home.opponentAnyone", hint: "lobby.home.opponentAnyoneHint" },
   { mode: "invite-friend", icon: "lock", label: "lobby.home.opponentPrivate", hint: "lobby.home.opponentPrivateHint" },
-  { mode: "bot", icon: "bot", label: "lobby.home.opponentBot", hint: "lobby.home.opponentBotHint" },
+  { mode: "solo", icon: "solo", label: "lobby.home.opponentSolo", hint: "lobby.home.opponentSoloHint" },
 ];
 
 /** Who the game is against; each choice explains itself in a tooltip, and
@@ -67,8 +67,8 @@ export function OpponentPicker({
 
 /** The start button's label names what it will do. */
 export function startMessageId(mode: HomeGameMode): string {
-  return mode === "bot"
-    ? "lobby.action.playBot"
+  return mode === "solo"
+    ? "lobby.action.playSolo"
     : mode === "invite-friend"
       ? "lobby.home.createRoom"
       : "lobby.action.findMatch";

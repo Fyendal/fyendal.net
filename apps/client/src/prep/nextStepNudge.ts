@@ -19,6 +19,7 @@ export function nextPrepStep(prep: PrepView | null): PrepStep | null {
   if (!me || !opponent) return null;
   if (prep.die && prep.startPlayer === null && canChooseFirst({
     botGame: prep.botGame === true,
+    soloGame: prep.soloGame === true,
     dieWinner: prep.die.winner,
     yourSeat: prep.yourSeat,
   })) return "first-player";

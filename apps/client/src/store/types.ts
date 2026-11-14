@@ -231,6 +231,8 @@ export interface StoreState {
   browserBotStatus: "fallback" | "refresh-required" | null;
   retryBrowserBot: () => void;
   botGame: boolean;
+  /** One account controls both seats of this private room. */
+  soloGame: boolean;
   playerProfiles: [PlayerProfileView, PlayerProfileView] | null;
   /** Per-seat printing id -> image id the server shared with this viewer. */
   cardArt: [Record<string, string>, Record<string, string>] | null;
@@ -281,6 +283,12 @@ export interface StoreState {
   playBotFromPrep: (format: Format, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
   /** End the finished bot game and start a new one with the same deck and bot. */
   playBotAgain: () => void;
+  /** Private room where this account prepares and plays both seats. */
+  createSoloRoom: (format: Format, deckId: string, opponentDeckId: string) => void;
+  /** Solo prep only: view and act as the given seat. */
+  switchSoloSeat: (seat: 0 | 1) => void;
+  /** End the finished solo game and start a new one with the same decks. */
+  playSoloAgain: () => void;
   joinRoom: (code: string, deckId?: string, spectate?: boolean) => void;
   inspectRoom: (code: string) => void;
   dismissInvite: (resetUrl?: boolean) => void;

@@ -18,6 +18,7 @@ import {
   loadPlaymatHintDismissed,
   loadBotMatchmakingPreference,
   loadHomeGameMode,
+  loadHomeSoloOpponentDeck,
   loadHomeFormat,
   loadLobbySettings,
   lobbySettingsStorageKey,
@@ -29,6 +30,7 @@ import {
   savePlaymatHintDismissed,
   saveBotMatchmakingPreference,
   saveHomeGameMode,
+  saveHomeSoloOpponentDeck,
   saveHomeFormat,
   saveLobbySettings,
 } from "../storage.js";
@@ -96,13 +98,29 @@ describe("client storage keys", () => {
   it("remembers the home game mode for each account across reloads", () => {
     const storage = memoryStorage();
     expect(loadHomeGameMode(storage, "Alice")).toBe("find-match");
-    saveHomeGameMode(storage, "Alice", "bot");
-    expect(loadHomeGameMode(storage, "ALICE")).toBe("bot");
+    saveHomeGameMode(storage, "Alice", "solo");
+    expect(loadHomeGameMode(storage, "ALICE")).toBe("solo");
     expect(loadHomeGameMode(storage, "Bob")).toBe("find-match");
     saveHomeGameMode(storage, "Bob", "invite-friend");
     expect(loadHomeGameMode(storage, "Bob")).toBe("invite-friend");
     storage.setItem("fyendal-home-game-mode-alice", "invalid");
     expect(loadHomeGameMode(storage, "Alice")).toBe("find-match");
+  });
+
+  it("reads a stored bot home mode as solo", () => {
+    const storage = memoryStorage();
+    storage.setItem("fyendal-home-game-mode-alice", "bot");
+    expect(loadHomeGameMode(storage, "Alice")).toBe("solo");
+  });
+
+  it("remembers the solo opponent deck per account and format", () => {
+    const storage = memoryStorage();
+    expect(loadHomeSoloOpponentDeck(storage, "Alice", "cc")).toBeNull();
+    saveHomeSoloOpponentDeck(storage, "Alice", "cc", "deck-b");
+    expect(loadHomeSoloOpponentDeck(storage, "ALICE", "cc")).toBe("deck-b");
+    expect(loadHomeSoloOpponentDeck(storage, "Alice", "silver-age")).toBeNull();
+    expect(loadHomeSoloOpponentDeck(storage, "Bob", "cc")).toBeNull();
+    expect(loadHomeSoloOpponentDeck(storage, null, "cc")).toBeNull();
   });
 
   it("remembers the home format for each account across reloads", () => {

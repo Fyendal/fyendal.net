@@ -2697,3 +2697,93 @@ describe("waiting-room deck switch", () => {
     expect(useStore.getState().deckSwitch).toEqual({ deckId: "precon-asr", deckName: "ASR deck" });
   });
 });
+
+describe("solo rooms", () => {
+  function soloPrep(yourSeat: 0 | 1, overrides: Record<string, unknown> = {}) {
+    return {
+      format: "cc",
+      phase: "select-arena",
+      soloGame: true,
+      seats: [
+        { username: "Alice", heroId: "HERO0", heroName: "Hero 0", ready: false, arenaLocked: false, connected: true },
+        { username: "Alice", heroId: "HERO1", heroName: "Hero 1", ready: false, arenaLocked: false, connected: true },
+      ],
+      yourSeat,
+      yourDeckId: yourSeat === 0 ? "precon-asb" : "precon-asr",
+      die: { rolls: [3, 5], winner: 1 },
+      startPlayer: 0,
+      ...overrides,
+    };
+  }
+
+  async function startSoloRoom() {
+    localStorage.setItem("fyendal-auth", JSON.stringify({ token: "token-a", username: "Alice" }));
+    const { useStore } = await import("../store.js");
+    useStore.getState().createSoloRoom("cc", "precon-asb", "precon-asr");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "room-created", code: "SOLO12", seat: 0, token: "solo-seat", version: 1 });
+    socket.message({ type: "prep-state", prep: soloPrep(0), version: 1 });
+    return { useStore, socket };
+  }
+
+  const sentOfType = (socket: FakeWebSocket, type: string) =>
+    socket.sent.map((raw) => JSON.parse(raw) as { type: string }).filter((message) => message.type === type);
+
+  it("creates a solo room and switches the prep seat and its deck", async () => {
+    const { useStore, socket } = await startSoloRoom();
+    expect(sentOfType(socket, "create-solo-room")).toEqual([
+      { type: "create-solo-room", format: "cc", deckId: "precon-asb", opponentDeckId: "precon-asr" },
+    ]);
+    await vi.waitFor(() => expect(useStore.getState().prepDeck?.id).toBe("precon-asb"));
+    expect(useStore.getState()).toMatchObject({ screen: "prep", soloGame: true, botGame: false });
+
+    useStore.getState().switchSoloSeat(1);
+    expect(sentOfType(socket, "solo-seat")).toEqual([{ type: "solo-seat", seat: 1 }]);
+    socket.message({ type: "prep-state", prep: soloPrep(1), version: 1 });
+    await vi.waitFor(() => expect(useStore.getState().prepDeck?.id).toBe("precon-asr"));
+
+    // Back on seat 0, its pool comes from the cache in the same update.
+    useStore.getState().switchSoloSeat(0);
+    socket.message({ type: "prep-state", prep: soloPrep(0), version: 1 });
+    expect(useStore.getState().prepDeck?.id).toBe("precon-asb");
+  });
+
+  it("moves to the other seat once the viewed seat locks its arena or readies", async () => {
+    const { useStore, socket } = await startSoloRoom();
+    const arena = { weaponIds: [], equipment: {} };
+    const locked = soloPrep(0, { yourArena: arena });
+    locked.seats[0] = { ...locked.seats[0]!, arenaLocked: true };
+    socket.message({ type: "prep-state", prep: locked, version: 2 });
+    expect(sentOfType(socket, "solo-seat")).toEqual([{ type: "solo-seat", seat: 1 }]);
+
+    const deckStage = soloPrep(1, { phase: "select-deck", yourArena: arena });
+    deckStage.seats = deckStage.seats.map((seat) => ({ ...seat, arenaLocked: true, arena }));
+    socket.message({ type: "prep-state", prep: deckStage, version: 3 });
+    expect(sentOfType(socket, "solo-seat")).toHaveLength(1);
+    const ready = { ...deckStage, seats: [deckStage.seats[0]!, { ...deckStage.seats[1]!, ready: true }] };
+    socket.message({ type: "prep-state", prep: ready, version: 4 });
+    expect(sentOfType(socket, "solo-seat")).toEqual([{ type: "solo-seat", seat: 1 }, { type: "solo-seat", seat: 0 }]);
+    expect(useStore.getState().soloGame).toBe(true);
+  });
+
+  it("ends a solo game explicitly and recreates it on Play again", async () => {
+    const { useStore, socket } = await startSoloRoom();
+    socket.message({ type: "game-started" });
+    socket.message({
+      ...staleState,
+      version: 5,
+      soloGame: true,
+      boardSeat: 0,
+      view: { ...staleState.view, phase: "game-over", winner: 0 },
+    });
+    expect(useStore.getState()).toMatchObject({ screen: "game", soloGame: true, botGame: false });
+
+    useStore.getState().playSoloAgain();
+    expect(sentOfType(socket, "leave-room")).toEqual([{ type: "leave-room", endGame: true }]);
+    expect(useStore.getState()).toMatchObject({ soloGame: false, roomCode: null, roomStartPending: true });
+    socket.message({ type: "left", playAgainSolo: { format: "cc", deckId: "precon-asb", opponentDeckId: "precon-asr" } });
+    expect(sentOfType(socket, "create-solo-room")).toHaveLength(2);
+    expect(useStore.getState().soloGame).toBe(true);
+  });
+});

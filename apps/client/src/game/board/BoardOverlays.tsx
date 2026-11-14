@@ -41,7 +41,7 @@ export function BoardOverlays({
   onCloseOverlay,
   onInspectCard,
   opponentUsername,
-  botGame,
+  practiceGame,
   gameOverClock,
   botSeat,
   drawOfferSeat,
@@ -78,7 +78,8 @@ export function BoardOverlays({
   onCloseOverlay: () => void;
   onInspectCard: (cardId: string | null) => void;
   opponentUsername: string | null;
-  botGame: boolean;
+  /** Bot or self-play: no human opponent to befriend. */
+  practiceGame: boolean;
   gameOverClock: GameClockSummary | null;
   botSeat: 0 | 1 | null;
   drawOfferSeat: number | undefined;
@@ -153,7 +154,7 @@ export function BoardOverlays({
           clock={gameOverClock}
           botSeat={botSeat}
           onClose={onDismissGameOver}
-          friendAction={!replaying && !botGame && !spectating && opponentUsername
+          friendAction={!replaying && !practiceGame && !spectating && opponentUsername
             ? <PostGameFriendAction username={opponentUsername} />
             : null}
         />

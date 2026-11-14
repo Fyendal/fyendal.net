@@ -139,7 +139,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent: sendStoreIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, endTurnWarning, sendPassUntil, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, clock, clockReceivedAt, replayClock, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, soloGame, betaTester, sendIntent: sendStoreIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, endTurnWarning, sendPassUntil, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, clock, clockReceivedAt, replayClock, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -156,6 +156,7 @@ export function GameBoard() {
       spectatorCount: state.spectatorCount,
       spectatorUsernames: state.spectatorUsernames,
       botGame: state.botGame,
+      soloGame: state.soloGame,
       betaTester: state.betaTester,
       sendIntent: state.sendIntent,
       sendPriorityMode: state.sendPriorityMode,
@@ -222,6 +223,8 @@ export function GameBoard() {
     };
   }));
   const [replayShareOpen, setReplayShareOpen] = useState(false);
+  // Neither bot nor self-play has a human opponent for draws, idle claims or friend actions.
+  const practiceGame = botGame || soloGame;
   const { view, update: viewUpdate } = useOpponentPlayPresentation({
     view: authoritativeView,
     update: authoritativeViewUpdate,
@@ -422,7 +425,7 @@ export function GameBoard() {
     volume: soundEffectsVolume,
     seat: spectating ? null : yourSeat,
     priorityAlertMode,
-    botGame,
+    botGame: practiceGame,
     achievementToastVisible: matchAchievements.toast.length > 0,
   });
   const arsenalDecisionKey =
@@ -671,7 +674,7 @@ export function GameBoard() {
     : replayNotes.find((note) =>
         note.roomVersion === liveNoteRoomVersion
         || (note.roomVersion === undefined && note.frame === liveNoteFrame))?.text ?? null;
-  const canSendEmote = !spectating && !replaying && connected;
+  const canSendEmote = !spectating && !replaying && connected && !soloGame;
   const authoritativeMe = view.players[seat]!;
   const me = presentedView.players[seat]!;
   const opp = presentedView.players[seat === 0 ? 1 : 0]!;
@@ -839,7 +842,7 @@ export function GameBoard() {
   const oppLastAction = !spectating && yourSeat !== null ? (lastActionAt?.[1 - seat] ?? 0) : 0;
   const oppIdleMs = oppLastAction > 0 ? now - oppLastAction : 0;
   const showIdleToast = shouldShowIdleVictoryClaim({
-    botGame,
+    botGame: practiceGame,
     replaying,
     gameOver: view.phase === "game-over",
     waitingOnOpponent: waitingOnOpp,
@@ -1380,7 +1383,7 @@ export function GameBoard() {
     <PlayerNameplate
       placement="opponent"
       profile={playerProfiles[1 - seat]!}
-      actions={authUser && roomCode && !spectating && !botGame && !replaying ? (
+      actions={authUser && roomCode && !spectating && !practiceGame && !replaying ? (
         <OpponentActions
           username={playerProfiles[1 - seat]!.username}
           roomCode={roomCode}
@@ -1861,7 +1864,7 @@ export function GameBoard() {
         onUndo={canUndo ? undoAndDismissAnnouncement : null}
         undoDisabled={roomCommandPending}
         onLeave={leave}
-        leaveAction={botGame && !spectating ? "end-game" : "leave"}
+        leaveAction={practiceGame && !spectating ? "end-game" : "leave"}
         onConcede={
           !spectating && !replaying && view.phase !== "game-over"
             ? () => send({ kind: "concede" })
@@ -1869,7 +1872,7 @@ export function GameBoard() {
         }
         drawOfferSeat={view.drawOfferSeat}
         drawSeat={seat}
-        onDrawIntent={!spectating && !replaying && !botGame && view.phase !== "game-over"
+        onDrawIntent={!spectating && !replaying && !practiceGame && view.phase !== "game-over"
           ? (kind) => send({ kind })
           : null}
         spectating={spectating}
@@ -2022,7 +2025,7 @@ export function GameBoard() {
         gameOverDismissed={gameOverDismissed}
         getRecordedViews={getRecordedViews}
         replayViews={replayViews}
-        replayAvailable={replayFrames > 0}
+        replayAvailable={replayFrames > 0 && !soloGame}
         onWatchReplay={watchReplay}
         onDownloadReplay={downloadReplay}
         onLeave={leave}
@@ -2032,13 +2035,13 @@ export function GameBoard() {
         onCloseOverlay={() => setOverlay(null)}
         onInspectCard={setInspectedCardId}
         opponentUsername={playerProfiles?.[1 - seat]?.username ?? null}
-        botGame={botGame}
+        practiceGame={practiceGame}
         gameOverClock={replaying ? replayClock : clock}
         botSeat={botGame && !replaying && yourSeat !== null ? (yourSeat === 0 ? 1 : 0) : null}
         drawOfferSeat={view.drawOfferSeat}
-        onAcceptDraw={!spectating && !replaying && !botGame && view.phase !== "game-over"
+        onAcceptDraw={!spectating && !replaying && !practiceGame && view.phase !== "game-over"
           ? () => send({ kind: "accept-draw" }) : null}
-        onDeclineDraw={!spectating && !replaying && !botGame && view.phase !== "game-over"
+        onDeclineDraw={!spectating && !replaying && !practiceGame && view.phase !== "game-over"
           ? () => send({ kind: "decline-draw" }) : null}
         standingOrders={inspectedStandingOrders
           ? { model: inspectedStandingOrders, onSetOrder: standingOrders.onSetOrder }

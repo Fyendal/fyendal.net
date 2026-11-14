@@ -11,7 +11,7 @@ import { deckArtIsCustom, useCardArtCatalog } from "../game/cardArtCatalog.js";
 import { shownCardArt } from "../components/CardArtVariants.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { UiIcon } from "../components/UiIcon.js";
-import { BotOpponentModal } from "./BotOpponentModal.js";
+import { SoloModeModal } from "./SoloModeModal.js";
 import { OpponentPicker, startMessageId } from "./OpponentPicker.js";
 import { CardPoolHelp } from "./CardPoolHelp.js";
 import { CARD_POOL_MODES } from "./CardPoolModeControl.js";
@@ -38,6 +38,7 @@ export function DeckDetailModal(props: {
     cardPoolModes,
     createBotRoom,
     createRoom,
+    createSoloRoom,
     queuedFormat,
     queueJoin,
     queueLeave,
@@ -49,6 +50,7 @@ export function DeckDetailModal(props: {
     cardPoolModes: state.cardPoolModes,
     createBotRoom: state.createBotRoom,
     createRoom: state.createRoom,
+    createSoloRoom: state.createSoloRoom,
     queuedFormat: state.queuedFormat,
     queueJoin: state.queueJoin,
     queueLeave: state.queueLeave,
@@ -58,7 +60,7 @@ export function DeckDetailModal(props: {
   const [mode, setMode] = useState<HomeGameMode>(() =>
     typeof localStorage === "undefined" ? "find-match" : loadHomeGameMode(localStorage, authUser)
   );
-  const [choosingBot, setChoosingBot] = useState(false);
+  const [choosingSolo, setChoosingSolo] = useState(false);
   const [artOk, setArtOk] = useState(true);
   const [headshotOk, setHeadshotOk] = useState(true);
   const poolId = useId();
@@ -73,15 +75,20 @@ export function DeckDetailModal(props: {
   const artCatalog = useCardArtCatalog(betaTester && deckArtIsCustom(deck.art));
   const heroArt = artCatalog && heroCard ? shownCardArt(artCatalog, heroCard.id, deck.art) : undefined;
 
-  if (choosingBot) {
+  if (choosingSolo) {
     return (
-      <BotOpponentModal
+      <SoloModeModal
         format={format}
-        onSelect={(bot, searchForPlayer) => {
+        deckId={deck.id}
+        onSelectBot={(bot, searchForPlayer) => {
           createBotRoom(format, deck.id, bot, searchForPlayer);
           props.onClose();
         }}
-        onClose={() => setChoosingBot(false)}
+        onStartSolo={(opponentDeckId) => {
+          createSoloRoom(format, deck.id, opponentDeckId);
+          props.onClose();
+        }}
+        onClose={() => setChoosingSolo(false)}
       />
     );
   }
@@ -93,8 +100,8 @@ export function DeckDetailModal(props: {
 
   const start = () => {
     if (queued || blocked.length > 0) return;
-    if (mode === "bot") {
-      setChoosingBot(true);
+    if (mode === "solo") {
+      setChoosingSolo(true);
       return;
     }
     if (mode === "find-match") {

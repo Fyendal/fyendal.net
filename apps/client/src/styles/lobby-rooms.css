@@ -585,3 +585,58 @@
   background: rgba(0, 0, 0, 0.25); user-select: all;
 }
 .lobby-replay-error { text-align: center; margin: 9px 0 0; }
+
+.solo-mode-modal { width: min(620px, calc(100vw - 32px)); }
+.solo-mode-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: 12px;
+}
+.solo-mode-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 18px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  clip-path: none;
+  background: radial-gradient(120% 140% at 100% 50%, #3a2716 0%, #211a15 60%);
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+}
+.solo-mode-card:hover { border-color: var(--border-strong); }
+.solo-mode-card:hover > strong { color: var(--gold); }
+.solo-mode-card:focus-visible { outline: 2px solid var(--gold); outline-offset: -4px; }
+.solo-mode-card > strong { color: #f6e8c6; font: 700 19px/1.2 var(--font-lobby-title); }
+.solo-mode-card > small { color: var(--text-muted); font-size: 13px; line-height: 1.4; }
+.solo-mode-card > .solo-mode-icon { font-size: 26px; color: var(--gold); }
+/* The deck list opens past the dialog's edge, like the create-room picker. */
+@media (min-width: 621px) {
+  .solo-both-modal { overflow: visible; }
+}
+.solo-both-form { display: grid; gap: 16px; }
+.solo-both-field { display: grid; gap: 6px; min-width: 0; }
+.solo-both-field > span { color: var(--text-muted); font-size: 13px; }
+.solo-both-own { color: #f6e8c6; overflow-wrap: anywhere; }
+.solo-both-import {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 6px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--gold);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.solo-both-import:hover { text-decoration: underline; text-underline-offset: 3px; }
+.solo-both-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; }

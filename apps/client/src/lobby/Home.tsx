@@ -8,7 +8,7 @@ import playPoster from "../../../assets/play-poster.jpg";
 import { deckChoicesFor, deckIsLegalForRoom, sortDecksForPicker } from "./DeckGrid.js";
 import { DeckDropdown } from "./CreateRoomModal.js";
 import { RoomCard } from "./RoomCard.js";
-import { BotOpponentModal } from "./BotOpponentModal.js";
+import { SoloModeModal } from "./SoloModeModal.js";
 import { CardPoolHelp } from "./CardPoolHelp.js";
 import { OpponentPicker, startMessageId } from "./OpponentPicker.js";
 import { formatSelectLabel } from "./FormatBadge.js";
@@ -22,6 +22,7 @@ export function Home() {
     cardPoolModes,
     createBotRoom,
     createRoom,
+    createSoloRoom,
     decks,
     decksLoading,
     deckPlayedAt,
@@ -38,6 +39,7 @@ export function Home() {
     cardPoolModes: state.cardPoolModes,
     createBotRoom: state.createBotRoom,
     createRoom: state.createRoom,
+    createSoloRoom: state.createSoloRoom,
     decks: state.decks,
     decksLoading: state.decksLoading,
     deckPlayedAt: state.deckPlayedAt,
@@ -61,7 +63,7 @@ export function Home() {
       ? "find-match"
       : loadHomeGameMode(localStorage, authUser)
   );
-  const [choosingBot, setChoosingBot] = useState(false);
+  const [choosingSolo, setChoosingSolo] = useState(false);
   const cardPoolId = useId();
   const opponentLabelId = useId();
 
@@ -95,7 +97,7 @@ export function Home() {
     } else if (mode === "invite-friend") {
       createRoom(format, selectedDeck.id, "private");
     } else {
-      setChoosingBot(true);
+      setChoosingSolo(true);
     }
   };
 
@@ -214,14 +216,19 @@ export function Home() {
         </form>
       </section>
 
-      {choosingBot && selectedDeck ? (
-        <BotOpponentModal
+      {choosingSolo && selectedDeck ? (
+        <SoloModeModal
           format={format}
-          onSelect={(bot, searchForPlayer) => {
+          deckId={selectedDeck.id}
+          onSelectBot={(bot, searchForPlayer) => {
             createBotRoom(format, selectedDeck.id, bot, searchForPlayer);
-            setChoosingBot(false);
+            setChoosingSolo(false);
           }}
-          onClose={() => setChoosingBot(false)}
+          onStartSolo={(opponentDeckId) => {
+            createSoloRoom(format, selectedDeck.id, opponentDeckId);
+            setChoosingSolo(false);
+          }}
+          onClose={() => setChoosingSolo(false)}
         />
       ) : null}
     </div>

@@ -315,3 +315,40 @@ describe("preparation stage layout", () => {
     expect(html).toContain("prep-match-accept-prompt");
   });
 });
+
+describe("solo prep room", () => {
+  function soloPrep(phase: PrepView["phase"], yourSeat: 0 | 1 = 1): PrepView {
+    const prep = pairedPrep(phase);
+    const seats = prep.seats.map((seat, index) => seat && ({ ...seat, username: "alice", heroName: `Hero ${index + 1}` }));
+    const { botGame: _botGame, ...rest } = prep;
+    return { ...rest, soloGame: true, yourSeat, seats: [seats[0]!, seats[1]!] };
+  }
+
+  it.each([false, true])("shows a tab per seat with its hero and status (mobile: %s)", (mobile) => {
+    const html = render(soloPrep("select-arena"), mobile, deck, { switchSoloSeat: vi.fn() });
+    expect(html).toContain('role="tablist" aria-label="Players"');
+    expect(html).toMatch(/id="solo-seat-tab-1"[^>]*role="tab"[^>]*aria-selected="true"/);
+    expect(html).toMatch(/id="solo-seat-tab-0"[^>]*role="tab"[^>]*aria-selected="false"/);
+    expect(html).toContain("<small>Player 1</small>Hero 1");
+    expect(html).toContain("Choosing arena cards");
+    expect(html).toContain('id="solo-seat-panel" role="tabpanel" aria-labelledby="solo-seat-tab-1"');
+  });
+
+  it("offers both heroes for the first-player pick without a die notice", () => {
+    const html = render(soloPrep("choose-first"), false, deck, { switchSoloSeat: vi.fn() });
+    expect(html).toContain("You play both sides: choose which player goes first.");
+    expect(html).toContain("Player 1 (Hero 1) goes first");
+    expect(html).toContain("Player 2 (Hero 2) goes first");
+    expect(html).not.toContain("Go second");
+    expect(html).not.toContain("prep-die");
+  });
+
+  it("names the hero going first once chosen", () => {
+    const html = render(soloPrep("select-deck"), false, deck, { switchSoloSeat: vi.fn() });
+    expect(html).toContain('<p class="prep-sheet-turn">Player 1 (Hero 1) goes <strong>first</strong></p>');
+  });
+
+  it("leaves seat tabs out of other rooms", () => {
+    expect(render(pairedPrep("select-arena"), false)).not.toContain("solo-seat-tab");
+  });
+});

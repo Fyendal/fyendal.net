@@ -8,7 +8,7 @@ import { AcceptHeroMatchup, MatchAcceptContent } from "../prep/AcceptHeroMatchup
 export function WaitingRoom() {
   const intl = useIntl();
   const {
-    roomCode, leave, declineMatch, spectating, botGame, prep, matchAcceptanceRole, acceptMatch,
+    roomCode, leave, declineMatch, spectating, botGame, soloGame, prep, matchAcceptanceRole, acceptMatch,
     pendingBotStart, botMatchTransition, acknowledgeBotMatchFallback, backgroundMatchmaking,
   } = useStore(
     useShallow((state) => ({
@@ -17,6 +17,7 @@ export function WaitingRoom() {
       declineMatch: state.declineMatch,
       spectating: state.spectating,
       botGame: state.botGame,
+      soloGame: state.soloGame,
       prep: state.prep,
       matchAcceptanceRole: state.matchAcceptanceRole,
       acceptMatch: state.acceptMatch,
@@ -114,7 +115,7 @@ export function WaitingRoom() {
         </p>
         <p className="muted">{intl.formatMessage({ id: "lobby.waiting.shareHint" })}</p>
         <button onClick={leave}>
-          {intl.formatMessage({ id: botGame ? "common.endGame" : "common.cancel" })}
+          {intl.formatMessage({ id: botGame || soloGame ? "common.endGame" : "common.cancel" })}
         </button>
       </div>
     </div>
