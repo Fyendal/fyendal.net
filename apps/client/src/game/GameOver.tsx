@@ -33,6 +33,7 @@ export function GameOver({
   friendAction = null,
   clock = null,
   botSeat = null,
+  solo = false,
 }: {
   view: GameView;
   seat: number;
@@ -48,6 +49,8 @@ export function GameOver({
   /** Final game clock; null for rooms and replays recorded before it existed. */
   clock?: GameClockSummary | null;
   botSeat?: 0 | 1 | null;
+  /** Both seats are the viewer's: no victory or defeat, only the named winner. */
+  solo?: boolean;
 }) {
   const intl = useIntl();
   const openingTooltipId = useId();
@@ -65,7 +68,7 @@ export function GameOver({
   const headline = winner === null
     ? intl.formatMessage({ id: "game.result.draw" })
     : intl.formatMessage({ id: "game.result.namedWinner" }, { winner: winnerName });
-  const resultLabel = winner === null || spectating || replaying
+  const resultLabel = winner === null || spectating || replaying || solo
     ? intl.formatMessage({ id: "game.over.matchComplete" })
     : intl.formatMessage({ id: winner === seat ? "game.result.victory" : "game.result.defeat" });
   const names: [string, string] = [

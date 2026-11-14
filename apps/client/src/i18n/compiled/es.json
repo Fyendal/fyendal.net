@@ -31647,6 +31647,16 @@
       "value": "LAYER STEP"
     }
   ],
+  "game.timing.namedChoosingBlocks": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " ELIGE BLOQUEOS"
+    }
+  ],
   "game.timing.namedPriority": [
     {
       "type": 0,
@@ -31779,6 +31789,24 @@
       "value": "El oponente pasó para terminar su turno. Si actúas, recuperará la prioridad."
     }
   ],
+  "game.turn.endPassPending.solo": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " pasó para terminar el turno. Si actúas ahora, "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " recupera la prioridad."
+    }
+  ],
   "game.turn.named": [
     {
       "type": 0,
@@ -31873,6 +31901,16 @@
     {
       "type": 0,
       "value": "Esperando al oponente…"
+    }
+  ],
+  "game.waiting.solo": [
+    {
+      "type": 0,
+      "value": "Turno de actuar de "
+    },
+    {
+      "type": 1,
+      "value": "hero"
     }
   ],
   "game.waiting.spectating": [

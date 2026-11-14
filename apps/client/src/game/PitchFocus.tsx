@@ -56,7 +56,7 @@ export function PitchFocus({ source, seat, motionPreference, getStackFocusOrigin
     )];
     const stackElement = candidates.find((element) => element.closest(".stack-float"));
     const sourceElement = (openedFrom.fromHand
-      ? candidates.find((element) => element.closest("#player-hand"))
+      ? candidates.find((element) => element.closest("#player-hand, .opp-hand"))
       : stackElement)
       ?? table.querySelector<HTMLElement>(`[data-card-stack-id="${instanceId}"]`)
       ?? candidates[0];

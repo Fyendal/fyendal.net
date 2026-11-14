@@ -10,6 +10,8 @@ export function snapshotBeforeReplay(state: StoreState): PreReplaySnapshot | nul
     actionCandidates: state.actionCandidates,
     endTurnWarning: state.endTurnWarning,
     yourSeat: state.yourSeat,
+    boardSeat: state.boardSeat,
+    soloGame: state.soloGame,
     spectating: state.spectating,
     spectatorCount: state.spectatorCount,
     spectatorUsernames: state.spectatorUsernames,
@@ -44,6 +46,7 @@ export function replayViewerProjection(
     cardArt: null,
     botGame: false,
     soloGame: false,
+    boardSeat: null,
     error: null,
   };
 }

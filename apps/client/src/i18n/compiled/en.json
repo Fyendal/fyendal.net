@@ -30763,6 +30763,16 @@
       "value": "LAYER STEP"
     }
   ],
+  "game.timing.namedChoosingBlocks": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " CHOOSING BLOCKS"
+    }
+  ],
   "game.timing.namedPriority": [
     {
       "type": 1,
@@ -30895,6 +30905,24 @@
       "value": "Opponent passed to end their turn. If you act, they will regain priority."
     }
   ],
+  "game.turn.endPassPending.solo": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " passed to end the turn. Acting now gives "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " priority again."
+    }
+  ],
   "game.turn.named": [
     {
       "type": 1,
@@ -30989,6 +31017,16 @@
     {
       "type": 0,
       "value": "Waiting for opponent…"
+    }
+  ],
+  "game.waiting.solo": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " to act"
     }
   ],
   "game.waiting.spectating": [

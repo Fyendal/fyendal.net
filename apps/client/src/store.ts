@@ -1116,7 +1116,7 @@ export const useStore = create<StoreState>((set, get) => {
         // keep recording frames even while watching a replay of this room
         const code = get().roomCode;
         const frames = code
-          ? replayRuntime.recordFrame(code, msg.version, msg.view, msg.yourSeat, msg.transition)
+          ? replayRuntime.recordFrame(code, msg.version, msg.view, msg.boardSeat ?? msg.yourSeat, msg.transition)
           : get().replayFrames;
         const commandState = acceptRoomCommandState(msg.version, msg);
         const clock = { clock: msg.clock ?? null, clockReceivedAt: performance.now() };
@@ -1185,6 +1185,7 @@ export const useStore = create<StoreState>((set, get) => {
           spectatorCount: msg.spectators ?? 0,
           botGame: msg.botGame === true,
           soloGame: msg.soloGame === true,
+          boardSeat: msg.boardSeat ?? null,
           botMatchTransition: null,
           lastActionAt: msg.lastActionAt,
           ...clock,

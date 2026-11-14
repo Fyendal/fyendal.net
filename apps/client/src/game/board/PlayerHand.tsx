@@ -9,15 +9,10 @@ import type {
   PlayableZone,
   PlayerView,
 } from "@fyendal/shared";
-import { cardData } from "@fyendal/cards/client";
 import { CardBack, CardFace } from "../Card.js";
 import { PreviewCardFace } from "../PreviewCardFace.js";
 import { cardLegalityExplanation } from "../causalExplanations.js";
-import {
-  canAddPaymentCard,
-  canAddResourcePaymentPitch,
-  isDiscardPayment,
-} from "../legalSelection.js";
+import type { canAddPaymentCard } from "../legalSelection.js";
 import { playableZoneTooltip } from "../playableZoneTooltip.js";
 import {
   motionLocationKey,
@@ -32,6 +27,7 @@ import { handFanSlotStyle } from "./handFan.js";
 import { presentedHandCount } from "../defenderState.js";
 import type { MotionPreference } from "../../storage.js";
 import { useMotionPreference } from "../motion/useMotionPreference.js";
+import { handCardState } from "./handCardState.js";
 
 type ResourcePayment = NonNullable<PendingDecision["resourcePayment"]>;
 
@@ -122,6 +118,7 @@ export function PlayerHand({
   replaying,
   motionPreference = "system",
   interaction,
+  inert = false,
 }: {
   view: GameView;
   player: PlayerView;
@@ -130,6 +127,8 @@ export function PlayerHand({
   replaying: boolean;
   motionPreference?: MotionPreference;
   interaction: PlayerHandInteraction;
+  /** Solo: this seat is not acting, so its cards show without affordances. */
+  inert?: boolean;
 }) {
   const intl = useIntl();
   const reducedMotion = useMotionPreference(motionPreference);
@@ -147,7 +146,7 @@ export function PlayerHand({
     handRef,
     preStackCards.map((card) => card.instanceId),
     reorderEnabled,
-    interaction.onHandDrop ? {
+    interaction.onHandDrop && !inert ? {
       action: (instanceId) => handDropAction(instanceId, {
         defending: interaction.defending,
         stageableIds: interaction.legalState.stageableDefenders,
@@ -176,7 +175,7 @@ export function PlayerHand({
   useEffect(() => {
     previousHandOrderRef.current = visibleCards.map((card) => card.instanceId);
   });
-  const playableZoneCards = spectating
+  const playableZoneCards = spectating || inert
     ? []
     : [...interaction.legalState.playableZones]
       .filter((entry): entry is [number, Exclude<PlayableZone, "deck">] => entry[1] !== "deck")
@@ -193,7 +192,7 @@ export function PlayerHand({
           .find((candidate) => candidate.instanceId === instanceId);
         return card ? [{ card, zone }] : [];
       });
-  const activatableZoneCards = spectating
+  const activatableZoneCards = spectating || inert
     ? []
     : [...player.graveyard, ...player.banish].filter((card) =>
       !interaction.optimisticallyHiddenIds.has(card.instanceId) &&
@@ -246,11 +245,6 @@ export function PlayerHand({
       behavior: "smooth",
     });
   };
-  const pitchValue = (instanceId: number) => {
-    const card = player.hand.find((candidate) => candidate.instanceId === instanceId);
-    return card ? (cardData[card.cardId]?.pitch ?? 0) : 0;
-  };
-  const discardPayment = isDiscardPayment(interaction.selectedPaymentVariants);
   const showBacks = spectating && view.phase !== "game-over" && !(replaying && player.hand.length > 0);
   // A focused source keeps its DOM node but leaves the fan.
   const fannedHandCards = visibleCards.filter((card) =>
@@ -309,53 +303,9 @@ export function PlayerHand({
               />
             ))
           : visibleCards.map((card) => {
-            const stageable = interaction.defending &&
-              interaction.legalState.stageableDefenders.has(card.instanceId);
-            const selected =
-              ((interaction.selection.kind === "play-hand" ||
-                interaction.selection.kind === "choose-hand-action") &&
-                interaction.selection.instanceId === card.instanceId) ||
-              (interaction.selection.kind === "activate" &&
-                interaction.selection.sourceInstanceId === card.instanceId) ||
-              interaction.preStackSelectedInstanceId === card.instanceId ||
-              (
-                interaction.boundedHandPick?.has(card.instanceId) === true &&
-                interaction.selectedBoundedChoiceOptionIds?.has(
-                  interaction.boundedHandPick.get(card.instanceId)!,
-                ) === true
-              );
-            const resourcePitchable = interaction.resourcePayment !== undefined && (
-              interaction.pitchSelection.includes(card.instanceId) ||
-              canAddResourcePaymentPitch(
-                interaction.resourcePayment,
-                player.resources + (player.chi ?? 0),
-                interaction.pitchSelection,
-                card.instanceId,
-                pitchValue,
-              )
-            );
-            const pitchable = interaction.selection.kind !== "none" && !selected && (
-              interaction.pitchSelection.includes(card.instanceId) ||
-              canAddPaymentCard(
-                interaction.selectedPaymentVariants,
-                interaction.pitchSelection,
-                card.instanceId,
-                pitchValue,
-              )
-            );
-            const actionable = interaction.choosingPitch
-              ? !selected && (interaction.resourcePayment ? resourcePitchable : pitchable)
-              : interaction.defending
-                ? stageable
-                : interaction.selection.kind !== "none"
-                  ? pitchable || selected
-                  : resourcePitchable ||
-                    interaction.choosingArsenal ||
-                    interaction.handPick?.has(card.instanceId) === true ||
-                    interaction.boundedHandPick?.has(card.instanceId) === true ||
-                    interaction.legalState.playableHand.has(card.instanceId) ||
-                    interaction.legalState.activatable.has(card.instanceId);
-            const explanation = !spectating && !replaying && !actionable &&
+            const state = handCardState(card, player, inert ? null : interaction);
+            const actionable = state.actionable;
+            const explanation = !inert && !spectating && !replaying && !actionable &&
               interaction.selection.kind === "none"
               ? cardLegalityExplanation(view, viewerSeat, interaction.legalIntents, card).text
               : undefined;
@@ -372,12 +322,10 @@ export function PlayerHand({
                 onClick={actionable && interaction.focusedSourceInstanceId !== card.instanceId
                   ? () => interaction.onCardClick(card) : undefined}
                 explanation={explanation}
-                selected={selected || (
-                  discardPayment && interaction.pitchSelection.includes(card.instanceId)
-                )}
-                pitched={!discardPayment && interaction.pitchSelection.includes(card.instanceId)}
+                selected={state.selected}
+                pitched={state.pitched}
                 highlighted={actionable}
-                dimmed={interaction.defending && !stageable}
+                dimmed={state.dimmed}
               />
             );
             })}

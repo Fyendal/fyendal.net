@@ -7,7 +7,7 @@ import { useShallow } from "zustand/react/shallow";
 import type { CardView, GameIntent, MeldSide, PassUntilMode } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { useStore } from "../store.js";
-import { cardPreviewSize, CardArtProvider, CardBack, CardFace, SquareCardPresentation } from "./Card.js";
+import { cardPreviewSize, CardArtProvider, SquareCardPresentation } from "./Card.js";
 import { ChainFloat } from "./ChainFloat.js";
 import { EndTurnPassToast } from "./EndTurnPassToast.js";
 import { StatusFloat, type PrimaryAction } from "./StatusFloat.js";
@@ -15,6 +15,7 @@ import {
   ChainPriorityStatus,
   ChainTimingStatus,
   PriorityFloat,
+  soloPriorityLabel,
   TurnTimingFloat,
 } from "./PriorityFloat.js";
 import { StackFloat } from "./StackFloat.js";
@@ -102,19 +103,15 @@ import { useGameShortcuts } from "./board/useGameShortcuts.js";
 import type { BoardOverlay } from "./board/BoardPrimitives.js";
 import { heroCard } from "./board/heroCard.js";
 import { PlayerHalf } from "./board/PlayerHalf.js";
-import { PlayerHand } from "./board/PlayerHand.js";
-import { handFanSlotStyle } from "./board/handFan.js";
+import { PlayerHand, type PlayerHandInteraction } from "./board/PlayerHand.js";
+import { OpponentHand } from "./board/OpponentHand.js";
+import { boardSeats, seatInteractive } from "./board/boardSeats.js";
 import { handPlayWindow } from "./board/handOrder.js";
 import { BoardOverlays, type BoardPreview } from "./board/BoardOverlays.js";
 import { GameClockPanel } from "./GameClockPanel.js";
 import { optimisticInteractionHiddenIds } from "./pendingInteraction.js";
 import { optimisticDefenderView } from "./optimisticDefenderStaging.js";
 import { optimisticInteractionView } from "./optimisticInteraction.js";
-import {
-  motionLocationKey,
-  opaqueMotionPresentationKey,
-  motionPresentationKey,
-} from "./motion/motionTypes.js";
 import { GameMotionLayer } from "./motion/GameMotionLayer.js";
 import { useGameMotion } from "./motion/useGameMotion.js";
 import { useGameSounds } from "./sound/useGameSounds.js";
@@ -139,7 +136,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, soloGame, betaTester, sendIntent: sendStoreIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, endTurnWarning, sendPassUntil, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, clock, clockReceivedAt, replayClock, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, boardSeat: soloBoardSeat, spectating, spectatorCount, spectatorUsernames, botGame, soloGame, betaTester, sendIntent: sendStoreIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, endTurnWarning, sendPassUntil, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, playSoloAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, clock, clockReceivedAt, replayClock, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -152,6 +149,7 @@ export function GameBoard() {
       pendingInteraction: state.pendingInteraction,
       pendingDefenderStageIds: state.pendingDefenderStageIds,
       yourSeat: state.yourSeat,
+      boardSeat: state.boardSeat,
       spectating: state.spectating,
       spectatorCount: state.spectatorCount,
       spectatorUsernames: state.spectatorUsernames,
@@ -172,6 +170,7 @@ export function GameBoard() {
       error: state.error,
       leave: state.leave,
       playBotAgain: state.playBotAgain,
+      playSoloAgain: state.playSoloAgain,
       opponentConnected: state.opponentConnected,
       connected: state.connected,
       connectionIssueVisible: state.connectionIssueVisible,
@@ -225,6 +224,8 @@ export function GameBoard() {
   const [replayShareOpen, setReplayShareOpen] = useState(false);
   // Neither bot nor self-play has a human opponent for draws, idle claims or friend actions.
   const practiceGame = botGame || soloGame;
+  // `yourSeat` is the acting seat; the board stays on `orientationSeat`.
+  const { boardSeat: orientationSeat, actingSeat } = boardSeats({ soloGame, boardSeat: soloBoardSeat, yourSeat });
   const { view, update: viewUpdate } = useOpponentPlayPresentation({
     view: authoritativeView,
     update: authoritativeViewUpdate,
@@ -348,7 +349,7 @@ export function GameBoard() {
   });
   const standingOrders = useStandingOrders({
     view: authoritativeView,
-    viewerSeat: spectating ? null : yourSeat,
+    viewerSeat: spectating || yourSeat === null ? null : orientationSeat,
     orders: standingOrderSettings,
     updateStandingOrder,
   });
@@ -622,7 +623,7 @@ export function GameBoard() {
   // what we see at once. A choice made here waits for the server to echo it
   // before the account copy may override it again.
   const ownsPlaymat = !spectating && !replaying && yourSeat !== null;
-  const matSeat: 0 | 1 = yourSeat === 1 ? 1 : 0;
+  const matSeat: 0 | 1 = orientationSeat;
   const pendingPlaymatRef = useRef<PlaymatId | null>(null);
   const carriedPlaymatRef = useRef(false);
   const chooseOwnPlaymat = (next: PlaymatId) => {
@@ -663,8 +664,8 @@ export function GameBoard() {
   });
 
   if (!view || !presentedView || (yourSeat === null && !spectating)) return null;
-  const causal = causalStatus(view, spectating ? null : yourSeat);
-  const seat: 0 | 1 = yourSeat === 1 ? 1 : 0; // spectators watch from seat 0's side of the table
+  const causal = causalStatus(view, spectating || soloGame ? null : yourSeat, { namedActors: soloGame });
+  const seat = orientationSeat;
   const liveNoteFrame = !replaying && replayFrames > 0 ? replayFrames - 1 : null;
   const liveNoteRoomVersion = !replaying && viewUpdate.source === "live"
     ? viewUpdate.roomVersion ?? null
@@ -675,14 +676,18 @@ export function GameBoard() {
         note.roomVersion === liveNoteRoomVersion
         || (note.roomVersion === undefined && note.frame === liveNoteFrame))?.text ?? null;
   const canSendEmote = !spectating && !replaying && connected && !soloGame;
-  const authoritativeMe = view.players[seat]!;
   const me = presentedView.players[seat]!;
   const opp = presentedView.players[seat === 0 ? 1 : 0]!;
+  const authoritativeActor = view.players[actingSeat]!;
+  const actor = presentedView.players[actingSeat]!;
+  const actorOpp = presentedView.players[actingSeat === 0 ? 1 : 0]!;
+  const topInteractive = soloGame && seatInteractive(opp.seat, yourSeat, spectating || replaying);
+  const bottomInert = soloGame && !seatInteractive(me.seat, yourSeat, spectating || replaying);
   const arenaPaymentCandidateIds = new Set(
     sel.kind !== "none" &&
       actionStep === "payment" &&
       (!stagedAdditionalCostDefinition || additionalCostConfirmed)
-      ? me.board
+      ? actor.board
           .filter((card) =>
             pitchSel.includes(card.instanceId) ||
             canAddPaymentCard(selectedPaymentVariants, pitchSel, card.instanceId)
@@ -691,14 +696,15 @@ export function GameBoard() {
       : [],
   );
   const authoritativeVisibleDeckTop = !spectating
-    ? visibleDeckTop(authoritativeMe, deckCardFeedback.shuffledSeats.has(authoritativeMe.seat))
+    ? visibleDeckTop(authoritativeActor, deckCardFeedback.shuffledSeats.has(authoritativeActor.seat))
     : undefined;
-  const myVisibleDeckTop = !spectating
-    ? visibleDeckTop(me, deckCardFeedback.shuffledSeats.has(me.seat))
+  const deckTopFor = (player: typeof me) => !spectating
+    ? visibleDeckTop(player, deckCardFeedback.shuffledSeats.has(player.seat))
     : undefined;
+  const actorVisibleDeckTop = deckTopFor(actor);
   const optimisticallyHiddenIds = optimisticInteractionHiddenIds(
     !spectating && !replaying ? (pendingInteraction?.intent ?? null) : null,
-    authoritativeMe,
+    authoritativeActor,
     authoritativeVisibleDeckTop,
   ) ?? EMPTY_INSTANCE_IDS;
   const hiddenHandIds = new Set(optimisticallyHiddenIds);
@@ -706,7 +712,7 @@ export function GameBoard() {
   const presentedHandCount = presentedDefenderHandCount(presentedView, seat, hiddenHandIds);
   const presentedOppHandCount = presentedDefenderHandCount(presentedView, opp.seat);
   const pd = presentedView.pendingDecision;
-  const myDecision = !spectating && pd !== null && pd.player === seat;
+  const myDecision = !spectating && pd !== null && pd.player === actingSeat;
   const showCardSearchOverlay = myDecision && isCardSearchOverlayDecision(pd);
   const pendingPreStackPlayId = (() => {
     const intent = !spectating && !replaying ? pendingInteraction?.intent : undefined;
@@ -722,14 +728,14 @@ export function GameBoard() {
     ?? (myDecision ? (pd.preStackSource?.card.instanceId ?? null) : null);
   const resourcePayment = myDecision ? pd.resourcePayment : undefined;
   const handPitchValue = (instanceId: number) => {
-    const card = me.hand.find((candidate) => candidate.instanceId === instanceId);
+    const card = actor.hand.find((candidate) => candidate.instanceId === instanceId);
     return card ? (cardData[card.cardId]?.pitch ?? 0) : 0;
   };
   const resourcePaymentSelected = resourcePayment
     ? pitchSel.reduce((total, instanceId) => total + handPitchValue(instanceId), 0)
     : 0;
   const resourcePaymentRequired = resourcePayment
-    ? Math.max(0, resourcePayment.cost - me.resources - (me.chi ?? 0))
+    ? Math.max(0, resourcePayment.cost - actor.resources - (actor.chi ?? 0))
     : 0;
   const livePriority: PriorityPresentation = {
     gameId: presentedView.gameId,
@@ -751,16 +757,16 @@ export function GameBoard() {
   // Gate the viewer's affordances only while a hand-off to them is in flight;
   // their own plays never wait.
   const awaitingHandoff = presentedPriority !== livePriority
-    && presentedPriority.holder !== seat
-    && presentedPriority.priorityPlayer !== seat;
+    && presentedPriority.holder !== actingSeat
+    && presentedPriority.priorityPlayer !== actingSeat;
   // An open resource payment is a hand-card choice, rather than an invitation
   // to start another play or ability from the arena or inactive zones.
   const boardActionState = choosingPitch || awaitingHandoff
     ? deriveBoardLegalState([], legal, true)
     : derived;
-  const myTurn = view.activePlayer === seat;
+  const myTurn = view.activePlayer === actingSeat;
   const activeHeroName = view.players[view.activePlayer]?.heroName ?? "";
-  const turnLabel = spectating
+  const turnLabel = spectating || soloGame
     ? intl.formatMessage({ id: "game.turn.named" }, { player: activeHeroName })
     : myTurn
       ? intl.formatMessage({ id: "game.turn.yours" })
@@ -773,10 +779,10 @@ export function GameBoard() {
     ...(activeChainLink?.additionalTargets ?? []).map((target) => target.ally.instanceId),
   ]);
   const optionCardLabels = cardChoiceLocationLabels(
-    me.heroInstanceId,
-    opp.heroInstanceId,
-    me.weapons.map((weapon) => weapon.instanceId),
-    me.arsenal.map((card) => card.instanceId),
+    actor.heroInstanceId,
+    actorOpp.heroInstanceId,
+    actor.weapons.map((weapon) => weapon.instanceId),
+    actor.arsenal.map((card) => card.instanceId),
     {
       yourHero: intl.formatMessage(
         { id: "game.zone.mine" },
@@ -795,24 +801,32 @@ export function GameBoard() {
     },
   );
   const showPriorityFloat = !spectating && !replaying && presentedPriority.priorityPlayer !== null;
-  const hasOwnPriority = showPriorityFloat && presentedPriority.priorityPlayer === seat;
+  const hasOwnPriority = showPriorityFloat && presentedPriority.priorityPlayer === actingSeat;
   const priorityHolder = presentedPriority.holder;
   const priorityHolderName = priorityHolder === null
     ? ""
     : (presentedView.players[priorityHolder]?.heroName ?? "");
-  const priorityLabel = presentedPriority.priorityPlayer === seat ? "YOUR PRIORITY" : "OPPONENT'S PRIORITY";
+  const priorityLabel = soloPriorityLabel(
+    soloGame,
+    presentedPriority.priorityPlayer === actingSeat,
+    presentedPriority.priorityPlayer === null
+      ? ""
+      : (presentedView.players[presentedPriority.priorityPlayer]?.heroName ?? ""),
+  );
+  const priorityMine = soloGame || presentedPriority.priorityPlayer === actingSeat;
   const priorityTimingLabel = presentedPriority.timingLabel;
   const showEndTurnPassToast =
     !spectating &&
     !replaying &&
     view.endTurnPassPending === true &&
-    view.activePlayer !== seat;
+    view.activePlayer !== actingSeat;
   const timingFloat = showPriorityFloat ? (
     <PriorityFloat
       turn={view.turn}
       turnLabel={turnLabel}
       timingLabel={priorityTimingLabel}
       priorityLabel={priorityLabel}
+      mine={priorityMine}
     />
   ) : !spectating && !replaying && pd ? (
     <TurnTimingFloat
@@ -825,6 +839,7 @@ export function GameBoard() {
     <ChainPriorityStatus
       timingLabel={priorityTimingLabel}
       priorityLabel={priorityLabel}
+      mine={priorityMine}
     />
   ) : pd ? (
     <ChainTimingStatus
@@ -838,7 +853,7 @@ export function GameBoard() {
   // Only the seat the game is NOT waiting on may claim — the idle player must
   // be the one holding up the game (their turn or their pending decision), so
   // you never see this off your own inaction.
-  const waitingOnOpp = pd !== null ? pd.player !== seat : view.activePlayer !== seat;
+  const waitingOnOpp = pd !== null ? pd.player !== actingSeat : view.activePlayer !== actingSeat;
   const oppLastAction = !spectating && yourSeat !== null ? (lastActionAt?.[1 - seat] ?? 0) : 0;
   const oppIdleMs = oppLastAction > 0 ? now - oppLastAction : 0;
   const showIdleToast = shouldShowIdleVictoryClaim({
@@ -854,7 +869,7 @@ export function GameBoard() {
 
   /** Short authoritative UI label projected for one of a source's abilities. */
   const abilityLabel = (sourceInstanceId: number, index: number) =>
-    abilityLabelForSource(me, view.chain, sourceInstanceId, index);
+    abilityLabelForSource(actor, view.chain, sourceInstanceId, index);
 
   const clickActivate = (sourceInstanceId: number) => () => {
     const indexes = abilityIndexes(actionCandidates, sourceInstanceId);
@@ -893,11 +908,11 @@ export function GameBoard() {
   const choosingArsenal = !replaying && myDecision && pd !== null && pd.kind === "arsenal";
   /** scripted card-picks whose options all live in my hand (Death Dealer,
    *  Reload, …): the card is clicked in the hand row — instanceId → optionId */
-  const handPick = replaying || !myDecision ? null : handCardChoiceOptions(pd, me.hand);
+  const handPick = replaying || !myDecision ? null : handCardChoiceOptions(pd, actor.hand);
   const boundedCardChoice = replaying || !myDecision ? null : boundedCardChoiceModel(pd);
   const boundedHandPick = replaying || !myDecision
     ? null
-    : boundedHandCardChoiceOptions(pd, me.hand);
+    : boundedHandCardChoiceOptions(pd, actor.hand);
   const toggleBoundedChoice = (optionId: string) => {
     if (!boundedCardChoice || boundedChoiceKey === null) return;
     setBoundedChoiceSelection((current) => {
@@ -945,7 +960,7 @@ export function GameBoard() {
         togglePitch(c.instanceId);
         return;
       }
-      const floating = me.resources + (me.chi ?? 0);
+      const floating = actor.resources + (actor.chi ?? 0);
       if (!canAddResourcePaymentPitch(resourcePayment, floating, pitchSel, c.instanceId, handPitchValue)) return;
       const payment = resourcePaymentIntent(resourcePayment, floating, [...pitchSel, c.instanceId], handPitchValue);
       if (payment) send(payment);
@@ -974,7 +989,7 @@ export function GameBoard() {
           pitchSel,
           c.instanceId,
           (instanceId) => {
-            const card = playerHand.find((candidate) => candidate.instanceId === instanceId);
+            const card = actor.hand.find((candidate) => candidate.instanceId === instanceId);
             return card ? (cardData[card.cardId]?.pitch ?? 0) : 0;
           },
         )
@@ -987,10 +1002,10 @@ export function GameBoard() {
 
   const selCardId: string | undefined = (() => {
     if (sel.kind === "play-hand" || sel.kind === "choose-hand-action") {
-      return me.hand.find((x) => x.instanceId === sel.instanceId)?.cardId;
+      return actor.hand.find((x) => x.instanceId === sel.instanceId)?.cardId;
     }
     if (sel.kind === "play-arsenal") {
-      return me.arsenal.find((x) => x.instanceId === sel.instanceId)?.cardId;
+      return actor.arsenal.find((x) => x.instanceId === sel.instanceId)?.cardId;
     }
     if (sel.kind === "play-zone") {
       return [
@@ -998,20 +1013,20 @@ export function GameBoard() {
           ...player.banish,
           ...player.graveyard,
         ]),
-        ...(myVisibleDeckTop ? [myVisibleDeckTop] : []),
+        ...(actorVisibleDeckTop ? [actorVisibleDeckTop] : []),
       ].find((x) => x.instanceId === sel.instanceId)?.cardId;
     }
     if (sel.kind === "activate") {
       const id = sel.sourceInstanceId;
-      if (id === me.heroInstanceId) return me.heroCardId;
+      if (id === actor.heroInstanceId) return actor.heroCardId;
       return [
-        ...me.hand,
-        ...me.arsenal,
-        ...me.weapons,
-        ...Object.values(me.equipment),
-        ...me.board,
-        ...me.graveyard,
-        ...me.banish,
+        ...actor.hand,
+        ...actor.arsenal,
+        ...actor.weapons,
+        ...Object.values(actor.equipment),
+        ...actor.board,
+        ...actor.graveyard,
+        ...actor.banish,
         ...view.chain.flatMap((link) => [
           link.attackingCard,
           ...link.defendingCards,
@@ -1061,10 +1076,10 @@ export function GameBoard() {
     if (allyIds.size === 0) return [];
     return [
       ...(heroOffered
-        ? [{ id: null as number | null, label: opp.heroName, card: heroCard(opp) }]
+        ? [{ id: null as number | null, label: actorOpp.heroName, card: heroCard(actorOpp) }]
         : []),
       ...[...allyIds].flatMap((id) => {
-        const card = opp.board.find((candidate) => candidate.instanceId === id);
+        const card = actorOpp.board.find((candidate) => candidate.instanceId === id);
         return card
           ? [{
               id: id as number | null,
@@ -1123,10 +1138,10 @@ export function GameBoard() {
     ];
   })();
   const controlledCards = [
-    ...me.hand,
-    ...me.board,
-    ...me.weapons,
-    ...Object.values(me.equipment).filter((card): card is CardView => card !== undefined),
+    ...actor.hand,
+    ...actor.board,
+    ...actor.weapons,
+    ...Object.values(actor.equipment).filter((card): card is CardView => card !== undefined),
   ];
   const alternativeCostChoices = [...alternativeCostSets.entries()].map(([key, instanceIds]) => ({
     key,
@@ -1136,11 +1151,11 @@ export function GameBoard() {
     ),
   }));
   const stagedAdditionalCost = stagedAdditionalCostDefinition ? (() => {
-    const handCards = me.hand.filter((card) => stagedAdditionalCostCandidateIds.has(card.instanceId));
+    const handCards = actor.hand.filter((card) => stagedAdditionalCostCandidateIds.has(card.instanceId));
     const arenaCards = [
-      ...me.board,
-      ...me.weapons,
-      ...Object.values(me.equipment).filter((card): card is CardView => card !== undefined),
+      ...actor.board,
+      ...actor.weapons,
+      ...Object.values(actor.equipment).filter((card): card is CardView => card !== undefined),
     ].filter((card) => stagedAdditionalCostCandidateIds.has(card.instanceId));
     return {
       cardLabel: stagedAdditionalCostDefinition.cardLabel,
@@ -1221,7 +1236,7 @@ export function GameBoard() {
     sendPassUntil(mode);
   };
   // The server's turn latch also stops where the end-turn warning would ask.
-  const passUntilWaiting = passUntilPaused(view, seat, passUntil, legal) || (passUntil === "turn" && endTurnWarning);
+  const passUntilWaiting = passUntilPaused(view, actingSeat, passUntil, legal) || (passUntil === "turn" && endTurnWarning);
   const passUntilControl = (placement: "hud" | "toolbar") => passUntilAvailable ? (
     <PassUntilControl
       mode={passUntil}
@@ -1339,7 +1354,7 @@ export function GameBoard() {
     if (event.defaultPrevented) return;
 
     const insideChoiceSurface = target.closest(
-      "#player-hand, .decision-float, .card-search-overlay, .pitch-focus-card",
+      "#player-hand, .opp-hand-interactive, .decision-float, .card-search-overlay, .pitch-focus-card",
     ) !== null;
     const dismissal = handChoiceDismissal(
       sel.kind === "play-hand" || sel.kind === "choose-hand-action",
@@ -1383,6 +1398,7 @@ export function GameBoard() {
     <PlayerNameplate
       placement="opponent"
       profile={playerProfiles[1 - seat]!}
+      name={soloGame ? opp.heroName : undefined}
       actions={authUser && roomCode && !spectating && !practiceGame && !replaying ? (
         <OpponentActions
           username={playerProfiles[1 - seat]!.username}
@@ -1396,55 +1412,44 @@ export function GameBoard() {
     <PlayerNameplate
       placement="self"
       profile={playerProfiles[seat]!}
+      name={soloGame ? me.heroName : undefined}
       actions={authUser && !spectating && !replaying && !mobileFloatViewport && !mobileLandscapeViewport ? (
         <span ref={setSocialAnchor} className="nameplate-social-slot" />
       ) : null}
     />
   ) : null;
-  const oppHandRevealed = view.phase === "game-over" || replaying;
-  const oppRevealedHand = oppHandRevealed
-    ? opp.hand.filter((card) => !stagedIds.has(card.instanceId))
-    : [];
+  const handInteraction: PlayerHandInteraction = {
+    legalState: boardActionState,
+    legalIntents: legal,
+    selection: sel,
+    preStackSelectedInstanceId,
+    pitchSelection: pitchSel,
+    choosingPitch,
+    focusedSourceInstanceId: pitchSource?.fromHand ? pitchSource.card.instanceId : null,
+    selectedPaymentVariants:
+      stagedAdditionalCostDefinition && !additionalCostConfirmed
+        ? []
+        : selectedPaymentVariants,
+    resourcePayment,
+    stagedIds,
+    optimisticallyHiddenIds,
+    defending,
+    choosingArsenal,
+    handPick,
+    boundedHandPick,
+    selectedBoundedChoiceOptionIds,
+    onCardClick: onHandClick,
+    onActivate: (instanceId) => clickActivate(instanceId)(),
+    onSelect: setSel,
+  };
   const oppHand = (
-    <div
-      className={`opp-hand${oppHandRevealed ? " opp-hand-revealed" : ""}`}
-      data-motion-zone={motionLocationKey({ kind: "hand", seat: opp.seat })}
-      role="group"
-      aria-label={intl.formatMessage({ id: "game.hand.opponentCount" }, { count: presentedOppHandCount })}
-      style={{
-        "--fan-n": Math.max(1, oppHandRevealed ? oppRevealedHand.length : presentedOppHandCount),
-      } as CSSProperties}
-    >
-      {oppHandRevealed
-        ? oppRevealedHand.map((card, i) => (
-            <CardFace
-              key={card.instanceId}
-              card={card}
-              style={handFanSlotStyle(i)}
-              motionKey={motionPresentationKey(
-                { kind: "hand", seat: opp.seat },
-                card.instanceId,
-              )}
-            />
-          ))
-        : Array.from({ length: presentedOppHandCount }, (_, i) => (
-            <CardBack
-              key={i}
-              label=""
-              size="hand"
-              style={handFanSlotStyle(i)}
-              motionKey={opaqueMotionPresentationKey(
-                { kind: "hand", seat: opp.seat },
-                i,
-              )}
-              motionZoneAnchor={i === presentedOppHandCount - 1
-                ? motionLocationKey({ kind: "hand", seat: opp.seat })
-                : undefined}
-            />
-          ))}
-      {presentedOppHandCount === 0 && <span className="muted">opponent has no cards in hand</span>}
-      <span className="opp-hand-count" aria-hidden="true">{presentedOppHandCount}</span>
-    </div>
+    <OpponentHand
+      player={opp}
+      presentedCount={presentedOppHandCount}
+      revealed={view.phase === "game-over" || replaying}
+      solo={soloGame && !spectating}
+      interaction={topInteractive ? handInteraction : null}
+    />
   );
   return (
     <EffectHeroesContext.Provider value={effectHeroList}>
@@ -1486,7 +1491,7 @@ export function GameBoard() {
           <PitchFocus
             key={pitchSource.card.instanceId}
             source={pitchSource}
-            seat={seat}
+            seat={actingSeat}
             motionPreference={motionPreference}
             getStackFocusOrigin={gameMotion.getStackFocusOrigin}
             getHandFocusOrigin={gameMotion.getHandFocusOrigin}
@@ -1506,11 +1511,15 @@ export function GameBoard() {
         <PlayerHalf
           player={opp}
           mine={false}
+          interactive={topInteractive}
+          revealsFaceDown={soloGame && !spectating}
           mirrored
           holdsPriority={priorityHolder === opp.seat}
+          priorityPulse={topInteractive && hasOwnPriority}
           ongoing={view.ongoing.filter((effect) => effect.seat === opp.seat)}
           gameOver={view.phase === "game-over"}
           replaying={replaying}
+          visibleDeckTop={soloGame ? deckTopFor(opp) : undefined}
           deckShuffling={deckCardFeedback.shuffledSeats.has(opp.seat)}
           interaction={playerHalfInteraction}
           latestEmote={latestEmote}
@@ -1535,7 +1544,7 @@ export function GameBoard() {
           ) : null}
           <div className="mat-divider-center">
             {showEndTurnPassToast && !mobileFloatViewport
-              ? <EndTurnPassToast placement="divider" />
+              ? <EndTurnPassToast placement="divider" passedHeroName={soloGame ? activeHeroName : undefined} />
               : null}
             {timingFloat}
             <div className="mat-divider-mini-dock" ref={setSplitLineMiniHost} />
@@ -1550,13 +1559,14 @@ export function GameBoard() {
           // whenever that arsenal contains only face-down cards. Replays keep
           // their recorded player perspective while exposing replay data.
           mine={!spectating || replaying}
+          interactive={bottomInert ? false : undefined}
           mirrored={false}
           holdsPriority={priorityHolder === me.seat}
-          priorityPulse={hasOwnPriority}
+          priorityPulse={!bottomInert && hasOwnPriority}
           ongoing={view.ongoing.filter((effect) => effect.seat === me.seat)}
           gameOver={view.phase === "game-over"}
           replaying={replaying}
-          visibleDeckTop={myVisibleDeckTop}
+          visibleDeckTop={deckTopFor(me)}
           deckShuffling={deckCardFeedback.shuffledSeats.has(me.seat)}
           interaction={playerHalfInteraction}
           latestEmote={latestEmote}
@@ -1581,36 +1591,16 @@ export function GameBoard() {
           spectating={spectating}
           replaying={replaying}
           motionPreference={motionPreference}
+          inert={bottomInert}
           interaction={{
-            legalState: boardActionState,
-            legalIntents: legal,
-            selection: sel,
-            preStackSelectedInstanceId,
-            pitchSelection: pitchSel,
-            choosingPitch,
-            focusedSourceInstanceId: pitchSource?.fromHand ? pitchSource.card.instanceId : null,
-            selectedPaymentVariants:
-              stagedAdditionalCostDefinition && !additionalCostConfirmed
-                ? []
-                : selectedPaymentVariants,
-            resourcePayment,
-            stagedIds,
-            optimisticallyHiddenIds,
-            defending,
-            choosingArsenal,
-            handPick,
-            boundedHandPick,
-            selectedBoundedChoiceOptionIds,
-            onCardClick: onHandClick,
-            onActivate: (instanceId) => clickActivate(instanceId)(),
-            onSelect: setSel,
+            ...handInteraction,
             onHandDrop: (instanceId, action) => {
               if (action === "play") {
                 playHandFromDrop(instanceId);
                 return;
               }
               // Blocking and arsenal drops act exactly like clicking the card.
-              const card = me.hand.find((candidate) => candidate.instanceId === instanceId);
+              const card = actor.hand.find((candidate) => candidate.instanceId === instanceId);
               if (card) onHandClick(card);
             },
             onDragStart: (action) => {
@@ -1637,7 +1627,9 @@ export function GameBoard() {
           ? mobileFloatViewport
             ? intl.formatMessage({ id: "game.waiting.spectating.short" })
             : intl.formatMessage({ id: "game.waiting.spectating" }, { hero: activeHeroName })
-          : intl.formatMessage({ id: "game.waiting.opponent" })}
+          : soloGame
+            ? intl.formatMessage({ id: "game.waiting.solo" }, { hero: priorityHolderName || activeHeroName })
+            : intl.formatMessage({ id: "game.waiting.opponent" })}
       </div>
 
       <MobileHandToggle
@@ -1647,7 +1639,7 @@ export function GameBoard() {
       />
 
       {showEndTurnPassToast && mobileFloatViewport
-        ? <EndTurnPassToast placement="mobile-hand" />
+        ? <EndTurnPassToast placement="mobile-hand" passedHeroName={soloGame ? activeHeroName : undefined} />
         : null}
 
       {/* ── floating status window: life + remaining AP + pass.
@@ -1734,7 +1726,7 @@ export function GameBoard() {
 
       {/* ── floating decision window: prompts, choices, pitch selection ── */}
       {gameMotion.turnStartUiReady ? <DecisionFloat
-        viewerSeat={seat}
+        viewerSeat={actingSeat}
         optionHotkeys={optionHotkeys}
         lethalConfirmation={confirmLethalPass && lethalRisk
           ? {
@@ -1774,7 +1766,7 @@ export function GameBoard() {
           optionCardLabels,
           canPass: derived.canPass,
           defendPitchIds,
-          hand: me.hand,
+          hand: actor.hand,
           defendSel: [...stagedIds],
           selectedPitchIds: pitchSel,
           onTogglePitch: togglePitch,
@@ -1886,7 +1878,7 @@ export function GameBoard() {
           view.phase === "game-over"
             ? view.winner === null
               ? intl.formatMessage({ id: "game.result.draw" })
-              : spectating
+              : spectating || soloGame
               ? intl.formatMessage({ id: "game.result.namedWinner" }, { winner: winnerName })
               : view.winner === seat
                 ? intl.formatMessage({ id: "game.result.victory" })
@@ -1977,9 +1969,9 @@ export function GameBoard() {
           key={`${pd?.prompt ?? "search"}:${pd?.options?.join(":") ?? "choice"}`}
           decision={pd}
           zoneCounts={{
-            hand: opp.handCount,
-            deck: opp.deckCount,
-            arsenal: opp.arsenalCount,
+            hand: actorOpp.handCount,
+            deck: actorOpp.deckCount,
+            arsenal: actorOpp.arsenalCount,
           }}
           {...(boundedCardChoice
             ? {
@@ -2029,7 +2021,10 @@ export function GameBoard() {
         onWatchReplay={watchReplay}
         onDownloadReplay={downloadReplay}
         onLeave={leave}
-        onPlayAgain={botGame && !spectating && connected ? playBotAgain : null}
+        onPlayAgain={!spectating && connected
+          ? botGame ? playBotAgain : soloGame ? playSoloAgain : null
+          : null}
+        soloGame={soloGame && !spectating}
         onCloseReplay={closeReplay}
         onDismissGameOver={() => setGameOverDismissed(true)}
         onCloseOverlay={() => setOverlay(null)}

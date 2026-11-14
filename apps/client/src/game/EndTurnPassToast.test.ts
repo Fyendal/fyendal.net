@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { IntlProvider } from "react-intl";
 import { describe, expect, it } from "vitest";
 import { EndTurnPassToast } from "./EndTurnPassToast.js";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 const MESSAGE = "Opponent passed to end their turn. If you act, they will regain priority.";
 
@@ -29,5 +30,16 @@ describe("EndTurnPassToast", () => {
     const html = renderToast("mobile-hand");
 
     expect(html).toContain("end-turn-pass-toast-mobile-hand");
+  });
+
+  it("names the hero who passed in solo", () => {
+    const html = renderToStaticMarkup(createElement(
+      TestI18nProvider,
+      null,
+      createElement(EndTurnPassToast, { passedHeroName: "Kayo" }),
+    ));
+
+    expect(html).toContain("Kayo passed to end the turn. Acting now gives Kayo priority again.");
+    expect(html).not.toContain("Opponent");
   });
 });

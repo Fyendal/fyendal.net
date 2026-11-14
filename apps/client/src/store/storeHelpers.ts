@@ -23,6 +23,7 @@ export function initialStoreProjection(
     spectatorKicked: false,
     botGame: false,
     soloGame: false,
+    boardSeat: null,
     playerProfiles: null,
     cardArt: null,
     view: null,
@@ -109,6 +110,7 @@ export function clearedRoomProjection(): Pick<
   | "spectatorKicked"
   | "botGame"
   | "soloGame"
+  | "boardSeat"
   | "playerProfiles"
   | "cardArt"
   | "view"
@@ -161,6 +163,7 @@ export function clearedRoomProjection(): Pick<
     spectatorKicked: false,
     botGame: false,
     soloGame: false,
+    boardSeat: null,
     playerProfiles: null,
     cardArt: null,
     view: null,

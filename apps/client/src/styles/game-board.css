@@ -1170,6 +1170,27 @@
 .game-is-over .mat-opp .zone-arsenal .card {
   transform: rotate(180deg);
 }
+/* Solo: the second seat's hand reads upright and slides into view when hovered or chosen. */
+.opp-hand-solo { overflow: visible; }
+.opp-hand-solo .card-hand {
+  --opp-hand-reveal: 0px;
+  transform: translateY(calc(var(--fan-y) + var(--opp-hand-reveal))) rotate(var(--fan-angle));
+  transition: transform .14s ease-out;
+}
+.opp-hand-solo .card-hand.card-selected,
+.opp-hand-solo .card-hand.card-pitched {
+  --opp-hand-reveal: calc(var(--opp-hand-band) * .9);
+  z-index: 1;
+}
+@media (hover: hover) {
+  .opp-hand-solo .card-hand:hover {
+    --opp-hand-reveal: calc(var(--opp-hand-band) * 1.1);
+    z-index: 2;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .opp-hand-solo .card-hand { transition: none; }
+}
 
 .hand {
   --hand-outline-clearance: 5px;

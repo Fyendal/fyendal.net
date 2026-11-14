@@ -143,6 +143,32 @@ describe("GameOver player statistics", () => {
     expect(html).toContain('<button class="btn-primary">Play again</button>');
   });
 
+  it("names the winning hero without victory or defeat in solo", () => {
+    const view = finishedView();
+    const render = (solo: boolean) => renderToStaticMarkup(
+      <TestI18nProvider>
+        <GameOver
+          view={view}
+          seat={0}
+          spectating={false}
+          recordedViews={[view]}
+          onWatchReplay={null}
+          onDownloadReplay={null}
+          onBackToLobby={() => undefined}
+          onPlayAgain={() => undefined}
+          onClose={() => undefined}
+          solo={solo}
+        />
+      </TestI18nProvider>,
+    );
+    const solo = render(true);
+    expect(solo).toContain('<h2 class="gameover-headline">Gravy Bones wins!</h2>');
+    expect(solo).toContain("Match complete");
+    expect(solo).not.toContain("Defeat");
+    expect(solo).toContain('<button class="btn-primary">Play again</button>');
+    expect(render(false)).toContain("Defeat");
+  });
+
   it("presents heroes as a switcher and labels the single selected stats panel", () => {
     const view = finishedView();
     view.gameStats = { turns: [

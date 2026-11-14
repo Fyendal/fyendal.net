@@ -48,6 +48,7 @@ export function BoardOverlays({
   onAcceptDraw,
   onDeclineDraw,
   standingOrders = null,
+  soloGame = false,
 }: {
   preview: BoardPreview | null;
   overlay: BoardOverlay | null;
@@ -87,6 +88,8 @@ export function BoardOverlays({
   onDeclineDraw: (() => void) | null;
   /** The inspected card's repeating questions. */
   standingOrders?: StandingOrderPanelModel | null;
+  /** One account plays both seats: every card is the viewer's and the result names the winner. */
+  soloGame?: boolean;
 }) {
   const intl = useIntl();
   return (
@@ -96,6 +99,7 @@ export function BoardOverlays({
         <ZoneOverlay
           overlay={overlay}
           yourSeat={yourSeat}
+          revealAllOwners={soloGame}
           onClose={onCloseOverlay}
           onInspectCard={onInspectCard}
         />
@@ -153,6 +157,7 @@ export function BoardOverlays({
           replaying={replaying}
           clock={gameOverClock}
           botSeat={botSeat}
+          solo={soloGame}
           onClose={onDismissGameOver}
           friendAction={!replaying && !practiceGame && !spectating && opponentUsername
             ? <PostGameFriendAction username={opponentUsername} />

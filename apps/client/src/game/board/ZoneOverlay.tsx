@@ -11,11 +11,14 @@ const ZONE_SORT_OPTIONS: readonly CardSortOrder[] = ["zone", "pitch", "name"];
 export function ZoneOverlay({
   overlay,
   yourSeat,
+  revealAllOwners = false,
   onClose,
   onInspectCard,
 }: {
   overlay: BoardOverlay;
   yourSeat: number | null;
+  /** Solo: both seats are the viewer's, so every owner's face-down cards are known. */
+  revealAllOwners?: boolean;
   onClose: () => void;
   onInspectCard: (cardId: string) => void;
 }) {
@@ -88,10 +91,9 @@ export function ZoneOverlay({
               squareArt={false}
               showFaceDownIdentity={
                 overlay.showOwnedFaceDownIdentities === true &&
-                yourSeat !== null &&
-                card.owner === yourSeat
+                (revealAllOwners || (yourSeat !== null && card.owner === yourSeat))
               }
-              revealOwnerIntimidated={yourSeat !== null && card.owner === yourSeat}
+              revealOwnerIntimidated={revealAllOwners || (yourSeat !== null && card.owner === yourSeat)}
               highlighted={overlay.usableIds?.has(card.instanceId) === true}
             />
           ) : <CardFace key={card.instanceId} card={card} size="zone" squareArt={false} />)}

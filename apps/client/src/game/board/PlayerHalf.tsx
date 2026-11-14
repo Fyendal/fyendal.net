@@ -105,6 +105,8 @@ interface PlayerHalfInteraction {
 export function PlayerHalf({
   player,
   mine,
+  interactive = mine,
+  revealsFaceDown = mine,
   mirrored,
   holdsPriority = false,
   priorityPulse = false,
@@ -128,7 +130,12 @@ export function PlayerHalf({
   standingOrders,
 }: {
   player: PlayerView;
+  /** The viewer's own half: zone labels and the emote button. */
   mine: boolean;
+  /** This half's seat may act now (solo: the acting seat). Defaults to `mine`. */
+  interactive?: boolean;
+  /** Face-down identities and the whole arsenal are known. Defaults to `mine`. */
+  revealsFaceDown?: boolean;
   mirrored: boolean;
   /** The game is waiting on this half's player. */
   holdsPriority?: boolean;
@@ -180,8 +187,8 @@ export function PlayerHalf({
     { id: mine ? "game.zone.mine" : "game.zone.opponent" },
     { zone: zoneLabel(zone) },
   );
-  const optimisticallyHiddenIds = mine ? interaction.optimisticallyHiddenIds : EMPTY_INSTANCE_IDS;
-  const arsenalSlots = arsenalSlotViews(player, mine, optimisticallyHiddenIds);
+  const optimisticallyHiddenIds = interactive ? interaction.optimisticallyHiddenIds : EMPTY_INSTANCE_IDS;
+  const arsenalSlots = arsenalSlotViews(player, revealsFaceDown, optimisticallyHiddenIds);
   const hasAdditionalArsenal = arsenalSlots.length === 2;
   const visibleReplayDeck = replaying || gameOver ? player.deck : undefined;
   const presentedDeckTop = visibleDeckTop && !optimisticallyHiddenIds.has(visibleDeckTop.instanceId)
@@ -239,7 +246,7 @@ export function PlayerHalf({
     const underCardCountLabel = underCardCount > 0
       ? intl.formatMessage({ id: "game.under.count" }, { count: underCardCount })
       : undefined;
-    if (!mine) {
+    if (!interactive) {
       return (
         <MatZone
           key={slot}
@@ -301,9 +308,9 @@ export function PlayerHalf({
     const blocking = card !== undefined && (
       interaction.stagedIds.has(card.instanceId) || interaction.committedDefenderIds.has(card.instanceId)
     );
-    const canBlock = mine && card !== undefined && interaction.defending && !blocking &&
+    const canBlock = interactive && card !== undefined && interaction.defending && !blocking &&
       interaction.legal.stageableDefenders.has(card.instanceId);
-    const canActivate = mine && card !== undefined && !interaction.defending &&
+    const canActivate = interactive && card !== undefined && !interaction.defending &&
       interaction.legal.activatable.has(card.instanceId);
     const location = { kind: "weapon" as const, seat: player.seat, index };
     const weaponLabel = player.weapons.length > 1
@@ -329,9 +336,9 @@ export function PlayerHalf({
               ? intl.formatMessage({ id: "game.card.onchain" })
               : undefined}
             highlighted={canActivate || canBlock}
-            selected={mine && interaction.selection.kind === "activate" &&
+            selected={interactive && interaction.selection.kind === "activate" &&
               interaction.selection.sourceInstanceId === card.instanceId}
-            dimmed={blocking || (mine && interaction.defending && !canBlock)}
+            dimmed={blocking || (interactive && interaction.defending && !canBlock)}
             onClick={canBlock
               ? () => interaction.onStage([...interaction.stagedIds, card.instanceId])
               : canActivate
@@ -353,9 +360,9 @@ export function PlayerHalf({
 
   const heroBlocking = interaction.stagedIds.has(hero.instanceId) ||
     interaction.committedDefenderIds.has(hero.instanceId);
-  const heroCanBlock = mine && interaction.defending && !heroBlocking &&
+  const heroCanBlock = interactive && interaction.defending && !heroBlocking &&
     interaction.legal.stageableDefenders.has(hero.instanceId);
-  const heroCanActivate = mine && !interaction.defending && interaction.legal.activatable.has(hero.instanceId);
+  const heroCanActivate = interactive && !interaction.defending && interaction.legal.activatable.has(hero.instanceId);
   const pileZone = (
     area: string,
     kind: "graveyard" | "banished",
@@ -377,7 +384,7 @@ export function PlayerHalf({
             title,
             cards,
             inactiveZone: true,
-            showOwnedFaceDownIdentities: mine,
+            showOwnedFaceDownIdentities: revealsFaceDown,
             usableIds: new Set(cards
               .map((card) => card.instanceId)
               .filter((id) => interaction.legal.playableZones.has(id) || interaction.legal.activatable.has(id))),
@@ -443,7 +450,7 @@ export function PlayerHalf({
           <div className="board-strip board-cards">
             {groupBoardCards(
               arrangedBoard.cards,
-              mine ? interaction.legal.activatable : undefined,
+              interactive ? interaction.legal.activatable : undefined,
               individuallyRenderedIds,
             ).map((group) => {
               const boundCards = arrangedBoard.boundCardsByAlly.get(group.card.instanceId) ?? [];
@@ -452,24 +459,24 @@ export function PlayerHalf({
                 interaction.stagedIds.has(instanceId) ||
                 interaction.committedDefenderIds.has(instanceId)
               );
-              const stageableDefenderId = mine && interaction.defending && !blocking
+              const stageableDefenderId = interactive && interaction.defending && !blocking
                 ? group.instanceIds.find((instanceId) =>
                     interaction.legal.stageableDefenders.has(instanceId)
                   )
                 : undefined;
               const canBlock = stageableDefenderId !== undefined;
-              const selectedPaymentCardId = mine
+              const selectedPaymentCardId = interactive
                 ? group.instanceIds.find((instanceId) =>
                     interaction.paymentSelectedIds.has(instanceId)
                   )
                 : undefined;
-              const paymentCardId = selectedPaymentCardId ?? (mine
+              const paymentCardId = selectedPaymentCardId ?? (interactive
                 ? group.instanceIds.find((instanceId) =>
                     interaction.paymentCandidateIds.has(instanceId)
                   )
                 : undefined);
               const canPay = paymentCardId !== undefined;
-              const canActivate = mine && !interaction.defending && group.activatable;
+              const canActivate = interactive && !interaction.defending && group.activatable;
               // Tap the last copy so the stack keeps its slot and the used card peels off beside it.
               const activationId = group.instanceIds.at(-1)!;
               return (
@@ -511,10 +518,10 @@ export function PlayerHalf({
                         )
                       : undefined}
                     highlighted={canActivate || canBlock || canPay}
-                    selected={(mine && interaction.selection.kind === "activate" &&
+                    selected={(interactive && interaction.selection.kind === "activate" &&
                       group.instanceIds.includes(interaction.selection.sourceInstanceId)) ||
                       selectedPaymentCardId !== undefined}
-                    dimmed={blocking || (mine && interaction.defending && !canBlock)}
+                    dimmed={blocking || (interactive && interaction.defending && !canBlock)}
                     onClick={canBlock
                       ? () => interaction.onStage([...interaction.stagedIds, stageableDefenderId])
                       : canPay
@@ -570,9 +577,9 @@ export function PlayerHalf({
                 underCards={player.soul}
                 underCardMotionLocation={{ kind: "soul", seat: player.seat }}
                 highlighted={heroCanActivate || heroCanBlock}
-                selected={mine && interaction.selection.kind === "activate" &&
+                selected={interactive && interaction.selection.kind === "activate" &&
                   interaction.selection.sourceInstanceId === hero.instanceId}
-                dimmed={heroBlocking || (mine && interaction.defending && !heroCanBlock)}
+                dimmed={heroBlocking || (interactive && interaction.defending && !heroCanBlock)}
                 soulCount={player.soul.length}
                 soulCountLabel={intl.formatMessage(
                   { id: "game.soul.count" },
@@ -712,10 +719,10 @@ export function PlayerHalf({
               ? intl.formatMessage({ id: "game.zone.arsenalSlot" }, { slot: slotIndex + 1 })
               : zoneLabel("arsenal");
             const blocking = card !== undefined && interaction.stagedIds.has(card.instanceId);
-            const canBlock = mine && card !== undefined && interaction.defending && !blocking &&
+            const canBlock = interactive && card !== undefined && interaction.defending && !blocking &&
               interaction.legal.stageableDefenders.has(card.instanceId);
             const playable = card !== undefined && interaction.legal.playableArsenal.has(card.instanceId);
-            const canActivate = mine && card !== undefined && !interaction.defending &&
+            const canActivate = interactive && card !== undefined && !interaction.defending &&
               interaction.legal.activatable.has(card.instanceId);
 
             return (
@@ -737,7 +744,7 @@ export function PlayerHalf({
                       { kind: "arsenal", seat: player.seat },
                       card.instanceId,
                     )}
-                    dimmed={mine && (blocking || (card.faceDown && !playable && !canActivate && !canBlock))}
+                    dimmed={interactive && (blocking || (card.faceDown && !playable && !canActivate && !canBlock))}
                     highlighted={playable || canActivate || canBlock}
                     selected={
                       (interaction.selection.kind === "play-arsenal" &&

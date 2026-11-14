@@ -528,3 +528,99 @@ describe("playmat", () => {
     expect(html).not.toContain("playmat-art");
   });
 });
+
+describe("GameBoard solo play", () => {
+  function soloState(actingSeat: 0 | 1, overrides: Partial<GameView> = {}): StoreState {
+    const bottom = { ...player(0), hand: [{ instanceId: 10, cardId: "TST-HAND", owner: 0 }], handCount: 1, arsenalCount: 0 };
+    const top = { ...player(1), hand: [{ instanceId: 60, cardId: "TST-TOP-HAND", owner: 1 }], handCount: 1, arsenalCount: 0 };
+    const playable = actingSeat === 0 ? 10 : 60;
+    const view: GameView = {
+      ...spectatorView(),
+      gameId: "solo",
+      activePlayer: actingSeat,
+      priorityPlayer: actingSeat,
+      players: [bottom, top],
+      ...overrides,
+    };
+    return {
+      ...liveState(false),
+      view,
+      yourSeat: actingSeat,
+      boardSeat: 0,
+      soloGame: true,
+      playSoloAgain: vi.fn(),
+      playerProfiles: [{ username: "alice" }, { username: "alice" }],
+      legal: [{ kind: "pass" }, { kind: "play-card", instanceId: playable, pitchInstanceIds: [] }],
+      actionCandidates: [{ kind: "play-card", instanceId: playable, pitchInstanceIds: [] }],
+    } as unknown as StoreState;
+  }
+  const render = () => renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
+  const topHand = (html: string) => html.slice(html.indexOf('class="opp-hand'), html.indexOf("mat-half"));
+
+  it("keeps the owner's seat at the bottom whichever seat acts", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    for (const acting of [0, 1] as const) {
+      gameStore.state = soloState(acting);
+      const html = render();
+      expect(html.indexOf('data-motion-card="1:hero:2"')).toBeLessThan(html.indexOf('data-motion-card="0:hero:1"'));
+      expect(html).toMatch(/<div class="hand" id="player-hand" data-motion-zone="0:hand"/);
+      expect(topHand(html)).toContain('data-motion-card="1:hand:60"');
+    }
+  });
+
+  it("makes only the acting seat's hand clickable, top or bottom", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    gameStore.state = soloState(1);
+    const topActing = render();
+    expect(topActing).toContain("opp-hand opp-hand-revealed opp-hand-solo opp-hand-interactive");
+    expect(cardClasses(topActing, "TST-TOP-HAND")).toContain("card-clickable");
+    expect(cardClasses(topActing, "TST-HAND")).not.toContain("card-clickable");
+    expect(cardClasses(topActing, "TST-HAND")).not.toContain("card-highlight");
+
+    gameStore.state = soloState(0);
+    const bottomActing = render();
+    expect(bottomActing).not.toContain("opp-hand-interactive");
+    expect(cardClasses(bottomActing, "TST-HAND")).toContain("card-clickable");
+    expect(cardClasses(bottomActing, "TST-TOP-HAND")).not.toContain("card-clickable");
+  });
+
+  it("names heroes instead of you and the opponent", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    gameStore.state = soloState(1);
+    const html = render();
+    expect(html).toContain("Turn 1 · Hero 1&#x27;s turn");
+    expect(html).toContain("HERO 1&#x27;S PRIORITY");
+    expect(html).not.toContain("Your turn");
+    expect(html).not.toContain("OPPONENT&#x27;S PRIORITY");
+    expect(html).toContain('<span class="player-nameplate-username" translate="no">Hero 1</span>');
+    expect(html).toContain('<span class="player-nameplate-username" translate="no">Hero 0</span>');
+    expect(html).not.toContain(">alice</span>");
+  });
+
+  it("stages a top-hand blocker for the defending top seat", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    const state = soloState(1, {
+      activePlayer: 0,
+      pendingDecision: { player: 1, kind: "defend", prompt: "" },
+    });
+    gameStore.state = {
+      ...state,
+      legal: [{ kind: "stage-defenders", instanceIds: [60] }, { kind: "defend", instanceIds: [] }],
+      actionCandidates: [],
+    };
+    const html = render();
+    expect(cardClasses(html, "TST-TOP-HAND")).toContain("card-clickable");
+    expect(cardClasses(html, "TST-HAND")).not.toContain("card-clickable");
+  });
+
+  it("names the winning hero at game over", () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    gameStore.state = soloState(0, { phase: "game-over", winner: 1 });
+    const html = render();
+    expect(html).toContain('<h2 class="gameover-headline">Hero 1 wins!</h2>');
+    expect(html).not.toContain("Victory!");
+    expect(html).not.toContain("Defeat");
+    expect(html).not.toContain("Watch replay");
+    expect(html).toContain("Play again");
+  });
+});

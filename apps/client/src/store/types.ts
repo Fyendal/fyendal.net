@@ -233,6 +233,8 @@ export interface StoreState {
   botGame: boolean;
   /** One account controls both seats of this private room. */
   soloGame: boolean;
+  /** Solo games: the owner's seat, fixed at the bottom of the board while `yourSeat` follows the acting seat. */
+  boardSeat: 0 | 1 | null;
   playerProfiles: [PlayerProfileView, PlayerProfileView] | null;
   /** Per-seat printing id -> image id the server shared with this viewer. */
   cardArt: [Record<string, string>, Record<string, string>] | null;
@@ -382,6 +384,8 @@ export interface PreReplaySnapshot {
   actionCandidates: GameIntent[];
   endTurnWarning: boolean;
   yourSeat: number | null;
+  boardSeat: 0 | 1 | null;
+  soloGame: boolean;
   spectating: boolean;
   spectatorCount: number;
   spectatorUsernames: Array<string | null>;

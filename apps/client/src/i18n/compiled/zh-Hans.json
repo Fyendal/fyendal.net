@@ -29515,6 +29515,16 @@
       "value": "LAYER STEP"
     }
   ],
+  "game.timing.namedChoosingBlocks": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 正在选择防御牌"
+    }
+  ],
   "game.timing.namedPriority": [
     {
       "type": 1,
@@ -29651,6 +29661,24 @@
       "value": "对手已让过优先权以结束回合。如果你现在行动，对手将重新获得优先权。"
     }
   ],
+  "game.turn.endPassPending.solo": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 已让过优先权以结束回合。如果现在行动，"
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 将重新获得优先权。"
+    }
+  ],
   "game.turn.named": [
     {
       "type": 1,
@@ -29727,6 +29755,20 @@
     {
       "type": 0,
       "value": "正在等待对手…"
+    }
+  ],
+  "game.waiting.solo": [
+    {
+      "type": 0,
+      "value": "等待 "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " 行动"
     }
   ],
   "game.waiting.spectating": [
