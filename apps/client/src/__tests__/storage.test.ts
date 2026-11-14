@@ -17,6 +17,8 @@ import {
   loadGameSettings,
   loadPlaymatHintDismissed,
   loadBotMatchmakingPreference,
+  loadSoloBothSidesSeen,
+  saveSoloBothSidesSeen,
   loadHomeGameMode,
   loadHomeSoloOpponentDeck,
   loadHomeFormat,
@@ -93,6 +95,13 @@ describe("client storage keys", () => {
     expect(loadBotMatchmakingPreference(storage)).toBe(true);
     stored = JSON.stringify({ version: 1, searchForPlayer: "yes" });
     expect(loadBotMatchmakingPreference(storage)).toBe(true);
+  });
+
+  it("remembers that the self-play tab was opened", () => {
+    const storage = memoryStorage();
+    expect(loadSoloBothSidesSeen(storage)).toBe(false);
+    saveSoloBothSidesSeen(storage);
+    expect(loadSoloBothSidesSeen(storage)).toBe(true);
   });
 
   it("remembers the home game mode for each account across reloads", () => {

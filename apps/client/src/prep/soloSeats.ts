@@ -1,5 +1,8 @@
 import type { PrepView } from "@fyendal/shared";
 
+/** The seat holding the deck the player started with; the other seat is "the opponent". */
+export const SOLO_OWN_SEAT = 0;
+
 export type SoloSeatStatus = "turn-order" | "arena" | "arena-locked" | "sideboarding" | "ready";
 
 /** What a seat of a self-play prep room still has to do. */

@@ -30963,6 +30963,12 @@
       "value": "Opponent passed to end their turn. If you act, they will regain priority."
     }
   ],
+  "game.turn.endPassPendingYours": [
+    {
+      "type": 0,
+      "value": "You passed to end your turn. If the opponent acts, you will regain priority."
+    }
+  ],
   "game.turn.named": [
     {
       "type": 1,
@@ -34895,12 +34901,6 @@
       "value": "Practice vs bot"
     }
   ],
-  "lobby.solo.botDescription": [
-    {
-      "type": 0,
-      "value": "Pick a bot opponent and play against it."
-    }
-  ],
   "lobby.solo.bothSides": [
     {
       "type": 0,
@@ -36260,71 +36260,13 @@
   "prep.solo.chooseFirst": [
     {
       "type": 0,
-      "value": "You play both sides: choose which player goes first."
+      "value": "You play both sides: choose who goes first."
     }
   ],
-  "prep.solo.firstPlayer": [
+  "prep.solo.opponentFirst": [
     {
       "type": 0,
-      "value": "Player "
-    },
-    {
-      "type": 1,
-      "value": "player"
-    },
-    {
-      "type": 0,
-      "value": " ("
-    },
-    {
-      "type": 1,
-      "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": ") goes "
-    },
-    {
-      "type": 8,
-      "value": "order",
-      "children": [
-        {
-          "type": 0,
-          "value": "first"
-        }
-      ]
-    }
-  ],
-  "prep.solo.goesFirst": [
-    {
-      "type": 0,
-      "value": "Player "
-    },
-    {
-      "type": 1,
-      "value": "player"
-    },
-    {
-      "type": 0,
-      "value": " ("
-    },
-    {
-      "type": 1,
-      "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": ") goes first"
-    }
-  ],
-  "prep.solo.player": [
-    {
-      "type": 0,
-      "value": "Player "
-    },
-    {
-      "type": 1,
-      "value": "player"
+      "value": "Opponent goes first"
     }
   ],
   "prep.solo.seatsAria": [
@@ -36361,6 +36303,28 @@
     {
       "type": 0,
       "value": "Choosing turn order"
+    }
+  ],
+  "prep.solo.turnOrder.opponentFirst": [
+    {
+      "type": 0,
+      "value": "Opponent goes "
+    },
+    {
+      "type": 8,
+      "value": "order",
+      "children": [
+        {
+          "type": 0,
+          "value": "first"
+        }
+      ]
+    }
+  ],
+  "prep.solo.youFirst": [
+    {
+      "type": 0,
+      "value": "You go first"
     }
   ],
   "prep.status.ready": [

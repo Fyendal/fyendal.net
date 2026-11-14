@@ -55,6 +55,7 @@ import { PrepPresentation, type PrepCardArt } from "./PrepPresentation.js";
 import { PrepArtPopover } from "./PrepArtPopover.js";
 import { OpenSeatPanel } from "./OpenSeatPanel.js";
 import { SOLO_SEAT_PANEL_ID, SoloSeatTabs, soloSeatTabId } from "./SoloSeatTabs.js";
+import { SOLO_OWN_SEAT } from "./soloSeats.js";
 import { UiIcon } from "../components/UiIcon.js";
 import { hasCardArtChoices, shownCardArt } from "../components/CardArtVariants.js";
 import { useCardArtCatalog } from "../game/cardArtCatalog.js";
@@ -112,14 +113,14 @@ function plainMatchupNotes(notes: string): string {
 function FirstPlayerChoice({
   className,
   nudge,
-  soloHeroes,
+  solo,
   yourSeat,
   onChoose,
 }: {
   className: string;
   nudge: boolean;
-  /** Self-play names each seat's hero instead of "you". */
-  soloHeroes?: [string, string];
+  /** Self-play picks between your deck's seat and the opposing deck's. */
+  solo: boolean;
   yourSeat: number;
   onChoose: (first: boolean) => void;
 }) {
@@ -130,9 +131,9 @@ function FirstPlayerChoice({
       role="group"
       aria-label={intl.formatMessage({ id: "prep.firstPlayer.choose" })}
     >
-      {soloHeroes ? soloHeroes.map((hero, seat) => (
+      {solo ? ([0, 1] as const).map((seat) => (
         <button key={seat} type="button" className="btn-primary" onClick={() => onChoose(seat === yourSeat)}>
-          {intl.formatMessage({ id: "prep.solo.goesFirst" }, { player: seat + 1, hero })}
+          {intl.formatMessage({ id: seat === SOLO_OWN_SEAT ? "prep.solo.youFirst" : "prep.solo.opponentFirst" })}
         </button>
       )) : (
         <>
@@ -751,24 +752,18 @@ export function PrepRoom() {
       {prep?.deadlineAt ? <> · <DeadlineCountdown deadlineAt={prep.deadlineAt} /></> : null}
     </button>
   );
-  const soloHeroes: [string, string] | undefined = solo && me && opp
-    ? [prep.seats[0]!.heroName, prep.seats[1]!.heroName]
-    : undefined;
+  // Self-play keeps "you" on the own seat, whichever seat is being viewed.
+  const youStart = prep?.startPlayer === (solo ? SOLO_OWN_SEAT : yourSeat);
   const turnOrderLine = prep?.startPlayer != null ? (
     <p className="prep-sheet-turn">
-      {soloHeroes
-        ? intl.formatMessage(
-          { id: "prep.solo.firstPlayer" },
-          {
-            player: prep.startPlayer + 1,
-            hero: soloHeroes[prep.startPlayer],
-            order: (chunks) => <strong>{chunks}</strong>,
-          },
-        )
-        : intl.formatMessage(
-          { id: prep.startPlayer === yourSeat ? "prep.turnOrder.youFirst" : "prep.turnOrder.youSecond" },
-          { order: (chunks) => <strong>{chunks}</strong> },
-        )}
+      {intl.formatMessage(
+        {
+          id: youStart
+            ? "prep.turnOrder.youFirst"
+            : solo ? "prep.solo.turnOrder.opponentFirst" : "prep.turnOrder.youSecond",
+        },
+        { order: (chunks) => <strong>{chunks}</strong> },
+      )}
     </p>
   ) : null;
   const choosePrompt = intl.formatMessage({
@@ -784,7 +779,7 @@ export function PrepRoom() {
           <FirstPlayerChoice
             className="prep-pick"
             nudge={nudge === "first-player"}
-            soloHeroes={soloHeroes}
+            solo={solo}
             yourSeat={yourSeat}
             onChoose={chooseFirst}
           />
@@ -977,7 +972,7 @@ export function PrepRoom() {
             <FirstPlayerChoice
               className="prep-float-pick"
               nudge={nudge === "first-player"}
-              soloHeroes={soloHeroes}
+              solo={solo}
               yourSeat={yourSeat}
               onChoose={chooseFirst}
             />

@@ -2,7 +2,7 @@ import { useRef, useState, type KeyboardEvent } from "react";
 import { useIntl } from "react-intl";
 import type { PrepSeatView, PrepView } from "@fyendal/shared";
 import { heroImageUrl } from "../lobby/heroImage.js";
-import { soloSeatStatus } from "./soloSeats.js";
+import { SOLO_OWN_SEAT, soloSeatStatus } from "./soloSeats.js";
 
 export const SOLO_SEAT_PANEL_ID = "solo-seat-panel";
 
@@ -57,7 +57,7 @@ export function SoloSeatTabs({ prep, onSelect }: { prep: PrepView; onSelect: (se
             {view ? <SeatHeadshot seat={view} /> : null}
             <span className="solo-seat-tab-copy">
               <span className="solo-seat-tab-name">
-                <small>{intl.formatMessage({ id: "prep.solo.player" }, { player: seat + 1 })}</small>
+                <small>{intl.formatMessage({ id: seat === SOLO_OWN_SEAT ? "prep.you" : "prep.opponent" })}</small>
                 {view?.heroName ?? ""}
               </span>
               {status ? (

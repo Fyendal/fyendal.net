@@ -575,6 +575,8 @@ html:not(:lang(en)) :is(
   left: clamp(12px, 50% - var(--toast-w) / 2, var(--toast-room) + 12px - var(--toast-w));
   width: var(--toast-w);
 }
+/* Self-play: above the seam, on the side of the seat that now acts. */
+.end-turn-pass-toast-divider.end-turn-pass-toast-opposing { top: auto; bottom: calc(100% + 8px); }
 .end-turn-pass-toast-mobile-hand { display: none; }
 @keyframes end-turn-pass-blink {
   50% {

@@ -329,23 +329,27 @@ describe("solo prep room", () => {
     expect(html).toContain('role="tablist" aria-label="Players"');
     expect(html).toMatch(/id="solo-seat-tab-1"[^>]*role="tab"[^>]*aria-selected="true"/);
     expect(html).toMatch(/id="solo-seat-tab-0"[^>]*role="tab"[^>]*aria-selected="false"/);
-    expect(html).toContain("<small>Player 1</small>Hero 1");
+    expect(html).toContain("<small>You</small>Hero 1");
+    expect(html).toContain("<small>Opponent</small>Hero 2");
     expect(html).toContain("Choosing arena cards");
     expect(html).toContain('id="solo-seat-panel" role="tabpanel" aria-labelledby="solo-seat-tab-1"');
   });
 
-  it("offers both heroes for the first-player pick without a die notice", () => {
+  it("offers you or the opponent for the first-player pick without a die notice", () => {
     const html = render(soloPrep("choose-first"), false, deck, { switchSoloSeat: vi.fn() });
-    expect(html).toContain("You play both sides: choose which player goes first.");
-    expect(html).toContain("Player 1 (Hero 1) goes first");
-    expect(html).toContain("Player 2 (Hero 2) goes first");
+    expect(html).toContain("You play both sides: choose who goes first.");
+    expect(html).toContain(">You go first</button>");
+    expect(html).toContain(">Opponent goes first</button>");
     expect(html).not.toContain("Go second");
     expect(html).not.toContain("prep-die");
   });
 
-  it("names the hero going first once chosen", () => {
+  it("says who goes first once chosen, keeping you on your deck's seat", () => {
     const html = render(soloPrep("select-deck"), false, deck, { switchSoloSeat: vi.fn() });
-    expect(html).toContain('<p class="prep-sheet-turn">Player 1 (Hero 1) goes <strong>first</strong></p>');
+    expect(html).toContain('<p class="prep-sheet-turn">You go <strong>first</strong></p>');
+    const opponentFirst = { ...soloPrep("select-deck"), startPlayer: 1 as const };
+    expect(render(opponentFirst, false, deck, { switchSoloSeat: vi.fn() }))
+      .toContain('<p class="prep-sheet-turn">Opponent goes <strong>first</strong></p>');
   });
 
   it("leaves seat tabs out of other rooms", () => {

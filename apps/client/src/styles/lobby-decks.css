@@ -900,8 +900,8 @@
   text-align: left;
 }
 .deck-library-card > .deck-card:focus-visible { outline-offset: -4px; }
-/* The scrim behind the hero line, shared with the deck modal's banner and bot cards. */
-:is(.deck-library-card > .deck-card, .deck-detail-banner, .bot-opponent-card)::after {
+/* The scrim behind the hero line, shared with the deck modal's banner, bot cards and solo matchup. */
+:is(.deck-library-card > .deck-card, .deck-detail-banner, .bot-opponent-card, .solo-matchup-seat)::after {
   position: absolute;
   right: 0;
   bottom: 0;
@@ -913,7 +913,7 @@
 }
 /* The hero card's art fades in from under the name, cropped inside the
    card frame. Without card art, the headshot takes the same place. */
-:is(.deck-library-card, .deck-detail-banner, .bot-opponent-card) :is(.deck-card-art, .deck-card-img) {
+:is(.deck-library-card, .deck-detail-banner, .bot-opponent-card, .solo-matchup-seat) :is(.deck-card-art, .deck-card-img) {
   position: absolute;
   top: 0;
   right: 0;
@@ -922,8 +922,8 @@
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
   mask-image: linear-gradient(90deg, transparent 0%, #000 38%);
 }
-:is(.deck-library-card, .deck-detail-banner, .bot-opponent-card) .deck-card-art { overflow: hidden; }
-:is(.deck-library-card, .deck-detail-banner, .bot-opponent-card) .deck-card-art img {
+:is(.deck-library-card, .deck-detail-banner, .bot-opponent-card, .solo-matchup-seat) .deck-card-art { overflow: hidden; }
+:is(.deck-library-card, .deck-detail-banner, .bot-opponent-card, .solo-matchup-seat) .deck-card-art img {
   position: absolute;
   top: 0;
   left: 54%;
@@ -934,7 +934,7 @@
   transform-origin: 50% 25%;
 }
 .deck-library-card .deck-card.has-art .deck-card-img { display: none; }
-:is(.deck-library-card, .deck-detail-banner, .bot-opponent-card) .deck-card-img {
+:is(.deck-library-card, .deck-detail-banner, .bot-opponent-card, .solo-matchup-seat) .deck-card-img {
   border: 0;
   border-radius: 0;
   box-shadow: none;

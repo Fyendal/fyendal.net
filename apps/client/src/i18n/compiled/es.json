@@ -31851,6 +31851,12 @@
       "value": "El oponente pasó para terminar su turno. Si actúas, recuperará la prioridad."
     }
   ],
+  "game.turn.endPassPendingYours": [
+    {
+      "type": 0,
+      "value": "Pasaste para terminar tu turno. Si el oponente actúa, recuperarás la prioridad."
+    }
+  ],
   "game.turn.named": [
     {
       "type": 0,
@@ -35779,12 +35785,6 @@
       "value": "Practicar contra bot"
     }
   ],
-  "lobby.solo.botDescription": [
-    {
-      "type": 0,
-      "value": "Elige un bot como oponente y juega contra él."
-    }
-  ],
   "lobby.solo.bothSides": [
     {
       "type": 0,
@@ -37144,71 +37144,13 @@
   "prep.solo.chooseFirst": [
     {
       "type": 0,
-      "value": "Juegas ambos lados: elige qué jugador empieza."
+      "value": "Juegas ambos lados: elige quién empieza."
     }
   ],
-  "prep.solo.firstPlayer": [
+  "prep.solo.opponentFirst": [
     {
       "type": 0,
-      "value": "Jugador "
-    },
-    {
-      "type": 1,
-      "value": "player"
-    },
-    {
-      "type": 0,
-      "value": " ("
-    },
-    {
-      "type": 1,
-      "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": ") juega "
-    },
-    {
-      "type": 8,
-      "value": "order",
-      "children": [
-        {
-          "type": 0,
-          "value": "primero"
-        }
-      ]
-    }
-  ],
-  "prep.solo.goesFirst": [
-    {
-      "type": 0,
-      "value": "Jugador "
-    },
-    {
-      "type": 1,
-      "value": "player"
-    },
-    {
-      "type": 0,
-      "value": " ("
-    },
-    {
-      "type": 1,
-      "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": ") empieza"
-    }
-  ],
-  "prep.solo.player": [
-    {
-      "type": 0,
-      "value": "Jugador "
-    },
-    {
-      "type": 1,
-      "value": "player"
+      "value": "El oponente juega primero"
     }
   ],
   "prep.solo.seatsAria": [
@@ -37245,6 +37187,28 @@
     {
       "type": 0,
       "value": "Eligiendo el orden de turno"
+    }
+  ],
+  "prep.solo.turnOrder.opponentFirst": [
+    {
+      "type": 0,
+      "value": "El oponente juega "
+    },
+    {
+      "type": 8,
+      "value": "order",
+      "children": [
+        {
+          "type": 0,
+          "value": "primero"
+        }
+      ]
+    }
+  ],
+  "prep.solo.youFirst": [
+    {
+      "type": 0,
+      "value": "Juegas primero"
     }
   ],
   "prep.status.ready": [

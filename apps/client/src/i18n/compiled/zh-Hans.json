@@ -29719,6 +29719,12 @@
       "value": "对手已让过优先权以结束回合。如果你现在行动，对手将重新获得优先权。"
     }
   ],
+  "game.turn.endPassPendingYours": [
+    {
+      "type": 0,
+      "value": "你已让过优先权以结束回合。如果对手现在行动，你将重新获得优先权。"
+    }
+  ],
   "game.turn.named": [
     {
       "type": 1,
@@ -33172,12 +33178,6 @@
       "value": "对战机器人练习"
     }
   ],
-  "lobby.solo.botDescription": [
-    {
-      "type": 0,
-      "value": "选择一个机器人对手与之对战。"
-    }
-  ],
   "lobby.solo.bothSides": [
     {
       "type": 0,
@@ -34439,71 +34439,13 @@
   "prep.solo.chooseFirst": [
     {
       "type": 0,
-      "value": "你同时操控双方：选择哪位玩家先手。"
+      "value": "你同时操控双方：选择谁先手。"
     }
   ],
-  "prep.solo.firstPlayer": [
+  "prep.solo.opponentFirst": [
     {
       "type": 0,
-      "value": "玩家 "
-    },
-    {
-      "type": 1,
-      "value": "player"
-    },
-    {
-      "type": 0,
-      "value": "（"
-    },
-    {
-      "type": 1,
-      "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": "）"
-    },
-    {
-      "type": 8,
-      "value": "order",
-      "children": [
-        {
-          "type": 0,
-          "value": "先手"
-        }
-      ]
-    }
-  ],
-  "prep.solo.goesFirst": [
-    {
-      "type": 0,
-      "value": "玩家 "
-    },
-    {
-      "type": 1,
-      "value": "player"
-    },
-    {
-      "type": 0,
-      "value": "（"
-    },
-    {
-      "type": 1,
-      "value": "hero"
-    },
-    {
-      "type": 0,
-      "value": "）先手"
-    }
-  ],
-  "prep.solo.player": [
-    {
-      "type": 0,
-      "value": "玩家 "
-    },
-    {
-      "type": 1,
-      "value": "player"
+      "value": "对手先手"
     }
   ],
   "prep.solo.seatsAria": [
@@ -34540,6 +34482,28 @@
     {
       "type": 0,
       "value": "选择先后手"
+    }
+  ],
+  "prep.solo.turnOrder.opponentFirst": [
+    {
+      "type": 0,
+      "value": "对手"
+    },
+    {
+      "type": 8,
+      "value": "order",
+      "children": [
+        {
+          "type": 0,
+          "value": "先手"
+        }
+      ]
+    }
+  ],
+  "prep.solo.youFirst": [
+    {
+      "type": 0,
+      "value": "你先手"
     }
   ],
   "prep.status.ready": [

@@ -8,6 +8,7 @@ export const REPLAY_STORAGE_PREFIX = "fyendal-replay-";
 export const GAME_SETTINGS_STORAGE_KEY = "fyendal-game-settings";
 export const BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY = "fyendal-bot-matchmaking-preference";
 export const BOT_SHOW_BANNED_STORAGE_KEY = "fyendal-bot-show-banned";
+export const SOLO_BOTH_SIDES_SEEN_STORAGE_KEY = "fyendal-solo-both-sides-seen";
 // v2 drops every earlier choice so pitch becomes everyone's default once.
 const PREP_SORT_STORAGE_KEY = "fyendal-prep-sort-v2";
 const PREP_VIEW_STORAGE_KEY = "fyendal-prep-view";
@@ -275,6 +276,23 @@ export function saveBotShowBannedPreference(storage: Pick<Storage, "setItem">, s
     storage.setItem(BOT_SHOW_BANNED_STORAGE_KEY, show ? "1" : "0");
   } catch {
     // A blocked/full localStorage should not prevent changing the toggle.
+  }
+}
+
+/** Whether this browser has opened the self-play tab; until then it wears an unseen dot. */
+export function loadSoloBothSidesSeen(storage: Pick<Storage, "getItem">): boolean {
+  try {
+    return storage.getItem(SOLO_BOTH_SIDES_SEEN_STORAGE_KEY) === "1";
+  } catch {
+    return true;
+  }
+}
+
+export function saveSoloBothSidesSeen(storage: Pick<Storage, "setItem">): void {
+  try {
+    storage.setItem(SOLO_BOTH_SIDES_SEEN_STORAGE_KEY, "1");
+  } catch {
+    // A blocked/full localStorage only means the dot returns next time.
   }
 }
 

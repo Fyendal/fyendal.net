@@ -177,6 +177,23 @@ export function BotOpponentModal(props: {
   onClose: () => void;
 }) {
   const intl = useIntl();
+  return (
+    <ModalSurface
+      className="bot-opponent-modal"
+      title={intl.formatMessage({ id: "lobby.bot.chooseOpponent" })}
+      onClose={props.onClose}
+    >
+      <BotOpponentPicker format={props.format} onSelect={props.onSelect} />
+    </ModalSurface>
+  );
+}
+
+/** The bot roster and its matchmaking switch, for any dialog that hosts it. */
+export function BotOpponentPicker(props: {
+  format: Format;
+  onSelect: (bot: BotOpponent, searchForPlayer: boolean) => void;
+}) {
+  const intl = useIntl();
   const betaTester = useStore((state) => state.betaTester);
   const [showBanned, setShowBanned] = useState(() =>
     typeof localStorage === "undefined" ? false : loadBotShowBannedPreference(localStorage)
@@ -204,11 +221,7 @@ export function BotOpponentModal(props: {
 
   const activeWarnings = activeBot ? BOT_CARD_WARNINGS.get(activeBot) : undefined;
   return (
-    <ModalSurface
-      className="bot-opponent-modal"
-      title={intl.formatMessage({ id: "lobby.bot.chooseOpponent" })}
-      onClose={props.onClose}
-    >
+    <>
       <label className="bot-matchmaking-option">
         <span className="bot-matchmaking-copy">
           <strong>{intl.formatMessage({ id: "lobby.bot.searchForPlayer" })}</strong>
@@ -330,7 +343,7 @@ export function BotOpponentModal(props: {
             className="lobby-tooltip bot-card-warning-tooltip"
           />
         : null}
-    </ModalSurface>
+    </>
   );
 }
 

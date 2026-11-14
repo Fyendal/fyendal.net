@@ -834,6 +834,8 @@ export function GameBoard() {
     !replaying &&
     view.endTurnPassPending === true &&
     view.activePlayer !== actingSeat;
+  // Self-play: the opposing seat answers your pass, so the notice moves to its side.
+  const endTurnPasser = soloGame && actingSeat !== orientationSeat ? "you" : "opponent";
   const timingFloat = showPriorityFloat ? (
     <PriorityFloat
       turn={view.turn}
@@ -1568,7 +1570,7 @@ export function GameBoard() {
           ) : null}
           <div className="mat-divider-center">
             {showEndTurnPassToast && !mobileFloatViewport
-              ? <EndTurnPassToast placement="divider" />
+              ? <EndTurnPassToast placement="divider" passer={endTurnPasser} />
               : null}
             {timingFloat}
             <div className="mat-divider-mini-dock" ref={setSplitLineMiniHost} />
@@ -1661,7 +1663,7 @@ export function GameBoard() {
       />
 
       {showEndTurnPassToast && mobileFloatViewport
-        ? <EndTurnPassToast placement="mobile-hand" />
+        ? <EndTurnPassToast placement="mobile-hand" passer={endTurnPasser} />
         : null}
 
       {/* ── floating status window: life + remaining AP + pass.
