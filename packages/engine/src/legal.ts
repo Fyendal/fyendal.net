@@ -797,6 +797,9 @@ function windowAbilityIntents(
           .filter((candidate) => candidate.instanceId !== card.instanceId).length < ability.discardCost.count
       ) continue;
       if (!canPayActivatedEffectCardCosts(state, player, card, ability)) continue;
+      if (!variableAbilityHasChoice(
+        state, runtime, player, card, ability, includeUnaffordable, link,
+      )) continue;
       const resourceCost = abilityResourceCost(state, runtime, player.seat, card, ability, link);
       const cardTargets: Array<number | undefined> = ability.targetCardOptions
         ? activatedAbilityTargetOptions(state, runtime, player.seat, card, ability, link)

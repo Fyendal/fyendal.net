@@ -31,7 +31,7 @@ import {
   type ChoiceModalOption,
 } from "./ChoiceModal.js";
 import { RevealedChoiceCards } from "./CardChoices.js";
-import { CardRef, cardAffiliation, DecisionPrompt, PitchPaymentProgress } from "./DecisionShared.js";
+import { CardRef, cardAffiliation, cardDisplayName, DecisionPrompt, PitchPaymentProgress } from "./DecisionShared.js";
 import type { PendingDecisionModel } from "./DecisionModels.js";
 import { NameChoiceAutocomplete } from "./NameChoiceAutocomplete.js";
 import { NumberChoiceInput } from "./NumberChoiceInput.js";
@@ -426,6 +426,13 @@ export function PendingDecisionPanel({
       const side = heroTargetSide(option, viewerSeat) ?? undefined;
       // Hero-name labels need the side spelled out; relative values already say it.
       const sideTag = side !== undefined && option.startsWith("hero:");
+      const enabledCards = pd.optionEnabledCards?.[index];
+      const enabledText = enabledCards?.length
+        ? intl.formatMessage(
+            { id: "game.decision.enabledCards.named" },
+            { cards: intl.formatList(enabledCards.map(cardDisplayName), { type: "conjunction" }) },
+          )
+        : undefined;
       if (optionMessage) {
         const text = formatGameMessage(intl, optionMessage, optionResolvers);
         textOptions.push({
@@ -437,6 +444,7 @@ export function PendingDecisionPanel({
           spaceDefault,
           side,
           sideTag,
+          ...(enabledCards ? { enabledCards } : {}),
           onChoose,
         });
         return;
@@ -458,10 +466,13 @@ export function PendingDecisionPanel({
       textOptions.push({
         key: option,
         label: optionLabel,
-        text: spaceDefault ? shortcutLabel : undefined,
+        text: enabledText !== undefined
+          ? `${shortcutLabel}, ${enabledText}`
+          : spaceDefault ? shortcutLabel : undefined,
         spaceDefault,
         side,
         sideTag,
+        ...(enabledCards ? { enabledCards } : {}),
         onChoose,
       });
     });

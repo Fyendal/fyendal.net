@@ -914,6 +914,9 @@ export interface PendingDecisionState extends PendingDecision {
   /** Parallel to options: a live card instance id or registered card id to
    *  render for that option, null for literal string options. */
   cardOptions?: (number | string | null)[];
+  /** Parallel to options: the cards choosing that option lets the deciding
+   *  player play. Projected only to them. */
+  optionEnabledCardIds?: number[][];
   /** Cards a look-at effect floats for the deciding player (chooseHook
    *  "engine-look"), or the surviving look context carried into a follow-up
    *  scripted choice. Rendered as non-interactive card images; projected only

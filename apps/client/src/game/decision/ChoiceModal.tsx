@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { useIntl } from "react-intl";
+import type { CardView } from "@fyendal/shared";
+import { CardFace } from "../Card.js";
 import type { HeroTargetSide } from "../decisionPresentation.js";
 import {
   choiceHotkeyLabel,
@@ -7,7 +9,7 @@ import {
   useChoiceHotkeys,
   useChoiceHotkeysEnabled,
 } from "./choiceHotkeys.js";
-import { chooseWithoutFocus } from "./DecisionShared.js";
+import { CardRef, chooseWithoutFocus } from "./DecisionShared.js";
 
 export interface ChoiceModalOption {
   key: string;
@@ -24,6 +26,8 @@ export interface ChoiceModalOption {
   side?: HeroTargetSide;
   /** Shows the side as a tag when the label alone (a hero name) does not. */
   sideTag?: boolean;
+  /** Cards this option lets the player play, drawn in the row. */
+  enabledCards?: readonly CardView[];
   onChoose: () => void;
 }
 
@@ -67,6 +71,22 @@ export function ChoiceButton({
         <kbd className="shortcut-key" aria-label={intl.formatMessage({ id: "common.spaceKey" })} />
       ) : null}
     </button>
+  );
+}
+
+/** The cards an option lets the player play. */
+function EnabledCards({ cards }: { cards: readonly CardView[] }) {
+  return (
+    <span className="decision-choice-enabled">
+      <span className="decision-choice-enabled-names">
+        {cards.map((card) => (
+          <CardRef key={card.instanceId} id={card.cardId} name={card.name} />
+        ))}
+      </span>
+      {cards.map((card) => (
+        <CardFace key={card.instanceId} card={card} size="zone" squareArt={false} />
+      ))}
+    </span>
   );
 }
 
@@ -125,9 +145,10 @@ export function ChoiceList({
           hotkey={hotkeysEnabled ? choiceHotkeyLabel(hotkeys.get(row.option.key) ?? -1) : undefined}
           className={`decision-choice-option${row.option.selected ? " decision-choice-selected" : ""}${
             row.option.side ? ` decision-choice-${row.option.side}` : ""
-          }`}
+          }${row.option.enabledCards?.length ? " decision-choice-enables" : ""}`}
         >
           <span className="decision-choice-label">{row.option.label}</span>
+          {row.option.enabledCards?.length ? <EnabledCards cards={row.option.enabledCards} /> : null}
           {row.option.side && row.option.sideTag ? (
             <span className="decision-choice-side" aria-hidden="true">
               {intl.formatMessage({ id: `game.decision.target.${row.option.side}` })}

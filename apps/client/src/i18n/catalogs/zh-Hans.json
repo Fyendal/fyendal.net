@@ -2570,6 +2570,7 @@
   "game.decision.effectChoice.apply": "应用",
   "game.decision.effectChoice.applyNamed": "应用 {source}：{label}",
   "game.decision.effectChoice.instructions": "应用一个替代效果。之后仍适用的效果会继续提供选择。",
+  "game.decision.enabledCards.named": "可打出 {cards}",
   "game.decision.endTurn.action": "仍然结束回合",
   "game.decision.endTurn.prompt": "你还有行动点，确定要结束回合吗？",
   "game.decision.equipFails.noBase.warning": "警告：该部位没有基础装备，{card} 无法装备，将被置入你的墓地。",

@@ -2570,6 +2570,7 @@
   "game.decision.effectChoice.apply": "Aplicar",
   "game.decision.effectChoice.applyNamed": "Aplicar {source}: {label}",
   "game.decision.effectChoice.instructions": "Aplica un efecto de reemplazo. Los que sigan aplicándose después se ofrecerán a continuación.",
+  "game.decision.enabledCards.named": "Te permite jugar {cards}",
   "game.decision.endTurn.action": "Terminar turno igualmente",
   "game.decision.endTurn.prompt": "Aún te queda un Action Point. ¿Seguro que quieres terminar tu turno?",
   "game.decision.equipFails.noBase.warning": "Atención: {card} no se puede equipar porque no tienes un equipo base en esa ranura. Irá a tu cementerio.",

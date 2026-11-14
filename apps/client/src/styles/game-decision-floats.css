@@ -236,6 +236,29 @@
 }
 .decision-choice-opponent .decision-choice-side { color: #f0a098; }
 .decision-choice-self .decision-choice-side { color: #8fc9a7; }
+/* Options that unlock cards show them at the row's trailing edge. */
+.decision-choice-enabled {
+  flex: 0 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+.decision-choice-enabled-names {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 0;
+  font-size: 13px;
+  text-align: right;
+}
+.decision-choice-enabled .card-zone {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 64px;
+}
+.decision-choice-enables { padding-block: 7px; }
 .decision-choice-chosen,
 .decision-choice-chosen:hover {
   justify-content: flex-start;

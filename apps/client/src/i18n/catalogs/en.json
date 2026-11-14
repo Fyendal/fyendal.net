@@ -2570,6 +2570,7 @@
   "game.decision.effectChoice.apply": "Apply",
   "game.decision.effectChoice.applyNamed": "Apply {source}: {label}",
   "game.decision.effectChoice.instructions": "Apply one replacement effect. Any that still apply afterward are offered next.",
+  "game.decision.enabledCards.named": "Lets you play {cards}",
   "game.decision.endTurn.action": "End turn anyway",
   "game.decision.endTurn.prompt": "You still have an action point. Are you sure you want to end your turn?",
   "game.decision.equipFails.noBase.warning": "Warning: {card} can't be equipped because you have no base equipment in that slot. It will go to your graveyard.",

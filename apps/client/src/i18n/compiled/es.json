@@ -29172,6 +29172,16 @@
       "value": "Aplica un efecto de reemplazo. Los que sigan aplicándose después se ofrecerán a continuación."
     }
   ],
+  "game.decision.enabledCards.named": [
+    {
+      "type": 0,
+      "value": "Te permite jugar "
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
   "game.decision.endTurn.action": [
     {
       "type": 0,

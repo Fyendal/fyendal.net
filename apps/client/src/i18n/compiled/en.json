@@ -28296,6 +28296,16 @@
       "value": "Apply one replacement effect. Any that still apply afterward are offered next."
     }
   ],
+  "game.decision.enabledCards.named": [
+    {
+      "type": 0,
+      "value": "Lets you play "
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
   "game.decision.endTurn.action": [
     {
       "type": 0,

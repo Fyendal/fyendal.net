@@ -24,6 +24,7 @@ import {
   payCost,
   resolveVariableAbilityCost,
   resolveVariablePlayCost,
+  variableChoiceEnabledCardIds,
   variableResourceChoices,
   variableResourceCost,
 } from "./costs.js";
@@ -363,6 +364,7 @@ export function activateWindowAbility(
       ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
       ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
       options,
+      ...variableChoiceEnabledCardIds(choices, resolvedVariableCost),
       sourceInstanceId: card.instanceId,
       chooseHook: "engine-variable-activation-x",
       variableActivationCost: {

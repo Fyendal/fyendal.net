@@ -13,13 +13,14 @@ interface VariableResourceCost {
   minimum?: number;
   maximum?: number;
   canDeclareX?(x: number): boolean;
+  cardsForX?(x: number): number[];
 }
 
 type VariablePlayCost = NonNullable<CardScript["variablePlayCost"]>;
 type ResolvedVariablePlayCost = Omit<VariablePlayCost, "maximum" | "canDeclareX"> &
   VariableResourceCost;
 type VariableAbilityCost = NonNullable<ActivatedAbility["variableCost"]>;
-type ResolvedVariableAbilityCost = Omit<VariableAbilityCost, "maximum" | "canDeclareX"> &
+type ResolvedVariableAbilityCost = Omit<VariableAbilityCost, "maximum" | "canDeclareX" | "cardsForX"> &
   VariableResourceCost;
 
 type VariableResourceChoice = { x: number; cost: number };
@@ -65,6 +66,9 @@ export function resolveVariableAbilityCost(
     canDeclareX: variableCost.canDeclareX
       ? (x: number) => variableCost.canDeclareX!(ctx, x)
       : undefined,
+    cardsForX: variableCost.cardsForX
+      ? (x: number) => variableCost.cardsForX!(ctx, x)
+      : undefined,
   };
 }
 
@@ -91,6 +95,16 @@ export function variableResourceChoices(
     choices[`X = ${x}`] = { x, cost };
   }
   return choices;
+}
+
+/** Parallel to the X choices: the cards each declaration lets the player play. */
+export function variableChoiceEnabledCardIds(
+  choices: Record<string, { x: number }>,
+  variableCost: VariableResourceCost,
+): { optionEnabledCardIds?: number[][] } {
+  const cardsForX = variableCost.cardsForX;
+  if (!cardsForX) return {};
+  return { optionEnabledCardIds: Object.values(choices).map((choice) => cardsForX(choice.x)) };
 }
 
 export function isValidVariableX(

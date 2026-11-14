@@ -5,7 +5,7 @@ import {
   dealArcane,
   dealArcaneToAnyTargetChoice,
   decisionPrompt,
-  hasCardSubtype,
+  isWizardNonAttack,
   localizedCardLog,
   opponentSeat,
   optN,
@@ -36,13 +36,10 @@ function viaBlaze(ctx: ScriptCtx): boolean {
   return wizardActionAsInstant(ctx);
 }
 
-function blazeMatches(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, amount: number): boolean {
-  return (
-    ctx.hasCardType(card, "action") &&
-    !hasCardSubtype(ctx, card, "attack") &&
-    hasCardSubtype(ctx, card, "wizard") &&
-    ctx.arcaneDamageEffectAmounts(card.cardId).includes(amount)
-  );
+/** Hand cards Blaze may banish for X: Wizard non-attack actions dealing X arcane. */
+function blazeCardsForX(ctx: ScriptCtx, x: number): DeepReadonly<CardInstance>[] {
+  return ctx.player(ctx.seat).hand.filter((card) =>
+    isWizardNonAttack(ctx, card) && ctx.arcaneDamageEffectAmounts(card.cardId).includes(x));
 }
 
 // ── "target hero" / "any target" choices ────────────────────────────────────
@@ -156,13 +153,16 @@ export const sbz: Record<string, CardScript> = {
         stateKey: "blazeX",
         removeCounterKey: "energy",
         maximum: (ctx) => ctx.getCounter("energy"),
+        canDeclareX: (ctx, x) => blazeCardsForX(ctx, x).length > 0,
+        cardsForX: (ctx, x) => blazeCardsForX(ctx, x).map((card) => card.instanceId),
         prompt: decisionPrompt("Blaze, Firemind: remove how many energy counters?", "card.sbz.blaze.energy.choose"),
       },
+      // Priority windows open on canActivate alone, not on a declarable X.
       canActivate: (ctx) =>
-        ctx.getCounter("energy") > 0 || ctx.player(ctx.seat).hand.some((card) => blazeMatches(ctx, card, 0)),
+        Array.from({ length: ctx.getCounter("energy") + 1 }, (_, x) => x).some((x) => blazeCardsForX(ctx, x).length > 0),
       onActivate(ctx) {
         const x = ctx.getState("blazeX");
-        const matches = ctx.player(ctx.seat).hand.filter((card) => blazeMatches(ctx, card, x));
+        const matches = blazeCardsForX(ctx, x);
         if (matches.length === 0) {
           ctx.logPublic(
             localizedCardLog(

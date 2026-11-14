@@ -842,6 +842,9 @@ export interface ActivatedAbility {
     maximum?: number | ((ctx: ScriptCtx) => number);
     /** Restrict declarations to values that can produce the printed effect. */
     canDeclareX?(ctx: ScriptCtx, x: number): boolean;
+    /** Instance ids of the cards declaring this X lets the player play,
+     *  shown beside that option. Presentation only. */
+    cardsForX?(ctx: ScriptCtx, x: number): number[];
     prompt?: ScriptPrompt;
   };
   /** Chi point cost ({c}) in addition to `cost` (CR 1.14.2c/d): only chi

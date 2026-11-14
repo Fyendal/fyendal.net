@@ -1382,6 +1382,16 @@ function projectState(
                   ),
                 }
               : {}),
+            ...((revealAll || pd.player === seat) && pd.optionEnabledCardIds
+              ? {
+                  optionEnabledCards: pd.optionEnabledCardIds.map((ids) =>
+                    ids.flatMap((id) => {
+                      const card = optionCardView(state, runtime, id);
+                      return card ? [card] : [];
+                    }),
+                  ),
+                }
+              : {}),
             ...((revealAll || pd.player === seat) && pd.lookedCardIds
               ? {
                   // look-at floats are private, exactly like optionCards

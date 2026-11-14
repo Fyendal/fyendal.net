@@ -286,7 +286,8 @@ export function numberChoice(decision: PendingDecision | null): NumberChoice | n
     decision?.kind !== "choose-target" ||
     !decision.options ||
     decision.optionCards?.some(Boolean) ||
-    decision.optionMessages?.some(Boolean)
+    decision.optionMessages?.some(Boolean) ||
+    decision.optionEnabledCards
   ) return null;
   const parse = (pattern: RegExp) => new Map(decision.options!.flatMap((option) => {
     const digits = pattern.exec(option)?.[1];

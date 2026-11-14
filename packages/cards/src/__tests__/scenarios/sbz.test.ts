@@ -8,7 +8,7 @@
  * are answered with doRaw.
  */
 import { describe, expect, it } from "vitest";
-import { legalIntents } from "@fyendal/engine";
+import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { scenario } from "../harness.js";
 
 const BLAZE = "blaze, firemind|0";
@@ -189,6 +189,45 @@ describe("SBZ — Blaze, Firemind", () => {
 
     expect(s.state.players[0]!.hero.counters.energy).toBe(0);
     s.expectInZone(0, "nucleus aetherbolt|1", "banish");
+  });
+
+  it("offers only the X values that match a hand card, and shows that card to the deciding player", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: BLAZE,
+          weapons: [],
+          hand: ["aether spindle|2", "aether spindle|3", FODDER],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.hero.counters = { energy: 3 };
+
+    s.activate(BLAZE);
+
+    const [yellow, blue] = s.state.players[0]!.hand.map((card) => card.instanceId);
+    const enabled = (seat: number) =>
+      projectStateFor(s.state, seat).pendingDecision?.optionEnabledCards?.map((cards) =>
+        cards.map((card) => card.instanceId));
+    expect(s.state.pendingDecision?.options).toEqual(["X = 2", "X = 3"]);
+    expect(enabled(0)).toEqual([[blue], [yellow]]);
+    expect(enabled(1)).toBeUndefined();
+  });
+
+  it("cannot be activated when no X matches a hand card", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: BLAZE, weapons: [], hand: ["aether spindle|2", FODDER] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.hero.counters = { energy: 2 };
+    const heroId = s.state.players[0]!.hero.instanceId;
+
+    expect(legalIntents(s.state, 0).some((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === heroId)).toBe(false);
   });
 
   it.each([

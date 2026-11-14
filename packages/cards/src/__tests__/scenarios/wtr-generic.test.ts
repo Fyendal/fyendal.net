@@ -210,6 +210,7 @@ describe("WTR generic — attacks", () => {
       ],
     });
     g.play("nimble strike|1")
+      .chooseCard("nimblism|1")
       .expectLog("banishes Nimblism from graveyard")
       .expectAttackValue(5) // 4 + 1
       .blockWith()
@@ -217,6 +218,23 @@ describe("WTR generic — attacks", () => {
       .expectAP(0, 1)
       .expectInZone(0, "nimblism|1", "banish")
       .expectLife(1, 15);
+  });
+
+  it("Nimble Strike may decline to banish Nimblism", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["nimble strike|1", "raging onslaught|2"], graveyard: ["nimblism|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.play("nimble strike|1")
+      .chooseOption("pass")
+      .expectAttackValue(4)
+      .blockWith()
+      .settle()
+      .expectAP(0, 0)
+      .expectInZone(0, "nimblism|1", "graveyard")
+      .expectLife(1, 16);
   });
 
   it("Scar for a Scar gains go again when at less life", () => {

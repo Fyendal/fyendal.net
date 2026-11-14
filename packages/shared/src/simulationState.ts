@@ -440,6 +440,7 @@ export interface PersistedPendingDecisionV1 {
   followUpDecisions?: PersistedPendingDecisionV1[];
   tokenCreationCause?: PersistedTokenCreationCauseV1;
   cardOptions?: (number | string | null)[];
+  optionEnabledCardIds?: number[][];
   revealedCardIds?: number[];
   lookedCardIds?: number[];
   payment?: { pitchOptions: Record<string, { cost: number; pitchIds: number[]; result: string }> };

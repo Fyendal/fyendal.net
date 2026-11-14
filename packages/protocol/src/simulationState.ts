@@ -729,7 +729,7 @@ function validateResume(value: unknown, code: string, path: string): void {
 
 function validateDecision(value: unknown, code: string, path: string, depth = 0): void {
   if (depth > 16) fail(code, path, "follow-up decision nesting is too deep");
-  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["promptMessage", "warningMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "sourceInstanceId", "scriptSourceSnapshot", "chooseHook", "followUpDecisions", "tokenCreationCause", "cardOptions", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
+  const decision = exact(value, code, path, ["player", "kind", "prompt"], ["promptMessage", "warningMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "sourceInstanceId", "scriptSourceSnapshot", "chooseHook", "followUpDecisions", "tokenCreationCause", "cardOptions", "optionEnabledCardIds", "revealedCardIds", "lookedCardIds", "payment", "resourcePayment", "xPayment", "variablePlayCost", "variableActivationCost", "tokenCreationReplacement", "tokenCreationReplacementOrder", "wagerLossReplacementOrder", "activationCost", "clash", "arcane", "triggerOrder", "deckBottomOrder", "dieRoll", "staged", "resume"]);
   integer(decision.player, code, `${path}.player`);
   oneOf(decision.kind, ["defend", "attack-reaction", "defense-reaction", "priority-window", "arsenal", "choose-target", "choose-name", "order-triggers", "optional-effect"] as const, code, `${path}.kind`);
   string(decision.prompt, code, `${path}.prompt`);
@@ -827,6 +827,16 @@ function validateDecision(value: unknown, code: string, path: string, depth = 0)
   }, path);
   optional(decision, "tokenCreationCause", (v, p) => validateTokenCreationCause(v, code, p), path);
   optional(decision, "cardOptions", (v, p) => validateCardOptionArray(v, code, p), path);
+  optional(decision, "optionEnabledCardIds", (v, p) => {
+    array(v, code, p).forEach((entry, index) => validateIntegerArray(entry, code, `${p}[${index}]`));
+  }, path);
+  if (
+    Array.isArray(decision.options) &&
+    Array.isArray(decision.optionEnabledCardIds) &&
+    decision.options.length !== decision.optionEnabledCardIds.length
+  ) {
+    fail(code, `${path}.optionEnabledCardIds`, "must be parallel to options");
+  }
   optional(decision, "revealedCardIds", (v, p) => validateIntegerArray(v, code, p), path);
   optional(decision, "lookedCardIds", (v, p) => validateIntegerArray(v, code, p), path);
   optional(decision, "staged", (v, p) => validateIntegerArray(v, code, p), path);

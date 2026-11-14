@@ -29812,6 +29812,16 @@
       "value": "Aplique um efeito de substituição. Os que ainda se aplicarem depois serão oferecidos em seguida."
     }
   ],
+  "game.decision.enabledCards.named": [
+    {
+      "type": 0,
+      "value": "Permite que você jogue "
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
   "game.decision.endTurn.action": [
     {
       "type": 0,

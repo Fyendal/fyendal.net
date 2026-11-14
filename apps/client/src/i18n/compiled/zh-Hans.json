@@ -27194,6 +27194,16 @@
       "value": "应用一个替代效果。之后仍适用的效果会继续提供选择。"
     }
   ],
+  "game.decision.enabledCards.named": [
+    {
+      "type": 0,
+      "value": "可打出 "
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
   "game.decision.endTurn.action": [
     {
       "type": 0,

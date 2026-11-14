@@ -1625,7 +1625,7 @@ function turnFacts(value: unknown): value is TurnFactsView {
 function pendingDecision(value: unknown): boolean {
   const decision = object(value);
   return !!decision && exactKeys(decision, [
-    "player", "kind", "prompt", "promptMessage", "warningMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "stagedAttack", "stagedAttackModifiers", "defenderDefense",
+    "player", "kind", "prompt", "promptMessage", "warningMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "optionEnabledCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "stagedAttack", "stagedAttackModifiers", "defenderDefense",
     "resourcePayment", "preStackSource", "optionLayout", "sourceInstanceId",
   ], ["player", "kind", "prompt"])
     && seat(decision.player) && DECISION_KINDS.has(String(decision.kind))
@@ -1648,6 +1648,7 @@ function pendingDecision(value: unknown): boolean {
         count === null || (integer(count) && count >= 2 && count <= MAX_CARDS), MAX_CARDS))
     && optional(decision.optionCards, (v): v is Array<CardView | null> =>
       array(v, (item): item is CardView | null => item === null || cardView(item), MAX_CARDS))
+    && optional(decision.optionEnabledCards, (v): v is CardView[][] => array(v, cardViews, MAX_CARDS))
     && optional(decision.revealedCards, cardViews)
     && optional(decision.lookedCards, cardViews)
     && optional(decision.stagedCards, cardViews)
@@ -1690,6 +1691,8 @@ function pendingDecision(value: unknown): boolean {
     })
     && (!(Array.isArray(decision.options) && Array.isArray(decision.optionCards))
       || decision.options.length === decision.optionCards.length)
+    && (!(Array.isArray(decision.options) && Array.isArray(decision.optionEnabledCards))
+      || decision.options.length === decision.optionEnabledCards.length)
     && (!(Array.isArray(decision.options) && Array.isArray(decision.optionLabels))
       || decision.options.length === decision.optionLabels.length)
     && (!(Array.isArray(decision.options) && Array.isArray(decision.optionMessages))

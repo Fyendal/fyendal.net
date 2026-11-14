@@ -307,23 +307,33 @@ const hopeMerchantsHoodScript = (): CardScript => ({
 // ── Nimble Strike ───────────────────────────────────────────────────────────
 
 const nimbleStrikeScript = (): CardScript => ({
-  additionalCost(ctx) {
-    const nimblism = cardInGraveyard(ctx, "Nimblism");
-    if (!nimblism) return;
-    if (ctx.banish(nimblism.instanceId)) {
-      ctx.setState("nimblismBanished", 1);
-      ctx.logPublic(
-        localizedLog(
-          `${ctx.data.name}: banishes Nimblism from graveyard`,
-          "card.log.common.card.banished.from.graveyard",
-          {
-            card: { kind: "card", cardId: ctx.self.cardId },
-            result: { kind: "card", cardId: nimblism.cardId },
-          },
-          { kind: "card-moved", cardId: nimblism.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "banish" },
-        ),
+  declareAdditionalCost(ctx) {
+    const nimblisms = faceUpGraveyard(ctx).filter((c) => cardNamed(ctx, c, "Nimblism"));
+    if (nimblisms.length)
+      ctx.requestCardChoice(
+        "nimble-strike-banish",
+        decisionPrompt("Banish a Nimblism for +1 power and go again?", "card.sea.jacknimble.nimblism.banish", {
+          optionMessages: commonOptionMessages("pass"),
+        }),
+        ["pass", ...nimblisms.map((c) => c.instanceId)],
       );
-    }
+  },
+  onChoose(ctx, hook, option) {
+    if (hook !== "nimble-strike-banish" || option === "pass") return;
+    const nimblism = faceUpGraveyard(ctx).find((c) => c.instanceId === Number(option) && cardNamed(ctx, c, "Nimblism"));
+    if (!nimblism || !ctx.banish(nimblism.instanceId)) return;
+    ctx.setState("nimblismBanished", 1);
+    ctx.logPublic(
+      localizedLog(
+        `${ctx.data.name}: banishes Nimblism from graveyard`,
+        "card.log.common.card.banished.from.graveyard",
+        {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          result: { kind: "card", cardId: nimblism.cardId },
+        },
+        { kind: "card-moved", cardId: nimblism.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "banish" },
+      ),
+    );
   },
   modifyAttack(ctx) {
     return ctx.getState("nimblismBanished") ? 1 : 0;

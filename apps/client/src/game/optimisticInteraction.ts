@@ -300,6 +300,9 @@ function projectDecision(
                 ...(decision.optionCards
                   ? { optionCards: keptIndices.map((index) => decision.optionCards![index]!) }
                   : {}),
+                ...(decision.optionEnabledCards
+                  ? { optionEnabledCards: keptIndices.map((index) => decision.optionEnabledCards![index]!) }
+                  : {}),
                 ...(decision.lookedCards
                   ? {
                       lookedCards: decision.lookedCards.filter(
