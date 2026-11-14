@@ -43,6 +43,7 @@ type EnginePendingDecision = NonNullable<GameState["pendingDecision"]>;
 type PersistedEngineDecision = Omit<
   EnginePendingDecision,
   | "optionCards"
+  | "optionEnabledCards"
   | "revealedCards"
   | "lookedCards"
   | "stagedCards"
