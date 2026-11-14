@@ -60,6 +60,7 @@ import {
 import {
   PgRoomStore,
   hashReconnectToken,
+  isSoloRoom,
   PLAY_REQUIRES_LOGIN,
   PRESENCE_HEARTBEAT_MS,
   prepViewFor,
@@ -582,7 +583,8 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
       connections.detach(ctx);
       return undefined;
     }
-    return ctx.seat;
+    // Started solo games project for the acting seat in `stateMessage`.
+    return isSoloRoom(room) && !room.state ? ctx.viewSeat ?? ctx.seat : ctx.seat;
   }
 
   function seatCredentials(ctx: ClientCtx): SeatCredentials | null {
@@ -1023,10 +1025,59 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         send(ws, { type: "room-info", room });
         return;
       }
-      case "create-solo-room":
-      case "solo-seat":
-        send(ws, { type: "error", message: "solo rooms are not available yet" });
+      case "create-solo-room": {
+        if (!ctx.user) {
+          send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
+          return;
+        }
+        if (ctx.code !== null) {
+          send(ws, { type: "error", message: ALREADY_IN_ROOM });
+          return;
+        }
+        const cardPoolMode = msg.cardPoolMode ?? "legal";
+        const choice = await resolveChoice(ctx.user, msg.format, msg.deckId, cardPoolMode);
+        if ("error" in choice) {
+          send(ws, { type: "error", message: choice.error });
+          return;
+        }
+        const opponent = await resolveChoice(ctx.user, msg.format, msg.opponentDeckId, cardPoolMode);
+        if ("error" in opponent) {
+          send(ws, { type: "error", message: opponent.error });
+          return;
+        }
+        const { code, seat, token } = await rooms.createSoloRoom(msg.format, {
+          ...choice.choice,
+          username: ctx.user.username,
+          userId: ctx.user.id,
+        }, opponent.choice, cardPoolMode);
+        await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
+        connections.attach(ctx, code, seat, token);
+        const version = await markAttachedPresent(ctx);
+        send(ws, { type: "room-created", code, seat, token, version });
+        await publishRoomEvent({ code, kind: "created", version });
+        await publishRoomEvent({ code, kind: "prep", version });
         return;
+      }
+      case "solo-seat": {
+        if (!ctx.code || ctx.seat === null || !ctx.token) {
+          send(ws, { type: "error", message: "not in a solo room" });
+          return;
+        }
+        const room = await rooms.getRoom(ctx.code);
+        if (!room || !isSoloRoom(room)) {
+          send(ws, { type: "error", message: "not in a solo room" });
+          return;
+        }
+        if (room.state) {
+          send(ws, { type: "error", message: "control follows the acting seat once the game starts" });
+          return;
+        }
+        if (authorizedProjectionSeat(room, ctx) === undefined) return;
+        // Socket-local: switching prep views is not a room mutation.
+        ctx.viewSeat = msg.seat;
+        send(ws, { type: "prep-state", prep: prepViewFor(room, msg.seat), version: room.version });
+        return;
+      }
       case "list-rooms": {
         lobbyClients.add(ctx);
         send(ws, { type: "rooms", rooms: await rooms.listRooms(ctx.user?.id) });
@@ -1218,7 +1269,8 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         const player = requirePlayer(ws, ctx);
         if (!player) return;
         const room = await rooms.getRoom(player.code);
-        const seat = ctx.seat === null ? null : room?.seats[ctx.seat];
+        const actingSeat = ctx.viewSeat ?? ctx.seat;
+        const seat = actingSeat === null ? null : room?.seats[actingSeat];
         let fabraryArt: Record<string, string> = {};
         if (seat?.deckId && ctx.user) {
           const refreshed = await resolveFreshDeck(deps.db, ctx.user.id, seat.deckId, fabraryClient);
@@ -1337,14 +1389,18 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
               queuedUsers.delete(ctx.user.id);
             }
           }
-          const ended = await rooms.deleteBotRoom(code, credentials);
+          const ended = await rooms.deletePracticeRoom(code, credentials);
           if (!ended.ok) {
             send(ws, { type: "error", message: ended.error });
             return;
           }
           if (ended.replayFinalizationId) replayFinalizer.enqueue(ended.replayFinalizationId);
           connections.detach(ctx);
-          send(ws, { type: "left", ...(ended.playAgain ? { playAgain: ended.playAgain } : {}) });
+          send(ws, {
+            type: "left",
+            ...(ended.playAgain ? { playAgain: ended.playAgain } : {}),
+            ...(ended.playAgainSolo ? { playAgainSolo: ended.playAgainSolo } : {}),
+          });
           await publishRoomEvent({ code, kind: "deleted", version: ended.version });
           return;
         }
@@ -1934,7 +1990,8 @@ export async function broadcastCommittedRoom(
   await clusterPublisherByServer.get(server)?.(event);
 }
 
-/** Resolve the stable room code and credentials needed for a player action. */
+/** Resolve the stable room code and credentials needed for a player action.
+ * In solo prep they act as the viewed seat; the store ignores that elsewhere. */
 function requirePlayer(
   ws: WebSocket,
   ctx: ClientCtx,
@@ -1950,7 +2007,11 @@ function requirePlayer(
   if (!ctx.token) return null;
   return {
     code: ctx.code,
-    credentials: { token: ctx.token, userId: ctx.user?.id },
+    credentials: {
+      token: ctx.token,
+      userId: ctx.user?.id,
+      ...(ctx.viewSeat === undefined ? {} : { actAs: ctx.viewSeat }),
+    },
   };
 }
 

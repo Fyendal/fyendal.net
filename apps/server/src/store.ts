@@ -5,6 +5,7 @@ import {
   type BackgroundMatchmakingStatus,
   type BotOpponent,
   type BotRematch,
+  type SoloRematch,
   type CardPoolMode,
   type Decklist,
   type EquipmentSlot,
@@ -46,6 +47,7 @@ import {
   legalIntents,
   onlyIdleResourceSources,
   projectStateFor,
+  projectStateRevealedFor,
   projectTransitionEvents,
   TOKEN_SKIP_INTENTS,
   tokenSkipSequenceActive,
@@ -82,7 +84,7 @@ import {
   resolveLeagueRoomGame,
   startLeagueRoomGame,
 } from "./league/leagueMatches.js";
-import { decodeDeckPool, resolveDeck, validatePresentation } from "./decks.js";
+import { decodeDeckPool, resolveDeck, validatePresentation, type DeckRow } from "./decks.js";
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
 import { assertActiveRuleset } from "./rulesetFence.js";
 import { withTransaction, type Queryable } from "./db.js";
@@ -179,6 +181,8 @@ export interface SpectatorRow {
 export interface SeatCredentials {
   token: string;
   userId?: number;
+  /** Solo prep only: act for the self seat after authenticating the real one. */
+  actAs?: 0 | 1;
 }
 
 export interface RoomCommand {
@@ -343,13 +347,42 @@ const TOKEN_SKIP_COMMANDS = {
   "seismic-surge": "seismic-surge-skip",
 } as const satisfies Record<TokenSkipKind, string>;
 
-function seatForCredentials(room: RoomRow, credentials: SeatCredentials): SeatIndex | null {
+/** Private practice: bot and solo rooms, where only one account plays. */
+export function isPracticeRoom(room: Pick<RoomRow, "seats">): boolean {
+  return room.seats.some((seat) => seat?.controller !== undefined);
+}
+
+export function isSoloRoom(room: Pick<RoomRow, "seats">): boolean {
+  return room.seats.some((seat) => seat?.controller === "self");
+}
+
+/** The seat a solo game is waiting on; its owner acts as that seat. */
+function soloActingSeat(state: GameState): SeatIndex {
+  return (state.pendingDecision?.player ?? state.priorityPlayer) as SeatIndex;
+}
+
+function soloInPlay(room: RoomRow): boolean {
+  return isSoloRoom(room) && !!room.state && room.state.phase !== "game-over";
+}
+
+/** Solo seat actions resolve the acting seat at commit time; the version fence
+ *  keeps a command built for one seat from applying after control moved. */
+const SOLO_COMMAND_REQUIRED = "solo actions require an expected room version";
+
+/** Authenticate the credential's own seat. With `delegate`, the owner of a
+ *  solo room acts for the seat its game is waiting on, or for `actAs` in prep;
+ *  delegation never grants a bot or another player's seat. Membership
+ *  operations pass `delegate = false`. */
+function seatForCredentials(room: RoomRow, credentials: SeatCredentials, delegate = true): SeatIndex | null {
   const tokenHash = hashReconnectToken(credentials.token);
   const seat = room.seats.findIndex((s) => s?.tokenHash === tokenHash);
   if (seat === -1) return null;
-  const owner = room.seats[seat]!.userId;
-  if (owner != null && owner !== credentials.userId) return null;
-  return seat as SeatIndex;
+  const member = room.seats[seat]!;
+  if (member.userId != null && member.userId !== credentials.userId) return null;
+  if (!delegate || member.controller !== undefined || !isSoloRoom(room)) return seat as SeatIndex;
+  if (room.state) return room.state.phase === "game-over" ? seat as SeatIndex : soloActingSeat(room.state);
+  const actAs = credentials.actAs;
+  return actAs !== undefined && room.seats[actAs]?.controller === "self" ? actAs : seat as SeatIndex;
 }
 
 const AUTO_PASS_WINDOW_KINDS: ReadonlySet<PendingDecision["kind"]> = new Set([
@@ -950,6 +983,7 @@ async function recordRoomMatch(
   room: RoomRow,
   outcome: { replayId: string | null; winner: 0 | 1 | null; endReason: MatchEndReason; finishedAt: number },
 ): Promise<void> {
+  if (isSoloRoom(room)) return;
   const seats = room.seats.map((seat): MatchSeatInput | null => {
     const heroId = seat?.heroId;
     if (!seat || !heroId) return null;
@@ -1504,7 +1538,8 @@ export class PgRoomStore {
         }
         let commandSeat: SeatIndex | null = null;
         if (command) {
-          commandSeat = seatForCredentials(room, command.credentials);
+          // Keyed by the authenticated seat: a solo retry may find control moved.
+          commandSeat = seatForCredentials(room, command.credentials, false);
           if (commandSeat === null) return { ok: false as const, error: "not a player in this room" };
           const { rows } = await db.query(
             `SELECT committed_version FROM room_commands
@@ -1560,7 +1595,9 @@ export class PgRoomStore {
         this.tickClock(out.room, hadGame);
         if (!(await this.save(out.room, db))) throw VERSION_CONFLICT;
         await this.applySeatWrites(db, out.room, out.seatWrites ?? []);
-        const gameJustEnded = !wasGameOver && out.room.state?.phase === "game-over";
+        // Solo games leave no durable record: no replay, match, counters, or awards.
+        const recorded = !isSoloRoom(out.room);
+        const gameJustEnded = recorded && !wasGameOver && out.room.state?.phase === "game-over";
         const pendingAchievements = gameJustEnded ? await awardAchievements(db, out.room) : null;
         if (out.releaseMatchmaking) {
           const released = out.releaseMatchmaking.joiningUserId === undefined
@@ -1580,7 +1617,7 @@ export class PgRoomStore {
         }
         if (out.snapshot) await this.saveSnapshot(db, room, out.snapshot);
         let replayFinalizationId: string | undefined;
-        if (out.replay?.kind === "start" && out.room.state) {
+        if (out.replay?.kind === "start" && out.room.state && recorded) {
           const participants = ([0, 1] as const).map((seat) => {
             const member = out.room.seats[seat];
             const heroId = member?.heroId;
@@ -1600,7 +1637,7 @@ export class PgRoomStore {
           });
           await recordGamePlayers(db, participants.map((participant) => participant.userId));
           await startLeagueRoomGame(db, out.room.code);
-        } else if (out.replay?.kind === "frame" && out.room.state) {
+        } else if (out.replay?.kind === "frame" && out.room.state && recorded) {
           const replayFrameAt = Date.now();
           replayFinalizationId = (await appendReplayView(
             db,
@@ -1769,20 +1806,58 @@ export class PgRoomStore {
     }
     const legality = formatLegalityErrors(cardData, botDeck.decklist, format, { cardPoolMode: "open" });
     if (legality.length > 0) throw new Error(legality.join("; "));
-    const code = newCode();
     const token = newToken();
-    const now = Date.now();
-    const room: RoomRow = {
-      code, format, cardPoolMode, version: 0, createdAt: now, gcAt: now + GC_DELAY_MS,
-      rulesetVersion: this.rulesetVersion, isPrivate: true, spectators: [], state: null,
-      prep: rollDice(), prepDeadlineAt: null, lastTransition: null, clock: null,
-      seats: [
+    return this.insertPracticeRoom(db, format, cardPoolMode, token, [
+      { ...seat, heroId: humanDeck.decklist.heroId, tokenHash: hashReconnectToken(token), lastSeenAt: 0 },
+      {
+        deckId: botDeck.id, deckName: botDeck.name, heroId: botDeck.decklist.heroId,
+        username: definition.username, controller: "bot", tokenHash: hashReconnectToken(newToken()), lastSeenAt: 0,
+      },
+    ]);
+  }
+
+  /** Create a private self-play room: the human holds seat 0 and plays seat 1
+   * through delegation. Deck ownership and freshness are checked by the caller. */
+  async createSoloRoom(
+    format: Format,
+    seat: { deckId: string; deckName?: string; username: string; userId: number },
+    opponent: { deckId: string; deckName?: string },
+    cardPoolMode: CardPoolMode = "legal",
+  ): Promise<{ code: string; seat: number; token: string; version: number }> {
+    return withTransaction(this.db, async (db) => {
+      await assertActiveRuleset(db, this.rulesetVersion);
+      const decks = [await resolveDeck(db, seat.deckId), await resolveDeck(db, opponent.deckId)];
+      for (const deck of decks) {
+        if (!deck || deck.format !== format) throw new Error(`choose a ${format} deck`);
+        const legality = formatLegalityErrors(cardData, deck.decklist, format, { cardPoolMode });
+        if (legality.length > 0) throw new Error(legality.join("; "));
+      }
+      const [humanDeck, opponentDeck] = decks as [DeckRow, DeckRow];
+      const token = newToken();
+      return this.insertPracticeRoom(db, format, cardPoolMode, token, [
         { ...seat, heroId: humanDeck.decklist.heroId, tokenHash: hashReconnectToken(token), lastSeenAt: 0 },
         {
-          deckId: botDeck.id, deckName: botDeck.name, heroId: botDeck.decklist.heroId,
-          username: definition.username, controller: "bot", tokenHash: hashReconnectToken(newToken()), lastSeenAt: 0,
+          deckId: opponentDeck.id, deckName: opponent.deckName ?? opponentDeck.name,
+          heroId: opponentDeck.decklist.heroId, username: seat.username, controller: "self",
+          tokenHash: hashReconnectToken(newToken()), lastSeenAt: 0,
         },
-      ],
+      ]);
+    });
+  }
+
+  /** Insert a private prep room whose seat 0 holds `token`. */
+  private async insertPracticeRoom(
+    db: Queryable,
+    format: Format,
+    cardPoolMode: CardPoolMode,
+    token: string,
+    seats: [SeatRow, SeatRow],
+  ): Promise<{ code: string; seat: number; token: string; version: number }> {
+    const now = Date.now();
+    const room: RoomRow = {
+      code: newCode(), format, cardPoolMode, version: 0, createdAt: now, gcAt: now + GC_DELAY_MS,
+      rulesetVersion: this.rulesetVersion, isPrivate: true, spectators: [], state: null,
+      prep: rollDice(), prepDeadlineAt: null, lastTransition: null, clock: null, seats,
     };
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       if (attempt > 0) room.code = newCode();
@@ -3196,8 +3271,8 @@ export class PgRoomStore {
           if (seatRow.userId != null && seatRow.userId !== opts.userId) {
             return { error: "seat belongs to another account" };
           }
-          const reuseCredential = seatRow.userId != null && seatRow.controller !== "bot"
-            && room.seats.some((candidate) => candidate?.controller === "bot");
+          const reuseCredential = seatRow.userId != null && seatRow.controller === undefined
+            && isPracticeRoom(room);
           const rotatedToken = reuseCredential ? token : newToken();
           seatRow.tokenHash = hashReconnectToken(rotatedToken);
           return {
@@ -3549,7 +3624,7 @@ export class PgRoomStore {
     const room = await this.getRoom(code.toUpperCase());
     if (!room) return { ok: false, error: "room not found" };
     if (room.state) return { ok: false, error: "game has already started" };
-    const seatIdx = seatForCredentials(room, credentials);
+    const seatIdx = seatForCredentials(room, credentials, false);
     if (seatIdx === null) return { ok: false, error: "not a player in this room" };
     if (room.seats[1 - seatIdx] !== null) return { ok: false, error: "room is full" };
     // League seats are reserved for the two members. Matchmaking rooms are fine:
@@ -3567,7 +3642,8 @@ export class PgRoomStore {
     };
   }
 
-  /** Prep room: the die winner picks in PvP; the human always picks against a bot. */
+  /** Prep room: the die winner picks in PvP; the human always picks in practice,
+   *  for whichever seat it acts as. */
   async chooseFirst(
     code: string,
     credentials: SeatCredentials,
@@ -3580,8 +3656,8 @@ export class PgRoomStore {
       const seatIdx = seatForCredentials(room, credentials);
       if (seatIdx === null) return { error: "not a player in this room" };
       const botSeat = room.seats.findIndex((candidate) => candidate?.controller === "bot");
-      const isHumanInBotGame = botSeat !== -1 && seatIdx !== botSeat;
-      if (!isHumanInBotGame && seatIdx !== room.prep.dieWinner) {
+      const practicePick = isPracticeRoom(room) && seatIdx !== botSeat;
+      if (!practicePick && seatIdx !== room.prep.dieWinner) {
         return { error: "only the die-roll winner picks" };
       }
       const phase = matchPrepPhase(room);
@@ -3638,31 +3714,31 @@ export class PgRoomStore {
         if (room.state) return { error: "game has already started" };
         const tokenHash = hashReconnectToken(credentials.token);
         const tokenSeat = room.seats.findIndex((s) => s?.tokenHash === tokenHash);
-        const seatIdx = seatForCredentials(room, credentials);
+        const seatIdx = seatForCredentials(room, credentials, false);
         if (tokenSeat !== -1 && seatIdx === null) return { error: "not a player in this room" };
         if (seatIdx !== null) {
           const otherSeat = (1 - seatIdx) as SeatIndex;
-          const removesBot = room.seats[otherSeat]?.controller === "bot";
+          const removesPracticeSeat = room.seats[otherSeat]?.controller !== undefined;
           const survivor = room.seats[otherSeat];
           const resetsSurvivor = survivor?.accepted === true || survivor?.ready === true || survivor?.presented !== undefined;
           room.seats[seatIdx] = null;
           room.prep = null;
           room.prepDeadlineAt = null;
           if (survivor) resetPreparation(survivor);
-          // A bot room is private to its human creator. If that player leaves
-          // prep, remove the synthetic seat as well instead of listing an
-          // orphaned Briar room for matchmaking.
-          if (removesBot) {
+          // A practice room is private to its human creator. If that player
+          // leaves prep, remove the synthetic seat too instead of listing an
+          // orphaned room for matchmaking.
+          if (removesPracticeSeat) {
             room.seats[otherSeat] = null;
           }
           return {
             room,
             seatWrites: [
               { kind: "delete", seat: seatIdx },
-              ...(room.seats[otherSeat] && !removesBot && resetsSurvivor
+              ...(room.seats[otherSeat] && !removesPracticeSeat && resetsSurvivor
                 ? [{ kind: "full" as const, seat: otherSeat, mode: "update" as const }]
                 : []),
-              ...(removesBot ? [{ kind: "delete" as const, seat: otherSeat }] : []),
+              ...(removesPracticeSeat ? [{ kind: "delete" as const, seat: otherSeat }] : []),
             ],
             result: {
               freedSeat: seatIdx,
@@ -3873,15 +3949,15 @@ export class PgRoomStore {
     return resolved;
   }
 
-  /** Close the active replay and permanently delete a bot room when its seated
-   *  human chooses End Game. Authorization, replay closure, and the bot-seat
-   *  check happen in the deletion transaction; room history, seats, and
-   *  presence cascade from the room row. */
-  async deleteBotRoom(
+  /** Close the active replay and permanently delete a bot or solo room when
+   *  its seated human chooses End Game. Authorization, replay closure, and the
+   *  practice check happen in the deletion transaction; room history, seats,
+   *  and presence cascade from the room row. */
+  async deletePracticeRoom(
     code: string,
     credentials: SeatCredentials,
   ): Promise<
-    { ok: true; version: number; replayFinalizationId?: string; playAgain?: BotRematch }
+    { ok: true; version: number; replayFinalizationId?: string; playAgain?: BotRematch; playAgainSolo?: SoloRematch }
     | { ok: false; error: string }
   > {
     const upper = code.toUpperCase();
@@ -3889,11 +3965,11 @@ export class PgRoomStore {
       () => withTransaction(this.db, async (db) => {
         const room = await this.loadRoom(db, upper);
         if (!room) return { ok: false as const, error: "room not found" };
-        if (!room.seats.some((seat) => seat?.controller === "bot")) {
+        if (!isPracticeRoom(room)) {
           return { ok: false as const, error: "not a bot game" };
         }
-        const seat = seatForCredentials(room, credentials);
-        if (seat === null || room.seats[seat]?.controller === "bot") {
+        const seat = seatForCredentials(room, credentials, false);
+        if (seat === null || room.seats[seat]?.controller !== undefined) {
           return { ok: false as const, error: "not a player in this room" };
         }
         const replayFinalizationId = room.state
@@ -3921,15 +3997,20 @@ export class PgRoomStore {
           event: { code: upper, kind: "deleted", version: room.version + 1 },
         });
         const humanDeckId = room.seats[seat]?.deckId;
-        const bot = botDefinitionForDeckId(room.seats[1 - seat]?.deckId);
+        const other = room.seats[1 - seat];
+        const bot = other?.controller === "bot" ? botDefinitionForDeckId(other.deckId) : undefined;
         const playAgain: BotRematch | undefined = humanDeckId && bot?.format === room.format
           ? { format: room.format, deckId: humanDeckId, bot: bot.id }
+          : undefined;
+        const playAgainSolo: SoloRematch | undefined = humanDeckId && other?.controller === "self" && other.deckId
+          ? { format: room.format, deckId: humanDeckId, opponentDeckId: other.deckId }
           : undefined;
         return {
           ok: true as const,
           version: room.version + 1,
           ...(replayFinalizationId ? { replayFinalizationId } : {}),
           ...(playAgain ? { playAgain } : {}),
+          ...(playAgainSolo ? { playAgainSolo } : {}),
         };
       }),
       () => ({ ok: false as const, error: "room is busy, try again" }),
@@ -4161,11 +4242,14 @@ export class PgRoomStore {
     const r = await this.withRetry<{ autoPassed: boolean }>(upper, (room) => {
       const seat = seatForCredentials(room, credentials);
       if (seat === null) return { error: "not a player in this room" };
-      room.seats[seat]!.priorityMode = mode;
+      // One person plays both solo seats, so one preference covers both.
+      const seats = isSoloRoom(room) ? [0, 1] : [seat];
+      for (const target of seats) room.seats[target]!.priorityMode = mode;
+      const state = room.state;
       const shouldPass = mode === "auto-pass"
-        && !!room.state
-        && room.state.phase !== "game-over"
-        && autoPassSkipsWindow(room.state, seat, room.seats[seat]!.controller);
+        && !!state
+        && state.phase !== "game-over"
+        && seats.some((target) => autoPassSkipsWindow(state, target, room.seats[target]!.controller));
       if (!shouldPass) return { room, result: { autoPassed: false }, versionNeutral: true };
       const events: EngineTransitionMove[] = [];
       this.applyServerShortcuts(room, events);
@@ -4193,13 +4277,19 @@ export class PgRoomStore {
     const r = await this.withRetry<{ advanced: boolean }>(upper, (room) => {
       const seat = seatForCredentials(room, credentials);
       if (seat === null) return { error: "not a player in this room" };
-      const member = room.seats[seat]!;
-      if (Object.keys(orders).length > 0) member.standingOrders = orders;
-      else delete member.standingOrders;
-      const answers = !!room.state
-        && room.state.phase !== "game-over"
-        && !!member.standingOrders
-        && standingOrderIntent(room.state, seat, member.standingOrders) !== null;
+      const seats = isSoloRoom(room) ? [0, 1] : [seat];
+      for (const target of seats) {
+        const member = room.seats[target]!;
+        if (Object.keys(orders).length > 0) member.standingOrders = orders;
+        else delete member.standingOrders;
+      }
+      const state = room.state;
+      const answers = !!state
+        && state.phase !== "game-over"
+        && seats.some((target) => {
+          const own = room.seats[target]!.standingOrders;
+          return !!own && standingOrderIntent(state, target, own) !== null;
+        });
       if (!answers) return { room, result: { advanced: false }, versionNeutral: true };
       const events: EngineTransitionMove[] = [];
       this.applyServerShortcuts(room, events);
@@ -4228,6 +4318,7 @@ export class PgRoomStore {
   ): Promise<{ ok: true; version: number; advanced: boolean; replayFinalizationId?: string } | { ok: false; error: string }> {
     const upper = code.toUpperCase();
     const r = await this.withRetry<{ advanced: boolean }>(upper, (room) => {
+      if (!command && soloInPlay(room)) return { error: SOLO_COMMAND_REQUIRED };
       const seat = seatForCredentials(room, credentials);
       if (seat === null) return { error: "not a player in this room" };
       if (!enabled) {
@@ -4266,6 +4357,7 @@ export class PgRoomStore {
   ): Promise<{ ok: true; version: number; advanced: boolean; replayFinalizationId?: string } | { ok: false; error: string }> {
     const upper = code.toUpperCase();
     const r = await this.withRetry<{ advanced: boolean }>(upper, (room) => {
+      if (!command && soloInPlay(room)) return { error: SOLO_COMMAND_REQUIRED };
       const seat = seatForCredentials(room, credentials);
       if (seat === null) return { error: "not a player in this room" };
       const member = room.seats[seat]!;
@@ -4308,9 +4400,10 @@ export class PgRoomStore {
   ): Promise<{ ok: true; version: number; replayFinalizationId?: string } | { ok: false; error: string }> {
     const r = await this.withRetry(code.toUpperCase(), (room) => {
       if (!room.state) return { error: "game has not started" };
+      if (!command && soloInPlay(room)) return { error: SOLO_COMMAND_REQUIRED };
       const seat = seatForCredentials(room, credentials);
       if (seat === null) return { error: "not a player in this room" };
-      if (room.seats.some((member) => member?.controller === "bot") &&
+      if (isPracticeRoom(room) &&
         (intent.kind === "offer-draw" || intent.kind === "accept-draw" || intent.kind === "decline-draw" || intent.kind === "withdraw-draw")) {
         return { error: "draw offers are only available in player games" };
       }
@@ -4431,11 +4524,13 @@ export class PgRoomStore {
         if (requestingSeat === null) {
           return { ok: false as const, error: "not a player in this room" };
         }
+        if (!command && soloInPlay(room)) return { ok: false as const, error: SOLO_COMMAND_REQUIRED };
+        const commandSeat = seatForCredentials(room, credentials, false);
         if (command) {
           const { rows } = await db.query(
             `SELECT committed_version FROM room_commands
              WHERE room_code = $1 AND seat = $2 AND command_id = $3`,
-            [upper, requestingSeat, command.id],
+            [upper, commandSeat, command.id],
           );
           if (rows.length > 0) {
             return { ok: true as const, version: Number(rows[0]!.committed_version) };
@@ -4536,7 +4631,7 @@ export class PgRoomStore {
             `INSERT INTO room_commands
               (room_code, seat, command_id, command_type, expected_version, committed_version, created_at)
              VALUES ($1,$2,$3,'undo',$4,$5,$6)`,
-            [upper, requestingSeat, command.id, command.expectedVersion, room.version + 1, Date.now()],
+            [upper, commandSeat, command.id, command.expectedVersion, room.version + 1, Date.now()],
           );
         }
         return {
@@ -4567,6 +4662,7 @@ export class PgRoomStore {
       if (room.state.phase === "game-over") return { error: "game is already over" };
       const seatIdx = seatForCredentials(room, credentials);
       if (seatIdx === null) return { error: "not a player in this room" };
+      if (isSoloRoom(room)) return { error: "both seats are yours" };
       const waitingOn = room.state.pendingDecision?.player ?? room.state.activePlayer;
       if (waitingOn === seatIdx) return { error: "the game is waiting on you" };
       const lastAction = room.seats[1 - seatIdx]?.lastActionAt ?? 0;
@@ -4610,7 +4706,7 @@ export class PgRoomStore {
       () => withTransaction(this.db, async (db) => {
         const room = await this.loadRoom(db, upper);
         if (!room) return { ok: false as const, error: "room not found" };
-        if (seatForCredentials(room, credentials) === null) {
+        if (seatForCredentials(room, credentials, false) === null) {
           return { ok: false as const, error: "not a player in this room" };
         }
         const users = await db.query("SELECT id FROM users WHERE username_lc = $1", [username.toLowerCase()]);
@@ -5083,9 +5179,20 @@ export function spectatorListMessage(room: RoomRow): ServerMessage {
   };
 }
 
-export function stateMessage(room: RoomRow, seat: number | null, now = Date.now()): ServerMessage | null {
+export function stateMessage(room: RoomRow, viewer: number | null, now = Date.now()): ServerMessage | null {
   if (!room.state) return null;
-  const view = projectStateFor(room.state, seat, room.code);
+  // A seated solo owner keeps a fixed board, sees both hands, and controls whichever seat must act.
+  const owner = viewer !== null && isSoloRoom(room)
+    ? room.seats.findIndex((member) => member !== null && member.controller === undefined)
+    : -1;
+  const boardSeat = owner === 0 || owner === 1 ? owner : null;
+  const seat = boardSeat === null
+    ? viewer
+    : room.state.phase === "game-over" ? boardSeat : soloActingSeat(room.state);
+  const reveal = boardSeat !== null;
+  const view = reveal
+    ? projectStateRevealedFor(room.state, seat!, room.code)
+    : projectStateFor(room.state, seat, room.code);
   const candidates = seat === null ? [] : actionCandidates(room.state, seat);
   const profile = (member: SeatRow | null) => ({
     username: member?.username ?? "Unknown player",
@@ -5105,7 +5212,7 @@ export function stateMessage(room: RoomRow, seat: number | null, now = Date.now(
             ...(room.lastTransition.restoreVersion === undefined
               ? {}
               : { restoreVersion: room.lastTransition.restoreVersion }),
-            events: projectTransitionEvents(room.lastTransition.events, seat),
+            events: projectTransitionEvents(room.lastTransition.events, seat, reveal),
           },
         }
       : {}),
@@ -5117,9 +5224,11 @@ export function stateMessage(room: RoomRow, seat: number | null, now = Date.now(
     lastActionAt: [room.seats[0]?.lastActionAt ?? 0, room.seats[1]?.lastActionAt ?? 0],
     ...(room.clock ? { clock: clockView(room.clock, now) } : {}),
     ...(room.seats.some((member) => member?.controller === "bot") ? { botGame: true } : {}),
+    ...(isSoloRoom(room) ? { soloGame: true } : {}),
+    ...(boardSeat !== null ? { boardSeat } : {}),
     ...(seat !== null && room.seats[seat]?.passUntil ? { passUntil: room.seats[seat].passUntil.mode } : {}),
     ...(seat !== null && forfeitsActionPoint(view, seat, candidates) ? { endTurnWarning: true as const } : {}),
-    ...visibleCardArt(room, view, seat),
+    ...visibleCardArt(room, view, seat, reveal),
   };
 }
 
@@ -5129,6 +5238,7 @@ function visibleCardArt(
   room: RoomRow,
   view: GameView,
   seat: number | null,
+  revealAll = false,
 ): { cardArt?: [Record<string, string>, Record<string, string>] } {
   if (!room.seats.some((member) => member?.cardArt)) return {};
   const visible = [new Set<string>(), new Set<string>()];
@@ -5150,7 +5260,7 @@ function visibleCardArt(
   }
   const forSeat = (index: 0 | 1): Record<string, string> => {
     const art = room.seats[index]?.cardArt ?? {};
-    if (index === seat) return art;
+    if (index === seat || revealAll) return art;
     return Object.fromEntries(Object.entries(art).filter(([cardId]) => visible[index]!.has(cardId)));
   };
   return { cardArt: [forSeat(0), forSeat(1)] };
@@ -5170,7 +5280,7 @@ export function prepViewFor(room: RoomRow, seat: number): PrepView {
       arenaLocked: !!room.prep?.arenas[index],
       ...(room.prep?.arenas.every(Boolean)
         ? { arena: revealArena(room.prep.arenas[index]!) } : {}),
-      connected: s.controller === "bot" || isPresent(s.lastSeenAt, now),
+      connected: s.controller !== undefined || isPresent(s.lastSeenAt, now),
       ...(s.fromQueue ? { accepted: s.accepted === true } : {}),
     };
   };
@@ -5178,6 +5288,7 @@ export function prepViewFor(room: RoomRow, seat: number): PrepView {
     format: room.format,
     ...(room.cardPoolMode === "legal" ? {} : { cardPoolMode: room.cardPoolMode }),
     ...(room.seats.some((member) => member?.controller === "bot") ? { botGame: true } : {}),
+    ...(isSoloRoom(room) ? { soloGame: true } : {}),
     ...(room.seats[seat]?.fromQueue && room.seats[1 - seat] === null ? { searching: true as const } : {}),
     phase: prepPhase(room),
     ...(room.seats[seat]?.presented ? { yourPresentedDeck: [...room.seats[seat]!.presented!.deck] } : {}),

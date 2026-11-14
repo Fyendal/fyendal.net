@@ -30,6 +30,7 @@ import { skipTokenStep } from "./tokenSkip.js";
 import {
   projectStateFor as projectStateForImpl,
   projectStateForReplay as projectStateForReplayImpl,
+  projectStateRevealedFor as projectStateRevealedForImpl,
 } from "./project.js";
 import {
   anyWindowAction as anyWindowActionImpl,
@@ -843,6 +844,10 @@ export function projectStateFor(
 
 export function projectStateForReplay(state: GameStateInternal, publicGameId?: string) {
   return projectStateForReplayImpl(state, engineRuntime, publicGameId);
+}
+
+export function projectStateRevealedFor(state: GameStateInternal, seat: number, publicGameId?: string) {
+  return projectStateRevealedForImpl(state, engineRuntime, seat, publicGameId);
 }
 export { TOKEN_SKIP_INTENTS, tokenSkipSequenceActive } from "./tokenSkip.js";
 export { damageStepPriorityAttacker } from "./triggers.js";

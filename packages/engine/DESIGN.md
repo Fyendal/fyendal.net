@@ -15,6 +15,7 @@ actionCandidates(state: GameState, seat: number): GameIntent[]
 applyIntent(state: GameState, seat: number, intent: GameIntent): ApplyResult
 projectStateFor(state: GameState, seat: number | null, publicGameId?: string): GameView
 projectStateForReplay(state: GameState, publicGameId?: string): GameView
+projectStateRevealedFor(state: GameState, seat: number, publicGameId?: string): GameView
 ```
 
 `legalIntents` is the authority for player actions. Every returned intent must
@@ -207,6 +208,10 @@ always produces a full-information view of every zone while omitting live
 action capabilities and the RNG seed.
 The server may persist replay projections while a game is active, but callers
 must not expose them until the game is over.
+`projectStateRevealedFor` is for one person playing both seats: a seated
+projection that also reveals the other player's hand, arsenal, and face-down
+cards, keeps deck order hidden until game over, and merges both seats' private
+log entries so the log does not depend on the seat.
 
 Log projection follows the same audience boundary:
 

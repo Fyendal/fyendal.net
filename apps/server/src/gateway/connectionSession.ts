@@ -8,6 +8,8 @@ export interface ClientCtx {
   closed: boolean;
   code: string | null;
   seat: number | null;
+  /** Solo rooms: the seat this socket views and acts as; real seat when absent. */
+  viewSeat?: 0 | 1;
   token: string | null;
   presenceLeaseId: string | null;
   user: AuthUser | null;
@@ -50,6 +52,7 @@ export class ConnectionRegistry {
     ctx.seat = seat;
     ctx.token = token;
     ctx.presenceLeaseId = randomBytes(12).toString("hex");
+    ctx.viewSeat = undefined;
     ctx.lastEmoteAt = 0;
     this.lobby.delete(ctx);
     let clients = this.byRoom.get(code);
@@ -67,6 +70,7 @@ export class ConnectionRegistry {
     ctx.seat = null;
     ctx.token = null;
     ctx.presenceLeaseId = null;
+    ctx.viewSeat = undefined;
     ctx.botRuntimeId = undefined;
   }
 }

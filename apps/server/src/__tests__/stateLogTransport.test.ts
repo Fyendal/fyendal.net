@@ -56,6 +56,20 @@ describe("incremental log transport", () => {
     expect(new LiveServerMessageDecoder().decode(full)).toEqual(state(1, 20));
   });
 
+  it("keeps a solo board's log stream across acting-seat changes", () => {
+    const encoder = new StateLogTransport();
+    const decoder = new LiveServerMessageDecoder();
+    const solo = (start: number, version: number, yourSeat: 0 | 1): StateMessage =>
+      ({ ...state(start, 20, version), yourSeat, soloGame: true, boardSeat: 0 });
+    decoder.decode(encoder.encode(solo(1, 1, 1)));
+    const next = solo(2, 2, 0);
+    const frame = encoder.encode(next);
+    expect(frame.drop).not.toBeNull();
+    expect(decoder.decode(JSON.parse(JSON.stringify(frame)))).toEqual(next);
+    // A real seat change outside solo still snapshots.
+    expect(encoder.encode({ ...state(2, 20, 3), yourSeat: 1 }).drop).toBeNull();
+  });
+
   it("snapshots an undo replacement even if its log still overlaps", () => {
     const encoder = new StateLogTransport();
     encoder.encode(state(1, 20));

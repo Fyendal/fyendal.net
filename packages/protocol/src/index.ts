@@ -1914,7 +1914,7 @@ function decodeStateMessage(value: unknown): StateMessage | null {
   if (!message || message.type !== "state") return null;
   const valid = exactKeys(message, [
     "type", "version", "view", "transition", "playerProfiles", "yourSeat", "legal", "actionCandidates",
-    "spectators", "lastActionAt", "clock", "botGame", "soloGame", "cardArt", "passUntil", "endTurnWarning",
+    "spectators", "lastActionAt", "clock", "botGame", "soloGame", "boardSeat", "cardArt", "passUntil", "endTurnWarning",
   ], ["type", "version", "view", "playerProfiles", "yourSeat", "legal", "lastActionAt"])
     && optional(message.clock, gameClockView)
     && optional(message.cardArt, (v): v is [Record<string, string>, Record<string, string>] =>
@@ -1929,6 +1929,7 @@ function decodeStateMessage(value: unknown): StateMessage | null {
     && optional(message.spectators, nonNegativeInteger)
     && optional(message.botGame, (v): v is boolean => typeof v === "boolean")
     && optional(message.soloGame, (v): v is boolean => typeof v === "boolean")
+    && optional(message.boardSeat, (v): v is 0 | 1 => v === 0 || v === 1)
     && optional(message.passUntil, passUntilMode)
     && optional(message.endTurnWarning, (v): v is true => v === true)
     && Array.isArray(message.lastActionAt) && message.lastActionAt.length === 2
@@ -3145,11 +3146,16 @@ export class IncompatibleStateFrameError extends Error {
   constructor() { super("State frame does not match this client's protocol"); }
 }
 
+/** Whose log a state carries: a solo board's log is the same for whichever seat acts. */
+export function stateLogAudience(state: StateMessage): string {
+  return state.boardSeat === undefined ? `seat:${state.yourSeat}` : `board:${state.boardSeat}`;
+}
+
 /** Socket-local delivery history, independent of room versions and replay UI.
  * Only projected logs are retained; callers always receive a complete state. */
 export class LiveServerMessageDecoder {
   private baseline: {
-    stream: string; sequence: number; gameId: string; seat: number | null;
+    stream: string; sequence: number; gameId: string; audience: string;
     log: string[]; logEntries: GameLogViewEntry[] | undefined;
   } | null = null;
 
@@ -3171,7 +3177,7 @@ export class LiveServerMessageDecoder {
     if (frame.drop !== null) {
       const previous = this.baseline;
       if (!previous || previous.stream !== frame.stream || previous.sequence + 1 !== frame.sequence
-        || previous.gameId !== state.view.gameId || previous.seat !== state.yourSeat
+        || previous.gameId !== state.view.gameId || previous.audience !== stateLogAudience(state)
         || frame.drop > previous.log.length
         || (previous.logEntries === undefined) !== (state.view.logEntries === undefined)) {
         this.reset(); throw new StateStreamError();
@@ -3185,7 +3191,7 @@ export class LiveServerMessageDecoder {
       state = { ...state, view };
     }
     this.baseline = {
-      stream: frame.stream, sequence: frame.sequence, gameId: state.view.gameId, seat: state.yourSeat,
+      stream: frame.stream, sequence: frame.sequence, gameId: state.view.gameId, audience: stateLogAudience(state),
       log: [...state.view.log], logEntries: state.view.logEntries && structuredClone(state.view.logEntries),
     };
     return state;

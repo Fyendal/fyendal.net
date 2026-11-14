@@ -67,8 +67,17 @@ function projectedLog(
   state: GameStateInternal,
   seat: number | null,
   revealAll: boolean,
+  allSeats = false,
 ): { log: string[]; logEntries?: GameLogViewEntry[] } {
   const entries = state.log.flatMap((entry) => {
+    if (allSeats) {
+      // The same text for every viewer: the first seat's override, then the other's.
+      const override = [0, 1].find((index) => entry.seatText?.[index] != null);
+      const text = override === undefined ? entry.publicText : entry.seatText![override]!;
+      if (text === null) return [];
+      const payload = override === undefined ? entry.publicPayload : entry.seatPayloads?.[override] ?? undefined;
+      return [{ text, payload, sequence: entry.sequence }];
+    }
     const publicAudience = seat === null || revealAll;
     const seatText = publicAudience ? undefined : entry.seatText?.[seat];
     const usesSeatOverride = seatText !== undefined && seatText !== null;
@@ -351,6 +360,7 @@ function playerView(
   self: boolean,
   revealAll = false,
   viewerSeat: number | null = null,
+  revealDeck = revealAll,
 ): PlayerView {
   const gameOver = state.phase === "game-over";
   const equipment: Partial<Record<EquipmentSlot, CardView>> = {};
@@ -395,7 +405,7 @@ function playerView(
     hand: self || gameOver || revealAll ? p.hand.map((c) => cardView(state, runtime, c, INACTIVE_ZONE)) : [],
     handCount: p.hand.length,
     deckCount: p.deck.length,
-    ...(gameOver || revealAll ? { deck: p.deck.map((c) => cardView(state, runtime, c, INACTIVE_ZONE)) } : {}),
+    ...(gameOver || revealDeck ? { deck: p.deck.map((c) => cardView(state, runtime, c, INACTIVE_ZONE)) } : {}),
     // face-up cards (e.g. a flipped mentor) are public; face-down stay secret
     arsenal: self || gameOver || revealAll
       ? p.arsenal.map((c) => cardView(state, runtime, c, INACTIVE_ZONE))
@@ -413,7 +423,7 @@ function playerView(
         : cardView(state, runtime, c, {
             includeCounters: false,
             includeLife: false,
-            ...(self && !revealAll ? { playableFrom: { zone: "graveyard", actingSeat: p.seat } } : {}),
+            ...(self ? { playableFrom: { zone: "graveyard", actingSeat: p.seat } } : {}),
           })
     ),
     // face-down banished cards are secret to everyone but their owner
@@ -423,7 +433,7 @@ function playerView(
         : cardView(state, runtime, c, {
             includeCounters: false,
             includeLife: false,
-            ...(viewerSeat !== null && !revealAll
+            ...(viewerSeat !== null
               ? { playableFrom: { zone: "banish", actingSeat: viewerSeat } }
               : {}),
           })
@@ -845,6 +855,20 @@ export function projectStateForReplay(
   return projectState(state, runtime, null, publicGameId, true);
 }
 
+/** A seated projection with both players' hands, arsenals, and face-down cards
+ * revealed, for one person playing both seats. Decision details, legal-play
+ * provenance, and the seat's own deck knowledge are the seat's, as in
+ * `projectStateFor`; deck order stays hidden until game over. The log merges
+ * both seats' private entries, so it is the same for either seat. */
+export function projectStateRevealedFor(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  publicGameId = "game",
+): GameView {
+  return projectState(state, runtime, seat, publicGameId, true, true);
+}
+
 /** Project the authoritative stack one-for-one. Counted server layers expose
  * their remaining occurrence count directly; the client does no grouping.
  * While new triggers are being ordered, the lower stack is parked on the
@@ -1027,6 +1051,7 @@ function projectState(
   seat: number | null,
   publicGameId: string,
   revealAll: boolean,
+  bothSeats = false,
 ): GameView {
   // Until the attack-layer resolves, the newest link is presented on the
   // stack. Attack-step triggers run after it has become attacking.
@@ -1218,7 +1243,7 @@ function projectState(
       arcaneDamageTaken: player.flags.arcaneDamageTakenThisTurn === true,
     })) as TurnFactsView["players"],
   };
-  const projectedGameLog = projectedLog(state, seat, revealAll);
+  const projectedGameLog = projectedLog(state, seat, revealAll, bothSeats);
   return {
     // The RNG seed is private server state. Publishing it lets a client
     // reconstruct every future shuffle/random choice in a deterministic game.
@@ -1233,8 +1258,8 @@ function projectState(
       ? { endTurnPassPending: true as const }
       : {}),
     players: [
-      playerView(state, runtime, state.players[0] as PlayerState, seat === 0, revealAll, seat),
-      playerView(state, runtime, state.players[1] as PlayerState, seat === 1, revealAll, seat),
+      playerView(state, runtime, state.players[0] as PlayerState, seat === 0, revealAll, seat, revealAll && !bothSeats),
+      playerView(state, runtime, state.players[1] as PlayerState, seat === 1, revealAll, seat, revealAll && !bothSeats),
     ],
     chain,
     stack: projectedStackLayers(state, runtime, seat, revealAll),

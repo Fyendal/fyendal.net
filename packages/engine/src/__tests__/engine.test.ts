@@ -1,7 +1,7 @@
 import { engineRuntime } from "../engineRuntime.js";
 import { describe, expect, it, vi } from "vitest";
 import type { GameIntent } from "@fyendal/shared";
-import { actionCandidates, applyIntent, legalIntents, projectStateFor, projectStateForReplay, projectTransitionEvents, rngNext } from "../index.js";
+import { actionCandidates, applyIntent, legalIntents, projectStateFor, projectStateForReplay, projectStateRevealedFor, projectTransitionEvents, rngNext } from "../index.js";
 import { declareAttack, queueAttackCard } from "../attacks.js";
 import { closeChain } from "../combatChain.js";
 import { computeAttack } from "../combatValues.js";
@@ -4165,6 +4165,36 @@ describe("projection", () => {
     expect(replay.players[1]!.arsenal[0]!.instanceId).toBe(arsenalCard.instanceId);
     expect(replay.players[0]!.deck?.length).toBeGreaterThan(0);
     expect(replay.players[1]!.deck?.length).toBeGreaterThan(0);
+  });
+
+  it("reveals both seats for one player without changing the seat's own view", () => {
+    const s = makeGame(122, undefined, "MENTOR");
+    const arsenalCard = s.players[1]!.hand.shift()!;
+    arsenalCard.faceDown = true;
+    s.players[1]!.arsenal.push(arsenalCard);
+    const banished = s.players[1]!.hand.shift()!;
+    banished.faceDown = true;
+    s.players[1]!.banish.push(banished);
+    logPrivate(s, 0, "seat zero secret");
+    logPrivate(s, 1, "seat one secret", "seat one public");
+
+    for (const seat of [0, 1] as const) {
+      const live = projectStateFor(s, seat);
+      const revealed = projectStateRevealedFor(s, seat);
+      expect(revealed.players[seat]).toEqual(live.players[seat]);
+      expect(revealed.players[1 - seat]!.hand.map((card) => card.instanceId))
+        .toEqual(s.players[1 - seat]!.hand.map((card) => card.instanceId));
+      expect(revealed.players[0]!.deck).toBeUndefined();
+      expect(revealed.players[1]!.deck).toBeUndefined();
+      expect(revealed.players[1]!.arsenal.map((card) => card.instanceId)).toContain(arsenalCard.instanceId);
+      expect(revealed.players[1]!.banish.at(-1)!.cardId).toBe(banished.cardId);
+    }
+    expect(projectStateFor(s, 0).players[1]!.banish.at(-1)!.cardId).not.toBe(banished.cardId);
+    // The pending mentor decision keeps its details for the deciding seat.
+    expect(projectStateRevealedFor(s, 0).pendingDecision).toEqual(projectStateFor(s, 0).pendingDecision);
+    const logs = [0, 1].map((seat) => projectStateRevealedFor(s, seat).log);
+    expect(logs[0]).toEqual(logs[1]);
+    expect(logs[0]!.slice(-2)).toEqual(["seat zero secret", "seat one secret"]);
   });
 });
 

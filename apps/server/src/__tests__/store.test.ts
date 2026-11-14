@@ -489,7 +489,7 @@ describe("PgRoomStore storage", () => {
       "UPDATE room_seats SET last_action_at = $3 WHERE room_code = $1 AND seat = $2",
     ]);
 
-    const ended = await store.deleteBotRoom(created.code, {
+    const ended = await store.deletePracticeRoom(created.code, {
       token: created.token,
       userId,
     });
@@ -513,7 +513,7 @@ describe("PgRoomStore storage", () => {
       username: "BotOwner",
       userId,
     });
-    expect(await store.deleteBotRoom(humanRoom.code, {
+    expect(await store.deletePracticeRoom(humanRoom.code, {
       token: humanRoom.token,
       userId,
     })).toEqual({ ok: false, error: "not a bot game" });
