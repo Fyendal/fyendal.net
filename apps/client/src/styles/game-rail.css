@@ -763,6 +763,16 @@
     gap: 7px;
     padding: 10px 12px;
     cursor: default;
+    /* Priority light runs in from the bar's ends. */
+    --hud-light-reach: 110px;
+    --hud-light-opp-side: to right;
+    --hud-light-me-side: to left;
+    --hud-rule-run: to bottom;
+    --hud-rule-size: 3px 100%;
+    --hud-rule-opp-edge: left;
+    --hud-rule-me-edge: right;
+    --hud-glow-x: 6px;
+    --hud-glow-y: 0px;
   }
   .status-float .life { font-size: 25px; }
   .status-float .btn-pass { padding: 5px 14px; }

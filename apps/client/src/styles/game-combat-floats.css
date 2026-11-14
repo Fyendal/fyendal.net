@@ -137,6 +137,92 @@
   cursor: default;
   box-shadow: 0 12px 38px #000c, inset 0 1px 0 #ffd4791c;
 }
+/* Priority light, desktop HUD: the awaited hero's end of the panel takes a
+   brushed-brass rule over an amber wash, and its life total brightens. Same
+   registered-number scheme as .mat-half, so the light crosses the panel. */
+@property --hud-light-opp {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --hud-light-me {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@media (min-width: 701px) {
+  .status-float {
+    --hud-light-reach: 72px;
+    --hud-light-opp-side: to bottom;
+    --hud-light-me-side: to top;
+    --hud-rule-run: to right;
+    --hud-rule-size: 100% 3px;
+    --hud-rule-opp-edge: top;
+    --hud-rule-me-edge: bottom;
+    --hud-glow-x: 0px;
+    --hud-glow-y: 6px;
+    background:
+      linear-gradient(
+        var(--hud-rule-run),
+        rgb(112 74 22 / var(--hud-light-opp)) 0,
+        rgb(226 172 58 / var(--hud-light-opp)) 26%,
+        rgb(246 220 140 / var(--hud-light-opp)) 46%,
+        rgb(226 172 58 / var(--hud-light-opp)) 62%,
+        rgb(112 74 22 / var(--hud-light-opp)) 100%
+      ) var(--hud-rule-opp-edge) / var(--hud-rule-size) no-repeat,
+      linear-gradient(
+        var(--hud-rule-run),
+        rgb(112 74 22 / var(--hud-light-me)) 0,
+        rgb(226 172 58 / var(--hud-light-me)) 26%,
+        rgb(246 220 140 / var(--hud-light-me)) 46%,
+        rgb(226 172 58 / var(--hud-light-me)) 62%,
+        rgb(112 74 22 / var(--hud-light-me)) 100%
+      ) var(--hud-rule-me-edge) / var(--hud-rule-size) no-repeat,
+      linear-gradient(
+        var(--hud-light-opp-side),
+        rgb(200 138 38 / calc(var(--hud-light-opp) * .5)) 0,
+        rgb(184 120 34 / calc(var(--hud-light-opp) * .24)) calc(var(--hud-light-reach) * .2),
+        rgb(160 98 28 / calc(var(--hud-light-opp) * .1)) calc(var(--hud-light-reach) * .6),
+        rgb(160 98 28 / 0) var(--hud-light-reach)
+      ),
+      linear-gradient(
+        var(--hud-light-me-side),
+        rgb(200 138 38 / calc(var(--hud-light-me) * .5)) 0,
+        rgb(184 120 34 / calc(var(--hud-light-me) * .24)) calc(var(--hud-light-reach) * .2),
+        rgb(160 98 28 / calc(var(--hud-light-me) * .1)) calc(var(--hud-light-reach) * .6),
+        rgb(160 98 28 / 0) var(--hud-light-reach)
+      ),
+      #140d07f2;
+    box-shadow:
+      0 12px 38px #000c,
+      inset 0 1px 0 #ffd4791c,
+      calc(var(--hud-glow-x) * -1) calc(var(--hud-glow-y) * -1) 16px rgb(190 120 30 / calc(var(--hud-light-opp) * .3)),
+      var(--hud-glow-x) var(--hud-glow-y) 16px rgb(190 120 30 / calc(var(--hud-light-me) * .3));
+    transition: --hud-light-opp .34s ease-out, --hud-light-me .34s ease-out;
+  }
+  .status-float:has(.life-opp.life-priority-holder) { --hud-light-opp: 1; }
+  .status-float:has(.life-me.life-priority-holder) { --hud-light-me: 1; }
+  .status-float:has(.life-me.life-priority-pulse) {
+    animation: hud-priority-breathe 3.6s ease-in-out infinite;
+  }
+  /* The lit total brightens and gets a dark halo so it reads over the wash. */
+  .status-float .life { transition: color .34s ease-out, text-shadow .34s ease-out; }
+  .status-float .life-priority-holder { text-shadow: 0 1px 2px #000, 0 0 10px #140d07; }
+  .status-float .life-me.life-priority-holder { color: #a6dc55; }
+  .status-float .life-opp.life-priority-holder { color: #f27565; }
+}
+@keyframes hud-priority-breathe {
+  0%, 100% { --hud-light-me: 1; }
+  50% { --hud-light-me: 1.25; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .status-float,
+  .status-float .life { transition: none; }
+  .table:not([data-motion-preference="full"]) .status-float:has(.life-me.life-priority-pulse) { animation: none; }
+}
+.table[data-motion-preference="reduced"] .status-float,
+.table[data-motion-preference="reduced"] .status-float .life { transition: none; }
+.table[data-motion-preference="reduced"] .status-float:has(.life-me.life-priority-pulse) { animation: none; }
 /* Match the square board's pile column and leave space beside its graveyards. */
 @media (min-width: 701px) {
   .table:has(.mat-square-board) .status-float {
