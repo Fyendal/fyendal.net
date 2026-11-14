@@ -118,8 +118,9 @@ import { acknowledgePassUntil, armPassUntil, decodeStoredPassUntil, passUntilInt
 
 export interface SeatRow {
   tokenHash: string;
-  /** Bot seats have no socket or account and are driven after room commits. */
-  controller?: "bot";
+  /** Bot seats have no socket or account and are driven after room commits;
+   *  self seats are played by the other seat's human through delegation. */
+  controller?: "bot" | "self";
   /** the saved deck this seat plays with (absent only on human seats of
    *  locally seeded manual-test rooms, which start in play) */
   deckId?: string;
@@ -384,7 +385,7 @@ function isEmptyPriorityWindow(state: GameState, seat: number): boolean {
 /** Whether auto-pass skips this seat's empty window. A human attacker still
  *  stops in the Damage Step to see the block and its outcome; bots never
  *  stop. */
-function autoPassSkipsWindow(state: GameState, seat: number, controller: "bot" | undefined): boolean {
+function autoPassSkipsWindow(state: GameState, seat: number, controller: SeatRow["controller"]): boolean {
   return isEmptyPriorityWindow(state, seat) &&
     (controller === "bot" || damageStepPriorityAttacker(state) !== seat);
 }
@@ -791,8 +792,8 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
     const seat = Number(row.seat);
     if (!(seat === 0 || seat === 1) || seats[seat]) throw new CorruptRoomError(code, `seats[${index}].seat`, "invalid or duplicate seat");
     if (typeof row.token_hash !== "string") throw new CorruptRoomError(code, `seats[${index}].token_hash`, "expected a string");
-    if (!(row.controller === "human" || row.controller === "bot")) {
-      throw new CorruptRoomError(code, `seats[${index}].controller`, "expected human or bot");
+    if (!(row.controller === "human" || row.controller === "bot" || row.controller === "self")) {
+      throw new CorruptRoomError(code, `seats[${index}].controller`, "expected human, bot, or self");
     }
     if (!(row.priority_mode === "always-pause" || row.priority_mode === "auto-pass")) {
       throw new CorruptRoomError(code, `seats[${index}].priority_mode`, "expected always-pause or auto-pass");
@@ -835,7 +836,7 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
     }
     seats[seat] = {
       tokenHash: row.token_hash,
-      ...(row.controller === "bot" ? { controller: "bot" as const } : {}),
+      ...(row.controller === "human" ? {} : { controller: row.controller }),
       ...(typeof row.deck_id === "string" ? { deckId: row.deck_id } : {}),
       ...(typeof row.deck_name === "string" ? { deckName: row.deck_name } : {}),
       ...(typeof row.username === "string" ? { username: row.username } : {}),

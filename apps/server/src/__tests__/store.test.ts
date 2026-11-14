@@ -296,6 +296,17 @@ describe("PgRoomStore storage", () => {
     expect(replay).toMatchObject({ status: "finalizing", winner: null });
   });
 
+  it("round-trips a self-play seat controller through reads and seat rewrites", async () => {
+    const { code, tokens } = await fullRoom();
+    await db.query("UPDATE room_seats SET controller = 'self' WHERE room_code = $1 AND seat = 1", [code]);
+    const loaded = await store.getRoom(code);
+    expect(loaded?.seats[1]?.controller).toBe("self");
+    expect(loaded?.seats[0]?.controller).toBeUndefined();
+    expect((await store.setPriorityMode(code, { token: tokens[1] }, "auto-pass")).ok).toBe(true);
+    expect((await rawSeats(code)).map((seat) => seat.controller)).toEqual(["human", "self"]);
+    await expect(db.query("UPDATE room_seats SET controller = 'robot' WHERE room_code = $1", [code])).rejects.toThrow();
+  });
+
   it("persists and advertises a room's card-pool mode", async () => {
     const created = await store.createRoom(
       "cc",

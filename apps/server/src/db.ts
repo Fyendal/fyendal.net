@@ -1192,6 +1192,19 @@ export const MIGRATIONS: Migration[] = [
       ADD CONSTRAINT pending_bot_starts_bot_check
       CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia', 'boltyn', 'ira-sage', 'aurora', 'dorinthea'));`,
   },
+  {
+    version: 66,
+    // Self-play seats are driven by the room's own human socket.
+    sql: `ALTER TABLE room_seats
+      DROP CONSTRAINT IF EXISTS room_seats_controller_check;
+    -- pg-mem assigns positional names to inline checks; production Postgres
+    -- uses the column-derived name above.
+    ALTER TABLE room_seats
+      DROP CONSTRAINT IF EXISTS room_seats_constraint_2;
+    ALTER TABLE room_seats
+      ADD CONSTRAINT room_seats_controller_check
+      CHECK (controller IN ('human', 'bot', 'self'));`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

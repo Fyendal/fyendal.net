@@ -413,6 +413,10 @@ describe("client messages", () => {
     { type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "dorinthea" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira", searchForPlayer: true, avoidRoomCodes: ["ABC123"] },
     { type: "create-bot-room", deckId: "precon-sba" },
+    { type: "create-solo-room", format: "cc", deckId: "deck", opponentDeckId: "precon-asr" },
+    { type: "create-solo-room", format: "silver-age", deckId: "precon-sba", opponentDeckId: "precon-sba", cardPoolMode: "open" },
+    { type: "solo-seat", seat: 0 },
+    { type: "solo-seat", seat: 1 },
     { type: "join-room", code: "ABC123", token: "seat-token", deckId: "deck", spectate: false },
     { type: "inspect-room", code: "ABC123" },
     { type: "list-rooms" },
@@ -544,6 +548,14 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "queue-join", format: "cc" })).toBeNull();
     expect(decodeClientMessage({ type: "join-room", code: "ABC123", hero: "rhinar" })).toBeNull();
     expect(decodeClientMessage({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "unknown" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-solo-room", format: "cc", deckId: "deck" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-solo-room", deckId: "deck", opponentDeckId: "deck" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-solo-room", format: "cc", deckId: "deck", opponentDeckId: "" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-solo-room", format: "cc", deckId: "deck", opponentDeckId: "deck", bot: "ira" })).toBeNull();
+    for (const seat of [2, -1, "0", null, 0.5, undefined]) {
+      expect(decodeClientMessage({ type: "solo-seat", seat })).toBeNull();
+    }
+    expect(decodeClientMessage({ type: "solo-seat" })).toBeNull();
     expect(decodeClientMessage({ type: "auth", token: "x".repeat(129) })).toBeNull();
     expect(decodeClientMessage({ type: "friend-request", username: "has space" })).toBeNull();
     expect(decodeClientMessage({ type: "chat-send", username: "Alice", text: "x".repeat(1_001), clientMessageId: "message-1" })).toBeNull();
@@ -1198,6 +1210,7 @@ describe("GameView and server messages", () => {
       { type: "game-started", version: 1 },
       { type: "state", version: 1, view: gameView(), transition: { fromVersion: 0, kind: "forward", events: [{ kind: "move", from: { kind: "deck", seat: 0, position: "top" }, to: { kind: "hand", seat: 0 }, count: 1 }] }, playerProfiles, yourSeat: 0, legal: [{ kind: "play-card", instanceId: 1, pitchInstanceIds: [], boost: true }], actionCandidates: [{ kind: "play-card", instanceId: 2, pitchInstanceIds: [], pitchRequired: 4, deferPlayPresentation: true }], spectators: 2, lastActionAt: [0, 1], botGame: true },
       { type: "state", version: 3, view: gameView(), transition: { fromVersion: 2, kind: "replace", restoreVersion: 1, events: [] }, playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 1] },
+      { type: "state", version: 4, view: gameView(), playerProfiles, yourSeat: 1, legal: [], lastActionAt: [0, 1], soloGame: true },
       { type: "spectators", count: 2, version: 1 },
       { type: "spectator-list", usernames: ["Alice", null], version: 1 },
       { type: "opponent-disconnected", version: 1 }, { type: "opponent-reconnected", version: 1 },
@@ -1232,6 +1245,15 @@ describe("GameView and server messages", () => {
         die: { rolls: [3, 5], winner: 1 }, startPlayer: null,
         cardPoolMode: "open", deadlineAt: 30_000, deadlinePhase: "accept",
       } },
+      { type: "prep-state", version: 2, prep: {
+        format: "cc", phase: "accept", yourSeat: 1, soloGame: true,
+        seats: [0, 1].map((seat) => ({
+          username: `Player ${seat}`, heroId: `HERO${seat}`, heroName: `Hero ${seat}`,
+          ready: false, arenaLocked: false, connected: true, accepted: false,
+        })),
+        die: { rolls: [3, 5], winner: 1 }, startPlayer: null,
+      } },
+      { type: "left", playAgainSolo: { format: "silver-age", deckId: "deck", opponentDeckId: "precon-sba" } },
       { type: "left" }, { type: "left", playAgain: { format: "cc", deckId: "precon-asb", bot: "hala" } },
       { type: "error", code: "ROOM_NOT_FOUND", message: "gone" },
     ];
@@ -1245,6 +1267,17 @@ describe("GameView and server messages", () => {
       { format: "cc", bot: "hala" },
       { format: "cc", deckId: "precon-asb", bot: "hala", extra: true },
     ]) expect(decodeServerMessage({ type: "left", playAgain })).toBeNull();
+    for (const playAgainSolo of [
+      { format: "cc", deckId: "deck" },
+      { format: "draft", deckId: "deck", opponentDeckId: "deck" },
+      { format: "cc", deckId: "deck", opponentDeckId: "deck", bot: "hala" },
+    ]) expect(decodeServerMessage({ type: "left", playAgainSolo })).toBeNull();
+    expect(decodeServerMessage({
+      type: "left",
+      playAgain: { format: "cc", deckId: "precon-asb", bot: "hala" },
+      playAgainSolo: { format: "cc", deckId: "deck", opponentDeckId: "deck" },
+    })).toBeNull();
+    expect(decodeServerMessage({ type: "state", version: 1, view: gameView(), playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 1], soloGame: "yes" })).toBeNull();
   });
 
   it("decodes arena stages and rejects premature reveals and malformed commitments", () => {

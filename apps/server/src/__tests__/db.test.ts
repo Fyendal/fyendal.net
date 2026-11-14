@@ -330,6 +330,26 @@ describe("initial schema", () => {
     await expect(db.query("UPDATE room_seats SET token_skip = 'aura'")).rejects.toThrow();
   });
 
+  it("widens room seat controllers to self-play without disturbing existing seats", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 65));
+    await db.query(
+      `INSERT INTO rooms (code, format, spectators, ruleset_version, version, created_at, status)
+       VALUES ('SOLO01', 'cc', '[]', 'rules-a', 0, 1, 'open')`,
+    );
+    await db.query("INSERT INTO room_seats (room_code, seat, token_hash, controller) VALUES ('SOLO01', 0, 'hash', 'human')");
+    await db.query("INSERT INTO room_seats (room_code, seat, token_hash, controller) VALUES ('SOLO01', 1, 'hash', 'bot')");
+    await expect(db.query("UPDATE room_seats SET controller = 'self' WHERE seat = 1")).rejects.toThrow();
+
+    await applyMigrations(db, MIGRATIONS);
+
+    expect((await db.query("SELECT controller FROM room_seats ORDER BY seat")).rows)
+      .toEqual([{ controller: "human" }, { controller: "bot" }]);
+    await db.query("UPDATE room_seats SET controller = 'self' WHERE seat = 1");
+    await expect(db.query("UPDATE room_seats SET controller = 'robot' WHERE seat = 1")).rejects.toThrow();
+    await expect(db.query("UPDATE room_seats SET priority_mode = 'never' WHERE seat = 1")).rejects.toThrow();
+  });
+
   it("adds optional recovery email and cascading recovery tokens to existing accounts", async () => {
     const db = rawDb();
     await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 51));

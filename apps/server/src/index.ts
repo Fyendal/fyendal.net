@@ -1023,6 +1023,10 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         send(ws, { type: "room-info", room });
         return;
       }
+      case "create-solo-room":
+      case "solo-seat":
+        send(ws, { type: "error", message: "solo rooms are not available yet" });
+        return;
       case "list-rooms": {
         lobbyClients.add(ctx);
         send(ws, { type: "rooms", rooms: await rooms.listRooms(ctx.user?.id) });

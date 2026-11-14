@@ -23,6 +23,13 @@ export interface BotRematch {
   bot: BotOpponent;
 }
 
+/** What a finished self-play game needs to start again with the same decks. */
+export interface SoloRematch {
+  format: Format;
+  deckId: string;
+  opponentDeckId: string;
+}
+
 /** Numeric resources produced when pitched. Colored cards use their red/
  * yellow/blue/purple color value (1/2/3/4). */
 export type Pitch = 1 | 2 | 3 | 4;
@@ -1042,6 +1049,8 @@ export interface PrepView {
   cardPoolMode?: Exclude<CardPoolMode, "legal">;
   /** This room has a synthetic AI opponent and is deleted when its human ends it. */
   botGame?: boolean;
+  /** One account controls both seats of this private room. */
+  soloGame?: boolean;
   /** Your seat came from matchmaking and is still waiting to be paired. */
   searching?: true;
   seats: [PrepSeatView | null, PrepSeatView | null];
@@ -1189,6 +1198,10 @@ export type ClientMessage =
   | { type: "create-room"; format: Format; deckId: string; private?: boolean; cardPoolMode?: CardPoolMode }
   /** Create a dedicated constructed room with the selected AI opponent. */
   | { type: "create-bot-room"; format?: Format; deckId: string; bot?: BotOpponent; cardPoolMode?: CardPoolMode; searchForPlayer?: boolean; avoidRoomCodes?: string[] }
+  /** Create a private room where the creator plays both seats. */
+  | { type: "create-solo-room"; format: Format; deckId: string; opponentDeckId: string; cardPoolMode?: CardPoolMode }
+  /** Solo room: switch which seat this socket views and acts as. */
+  | { type: "solo-seat"; seat: 0 | 1 }
   /** deckId required to take a player seat; omit to spectate. spectate
    *  forces a spectator slot even when a player seat is free */
   | { type: "join-room"; code: string; token?: string; deckId?: string; spectate?: boolean }
@@ -1269,7 +1282,7 @@ export type ServerMessage =
   | { type: "deck-changed"; deckId: string }
   | { type: "friend-invited"; username: string }
   | { type: "game-started"; version: number }
-  | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; /** Absent for rooms started before the clock existed. */ clock?: GameClockView; botGame?: boolean; /** The recipient seat's armed pass shortcut; never sent to anyone else. */ passUntil?: PassUntilMode; /** Passing now would end the recipient seat's turn with a usable action point; never sent to anyone else. */ endTurnWarning?: true; /** Per-seat printing id -> image id, limited to cards this viewer can see. */ cardArt?: [Record<string, string>, Record<string, string>] }
+  | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; /** Absent for rooms started before the clock existed. */ clock?: GameClockView; botGame?: boolean; soloGame?: boolean; /** The recipient seat's armed pass shortcut; never sent to anyone else. */ passUntil?: PassUntilMode; /** Passing now would end the recipient seat's turn with a usable action point; never sent to anyone else. */ endTurnWarning?: true; /** Per-seat printing id -> image id, limited to cards this viewer can see. */ cardArt?: [Record<string, string>, Record<string, string>] }
   | { type: "spectators"; count: number; version: number }
   /** Additive companion to the legacy count message; null identifies a guest. */
   | { type: "spectator-list"; usernames: Array<string | null>; version: number }
@@ -1287,8 +1300,8 @@ export type ServerMessage =
   | { type: "match-timeout" }
   /** pre-game prep room update */
   | { type: "prep-state"; prep: PrepView; version: number }
-  /** your leave-room went through; an ended bot game names its deck and bot for Play again */
-  | { type: "left"; playAgain?: BotRematch }
+  /** your leave-room went through; an ended bot or solo game names what Play again recreates */
+  | { type: "left"; playAgain?: BotRematch; playAgainSolo?: SoloRematch }
   | { type: "error"; code: ErrorCode; message: string };
 
 /** Full application state after socket log reconstruction. */

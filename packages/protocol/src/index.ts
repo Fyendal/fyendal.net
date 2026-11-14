@@ -1150,6 +1150,16 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
           && message.avoidRoomCodes.every((code) => typeof code === "string" && /^[A-Za-z0-9]{6}$/.test(code))
         ));
       break;
+    case "create-solo-room":
+      valid = exactKeys(message, ["type", "format", "deckId", "opponentDeckId", "cardPoolMode"], ["type", "format", "deckId", "opponentDeckId"])
+        && FORMATS.has(String(message.format))
+        && id(message.deckId)
+        && id(message.opponentDeckId)
+        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)));
+      break;
+    case "solo-seat":
+      valid = exactKeys(message, ["type", "seat"]) && seat(message.seat);
+      break;
     case "join-room":
       valid = exactKeys(message, ["type", "code", "token", "deckId", "spectate"], ["type", "code"])
         && typeof message.code === "string" && /^[A-Za-z0-9]{6}$/.test(message.code)
@@ -1813,7 +1823,7 @@ function prepSeat(value: unknown): boolean {
 
 function prepView(value: unknown): value is PrepView {
   const prep = object(value);
-  if (!prep || !exactKeys(prep, ["format", "seats", "yourSeat", "yourDeckId", "die", "startPlayer", "botGame", "searching", "cardPoolMode", "deadlineAt", "deadlinePhase", "phase", "yourArena", "yourPresentedDeck"], ["format", "seats", "yourSeat", "die", "startPlayer", "phase"])) return false;
+  if (!prep || !exactKeys(prep, ["format", "seats", "yourSeat", "yourDeckId", "die", "startPlayer", "botGame", "soloGame", "searching", "cardPoolMode", "deadlineAt", "deadlinePhase", "phase", "yourArena", "yourPresentedDeck"], ["format", "seats", "yourSeat", "die", "startPlayer", "phase"])) return false;
   let dieValid = prep.die === null;
   if (!dieValid) {
     const die = object(prep.die);
@@ -1826,6 +1836,7 @@ function prepView(value: unknown): value is PrepView {
     && prep.seats.every((item) => item === null || prepSeat(item)) && seat(prep.yourSeat)
     && optional(prep.yourDeckId, id)
     && optional(prep.botGame, (v): v is boolean => typeof v === "boolean")
+    && optional(prep.soloGame, (v): v is boolean => typeof v === "boolean")
     && optional(prep.searching, (v): v is true => v === true)
     && (prep.searching === undefined || prep.phase === "waiting")
     && optional(prep.cardPoolMode, (v): v is "future" | "open" => v === "future" || v === "open")
@@ -1859,6 +1870,12 @@ function botRematch(value: unknown): boolean {
   const rematch = object(value);
   return !!rematch && exactKeys(rematch, ["format", "deckId", "bot"])
     && FORMATS.has(String(rematch.format)) && id(rematch.deckId) && BOT_OPPONENTS.has(String(rematch.bot));
+}
+
+function soloRematch(value: unknown): boolean {
+  const rematch = object(value);
+  return !!rematch && exactKeys(rematch, ["format", "deckId", "opponentDeckId"])
+    && FORMATS.has(String(rematch.format)) && id(rematch.deckId) && id(rematch.opponentDeckId);
 }
 
 function backgroundMatchmakingStatus(value: unknown): boolean {
@@ -1897,7 +1914,7 @@ function decodeStateMessage(value: unknown): StateMessage | null {
   if (!message || message.type !== "state") return null;
   const valid = exactKeys(message, [
     "type", "version", "view", "transition", "playerProfiles", "yourSeat", "legal", "actionCandidates",
-    "spectators", "lastActionAt", "clock", "botGame", "cardArt", "passUntil", "endTurnWarning",
+    "spectators", "lastActionAt", "clock", "botGame", "soloGame", "cardArt", "passUntil", "endTurnWarning",
   ], ["type", "version", "view", "playerProfiles", "yourSeat", "legal", "lastActionAt"])
     && optional(message.clock, gameClockView)
     && optional(message.cardArt, (v): v is [Record<string, string>, Record<string, string>] =>
@@ -1911,6 +1928,7 @@ function decodeStateMessage(value: unknown): StateMessage | null {
       array(v, decodeGameIntentValue, MAX_LEGAL_INTENTS))
     && optional(message.spectators, nonNegativeInteger)
     && optional(message.botGame, (v): v is boolean => typeof v === "boolean")
+    && optional(message.soloGame, (v): v is boolean => typeof v === "boolean")
     && optional(message.passUntil, passUntilMode)
     && optional(message.endTurnWarning, (v): v is true => v === true)
     && Array.isArray(message.lastActionAt) && message.lastActionAt.length === 2
@@ -1984,8 +2002,10 @@ function decodeServerEvent(value: unknown): Exclude<ServerMessage, StateMessage>
       valid = exactKeys(message, ["type"]);
       break;
     case "left":
-      valid = exactKeys(message, ["type", "playAgain"], ["type"])
-        && (message.playAgain === undefined || botRematch(message.playAgain));
+      valid = exactKeys(message, ["type", "playAgain", "playAgainSolo"], ["type"])
+        && (message.playAgain === undefined || botRematch(message.playAgain))
+        && (message.playAgainSolo === undefined || soloRematch(message.playAgainSolo))
+        && (message.playAgain === undefined || message.playAgainSolo === undefined);
       break;
     case "background-matchmaking":
       valid = exactKeys(message, ["type", "status"])
