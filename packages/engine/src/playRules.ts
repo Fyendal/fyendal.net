@@ -13,7 +13,7 @@ import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, ChainLinkState, Modifier, PlayerState, StackLayer } from "./state.js";
 import { destroyControlledCard, destroyPermanent, enterBanish } from "./zoneMoves.js";
 import { currentLink, defendingSeatOf, findCardAnywhere, opponent, removeFromArray } from "./zoneQueries.js";
-import type { MeldSide, PlayableZone } from "@fyendal/shared";
+import type { CardType, MeldSide, PlayableZone } from "@fyendal/shared";
 import { clearPlayFromZoneGrant, noteActionPlayedOrActivated } from "./cardLifecycle.js";
 import {
   actionKindRestrictionApplies, actionLimitReached, firstActionExtraCost, goAgainSuppressed,
@@ -338,7 +338,12 @@ function modifierMatchesPlayedCard(
   const data = instanceDataOf(state, card);
   const cost = data.cost ?? 0;
   const color = cardColorOf(state, card);
-  if (mod.appliesToCardType && !data.types.some((type) => type === mod.appliesToCardType)) return false;
+  // cardHasType sees the declared sides of a split card, not only its printed type.
+  if (
+    mod.appliesToCardType &&
+    !data.types.some((type) => type === mod.appliesToCardType) &&
+    !cardHasType(state, card, mod.appliesToCardType as CardType)
+  ) return false;
   if (mod.appliesToPitch !== undefined && color !== mod.appliesToPitch) return false;
   if (mod.minCost !== undefined && cost < mod.minCost) return false;
   if (mod.maxCost !== undefined && cost > mod.maxCost) return false;

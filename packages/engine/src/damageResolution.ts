@@ -767,14 +767,19 @@ function fireFriendlyDamageDealt(
  *  Face-down (Cloaked) equipment's abilities are non-functional. Equipment
  *  whose value is variable or conditional provides it via the spellvoidValue
  *  script hook, which overrides the printed keyword. */
+function spellvoidSources(player: PlayerState): CardInstance[] {
+  return [
+    ...Object.values(player.equipment).filter((card): card is CardInstance => card !== undefined),
+    // off-hand equipment sits in the weapon zone
+    ...player.weapons,
+    ...player.board,
+  ];
+}
+
 function spellvoidPieces(state: GameStateInternal,
   runtime: EngineRuntime, player: PlayerState): { id: number; n: number }[] {
   const out: { id: number; n: number }[] = [];
-  const sources = [
-    ...Object.values(player.equipment).filter((card): card is CardInstance => card !== undefined),
-    ...player.board,
-  ];
-  for (const eq of sources) {
+  for (const eq of spellvoidSources(player)) {
     if (eq.faceDown || cardAbilitiesSuppressed(state, eq)) continue;
     const dynamic = scriptOf(state, eq.cardId, eq)?.spellvoidValue;
     if (dynamic) {
@@ -2045,10 +2050,7 @@ export function answerArcaneBarrier(
     if (!pd.options?.includes(optionId)) return "invalid option";
     if (optionId !== "decline") {
       const id = Number(optionId.slice("destroy ".length));
-      const eq = [
-        ...Object.values(player.equipment).filter((card): card is CardInstance => card !== undefined),
-        ...player.board,
-      ].find((card) => card.instanceId === id);
+      const eq = spellvoidSources(player).find((card) => card.instanceId === id);
       if (!eq) return "Spellvoid source not found";
       const piece = spellvoidPieces(state, runtime, player).find((p) => p.id === id);
       if (!piece) return "Spellvoid source not found";

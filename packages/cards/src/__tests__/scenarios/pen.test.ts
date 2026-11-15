@@ -2462,6 +2462,24 @@ describe("PEN — conditional Spellvoid", () => {
   });
 });
 
+describe("PEN — off-hand Spellvoid", () => {
+  it("Graven Gaslight in the weapon zone can be destroyed to prevent 1 arcane damage", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["glyph power spell|1", "sigil of solace|3"], resources: 2, equipment: NO_EQUIPMENT },
+        { hero: "rhinar", life: 20, weapons: ["graven gaslight|0"], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("glyph power spell|1").chooseOption("opponent");
+    expect(g.state.pendingDecision?.chooseHook).toBe("spellvoid");
+    g.chooseOption("destroy");
+    expect(g.state.players[1]!.weapons).toHaveLength(0);
+    g.expectInZone(1, "graven gaslight|0", "graveyard");
+    g.expectLife(1, 17);
+  });
+});
+
 describe("PEN — Shapeless Form", () => {
   it("names an ephemeral attack played after it on the combat chain", () => {
     const g = scenario({

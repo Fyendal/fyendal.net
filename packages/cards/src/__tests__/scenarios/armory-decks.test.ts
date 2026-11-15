@@ -426,6 +426,26 @@ describe("Armory Decks — AIO, AJV, and AST", () => {
       .expectFinalAttack(4);
   });
 
+  it("Arc Lightning's go again is used up by a melded action half", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["arc lightning|2", "burn up // shock|1", "nimby|1"],
+          resources: 2,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2").declareTarget(1);
+    g.play("burn up // shock|1", { meldSide: "both" });
+    g.expectLog("Burn Up // Shock gains go again");
+    g.chooseOption("opposing hero").settle();
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+    g.declareTarget(1).play("nimby|1").expectNoLog("Nimby gains go again");
+  });
+
   it("Aurora creates Embodiment of Lightning after a Lightning card was played", () => {
     const g = scenario({
       seats: [
