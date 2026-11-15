@@ -2,7 +2,7 @@ import http from "node:http";
 import { promisify } from "node:util";
 import { gunzip as gunzipCallback, gzip as gzipCallback } from "node:zlib";
 import type { DeckArt, DeckPool, Format } from "@fyendal/shared";
-import { cardData, findPrinting, formatLegalityIssues } from "@fyendal/cards";
+import { cardData, findPrinting, formatLegalityIssues, isDeckConstructionIssue } from "@fyendal/cards";
 import {
   decodeDeckArtRequest,
   decodeLeagueAvailabilityRequest,
@@ -16,6 +16,7 @@ import {
   MATCH_OPPONENT_FILTERS,
   REPLAY_SHARE_TOKEN_RE,
   type MatchListFilters,
+  type DeckConstructionIssue,
 } from "@fyendal/protocol";
 import type { Queryable } from "./db.js";
 import {
@@ -337,12 +338,17 @@ function deckOut(d: {
   heroName: string; decklist: DeckPool; updatedAt: number; art: DeckArt;
 }): Record<string, unknown> {
   const legality = formatLegalityIssues(cardData, d.decklist, d.format);
+  const cardIssues = legality.flatMap((issue) => isDeckConstructionIssue(issue) ? [] : [issue]);
   const bannedCards = [...new Set(
-    legality.filter((issue) => issue.kind !== "future-card").map((issue) => issue.cardName),
+    cardIssues.filter((issue) => issue.kind !== "future-card").map((issue) => issue.cardName),
   )];
   const futureCards = [...new Set(
-    legality.filter((issue) => issue.kind === "future-card").map((issue) => issue.cardName),
+    cardIssues.filter((issue) => issue.kind === "future-card").map((issue) => issue.cardName),
   )];
+  const constructionIssues = legality.flatMap((issue): DeckConstructionIssue[] => !isDeckConstructionIssue(issue) ? []
+    : issue.kind === "too-many-copies"
+      ? [{ kind: issue.kind, cardName: issue.cardName, count: issue.count, limit: issue.limit }]
+      : [{ kind: issue.kind, count: issue.count, limit: issue.limit }]);
   return {
     id: d.id,
     name: d.name,
@@ -359,6 +365,7 @@ function deckOut(d: {
     updatedAt: d.updatedAt,
     ...(bannedCards.length > 0 ? { bannedCards } : {}),
     ...(futureCards.length > 0 ? { futureCards } : {}),
+    ...(constructionIssues.length > 0 ? { constructionIssues } : {}),
     art: d.art,
   };
 }

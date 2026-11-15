@@ -31806,7 +31806,7 @@
   "lobby.cardPool.openDescription": [
     {
       "type": 0,
-      "value": "允许所有已实现卡牌，包括禁用卡牌和传奇殿堂英雄。"
+      "value": "允许所有已实现卡牌，包括禁用卡牌和传奇殿堂英雄，且不限同名卡牌数量和牌组上限。"
     }
   ],
   "lobby.cardPool.title": [
@@ -32296,6 +32296,54 @@
       "value": "确认删除"
     }
   ],
+  "lobby.deck.construction.poolTooLarge": [
+    {
+      "type": 0,
+      "value": "卡牌池共 "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张（上限 "
+    },
+    {
+      "type": 1,
+      "value": "limit"
+    },
+    {
+      "type": 0,
+      "value": " 张）"
+    }
+  ],
+  "lobby.deck.construction.tooManyCopies": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " 张（上限 "
+    },
+    {
+      "type": 1,
+      "value": "limit"
+    },
+    {
+      "type": 0,
+      "value": " 张）"
+    }
+  ],
   "lobby.deck.createImport": [
     {
       "type": 0,
@@ -32512,34 +32560,6 @@
       "value": "正在导入…"
     }
   ],
-  "lobby.deck.includesBanned": [
-    {
-      "type": 0,
-      "value": "包含 "
-    },
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": " 张禁用卡牌"
-    }
-  ],
-  "lobby.deck.includesFuture": [
-    {
-      "type": 0,
-      "value": "包含 "
-    },
-    {
-      "type": 1,
-      "value": "count"
-    },
-    {
-      "type": 0,
-      "value": " 张未来卡牌"
-    }
-  ],
   "lobby.deck.keep": [
     {
       "type": 0,
@@ -32568,6 +32588,18 @@
     {
       "type": 0,
       "value": "需要处理"
+    }
+  ],
+  "lobby.deck.needsPool.future": [
+    {
+      "type": 0,
+      "value": "需未来模式"
+    }
+  ],
+  "lobby.deck.needsPool.open": [
+    {
+      "type": 0,
+      "value": "需开放模式"
     }
   ],
   "lobby.deck.openFabrary": [
@@ -33077,7 +33109,7 @@
   "lobby.openCardPoolNote": [
     {
       "type": 0,
-      "value": "此房间允许所有已实现卡牌，包括禁用卡牌和传奇殿堂英雄。"
+      "value": "此房间允许所有已实现卡牌，包括禁用卡牌和传奇殿堂英雄，且不限同名卡牌数量和牌组上限。"
     }
   ],
   "lobby.room.loadingState": [

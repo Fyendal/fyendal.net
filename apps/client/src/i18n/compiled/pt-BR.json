@@ -35010,7 +35010,7 @@
   "lobby.cardPool.openDescription": [
     {
       "type": 0,
-      "value": "Todas as cartas implementadas, incluindo cartas banidas e heróis Living Legend."
+      "value": "Todas as cartas implementadas, incluindo cartas banidas e heróis Living Legend, sem limite de cópias nem tamanho máximo de deck."
     }
   ],
   "lobby.cardPool.title": [
@@ -35607,6 +35607,50 @@
       "value": "Confirmar exclusão"
     }
   ],
+  "lobby.deck.construction.poolTooLarge": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " cartas no pool de cartas (limite "
+    },
+    {
+      "type": 1,
+      "value": "limit"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "lobby.deck.construction.tooManyCopies": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " cópias (limite "
+    },
+    {
+      "type": 1,
+      "value": "limit"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
   "lobby.deck.createImport": [
     {
       "type": 0,
@@ -35882,66 +35926,6 @@
       "value": "Importando…"
     }
   ],
-  "lobby.deck.includesBanned": [
-    {
-      "type": 0,
-      "value": "Inclui "
-    },
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "carta banida"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "cartas banidas"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
-  "lobby.deck.includesFuture": [
-    {
-      "type": 0,
-      "value": "Inclui "
-    },
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "carta futura"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "cartas futuras"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
   "lobby.deck.keep": [
     {
       "type": 0,
@@ -35970,6 +35954,18 @@
     {
       "type": 0,
       "value": "Requer atenção"
+    }
+  ],
+  "lobby.deck.needsPool.future": [
+    {
+      "type": 0,
+      "value": "Requer Futuro"
+    }
+  ],
+  "lobby.deck.needsPool.open": [
+    {
+      "type": 0,
+      "value": "Requer Aberto"
     }
   ],
   "lobby.deck.openFabrary": [
@@ -36572,7 +36568,7 @@
   "lobby.openCardPoolNote": [
     {
       "type": 0,
-      "value": "Esta sala permite todas as cartas implementadas, incluindo cartas banidas e heróis Living Legend."
+      "value": "Esta sala permite todas as cartas implementadas, incluindo cartas banidas e heróis Living Legend, sem limite de cópias nem tamanho máximo de deck."
     }
   ],
   "lobby.room.loadingState": [

@@ -29,7 +29,8 @@ const cards: Record<string, CardData> = {
   CHEST: card("CHEST", "equipment", ["chest"]),
   BOTH: card("BOTH", "equipment", ["head", "chest"]),
   MODULAR: { ...card("MODULAR", "equipment"), keywords: ["Modular"] },
-  MAIN: card("MAIN", "action", ["attack"]),
+  // Unlimited keeps the one-card filler pool inside the copy limit.
+  MAIN: { ...card("MAIN", "action", ["attack"]), keywords: ["Unlimited"] },
   SIDE: card("SIDE", "action", ["attack"]),
   OUT: card("OUT", "action", ["attack"]),
   FUTURE: { ...card("FUTURE", "action", ["attack"]), set: "AMO" },
@@ -159,8 +160,18 @@ describe("shared presentation validation", () => {
     ["silver-age", 40, true],
     ["silver-age", 41, false],
   ] as [Format, number, boolean][])("enforces %s size %d", (format, size, ok) => {
-    const pool = basePool(Math.max(60, size));
+    const pool = basePool(format === "cc" ? Math.max(60, size) : 45);
     expect(validatePresentationAgainstCards(cards, pool, presentation(size), format).ok).toBe(ok);
+  });
+
+  it("waives the exact size and pool limits in the open card pool, but not the minimum", () => {
+    const pool = basePool(60);
+    const open = { cardPoolMode: "open" } as const;
+    expect(validatePresentationAgainstCards(cards, pool, presentation(60), "silver-age", open).ok).toBe(true);
+    expect(validatePresentationAgainstCards(cards, pool, presentation(39), "silver-age", open).ok).toBe(false);
+    expect(validatePresentationAgainstCards(cards, pool, presentation(40), "silver-age")).toMatchObject({
+      ok: false, error: "card pool too large (67 cards, silver-age allows at most 55)",
+    });
   });
 });
 

@@ -90,7 +90,7 @@ describe("BotOpponentModal", () => {
     expect(html).not.toContain("Scarlet Revenger");
     expect(html).not.toContain("Decimator Great Axe");
     expect(html).not.toContain("Elemental Runeblade");
-    expect(html).not.toContain("Includes banned");
+    expect(html).not.toContain("Needs Open");
     expect(html).toContain("Briar is hidden because its deck includes banned cards.");
   });
 
@@ -122,7 +122,7 @@ describe("BotOpponentModal", () => {
     );
 
     expect(html).toContain("Elemental Runeblade");
-    expect(html).toContain("Includes banned");
+    expect(html).toContain("Needs Open");
     expect(html).toContain('role="tooltip">Banned cards:\nBriar');
     expect(html).toContain('aria-describedby=');
     expect(html).not.toContain('title="Banned cards:');

@@ -5,8 +5,7 @@ import type { DeckArt, DeckPool, EquipmentSlot, RevealedArena } from "@fyendal/s
 import {
   arenaWeaponIssue,
   cardData,
-  EXACT_DECK_SIZE,
-  MIN_DECK_SIZE,
+  presentedDeckSize,
   validatePresentation,
   validateArena,
 } from "@fyendal/cards/client";
@@ -379,8 +378,7 @@ export function PrepRoom() {
   if (selection !== sel) setSel(selection);
 
   const pool = prepDeck.decklist;
-  const min = MIN_DECK_SIZE[prepDeck.format];
-  const exact = EXACT_DECK_SIZE[prepDeck.format];
+  const { minimum: min, exact } = presentedDeckSize(prepDeck.format, prep?.cardPoolMode);
   const format = prepFormat ?? prepDeck.format;
   const yourSeat = prep?.yourSeat ?? 0;
   const me = prep?.seats[yourSeat] ?? null;

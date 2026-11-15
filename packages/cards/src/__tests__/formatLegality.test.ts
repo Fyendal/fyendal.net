@@ -154,7 +154,7 @@ describe("Classic Constructed format legality", () => {
       weaponIds: ["REAPING_BLADE", "VOLZAR"],
       deck: ["ART", "CHANNEL_LIGHTNING_VALLEY", "PHANTOM_TIDEMAW", "REMEMBRANCE"],
     }), "cc");
-    expect(issues.map((issue) => issue.cardName)).toEqual([
+    expect(issues.map((issue) => "cardName" in issue ? issue.cardName : issue.kind)).toEqual([
       "Reaping Blade",
       "Volzar, the Lightning Rod",
       "Art of War",
@@ -175,7 +175,7 @@ describe("Classic Constructed format legality", () => {
       pool({ deck: ["BONDS_YELLOW", "BONDS_BLUE", "SOMERSAULT_RED", "SOMERSAULT_YELLOW"] }),
       "cc",
     );
-    expect(issues.map((issue) => issue.cardId)).toEqual([
+    expect(issues.map((issue) => "cardId" in issue ? issue.cardId : issue.kind)).toEqual([
       "BONDS_YELLOW",
       "BONDS_BLUE",
       "SOMERSAULT_RED",
@@ -249,7 +249,7 @@ describe("Silver Age format legality", () => {
     const deck = Object.keys(silverAgeBannedCards);
     const issues = formatLegalityIssues(cards, pool({ deck }), "silver-age");
     expect(issues.map((issue) => issue.kind)).toEqual(deck.map(() => "banned-card"));
-    expect(issues.map((issue) => issue.cardName)).toEqual(SILVER_AGE_BANNED_NAMES);
+    expect(issues.map((issue) => "cardName" in issue ? issue.cardName : issue.kind)).toEqual(SILVER_AGE_BANNED_NAMES);
     expect(issues.map((issue) => issue.message)).toEqual(
       SILVER_AGE_BANNED_NAMES.map((name) => `${name} is banned in Silver Age`),
     );
@@ -278,5 +278,34 @@ describe("Silver Age format legality", () => {
       "silver-age",
       { cardPoolMode: "open" },
     )).toEqual([]);
+  });
+
+  it("enforces copy limits per name and pitch outside Open mode", () => {
+    const overCopies = pool({ deck: ["ART", "ART", "ART", "ART"] });
+    expect(formatLegalityIssues(cards, pool({ deck: ["ART", "ART"] }), "silver-age")).toEqual([]);
+    expect(formatLegalityIssues(cards, pool({ deck: ["ART", "ART"], sideboard: ["ART"] }), "silver-age"))
+      .toMatchObject([{ kind: "too-many-copies", cardName: "Art of War", count: 3, limit: 2 }]);
+    expect(formatLegalityIssues(cards, overCopies, "cc", { cardPoolMode: "open" })).toEqual([]);
+    expect(formatLegalityIssues(cards, pool({ deck: ["BONDS_YELLOW", "BONDS_YELLOW", "BONDS_BLUE"] }), "silver-age")
+      .map((issue) => issue.kind)).not.toContain("too-many-copies");
+  });
+
+  it("does not count Unlimited cards against the copy limit", () => {
+    const unlimited = { ...cards, COG: { ...card("COG", "Copper Cog"), keywords: ["Unlimited"] } };
+    expect(formatLegalityIssues(unlimited, pool({ deck: Array.from({ length: 6 }, () => "COG") }), "cc"))
+      .toEqual([]);
+  });
+
+  it("enforces the registered pool maximum outside Open mode", () => {
+    const many = Object.fromEntries(Array.from({ length: 60 }, (_, index) => {
+      const id = `FILLER_${index}`;
+      return [id, card(id, `Filler ${index}`)];
+    }));
+    const oversized = pool({ deck: Object.keys(many) });
+    expect(formatLegalityIssues({ ...cards, ...many }, oversized, "silver-age", { cardPoolMode: "future" }))
+      .toMatchObject([{ kind: "pool-too-large", count: 60, limit: 55 }]);
+    expect(formatLegalityIssues({ ...cards, ...many }, oversized, "cc")).toEqual([]);
+    expect(formatLegalityIssues({ ...cards, ...many }, oversized, "silver-age", { cardPoolMode: "open" }))
+      .toEqual([]);
   });
 });

@@ -136,12 +136,13 @@ export {
   SILVER_AGE_LEGALITY_CHECKED_ON,
   formatLegalityErrors,
   formatLegalityIssues,
+  isDeckConstructionIssue,
   type FormatLegalityIssue,
 } from "./formatLegality.js";
 export {
   arenaWeaponIssue,
-  EXACT_DECK_SIZE,
   MIN_DECK_SIZE,
+  presentedDeckSize,
 } from "./presentation.js";
 export type { PresentationResult } from "./presentation.js";
 

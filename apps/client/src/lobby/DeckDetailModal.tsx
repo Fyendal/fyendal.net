@@ -15,7 +15,7 @@ import { SoloModeModal } from "./SoloModeModal.js";
 import { OpponentPicker, startMessageId } from "./OpponentPicker.js";
 import { CardPoolHelp } from "./CardPoolHelp.js";
 import { CARD_POOL_MODES } from "./CardPoolModeControl.js";
-import { deckBlockedCards } from "./DeckGrid.js";
+import { deckBlockedCards, deckConstructionMessages, deckOverLimits } from "./DeckGrid.js";
 import { shortFormatLabel } from "./FormatBadge.js";
 import { heroImageUrl } from "./heroImage.js";
 
@@ -68,7 +68,13 @@ export function DeckDetailModal(props: {
   const deck = props.deck;
   const format = deck.format;
   const cardPoolMode = cardPoolModes[format];
-  const blocked = deckBlockedCards(deck, cardPoolMode);
+  const blockedCards = deckBlockedCards(deck, cardPoolMode);
+  const blocked = [
+    ...(blockedCards.length > 0
+      ? [intl.formatMessage({ id: "lobby.deck.illegalCards" }, { cards: blockedCards.join(", ") })]
+      : []),
+    ...(deckOverLimits(deck, cardPoolMode) ? deckConstructionMessages(intl, deck) : []),
+  ];
   const queued = queuedFormat !== null;
   const heroCard = findPrinting(deck.heroName);
   const showArt = heroCard !== undefined && artOk;
@@ -164,7 +170,7 @@ export function DeckDetailModal(props: {
           <p className="deck-detail-blocked" role="status">
             {intl.formatMessage(
               { id: "lobby.deck.blocked" },
-              { reason: intl.formatMessage({ id: "lobby.deck.illegalCards" }, { cards: blocked.join(", ") }) },
+              { reason: blocked.join("; ") },
             )}
           </p>
         ) : null}

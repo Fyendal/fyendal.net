@@ -1489,6 +1489,22 @@ describe("replays and HTTP responses", () => {
       decks: [{ ...summary, bannedCards: ["Art of War"], futureCards: ["Tomorrow's Attack"] }],
       plays: [{ deckId: summary.id, playedAt: 123 }],
     })).not.toBeNull();
+    expect(decodeDecksResponse({
+      ok: true,
+      decks: [{
+        ...summary,
+        constructionIssues: [
+          { kind: "too-many-copies", cardName: "Wounded Bull", count: 3, limit: 2 },
+          { kind: "pool-too-large", count: 60, limit: 55 },
+        ],
+      }],
+      plays: [],
+    })).not.toBeNull();
+    expect(decodeDecksResponse({
+      ok: true,
+      decks: [{ ...summary, constructionIssues: [{ kind: "pool-too-large", count: 60 }] }],
+      plays: [],
+    })).toBeNull();
     expect(decodeDecksResponse({ ok: true, decks: [], plays: [{ deckId: "precon-sba", playedAt: -1 }] })).toBeNull();
     expect(decodeDecksResponse({ ok: true, decks: [] })).toBeNull();
     const withArt = (art: unknown) => decodeDeckResponse({ ok: true, deck: { ...summary, art } });

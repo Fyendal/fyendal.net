@@ -61,15 +61,28 @@
 .deck-card.selected .deck-card-name { color: var(--gold); }
 .deck-card.blocked { cursor: not-allowed; }
 .deck-card-meta { font-size: 13px; color: #9c8a6d; }
+/* A status, not a category: rounded and dotted so it never reads as a second format chip. */
 .deck-legality-hint {
-  font-size: 12px;
-  line-height: 1.2;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 9px 2px 8px;
+  border-radius: 999px;
+  font: 600 12px/17px var(--font-lobby-ui);
+  white-space: nowrap;
+  text-shadow: none;
 }
-.deck-legality-hint.banned {
-  color: #ff6b64;
-  font-weight: 700;
+.deck-legality-hint::before {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
 }
-.deck-legality-hint.future { color: #d9b8ff; }
+.deck-legality-hint.banned { background: #4a1512e0; color: #ff9d96; }
+.deck-legality-hint.future { background: #2c1d47e0; color: #d9b8ff; }
 .deck-legality-cell { color: #b9aa92; font-size: 13px !important; }
 .deck-choice { position: relative; min-width: 0; aspect-ratio: 1.08; content-visibility: auto; contain-intrinsic-size: 0 230px; }
 .deck-choice > .deck-card { width: 100%; height: 100%; }
@@ -400,7 +413,8 @@
   margin-top: 4px;
   text-shadow: 0 1px 2px #000;
 }
-.bot-card-warning-description {
+.bot-card-warning-description,
+.deck-legality-description {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -408,7 +422,8 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
-.bot-card-warning-tooltip {
+.bot-card-warning-tooltip,
+.deck-legality-tooltip {
   white-space: pre-line;
 }
 
@@ -817,6 +832,9 @@
   background: #211a15;
   transition: border-color 120ms ease;
 }
+/* Zero-specificity so hover and selection still own the frame colour. */
+.deck-library-card:where(:has(> .deck-card[data-format="cc"])) { border-color: #6e3a26; }
+.deck-library-card:where(:has(> .deck-card[data-format="silver-age"])) { border-color: #565c64; }
 .deck-library-card:hover { border-color: #806334; }
 .deck-library-card:has(.deck-library-select input:checked) {
   border-color: var(--gold);
@@ -911,6 +929,19 @@
   content: "";
   pointer-events: none;
 }
+/* Ember for Classic Constructed, steel for Silver Age; the scrim takes the same tint. */
+.deck-library-card > .deck-card[data-format="cc"] {
+  background: radial-gradient(120% 140% at 100% 50%, #4a2415 0%, #2a1610 60%);
+}
+.deck-library-card > .deck-card[data-format="cc"]::after {
+  background: linear-gradient(0deg, #2a1610f2 0%, #2a1610b8 45%, transparent 100%);
+}
+.deck-library-card > .deck-card[data-format="silver-age"] {
+  background: radial-gradient(120% 140% at 100% 50%, #2c323a 0%, #1b1e22 60%);
+}
+.deck-library-card > .deck-card[data-format="silver-age"]::after {
+  background: linear-gradient(0deg, #1b1e22f2 0%, #1b1e22b8 45%, transparent 100%);
+}
 /* The hero card's art fades in from under the name, cropped inside the
    card frame. Without card art, the headshot takes the same place. */
 :is(.deck-library-card, .deck-detail-banner, .bot-opponent-card, .solo-matchup-seat) :is(.deck-card-art, .deck-card-img) {
@@ -954,8 +985,8 @@
   scale: 1.04;
 }
 .deck-library-card .deck-card-name,
-.deck-library-card .deck-card-details,
-.deck-library-card .deck-legality-hint { position: relative; z-index: 1; }
+.deck-library-card .deck-card-tags,
+.deck-library-card .deck-card-details { position: relative; z-index: 1; }
 .deck-library-card .deck-card:not(.deck-import-card) .deck-card-name {
   width: auto;
   max-width: 70%;
@@ -967,26 +998,27 @@
   text-shadow: 0 1px 2px #000, 0 0 14px #000c;
 }
 .deck-library-card > .deck-card:hover .deck-card-name { color: var(--gold); }
-/* The format chip leads, the hero name takes what is left and may wrap. */
+.deck-library-card .deck-card-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 1px;
+}
 .deck-library-card .deck-card-details {
   display: flex;
   width: 100%;
   order: 1;
-  align-items: flex-start;
-  gap: 8px;
   margin-top: auto;
   padding-top: 6px;
 }
 .deck-library-card .deck-card-details > span:first-child {
-  display: -webkit-box;
   min-width: 0;
   overflow: hidden;
   color: #e3d5b8;
   font: 600 14px/19px var(--font-lobby-ui);
+  text-overflow: ellipsis;
   text-shadow: 0 1px 2px #000;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  white-space: nowrap;
 }
 :is(.deck-library-card, .deck-detail-meta) .deck-card-format {
   display: block;
@@ -1000,7 +1032,9 @@
 }
 .deck-card-format[data-format="cc"], .format-cc { border-color: #c45a34a0; background: #3a150cd9; color: #ffa47f; }
 .deck-card-format[data-format="silver-age"], .format-sa { border-color: #a39a88a0; background: #26221cd9; color: #d6d0c2; }
-.deck-library-card .deck-legality-hint { max-width: 70%; font-size: 13px; text-shadow: 0 1px 2px #000; }
+/* Solid on a tile: the outlined chip disappears into a tile tinted its own hue. */
+.deck-library-card .deck-card-format[data-format="cc"] { border-color: transparent; background: #b9512e; color: #fff1e8; }
+.deck-library-card .deck-card-format[data-format="silver-age"] { border-color: transparent; background: #b9b4a8; color: #26221c; }
 .deck-bulk-actions button {
   display: inline-flex;
   min-width: 0;
@@ -1295,15 +1329,10 @@
     -webkit-line-clamp: 2;
     line-clamp: 2;
   }
-  .deck-library-card .deck-card-details { align-items: center; padding-top: 4px; }
-  .deck-library-card .deck-card-details > span:first-child {
-    font-size: 13px;
-    line-height: 18px;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
-  }
+  .deck-library-card .deck-card-details { padding-top: 4px; }
+  .deck-library-card .deck-card-details > span:first-child { font-size: 13px; line-height: 18px; }
   .deck-library-card .deck-card-format { padding: 0 6px; font-size: 11px; line-height: 16px; }
-  .deck-library-card .deck-legality-hint { max-width: 72%; font-size: 12px; }
+  .deck-library-card .deck-legality-hint { padding: 1px 8px 1px 7px; font-size: 11px; line-height: 16px; }
   .bot-opponent-card :is(.deck-card-art, .deck-card-img) { width: 64%; }
   .bot-opponent-card .deck-card-art img { width: 150%; transform: translate(-50%, -17%); }
   /* A finger-sized target around the same small gem. */

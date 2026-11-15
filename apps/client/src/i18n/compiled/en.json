@@ -33296,7 +33296,7 @@
   "lobby.cardPool.openDescription": [
     {
       "type": 0,
-      "value": "All implemented cards, including banned cards and Living Legend heroes."
+      "value": "All implemented cards, including banned cards and Living Legend heroes, with no copy limit or maximum deck size."
     }
   ],
   "lobby.cardPool.title": [
@@ -33881,6 +33881,50 @@
       "value": "Confirm delete"
     }
   ],
+  "lobby.deck.construction.poolTooLarge": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " cards in the card pool (limit "
+    },
+    {
+      "type": 1,
+      "value": "limit"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "lobby.deck.construction.tooManyCopies": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " copies (limit "
+    },
+    {
+      "type": 1,
+      "value": "limit"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
   "lobby.deck.createImport": [
     {
       "type": 0,
@@ -34145,66 +34189,6 @@
       "value": "Importing…"
     }
   ],
-  "lobby.deck.includesBanned": [
-    {
-      "type": 0,
-      "value": "Includes banned "
-    },
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "card"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "cards"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
-  "lobby.deck.includesFuture": [
-    {
-      "type": 0,
-      "value": "Includes future "
-    },
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "card"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "cards"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
   "lobby.deck.keep": [
     {
       "type": 0,
@@ -34233,6 +34217,18 @@
     {
       "type": 0,
       "value": "Needs attention"
+    }
+  ],
+  "lobby.deck.needsPool.future": [
+    {
+      "type": 0,
+      "value": "Needs Future"
+    }
+  ],
+  "lobby.deck.needsPool.open": [
+    {
+      "type": 0,
+      "value": "Needs Open"
     }
   ],
   "lobby.deck.openFabrary": [
@@ -34800,7 +34796,7 @@
   "lobby.openCardPoolNote": [
     {
       "type": 0,
-      "value": "This room allows all implemented cards, including banned cards and Living Legend heroes."
+      "value": "This room allows all implemented cards, including banned cards and Living Legend heroes, with no copy limit or maximum deck size."
     }
   ],
   "lobby.room.loadingState": [

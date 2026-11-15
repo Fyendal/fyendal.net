@@ -183,17 +183,40 @@ const PITCH_NAMES: Record<NonNullable<CardData["pitch"]>, string> = {
   4: "Colorless",
 };
 
-export type FormatLegalityIssue = {
-  kind:
-    | "living-legend-hero"
-    | "living-legend-weapon"
-    | "benched-hero"
-    | "banned-card"
-    | "future-card";
-  cardId: string;
-  cardName: string;
-  message: string;
+/** Most copies of one card (same name and pitch) a registered pool may hold. */
+const MAX_COPIES: Record<Format, number> = {
+  cc: 3,
+  "silver-age": 2,
 };
+
+/** Maximum registered pool size: every card except the hero. */
+const MAX_POOL_SIZE: Record<Format, number> = {
+  cc: 80,
+  "silver-age": 55,
+};
+
+export type FormatLegalityIssue =
+  | {
+    kind:
+      | "living-legend-hero"
+      | "living-legend-weapon"
+      | "benched-hero"
+      | "banned-card"
+      | "future-card";
+    cardId: string;
+    cardName: string;
+    message: string;
+  }
+  | DeckConstructionIssue;
+
+/** A deckbuilding limit the pool exceeds; only the open card pool waives these. */
+export type DeckConstructionIssue =
+  | { kind: "too-many-copies"; cardId: string; cardName: string; count: number; limit: number; message: string }
+  | { kind: "pool-too-large"; count: number; limit: number; message: string };
+
+export function isDeckConstructionIssue(issue: FormatLegalityIssue): issue is DeckConstructionIssue {
+  return issue.kind === "too-many-copies" || issue.kind === "pool-too-large";
+}
 
 function normalizedName(card: CardData): string {
   return card.name.trim().toLowerCase();
@@ -210,7 +233,48 @@ function uniquePoolIds(pool: DeckPool): string[] {
   ])];
 }
 
-/** Return every tracked ban-list, Living Legend, or release violation in a card-pool. */
+function deckConstructionIssues(
+  cards: Record<string, CardData>,
+  pool: DeckPool,
+  format: Format,
+): DeckConstructionIssue[] {
+  const issues: DeckConstructionIssue[] = [];
+  const copies = new Map<string, { card: CardData; count: number }>();
+  for (const id of [...pool.deck, ...(pool.sideboard ?? [])]) {
+    const card = cards[id];
+    if (!card || card.keywords?.some((keyword) => keyword.trim().toLowerCase() === "unlimited")) continue;
+    const key = `${normalizedName(card)}|${card.pitch ?? 0}`;
+    const entry = copies.get(key);
+    if (entry) entry.count += 1;
+    else copies.set(key, { card, count: 1 });
+  }
+  const limit = MAX_COPIES[format];
+  for (const { card, count } of copies.values()) {
+    if (count <= limit) continue;
+    issues.push({
+      kind: "too-many-copies",
+      cardId: card.id,
+      cardName: card.name,
+      count,
+      limit,
+      message: `too many copies of ${card.name} (${count}, max ${limit})`,
+    });
+  }
+  const size = pool.weaponIds.length + pool.equipmentPool.length + (pool.inventoryPool?.length ?? 0) +
+    pool.deck.length + (pool.sideboard?.length ?? 0);
+  const max = MAX_POOL_SIZE[format];
+  if (size > max) {
+    issues.push({
+      kind: "pool-too-large",
+      count: size,
+      limit: max,
+      message: `card pool too large (${size} cards, ${format} allows at most ${max})`,
+    });
+  }
+  return issues;
+}
+
+/** Return every tracked ban-list, Living Legend, release, or deckbuilding-limit violation in a card-pool. */
 export function formatLegalityIssues(
   cards: Record<string, CardData>,
   pool: DeckPool,
@@ -285,6 +349,7 @@ export function formatLegalityIssues(
       });
     }
   }
+  if (mode !== "open") issues.push(...deckConstructionIssues(cards, pool, format));
   return issues;
 }
 

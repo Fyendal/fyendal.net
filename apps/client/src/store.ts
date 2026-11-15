@@ -1477,7 +1477,7 @@ export const useStore = create<StoreState>((set, get) => {
       const { deck } = pending.result;
       const { format } = pending.route.request;
       const mode = get().cardPoolModes[format];
-      if (deck.format !== format || (mode !== "open" && deck.bannedCards?.length)
+      if (deck.format !== format || (mode !== "open" && (deck.bannedCards?.length || deck.constructionIssues?.length))
         || (mode === "legal" && deck.futureCards?.length)) return;
       errors.clear();
       set({ pendingFabraryPlay: { ...pending, status: "starting" } });

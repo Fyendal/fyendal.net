@@ -15,8 +15,10 @@ export function emptyQueueCounts(): Record<Format, QueuePoolCounts> {
 
 /** The strictest pool a deck is legal in, from the server's legality hints.
  *  Without a deck, assume one that pairs under any pool. */
-export function deckCardPool(deck: Pick<DeckSummary, "bannedCards" | "futureCards"> | null | undefined): CardPoolMode {
-  if (deck?.bannedCards?.length) return "open";
+export function deckCardPool(
+  deck: Pick<DeckSummary, "bannedCards" | "futureCards" | "constructionIssues"> | null | undefined,
+): CardPoolMode {
+  if (deck?.bannedCards?.length || deck?.constructionIssues?.length) return "open";
   if (deck?.futureCards?.length) return "future";
   return "legal";
 }

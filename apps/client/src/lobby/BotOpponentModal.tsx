@@ -1,6 +1,6 @@
 import { useId, useRef, useState } from "react";
 import { useIntl } from "react-intl";
-import { FUTURE_SET_CODES, cardData, formatLegalityIssues, precon } from "@fyendal/cards/client";
+import { FUTURE_SET_CODES, cardData, formatLegalityIssues, isDeckConstructionIssue, precon } from "@fyendal/cards/client";
 import type { BotOpponent, Format } from "@fyendal/shared";
 import { BETA_BOT_OPPONENTS } from "@fyendal/protocol";
 import { heroImageUrl } from "./heroImage.js";
@@ -159,7 +159,8 @@ function botCardWarnings(bot: BotOption): { banned: string[]; future: string[] }
     ...(pool.sideboard ?? []),
   ];
   return {
-    banned: [...new Set(issues.filter((issue) => issue.kind !== "future-card").map((issue) => issue.cardName))],
+    banned: [...new Set(issues.flatMap((issue) =>
+      isDeckConstructionIssue(issue) || issue.kind === "future-card" ? [] : [issue.cardName]))],
     future: [...new Set(cardIds.flatMap((id) => {
       const card = cardData[id];
       return card?.set && FUTURE_SET_CODES.has(card.set) ? [card.name] : [];
@@ -271,20 +272,11 @@ export function BotOpponentPicker(props: {
                   onPointerEnter={() => setHoveredBot(bot.id)}
                   onPointerLeave={() => setHoveredBot((current) => current === bot.id ? null : current)}
                 >
-                  {warnings.banned.length > 0 ? (
-                    <span className="deck-legality-hint banned">
-                      {intl.formatMessage({ id: "lobby.deck.includesBanned" }, {
-                        count: warnings.banned.length,
-                      })}
-                    </span>
-                  ) : null}
-                  {warnings.future.length > 0 ? (
-                    <span className="deck-legality-hint future">
-                      {intl.formatMessage({ id: "lobby.deck.includesFuture" }, {
-                        count: warnings.future.length,
-                      })}
-                    </span>
-                  ) : null}
+                  <span className={`deck-legality-hint ${warnings.banned.length > 0 ? "banned" : "future"}`}>
+                    {intl.formatMessage({
+                      id: warnings.banned.length > 0 ? "lobby.deck.needsPool.open" : "lobby.deck.needsPool.future",
+                    })}
+                  </span>
                 </span>
               ) : null}
               <span className="bot-opponent-foot">

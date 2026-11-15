@@ -7,7 +7,6 @@ import {
   isImplemented,
   isWeaponZoneCard,
   MIN_DECK_SIZE,
-  normalizeCardName,
   precon,
 } from "@fyendal/cards";
 import { normalizeDeckArt } from "@fyendal/cards/art";
@@ -63,7 +62,7 @@ interface ParsedLine {
   section: Section;
 }
 
-/** Largest quantity one export line may claim (pools max out at 80 cards). */
+/** Largest quantity one export line may claim; a stored zone holds at most 100 cards. */
 const MAX_LINE_QTY = 99;
 
 /**
@@ -115,7 +114,6 @@ export function parseDecklistText(text: string): ParsedLine[] {
       : undefined;
     // Clamp absurd quantities at parse time: validateDeck expands qty into
     // per-copy array pushes, so an unclamped "999999999x …" line is a DoS.
-    // Anything over the cap still fails validation (copies/pool-size limits).
     out.push({ qty: Math.min(Number(m[1]), MAX_LINE_QTY), name: m[2]!, pitch, section });
   }
   return out;
@@ -123,19 +121,8 @@ export function parseDecklistText(text: string): ParsedLine[] {
 
 // ── Validation ──────────────────────────────────────────────────────────────
 
-/** Maximum registered pool size (all non-hero cards: weapons + equipment +
- *  deck + sideboard). */
-const MAX_POOL_SIZE: Record<Format, number> = {
-  cc: 80,
-  "silver-age": 55,
-};
-/** Weapons a player may present for one game: up to 2 one-hand weapons, or a
- *  single two-hand weapon alone — except that a quiver may accompany a
- *  two-hander bow (CR 8.2.15a; at most one quiver, 8.2.15b). */
-const MAX_COPIES: Record<Format, number> = {
-  cc: 3,
-  "silver-age": 2,
-};
+/** Hard per-zone cap on a stored pool; `decodeDeckPool` rejects anything larger. */
+const MAX_ZONE_CARDS = 100;
 const EQUIPMENT_SLOTS: EquipmentSlot[] = ["head", "chest", "arms", "legs"];
 const INVENTORY_FRONT_ID_BY_BACK_ID = new Map(
   Object.values(cardData).flatMap((card) => card.backId ? [[card.backId, card.id] as const] : []),
@@ -174,8 +161,9 @@ export type ValidationResult =
  * Resolve parsed lines against the card pool and validate its stable shape.
  * Strict on purpose: every card must resolve AND be implemented (scripted or
  * curated vanilla) — the missing/unimplemented lists double as the card
- * implementation TODO. The result is the registered pool (DeckPool); in-game
- * legality of the presented 60/40 is checked per game by validatePresentation.
+ * implementation TODO. Copy and pool-size limits are not checked here: they
+ * are card-pool rules (formatLegalityIssues) applied when a game starts, and
+ * the presented 60/40 is checked per game by validatePresentation.
  */
 export function validateDeck(lines: ParsedLine[], format: Format): ValidationResult {
   const missing = new Set<string>();
@@ -189,7 +177,6 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
   const inventoryPool: string[] = [];
   const deck: string[] = [];
   const sideboard: string[] = [];
-  const copies = new Map<string, number>(); // functional identity → count
 
   for (const line of lines) {
     const card = findPrinting(line.name, line.pitch);
@@ -235,30 +222,20 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
     }
     const target = line.section === "sideboard" ? sideboard : deck;
     for (let i = 0; i < line.qty; i++) target.push(card.id);
-    const unlimited = card.keywords?.some(
-      (keyword) => keyword.trim().toLowerCase() === "unlimited",
-    ) === true;
-    if (!unlimited) {
-      const key = normalizeCardName(card.name) + "|" + (card.pitch ?? 0);
-      copies.set(key, (copies.get(key) ?? 0) + line.qty);
-    }
   }
 
   if (!heroId) errors.push("no hero found in the decklist");
-  const maxCopies = MAX_COPIES[format];
-  for (const [key, n] of copies) {
-    if (n > maxCopies) errors.push(`too many copies of ${key.split("|")[0]} (${n}, max ${maxCopies})`);
-  }
   const min = MIN_DECK_SIZE[format];
   if (min && deck.length + sideboard.length < min) {
     errors.push(
       `card pool too small (${deck.length + sideboard.length} main-deck cards, ${format} requires at least ${min})`,
     );
   }
-  const max = MAX_POOL_SIZE[format];
-  const poolSize = weaponIds.length + equipmentPool.length + inventoryPool.length + deck.length + sideboard.length;
-  if (max && poolSize > max) {
-    errors.push(`card pool too large (${poolSize} cards, ${format} allows at most ${max})`);
+  const zones = { weapons: weaponIds, equipment: equipmentPool, inventory: inventoryPool, deck, sideboard };
+  for (const [zone, ids] of Object.entries(zones)) {
+    if (ids.length > MAX_ZONE_CARDS) {
+      errors.push(`too many ${zone} cards (${ids.length}, at most ${MAX_ZONE_CARDS})`);
+    }
   }
   if (missing.size || unimplemented.size || errors.length) {
     return {
@@ -305,7 +282,7 @@ function dbString(value: unknown, path: string, max = MAX_DB_STRING): string {
   return value;
 }
 
-function dbStringArray(value: unknown, path: string, max = 100): string[] {
+function dbStringArray(value: unknown, path: string, max = MAX_ZONE_CARDS): string[] {
   if (!Array.isArray(value) || value.length > max) {
     return corruptDeck(path, `expected an array of at most ${max} card ids`);
   }

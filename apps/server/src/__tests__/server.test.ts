@@ -1562,7 +1562,8 @@ describe("cc prep room", () => {
     { heroId: hero.id, weaponIds: [], equipmentPool: [], deck: [id], sideboard: [] },
     "cc",
   );
-  const weapon = printings.find((c) => hasType(c, "weapon") && ccIssuesFor(c.id).length === 0)!;
+  const weapon = printings.find((c) =>
+    hasType(c, "weapon") && !hasType(c, "token") && ccIssuesFor(c.id).length === 0)!;
   const deckCards = printings.filter(
     (c) =>
       objectKind(c) === "deck" &&

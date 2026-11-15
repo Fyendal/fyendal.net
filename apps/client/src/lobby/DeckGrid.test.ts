@@ -58,9 +58,39 @@ describe("deckChoicesFor", () => {
       createElement(DeckTile, { deck, onSelect: () => {} }),
     ));
 
-    expect(html).toContain("Includes banned card");
+    expect(html).toContain("Needs Open");
     expect(html).toContain("Banned cards:\nArt of War");
     expect(html).toContain("deck-legality-hint banned");
+    expect(deckIsLegalForRoom(deck, "legal")).toBe(false);
+    expect(deckIsLegalForRoom(deck, "future")).toBe(false);
+    expect(deckIsLegalForRoom(deck, "open")).toBe(true);
+  });
+
+  it("names exceeded deckbuilding limits and allows the deck only in the open card pool", async () => {
+    const { DeckTile, deckIsLegalForRoom } = await import("./DeckGrid.js");
+    const deck: DeckSummary = {
+      id: "brew",
+      name: "Brew",
+      format: "silver-age",
+      fabraryUrl: null,
+      heroName: "Ira",
+      deckSize: 66,
+      updatedAt: 1,
+      art: { highestRarity: false, picks: {} },
+      constructionIssues: [
+        { kind: "too-many-copies", cardName: "Wounded Bull", count: 3, limit: 2 },
+        { kind: "pool-too-large", count: 66, limit: 55 },
+      ],
+    };
+
+    const html = renderToStaticMarkup(createElement(
+      TestI18nProvider,
+      null,
+      createElement(DeckTile, { deck, onSelect: () => {} }),
+    ));
+
+    expect(html).toContain("Needs Open");
+    expect(html).toContain("Wounded Bull: 3 copies (limit 2)\n66 cards in the card pool (limit 55)");
     expect(deckIsLegalForRoom(deck, "legal")).toBe(false);
     expect(deckIsLegalForRoom(deck, "future")).toBe(false);
     expect(deckIsLegalForRoom(deck, "open")).toBe(true);

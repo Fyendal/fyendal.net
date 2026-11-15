@@ -174,8 +174,13 @@ export interface DeckSummary {
   /** Current legality hints; omitted when the corresponding list is empty. */
   bannedCards?: string[];
   futureCards?: string[];
+  /** Deckbuilding limits the pool exceeds; only the open card pool waives them. */
+  constructionIssues?: DeckConstructionIssue[];
   art: DeckArt;
 }
+export type DeckConstructionIssue =
+  | { kind: "too-many-copies"; cardName: string; count: number; limit: number }
+  | { kind: "pool-too-large"; count: number; limit: number };
 export interface DeckPlay { deckId: string; playedAt: number }
 export interface DecksResponse { ok: true; decks: DeckSummary[]; plays: DeckPlay[] }
 export interface DeckResponse { ok: true; deck: DeckSummary }
@@ -2829,11 +2834,20 @@ export const decodeDeckArtRequest: Decoder<DeckArtRequest> = (value) => {
   return data && exactKeys(data, ["id", "art"]) && id(data.id) && deckArt(data.art) ? value as DeckArtRequest : null;
 };
 
+function deckConstructionIssue(value: unknown): value is DeckConstructionIssue {
+  const issue = object(value);
+  if (!issue || !nonNegativeInteger(issue.count) || !nonNegativeInteger(issue.limit)) return false;
+  if (issue.kind === "pool-too-large") return exactKeys(issue, ["kind", "count", "limit"]);
+  return issue.kind === "too-many-copies" && exactKeys(issue, ["kind", "cardName", "count", "limit"])
+    && string(issue.cardName, MAX_SHORT_TEXT, false);
+}
+
 function decodeDeckSummary(value: unknown): DeckSummary | null {
   const deck = object(value);
   return deck && exactKeys(
     deck,
-    ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "bannedCards", "futureCards", "art"],
+    ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "bannedCards", "futureCards",
+      "constructionIssues", "art"],
     ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "art"],
   )
     && deckArt(deck.art)
@@ -2843,6 +2857,7 @@ function decodeDeckSummary(value: unknown): DeckSummary | null {
     && nonNegativeInteger(deck.updatedAt)
     && optional(deck.bannedCards, shortStrings)
     && optional(deck.futureCards, shortStrings)
+    && optional(deck.constructionIssues, (issues): issues is DeckConstructionIssue[] => array(issues, deckConstructionIssue, MAX_CARDS))
     ? value as DeckSummary
     : null;
 }
@@ -2892,7 +2907,8 @@ export const decodeDeckDetailResponse: Decoder<DeckDetailResponse> = (value) => 
     || !exactKeys(
       rawDeck,
       [
-        "id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "bannedCards", "futureCards", "art",
+        "id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "bannedCards", "futureCards",
+        "constructionIssues", "art",
         "decklist", "matchups", "selectedMatchupId", "fabraryArt",
       ],
       ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "art", "decklist"],
