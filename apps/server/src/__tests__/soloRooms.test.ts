@@ -228,8 +228,6 @@ describe("solo rooms", () => {
     expect(await store.undo(code, seats[0], "last-action", { id: "undo-edit", expectedVersion: room.version }))
       .toMatchObject({ ok: true });
     expect(await frames()).toBe(before + 1);
-    expect(Number((await db.query("SELECT recorded_frames FROM replay_games")).rows[0]!.recorded_frames))
-      .toBe(before + 1);
 
     const ended = await store.deletePracticeRoom(code, seats[0]);
     if (!ended.ok || !ended.replayFinalizationId) throw new Error("expected a replay to finalize");

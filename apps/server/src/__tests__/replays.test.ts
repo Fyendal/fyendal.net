@@ -547,24 +547,25 @@ describe("server replay retention", () => {
     )?.replay.seat)).toEqual([0, 1]);
   });
 
-  it("stops appending at the frame cap but still records and finalizes the game-over frame", async () => {
+  it("keeps the first frames and the final one when a recording passes the frame cap", async () => {
     const game = await startedGame();
     const room = (await store.getRoom(game.code))!;
     const state = room.state!;
     const move = { kind: "forward" as const, events: [] };
-    expect(await appendReplayView(db, game.code, room.version + 1, state, null, move, Date.now(), null, null, 3))
-      .toBeNull();
-    expect(await appendReplayView(db, game.code, room.version + 2, state, null, move, Date.now(), null, null, 3))
-      .toBeNull();
-    expect(Number((await db.query("SELECT COUNT(*) AS n FROM replay_frames")).rows[0]!.n)).toBe(2);
+    for (let step = 1; step <= 4; step++) {
+      expect(await appendReplayView(db, game.code, room.version + step, state, null, move)).toBeNull();
+    }
     state.phase = "game-over";
     state.winner = 0;
-    const id = await appendReplayView(db, game.code, room.version + 3, state, 0, move, Date.now(), null, null, 3);
+    const id = await appendReplayView(db, game.code, room.version + 5, state, 0, move);
     expect(id).toMatch(/^[a-f0-9]{24}$/);
-    const last = (await db.query("SELECT transition FROM replay_frames ORDER BY room_version DESC LIMIT 1")).rows[0]!;
-    expect(last.transition).toBeNull();
-    expect(await finalizeReplay(db, id!)).toBe(true);
+    expect(Number((await db.query("SELECT COUNT(*) AS n FROM replay_frames")).rows[0]!.n)).toBe(6);
+    expect(await finalizeReplay(db, id!, undefined, undefined, 3)).toBe(true);
     expect((await listReplays(db, game.users[0]))[0]).toMatchObject({ id, frameCount: 3, winner: 0 });
+    const replay = await getReplay(db, game.users[0], id!);
+    if (replay?.version !== 2) throw new Error("expected a version 2 replay");
+    expect(replay.frames.map((frame) => frame.transition === null)).toEqual([true, false, true]);
+    expect(replay.frames.at(-1)!.view.winner).toBe(0);
   });
 
   it("loads large replay recordings in bounded frame batches", async () => {

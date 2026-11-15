@@ -1212,9 +1212,8 @@ export const MIGRATIONS: Migration[] = [
   },
   {
     version: 68,
-    // Sandbox replays are labeled; the frame counter caps recording without a per-frame COUNT.
-    sql: `ALTER TABLE replay_games ADD COLUMN sandbox BOOLEAN NOT NULL DEFAULT FALSE;
-    ALTER TABLE replay_games ADD COLUMN recorded_frames INTEGER NOT NULL DEFAULT 0;`,
+    // Sandbox replays are listed apart from match history.
+    sql: `ALTER TABLE replay_games ADD COLUMN sandbox BOOLEAN NOT NULL DEFAULT FALSE;`,
   },
 ];
 
