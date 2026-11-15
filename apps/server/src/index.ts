@@ -974,7 +974,6 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
               deckId: choice.choice.deckId,
               bot: botOpponent,
               requestedAt: Date.now(),
-              sandbox: msg.sandbox === true,
             },
           });
           if (!queued.ok) {
@@ -1001,7 +1000,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           deckName: choice.choice.deckName,
           username: ctx.user.username,
           userId: ctx.user.id,
-        }, msg.cardPoolMode ?? "legal", botOpponent, msg.sandbox === true);
+        }, msg.cardPoolMode ?? "legal", botOpponent);
         await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
         connections.attach(ctx, code, seat, token);
         const version = await markAttachedPresent(ctx);

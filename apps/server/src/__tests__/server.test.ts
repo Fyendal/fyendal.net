@@ -573,40 +573,6 @@ describe("server rooms over websocket", () => {
     a.ws.close();
   });
 
-  it("opts a bot room into sandbox with or without player search", async () => {
-    const direct = await authedClient();
-    direct.sendMsg({ type: "create-bot-room", format: "cc", deckId: "precon-asb", bot: "ira", sandbox: true });
-    const sandboxRoom = await direct.next((message) => message.type === "room-created") as Extract<
-      ServerMessage, { type: "room-created" }
-    >;
-    expect(await direct.next((message) => message.type === "prep-state" && message.prep.botGame === true))
-      .toMatchObject({ prep: { sandbox: true } });
-    expect((await db.query("SELECT sandbox FROM rooms WHERE code = $1", [sandboxRoom.code])).rows)
-      .toEqual([{ sandbox: true }]);
-    direct.sendMsg({ type: "leave-room", endGame: true });
-    expect(await direct.next((message) => message.type === "left")).toMatchObject({ type: "left" });
-    direct.ws.close();
-
-    const searching = await authedClient();
-    searching.sendMsg({
-      type: "create-bot-room", format: "cc", deckId: "precon-asb", bot: "ira", searchForPlayer: true, sandbox: true,
-    });
-    const practice = await searching.next((message) => message.type === "room-created") as Extract<
-      ServerMessage, { type: "room-created" }
-    >;
-    expect(await searching.next((message) => message.type === "prep-state" && message.prep.botGame === true))
-      .toMatchObject({ prep: { sandbox: true } });
-    expect((await db.query("SELECT sandbox FROM rooms WHERE code = $1", [practice.code])).rows)
-      .toEqual([{ sandbox: true }]);
-    searching.sendMsg({ type: "background-matchmaking-leave" });
-    await searching.next((message) =>
-      message.type === "background-matchmaking" && message.status.state === "inactive"
-    );
-    searching.sendMsg({ type: "leave-room", endGame: true });
-    await searching.next((message) => message.type === "left");
-    searching.ws.close();
-  });
-
   it("restores background bot matchmaking after reconnect", async () => {
     const a = await authedClient();
     a.sendMsg({

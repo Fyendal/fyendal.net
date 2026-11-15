@@ -31521,6 +31521,30 @@
       "value": "Cartas"
     }
   ],
+  "game.sandbox.convert.confirm": [
+    {
+      "type": 0,
+      "value": "Activar Sandbox"
+    }
+  ],
+  "game.sandbox.convert.confirming": [
+    {
+      "type": 0,
+      "value": "Activando…"
+    }
+  ],
+  "game.sandbox.convert.description": [
+    {
+      "type": 0,
+      "value": "Las herramientas de Sandbox te permiten editar tu propia vida, recursos, mazo y cartas. Esta partida dejará de contar para el historial, las estadísticas y los logros, y esto no se puede deshacer."
+    }
+  ],
+  "game.sandbox.convert.title": [
+    {
+      "type": 0,
+      "value": "¿Convertir esta partida en Sandbox?"
+    }
+  ],
   "game.sandbox.decrease": [
     {
       "type": 0,
@@ -36589,12 +36613,6 @@
     {
       "type": 0,
       "value": "Los jugadores pueden editar su propia vida, recursos, mazo y mano. La partida se guarda como repetición, pero no cuenta para el historial ni las estadísticas."
-    }
-  ],
-  "lobby.sandbox.descriptionBot": [
-    {
-      "type": 0,
-      "value": "Puedes editar tu propia vida, recursos, mazo y mano; el lado del bot no cambia. La partida se guarda como repetición, pero no cuenta para el historial ni las estadísticas. Si se encuentra un jugador real, esa partida se juega con normalidad."
     }
   ],
   "lobby.sandbox.descriptionPrivateOnly": [

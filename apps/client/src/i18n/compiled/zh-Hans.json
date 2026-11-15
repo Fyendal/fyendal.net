@@ -29437,6 +29437,30 @@
       "value": "卡牌"
     }
   ],
+  "game.sandbox.convert.confirm": [
+    {
+      "type": 0,
+      "value": "开启沙盒"
+    }
+  ],
+  "game.sandbox.convert.confirming": [
+    {
+      "type": 0,
+      "value": "正在开启…"
+    }
+  ],
+  "game.sandbox.convert.description": [
+    {
+      "type": 0,
+      "value": "沙盒工具可以编辑你自己的生命、资源、牌库和卡牌。本局将不再计入对局历史、统计和成就，且无法撤销。"
+    }
+  ],
+  "game.sandbox.convert.title": [
+    {
+      "type": 0,
+      "value": "将本局转为沙盒？"
+    }
+  ],
   "game.sandbox.decrease": [
     {
       "type": 0,
@@ -34022,12 +34046,6 @@
     {
       "type": 0,
       "value": "玩家可以编辑自己的生命、资源、牌库和手牌。本局会保存回放，但不计入对局历史和统计。"
-    }
-  ],
-  "lobby.sandbox.descriptionBot": [
-    {
-      "type": 0,
-      "value": "你可以编辑自己的生命、资源、牌库和手牌；机器人一方保持不变。本局会保存回放，但不计入对局历史和统计。如果匹配到真人玩家，那局对局将按正常方式进行。"
     }
   ],
   "lobby.sandbox.descriptionPrivateOnly": [

@@ -30625,6 +30625,30 @@
       "value": "Cards"
     }
   ],
+  "game.sandbox.convert.confirm": [
+    {
+      "type": 0,
+      "value": "Turn on sandbox"
+    }
+  ],
+  "game.sandbox.convert.confirming": [
+    {
+      "type": 0,
+      "value": "Turning on…"
+    }
+  ],
+  "game.sandbox.convert.description": [
+    {
+      "type": 0,
+      "value": "Sandbox tools let you edit your own life, resources, deck, and cards. This game will stop counting toward match history, stats, and achievements, and this can't be undone."
+    }
+  ],
+  "game.sandbox.convert.title": [
+    {
+      "type": 0,
+      "value": "Turn this game into a sandbox?"
+    }
+  ],
   "game.sandbox.decrease": [
     {
       "type": 0,
@@ -35697,12 +35721,6 @@
     {
       "type": 0,
       "value": "Players can edit their own life, resources, deck, and hand. The game is saved as a replay but doesn't count toward match history or stats."
-    }
-  ],
-  "lobby.sandbox.descriptionBot": [
-    {
-      "type": 0,
-      "value": "Edit your own life, resources, deck, and hand; the bot's side stays as dealt. The game is saved as a replay but doesn't count toward match history or stats. If a real player is found, that game is played normally."
     }
   ],
   "lobby.sandbox.descriptionPrivateOnly": [

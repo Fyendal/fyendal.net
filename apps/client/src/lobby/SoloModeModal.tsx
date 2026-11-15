@@ -53,7 +53,7 @@ export function SoloModeModal({
 }: {
   format: Format;
   deckId: string;
-  onSelectBot: (bot: BotOpponent, searchForPlayer: boolean, sandbox: boolean) => void;
+  onSelectBot: (bot: BotOpponent, searchForPlayer: boolean) => void;
   onStartSolo: (opponentDeckId: string) => void;
   onClose: () => void;
 }) {

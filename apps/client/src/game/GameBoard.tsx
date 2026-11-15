@@ -28,6 +28,7 @@ import { useDeckCardFeedback } from "./DeckCardToast.js";
 import { SideRail } from "./SideRail.js";
 import { ShareReplayDialog, savedReplayDaysLeft } from "../history/ShareReplayDialog.js";
 import { SandboxPanel, canOpenSandbox, type SandboxSeat, type SandboxZone } from "./SandboxPanel.js";
+import { SandboxConvertConfirm } from "./SandboxConvertConfirm.js";
 import { DeckOrderEditor, DeckRevealConfirm } from "./board/DeckOrderEditor.js";
 import { loadDeckOrderRevealAccepted, saveDeckOrderRevealAccepted } from "../storage.js";
 import {
@@ -242,6 +243,19 @@ export function GameBoard() {
     sandboxEditRefusal: state.sandboxEditRefusal,
     clearSandboxEditRefusal: state.clearSandboxEditRefusal,
   })));
+  // A bot game's first sandbox edit waits on this confirm; `then` runs once the room is sandbox.
+  const [sandboxConvert, setSandboxConvert] = useState<
+    { send: () => boolean | void; then?: () => void; sending: boolean } | null
+  >(null);
+  useEffect(() => {
+    if (!sandboxConvert?.sending) return;
+    if (sandbox) {
+      sandboxConvert.then?.();
+      setSandboxConvert(null);
+    } else if (!connected) {
+      setSandboxConvert(null);
+    }
+  }, [sandboxConvert, sandbox, connected]);
   // Neither bot nor self-play has a human opponent for draws, idle claims or friend actions.
   const practiceGame = botGame || soloGame;
   // `yourSeat` is the acting seat; the board stays on `orientationSeat`.
@@ -704,7 +718,13 @@ export function GameBoard() {
   const canSendEmote = !spectating && !replaying && connected && !soloGame;
   // Sandbox tools are desktop-only for now.
   const canSandbox = !mobileFloatViewport && !mobileLandscapeViewport
-    && canOpenSandbox({ sandbox, spectating, replaying, yourSeat, gameOver: view.phase === "game-over" });
+    && canOpenSandbox({ sandbox, botGame, spectating, replaying, yourSeat, gameOver: view.phase === "game-over" });
+  const confirmSandbox = canSandbox && !sandbox
+    ? (send: () => boolean | void, then?: () => void) => {
+        clearSandboxEditRefusal();
+        setSandboxConvert({ send, then, sending: false });
+      }
+    : undefined;
   const sandboxSeats: SandboxSeat[] = (soloGame ? [seat, 1 - seat] : [yourSeat ?? seat]).map((candidate) => {
     const player = view.players[candidate]!;
     return {
@@ -714,17 +734,31 @@ export function GameBoard() {
       resources: player.resources,
       zones: {
         hand: player.hand.length,
-        deck: player.deck === undefined ? null : player.deck.length,
+        // An unconverted bot game reveals the deck on conversion.
+        deck: player.deck?.length ?? (sandbox ? null : player.deckCount),
         graveyard: player.graveyard.length,
         banish: player.banish.filter((card) => !card.faceDown).length,
       },
     };
   });
-  const deckEditable = (seatIndex: number) => canSandbox
-    && sandboxSeats.some((candidate) => candidate.seat === seatIndex)
-    && view.players[seatIndex]?.deck !== undefined;
+  const seatEditable = (seatIndex: number) => canSandbox
+    && sandboxSeats.some((candidate) => candidate.seat === seatIndex);
+  const deckEditable = (seatIndex: number) => seatEditable(seatIndex) && view.players[seatIndex]?.deck !== undefined;
+  // Before conversion the deck is hidden; opening the editor converts and reveals it.
+  const deckEditOffered = (seatIndex: number) => seatEditable(seatIndex)
+    && (!!confirmSandbox || view.players[seatIndex]?.deck !== undefined);
   const openDeckEditor = (seatIndex: number) => {
     clearSandboxEditRefusal();
+    if (confirmSandbox) {
+      confirmSandbox(
+        () => sendSandboxEdit(seatIndex as 0 | 1, { kind: "reveal-deck" }),
+        () => {
+          if (typeof localStorage !== "undefined") saveDeckOrderRevealAccepted(localStorage, view.gameId);
+          setDeckEditorSeat(seatIndex as 0 | 1);
+        },
+      );
+      return;
+    }
     const accepted = typeof localStorage !== "undefined" && loadDeckOrderRevealAccepted(localStorage, view.gameId);
     if (accepted) setDeckEditorSeat(seatIndex as 0 | 1);
     else setDeckRevealSeat(seatIndex as 0 | 1);
@@ -744,7 +778,9 @@ export function GameBoard() {
         refusal: sandboxEditRefusal,
         onMove: (instanceId, to) => {
           clearSandboxEditRefusal();
-          sendSandboxEdit(overlaySource.seat as 0 | 1, { kind: "move-card", instanceId, to });
+          const move = () => sendSandboxEdit(overlaySource.seat as 0 | 1, { kind: "move-card", instanceId, to });
+          if (confirmSandbox) confirmSandbox(move);
+          else move();
         },
       }
     : undefined;
@@ -1642,7 +1678,7 @@ export function GameBoard() {
           onOpenOverlay={setOverlay}
           onOpenEffects={openEffectLedger}
           standingOrders={soloBoard ? standingOrders : undefined}
-          onEditDeck={deckEditable(opp.seat) ? () => openDeckEditor(opp.seat) : undefined}
+          onEditDeck={deckEditOffered(opp.seat) ? () => openDeckEditor(opp.seat) : undefined}
         />
 
         {/* center divider: a brass-inlay strip marking the seam */}
@@ -1691,7 +1727,7 @@ export function GameBoard() {
           onOpenOverlay={setOverlay}
           onOpenEffects={openEffectLedger}
           standingOrders={standingOrders}
-          onEditDeck={deckEditable(me.seat) ? () => openDeckEditor(me.seat) : undefined}
+          onEditDeck={deckEditOffered(me.seat) ? () => openDeckEditor(me.seat) : undefined}
         />
 
         <PlayerHand
@@ -2077,7 +2113,20 @@ export function GameBoard() {
           onEdit={sendSandboxEdit}
           onClearRefusal={clearSandboxEditRefusal}
           onOpenZone={openSandboxZone}
+          confirmFirst={confirmSandbox}
           onClose={() => setSandboxOpen(false)}
+        />
+      ) : null}
+      {sandboxConvert && canSandbox ? (
+        <SandboxConvertConfirm
+          sending={sandboxConvert.sending}
+          refusal={sandboxConvert.sending ? sandboxEditRefusal : null}
+          onCancel={() => setSandboxConvert(null)}
+          onConfirm={() => {
+            clearSandboxEditRefusal();
+            // False means another room command is in flight; the viewer may confirm again.
+            if (sandboxConvert.send() !== false) setSandboxConvert({ ...sandboxConvert, sending: true });
+          }}
         />
       ) : null}
       {deckRevealSeat !== null && deckEditable(deckRevealSeat) ? (

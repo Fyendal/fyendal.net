@@ -18,7 +18,7 @@ export function shouldOfferBotPractice(input: {
 export function BotPracticeNudge(props: {
   format: Format;
   busy: boolean;
-  onPlay: (bot: BotOpponent, searchForPlayer: boolean, sandbox: boolean) => void;
+  onPlay: (bot: BotOpponent, searchForPlayer: boolean) => void;
   onDismiss: () => void;
 }) {
   const intl = useIntl();
@@ -70,9 +70,9 @@ export function BotPracticeNudge(props: {
         {choosingBot ? (
           <BotOpponentModal
             format={props.format}
-            onSelect={(bot, searchForPlayer, sandbox) => {
+            onSelect={(bot, searchForPlayer) => {
               setChoosingBot(false);
-              props.onPlay(bot, searchForPlayer, sandbox);
+              props.onPlay(bot, searchForPlayer);
             }}
             onClose={() => setChoosingBot(false)}
           />

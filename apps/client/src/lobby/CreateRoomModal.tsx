@@ -52,9 +52,9 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
     onClose();
   };
 
-  const playBot = (bot: BotOpponent, searchForPlayer: boolean, sandbox: boolean) => {
+  const playBot = (bot: BotOpponent, searchForPlayer: boolean) => {
     if (!selectionValid) return;
-    createBotRoom(format, deckId, bot, searchForPlayer, sandbox);
+    createBotRoom(format, deckId, bot, searchForPlayer);
     onClose();
   };
 

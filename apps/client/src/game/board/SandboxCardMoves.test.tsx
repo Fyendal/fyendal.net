@@ -80,13 +80,14 @@ describe("sandbox card moves", () => {
     expect(sandboxMoveRefusalMessage("SANDBOX_SEAT_FORBIDDEN")).toBe("game.sandbox.refusal.seat");
   });
 
-  it("offers moves only in sandbox games, to players, for seats they may edit", () => {
+  it("offers moves only in sandbox or bot games, to players, for seats they may edit", () => {
     const source = { seat: 1, zone: "graveyard" as const };
     const can = (overrides: Partial<Parameters<typeof canOpenSandbox>[0]>) => canOpenSandbox({
-      sandbox: true, spectating: false, replaying: false, yourSeat: 0, gameOver: false, ...overrides,
+      sandbox: true, botGame: false, spectating: false, replaying: false, yourSeat: 0, gameOver: false, ...overrides,
     });
     expect(editableOverlaySource(source, can({}), [0, 1])).toBe(source);
     expect(editableOverlaySource(source, can({}), [0])).toBeNull();
+    expect(editableOverlaySource(source, can({ sandbox: false, botGame: true }), [1])).toBe(source);
     for (const blocked of [{ sandbox: false }, { spectating: true }, { replaying: true }, { yourSeat: null }, { gameOver: true }]) {
       expect(editableOverlaySource(source, can(blocked), [0, 1]), JSON.stringify(blocked)).toBeNull();
     }

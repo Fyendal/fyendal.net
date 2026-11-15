@@ -417,8 +417,6 @@ describe("client messages", () => {
     { type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "dorinthea" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira", searchForPlayer: true, avoidRoomCodes: ["ABC123"] },
     { type: "create-bot-room", deckId: "precon-sba" },
-    { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira", sandbox: true },
-    { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira", sandbox: false },
     { type: "create-solo-room", format: "cc", deckId: "deck", opponentDeckId: "precon-asr" },
     { type: "create-solo-room", format: "silver-age", deckId: "precon-sba", opponentDeckId: "precon-sba", cardPoolMode: "open" },
     { type: "solo-seat", seat: 0 },
@@ -555,6 +553,7 @@ describe("client messages", () => {
     expect(decodeManualEdit({ kind: "reorder-deck", instanceIds: [3, 0, 7] })).toEqual({ kind: "reorder-deck", instanceIds: [3, 0, 7] });
     expect(decodeManualEdit({ kind: "reorder-deck", instanceIds: Array.from({ length: 256 }, (_, i) => i) })).not.toBeNull();
     expect(decodeManualEdit({ kind: "shuffle-deck" })).toEqual({ kind: "shuffle-deck" });
+    expect(decodeManualEdit({ kind: "reveal-deck" })).toEqual({ kind: "reveal-deck" });
     for (const to of ["hand", "deck-top", "deck-bottom", "graveyard", "banish"]) {
       expect(decodeManualEdit({ kind: "move-card", instanceId: 4, to })).toEqual({ kind: "move-card", instanceId: 4, to });
     }
@@ -573,6 +572,7 @@ describe("client messages", () => {
       { kind: "reorder-deck", instanceIds: Array.from({ length: 257 }, (_, i) => i) },
       { kind: "reorder-deck", instanceIds: [1], extra: 1 },
       { kind: "shuffle-deck", seed: 1 },
+      { kind: "reveal-deck", seat: 0 },
       { kind: "move-card", instanceId: 4 },
       { kind: "move-card", instanceId: -1, to: "hand" },
       { kind: "move-card", instanceId: "4", to: "hand" },
@@ -600,7 +600,8 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "queue-join", format: "cc" })).toBeNull();
     expect(decodeClientMessage({ type: "join-room", code: "ABC123", hero: "rhinar" })).toBeNull();
     expect(decodeClientMessage({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "unknown" })).toBeNull();
-    expect(decodeClientMessage({ type: "create-bot-room", format: "cc", deckId: "precon-asr", sandbox: "yes" })).toBeNull();
+    // Bot rooms convert on first sandbox edit; creation takes no flag.
+    expect(decodeClientMessage({ type: "create-bot-room", format: "cc", deckId: "precon-asr", sandbox: true })).toBeNull();
     expect(decodeClientMessage({ type: "create-solo-room", format: "cc", deckId: "deck" })).toBeNull();
     expect(decodeClientMessage({ type: "create-solo-room", deckId: "deck", opponentDeckId: "deck" })).toBeNull();
     expect(decodeClientMessage({ type: "create-solo-room", format: "cc", deckId: "deck", opponentDeckId: "" })).toBeNull();
@@ -1311,7 +1312,6 @@ describe("GameView and server messages", () => {
       } },
       { type: "left", playAgainSolo: { format: "silver-age", deckId: "deck", opponentDeckId: "precon-sba" } },
       { type: "left" }, { type: "left", playAgain: { format: "cc", deckId: "precon-asb", bot: "hala" } },
-      { type: "left", playAgain: { format: "cc", deckId: "precon-asb", bot: "hala", sandbox: true } },
       { type: "error", code: "ROOM_NOT_FOUND", message: "gone" },
     ];
     for (const message of variants) {
@@ -1323,7 +1323,7 @@ describe("GameView and server messages", () => {
       { format: "draft", deckId: "precon-asb", bot: "hala" },
       { format: "cc", bot: "hala" },
       { format: "cc", deckId: "precon-asb", bot: "hala", extra: true },
-      { format: "cc", deckId: "precon-asb", bot: "hala", sandbox: false },
+      { format: "cc", deckId: "precon-asb", bot: "hala", sandbox: true },
     ]) expect(decodeServerMessage({ type: "left", playAgain })).toBeNull();
     for (const playAgainSolo of [
       { format: "cc", deckId: "deck" },

@@ -167,6 +167,8 @@ export function manualEditRefusal(
       return deckEditRefusal(state);
     case "move-card":
       return moveCardRefusal(state, seat, edit.instanceId, edit.to);
+    case "reveal-deck":
+      return null;
     default:
       return "unknown edit";
   }
@@ -185,6 +187,8 @@ export function applyManualEdit(
   const refusal = manualEditRefusal(state, seat, edit);
   if (refusal) return { ok: false, error: refusal };
   const next = cloneState(state);
+  // No log line: the owner seeing their own deck reveals nothing to the opponent.
+  if (edit.kind === "reveal-deck") return { ok: true, state: next, events: [] };
   const transition = createTransitionCollector();
   const player = next.players[seat]!;
   const hero = nameOf(next, player.heroCardId);

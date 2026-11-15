@@ -473,7 +473,6 @@ export interface AccountExport {
       bot: string;
       cardPoolMode: CardPoolMode;
       requestedAt: number;
-      sandbox?: true;
       candidates: Array<{
         candidateUserId: number;
         ordinal: number;
@@ -1016,6 +1015,7 @@ export function decodeManualEdit(value: unknown): ManualEdit | null {
         ? edit as ManualEdit
         : null;
     case "shuffle-deck":
+    case "reveal-deck":
       return exactKeys(edit, ["kind"]) ? edit as ManualEdit : null;
     case "move-card":
       return exactKeys(edit, ["kind", "instanceId", "to"]) && nonNegativeInteger(edit.instanceId)
@@ -1175,13 +1175,12 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
         ));
       break;
     case "create-bot-room":
-      valid = exactKeys(message, ["type", "format", "deckId", "bot", "cardPoolMode", "searchForPlayer", "avoidRoomCodes", "sandbox"], ["type", "deckId"])
+      valid = exactKeys(message, ["type", "format", "deckId", "bot", "cardPoolMode", "searchForPlayer", "avoidRoomCodes"], ["type", "deckId"])
         && (message.format === undefined || FORMATS.has(String(message.format)))
         && id(message.deckId)
         && (message.bot === undefined || BOT_OPPONENTS.has(String(message.bot)))
         && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)))
         && (message.searchForPlayer === undefined || typeof message.searchForPlayer === "boolean")
-        && (message.sandbox === undefined || typeof message.sandbox === "boolean")
         && (message.avoidRoomCodes === undefined || (
           Array.isArray(message.avoidRoomCodes)
           && message.avoidRoomCodes.length <= MAX_MATCHMAKING_AVOID_ROOM_CODES
@@ -1916,9 +1915,8 @@ function prepView(value: unknown): value is PrepView {
 
 function botRematch(value: unknown): boolean {
   const rematch = object(value);
-  return !!rematch && exactKeys(rematch, ["format", "deckId", "bot", "sandbox"], ["format", "deckId", "bot"])
-    && FORMATS.has(String(rematch.format)) && id(rematch.deckId) && BOT_OPPONENTS.has(String(rematch.bot))
-    && (rematch.sandbox === undefined || rematch.sandbox === true);
+  return !!rematch && exactKeys(rematch, ["format", "deckId", "bot"])
+    && FORMATS.has(String(rematch.format)) && id(rematch.deckId) && BOT_OPPONENTS.has(String(rematch.bot));
 }
 
 function soloRematch(value: unknown): boolean {
@@ -3072,9 +3070,8 @@ function exportMatchmaking(value: unknown): boolean {
     && (matchmaking.pendingBotStart === null || (
       !!pendingBotStart
       && exactKeys(pendingBotStart, [
-        "format", "deckId", "bot", "cardPoolMode", "requestedAt", "sandbox", "candidates",
-      ], ["format", "deckId", "bot", "cardPoolMode", "requestedAt", "candidates"])
-      && (pendingBotStart.sandbox === undefined || pendingBotStart.sandbox === true)
+        "format", "deckId", "bot", "cardPoolMode", "requestedAt", "candidates",
+      ])
       && FORMATS.has(String(pendingBotStart.format))
       && id(pendingBotStart.deckId)
       && BOT_OPPONENTS.has(String(pendingBotStart.bot))

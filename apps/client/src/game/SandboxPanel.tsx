@@ -34,14 +34,16 @@ export const SANDBOX_REFUSAL_MESSAGE: Record<SandboxEditRefusal, string> = {
   SANDBOX_EDIT_UNAVAILABLE: "game.sandbox.refusal.unavailable",
 };
 
-export function canOpenSandbox({ sandbox, spectating, replaying, yourSeat, gameOver }: {
+/** Bot games offer the tools too; the first edit converts them after a confirm. */
+export function canOpenSandbox({ sandbox, botGame, spectating, replaying, yourSeat, gameOver }: {
   sandbox: boolean;
+  botGame: boolean;
   spectating: boolean;
   replaying: boolean;
   yourSeat: number | null;
   gameOver: boolean;
 }): boolean {
-  return sandbox && !spectating && !replaying && yourSeat !== null && !gameOver;
+  return (sandbox || botGame) && !spectating && !replaying && yourSeat !== null && !gameOver;
 }
 
 function clamp(value: number, minimum: number, maximum: number): number {
@@ -212,9 +214,10 @@ export function SandboxPanel({
   onEdit,
   onClearRefusal,
   onOpenZone,
+  confirmFirst,
   onClose,
 }: {
-  /** Seats the viewer may edit: both in solo, only their own in a private room. */
+  /** Seats the viewer may edit: both in solo, only their own in a private or bot room. */
   seats: readonly SandboxSeat[];
   initialSeat?: 0 | 1;
   pending: boolean;
@@ -224,6 +227,8 @@ export function SandboxPanel({
   onClearRefusal: () => void;
   /** Opens a zone's card list with move actions, replacing this panel. */
   onOpenZone?: (seat: 0 | 1, zone: SandboxZone) => void;
+  /** Runs `apply` once the viewer confirms converting the room; absent when already sandbox. */
+  confirmFirst?: (apply: () => void) => void;
   onClose: () => void;
 }) {
   const intl = useIntl();
@@ -296,7 +301,9 @@ export function SandboxPanel({
           pending={pending || queue !== null}
           onApply={(edits) => {
             onClearRefusal();
-            setQueue({ seat: active.seat, edits });
+            const apply = () => setQueue({ seat: active.seat, edits });
+            if (confirmFirst) confirmFirst(apply);
+            else apply();
           }}
         />
         {onOpenZone ? (

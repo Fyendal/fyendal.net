@@ -1220,6 +1220,11 @@ export const MIGRATIONS: Migration[] = [
     // A searching player's bot practice may be sandbox; the matched PvP room never is.
     sql: `ALTER TABLE pending_bot_starts ADD COLUMN sandbox BOOLEAN NOT NULL DEFAULT FALSE;`,
   },
+  {
+    version: 70,
+    // Bot rooms now turn sandbox on first edit, not at creation.
+    sql: `ALTER TABLE pending_bot_starts DROP COLUMN sandbox;`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

@@ -627,3 +627,35 @@ describe("GameBoard solo play", () => {
     expect(html).toContain("Play again");
   });
 });
+
+describe("GameBoard sandbox tools", () => {
+  const render = () => {
+    vi.stubGlobal("localStorage", { getItem: () => null });
+    return renderToStaticMarkup(<TestI18nProvider><GameBoard /></TestI18nProvider>);
+  };
+  const baseState = (overrides: Partial<StoreState>): StoreState => ({
+    ...liveState(false),
+    view: { ...interactiveView(), chain: [] },
+    sendSandboxEdit: vi.fn(() => true),
+    sandboxEditRefusal: null,
+    clearSandboxEditRefusal: vi.fn(),
+    ...overrides,
+  } as unknown as StoreState);
+
+  it("offers the panel and deck editor in an unconverted bot game, before the deck is revealed", () => {
+    gameStore.state = baseState({ botGame: true, sandbox: false });
+    const html = render();
+    expect(html).toContain('class="hud-sandbox"');
+    expect(html).toContain('class="deck-edit-button"');
+    expect(html).not.toContain("sandbox-badge");
+  });
+
+  it("offers no sandbox tools in an ordinary game or to spectators", () => {
+    gameStore.state = baseState({ botGame: false, sandbox: false });
+    expect(render()).not.toContain('class="hud-sandbox"');
+    gameStore.state = baseState({ botGame: true, sandbox: false, spectating: true, yourSeat: null });
+    const spectated = render();
+    expect(spectated).not.toContain('class="hud-sandbox"');
+    expect(spectated).not.toContain('class="deck-edit-button"');
+  });
+});

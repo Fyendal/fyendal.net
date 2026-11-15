@@ -23,10 +23,7 @@ afterEach(async () => {
 });
 
 const DECK = "precon-asb";
-const HISTORY_TABLES = [
-  "matches", "match_participants", "hero_records",
-  "matchup_records", "user_achievements", "daily_game_players",
-] as const;
+const HISTORY_TABLES = ["matches", "match_participants", "hero_records", "matchup_records", "user_achievements"] as const;
 
 function presentation(deckId: string): PresentedDeck {
   const pool = precon(deckId)!.pool;
@@ -37,24 +34,47 @@ async function count(table: string): Promise<number> {
   return Number((await db.query(`SELECT COUNT(*) AS n FROM ${table}`)).rows[0]!.n);
 }
 
-async function sandboxBotGame(): Promise<{ code: string; human: SeatCredentials }> {
+async function user(name: string): Promise<number> {
   const { rows } = await db.query(
-    "INSERT INTO users (username, username_lc, pass_hash, created_at) VALUES ('Alice','alice','hash',1) RETURNING id",
+    "INSERT INTO users (username, username_lc, pass_hash, created_at) VALUES ($1,$2,'hash',1) RETURNING id",
+    [name, name.toLowerCase()],
   );
-  const userId = Number(rows[0]!.id);
-  const created = await store.createBotRoom("cc", { deckId: DECK, username: "Alice", userId }, "legal", "ira", true);
-  const human = { token: created.token, userId };
-  const prepRoom = (await store.getRoom(created.code))!;
-  expect(prepRoom.sandbox).toBe(true);
-  expect(isSandboxRoom(prepRoom)).toBe(true);
-  expect(prepViewFor(prepRoom, 0).sandbox).toBe(true);
-  await store.chooseFirst(created.code, human, true);
+  return Number(rows[0]!.id);
+}
+
+async function startGame(code: string, human: SeatCredentials): Promise<void> {
+  await store.chooseFirst(code, human, true);
   const deck = presentation(DECK);
-  await store.presentArena(created.code, human, { weaponIds: deck.weaponIds, equipment: {} });
-  await store.presentDeck(created.code, human, deck);
-  if (!(await store.getRoom(created.code))!.state) await store.chooseFirst(created.code, human, true);
-  expect((await store.getRoom(created.code))!.state).not.toBeNull();
-  return { code: created.code, human };
+  await store.presentArena(code, human, { weaponIds: deck.weaponIds, equipment: {} });
+  await store.presentDeck(code, human, deck);
+  if (!(await store.getRoom(code))!.state) await store.chooseFirst(code, human, true);
+  expect((await store.getRoom(code))!.state).not.toBeNull();
+}
+
+/** A bot room in prep; `search` starts it as background-search practice. */
+async function botRoom(search = false): Promise<{ code: string; human: SeatCredentials }> {
+  const userId = await user("Alice");
+  if (!search) {
+    const created = await store.createBotRoom("cc", { deckId: DECK, username: "Alice", userId }, "legal", "ira");
+    return { code: created.code, human: { token: created.token, userId } };
+  }
+  const queued = await store.queueForMatch("cc", {
+    userId, username: "Alice", deckId: DECK, cardPoolMode: "legal",
+    pendingBotStart: { format: "cc", deckId: DECK, bot: "ira", requestedAt: Date.now() },
+  });
+  if (!queued.ok || queued.kind !== "opened") throw new Error("missing search opener");
+  const source = await store.startPendingBotPractice(userId);
+  if (!source) throw new Error("missing bot practice");
+  return { code: source.code, human: { token: source.token, userId } };
+}
+
+async function botGame(search = false): Promise<{ code: string; human: SeatCredentials }> {
+  const room = await botRoom(search);
+  const prep = (await store.getRoom(room.code))!;
+  expect(prep.sandbox).toBe(false);
+  expect(prepViewFor(prep, 0).sandbox).toBeUndefined();
+  await startGame(room.code, room.human);
+  return room;
 }
 
 async function edit(code: string, credentials: SeatCredentials, seat: 0 | 1, change: ManualEdit) {
@@ -65,6 +85,17 @@ async function edit(code: string, credentials: SeatCredentials, seat: 0 | 1, cha
 function codeOf(error: string) {
   const wire = encodeWireMessage({ type: "error", message: error });
   return wire.type === "error" ? wire.code : null;
+}
+
+function expectRefused(result: { ok: boolean; error?: string }, code: string): void {
+  expect(result.ok).toBe(false);
+  if (!result.ok) expect(codeOf(result.error!)).toBe(code);
+}
+
+async function persistedSandbox(code: string): Promise<{ room: boolean; replays: boolean[] }> {
+  const room = await db.query("SELECT sandbox FROM rooms WHERE code = $1", [code]);
+  const replays = await db.query("SELECT sandbox FROM replay_games WHERE room_code = $1", [code]);
+  return { room: room.rows[0]!.sandbox === true, replays: replays.rows.map((row) => row.sandbox === true) };
 }
 
 function actor(room: RoomRow): number {
@@ -97,89 +128,192 @@ async function advance(code: string, human: SeatCredentials, steps: number): Pro
   return botMoves;
 }
 
-describe("sandbox bot rooms", () => {
-  it("lets the human edit only their own seat", async () => {
-    const { code, human } = await sandboxBotGame();
-    const room = (await store.getRoom(code))!;
-    const botCard = room.state!.players[1]!.hand[0]!.instanceId;
-    for (const change of [
-      { kind: "set-life", life: 5 },
-      { kind: "set-resources", resources: 3 },
-      { kind: "shuffle-deck" },
-      { kind: "move-card", instanceId: botCard, to: "graveyard" },
-    ] as const) {
-      const refused = await edit(code, human, 1, change);
-      expect(refused.ok).toBe(false);
-      if (!refused.ok) expect(codeOf(refused.error)).toBe("SANDBOX_SEAT_FORBIDDEN");
-    }
-    const byInstance = await edit(code, human, 0, { kind: "move-card", instanceId: botCard, to: "graveyard" });
-    expect(byInstance.ok).toBe(false);
-    expect(await edit(code, human, 0, { kind: "set-life", life: 30 })).toMatchObject({ ok: true });
-    const after = (await store.getRoom(code))!;
-    expect(after.state!.players[0]!.life).toBe(30);
-    expect(after.state!.players[1]).toEqual(room.state!.players[1]);
+async function finish(code: string, human: SeatCredentials): Promise<void> {
+  if ((await store.getRoom(code))!.state!.phase !== "game-over") {
+    expect(await store.applyIntent(code, human, { kind: "concede" })).toMatchObject({ ok: true });
+  }
+  expect((await store.getRoom(code))!.state!.phase).toBe("game-over");
+  expect(await finalizeReplayForRoom(db, code)).toBe(true);
+}
+
+describe("bot rooms turning sandbox", () => {
+  it("records an untouched bot game normally", async () => {
+    const { code, human } = await botGame();
+    const view = stateMessage((await store.getRoom(code))!, 0);
+    if (view?.type !== "state") throw new Error("expected state");
+    expect(view.sandbox).toBeUndefined();
+    expect(view.botGame).toBe(true);
+    expect(view.view.players[0].deck).toBeUndefined();
+    await finish(code, human);
+    expect(await count("matches")).toBe(1);
+    expect(await count("match_participants")).toBeGreaterThan(0);
+    expect(await count("hero_records")).toBe(1);
+    expect(await persistedSandbox(code)).toEqual({ room: false, replays: [false] });
+    const [replay] = await listReplays(db, human.userId!);
+    expect(replay).toBeDefined();
+    expect(replay!.sandbox).toBeUndefined();
   });
 
-  it("reveals the human's deck to the human, never to the bot task", async () => {
-    const { code, human } = await sandboxBotGame();
-    const before = (await store.getRoom(code))!;
-    const order = before.state!.players[0]!.deck.map((card) => card.instanceId);
-    expect(await edit(code, human, 0, { kind: "reorder-deck", instanceIds: [...order].reverse() })).toMatchObject({ ok: true });
-    const room = (await store.getRoom(code))!;
-    const humanView = stateMessage(room, 0);
-    if (humanView?.type !== "state") throw new Error("expected state");
-    expect(humanView.sandbox).toBe(true);
-    expect(humanView.view.players[0].deck?.map((card) => card.instanceId)).toEqual([...order].reverse());
-    const botView = stateMessage(room, 1);
-    if (botView?.type !== "state") throw new Error("expected state");
-    expect(botView.view.players[0].deck).toBeUndefined();
-    expect(botView.view.players[1].deck).toBeUndefined();
-
-    let botTurn = (await store.getRoom(code))!;
-    for (let step = 0; step < 40 && actor(botTurn) !== 1; step++) {
-      await humanStep(code, human, botTurn);
-      botTurn = (await store.getRoom(code))!;
-    }
-    const task = clientBotTask(botTurn, "a".repeat(64), 0);
-    if (task?.type !== "bot-task") throw new Error("expected a bot task");
-    expect(task.view.players[0].deck).toBeUndefined();
-    expect(task.view.players[1].deck).toBeUndefined();
-    // The task is the same whatever order the human's deck is in.
-    botTurn.state!.players[0]!.deck.reverse();
-    expect(clientBotTask(botTurn, "a".repeat(64), 0)).toEqual(task);
-  });
-
-  it("keeps the bot playing legally after life, resource, and deck edits, then records only a replay", async () => {
-    const { code, human } = await sandboxBotGame();
-    const room = (await store.getRoom(code))!;
-    const deck = room.state!.players[0]!.deck.map((card) => card.instanceId);
-    expect(await edit(code, human, 0, { kind: "reorder-deck", instanceIds: [...deck].reverse() })).toMatchObject({ ok: true });
+  it("converts on the first accepted edit, keeps the bot legal, and records only a sandbox replay", async () => {
+    const { code, human } = await botGame();
     expect(await edit(code, human, 0, { kind: "set-life", life: 12 })).toMatchObject({ ok: true });
-    expect(await edit(code, human, 0, { kind: "set-resources", resources: 2 })).toMatchObject({ ok: true });
+    const room = (await store.getRoom(code))!;
+    expect(room.sandbox).toBe(true);
+    expect(isSandboxRoom(room)).toBe(true);
+    expect(room.state!.players[0]!.life).toBe(12);
+    expect(await persistedSandbox(code)).toEqual({ room: true, replays: [true] });
+    const view = stateMessage(room, 0);
+    if (view?.type !== "state") throw new Error("expected state");
+    expect(view.sandbox).toBe(true);
+    expect(view.view.players[0].deck?.map((card) => card.instanceId))
+      .toEqual(room.state!.players[0]!.deck.map((card) => card.instanceId));
 
     // A bot result computed before an edit goes stale on the version bump.
     const observed = (await store.getRoom(code))!;
-    expect(await edit(code, human, 0, { kind: "move-card", instanceId: deck[0]!, to: "graveyard" })).toMatchObject({ ok: true });
+    expect(await edit(code, human, 0, { kind: "set-resources", resources: 2 })).toMatchObject({ ok: true });
     expect(await store.applyBotIntent(code, observed.version, null, {
       credentials: human, command: { id: `stale-${++commandCounter}`, expectedVersion: observed.version },
     })).toMatchObject({ ok: false, error: "stale room version" });
 
     expect(await advance(code, human, 120)).toBeGreaterThan(0);
-    const end = (await store.getRoom(code))!;
-    if (end.state!.phase !== "game-over") {
-      expect(await store.applyIntent(code, human, { kind: "concede" })).toMatchObject({ ok: true });
-    }
-    expect((await store.getRoom(code))!.state!.phase).toBe("game-over");
+    await finish(code, human);
     for (const table of HISTORY_TABLES) expect(await count(table), table).toBe(0);
     expect(await count("analytics_events")).toBe(0);
-    expect(await finalizeReplayForRoom(db, code)).toBe(true);
+    expect(await persistedSandbox(code)).toEqual({ room: true, replays: [true] });
     expect(await listReplays(db, human.userId!)).toEqual([expect.objectContaining({ sandbox: true, yourSeat: 0 })]);
   });
 
-  it("offers a sandbox rematch", async () => {
-    const { code, human } = await sandboxBotGame();
+  it("does not convert on a refused edit", async () => {
+    const { code, human } = await botGame();
+    const before = (await store.getRoom(code))!;
+    const botCard = before.state!.players[1]!.hand[0]!.instanceId;
+    expectRefused(await edit(code, human, 0, { kind: "set-life", life: 0 }), "SANDBOX_EDIT_UNAVAILABLE");
+    expectRefused(await edit(code, human, 0, { kind: "move-card", instanceId: botCard, to: "graveyard" }), "SANDBOX_EDIT_UNAVAILABLE");
+    for (const change of [{ kind: "set-life", life: 5 }, { kind: "reveal-deck" }] as const) {
+      expectRefused(await edit(code, human, 1, change), "SANDBOX_SEAT_FORBIDDEN");
+    }
+    const after = (await store.getRoom(code))!;
+    expect(after.sandbox).toBe(false);
+    expect(after.version).toBe(before.version);
+    expect(await persistedSandbox(code)).toEqual({ room: false, replays: [false] });
+  });
+
+  it("converts on reveal-deck without changing the game or the bot's task", async () => {
+    const { code, human } = await botGame();
+    let room = (await store.getRoom(code))!;
+    for (let step = 0; step < 40 && actor(room) !== 1; step++) {
+      await humanStep(code, human, room);
+      room = (await store.getRoom(code))!;
+    }
+    const task = clientBotTask(room, "a".repeat(64), 0);
+    if (task?.type !== "bot-task") throw new Error("expected a bot task");
+    const history = await count("room_history");
+
+    expect(await edit(code, human, 0, { kind: "reveal-deck" })).toMatchObject({ ok: true, version: room.version + 1 });
+    const revealed = (await store.getRoom(code))!;
+    expect(revealed.sandbox).toBe(true);
+    expect(revealed.state).toEqual(room.state);
+    expect(await count("room_history")).toBe(history);
+    const view = stateMessage(revealed, 0);
+    if (view?.type !== "state") throw new Error("expected state");
+    expect(view.sandbox).toBe(true);
+    expect(view.view.players[0].deck?.map((card) => card.instanceId))
+      .toEqual(room.state!.players[0]!.deck.map((card) => card.instanceId));
+    const botView = stateMessage(revealed, 1);
+    if (botView?.type !== "state") throw new Error("expected state");
+    expect(botView.view.players[0].deck).toBeUndefined();
+    expect(botView.view.players[1].deck).toBeUndefined();
+    expect(clientBotTask(revealed, "a".repeat(64), 0)).toEqual({ ...task, version: revealed.version });
+    // The task is the same whatever order the human's deck is in.
+    revealed.state!.players[0]!.deck.reverse();
+    expect(clientBotTask(revealed, "a".repeat(64), 0)).toEqual({ ...task, version: revealed.version });
+
+    // In a room that is already sandbox it changes nothing at all.
+    expect(await edit(code, human, 0, { kind: "reveal-deck" })).toEqual({ ok: true, version: revealed.version });
+    expect((await store.getRoom(code))!.version).toBe(revealed.version);
+  });
+
+  it("keeps the room sandbox when the converting edit is undone", async () => {
+    const { code, human } = await botGame();
+    const life = (await store.getRoom(code))!.state!.players[0]!.life;
+    expect(await edit(code, human, 0, { kind: "set-life", life: 30 })).toMatchObject({ ok: true });
+    const converted = (await store.getRoom(code))!;
+    expect(await store.undo(code, human, "last-action", {
+      id: `undo-${++commandCounter}`, expectedVersion: converted.version,
+    })).toMatchObject({ ok: true });
+    const undone = (await store.getRoom(code))!;
+    expect(undone.state!.players[0]!.life).toBe(life);
+    expect(undone.sandbox).toBe(true);
+    expect(await persistedSandbox(code)).toEqual({ room: true, replays: [true] });
+    await finish(code, human);
+    for (const table of HISTORY_TABLES) expect(await count(table), table).toBe(0);
+  });
+
+  it("refuses conversion before the game starts, after game over, and for spectators", async () => {
+    const { code, human } = await botRoom();
+    expectRefused(await edit(code, human, 0, { kind: "reveal-deck" }), "SANDBOX_EDIT_UNAVAILABLE");
+    expect((await store.getRoom(code))!.sandbox).toBe(false);
+
+    await startGame(code, human);
+    const watcherId = await user("Watcher");
+    const watcher = await store.joinRoom(code, undefined, { allowPlayer: false, userId: watcherId, username: "Watcher" });
+    if (!watcher.ok || watcher.kind !== "spectator") throw new Error("spectate failed");
+    expect(await edit(code, { token: watcher.token, userId: watcherId }, 0, { kind: "reveal-deck" }))
+      .toEqual({ ok: false, error: "not a player in this room" });
+    expect(await edit(code, { token: "not-a-token" }, 0, { kind: "reveal-deck" }))
+      .toEqual({ ok: false, error: "not a player in this room" });
+    expect((await store.getRoom(code))!.sandbox).toBe(false);
+
     expect(await store.applyIntent(code, human, { kind: "concede" })).toMatchObject({ ok: true });
-    const left = await store.deletePracticeRoom(code, human);
-    expect(left).toMatchObject({ ok: true, playAgain: { format: "cc", deckId: DECK, bot: "ira", sandbox: true } });
+    for (const change of [{ kind: "reveal-deck" }, { kind: "set-life", life: 5 }] as const) {
+      expectRefused(await edit(code, human, 0, change), "SANDBOX_EDIT_UNAVAILABLE");
+    }
+    expect((await store.getRoom(code))!.sandbox).toBe(false);
+    expect(await count("matches")).toBe(1);
+  });
+
+  it("refuses edits in public and matchmade rooms", async () => {
+    const hostId = await user("Host");
+    const host = await store.createRoom("cc", { deckId: DECK, userId: hostId, username: "Host" }, "public");
+    expectRefused(await edit(host.code, { token: host.token, userId: hostId }, 0, { kind: "reveal-deck" }), "SANDBOX_REQUIRED");
+
+    const [a, b] = [await user("MatchA"), await user("MatchB")];
+    const opened = await store.queueForMatch("cc", { userId: a, username: "MatchA", deckId: DECK, cardPoolMode: "legal" });
+    if (!opened.ok || opened.kind !== "opened") throw new Error("queue did not open a room");
+    const opener = await store.joinRoom(opened.code, undefined, { allowPlayer: true, userId: a });
+    if (!opener.ok || opener.kind !== "player") throw new Error("reclaim failed");
+    await store.markPresent(opened.code, opener.token, "a", 0, a);
+    const matched = await store.queueForMatch("cc", { userId: b, username: "MatchB", deckId: DECK, cardPoolMode: "legal" });
+    if (!matched.ok || matched.kind !== "matched") throw new Error("match failed");
+    const seat = await store.joinRoom(matched.code, undefined, { allowPlayer: true, userId: b });
+    if (!seat.ok || seat.kind !== "player") throw new Error("reclaim failed");
+    expectRefused(await edit(matched.code, { token: seat.token, userId: b }, seat.seat as 0 | 1, { kind: "reveal-deck" }), "SANDBOX_REQUIRED");
+    for (const code of [host.code, matched.code]) expect((await store.getRoom(code))!.sandbox).toBe(false);
+  });
+
+  it("converts a bot game that is searching for a player in the background", async () => {
+    const { code, human } = await botGame(true);
+    expect((await db.query("SELECT source_room_code FROM matchmaking_entries WHERE user_id = $1", [human.userId])).rows)
+      .toEqual([{ source_room_code: code }]);
+    expect(await edit(code, human, 0, { kind: "reveal-deck" })).toMatchObject({ ok: true });
+    expect(await persistedSandbox(code)).toEqual({ room: true, replays: [true] });
+    expect((await db.query("SELECT code FROM rooms WHERE sandbox ORDER BY code")).rows).toEqual([{ code }]);
+  });
+
+  it("records nothing when a converted game is ended mid-match, and rematches normally", async () => {
+    const plain = await botGame();
+    expect(await store.deletePracticeRoom(plain.code, plain.human))
+      .toMatchObject({ ok: true, playAgain: { format: "cc", deckId: DECK, bot: "ira" } });
+    expect((await db.query("SELECT winner, end_reason FROM matches")).rows).toEqual([{ winner: null, end_reason: "ended" }]);
+
+    const userId = plain.human.userId!;
+    const created = await store.createBotRoom("cc", { deckId: DECK, username: "Alice", userId }, "legal", "ira");
+    const human = { token: created.token, userId };
+    await startGame(created.code, human);
+    expect(await edit(created.code, human, 0, { kind: "set-life", life: 9 })).toMatchObject({ ok: true });
+    const left = await store.deletePracticeRoom(created.code, human);
+    expect(left).toMatchObject({ ok: true });
+    if (left.ok) expect(left.playAgain).toEqual({ format: "cc", deckId: DECK, bot: "ira" });
+    expect(await count("matches")).toBe(1);
   });
 });

@@ -896,9 +896,9 @@ export function PrepRoom() {
           <BotPracticeNudge
             format={prepFormat}
             busy={botNudgeBusyFor === botNudgeKey}
-            onPlay={(bot, searchForPlayer, sandbox) => {
+            onPlay={(bot, searchForPlayer) => {
               setBotNudgeBusyFor(botNudgeKey);
-              playBotFromPrep(prepFormat, prepDeck.id, bot, searchForPlayer, sandbox);
+              playBotFromPrep(prepFormat, prepDeck.id, bot, searchForPlayer);
             }}
             onDismiss={() => setBotNudgeDismissedFor(botNudgeKey)}
           />

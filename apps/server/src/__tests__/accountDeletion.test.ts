@@ -48,7 +48,6 @@ describe("account deletion races", () => {
         deckId: "precon-asb",
         bot: "ira",
         requestedAt: 3,
-        sandbox: true,
       },
     });
     expect(offered).toMatchObject({ ok: true, kind: "matched", code: candidate.code });
@@ -62,7 +61,6 @@ describe("account deletion races", () => {
       avoidedHeroes: [],
       pendingBotStart: {
         bot: "ira",
-        sandbox: true,
         candidates: [{ candidateUserId: candidateId, ordinal: 0, attempted: false, skipped: false }],
       },
       offer: { roomCode: candidate.code, opponentUserId: candidateId },

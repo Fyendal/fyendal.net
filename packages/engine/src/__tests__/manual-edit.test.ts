@@ -330,6 +330,24 @@ describe("deck edits", () => {
 type MoveTo = Extract<ManualEdit, { kind: "move-card" }>["to"];
 type MoveZone = "hand" | "deck" | "graveyard" | "banish";
 
+describe("reveal-deck edits", () => {
+  it("changes nothing and logs nothing, even mid-decision", () => {
+    for (const s of [makeGame(), defendPending()]) {
+      const result = applyManualEdit(s, 0, { kind: "reveal-deck" });
+      if (!result.ok) throw new Error(result.error);
+      expect(result.events).toEqual([]);
+      expect(result.state).not.toBe(s);
+      expect(result.state).toEqual(cloneState(s));
+    }
+  });
+
+  it("is refused only at game over", () => {
+    const s = cloneState(makeGame());
+    s.phase = "game-over";
+    expect(applyManualEdit(s, 0, { kind: "reveal-deck" })).toEqual({ ok: false, error: "game is over" });
+  });
+});
+
 function move(instanceId: number, to: MoveTo): ManualEdit {
   return { kind: "move-card", instanceId, to };
 }

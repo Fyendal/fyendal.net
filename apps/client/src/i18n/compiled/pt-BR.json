@@ -32225,6 +32225,30 @@
       "value": "Cartas"
     }
   ],
+  "game.sandbox.convert.confirm": [
+    {
+      "type": 0,
+      "value": "Ativar Sandbox"
+    }
+  ],
+  "game.sandbox.convert.confirming": [
+    {
+      "type": 0,
+      "value": "Ativando…"
+    }
+  ],
+  "game.sandbox.convert.description": [
+    {
+      "type": 0,
+      "value": "As ferramentas de Sandbox permitem editar a sua própria vida, recursos, deck e cartas. Esta partida deixa de contar para o histórico, as estatísticas e as conquistas, e isso não pode ser desfeito."
+    }
+  ],
+  "game.sandbox.convert.title": [
+    {
+      "type": 0,
+      "value": "Transformar esta partida em Sandbox?"
+    }
+  ],
   "game.sandbox.decrease": [
     {
       "type": 0,
@@ -37477,12 +37501,6 @@
     {
       "type": 0,
       "value": "Os jogadores podem editar a própria vida, recursos, deck e mão. A partida fica salva como replay, mas não conta para o histórico nem para as estatísticas."
-    }
-  ],
-  "lobby.sandbox.descriptionBot": [
-    {
-      "type": 0,
-      "value": "Você pode editar a própria vida, recursos, deck e mão; o lado do bot não muda. A partida fica salva como replay, mas não conta para o histórico nem para as estatísticas. Se um jogador real for encontrado, essa partida é jogada normalmente."
     }
   ],
   "lobby.sandbox.descriptionPrivateOnly": [

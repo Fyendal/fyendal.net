@@ -76,10 +76,13 @@ describe("SandboxPanel", () => {
 });
 
 describe("canOpenSandbox", () => {
-  const live = { sandbox: true, spectating: false, replaying: false, yourSeat: 0, gameOver: false };
-  it("is available only to seated players in a live sandbox game", () => {
+  const live = { sandbox: true, botGame: false, spectating: false, replaying: false, yourSeat: 0, gameOver: false };
+  it("is available only to seated players in a live sandbox or bot game", () => {
     expect(canOpenSandbox(live)).toBe(true);
     expect(canOpenSandbox({ ...live, sandbox: false })).toBe(false);
+    expect(canOpenSandbox({ ...live, sandbox: false, botGame: true })).toBe(true);
+    expect(canOpenSandbox({ ...live, sandbox: false, botGame: true, spectating: true })).toBe(false);
+    expect(canOpenSandbox({ ...live, sandbox: false, botGame: true, gameOver: true })).toBe(false);
     expect(canOpenSandbox({ ...live, spectating: true })).toBe(false);
     expect(canOpenSandbox({ ...live, replaying: true })).toBe(false);
     expect(canOpenSandbox({ ...live, yourSeat: null })).toBe(false);

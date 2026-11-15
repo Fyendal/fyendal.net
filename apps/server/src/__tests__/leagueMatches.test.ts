@@ -14,6 +14,7 @@ import {
 } from "../league/leagueMatches.js";
 import { listMemberLeagues } from "../league/leagueStore.js";
 import { advanceLeague, tickLeagues } from "../league/leagueWorker.js";
+import { SANDBOX_REQUIRED } from "../errors.js";
 import { PgRoomStore } from "../store.js";
 import { freshDb } from "./testdb.js";
 
@@ -234,6 +235,17 @@ describe("league rooms", () => {
     expect(conceded.ok).toBe(true);
     const { rows: recorded } = await db.query("SELECT id FROM matches WHERE room_code = $1", [code]);
     expect(await match()).toMatchObject({ status: "complete", result: "played", winner: 1, match_id: recorded[0].id });
+  });
+
+  it("refuses sandbox edits in a started league game", async () => {
+    const code = await store.ensureLeagueRoom(alice, matchId);
+    const tokens = await startGame(code);
+    const room = (await store.getRoom(code))!;
+    expect(room.state).not.toBeNull();
+    expect(await store.sandboxEdit(code, { token: tokens[0], userId: alice }, 0, { kind: "reveal-deck" }, {
+      id: "league-edit", expectedVersion: room.version,
+    })).toEqual({ ok: false, error: SANDBOX_REQUIRED });
+    expect((await store.getRoom(code))!.sandbox).toBe(false);
   });
 
   it("forgets a lost room, and returns a lost game to scheduling", async () => {

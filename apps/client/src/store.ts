@@ -191,9 +191,7 @@ export const useStore = create<StoreState>((set, get) => {
   let reconnectOnActive = false;
   /** A bot-room request waiting for the retained matchmaking room to release
    *  this socket. WebSocket commands stay ordered by waiting for `left`. */
-  let pendingBotRoom: {
-    format: Format; deckId: string; bot?: BotOpponent; searchForPlayer?: boolean; sandbox?: boolean;
-  } | null = null;
+  let pendingBotRoom: { format: Format; deckId: string; bot?: BotOpponent; searchForPlayer?: boolean } | null = null;
   /** Play again ended the bot or solo room and waits for "left" to name the rematch. */
   let pendingPlayAgain = false;
   /** A declined matchmade room; the next pairing or opener replaces it. */
@@ -831,7 +829,7 @@ export const useStore = create<StoreState>((set, get) => {
     replayRuntime.discard(get().roomCode);
     resetRoomVersionState();
     set(clearedRoomProjection());
-    get().createBotRoom(pending.format, pending.deckId, pending.bot, pending.searchForPlayer, pending.sandbox);
+    get().createBotRoom(pending.format, pending.deckId, pending.bot, pending.searchForPlayer);
   }
 
   function syncCompletedReplay(code: string): Promise<ReplayFile | null> {
@@ -1343,10 +1341,7 @@ export const useStore = create<StoreState>((set, get) => {
         // waits for this acknowledgement before reusing the socket.
         if (pendingPlayAgain) {
           pendingPlayAgain = false;
-          if (msg.playAgain) {
-            const { format, deckId, bot, sandbox } = msg.playAgain;
-            get().createBotRoom(format, deckId, bot, false, sandbox === true);
-          }
+          if (msg.playAgain) get().createBotRoom(msg.playAgain.format, msg.playAgain.deckId, msg.playAgain.bot);
           else if (msg.playAgainSolo) {
             get().createSoloRoom(msg.playAgainSolo.format, msg.playAgainSolo.deckId, msg.playAgainSolo.opponentDeckId);
           } else set({ roomStartPending: false });
@@ -1499,7 +1494,7 @@ export const useStore = create<StoreState>((set, get) => {
       errors.clear();
       set({ pendingFabraryPlay: { ...pending, status: "starting" } });
       if (choice.kind === "player") get().queueJoin(format, deck.id);
-      else get().createBotRoom(format, deck.id, choice.bot, choice.searchForPlayer, choice.sandbox);
+      else get().createBotRoom(format, deck.id, choice.bot, choice.searchForPlayer);
     },
     setSocialOpen: (socialOpen) => set({ socialOpen }),
     clearSocialError: () => set({ socialError: null }),
@@ -1693,7 +1688,7 @@ export const useStore = create<StoreState>((set, get) => {
         });
       });
     },
-    createBotRoom: (format, deckId, bot, searchForPlayer = false, sandbox = false) => {
+    createBotRoom: (format, deckId, bot, searchForPlayer = false) => {
       roomEntryPending = false;
       prepDeckId = deckId;
       const cardPoolMode = get().cardPoolModes[format];
@@ -1724,7 +1719,6 @@ export const useStore = create<StoreState>((set, get) => {
           deckId,
           ...(bot ? { bot } : {}),
           ...(searchForPlayer ? { searchForPlayer: true } : {}),
-          ...(sandbox ? { sandbox: true } : {}),
           ...(avoidRoomCodes.length > 0 ? { avoidRoomCodes } : {}),
           ...(get().cardPoolModes[format] !== "legal"
             ? { cardPoolMode: get().cardPoolModes[format] }
@@ -1732,12 +1726,12 @@ export const useStore = create<StoreState>((set, get) => {
         });
       });
     },
-    playBotFromPrep: (format, deckId, bot, searchForPlayer = true, sandbox = false) => {
+    playBotFromPrep: (format, deckId, bot, searchForPlayer = true) => {
       if (pendingBotRoom || !get().matchmakingActive || !get().roomCode) return;
       if (searchForPlayer) {
-        get().createBotRoom(format, deckId, bot, true, sandbox);
+        get().createBotRoom(format, deckId, bot, true);
       } else {
-        pendingBotRoom = { format, deckId, ...(bot ? { bot } : {}), searchForPlayer: false, sandbox };
+        pendingBotRoom = { format, deckId, ...(bot ? { bot } : {}), searchForPlayer: false };
         send({ type: "leave-room" });
       }
     },

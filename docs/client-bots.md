@@ -34,15 +34,16 @@ must refresh; it does not trigger expensive server search. The tab reloads
 itself once per runtime pair (guarded in `sessionStorage`) and shows the
 refresh notice if the reload still serves the stale bundle.
 
-A bot room may opt into sandbox (`create-bot-room` `sandbox`). With player
-search the flag rides on `pending_bot_starts` to the practice room only; a
-matched PvP game is a new room and never sandbox. The human may edit only
+A bot game starts recorded and becomes sandbox on the human's first accepted
+`sandbox-edit` (the deck editor sends a no-op `reveal-deck` to convert before
+showing the order); conversion is permanent, undo included. Background search
+never converts: a matched PvP game is a new room. The human may edit only
 their own seat, and edits bump the room version, so in-flight bot work goes
 stale like undo. The human sees their own deck in order; the bot seat's
 projection never reveals a deck, and snapshots re-sort both decks, so tasks
-are identical whatever order the human set. The game keeps a sandbox replay
-but writes no match row, counters, achievements, or analytics, and its
-rematch stays sandbox. Because edits change zones and decks in place, the
+are identical whatever order the human set. A converted game keeps a sandbox
+replay but writes no match row, counters, achievements, or analytics, and its
+rematch is a normal game. Because edits change zones and decks in place, the
 `hand-value.ts` solver cache keys on a hash of both decklists and the
 opponent's unseen cards, not only on list lengths.
 

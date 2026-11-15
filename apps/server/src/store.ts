@@ -210,8 +210,6 @@ export interface MatchmakingChoice {
     deckId: string;
     bot: BotOpponent;
     requestedAt: number;
-    /** Applies to the practice room only, never to a matched game. */
-    sandbox?: boolean;
   };
   continuePendingBotStart?: boolean;
   /** A post-decline continuation must not resurrect a stopped search. */
@@ -250,7 +248,8 @@ export interface RoomRow {
   rulesetVersion: string;
   /** Private rooms are accessible by code/URL and visible in the lobby only to seated accounts. */
   isPrivate: boolean;
-  /** Opted in at private or bot-room creation; immutable. Solo rooms are sandbox regardless. */
+  /** Opted in at private-room creation or set by a bot room's first sandbox edit;
+   *  never cleared, undo included. Solo rooms are sandbox regardless. */
   sandbox: boolean;
   /** Room-wide format rule, fixed when the room is created. */
   cardPoolMode: CardPoolMode;
@@ -1220,7 +1219,8 @@ export class PgRoomStore {
     const { status, winner } = lifecycle(room);
     const { rowCount } = await db.query(
       `UPDATE rooms SET spectators=$2, state=$3, gc_at=$4, prep=$5,
-         status=$6, winner=$7, prep_deadline_at=$8, last_transition=$9, clock=$11, version=version+1
+         status=$6, winner=$7, prep_deadline_at=$8, last_transition=$9, clock=$11,
+         sandbox=(sandbox OR $12), version=version+1
        WHERE code=$1 AND version=$10`,
       [
         room.code,
@@ -1234,6 +1234,7 @@ export class PgRoomStore {
         room.lastTransition ? JSON.stringify(room.lastTransition) : null,
         room.version,
         room.clock ? JSON.stringify(room.clock) : null,
+        room.sandbox,
       ],
     );
     return rowCount === 1;
@@ -1583,6 +1584,7 @@ export class PgRoomStore {
             ] as const
           : null);
         const wasGameOver = room.state?.phase === "game-over";
+        const wasSandbox = isSandboxRoom(room);
         const hadGame = room.state !== null;
         const out = await fn(room, db);
         if ("error" in out) return { ok: false as const, error: out.error };
@@ -1614,6 +1616,12 @@ export class PgRoomStore {
         await this.applySeatWrites(db, out.room, out.seatWrites ?? []);
         // Every game keeps a replay; sandbox games skip match history, counters, awards, and analytics.
         const sandbox = isSandboxRoom(out.room);
+        if (sandbox && !wasSandbox) {
+          await db.query(
+            "UPDATE replay_games SET sandbox = TRUE WHERE room_code = $1 AND status = 'recording'",
+            [out.room.code],
+          );
+        }
         const gameJustEnded = !sandbox && !wasGameOver && out.room.state?.phase === "game-over";
         const pendingAchievements = gameJustEnded ? await awardAchievements(db, out.room) : null;
         if (out.releaseMatchmaking) {
@@ -1807,9 +1815,8 @@ export class PgRoomStore {
     },
     cardPoolMode: CardPoolMode = "legal",
     bot: BotOpponent = format === "cc" ? "hala" : "briar",
-    sandbox = false,
   ): Promise<{ code: string; seat: number; token: string; version: number }> {
-    return withTransaction(this.db, (db) => this.insertBotRoom(db, format, seat, cardPoolMode, bot, sandbox));
+    return withTransaction(this.db, (db) => this.insertBotRoom(db, format, seat, cardPoolMode, bot));
   }
 
   private async insertBotRoom(
@@ -1818,7 +1825,6 @@ export class PgRoomStore {
     seat: { deckId: string; deckName?: string; username: string; userId: number },
     cardPoolMode: CardPoolMode,
     bot: BotOpponent,
-    sandbox = false,
   ): Promise<{ code: string; seat: number; token: string; version: number }> {
     await assertActiveRuleset(db, this.rulesetVersion);
     const definition = botDefinition(bot);
@@ -1837,7 +1843,7 @@ export class PgRoomStore {
         deckId: botDeck.id, deckName: botDeck.name, heroId: botDeck.decklist.heroId,
         username: definition.username, controller: "bot", tokenHash: hashReconnectToken(newToken()), lastSeenAt: 0,
       },
-    ], sandbox);
+    ]);
   }
 
   /** Create a private self-play room: the human holds seat 0 and plays seat 1
@@ -1876,12 +1882,11 @@ export class PgRoomStore {
     cardPoolMode: CardPoolMode,
     token: string,
     seats: [SeatRow, SeatRow],
-    sandbox = false,
   ): Promise<{ code: string; seat: number; token: string; version: number }> {
     const now = Date.now();
     const room: RoomRow = {
       code: newCode(), format, cardPoolMode, version: 0, createdAt: now, gcAt: now + GC_DELAY_MS,
-      rulesetVersion: this.rulesetVersion, isPrivate: true, sandbox, spectators: [], state: null,
+      rulesetVersion: this.rulesetVersion, isPrivate: true, sandbox: false, spectators: [], state: null,
       prep: rollDice(), prepDeadlineAt: null, lastTransition: null, clock: null, seats,
     };
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
@@ -1892,9 +1897,9 @@ export class PgRoomStore {
         `INSERT INTO rooms
           (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
            status, winner, is_private, card_pool_mode, prep_deadline_at, sandbox)
-         VALUES ($1,$2,'[]',NULL,$3,$4,0,$5,$6,'prep',NULL,TRUE,$7,NULL,$8)
+         VALUES ($1,$2,'[]',NULL,$3,$4,0,$5,$6,'prep',NULL,TRUE,$7,NULL,FALSE)
          ON CONFLICT (code) DO NOTHING RETURNING code`,
-        [room.code, format, JSON.stringify(room.prep), this.rulesetVersion, now, room.gcAt, cardPoolMode, sandbox],
+        [room.code, format, JSON.stringify(room.prep), this.rulesetVersion, now, room.gcAt, cardPoolMode],
       );
       if (inserted.rows.length === 0) continue;
       await this.applySeatWrites(db, room, [
@@ -1918,7 +1923,7 @@ export class PgRoomStore {
       let raw: Record<string, unknown>;
       while (true) {
         const pending = await db.query(
-          `SELECT p.format, p.deck_id, p.bot, p.card_pool_mode, p.sandbox, u.username, q.deck_name
+          `SELECT p.format, p.deck_id, p.bot, p.card_pool_mode, u.username, q.deck_name
            FROM pending_bot_starts p
            JOIN matchmaking_entries q ON q.user_id = p.user_id
            JOIN users u ON u.id = p.user_id
@@ -1943,7 +1948,7 @@ export class PgRoomStore {
       const created = await this.insertBotRoom(db, definition.format, {
         userId, username: raw.username, deckId: raw.deck_id,
         ...(typeof raw.deck_name === "string" ? { deckName: raw.deck_name } : {}),
-      }, raw.card_pool_mode, definition.id, raw.sandbox === true);
+      }, raw.card_pool_mode, definition.id);
       await db.query(
         "UPDATE matchmaking_entries SET mode = 'background', source_room_code = $2 WHERE user_id = $1",
         [userId, created.code],
@@ -2167,8 +2172,8 @@ export class PgRoomStore {
       if (choice.pendingBotStart) {
         await db.query(
           `INSERT INTO pending_bot_starts
-            (user_id, format, deck_id, bot, card_pool_mode, requested_at, sandbox)
-           VALUES ($1,$2,$3,$4,$5,$6,$7)
+            (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+           VALUES ($1,$2,$3,$4,$5,$6)
            ON CONFLICT (user_id) DO NOTHING`,
           [
             choice.userId,
@@ -2177,7 +2182,6 @@ export class PgRoomStore {
             choice.pendingBotStart.bot,
             choice.cardPoolMode,
             choice.pendingBotStart.requestedAt,
-            choice.pendingBotStart.sandbox === true,
           ],
         );
         const candidates = await db.query(
@@ -4028,7 +4032,7 @@ export class PgRoomStore {
         const other = room.seats[1 - seat];
         const bot = other?.controller === "bot" ? botDefinitionForDeckId(other.deckId) : undefined;
         const playAgain: BotRematch | undefined = humanDeckId && bot?.format === room.format
-          ? { format: room.format, deckId: humanDeckId, bot: bot.id, ...(room.sandbox ? { sandbox: true as const } : {}) }
+          ? { format: room.format, deckId: humanDeckId, bot: bot.id }
           : undefined;
         const playAgainSolo: SoloRematch | undefined = humanDeckId && other?.controller === "self" && other.deckId
           ? { format: room.format, deckId: humanDeckId, opponentDeckId: other.deckId }
@@ -4480,7 +4484,8 @@ export class PgRoomStore {
   }
 
   /** Silently edit a seat in a sandbox room. Undo restores the pre-edit
-   * snapshot. Solo owners may edit either seat whoever is acting. */
+   * snapshot. Solo owners may edit either seat whoever is acting. The first
+   * accepted edit by a bot room's human converts the room to sandbox. */
   async sandboxEdit(
     code: string,
     credentials: SeatCredentials,
@@ -4491,14 +4496,18 @@ export class PgRoomStore {
     const r = await this.withRetry(code.toUpperCase(), (room) => {
       const own = seatForCredentials(room, credentials, false);
       if (own === null || room.seats[own]?.controller !== undefined) return { error: "not a player in this room" };
-      if (!isSandboxRoom(room)) return { error: SANDBOX_REQUIRED };
+      const converting = !isSandboxRoom(room);
+      if (converting && room.seats[1 - own]?.controller !== "bot") return { error: SANDBOX_REQUIRED };
       if (!command && soloInPlay(room)) return { error: SOLO_COMMAND_REQUIRED };
       const target = room.seats[seat];
       if (!target || (seat !== own && target.controller !== "self")) return { error: SANDBOX_SEAT_FORBIDDEN };
       if (!room.state) return { error: `${SANDBOX_EDIT_UNAVAILABLE}: game has not started` };
       const res = applyManualEdit(room.state, seat, edit);
       if (!res.ok) return { error: `${SANDBOX_EDIT_UNAVAILABLE}: ${res.error}` };
-      const snapshot = room.state;
+      // Reveal only converts; in a sandbox room the deck is already shown.
+      if (edit.kind === "reveal-deck" && !converting) return { room, result: undefined, versionNeutral: true };
+      if (converting) room.sandbox = true;
+      const snapshot = edit.kind === "reveal-deck" ? undefined : room.state;
       room.state = res.state;
       const events = [...res.events];
       this.applyServerShortcuts(room, events);

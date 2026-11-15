@@ -21,8 +21,6 @@ export interface BotRematch {
   format: Format;
   deckId: string;
   bot: BotOpponent;
-  /** Sent only when true so stale decoders keep accepting ordinary rematches. */
-  sandbox?: true;
 }
 
 /** What a finished self-play game needs to start again with the same decks. */
@@ -1204,7 +1202,7 @@ export type ClientMessage =
   /** deckId of a saved deck or format precon */
   | { type: "create-room"; format: Format; deckId: string; private?: boolean; cardPoolMode?: CardPoolMode; /** Requires `private`. */ sandbox?: boolean }
   /** Create a dedicated constructed room with the selected AI opponent. */
-  | { type: "create-bot-room"; format?: Format; deckId: string; bot?: BotOpponent; cardPoolMode?: CardPoolMode; searchForPlayer?: boolean; avoidRoomCodes?: string[]; sandbox?: boolean }
+  | { type: "create-bot-room"; format?: Format; deckId: string; bot?: BotOpponent; cardPoolMode?: CardPoolMode; searchForPlayer?: boolean; avoidRoomCodes?: string[] }
   /** Create a private room where the creator plays both seats. */
   | { type: "create-solo-room"; format: Format; deckId: string; opponentDeckId: string; cardPoolMode?: CardPoolMode }
   /** Solo room: switch which seat this socket views and acts as. */
@@ -1278,7 +1276,9 @@ export type ManualEdit =
   | { kind: "reorder-deck"; instanceIds: number[] }
   | { kind: "shuffle-deck" }
   /** Move one of the seat's own hand, deck, graveyard, or face-up banished cards. */
-  | { kind: "move-card"; instanceId: number; to: ManualMoveDestination };
+  | { kind: "move-card"; instanceId: number; to: ManualMoveDestination }
+  /** Changes nothing; converts a bot room so its deck order is shown before any edit. */
+  | { kind: "reveal-deck" };
 
 export const MANUAL_MOVE_DESTINATIONS = ["hand", "deck-top", "deck-bottom", "graveyard", "banish"] as const;
 export type ManualMoveDestination = typeof MANUAL_MOVE_DESTINATIONS[number];
