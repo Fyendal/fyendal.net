@@ -86,6 +86,8 @@ export function DeckOrderEditor({
   const [lastSent, setLastSent] = useState<ManualEdit["kind"] | null>(null);
   /** Server order our own card move should produce; reaching it is no conflict. */
   const expectedOrder = useRef<number[] | null>(null);
+  /** Set by Apply so the editor closes once that order arrives. */
+  const closeOnApplied = useRef(false);
 
   useEffect(() => {
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -101,8 +103,10 @@ export function DeckOrderEditor({
     // Our own applied order arriving back is not a conflict.
     if (sameOrder(draft.order, serverOrder)) {
       setDraft(null);
+      if (closeOnApplied.current) onClose();
       return;
     }
+    closeOnApplied.current = false;
     const rebased = reconcileDeckOrder(draft.order, draft.base, serverOrder);
     const ownMove = expected !== null && sameOrder(expected, serverOrder);
     setChanged(rebased.changed && !ownMove);
@@ -122,6 +126,7 @@ export function DeckOrderEditor({
   const last = cards.length - 1;
 
   const move = (from: number, to: number) => {
+    closeOnApplied.current = false;
     setChanged(false);
     setDraft((current) => ({
       order: moveOrderItem(current?.order ?? serverOrder, from, to),
@@ -131,6 +136,7 @@ export function DeckOrderEditor({
   const send = (edit: ManualEdit) => {
     onClearRefusal();
     setLastSent(edit.kind);
+    closeOnApplied.current = edit.kind === "reorder-deck";
     onEdit(edit);
   };
   const moveOut = (instanceId: number, to: ManualMoveDestination) => {

@@ -157,7 +157,7 @@ function CounterSection({
 }: {
   seat: SandboxSeat;
   pending: boolean;
-  onApply: (edits: ManualEdit[]) => void;
+  onApply: (edits: ManualEdit[], target: CounterDraft) => void;
 }) {
   const intl = useIntl();
   const [draft, setDraft] = useState<CounterDraft>({ life: seat.life, resources: seat.resources });
@@ -170,7 +170,7 @@ function CounterSection({
       className="sandbox-section"
       onSubmit={(event) => {
         event.preventDefault();
-        if (edits.length > 0 && !pending) onApply(edits);
+        if (edits.length > 0 && !pending) onApply(edits, draft);
       }}
     >
       <div className="sandbox-steppers">
@@ -237,7 +237,16 @@ export function SandboxPanel({
     seats.some((seat) => seat.seat === initialSeat) ? initialSeat! : seats[0]!.seat,
   );
   const [queue, setQueue] = useState<{ seat: 0 | 1; edits: ManualEdit[] } | null>(null);
+  const [applied, setApplied] = useState<{ seat: 0 | 1; target: CounterDraft } | null>(null);
   const active = seats.find((seat) => seat.seat === selected) ?? seats[0]!;
+  const appliedSeat = applied ? seats.find((seat) => seat.seat === applied.seat) : undefined;
+  const landed = !!applied && !!appliedSeat && sandboxCounterEdits(appliedSeat, applied.target).length === 0;
+
+  // Close once the applied values arrive; a refusal keeps the panel open.
+  useEffect(() => {
+    if (refusal) setApplied(null);
+    else if (landed) onClose();
+  }, [landed, refusal, onClose]);
 
   // Send queued edits one versioned command at a time; a refusal drops the rest.
   useEffect(() => {
@@ -299,9 +308,12 @@ export function SandboxPanel({
           key={active.seat}
           seat={active}
           pending={pending || queue !== null}
-          onApply={(edits) => {
+          onApply={(edits, target) => {
             onClearRefusal();
-            const apply = () => setQueue({ seat: active.seat, edits });
+            const apply = () => {
+              setQueue({ seat: active.seat, edits });
+              setApplied({ seat: active.seat, target });
+            };
             if (confirmFirst) confirmFirst(apply);
             else apply();
           }}
