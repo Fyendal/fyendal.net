@@ -98,6 +98,16 @@ const BOTS: Readonly<Record<Format, readonly BotOption[]>> = {
   ],
   "silver-age": [
     {
+      id: "dorinthea",
+      name: "Dorinthea",
+      title: "Decimator Great Axe",
+      heroName: "Dorinthea",
+      deckId: "bot-dorinthea-sage",
+      deckType: "guardian",
+      descriptionId: "lobby.bot.dorinthea.description",
+      isNew: true,
+    },
+    {
       id: "kayo",
       name: "Kayo",
       title: "SAGE Kayo",
@@ -132,15 +142,6 @@ const BOTS: Readonly<Record<Format, readonly BotOption[]>> = {
       deckId: "bot-ira-sage",
       deckType: "midrange",
       descriptionId: "lobby.bot.irasage.description",
-    },
-    {
-      id: "dorinthea",
-      name: "Dorinthea",
-      title: "Decimator Great Axe",
-      heroName: "Dorinthea",
-      deckId: "bot-dorinthea-sage",
-      deckType: "guardian",
-      descriptionId: "lobby.bot.dorinthea.description",
     },
   ],
 };

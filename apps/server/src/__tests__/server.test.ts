@@ -789,11 +789,19 @@ describe("server rooms over websocket", () => {
     a.ws.close();
   });
 
-  it("refuses the beta-only Dorinthea bot to other players", async () => {
+  it("creates the selected Silver Age Dorinthea bot room", async () => {
     const a = await authedClient();
     a.sendMsg({ type: "create-bot-room", format: "silver-age", deckId: "precon-sly", bot: "dorinthea" });
-    expect(await a.next((message) => message.type === "error"))
-      .toMatchObject({ type: "error", message: "choose a silver-age bot" });
+    await a.next((message) => message.type === "room-created");
+    const prep = await a.next(
+      (message) => message.type === "prep-state" && message.prep.seats[1]?.username === "Dorinthea Bot",
+    );
+    expect(prep).toMatchObject({
+      type: "prep-state",
+      prep: { format: "silver-age", botGame: true, seats: [expect.anything(), { username: "Dorinthea Bot", connected: true }] },
+    });
+    a.sendMsg({ type: "leave-room", endGame: true });
+    await a.next((message) => message.type === "left");
     a.ws.close();
   });
 

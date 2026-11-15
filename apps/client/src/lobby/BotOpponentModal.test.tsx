@@ -73,6 +73,19 @@ describe("BotOpponentModal", () => {
     expect(html).toMatch(/class="bot-opponent-card" data-modal-initial-focus="">.*?<span class="bot-new-ribbon">New<\/span>/);
   });
 
+  it("lists Dorinthea first in Silver Age with the only New ribbon", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <BotOpponentModal format="silver-age" onSelect={vi.fn()} onClose={vi.fn()} />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain("A defensive deck that blocks patiently and swings Decimator Great Axe every turn.");
+    expect(html.indexOf("Decimator Great Axe")).toBeLessThan(html.indexOf("SAGE Kayo"));
+    expect(html.match(/class="bot-new-ribbon"/g)).toHaveLength(1);
+    expect(html).toMatch(/class="bot-opponent-card" data-modal-initial-focus="">.*?<span class="bot-new-ribbon">New<\/span>/);
+  });
+
   it("offers Kayo, Bravo, and SAGE Ira for Silver Age and hides banned Briar by default", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
@@ -88,22 +101,9 @@ describe("BotOpponentModal", () => {
     expect(html).toContain("Crimson Haze");
     expect(html).toContain("Midrange");
     expect(html).not.toContain("Scarlet Revenger");
-    expect(html).not.toContain("Decimator Great Axe");
     expect(html).not.toContain("Elemental Runeblade");
     expect(html).not.toContain("Needs Open");
     expect(html).toContain("Briar is hidden because its deck includes banned cards.");
-  });
-
-  it("offers the beta-only Dorinthea bot to beta testers", () => {
-    botModalStore.state = { betaTester: true } as StoreState;
-    const html = renderToStaticMarkup(
-      <TestI18nProvider>
-        <BotOpponentModal format="silver-age" onSelect={vi.fn()} onClose={vi.fn()} />
-      </TestI18nProvider>,
-    );
-
-    expect(html).toContain("Decimator Great Axe");
-    expect(html).toContain("A defensive deck that blocks patiently and swings Decimator Great Axe every turn.");
   });
 
   it("shows banned Briar with an accessible custom tooltip once the toggle is on", () => {
