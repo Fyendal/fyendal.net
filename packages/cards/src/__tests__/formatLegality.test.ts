@@ -99,7 +99,7 @@ const cards: Record<string, CardData> = {
   SOMERSAULT_YELLOW: card("SOMERSAULT_YELLOW", "Electromagnetic Somersault", "action", 2),
   SOMERSAULT_BLUE: card("SOMERSAULT_BLUE", "Electromagnetic Somersault", "action", 3),
   NORMAL: card("NORMAL", "Wrecker Romp", "action", 3),
-  FUTURE: card("FUTURE", "Tomorrow's Attack", "action", 1, "AMO"),
+  FUTURE: card("FUTURE", "Tomorrow's Attack", "action", 1, "OBK"),
   IAR_RELEASED: card("IAR000", "Soul of Existence", "resource", undefined, "IAR"),
   MALICE_RELEASED: card("AMA001", "Malice, Domina of the Dead", "hero", undefined, "AMA"),
   CHANE: card("CHANE", "Chane", "hero"),

@@ -6,7 +6,7 @@ import { hasType } from "@fyendal/shared";
  * yet. Remove a code when the product releases; imports remain usable either
  * way because release legality is checked when a game starts.
  */
-export const FUTURE_SET_CODES: ReadonlySet<string> = new Set(["AMG", "AMO", "MPA", "OBK"]);
+export const FUTURE_SET_CODES: ReadonlySet<string> = new Set(["AMG", "OBK"]);
 
 /**
  * Official policy source for this snapshot. Living Legend changes are checked

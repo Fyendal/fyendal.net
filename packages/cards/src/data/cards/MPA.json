@@ -42,6 +42,17 @@
     "set": "MPA"
   },
   {
+    "id": "MPA005",
+    "name": "Spider's Bite",
+    "types": ["weapon"],
+    "text": "Once per Turn Action - {r}{r}: Attack. Go again\nPiercing 1\nWhen this hits a hero, the next time they defend with 1 or more attack action cards this turn, those cards have -1{d} while defending.",
+    "attack": 1,
+    "classes": ["assassin"],
+    "subtypes": ["dagger", "1h"],
+    "keywords": ["Piercing 1"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA006",
     "name": "Phial of Calamity",
     "types": ["equipment"],
@@ -262,6 +273,20 @@
     "pitch": 1,
     "cost": 0,
     "attack": 3,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA025",
+    "name": "Persuasive Prognosis",
+    "types": ["action"],
+    "text": "Stealth\nWhen this hits a hero, banish the top card of their deck. Then look at their hand and banish a card with the same color as the banished card.\nWhenever this banishes an action card, gain 1{h}.",
+    "pitch": 3,
+    "cost": 0,
+    "attack": 1,
     "defense": 3,
     "classes": ["assassin"],
     "subtypes": ["attack"],
@@ -503,6 +528,19 @@
     "set": "MPA"
   },
   {
+    "id": "MPA044",
+    "name": "Sneaking Rot",
+    "types": ["action"],
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "text": "If you've played or activated an attack reaction this chain link, this gets \"When this hits a hero, create a Bloodrot Pox token under their control.\"",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 6,
+    "defense": 3,
+    "set": "MPA"
+  },
+  {
     "id": "MPA045",
     "name": "Sneaking Weakness",
     "types": ["action"],
@@ -581,6 +619,19 @@
     "set": "MPA"
   },
   {
+    "id": "MPA051",
+    "name": "Wound Extraction",
+    "types": ["action"],
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "text": "If you've hit with a dagger this combat chain, this gets \"When this hits a hero, create a Frailty, Inertia, or Bloodrot Pox token under their control.\"",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 5,
+    "defense": 3,
+    "set": "MPA"
+  },
+  {
     "id": "MPA052",
     "name": "Act on Intel: Haunts",
     "types": ["attack-reaction"],
@@ -603,11 +654,33 @@
     "set": "MPA"
   },
   {
+    "id": "MPA054",
+    "name": "Act on Intel: Whereabouts",
+    "types": ["attack-reaction"],
+    "text": "Target Assassin attack action card with contract gets +1{p} and \"When this hits a hero, they choose a card in their hand. Banish it.\"",
+    "pitch": 1,
+    "cost": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA055",
     "name": "Pinpoint Elimination",
     "types": ["attack-reaction"],
     "text": "Name a card, then the defending hero reveals the top card of their deck. If it's the named card, banish it and create a Silver token.",
     "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA056",
+    "name": "Shred",
+    "types": ["attack-reaction"],
+    "text": "Target card defending an Assassin attack gets -3{d} this combat chain.",
+    "pitch": 2,
     "cost": 0,
     "defense": 3,
     "classes": ["assassin"],
@@ -641,6 +714,39 @@
     "types": ["attack-reaction"],
     "text": "If the defending hero is infected, defending cards get -1{d} this chain link. (A hero is infected if they control a disease.)",
     "pitch": 3,
+    "cost": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA060",
+    "name": "Spike with Bloodrot",
+    "types": ["attack-reaction"],
+    "text": "Target attack action card with stealth gains +3{p} and \"When this hits a hero, create a Bloodrot Pox token under their control.\"",
+    "pitch": 1,
+    "cost": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA061",
+    "name": "Spike with Frailty",
+    "types": ["attack-reaction"],
+    "text": "Target attack action card with stealth gains +3{p} and \"When this hits a hero, create a Frailty token under their control.\"",
+    "pitch": 1,
+    "cost": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA062",
+    "name": "Spike with Inertia",
+    "types": ["attack-reaction"],
+    "text": "Target attack action card with stealth gains +3{p} and \"When this hits a hero, create an Inertia token under their control.\"",
+    "pitch": 1,
     "cost": 1,
     "defense": 3,
     "classes": ["assassin"],
@@ -815,6 +921,19 @@
     "set": "MPA"
   },
   {
+    "id": "MPA076",
+    "name": "Escaped Subject",
+    "types": ["action"],
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "text": "If the defending hero is infected, this gets go again. (A hero is infected if they control a disease.)",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 4,
+    "defense": 3,
+    "set": "MPA"
+  },
+  {
     "id": "MPA077",
     "name": "Escaped Subject",
     "types": ["action"],
@@ -838,6 +957,20 @@
     "defense": 3,
     "classes": ["assassin"],
     "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA079",
+    "name": "Eviscerate the Enervated",
+    "types": ["action"],
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "text": "Contract - You are contracted to banish infected opponents' cards. Whenever you complete this contract, create a Silver token. (A hero is infected if they control a disease.)\nWhen this hits a hero, banish the top card of their deck.",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 5,
+    "defense": 3,
+    "keywords": ["Contract"],
     "set": "MPA"
   },
   {
@@ -908,6 +1041,62 @@
     "set": "MPA"
   },
   {
+    "id": "MPA085",
+    "name": "Infect",
+    "types": ["action"],
+    "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA086",
+    "name": "Infect",
+    "types": ["action"],
+    "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+    "pitch": 2,
+    "cost": 0,
+    "attack": 2,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA087",
+    "name": "Infect",
+    "types": ["action"],
+    "text": "Stealth\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
+    "pitch": 3,
+    "cost": 0,
+    "attack": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA088",
+    "name": "Isolate",
+    "types": ["action"],
+    "text": "Stealth\nDominate",
+    "pitch": 3,
+    "cost": 0,
+    "attack": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth", "Dominate"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA089",
     "name": "Professional Rivalry",
     "types": ["action"],
@@ -964,6 +1153,48 @@
     "set": "MPA"
   },
   {
+    "id": "MPA093",
+    "name": "Sedate",
+    "types": ["action"],
+    "text": "Stealth\nWhen this hits a hero, create an Inertia token under their control.",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA094",
+    "name": "Sedate",
+    "types": ["action"],
+    "text": "Stealth\nWhen this hits a hero, create an Inertia token under their control.",
+    "pitch": 2,
+    "cost": 0,
+    "attack": 2,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA095",
+    "name": "Sedate",
+    "types": ["action"],
+    "text": "Stealth\nWhen this hits a hero, create an Inertia token under their control.",
+    "pitch": 3,
+    "cost": 0,
+    "attack": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA096",
     "name": "Slice the Sickly",
     "types": ["action"],
@@ -1003,6 +1234,19 @@
     "classes": ["assassin"],
     "subtypes": ["attack"],
     "keywords": ["Contract"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA099",
+    "name": "Sneak Attack",
+    "types": ["action"],
+    "text": "If you've played or activated an attack reaction this chain link, Sneak Attack has +4{p}.",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 3,
+    "defense": 2,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
     "set": "MPA"
   },
   {
@@ -1112,6 +1356,95 @@
     "set": "MPA"
   },
   {
+    "id": "MPA108",
+    "name": "Viral Sampling",
+    "types": ["action"],
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "text": "Stealth\nContract - You are contracted to hit an infected opposing hero. Whenever you complete this contract, create a Silver token. (A hero is infected if they control a disease.)",
+    "pitch": 3,
+    "cost": 0,
+    "attack": 1,
+    "defense": 3,
+    "keywords": ["Stealth", "Contract"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA109",
+    "name": "Wither",
+    "types": ["action"],
+    "text": "Stealth\nWhen this hits a hero, create a Frailty token under their control.",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA110",
+    "name": "Wither",
+    "types": ["action"],
+    "text": "Stealth\nWhen this hits a hero, create a Frailty token under their control.",
+    "pitch": 2,
+    "cost": 0,
+    "attack": 2,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA111",
+    "name": "Wither",
+    "types": ["action"],
+    "text": "Stealth\nWhen this hits a hero, create a Frailty token under their control.",
+    "pitch": 3,
+    "cost": 0,
+    "attack": 1,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Stealth"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA112",
+    "name": "Cut to the Chase",
+    "types": ["attack-reaction"],
+    "text": "Target Assassin attack action card with contract gains +3{p}.\nLook at the top card of the defending hero's deck. You may put it on the bottom.",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA113",
+    "name": "Cut to the Chase",
+    "types": ["attack-reaction"],
+    "text": "Target Assassin attack action card with contract gains +2{p}.\nLook at the top card of the defending hero's deck. You may put it on the bottom.",
+    "pitch": 2,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA114",
+    "name": "Cut to the Chase",
+    "types": ["attack-reaction"],
+    "text": "Target Assassin attack action card with contract gains +1{p}.\nLook at the top card of the defending hero's deck. You may put it on the bottom.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA115",
     "name": "Easy Prey",
     "types": ["attack-reaction"],
@@ -1178,6 +1511,39 @@
     "set": "MPA"
   },
   {
+    "id": "MPA121",
+    "name": "Razor's Edge",
+    "types": ["attack-reaction"],
+    "text": "Target attack action card with stealth gets +3{p}.",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA122",
+    "name": "Razor's Edge",
+    "types": ["attack-reaction"],
+    "text": "Target attack action card with stealth gets +2{p}.",
+    "pitch": 2,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA123",
+    "name": "Razor's Edge",
+    "types": ["attack-reaction"],
+    "text": "Target attack action card with stealth gets +1{p}.",
+    "pitch": 3,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA124",
     "name": "Pick Your Poison",
     "types": ["action"],
@@ -1220,6 +1586,56 @@
     "set": "MPA"
   },
   {
+    "id": "MPA128",
+    "name": "Pain in the Backside",
+    "types": ["action"],
+    "text": "When this hits a hero, target dagger you control deals 1 damage to them. If damage is dealt this way, the dagger has hit.\nGo again",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 3,
+    "defense": 2,
+    "classes": ["assassin", "ninja"],
+    "subtypes": ["attack"],
+    "keywords": ["Go again"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA129",
+    "name": "Bloodrot Trap",
+    "types": ["defense-reaction"],
+    "text": "When this defends and the attacking hero has played or activated a reaction this chain link, create a Bloodrot Pox token under their control.",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin", "ranger"],
+    "subtypes": ["trap"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA130",
+    "name": "Frailty Trap",
+    "types": ["defense-reaction"],
+    "text": "When this defends an attack with go again, create a Frailty token under the attacking hero's control.",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin", "ranger"],
+    "subtypes": ["trap"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA131",
+    "name": "Inertia Trap",
+    "types": ["defense-reaction"],
+    "text": "When this defends an attack with {p} greater than its base, create an Inertia token under the attacking hero's control.",
+    "pitch": 1,
+    "cost": 0,
+    "defense": 3,
+    "classes": ["assassin", "ranger"],
+    "subtypes": ["trap"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA132",
     "name": "Puredew Panacea",
     "types": ["equipment"],
@@ -1227,6 +1643,45 @@
     "classes": ["generic"],
     "subtypes": ["off-hand"],
     "keywords": ["Cure"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA133",
+    "name": "Bunker Beard",
+    "types": ["equipment"],
+    "text": "Defense Reaction - Destroy this: You may add an action card from your arsenal to the active chain link as a defending card.",
+    "defense": 0,
+    "classes": ["generic"],
+    "subtypes": ["head"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA134",
+    "name": "Heartened Cross Strap",
+    "types": ["equipment"],
+    "text": "Action - Destroy this: The next attack action card you play this turn costs {r}{r} less to play. Go again",
+    "defense": 0,
+    "classes": ["generic"],
+    "subtypes": ["chest"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA135",
+    "name": "Fisticuffs",
+    "types": ["equipment"],
+    "text": "Attack Reaction - {r}{r}, destroy Fisticuffs: Target attack action card gains +1{p}.",
+    "classes": ["generic"],
+    "subtypes": ["arms"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA136",
+    "name": "Snapdragon Scalers",
+    "types": ["equipment"],
+    "text": "Attack Reaction - Destroy this: Target attack action card with cost 1 or less gets go again.",
+    "defense": 0,
+    "classes": ["generic"],
+    "subtypes": ["legs"],
     "set": "MPA"
   },
   {
@@ -1300,6 +1755,59 @@
     "set": "MPA"
   },
   {
+    "id": "MPA143",
+    "name": "Infectious Host",
+    "types": ["action"],
+    "text": "When this attacks a hero, if you control a Frailty token, create a Frailty token under their control, then repeat for Inertia and Bloodrot Pox.",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 4,
+    "defense": 2,
+    "classes": ["generic"],
+    "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA144",
+    "name": "Looking for a Scrap",
+    "types": ["action"],
+    "text": "As an additional cost to play Looking for a Scrap, you may banish a card with 1{p} from your graveyard. When you do, this gains +1{p} and go again.",
+    "pitch": 1,
+    "cost": 1,
+    "attack": 4,
+    "defense": 2,
+    "classes": ["generic"],
+    "subtypes": ["attack"],
+    "keywords": ["Go again"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA145",
+    "name": "Wreck Havoc",
+    "types": ["action"],
+    "text": "Defense reactions can't be played to this chain link.\nWhen this hits a hero, you may turn a card in their arsenal face up, then destroy a defense reaction in their arsenal.",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 6,
+    "defense": 2,
+    "classes": ["generic"],
+    "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA146",
+    "name": "Cut Down to Size",
+    "types": ["action"],
+    "text": "When this hits a hero, if they have 4 or more cards in hand, they discard a card.",
+    "pitch": 1,
+    "cost": 2,
+    "attack": 6,
+    "defense": 2,
+    "classes": ["generic"],
+    "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
     "id": "MPA147",
     "name": "Free of Burdens",
     "types": ["action"],
@@ -1336,6 +1844,68 @@
     "defense": 2,
     "classes": ["generic"],
     "subtypes": ["attack"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA150",
+    "name": "Razor Reflex",
+    "types": ["attack-reaction"],
+    "text": "Choose 1;\n- Target dagger or sword weapon attack gets +3{p}.\n- Target attack action card with cost 1 or less gets +3{p} and \"When this hits, it gets go again.\"",
+    "pitch": 1,
+    "cost": 1,
+    "defense": 2,
+    "classes": ["generic"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA154",
+    "name": "Silver",
+    "types": ["token"],
+    "text": "Action - {r}{r}{r}, destroy Silver: Draw a card. Go again",
+    "classes": ["generic"],
+    "subtypes": ["item"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA155",
+    "name": "Eradicate",
+    "types": ["action"],
+    "text": "Contract - You are contracted to banish opponents' yellow cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top X cards of their deck, where X is the damage dealt by Eradicate.",
+    "pitch": 2,
+    "cost": 1,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Contract"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA156",
+    "name": "Leave No Witnesses",
+    "types": ["action"],
+    "text": "Contract - You are contracted to banish opponents' red cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck and up to 1 card in their arsenal.",
+    "pitch": 1,
+    "cost": 0,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Contract"],
+    "set": "MPA"
+  },
+  {
+    "id": "MPA157",
+    "name": "Surgical Extraction",
+    "types": ["action"],
+    "text": "Contract  - You are contracted to banish opponents' blue cards. Whenever you complete this contract, create a Silver token.\nWhen this hits a hero, banish the top card of their deck, then look at their hand and banish a card.",
+    "pitch": 3,
+    "cost": 2,
+    "attack": 4,
+    "defense": 3,
+    "classes": ["assassin"],
+    "subtypes": ["attack"],
+    "keywords": ["Contract"],
     "set": "MPA"
   }
 ]

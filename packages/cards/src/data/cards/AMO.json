@@ -352,5 +352,14 @@
     "cost": 0,
     "classes": ["assassin"],
     "set": "AMO"
+  },
+  {
+    "id": "AMO033",
+    "name": "Silver",
+    "types": ["token"],
+    "text": "Action - {r}{r}{r}, destroy Silver: Draw a card. Go again",
+    "classes": ["generic"],
+    "subtypes": ["item"],
+    "set": "AMO"
   }
 ]

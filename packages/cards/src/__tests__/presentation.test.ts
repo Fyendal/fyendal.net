@@ -33,7 +33,7 @@ const cards: Record<string, CardData> = {
   MAIN: { ...card("MAIN", "action", ["attack"]), keywords: ["Unlimited"] },
   SIDE: card("SIDE", "action", ["attack"]),
   OUT: card("OUT", "action", ["attack"]),
-  FUTURE: { ...card("FUTURE", "action", ["attack"]), set: "AMO" },
+  FUTURE: { ...card("FUTURE", "action", ["attack"]), set: "OBK" },
   INCARNATE: { ...card("INCARNATE", "action", ["ally"]), keywords: ["Incarnate"] },
   INVENTORY: card("INVENTORY", "hero"),
 };
@@ -68,7 +68,7 @@ describe("shared presentation validation", () => {
     const deck = presentation().deck;
     deck[0] = "FUTURE";
     expect(validatePresentationAgainstCards(cards, pool, { ...presentation(), deck }, "cc"))
-      .toEqual({ ok: false, error: "FUTURE is from the unreleased AMO set" });
+      .toEqual({ ok: false, error: "FUTURE is from the unreleased OBK set" });
     expect(validatePresentationAgainstCards(
       cards,
       pool,

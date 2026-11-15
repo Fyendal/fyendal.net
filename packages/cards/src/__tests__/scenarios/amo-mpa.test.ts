@@ -1567,10 +1567,12 @@ describe("Armory Deck Mortimer and Mastery Pack Assassin spoilers", () => {
       for (const id of deck!.pool.deck) expect(isImplemented(cardData[id]!), id).toBe(true);
     });
 
-    it("resolves deck imports to released printings over unreleased AMO reprints", () => {
-      expect(findPrinting("Excessive Bloodloss", 1)?.id).toBe("PEN144");
-      expect(findPrinting("Seeker Kunai", 1)?.id).toBe("PEN142");
+    it("registers reprint printings with their original scripts", () => {
       expect(findPrinting("Escaped Subject", 1)?.id).toBe("AMO008");
+      for (const [reprint, original] of [["MPA093", "OUT036"], ["MPA076", "AMO008"], ["AMO033", "EVR195"]] as const) {
+        expect(cardData[reprint]?.name).toBe(cardData[original]?.name);
+        expect(isImplemented(cardData[reprint]!)).toBe(true);
+      }
     });
 
     it("Plague Mask stops disease tokens under its controller only for the turn", () => {
