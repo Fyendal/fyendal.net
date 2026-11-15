@@ -258,6 +258,8 @@ export interface ReplaySummary {
   frameCount: number;
   favorite: boolean;
   share: ReplayShare | null;
+  /** A sandbox or solo game: it counts toward no match history or stats. */
+  sandbox?: true;
 }
 export interface ReplaysResponse { ok: true; replays: ReplaySummary[] }
 /** "public" opens for anyone holding the link, signed in or not; "friends"
@@ -2284,7 +2286,11 @@ export const decodeReplayShareResponse: Decoder<ReplayShareResponse> = (value) =
 function decodeReplaySummary(value: unknown): ReplaySummary | null {
   const replay = object(value);
   return replay
-    && exactKeys(replay, ["id", "format", "heroIds", "yourSeat", "winner", "finishedAt", "expiresAt", "frameCount", "favorite", "share"])
+    && exactKeys(
+      replay,
+      ["id", "format", "heroIds", "yourSeat", "winner", "finishedAt", "expiresAt", "frameCount", "favorite", "share", "sandbox"],
+      ["id", "format", "heroIds", "yourSeat", "winner", "finishedAt", "expiresAt", "frameCount", "favorite", "share"],
+    )
     && id(replay.id)
     && FORMATS.has(String(replay.format))
     && Array.isArray(replay.heroIds) && replay.heroIds.length === 2 && replay.heroIds.every(id)
@@ -2293,6 +2299,7 @@ function decodeReplaySummary(value: unknown): ReplaySummary | null {
     && nonNegativeInteger(replay.frameCount)
     && typeof replay.favorite === "boolean"
     && (replay.share === null || replayShare(replay.share))
+    && (replay.sandbox === undefined || replay.sandbox === true)
     ? value as ReplaySummary
     : null;
 }

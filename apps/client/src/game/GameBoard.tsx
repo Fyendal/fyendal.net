@@ -2165,7 +2165,7 @@ export function GameBoard() {
         gameOverDismissed={gameOverDismissed}
         getRecordedViews={getRecordedViews}
         replayViews={replayViews}
-        replayAvailable={replayFrames > 0 && !soloGame}
+        replayAvailable={replayFrames > 0}
         onWatchReplay={watchReplay}
         onDownloadReplay={downloadReplay}
         onLeave={leave}

@@ -360,7 +360,7 @@ export function isSoloRoom(room: Pick<RoomRow, "seats">): boolean {
   return room.seats.some((seat) => seat?.controller === "self");
 }
 
-/** Sandbox games are never recorded. */
+/** Sandbox games keep their replay but count toward no history, counters, awards, or analytics. */
 export function isSandboxRoom(room: Pick<RoomRow, "seats" | "sandbox">): boolean {
   return room.sandbox || isSoloRoom(room);
 }
@@ -1610,9 +1610,9 @@ export class PgRoomStore {
         this.tickClock(out.room, hadGame);
         if (!(await this.save(out.room, db))) throw VERSION_CONFLICT;
         await this.applySeatWrites(db, out.room, out.seatWrites ?? []);
-        // Sandbox games leave no durable record: no replay, match, counters, or awards.
-        const recorded = !isSandboxRoom(out.room);
-        const gameJustEnded = recorded && !wasGameOver && out.room.state?.phase === "game-over";
+        // Every game keeps a replay; sandbox games skip match history, counters, awards, and analytics.
+        const sandbox = isSandboxRoom(out.room);
+        const gameJustEnded = !sandbox && !wasGameOver && out.room.state?.phase === "game-over";
         const pendingAchievements = gameJustEnded ? await awardAchievements(db, out.room) : null;
         if (out.releaseMatchmaking) {
           const released = out.releaseMatchmaking.joiningUserId === undefined
@@ -1632,7 +1632,7 @@ export class PgRoomStore {
         }
         if (out.snapshot) await this.saveSnapshot(db, room, out.snapshot);
         let replayFinalizationId: string | undefined;
-        if (out.replay?.kind === "start" && out.room.state && recorded) {
+        if (out.replay?.kind === "start" && out.room.state) {
           const participants = ([0, 1] as const).map((seat) => {
             const member = out.room.seats[seat];
             const heroId = member?.heroId;
@@ -1649,10 +1649,13 @@ export class PgRoomStore {
             state: out.room.state,
             roomVersion: room.version + 1,
             participants,
+            sandbox,
           });
-          await recordGamePlayers(db, participants.map((participant) => participant.userId));
-          await startLeagueRoomGame(db, out.room.code);
-        } else if (out.replay?.kind === "frame" && out.room.state && recorded) {
+          if (!sandbox) {
+            await recordGamePlayers(db, participants.map((participant) => participant.userId));
+            await startLeagueRoomGame(db, out.room.code);
+          }
+        } else if (out.replay?.kind === "frame" && out.room.state) {
           const replayFrameAt = Date.now();
           replayFinalizationId = (await appendReplayView(
             db,
@@ -1667,7 +1670,7 @@ export class PgRoomStore {
             pendingAchievements,
             out.room.clock ? clockSummary(out.room.clock) : null,
           )) ?? undefined;
-          if (replayFinalizationId) {
+          if (replayFinalizationId && !sandbox) {
             await recordGameCompletion(db, {
               occurredAt: replayFrameAt,
               format: out.room.format,

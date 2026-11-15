@@ -19815,7 +19815,7 @@
   "common.sandbox.badge": [
     {
       "type": 0,
-      "value": "Sandbox · sem registro"
+      "value": "Sandbox · fora das estatísticas"
     }
   ],
   "common.shortcut.space": [
@@ -34115,10 +34115,28 @@
       "value": "Derrota"
     }
   ],
+  "history.result.sandbox": [
+    {
+      "type": 0,
+      "value": "Sandbox"
+    }
+  ],
   "history.result.win": [
     {
       "type": 0,
       "value": "Vitória"
+    }
+  ],
+  "history.sandboxReplays.note": [
+    {
+      "type": 0,
+      "value": "Partidas de sandbox e partidas em que você joga pelos dois lados ficam salvas como replay, mas não contam para o seu histórico nem para as suas estatísticas."
+    }
+  ],
+  "history.sandboxReplays.title": [
+    {
+      "type": 0,
+      "value": "Replays de sandbox"
     }
   ],
   "history.stat.allGames": [
@@ -37458,13 +37476,13 @@
   "lobby.sandbox.description": [
     {
       "type": 0,
-      "value": "Os jogadores podem editar a própria vida, recursos, deck e mão. A partida não fica registrada."
+      "value": "Os jogadores podem editar a própria vida, recursos, deck e mão. A partida fica salva como replay, mas não conta para o histórico nem para as estatísticas."
     }
   ],
   "lobby.sandbox.descriptionPrivateOnly": [
     {
       "type": 0,
-      "value": "Só para salas privadas. Os jogadores podem editar a própria vida, recursos, deck e mão. A partida não fica registrada."
+      "value": "Só para salas privadas. Os jogadores podem editar a própria vida, recursos, deck e mão. A partida fica salva como replay, mas não conta para o histórico nem para as estatísticas."
     }
   ],
   "lobby.sandbox.label": [

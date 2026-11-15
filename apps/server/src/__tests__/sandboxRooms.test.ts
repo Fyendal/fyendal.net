@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { precon } from "@fyendal/cards";
 import type { Queryable } from "../db.js";
 import { PgRoomStore, isSandboxRoom, prepViewFor, stateMessage } from "../store.js";
+import { finalizeReplayForRoom, listReplays } from "../replays.js";
 import { freshDb } from "./testdb.js";
 
 let db: Queryable;
@@ -17,8 +18,8 @@ afterEach(async () => {
 });
 
 const DECK = "precon-asb";
-const UNRECORDED_TABLES = [
-  "replay_games", "replay_frames", "matches", "match_participants", "hero_records",
+const HISTORY_TABLES = [
+  "matches", "match_participants", "hero_records",
   "matchup_records", "user_achievements", "daily_game_players",
 ] as const;
 
@@ -70,20 +71,34 @@ async function concededPrivateGame(sandbox: boolean): Promise<string> {
 }
 
 describe("sandbox rooms", () => {
-  it("plays a private sandbox game to game over without recording anything", async () => {
+  it("plays a private sandbox game to game over recording only a labeled replay", async () => {
     const code = await concededPrivateGame(true);
     const room = (await store.getRoom(code))!;
     expect(room).toMatchObject({ isPrivate: true, sandbox: true });
     expect(isSandboxRoom(room)).toBe(true);
-    for (const table of UNRECORDED_TABLES) expect(await count(table), table).toBe(0);
+    for (const table of HISTORY_TABLES) expect(await count(table), table).toBe(0);
+    expect(await finalizeReplayForRoom(db, code)).toBe(true);
+    for (const seat of room.seats) {
+      expect(await listReplays(db, seat!.userId!)).toEqual([
+        expect.objectContaining({ sandbox: true, yourSeat: room.seats.indexOf(seat), winner: room.state!.winner }),
+      ]);
+    }
   });
 
   it("still records a private game without the sandbox switch", async () => {
     const code = await concededPrivateGame(false);
-    expect(isSandboxRoom((await store.getRoom(code))!)).toBe(false);
+    const room = (await store.getRoom(code))!;
+    expect(isSandboxRoom(room)).toBe(false);
     expect(await count("matches")).toBe(1);
+    expect(await count("match_participants")).toBe(2);
     expect(await count("replay_games")).toBe(1);
     expect(await count("hero_records")).toBeGreaterThan(0);
+    expect(await count("matchup_records")).toBeGreaterThan(0);
+    expect(await count("daily_game_players")).toBeGreaterThan(0);
+    expect(await finalizeReplayForRoom(db, code)).toBe(true);
+    const [summary] = await listReplays(db, room.seats[0]!.userId!);
+    expect(summary).toBeDefined();
+    expect(summary).not.toHaveProperty("sandbox");
   });
 
   it("refuses sandbox on public rooms", async () => {

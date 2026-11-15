@@ -19238,7 +19238,7 @@
   "common.sandbox.badge": [
     {
       "type": 0,
-      "value": "Sandbox · not recorded"
+      "value": "Sandbox · not in stats"
     }
   ],
   "common.shortcut.space": [
@@ -32437,10 +32437,28 @@
       "value": "Defeat"
     }
   ],
+  "history.result.sandbox": [
+    {
+      "type": 0,
+      "value": "Sandbox"
+    }
+  ],
   "history.result.win": [
     {
       "type": 0,
       "value": "Victory"
+    }
+  ],
+  "history.sandboxReplays.note": [
+    {
+      "type": 0,
+      "value": "Sandbox and play-both-sides games keep a replay but don't count toward your match history or stats."
+    }
+  ],
+  "history.sandboxReplays.title": [
+    {
+      "type": 0,
+      "value": "Sandbox replays"
     }
   ],
   "history.stat.allGames": [
@@ -35678,13 +35696,13 @@
   "lobby.sandbox.description": [
     {
       "type": 0,
-      "value": "Players can edit their own life, resources, deck, and hand. The game is not recorded."
+      "value": "Players can edit their own life, resources, deck, and hand. The game is saved as a replay but doesn't count toward match history or stats."
     }
   ],
   "lobby.sandbox.descriptionPrivateOnly": [
     {
       "type": 0,
-      "value": "Private rooms only. Players can edit their own life, resources, deck, and hand. The game is not recorded."
+      "value": "Private rooms only. Players can edit their own life, resources, deck, and hand. The game is saved as a replay but doesn't count toward match history or stats."
     }
   ],
   "lobby.sandbox.label": [

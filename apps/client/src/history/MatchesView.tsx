@@ -7,6 +7,7 @@ import { formatSelectLabel } from "../lobby/FormatBadge.js";
 import { useStore } from "../store.js";
 import { heroName } from "./HeroPortrait.js";
 import { MatchList } from "./MatchList.js";
+import { SandboxReplayList } from "./SandboxReplayList.js";
 import { playedHeroes } from "./summarizeRecords.js";
 
 const FORMAT_OPTIONS: readonly Format[] = ["cc", "silver-age"];
@@ -94,14 +95,19 @@ export function MatchesView({
   onFiltersChange: (filters: MatchListFilters) => void;
 }) {
   const intl = useIntl();
-  const { list, loadMatches, token } = useStore(useShallow((state) => ({
+  const { list, loadMatches, refreshReplays, token } = useStore(useShallow((state) => ({
     list: state.matchList,
     loadMatches: state.loadMatches,
+    refreshReplays: state.refreshReplays,
     token: state.authToken,
   })));
   useEffect(() => {
     void loadMatches(filters);
   }, [filters, loadMatches, token]);
+  // Sandbox replays have no match row, and ending a practice game does not refresh the saved list.
+  useEffect(() => {
+    void refreshReplays();
+  }, [refreshReplays, token]);
   const heroes = useMemo(() => playedHeroes(records), [records]);
   const filtered = filters.format !== undefined || filters.heroId !== undefined
     || (filters.opponent !== undefined && filters.opponent !== "all");
@@ -141,6 +147,7 @@ export function MatchesView({
         <OpenReplayFile />
       </FormatFilters>
       <RetentionNote />
+      <SandboxReplayList />
       <MatchList
         matches={list.matches}
         loading={list.loading}

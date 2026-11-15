@@ -1,6 +1,6 @@
 import { useIntl } from "react-intl";
 
-/** Opt-in for an unrecorded private room whose players may edit their own side. */
+/** Opt-in for a private room that skips match history and whose players may edit their own side. */
 export function SandboxSwitch({
   checked,
   onChange,

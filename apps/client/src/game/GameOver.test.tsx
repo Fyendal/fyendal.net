@@ -169,6 +169,28 @@ describe("GameOver player statistics", () => {
     expect(render(false)).toContain("Defeat");
   });
 
+  it("offers the replay in a solo game", () => {
+    const view = finishedView();
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <GameOver
+          view={view}
+          seat={0}
+          spectating={false}
+          recordedViews={[view]}
+          onWatchReplay={() => undefined}
+          onDownloadReplay={() => undefined}
+          onBackToLobby={() => undefined}
+          onPlayAgain={() => undefined}
+          onClose={() => undefined}
+          solo
+        />
+      </TestI18nProvider>,
+    );
+    expect(html).toContain("Watch replay");
+    expect(html).not.toContain("Defeat");
+  });
+
   it("presents heroes as a switcher and labels the single selected stats panel", () => {
     const view = finishedView();
     view.gameStats = { turns: [

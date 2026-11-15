@@ -1173,15 +1173,17 @@ describe("PgRoomStore storage", () => {
     const waitingOn = (afterRoom.state!.pendingDecision?.player ?? afterRoom.state!.activePlayer) as 0 | 1;
     expect(await store.claimVictory(code, { token: tokens[1 - waitingOn]! }, startedAt + 60_000))
       .toEqual({ ok: false, error: "opponent is still active" });
-    expect(replayDml(queries)).toHaveLength(1);
-    expect(replayDml(queries)[0]).toContain("SELECT active.id, $2::bigint");
+    expect(replayDml(queries)).toHaveLength(2);
+    expect(replayDml(queries)[0]).toContain("SET recorded_frames = recorded_frames + 1");
+    expect(replayDml(queries)[1]).toContain("INSERT INTO replay_frames");
 
     queries.length = 0;
     expect((await measured.undo(code, { token: tokens[actor] })).ok).toBe(true);
     expect(await rawSeats(code)).toEqual(afterIntent);
     expect(seatDml(queries)).toEqual([]);
-    expect(replayDml(queries)).toHaveLength(1);
+    expect(replayDml(queries)).toHaveLength(2);
     expect(replayDml(queries)[0]).toContain("DELETE FROM replay_frames");
+    expect(replayDml(queries)[1]).toContain("SET recorded_frames = (SELECT COUNT(*)");
   });
 
   it("does not rewrite seats when claiming an idle victory", async () => {
@@ -1203,9 +1205,10 @@ describe("PgRoomStore storage", () => {
     expect(claimed.replayFinalizationId).toMatch(/^[0-9a-f]{24}$/);
     expect(await rawSeats(code)).toEqual(before);
     expect(seatDml(queries)).toEqual([]);
-    expect(replayDml(queries)).toHaveLength(2);
-    expect(replayDml(queries)[0]).toContain("INSERT INTO replay_frames");
-    expect(replayDml(queries)[1]).toContain("UPDATE replay_games");
+    expect(replayDml(queries)).toHaveLength(3);
+    expect(replayDml(queries)[0]).toContain("SET recorded_frames = recorded_frames + 1");
+    expect(replayDml(queries)[1]).toContain("INSERT INTO replay_frames");
+    expect(replayDml(queries)[2]).toContain("status='finalizing'");
   });
 
   it("awards the winner when a game-over transition commits", async () => {

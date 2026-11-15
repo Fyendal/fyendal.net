@@ -1771,6 +1771,9 @@ describe("replays and HTTP responses", () => {
       share: null,
     };
     expect(decodeReplaysResponse({ ok: true, replays: [replaySummary] })).not.toBeNull();
+    expect(decodeReplaysResponse({ ok: true, replays: [{ ...replaySummary, sandbox: true }] })?.replays[0]?.sandbox)
+      .toBe(true);
+    expect(decodeReplaysResponse({ ok: true, replays: [{ ...replaySummary, sandbox: false }] })).toBeNull();
     const share = { token: "AbCdEfGhIjKlMnOpQr_-12", visibility: "public", includeNotes: true };
     expect(decodeReplaysResponse({ ok: true, replays: [{ ...replaySummary, share }] })).not.toBeNull();
     expect(decodeReplaysResponse({

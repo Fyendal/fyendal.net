@@ -18097,7 +18097,7 @@
   "common.sandbox.badge": [
     {
       "type": 0,
-      "value": "沙盒 · 不计入记录"
+      "value": "沙盒 · 不计入统计"
     }
   ],
   "common.shortcut.space": [
@@ -31073,10 +31073,28 @@
       "value": "失败"
     }
   ],
+  "history.result.sandbox": [
+    {
+      "type": 0,
+      "value": "沙盒"
+    }
+  ],
   "history.result.win": [
     {
       "type": 0,
       "value": "胜利"
+    }
+  ],
+  "history.sandboxReplays.note": [
+    {
+      "type": 0,
+      "value": "沙盒对局和双方都由你操作的对局会保存回放，但不计入你的对局历史和统计。"
+    }
+  ],
+  "history.sandboxReplays.title": [
+    {
+      "type": 0,
+      "value": "沙盒回放"
     }
   ],
   "history.stat.allGames": [
@@ -34003,13 +34021,13 @@
   "lobby.sandbox.description": [
     {
       "type": 0,
-      "value": "玩家可以编辑自己的生命、资源、牌库和手牌。本局不计入记录。"
+      "value": "玩家可以编辑自己的生命、资源、牌库和手牌。本局会保存回放，但不计入对局历史和统计。"
     }
   ],
   "lobby.sandbox.descriptionPrivateOnly": [
     {
       "type": 0,
-      "value": "仅限私人房间。玩家可以编辑自己的生命、资源、牌库和手牌。本局不计入记录。"
+      "value": "仅限私人房间。玩家可以编辑自己的生命、资源、牌库和手牌。本局会保存回放，但不计入对局历史和统计。"
     }
   ],
   "lobby.sandbox.label": [

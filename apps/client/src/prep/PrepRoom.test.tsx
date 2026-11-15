@@ -57,10 +57,10 @@ function render(
 }
 
 describe("sandbox badge", () => {
-  it("shows sandbox rooms as unrecorded before anyone readies", () => {
+  it("shows the sandbox badge before anyone readies", () => {
     const prep = { ...pairedPrep("select-arena"), botGame: false, sandbox: true as const };
     const heading = render(prep, false, deck, { sandbox: true }).match(/<div class="prep-heading">([\s\S]*?)<\/div>/)?.[1];
-    expect(heading).toContain('<span class="sandbox-badge">Sandbox · not recorded</span>');
+    expect(heading).toContain('<span class="sandbox-badge">Sandbox · not in stats</span>');
   });
 
   it("is absent from ordinary rooms", () => {

@@ -26,7 +26,7 @@ describe("sandbox switch", () => {
     setStore();
     const html = renderToStaticMarkup(<TestI18nProvider><FriendRoomModal /></TestI18nProvider>);
     expect(html).toMatch(/<label class="bot-matchmaking-option sandbox-option">.*<strong>Sandbox<\/strong>/);
-    expect(html).toContain("Players can edit their own life, resources, deck, and hand. The game is not recorded.");
+    expect(html).toContain("Players can edit their own life, resources, deck, and hand. The game is saved as a replay but doesn&#x27;t count toward match history or stats.");
     expect(html).toMatch(/<input type="checkbox"\/><span class="switch-track"><\/span><\/label>/);
   });
 

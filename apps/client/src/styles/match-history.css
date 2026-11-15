@@ -150,6 +150,9 @@
 .match-row.is-win { box-shadow: inset 3px 0 0 var(--gold); }
 .match-row.is-loss { box-shadow: inset 3px 0 0 var(--blood-hi); }
 .match-row.is-draw { box-shadow: inset 3px 0 0 var(--bronze); }
+.match-row.is-sandbox { box-shadow: inset 3px 0 0 var(--border-strong); }
+.match-result .sandbox-badge { justify-self: start; }
+.sandbox-replays { padding-top: 4px; margin-bottom: 22px; }
 .match-result { display: grid; gap: 3px; }
 .match-result strong { color: var(--text-secondary); font-size: 14px; font-weight: 700; }
 .is-win .match-result strong { color: var(--gold); }

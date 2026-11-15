@@ -1,6 +1,6 @@
 import { useIntl } from "react-intl";
 
-/** Marks an unrecorded sandbox room. */
+/** Marks a sandbox game, which keeps a replay but counts toward no history or stats. */
 export function SandboxBadge() {
   const intl = useIntl();
   return (

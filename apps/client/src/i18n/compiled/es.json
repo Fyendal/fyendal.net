@@ -19366,7 +19366,7 @@
   "common.sandbox.badge": [
     {
       "type": 0,
-      "value": "Sandbox · sin registro"
+      "value": "Sandbox · fuera de estadísticas"
     }
   ],
   "common.shortcut.space": [
@@ -33329,10 +33329,28 @@
       "value": "Derrota"
     }
   ],
+  "history.result.sandbox": [
+    {
+      "type": 0,
+      "value": "Sandbox"
+    }
+  ],
   "history.result.win": [
     {
       "type": 0,
       "value": "Victoria"
+    }
+  ],
+  "history.sandboxReplays.note": [
+    {
+      "type": 0,
+      "value": "Las partidas de sandbox y las que juegas con ambos lados guardan una repetición, pero no cuentan para tu historial ni tus estadísticas."
+    }
+  ],
+  "history.sandboxReplays.title": [
+    {
+      "type": 0,
+      "value": "Repeticiones de sandbox"
     }
   ],
   "history.stat.allGames": [
@@ -36570,13 +36588,13 @@
   "lobby.sandbox.description": [
     {
       "type": 0,
-      "value": "Los jugadores pueden editar su propia vida, recursos, mazo y mano. La partida no se registra."
+      "value": "Los jugadores pueden editar su propia vida, recursos, mazo y mano. La partida se guarda como repetición, pero no cuenta para el historial ni las estadísticas."
     }
   ],
   "lobby.sandbox.descriptionPrivateOnly": [
     {
       "type": 0,
-      "value": "Solo salas privadas. Los jugadores pueden editar su propia vida, recursos, mazo y mano. La partida no se registra."
+      "value": "Solo salas privadas. Los jugadores pueden editar su propia vida, recursos, mazo y mano. La partida se guarda como repetición, pero no cuenta para el historial ni las estadísticas."
     }
   ],
   "lobby.sandbox.label": [

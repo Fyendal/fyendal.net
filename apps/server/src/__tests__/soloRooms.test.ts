@@ -10,6 +10,20 @@ import type { Queryable } from "../db.js";
 import { login, register } from "../auth.js";
 import { closeGameServer, createGameServer } from "../index.js";
 import { PgRoomStore, prepViewFor, stateMessage, type RoomRow, type SeatCredentials } from "../store.js";
+import {
+  deleteReplay,
+  finalizeReplay,
+  getReplay,
+  getReplayNotes,
+  getReplayPayloadForRoom,
+  listReplays,
+  saveReplayNote,
+  setReplayFavorite,
+  sweepReplays,
+  REPLAY_TTL_MS,
+} from "../replays.js";
+import { readSharedReplay, setReplayShare } from "../replayShares.js";
+import { exportAccount } from "../accounts.js";
 import { StateLogTransport } from "../stateLogTransport.js";
 import { freshDb } from "./testdb.js";
 
@@ -86,6 +100,14 @@ async function count(table: string): Promise<number> {
   return Number((await db.query(`SELECT COUNT(*) AS n FROM ${table}`)).rows[0]!.n);
 }
 
+const HISTORY_TABLES = [
+  "matches", "match_participants", "hero_records", "matchup_records", "user_achievements", "daily_game_players",
+] as const;
+
+async function expectNoHistory(): Promise<void> {
+  for (const table of HISTORY_TABLES) expect(await count(table), table).toBe(0);
+}
+
 describe("solo rooms", () => {
   it("creates a private room whose second seat is delegated to its owner", async () => {
     const { code, userId } = await soloRoom();
@@ -113,8 +135,8 @@ describe("solo rooms", () => {
     )).rejects.toThrow("choose a silver-age deck");
   });
 
-  it("plays both seats, undoes from either, and records nothing durable", async () => {
-    const { code, seats } = await soloRoom();
+  it("plays both seats, undoes from either, and records only a replay", async () => {
+    const { code, seats, userId } = await soloRoom();
     await startSolo(code, seats);
     let room = (await store.getRoom(code))!;
     expect(room.state!.activePlayer).toBe(1);
@@ -147,15 +169,18 @@ describe("solo rooms", () => {
       .toEqual({ ok: false, error: "both seats are yours" });
 
     const loser = soloActor(room);
-    expect(await act(code, seats[0], { kind: "concede" })).toEqual({ ok: true, version: expect.any(Number) });
+    const conceded = await act(code, seats[0], { kind: "concede" });
+    expect(conceded).toEqual({ ok: true, version: expect.any(Number), replayFinalizationId: expect.any(String) });
     room = (await store.getRoom(code))!;
     expect(room.state).toMatchObject({ phase: "game-over", winner: 1 - loser });
     expect(stateMessage(room, 0)).toMatchObject({ yourSeat: 0, boardSeat: 0 });
 
-    for (const table of [
-      "replay_games", "replay_frames", "matches", "match_participants", "hero_records",
-      "matchup_records", "user_achievements", "daily_game_players",
-    ]) expect(await count(table), table).toBe(0);
+    await expectNoHistory();
+    const replayId = conceded.ok ? conceded.replayFinalizationId! : "";
+    expect(await finalizeReplay(db, replayId)).toBe(true);
+    const [summary] = await listReplays(db, userId);
+    expect(summary).toMatchObject({ id: replayId, sandbox: true, yourSeat: 0, winner: 1 - loser });
+    expect(await getReplayPayloadForRoom(db, userId, code)).not.toBeNull();
 
     const ended = await store.deletePracticeRoom(code, seats[1]);
     expect(ended).toEqual({
@@ -164,14 +189,91 @@ describe("solo rooms", () => {
       playAgainSolo: { format: "cc", deckId: DECKS[0], opponentDeckId: DECKS[1] },
     });
     expect(await store.getRoom(code)).toBeNull();
-    expect(await count("matches")).toBe(0);
+    await expectNoHistory();
+    expect(await listReplays(db, userId)).toHaveLength(1);
   });
 
-  it("ends an unfinished solo game without a match row", async () => {
-    const { code, seats } = await soloRoom();
+  it("ends an unfinished solo game with a finalized replay and no match row", async () => {
+    const { code, seats, userId } = await soloRoom();
     await startSolo(code, seats);
-    expect(await store.deletePracticeRoom(code, seats[0])).toMatchObject({ ok: true });
-    expect(await count("matches")).toBe(0);
+    const ended = await store.deletePracticeRoom(code, seats[0]);
+    if (!ended.ok || !ended.replayFinalizationId) throw new Error("expected a replay to finalize");
+    expect(await finalizeReplay(db, ended.replayFinalizationId)).toBe(true);
+    expect(await listReplays(db, userId)).toEqual([
+      expect.objectContaining({ id: ended.replayFinalizationId, sandbox: true, winner: null }),
+    ]);
+    await expectNoHistory();
+  });
+
+  it("records sandbox edits as replay frames and prunes an undone edit", async () => {
+    const { code, seats, userId } = await soloRoom();
+    await startSolo(code, seats);
+    const frames = () => count("replay_frames");
+    const before = await frames();
+    const edit = async (change: Parameters<PgRoomStore["sandboxEdit"]>[3]) => {
+      const room = (await store.getRoom(code))!;
+      return store.sandboxEdit(code, seats[0], 1, change, { id: `edit-${++commandCounter}`, expectedVersion: room.version });
+    };
+    expect(await edit({ kind: "set-life", life: 7 })).toMatchObject({ ok: true });
+    const deck = (await store.getRoom(code))!.state!.players[1]!.deck.map((card) => card.instanceId);
+    expect(await edit({ kind: "reorder-deck", instanceIds: [...deck].reverse() })).toMatchObject({ ok: true });
+    expect(await frames()).toBe(before + 2);
+    const latest = (await db.query("SELECT view FROM replay_frames ORDER BY room_version DESC LIMIT 1")).rows[0]!;
+    const view = typeof latest.view === "string" ? JSON.parse(latest.view) : latest.view;
+    expect(view.players[1].life).toBe(7);
+    expect(JSON.stringify(view.logEntries)).toContain("engine.log.manual.life");
+    expect(JSON.stringify(view.logEntries)).toContain("engine.log.manual.deck");
+
+    const room = (await store.getRoom(code))!;
+    expect(await store.undo(code, seats[0], "last-action", { id: "undo-edit", expectedVersion: room.version }))
+      .toMatchObject({ ok: true });
+    expect(await frames()).toBe(before + 1);
+    expect(Number((await db.query("SELECT recorded_frames FROM replay_games")).rows[0]!.recorded_frames))
+      .toBe(before + 1);
+
+    const ended = await store.deletePracticeRoom(code, seats[0]);
+    if (!ended.ok || !ended.replayFinalizationId) throw new Error("expected a replay to finalize");
+    expect(await finalizeReplay(db, ended.replayFinalizationId)).toBe(true);
+    const replay = await getReplay(db, userId, ended.replayFinalizationId);
+    if (replay?.version !== 2) throw new Error("expected a version 2 replay");
+    expect(replay.frames).toHaveLength(before + 1);
+    expect(replay.frames.at(-1)?.view.players[1]!.life).toBe(7);
+    await expectNoHistory();
+  });
+
+  it("supports notes, favorites, sharing, export, deletion and expiry with one participant", async () => {
+    const { code, seats, userId } = await soloRoom();
+    await startSolo(code, seats);
+    const ended = await store.deletePracticeRoom(code, seats[0]);
+    if (!ended.ok || !ended.replayFinalizationId) throw new Error("expected a replay to finalize");
+    const id = ended.replayFinalizationId;
+    expect(await finalizeReplay(db, id)).toBe(true);
+    expect((await db.query("SELECT seat FROM replay_participants WHERE replay_id=$1", [id])).rows).toEqual([{ seat: 0 }]);
+
+    expect(await saveReplayNote(db, userId, { replayId: id, frame: 0, text: "Solo note" })).toBe(true);
+    expect(await getReplayNotes(db, userId, { replayId: id })).toEqual([expect.objectContaining({ text: "Solo note" })]);
+    expect(await setReplayFavorite(db, userId, id, true)).toBe("updated");
+    expect((await listReplays(db, userId))[0]).toMatchObject({ favorite: true, sandbox: true });
+    const share = await setReplayShare(db, userId, { replayId: id, visibility: "public", includeNotes: true });
+    if (!share) throw new Error("share failed");
+    expect((await readSharedReplay(db, share.token, null)).kind).toBe("ready");
+    expect((await exportAccount(db, userId))?.replays.map((replay) => replay.id)).toEqual([id]);
+
+    expect(await sweepReplays(db, Date.now() + REPLAY_TTL_MS * 2)).toBe(0);
+    expect(await setReplayFavorite(db, userId, id, false)).toBe("updated");
+    expect(await deleteReplay(db, userId, id)).toBe(true);
+    expect(await listReplays(db, userId)).toEqual([]);
+    expect(await count("replay_games")).toBe(0);
+  });
+
+  it("sweeps an expired single-participant replay", async () => {
+    const { code, seats, userId } = await soloRoom();
+    await startSolo(code, seats);
+    const ended = await store.deletePracticeRoom(code, seats[0]);
+    if (!ended.ok || !ended.replayFinalizationId) throw new Error("expected a replay to finalize");
+    expect(await finalizeReplay(db, ended.replayFinalizationId)).toBe(true);
+    expect(await sweepReplays(db, Date.now() + REPLAY_TTL_MS * 2)).toBe(1);
+    expect(await listReplays(db, userId)).toEqual([]);
     expect(await count("replay_games")).toBe(0);
   });
 

@@ -1210,6 +1210,12 @@ export const MIGRATIONS: Migration[] = [
     // Sandbox rooms opt out of match history at creation.
     sql: `ALTER TABLE rooms ADD COLUMN sandbox BOOLEAN NOT NULL DEFAULT FALSE;`,
   },
+  {
+    version: 68,
+    // Sandbox replays are labeled; the frame counter caps recording without a per-frame COUNT.
+    sql: `ALTER TABLE replay_games ADD COLUMN sandbox BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE replay_games ADD COLUMN recorded_frames INTEGER NOT NULL DEFAULT 0;`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

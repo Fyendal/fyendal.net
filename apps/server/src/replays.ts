@@ -79,6 +79,7 @@ export async function startReplay(
     state: GameState;
     roomVersion: number;
     participants: [ReplayStartParticipant, ReplayStartParticipant];
+    sandbox?: boolean;
     createdAt?: number;
   },
 ): Promise<void> {
@@ -87,8 +88,8 @@ export async function startReplay(
   await db.query(
     `INSERT INTO replay_games
       (id, room_code, ruleset_version, format, hero_0_id, hero_1_id,
-       winner, status, created_at, finished_at, expires_at, frame_count)
-     VALUES ($1,$2,$3,$4,$5,$6,NULL,'recording',$7,NULL,NULL,NULL)`,
+       winner, status, created_at, finished_at, expires_at, frame_count, sandbox, recorded_frames)
+     VALUES ($1,$2,$3,$4,$5,$6,NULL,'recording',$7,NULL,NULL,NULL,$8,1)`,
     [
       id,
       input.roomCode,
@@ -97,6 +98,7 @@ export async function startReplay(
       input.participants[0].heroId,
       input.participants[1].heroId,
       createdAt,
+      input.sandbox === true,
     ],
   );
   for (const participant of input.participants) {
@@ -127,12 +129,29 @@ export async function appendReplayView(
   now = Date.now(),
   pendingAchievements: ReplayPendingAchievements | null = null,
   clock: GameClockSummary | null = null,
+  maxViews = MAX_REPLAY_VIEWS,
 ): Promise<string | null> {
+  const gameOver = state.phase === "game-over";
+  // The last slot is reserved for the game-over frame so a capped replay still finalizes.
+  const counted = await db.query(
+    `UPDATE replay_games SET recorded_frames = recorded_frames + 1
+     WHERE id = (
+       SELECT id FROM replay_games
+       WHERE room_code = $1 AND status = 'recording'
+       ORDER BY created_at DESC LIMIT 1
+     ) AND recorded_frames < $2
+     RETURNING id, recorded_frames`,
+    [roomCode, gameOver ? maxViews : maxViews - 1],
+  );
+  if (!counted.rows.length) return null;
+  const countedId = String(counted.rows[0]!.id);
+  // At the cap earlier frames may be missing, so the transition has no reliable start.
+  const capped = safeInteger(counted.rows[0]!.recorded_frames, "replay recorded frames") >= maxViews;
   let view: string;
   let projectedTransition: string | null;
   try {
     view = JSON.stringify(projectStateForReplay(state, roomCode));
-    projectedTransition = transition
+    projectedTransition = transition && !capped
       ? JSON.stringify({
           kind: transition.kind,
           events: projectTransitionEvents(transition.events, null, true),
@@ -154,15 +173,10 @@ export async function appendReplayView(
   }
   const inserted = await db.query(
     `INSERT INTO replay_frames (replay_id, room_version, view, transition)
-     SELECT active.id, $2::bigint, $3::jsonb, $4::jsonb
-     FROM (
-       SELECT id FROM replay_games
-       WHERE room_code = $1 AND status = 'recording'
-       ORDER BY created_at DESC LIMIT 1
-     ) active
+     VALUES ($1, $2::bigint, $3::jsonb, $4::jsonb)
      RETURNING replay_id`,
     [
-      roomCode,
+      countedId,
       roomVersion,
       view,
       projectedTransition,
@@ -170,7 +184,7 @@ export async function appendReplayView(
   );
   if (!inserted.rows.length) return null;
   const id = String(inserted.rows[0].replay_id);
-  if (state.phase === "game-over") {
+  if (gameOver) {
     const finalized = await db.query(
       `UPDATE replay_games
        SET winner=$2, status='finalizing', finished_at=$3, expires_at=$4, pending_achievements=$5::jsonb,
@@ -195,23 +209,22 @@ export async function pruneReplayFramesFrom(
   roomCode: string,
   fromRoomVersion: number,
 ): Promise<number> {
-  await db.query(
-    `DELETE FROM replay_notes
-     WHERE replay_id = (
-       SELECT id FROM replay_games
-       WHERE room_code = $1 AND status = 'recording'
-       ORDER BY created_at DESC LIMIT 1
-     ) AND room_version >= $2`,
-    [roomCode, fromRoomVersion],
+  const active = await db.query(
+    `SELECT id FROM replay_games
+     WHERE room_code = $1 AND status = 'recording'
+     ORDER BY created_at DESC LIMIT 1`,
+    [roomCode],
   );
+  if (!active.rows.length) return 0;
+  const id = String(active.rows[0]!.id);
+  await db.query("DELETE FROM replay_notes WHERE replay_id = $1 AND room_version >= $2", [id, fromRoomVersion]);
   const deleted = await db.query(
-    `DELETE FROM replay_frames
-     WHERE replay_id = (
-       SELECT id FROM replay_games
-       WHERE room_code = $1 AND status = 'recording'
-       ORDER BY created_at DESC LIMIT 1
-     ) AND room_version >= $2`,
-    [roomCode, fromRoomVersion],
+    "DELETE FROM replay_frames WHERE replay_id = $1 AND room_version >= $2",
+    [id, fromRoomVersion],
+  );
+  await db.query(
+    "UPDATE replay_games SET recorded_frames = (SELECT COUNT(*) FROM replay_frames WHERE replay_id = $1) WHERE id = $1",
+    [id],
   );
   return deleted.rowCount ?? 0;
 }
@@ -672,7 +685,7 @@ export async function listReplays(
 ): Promise<ReplaySummary[]> {
   const { rows } = await db.query(
     `SELECT g.id, g.format, g.hero_0_id, g.hero_1_id, p.seat, g.winner,
-            g.finished_at, g.expires_at, g.frame_count, p.favorite,
+            g.finished_at, g.expires_at, g.frame_count, p.favorite, g.sandbox,
             s.token AS share_token, s.visibility AS share_visibility,
             s.include_notes AS share_include_notes
      FROM replay_games g
@@ -701,6 +714,8 @@ export async function listReplays(
       frameCount: safeInteger(row.frame_count, "replay frame count"),
       favorite: row.favorite === true,
       share: replayShareFromRow(row),
+      // Sent only when true: older clients reject unknown summary keys.
+      ...(row.sandbox === true ? { sandbox: true as const } : {}),
     };
   });
 }
