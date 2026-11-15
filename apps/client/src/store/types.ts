@@ -260,6 +260,8 @@ export interface StoreState {
   clockReceivedAt: number | null;
   /** This seat's armed pass shortcut, optimistic until the server's next state. */
   passUntil: PassUntilMode | null;
+  /** Pass shortcuts keep passing over the opponent's new plays. */
+  passUntilIgnorePlays: boolean;
   /** Passing now would end this seat's turn with a usable action point. */
   endTurnWarning: boolean;
   opponentConnected: boolean;
@@ -332,6 +334,8 @@ export interface StoreState {
   sendTokenSkip: (kind: TokenSkipKind, enabled: boolean) => void;
   /** Arm a pass shortcut, or cancel it with null. */
   sendPassUntil: (mode: PassUntilMode | null) => void;
+  /** Remembered across games; re-arms an armed shortcut with the new choice. */
+  setPassUntilIgnorePlays: (ignore: boolean) => void;
   sendEmote: (message: EmoteMessage) => void;
   kickSpectator: (username: string) => void;
   undo: (target?: UndoTarget) => void;

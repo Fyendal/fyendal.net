@@ -24,10 +24,11 @@ export function attackThreatensLethal(view: GameView, seat: number): boolean {
 }
 
 /** The armed shortcut waits on `seat`: the server answers only pass windows
- *  and non-lethal blocks, and not a window over a new opposing play or a
- *  lethal final pass with a response available, so any other choice, or a
- *  window the server left with an opposing layer on the stack, is a pause. A
- *  chain-link shortcut waiting for its link is armed, not paused. */
+ *  and non-lethal blocks, and not a window over a new opposing play the seat
+ *  can answer (unless it ignores plays) or a lethal final pass with a
+ *  response available, so any other choice, or a window the server left with
+ *  an opposing layer on the stack, is a pause. A chain-link shortcut waiting
+ *  for its link is armed, not paused. */
 export function passUntilPaused(
   view: GameView,
   seat: number,

@@ -1234,8 +1234,9 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
         && commandFields(message);
       break;
     case "pass-until":
-      valid = exactKeys(message, ["type", "mode", "commandId", "expectedVersion"], ["type", "mode"])
+      valid = exactKeys(message, ["type", "mode", "ignorePlays", "commandId", "expectedVersion"], ["type", "mode"])
         && (message.mode === null || passUntilMode(message.mode))
+        && optional(message.ignorePlays, (value) => value === true)
         && commandFields(message);
       break;
     case "runechant-skip":

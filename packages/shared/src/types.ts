@@ -1255,7 +1255,7 @@ export type ClientMessage =
   /** Arm (or with null, cancel) the seat's temporary pass shortcut. The server
    *  passes its windows and declares no blocks until the mode expires, pausing
    *  for other choices and before an attack that could defeat the seat. */
-  | { type: "pass-until"; mode: PassUntilMode | null; commandId?: string; expectedVersion?: number }
+  | { type: "pass-until"; mode: PassUntilMode | null; /** Keep passing over the opponent's new plays too. */ ignorePlays?: true; commandId?: string; expectedVersion?: number }
   /** The same one-shot shortcut for a consecutive Seismic Surge resolution. */
   | { type: "seismic-surge-skip"; enabled: boolean; commandId?: string; expectedVersion?: number }
   | { type: "undo"; target?: UndoTarget; commandId?: string; expectedVersion?: number }

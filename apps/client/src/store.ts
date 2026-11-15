@@ -42,6 +42,8 @@ import {
   pruneRejectedMatchRooms,
   rememberRejectedMatchRoom,
   saveLobbySettings,
+  loadPassUntilIgnorePlays,
+  savePassUntilIgnorePlays,
 } from "./storage.js";
 import {
   loadRoomSession,
@@ -1473,6 +1475,7 @@ export const useStore = create<StoreState>((set, get) => {
 
   return {
     ...initialStoreProjection(stored, lobbySettings),
+    passUntilIgnorePlays: loadPassUntilIgnorePlays(localStorage),
     pendingFabraryPlay: initialPlayRoute ? { route: initialPlayRoute, status: "idle", result: null } : null,
     ...accountActions,
     ...replayActions,
@@ -1996,9 +1999,16 @@ export const useStore = create<StoreState>((set, get) => {
     sendPassUntil: (mode) => {
       const code = get().roomCode;
       const command = roomCommand();
-      if (!code || !send({ type: "pass-until", mode, ...command })) return;
+      const ignorePlays = mode !== null && get().passUntilIgnorePlays ? { ignorePlays: true as const } : {};
+      if (!code || !send({ type: "pass-until", mode, ...ignorePlays, ...command })) return;
       passUntilRequest = { code, mode, afterVersion: command.expectedVersion };
       set({ passUntil: mode });
+    },
+    setPassUntilIgnorePlays: (ignore) => {
+      savePassUntilIgnorePlays(localStorage, ignore);
+      set({ passUntilIgnorePlays: ignore });
+      const armed = get().passUntil;
+      if (armed) get().sendPassUntil(armed);
     },
     sendTokenSkip: (kind, enabled) => {
       send({ type: kind === "runechant" ? "runechant-skip" : "seismic-surge-skip", enabled, ...roomCommand() });

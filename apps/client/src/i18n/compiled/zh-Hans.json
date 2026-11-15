@@ -29080,7 +29080,7 @@
   "game.passUntil.chainLink.detail": [
     {
       "type": 0,
-      "value": "让过且不防御，直到该 chain link 结算完毕。对手打出牌或启动能力时，以及可能致命的攻击前会停下。"
+      "value": "让过且不防御，直到该 chain link 结算完毕。对手打出牌或启动能力且你可以响应时，以及可能致命的攻击前会停下。"
     }
   ],
   "game.passUntil.heading": [
@@ -29119,6 +29119,18 @@
       "value": "按住"
     }
   ],
+  "game.passUntil.ignorePlays": [
+    {
+      "type": 0,
+      "value": "忽略对手的出牌"
+    }
+  ],
+  "game.passUntil.ignorePlays.detail": [
+    {
+      "type": 0,
+      "value": "即使对手打出牌或启动能力、而你可以响应，也继续让过。可能致命的攻击前仍会停下。"
+    }
+  ],
   "game.passUntil.nextChainLink": [
     {
       "type": 0,
@@ -29152,7 +29164,7 @@
   "game.passUntil.turn.detail": [
     {
       "type": 0,
-      "value": "让过每个时机且不防御，直到回合结束。对手打出牌或启动能力时，以及可能致命的攻击前会停下。"
+      "value": "让过每个时机且不防御，直到回合结束。对手打出牌或启动能力且你可以响应时，以及可能致命的攻击前会停下。"
     }
   ],
   "game.playerNumber": [

@@ -4385,6 +4385,7 @@ export class PgRoomStore {
     code: string,
     credentials: SeatCredentials,
     mode: PassUntilMode | null,
+    ignorePlays = false,
     command?: RoomCommand,
   ): Promise<{ ok: true; version: number; advanced: boolean; replayFinalizationId?: string } | { ok: false; error: string }> {
     const upper = code.toUpperCase();
@@ -4398,7 +4399,7 @@ export class PgRoomStore {
         delete member.passUntil;
         return { room, result: { advanced: false }, versionNeutral: true };
       }
-      member.passUntil = armPassUntil(state, seat, mode);
+      member.passUntil = armPassUntil(state, seat, mode, ignorePlays);
       if (passUntilIntent(state, seat, member.passUntil) === null) {
         return { room, result: { advanced: false }, versionNeutral: true };
       }

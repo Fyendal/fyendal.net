@@ -1755,8 +1755,9 @@ describe("PgRoomStore storage", () => {
 
   /** The attacker's action phase with two 0-cost Wounding Blows and two
    * action points against a defender holding a playable defense reaction, so
-   * no window the defender sees is empty. */
-  async function forceContestedAttacks(code: string, defenderLife = 20, turn?: number) {
+   * no window the defender sees is empty; with `defenderResponds` false the
+   * defender has no cards or equipment. */
+  async function forceContestedAttacks(code: string, defenderLife = 20, turn?: number, defenderResponds = true) {
     await forceEmptyPriorityWindow(code, 0);
     const state = (await store.getRoom(code))!.state!;
     const attacker = state.activePlayer as 0 | 1;
@@ -1769,7 +1770,8 @@ describe("PgRoomStore storage", () => {
     const sink = card(printing("Sink Below"), defender);
     state.players[attacker]!.hand = [...blows, press];
     state.players[attacker]!.actionPoints = 2;
-    state.players[defender]!.hand = [sink];
+    state.players[defender]!.hand = defenderResponds ? [sink] : [];
+    if (!defenderResponds) state.players[defender]!.equipment = {};
     state.players[defender]!.life = defenderLife;
     if (turn !== undefined) state.turn = turn;
     state.phase = "action";
@@ -1909,6 +1911,29 @@ describe("PgRoomStore storage", () => {
     expect(resolved.players[defender]!.hand.map((card) => card.instanceId)).toEqual([sink.instanceId]);
   });
 
+  it.each([
+    ["the seat ignores plays", true, true],
+    ["the seat has no response", false, false],
+  ] as const)("keeps passing over the opponent's new play when %s", async (_case, ignorePlays, defenderResponds) => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    const { attacker, defender, blows, press } = await forceContestedAttacks(code, 20, undefined, defenderResponds);
+    expect((await store.setPassUntil(code, { token: tokens[defender] }, "turn", ignorePlays)).ok).toBe(true);
+    expect((await store.getRoom(code))!.seats[defender]!.passUntil)
+      .toEqual({ mode: "turn", turn: expect.any(Number), seen: [], ...(ignorePlays ? { ignorePlays: true } : {}) });
+
+    const play: GameIntent = { kind: "play-card", instanceId: blows[0]!.instanceId, pitchInstanceIds: [] };
+    expect((await store.applyIntent(code, { token: tokens[attacker] }, play)).ok).toBe(true);
+    const reacting = await attackerPassesUntil(code, tokens, attacker, (state) =>
+      legalIntents(state, attacker).some((intent) => intent.kind === "play-card" && intent.instanceId === press.instanceId));
+    const reaction = legalIntents(reacting, attacker)
+      .find((intent) => intent.kind === "play-card" && intent.instanceId === press.instanceId)!;
+    expect((await store.applyIntent(code, { token: tokens[attacker] }, reaction)).ok).toBe(true);
+
+    const resolved = await attackerPassesUntil(code, tokens, attacker, (state) => state.chain[0]?.resolved === true);
+    expect(resolved.chain[0]).toMatchObject({ resolved: true, damage: 5, defendingCards: [] });
+  });
+
   it("does not pause again for an opposing play the seat already answered with its own", async () => {
     const { code, tokens } = await fullRoom();
     await startGame(code, tokens);
@@ -1972,6 +1997,9 @@ describe("PgRoomStore storage", () => {
     expect(decodeStoredPassUntil({ mode: "chain-link", turn: 3, link: { index: 0, instanceId: 4 } }))
       .toEqual({ mode: "chain-link", turn: 3, link: { index: 0, instanceId: 4 }, seen: [] });
     expect(decodeStoredPassUntil({ mode: "turn", turn: 3, seen: [1] })).toBeNull();
+    expect(decodeStoredPassUntil({ mode: "turn", turn: 3, seen: [], ignorePlays: true }))
+      .toEqual({ mode: "turn", turn: 3, seen: [], ignorePlays: true });
+    expect(decodeStoredPassUntil({ mode: "turn", turn: 3, seen: [], ignorePlays: false })).toBeNull();
   });
 
   /** After a cancel, the attacker's passes reach a window the shortcut

@@ -128,8 +128,8 @@
 }
 .pass-until-option:focus-visible { box-shadow: inset 0 0 0 1px #ffd47980; }
 /* The armed mode carries a gold notch on its leading edge. */
-.pass-until-option[aria-checked="true"] { background: #ffd47917; color: var(--gold); }
-.pass-until-option[aria-checked="true"]::before {
+.pass-until-option[role="menuitemradio"][aria-checked="true"] { background: #ffd47917; color: var(--gold); }
+.pass-until-option[role="menuitemradio"][aria-checked="true"]::before {
   content: "";
   position: absolute;
   inset: 8px auto 8px 0;
@@ -142,7 +142,7 @@
   height: 16px;
   color: var(--bronze);
 }
-.pass-until-option[aria-checked="true"] .pass-until-option-icon { color: var(--gold); }
+.pass-until-option[role="menuitemradio"][aria-checked="true"] .pass-until-option-icon { color: var(--gold); }
 .pass-until-option-name { font-size: 13px; font-weight: 600; line-height: 1.3; white-space: nowrap; }
 .pass-until-keys {
   display: inline-flex;
@@ -171,6 +171,22 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
+.pass-until-option-toggle {
+  grid-template-columns: 16px 1fr;
+  margin-top: 4px;
+}
+.pass-until-option-toggle .pass-until-option-name { font-weight: 500; white-space: normal; }
+.pass-until-checkbox {
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--bronze);
+  border-radius: 3px;
+  color: var(--gold);
+}
+.pass-until-option-toggle[aria-checked="true"] .pass-until-checkbox { border-color: var(--gold); background: #ffd47922; }
+.pass-until-checkbox .ui-icon { width: 10px; height: 10px; }
 .pass-until-option-stop {
   display: flex;
   justify-content: space-between;
@@ -179,6 +195,7 @@
   font-size: 13px;
   font-weight: 600;
 }
+.pass-until-option-toggle::after,
 .pass-until-option-stop::after {
   content: "";
   position: absolute;

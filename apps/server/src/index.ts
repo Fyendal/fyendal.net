@@ -1546,6 +1546,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           player.code,
           player.credentials,
           msg.mode,
+          msg.ignorePlays === true,
           msg.commandId !== undefined && msg.expectedVersion !== undefined
             ? { id: msg.commandId, expectedVersion: msg.expectedVersion }
             : undefined,

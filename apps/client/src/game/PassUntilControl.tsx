@@ -73,8 +73,8 @@ function menuPosition(toggle: DOMRect, menu: DOMRect): { style: CSSProperties; a
 }
 
 /** Fast-forward segment beside Pass. Its menu keeps passing until the chain
- *  link resolves or the turn ends, pausing on opposing plays; while armed, the
- *  segment itself shows it. */
+ *  link resolves or the turn ends, pausing on opposing plays the seat can
+ *  answer unless it ignores them; while armed, the segment itself shows it. */
 export function PassUntilControl({
   mode,
   linkOpen,
@@ -85,6 +85,8 @@ export function PassUntilControl({
   placement = "hud",
   hint = false,
   onHintClose,
+  ignorePlays = false,
+  onIgnorePlaysChange,
   onArm,
   onCancel,
 }: {
@@ -103,6 +105,9 @@ export function PassUntilControl({
   hint?: boolean;
   /** `retire` when the player closed the hint by hand. */
   onHintClose?: (retire?: boolean) => void;
+  /** Keep passing over the opponent's new plays; offered in the menu. */
+  ignorePlays?: boolean;
+  onIgnorePlaysChange?: (ignore: boolean) => void;
   onArm: (mode: PassUntilMode) => void;
   onCancel: () => void;
 }) {
@@ -380,9 +385,25 @@ export function PassUntilControl({
               </TooltipButton>
             );
           })}
+          {onIgnorePlaysChange ? (
+            <TooltipButton
+              ref={(element) => { itemRefs.current[MODES.length] = element; }}
+              role="menuitemcheckbox"
+              aria-checked={ignorePlays}
+              className="pass-until-option pass-until-option-toggle"
+              tooltip={intl.formatMessage({ id: "game.passUntil.ignorePlays.detail" })}
+              tooltipClassName="lobby-tooltip pass-until-tooltip"
+              onClick={() => onIgnorePlaysChange(!ignorePlays)}
+            >
+              <span className="pass-until-checkbox" aria-hidden="true">
+                {ignorePlays ? <UiIcon name="check" /> : null}
+              </span>
+              <span className="pass-until-option-name">{intl.formatMessage({ id: "game.passUntil.ignorePlays" })}</span>
+            </TooltipButton>
+          ) : null}
           {mode ? (
             <button
-              ref={(element) => { itemRefs.current[MODES.length] = element; }}
+              ref={(element) => { itemRefs.current[MODES.length + 1] = element; }}
               type="button"
               role="menuitem"
               aria-keyshortcuts="Escape"

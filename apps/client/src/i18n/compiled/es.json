@@ -31108,7 +31108,7 @@
   "game.passUntil.chainLink.detail": [
     {
       "type": 0,
-      "value": "Pasa y no bloquea hasta que se resuelva el chain link. Se detiene cuando el oponente juega o activa algo y antes de un ataque letal."
+      "value": "Pasa y no bloquea hasta que se resuelva el chain link. Se detiene cuando el oponente juega o activa algo a lo que puedes responder y antes de un ataque letal."
     }
   ],
   "game.passUntil.heading": [
@@ -31147,6 +31147,18 @@
       "value": "Mantén"
     }
   ],
+  "game.passUntil.ignorePlays": [
+    {
+      "type": 0,
+      "value": "Ignorar las jugadas del oponente"
+    }
+  ],
+  "game.passUntil.ignorePlays.detail": [
+    {
+      "type": 0,
+      "value": "Sigue pasando aunque el oponente juegue o active algo a lo que podrías responder. Aún se detiene antes de un ataque letal."
+    }
+  ],
   "game.passUntil.nextChainLink": [
     {
       "type": 0,
@@ -31180,7 +31192,7 @@
   "game.passUntil.turn.detail": [
     {
       "type": 0,
-      "value": "Pasa en todas las ventanas y no bloquea hasta que termine el turno. Se detiene cuando el oponente juega o activa algo y antes de un ataque letal."
+      "value": "Pasa en todas las ventanas y no bloquea hasta que termine el turno. Se detiene cuando el oponente juega o activa algo a lo que puedes responder y antes de un ataque letal."
     }
   ],
   "game.playerNumber": [

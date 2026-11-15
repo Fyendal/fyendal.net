@@ -155,6 +155,25 @@ export function savePassUntilHintGames(storage: Pick<Storage, "setItem">, games:
   }
 }
 
+const PASS_UNTIL_IGNORE_PLAYS_STORAGE_KEY = "fyendal-pass-until-ignore-plays";
+
+export function loadPassUntilIgnorePlays(storage: Pick<Storage, "getItem">): boolean {
+  try {
+    return storage.getItem(PASS_UNTIL_IGNORE_PLAYS_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function savePassUntilIgnorePlays(storage: Pick<Storage, "setItem" | "removeItem">, ignore: boolean): void {
+  try {
+    if (ignore) storage.setItem(PASS_UNTIL_IGNORE_PLAYS_STORAGE_KEY, "1");
+    else storage.removeItem(PASS_UNTIL_IGNORE_PLAYS_STORAGE_KEY);
+  } catch {
+    // The choice still holds for this session when storage is unavailable.
+  }
+}
+
 const PLAYMAT_HINT_STORAGE_PREFIX = "fyendal-playmat-hint-";
 
 function playmatHintStorageKey(username: string | null): string {

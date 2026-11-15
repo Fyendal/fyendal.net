@@ -30216,7 +30216,7 @@
   "game.passUntil.chainLink.detail": [
     {
       "type": 0,
-      "value": "Passes and blocks nothing until the chain link resolves. Stops when the opponent plays or activates something, and before a lethal attack."
+      "value": "Passes and blocks nothing until the chain link resolves. Stops when the opponent plays or activates something you can respond to, and before a lethal attack."
     }
   ],
   "game.passUntil.heading": [
@@ -30255,6 +30255,18 @@
       "value": "Hold"
     }
   ],
+  "game.passUntil.ignorePlays": [
+    {
+      "type": 0,
+      "value": "Ignore opponent's plays"
+    }
+  ],
+  "game.passUntil.ignorePlays.detail": [
+    {
+      "type": 0,
+      "value": "Keeps passing even when the opponent plays or activates something you could respond to. Still stops before a lethal attack."
+    }
+  ],
   "game.passUntil.nextChainLink": [
     {
       "type": 0,
@@ -30288,7 +30300,7 @@
   "game.passUntil.turn.detail": [
     {
       "type": 0,
-      "value": "Passes every window and blocks nothing until the turn ends. Stops when the opponent plays or activates something, and before a lethal attack."
+      "value": "Passes every window and blocks nothing until the turn ends. Stops when the opponent plays or activates something you can respond to, and before a lethal attack."
     }
   ],
   "game.playerNumber": [
