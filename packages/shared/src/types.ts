@@ -1274,7 +1274,12 @@ export type ManualEdit =
   | { kind: "set-resources"; resources: number }
   /** A permutation of the seat's deck instance ids; index 0 becomes the top. */
   | { kind: "reorder-deck"; instanceIds: number[] }
-  | { kind: "shuffle-deck" };
+  | { kind: "shuffle-deck" }
+  /** Move one of the seat's own hand, deck, graveyard, or face-up banished cards. */
+  | { kind: "move-card"; instanceId: number; to: ManualMoveDestination };
+
+export const MANUAL_MOVE_DESTINATIONS = ["hand", "deck-top", "deck-bottom", "graveyard", "banish"] as const;
+export type ManualMoveDestination = typeof MANUAL_MOVE_DESTINATIONS[number];
 
 export type ManualEditKind = ManualEdit["kind"];
 

@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { useIntl } from "react-intl";
-import type { CardView, ManualEdit } from "@fyendal/shared";
+import type { CardView, ManualEdit, ManualMoveDestination } from "@fyendal/shared";
 import { ModalSurface } from "../../components/ModalSurface.js";
 import { TooltipButton } from "../../components/TooltipButton.js";
 import { UiIcon } from "../../components/UiIcon.js";
@@ -9,6 +9,7 @@ import { CardFace } from "../Card.js";
 import { cardDisplayName } from "../decision/DecisionShared.js";
 import { moveOrderItem, ReorderList } from "../ReorderList.js";
 import { SANDBOX_REFUSAL_MESSAGE } from "../SandboxPanel.js";
+import { SandboxCardMoves, sandboxMoveRefusalMessage, sandboxMoveShortcut } from "./SandboxCardMoves.js";
 
 function sameOrder(a: readonly number[], b: readonly number[]): boolean {
   return a.length === b.length && a.every((id, index) => id === b[index]);
@@ -82,6 +83,9 @@ export function DeckOrderEditor({
   const [draft, setDraft] = useState<DeckDraft | null>(null);
   const [changed, setChanged] = useState(false);
   const [focusId, setFocusId] = useState<number | null>(null);
+  const [lastSent, setLastSent] = useState<ManualEdit["kind"] | null>(null);
+  /** Server order our own card move should produce; reaching it is no conflict. */
+  const expectedOrder = useRef<number[] | null>(null);
 
   useEffect(() => {
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -91,6 +95,8 @@ export function DeckOrderEditor({
 
   // serverKey stands in for the order array, which is rebuilt each render.
   useEffect(() => {
+    const expected = expectedOrder.current;
+    expectedOrder.current = null;
     if (!draft || sameOrder(draft.base, serverOrder)) return;
     // Our own applied order arriving back is not a conflict.
     if (sameOrder(draft.order, serverOrder)) {
@@ -98,7 +104,8 @@ export function DeckOrderEditor({
       return;
     }
     const rebased = reconcileDeckOrder(draft.order, draft.base, serverOrder);
-    setChanged(rebased.changed);
+    const ownMove = expected !== null && sameOrder(expected, serverOrder);
+    setChanged(rebased.changed && !ownMove);
     setDraft(sameOrder(rebased.order, serverOrder) ? null : { order: rebased.order, base: serverOrder });
   }, [serverKey]);
 
@@ -123,9 +130,23 @@ export function DeckOrderEditor({
   };
   const send = (edit: ManualEdit) => {
     onClearRefusal();
+    setLastSent(edit.kind);
     onEdit(edit);
   };
+  const moveOut = (instanceId: number, to: ManualMoveDestination) => {
+    expectedOrder.current = serverOrder.filter((id) => id !== instanceId);
+    send({ kind: "move-card", instanceId, to });
+  };
   const onCardKey = (event: KeyboardEvent<HTMLElement>, index: number, instanceId: number) => {
+    const out = event.altKey || event.ctrlKey || event.metaKey ? null : sandboxMoveShortcut(event.key);
+    if (out) {
+      event.preventDefault();
+      if (pending) return;
+      const next = cards[index + 1] ?? cards[index - 1];
+      setFocusId(next?.instanceId ?? null);
+      moveOut(instanceId, out);
+      return;
+    }
     const to = deckKeyTarget(event.key, index, cards.length);
     if (to === null) return;
     event.preventDefault();
@@ -137,8 +158,9 @@ export function DeckOrderEditor({
   const status = refusal
     ? <p className="deck-order-status deck-order-refusal" role="alert">
         {intl.formatMessage({
-          // Only deck edits are sent from here, so an unavailable edit is a deck refusal.
-          id: refusal === "SANDBOX_EDIT_UNAVAILABLE" ? "game.deckOrder.refusal" : SANDBOX_REFUSAL_MESSAGE[refusal],
+          id: lastSent === "move-card"
+            ? sandboxMoveRefusalMessage(refusal)
+            : refusal === "SANDBOX_EDIT_UNAVAILABLE" ? "game.deckOrder.refusal" : SANDBOX_REFUSAL_MESSAGE[refusal],
         })}
       </p>
     : changed
@@ -215,9 +237,17 @@ export function DeckOrderEditor({
                     { id: "game.deckOrder.position" },
                     { card: name, position: index + 1, count: cards.length },
                   )}
+                  aria-keyshortcuts="H G B"
                   onKeyDown={(event) => onCardKey(event, index, card.instanceId)}
                 >
                   <CardFace card={card} size="zone" squareArt={false} />
+                  <SandboxCardMoves
+                    zone="deck"
+                    card={card}
+                    pending={pending}
+                    focusable={false}
+                    onMove={(to) => moveOut(card.instanceId, to)}
+                  />
                   <span className="deck-order-position" aria-hidden="true">{index + 1}</span>
                   <span className="deck-order-jump">
                     <TooltipButton

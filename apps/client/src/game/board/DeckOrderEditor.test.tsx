@@ -46,6 +46,19 @@ describe("DeckOrderEditor", () => {
     expect(html).toContain("Card 1 is drawn next.");
   });
 
+  it("offers hand, graveyard, and banish moves on each card, sent as one move-card edit", () => {
+    const html = render();
+    const cards = html.match(/<li class="deck-order-card" draggable="true">[^]*?<\/li>/g)!;
+    for (const card of cards) {
+      expect([...card.matchAll(/data-sandbox-move="([^"]+)"/g)].map((match) => match[1]))
+        .toEqual(["hand", "graveyard", "banish"]);
+      expect(card).toContain('aria-keyshortcuts="H G B"');
+    }
+    expect(cards[0]).toContain('aria-label="Move Head Jab to the hand"');
+    expect(render({ pending: true })).toMatch(/data-sandbox-move="hand"[^>]*disabled=""/);
+    expect(html).toContain("Press H, G, or B");
+  });
+
   it("shows a refusal and an empty deck", () => {
     const refused = render({ refusal: "SANDBOX_EDIT_UNAVAILABLE" });
     expect(refused).toContain('role="alert"');

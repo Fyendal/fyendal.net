@@ -8,6 +8,8 @@ export interface BoardOverlay {
   showOwnedFaceDownIdentities?: boolean;
   /** Cards the viewer could play or activate from this zone when it was opened. */
   usableIds?: ReadonlySet<number>;
+  /** The live pile this snapshot shows, so sandbox moves can follow it. */
+  source?: { seat: number; zone: "hand" | "graveyard" | "banish" };
 }
 
 export function MatZone({

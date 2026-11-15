@@ -273,6 +273,87 @@ describe("sandbox edits", () => {
     }
     expect((await store.getRoom(code))!.state!.players[1]!.deck.map((card) => card.instanceId)).toEqual(before);
   });
+
+  it("refuses moving the opponent's cards in a private room, by seat or by instance id", async () => {
+    const { code, seats } = await privateGame(true);
+    const state = (await store.getRoom(code))!.state!;
+    const rivalCard = state.players[1]!.hand[0]!.instanceId;
+    const bySeat = await edit(code, seats[0], 1, { kind: "move-card", instanceId: rivalCard, to: "graveyard" });
+    expect(bySeat.ok).toBe(false);
+    if (!bySeat.ok) expect(codeOf(bySeat.error)).toBe("SANDBOX_SEAT_FORBIDDEN");
+    for (const instanceId of [rivalCard, state.players[1]!.deck[0]!.instanceId]) {
+      const byId = await edit(code, seats[0], 0, { kind: "move-card", instanceId, to: "hand" });
+      expect(byId.ok).toBe(false);
+      if (!byId.ok) expect(codeOf(byId.error)).toBe("SANDBOX_EDIT_UNAVAILABLE");
+    }
+    expect((await store.getRoom(code))!.state!.players[1]!.hand.map((c) => c.instanceId)).toContain(rivalCard);
+  });
+
+  it("hides hand-to-deck and deck-to-hand cards from the opponent and spectators", async () => {
+    const { code, seats } = await privateGame(true);
+    const watcherId = await user("Watcher");
+    const watcher = await store.joinRoom(code, undefined, { allowPlayer: false, userId: watcherId, username: "Watcher" });
+    if (!watcher.ok) throw new Error(watcher.error);
+    const state = (await store.getRoom(code))!.state!;
+    const handCard = state.players[0]!.hand[0]!;
+    const deckCard = state.players[0]!.deck.at(-1)!;
+    expect(await edit(code, seats[0], 0, { kind: "move-card", instanceId: handCard.instanceId, to: "deck-top" }))
+      .toMatchObject({ ok: true });
+    expect(await edit(code, seats[0], 0, { kind: "move-card", instanceId: deckCard.instanceId, to: "hand" }))
+      .toMatchObject({ ok: true });
+    const room = (await store.getRoom(code))!;
+    const names = [handCard, deckCard].map((card) => room.state!.cardsRef[card.cardId]!.name);
+    for (const viewer of [1, null] as const) {
+      const message = stateMessage(room, viewer);
+      const view = viewOf(message);
+      const recent = JSON.stringify({ log: view.log.slice(-2), entries: view.logEntries?.slice(-2) });
+      expect(recent).toContain("engine.log.manual.card.moved.hidden");
+      for (const name of names) expect(recent).not.toContain(name);
+      for (const card of [handCard, deckCard]) expect(recent).not.toContain(`"cardId":"${card.cardId}"`);
+      expect(view.players[0]!.deck).toBeUndefined();
+      expect(view.players[0]!.hand?.some((card) => card.instanceId === deckCard.instanceId) ?? false).toBe(false);
+      expect(message?.type === "state" && message.transition?.events).toEqual([
+        { kind: "move", from: { kind: "deck", seat: 0 }, to: { kind: "hand", seat: 0 }, count: 1 },
+      ]);
+    }
+    const ownLog = viewOf(stateMessage(room, 0)).log.slice(-2).join("\n");
+    for (const name of names) expect(ownLog).toContain(name);
+  });
+
+  it("makes a card moved from deck to hand playable through normal intents", async () => {
+    const { code, seats } = await privateGame(true);
+    const state = (await store.getRoom(code))!.state!;
+    const seat = state.activePlayer as 0 | 1;
+    for (const card of state.players[seat]!.deck) {
+      expect(await edit(code, seats[seat], seat, { kind: "move-card", instanceId: card.instanceId, to: "hand" }))
+        .toMatchObject({ ok: true });
+      const room = (await store.getRoom(code))!;
+      const play = legalIntents(room.state!, seat)
+        .find((intent) => intent.kind === "play-card" && intent.instanceId === card.instanceId);
+      if (!play) continue;
+      expect(await store.applyIntent(code, seats[seat], play)).toMatchObject({ ok: true });
+      const after = (await store.getRoom(code))!.state!;
+      expect(after.players[seat]!.hand.map((c) => c.instanceId)).not.toContain(card.instanceId);
+      return;
+    }
+    throw new Error("no deck card became playable");
+  });
+
+  it("undo restores the zones before a move", async () => {
+    const { code, seats } = await soloGame();
+    const zones = async () => {
+      const p = (await store.getRoom(code))!.state!.players[1]!;
+      return [p.hand, p.deck, p.graveyard, p.banish].map((zone) => zone.map((card) => card.instanceId));
+    };
+    const before = await zones();
+    const handCard = before[0]![0]!;
+    expect(await edit(code, seats[0], 1, { kind: "move-card", instanceId: handCard, to: "banish" })).toMatchObject({ ok: true });
+    expect((await zones())[3]).toContain(handCard);
+    const room = (await store.getRoom(code))!;
+    expect(await store.undo(code, seats[0], "last-action", { id: "undo-move", expectedVersion: room.version }))
+      .toMatchObject({ ok: true });
+    expect(await zones()).toEqual(before);
+  });
 });
 
 function viewOf(message: ServerMessage | null) {

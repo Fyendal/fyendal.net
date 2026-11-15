@@ -553,6 +553,9 @@ describe("client messages", () => {
     expect(decodeManualEdit({ kind: "reorder-deck", instanceIds: [3, 0, 7] })).toEqual({ kind: "reorder-deck", instanceIds: [3, 0, 7] });
     expect(decodeManualEdit({ kind: "reorder-deck", instanceIds: Array.from({ length: 256 }, (_, i) => i) })).not.toBeNull();
     expect(decodeManualEdit({ kind: "shuffle-deck" })).toEqual({ kind: "shuffle-deck" });
+    for (const to of ["hand", "deck-top", "deck-bottom", "graveyard", "banish"]) {
+      expect(decodeManualEdit({ kind: "move-card", instanceId: 4, to })).toEqual({ kind: "move-card", instanceId: 4, to });
+    }
     for (const edit of [
       { kind: "set-life" },
       { kind: "set-life", life: 1.5 },
@@ -568,6 +571,12 @@ describe("client messages", () => {
       { kind: "reorder-deck", instanceIds: Array.from({ length: 257 }, (_, i) => i) },
       { kind: "reorder-deck", instanceIds: [1], extra: 1 },
       { kind: "shuffle-deck", seed: 1 },
+      { kind: "move-card", instanceId: 4 },
+      { kind: "move-card", instanceId: -1, to: "hand" },
+      { kind: "move-card", instanceId: "4", to: "hand" },
+      { kind: "move-card", instanceId: 4, to: "deck" },
+      { kind: "move-card", instanceId: 4, to: "arsenal" },
+      { kind: "move-card", instanceId: 4, to: "hand", seat: 1 },
       null,
       [],
     ]) {

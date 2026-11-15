@@ -26498,6 +26498,210 @@
       "value": " no puede ganar vida mientras tenga más vida que su oponente"
     }
   ],
+  "engine.log.manual.card.moved": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " mueve "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 5,
+      "value": "from",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de su mano"
+            }
+          ]
+        },
+        "deck": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de su mazo"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de su cementerio"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de la zona de banish"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " a "
+    },
+    {
+      "type": 5,
+      "value": "to",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "su mano"
+            }
+          ]
+        },
+        "deckTop": {
+          "value": [
+            {
+              "type": 0,
+              "value": "la parte superior de su mazo"
+            }
+          ]
+        },
+        "deckBottom": {
+          "value": [
+            {
+              "type": 0,
+              "value": "el fondo de su mazo"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "su cementerio"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "la zona de banish"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine.log.manual.card.moved.hidden": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " mueve una carta "
+    },
+    {
+      "type": 5,
+      "value": "from",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de su mano"
+            }
+          ]
+        },
+        "deck": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de su mazo"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de su cementerio"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "de la zona de banish"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " a "
+    },
+    {
+      "type": 5,
+      "value": "to",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "su mano"
+            }
+          ]
+        },
+        "deckTop": {
+          "value": [
+            {
+              "type": 0,
+              "value": "la parte superior de su mazo"
+            }
+          ]
+        },
+        "deckBottom": {
+          "value": [
+            {
+              "type": 0,
+              "value": "el fondo de su mazo"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "su cementerio"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "la zona de banish"
+            }
+          ]
+        }
+      }
+    }
+  ],
   "engine.log.manual.deck.reordered": [
     {
       "type": 0,
@@ -29747,7 +29951,7 @@
   "game.deckOrder.instructions": [
     {
       "type": 0,
-      "value": "La carta 1 es la próxima que robas. Arrastra las cartas para reordenarlas o selecciona una carta y usa las flechas del teclado."
+      "value": "La carta 1 es la próxima que robas. Arrastra las cartas para reordenarlas o selecciona una carta y usa las flechas del teclado. Pulsa H, G o B para mover la carta seleccionada a la mano, el cementerio o la zona de banish."
     }
   ],
   "game.deckOrder.label": [
@@ -31311,6 +31515,12 @@
       "value": "Aplicando…"
     }
   ],
+  "game.sandbox.cards": [
+    {
+      "type": 0,
+      "value": "Cartas"
+    }
+  ],
   "game.sandbox.decrease": [
     {
       "type": 0,
@@ -31343,6 +31553,114 @@
       "value": "Vida"
     }
   ],
+  "game.sandbox.move.banish": [
+    {
+      "type": 0,
+      "value": "Banish"
+    }
+  ],
+  "game.sandbox.move.banishNamed": [
+    {
+      "type": 0,
+      "value": "Hacer banish de "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.sandbox.move.deckBottom": [
+    {
+      "type": 0,
+      "value": "Fondo del mazo"
+    }
+  ],
+  "game.sandbox.move.deckBottomNamed": [
+    {
+      "type": 0,
+      "value": "Poner "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " en el fondo del mazo"
+    }
+  ],
+  "game.sandbox.move.deckTop": [
+    {
+      "type": 0,
+      "value": "Arriba del mazo"
+    }
+  ],
+  "game.sandbox.move.deckTopNamed": [
+    {
+      "type": 0,
+      "value": "Poner "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " en la parte superior del mazo"
+    }
+  ],
+  "game.sandbox.move.empty": [
+    {
+      "type": 0,
+      "value": "Ya no quedan cartas aquí."
+    }
+  ],
+  "game.sandbox.move.graveyard": [
+    {
+      "type": 0,
+      "value": "Cementerio"
+    }
+  ],
+  "game.sandbox.move.graveyardNamed": [
+    {
+      "type": 0,
+      "value": "Poner "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " en el cementerio"
+    }
+  ],
+  "game.sandbox.move.hand": [
+    {
+      "type": 0,
+      "value": "A la mano"
+    }
+  ],
+  "game.sandbox.move.handNamed": [
+    {
+      "type": 0,
+      "value": "Mover "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " a la mano"
+    }
+  ],
+  "game.sandbox.move.instructions": [
+    {
+      "type": 0,
+      "value": "Los movimientos son silenciosos: no se activa nada. Cada movimiento aparece en el registro de la partida y se puede deshacer."
+    }
+  ],
   "game.sandbox.open": [
     {
       "type": 0,
@@ -31361,6 +31679,12 @@
     {
       "type": 1,
       "value": "maximum"
+    }
+  ],
+  "game.sandbox.refusal.move": [
+    {
+      "type": 0,
+      "value": "Esa carta no se puede mover ahora. Inténtalo de nuevo cuando la stack esté vacía y no haya ninguna elección ni pago en curso."
     }
   ],
   "game.sandbox.refusal.required": [
@@ -31403,6 +31727,98 @@
     {
       "type": 0,
       "value": "Sandbox"
+    }
+  ],
+  "game.sandbox.zoneButton": [
+    {
+      "type": 5,
+      "value": "zone",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Mano"
+            }
+          ]
+        },
+        "deck": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Mazo"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Cementerio"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Banished"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "game.sandbox.zoneTitle": [
+    {
+      "type": 5,
+      "value": "zone",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Mano"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Cementerio"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Zona de banish"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " de "
+    },
+    {
+      "type": 1,
+      "value": "hero"
     }
   ],
   "game.search.instructions": [

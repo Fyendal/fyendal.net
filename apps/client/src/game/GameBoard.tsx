@@ -27,7 +27,7 @@ import {
 import { useDeckCardFeedback } from "./DeckCardToast.js";
 import { SideRail } from "./SideRail.js";
 import { ShareReplayDialog, savedReplayDaysLeft } from "../history/ShareReplayDialog.js";
-import { SandboxPanel, canOpenSandbox, type SandboxSeat } from "./SandboxPanel.js";
+import { SandboxPanel, canOpenSandbox, type SandboxSeat, type SandboxZone } from "./SandboxPanel.js";
 import { DeckOrderEditor, DeckRevealConfirm } from "./board/DeckOrderEditor.js";
 import { loadDeckOrderRevealAccepted, saveDeckOrderRevealAccepted } from "../storage.js";
 import {
@@ -113,6 +113,8 @@ import { boardFeedback, soloSides } from "./board/soloControl.js";
 import { useSoloSeatInputLock } from "./board/useSoloSeatInputLock.js";
 import { handPlayWindow } from "./board/handOrder.js";
 import { BoardOverlays, type BoardPreview } from "./board/BoardOverlays.js";
+import type { ZoneOverlayMoves } from "./board/ZoneOverlay.js";
+import { editableOverlaySource } from "./board/SandboxCardMoves.js";
 import { GameClockPanel } from "./GameClockPanel.js";
 import { optimisticInteractionHiddenIds } from "./pendingInteraction.js";
 import { optimisticDefenderView } from "./optimisticDefenderStaging.js";
@@ -705,7 +707,18 @@ export function GameBoard() {
     && canOpenSandbox({ sandbox, spectating, replaying, yourSeat, gameOver: view.phase === "game-over" });
   const sandboxSeats: SandboxSeat[] = (soloGame ? [seat, 1 - seat] : [yourSeat ?? seat]).map((candidate) => {
     const player = view.players[candidate]!;
-    return { seat: candidate as 0 | 1, heroName: player.heroName, life: player.life, resources: player.resources };
+    return {
+      seat: candidate as 0 | 1,
+      heroName: player.heroName,
+      life: player.life,
+      resources: player.resources,
+      zones: {
+        hand: player.hand.length,
+        deck: player.deck === undefined ? null : player.deck.length,
+        graveyard: player.graveyard.length,
+        banish: player.banish.filter((card) => !card.faceDown).length,
+      },
+    };
   });
   const deckEditable = (seatIndex: number) => canSandbox
     && sandboxSeats.some((candidate) => candidate.seat === seatIndex)
@@ -715,6 +728,41 @@ export function GameBoard() {
     const accepted = typeof localStorage !== "undefined" && loadDeckOrderRevealAccepted(localStorage, view.gameId);
     if (accepted) setDeckEditorSeat(seatIndex as 0 | 1);
     else setDeckRevealSeat(seatIndex as 0 | 1);
+  };
+  const overlaySource = editableOverlaySource(
+    overlay?.source,
+    canSandbox,
+    sandboxSeats.map((candidate) => candidate.seat),
+  );
+  const shownOverlay = overlay && overlaySource
+    ? { ...overlay, cards: view.players[overlaySource.seat]![overlaySource.zone] }
+    : overlay;
+  const overlayMoves: ZoneOverlayMoves | undefined = overlaySource
+    ? {
+        zone: overlaySource.zone,
+        pending: roomCommandPending,
+        refusal: sandboxEditRefusal,
+        onMove: (instanceId, to) => {
+          clearSandboxEditRefusal();
+          sendSandboxEdit(overlaySource.seat as 0 | 1, { kind: "move-card", instanceId, to });
+        },
+      }
+    : undefined;
+  const openSandboxZone = (seatIndex: 0 | 1, zone: SandboxZone) => {
+    setSandboxOpen(false);
+    if (zone === "deck") {
+      openDeckEditor(seatIndex);
+      return;
+    }
+    clearSandboxEditRefusal();
+    const player = view.players[seatIndex]!;
+    setOverlay({
+      title: intl.formatMessage({ id: "game.sandbox.zoneTitle" }, { hero: player.heroName, zone }),
+      cards: player[zone],
+      source: { seat: seatIndex, zone },
+      inactiveZone: zone !== "hand",
+      showOwnedFaceDownIdentities: true,
+    });
   };
   const deckEditorPlayer = deckEditorSeat !== null && deckEditable(deckEditorSeat)
     ? view.players[deckEditorSeat]!
@@ -2028,6 +2076,7 @@ export function GameBoard() {
           refusal={sandboxEditRefusal}
           onEdit={sendSandboxEdit}
           onClearRefusal={clearSandboxEditRefusal}
+          onOpenZone={openSandboxZone}
           onClose={() => setSandboxOpen(false)}
         />
       ) : null}
@@ -2097,7 +2146,8 @@ export function GameBoard() {
 
       <BoardOverlays
         preview={pitchSource && preview?.id === pitchSource.card.cardId ? null : shownPreview}
-        overlay={showCardSearchOverlay ? null : overlay}
+        overlay={showCardSearchOverlay ? null : shownOverlay}
+        overlayMoves={showCardSearchOverlay ? undefined : overlayMoves}
         inspectedCardId={inspectedCardId}
         seat={seat}
         yourSeat={yourSeat}

@@ -26,6 +26,18 @@ function render(overrides: Partial<ComponentProps<typeof SandboxPanel>> = {}): s
 }
 
 describe("SandboxPanel", () => {
+  it("lists each zone with its card count when zones can be opened", () => {
+    const seats: SandboxSeat[] = [{ ...SEATS[0]!, zones: { hand: 4, deck: null, graveyard: 0, banish: 2 } }];
+    const html = render({ seats, onOpenZone: vi.fn() });
+    expect(html).toContain(">Cards</h3>");
+    expect(html).toMatch(/data-sandbox-zone="hand"[^>]*>Hand \(4\)</);
+    expect(html).toMatch(/data-sandbox-zone="deck"[^>]*disabled=""[^>]*>Deck \(0\)</);
+    expect(html).toMatch(/data-sandbox-zone="graveyard"[^>]*disabled=""[^>]*>Graveyard \(0\)</);
+    expect(html).toMatch(/data-sandbox-zone="banish"[^>]*>Banished \(2\)</);
+    expect(render({ seats })).not.toContain("data-sandbox-zone");
+    expect(render({ onOpenZone: vi.fn() })).not.toContain("data-sandbox-zone");
+  });
+
   it("shows a tab per seat in solo games, labelled by hero", () => {
     const html = render({ initialSeat: 1 });
     expect(html).toContain('role="tablist"');

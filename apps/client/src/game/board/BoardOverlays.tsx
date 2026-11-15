@@ -7,13 +7,14 @@ import { MobileCardInspect } from "../MobileCardInspect.js";
 import type { StandingOrderPanelModel } from "../StandingOrderPanel.js";
 import { PostGameFriendAction } from "../../social/PostGameFriendAction.js";
 import type { BoardOverlay } from "./BoardPrimitives.js";
-import { ZoneOverlay } from "./ZoneOverlay.js";
+import { ZoneOverlay, type ZoneOverlayMoves } from "./ZoneOverlay.js";
 
 export type { BoardPreview } from "../HoverCardPreview.js";
 
 export function BoardOverlays({
   preview,
   overlay,
+  overlayMoves,
   inspectedCardId,
   seat,
   yourSeat,
@@ -52,6 +53,8 @@ export function BoardOverlays({
 }: {
   preview: BoardPreview | null;
   overlay: BoardOverlay | null;
+  /** Sandbox move actions for the open pile, when the viewer may edit it. */
+  overlayMoves?: ZoneOverlayMoves;
   inspectedCardId: string | null;
   seat: number;
   yourSeat: number | null;
@@ -100,6 +103,7 @@ export function BoardOverlays({
           overlay={overlay}
           yourSeat={yourSeat}
           revealAllOwners={soloGame}
+          moves={overlayMoves}
           onClose={onCloseOverlay}
           onInspectCard={onInspectCard}
         />

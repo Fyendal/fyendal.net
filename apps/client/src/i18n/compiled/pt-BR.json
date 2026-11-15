@@ -26972,6 +26972,210 @@
       "value": " não pode ganhar vida enquanto estiver à frente na vida"
     }
   ],
+  "engine.log.manual.card.moved": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " move "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 5,
+      "value": "from",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "da mão"
+            }
+          ]
+        },
+        "deck": {
+          "value": [
+            {
+              "type": 0,
+              "value": "do deck"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "do cemitério"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "da zona banished"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 5,
+      "value": "to",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a mão"
+            }
+          ]
+        },
+        "deckTop": {
+          "value": [
+            {
+              "type": 0,
+              "value": "o topo do deck"
+            }
+          ]
+        },
+        "deckBottom": {
+          "value": [
+            {
+              "type": 0,
+              "value": "o fundo do deck"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "o cemitério"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a zona banished"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine.log.manual.card.moved.hidden": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " move uma carta "
+    },
+    {
+      "type": 5,
+      "value": "from",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "da mão"
+            }
+          ]
+        },
+        "deck": {
+          "value": [
+            {
+              "type": 0,
+              "value": "do deck"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "do cemitério"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "da zona banished"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 5,
+      "value": "to",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a mão"
+            }
+          ]
+        },
+        "deckTop": {
+          "value": [
+            {
+              "type": 0,
+              "value": "o topo do deck"
+            }
+          ]
+        },
+        "deckBottom": {
+          "value": [
+            {
+              "type": 0,
+              "value": "o fundo do deck"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "o cemitério"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a zona banished"
+            }
+          ]
+        }
+      }
+    }
+  ],
   "engine.log.manual.deck.reordered": [
     {
       "type": 0,
@@ -30395,7 +30599,7 @@
   "game.deckOrder.instructions": [
     {
       "type": 0,
-      "value": "A carta 1 é a próxima a ser comprada. Arraste as cartas para reordenar ou selecione uma carta e use as setas do teclado."
+      "value": "A carta 1 é a próxima a ser comprada. Arraste as cartas para reordenar ou selecione uma carta e use as setas do teclado. Pressione H, G ou B para mover a carta selecionada para a mão, o cemitério ou a zona banished."
     }
   ],
   "game.deckOrder.label": [
@@ -32015,6 +32219,12 @@
       "value": "Aplicando…"
     }
   ],
+  "game.sandbox.cards": [
+    {
+      "type": 0,
+      "value": "Cartas"
+    }
+  ],
   "game.sandbox.decrease": [
     {
       "type": 0,
@@ -32047,6 +32257,114 @@
       "value": "Vida"
     }
   ],
+  "game.sandbox.move.banish": [
+    {
+      "type": 0,
+      "value": "Banish"
+    }
+  ],
+  "game.sandbox.move.banishNamed": [
+    {
+      "type": 0,
+      "value": "Fazer banish de "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.sandbox.move.deckBottom": [
+    {
+      "type": 0,
+      "value": "Fundo do deck"
+    }
+  ],
+  "game.sandbox.move.deckBottomNamed": [
+    {
+      "type": 0,
+      "value": "Colocar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " no fundo do deck"
+    }
+  ],
+  "game.sandbox.move.deckTop": [
+    {
+      "type": 0,
+      "value": "Topo do deck"
+    }
+  ],
+  "game.sandbox.move.deckTopNamed": [
+    {
+      "type": 0,
+      "value": "Colocar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " no topo do deck"
+    }
+  ],
+  "game.sandbox.move.empty": [
+    {
+      "type": 0,
+      "value": "Não há mais cartas aqui."
+    }
+  ],
+  "game.sandbox.move.graveyard": [
+    {
+      "type": 0,
+      "value": "Cemitério"
+    }
+  ],
+  "game.sandbox.move.graveyardNamed": [
+    {
+      "type": 0,
+      "value": "Colocar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " no cemitério"
+    }
+  ],
+  "game.sandbox.move.hand": [
+    {
+      "type": 0,
+      "value": "Para a mão"
+    }
+  ],
+  "game.sandbox.move.handNamed": [
+    {
+      "type": 0,
+      "value": "Mover "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " para a mão"
+    }
+  ],
+  "game.sandbox.move.instructions": [
+    {
+      "type": 0,
+      "value": "Os movimentos são silenciosos: nada é ativado. Cada movimento aparece no registro da partida e pode ser desfeito."
+    }
+  ],
   "game.sandbox.open": [
     {
       "type": 0,
@@ -32065,6 +32383,12 @@
     {
       "type": 1,
       "value": "maximum"
+    }
+  ],
+  "game.sandbox.refusal.move": [
+    {
+      "type": 0,
+      "value": "Essa carta não pode ser movida agora. Tente de novo quando a stack estiver vazia e nenhuma escolha ou pagamento estiver em andamento."
     }
   ],
   "game.sandbox.refusal.required": [
@@ -32107,6 +32431,98 @@
     {
       "type": 0,
       "value": "Sandbox"
+    }
+  ],
+  "game.sandbox.zoneButton": [
+    {
+      "type": 5,
+      "value": "zone",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Mão"
+            }
+          ]
+        },
+        "deck": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Deck"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Cemitério"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Banished"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "game.sandbox.zoneTitle": [
+    {
+      "type": 5,
+      "value": "zone",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Mão"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Cemitério"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Zona banished"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " de "
+    },
+    {
+      "type": 1,
+      "value": "hero"
     }
   ],
   "game.search.instructions": [

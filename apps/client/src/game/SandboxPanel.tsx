@@ -16,7 +16,12 @@ export interface SandboxSeat {
   heroName: string;
   life: number;
   resources: number;
+  /** Movable cards per zone; deck is null while its order is unrevealed. */
+  zones?: { hand: number; deck: number | null; graveyard: number; banish: number };
 }
+
+export type SandboxZone = "hand" | "deck" | "graveyard" | "banish";
+const SANDBOX_ZONES: readonly SandboxZone[] = ["hand", "deck", "graveyard", "banish"];
 
 interface CounterDraft {
   life: number;
@@ -110,6 +115,39 @@ function SandboxStepper({
   );
 }
 
+function ZoneSection({
+  seat,
+  onOpenZone,
+}: {
+  seat: SandboxSeat;
+  onOpenZone: (zone: SandboxZone) => void;
+}) {
+  const intl = useIntl();
+  const zones = seat.zones;
+  if (!zones) return null;
+  return (
+    <div className="sandbox-section sandbox-zones">
+      <h3 className="sandbox-section-title">{intl.formatMessage({ id: "game.sandbox.cards" })}</h3>
+      <div className="sandbox-zone-buttons">
+        {SANDBOX_ZONES.map((zone) => {
+          const count = zones[zone];
+          return (
+            <button
+              key={zone}
+              type="button"
+              data-sandbox-zone={zone}
+              disabled={!count}
+              onClick={() => onOpenZone(zone)}
+            >
+              {intl.formatMessage({ id: "game.sandbox.zoneButton" }, { zone, count: count ?? 0 })}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function CounterSection({
   seat,
   pending,
@@ -173,6 +211,7 @@ export function SandboxPanel({
   refusal,
   onEdit,
   onClearRefusal,
+  onOpenZone,
   onClose,
 }: {
   /** Seats the viewer may edit: both in solo, only their own in a private room. */
@@ -183,6 +222,8 @@ export function SandboxPanel({
   /** Sends one edit; false when another room command is still in flight. */
   onEdit: (seat: 0 | 1, edit: ManualEdit) => boolean;
   onClearRefusal: () => void;
+  /** Opens a zone's card list with move actions, replacing this panel. */
+  onOpenZone?: (seat: 0 | 1, zone: SandboxZone) => void;
   onClose: () => void;
 }) {
   const intl = useIntl();
@@ -258,6 +299,12 @@ export function SandboxPanel({
             setQueue({ seat: active.seat, edits });
           }}
         />
+        {onOpenZone ? (
+          <ZoneSection
+            seat={active}
+            onOpenZone={(zone) => onOpenZone(active.seat, zone)}
+          />
+        ) : null}
       </div>
       {refusal ? (
         <p className="sandbox-refusal" role="alert">

@@ -391,6 +391,7 @@ export function PlayerHalf({
         ? () => onOpenOverlay({
             title,
             cards,
+            source: { seat: player.seat, zone: location.kind },
             inactiveZone: true,
             showOwnedFaceDownIdentities: revealsFaceDown,
             usableIds: new Set(cards

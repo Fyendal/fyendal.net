@@ -1,5 +1,5 @@
 import type { ClientBotTask, BotWorkerResponse } from "@fyendal/shared";
-import { STANDARD_CARD_ART } from "@fyendal/shared";
+import { MANUAL_MOVE_DESTINATIONS, STANDARD_CARD_ART } from "@fyendal/shared";
 import { decodeSerializedStateEnvelope } from "./simulationState.js";
 import type {
   AttackQueueEntryView,
@@ -1014,6 +1014,11 @@ export function decodeManualEdit(value: unknown): ManualEdit | null {
         : null;
     case "shuffle-deck":
       return exactKeys(edit, ["kind"]) ? edit as ManualEdit : null;
+    case "move-card":
+      return exactKeys(edit, ["kind", "instanceId", "to"]) && nonNegativeInteger(edit.instanceId)
+        && (MANUAL_MOVE_DESTINATIONS as readonly unknown[]).includes(edit.to)
+        ? edit as ManualEdit
+        : null;
     default:
       return null;
   }
