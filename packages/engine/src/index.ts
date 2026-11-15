@@ -809,6 +809,8 @@ export function applyIntent(
 
 export { projectTransitionEvents };
 export type { EngineTransitionMove };
+/** The one state change outside `applyIntent`: sandbox rooms only, never in `legalIntents`. */
+export { applyManualEdit, manualEditAllowed, manualEditRefusal } from "./manualEdit.js";
 
 export function legalIntents(state: GameStateInternal, seat: number) {
   return legalIntentsImpl(state, engineRuntime, seat);

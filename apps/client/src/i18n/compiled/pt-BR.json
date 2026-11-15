@@ -26972,6 +26972,58 @@
       "value": " não pode ganhar vida enquanto estiver à frente na vida"
     }
   ],
+  "engine.log.manual.life": [
+    {
+      "type": 0,
+      "value": "A vida de "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " foi alterada de "
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    }
+  ],
+  "engine.log.manual.resources": [
+    {
+      "type": 0,
+      "value": "Os recursos flutuantes de "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " foram alterados de "
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    }
+  ],
   "engine.log.mirage.fizzles.condition.failed": [
     {
       "type": 0,
@@ -31751,6 +31803,112 @@
     {
       "type": 1,
       "value": "code"
+    }
+  ],
+  "game.sandbox.apply": [
+    {
+      "type": 0,
+      "value": "Aplicar"
+    }
+  ],
+  "game.sandbox.applying": [
+    {
+      "type": 0,
+      "value": "Aplicando…"
+    }
+  ],
+  "game.sandbox.decrease": [
+    {
+      "type": 0,
+      "value": "Diminuir "
+    },
+    {
+      "type": 1,
+      "value": "field"
+    }
+  ],
+  "game.sandbox.description": [
+    {
+      "type": 0,
+      "value": "As mudanças valem para os dois jogadores, aparecem no registro da partida e podem ser desfeitas."
+    }
+  ],
+  "game.sandbox.increase": [
+    {
+      "type": 0,
+      "value": "Aumentar "
+    },
+    {
+      "type": 1,
+      "value": "field"
+    }
+  ],
+  "game.sandbox.life": [
+    {
+      "type": 0,
+      "value": "Vida"
+    }
+  ],
+  "game.sandbox.open": [
+    {
+      "type": 0,
+      "value": "Ferramentas de sandbox"
+    }
+  ],
+  "game.sandbox.range": [
+    {
+      "type": 1,
+      "value": "minimum"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "maximum"
+    }
+  ],
+  "game.sandbox.refusal.required": [
+    {
+      "type": 0,
+      "value": "As ferramentas de sandbox só estão disponíveis em partidas sandbox."
+    }
+  ],
+  "game.sandbox.refusal.seat": [
+    {
+      "type": 0,
+      "value": "Você só pode editar o seu próprio hero."
+    }
+  ],
+  "game.sandbox.refusal.unavailable": [
+    {
+      "type": 0,
+      "value": "Essa mudança não é permitida agora. Os recursos flutuantes não podem mudar durante um pagamento."
+    }
+  ],
+  "game.sandbox.reset": [
+    {
+      "type": 0,
+      "value": "Redefinir"
+    }
+  ],
+  "game.sandbox.resources": [
+    {
+      "type": 0,
+      "value": "Recursos flutuantes"
+    }
+  ],
+  "game.sandbox.seats": [
+    {
+      "type": 0,
+      "value": "Hero a editar"
+    }
+  ],
+  "game.sandbox.title": [
+    {
+      "type": 0,
+      "value": "Sandbox"
     }
   ],
   "game.search.instructions": [

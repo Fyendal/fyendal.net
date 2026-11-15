@@ -29,6 +29,12 @@ currently afford, so it must never be treated as an authorization list or fed
 to bots. The client may fill in an exact pitch sequence and submit the normal
 intent; `applyIntent` remains authoritative.
 
+`applyManualEdit(state, seat, edit)` (`src/manualEdit.ts`) is the one
+exception: a narrow, silent entry point for sandbox rooms that sets a seat's
+life or floating resources without triggers, flags, stats, scripts, or
+state-based checks. It is never a `GameIntent`, `legalIntents` never returns
+it, and the server alone decides who may call it.
+
 Callers supply the two decklists, a seed, the card registry, the script
 registry, and optionally the starting seat. The engine performs no I/O and
 does not consult ambient configuration.
@@ -37,7 +43,8 @@ does not consult ambient configuration.
 
 - Keep engine code card-agnostic. Add generic hooks and commands, not special
   cases for a printing, card name, class, or hero.
-- Route every player action through `legalIntents` and `applyIntent`.
+- Route every player action through `legalIntents` and `applyIntent`; only
+  sandbox edits use `applyManualEdit`.
 - Route every random result through the seeded RNG. A state plus an intent
   sequence must reproduce the same game.
 - Keep state JSON-round-trip serializable. Do not store functions, classes,

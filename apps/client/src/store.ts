@@ -5,6 +5,7 @@ import { create } from "zustand";
 import type {
   BotOpponent,
   CardPoolMode,
+  ErrorCode,
   ClientMessage,
   EmoteMessage,
   PassUntilMode,
@@ -54,6 +55,7 @@ import {
 import type {
   OptimisticInteractionIntent,
   PreReplaySnapshot,
+  SandboxEditRefusal,
   StoreState,
   ViewTransition,
   ViewUpdate,
@@ -106,6 +108,9 @@ const SOCIAL_ERROR_CODES = new Set([
   "MESSAGE_BOUNDS",
   "MESSAGE_RATE_LIMITED",
 ]);
+function isSandboxEditRefusal(code: ErrorCode): code is SandboxEditRefusal {
+  return code.startsWith("SANDBOX_");
+}
 const roomVersions = new RoomVersionGate();
 const replayRuntime = createReplayRuntime(localStorage);
 
@@ -1377,6 +1382,11 @@ export const useStore = create<StoreState>((set, get) => {
           set({ deckSwitchLocked: true });
           break;
         }
+        if (isSandboxEditRefusal(msg.code)) {
+          resetRoomCommandPipeline();
+          set({ sandboxEditRefusal: msg.code });
+          break;
+        }
         set({ roomStartPending: false });
         if ((get().pendingBotStart || pendingMatchDecline !== null) && get().screen === "room-loading"
           && get().prep?.deadlinePhase === "accept") {
@@ -1999,6 +2009,12 @@ export const useStore = create<StoreState>((set, get) => {
       get().clearError();
       sendVersionedRoomCommand((command) => ({ type: "undo", target, ...command }));
     },
+    sendSandboxEdit: (seat, edit) => {
+      get().clearError();
+      set({ sandboxEditRefusal: null });
+      return sendVersionedRoomCommand((command) => ({ type: "sandbox-edit", seat, edit, ...command }));
+    },
+    clearSandboxEditRefusal: () => set({ sandboxEditRefusal: null }),
     claimVictory: () => {
       get().clearError();
       sendVersionedRoomCommand((command) => ({ type: "claim-victory", ...command }));

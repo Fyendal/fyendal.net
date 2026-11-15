@@ -5,6 +5,7 @@ import {
   type BackgroundMatchmakingStatus,
   type BotOpponent,
   type BotRematch,
+  type ManualEdit,
   type SoloRematch,
   type CardPoolMode,
   type Decklist,
@@ -42,6 +43,7 @@ import {
 import {
   actionCandidates,
   applyIntent as engineApplyIntent,
+  applyManualEdit,
   createGame,
   damageStepPriorityAttacker,
   legalIntents,
@@ -88,7 +90,7 @@ import { decodeDeckPool, resolveDeck, validatePresentation, type DeckRow } from 
 import { appendClusterEvent, type ClusterEvent } from "./clusterEvents.js";
 import { assertActiveRuleset } from "./rulesetFence.js";
 import { withTransaction, type Queryable } from "./db.js";
-import { DECKS_LOCKED } from "./errors.js";
+import { DECKS_LOCKED, SANDBOX_EDIT_UNAVAILABLE, SANDBOX_REQUIRED, SANDBOX_SEAT_FORBIDDEN } from "./errors.js";
 import {
   CorruptRoomError,
   decodePersistedState,
@@ -4466,6 +4468,40 @@ export class PgRoomStore {
     return r.ok
       ? { ok: true, version: r.version, ...(r.replayFinalizationId ? { replayFinalizationId: r.replayFinalizationId } : {}) }
       : { ok: false, error: r.error };
+  }
+
+  /** Silently edit a seat in a sandbox room. Undo restores the pre-edit
+   * snapshot. Solo owners may edit either seat whoever is acting. */
+  async sandboxEdit(
+    code: string,
+    credentials: SeatCredentials,
+    seat: SeatIndex,
+    edit: ManualEdit,
+    command?: RoomCommand,
+  ): Promise<{ ok: true; version: number } | { ok: false; error: string }> {
+    const r = await this.withRetry(code.toUpperCase(), (room) => {
+      const own = seatForCredentials(room, credentials, false);
+      if (own === null || room.seats[own]?.controller !== undefined) return { error: "not a player in this room" };
+      if (!isSandboxRoom(room)) return { error: SANDBOX_REQUIRED };
+      if (!command && soloInPlay(room)) return { error: SOLO_COMMAND_REQUIRED };
+      const target = room.seats[seat];
+      if (!target || (seat !== own && target.controller !== "self")) return { error: SANDBOX_SEAT_FORBIDDEN };
+      if (!room.state) return { error: `${SANDBOX_EDIT_UNAVAILABLE}: game has not started` };
+      const res = applyManualEdit(room.state, seat, edit);
+      if (!res.ok) return { error: `${SANDBOX_EDIT_UNAVAILABLE}: ${res.error}` };
+      const snapshot = room.state;
+      room.state = res.state;
+      const events = [...res.events];
+      this.applyServerShortcuts(room, events);
+      room.lastTransition = { fromVersion: room.version, kind: "forward", events };
+      return { room, result: undefined, snapshot, replay: { kind: "frame" }, seatWrites: stampActivity(room) };
+    }, command ? {
+      meta: command,
+      credentials,
+      type: `sandbox-edit:${edit.kind}`,
+      duplicateResult: () => undefined,
+    } : undefined);
+    return r.ok ? { ok: true, version: r.version } : { ok: false, error: r.error };
   }
 
   /** Apply an authenticated bot submission against the exact observed version. */

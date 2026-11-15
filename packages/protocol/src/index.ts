@@ -19,6 +19,7 @@ import type {
   Format,
   GameIntent,
   GameLogEvent,
+  ManualEdit,
   GameLogViewEntry,
   GameMessage,
   GameMessageValue,
@@ -599,6 +600,7 @@ const ERROR_CODES = new Set([
   "INTERNAL_ERROR", "RESYNC_REQUIRED",
   "USER_NOT_FOUND", "INVALID_FRIEND_REQUEST", "FRIEND_REQUEST_CONFLICT", "FRIEND_REQUIRED",
   "FRIEND_UNAVAILABLE", "MESSAGE_BOUNDS", "MESSAGE_RATE_LIMITED", "DECK_LOCKED",
+  "SANDBOX_REQUIRED", "SANDBOX_SEAT_FORBIDDEN", "SANDBOX_EDIT_UNAVAILABLE",
 ]);
 const UNDO_TARGETS = new Set(["last-action", "current-turn", "previous-turn"]);
 const EMOTE_MESSAGES = new Set([
@@ -997,6 +999,20 @@ function turnTriggerChoice(value: unknown): value is TurnTriggerChoiceView {
     }, MAX_STANDING_CHOICE_OPTIONS);
 }
 
+/** Shape only; the engine enforces ranges so refusals carry a reason. */
+export function decodeManualEdit(value: unknown): ManualEdit | null {
+  const edit = object(value);
+  if (!edit) return null;
+  switch (edit.kind) {
+    case "set-life":
+      return exactKeys(edit, ["kind", "life"]) && integer(edit.life) ? edit as ManualEdit : null;
+    case "set-resources":
+      return exactKeys(edit, ["kind", "resources"]) && integer(edit.resources) ? edit as ManualEdit : null;
+    default:
+      return null;
+  }
+}
+
 function commandFields(message: Record<string, unknown>): boolean {
   if (message.commandId === undefined && message.expectedVersion === undefined) return true;
   return commandId(message.commandId) && nonNegativeInteger(message.expectedVersion);
@@ -1217,6 +1233,12 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
     case "undo":
       valid = exactKeys(message, ["type", "target", "commandId", "expectedVersion"], ["type"])
         && (message.target === undefined || UNDO_TARGETS.has(String(message.target)))
+        && commandFields(message);
+      break;
+    case "sandbox-edit":
+      valid = exactKeys(message, ["type", "seat", "edit", "commandId", "expectedVersion"], ["type", "seat", "edit"])
+        && (message.seat === 0 || message.seat === 1)
+        && decodeManualEdit(message.edit) !== null
         && commandFields(message);
       break;
     case "emote":

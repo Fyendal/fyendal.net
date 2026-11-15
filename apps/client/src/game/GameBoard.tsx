@@ -27,6 +27,7 @@ import {
 import { useDeckCardFeedback } from "./DeckCardToast.js";
 import { SideRail } from "./SideRail.js";
 import { ShareReplayDialog, savedReplayDaysLeft } from "../history/ShareReplayDialog.js";
+import { SandboxPanel, canOpenSandbox, type SandboxSeat } from "./SandboxPanel.js";
 import {
   canAddPaymentCard,
   canAddResourcePaymentPitch,
@@ -229,6 +230,12 @@ export function GameBoard() {
     };
   }));
   const [replayShareOpen, setReplayShareOpen] = useState(false);
+  const [sandboxOpen, setSandboxOpen] = useState(false);
+  const { sendSandboxEdit, sandboxEditRefusal, clearSandboxEditRefusal } = useStore(useShallow((state) => ({
+    sendSandboxEdit: state.sendSandboxEdit,
+    sandboxEditRefusal: state.sandboxEditRefusal,
+    clearSandboxEditRefusal: state.clearSandboxEditRefusal,
+  })));
   // Neither bot nor self-play has a human opponent for draws, idle claims or friend actions.
   const practiceGame = botGame || soloGame;
   // `yourSeat` is the acting seat; the board stays on `orientationSeat`.
@@ -689,6 +696,17 @@ export function GameBoard() {
         note.roomVersion === liveNoteRoomVersion
         || (note.roomVersion === undefined && note.frame === liveNoteFrame))?.text ?? null;
   const canSendEmote = !spectating && !replaying && connected && !soloGame;
+  // Sandbox tools are desktop-only for now.
+  const canSandbox = !mobileFloatViewport && !mobileLandscapeViewport
+    && canOpenSandbox({ sandbox, spectating, replaying, yourSeat, gameOver: view.phase === "game-over" });
+  const sandboxSeats: SandboxSeat[] = (soloGame ? [seat, 1 - seat] : [yourSeat ?? seat]).map((candidate) => {
+    const player = view.players[candidate]!;
+    return { seat: candidate as 0 | 1, heroName: player.heroName, life: player.life, resources: player.resources };
+  });
+  const openSandbox = () => {
+    clearSandboxEditRefusal();
+    setSandboxOpen(true);
+  };
   const me = presentedView.players[seat]!;
   const opp = presentedView.players[seat === 0 ? 1 : 0]!;
   const authoritativeActor = view.players[actingSeat]!;
@@ -1695,7 +1713,7 @@ export function GameBoard() {
         passUntil={passUntilControl("hud")}
         onUndo={mobileLandscapeViewport && canUndo ? () => undoAndDismissAnnouncement("last-action") : null}
         undoDisabled={roomCommandPending}
-        sandbox={sandbox}
+        onOpenSandbox={canSandbox ? openSandbox : null}
         rail={mobileLandscapeViewport
           ? {
               oppIdentity: oppNameplate,
@@ -1984,6 +2002,17 @@ export function GameBoard() {
         backgroundSearching={backgroundSearching}
         onStopBackgroundSearch={stopBackgroundMatchmaking}
       />
+      {sandboxOpen && canSandbox ? (
+        <SandboxPanel
+          seats={sandboxSeats}
+          initialSeat={yourSeat as 0 | 1}
+          pending={roomCommandPending}
+          refusal={sandboxEditRefusal}
+          onEdit={sendSandboxEdit}
+          onClearRefusal={clearSandboxEditRefusal}
+          onClose={() => setSandboxOpen(false)}
+        />
+      ) : null}
       {replayShareOpen && savedReplayShare.replayId ? (
         <ShareReplayDialog
           replayId={savedReplayShare.replayId}

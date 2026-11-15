@@ -5,7 +5,8 @@ import { cardImageUrl } from "./Card.js";
 import { MARKED_TOKEN_ID } from "./cardBadges.js";
 import { ControlIcon, undoWithoutFocus } from "./gameControls.js";
 import { LifeHeroPortrait } from "./LifeHeroPortrait.js";
-import { SandboxBadge } from "../components/SandboxBadge.js";
+import { TooltipButton } from "../components/TooltipButton.js";
+import { UiIcon } from "../components/UiIcon.js";
 
 export type PrimaryAction = "end-turn" | "confirm-blocks" | "confirm-no-blocks" | "pass";
 
@@ -310,7 +311,7 @@ export function StatusFloat({
   onUndo = null,
   undoDisabled = false,
   rail = null,
-  sandbox = false,
+  onOpenSandbox = null,
 }: {
   dockRect: DOMRect | null;
   hostRef?: Ref<HTMLDivElement>;
@@ -349,8 +350,8 @@ export function StatusFloat({
     /** Fills the gap between the plates. */
     middle?: ReactNode;
   } | null;
-  /** Unrecorded sandbox room. */
-  sandbox?: boolean;
+  /** Seated player in a live sandbox game. */
+  onOpenSandbox?: (() => void) | null;
 }) {
   const intl = useIntl();
   const oppSeat = mySeat === 0 ? 1 : 0;
@@ -397,6 +398,22 @@ export function StatusFloat({
       </span>
     </div>
   );
+  const sandboxButton = onOpenSandbox ? (
+    <TooltipButton
+      className="hud-sandbox"
+      tooltip={intl.formatMessage({ id: "game.sandbox.open" })}
+      aria-haspopup="dialog"
+      onClick={onOpenSandbox}
+    >
+      <UiIcon name="edit" />
+    </TooltipButton>
+  ) : null;
+  const apRow = sandboxButton ? (
+    <div className="hud-ap-row">
+      {actionPointsPip}
+      {sandboxButton}
+    </div>
+  ) : actionPointsPip;
   const resourcesPip = (
     <div
       className={`hud-resources${myResources > 0 ? "" : " hud-resources-empty"}`}
@@ -448,7 +465,6 @@ export function StatusFloat({
         aria-label={intl.formatMessage({ id: "game.hud.label" })}
       >
         {plate(oppSeat, "opp", rail.oppIdentity, oppLifeStatus)}
-        {sandbox ? <SandboxBadge /> : null}
         {rail.middle}
         {plate(mySeat, "me", rail.myIdentity, <>{myLifeStatus}{resourcesPip}</>)}
       </div>
@@ -460,9 +476,8 @@ export function StatusFloat({
       className="float status-float game-hud"
       aria-label={intl.formatMessage({ id: "game.hud.label" })}
     >
-      {sandbox ? <SandboxBadge /> : null}
       {oppLifeStatus}
-      {actionPointsPip}
+      {apRow}
       {resourcesPip}
       {undoButton}
       {primaryButton || passUntil ? (

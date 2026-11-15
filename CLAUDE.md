@@ -57,8 +57,10 @@ Fyendal is a TypeScript/pnpm monorepo for playing Flesh and Blood. Read
 `packages/engine/DESIGN.md` is the full reference. In short:
 
 - Games change only through `applyIntent`; `legalIntents` is the authority and
-  every returned intent must apply. All randomness uses the seeded RNG, and
-  state must survive a JSON round trip.
+  every returned intent must apply. The one exception is `applyManualEdit`,
+  the silent sandbox-room edit entry point, which is never a `GameIntent`.
+  All randomness uses the seeded RNG, and state must survive a JSON round
+  trip.
 - The engine never references a printing id, card name, class, or hero. Add
   the narrowest generic hook or `ScriptCtx` command instead.
 - Card scripts read deeply readonly state and mutate only through `ScriptCtx`.

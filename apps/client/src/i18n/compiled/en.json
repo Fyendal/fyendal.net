@@ -25674,6 +25674,50 @@
       "value": " can't gain life while ahead on life"
     }
   ],
+  "engine.log.manual.life": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "'s life is set from "
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " to "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    }
+  ],
+  "engine.log.manual.resources": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "'s floating resources are set from "
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " to "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    }
+  ],
   "engine.log.mirage.fizzles.condition.failed": [
     {
       "type": 0,
@@ -30159,6 +30203,112 @@
     {
       "type": 1,
       "value": "code"
+    }
+  ],
+  "game.sandbox.apply": [
+    {
+      "type": 0,
+      "value": "Apply"
+    }
+  ],
+  "game.sandbox.applying": [
+    {
+      "type": 0,
+      "value": "Applying…"
+    }
+  ],
+  "game.sandbox.decrease": [
+    {
+      "type": 0,
+      "value": "Decrease "
+    },
+    {
+      "type": 1,
+      "value": "field"
+    }
+  ],
+  "game.sandbox.description": [
+    {
+      "type": 0,
+      "value": "Changes apply for both players, appear in the game log, and can be undone."
+    }
+  ],
+  "game.sandbox.increase": [
+    {
+      "type": 0,
+      "value": "Increase "
+    },
+    {
+      "type": 1,
+      "value": "field"
+    }
+  ],
+  "game.sandbox.life": [
+    {
+      "type": 0,
+      "value": "Life"
+    }
+  ],
+  "game.sandbox.open": [
+    {
+      "type": 0,
+      "value": "Sandbox tools"
+    }
+  ],
+  "game.sandbox.range": [
+    {
+      "type": 1,
+      "value": "minimum"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "maximum"
+    }
+  ],
+  "game.sandbox.refusal.required": [
+    {
+      "type": 0,
+      "value": "Sandbox tools are only available in sandbox games."
+    }
+  ],
+  "game.sandbox.refusal.seat": [
+    {
+      "type": 0,
+      "value": "You can only edit your own hero."
+    }
+  ],
+  "game.sandbox.refusal.unavailable": [
+    {
+      "type": 0,
+      "value": "That change isn't allowed right now. Floating resources can't change while a payment is in progress."
+    }
+  ],
+  "game.sandbox.reset": [
+    {
+      "type": 0,
+      "value": "Reset"
+    }
+  ],
+  "game.sandbox.resources": [
+    {
+      "type": 0,
+      "value": "Floating resources"
+    }
+  ],
+  "game.sandbox.seats": [
+    {
+      "type": 0,
+      "value": "Hero to edit"
+    }
+  ],
+  "game.sandbox.title": [
+    {
+      "type": 0,
+      "value": "Sandbox"
     }
   ],
   "game.search.instructions": [

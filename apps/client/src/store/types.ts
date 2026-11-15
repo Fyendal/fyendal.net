@@ -29,6 +29,7 @@ import type {
   LeagueMembership,
   GameClockSummary,
   GameClockView,
+  ManualEdit,
 } from "@fyendal/shared";
 import type {
   AccountExport,
@@ -235,6 +236,8 @@ export interface StoreState {
   soloGame: boolean;
   /** Unrecorded sandbox room: a private opt-in or a solo game. */
   sandbox: boolean;
+  /** Error code of the last refused sandbox edit, shown in the sandbox panel. */
+  sandboxEditRefusal: SandboxEditRefusal | null;
   /** Solo games: the owner's seat, fixed at the bottom of the board while `yourSeat` follows the acting seat. */
   boardSeat: 0 | 1 | null;
   playerProfiles: [PlayerProfileView, PlayerProfileView] | null;
@@ -332,6 +335,9 @@ export interface StoreState {
   sendEmote: (message: EmoteMessage) => void;
   kickSpectator: (username: string) => void;
   undo: (target?: UndoTarget) => void;
+  /** True when the edit was sent; one versioned command at a time. */
+  sendSandboxEdit: (seat: 0 | 1, edit: ManualEdit) => boolean;
+  clearSandboxEditRefusal: () => void;
   claimVictory: () => void;
   leave: () => void;
 
@@ -398,3 +404,5 @@ export interface PreReplaySnapshot {
   /** Per-seat printing id -> image id the server shared with this viewer. */
   cardArt: [Record<string, string>, Record<string, string>] | null;
 }
+
+export type SandboxEditRefusal = Extract<ErrorCode, `SANDBOX_${string}`>;

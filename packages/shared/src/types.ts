@@ -1259,12 +1259,26 @@ export type ClientMessage =
   /** The same one-shot shortcut for a consecutive Seismic Surge resolution. */
   | { type: "seismic-surge-skip"; enabled: boolean; commandId?: string; expectedVersion?: number }
   | { type: "undo"; target?: UndoTarget; commandId?: string; expectedVersion?: number }
+  /** Sandbox rooms only: directly edit a seat the caller controls. */
+  | { type: "sandbox-edit"; seat: 0 | 1; edit: ManualEdit; commandId?: string; expectedVersion?: number }
   /** Broadcast a predefined, ephemeral message to the current room. */
   | { type: "emote"; message: EmoteMessage }
   /** Seated players may remove every live spectator session owned by this account. */
   | { type: "kick-spectator"; username: string }
   /** end the game as winner because the opponent has been idle (IDLE_VICTORY_MS) */
   | { type: "claim-victory"; commandId?: string; expectedVersion?: number };
+
+/** A silent direct state edit in a sandbox room; never a `GameIntent`. */
+export type ManualEdit =
+  | { kind: "set-life"; life: number }
+  | { kind: "set-resources"; resources: number };
+
+export type ManualEditKind = ManualEdit["kind"];
+
+export const MANUAL_LIFE_MIN = 1;
+export const MANUAL_LIFE_MAX = 999;
+export const MANUAL_RESOURCES_MIN = 0;
+export const MANUAL_RESOURCES_MAX = 99;
 
 export type ServerMessage =
   | { type: "bot-runtime"; code: string; runtimeId: string }
@@ -1344,6 +1358,12 @@ export type ErrorCode =
   | "MESSAGE_RATE_LIMITED"
   /** An opponent took the open seat before a deck switch committed. */
   | "DECK_LOCKED"
+  /** Manual edits are only available in sandbox rooms. */
+  | "SANDBOX_REQUIRED"
+  /** The caller may not edit that seat. */
+  | "SANDBOX_SEAT_FORBIDDEN"
+  /** The edit is out of range or not allowed in the current game state. */
+  | "SANDBOX_EDIT_UNAVAILABLE"
   | "INTERNAL_ERROR";
 /** Operator-authored plain text shown to every visitor. */
 export interface GlobalNotice {

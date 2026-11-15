@@ -338,6 +338,26 @@
   font-variant-numeric: tabular-nums;
 }
 .ap-count strong { font: inherit; }
+.hud-ap-row {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+.hud-sandbox {
+  display: grid;
+  min-width: 0;
+  width: 32px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid #b8933f44;
+  border-radius: 3px;
+  background: #00000033;
+  box-shadow: none;
+  clip-path: none;
+  color: #d9b866;
+}
+.hud-sandbox .ui-icon { width: 16px; height: 16px; }
+.hud-sandbox:hover { background: #ffd47914; color: var(--gold); }
 /* prompts/choices float above the hand; inner .decision boxes carry the chrome */
 .decision-float {
   left: var(--mat-cx);

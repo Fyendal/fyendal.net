@@ -793,3 +793,93 @@
   .rail-actions { margin-top: 2px; }
   .log { min-height: 70px; }
 }
+
+.sandbox-sheet {
+  width: min(420px, calc(100vw - 32px));
+  padding: 18px;
+  border-color: var(--border-strong);
+  border-radius: 14px;
+  background: var(--surface-panel);
+  font-family: var(--font-lobby-ui);
+}
+.sandbox-sheet .modal-surface-description {
+  margin: 0 2px 14px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.sandbox-seat-tabs { margin-bottom: 14px; }
+.sandbox-seat-tabs button { overflow: hidden; text-overflow: ellipsis; }
+.sandbox-seat-name {
+  margin: 0 2px 12px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.sandbox-steppers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.sandbox-stepper {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.sandbox-stepper > label {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+.sandbox-stepper-controls {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  gap: 4px;
+}
+.sandbox-stepper-controls button {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 8px;
+  clip-path: none;
+}
+.sandbox-stepper-controls input {
+  min-width: 0;
+  min-height: 40px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--surface-well);
+  color: var(--text-primary);
+  font: 600 18px var(--font-lobby-ui);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.sandbox-stepper-range {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.sandbox-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+.sandbox-actions button {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 9px;
+  clip-path: none;
+  font: 600 14px var(--font-lobby-ui);
+  text-transform: none;
+}
+.sandbox-actions .sandbox-reset {
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-muted);
+}
+.sandbox-refusal {
+  margin: 12px 2px 0;
+  color: var(--danger);
+  font-size: 13px;
+}

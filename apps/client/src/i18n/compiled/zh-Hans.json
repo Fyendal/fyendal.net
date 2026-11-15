@@ -24894,6 +24894,58 @@
       "value": " 的生命领先时无法恢复生命"
     }
   ],
+  "engine.log.manual.life": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 的生命被设为 "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    },
+    {
+      "type": 0,
+      "value": "（原为 "
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
+  "engine.log.manual.resources": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " 的浮动资源被设为 "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    },
+    {
+      "type": 0,
+      "value": "（原为 "
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": "）"
+    }
+  ],
   "engine.log.mirage.fizzles.condition.failed": [
     {
       "type": 0,
@@ -28959,6 +29011,112 @@
     {
       "type": 1,
       "value": "code"
+    }
+  ],
+  "game.sandbox.apply": [
+    {
+      "type": 0,
+      "value": "应用"
+    }
+  ],
+  "game.sandbox.applying": [
+    {
+      "type": 0,
+      "value": "正在应用…"
+    }
+  ],
+  "game.sandbox.decrease": [
+    {
+      "type": 0,
+      "value": "减少"
+    },
+    {
+      "type": 1,
+      "value": "field"
+    }
+  ],
+  "game.sandbox.description": [
+    {
+      "type": 0,
+      "value": "修改对双方生效，会记录在对局日志中，并且可以撤销。"
+    }
+  ],
+  "game.sandbox.increase": [
+    {
+      "type": 0,
+      "value": "增加"
+    },
+    {
+      "type": 1,
+      "value": "field"
+    }
+  ],
+  "game.sandbox.life": [
+    {
+      "type": 0,
+      "value": "生命"
+    }
+  ],
+  "game.sandbox.open": [
+    {
+      "type": 0,
+      "value": "沙盒工具"
+    }
+  ],
+  "game.sandbox.range": [
+    {
+      "type": 1,
+      "value": "minimum"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "maximum"
+    }
+  ],
+  "game.sandbox.refusal.required": [
+    {
+      "type": 0,
+      "value": "沙盒工具仅在沙盒对局中可用。"
+    }
+  ],
+  "game.sandbox.refusal.seat": [
+    {
+      "type": 0,
+      "value": "你只能编辑自己的英雄。"
+    }
+  ],
+  "game.sandbox.refusal.unavailable": [
+    {
+      "type": 0,
+      "value": "现在不能进行此修改。支付进行中时无法更改浮动资源。"
+    }
+  ],
+  "game.sandbox.reset": [
+    {
+      "type": 0,
+      "value": "重置"
+    }
+  ],
+  "game.sandbox.resources": [
+    {
+      "type": 0,
+      "value": "浮动资源"
+    }
+  ],
+  "game.sandbox.seats": [
+    {
+      "type": 0,
+      "value": "要编辑的英雄"
+    }
+  ],
+  "game.sandbox.title": [
+    {
+      "type": 0,
+      "value": "沙盒"
     }
   ],
   "game.search.instructions": [

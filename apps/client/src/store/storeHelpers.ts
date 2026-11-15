@@ -24,6 +24,7 @@ export function initialStoreProjection(
     botGame: false,
     soloGame: false,
     sandbox: false,
+    sandboxEditRefusal: null,
     boardSeat: null,
     playerProfiles: null,
     cardArt: null,
@@ -112,6 +113,7 @@ export function clearedRoomProjection(): Pick<
   | "botGame"
   | "soloGame"
   | "sandbox"
+  | "sandboxEditRefusal"
   | "boardSeat"
   | "playerProfiles"
   | "cardArt"
@@ -166,6 +168,7 @@ export function clearedRoomProjection(): Pick<
     botGame: false,
     soloGame: false,
     sandbox: false,
+    sandboxEditRefusal: null,
     boardSeat: null,
     playerProfiles: null,
     cardArt: null,

@@ -12,6 +12,7 @@ import {
   decodePlayerReportResponse,
   decodeApiError,
   decodeClientMessage,
+  decodeManualEdit,
   decodeDeckDetailResponse,
   decodeDeckInvalidResponse,
   decodeDeckArtRequest,
@@ -541,6 +542,33 @@ describe("client messages", () => {
     for (const target of ["last-action", "current-turn", "previous-turn"]) {
       expect(decodeClientMessage({ type: "undo", target })).not.toBeNull();
     }
+  });
+
+  it("decodes sandbox edits with exact keys", () => {
+    expect(decodeClientMessage({ type: "sandbox-edit", seat: 0, edit: { kind: "set-life", life: 12 } })).not.toBeNull();
+    expect(decodeClientMessage({
+      type: "sandbox-edit", seat: 1, edit: { kind: "set-resources", resources: 3 }, commandId: "00000000-0000-4000-8000-000000000001", expectedVersion: 4,
+    })).not.toBeNull();
+    expect(decodeManualEdit({ kind: "set-life", life: 5 })).toEqual({ kind: "set-life", life: 5 });
+    for (const edit of [
+      { kind: "set-life" },
+      { kind: "set-life", life: 1.5 },
+      { kind: "set-life", life: "5" },
+      { kind: "set-life", life: 5, extra: true },
+      { kind: "set-life", resources: 5 },
+      { kind: "set-resources", resources: Number.MAX_SAFE_INTEGER + 1 },
+      { kind: "set-chi", chi: 1 },
+      null,
+      [],
+    ]) {
+      expect(decodeManualEdit(edit)).toBeNull();
+      expect(decodeClientMessage({ type: "sandbox-edit", seat: 0, edit })).toBeNull();
+    }
+    for (const seat of [2, -1, "0", null, undefined]) {
+      expect(decodeClientMessage({ type: "sandbox-edit", seat, edit: { kind: "set-life", life: 5 } })).toBeNull();
+    }
+    expect(decodeClientMessage({ type: "sandbox-edit", seat: 0, edit: { kind: "set-life", life: 5 }, extra: 1 })).toBeNull();
+    expect(decodeClientMessage({ type: "sandbox-edit", seat: 0, edit: { kind: "set-life", life: 5 }, commandId: "00000000-0000-4000-8000-000000000001" })).toBeNull();
   });
 
   it("rejects unknown fields, unsafe integers, oversized data, bad nesting, and non-literal Boost", () => {

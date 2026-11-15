@@ -1647,6 +1647,25 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         await publishRoomEvent({ code: player.code, kind: "spectators", version: kicked.version });
         return;
       }
+      case "sandbox-edit": {
+        const player = requirePlayer(ws, ctx);
+        if (!player) return;
+        const r = await rooms.sandboxEdit(
+          player.code,
+          player.credentials,
+          msg.seat,
+          msg.edit,
+          msg.commandId !== undefined && msg.expectedVersion !== undefined
+            ? { id: msg.commandId, expectedVersion: msg.expectedVersion }
+            : undefined,
+        );
+        if (!r.ok) {
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        await afterStateCommit(player.code, r.version);
+        return;
+      }
       case "claim-victory": {
         const player = requirePlayer(ws, ctx);
         if (!player) return;
