@@ -9,6 +9,8 @@ import { EffectPins, EffectSlot } from "../effects/EffectSlot.js";
 import { EquipmentStack } from "../EquipmentStack.js";
 import { HeroEmote } from "../HeroEmote.js";
 import { HoverHint } from "../../history/HoverHint.js";
+import { TooltipButton } from "../../components/TooltipButton.js";
+import { UiIcon } from "../../components/UiIcon.js";
 import { PitchStack } from "../PitchStack.js";
 import { StandingOrderChip } from "../StandingOrderChip.js";
 import { standingOrderKey } from "../standingOrders.js";
@@ -129,6 +131,7 @@ export function PlayerHalf({
   onOpenEffects,
   standingOrders,
   handOverEffects = false,
+  onEditDeck,
 }: {
   player: PlayerView;
   /** The viewer's own half: zone labels and the emote button. */
@@ -163,6 +166,8 @@ export function PlayerHalf({
   standingOrders?: StandingOrderBoard;
   /** Solo's second hand rests over the effect slot, leaving it one row. */
   handOverEffects?: boolean;
+  /** Sandbox: opens this seat's draw-order editor. */
+  onEditDeck?: () => void;
 }) {
   const intl = useIntl();
   const row = (value: number) => (mirrored ? 4 - value : value);
@@ -688,6 +693,20 @@ export function PlayerHalf({
               motionZoneAnchor={motionLocationKey({ kind: "deck", seat: player.seat })}
             />
           )}
+          {onEditDeck ? (
+            <TooltipButton
+              className="deck-edit-button"
+              tooltip={intl.formatMessage({ id: "game.deckOrder.edit" })}
+              tooltipSide="above"
+              aria-label={intl.formatMessage({ id: "game.deckOrder.editNamed" }, { hero: player.heroName })}
+              onClick={(event) => {
+                event.stopPropagation();
+                onEditDeck();
+              }}
+            >
+              <UiIcon name="edit" />
+            </TooltipButton>
+          ) : null}
         </div>
         {deckShuffling ? (
           <>

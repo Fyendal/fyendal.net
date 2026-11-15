@@ -25674,6 +25674,26 @@
       "value": " can't gain life while ahead on life"
     }
   ],
+  "engine.log.manual.deck.reordered": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "'s deck is reordered"
+    }
+  ],
+  "engine.log.manual.deck.shuffled": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " shuffles their deck"
+    }
+  ],
   "engine.log.manual.life": [
     {
       "type": 1,
@@ -28808,6 +28828,184 @@
     {
       "type": 1,
       "value": "name"
+    }
+  ],
+  "game.deckOrder.apply": [
+    {
+      "type": 0,
+      "value": "Apply order"
+    }
+  ],
+  "game.deckOrder.changed": [
+    {
+      "type": 0,
+      "value": "The deck changed. Your order was kept for the cards still in it, and new cards were added at the bottom."
+    }
+  ],
+  "game.deckOrder.edit": [
+    {
+      "type": 0,
+      "value": "Edit draw order"
+    }
+  ],
+  "game.deckOrder.editNamed": [
+    {
+      "type": 0,
+      "value": "Edit "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": "'s draw order"
+    }
+  ],
+  "game.deckOrder.empty": [
+    {
+      "type": 0,
+      "value": "The deck is empty."
+    }
+  ],
+  "game.deckOrder.instructions": [
+    {
+      "type": 0,
+      "value": "Card 1 is drawn next. Drag cards to reorder, or focus a card and use the arrow keys."
+    }
+  ],
+  "game.deckOrder.label": [
+    {
+      "type": 0,
+      "value": "Deck order, top card first"
+    }
+  ],
+  "game.deckOrder.moveToBottom": [
+    {
+      "type": 0,
+      "value": "Move "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " to the bottom"
+    }
+  ],
+  "game.deckOrder.moveToTop": [
+    {
+      "type": 0,
+      "value": "Move "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " to the top"
+    }
+  ],
+  "game.deckOrder.position": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ", position "
+    },
+    {
+      "type": 1,
+      "value": "position"
+    },
+    {
+      "type": 0,
+      "value": " of "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    }
+  ],
+  "game.deckOrder.refusal": [
+    {
+      "type": 0,
+      "value": "The deck can't change right now. Try again when no choice or payment is in progress."
+    }
+  ],
+  "game.deckOrder.reveal.confirm": [
+    {
+      "type": 0,
+      "value": "Show draw order"
+    }
+  ],
+  "game.deckOrder.reveal.description": [
+    {
+      "type": 0,
+      "value": "This shows every card left in "
+    },
+    {
+      "type": 5,
+      "value": "owner",
+      "options": {
+        "mine": {
+          "value": [
+            {
+              "type": 0,
+              "value": "your deck"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "your opponent's deck"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": ", in draw order."
+    }
+  ],
+  "game.deckOrder.reveal.title": [
+    {
+      "type": 0,
+      "value": "See the draw order?"
+    }
+  ],
+  "game.deckOrder.shuffle": [
+    {
+      "type": 0,
+      "value": "Shuffle"
+    }
+  ],
+  "game.deckOrder.title": [
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": "'s draw order"
+    }
+  ],
+  "game.deckOrder.toBottom": [
+    {
+      "type": 0,
+      "value": "To bottom"
+    }
+  ],
+  "game.deckOrder.toTop": [
+    {
+      "type": 0,
+      "value": "To top"
     }
   ],
   "game.deckToast.arsenalFromBanish": [

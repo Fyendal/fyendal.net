@@ -23,7 +23,7 @@ interface CounterDraft {
   resources: number;
 }
 
-const REFUSAL_MESSAGE: Record<SandboxEditRefusal, string> = {
+export const SANDBOX_REFUSAL_MESSAGE: Record<SandboxEditRefusal, string> = {
   SANDBOX_REQUIRED: "game.sandbox.refusal.required",
   SANDBOX_SEAT_FORBIDDEN: "game.sandbox.refusal.seat",
   SANDBOX_EDIT_UNAVAILABLE: "game.sandbox.refusal.unavailable",
@@ -261,7 +261,7 @@ export function SandboxPanel({
       </div>
       {refusal ? (
         <p className="sandbox-refusal" role="alert">
-          {intl.formatMessage({ id: REFUSAL_MESSAGE[refusal] })}
+          {intl.formatMessage({ id: SANDBOX_REFUSAL_MESSAGE[refusal] })}
         </p>
       ) : null}
     </ModalSurface>

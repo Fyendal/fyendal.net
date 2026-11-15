@@ -296,6 +296,25 @@ export function saveSoloBothSidesSeen(storage: Pick<Storage, "setItem">): void {
   }
 }
 
+const DECK_ORDER_REVEAL_STORAGE_KEY = "fyendal-deck-order-reveal-game";
+
+/** Whether the draw-order reveal was accepted in this game; only the latest game is kept. */
+export function loadDeckOrderRevealAccepted(storage: Pick<Storage, "getItem">, gameId: string): boolean {
+  try {
+    return storage.getItem(DECK_ORDER_REVEAL_STORAGE_KEY) === gameId;
+  } catch {
+    return false;
+  }
+}
+
+export function saveDeckOrderRevealAccepted(storage: Pick<Storage, "setItem">, gameId: string): void {
+  try {
+    storage.setItem(DECK_ORDER_REVEAL_STORAGE_KEY, gameId);
+  } catch {
+    // Without storage the prompt simply returns next time.
+  }
+}
+
 interface RejectedMatchRoom {
   code: string;
   rejectedAt: number;

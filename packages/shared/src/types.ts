@@ -1271,7 +1271,10 @@ export type ClientMessage =
 /** A silent direct state edit in a sandbox room; never a `GameIntent`. */
 export type ManualEdit =
   | { kind: "set-life"; life: number }
-  | { kind: "set-resources"; resources: number };
+  | { kind: "set-resources"; resources: number }
+  /** A permutation of the seat's deck instance ids; index 0 becomes the top. */
+  | { kind: "reorder-deck"; instanceIds: number[] }
+  | { kind: "shuffle-deck" };
 
 export type ManualEditKind = ManualEdit["kind"];
 

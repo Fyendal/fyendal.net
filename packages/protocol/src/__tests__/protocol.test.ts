@@ -550,6 +550,9 @@ describe("client messages", () => {
       type: "sandbox-edit", seat: 1, edit: { kind: "set-resources", resources: 3 }, commandId: "00000000-0000-4000-8000-000000000001", expectedVersion: 4,
     })).not.toBeNull();
     expect(decodeManualEdit({ kind: "set-life", life: 5 })).toEqual({ kind: "set-life", life: 5 });
+    expect(decodeManualEdit({ kind: "reorder-deck", instanceIds: [3, 0, 7] })).toEqual({ kind: "reorder-deck", instanceIds: [3, 0, 7] });
+    expect(decodeManualEdit({ kind: "reorder-deck", instanceIds: Array.from({ length: 256 }, (_, i) => i) })).not.toBeNull();
+    expect(decodeManualEdit({ kind: "shuffle-deck" })).toEqual({ kind: "shuffle-deck" });
     for (const edit of [
       { kind: "set-life" },
       { kind: "set-life", life: 1.5 },
@@ -558,6 +561,13 @@ describe("client messages", () => {
       { kind: "set-life", resources: 5 },
       { kind: "set-resources", resources: Number.MAX_SAFE_INTEGER + 1 },
       { kind: "set-chi", chi: 1 },
+      { kind: "reorder-deck" },
+      { kind: "reorder-deck", instanceIds: [1, -2] },
+      { kind: "reorder-deck", instanceIds: [1, 2.5] },
+      { kind: "reorder-deck", instanceIds: ["1"] },
+      { kind: "reorder-deck", instanceIds: Array.from({ length: 257 }, (_, i) => i) },
+      { kind: "reorder-deck", instanceIds: [1], extra: 1 },
+      { kind: "shuffle-deck", seed: 1 },
       null,
       [],
     ]) {

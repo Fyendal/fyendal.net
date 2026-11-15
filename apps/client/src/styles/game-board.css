@@ -794,6 +794,28 @@
   position: relative;
   display: flex;
 }
+/* Mirrors the deck count pill in the opposite corner. */
+.deck-edit-button {
+  position: absolute;
+  z-index: 3;
+  top: 4px;
+  left: 4px;
+  display: grid;
+  width: 27px;
+  height: 27px;
+  min-height: 0;
+  padding: 0;
+  place-items: center;
+  border: 1px solid #d7c27d;
+  border-radius: 50%;
+  background: #080504db;
+  box-shadow: 0 2px 7px #000c;
+  clip-path: none;
+  color: #fff4c7;
+}
+.deck-edit-button:hover { background: #d7c27d; color: #1a120a; }
+.deck-edit-button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.deck-edit-button .ui-icon { width: 14px; height: 14px; }
 .zone-card-pile-under {
   position: absolute;
   top: 0;

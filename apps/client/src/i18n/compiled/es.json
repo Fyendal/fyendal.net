@@ -26498,6 +26498,30 @@
       "value": " no puede ganar vida mientras tenga más vida que su oponente"
     }
   ],
+  "engine.log.manual.deck.reordered": [
+    {
+      "type": 0,
+      "value": "El mazo de "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " se reordena"
+    }
+  ],
+  "engine.log.manual.deck.shuffled": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " baraja su mazo"
+    }
+  ],
   "engine.log.manual.life": [
     {
       "type": 0,
@@ -29684,6 +29708,180 @@
     {
       "type": 1,
       "value": "name"
+    }
+  ],
+  "game.deckOrder.apply": [
+    {
+      "type": 0,
+      "value": "Aplicar orden"
+    }
+  ],
+  "game.deckOrder.changed": [
+    {
+      "type": 0,
+      "value": "El mazo cambió. Se mantuvo tu orden para las cartas que siguen en él y las cartas nuevas se añadieron al fondo."
+    }
+  ],
+  "game.deckOrder.edit": [
+    {
+      "type": 0,
+      "value": "Editar orden de robo"
+    }
+  ],
+  "game.deckOrder.editNamed": [
+    {
+      "type": 0,
+      "value": "Editar el orden de robo de "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
+  "game.deckOrder.empty": [
+    {
+      "type": 0,
+      "value": "El mazo está vacío."
+    }
+  ],
+  "game.deckOrder.instructions": [
+    {
+      "type": 0,
+      "value": "La carta 1 es la próxima que robas. Arrastra las cartas para reordenarlas o selecciona una carta y usa las flechas del teclado."
+    }
+  ],
+  "game.deckOrder.label": [
+    {
+      "type": 0,
+      "value": "Orden del mazo, la carta superior primero"
+    }
+  ],
+  "game.deckOrder.moveToBottom": [
+    {
+      "type": 0,
+      "value": "Mover "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " abajo del todo"
+    }
+  ],
+  "game.deckOrder.moveToTop": [
+    {
+      "type": 0,
+      "value": "Mover "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " arriba del todo"
+    }
+  ],
+  "game.deckOrder.position": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ", posición "
+    },
+    {
+      "type": 1,
+      "value": "position"
+    },
+    {
+      "type": 0,
+      "value": " de "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    }
+  ],
+  "game.deckOrder.refusal": [
+    {
+      "type": 0,
+      "value": "El mazo no puede cambiar ahora. Inténtalo de nuevo cuando no haya una elección ni un pago en curso."
+    }
+  ],
+  "game.deckOrder.reveal.confirm": [
+    {
+      "type": 0,
+      "value": "Mostrar orden de robo"
+    }
+  ],
+  "game.deckOrder.reveal.description": [
+    {
+      "type": 0,
+      "value": "Esto muestra todas las cartas que quedan "
+    },
+    {
+      "type": 5,
+      "value": "owner",
+      "options": {
+        "mine": {
+          "value": [
+            {
+              "type": 0,
+              "value": "en tu mazo"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "en el mazo de tu oponente"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": ", en orden de robo."
+    }
+  ],
+  "game.deckOrder.reveal.title": [
+    {
+      "type": 0,
+      "value": "¿Ver el orden de robo?"
+    }
+  ],
+  "game.deckOrder.shuffle": [
+    {
+      "type": 0,
+      "value": "Barajar"
+    }
+  ],
+  "game.deckOrder.title": [
+    {
+      "type": 0,
+      "value": "Orden de robo de "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
+  "game.deckOrder.toBottom": [
+    {
+      "type": 0,
+      "value": "Abajo del todo"
+    }
+  ],
+  "game.deckOrder.toTop": [
+    {
+      "type": 0,
+      "value": "Arriba del todo"
     }
   ],
   "game.deckToast.arsenalFromBanish": [

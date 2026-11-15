@@ -1008,6 +1008,12 @@ export function decodeManualEdit(value: unknown): ManualEdit | null {
       return exactKeys(edit, ["kind", "life"]) && integer(edit.life) ? edit as ManualEdit : null;
     case "set-resources":
       return exactKeys(edit, ["kind", "resources"]) && integer(edit.resources) ? edit as ManualEdit : null;
+    case "reorder-deck":
+      return exactKeys(edit, ["kind", "instanceIds"]) && array(edit.instanceIds, nonNegativeInteger, MAX_CARDS)
+        ? edit as ManualEdit
+        : null;
+    case "shuffle-deck":
+      return exactKeys(edit, ["kind"]) ? edit as ManualEdit : null;
     default:
       return null;
   }

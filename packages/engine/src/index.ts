@@ -31,6 +31,7 @@ import {
   projectStateFor as projectStateForImpl,
   projectStateForReplay as projectStateForReplayImpl,
   projectStateRevealedFor as projectStateRevealedForImpl,
+  type ProjectionOptions,
 } from "./project.js";
 import {
   anyWindowAction as anyWindowActionImpl,
@@ -811,6 +812,7 @@ export { projectTransitionEvents };
 export type { EngineTransitionMove };
 /** The one state change outside `applyIntent`: sandbox rooms only, never in `legalIntents`. */
 export { applyManualEdit, manualEditAllowed, manualEditRefusal } from "./manualEdit.js";
+export type { ProjectionOptions } from "./project.js";
 
 export function legalIntents(state: GameStateInternal, seat: number) {
   return legalIntentsImpl(state, engineRuntime, seat);
@@ -840,16 +842,22 @@ export function projectStateFor(
   state: GameStateInternal,
   seat: number | null,
   publicGameId?: string,
+  options?: ProjectionOptions,
 ) {
-  return projectStateForImpl(state, engineRuntime, seat, publicGameId);
+  return projectStateForImpl(state, engineRuntime, seat, publicGameId, options);
 }
 
 export function projectStateForReplay(state: GameStateInternal, publicGameId?: string) {
   return projectStateForReplayImpl(state, engineRuntime, publicGameId);
 }
 
-export function projectStateRevealedFor(state: GameStateInternal, seat: number, publicGameId?: string) {
-  return projectStateRevealedForImpl(state, engineRuntime, seat, publicGameId);
+export function projectStateRevealedFor(
+  state: GameStateInternal,
+  seat: number,
+  publicGameId?: string,
+  options?: ProjectionOptions,
+) {
+  return projectStateRevealedForImpl(state, engineRuntime, seat, publicGameId, options);
 }
 export { TOKEN_SKIP_INTENTS, tokenSkipSequenceActive } from "./tokenSkip.js";
 export { damageStepPriorityAttacker } from "./triggers.js";

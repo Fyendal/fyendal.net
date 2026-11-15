@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { precon } from "@fyendal/cards";
-import type { ManualEdit, PresentedDeck } from "@fyendal/shared";
+import { legalIntents } from "@fyendal/engine";
+import type { GameIntent, ManualEdit, PresentedDeck, ServerMessage } from "@fyendal/shared";
 import type { Queryable } from "../db.js";
 import { encodeWireMessage } from "../errors.js";
 import { PgRoomStore, stateMessage, type SeatCredentials } from "../store.js";
@@ -197,4 +198,91 @@ describe("sandbox edits", () => {
     expect(restored.players.map((p) => p.life)).toEqual(before.players.map((p) => p.life));
     expect(JSON.stringify(restored.log)).not.toContain("engine.log.manual.resources");
   });
+
+  it("shows a private sandbox player their own deck in order, and nobody else", async () => {
+    const { code, seats } = await privateGame(true);
+    const room = (await store.getRoom(code))!;
+    const order = (seat: number) => room.state!.players[seat]!.deck.map((card) => card.instanceId);
+    const own = viewOf(stateMessage(room, 0));
+    expect(own.players[0]!.deck?.map((card) => card.instanceId)).toEqual(order(0));
+    expect(own.players[1]!.deck).toBeUndefined();
+    const opponent = viewOf(stateMessage(room, 1));
+    expect(opponent.players[1]!.deck?.map((card) => card.instanceId)).toEqual(order(1));
+    expect(opponent.players[0]!.deck).toBeUndefined();
+    expect(viewOf(stateMessage(room, null)).players.map((p) => p.deck)).toEqual([undefined, undefined]);
+
+    expect(await edit(code, seats[0], 0, { kind: "reorder-deck", instanceIds: [...order(0)].reverse() }))
+      .toMatchObject({ ok: true });
+    const edited = (await store.getRoom(code))!;
+    const watcher = viewOf(stateMessage(edited, null));
+    const rival = viewOf(stateMessage(edited, 1));
+    for (const view of [watcher, rival]) {
+      expect(view.players[0]!.deck).toBeUndefined();
+      expect(JSON.stringify(view.logEntries)).toContain("engine.log.manual.deck.reordered");
+    }
+    const editEntry = JSON.stringify(rival.logEntries?.at(-1));
+    expect(editEntry).not.toContain("cardId");
+  });
+
+  it("keeps decks hidden in a non-sandbox private room", async () => {
+    const { code } = await privateGame(false);
+    const room = (await store.getRoom(code))!;
+    for (const viewer of [0, 1, null]) {
+      expect(viewOf(stateMessage(room, viewer)).players.map((p) => p.deck)).toEqual([undefined, undefined]);
+    }
+  });
+
+  it("shows the solo owner both decks and draws the chosen top card", async () => {
+    const { code, seats } = await soloGame();
+    let room = (await store.getRoom(code))!;
+    const view = viewOf(stateMessage(room, 0));
+    for (const seat of [0, 1]) {
+      expect(view.players[seat]!.deck?.map((card) => card.instanceId))
+        .toEqual(room.state!.players[seat]!.deck.map((card) => card.instanceId));
+    }
+    const turn = room.state!.activePlayer as 0 | 1;
+    const ids = room.state!.players[turn]!.deck.map((card) => card.instanceId);
+    const chosen = ids.at(-1)!;
+    expect(await edit(code, seats[0], turn, { kind: "reorder-deck", instanceIds: [chosen, ...ids.slice(0, -1)] }))
+      .toMatchObject({ ok: true });
+    for (let guard = 0; guard < 40; guard++) {
+      room = (await store.getRoom(code))!;
+      if (room.state!.activePlayer !== turn) break;
+      const actor = room.state!.pendingDecision?.player ?? room.state!.priorityPlayer;
+      const intent = endTurnStep(legalIntents(room.state!, actor));
+      const applied = await store.applyIntent(code, seats[actor as 0 | 1], intent, {}, {
+        id: `end-${++commandCounter}`, expectedVersion: room.version,
+      });
+      expect(applied, JSON.stringify(intent)).toMatchObject({ ok: true });
+    }
+    room = (await store.getRoom(code))!;
+    expect(room.state!.activePlayer).not.toBe(turn);
+    expect(room.state!.players[turn]!.hand.map((card) => card.instanceId)).toContain(chosen);
+  });
+
+  it("undo restores the previous deck order", async () => {
+    const { code, seats } = await soloGame();
+    const before = (await store.getRoom(code))!.state!.players[1]!.deck.map((card) => card.instanceId);
+    expect(await edit(code, seats[0], 1, { kind: "reorder-deck", instanceIds: [...before].reverse() }))
+      .toMatchObject({ ok: true });
+    expect(await edit(code, seats[0], 1, { kind: "shuffle-deck" })).toMatchObject({ ok: true });
+    for (let undo = 0; undo < 2; undo++) {
+      const room = (await store.getRoom(code))!;
+      expect(await store.undo(code, seats[0], "last-action", { id: `undo-deck-${undo}`, expectedVersion: room.version }))
+        .toMatchObject({ ok: true });
+    }
+    expect((await store.getRoom(code))!.state!.players[1]!.deck.map((card) => card.instanceId)).toEqual(before);
+  });
 });
+
+function viewOf(message: ServerMessage | null) {
+  if (message?.type !== "state") throw new Error("expected state");
+  return message.view;
+}
+
+/** Ends the turn without playing anything, arsenalling a card so the end phase draws one. */
+function endTurnStep(legal: GameIntent[]): GameIntent {
+  const passive = legal.find((intent) => intent.kind === "choose") ?? legal.find((intent) => intent.kind === "pass");
+  if (!passive) throw new Error(`no passive intent in ${JSON.stringify(legal)}`);
+  return passive;
+}

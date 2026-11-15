@@ -19,6 +19,8 @@ import {
   loadBotMatchmakingPreference,
   loadSoloBothSidesSeen,
   saveSoloBothSidesSeen,
+  loadDeckOrderRevealAccepted,
+  saveDeckOrderRevealAccepted,
   loadHomeGameMode,
   loadHomeSoloOpponentDeck,
   loadHomeFormat,
@@ -102,6 +104,17 @@ describe("client storage keys", () => {
     expect(loadSoloBothSidesSeen(storage)).toBe(false);
     saveSoloBothSidesSeen(storage);
     expect(loadSoloBothSidesSeen(storage)).toBe(true);
+  });
+
+  it("remembers the draw-order reveal only for the game it was accepted in", () => {
+    const storage = memoryStorage();
+    expect(loadDeckOrderRevealAccepted(storage, "GAME1")).toBe(false);
+    saveDeckOrderRevealAccepted(storage, "GAME1");
+    expect(loadDeckOrderRevealAccepted(storage, "GAME1")).toBe(true);
+    expect(loadDeckOrderRevealAccepted(storage, "GAME2")).toBe(false);
+    saveDeckOrderRevealAccepted(storage, "GAME2");
+    expect(loadDeckOrderRevealAccepted(storage, "GAME1")).toBe(false);
+    expect(loadDeckOrderRevealAccepted({ getItem: () => { throw new Error("blocked"); } }, "GAME2")).toBe(false);
   });
 
   it("remembers the home game mode for each account across reloads", () => {

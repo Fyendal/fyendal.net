@@ -5243,9 +5243,11 @@ export function stateMessage(room: RoomRow, viewer: number | null, now = Date.no
     ? viewer
     : room.state.phase === "game-over" ? boardSeat : soloActingSeat(room.state);
   const reveal = boardSeat !== null;
+  // Sandbox players see their own deck order; a bot seat's task never does.
+  const revealOwnDeck = seat !== null && isSandboxRoom(room) && room.seats[seat]?.controller !== "bot";
   const view = reveal
-    ? projectStateRevealedFor(room.state, seat!, room.code)
-    : projectStateFor(room.state, seat, room.code);
+    ? projectStateRevealedFor(room.state, seat!, room.code, { revealOwnDeck })
+    : projectStateFor(room.state, seat, room.code, { revealOwnDeck });
   const candidates = seat === null ? [] : actionCandidates(room.state, seat);
   const profile = (member: SeatRow | null) => ({
     username: member?.username ?? "Unknown player",

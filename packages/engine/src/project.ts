@@ -832,6 +832,12 @@ function projectedStackContext(state: GameStateInternal): string | undefined {
   return "ACTION PHASE · EFFECTS";
 }
 
+export interface ProjectionOptions {
+  /** Sandbox rooms: the viewer's own deck (both decks when revealed for one
+   * person playing both seats) is listed in order. */
+  revealOwnDeck?: boolean;
+}
+
 /** Per-player projection: full info for own zones, hidden info as counts.
  *  `seat` is the viewer's seat; `null` is a spectator (everything hidden). */
 export function projectStateFor(
@@ -839,8 +845,9 @@ export function projectStateFor(
   runtime: EngineRuntime,
   seat: number | null,
   publicGameId = "game",
+  options: ProjectionOptions = {},
 ): GameView {
-  return projectState(state, runtime, seat, publicGameId, false);
+  return projectState(state, runtime, seat, publicGameId, false, false, options.revealOwnDeck === true);
 }
 
 /** Full-information projection for a completed-game replay. It may be
@@ -865,8 +872,9 @@ export function projectStateRevealedFor(
   runtime: EngineRuntime,
   seat: number,
   publicGameId = "game",
+  options: ProjectionOptions = {},
 ): GameView {
-  return projectState(state, runtime, seat, publicGameId, true, true);
+  return projectState(state, runtime, seat, publicGameId, true, true, options.revealOwnDeck === true);
 }
 
 /** Project the authoritative stack one-for-one. Counted server layers expose
@@ -1052,6 +1060,7 @@ function projectState(
   publicGameId: string,
   revealAll: boolean,
   bothSeats = false,
+  revealOwnDeck = false,
 ): GameView {
   // Until the attack-layer resolves, the newest link is presented on the
   // stack. Attack-step triggers run after it has become attacking.
@@ -1244,6 +1253,8 @@ function projectState(
     })) as TurnFactsView["players"],
   };
   const projectedGameLog = projectedLog(state, seat, revealAll, bothSeats);
+  const revealsDeck = (index: number) =>
+    (revealAll && !bothSeats) || (revealOwnDeck && seat !== null && (bothSeats || seat === index));
   return {
     // The RNG seed is private server state. Publishing it lets a client
     // reconstruct every future shuffle/random choice in a deterministic game.
@@ -1258,8 +1269,8 @@ function projectState(
       ? { endTurnPassPending: true as const }
       : {}),
     players: [
-      playerView(state, runtime, state.players[0] as PlayerState, seat === 0, revealAll, seat, revealAll && !bothSeats),
-      playerView(state, runtime, state.players[1] as PlayerState, seat === 1, revealAll, seat, revealAll && !bothSeats),
+      playerView(state, runtime, state.players[0] as PlayerState, seat === 0, revealAll, seat, revealsDeck(0)),
+      playerView(state, runtime, state.players[1] as PlayerState, seat === 1, revealAll, seat, revealsDeck(1)),
     ],
     chain,
     stack: projectedStackLayers(state, runtime, seat, revealAll),

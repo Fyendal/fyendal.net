@@ -195,7 +195,9 @@ describe("solo rooms", () => {
         expect(message.view.players[seat].hand.map((card) => card.instanceId))
           .toEqual(state.players[seat].hand.map((card) => card.instanceId));
         expect(message.view.players[seat].arsenal).toHaveLength(state.players[seat].arsenal.length);
-        expect(message.view.players[seat].deck).toBeUndefined();
+        // Solo rooms are sandbox rooms, so the owner sees both decks in order.
+        expect(message.view.players[seat].deck?.map((card) => card.instanceId))
+          .toEqual(state.players[seat].deck.map((card) => card.instanceId));
       }
       const frame = transport.encode(message);
       if (previousActor !== null && previousActor !== actor) {

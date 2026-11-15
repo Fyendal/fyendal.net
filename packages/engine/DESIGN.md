@@ -31,9 +31,13 @@ intent; `applyIntent` remains authoritative.
 
 `applyManualEdit(state, seat, edit)` (`src/manualEdit.ts`) is the one
 exception: a narrow, silent entry point for sandbox rooms that sets a seat's
-life or floating resources without triggers, flags, stats, scripts, or
-state-based checks. It is never a `GameIntent`, `legalIntents` never returns
-it, and the server alone decides who may call it.
+life or floating resources, or reorders or shuffles its deck (seeded RNG),
+without triggers, flags, stats, scripts, or state-based checks. Deck edits are
+refused unless the pending decision is absent or a plain priority, reaction,
+or defend window, so no continuation can hold a deck reference. It is never a
+`GameIntent`, `legalIntents` never returns it, and the server alone decides
+who may call it. `projectStateFor`/`projectStateRevealedFor` take
+`revealOwnDeck` so sandbox viewers see their own deck in order.
 
 Callers supply the two decklists, a seed, the card registry, the script
 registry, and optionally the starting seat. The engine performs no I/O and

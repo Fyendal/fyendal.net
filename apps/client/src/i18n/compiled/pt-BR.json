@@ -26972,6 +26972,30 @@
       "value": " não pode ganhar vida enquanto estiver à frente na vida"
     }
   ],
+  "engine.log.manual.deck.reordered": [
+    {
+      "type": 0,
+      "value": "O deck de "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " foi reordenado"
+    }
+  ],
+  "engine.log.manual.deck.shuffled": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " embaralha o próprio deck"
+    }
+  ],
   "engine.log.manual.life": [
     {
       "type": 0,
@@ -30332,6 +30356,180 @@
     {
       "type": 1,
       "value": "name"
+    }
+  ],
+  "game.deckOrder.apply": [
+    {
+      "type": 0,
+      "value": "Aplicar ordem"
+    }
+  ],
+  "game.deckOrder.changed": [
+    {
+      "type": 0,
+      "value": "O deck mudou. Sua ordem foi mantida para as cartas que continuam nele, e as cartas novas foram colocadas no fundo."
+    }
+  ],
+  "game.deckOrder.edit": [
+    {
+      "type": 0,
+      "value": "Editar ordem de compra"
+    }
+  ],
+  "game.deckOrder.editNamed": [
+    {
+      "type": 0,
+      "value": "Editar a ordem de compra de "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
+  "game.deckOrder.empty": [
+    {
+      "type": 0,
+      "value": "O deck está vazio."
+    }
+  ],
+  "game.deckOrder.instructions": [
+    {
+      "type": 0,
+      "value": "A carta 1 é a próxima a ser comprada. Arraste as cartas para reordenar ou selecione uma carta e use as setas do teclado."
+    }
+  ],
+  "game.deckOrder.label": [
+    {
+      "type": 0,
+      "value": "Ordem do deck, carta do topo primeiro"
+    }
+  ],
+  "game.deckOrder.moveToBottom": [
+    {
+      "type": 0,
+      "value": "Mover "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " para o fundo"
+    }
+  ],
+  "game.deckOrder.moveToTop": [
+    {
+      "type": 0,
+      "value": "Mover "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " para o topo"
+    }
+  ],
+  "game.deckOrder.position": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ", posição "
+    },
+    {
+      "type": 1,
+      "value": "position"
+    },
+    {
+      "type": 0,
+      "value": " de "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    }
+  ],
+  "game.deckOrder.refusal": [
+    {
+      "type": 0,
+      "value": "O deck não pode mudar agora. Tente de novo quando não houver escolha ou pagamento em andamento."
+    }
+  ],
+  "game.deckOrder.reveal.confirm": [
+    {
+      "type": 0,
+      "value": "Mostrar ordem de compra"
+    }
+  ],
+  "game.deckOrder.reveal.description": [
+    {
+      "type": 0,
+      "value": "Isto mostra todas as cartas restantes "
+    },
+    {
+      "type": 5,
+      "value": "owner",
+      "options": {
+        "mine": {
+          "value": [
+            {
+              "type": 0,
+              "value": "no seu deck"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "no deck do seu oponente"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": ", em ordem de compra."
+    }
+  ],
+  "game.deckOrder.reveal.title": [
+    {
+      "type": 0,
+      "value": "Ver a ordem de compra?"
+    }
+  ],
+  "game.deckOrder.shuffle": [
+    {
+      "type": 0,
+      "value": "Embaralhar"
+    }
+  ],
+  "game.deckOrder.title": [
+    {
+      "type": 0,
+      "value": "Ordem de compra de "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
+  "game.deckOrder.toBottom": [
+    {
+      "type": 0,
+      "value": "Para o fundo"
+    }
+  ],
+  "game.deckOrder.toTop": [
+    {
+      "type": 0,
+      "value": "Para o topo"
     }
   ],
   "game.deckToast.arsenalFromBanish": [

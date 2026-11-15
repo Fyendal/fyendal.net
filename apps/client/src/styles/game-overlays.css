@@ -113,6 +113,162 @@
   padding: 20px;
   background: #120d08;
 }
+/* Draw-order editor: the pile viewer's well, with cards that drag. Its
+   position coins reuse the deck count's gold-ringed pill. */
+.overlay-panel.deck-order-editor {
+  width: min(1100px, 92vw);
+  max-width: 92vw;
+  max-height: 88vh;
+}
+.deck-order-editor .zone-viewer-header { grid-template-areas: "heading shuffle close"; }
+.deck-order-shuffle {
+  display: inline-flex;
+  grid-area: shuffle;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  clip-path: none;
+  font: 600 14px var(--font-lobby-ui);
+  text-transform: none;
+}
+.deck-order-well {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #120d08;
+}
+.deck-order-empty {
+  margin: 0;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  text-align: center;
+}
+.overlay-cards.deck-order-cards {
+  gap: 18px 16px;
+  margin: 0;
+  padding: 22px 22px 26px;
+  list-style: none;
+}
+.deck-order-card {
+  position: relative;
+  cursor: grab;
+  transition: opacity 120ms ease;
+}
+.deck-order-card:active { cursor: grabbing; }
+.deck-order-card.is-dragging { opacity: .35; }
+.deck-order-card.is-drop-target::before {
+  position: absolute;
+  z-index: 3;
+  top: -4px;
+  bottom: -4px;
+  width: 4px;
+  border-radius: 2px;
+  background: #e6c96a;
+  box-shadow: 0 0 10px #e6c96a99;
+  content: "";
+}
+.deck-order-card.is-drop-before::before { left: -10px; }
+.deck-order-card.is-drop-after::before { right: -10px; }
+.deck-order-slot {
+  position: relative;
+  border-radius: 6px;
+}
+.deck-order-slot:focus { outline: none; }
+.deck-order-slot:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+.deck-order-position {
+  position: absolute;
+  z-index: 2;
+  top: -8px;
+  left: -8px;
+  display: grid;
+  min-width: 25px;
+  height: 25px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  place-items: center;
+  border: 1px solid #d7c27d;
+  border-radius: 999px;
+  background: #080504eb;
+  box-shadow: 0 2px 6px #000c;
+  color: #fff4c7;
+  font: 800 12px/1 var(--font-lobby-ui);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.deck-order-card:first-child .deck-order-position {
+  background: #e6c96a;
+  color: #1a120a;
+}
+.deck-order-jump {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 6px;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.deck-order-card:hover .deck-order-jump,
+.deck-order-slot:focus-within .deck-order-jump { opacity: 1; }
+.deck-order-jump button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  min-height: 0;
+  padding: 0;
+  place-items: center;
+  border: 1px solid #d7c27d;
+  border-radius: 50%;
+  background: #080504e6;
+  clip-path: none;
+  color: #fff4c7;
+}
+.deck-order-jump button:hover:not(:disabled) { background: #d7c27d; color: #1a120a; }
+.deck-order-jump button:disabled { opacity: .35; }
+.deck-order-jump .ui-icon { width: 14px; height: 14px; }
+.deck-order-footer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px 12px 20px;
+  border-top: 1px solid #33271b;
+}
+.deck-order-status {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.deck-order-refusal { color: var(--danger); }
+.deck-order-footer button {
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 8px;
+  clip-path: none;
+  font: 600 14px var(--font-lobby-ui);
+  text-transform: none;
+}
+.deck-order-footer .deck-order-reset {
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .deck-order-card,
+  .deck-order-jump { transition: none; }
+}
 .card-search-overlay-panel {
   width: min(1180px, 92vw);
   max-width: 92vw;

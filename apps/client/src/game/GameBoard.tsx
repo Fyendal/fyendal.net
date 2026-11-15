@@ -28,6 +28,8 @@ import { useDeckCardFeedback } from "./DeckCardToast.js";
 import { SideRail } from "./SideRail.js";
 import { ShareReplayDialog, savedReplayDaysLeft } from "../history/ShareReplayDialog.js";
 import { SandboxPanel, canOpenSandbox, type SandboxSeat } from "./SandboxPanel.js";
+import { DeckOrderEditor, DeckRevealConfirm } from "./board/DeckOrderEditor.js";
+import { loadDeckOrderRevealAccepted, saveDeckOrderRevealAccepted } from "../storage.js";
 import {
   canAddPaymentCard,
   canAddResourcePaymentPitch,
@@ -231,6 +233,8 @@ export function GameBoard() {
   }));
   const [replayShareOpen, setReplayShareOpen] = useState(false);
   const [sandboxOpen, setSandboxOpen] = useState(false);
+  const [deckEditorSeat, setDeckEditorSeat] = useState<0 | 1 | null>(null);
+  const [deckRevealSeat, setDeckRevealSeat] = useState<0 | 1 | null>(null);
   const { sendSandboxEdit, sandboxEditRefusal, clearSandboxEditRefusal } = useStore(useShallow((state) => ({
     sendSandboxEdit: state.sendSandboxEdit,
     sandboxEditRefusal: state.sandboxEditRefusal,
@@ -703,6 +707,18 @@ export function GameBoard() {
     const player = view.players[candidate]!;
     return { seat: candidate as 0 | 1, heroName: player.heroName, life: player.life, resources: player.resources };
   });
+  const deckEditable = (seatIndex: number) => canSandbox
+    && sandboxSeats.some((candidate) => candidate.seat === seatIndex)
+    && view.players[seatIndex]?.deck !== undefined;
+  const openDeckEditor = (seatIndex: number) => {
+    clearSandboxEditRefusal();
+    const accepted = typeof localStorage !== "undefined" && loadDeckOrderRevealAccepted(localStorage, view.gameId);
+    if (accepted) setDeckEditorSeat(seatIndex as 0 | 1);
+    else setDeckRevealSeat(seatIndex as 0 | 1);
+  };
+  const deckEditorPlayer = deckEditorSeat !== null && deckEditable(deckEditorSeat)
+    ? view.players[deckEditorSeat]!
+    : null;
   const openSandbox = () => {
     clearSandboxEditRefusal();
     setSandboxOpen(true);
@@ -1578,6 +1594,7 @@ export function GameBoard() {
           onOpenOverlay={setOverlay}
           onOpenEffects={openEffectLedger}
           standingOrders={soloBoard ? standingOrders : undefined}
+          onEditDeck={deckEditable(opp.seat) ? () => openDeckEditor(opp.seat) : undefined}
         />
 
         {/* center divider: a brass-inlay strip marking the seam */}
@@ -1626,6 +1643,7 @@ export function GameBoard() {
           onOpenOverlay={setOverlay}
           onOpenEffects={openEffectLedger}
           standingOrders={standingOrders}
+          onEditDeck={deckEditable(me.seat) ? () => openDeckEditor(me.seat) : undefined}
         />
 
         <PlayerHand
@@ -2011,6 +2029,29 @@ export function GameBoard() {
           onEdit={sendSandboxEdit}
           onClearRefusal={clearSandboxEditRefusal}
           onClose={() => setSandboxOpen(false)}
+        />
+      ) : null}
+      {deckRevealSeat !== null && deckEditable(deckRevealSeat) ? (
+        <DeckRevealConfirm
+          mine={deckRevealSeat === seat}
+          onCancel={() => setDeckRevealSeat(null)}
+          onConfirm={() => {
+            if (typeof localStorage !== "undefined") saveDeckOrderRevealAccepted(localStorage, view.gameId);
+            setDeckEditorSeat(deckRevealSeat);
+            setDeckRevealSeat(null);
+          }}
+        />
+      ) : null}
+      {deckEditorPlayer ? (
+        <DeckOrderEditor
+          key={deckEditorPlayer.seat}
+          heroName={deckEditorPlayer.heroName}
+          deck={deckEditorPlayer.deck!}
+          pending={roomCommandPending}
+          refusal={sandboxEditRefusal}
+          onEdit={(edit) => sendSandboxEdit(deckEditorPlayer.seat as 0 | 1, edit)}
+          onClearRefusal={clearSandboxEditRefusal}
+          onClose={() => setDeckEditorSeat(null)}
         />
       ) : null}
       {replayShareOpen && savedReplayShare.replayId ? (
