@@ -1073,6 +1073,31 @@ describe("EVO — registration and core mechanics", () => {
     })).toBe(true);
   });
 
+  it("Terminator Tank's discard needs a hero hit, not an ally hit", () => {
+    const attack = (targetAlly?: string) => {
+      const s = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            resources: 6,
+            hand: ["terminator tank|1"],
+            equipment: {
+              head: "evo beta base head|3",
+              chest: "cogwerx base chest|0",
+              arms: "cogwerx base arms|0",
+              legs: "cogwerx base legs|0",
+            },
+          },
+          { hero: "dorinthea", hand: [BLUE], board: ["barnacle|2"] },
+        ],
+      });
+      return s.play("terminator tank|1", targetAlly === undefined ? {} : { targetAlly });
+    };
+
+    attack("barnacle|2").expectHandSize(1, 1).expectNoLog("triggers: On hit");
+    attack().blockWith().settle().chooseCard(BLUE).expectHandSize(1, 0);
+  });
+
   it("Scrap banishes a graveyard item or equipment and leaves arena items alone", () => {
     const s = scenario({
       seats: [

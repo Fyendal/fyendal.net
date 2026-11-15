@@ -1043,4 +1043,28 @@ describe("HVY — Slap-Happy", () => {
     expect(link.damageToPrevent).toBeUndefined();
     g.expectLife(1, 18);
   });
+
+  it("Gauntlets of Iron Will reduces a power gain after its defend trigger resolved", () => {
+    const none = { head: null, chest: null, arms: null, legs: null } as const;
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "ira, scarlet revenger|0",
+          weapons: ["edge of autumn|0"],
+          hand: ["head jab|1"],
+          equipment: { ...none, arms: "okana scar wraps|0" },
+        },
+        { hero: "dorinthea", hand: [], equipment: { ...none, arms: "gauntlets of iron will|0" } },
+      ],
+    });
+
+    g.play("head jab|1")
+      .blockWith("gauntlets of iron will|0")
+      .passPriority()
+      .passPriority()
+      .activate("okana scar wraps|0")
+      .chooseCard("edge of autumn|0")
+      .expectLog("Head Jab hits for 1");
+  });
 });

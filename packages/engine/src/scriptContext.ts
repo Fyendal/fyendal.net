@@ -57,6 +57,7 @@ import {
   findCardAnywhere,
   findPermanent,
   globalCardInstances,
+  liveDefendingEquipment,
   opponent,
   removeFromArray,
 } from "./zoneQueries.js";
@@ -343,7 +344,7 @@ function publishAttackPowerChange(
       runtime.makeCtx(state, link.attacker, link.attackingCard, link),
       changed,
     ) ?? changed;
-    for (const defender of link.defendingEquipment) {
+    for (const defender of liveDefendingEquipment(state, link)) {
       const next = scriptOf(state, defender.cardId, defender)?.replacePowerGain?.(
         runtime.makeCtx(state, opponent(link.attacker), defender, link),
         replaced,
@@ -1304,7 +1305,7 @@ export function makeCtx(
             ) ?? delta
           : delta;
       if (adjusted > 0 && state.phase !== "reaction" && active?.attackingCard.instanceId === instanceId) {
-        for (const defender of active.defendingEquipment) {
+        for (const defender of liveDefendingEquipment(state, active)) {
           const next = scriptOf(state, defender.cardId, defender)?.replacePowerGain?.(
             runtime.makeCtx(state, opponent(active.attacker), defender, active),
             adjusted,

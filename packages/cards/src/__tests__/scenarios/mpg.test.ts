@@ -689,4 +689,27 @@ describe("MPG — import and Guardian pressure", () => {
       .expectNoEquipment(0, "head")
       .expectEquipped(1, "head", "ironrot helm|0");
   });
+
+  it("Test of Iron Grip makes its own controller discard after losing the clash", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { ...valda, hand: ["test of iron grip|1", "thunder quake|3"], deck: ["head jab|1"] },
+        {
+          ...valda,
+          hand: ["aftershock|1", "thunder quake|3", "thunder quake|3"],
+          deck: ["thunder quake|1"],
+        },
+      ],
+    });
+
+    g.play("aftershock|1", { pitch: ["thunder quake|3", "thunder quake|3"] })
+      .blockWith("test of iron grip|1")
+      .settle();
+
+    expect(g.state.pendingDecision).toMatchObject({ chooseHook: "iron-discard", player: 0 });
+    g.chooseCard("thunder quake|3")
+      .expectHandSize(0, 0)
+      .expectInZone(0, "thunder quake|3", "graveyard");
+  });
 });

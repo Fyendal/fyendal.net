@@ -62,6 +62,7 @@ describe("on-hit valuation", () => {
     ["When this hits, it gets go again.", ["tempo"]],
     ["When this hits, your next attack this turn gets +1{p}.", ["pump"]],
     [MARK, ["mark"]],
+    ["Whenever an attack you control hits, you may equip an Edge of Autumn from your banished zone.", ["setup"]],
     ["When this hits a hero, banish the top card of their deck.", ["deck-disruption"]],
     [DIG, ["self-destruction"]],
     ["When this hits, something unprecedented happens.", ["unclassified"]],

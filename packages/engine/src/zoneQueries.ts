@@ -95,6 +95,12 @@ export function findCardAnywhere(
   return undefined;
 }
 
+/** A link's defending equipment as the live arena objects, which hold script
+ * state; the link's own entries are detached copies after a state clone. */
+export function liveDefendingEquipment(state: GameStateInternal, link: ChainLinkState): CardInstance[] {
+  return link.defendingEquipment.map((card) => findCardAnywhere(state, card.instanceId)?.card ?? card);
+}
+
 export function findCardOrSubcard(
   cards: readonly CardInstance[],
   instanceId: number,

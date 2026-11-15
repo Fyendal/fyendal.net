@@ -48,6 +48,7 @@ import { weaponAttacksProhibited } from "./combatRestrictions.js";
 
 import {
   currentLink,
+  liveDefendingEquipment,
   opponent,
   removeFromArray,
 } from "./zoneQueries.js";
@@ -71,7 +72,7 @@ function replacePowerGain(
     runtime.makeCtx(state, link.attacker, link.attackingCard, link),
     amount,
   ) ?? amount;
-  for (const defender of link.defendingEquipment) {
+  for (const defender of liveDefendingEquipment(state, link)) {
     const next = scriptOf(state, defender.cardId, defender)?.replacePowerGain?.(
       runtime.makeCtx(state, opponent(link.attacker), defender, link),
       replaced,

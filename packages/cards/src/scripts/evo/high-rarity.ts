@@ -239,6 +239,7 @@ function evoThreshold(onHit?: (ctx: ScriptCtx) => void): CardScript {
       if (equippedEvos(ctx) >= 3) ctx.setFlag("link", "overpower", true);
     },
     modifyAttack: (ctx) => (equippedEvos(ctx) >= 4 ? 3 : 0),
+    canTriggerOnHit: (ctx) => equippedEvos(ctx) >= 1 && ctx.link?.targetAllyId === undefined,
     onHit,
   };
 }

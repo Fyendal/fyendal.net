@@ -858,7 +858,12 @@ Object.assign(mpg, {
         );
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook === "iron-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
+      if (hook !== "iron-discard") return;
+      const id = Number(option);
+      // Either hero can lose the clash.
+      const loser = [ctx.seat, opponentSeat(ctx)].find((seat) =>
+        ctx.player(seat).hand.some((card) => card.instanceId === id));
+      if (loser !== undefined) ctx.discardCard(loser, id);
     },
   },
   "base of the mountain|0": {

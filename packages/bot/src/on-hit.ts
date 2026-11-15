@@ -360,7 +360,7 @@ function setup(text: string): OnHitEvaluation | undefined {
   if (/put it into its owner's hand/.test(text)) return part("setup", PLAYABLE_CARD_VALUE);
   if (new RegExp(
     "into your (?:hero's )?soul|\\bopt \\d|look at the top card of your deck|sharpen" +
-      "|counter on (?:it|this|an item you control|a cog)|the crowd cheers you|equip a ",
+      "|counter on (?:it|this|an item you control|a cog)|the crowd cheers you|equip an? ",
   ).test(text)) {
     return part("setup", SETUP_VALUE);
   }
