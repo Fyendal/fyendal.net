@@ -193,7 +193,7 @@ export interface StoreState {
   resolveFabraryPlay: (refresh?: boolean) => Promise<void>;
   previewFabraryPlay: () => Promise<void>;
   dismissFabraryPlay: () => void;
-  startFabraryPlay: (choice: { kind: "player" } | { kind: "bot"; bot: BotOpponent; searchForPlayer: boolean }) => void;
+  startFabraryPlay: (choice: { kind: "player" } | { kind: "bot"; bot: BotOpponent; searchForPlayer: boolean; sandbox?: boolean }) => void;
   refreshDecks: (silent?: boolean) => Promise<void>;
   importDeck: (input: {
     name: string;
@@ -288,8 +288,9 @@ export interface StoreState {
     /** Private rooms only. */
     sandbox?: boolean,
   ) => void;
-  createBotRoom: (format: Format, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
-  playBotFromPrep: (format: Format, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
+  /** `sandbox` covers the bot game only; a matched game against a player never is. */
+  createBotRoom: (format: Format, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean, sandbox?: boolean) => void;
+  playBotFromPrep: (format: Format, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean, sandbox?: boolean) => void;
   /** End the finished bot game and start a new one with the same deck and bot. */
   playBotAgain: () => void;
   /** Private room where this account prepares and plays both seats. */

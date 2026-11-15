@@ -88,8 +88,8 @@ export function DeckDetailModal(props: {
       <SoloModeModal
         format={format}
         deckId={deck.id}
-        onSelectBot={(bot, searchForPlayer) => {
-          createBotRoom(format, deck.id, bot, searchForPlayer);
+        onSelectBot={(bot, searchForPlayer, sandbox) => {
+          createBotRoom(format, deck.id, bot, searchForPlayer, sandbox);
           props.onClose();
         }}
         onStartSolo={(opponentDeckId) => {

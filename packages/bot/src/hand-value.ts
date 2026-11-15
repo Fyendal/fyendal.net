@@ -16,6 +16,7 @@ import {
   type HeroSolverRules,
   type ModelContext,
 } from "./card-model.js";
+import { unseenCounts } from "./deck-knowledge.js";
 import type { HandSolver, SolverResult } from "./hand-solver.js";
 import { immediateOnHitDamage } from "./on-hit.js";
 import {
@@ -70,8 +71,28 @@ function handKey(input: BotPolicyInput, factory: HeroRulesFactory): string {
         input.view.chain.map((link) => `${link.attackValue}:${link.goAgain ? 1 : 0}:${link.resolved ? 1 : 0}`),
       ],
     nextTurn ? [] : input.view.ongoing.map((effect) => `${effect.seat}:${effect.cardId}:${effect.label}`),
-    input.decklists?.own?.length ?? 0, input.decklists?.opponent?.length ?? 0,
+    input.decklists?.own?.length ?? 0, input.decklists?.opponent?.length ?? 0, deckContentHash(input),
   ]);
+}
+
+/** FNV-1a over both decklists and the opponent's unseen cards: draw and
+ * disruption estimates read them, and sandbox edits change them in place. */
+function deckContentHash(input: BotPolicyInput): number {
+  let hash = 2_166_136_261;
+  const mix = (text: string) => {
+    for (let index = 0; index < text.length; index++) {
+      hash ^= text.charCodeAt(index);
+      hash = Math.imul(hash, 16_777_619);
+    }
+    hash ^= 0x7c;
+    hash = Math.imul(hash, 16_777_619);
+  };
+  for (const id of input.decklists?.own ?? []) mix(id);
+  mix("");
+  for (const id of input.decklists?.opponent ?? []) mix(id);
+  mix("");
+  for (const [id, count] of unseenCounts(input, "opponent") ?? []) mix(`${id}:${count}`);
+  return hash >>> 0;
 }
 
 function cachedHand(input: BotPolicyInput, factory: HeroRulesFactory): CachedHand {

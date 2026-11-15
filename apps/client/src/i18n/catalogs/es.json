@@ -3417,6 +3417,7 @@
   "lobby.rooms.pickDeck": "Unirse a {code}: elige un mazo",
   "lobby.rooms.started": "Partidas iniciadas",
   "lobby.rooms.yours": "Tus salas",
+  "lobby.sandbox.descriptionBot": "Puedes editar tu propia vida, recursos, mazo y mano; el lado del bot no cambia. La partida se guarda como repetición, pero no cuenta para el historial ni las estadísticas. Si se encuentra un jugador real, esa partida se juega con normalidad.",
   "lobby.sandbox.description": "Los jugadores pueden editar su propia vida, recursos, mazo y mano. La partida se guarda como repetición, pero no cuenta para el historial ni las estadísticas.",
   "lobby.sandbox.descriptionPrivateOnly": "Solo salas privadas. Los jugadores pueden editar su propia vida, recursos, mazo y mano. La partida se guarda como repetición, pero no cuenta para el historial ni las estadísticas.",
   "lobby.sandbox.label": "Sandbox",

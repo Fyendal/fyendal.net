@@ -37479,6 +37479,12 @@
       "value": "Os jogadores podem editar a própria vida, recursos, deck e mão. A partida fica salva como replay, mas não conta para o histórico nem para as estatísticas."
     }
   ],
+  "lobby.sandbox.descriptionBot": [
+    {
+      "type": 0,
+      "value": "Você pode editar a própria vida, recursos, deck e mão; o lado do bot não muda. A partida fica salva como replay, mas não conta para o histórico nem para as estatísticas. Se um jogador real for encontrado, essa partida é jogada normalmente."
+    }
+  ],
   "lobby.sandbox.descriptionPrivateOnly": [
     {
       "type": 0,

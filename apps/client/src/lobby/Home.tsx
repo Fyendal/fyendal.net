@@ -223,8 +223,8 @@ export function Home() {
         <SoloModeModal
           format={format}
           deckId={selectedDeck.id}
-          onSelectBot={(bot, searchForPlayer) => {
-            createBotRoom(format, selectedDeck.id, bot, searchForPlayer);
+          onSelectBot={(bot, searchForPlayer, sandbox) => {
+            createBotRoom(format, selectedDeck.id, bot, searchForPlayer, sandbox);
             setChoosingSolo(false);
           }}
           onStartSolo={(opponentDeckId) => {

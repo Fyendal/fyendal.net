@@ -3417,6 +3417,7 @@
   "lobby.rooms.pickDeck": "Join {code} — Pick a Deck",
   "lobby.rooms.started": "Started Games",
   "lobby.rooms.yours": "Your Rooms",
+  "lobby.sandbox.descriptionBot": "Edit your own life, resources, deck, and hand; the bot's side stays as dealt. The game is saved as a replay but doesn't count toward match history or stats. If a real player is found, that game is played normally.",
   "lobby.sandbox.description": "Players can edit their own life, resources, deck, and hand. The game is saved as a replay but doesn't count toward match history or stats.",
   "lobby.sandbox.descriptionPrivateOnly": "Private rooms only. Players can edit their own life, resources, deck, and hand. The game is saved as a replay but doesn't count toward match history or stats.",
   "lobby.sandbox.label": "Sandbox",

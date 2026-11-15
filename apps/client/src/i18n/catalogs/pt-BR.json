@@ -3417,6 +3417,7 @@
   "lobby.rooms.pickDeck": "Entrar em {code} — escolha um deck",
   "lobby.rooms.started": "Jogos em andamento",
   "lobby.rooms.yours": "Suas salas",
+  "lobby.sandbox.descriptionBot": "Você pode editar a própria vida, recursos, deck e mão; o lado do bot não muda. A partida fica salva como replay, mas não conta para o histórico nem para as estatísticas. Se um jogador real for encontrado, essa partida é jogada normalmente.",
   "lobby.sandbox.description": "Os jogadores podem editar a própria vida, recursos, deck e mão. A partida fica salva como replay, mas não conta para o histórico nem para as estatísticas.",
   "lobby.sandbox.descriptionPrivateOnly": "Só para salas privadas. Os jogadores podem editar a própria vida, recursos, deck e mão. A partida fica salva como replay, mas não conta para o histórico nem para as estatísticas.",
   "lobby.sandbox.label": "Sandbox",

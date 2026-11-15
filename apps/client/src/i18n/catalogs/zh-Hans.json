@@ -3417,6 +3417,7 @@
   "lobby.rooms.pickDeck": "加入 {code}——选择牌组",
   "lobby.rooms.started": "已开始的对局",
   "lobby.rooms.yours": "你的房间",
+  "lobby.sandbox.descriptionBot": "你可以编辑自己的生命、资源、牌库和手牌；机器人一方保持不变。本局会保存回放，但不计入对局历史和统计。如果匹配到真人玩家，那局对局将按正常方式进行。",
   "lobby.sandbox.description": "玩家可以编辑自己的生命、资源、牌库和手牌。本局会保存回放，但不计入对局历史和统计。",
   "lobby.sandbox.descriptionPrivateOnly": "仅限私人房间。玩家可以编辑自己的生命、资源、牌库和手牌。本局会保存回放，但不计入对局历史和统计。",
   "lobby.sandbox.label": "沙盒",

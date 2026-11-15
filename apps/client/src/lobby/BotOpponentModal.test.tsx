@@ -150,4 +150,36 @@ describe("BotOpponentModal", () => {
     expect(html).not.toContain('type="checkbox" checked=""');
     expect(getItem).toHaveBeenCalledWith(BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY);
   });
+
+  it("offers the sandbox switch while searching for a player", () => {
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain('class="bot-matchmaking-option sandbox-option"');
+    expect(html).toContain("If a real player is found, that game is played normally.");
+    expect(html.match(/type="checkbox" checked=""/g)).toHaveLength(1);
+  });
+
+  it("offers an unchecked sandbox switch for a bot-only game", () => {
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => key === BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY
+        ? JSON.stringify({ version: 1, searchForPlayer: false })
+        : null,
+      setItem: vi.fn(),
+    });
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
+      </TestI18nProvider>,
+    );
+
+    expect(html).toContain('class="bot-matchmaking-option sandbox-option"');
+    expect(html).toContain("<strong>Sandbox</strong>");
+    expect(html).toContain("the bot&#x27;s side stays as dealt");
+    expect(html.match(/type="checkbox" checked=""/g)).toBeNull();
+    expect(html.indexOf("sandbox-option")).toBeLessThan(html.indexOf("bot-opponent-options"));
+  });
 });

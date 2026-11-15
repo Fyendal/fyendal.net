@@ -14,6 +14,7 @@ import {
   saveBotShowBannedPreference,
 } from "../storage.js";
 import { useStore } from "../store.js";
+import { SandboxSwitch } from "./SandboxSwitch.js";
 
 interface BotOption {
   id: BotOpponent;
@@ -174,7 +175,7 @@ const BOT_CARD_WARNINGS = new Map(
 
 export function BotOpponentModal(props: {
   format: Format;
-  onSelect: (bot: BotOpponent, searchForPlayer: boolean) => void;
+  onSelect: (bot: BotOpponent, searchForPlayer: boolean, sandbox: boolean) => void;
   onClose: () => void;
 }) {
   const intl = useIntl();
@@ -192,7 +193,7 @@ export function BotOpponentModal(props: {
 /** The bot roster and its matchmaking switch, for any dialog that hosts it. */
 export function BotOpponentPicker(props: {
   format: Format;
-  onSelect: (bot: BotOpponent, searchForPlayer: boolean) => void;
+  onSelect: (bot: BotOpponent, searchForPlayer: boolean, sandbox: boolean) => void;
 }) {
   const intl = useIntl();
   const betaTester = useStore((state) => state.betaTester);
@@ -205,6 +206,7 @@ export function BotOpponentPicker(props: {
   const [searchForPlayer, setSearchForPlayer] = useState(() =>
     typeof localStorage === "undefined" ? true : loadBotMatchmakingPreference(localStorage)
   );
+  const [sandbox, setSandbox] = useState(false);
   const tooltipId = useId();
   const warningRefs = useRef<Partial<Record<BotOpponent, HTMLSpanElement | null>>>({});
   const [hoveredBot, setHoveredBot] = useState<BotOpponent | null>(null);
@@ -239,6 +241,7 @@ export function BotOpponentPicker(props: {
         />
         <span className="switch-track" />
       </label>
+      <SandboxSwitch bot checked={sandbox} onChange={setSandbox} />
       <div className="bot-opponent-options">
         {bots.map((bot, index) => {
           const warnings = BOT_CARD_WARNINGS.get(bot.id)!;
@@ -257,7 +260,7 @@ export function BotOpponentPicker(props: {
                 }
               }}
               onBlur={() => setFocusedBot((current) => current === bot.id ? null : current)}
-              onClick={() => props.onSelect(bot.id, searchForPlayer)}
+              onClick={() => props.onSelect(bot.id, searchForPlayer, sandbox)}
             >
               <BotArt bot={bot} />
               {bot.isNew ? (

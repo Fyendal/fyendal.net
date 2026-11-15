@@ -36591,6 +36591,12 @@
       "value": "Los jugadores pueden editar su propia vida, recursos, mazo y mano. La partida se guarda como repetición, pero no cuenta para el historial ni las estadísticas."
     }
   ],
+  "lobby.sandbox.descriptionBot": [
+    {
+      "type": 0,
+      "value": "Puedes editar tu propia vida, recursos, mazo y mano; el lado del bot no cambia. La partida se guarda como repetición, pero no cuenta para el historial ni las estadísticas. Si se encuentra un jugador real, esa partida se juega con normalidad."
+    }
+  ],
   "lobby.sandbox.descriptionPrivateOnly": [
     {
       "type": 0,

@@ -1215,6 +1215,11 @@ export const MIGRATIONS: Migration[] = [
     // Sandbox replays are listed apart from match history.
     sql: `ALTER TABLE replay_games ADD COLUMN sandbox BOOLEAN NOT NULL DEFAULT FALSE;`,
   },
+  {
+    version: 69,
+    // A searching player's bot practice may be sandbox; the matched PvP room never is.
+    sql: `ALTER TABLE pending_bot_starts ADD COLUMN sandbox BOOLEAN NOT NULL DEFAULT FALSE;`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

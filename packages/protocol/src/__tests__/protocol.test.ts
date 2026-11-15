@@ -417,6 +417,8 @@ describe("client messages", () => {
     { type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "dorinthea" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira", searchForPlayer: true, avoidRoomCodes: ["ABC123"] },
     { type: "create-bot-room", deckId: "precon-sba" },
+    { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira", sandbox: true },
+    { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira", sandbox: false },
     { type: "create-solo-room", format: "cc", deckId: "deck", opponentDeckId: "precon-asr" },
     { type: "create-solo-room", format: "silver-age", deckId: "precon-sba", opponentDeckId: "precon-sba", cardPoolMode: "open" },
     { type: "solo-seat", seat: 0 },
@@ -598,6 +600,7 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "queue-join", format: "cc" })).toBeNull();
     expect(decodeClientMessage({ type: "join-room", code: "ABC123", hero: "rhinar" })).toBeNull();
     expect(decodeClientMessage({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "unknown" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-bot-room", format: "cc", deckId: "precon-asr", sandbox: "yes" })).toBeNull();
     expect(decodeClientMessage({ type: "create-solo-room", format: "cc", deckId: "deck" })).toBeNull();
     expect(decodeClientMessage({ type: "create-solo-room", deckId: "deck", opponentDeckId: "deck" })).toBeNull();
     expect(decodeClientMessage({ type: "create-solo-room", format: "cc", deckId: "deck", opponentDeckId: "" })).toBeNull();
@@ -1308,6 +1311,7 @@ describe("GameView and server messages", () => {
       } },
       { type: "left", playAgainSolo: { format: "silver-age", deckId: "deck", opponentDeckId: "precon-sba" } },
       { type: "left" }, { type: "left", playAgain: { format: "cc", deckId: "precon-asb", bot: "hala" } },
+      { type: "left", playAgain: { format: "cc", deckId: "precon-asb", bot: "hala", sandbox: true } },
       { type: "error", code: "ROOM_NOT_FOUND", message: "gone" },
     ];
     for (const message of variants) {
@@ -1319,6 +1323,7 @@ describe("GameView and server messages", () => {
       { format: "draft", deckId: "precon-asb", bot: "hala" },
       { format: "cc", bot: "hala" },
       { format: "cc", deckId: "precon-asb", bot: "hala", extra: true },
+      { format: "cc", deckId: "precon-asb", bot: "hala", sandbox: false },
     ]) expect(decodeServerMessage({ type: "left", playAgain })).toBeNull();
     for (const playAgainSolo of [
       { format: "cc", deckId: "deck" },

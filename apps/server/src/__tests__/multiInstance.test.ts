@@ -279,21 +279,22 @@ describe("multi-instance gateways", () => {
       .toEqual([{ room_code: created.code }]);
   });
 
-  it("hands a practicing player to PvP while preserving the active bot game", async () => {
-    const a = await authed(first, "CrossBotA");
-    const b = await authed(second, "CrossBotB");
+  it.each([false, true])("hands a practicing player to PvP while preserving the active bot game (sandbox %s)", async (sandbox) => {
+    const a = await authed(first, sandbox ? "CrossSandA" : "CrossBotA");
+    const b = await authed(second, sandbox ? "CrossSandB" : "CrossBotB");
     a.send({
       type: "create-bot-room",
       format: "cc",
       deckId: "precon-asb",
       bot: "ira",
       searchForPlayer: true,
+      ...(sandbox ? { sandbox: true } : {}),
     });
     const source = await a.next((message) => message.type === "room-created") as Extract<
       ServerMessage,
       { type: "room-created" }
     >;
-    const user = await db.query("SELECT id FROM users WHERE username_lc = 'crossbota'");
+    const user = await db.query("SELECT id FROM users WHERE username_lc = $1", [sandbox ? "crosssanda" : "crossbota"]);
     const userId = Number(user.rows[0]!.id);
     const practiceStore = new PgRoomStore(db, "rules-a");
     expect(await practiceStore.chooseFirst(source.code, { token: source.token, userId }, true))
@@ -329,6 +330,9 @@ describe("multi-instance gateways", () => {
       message.type === "joined" && message.code === offerCode
     ) as Extract<ServerMessage, { type: "joined" }>;
     expect(handoff.code).toBe(offerCode);
+    expect((await db.query("SELECT code, sandbox FROM rooms WHERE code IN ($1, $2) ORDER BY code = $1 DESC", [
+      source.code, offerCode,
+    ])).rows).toEqual([{ code: source.code, sandbox }, { code: offerCode, sandbox: false }]);
 
     const preserved = await practiceStore.getRoom(source.code);
     expect(preserved?.state).not.toBeNull();

@@ -135,6 +135,8 @@ export interface AccountExport {
       bot: string;
       cardPoolMode: CardPoolMode;
       requestedAt: number;
+      /** Present only when true so older export decoders keep working. */
+      sandbox?: true;
       candidates: Array<{
         candidateUserId: number;
         ordinal: number;
@@ -262,7 +264,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       [userId],
     ),
     db.query(
-      `SELECT format, deck_id, bot, card_pool_mode, requested_at
+      `SELECT format, deck_id, bot, card_pool_mode, requested_at, sandbox
        FROM pending_bot_starts WHERE user_id = $1`,
       [userId],
     ),
@@ -431,6 +433,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
                   ? pendingBotRows[0].card_pool_mode
                   : "legal",
                 requestedAt: Number(pendingBotRows[0].requested_at),
+                ...(pendingBotRows[0].sandbox === true ? { sandbox: true as const } : {}),
                 candidates: candidateRows.map((candidate) => ({
                   candidateUserId: Number(candidate.candidate_user_id),
                   ordinal: Number(candidate.ordinal),

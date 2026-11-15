@@ -5,11 +5,14 @@ export function SandboxSwitch({
   checked,
   onChange,
   privateOnly = false,
+  bot = false,
 }: {
   checked: boolean;
   onChange: (enabled: boolean) => void;
   /** The surface also creates public rooms, which cannot be sandbox. */
   privateOnly?: boolean;
+  /** A bot practice game, where only the human's side is editable. */
+  bot?: boolean;
 }) {
   const intl = useIntl();
   return (
@@ -17,7 +20,10 @@ export function SandboxSwitch({
       <span className="bot-matchmaking-copy">
         <strong>{intl.formatMessage({ id: "lobby.sandbox.label" })}</strong>
         <small>
-          {intl.formatMessage({ id: privateOnly ? "lobby.sandbox.descriptionPrivateOnly" : "lobby.sandbox.description" })}
+          {intl.formatMessage({
+            id: bot ? "lobby.sandbox.descriptionBot"
+              : privateOnly ? "lobby.sandbox.descriptionPrivateOnly" : "lobby.sandbox.description",
+          })}
         </small>
       </span>
       <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} />
