@@ -18094,6 +18094,12 @@
       "value": "你的英雄"
     }
   ],
+  "common.sandbox.badge": [
+    {
+      "type": 0,
+      "value": "沙盒 · 不计入记录"
+    }
+  ],
   "common.shortcut.space": [
     {
       "type": 1,
@@ -33216,6 +33222,24 @@
     {
       "type": 0,
       "value": "你的房间"
+    }
+  ],
+  "lobby.sandbox.description": [
+    {
+      "type": 0,
+      "value": "玩家可以编辑自己的生命、资源、牌库和手牌。本局不计入记录。"
+    }
+  ],
+  "lobby.sandbox.descriptionPrivateOnly": [
+    {
+      "type": 0,
+      "value": "仅限私人房间。玩家可以编辑自己的生命、资源、牌库和手牌。本局不计入记录。"
+    }
+  ],
+  "lobby.sandbox.label": [
+    {
+      "type": 0,
+      "value": "沙盒"
     }
   ],
   "lobby.solo.bot": [

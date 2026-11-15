@@ -1054,6 +1054,8 @@ export interface PrepView {
   botGame?: boolean;
   /** One account controls both seats of this private room. */
   soloGame?: boolean;
+  /** Private room that opted into sandbox; solo rooms imply it without the key. */
+  sandbox?: true;
   /** Your seat came from matchmaking and is still waiting to be paired. */
   searching?: true;
   seats: [PrepSeatView | null, PrepSeatView | null];
@@ -1193,12 +1195,12 @@ export type ClientMessage =
   | { type: "chat-history"; username: string; beforeId?: string }
   | { type: "chat-send"; username: string; text: string; clientMessageId: string }
   | { type: "chat-read"; username: string; throughId: string }
-  | { type: "create-friend-room"; username: string; format: Format; deckId: string; cardPoolMode?: CardPoolMode }
+  | { type: "create-friend-room"; username: string; format: Format; deckId: string; cardPoolMode?: CardPoolMode; sandbox?: boolean }
   | { type: "friend-game-invite-dismiss"; inviteId: string }
   /** Takes your seat in a league match's room, creating the room on first entry. */
   | { type: "enter-league-room"; matchId: string; deckId: string }
   /** deckId of a saved deck or format precon */
-  | { type: "create-room"; format: Format; deckId: string; private?: boolean; cardPoolMode?: CardPoolMode }
+  | { type: "create-room"; format: Format; deckId: string; private?: boolean; cardPoolMode?: CardPoolMode; /** Requires `private`. */ sandbox?: boolean }
   /** Create a dedicated constructed room with the selected AI opponent. */
   | { type: "create-bot-room"; format?: Format; deckId: string; bot?: BotOpponent; cardPoolMode?: CardPoolMode; searchForPlayer?: boolean; avoidRoomCodes?: string[] }
   /** Create a private room where the creator plays both seats. */
@@ -1285,7 +1287,7 @@ export type ServerMessage =
   | { type: "deck-changed"; deckId: string }
   | { type: "friend-invited"; username: string }
   | { type: "game-started"; version: number }
-  | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; /** Absent for rooms started before the clock existed. */ clock?: GameClockView; botGame?: boolean; soloGame?: boolean; /** Solo games: the owner's seat, which the board keeps at the bottom while `yourSeat` follows whoever must act. */ boardSeat?: 0 | 1; /** The recipient seat's armed pass shortcut; never sent to anyone else. */ passUntil?: PassUntilMode; /** Passing now would end the recipient seat's turn with a usable action point; never sent to anyone else. */ endTurnWarning?: true; /** Per-seat printing id -> image id, limited to cards this viewer can see. */ cardArt?: [Record<string, string>, Record<string, string>] }
+  | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; /** Absent for rooms started before the clock existed. */ clock?: GameClockView; botGame?: boolean; soloGame?: boolean; /** Private room that opted into sandbox; solo rooms imply it without the key. */ sandbox?: true; /** Solo games: the owner's seat, which the board keeps at the bottom while `yourSeat` follows whoever must act. */ boardSeat?: 0 | 1; /** The recipient seat's armed pass shortcut; never sent to anyone else. */ passUntil?: PassUntilMode; /** Passing now would end the recipient seat's turn with a usable action point; never sent to anyone else. */ endTurnWarning?: true; /** Per-seat printing id -> image id, limited to cards this viewer can see. */ cardArt?: [Record<string, string>, Record<string, string>] }
   | { type: "spectators"; count: number; version: number }
   /** Additive companion to the legacy count message; null identifies a guest. */
   | { type: "spectator-list"; usernames: Array<string | null>; version: number }

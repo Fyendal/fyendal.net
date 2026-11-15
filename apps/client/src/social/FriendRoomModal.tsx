@@ -8,6 +8,7 @@ import { CardPoolModeControl } from "../lobby/CardPoolModeControl.js";
 import { DeckDropdown } from "../lobby/CreateRoomModal.js";
 import { deckChoicesFor, deckIsLegalForRoom } from "../lobby/DeckGrid.js";
 import { FormatName } from "../lobby/FormatBadge.js";
+import { SandboxSwitch } from "../lobby/SandboxSwitch.js";
 import { FORMATS } from "../domain.js";
 
 export function FriendRoomModal() {
@@ -37,6 +38,7 @@ export function FriendRoomModal() {
   })));
   const [format, setFormat] = useState<Format>("cc");
   const [deckFor, setDeckFor] = useState<Record<Format, string>>({ cc: "", "silver-age": "" });
+  const [sandbox, setSandbox] = useState(false);
   if (!target) return null;
 
   const cardPoolMode = cardPoolModes[format];
@@ -85,6 +87,7 @@ export function FriendRoomModal() {
           onSelect={(id) => setDeckFor((current) => ({ ...current, [format]: id }))}
         />
       </fieldset>
+      <SandboxSwitch checked={sandbox} onChange={setSandbox} />
       {choices.length === 0 ? (
         <p className="muted">{intl.formatMessage({ id: "social.invite.noDeck" })}</p>
       ) : null}
@@ -106,7 +109,7 @@ export function FriendRoomModal() {
           type="button"
           className="btn-primary"
           disabled={!valid}
-          onClick={() => selected && createFriendRoom(target, format, selected.id)}
+          onClick={() => selected && createFriendRoom(target, format, selected.id, sandbox)}
         >
           {intl.formatMessage({ id: "social.invite.send" })}
         </button>

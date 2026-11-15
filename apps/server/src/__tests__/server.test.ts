@@ -1417,10 +1417,44 @@ describe("lobby and matchmaking", () => {
     expect(prepA.prep.seats[0]?.heroId).toBe(heroId);
     expect(prepA.prep.seats[1]?.heroId).toBe(heroId);
     expect(prepA.prep.startPlayer).toBeNull();
+    expect(prepA.prep.sandbox).toBeUndefined();
+    expect((await db.query("SELECT sandbox FROM rooms WHERE code = $1", [created.code])).rows[0])
+      .toEqual({ sandbox: false });
     await startGameOverWs(a, b, prepA);
 
     a.ws.close();
     b.ws.close();
+  });
+
+  it("rejects sandbox on public rooms", async () => {
+    const host = await authedClient();
+    host.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb", sandbox: true });
+    const err = (await host.next((m) => m.type === "error")) as Extract<ServerMessage, { type: "error" }>;
+    expect(err.message).toBe("sandbox rooms must be private");
+    host.ws.close();
+  });
+
+  it("flags private sandbox rooms in prep and game state", async () => {
+    const host = await authedClient();
+    host.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb", private: true, sandbox: true });
+    const created = (await host.next((m) => m.type === "room-created")) as Extract<
+      ServerMessage,
+      { type: "room-created" }
+    >;
+    expect((await db.query("SELECT sandbox FROM rooms WHERE code = $1", [created.code])).rows[0])
+      .toEqual({ sandbox: true });
+    const guest = await authedClient();
+    guest.sendMsg({ type: "join-room", code: created.code, deckId: "precon-asr" });
+    await guest.next((m) => m.type === "joined");
+    const prep = (await host.next(
+      (m) => m.type === "prep-state" && m.prep.die !== null && m.prep.yourDeckId !== undefined,
+    )) as Extract<ServerMessage, { type: "prep-state" }>;
+    expect(prep.prep.sandbox).toBe(true);
+    await startGameOverWs(host, guest, prep);
+    const state = (await guest.next((m) => m.type === "state")) as Extract<ServerMessage, { type: "state" }>;
+    expect(state.sandbox).toBe(true);
+    host.ws.close();
+    guest.ws.close();
   });
 
   it("reconnecting to a matchmade opener resumes its search", async () => {

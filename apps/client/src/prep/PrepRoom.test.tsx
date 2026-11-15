@@ -56,6 +56,18 @@ function render(
   return renderToStaticMarkup(<TestI18nProvider><PrepRoom /></TestI18nProvider>);
 }
 
+describe("sandbox badge", () => {
+  it("shows sandbox rooms as unrecorded before anyone readies", () => {
+    const prep = { ...pairedPrep("select-arena"), botGame: false, sandbox: true as const };
+    const heading = render(prep, false, deck, { sandbox: true }).match(/<div class="prep-heading">([\s\S]*?)<\/div>/)?.[1];
+    expect(heading).toContain('<span class="sandbox-badge">Sandbox · not recorded</span>');
+  });
+
+  it("is absent from ordinary rooms", () => {
+    expect(render(pairedPrep("select-arena"), false)).not.toContain("sandbox-badge");
+  });
+});
+
 describe("preparation stage layout", () => {
   it.each([false, true])("shows full-screen control beside Leave (mobile: %s)", (mobile) => {
     vi.stubGlobal("document", {

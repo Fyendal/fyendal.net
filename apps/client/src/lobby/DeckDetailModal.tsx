@@ -14,6 +14,7 @@ import { UiIcon } from "../components/UiIcon.js";
 import { SoloModeModal } from "./SoloModeModal.js";
 import { OpponentPicker, startMessageId } from "./OpponentPicker.js";
 import { CardPoolHelp } from "./CardPoolHelp.js";
+import { SandboxSwitch } from "./SandboxSwitch.js";
 import { CARD_POOL_MODES } from "./CardPoolModeControl.js";
 import { deckBlockedCards, deckConstructionMessages, deckOverLimits } from "./DeckGrid.js";
 import { shortFormatLabel } from "./FormatBadge.js";
@@ -61,6 +62,7 @@ export function DeckDetailModal(props: {
     typeof localStorage === "undefined" ? "find-match" : loadHomeGameMode(localStorage, authUser)
   );
   const [choosingSolo, setChoosingSolo] = useState(false);
+  const [sandbox, setSandbox] = useState(false);
   const [artOk, setArtOk] = useState(true);
   const [headshotOk, setHeadshotOk] = useState(true);
   const poolId = useId();
@@ -116,7 +118,7 @@ export function DeckDetailModal(props: {
       if (typeof localStorage !== "undefined") saveHomeFormat(localStorage, authUser, format);
       setLobbyRail("home");
     } else {
-      createRoom(format, deck.id, "private");
+      createRoom(format, deck.id, "private", sandbox);
     }
     props.onClose();
   };
@@ -165,6 +167,7 @@ export function DeckDetailModal(props: {
 
       <div className="deck-detail-body">
         <OpponentPicker mode={mode} disabled={queued} onChange={selectMode} />
+        {mode === "invite-friend" ? <SandboxSwitch checked={sandbox} onChange={setSandbox} /> : null}
 
         {blocked.length > 0 ? (
           <p className="deck-detail-blocked" role="status">

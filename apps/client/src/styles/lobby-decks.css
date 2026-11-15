@@ -246,6 +246,7 @@
   cursor: pointer;
 }
 .bot-matchmaking-option:hover { border-color: #745c3f; }
+.sandbox-option { margin: 0; }
 .bot-matchmaking-copy { display: grid; min-width: 0; flex: 1; gap: 2px; }
 .bot-matchmaking-copy strong { color: var(--text-primary); font-size: 14px; font-weight: 600; }
 .bot-matchmaking-copy small { color: var(--text-muted); font-size: 13px; line-height: 1.35; }

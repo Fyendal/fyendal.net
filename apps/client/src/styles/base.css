@@ -605,3 +605,18 @@ html:not(:lang(en)) :is(
   animation: toast-in 0.18s ease-out;
 }
 .idle-toast .linklike { font-size: 14px; }
+
+.sandbox-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid #806334;
+  border-radius: 999px;
+  background: #2a1f12;
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  white-space: nowrap;
+}

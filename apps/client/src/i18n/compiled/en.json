@@ -19235,6 +19235,12 @@
       "value": "Your hero"
     }
   ],
+  "common.sandbox.badge": [
+    {
+      "type": 0,
+      "value": "Sandbox · not recorded"
+    }
+  ],
   "common.shortcut.space": [
     {
       "type": 1,
@@ -34903,6 +34909,24 @@
     {
       "type": 0,
       "value": "Your Rooms"
+    }
+  ],
+  "lobby.sandbox.description": [
+    {
+      "type": 0,
+      "value": "Players can edit their own life, resources, deck, and hand. The game is not recorded."
+    }
+  ],
+  "lobby.sandbox.descriptionPrivateOnly": [
+    {
+      "type": 0,
+      "value": "Private rooms only. Players can edit their own life, resources, deck, and hand. The game is not recorded."
+    }
+  ],
+  "lobby.sandbox.label": [
+    {
+      "type": 0,
+      "value": "Sandbox"
     }
   ],
   "lobby.solo.bot": [

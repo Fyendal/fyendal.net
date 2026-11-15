@@ -19363,6 +19363,12 @@
       "value": "Tu héroe"
     }
   ],
+  "common.sandbox.badge": [
+    {
+      "type": 0,
+      "value": "Sandbox · sin registro"
+    }
+  ],
   "common.shortcut.space": [
     {
       "type": 1,
@@ -35787,6 +35793,24 @@
     {
       "type": 0,
       "value": "Tus salas"
+    }
+  ],
+  "lobby.sandbox.description": [
+    {
+      "type": 0,
+      "value": "Los jugadores pueden editar su propia vida, recursos, mazo y mano. La partida no se registra."
+    }
+  ],
+  "lobby.sandbox.descriptionPrivateOnly": [
+    {
+      "type": 0,
+      "value": "Solo salas privadas. Los jugadores pueden editar su propia vida, recursos, mazo y mano. La partida no se registra."
+    }
+  ],
+  "lobby.sandbox.label": [
+    {
+      "type": 0,
+      "value": "Sandbox"
     }
   ],
   "lobby.solo.bot": [

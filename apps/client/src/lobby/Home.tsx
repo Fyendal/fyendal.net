@@ -10,6 +10,7 @@ import { DeckDropdown } from "./CreateRoomModal.js";
 import { RoomCard } from "./RoomCard.js";
 import { SoloModeModal } from "./SoloModeModal.js";
 import { CardPoolHelp } from "./CardPoolHelp.js";
+import { SandboxSwitch } from "./SandboxSwitch.js";
 import { OpponentPicker, startMessageId } from "./OpponentPicker.js";
 import { formatSelectLabel } from "./FormatBadge.js";
 import { deckCardPool, pairableSearchers } from "../matchmaking/pairableSearchers.js";
@@ -64,6 +65,7 @@ export function Home() {
       : loadHomeGameMode(localStorage, authUser)
   );
   const [choosingSolo, setChoosingSolo] = useState(false);
+  const [sandbox, setSandbox] = useState(false);
   const cardPoolId = useId();
   const opponentLabelId = useId();
 
@@ -95,7 +97,7 @@ export function Home() {
     if (mode === "find-match") {
       queueJoin(format, selectedDeck.id);
     } else if (mode === "invite-friend") {
-      createRoom(format, selectedDeck.id, "private");
+      createRoom(format, selectedDeck.id, "private", sandbox);
     } else {
       setChoosingSolo(true);
     }
@@ -194,6 +196,7 @@ export function Home() {
               searching={queuedFormat === null ? searching : 0}
               onChange={selectMode}
             />
+            {mode === "invite-friend" ? <SandboxSwitch checked={sandbox} onChange={setSandbox} /> : null}
           </div>
 
           <div className="home-play-actions">

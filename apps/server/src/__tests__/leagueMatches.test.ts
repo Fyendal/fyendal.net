@@ -189,6 +189,7 @@ describe("league rooms", () => {
     const code = await store.ensureLeagueRoom(bob, matchId);
     expect(await match()).toMatchObject({ status: "proposed", room_code: code });
     expect((await store.getRoom(code))!.seats).toEqual([null, null]);
+    expect((await store.getRoom(code))!.sandbox).toBe(false);
     expect((await listMemberLeagues(db, alice))[0]!.matches[0]!.roomCode).toBe(code);
     expect(await store.ensureLeagueRoom(alice, matchId)).toBe(code);
     await expect(store.ensureLeagueRoom(carol, matchId)).rejects.toBeInstanceOf(LeagueRoomUnavailable);

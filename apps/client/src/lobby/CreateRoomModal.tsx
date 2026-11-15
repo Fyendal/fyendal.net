@@ -9,6 +9,7 @@ import { FormatName } from "./FormatBadge.js";
 import { heroImageUrl } from "./heroImage.js";
 import { BotOpponentModal } from "./BotOpponentModal.js";
 import { CardPoolModeControl } from "./CardPoolModeControl.js";
+import { SandboxSwitch } from "./SandboxSwitch.js";
 import { ListboxDropdown, type ListboxSection } from "../components/ListboxDropdown.js";
 import { FORMATS } from "../domain.js";
 
@@ -33,6 +34,7 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
   })));
   const [format, setFormat] = useState<Format>("cc");
   const [choosingBot, setChoosingBot] = useState(false);
+  const [sandbox, setSandbox] = useState(false);
   const [deckFor, setDeckFor] = useState<Record<Format, string>>({
     cc: "",
     "silver-age": "",
@@ -46,7 +48,7 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
 
   const createHostedRoom = (visibility: "public" | "private") => {
     if (!selectionValid) return;
-    createRoom(format, deckId, visibility);
+    createRoom(format, deckId, visibility, sandbox);
     onClose();
   };
 
@@ -107,8 +109,10 @@ export function CreateRoomModal({ onClose }: { onClose: () => void }) {
           />
         </fieldset>
 
+        <SandboxSwitch checked={sandbox} onChange={setSandbox} privateOnly />
+
         <div className="create-room-actions">
-          <button className="btn-primary" disabled={!selectionValid} onClick={() => createHostedRoom("public")}>
+          <button className="btn-primary" disabled={!selectionValid || sandbox} onClick={() => createHostedRoom("public")}>
             {intl.formatMessage({ id: "lobby.createRoom.open" })}
           </button>
           <button className="btn-private-room" disabled={!selectionValid} onClick={() => createHostedRoom("private")}>

@@ -63,6 +63,7 @@ import { opponentPrepState, PrepMatchSheet } from "./PrepMatchSheet.js";
 import { nextPrepStep, useStepNudge } from "./nextStepNudge.js";
 import { FullscreenButton } from "../components/FullscreenButton.js";
 import { TopbarSocialSlot } from "../social/TopbarSocialSlot.js";
+import { SandboxBadge } from "../components/SandboxBadge.js";
 import {
   canPreloadCardImages,
   preloadCardImage,
@@ -155,13 +156,14 @@ function FirstPlayerChoice({
 export function PrepRoom() {
   const intl = useIntl();
   const {
-    prepDeck, prep, roomCode, matchmakingActive, matchAcceptanceRole,
+    prepDeck, prep, sandbox, roomCode, matchmakingActive, matchAcceptanceRole,
     acceptMatch, declineMatch, playBotFromPrep, presentArena, presentDeck, prepUnready,
     chooseFirst, leave, selectPrepMatchup, setDeckArt, betaTester,
     deckSwitch, deckSwitchLocked, dismissDeckSwitchLocked, switchSoloSeat,
   } = useStore(useShallow((state) => ({
     prepDeck: state.prepDeck,
     prep: state.prep,
+    sandbox: state.sandbox,
     roomCode: state.roomCode,
     matchmakingActive: state.matchmakingActive,
     matchAcceptanceRole: state.matchAcceptanceRole,
@@ -816,6 +818,7 @@ export function PrepRoom() {
             )}
             {roomCode && <span className="room-code prep-code">{roomCode}</span>}
           </h2>
+          {sandbox ? <SandboxBadge /> : null}
         </div>
         <div className="prep-topbar-actions">
           <TopbarSocialSlot />

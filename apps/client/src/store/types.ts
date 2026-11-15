@@ -180,7 +180,7 @@ export interface StoreState {
   markChatRead: (username: string) => void;
   beginFriendInvite: (username: string) => void;
   cancelFriendInvite: () => void;
-  createFriendRoom: (username: string, format: Format, deckId: string) => void;
+  createFriendRoom: (username: string, format: Format, deckId: string, sandbox?: boolean) => void;
   /** Takes your seat in a league match's room; the server creates it on first entry. */
   enterLeagueRoom: (matchId: string, deckId: string) => void;
   dismissFriendGameInvite: (inviteId: string) => void;
@@ -233,6 +233,8 @@ export interface StoreState {
   botGame: boolean;
   /** One account controls both seats of this private room. */
   soloGame: boolean;
+  /** Unrecorded sandbox room: a private opt-in or a solo game. */
+  sandbox: boolean;
   /** Solo games: the owner's seat, fixed at the bottom of the board while `yourSeat` follows the acting seat. */
   boardSeat: 0 | 1 | null;
   playerProfiles: [PlayerProfileView, PlayerProfileView] | null;
@@ -280,6 +282,8 @@ export interface StoreState {
     format: Format,
     deckId: string,
     visibility?: "private" | "public",
+    /** Private rooms only. */
+    sandbox?: boolean,
   ) => void;
   createBotRoom: (format: Format, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
   playBotFromPrep: (format: Format, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
@@ -386,6 +390,7 @@ export interface PreReplaySnapshot {
   yourSeat: number | null;
   boardSeat: 0 | 1 | null;
   soloGame: boolean;
+  sandbox: boolean;
   spectating: boolean;
   spectatorCount: number;
   spectatorUsernames: Array<string | null>;

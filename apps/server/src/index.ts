@@ -84,6 +84,7 @@ const WS_PING_INTERVAL_MS = 30_000;
 const EMOTE_COOLDOWN_MS = 1_000;
 const SESSION_SWEEP_INTERVAL_MS = 15 * 60 * 1000;
 const ALREADY_IN_ROOM = "this connection is already in a room";
+const SANDBOX_REQUIRES_PRIVATE = "sandbox rooms must be private";
 
 interface ServerDeps {
   db: Queryable;
@@ -841,7 +842,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           ...choice.choice,
           username: ctx.user.username,
           userId: ctx.user.id,
-        }, "private", cardPoolMode);
+        }, "private", cardPoolMode, msg.sandbox === true);
         await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
         connections.attach(ctx, code, seat, token);
         const version = await markAttachedPresent(ctx);
@@ -895,6 +896,10 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
           return;
         }
+        if (msg.sandbox && !msg.private) {
+          send(ws, { type: "error", message: SANDBOX_REQUIRES_PRIVATE });
+          return;
+        }
         const cardPoolMode = msg.cardPoolMode ?? "legal";
         const choice = await resolveChoice(ctx.user, msg.format, msg.deckId, cardPoolMode);
         if ("error" in choice) {
@@ -905,7 +910,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           ...choice.choice,
           username: ctx.user.username,
           userId: ctx.user.id,
-        }, msg.private ? "private" : "public", cardPoolMode);
+        }, msg.private ? "private" : "public", cardPoolMode, msg.sandbox === true);
         await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
         connections.attach(ctx, code, seat, token);
         const version = await markAttachedPresent(ctx);

@@ -1107,10 +1107,11 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
         && username(message.username) && decimalId(message.throughId);
       break;
     case "create-friend-room":
-      valid = exactKeys(message, ["type", "username", "format", "deckId", "cardPoolMode"], ["type", "username", "format", "deckId"])
+      valid = exactKeys(message, ["type", "username", "format", "deckId", "cardPoolMode", "sandbox"], ["type", "username", "format", "deckId"])
         && username(message.username) && FORMATS.has(String(message.format))
         && id(message.deckId)
-        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)));
+        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)))
+        && (message.sandbox === undefined || typeof message.sandbox === "boolean");
       break;
     case "friend-game-invite-dismiss":
       valid = exactKeys(message, ["type", "inviteId"]) && requestId(message.inviteId);
@@ -1125,11 +1126,12 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
       valid = exactKeys(message, ["type", "matchId", "deckId"]) && leagueRecordId(message.matchId) && id(message.deckId);
       break;
     case "create-room":
-      valid = exactKeys(message, ["type", "format", "deckId", "private", "cardPoolMode"], ["type", "format", "deckId"])
+      valid = exactKeys(message, ["type", "format", "deckId", "private", "cardPoolMode", "sandbox"], ["type", "format", "deckId"])
         && FORMATS.has(String(message.format))
         && id(message.deckId)
         && (message.private === undefined || typeof message.private === "boolean")
-        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)));
+        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)))
+        && (message.sandbox === undefined || typeof message.sandbox === "boolean");
       break;
     case "queue-join":
       valid = exactKeys(message, ["type", "format", "deckId", "cardPoolMode", "avoidRoomCodes"], ["type", "format", "deckId"])
@@ -1831,7 +1833,7 @@ function prepSeat(value: unknown): boolean {
 
 function prepView(value: unknown): value is PrepView {
   const prep = object(value);
-  if (!prep || !exactKeys(prep, ["format", "seats", "yourSeat", "yourDeckId", "die", "startPlayer", "botGame", "soloGame", "searching", "cardPoolMode", "deadlineAt", "deadlinePhase", "phase", "yourArena", "yourPresentedDeck"], ["format", "seats", "yourSeat", "die", "startPlayer", "phase"])) return false;
+  if (!prep || !exactKeys(prep, ["format", "seats", "yourSeat", "yourDeckId", "die", "startPlayer", "botGame", "soloGame", "sandbox", "searching", "cardPoolMode", "deadlineAt", "deadlinePhase", "phase", "yourArena", "yourPresentedDeck"], ["format", "seats", "yourSeat", "die", "startPlayer", "phase"])) return false;
   let dieValid = prep.die === null;
   if (!dieValid) {
     const die = object(prep.die);
@@ -1845,6 +1847,7 @@ function prepView(value: unknown): value is PrepView {
     && optional(prep.yourDeckId, id)
     && optional(prep.botGame, (v): v is boolean => typeof v === "boolean")
     && optional(prep.soloGame, (v): v is boolean => typeof v === "boolean")
+    && optional(prep.sandbox, (v): v is true => v === true)
     && optional(prep.searching, (v): v is true => v === true)
     && (prep.searching === undefined || prep.phase === "waiting")
     && optional(prep.cardPoolMode, (v): v is "future" | "open" => v === "future" || v === "open")
@@ -1922,7 +1925,7 @@ function decodeStateMessage(value: unknown): StateMessage | null {
   if (!message || message.type !== "state") return null;
   const valid = exactKeys(message, [
     "type", "version", "view", "transition", "playerProfiles", "yourSeat", "legal", "actionCandidates",
-    "spectators", "lastActionAt", "clock", "botGame", "soloGame", "boardSeat", "cardArt", "passUntil", "endTurnWarning",
+    "spectators", "lastActionAt", "clock", "botGame", "soloGame", "sandbox", "boardSeat", "cardArt", "passUntil", "endTurnWarning",
   ], ["type", "version", "view", "playerProfiles", "yourSeat", "legal", "lastActionAt"])
     && optional(message.clock, gameClockView)
     && optional(message.cardArt, (v): v is [Record<string, string>, Record<string, string>] =>
@@ -1937,6 +1940,7 @@ function decodeStateMessage(value: unknown): StateMessage | null {
     && optional(message.spectators, nonNegativeInteger)
     && optional(message.botGame, (v): v is boolean => typeof v === "boolean")
     && optional(message.soloGame, (v): v is boolean => typeof v === "boolean")
+    && optional(message.sandbox, (v): v is true => v === true)
     && optional(message.boardSeat, (v): v is 0 | 1 => v === 0 || v === 1)
     && optional(message.passUntil, passUntilMode)
     && optional(message.endTurnWarning, (v): v is true => v === true)

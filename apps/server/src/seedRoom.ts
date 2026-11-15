@@ -151,8 +151,8 @@ try {
     await tx.query(
       `INSERT INTO rooms
          (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
-          status, winner, is_private, clock)
-       VALUES ($1, $2, '[]', $3, $4, $5, $7, $6, NULL, 'active', NULL, TRUE, $8)`,
+          status, winner, is_private, clock, sandbox)
+       VALUES ($1, $2, '[]', $3, $4, $5, $7, $6, NULL, 'active', NULL, TRUE, $8, FALSE)`,
       [
         fixture.code,
         fixture.format,

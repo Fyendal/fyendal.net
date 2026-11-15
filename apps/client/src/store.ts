@@ -497,7 +497,7 @@ export const useStore = create<StoreState>((set, get) => {
       const pendingPlay = get().pendingFabraryPlay;
       if (pendingPlay?.status === "starting") {
         set({ pendingFabraryPlay: { ...pendingPlay, status: "ready" },
-          matchmakingActive: false, botGame: false, soloGame: false, pendingBotStart: false });
+          matchmakingActive: false, botGame: false, soloGame: false, sandbox: false, pendingBotStart: false });
       }
       if (roomEntryPending && !roomEntryRetryable) {
         failPendingRoomEntry("connection to room failed");
@@ -1185,6 +1185,7 @@ export const useStore = create<StoreState>((set, get) => {
           spectatorCount: msg.spectators ?? 0,
           botGame: msg.botGame === true,
           soloGame: msg.soloGame === true,
+          sandbox: msg.sandbox === true || msg.soloGame === true,
           boardSeat: msg.boardSeat ?? null,
           botMatchTransition: null,
           lastActionAt: msg.lastActionAt,
@@ -1314,6 +1315,7 @@ export const useStore = create<StoreState>((set, get) => {
           prep: msg.prep,
           botGame: msg.prep.botGame === true,
           soloGame: msg.prep.soloGame === true,
+          sandbox: msg.prep.sandbox === true || msg.prep.soloGame === true,
           queuedFormat: null,
           roomStartPending: false,
           matchAcceptanceRole,
@@ -1396,7 +1398,7 @@ export const useStore = create<StoreState>((set, get) => {
         const pendingPlay = get().pendingFabraryPlay;
         if (pendingPlay?.status === "starting") {
           set({ pendingFabraryPlay: { ...pendingPlay, status: "ready" },
-            matchmakingActive: false, botGame: false, soloGame: false, pendingBotStart: false });
+            matchmakingActive: false, botGame: false, soloGame: false, sandbox: false, pendingBotStart: false });
         }
         if (failPendingRoomEntry(msg.message)) break;
         resetRoomCommandPipeline();
@@ -1545,7 +1547,7 @@ export const useStore = create<StoreState>((set, get) => {
       set({ friendInviteTarget: username, socialOpen: false });
     },
     cancelFriendInvite: () => set({ friendInviteTarget: null }),
-    createFriendRoom: (username, format, deckId) => {
+    createFriendRoom: (username, format, deckId, sandbox = false) => {
       if (get().roomCode || get().screen !== "lobby") {
         set({ friendInviteTarget: null });
         return;
@@ -1557,6 +1559,7 @@ export const useStore = create<StoreState>((set, get) => {
         prepDeck: null,
         botGame: false,
         soloGame: false,
+        sandbox: false,
         socialError: null,
       });
       connect(() => send({
@@ -1564,6 +1567,7 @@ export const useStore = create<StoreState>((set, get) => {
         username,
         format,
         deckId,
+        ...(sandbox ? { sandbox: true } : {}),
         ...(get().cardPoolModes[format] === "legal" ? {} : { cardPoolMode: get().cardPoolModes[format] }),
       }));
     },
@@ -1571,7 +1575,7 @@ export const useStore = create<StoreState>((set, get) => {
       if (get().roomCode || get().screen !== "lobby") return;
       prepDeckId = deckId;
       roomEntryPending = false;
-      set({ prep: null, prepDeck: null, botGame: false, soloGame: false });
+      set({ prep: null, prepDeck: null, botGame: false, soloGame: false, sandbox: false });
       connect(() => send({ type: "enter-league-room", matchId, deckId }));
     },
     dismissFriendGameInvite: (inviteId) => {
@@ -1653,12 +1657,12 @@ export const useStore = create<StoreState>((set, get) => {
       clearAuthenticatedState();
       if (token) await apiLogout(token);
     },
-    createRoom: (format, deckId, visibility = "private") => {
+    createRoom: (format, deckId, visibility = "private", sandbox = false) => {
       roomEntryPending = false;
       pendingBotRoom = null;
       // hosts land on the prep room once the room exists
       prepDeckId = deckId;
-      set({ prep: null, prepDeck: null, botGame: false, soloGame: false, matchmakingActive: false, roomStartPending: true });
+      set({ prep: null, prepDeck: null, botGame: false, soloGame: false, sandbox: false, matchmakingActive: false, roomStartPending: true });
       // Warm the deck art while the server refreshes the Fabrary deck.
       void loadPrepDeck(deckId, true);
       connect(() => {
@@ -1667,6 +1671,7 @@ export const useStore = create<StoreState>((set, get) => {
           format,
           deckId,
           private: visibility === "private",
+          ...(sandbox && visibility === "private" ? { sandbox: true } : {}),
           ...(get().cardPoolModes[format] !== "legal"
             ? { cardPoolMode: get().cardPoolModes[format] }
             : {}),
@@ -1688,6 +1693,7 @@ export const useStore = create<StoreState>((set, get) => {
         prepDeck: null,
         botGame: true,
         soloGame: false,
+        sandbox: false,
         matchmakingActive: searchForPlayer,
         backgroundMatchmaking: { state: "inactive" },
         declinedBackgroundHero: null,
@@ -1729,6 +1735,7 @@ export const useStore = create<StoreState>((set, get) => {
         prepDeck: null,
         botGame: false,
         soloGame: true,
+        sandbox: true,
         matchmakingActive: false,
         roomStartPending: true,
       });
@@ -1785,7 +1792,7 @@ export const useStore = create<StoreState>((set, get) => {
           set({ roomCode: upperCode, screen: "room-loading", inviteRoom: null });
         }
       }
-      set({ botGame: false, soloGame: false });
+      set({ botGame: false, soloGame: false, sandbox: false });
       // a deck id means a player seat → prep room;
       // without one (spectate or token reconnect) keep the current session
       if (deckId) {

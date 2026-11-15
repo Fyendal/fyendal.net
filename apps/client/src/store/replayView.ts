@@ -12,6 +12,7 @@ export function snapshotBeforeReplay(state: StoreState): PreReplaySnapshot | nul
     yourSeat: state.yourSeat,
     boardSeat: state.boardSeat,
     soloGame: state.soloGame,
+    sandbox: state.sandbox,
     spectating: state.spectating,
     spectatorCount: state.spectatorCount,
     spectatorUsernames: state.spectatorUsernames,
@@ -46,6 +47,7 @@ export function replayViewerProjection(
     cardArt: null,
     botGame: false,
     soloGame: false,
+    sandbox: false,
     boardSeat: null,
     error: null,
   };

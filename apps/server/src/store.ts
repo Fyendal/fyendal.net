@@ -246,6 +246,8 @@ export interface RoomRow {
   rulesetVersion: string;
   /** Private rooms are accessible by code/URL and visible in the lobby only to seated accounts. */
   isPrivate: boolean;
+  /** Opted in at private-room creation; immutable. Solo rooms are sandbox regardless. */
+  sandbox: boolean;
   /** Room-wide format rule, fixed when the room is created. */
   cardPoolMode: CardPoolMode;
   /** Latest committed semantic edge. Its fromVersion fences reconnects and
@@ -354,6 +356,11 @@ export function isPracticeRoom(room: Pick<RoomRow, "seats">): boolean {
 
 export function isSoloRoom(room: Pick<RoomRow, "seats">): boolean {
   return room.seats.some((seat) => seat?.controller === "self");
+}
+
+/** Sandbox games are never recorded. */
+export function isSandboxRoom(room: Pick<RoomRow, "seats" | "sandbox">): boolean {
+  return room.sandbox || isSoloRoom(room);
 }
 
 /** The seat a solo game is waiting on; its owner acts as that seat. */
@@ -527,6 +534,7 @@ type RawRoomRow = {
   prep_deadline_at: number | null;
   ruleset_version: string;
   is_private: boolean;
+  sandbox: boolean;
   card_pool_mode: CardPoolMode;
   last_transition: unknown;
   clock: RoomClock | null;
@@ -766,6 +774,9 @@ function decodeRawRoomRow(value: unknown): RawRoomRow {
   if (typeof row.is_private !== "boolean") {
     throw new CorruptRoomError(code, "row.is_private", "expected a boolean");
   }
+  if (typeof row.sandbox !== "boolean") {
+    throw new CorruptRoomError(code, "row.sandbox", "expected a boolean");
+  }
   if (!(row.card_pool_mode === "legal" || row.card_pool_mode === "future" || row.card_pool_mode === "open")) {
     throw new CorruptRoomError(code, "row.card_pool_mode", "expected a card-pool mode");
   }
@@ -812,6 +823,7 @@ function decodeRawRoomRow(value: unknown): RawRoomRow {
     prep_deadline_at: row.prep_deadline_at === null ? null : Number(row.prep_deadline_at),
     ruleset_version: row.ruleset_version,
     is_private: row.is_private,
+    sandbox: row.sandbox,
     card_pool_mode: row.card_pool_mode,
     last_transition: row.last_transition,
     clock,
@@ -943,6 +955,7 @@ function toRoom(value: unknown): RoomRow {
     prepDeadlineAt: r.prep_deadline_at == null ? null : Number(r.prep_deadline_at),
     rulesetVersion: r.ruleset_version,
     isPrivate: r.is_private,
+    sandbox: r.sandbox,
     cardPoolMode: r.card_pool_mode,
     lastTransition: decodeStoredTransition(r.last_transition, r.code, "row.last_transition"),
     clock: r.clock,
@@ -983,7 +996,7 @@ async function recordRoomMatch(
   room: RoomRow,
   outcome: { replayId: string | null; winner: 0 | 1 | null; endReason: MatchEndReason; finishedAt: number },
 ): Promise<void> {
-  if (isSoloRoom(room)) return;
+  if (isSandboxRoom(room)) return;
   const seats = room.seats.map((seat): MatchSeatInput | null => {
     const heroId = seat?.heroId;
     if (!seat || !heroId) return null;
@@ -1154,7 +1167,7 @@ export class PgRoomStore {
          GROUP BY p.room_code
        )
        SELECT r.code, r.format, r.spectators, r.state, r.prep, r.ruleset_version,
-              r.version, r.created_at, r.gc_at, r.prep_deadline_at, r.is_private, r.card_pool_mode,
+              r.version, r.created_at, r.gc_at, r.prep_deadline_at, r.is_private, r.sandbox, r.card_pool_mode,
               r.last_transition, r.clock,
               COALESCE(seat_data.seat_rows, '[]'::json) AS seat_rows,
               COALESCE(presence_data.presence_rows, '[]'::json) AS presence_rows
@@ -1595,8 +1608,8 @@ export class PgRoomStore {
         this.tickClock(out.room, hadGame);
         if (!(await this.save(out.room, db))) throw VERSION_CONFLICT;
         await this.applySeatWrites(db, out.room, out.seatWrites ?? []);
-        // Solo games leave no durable record: no replay, match, counters, or awards.
-        const recorded = !isSoloRoom(out.room);
+        // Sandbox games leave no durable record: no replay, match, counters, or awards.
+        const recorded = !isSandboxRoom(out.room);
         const gameJustEnded = recorded && !wasGameOver && out.room.state?.phase === "game-over";
         const pendingAchievements = gameJustEnded ? await awardAchievements(db, out.room) : null;
         if (out.releaseMatchmaking) {
@@ -1705,7 +1718,9 @@ export class PgRoomStore {
     },
     visibility: "public" | "private" = "public",
     cardPoolMode: CardPoolMode = "legal",
+    sandbox = false,
   ): Promise<{ code: string; seat: number; token: string; version: number }> {
+    if (sandbox && visibility !== "private") throw new Error("sandbox rooms must be private");
     // snapshot the hero for prep-room display (best-effort; caller validated)
     const heroId = (await resolveDeck(this.db, seat.deckId))?.decklist.heroId;
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
@@ -1719,9 +1734,9 @@ export class PgRoomStore {
           const now = Date.now();
           await db.query(
             `INSERT INTO rooms
-              (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner, is_private, card_pool_mode)
-             VALUES ($1, $2, '[]', NULL, NULL, $3, 0, $4, $5, 'open', NULL, $6, $7)`,
-            [code, format, this.rulesetVersion, now, now + GC_DELAY_MS, visibility === "private", cardPoolMode],
+              (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner, is_private, card_pool_mode, sandbox)
+             VALUES ($1, $2, '[]', NULL, NULL, $3, 0, $4, $5, 'open', NULL, $6, $7, $8)`,
+            [code, format, this.rulesetVersion, now, now + GC_DELAY_MS, visibility === "private", cardPoolMode, sandbox],
           );
           await db.query(
             `INSERT INTO room_seats
@@ -1759,8 +1774,8 @@ export class PgRoomStore {
           const now = Date.now();
           await db.query(
             `INSERT INTO rooms
-              (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner, is_private, card_pool_mode)
-             VALUES ($1, $2, '[]', NULL, NULL, $3, 0, $4, $5, 'open', NULL, TRUE, 'legal')`,
+              (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at, status, winner, is_private, card_pool_mode, sandbox)
+             VALUES ($1, $2, '[]', NULL, NULL, $3, 0, $4, $5, 'open', NULL, TRUE, 'legal', FALSE)`,
             [code, claimed.format, this.rulesetVersion, now, now + GC_DELAY_MS],
           );
           await bindLeagueRoom(db, userId, matchId, code);
@@ -1856,7 +1871,7 @@ export class PgRoomStore {
     const now = Date.now();
     const room: RoomRow = {
       code: newCode(), format, cardPoolMode, version: 0, createdAt: now, gcAt: now + GC_DELAY_MS,
-      rulesetVersion: this.rulesetVersion, isPrivate: true, spectators: [], state: null,
+      rulesetVersion: this.rulesetVersion, isPrivate: true, sandbox: false, spectators: [], state: null,
       prep: rollDice(), prepDeadlineAt: null, lastTransition: null, clock: null, seats,
     };
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
@@ -1866,8 +1881,8 @@ export class PgRoomStore {
       const inserted = await db.query(
         `INSERT INTO rooms
           (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
-           status, winner, is_private, card_pool_mode, prep_deadline_at)
-         VALUES ($1,$2,'[]',NULL,$3,$4,0,$5,$6,'prep',NULL,TRUE,$7,NULL)
+           status, winner, is_private, card_pool_mode, prep_deadline_at, sandbox)
+         VALUES ($1,$2,'[]',NULL,$3,$4,0,$5,$6,'prep',NULL,TRUE,$7,NULL,FALSE)
          ON CONFLICT (code) DO NOTHING RETURNING code`,
         [room.code, format, JSON.stringify(room.prep), this.rulesetVersion, now, room.gcAt, cardPoolMode],
       );
@@ -2234,6 +2249,7 @@ export class PgRoomStore {
           prepDeadlineAt: null,
           rulesetVersion: this.rulesetVersion,
           isPrivate: false,
+          sandbox: false,
           cardPoolMode: choice.cardPoolMode,
           lastTransition: null,
           clock: null,
@@ -2241,8 +2257,8 @@ export class PgRoomStore {
         await db.query(
           `INSERT INTO rooms
             (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
-             status, winner, is_private, card_pool_mode, prep_deadline_at)
-           VALUES ($1,$2,'[]',NULL,NULL,$3,0,$4,$5,'open',NULL,FALSE,$6,NULL)`,
+             status, winner, is_private, card_pool_mode, prep_deadline_at, sandbox)
+           VALUES ($1,$2,'[]',NULL,NULL,$3,0,$4,$5,'open',NULL,FALSE,$6,NULL,FALSE)`,
           [code, format, this.rulesetVersion, now, room.gcAt, choice.cardPoolMode],
         );
         await this.applySeatWrites(db, room, [{ kind: "full", seat: 0, mode: "insert" }]);
@@ -2417,6 +2433,7 @@ export class PgRoomStore {
           prepDeadlineAt: now + MATCH_ACCEPT_MS,
           rulesetVersion: this.rulesetVersion,
           isPrivate: false,
+          sandbox: false,
           cardPoolMode: pairPool,
           lastTransition: null,
           clock: null,
@@ -2424,8 +2441,8 @@ export class PgRoomStore {
         await db.query(
           `INSERT INTO rooms
             (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
-             status, winner, is_private, card_pool_mode, prep_deadline_at)
-           VALUES ($1,$2,'[]',NULL,$3,$4,0,$5,$6,'prep',NULL,FALSE,$7,$8)`,
+             status, winner, is_private, card_pool_mode, prep_deadline_at, sandbox)
+           VALUES ($1,$2,'[]',NULL,$3,$4,0,$5,$6,'prep',NULL,FALSE,$7,$8,FALSE)`,
           [code, format, JSON.stringify(room.prep), this.rulesetVersion, now, room.gcAt, pairPool, room.prepDeadlineAt],
         );
         await this.applySeatWrites(db, room, [
@@ -5225,6 +5242,7 @@ export function stateMessage(room: RoomRow, viewer: number | null, now = Date.no
     ...(room.clock ? { clock: clockView(room.clock, now) } : {}),
     ...(room.seats.some((member) => member?.controller === "bot") ? { botGame: true } : {}),
     ...(isSoloRoom(room) ? { soloGame: true } : {}),
+    ...(room.sandbox ? { sandbox: true as const } : {}),
     ...(boardSeat !== null ? { boardSeat } : {}),
     ...(seat !== null && room.seats[seat]?.passUntil ? { passUntil: room.seats[seat].passUntil.mode } : {}),
     ...(seat !== null && forfeitsActionPoint(view, seat, candidates) ? { endTurnWarning: true as const } : {}),
@@ -5289,6 +5307,7 @@ export function prepViewFor(room: RoomRow, seat: number): PrepView {
     ...(room.cardPoolMode === "legal" ? {} : { cardPoolMode: room.cardPoolMode }),
     ...(room.seats.some((member) => member?.controller === "bot") ? { botGame: true } : {}),
     ...(isSoloRoom(room) ? { soloGame: true } : {}),
+    ...(room.sandbox ? { sandbox: true as const } : {}),
     ...(room.seats[seat]?.fromQueue && room.seats[1 - seat] === null ? { searching: true as const } : {}),
     phase: prepPhase(room),
     ...(room.seats[seat]?.presented ? { yourPresentedDeck: [...room.seats[seat]!.presented!.deck] } : {}),

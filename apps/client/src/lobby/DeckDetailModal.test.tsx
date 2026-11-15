@@ -41,6 +41,7 @@ describe("DeckDetailModal", () => {
     const html = render({ href: "https://fabrary.net/decks/01M1WZTPC64GDCMN2GX752E3R7" });
     expect(html).toContain("Bravo Deck");
     expect(html).toContain("Bravo · 80 cards");
+    expect(html).not.toContain("sandbox-option");
     expect(html).toContain('class="opponent-picker" role="group" aria-label="Opponent"');
     expect(html).toMatch(/aria-pressed="true"><span class="ui-icon"[^>]*><\/span>Anyone<\/button>/);
     expect(html).toMatch(/aria-pressed="false"><span class="ui-icon"[^>]*><\/span>Private<\/button>/);

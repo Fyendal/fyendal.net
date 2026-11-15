@@ -1205,6 +1205,11 @@ export const MIGRATIONS: Migration[] = [
       ADD CONSTRAINT room_seats_controller_check
       CHECK (controller IN ('human', 'bot', 'self'));`,
   },
+  {
+    version: 67,
+    // Sandbox rooms opt out of match history at creation.
+    sql: `ALTER TABLE rooms ADD COLUMN sandbox BOOLEAN NOT NULL DEFAULT FALSE;`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

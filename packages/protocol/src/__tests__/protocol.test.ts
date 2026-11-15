@@ -397,9 +397,12 @@ describe("client messages", () => {
     { type: "chat-send", username: "Alice_1", text: "hello", clientMessageId: "message-123" },
     { type: "chat-read", username: "Alice_1", throughId: "123" },
     { type: "create-friend-room", username: "Alice_1", format: "cc", deckId: "deck" },
+    { type: "create-friend-room", username: "Alice_1", format: "cc", deckId: "deck", sandbox: true },
     { type: "friend-game-invite-dismiss", inviteId: "invite-123" },
     { type: "create-room", format: "cc", deckId: "precon-asr" },
     { type: "create-room", format: "silver-age", deckId: "deck", private: true },
+    { type: "create-room", format: "cc", deckId: "deck", private: true, sandbox: false },
+    { type: "create-room", format: "cc", deckId: "deck", private: true, sandbox: true },
     { type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "briar" },
     { type: "create-bot-room", format: "silver-age", deckId: "precon-ska", bot: "kayo" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira" },
@@ -563,6 +566,8 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "chat-read", username: "Alice", throughId: "9007199254740992" })).not.toBeNull();
     expect(decodeClientMessage({ type: "chat-read", username: "Alice", throughId: "1.5" })).toBeNull();
     expect(decodeClientMessage({ type: "create-friend-room", username: "Alice", format: "classic-battles", deckId: "deck" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-friend-room", username: "Alice", format: "cc", deckId: "deck", sandbox: "yes" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-room", format: "cc", deckId: "deck", private: true, sandbox: 1 })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "choose", optionId: "x".repeat(257) } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "choose", optionId: "pay 3", pitchInstanceIds: [-1] } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: Number.MAX_SAFE_INTEGER + 1, pitchInstanceIds: [] } })).toBeNull();
@@ -1211,6 +1216,7 @@ describe("GameView and server messages", () => {
       { type: "state", version: 1, view: gameView(), transition: { fromVersion: 0, kind: "forward", events: [{ kind: "move", from: { kind: "deck", seat: 0, position: "top" }, to: { kind: "hand", seat: 0 }, count: 1 }] }, playerProfiles, yourSeat: 0, legal: [{ kind: "play-card", instanceId: 1, pitchInstanceIds: [], boost: true }], actionCandidates: [{ kind: "play-card", instanceId: 2, pitchInstanceIds: [], pitchRequired: 4, deferPlayPresentation: true }], spectators: 2, lastActionAt: [0, 1], botGame: true },
       { type: "state", version: 3, view: gameView(), transition: { fromVersion: 2, kind: "replace", restoreVersion: 1, events: [] }, playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 1] },
       { type: "state", version: 4, view: gameView(), playerProfiles, yourSeat: 1, legal: [], lastActionAt: [0, 1], soloGame: true, boardSeat: 0 },
+      { type: "state", version: 5, view: gameView(), playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 1], sandbox: true },
       { type: "spectators", count: 2, version: 1 },
       { type: "spectator-list", usernames: ["Alice", null], version: 1 },
       { type: "opponent-disconnected", version: 1 }, { type: "opponent-reconnected", version: 1 },
@@ -1243,7 +1249,7 @@ describe("GameView and server messages", () => {
           ready: false, arenaLocked: false, connected: true, accepted: false,
         })),
         die: { rolls: [3, 5], winner: 1 }, startPlayer: null,
-        cardPoolMode: "open", deadlineAt: 30_000, deadlinePhase: "accept",
+        cardPoolMode: "open", sandbox: true, deadlineAt: 30_000, deadlinePhase: "accept",
       } },
       { type: "prep-state", version: 2, prep: {
         format: "cc", phase: "accept", yourSeat: 1, soloGame: true,
@@ -1279,6 +1285,9 @@ describe("GameView and server messages", () => {
     })).toBeNull();
     expect(decodeServerMessage({ type: "state", version: 1, view: gameView(), playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 1], soloGame: "yes" })).toBeNull();
     expect(decodeServerMessage({ type: "state", version: 1, view: gameView(), playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 1], soloGame: true, boardSeat: 2 })).toBeNull();
+    for (const sandbox of [false, "yes", 1]) {
+      expect(decodeServerMessage({ type: "state", version: 1, view: gameView(), playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 1], sandbox })).toBeNull();
+    }
   });
 
   it("decodes arena stages and rejects premature reveals and malformed commitments", () => {

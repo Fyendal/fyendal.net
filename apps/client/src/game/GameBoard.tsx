@@ -138,7 +138,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, boardSeat: soloBoardSeat, spectating, spectatorCount, spectatorUsernames, botGame, soloGame, betaTester, sendIntent: sendStoreIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, endTurnWarning, sendPassUntil, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, playSoloAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, clock, clockReceivedAt, replayClock, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, boardSeat: soloBoardSeat, spectating, spectatorCount, spectatorUsernames, botGame, soloGame, sandbox, betaTester, sendIntent: sendStoreIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, endTurnWarning, sendPassUntil, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, playSoloAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, clock, clockReceivedAt, replayClock, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -157,6 +157,7 @@ export function GameBoard() {
       spectatorUsernames: state.spectatorUsernames,
       botGame: state.botGame,
       soloGame: state.soloGame,
+      sandbox: state.sandbox,
       betaTester: state.betaTester,
       sendIntent: state.sendIntent,
       sendPriorityMode: state.sendPriorityMode,
@@ -1694,6 +1695,7 @@ export function GameBoard() {
         passUntil={passUntilControl("hud")}
         onUndo={mobileLandscapeViewport && canUndo ? () => undoAndDismissAnnouncement("last-action") : null}
         undoDisabled={roomCommandPending}
+        sandbox={sandbox}
         rail={mobileLandscapeViewport
           ? {
               oppIdentity: oppNameplate,

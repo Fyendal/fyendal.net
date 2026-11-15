@@ -5,6 +5,7 @@ import { cardImageUrl } from "./Card.js";
 import { MARKED_TOKEN_ID } from "./cardBadges.js";
 import { ControlIcon, undoWithoutFocus } from "./gameControls.js";
 import { LifeHeroPortrait } from "./LifeHeroPortrait.js";
+import { SandboxBadge } from "../components/SandboxBadge.js";
 
 export type PrimaryAction = "end-turn" | "confirm-blocks" | "confirm-no-blocks" | "pass";
 
@@ -309,6 +310,7 @@ export function StatusFloat({
   onUndo = null,
   undoDisabled = false,
   rail = null,
+  sandbox = false,
 }: {
   dockRect: DOMRect | null;
   hostRef?: Ref<HTMLDivElement>;
@@ -347,6 +349,8 @@ export function StatusFloat({
     /** Fills the gap between the plates. */
     middle?: ReactNode;
   } | null;
+  /** Unrecorded sandbox room. */
+  sandbox?: boolean;
 }) {
   const intl = useIntl();
   const oppSeat = mySeat === 0 ? 1 : 0;
@@ -444,6 +448,7 @@ export function StatusFloat({
         aria-label={intl.formatMessage({ id: "game.hud.label" })}
       >
         {plate(oppSeat, "opp", rail.oppIdentity, oppLifeStatus)}
+        {sandbox ? <SandboxBadge /> : null}
         {rail.middle}
         {plate(mySeat, "me", rail.myIdentity, <>{myLifeStatus}{resourcesPip}</>)}
       </div>
@@ -455,6 +460,7 @@ export function StatusFloat({
       className="float status-float game-hud"
       aria-label={intl.formatMessage({ id: "game.hud.label" })}
     >
+      {sandbox ? <SandboxBadge /> : null}
       {oppLifeStatus}
       {actionPointsPip}
       {resourcesPip}
