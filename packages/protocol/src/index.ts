@@ -20,6 +20,7 @@ import type {
   GameIntent,
   GameLogEvent,
   ManualEdit,
+  ReactionDefenseView,
   GameLogViewEntry,
   GameMessage,
   GameMessageValue,
@@ -1670,6 +1671,7 @@ function pendingDecision(value: unknown): boolean {
   const decision = object(value);
   return !!decision && exactKeys(decision, [
     "player", "kind", "prompt", "promptMessage", "warningMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "optionEnabledCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "stagedAttack", "stagedAttackModifiers", "defenderDefense",
+    "reactionDefense",
     "resourcePayment", "preStackSource", "optionLayout", "sourceInstanceId",
   ], ["player", "kind", "prompt"])
     && seat(decision.player) && DECISION_KINDS.has(String(decision.kind))
@@ -1708,6 +1710,12 @@ function pendingDecision(value: unknown): boolean {
           && instanceId(item.instanceId) && nonNegativeInteger(item.defense)
           && nonNegativeInteger(item.attack)
           && optional(item.triggersPhantasm, (v): v is true => v === true);
+      }, MAX_CARDS))
+    && optional(decision.reactionDefense, (value): value is ReactionDefenseView[] =>
+      array(value, (entry): entry is ReactionDefenseView => {
+        const item = object(entry);
+        return !!item && exactKeys(item, ["instanceId", "defense"], ["instanceId", "defense"])
+          && instanceId(item.instanceId) && nonNegativeInteger(item.defense);
       }, MAX_CARDS))
     && optional(decision.optionLayout, (value): value is "effect-list" => value === "effect-list")
     && optional(decision.sourceInstanceId, instanceId)

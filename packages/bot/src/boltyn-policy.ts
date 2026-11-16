@@ -876,7 +876,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     score = scoreAttackReaction(data, input, own);
   } else if (hasType(data, "defense-reaction")) {
     score = boltynDefenseReactionWorthSpending(intent, card, data, input, chargeable)
-      ? scoreDefenseReaction(data, input) + (functional === SAVING_GRACE && chargeable.length > 0 ? 4 : 0)
+      ? scoreDefenseReaction(data, input, card) + (functional === SAVING_GRACE && chargeable.length > 0 ? 4 : 0)
       : -100;
   } else if (isAttack(data)) {
     score = card.attack ?? data.attack ?? 0;

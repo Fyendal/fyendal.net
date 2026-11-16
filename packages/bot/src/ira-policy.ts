@@ -698,7 +698,7 @@ function scorePlay(
     }
   } else if (hasType(data, "defense-reaction")) {
     score = defenseReactionWorthSpending(card, input, iraSolverRules, pitchIds(intent))
-      ? scoreDefenseReaction(data, input)
+      ? scoreDefenseReaction(data, input, card)
       : -100;
   } else if (functional === "energy potion|3") {
     score = furtherAttack ? -15 : 3;

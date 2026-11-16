@@ -22,6 +22,7 @@ import { immediateOnHitDamage } from "./on-hit.js";
 import {
   currentLink,
   pendingDefenseReactionValue,
+  reactionDefense,
   responseEvaluation,
   type BotPolicyInput,
   type ResponseEvaluation,
@@ -261,7 +262,7 @@ export function defenseReactionWorthSpending(
   input: BotPolicyInput,
   factory: HeroRulesFactory,
   pitched: Iterable<number>,
-  defense = Math.max(0, card.defense ?? input.cards[card.cardId]?.defense ?? 0),
+  defense = reactionDefense(card, input),
 ): boolean {
   const threat = defenseReactionThreat(input);
   if (threat.lethal) return true;

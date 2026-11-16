@@ -930,10 +930,7 @@ export function plannedDefenseReactionPlan(
     );
     const payment = minimumPitchForCost(cost, me.resources, pitchCandidates, input);
     if (!payment) continue;
-    const defense = reactions.reduce(
-      (total, card) => total + Math.max(0, card.defense ?? input.cards[card.cardId]?.defense ?? 0),
-      0,
-    );
+    const defense = reactions.reduce((total, card) => total + reactionDefense(card, input), 0);
     options.push({
       amount: defense,
       consumedIds: [...reactionIds, ...payment],
@@ -963,24 +960,38 @@ export function plannedDefenseReactionValue(
   return plannedDefenseReactionPlan(input, intent).amount;
 }
 
-/** Printed defense already committed by this bot's unresolved reaction cards. */
+/** Projected defense covers delayed reaction debuffs (Nerve Scalpel) the card's own value omits. */
+export function reactionDefense(card: CardView, input: BotPolicyInput): number {
+  const decision = input.view.pendingDecision;
+  const projected = decision?.player === input.seat
+    ? decision.reactionDefense?.find((entry) => entry.instanceId === card.instanceId)
+    : undefined;
+  if (projected) return projected.defense;
+  return Math.max(0, card.defense ?? input.cards[card.cardId]?.defense ?? 0);
+}
+
+/** Defense already committed by this bot's unresolved reaction cards. */
 export function pendingDefenseReactionValue(input: BotPolicyInput): number {
   return input.view.stack.reduce((total, layer) => {
     if (layer.seat !== input.seat || !layer.card) return total;
     const data = input.cards[layer.card.cardId];
     if (!data || !hasType(data, "defense-reaction") || mirageNullifiesDefense(data, input)) return total;
-    return total + Math.max(0, layer.card.defense ?? data.defense ?? 0);
+    return total + reactionDefense(layer.card, input);
   }, 0);
 }
 
-export function scoreDefenseReaction(data: CardData, input: BotPolicyInput): number {
+export function scoreDefenseReaction(
+  data: CardData,
+  input: BotPolicyInput,
+  card?: CardView,
+): number {
   const link = currentLink(input);
   const incoming = link
     ? Math.max(0, link.damage - pendingDefenseReactionValue(input))
     : 0;
   if (input.view.pendingDecision?.kind !== "defense-reaction" || incoming === 0) return -100;
   if (mirageNullifiesDefense(data, input)) return -100;
-  const defense = Math.max(0, data.defense ?? 0);
+  const defense = card ? reactionDefense(card, input) : Math.max(0, data.defense ?? 0);
   const me = input.view.players[input.seat];
   const threatened = Math.max(incoming, threatenedAttackDamage(input) - pendingDefenseReactionValue(input));
   if (link && Math.max(link.attackValue, threatened) >= me.life) {

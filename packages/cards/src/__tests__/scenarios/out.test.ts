@@ -576,6 +576,30 @@ describe("OUT — registration and core mechanics", () => {
       .expectLife(1, 16); // 3 - 2: the replayed Mirage is a new object
   });
 
+  it("Nerve Scalpel's -1{d} is projected onto the defender's defense reactions", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 6, weapons: ["nerve scalpel|0", "spider's bite|0"] },
+        { hero: "dorinthea", hand: ["sink below|1"] },
+      ],
+    });
+
+    s.attackWithWeapon("nerve scalpel|0").blockWith().settle()
+      .attackWithWeapon("spider's bite|0");
+    const sinkBelow = s.state.players[1]!.hand[0]!.instanceId;
+    expect(s.state.pendingDecision?.kind).toBe("defend");
+    expect(projectStateFor(s.state, 1).pendingDecision?.reactionDefense)
+      .toEqual([{ instanceId: sinkBelow, defense: 3 }]);
+    expect(projectStateFor(s.state, 0).pendingDecision?.reactionDefense).toBeUndefined();
+
+    s.blockWith().passPriority();
+    expect(s.state.pendingDecision?.kind).toBe("defense-reaction");
+    expect(projectStateFor(s.state, 1).pendingDecision?.reactionDefense)
+      .toEqual([{ instanceId: sinkBelow, defense: 3 }]);
+    s.react("sink below|1").doRaw({ kind: "choose", optionId: "pass" });
+    expect(projectStateFor(s.state, 1).chain[1]?.defenseValue).toBe(3);
+  });
+
   it("Nerve Scalpel's -1{d} ends when Rout returns the defending card to hand", () => {
     const s = scenario({
       seats: [

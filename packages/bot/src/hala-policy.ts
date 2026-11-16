@@ -2035,7 +2035,7 @@ function scorePlay(
   } else if (hasType(data, "defense-reaction")) {
     score = !toeTheLineCoversAttack(input) &&
         defenseReactionWorthSpending(card, input, halaSolverRules, pitchIds(intent))
-      ? scoreDefenseReaction(data, input)
+      ? scoreDefenseReaction(data, input, card)
       : -100;
   } else if (functional === "toe the line|1") {
     score = shouldPlayToeTheLine(input) ? (hasFlurry(input) ? 35 : 60) : -100;

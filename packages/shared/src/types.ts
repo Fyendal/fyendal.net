@@ -638,6 +638,11 @@ export interface PendingDecision {
    *  it removes). Unlike `CardView.defense`, it includes delayed "next time
    *  they defend" effects applied at the defend event (Spider's Bite). */
   defenderDefense?: DefenderDefenseView[];
+  /** Defend and defense-reaction decisions, projected only to the defender:
+   *  the defense each defense reaction in hand, arsenal, or on the stack adds
+   *  as it resolves, including delayed effects on the next defending reaction
+   *  card (Nerve Scalpel). Each entry assumes it is the next one to defend. */
+  reactionDefense?: ReactionDefenseView[];
   /** A declared resource cost waiting for ordinary hand-card pitching. Only
    *  projected to the paying player. Options are a capped sample of pitch
    *  orders; clients may answer any option with their own order in
@@ -819,6 +824,11 @@ export interface DefenderDefenseView {
   /** Defending with this card would trigger the attack's current Phantasm,
    *  after every effect on the attack and on this card's power. */
   triggersPhantasm?: true;
+}
+
+export interface ReactionDefenseView {
+  instanceId: number;
+  defense: number;
 }
 
 export interface OngoingEffectView {

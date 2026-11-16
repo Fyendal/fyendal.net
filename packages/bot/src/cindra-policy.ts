@@ -1438,7 +1438,7 @@ function scoreNonAttackCard(
   }
   if (hasType(data, "defense-reaction")) {
     const reactionScore = defenseReactionWorthSpending(context.card, input, cindraSolverRules, excludedIds)
-      ? scoreDefenseReaction(data, input)
+      ? scoreDefenseReaction(data, input, context.card)
       : -100;
     return reactionScore < 0 ? reactionScore : 500 + reactionScore;
   }

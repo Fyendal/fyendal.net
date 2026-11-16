@@ -296,7 +296,7 @@ function scorePlay(
     }
   } else if (hasType(data, "defense-reaction")) {
     score = defenseReactionWorthSpending(card, input, bravoSolverRules, pitchIds(intent))
-      ? scoreDefenseReaction(data, input)
+      ? scoreDefenseReaction(data, input, card)
       : -100;
   } else if (functional === "oasis respite|1") {
     score = oasisDamage > 0 ? 60 + Math.min(oasisDamage, 4) * 10 : -100;

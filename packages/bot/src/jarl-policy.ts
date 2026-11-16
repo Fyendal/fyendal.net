@@ -14,6 +14,7 @@ import {
   opponentDamageEffectOnStack,
   optionCard,
   pitchIds,
+  reactionDefense,
   resourcePaymentPitchIds,
   scoreArsenalChoice,
   scoreBinaryChoice,
@@ -617,8 +618,8 @@ function scorePlay(
   } else if (functional === "felling of the crown|1") {
     score = earthBanished(input) >= 4 ? 62 : 12;
   } else if (functional === "rootbound carapace|1") {
-    score = defenseReactionStopsEnough(input, Math.max(0, card.defense ?? data.defense ?? 0))
-      ? scoreDefenseReaction(data, input) + (earthBanished(input) < 4 ? 12 : 2)
+    score = defenseReactionStopsEnough(input, reactionDefense(card, input))
+      ? scoreDefenseReaction(data, input, card) + (earthBanished(input) < 4 ? 12 : 2)
       : -100;
   } else if (functional === "tear asunder|3") {
     const secondCycle = (card.pitchCount ?? 0) > 0;
@@ -653,7 +654,7 @@ function scorePlay(
     score = scoreBlizzard(intent, input);
   } else if (hasType(data, "defense-reaction")) {
     score = defenseReactionWorthSpending(card, input, jarlSolverRules, pitchIds(intent))
-      ? scoreDefenseReaction(data, input)
+      ? scoreDefenseReaction(data, input, card)
       : -100;
   } else if (isAttack(data)) {
     score = gravy && functional === "mangle|1" && compassIsMarked

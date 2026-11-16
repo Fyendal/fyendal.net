@@ -116,7 +116,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
   }
   if (hasType(data, "defense-reaction")) {
     return defenseReactionWorthSpending(card, input, kayoSolverRules, pitchIds(intent))
-      ? scoreDefenseReaction(data, input)
+      ? scoreDefenseReaction(data, input, card)
       : -100;
   }
   if (!isAttack(data) && !hasType(data, "weapon")) return -100;

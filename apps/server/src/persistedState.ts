@@ -52,6 +52,7 @@ type PersistedEngineDecision = Omit<
   | "stagedAttack"
   | "stagedAttackModifiers"
   | "defenderDefense"
+  | "reactionDefense"
   | "preStackSource"
   | "optionLayout"
 >;

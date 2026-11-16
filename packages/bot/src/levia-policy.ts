@@ -837,7 +837,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     score = followups() > 0 ? 35 : -35;
   } else if (hasType(data, "defense-reaction")) {
     score = defenseReactionWorthSpending(card, input, leviaSolverRules, pitchIds(intent))
-      ? scoreDefenseReaction(data, input)
+      ? scoreDefenseReaction(data, input, card)
       : -100;
   } else if (named === "diabolic offering" &&
     input.view.turnFacts?.players[input.seat]?.banishedSixPlusThisTurn !== true) {

@@ -774,6 +774,55 @@ describe("Ira policy", () => {
     expect(intent).not.toMatchObject(destroyStrap);
   });
 
+  it("blocks lethal when Nerve Scalpel weakens the planned defense reaction", () => {
+    let state = createGame({
+      decklists: [iraDeck(), iraDeck()],
+      cards: cardData,
+      scripts,
+      seed: 9112,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["ASR015", "ASR026"]);
+    replaceHand(state, 1, ["ASR009", "ASR009", "ASR015", "ASR018"]);
+    state.players[1]!.life = 2;
+    state.players[1]!.equipment = {};
+    state.modifiers.push({
+      id: state.nextModifierId++,
+      sourceInstanceId: state.players[0]!.weapons[0]!.instanceId,
+      sourceCardId: "OUT005",
+      seat: 1,
+      scope: "until-end-of-turn",
+      defense: -1,
+      appliesToCardType: "reaction",
+      once: true,
+    });
+    const [torrent, pitch] = state.players[0]!.hand;
+    state = apply(state, 0, {
+      kind: "play-card",
+      instanceId: torrent!.instanceId,
+      pitchInstanceIds: [pitch!.instanceId],
+    });
+    state = advanceUntil(state, (candidate) => candidate.pendingDecision?.kind === "defend");
+    const sinkBelow = state.players[1]!.hand.find((card) => card.cardId === "ASR018")!;
+    expect(projectStateFor(state, 1).pendingDecision?.reactionDefense)
+      .toContainEqual({ instanceId: sinkBelow.instanceId, defense: 3 });
+
+    const settled = (current: typeof state) =>
+      current.winner != null || current.chain.length === 0 || current.chain.at(-1)!.resolved;
+    for (let step = 0; step < 40 && !settled(state); step++) {
+      const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      const legal = legalIntents(state, actor);
+      const intent = actor === 1
+        ? chooseIraIntent({ seat: 1, view: projectStateFor(state, 1), legal, cards: cardData })
+        : legal.find((candidate) => candidate.kind === "pass")!;
+      state = apply(state, actor, intent);
+    }
+    expect(settled(state)).toBe(true);
+    expect(state.winner).toBeNull();
+    expect(state.players[1]!.life).toBeGreaterThan(0);
+  });
+
   it("preserves Snapdragon Scalers when an underblocked attack will get go again on hit", () => {
     let state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],

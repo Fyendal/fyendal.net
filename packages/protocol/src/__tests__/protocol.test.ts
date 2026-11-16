@@ -356,6 +356,7 @@ const gameView = () => ({
     stagedAttack: 5,
     stagedAttackModifiers: [{ sourceCardId: "WTR001", amount: 1 }],
     defenderDefense: [{ instanceId: 1, defense: 3, attack: 5, triggersPhantasm: true }],
+    reactionDefense: [{ instanceId: 1, defense: 3 }],
   },
   winner: null,
   log: ["started"],
@@ -693,6 +694,13 @@ describe("GameView and server messages", () => {
     view.pendingDecision.defenderDefense = [{ instanceId: 1, defense: 3, attack: 5 }] as never;
     expect(decodeGameView(view)).not.toBeNull();
     view.pendingDecision.defenderDefense = [{ instanceId: 1, defense: 3, attack: 5, triggersPhantasm: false }] as never;
+    expect(decodeGameView(view)).toBeNull();
+  });
+  it("rejects reaction defense entries with extra or negative values", () => {
+    const view = gameView();
+    view.pendingDecision.reactionDefense = [{ instanceId: 1, defense: -1 }] as never;
+    expect(decodeGameView(view)).toBeNull();
+    view.pendingDecision.reactionDefense = [{ instanceId: 1, defense: 3, attack: 5 }] as never;
     expect(decodeGameView(view)).toBeNull();
   });
   it("accepts the public soul turn facts and rejects malformed values", () => {

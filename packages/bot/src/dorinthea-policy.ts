@@ -15,6 +15,7 @@ import {
   ownCards,
   pendingDefenseReactionValue,
   pitchIds,
+  reactionDefense,
   remainingPitchValue,
   resourcePaymentPitchIds,
   responseEvaluation,
@@ -224,11 +225,11 @@ function scoreDefenseReactionPlay(card: CardView, data: CardData, intent: GameIn
   const unfunds = keepsWeaponFunded(input, new Set()) &&
     !keepsWeaponFunded(input, new Set([card.instanceId, ...pitchIds(intent)]));
   const swingLost = unfunds ? 4 * Math.max(0, input.cards[weapon(input)?.cardId ?? ""]?.attack ?? 0) : 0;
-  const shared = scoreDefenseReaction(data, input);
+  const shared = scoreDefenseReaction(data, input, card);
   const link = currentLink(input);
   if (shared > -100 || !link || input.view.pendingDecision?.kind !== "defense-reaction") return shared - swingLost;
   const incoming = Math.max(0, link.damage - pendingDefenseReactionValue(input));
-  const defense = Math.max(0, card.defense ?? data.defense ?? 0);
+  const defense = reactionDefense(card, input);
   if (incoming === 0) return -100;
   return 20 + Math.min(incoming, defense) * 4 - Math.max(0, defense - incoming) * 1.5 - swingLost;
 }

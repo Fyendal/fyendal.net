@@ -14,11 +14,13 @@ import type {
   PendingDecision,
   PlayableZone,
   PlayerView,
+  ReactionDefenseView,
   StackLayerView,
   TurnFactsView,
   TurnTriggerChoiceView,
   TurnTriggerEvent,
 } from "@fyendal/shared";
+import { hasType } from "@fyendal/shared";
 import type { CardInstance, CombatValueModifier, Modifier, PendingDecisionState, PlayerState } from "./state.js";
 import { arsenalCapacity, arsenalZoneCount } from "./cardLifecycle.js";
 import { attackHasVeil, cardColorOf, cardTypesOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
@@ -1338,6 +1340,10 @@ function projectState(
           const defenderDefense = pd.kind === "defend" && (revealAll || pd.player === seat)
             ? projectedDefenderDefense(state, runtime, pd.player, stagedInstances)
             : [];
+          const reactionDefense = (pd.kind === "defend" || pd.kind === "defense-reaction") &&
+              (revealAll || pd.player === seat)
+            ? projectedReactionDefense(state, runtime, pd.player)
+            : [];
           const privateDecision = revealAll || pd.player === seat;
           const promptMessage = projectedDecisionPromptMessage(
             state,
@@ -1413,6 +1419,7 @@ function projectState(
                 }
               : {}),
             ...(defenderDefense.length > 0 ? { defenderDefense } : {}),
+            ...(reactionDefense.length > 0 ? { reactionDefense } : {}),
             ...(pd.revealedCardIds
               ? {
                   // These identities were explicitly made public by the
@@ -1447,6 +1454,26 @@ function projectState(
     ...(state.drawOfferSeat === undefined ? {} : { drawOfferSeat: state.drawOfferSeat }),
     ...projectedGameLog,
   };
+}
+
+/** Defense each of the defender's defense reactions adds as it resolves. */
+function projectedReactionDefense(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  defenderSeat: number,
+): ReactionDefenseView[] {
+  const link = currentLink(state);
+  if (!link || link.resolved) return [];
+  const player = state.players[defenderSeat] as PlayerState;
+  const onStack = state.stack.flatMap((layer) =>
+    layer.seat === defenderSeat && layer.card ? [layer.card] : []
+  );
+  return [...player.hand, ...player.arsenal, ...onStack]
+    .filter((card) => hasType(dataOf(state, card.cardId), "defense-reaction"))
+    .map((card) => ({
+      instanceId: card.instanceId,
+      defense: Math.max(0, stagedDefenseTotal(state, runtime, link, [card])),
+    }));
 }
 
 /** Marginal defense of each legal defender relative to the staged set (for a

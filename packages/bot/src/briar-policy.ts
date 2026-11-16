@@ -543,7 +543,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     }
   } else if (hasType(data, "defense-reaction")) {
     score = card && defenseReactionWorthSpending(card, input, briarSolverRules, pitchIds(intent))
-      ? scoreDefenseReaction(data, input)
+      ? scoreDefenseReaction(data, input, card)
       : -100;
   }
 

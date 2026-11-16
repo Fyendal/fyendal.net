@@ -463,7 +463,7 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     }
   } else if (hasType(data, "defense-reaction")) {
     score = defenseReactionWorthSpending(card, input, auroraSolverRules, pitchIds(intent))
-      ? scoreDefenseReaction(data, input)
+      ? scoreDefenseReaction(data, input, card)
       : -100;
   }
 

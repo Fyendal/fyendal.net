@@ -577,7 +577,7 @@ function scorePlay(
     score = aggressiveOpponent(input) ? 58 : 18;
   } else if (hasType(data, "defense-reaction")) {
     score = defenseReactionWorthSpending(card, input, starvoSolverRules, pitchIds(intent))
-      ? scoreDefenseReaction(data, input)
+      ? scoreDefenseReaction(data, input, card)
       : -100;
   } else if (isElectromagneticSomersault(intent, input)) {
     score = hasFriendlySomersaultTarget(input, intent) ? 48 : -100;
