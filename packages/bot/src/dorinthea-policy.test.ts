@@ -106,6 +106,14 @@ describe("Dorinthea policy", () => {
     expect(cardName(chooseDorintheaIntent(input(state)), state)).toBe("Decimator Great Axe");
   });
 
+  it("swings the Axe at the hero rather than an ally it cannot kill", () => {
+    const state = game([["Felling Swing", 3]]);
+    state.players[1]!.board.push({ instanceId: state.nextInstanceId++, cardId: "IAR221", owner: 1, life: 6 });
+    const intent = chooseDorintheaIntent(input(state));
+    expect(cardName(intent, state)).toBe("Decimator Great Axe");
+    expect(intent).not.toHaveProperty("targetAllyId");
+  });
+
   it("plays Felling Swing when two blues fund it and the Axe", () => {
     const { played } = playUntil(
       game([["Felling Swing", 1], ["Raging Onslaught", 3], ["Biting Blade", 3], ["On the Horizon", 1]]),

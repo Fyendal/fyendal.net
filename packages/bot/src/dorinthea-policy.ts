@@ -6,6 +6,7 @@ import {
   continuationResources,
   currentAttackIsOurs,
   currentLink,
+  enforceAllyTargetPolicy,
   enforceSpectraPolicy,
   functionalKey as key,
   intentCard,
@@ -367,7 +368,7 @@ export function chooseDorintheaIntentWithTrace(input: BotPolicyInput): Dorinthea
     rankCandidate: (intent, observed) => scoreTacticalRoot(intent, observed, scorePlay),
     rootScore: (intent, observed) => scoreTacticalRoot(intent, observed, scorePlay),
   });
-  const intent = enforceSpectraPolicy(input, decision.intent);
+  const intent = enforceAllyTargetPolicy(input, enforceSpectraPolicy(input, decision.intent));
   return decision.plan ? { intent, plan: decision.plan } : { intent };
 }
 
