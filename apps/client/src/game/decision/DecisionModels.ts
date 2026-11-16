@@ -21,6 +21,9 @@ export interface PendingDecisionModel {
   confirmSkipArsenal: boolean;
   onRequestPass: () => void;
   onDisableGuidance: () => void;
+  /** "Don't ask again" for a trigger target declaration: the pick is repeated
+   * for that source's later declarations. */
+  rememberTarget?: { on: boolean; onChange: (on: boolean) => void };
   onConfirmSkipArsenal: () => void;
   onCancelSkipArsenal: () => void;
   /** Board-owned bounded card selection, so Space can submit it. */

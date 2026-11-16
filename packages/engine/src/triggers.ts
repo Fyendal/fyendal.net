@@ -999,6 +999,7 @@ function declareTriggerTargets(state: GameStateInternal, runtime: EngineRuntime)
     const optional = target.optional === true;
     const options = [...(optional ? ["pass"] : []), ...targets.map(String)];
     const presentation = scriptPromptParts(target.prompt(ctx), options);
+    const defaultTarget = target.defaultTarget?.(ctx);
     state.pendingDecision = {
       player: layer.seat,
       kind: "choose-target",
@@ -1009,6 +1010,9 @@ function declareTriggerTargets(state: GameStateInternal, runtime: EngineRuntime)
       cardOptions: [...(optional ? [null] : []), ...targets],
       sourceInstanceId: layer.sourceInstanceId,
       chooseHook: "trigger-target",
+      ...(defaultTarget !== undefined && targets.includes(defaultTarget)
+        ? { defaultOption: String(defaultTarget) }
+        : {}),
     };
     return true;
   }

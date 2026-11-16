@@ -1561,6 +1561,24 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         }
         return;
       }
+      case "remember-target": {
+        const player = requirePlayer(ws, ctx);
+        if (!player) return;
+        const r = await rooms.setRememberedTarget(
+          player.code,
+          player.credentials,
+          msg.optionId,
+          msg.commandId !== undefined && msg.expectedVersion !== undefined
+            ? { id: msg.commandId, expectedVersion: msg.expectedVersion }
+            : undefined,
+        );
+        if (!r.ok) {
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        await afterStateCommit(player.code, r.version, r.replayFinalizationId);
+        return;
+      }
       case "standing-orders": {
         const player = requirePlayer(ws, ctx);
         if (!player) return;

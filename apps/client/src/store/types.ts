@@ -332,6 +332,8 @@ export interface StoreState {
   sendPriorityMode: (mode: PriorityWindowMode) => void;
   sendStandingOrders: (orders: SeatStandingOrders) => void;
   sendTokenSkip: (kind: TokenSkipKind, enabled: boolean) => void;
+  /** Choose a trigger target and repeat it for that source's later declarations. */
+  sendRememberedTarget: (optionId: string) => boolean;
   /** Arm a pass shortcut, or cancel it with null. */
   sendPassUntil: (mode: PassUntilMode | null) => void;
   /** Remembered across games; re-arms an armed shortcut with the new choice. */

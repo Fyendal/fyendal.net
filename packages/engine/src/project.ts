@@ -922,6 +922,16 @@ function projectedStackLayers(
 }
 
 /** Project only announcement continuations, never ordinary resolution choices. */
+function projectedTriggerTarget(
+  state: GameStateInternal,
+  pd: PendingDecisionState,
+): Pick<PendingDecision, "triggerTarget"> {
+  if (pd.chooseHook !== "trigger-target" || pd.sourceInstanceId === undefined) return {};
+  const sourceCardId = findCardAnywhere(state, pd.sourceInstanceId)?.card.cardId
+    ?? state.stack.find((layer) => layer.sourceInstanceId === pd.sourceInstanceId)?.triggerSource?.cardId;
+  return sourceCardId ? { triggerTarget: { sourceInstanceId: pd.sourceInstanceId, sourceCardId } } : {};
+}
+
 function projectedPreStackSource(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -1378,6 +1388,7 @@ function projectState(
             ...((revealAll || pd.player === seat) && pd.defaultOption
               ? { defaultOption: pd.defaultOption }
               : {}),
+            ...(privateDecision ? projectedTriggerTarget(state, pd) : {}),
             ...((revealAll || pd.player === seat) && pd.optionLabels ? { optionLabels: pd.optionLabels } : {}),
             ...(privateDecision && pd.optionMessages ? { optionMessages: pd.optionMessages } : {}),
             ...(privateDecision && pd.chosenOptions ? { chosenOptions: pd.chosenOptions } : {}),

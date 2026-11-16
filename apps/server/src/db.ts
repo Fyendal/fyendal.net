@@ -1225,6 +1225,11 @@ export const MIGRATIONS: Migration[] = [
     // Bot rooms now turn sandbox on first edit, not at creation.
     sql: `ALTER TABLE pending_bot_starts DROP COLUMN sandbox;`,
   },
+  {
+    version: 71,
+    // Trigger targets the server repeats for a seat until the turn ends.
+    sql: "ALTER TABLE room_seats ADD COLUMN auto_target JSONB;",
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

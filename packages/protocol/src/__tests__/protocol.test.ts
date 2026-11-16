@@ -446,6 +446,8 @@ describe("client messages", () => {
     { type: "runechant-skip", enabled: true },
     { type: "runechant-skip", enabled: false },
     { type: "seismic-surge-skip", enabled: true },
+    { type: "remember-target", optionId: "12" },
+    { type: "remember-target", optionId: "12", commandId: "00000000-0000-4000-8000-000000000001", expectedVersion: 3 },
     { type: "leave-room" },
     { type: "leave-room", endGame: true },
     { type: "undo" },
@@ -653,6 +655,8 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "runechant-skip" })).toBeNull();
     expect(decodeClientMessage({ type: "runechant-skip", enabled: "yes" })).toBeNull();
     expect(decodeClientMessage({ type: "seismic-surge-skip" })).toBeNull();
+    expect(decodeClientMessage({ type: "remember-target" })).toBeNull();
+    expect(decodeClientMessage({ type: "remember-target", optionId: 12 })).toBeNull();
     expect(decodeClientMessage({ type: "undo", target: "entire-game" })).toBeNull();
     expect(decodeClientMessage({ type: "emote", message: "custom text" })).toBeNull();
     expect(decodeClientMessage({ type: "emote", message: "Well played!" })).toBeNull();

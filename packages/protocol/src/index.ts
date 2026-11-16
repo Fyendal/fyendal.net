@@ -1240,6 +1240,11 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
         && optional(message.ignorePlays, (value) => value === true)
         && commandFields(message);
       break;
+    case "remember-target":
+      valid = exactKeys(message, ["type", "optionId", "commandId", "expectedVersion"], ["type", "optionId"])
+        && string(message.optionId, MAX_SHORT_TEXT, false)
+        && commandFields(message);
+      break;
     case "runechant-skip":
     case "seismic-surge-skip":
       valid = exactKeys(message, ["type", "enabled", "commandId", "expectedVersion"], ["type", "enabled"])
@@ -1672,7 +1677,7 @@ function pendingDecision(value: unknown): boolean {
   return !!decision && exactKeys(decision, [
     "player", "kind", "prompt", "promptMessage", "warningMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "optionEnabledCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "stagedAttack", "stagedAttackModifiers", "defenderDefense",
     "reactionDefense",
-    "resourcePayment", "preStackSource", "optionLayout", "sourceInstanceId",
+    "resourcePayment", "preStackSource", "optionLayout", "sourceInstanceId", "triggerTarget",
   ], ["player", "kind", "prompt"])
     && seat(decision.player) && DECISION_KINDS.has(String(decision.kind))
     && string(decision.prompt, MAX_TEXT)
@@ -1683,6 +1688,11 @@ function pendingDecision(value: unknown): boolean {
     && optional(decision.maximumSelections, nonNegativeInteger)
     && optional(decision.distinctCardNames, (v): v is boolean => typeof v === "boolean")
     && optional(decision.defaultOption, (v): v is string => string(v, MAX_SHORT_TEXT, false))
+    && optional(decision.triggerTarget, (v): v is NonNullable<PendingDecision["triggerTarget"]> => {
+      const target = object(v);
+      return !!target && exactKeys(target, ["sourceInstanceId", "sourceCardId"], ["sourceInstanceId", "sourceCardId"])
+        && nonNegativeInteger(target.sourceInstanceId) && string(target.sourceCardId, MAX_SHORT_TEXT, false);
+    })
     && optional(decision.optionLabels, (v): v is string[] => shortStrings(v))
     && optional(decision.optionMessages, (v): v is Array<GameMessage | null> =>
       array(v, (item): item is GameMessage | null => item === null || decodeGameMessage(item) !== null, MAX_CARDS))

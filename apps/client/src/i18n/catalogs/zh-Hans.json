@@ -2615,6 +2615,7 @@
   "game.decision.selection.count": "已选择 {selected}/{maximum}",
   "game.decision.sheet.hide": "隐藏选择",
   "game.decision.sheet.show": "显示选择",
+  "game.decision.rememberTarget": "{card} 不再询问",
   "game.decision.target.opponent": "对手",
   "game.decision.target.self": "你",
   "game.decision.targetAlreadyPlayable": "已可打出",

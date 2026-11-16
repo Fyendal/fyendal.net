@@ -584,6 +584,8 @@ export interface PendingDecision {
   /** Option selected by the board's Space shortcut. Card scripts set this
    * explicitly when one choice is the expected/common path. */
   defaultOption?: string;
+  /** A triggered layer declaring its target (CR 6.6.6a); deciding player only. */
+  triggerTarget?: { sourceInstanceId: number; sourceCardId: string };
   /** Parallel display text for ordering/choice options whose ids are
    *  engine-owned and not suitable as player-facing labels. */
   optionLabels?: string[];
@@ -1266,6 +1268,9 @@ export type ClientMessage =
    *  passes its windows and declares no blocks until the mode expires, pausing
    *  for other choices and before an attack that could defeat the seat. */
   | { type: "pass-until"; mode: PassUntilMode | null; /** Keep passing over the opponent's new plays too. */ ignorePlays?: true; commandId?: string; expectedVersion?: number }
+  /** Declare `optionId` for the seat's pending trigger target and repeat it
+   *  for that source's later declarations this turn. */
+  | { type: "remember-target"; optionId: string; commandId?: string; expectedVersion?: number }
   /** The same one-shot shortcut for a consecutive Seismic Surge resolution. */
   | { type: "seismic-surge-skip"; enabled: boolean; commandId?: string; expectedVersion?: number }
   | { type: "undo"; target?: UndoTarget; commandId?: string; expectedVersion?: number }

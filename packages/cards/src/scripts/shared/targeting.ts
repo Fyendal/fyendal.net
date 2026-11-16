@@ -24,7 +24,12 @@ export function upToOneTargetAttack(
   };
 }
 
-/** "Target hero" declared by a trigger; read it with `targetHeroSeat`. */
+function opposingHeroId(ctx: ScriptCtx): number | undefined {
+  return ctx.state.players[opponentSeat(ctx)]?.hero.instanceId;
+}
+
+/** "Target hero" declared by a trigger; read it with `targetHeroSeat`. Space
+ * picks the opposing hero. */
 export function heroTarget(
   opts: { optional?: boolean; eligible?: (ctx: ScriptCtx, seat: number) => boolean } = {},
 ): TriggerTarget {
@@ -39,6 +44,7 @@ export function heroTarget(
         ...(opts.optional ? { optionMessages: commonOptionMessages("pass") } : {}),
       }),
     ...(opts.optional ? { optional: true } : {}),
+    defaultTarget: opposingHeroId,
   };
 }
 
@@ -59,8 +65,9 @@ function anyTargetIds(ctx: ScriptCtx, opts: { opposing?: boolean } = {}): number
     ]);
 }
 
-/** A trigger's "any target" damage declaration over `anyTargetIds`. Pair it
- * with `dealToAnyTarget(ctx, ctx.playTargetInstanceId, …)` in the effect. */
+/** A trigger's "any target" damage declaration over `anyTargetIds`; Space
+ * picks the opposing hero. Pair it with `dealToAnyTarget(ctx,
+ * ctx.playTargetInstanceId, …)` in the effect. */
 export function anyDamageTarget(
   prompt: (ctx: ScriptCtx) => ScriptPrompt,
   opts: { opposing?: boolean; optional?: boolean } = {},
@@ -69,6 +76,7 @@ export function anyDamageTarget(
     options: (ctx) => anyTargetIds(ctx, opts),
     prompt,
     ...(opts.optional ? { optional: true } : {}),
+    defaultTarget: opposingHeroId,
   };
 }
 

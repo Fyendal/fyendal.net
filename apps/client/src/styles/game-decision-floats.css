@@ -1620,3 +1620,22 @@
 .lethal-tally-damage { color: var(--danger); }
 .decision-lethal .decision-choice-option { border-color: var(--danger); color: var(--danger); }
 .decision-lethal .decision-choice-option:hover:not(:disabled) { background: #ff7b7214; }
+
+/* "Don't ask again" modifies the target pick rather than being one; the rule
+   sets it apart from the choices above. */
+.decision-remember {
+  display: flex;
+  justify-content: center;
+  align-self: stretch;
+  padding-top: 12px;
+  border-top: 1px solid #6a563966;
+}
+.decision-remember .toggle-switch {
+  gap: 10px;
+  color: var(--text-secondary);
+  font: 500 13px/1.3 var(--font-lobby-ui);
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: normal;
+}
+.decision-remember .toggle-switch:has(input:checked) { color: var(--text-primary); }

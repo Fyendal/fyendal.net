@@ -29738,6 +29738,16 @@
       "value": " está decidiendo…"
     }
   ],
+  "game.decision.rememberTarget": [
+    {
+      "type": 0,
+      "value": "No volver a preguntar para "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "game.decision.removeCard": [
     {
       "type": 0,

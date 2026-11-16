@@ -2018,6 +2018,7 @@ export const useStore = create<StoreState>((set, get) => {
     sendTokenSkip: (kind, enabled) => {
       send({ type: kind === "runechant" ? "runechant-skip" : "seismic-surge-skip", enabled, ...roomCommand() });
     },
+    sendRememberedTarget: (optionId) => send({ type: "remember-target", optionId, ...roomCommand() }),
     sendEmote: (message: EmoteMessage) => send({ type: "emote", message }),
     kickSpectator: (username) => send({ type: "kick-spectator", username }),
     undo: (target = "last-action") => {

@@ -144,7 +144,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, boardSeat: soloBoardSeat, spectating, spectatorCount, spectatorUsernames, botGame, soloGame, sandbox, betaTester, sendIntent: sendStoreIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, passUntilIgnorePlays, endTurnWarning, sendPassUntil, setPassUntilIgnorePlays, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, playSoloAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, clock, clockReceivedAt, replayClock, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, boardSeat: soloBoardSeat, spectating, spectatorCount, spectatorUsernames, botGame, soloGame, sandbox, betaTester, sendIntent: sendStoreIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, sendRememberedTarget, passUntil, passUntilIgnorePlays, endTurnWarning, sendPassUntil, setPassUntilIgnorePlays, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, playSoloAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, clock, clockReceivedAt, replayClock, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -169,6 +169,7 @@ export function GameBoard() {
       sendPriorityMode: state.sendPriorityMode,
       sendStandingOrders: state.sendStandingOrders,
       sendTokenSkip: state.sendTokenSkip,
+      sendRememberedTarget: state.sendRememberedTarget,
       passUntil: state.passUntil,
       endTurnWarning: state.endTurnWarning,
       sendPassUntil: state.sendPassUntil,
@@ -217,12 +218,20 @@ export function GameBoard() {
   // Solo: input built for one seat never acts for the next.
   const { locked: seatInputLocked, allows: seatInputAllows } =
     useSoloSeatInputLock(soloGame && connected && !spectating && screen !== "replay", yourSeat);
+  // "Don't ask again" covers one trigger source this turn; clicks and Space both route through it.
+  const [rememberTargetKey, setRememberTargetKey] = useState<string | null>(null);
+  const triggerTargetSource = authoritativeView?.pendingDecision?.triggerTarget?.sourceInstanceId;
+  const triggerTargetKey = triggerTargetSource === undefined ? null : `${authoritativeView!.turn}:${triggerTargetSource}`;
+  const rememberingTarget = triggerTargetKey !== null && triggerTargetKey === rememberTargetKey;
   const sendIntent = useCallback((intent: GameIntent) => {
     if (!seatInputAllows()) return false;
+    if (rememberingTarget && intent.kind === "choose" && /^\d+$/.test(intent.optionId)) {
+      return sendRememberedTarget(intent.optionId);
+    }
     const sent = sendStoreIntent(intent);
     if (sent) notePassHintIntent(intent);
     return sent;
-  }, [sendStoreIntent, notePassHintIntent, seatInputAllows]);
+  }, [sendStoreIntent, sendRememberedTarget, notePassHintIntent, seatInputAllows, rememberingTarget]);
   // Only a saved copy the account owns can be shared; replays opened from a
   // file, another player's link, or straight from the room have no saved id.
   const savedReplayShare = useStore(useShallow((state) => {
@@ -1927,6 +1936,10 @@ export function GameBoard() {
           confirmSkipArsenal,
           onRequestPass: requestPass,
           onDisableGuidance: () => updateLessGuidance(true),
+          rememberTarget: {
+            on: rememberingTarget,
+            onChange: (on: boolean) => setRememberTargetKey(on ? triggerTargetKey : null),
+          },
           onConfirmSkipArsenal: () => send({ kind: "pass" }),
           onCancelSkipArsenal: () => setConfirmSkipArsenal(false),
           ...(boundedCardChoice

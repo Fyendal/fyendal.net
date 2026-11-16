@@ -81,6 +81,7 @@ function blessingOfPatience(amount: number): CardScript {
     {
       target: {
         ...heroTarget(),
+        defaultTarget: (ctx) => ctx.player(ctx.seat).hero.instanceId,
         prompt: () =>
           decisionPrompt(`Choose a hero to gain ${amount} life`, "card.dyn.patience.hero.choose", { values: { amount } }),
       },

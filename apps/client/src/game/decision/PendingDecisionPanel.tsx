@@ -323,6 +323,7 @@ export function PendingDecisionPanel({
     confirmSkipArsenal,
     onRequestPass,
     onDisableGuidance,
+    rememberTarget,
     onConfirmSkipArsenal,
     onCancelSkipArsenal,
     boundedChoiceSelectedOptionIds,
@@ -738,6 +739,32 @@ export function PendingDecisionPanel({
       ) : (
         <ChoiceList options={textOptions} chosen={chosenOptions} />
       )}
+      {pd.triggerTarget && rememberTarget ? (
+        <div className="decision-remember">
+          {/* A clicked switch drops focus, so Space still answers the prompt. */}
+          <label
+            className="toggle-switch"
+            onClick={(event) => {
+              const input = event.currentTarget.querySelector("input");
+              if (event.detail > 0) setTimeout(() => input?.blur());
+            }}
+          >
+            <input
+              type="checkbox"
+              role="switch"
+              checked={rememberTarget.on}
+              onChange={(event) => rememberTarget.onChange(event.target.checked)}
+            />
+            <span className="switch-track" aria-hidden="true" />
+            <span>
+              {intl.formatMessage(
+                { id: "game.decision.rememberTarget" },
+                { card: <CardRef key="card" id={pd.triggerTarget.sourceCardId} /> },
+              )}
+            </span>
+          </label>
+        </div>
+      ) : null}
     </div>
   );
 }

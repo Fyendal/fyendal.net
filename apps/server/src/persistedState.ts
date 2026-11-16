@@ -55,6 +55,7 @@ type PersistedEngineDecision = Omit<
   | "reactionDefense"
   | "preStackSource"
   | "optionLayout"
+  | "triggerTarget"
 >;
 type PersistedEngineState = Omit<
   GameState,

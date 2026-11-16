@@ -1043,6 +1043,8 @@ export interface TriggerDef {
     ): readonly number[];
     prompt(ctx: ScriptCtx): ScriptPrompt;
     optional?: boolean;
+    /** Space-bar default; ignored unless it is one of `options`. */
+    defaultTarget?(ctx: ScriptCtx): number | undefined;
   };
   /** Space-bar default for an optional trigger choice. */
   defaultOption?: "yes" | "no";

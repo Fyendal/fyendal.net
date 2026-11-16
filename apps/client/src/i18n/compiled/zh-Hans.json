@@ -27764,6 +27764,16 @@
       "value": " 正在决定…"
     }
   ],
+  "game.decision.rememberTarget": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " 不再询问"
+    }
+  ],
   "game.decision.removeCard": [
     {
       "type": 0,

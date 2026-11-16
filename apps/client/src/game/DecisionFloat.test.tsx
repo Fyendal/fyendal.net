@@ -921,6 +921,50 @@ describe("scripted card-choice presentation", () => {
     expect(handPick).not.toContain("decision-sheet");
   });
 
+  it("offers don't-ask-again for a trigger target, naming its source", () => {
+    const mine = { instanceId: 11, cardId: "TST-HERO-A", owner: 0 };
+    const theirs = { instanceId: 22, cardId: "TST-HERO-B", owner: 1 };
+    const render = (triggerTarget: boolean, on = false) => renderLocalized(
+      <PendingDecisionPanel
+        viewerSeat={0}
+        model={{
+          decision: {
+            player: 0,
+            kind: "choose-target",
+            prompt: "Deal 1 arcane damage to any target",
+            options: ["11", "22"],
+            optionCards: [mine, theirs],
+            defaultOption: "22",
+            ...(triggerTarget ? { triggerTarget: { sourceInstanceId: 5, sourceCardId: "TST-ARC" } } : {}),
+          },
+          isMine: true,
+          canPass: false,
+          defendPitchIds: new Set(),
+          hand: [],
+          defendSel: [],
+          selectedPitchIds: [],
+          onTogglePitch: () => undefined,
+          resourcePaymentSelected: 0,
+          resourcePaymentRequired: 0,
+          confirmSkipArsenal: false,
+          onRequestPass: () => undefined,
+          onDisableGuidance: () => undefined,
+          rememberTarget: { on, onChange: () => undefined },
+          onConfirmSkipArsenal: () => undefined,
+          onCancelSkipArsenal: () => undefined,
+          onSend: () => undefined,
+        }}
+      />,
+    );
+    const html = render(true);
+    expect(html).toContain("ask again for");
+    expect(html).toContain('data-cardid="TST-ARC"');
+    expect(html).toContain('role="switch"');
+    expect(html).not.toContain("checked");
+    expect(render(true, true)).toContain("checked");
+    expect(render(false)).not.toContain("ask again for");
+  });
+
   it("marks the scripted Space default among card choices", () => {
     const mine = { instanceId: 11, cardId: "TST-HERO-A", owner: 0 };
     const theirs = { instanceId: 22, cardId: "TST-HERO-B", owner: 1 };

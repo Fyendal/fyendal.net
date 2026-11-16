@@ -28850,6 +28850,16 @@
       "value": " is deciding…"
     }
   ],
+  "game.decision.rememberTarget": [
+    {
+      "type": 0,
+      "value": "Don't ask again for "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "game.decision.removeCard": [
     {
       "type": 0,

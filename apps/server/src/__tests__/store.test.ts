@@ -1800,6 +1800,59 @@ describe("PgRoomStore storage", () => {
     throw new Error("attacker never reached the expected state");
   }
 
+  it("repeats a remembered trigger target for its source until the turn ends", async () => {
+    const { code, tokens } = await fullRoom();
+    await startGame(code, tokens);
+    const { attacker, defender, blows } = await forceContestedAttacks(code, 20, undefined, false);
+    const state = (await store.getRoom(code))!.state!;
+    const arcCardId = Object.values(cardData).find((card) => card.name === "Arc Lightning" && card.pitch === 2)!.id;
+    const arc = { instanceId: state.nextInstanceId++, cardId: arcCardId, owner: attacker };
+    state.players[attacker]!.hand = [arc, blows[0]!];
+    state.players[attacker]!.resources = 4;
+    await db.query("UPDATE rooms SET state = $2 WHERE code = $1", [code, JSON.stringify(dehydrateState(state, "rules-a"))]);
+    const opposingHero = String(state.players[defender]!.hero.instanceId);
+    const play = (id: number): GameIntent => ({ kind: "play-card", instanceId: id, pitchInstanceIds: [] });
+
+    /** Both seats pass and declare no blocks until the attacker must declare a target or `done`. */
+    async function advance(done: (s: NonNullable<RoomRow["state"]>) => boolean) {
+      for (let guard = 0; guard < 40; guard++) {
+        const s = (await store.getRoom(code))!.state!;
+        if (done(s) || s.pendingDecision?.chooseHook === "trigger-target") return s;
+        const actor = (s.pendingDecision?.player ?? s.priorityPlayer) as 0 | 1;
+        const intent: GameIntent = s.pendingDecision?.kind === "defend"
+          ? { kind: "defend", instanceIds: [] }
+          : { kind: "pass" };
+        expect((await store.applyIntent(code, { token: tokens[actor] }, intent)).ok).toBe(true);
+      }
+      throw new Error("never reached the expected state");
+    }
+
+    expect((await store.applyIntent(code, { token: tokens[attacker] }, play(arc.instanceId))).ok).toBe(true);
+    const declaring = await advance(() => false);
+    expect(declaring.pendingDecision).toMatchObject({
+      player: attacker,
+      chooseHook: "trigger-target",
+      defaultOption: opposingHero,
+      sourceInstanceId: arc.instanceId,
+    });
+    expect((await store.setRememberedTarget(code, { token: tokens[defender] }, opposingHero)).ok).toBe(false);
+    expect((await store.setRememberedTarget(code, { token: tokens[attacker] }, "pass")).ok).toBe(false);
+    expect((await store.setRememberedTarget(code, { token: tokens[attacker] }, opposingHero)).ok).toBe(true);
+    const armedRoom = (await store.getRoom(code))!;
+    expect(armedRoom.state!.pendingDecision?.chooseHook).not.toBe("trigger-target");
+    const remembered = { turn: state.turn, targets: [{ source: arc.instanceId, target: Number(opposingHero) }] };
+    expect(armedRoom.seats[attacker]!.rememberedTargets).toEqual(remembered);
+    expect((await db.query("SELECT auto_target FROM room_seats WHERE room_code = $1 AND seat = $2", [code, attacker]))
+      .rows[0]!.auto_target).toEqual(remembered);
+
+    // The attack's go again triggers Arc Lightning again; the server declares it.
+    const lifeBefore = (await advance((s) => s.stack.length === 0)).players[defender]!.life;
+    expect((await store.applyIntent(code, { token: tokens[attacker] }, play(blows[0]!.instanceId))).ok).toBe(true);
+    const after = await advance((s) => s.chain[0]?.resolved === true && s.stack.length === 0);
+    expect(after.pendingDecision?.chooseHook).not.toBe("trigger-target");
+    expect(after.players[defender]!.life).toBe(lifeBefore - 4 - 1);
+  });
+
   it("passes one chain link for the defender, declaring no blocks, then hands control back", async () => {
     const { code, tokens } = await fullRoom();
     await startGame(code, tokens);

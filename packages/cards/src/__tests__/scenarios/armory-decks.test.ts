@@ -426,6 +426,19 @@ describe("Armory Decks — AIO, AJV, and AST", () => {
       .expectFinalAttack(4);
   });
 
+  it("Arc Lightning's target declaration defaults to the opposing hero", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["arc lightning|2"], resources: 2, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2");
+    const decision = g.state.pendingDecision;
+    expect(decision?.chooseHook).toBe("trigger-target");
+    expect(decision?.defaultOption).toBe(String(g.state.players[1]!.hero.instanceId));
+  });
+
   it("Arc Lightning's go again is used up by a melded action half", () => {
     const g = scenario({
       seats: [

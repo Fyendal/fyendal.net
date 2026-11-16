@@ -2615,6 +2615,7 @@
   "game.decision.selection.count": "Seleccionadas: {selected} de {maximum}",
   "game.decision.sheet.hide": "Ocultar elección",
   "game.decision.sheet.show": "Mostrar elección",
+  "game.decision.rememberTarget": "No volver a preguntar para {card}",
   "game.decision.target.opponent": "Oponente",
   "game.decision.target.self": "Tú",
   "game.decision.targetAlreadyPlayable": "Ya se puede jugar",

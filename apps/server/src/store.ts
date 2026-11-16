@@ -106,6 +106,7 @@ import {
 import { hashToken } from "./tokenHash.js";
 import { advanceClock, clockSummary, clockView, startClock } from "./clock.js";
 import { standingOrderIntent } from "./standingOrders.js";
+import { rememberTargetChoice, rememberedTargetsActive, rememberedTargetIntent, decodeStoredRememberedTargets, type SeatRememberedTargets } from "./rememberedTargets.js";
 import { forfeitsActionPoint } from "./endTurnWarning.js";
 import { acknowledgePassUntil, armPassUntil, decodeStoredPassUntil, passUntilIntent, refreshPassUntil, type SeatPassUntil } from "./passUntil.js";
 
@@ -157,6 +158,8 @@ export interface SeatRow {
   tokenSkip?: TokenSkipKind;
   /** Temporary pass shortcut, expired by the server once its turn or link ends. */
   passUntil?: SeatPassUntil;
+  /** Trigger targets the server repeats for this seat until the turn ends. */
+  rememberedTargets?: SeatRememberedTargets;
   /** Answers the server applies to the seat's repeating questions. */
   standingOrders?: SeatStandingOrders;
   /** presence: last heartbeat/attach (epoch ms); 0 = absent */
@@ -868,6 +871,12 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
     if (passUntil === null) {
       throw new CorruptRoomError(code, `seats[${index}].pass_until`, "expected a pass shortcut");
     }
+    const rememberedTargets = row.auto_target == null
+      ? undefined
+      : decodeStoredRememberedTargets(typeof row.auto_target === "string" ? parseJson(row.auto_target) : row.auto_target);
+    if (rememberedTargets === null) {
+      throw new CorruptRoomError(code, `seats[${index}].auto_target`, "expected remembered targets");
+    }
     const standingOrders = row.standing_orders == null
       ? undefined
       : decodeStoredStandingOrders(parseJson(row.standing_orders));
@@ -901,6 +910,7 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
       priorityMode: row.priority_mode,
       ...(row.token_skip == null ? {} : { tokenSkip: row.token_skip }),
       ...(passUntil ? { passUntil } : {}),
+      ...(rememberedTargets ? { rememberedTargets } : {}),
       ...(standingOrders && Object.keys(standingOrders).length > 0 ? { standingOrders } : {}),
       lastSeenAt: 0,
       ...(row.last_action_at == null ? {} : { lastActionAt: Number(row.last_action_at) }),
@@ -1264,6 +1274,7 @@ export class PgRoomStore {
       encodeStandingOrders(member.standingOrders),
       member.cardArt ? JSON.stringify(member.cardArt) : null,
       member.passUntil ? JSON.stringify(member.passUntil) : null,
+      member.rememberedTargets ? JSON.stringify(member.rememberedTargets) : null,
     ];
   }
 
@@ -1304,8 +1315,8 @@ export class PgRoomStore {
             `INSERT INTO room_seats
               (room_code, seat, user_id, token_hash, username, hero_id, deck_id, deck_name,
                from_queue, ready, presented, last_action_at, controller, priority_mode, token_skip, accepted,
-               queue_card_pool_mode, standing_orders, card_art, pass_until)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,
+               queue_card_pool_mode, standing_orders, card_art, pass_until, auto_target)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)`,
             values,
           )
         : await db.query(
@@ -1327,7 +1338,8 @@ export class PgRoomStore {
                queue_card_pool_mode = $17,
                standing_orders = $18,
                card_art = $19,
-               pass_until = $20
+               pass_until = $20,
+               auto_target = $21
              WHERE room_code = $1 AND seat = $2`,
             values,
           );
@@ -1344,7 +1356,8 @@ export class PgRoomStore {
       const member = room.seats[seat];
       if (!member) continue;
       const { rowCount } = await db.query(
-        `UPDATE room_seats SET priority_mode = $3, token_skip = $4, standing_orders = $5, pass_until = $6
+        `UPDATE room_seats SET priority_mode = $3, token_skip = $4, standing_orders = $5, pass_until = $6,
+           auto_target = $7
          WHERE room_code = $1 AND seat = $2`,
         [
           room.code,
@@ -1353,6 +1366,7 @@ export class PgRoomStore {
           member.tokenSkip ?? null,
           encodeStandingOrders(member.standingOrders),
           member.passUntil ? JSON.stringify(member.passUntil) : null,
+          member.rememberedTargets ? JSON.stringify(member.rememberedTargets) : null,
         ],
       );
       if (rowCount !== 1) throw VERSION_CONFLICT;
@@ -1581,6 +1595,7 @@ export class PgRoomStore {
               seat.tokenSkip ?? null,
               seat.standingOrders,
               JSON.stringify(seat.passUntil ?? null),
+              JSON.stringify(seat.rememberedTargets ?? null),
             ] as const
           : null);
         const wasGameOver = room.state?.phase === "game-over";
@@ -1600,7 +1615,8 @@ export class PgRoomStore {
             && (before[0] !== (after.priorityMode ?? "always-pause")
               || before[1] !== (after.tokenSkip ?? null)
               || before[2] !== after.standingOrders
-              || before[3] !== JSON.stringify(after.passUntil ?? null));
+              || before[3] !== JSON.stringify(after.passUntil ?? null)
+              || before[4] !== JSON.stringify(after.rememberedTargets ?? null));
         });
         await this.persistSeatPreferences(db, out.room, preferenceSeats);
         if (out.versionNeutral) {
@@ -4215,7 +4231,7 @@ export class PgRoomStore {
       room.seats[seat]?.controller === "bot" || room.seats[seat]?.priorityMode === "auto-pass";
     const hasOrders = (seat: number): boolean => room.seats[seat]?.standingOrders !== undefined;
     if (!autoPasses(0) && !autoPasses(1) && !hasOrders(0) && !hasOrders(1)
-      && !room.seats.some((seat) => seat?.tokenSkip || seat?.passUntil)) return;
+      && !room.seats.some((seat) => seat?.tokenSkip || seat?.passUntil || seat?.rememberedTargets)) return;
     // Each shortcut strictly advances the game; the bound is insurance only.
     for (let guard = 0; guard < 64; guard++) {
       const state = room.state;
@@ -4224,6 +4240,7 @@ export class PgRoomStore {
           if (!member) continue;
           delete member.tokenSkip;
           delete member.passUntil;
+          delete member.rememberedTargets;
         }
         return;
       }
@@ -4236,6 +4253,7 @@ export class PgRoomStore {
           if (refreshed) member.passUntil = refreshed;
           else delete member.passUntil;
         }
+        if (member?.rememberedTargets && !rememberedTargetsActive(state, member.rememberedTargets)) delete member.rememberedTargets;
       }
       const seat = state.pendingDecision?.player ??
         (state.phase === "action" ? state.priorityPlayer : undefined);
@@ -4252,6 +4270,7 @@ export class PgRoomStore {
           (member?.controller === "bot" && isEmptyBotActionWindow(state, seat)))
           ? { kind: "pass" }
           : (member?.passUntil ? passUntilIntent(state, seat, member.passUntil) : null)
+            ?? (member?.rememberedTargets ? rememberedTargetIntent(state, seat, member.rememberedTargets) : null)
             ?? (member?.standingOrders ? standingOrderIntent(state, seat, member.standingOrders) : null);
       if (!intent) return;
       const res = engineApplyIntent(state, seat, intent);
@@ -4421,6 +4440,45 @@ export class PgRoomStore {
     } : undefined);
     return r.ok
       ? { ok: true, version: r.version, advanced: r.result.advanced, ...(r.replayFinalizationId ? { replayFinalizationId: r.replayFinalizationId } : {}) }
+      : { ok: false, error: r.error };
+  }
+
+  /** Declare `optionId` for the seat's pending trigger target and remember it
+   *  for that source's later declarations this turn, in one undoable commit. */
+  async setRememberedTarget(
+    code: string,
+    credentials: SeatCredentials,
+    optionId: string,
+    command?: RoomCommand,
+  ): Promise<{ ok: true; version: number; replayFinalizationId?: string } | { ok: false; error: string }> {
+    const r = await this.withRetry(code.toUpperCase(), (room) => {
+      if (!command && soloInPlay(room)) return { error: SOLO_COMMAND_REQUIRED };
+      const seat = seatForCredentials(room, credentials);
+      if (seat === null) return { error: "not a player in this room" };
+      const state = room.state;
+      if (!state || state.phase === "game-over") return { error: "game is not in progress" };
+      const member = room.seats[seat]!;
+      const armed = rememberTargetChoice(state, seat, member.rememberedTargets, optionId);
+      if (!armed) return { error: "no trigger target to declare" };
+      member.rememberedTargets = armed;
+      const events: EngineTransitionMove[] = [];
+      this.applyServerShortcuts(room, events);
+      room.lastTransition = { fromVersion: room.version, kind: "forward", events };
+      return {
+        room,
+        result: undefined,
+        snapshot: state,
+        replay: { kind: "frame" },
+        seatWrites: stampActivity(room),
+      };
+    }, command ? {
+      meta: command,
+      credentials,
+      type: "remember-target",
+      duplicateResult: () => undefined,
+    } : undefined);
+    return r.ok
+      ? { ok: true, version: r.version, ...(r.replayFinalizationId ? { replayFinalizationId: r.replayFinalizationId } : {}) }
       : { ok: false, error: r.error };
   }
 
@@ -4668,10 +4726,11 @@ export class PgRoomStore {
         // straight past the choice the player just asked to revisit.
         // Pass-until latches are cleared too: the player is revisiting a choice.
         const latchedSeats = ([0, 1] as const).filter((seat) =>
-          room.seats[seat]?.tokenSkip || room.seats[seat]?.passUntil);
+          room.seats[seat]?.tokenSkip || room.seats[seat]?.passUntil || room.seats[seat]?.rememberedTargets);
         for (const seat of latchedSeats) {
           delete room.seats[seat]!.tokenSkip;
           delete room.seats[seat]!.passUntil;
+          delete room.seats[seat]!.rememberedTargets;
         }
         await this.persistSeatPreferences(db, room, latchedSeats);
         // The restored snapshot can hold an empty window for a seat that
