@@ -2379,6 +2379,7 @@ describe("client connection and account race fences", () => {
       }),
     ]);
 
+    // The engine advertises only unstaged candidates once A is staged.
     socket.message({
       ...defendState,
       version: 3,
@@ -2390,6 +2391,7 @@ describe("client connection and account race fences", () => {
           stagedDefense: 3,
         },
       },
+      legal: [{ kind: "stage-defenders", instanceIds: [12] }],
     });
 
     expect(socket.sent.map((value) => JSON.parse(value))).toHaveLength(2);

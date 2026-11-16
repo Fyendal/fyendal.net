@@ -743,15 +743,20 @@ export const useStore = create<StoreState>((set, get) => {
       return { acknowledged: true, defenderStageIds: null };
     }
     const decision = message.view.pendingDecision;
-    const stageable = new Set(message.legal.flatMap((intent) =>
-      intent.kind === "stage-defenders" ? intent.instanceIds : []
-    ));
-    if (
-      decision?.kind !== "defend"
-      || decision.player !== message.yourSeat
-      || !desiredIds.every((id) => stageable.has(id))
-    ) return { acknowledged: true, defenderStageIds: null };
+    if (decision?.kind !== "defend" || decision.player !== message.yourSeat) {
+      return { acknowledged: true, defenderStageIds: null };
+    }
     const authoritativeIds = (decision.stagedCards ?? []).map((card) => card.instanceId);
+    // Legal staging advertises only unstaged candidates; already staged cards stay valid.
+    const stageable = new Set([
+      ...authoritativeIds,
+      ...message.legal.flatMap((intent) =>
+        intent.kind === "stage-defenders" ? intent.instanceIds : []
+      ),
+    ]);
+    if (!desiredIds.every((id) => stageable.has(id))) {
+      return { acknowledged: true, defenderStageIds: null };
+    }
     return {
       acknowledged: true,
       defenderStageIds: sameInstanceIds(desiredIds, authoritativeIds) ? null : desiredIds,
