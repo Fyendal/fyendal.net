@@ -78,6 +78,8 @@ export interface MotionFlight {
   /** Keep an effect draw visible in its temporary hand slot until discard starts. */
   lingerUntilMs?: number;
   destinationPresentationKey?: string;
+  /** Lets a later update's destination take over a flight still in the air. */
+  instanceId?: number;
   /** Retained stack source covered by this active flight, including its delay. */
   sourceMaskPresentationKey?: string;
   /** The newly exposed source-pile top stays hidden until this flight departs. */
@@ -629,6 +631,7 @@ export function resolveMotionBatch(
       showCount: event.kind === "move" && event.count > 1,
       delayMs: 0,
       destinationPresentationKey: event.destinationPresentationKey,
+      ...(event.kind === "move" && event.instanceId !== undefined ? { instanceId: event.instanceId } : {}),
       ...(sourceRevealPresentationKey ? { sourceRevealPresentationKey } : {}),
       ...(event.source.kind === "stack-layer" && event.sourcePresentationKey
         ? { sourceMaskPresentationKey: event.sourcePresentationKey } : {}),
