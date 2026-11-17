@@ -773,6 +773,29 @@ describe("OMN — import and set mechanics", () => {
     expect(g.state.chain[0]?.goAgain).toBe(false);
   });
 
+  it("Quick Succession's go again skips Star Fall and waits for an attack action card", () => {
+    const g = scenario({
+      seats: [
+        hero("aurora, emissary of lightning|0", {
+          weapons: ["star fall|0"],
+          hand: ["quick succession|3", "wrecker romp|3", "destructive fleetfoot|3"],
+        }),
+        foe(),
+      ],
+    });
+
+    g.play("quick succession|3")
+      .attackWithWeapon("star fall|0", { pitch: ["wrecker romp|3"] })
+      .blockWith()
+      .settle()
+      .expectAP(0, 1)
+      .play("destructive fleetfoot|3")
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
+    expect(g.state.chain.at(-1)?.goAgain).toBe(true);
+  });
+
   it("Quick Succession offsets Ravenous Rabble's revealed pitch penalty", () => {
     const g = scenario({
       seats: [

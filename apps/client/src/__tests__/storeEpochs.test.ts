@@ -1034,6 +1034,47 @@ describe("client connection and account race fences", () => {
     expect(FakeWebSocket.instances).toHaveLength(2);
   });
 
+  it("abandons a reconnect whose handshake never completes", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    const { useStore } = await import("../store.js");
+
+    useStore.getState().joinRoom("AAAAAA");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    socket.message({ type: "joined", code: "AAAAAA", seat: 0, token: "seat-token", version: 1 });
+    socket.message({ ...staleState, version: 2 });
+    socket.close(1006);
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    const stalled = FakeWebSocket.instances[1]!;
+    useStore.getState().setConnectionActive(true);
+    await vi.advanceTimersByTimeAsync(9_999);
+    expect(stalled.readyState).toBe(FakeWebSocket.CONNECTING);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(stalled.readyState).toBe(FakeWebSocket.CLOSED);
+
+    await vi.advanceTimersByTimeAsync(2_000);
+    const recovered = FakeWebSocket.instances[2]!;
+    recovered.open();
+    expect(recovered.sent.map((message) => JSON.parse(message))).toEqual([
+      { type: "join-room", code: "AAAAAA", token: "seat-token" },
+    ]);
+    expect(useStore.getState()).toMatchObject({ connected: true, connectionIssueVisible: false });
+  });
+
+  it("does not time out a socket that opened", async () => {
+    vi.useFakeTimers();
+    const { useStore } = await import("../store.js");
+
+    useStore.getState().joinRoom("AAAAAA");
+    const socket = FakeWebSocket.instances[0]!;
+    socket.open();
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(socket.readyState).toBe(FakeWebSocket.OPEN);
+    expect(FakeWebSocket.instances).toHaveLength(1);
+  });
+
   it("ignores every frame from a socket superseded by a newer room connection", async () => {
     const { useStore } = await import("../store.js");
 

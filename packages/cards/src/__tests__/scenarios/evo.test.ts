@@ -1491,6 +1491,26 @@ describe("EVO — registration and core mechanics", () => {
 });
 
 describe("EVO — rules regression coverage", () => {
+  it("Hadron Collider adds its steam counters to an attack boosted from arsenal", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          arsenal: ["zero to sixty|1"],
+          deck: ["zipper hit|3", "zipper hit|3"],
+          board: ["hadron collider|1", "hadron collider|1"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    for (const collider of s.state.players[0]!.board) collider.counters = { steam: 3 };
+
+    s.play("zero to sixty|1", { boost: true, fromArsenal: true, settle: false });
+
+    expect(s.state.players[0]!.board).toHaveLength(0);
+    s.expectAttackValue(10);
+  });
+
   it("Maxx grants Crank to a Hyper Driver as it enters", () => {
     const s = scenario({
       seats: [

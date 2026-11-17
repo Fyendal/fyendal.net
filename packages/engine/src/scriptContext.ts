@@ -782,13 +782,10 @@ export function makeCtx(
     setAttackActivationLimit(instanceId, limit) {
       const found = findCardAnywhere(state, instanceId);
       if (!found || !Number.isSafeInteger(limit) || limit <= 0) return;
-      const abilities = abilityList(scriptOf(state, found.card.cardId, found.card));
+      // Not gated on printed attack abilities: granted aura attacks read it too.
       const target = state.players[found.seat] as PlayerState;
-      for (let index = 0; index < abilities.length; index++) {
-        if (abilities[index]?.isAttack !== true) continue;
-        const key = runtime.commands.setAttackActivationLimitKey(instanceId);
-        target.flags[key] = Math.max(Number(target.flags[key] || 0), limit);
-      }
+      const key = runtime.commands.setAttackActivationLimitKey(instanceId);
+      target.flags[key] = Math.max(Number(target.flags[key] || 0), limit);
     },
     allowAbilitiesAsInstant(type) {
       player.flags[`abilitiesAsInstant:${type.toLowerCase()}`] = true;

@@ -30,13 +30,13 @@ import {
   logPublic,
   nameOf,
 } from "./gameLog.js";
-import { abilityList, activatedFlagKey } from "./scripts.js";
+import { abilityList } from "./scripts.js";
 import type { ActivatedAbility } from "./scripts.js";
 import type { CardInstance, ChainLinkState, Modifier, PlayerState, StackLayer } from "./state.js";
 
 import { controlledPermanents, observingHookSources } from "./sourceQueries.js";
 
-import { activationCostReductionForCard, actionAbilityRestrictedByModifier } from "./abilityRules.js";
+import { activationCostReductionForCard, actionAbilityRestrictedByModifier, grantedAuraAttackAvailable, recordGrantedAuraAttack } from "./abilityRules.js";
 import {
   clearTemporaryObjectEffects,
   consumeNextActionGoAgain,
@@ -153,7 +153,7 @@ export function isAuraAttacker(
   if (card.faceDown) return false;
   if (!grantsAuraAttackMarker(state, player, card)) return false;
   const abilityIndex = abilityList(scriptOf(state, card.cardId, card)).length;
-  return !player.flags[activatedFlagKey(card.instanceId, abilityIndex)];
+  return grantedAuraAttackAvailable(player, card.instanceId, abilityIndex);
 }
 
 /** The resource cost of a weapon/aura attack activation after the ability's
@@ -216,9 +216,10 @@ export function attackActivationCost(
 /**
  * Activate a granted aura attack: during their action phase, a matching ready
  * board card attacks like a weapon (it stays in play, doesn't tap) for 1 action
- * point + the marker's {r} cost, once per turn per aura. The granted ability
- * can have go again directly, or gain it from a +1{p} counter when the marker
- * has goAgainWithPowerCounter (also re-evaluated at link resolution).
+ * point + the marker's {r} cost, once per turn per aura unless an effect such
+ * as Flurry raises its attack limit. The granted ability can have go again
+ * directly, or gain it from a +1{p} counter when the marker has
+ * goAgainWithPowerCounter (also re-evaluated at link resolution).
  */
 export function activateAuraAttack(
   state: GameStateInternal,
@@ -252,7 +253,7 @@ export function activateAuraAttack(
   consumeFirstAttackExtraCost(state, player);
   player.actionPoints -= 1;
   noteActionPlayedOrActivated(player);
-  player.flags[activatedFlagKey(card.instanceId, grantedIndex)] = true;
+  recordGrantedAuraAttack(player, card.instanceId, grantedIndex);
   (card.scriptState ??= {}).attacked = 1;
   runtime.events.fireOnFriendlyActivate(state, seat, card, "action");
   // Observers may grant go again specifically to this action activation.

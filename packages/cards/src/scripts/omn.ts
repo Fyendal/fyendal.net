@@ -473,7 +473,7 @@ function rushOfPower(): CardScript {
 function quickSuccession(count: number): CardScript {
   return {
     onPlay(ctx) {
-      buffNextAttack(ctx, { goAgain: true, appliesToType: ["runeblade", "lightning"] });
+      buffNextAttack(ctx, { goAgain: true, appliesTo: "attack-action", appliesToType: ["runeblade", "lightning"] });
       ctx.setState("quickRemaining", count);
       ctx.addModifier({
         scope: "until-end-of-turn",

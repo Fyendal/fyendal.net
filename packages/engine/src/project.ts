@@ -56,7 +56,7 @@ import { additionalTargetsAroundPrimary, currentLink, findCardAnywhere } from ".
 import { queuedAttackObjects } from "./attackQueue.js";
 import { controlledPermanents } from "./sourceQueries.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
-import { activatedAbilityUsage } from "./abilityRules.js";
+import { activatedAbilityUsage, grantedAuraAttackAvailable } from "./abilityRules.js";
 import { defenseReactionRestriction, weaponAttacksProhibited } from "./combatRestrictions.js";
 import { cardTriggersPhantasm, legalDefenderCards } from "./defense.js";
 import { wardPieces } from "./damageResolution.js";
@@ -220,7 +220,7 @@ function cardView(state: GameStateInternal,
     ? abilityUsage.flatMap((usage, index) => usage?.remaining === 0 ? [index] : [])
     : [];
   // Aura attacks granted by another permanent (Reality Refractor, Cosmo)
-  // are synthetic once-per-turn abilities whose index follows the card's
+  // are synthetic attack-limited abilities whose index follows the card's
   // printed abilities. Project their per-instance usage too, so otherwise
   // identical board cards do not collapse after only one has attacked.
   const grantedAuraAttackIndex = controller &&
@@ -233,8 +233,8 @@ function cardView(state: GameStateInternal,
     ability.isAttack ? [index] : []);
   if (grantedAuraAttackIndex !== undefined) attackAbilityIndexes.push(grantedAuraAttackIndex);
   const tapAbilityIndexes = abilities.flatMap((ability, index) => ability.tap ? [index] : []);
-  const usedAbilityIndexes = grantedAuraAttackIndex !== undefined &&
-    controller?.flags[activatedFlagKey(c.instanceId, grantedAuraAttackIndex)] === true
+  const usedAbilityIndexes = controller && grantedAuraAttackIndex !== undefined &&
+    !grantedAuraAttackAvailable(controller, c.instanceId, grantedAuraAttackIndex)
       ? [...nativeUsedAbilityIndexes, grantedAuraAttackIndex]
       : nativeUsedAbilityIndexes;
   const playableFromSource = opts.playableFrom

@@ -6,7 +6,7 @@ import { BOOST_BANISHED_PREFIX } from "./combatValues.js";
 import { gameLogMessage, logCardValue, logNameOf, logPublic, nameOf } from "./gameLog.js";
 import { boostCountForCardPlay } from "./playRules.js";
 import { lingeringModifierSources } from "./sourceQueries.js";
-import { removeFromArray } from "./zoneQueries.js";
+import { findCardAnywhere, removeFromArray } from "./zoneQueries.js";
 import { enterBanish } from "./zoneMoves.js";
 import type { BanishBatch } from "./zoneMoves.js";
 
@@ -91,6 +91,9 @@ export function payBoosts(
   const player = state.players[seat] as PlayerState;
   let boosted = false;
   let boostSucceeded = false;
+  // The played card is between zones while Boost is paid; keep it findable so boost effects can target it.
+  const trackCard = !findCardAnywhere(state, card.instanceId);
+  if (trackCard) state.resolving.push(card);
   for (let boostIndex = 0; boostIndex < declaredBoostCount; boostIndex++) {
     const banished = player.deck.shift();
     if (!banished) break;
@@ -217,5 +220,6 @@ export function payBoosts(
       { card: logCardValue(card.cardId) },
     ));
   }
+  if (trackCard) removeFromArray(state.resolving, card.instanceId);
   return { boosted, boostSucceeded };
 }

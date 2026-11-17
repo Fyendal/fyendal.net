@@ -94,6 +94,9 @@ let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let reconnectNoticeTimer: ReturnType<typeof setTimeout> | null = null;
 const RECONNECT_NOTICE_GRACE_MS = 5_000;
+/** A handshake lost on a mobile network change can leave a socket CONNECTING
+ * indefinitely; abandon it so the close handler reconnects. */
+const CONNECT_TIMEOUT_MS = 10_000;
 let reconnectAttempts = 0;
 let emoteSequence = 0;
 let viewUpdateSequence = 0;
@@ -476,7 +479,11 @@ export const useStore = create<StoreState>((set, get) => {
     let streamFailed = false;
     ws = socket;
     const epoch = ++connectionEpoch;
+    const connectTimer = setTimeout(() => {
+      if (socket.readyState === WebSocket.CONNECTING) socket.close();
+    }, CONNECT_TIMEOUT_MS);
     socket.onopen = () => {
+      clearTimeout(connectTimer);
       if (ws !== socket || connectionEpoch !== epoch) return; // superseded by a newer socket
       cancelReconnect();
       set({ connected: true, connectionIssueVisible: false });
@@ -487,6 +494,7 @@ export const useStore = create<StoreState>((set, get) => {
       for (const cb of cbs) cb();
     };
     socket.onclose = (event) => {
+      clearTimeout(connectTimer);
       if (ws !== socket || connectionEpoch !== epoch) return;
       browserBot.reset();
       decoder.reset();

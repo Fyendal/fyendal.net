@@ -282,6 +282,42 @@ function activationsAgainstLimit(
   return activationCount(player, instanceId, abilityIndex);
 }
 
+/** Count one activation toward the ability's turn limit, spending a granted
+ * additional activation once the base limit is exhausted. */
+function recordActivationUse(
+  player: PlayerState,
+  instanceId: number,
+  abilityIndex: number,
+  ability: ActivatedAbility,
+): void {
+  const limit = activatedAbilityLimit(player, instanceId, ability);
+  const usedAgainstLimit = activationsAgainstLimit(player, instanceId, abilityIndex, ability);
+  player.flags[activationCountKey(instanceId, abilityIndex)] = activationCount(player, instanceId, abilityIndex) + 1;
+  if (ability.isAttack) {
+    const attackCountKey = attackActivationCountKey(instanceId);
+    player.flags[attackCountKey] = Number(player.flags[attackCountKey] || 0) + 1;
+  }
+  if (limit !== undefined) {
+    const extraKey = `additionalActivations:${instanceId}:${abilityIndex}`;
+    if (usedAgainstLimit >= limit) {
+      player.flags[extraKey] = Math.max(0, Number(player.flags[extraKey] || 0) - 1);
+    }
+    player.flags[activatedFlagKey(instanceId, abilityIndex)] = true;
+  }
+}
+
+/** A granted aura attack is a once-per-turn weapon attack, so attack-limit
+ * effects such as Flurry raise it like a printed weapon attack. */
+const GRANTED_AURA_ATTACK: ActivatedAbility = { cost: 0, isAttack: true, goAgain: false, oncePerTurn: true };
+
+export function grantedAuraAttackAvailable(player: PlayerState, instanceId: number, abilityIndex: number): boolean {
+  return activatedAbilityAvailable(player, instanceId, abilityIndex, GRANTED_AURA_ATTACK);
+}
+
+export function recordGrantedAuraAttack(player: PlayerState, instanceId: number, abilityIndex: number): void {
+  recordActivationUse(player, instanceId, abilityIndex, GRANTED_AURA_ATTACK);
+}
+
 export function activatedAbilityAvailable(
   player: PlayerState,
   instanceId: number,
@@ -724,20 +760,7 @@ export function payActivatedAbilityCost(
   if ((ability.timing ?? "action") === "action") {
     consumeFirstActionExtraCost(state, player);
   }
-  const usedAgainstLimit = activationsAgainstLimit(player, card.instanceId, abilityIndex, ability);
-  const usedActivations = activationCount(player, card.instanceId, abilityIndex);
-  player.flags[activationCountKey(card.instanceId, abilityIndex)] = usedActivations + 1;
-  if (ability.isAttack) {
-    const attackCountKey = attackActivationCountKey(card.instanceId);
-    player.flags[attackCountKey] = Number(player.flags[attackCountKey] || 0) + 1;
-  }
-  if (limit !== undefined) {
-    const extraKey = `additionalActivations:${card.instanceId}:${abilityIndex}`;
-    if (usedAgainstLimit >= limit) {
-      player.flags[extraKey] = Math.max(0, Number(player.flags[extraKey] || 0) - 1);
-    }
-    player.flags[flagKey] = true;
-  }
+  recordActivationUse(player, card.instanceId, abilityIndex, ability);
   if (ability.tap) card.tapped = true;
   if (ability.tapHeroCost) tapPermanent(state, runtime, player.hero.instanceId, true);
   if (ability.destroySelfCost) destroyPermanent(state, runtime, seat, card);

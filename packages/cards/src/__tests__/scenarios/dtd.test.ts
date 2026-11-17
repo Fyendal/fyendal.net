@@ -1407,6 +1407,33 @@ describe("DTD — Prism and Figments", () => {
     s.activate("blessing of spirits|1", { settle: false }).expectAttackValue(5);
   });
 
+  it("Flurry lets a Reality Refractor aura attack twice this turn", () => {
+    const auraAttackLegal = (s: ReturnType<typeof scenario>, instanceId: number) =>
+      legalIntents(s.state, 0).some((intent) => intent.kind === "activate-ability" && intent.sourceInstanceId === instanceId);
+    const closeChain = (s: ReturnType<typeof scenario>) => {
+      for (let i = 0; i < 10 && s.state.chain.length > 0; i++) s.passPriority();
+    };
+    const setup = (board: string[]) => scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "prism, advent of thrones|0", weapons: ["reality refractor|0"], board, resources: 4 },
+        { hero: "dorinthea" },
+      ],
+    });
+    const withFlurry = setup(["blessing of spirits|1", "flurry|0"]);
+    const aura = withFlurry.state.players[0]!.board[0]!;
+    withFlurry.activate("blessing of spirits|1").expectNotInZone(0, "flurry|0", "board").blockWith();
+    closeChain(withFlurry);
+    withFlurry.state.players[0]!.actionPoints = 1;
+    expect(auraAttackLegal(withFlurry, aura.instanceId)).toBe(true);
+
+    const without = setup(["blessing of spirits|1"]);
+    const plainAura = without.state.players[0]!.board[0]!;
+    without.activate("blessing of spirits|1").blockWith();
+    closeChain(without);
+    without.state.players[0]!.actionPoints = 1;
+    expect(auraAttackLegal(without, plainAura.instanceId)).toBe(false);
+  });
+
   it("Reality Refractor lets a tapped aura attack", () => {
     const s = scenario({
       seats: [
