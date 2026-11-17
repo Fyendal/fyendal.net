@@ -1318,6 +1318,36 @@ describe("DTD — Prism and Figments", () => {
     expect(s.state.chain.at(-1)?.defendingEquipment[0]?.tempDefense).toBe(-1);
   });
 
+  it("Decimator Great Axe does not trigger again for a later defense reaction", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          weapons: ["decimator great axe|0"],
+          resources: 3,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "rhinar", hand: ["raging onslaught|3", "sink below|1"], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    s.attackWithWeapon("decimator great axe|0")
+      .blockWith("raging onslaught|3")
+      .settle()
+      .doRaw({ kind: "choose", optionId: String(s.state.chain.at(-1)!.defendingCards[0]!.instanceId) });
+    expect(s.state.log.some((entry) =>
+      entry.publicText?.startsWith("Decimator Great Axe halves the base defense of Raging Onslaught")
+    )).toBe(true);
+
+    s.passPriority()
+      .react("sink below|1")
+      .chooseOption("pass")
+      .settle();
+    expect(s.state.log.filter((entry) =>
+      entry.publicText?.includes("Decimator Great Axe triggers")
+    )).toHaveLength(1);
+  });
+
   it("Decimator Great Axe does not trigger when another attack is defended", () => {
     const s = scenario({
       seats: [

@@ -7872,6 +7872,24 @@
       "value": " 力量和压制 (dominate)"
     }
   ],
+  "card.log.dtd.decimator.halved": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": "："
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " 的基础防御减半"
+    }
+  ],
   "card.log.dtd.diplomacy.mode.chosen": [
     {
       "type": 1,

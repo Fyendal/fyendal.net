@@ -8812,6 +8812,20 @@
       "value": " de poder e dominate"
     }
   ],
+  "card.log.dtd.decimator.halved": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " reduz à metade a defesa base de "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    }
+  ],
   "card.log.dtd.diplomacy.mode.chosen": [
     {
       "type": 1,

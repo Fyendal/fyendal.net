@@ -596,7 +596,8 @@ function collectDefendEventLayers(
   }
 
   const friendlyDefendedSources = [
-    link.attackingCard,
+    // A weapon's chain link holds a snapshot; script state lives on the zone card.
+    findCardAnywhere(state, link.attackingCard.instanceId)?.card ?? link.attackingCard,
     ...hookSources(state, link.attacker, {
       board: true,
       equipment: true,

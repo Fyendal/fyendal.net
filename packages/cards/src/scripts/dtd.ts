@@ -18,6 +18,7 @@ import {
   isNonAttackAction,
   isOwnAttack,
   leviaRedeemedAbility,
+  localizedCardLog,
   mergeSetScripts,
   opponentSeat,
   solflareTrigger,
@@ -475,7 +476,13 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
         return (
           ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
           ctx.getState("usedTurn") !== ctx.state.turn &&
-          defenders.some((card) => !ctx.hasCardType(card, "equipment"))
+          defenders.some((card) => !ctx.hasCardType(card, "equipment")) &&
+          // An earlier trigger may still be on the stack, so usedTurn is not set yet.
+          !ctx.link.defendingCards.some(
+            (card) =>
+              !defenders.some((defender) => defender.instanceId === card.instanceId) &&
+              !ctx.hasCardType(card, "equipment"),
+          )
         );
       },
     },
@@ -496,7 +503,16 @@ export const dtd: Record<string, CardScript> = mergeSetScripts("DTD", dtdHighRar
       const card = [...(ctx.link?.defendingCards ?? []), ...(ctx.link?.defendingEquipment ?? [])].find(
         (candidate) => candidate.instanceId === Number(option),
       );
-      if (card) ctx.addCardTempDefense(card.instanceId, -Math.floor((ctx.cardData(card.cardId).defense ?? 0) / 2));
+      if (!card) return;
+      ctx.addCardTempDefense(card.instanceId, -Math.floor((ctx.cardData(card.cardId).defense ?? 0) / 2));
+      ctx.logPublic(
+        localizedCardLog(
+          ctx,
+          `${ctx.data.name} halves the base defense of ${ctx.cardData(card.cardId).name}`,
+          "card.log.dtd.decimator.halved",
+          { target: { kind: "card", cardId: card.cardId } },
+        ),
+      );
     },
   },
   "scepter of pain|0": {

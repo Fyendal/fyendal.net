@@ -928,6 +928,7 @@
   "card.log.cru.knucklehead.halved": "{card}：掷骰结果为 {result}；{target} 的基础力量减半",
   "card.log.cru.riled.attack": "{card}：你的下一张 Guardian 攻击行动牌获得 +{amount} 力量",
   "card.log.cru.riled.attack.dominate": "{card}：你的下一张 Guardian 攻击行动牌获得 +{amount} 力量和压制 (dominate)",
+  "card.log.dtd.decimator.halved": "{card}：{target} 的基础防御减半",
   "card.log.dtd.diplomacy.mode.chosen": "{player} 为 {card} 选择“{mode}”",
   "card.log.dvr.dawnblade.counter": "{card} 获得一个 +{amount} 力量指示物",
   "card.log.dvr.dawnblade.turn.attack": "{card} 获得 +{amount} 力量直到回合结束",

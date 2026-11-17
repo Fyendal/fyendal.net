@@ -928,6 +928,7 @@
   "card.log.cru.knucklehead.halved": "{card}: sacó {result}; el poder base de {target} se reduce a la mitad",
   "card.log.cru.riled.attack": "{card}: tu siguiente attack action Guardian obtiene +{amount} de poder",
   "card.log.cru.riled.attack.dominate": "{card}: tu siguiente attack action Guardian obtiene +{amount} de poder y dominate",
+  "card.log.dtd.decimator.halved": "{card} reduce a la mitad la defensa base de {target}",
   "card.log.dtd.diplomacy.mode.chosen": "{player} elige «{mode}» para {card}",
   "card.log.dvr.dawnblade.counter": "{card} recibe un contador de +{amount} de poder",
   "card.log.dvr.dawnblade.turn.attack": "{card} obtiene +{amount} de poder hasta el final del turno",

@@ -8523,6 +8523,20 @@
       "value": " power and dominate"
     }
   ],
+  "card.log.dtd.decimator.halved": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " halves the base defense of "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    }
+  ],
   "card.log.dtd.diplomacy.mode.chosen": [
     {
       "type": 1,
