@@ -70,21 +70,42 @@ function apply(state: Game, seat: 0 | 1, intent: GameIntent): Game {
   return result.state;
 }
 
+interface TurnAction {
+  name: string;
+  /** Pending decision (or phase) when Fang acted. */
+  step: string;
+  /** The attack on the current link was still on the stack. */
+  onStack: boolean;
+}
+
 interface TurnLog {
   state: Game;
   swings: number;
   played: string[];
   pitched: string[];
+  /** Every card played and ability activated, in order. */
+  actions: TurnAction[];
 }
 
 /** Fang plays turn 2 against a passive opponent. */
 function playTurn(state: Game): TurnLog {
   const own = (id: number) => [...state.players[0]!.hand, ...state.players[0]!.arsenal]
     .find((card) => card.instanceId === id)?.cardId;
-  const log: TurnLog = { state, swings: 0, played: [], pitched: [] };
+  const log: TurnLog = { state, swings: 0, played: [], pitched: [], actions: [] };
   for (let step = 0; step < 120 && state.turn === 2 && state.winner === null; step++) {
     const seat = actor(state);
     const intent = seat === 0 ? choose(state) : passive(state, 1);
+    const me = state.players[0]!;
+    const id = intent.kind === "activate-ability" ? intent.sourceInstanceId
+      : intent.kind === "play-card" || intent.kind === "play-from-arsenal" ? intent.instanceId : undefined;
+    const source = [...me.hand, ...me.arsenal, ...me.board, ...me.weapons].find((card) => card.instanceId === id);
+    if (seat === 0 && source) {
+      log.actions.push({
+        name: cardData[source.cardId]?.name ?? "?",
+        step: state.pendingDecision?.kind ?? state.phase,
+        onStack: projectStateFor(state, 0).chain.at(-1)?.onStack === true,
+      });
+    }
     if (seat === 0 && "pitchInstanceIds" in intent) {
       for (const id of intent.pitchInstanceIds ?? []) log.pitched.push(own(id) ?? "?");
     }
@@ -181,6 +202,61 @@ describe("Fang policy", () => {
     expect(turn.swings).toBe(2);
     expect(names(turn.pitched)).toContain("Relentless Pursuit");
     expect(fealtyCount(state)).toBeGreaterThanOrEqual(2);
+  });
+
+  it("holds Draconic instants until the Vein's reaction step, not while the attack is on the stack", () => {
+    const state = newGame(9105);
+    // Tooth of the Dragon, Pledge Fealty, Glint the Quicksilver, Overcrowded.
+    replaceHand(state, 0, ["HNT166", "HNT164", "MPW022", "SUP216"]);
+    const instantNames = new Set(["Tooth of the Dragon", "Pledge Fealty", "Glint the Quicksilver"]);
+    const instants = playTurn(state).actions.filter((action) => instantNames.has(action.name));
+
+    expect(instants.length).toBeGreaterThan(0);
+    for (const play of instants) expect(play).toMatchObject({ onStack: false, step: "attack-reaction" });
+  });
+
+  it("spends a surplus Fealty to make Blade Flurry Draconic and swing the second Vein", () => {
+    const state = newGame(9106);
+    addFealty(state, 5);
+    // Blade Flurry, Overcrowded, Relentless Pursuit, Provoke: no Draconic card in hand.
+    replaceHand(state, 0, ["MPW021", "SUP216", "HNT229", "HNT117"]);
+    const turn = playTurn(state);
+    const actions = turn.actions.map((action) => action.name);
+
+    expect(turn.swings).toBe(2);
+    // The Fealty resolves first, so Blade Flurry is Draconic and gives the Vein go again.
+    expect(actions[actions.indexOf("Blade Flurry") - 1]).toBe("Fealty");
+    expect(actions.indexOf("Blade Flurry")).toBeLessThan(actions.lastIndexOf("Obsidian Fire Vein"));
+    expect(fealtyCount(turn.state)).toBeGreaterThanOrEqual(3);
+  });
+
+  it("gives the Vein go again with Tooth of the Dragon in the reaction step instead of spending Fealty", () => {
+    const state = newGame(9107);
+    addFealty(state, 5);
+    // Tooth of the Dragon, Blade Flurry, Overcrowded, Relentless Pursuit.
+    replaceHand(state, 0, ["HNT166", "MPW021", "SUP216", "HNT229"]);
+    const turn = playTurn(state);
+    const actions = turn.actions.map((action) => action.name);
+
+    expect(actions).not.toContain("Fealty");
+    expect(turn.swings).toBe(2);
+    const tooth = actions.indexOf("Tooth of the Dragon");
+    expect(turn.actions[tooth]!.step).toBe("attack-reaction");
+    expect(tooth).toBeGreaterThan(actions.indexOf("Obsidian Fire Vein"));
+    expect(tooth).toBeLessThan(actions.lastIndexOf("Obsidian Fire Vein"));
+    expect(fealtyCount(turn.state)).toBe(5);
+  });
+
+  it("spends one of three Fealty when no Draconic card would save them at the end phase", () => {
+    let state = newGame(9108);
+    addFealty(state, 3);
+    // Blade Flurry, Overcrowded, Relentless Pursuit, Provoke: no Draconic card in hand.
+    replaceHand(state, 0, ["MPW021", "SUP216", "HNT229", "HNT117"]);
+    const turn = playTurn(state);
+
+    expect(turn.swings).toBe(2);
+    // Holding all three would lose them at the end phase.
+    expect(fealtyCount(turn.state)).toBeGreaterThanOrEqual(2);
   });
 
   it("swings both Veins for free once three Fealty stand and spends the hand on pumps", () => {

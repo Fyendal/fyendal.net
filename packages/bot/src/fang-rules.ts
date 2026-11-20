@@ -241,6 +241,18 @@ export function fangSolverRules(input: BotPolicyInput): HeroSolverRules {
           : {}),
       };
     },
+    startPending(observed, nextTurn) {
+      // Next-attack setups already resolved this turn (Blade Flurry, Tooth, Savor...).
+      if (nextTurn) return [];
+      return observed.view.ongoing.flatMap((effect, index) => {
+        if (effect.seat !== observed.seat || effect.facts?.nextAttack !== true || !effect.facts.power) return [];
+        const source = named(observed.cards[effect.cardId]);
+        const appliesTo = source === "tooth of the dragon"
+          ? (attack: SolverCard, view: SolverView) => view.hasTrait(attack, "draconic")
+          : source === "blade flurry" || source === "braveforge bracers" ? isWeapon : isDagger;
+        return [{ key: `ongoing.${index}.${effect.cardId}`, uses: 1, power: effect.facts.power, appliesTo }];
+      });
+    },
     startResources(observed, nextTurn) {
       if (!nextTurn) return 0;
       return observed.view.players[observed.seat].board
