@@ -379,6 +379,18 @@
       "value": "Vence a Dorinthea Bot"
     }
   ],
+  "achievements.beatfang.description": [
+    {
+      "type": 0,
+      "value": "Derrota a Fang Bot en una partida de práctica."
+    }
+  ],
+  "achievements.beatfang.name": [
+    {
+      "type": 0,
+      "value": "Vence a Fang Bot"
+    }
+  ],
   "achievements.beathala.description": [
     {
       "type": 0,
@@ -34867,6 +34879,12 @@
     {
       "type": 0,
       "value": "Un mazo defensivo que bloquea con paciencia y ataca con Decimator Great Axe cada turno."
+    }
+  ],
+  "lobby.bot.fang.description": [
+    {
+      "type": 0,
+      "value": "Un mazo tempo que ataca con dagas y reúne Fealty para completar su misión."
     }
   ],
   "lobby.bot.hala.description": [

@@ -91,6 +91,8 @@ export interface SolverCard {
   readonly onHit: number;
   /** Power an attack reaction adds to the current attack. */
   readonly reactionPower?: number;
+  /** Dynamic `reactionPower`, e.g. scaling with chain links already made. */
+  reactionPowerIn?(view: SolverView): number;
   /** Damage-equivalent value gained when played that is not damage: a card
    * drawn, a token, a mark. Not scaled by hit chance. */
   bonusIn?(view: SolverView): number;
@@ -600,7 +602,7 @@ export class HandSolver {
       counters.attacks = 1;
       this.count(counters, "links:", traits);
     } else if (kind === "react") {
-      damage = card.reactionPower ?? 0;
+      damage = card.reactionPowerIn ? card.reactionPowerIn(before) : card.reactionPower ?? 0;
       // A granted on-hit rider pays off only if the current attack connects.
       const rider = card.onHitIn?.(before) ?? 0;
       onHit = rider * this.hitChance(REACTION_TARGET_POWER + damage, rider);

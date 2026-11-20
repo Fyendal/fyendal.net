@@ -379,6 +379,18 @@
       "value": "击败 Dorinthea 机器人"
     }
   ],
+  "achievements.beatfang.description": [
+    {
+      "type": 0,
+      "value": "在练习对局中击败 Fang 机器人。"
+    }
+  ],
+  "achievements.beatfang.name": [
+    {
+      "type": 0,
+      "value": "击败 Fang 机器人"
+    }
+  ],
   "achievements.beathala.description": [
     {
       "type": 0,
@@ -32497,6 +32509,12 @@
     {
       "type": 0,
       "value": "耐心防御、每回合挥动 Decimator Great Axe 的防守型牌组。"
+    }
+  ],
+  "lobby.bot.fang.description": [
+    {
+      "type": 0,
+      "value": "挥动匕首、收集 Fealty 以完成使命的节奏牌组。"
     }
   ],
   "lobby.bot.hala.description": [

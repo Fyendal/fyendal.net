@@ -9,6 +9,7 @@ import { chooseAuroraIntent, chooseAuroraIntentWithTrace } from "./aurora-policy
 import { chooseBoltynIntent, chooseBoltynIntentWithTrace } from "./boltyn-policy.js";
 import { chooseBravoIntent, chooseBravoIntentWithTrace } from "./bravo-policy.js";
 import { chooseDorintheaIntent, chooseDorintheaIntentWithTrace } from "./dorinthea-policy.js";
+import { chooseFangIntent, chooseFangIntentWithTrace } from "./fang-policy.js";
 import { chooseKayoIntent, chooseKayoIntentWithTrace } from "./kayo-policy.js";
 import { chooseBriarIntent, chooseBriarIntentWithTrace } from "./briar-policy.js";
 import {
@@ -42,6 +43,7 @@ import {
   kayoPresentationFor,
   cindraPresentationFor,
   dorintheaSagePresentationFor,
+  fangPresentationFor,
   halaPresentationFor,
   iraPresentation,
   iraSagePresentationFor,
@@ -288,6 +290,16 @@ export const BOT_DEFINITIONS = {
     chooseIntent: chooseAuroraIntent,
     chooseDecision: (input) => botDecisionFromTrace(chooseAuroraIntentWithTrace(input)),
     presentationFor: (opponent) => auroraPresentationFor(opponent),
+  }),
+  fang: stagedDefinition({
+    id: "fang",
+    format: "cc",
+    deckId: "bot-fang-dracai",
+    username: "Fang Bot",
+    deckName: "Fang, Dracai of Blades",
+    chooseIntent: chooseFangIntent,
+    chooseDecision: (input) => botDecisionFromTrace(chooseFangIntentWithTrace(input)),
+    presentationFor: (opponent) => fangPresentationFor(opponent),
   }),
 } as const satisfies Readonly<Record<BotOpponent, BotDefinition>>;
 

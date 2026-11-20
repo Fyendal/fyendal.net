@@ -60,6 +60,25 @@ describe("BotOpponentModal", () => {
     expect(html.match(/aria-hidden="true"/g)).toHaveLength(1);
   });
 
+  it("lists beta-only Fang first for beta testers and hides it from other players", () => {
+    const hidden = renderToStaticMarkup(
+      <TestI18nProvider>
+        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
+      </TestI18nProvider>,
+    );
+    expect(hidden).not.toContain("Dracai of Blades");
+
+    botModalStore.state = { betaTester: true } as StoreState;
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
+      </TestI18nProvider>,
+    );
+    expect(html).toContain("Dracai of Blades");
+    expect(html).toContain("A tempo deck that swings daggers and collects Fealty to finish his quest.");
+    expect(html.indexOf("Dracai of Blades")).toBeLessThan(html.indexOf("Legacy of Tempest"));
+  });
+
   it("lists Aurora first with the only New ribbon", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>

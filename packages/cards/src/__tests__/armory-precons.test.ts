@@ -199,6 +199,25 @@ describe("Classic Constructed shared decks", () => {
     expect(names.filter((name) => name === "Scar for a Scar")).toHaveLength(3);
   });
 
+  it("keeps the complete Fang pool internal, legal and implemented", () => {
+    const fang = precon("bot-fang-dracai");
+    expect(fang).toMatchObject({ name: "Fang, Dracai of Blades", format: "cc", botOnly: true });
+    expect(preconsForFormat("cc").map((deck) => deck.id)).not.toContain("bot-fang-dracai");
+    const pool = fang!.pool;
+    expect(pool.heroId).toBe("HNT098");
+    expect(pool.weaponIds).toEqual(["HNT100", "HNT100"]);
+    expect(pool.deck).toHaveLength(60);
+    expect(pool.sideboard).toHaveLength(11);
+    expect(pool.equipmentPool).toHaveLength(7);
+    expect(formatLegalityIssues(cardData, pool, "cc")).toEqual([]);
+    for (const id of [...pool.weaponIds, ...pool.equipmentPool, ...pool.deck, ...pool.sideboard!]) {
+      expect(cardData[id], id).toBeTruthy();
+      expect(isImplemented(cardData[id]!), id).toBe(true);
+    }
+    const blue = pool.deck.filter((id) => cardData[id]!.pitch === 3);
+    expect(blue).toHaveLength(15);
+  });
+
   it("registers the open-pool Starvo boss only for the practice bot", () => {
     const starvo = precon("bot-starvo-boss");
     expect(starvo).toMatchObject({

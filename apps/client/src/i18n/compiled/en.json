@@ -379,6 +379,18 @@
       "value": "Beat Dorinthea Bot"
     }
   ],
+  "achievements.beatfang.description": [
+    {
+      "type": 0,
+      "value": "Defeat Fang Bot in a practice game."
+    }
+  ],
+  "achievements.beatfang.name": [
+    {
+      "type": 0,
+      "value": "Beat Fang Bot"
+    }
+  ],
   "achievements.beathala.description": [
     {
       "type": 0,
@@ -33971,6 +33983,12 @@
     {
       "type": 0,
       "value": "A defensive deck that blocks patiently and swings Decimator Great Axe every turn."
+    }
+  ],
+  "lobby.bot.fang.description": [
+    {
+      "type": 0,
+      "value": "A tempo deck that swings daggers and collects Fealty to finish his quest."
     }
   ],
   "lobby.bot.hala.description": [

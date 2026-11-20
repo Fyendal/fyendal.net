@@ -789,6 +789,32 @@ describe("server rooms over websocket", () => {
     a.ws.close();
   });
 
+  it("creates the selected Classic Constructed Fang bot room only for beta testers", async () => {
+    const a = await authedClient();
+    a.sendMsg({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "fang" });
+    expect(await a.next((message) => message.type === "error"))
+      .toMatchObject({ type: "error", message: "choose a cc bot" });
+    await db.query(
+      "INSERT INTO beta_testers (user_id, added_at) SELECT id, 1 FROM users WHERE username_lc = $1",
+      [a.username.toLowerCase()],
+    );
+    a.sendMsg({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "fang" });
+    await a.next((message) => message.type === "room-created");
+    const prep = await a.next(
+      (message) => message.type === "prep-state" && message.prep.seats[1]?.username === "Fang Bot",
+    );
+    expect(prep).toMatchObject({
+      type: "prep-state",
+      prep: {
+        format: "cc", botGame: true,
+        seats: [expect.anything(), { username: "Fang Bot", heroName: "Fang, Dracai of Blades", connected: true }],
+      },
+    });
+    a.sendMsg({ type: "leave-room", endGame: true });
+    await a.next((message) => message.type === "left");
+    a.ws.close();
+  });
+
   it("creates the selected Silver Age Dorinthea bot room", async () => {
     const a = await authedClient();
     a.sendMsg({ type: "create-bot-room", format: "silver-age", deckId: "precon-sly", bot: "dorinthea" });

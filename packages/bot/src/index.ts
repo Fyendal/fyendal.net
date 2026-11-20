@@ -9,6 +9,7 @@ export {
   cindraPresentationFor,
   dorintheaSageMatchupForHeroName,
   dorintheaSagePresentationFor,
+  fangPresentationFor,
   halaPresentationFor,
   iraPresentation,
   iraSageMatchupForHeroName,
@@ -68,3 +69,5 @@ export type { AuroraIntentDecision } from "./aurora-policy.js";
 export type { BoltynIntentDecision } from "./boltyn-policy.js";
 export { chooseDorintheaIntent, chooseDorintheaIntentWithTrace } from "./dorinthea-policy.js";
 export type { DorintheaIntentDecision } from "./dorinthea-policy.js";
+export { chooseFangIntent, chooseFangIntentWithTrace } from "./fang-policy.js";
+export type { FangIntentDecision } from "./fang-policy.js";

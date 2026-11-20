@@ -1184,5 +1184,45 @@
                 "MPW146"
             ]
         }
+    },
+    "_comment_bot_fang":"Fang aggro list",
+    "bot-fang-dracai": {
+        "name": "Fang, Dracai of Blades",
+        "format": "cc",
+        "botOnly": true,
+        "pool": {
+            "heroId": "HNT098",
+            "weaponIds": ["HNT100", "HNT100"],
+            "equipmentPool": ["PEN310", "HNT115", "PEN309", "EVR154", "MPW010", "MPW011", "MPW012"],
+            "deck": [
+                "HNT103", "HNT103", "HNT103",
+                "MPW021", "MPW021", "MPW021",
+                "HNT106", "HNT106", "HNT106",
+                "HNT105",
+                "HNT158", "HNT158", "HNT158",
+                "HNT101", "HNT101", "HNT101",
+                "HNT109", "HNT109",
+                "HNT102", "HNT102", "HNT102",
+                "HNT149", "HNT149", "HNT149",
+                "HNT164", "HNT164", "HNT164",
+                "HNT198", "HNT198", "HNT198",
+                "SAR019", "SAR019", "SAR019",
+                "HNT111", "HNT111", "HNT111",
+                "ANQ034", "ANQ034", "ANQ034",
+                "HNT162", "HNT162", "HNT162",
+                "HNT166", "HNT166", "HNT166",
+                "MPW022", "MPW022", "MPW022",
+                "SUP216", "SUP216", "SUP216",
+                "SDO027", "SDO027", "SDO027",
+                "HNT117", "HNT117", "HNT117",
+                "HNT229", "HNT229", "HNT229"
+            ],
+            "sideboard": [
+                "SFA011", "SFA011", "SFA011",
+                "HNT140", "HNT140", "HNT140",
+                "ARC200", "ARC200", "ARC200",
+                "SUP260", "SUP260"
+            ]
+        }
     }
 }

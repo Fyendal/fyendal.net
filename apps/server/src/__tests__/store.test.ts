@@ -3260,7 +3260,7 @@ describe("PgRoomStore storage", () => {
     ]);
   });
 
-  it.each(["starvo", "levia", "boltyn", "ira-sage", "aurora", "dorinthea"] as const)("persists %s as a pending background-practice opponent", async (bot) => {
+  it.each(["starvo", "levia", "boltyn", "ira-sage", "aurora", "dorinthea", "fang"] as const)("persists %s as a pending background-practice opponent", async (bot) => {
     const user = await db.query(
       `INSERT INTO users (username, username_lc, pass_hash, created_at)
        VALUES ('StarvoPractice','starvopractice','hash',1) RETURNING id`,

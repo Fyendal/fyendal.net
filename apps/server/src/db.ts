@@ -1230,6 +1230,15 @@ export const MIGRATIONS: Migration[] = [
     // Trigger targets the server repeats for a seat until the turn ends.
     sql: "ALTER TABLE room_seats ADD COLUMN auto_target JSONB;",
   },
+  {
+    version: 72,
+    // Classic Constructed Fang joins the durable pending-practice bot ids.
+    sql: `ALTER TABLE pending_bot_starts
+      DROP CONSTRAINT IF EXISTS pending_bot_starts_bot_check;
+    ALTER TABLE pending_bot_starts
+      ADD CONSTRAINT pending_bot_starts_bot_check
+      CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia', 'boltyn', 'ira-sage', 'aurora', 'dorinthea', 'fang'));`,
+  },
 ];
 
 async function publicTables(db: Queryable): Promise<string[]> {

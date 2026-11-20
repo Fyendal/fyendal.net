@@ -2,6 +2,7 @@ import { cardData, precon } from "@fyendal/cards";
 import type { CardData, EquipmentSlot, PresentedDeck, RevealedArena } from "@fyendal/shared";
 import { auroraMatchupForHeroName, type AuroraMatchup } from "./aurora-strategy.js";
 import { briarMatchupForHeroName } from "./briar-strategy.js";
+import { fangMatchupForHeroName, type FangHead } from "./fang-strategy.js";
 
 /** Only information visible after arena reveal; never the opponent's deck. */
 export interface BotPrepOpponent extends RevealedArena {
@@ -19,6 +20,7 @@ const LEVIA_BOT_DECK_ID = "bot-levia-gates";
 const STARVO_BOT_DECK_ID = "bot-starvo-boss";
 const BOLTYN_BOT_DECK_ID = "bot-boltyn-raydn";
 const AURORA_BOT_DECK_ID = "bot-aurora-tempest";
+const FANG_BOT_DECK_ID = "bot-fang-dracai";
 
 const BRAVO_ARCANE_POLARITY = ["SBA030", "SBA030"];
 const BRAVO_RED_CHOKESLAM = ["SBR016", "SBR016"];
@@ -1050,6 +1052,66 @@ export function auroraPresentationFor(
       chest: matchup.arcane ? "DTD211" : "MON230", // Dyadic Carapace / Aether Ironweave
       arms: matchup.arcane ? "EVR103" : "ARC078", // Vexing Quillhand / Grasp of the Arknight
       legs: "WTR154", // Snapdragon Scalers
+    },
+    deck,
+  };
+}
+
+// ── Fang, Dracai of Blades ──────────────────────────────────────────────
+
+const FANG_FLEX = {
+  sinkBelow: "ANQ034",
+  smokeOut: "HNT162",
+  fireAndBrimstone: "HNT105",
+  imperialIntent: "HNT109",
+  blazeHeadlong: "SFA011",
+  swornVengeance: "HNT140",
+  fateForeseen: "ARC200",
+  parchedTerrain: "SUP260",
+} as const;
+
+const FANG_HEAD: Readonly<Record<FangHead, string>> = {
+  crown: "PEN310", // Crown of Providence
+  kabuto: "HNT115", // Kabuto of Imperial Authority
+  balance: "PEN309", // Balance of Justice
+  skullcap: "EVR154", // Arcanite Skullcap
+};
+
+/** Present the Fang list by the guide's matchup configurations. */
+export function fangPresentationFor(
+  opponent: BotPrepOpponent,
+  cards: Readonly<Record<string, CardData>> = cardData,
+): PresentedDeck {
+  const registered = precon(FANG_BOT_DECK_ID);
+  if (!registered || registered.format !== "cc" || registered.botOnly !== true) {
+    throw new Error("Fang bot deck is not registered");
+  }
+  const classes = cards[opponent.heroId]?.classes?.map((value) => value.toLowerCase()) ?? [];
+  const matchup = fangMatchupForHeroName(opponentHeroName(opponent, cards), classes);
+  const deck = [...registered.pool.deck];
+  const swap = (out: readonly (readonly [string, number])[], into: readonly (readonly [string, number])[]) => {
+    for (const [cardId, count] of out) removeCopies(deck, cardId, count);
+    for (const [cardId, count] of into) deck.push(...Array<string>(count).fill(cardId));
+  };
+  if (matchup.stance === "aggro") {
+    swap([[FANG_FLEX.sinkBelow, 3], [FANG_FLEX.smokeOut, 3]], [[FANG_FLEX.blazeHeadlong, 3], [FANG_FLEX.swornVengeance, 3]]);
+  } else if (matchup.stance === "defensive") {
+    swap([[FANG_FLEX.fireAndBrimstone, 1], [FANG_FLEX.imperialIntent, 2]], [[FANG_FLEX.fateForeseen, 3]]);
+  }
+  if (matchup.parched) {
+    // Against arcane racers Parched replaces Imperial Intent; otherwise the deck grows to 62.
+    if (matchup.head === "skullcap" && deck.includes(FANG_FLEX.imperialIntent)) {
+      removeCopies(deck, FANG_FLEX.imperialIntent, 2);
+    }
+    deck.push(FANG_FLEX.parchedTerrain, FANG_FLEX.parchedTerrain);
+  }
+  return {
+    weaponIds: [...registered.pool.weaponIds],
+    equipment: {
+      head: FANG_HEAD[matchup.head],
+      chest: "MPW010", // Grains of Bloodspill
+      arms: "MPW011", // Braveforge Bracers
+      legs: "MPW012", // Valiant Dynamo
     },
     deck,
   };

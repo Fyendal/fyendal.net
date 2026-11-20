@@ -32,6 +32,16 @@ type DeckType = "beginner" | "midrange" | "aggro" | "elemental" | "guardian" | "
 const BOTS: Readonly<Record<Format, readonly BotOption[]>> = {
   cc: [
     {
+      id: "fang",
+      name: "Fang",
+      title: "Dracai of Blades",
+      heroName: "Fang, Dracai of Blades",
+      deckId: "bot-fang-dracai",
+      deckType: "aggro",
+      descriptionId: "lobby.bot.fang.description",
+      isNew: true,
+    },
+    {
       id: "aurora",
       name: "Aurora",
       title: "Legacy of Tempest",

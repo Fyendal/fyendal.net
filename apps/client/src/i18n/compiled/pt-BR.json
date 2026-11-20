@@ -379,6 +379,18 @@
       "value": "Derrote o Dorinthea Bot"
     }
   ],
+  "achievements.beatfang.description": [
+    {
+      "type": 0,
+      "value": "Derrote o Fang Bot em um jogo de treino."
+    }
+  ],
+  "achievements.beatfang.name": [
+    {
+      "type": 0,
+      "value": "Derrote o Fang Bot"
+    }
+  ],
   "achievements.beathala.description": [
     {
       "type": 0,
@@ -35693,6 +35705,12 @@
     {
       "type": 0,
       "value": "Um deck defensivo que bloqueia com paciência e ataca com Decimator Great Axe todo turno."
+    }
+  ],
+  "lobby.bot.fang.description": [
+    {
+      "type": 0,
+      "value": "Um deck tempo que ataca com adagas e coleta Fealty para concluir sua missão."
     }
   ],
   "lobby.bot.hala.description": [
