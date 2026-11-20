@@ -11,6 +11,7 @@ import {
   entersArenaTrigger,
   equipmentZoneCards,
   faceUpGraveyard,
+  hasArcaneDamageEffect,
   hasCardSubtype,
   hasLiveTurnEffect,
   isArrow,
@@ -340,7 +341,7 @@ const metacarpusNode: CardScript = {
       event: "card-played",
       label: "Pay 1 resource for +1 arcane damage?",
       condition: (ctx, played) =>
-        !!played && ctx.cardData(played.cardId).text?.toLowerCase().includes("arcane damage") === true,
+        !!played && hasArcaneDamageEffect(ctx, played.cardId),
       effect(ctx, played) {
         if (!played) return;
         ctx.setState("metacarpusTarget", played.instanceId);

@@ -140,6 +140,31 @@ describe("Malice Armory Deck spoiled cards", () => {
     )).toBe(true);
   });
 
+  it("Vox Necropolis's targeted Corrupted Corpse attack reaches the defend step", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "malice, domina of the dead|0",
+        graveyard: ["corrupted corpse|0"],
+        resources: 3,
+        weapons: ["vox necropolis|0"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", board: ["blasmophet, the insatiable hunger|0"], equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("malice, domina of the dead|0")
+      .chooseCard("corrupted corpse|0")
+      .play("corrupted corpse|0", { fromZone: "graveyard" });
+
+    expect(g.state.pendingDecision?.chooseHook).toBe("engine-effect-attack-target");
+    g.doRaw({ kind: "choose", optionId: "opposing hero" }).settle();
+
+    expect(g.state.phase).toBe("defend");
+    expect(g.state.pendingDecision).toMatchObject({ kind: "defend", player: 1 });
+    expect(g.state.chain.at(-1)?.attackingCard.cardId).toBe("IAR090");
+  });
+
   it("Malice's permission does not follow a Dig for Souls zombie through death", () => {
     const g = scenario({ seats: [
       {

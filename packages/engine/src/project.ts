@@ -26,7 +26,7 @@ import { arsenalCapacity, arsenalZoneCount } from "./cardLifecycle.js";
 import { attackHasVeil, cardColorOf, cardTypesOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
 import type { TriggerEvent } from "./eventTypes.js";
 import { pendingOnHitEffects } from "./hits.js";
-import { freezeExpiry, linkGoAgainBlocked } from "./ruleQueries.js";
+import { freezeExpiry, linkGoAgainBlocked, pendingActionLimit } from "./ruleQueries.js";
 import {
   combatDamageUnpreventable,
   conditionalModifierGrantsGoAgain,
@@ -1065,6 +1065,11 @@ function projectedDecisionPromptMessage(
   return undefined;
 }
 
+function actionLimitFact(state: GameStateInternal, player: PlayerState): { actionLimit?: { turn: number; remaining: number } } {
+  const actionLimit = pendingActionLimit(state, player);
+  return actionLimit ? { actionLimit } : {};
+}
+
 function projectState(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -1247,6 +1252,7 @@ function projectState(
         ? { soulBanishedThisChain: Number(player.flags.soulBanishedThisChain) }
         : {}),
       ...(weaponAttacksProhibited(player) ? { weaponAttacksProhibited: true } : {}),
+      ...actionLimitFact(state, player as PlayerState),
       playedSubtypes: Object.keys(player.flags)
         .filter((flag) => flag.startsWith("playedSubtype:") && player.flags[flag] === true)
         .map((flag) => flag.slice("playedSubtype:".length))

@@ -13,6 +13,7 @@ import {
   solveHand,
 } from "./hand-value.js";
 import {
+  actionsAllowed,
   canGainGoAgain,
   chooseScoredIntent,
   currentAttackIsOurs,
@@ -109,6 +110,9 @@ function hasSetupFollowup(
   const setup = intentCard(setupIntent, own);
   if (!setup) return false;
   const consumed = new Set([setup.instanceId, ...pitchIds(setupIntent)]);
+  const setupData = input.cards[setup.cardId];
+  // An action-speed setup spends the last allowed action its follow-up needs.
+  const actionFollowupBlocked = actionsAllowed(input) < 2 && !!setupData && hasType(setupData, "action");
   return input.legal.some((candidate) => {
     if (
       candidate.kind !== "play-card" && candidate.kind !== "play-from-arsenal" &&
@@ -118,6 +122,7 @@ function hasSetupFollowup(
     if (!followup || consumed.has(followup.instanceId)) return false;
     if (pitchIds(candidate).some((id) => consumed.has(id))) return false;
     const data = input.cards[followup.cardId];
+    if (actionFollowupBlocked && data && (hasType(data, "action") || hasType(data, "weapon"))) return false;
     return !!data && consumesSetup(functional, data);
   });
 }

@@ -1151,7 +1151,10 @@ export function answerChoice(
       return "invalid attack target";
     }
     state.pendingDecision = null;
-    if (!attackWithPermanent(state, runtime, seat, srcId, targetAllyId, true)) {
+    // A pending stack continuation starts the queued attack; declaring it here
+    // too would let that continuation reset the new attack's steps.
+    const deferToStack = resume?.kind === "continue-stack";
+    if (!attackWithPermanent(state, runtime, seat, srcId, targetAllyId, true, deferToStack)) {
       return "effect-driven attack is no longer legal";
     }
   } else if (hook === UNIQUE_CHOICE_HOOK) {

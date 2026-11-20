@@ -3,6 +3,7 @@ import type { CardData } from "@fyendal/shared";
 import { functionalKeyOf } from "../functional.js";
 import { cardData } from "../index.js";
 import { registry } from "../scripts/index.js";
+import { printedDirectArcaneDamageEffect } from "../scripts/shared/arcane.js";
 import vanilla from "../data/vanilla.json" with { type: "json" };
 import { hasType } from "@fyendal/shared";
 
@@ -35,14 +36,6 @@ function hasStandaloneKeywordLine(card: CardData, keyword: string): boolean {
   return card.text.split("\n").some(
     (line) => line.trim().replace(/\.$/, "").toLowerCase() === normalized,
   );
-}
-
-function hasPrintedDirectArcaneDamageEffect(card: CardData): boolean {
-  // Granted abilities are not direct effects of the granting card. Removing
-  // quoted text keeps cards such as Frost Hex out of this contract.
-  const text = card.text.replace(/"[^"]*"/g, "");
-  return /\bdeal(?:s)?\s+(?:\d+|x(?:\s*\+\s*\d+)?)\s+arcane damage\b/i.test(text) ||
-    /\bdeal arcane damage to\b/i.test(text);
 }
 
 describe("script completeness", () => {
@@ -167,7 +160,7 @@ describe("script completeness", () => {
         hasType(card, "action") &&
         card.attack === undefined &&
         (card.classes ?? []).includes("wizard") &&
-        hasPrintedDirectArcaneDamageEffect(card)
+        printedDirectArcaneDamageEffect(card.text)
       )
       .filter(([key]) =>
         registry[key]?.arcaneDamageEffect !== true ||

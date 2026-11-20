@@ -40,6 +40,20 @@ export function dealArcaneToAnyTargetChoice(
   return target;
 }
 
+/** Printed text deals a set amount of arcane damage; quoted granted abilities and
+ * "deals that much arcane damage plus N" riders (Cindering Foresight) don't count. */
+export function printedDirectArcaneDamageEffect(text: string): boolean {
+  const own = text.replace(/"[^"]*"/g, "");
+  return /\bdeal(?:s)?\s+(?:\d+|x(?:\s*\+\s*\d+)?)\s+arcane damage\b/i.test(own) ||
+    /\bdeal arcane damage to\b/i.test(own);
+}
+
+/** Whether a card has an effect that deals arcane damage. */
+export function hasArcaneDamageEffect(ctx: ScriptCtx, cardId: string): boolean {
+  return ctx.arcaneDamageEffectAmounts(cardId).length > 0 ||
+    printedDirectArcaneDamageEffect(ctx.cardData(cardId).text ?? "");
+}
+
 /** "The next card you play this turn with an arcane damage effect deals +N"; bound on play, unlike Amp. */
 export function buffNextArcaneDamageCard(ctx: ScriptCtx, n: number): void {
   const bonus = Number(ctx.getPlayerFlag(ctx.seat, "nextArcaneCardBonus")) + n;

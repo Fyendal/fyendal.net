@@ -445,6 +445,12 @@ export function isAttack(data: CardData | undefined): boolean {
   return data !== undefined && hasType(data, "action") && !!data.subtypes?.includes("attack");
 }
 
+/** Actions the bot may still play or activate on `turn` under a delayed cap. */
+export function actionsAllowed(input: BotPolicyInput, turn = input.view.turn): number {
+  const limit = input.view.turnFacts?.players[input.seat]?.actionLimit;
+  return limit?.turn === turn ? limit.remaining : Number.POSITIVE_INFINITY;
+}
+
 export function isOpeningTurn(input: BotPolicyInput): boolean {
   return input.view.turn === 1 && input.view.activePlayer === input.seat;
 }

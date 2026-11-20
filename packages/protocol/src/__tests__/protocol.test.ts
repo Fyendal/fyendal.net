@@ -711,10 +711,11 @@ describe("GameView and server messages", () => {
     const current = gameView();
     Object.assign(current.turnFacts.players[0]!, {
       chargesThisTurn: 2, yellowSoulThisTurn: true, soulBanishedThisChain: 1, weaponAttacksProhibited: true,
+      actionLimit: { turn: 4, remaining: 1 },
     });
     expect(decodeGameView(current)).not.toBeNull();
     for (const malformed of [{ chargesThisTurn: -1 }, { yellowSoulThisTurn: "yes" }, { soulBanishedThisChain: 1.5 },
-      { weaponAttacksProhibited: 1 }]) {
+      { weaponAttacksProhibited: 1 }, { actionLimit: { turn: 4 } }, { actionLimit: { turn: 4, remaining: -1 } }]) {
       const view = gameView();
       Object.assign(view.turnFacts.players[0]!, malformed);
       expect(decodeGameView(view), JSON.stringify(malformed)).toBeNull();

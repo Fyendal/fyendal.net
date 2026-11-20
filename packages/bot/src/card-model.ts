@@ -292,6 +292,7 @@ export function buildHandSolver(context: ModelContext): HandSolver {
   const nextTurn = input.view.activePlayer !== input.seat;
   const solvedTurn = input.view.turn + (nextTurn ? 1 : 0);
   const chain = nextTurn ? undefined : chainStartFlags(input);
+  const actionLimit = input.view.turnFacts?.players[input.seat]?.actionLimit;
   const sources: SolverCard[] = [];
   const add = (card: CardView, zone: SolverZone) => {
     if (frozenOnTurn(card, solvedTurn)) return;
@@ -314,6 +315,7 @@ export function buildHandSolver(context: ModelContext): HandSolver {
   return new HandSolver(sources, {
     startResources: (nextTurn ? 0 : me.resources) + (rules.startResources?.(input, nextTurn) ?? 0),
     startActionPoints: nextTurn ? 1 : me.actionPoints + (rules.startActionPoints?.(input, nextTurn) ?? 0),
+    ...(actionLimit?.turn === solvedTurn ? { actionLimit: actionLimit.remaining } : {}),
     hitChance: nextTurn ? context.futureHitChanceFor : context.hitChanceFor,
     ...(rules.trackedTraits ? { trackedTraits: rules.trackedTraits } : {}),
     startFlags: { ...(chain?.flags ?? {}), ...(rules.startFlags?.(input, nextTurn) ?? {}) },

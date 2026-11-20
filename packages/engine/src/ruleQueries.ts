@@ -115,6 +115,18 @@ export function consumeFirstActionExtraCost(
   delete player.hero.scriptState?.firstActionExtraCostTurn;
 }
 
+/** The current or upcoming turn's action cap and how many actions it still allows. */
+export function pendingActionLimit(
+  state: GameStateInternal,
+  player: PlayerState,
+): { turn: number; remaining: number } | undefined {
+  const turn = Number(player.hero.scriptState?.actionLimitTurn ?? 0);
+  const limit = Number(player.hero.scriptState?.actionLimit ?? 0);
+  if (limit <= 0 || turn < state.turn) return undefined;
+  const used = turn === state.turn ? Number(player.flags.actionsPlayedOrActivatedThisTurn ?? 0) : 0;
+  return { turn, remaining: Math.max(0, limit - used) };
+}
+
 /** Whether a delayed cap prevents another action play or activation. */
 export function actionLimitReached(state: GameStateInternal, player: PlayerState): boolean {
   const turn = Number(player.hero.scriptState?.actionLimitTurn ?? 0);

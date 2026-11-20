@@ -61,6 +61,7 @@ function handKey(input: BotPolicyInput, factory: HeroRulesFactory): string {
   return JSON.stringify([
     factory.name, input.view.gameId, input.seat, input.view.turn, nextTurn, me.life, opponent.life,
     me.heroAbilitiesLost === true,
+    input.view.turnFacts?.players[input.seat]?.actionLimit ?? null,
     opponent.arsenalCount, opponent.handCount,
     ids(me.hand), ids(me.arsenal), ids(me.weapons), ids(me.board), ids(me.banish), ids(me.graveyard),
     ids(Object.values(me.equipment).flatMap((card) => card ? [card] : [])),

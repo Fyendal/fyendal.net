@@ -15,6 +15,7 @@ import {
   dealToAnyTarget,
   equippedCards,
   faceUpGraveyard,
+  hasArcaneDamageEffect,
   heroChoiceSeat,
   hyperDriver,
   isAttackAction,
@@ -402,6 +403,26 @@ const tempestAuroraLabel = (cost: number) =>
     "card.effect.dyn.tempestaurora",
     { cost },
   );
+
+function tempestAurora(maxCost: number): CardScript {
+  return {
+    onPlay(ctx) {
+      ctx.setState("auroraMax", maxCost);
+      ctx.addModifier({ scope: "until-end-of-turn", ...tempestAuroraLabel(maxCost) });
+    },
+    onFriendlyPlay(ctx, played) {
+      if (
+        ctx.getState("auroraMax") < 0 ||
+        (ctx.cardData(played.cardId).cost ?? 0) > ctx.getState("auroraMax") ||
+        !hasArcaneDamageEffect(ctx, played.cardId)
+      )
+        return;
+      ctx.addCardState(played.instanceId, "arcaneBonus", 1);
+      ctx.setState("auroraMax", -1);
+      consumeDelayedEffect(ctx);
+    },
+  };
+}
 
 export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRarity, {
   // Its Construct target is outside this C/R import; keeping Material here
@@ -1228,57 +1249,9 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "blessing of aether|1": blessing((ctx) => buffNextArcaneDamageCard(ctx, 3)),
   "blessing of aether|2": blessing((ctx) => buffNextArcaneDamageCard(ctx, 2)),
   "blessing of aether|3": blessing((ctx) => buffNextArcaneDamageCard(ctx, 1)),
-  "tempest aurora|1": {
-    onPlay(ctx) {
-      ctx.setState("auroraMax", 2);
-      ctx.addModifier({ scope: "until-end-of-turn", ...tempestAuroraLabel(2) });
-    },
-    onFriendlyPlay(ctx, played) {
-      if (
-        ctx.getState("auroraMax") < 0 ||
-        (ctx.cardData(played.cardId).cost ?? 0) > ctx.getState("auroraMax") ||
-        !ctx.cardData(played.cardId).text.toLowerCase().includes("arcane damage")
-      )
-        return;
-      ctx.addCardState(played.instanceId, "arcaneBonus", 1);
-      ctx.setState("auroraMax", -1);
-      consumeDelayedEffect(ctx);
-    },
-  },
-  "tempest aurora|2": {
-    onPlay(ctx) {
-      ctx.setState("auroraMax", 1);
-      ctx.addModifier({ scope: "until-end-of-turn", ...tempestAuroraLabel(1) });
-    },
-    onFriendlyPlay(ctx, played) {
-      if (
-        ctx.getState("auroraMax") < 0 ||
-        (ctx.cardData(played.cardId).cost ?? 0) > ctx.getState("auroraMax") ||
-        !ctx.cardData(played.cardId).text.toLowerCase().includes("arcane damage")
-      )
-        return;
-      ctx.addCardState(played.instanceId, "arcaneBonus", 1);
-      ctx.setState("auroraMax", -1);
-      consumeDelayedEffect(ctx);
-    },
-  },
-  "tempest aurora|3": {
-    onPlay(ctx) {
-      ctx.setState("auroraMax", 0);
-      ctx.addModifier({ scope: "until-end-of-turn", ...tempestAuroraLabel(0) });
-    },
-    onFriendlyPlay(ctx, played) {
-      if (
-        ctx.getState("auroraMax") < 0 ||
-        (ctx.cardData(played.cardId).cost ?? 0) > ctx.getState("auroraMax") ||
-        !ctx.cardData(played.cardId).text.toLowerCase().includes("arcane damage")
-      )
-        return;
-      ctx.addCardState(played.instanceId, "arcaneBonus", 1);
-      ctx.setState("auroraMax", -1);
-      consumeDelayedEffect(ctx);
-    },
-  },
+  "tempest aurora|1": tempestAurora(2),
+  "tempest aurora|2": tempestAurora(1),
+  "tempest aurora|3": tempestAurora(0),
   "seerstone|0": {
     activated: {
       cost: 3,

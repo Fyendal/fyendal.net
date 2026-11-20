@@ -119,6 +119,8 @@ export interface SolverCard {
 export interface SolverConfig {
   startResources?: number;
   startActionPoints?: number;
+  /** Actions that may still be played or activated this turn (a delayed cap). */
+  actionLimit?: number;
   startFlags?: SolverFlags;
   startPending?: readonly PendingEffect[];
   /** Chain links already opened this turn (mid-turn evaluation). */
@@ -163,6 +165,7 @@ interface TurnState {
   readonly used: number;
   readonly resources: number;
   readonly actionPoints: number;
+  readonly actionsLeft: number;
   readonly links: number;
   readonly lastAttack: number;
   readonly flags: SolverFlags;
@@ -247,6 +250,7 @@ export class HandSolver {
   private readonly cards: readonly SolverCard[];
   private readonly startResources: number;
   private readonly startActionPoints: number;
+  private readonly actionLimit: number;
   private readonly startFlags: SolverFlags;
   private readonly startPending: readonly PendingEffect[];
   private readonly startLinks: number;
@@ -271,6 +275,7 @@ export class HandSolver {
     this.cards = cards;
     this.startResources = config.startResources ?? 0;
     this.startActionPoints = config.startActionPoints ?? 1;
+    this.actionLimit = config.actionLimit ?? Infinity;
     this.startFlags = config.startFlags ?? EMPTY_FLAGS;
     this.startPending = config.startPending ?? [];
     this.startLinks = config.startLinks ?? 0;
@@ -344,6 +349,7 @@ export class HandSolver {
       used: 0,
       resources: this.startResources,
       actionPoints: this.startActionPoints,
+      actionsLeft: this.actionLimit,
       links: this.startLinks,
       lastAttack: -1,
       flags: this.startFlags,
@@ -370,7 +376,7 @@ export class HandSolver {
   }
 
   private key(state: TurnState): string {
-    return `${state.remaining}|${state.used}|${state.resources}|${state.actionPoints}|${state.links}|` +
+    return `${state.remaining}|${state.used}|${state.resources}|${state.actionPoints}|${state.actionsLeft}|${state.links}|` +
       `${state.lastAttack}|${this.flagsKey(state.flags)}|${pendingKey(state.pending)}`;
   }
 
@@ -449,7 +455,7 @@ export class HandSolver {
       default:
         return best;
     }
-    if (needsActionPoint && state.actionPoints < 1) return best;
+    if (needsActionPoint && (state.actionPoints < 1 || state.actionsLeft < 1)) return best;
 
     // Pending effects that this play consumes.
     let consumes: PendingEffect[] | undefined;
@@ -629,6 +635,7 @@ export class HandSolver {
       used: persistent ? state.used | bit : state.used,
       resources,
       actionPoints,
+      actionsLeft: state.actionsLeft - (needsActionPoint ? 1 : 0),
       links,
       lastAttack,
       flags,

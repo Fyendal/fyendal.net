@@ -1636,13 +1636,19 @@ export function decodeReplayPendingAchievements(value: unknown): ReplayPendingAc
   return result;
 }
 
+function actionLimitFact(value: unknown): value is NonNullable<PlayerTurnFactsView["actionLimit"]> {
+  const limit = object(value);
+  return !!limit && exactKeys(limit, ["turn", "remaining"], ["turn", "remaining"])
+    && nonNegativeInteger(limit.turn) && nonNegativeInteger(limit.remaining);
+}
+
 function playerTurnFacts(value: unknown): value is PlayerTurnFactsView {
   const facts = object(value);
   return !!facts && exactKeys(facts, [
     "attacks", "weaponAttacks", "playedSubtypes", "usedOncePerTurnEffectSourceIds", "dealtDamage",
     "physicalDamageDealt", "arcaneDamageDealt", "damageTaken",
     "physicalDamageTaken", "arcaneDamageTaken", "banishedSixPlusThisTurn",
-    "chargesThisTurn", "yellowSoulThisTurn", "soulBanishedThisChain", "weaponAttacksProhibited",
+    "chargesThisTurn", "yellowSoulThisTurn", "soulBanishedThisChain", "weaponAttacksProhibited", "actionLimit",
   ], [
     "attacks", "weaponAttacks", "playedSubtypes", "usedOncePerTurnEffectSourceIds", "dealtDamage",
     "physicalDamageDealt", "arcaneDamageDealt", "damageTaken",
@@ -1655,6 +1661,7 @@ function playerTurnFacts(value: unknown): value is PlayerTurnFactsView {
     && optional(facts.yellowSoulThisTurn, (value): value is boolean => typeof value === "boolean")
     && optional(facts.soulBanishedThisChain, nonNegativeInteger)
     && optional(facts.weaponAttacksProhibited, (value): value is boolean => typeof value === "boolean")
+    && optional(facts.actionLimit, actionLimitFact)
     && shortStrings(facts.playedSubtypes)
     && array(facts.usedOncePerTurnEffectSourceIds, instanceId, MAX_CARDS)
     && typeof facts.dealtDamage === "boolean"

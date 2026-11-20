@@ -42,6 +42,12 @@ describe("hand solver", () => {
     expect(result.line).toHaveLength(1);
   });
 
+  it("stops at a delayed action cap even with go again", () => {
+    const result = new HandSolver([red(4, { goAgain: true }), red(3, { goAgain: true }), red(5)], { actionLimit: 1 }).solve();
+    expect(result.damage).toBe(5);
+    expect(result.line).toHaveLength(1);
+  });
+
   it("chains go-again attacks before the terminal attack", () => {
     const result = new HandSolver([red(3, { goAgain: true }), red(4, { goAgain: true }), red(6)]).solve();
     expect(result.damage).toBe(13);

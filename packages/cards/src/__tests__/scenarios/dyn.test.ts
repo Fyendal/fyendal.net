@@ -461,6 +461,20 @@ describe("DYN — defense counters", () => {
 });
 
 describe("DYN — rules regression coverage", () => {
+  it("Tempest Aurora ignores arcane riders like Cindering Foresight and boosts the next arcane damage card", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["tempest aurora|3", "cindering foresight|3", "zap|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("tempest aurora|3").play("cindering foresight|3");
+    s.state.players[0]!.actionPoints = 1;
+    // Zap deals 3, +1 Cindering Foresight, +1 Tempest Aurora.
+    s.play("zap|1").chooseOption("opposing hero").expectLife(1, 15);
+  });
+
   it("Plasma Mainline asks before moving a steam counter after an item is cranked", () => {
     const s = scenario({
       seats: [

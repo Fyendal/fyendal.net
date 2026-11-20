@@ -1875,8 +1875,12 @@ describe("Armory Decks — rules regression coverage", () => {
         { hero: "rhinar", hand: ["head jab|1", "head jab|1"], equipment: NO_EQUIPMENT },
       ],
     });
-    g.play("red in the ledger|1", { fromArsenal: true }).blockWith().settle().endTurn();
+    g.play("red in the ledger|1", { fromArsenal: true }).blockWith().settle();
+    const limitedTurn = g.state.turn + 1;
+    expect(projectStateFor(g.state, 0).turnFacts?.players[1].actionLimit).toEqual({ turn: limitedTurn, remaining: 1 });
+    g.endTurn();
     g.play("head jab|1").blockWith().settle();
+    expect(projectStateFor(g.state, 1).turnFacts?.players[1].actionLimit).toEqual({ turn: limitedTurn, remaining: 0 });
     const second = g.state.players[1]!.hand.find((card) => card.cardId === printingId("head jab|1"));
     expect(legalIntents(g.state, 1).some((intent) => intent.kind === "play-card" && intent.instanceId === second?.instanceId)).toBe(false);
   });

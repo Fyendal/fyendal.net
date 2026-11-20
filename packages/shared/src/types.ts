@@ -711,6 +711,9 @@ export interface PlayerTurnFactsView {
   /** Public: a turn-scoped effect (Kabuto) prohibits this player's weapon
    * attacks. Omitted when false. */
   weaponAttacksProhibited?: boolean;
+  /** Public: a delayed cap (Red in the Ledger) on actions this player may play
+   * or activate during `turn`, with how many remain. Omitted when none applies. */
+  actionLimit?: { turn: number; remaining: number };
   playedSubtypes: string[];
   /** Public permanent instance ids whose once-per-turn triggered effects have
    * already been consumed this turn. */

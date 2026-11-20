@@ -701,6 +701,7 @@ export function attackWithPermanent(
   instanceId: number,
   targetAllyId?: number,
   targetDeclared = false,
+  deferToStack = false,
 ): boolean {
   const player = state.players[seat] as PlayerState;
   const weapon = player.weapons.find((card) => card.instanceId === instanceId);
@@ -747,7 +748,7 @@ export function attackWithPermanent(
   }
 
   if (!attackTargetIsLegal(state, runtime, seat, targetAllyId)) return false;
-  if (state.stack.length > 0 || state.resolving.length > 0 || currentLink(state)) {
+  if (deferToStack || state.stack.length > 0 || state.resolving.length > 0 || currentLink(state)) {
     enqueueAttack(player, { instanceId, ...(targetAllyId !== undefined ? { targetAllyId } : {}) });
     // Attack (with) targets as it queues the attack (CR 8.5.38), so Spectra
     // triggers now rather than when the attack reaches the chain (8.3.14b).

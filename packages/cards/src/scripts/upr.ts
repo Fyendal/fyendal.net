@@ -16,6 +16,7 @@ import {
   draconicLinks,
   entersArenaTrigger,
   faceUpGraveyard,
+  hasArcaneDamageEffect,
   hasCardSubtype,
   heroChoiceSeat,
   heroDamage,
@@ -1317,7 +1318,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     },
     quell: { amount: 1, cost: 1 },
     onFriendlyPlay(ctx, played) {
-      if (!ctx.getState("conduitReady") || !ctx.cardData(played.cardId).text.toLowerCase().includes("arcane damage"))
+      if (!ctx.getState("conduitReady") || !hasArcaneDamageEffect(ctx, played.cardId))
         return;
       ctx.setState("conduitSource", played.instanceId);
       ctx.setState("conduitReady", 0);

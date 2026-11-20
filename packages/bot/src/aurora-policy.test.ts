@@ -238,6 +238,18 @@ describe("Aurora policy", () => {
       .toBe("AST013");
   });
 
+  it("spends Red in the Ledger's single allowed action on an attack, not Nimblism", () => {
+    const state = newGame(4259, 0);
+    // Path of Same Ends x2 and Nimblism, with Nimblism in arsenal.
+    replaceHand(state, 0, ["GEM155", "GEM155", "GEM065"]);
+    state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "SEA239", owner: 0, arsenalSlot: 0 }];
+    state.players[0]!.hero.scriptState = { actionLimit: 1, actionLimitTurn: state.turn };
+    const intent = choose(state, 0);
+    expect(intent.kind).toBe("play-card");
+    expect(state.players[0]!.hand.find((card) => intent.kind === "play-card" && card.instanceId === intent.instanceId)?.cardId)
+      .toBe("GEM155");
+  });
+
   it("explores the hand's attacks instead of two payments for one Grasp activation", () => {
     // Grasp pitching one card and Grasp pitching two filled both root slots.
     const state = afterFirstSkyzyk(4258, false);
