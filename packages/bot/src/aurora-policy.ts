@@ -100,6 +100,13 @@ function consumesSetup(setup: string, followup: CardData): boolean {
   return isAttack(followup) || hasType(followup, "weapon");
 }
 
+/** Enlightened Strike's additional cost needs another hand card the setup did not spend. */
+function canBottomForEnlightened(strike: CardView, consumed: ReadonlySet<number>, input: BotPolicyInput): boolean {
+  return input.view.players[input.seat].hand.some((card) =>
+    card.instanceId !== strike.instanceId && !consumed.has(card.instanceId)
+  );
+}
+
 /** Another playable attack (or action, for Arc Lightning) can follow the setup. */
 function hasSetupFollowup(
   functional: string,
@@ -123,6 +130,7 @@ function hasSetupFollowup(
     if (pitchIds(candidate).some((id) => consumed.has(id))) return false;
     const data = input.cards[followup.cardId];
     if (actionFollowupBlocked && data && (hasType(data, "action") || hasType(data, "weapon"))) return false;
+    if (key(data) === "enlightened strike|1" && !canBottomForEnlightened(followup, consumed, input)) return false;
     return !!data && consumesSetup(functional, data);
   });
 }
@@ -451,6 +459,9 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       enlightenedGoAgain || snapdragonGoAgain
     ) {
       score += 13;
+    } else if (functional === "enlightened strike|1") {
+      // Without a follow-up it takes the +2{p} mode.
+      score += 2;
     }
     if (functional === "snatch|1") score += 3;
   } else if (hasType(data, "instant")) {

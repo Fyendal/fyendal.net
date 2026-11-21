@@ -275,6 +275,10 @@ export function evaluateTurnFuture(
   rules: HeroRulesFactory,
 ): TurnFutureValue {
   const me = input.view.players[root.seat];
+  // Inertia bottoms hand and arsenal at the start of the end phase, so nothing carries over.
+  if (me.board.some((card) => input.cards[card.cardId]?.name.trim().toLowerCase() === "inertia")) {
+    return { score: 0, heldValue: 0, arsenalValue: 0, cardsHeld: 0 };
+  }
   const threat = [...me.hand, ...me.arsenal].reduce((total, card) =>
     total + heldCardOffense(card, input, rules), 0);
   const rate = futureOffenseRate(input, root, threat);

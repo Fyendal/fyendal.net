@@ -177,6 +177,21 @@ describe("Aurora policy", () => {
     expect(state.players[0]!.deck.at(-1)?.cardId).toBe("OMN083");
   });
 
+  it("attacks with Enlightened Strike instead of spending its only cost card on Nimblism or Grasp", () => {
+    // Bug B3C191: Nimblism pitched to Grasp of the Arknight left Enlightened Strike unplayable.
+    let state = newGame(4260, 0);
+    expect(state.players[0]!.equipment.arms?.cardId).toBe("ARC078");
+    // Snapdragon Scalers were already spent.
+    delete state.players[0]!.equipment.legs;
+    replaceHand(state, 0, ["LGS368", "WTR159", "SEA239"]);
+    state = playFromHand(state, 0, "LGS368");
+    state = passUntil(state, (next) => next.phase === "action" && next.priorityPlayer === 0);
+    const intent = choose(state, 0);
+    expect(intent.kind).toBe("play-card");
+    expect(state.players[0]!.hand.find((card) => intent.kind === "play-card" && card.instanceId === intent.instanceId)?.cardId)
+      .toBe("WTR159");
+  });
+
   /** Bug 37AB80: Burn Up melded, Fry blocked, then Quick Succession and Snatch beside Scorpio. */
   function burnUpAfterBlockedFry(): Game {
     let state = newGame(4256, 0);

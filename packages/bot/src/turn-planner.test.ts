@@ -10,11 +10,13 @@ import {
   DEFAULT_MAX_SEARCH_NODES,
   DEFAULT_MAX_SEARCH_TRANSITIONS,
   evaluateOpponentResponse,
+  evaluateTurnFuture,
   isBotObservationKey,
   MAX_ROOT_CANDIDATES,
   planTurn,
   type TurnPlannerRoot,
 } from "./turn-planner.js";
+import { auroraSolverRules } from "./aurora-rules.js";
 
 function forcedIntent(legal: readonly GameIntent[]): GameIntent {
   return legal.find((intent) => intent.kind === "defend" && intent.instanceIds.length === 0)
@@ -188,6 +190,37 @@ describe("bounded turn planning", () => {
     expect(response.expectedDamage).toBeLessThan(response.rawDamage);
     expect(response.hitRate).toBeGreaterThanOrEqual(0);
     expect(response.hitRate).toBeLessThan(1);
+  });
+
+  it("carries nothing past a turn that ends under Inertia", () => {
+    // Bug B3C191: Aurora kept Enlightened Strike in arsenal for Inertia to bottom.
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 78,
+      startPlayer: 0,
+    });
+    const me = state.players[0]!;
+    me.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "WTR159", owner: 0, faceDown: true, arsenalSlot: 0 }];
+    const root: TurnPlannerRoot = {
+      seat: 0,
+      turn: state.turn,
+      life: me.life,
+      opponentLife: state.players[1]!.life,
+      opponentHandCount: 4,
+      opponentEquipmentDefense: 2,
+      threatenedAtRoot: 0,
+      equipmentValues: new Map(),
+      deckIds: new Set(),
+      cards: cardData,
+      decklists: undefined,
+    };
+    const future = () =>
+      evaluateTurnFuture({ seat: 0, view: projectStateFor(state, 0), legal: [], cards: cardData }, root, auroraSolverRules);
+    expect(future().score).toBeGreaterThan(0);
+    me.board.push({ instanceId: state.nextInstanceId++, cardId: "OUT236", owner: 0 });
+    expect(future()).toEqual({ score: 0, heldValue: 0, arsenalValue: 0, cardsHeld: 0 });
   });
 
   it("retains no more than forty-eight prepared root candidates", () => {
