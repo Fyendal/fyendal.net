@@ -564,6 +564,12 @@ function collectDefendEventLayers(
       card.cardId,
       { id: "engine.term.when.this.defends" },
     ));
+    // CR 6.6.5: the trap has triggered even if its layer later finds no target.
+    if ((dataOf(state, card.cardId).subtypes ?? []).includes("trap")) {
+      for (const group of runtime.events.collectCardEventTriggerLayers(state, "trap-triggered", defenderSeat)) {
+        for (const layer of group.layers) appendTriggerLayer(groups, group.seat, layer);
+      }
+    }
   }
 
   if (defenders.length > 0) {
@@ -838,11 +844,6 @@ export function resolveDefendEventLayer(state: GameStateInternal,
   if (effect?.kind === "on-defend-hook" && (link ||
     scriptOf(state, effect.source.cardId, effect.source)?.onDefendResolvesWithoutChainLink === true)) {
     const source = findCardAnywhere(state, layer.sourceInstanceId)?.card ?? effect.source;
-    // A trap's defend trigger is the trap triggering ("whenever a trap you
-    // control triggers"); announce it for every trap rather than per script.
-    if ((dataOf(state, source.cardId).subtypes ?? []).includes("trap")) {
-      runtime.events.queueTriggeredEvent(state, "trap-triggered", layer.seat);
-    }
     if (!declaredLayerTargetLegal(state, runtime, layer)) return;
     runtime.events.runHook(state, layer.seat, source, "onDefend", link, undefined, layer.targetCardInstanceId);
     // Defender-side "when this defends, intimidate" (Scowling Flesh Bag) queues

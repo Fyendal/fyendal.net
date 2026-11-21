@@ -591,7 +591,7 @@ describe("lingering marker labels (AST, OMN, SVI, OUT, DYN)", () => {
 
     const effects = ongoing(g, "quick succession|1");
     expect(effects.map((effect) => effect.label).sort()).toEqual([
-      "go again · next Runeblade or Lightning attack",
+      "go again · next Runeblade or Lightning attack action card",
       "your next 3 attacks get +1 power while they have go again · this turn",
     ]);
     expect(effects.find((effect) => effect.lifetime === "turn")?.summaryMessage)

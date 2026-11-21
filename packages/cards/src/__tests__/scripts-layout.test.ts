@@ -141,6 +141,10 @@ describe("card script layout", () => {
       beatenChest: "reads the flag beatChest sets",
       withdrawNextArcaneDamageCard: "undoes buffNextArcaneDamageCard's pool bookkeeping",
     };
+    // Shared exports only tests import, each with why.
+    const testOnlyAllowlist: Record<string, string> = {
+      printedDirectArcaneDamageEffect: "completeness.test.ts checks Wizard arcane markers against printed text",
+    };
     const sources = scriptSources(scriptsDir);
     const sharedModules = sources.filter(({ path }) => path.startsWith("shared/"));
     const owner = new Map<string, { module: string; localUse: boolean }>();
@@ -185,13 +189,14 @@ describe("card script layout", () => {
     for (const [name, { module, localUse }] of owner) {
       const sets = setUsers.get(name) ?? new Set();
       const shared = sharedUsers.get(name) ?? new Set();
-      if (sets.size === 0 && shared.size === 0) unused.push(`${module}:${name}`);
+      if (sets.size === 0 && shared.size === 0 && !(name in testOnlyAllowlist)) unused.push(`${module}:${name}`);
       else if (sets.size === 1 && shared.size === 0 && !localUse && !(name in singleSetAllowlist))
         singleSet.push(`${module}:${name} (only ${[...sets][0]})`);
     }
     expect(unused, "shared exports nothing imports; make them private or delete them").toEqual([]);
     expect(singleSet, "shared exports one set uses; move them into that set").toEqual([]);
-    for (const name of Object.keys(singleSetAllowlist)) expect(owner.has(name), `${name} is still shared`).toBe(true);
+    for (const name of [...Object.keys(singleSetAllowlist), ...Object.keys(testOnlyAllowlist)])
+      expect(owner.has(name), `${name} is still shared`).toBe(true);
   });
 
   it("uses only common message ids in shared code", () => {

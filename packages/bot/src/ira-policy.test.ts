@@ -535,6 +535,32 @@ describe("Ira policy", () => {
     expect(legacyTarget).toBe("Untamed");
   });
 
+  it("keeps Legacy of Ikaru off Edge of Autumn when its pitch funds the next attack", () => {
+    let state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9104,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["SEA227", "ASR026"]);
+    state.players[0]!.resources = 1;
+    state.players[1]!.hand = [];
+    const edge = legalIntents(state, 0).find((intent) =>
+      intent.kind === "activate-ability" &&
+      state.players[0]!.weapons.some((weapon) => weapon.instanceId === intent.sourceInstanceId)
+    )!;
+    state = apply(state, 0, edge);
+    state = advanceUntil(state, (candidate) => candidate.pendingDecision?.kind === "attack-reaction");
+
+    const legacy = state.players[0]!.hand.find((card) => card.cardId === "ASR026")!;
+    const legal = legalIntents(state, 0);
+    expect(legal.some((intent) => intent.kind === "play-card" && intent.instanceId === legacy.instanceId)).toBe(true);
+    const reaction = chooseIraIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state });
+    expect(reaction.kind === "play-card" && reaction.instanceId === legacy.instanceId).toBe(false);
+  });
+
   it("turns an Edge opener into a red Seek Vengeance combo link", () => {
     let state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],

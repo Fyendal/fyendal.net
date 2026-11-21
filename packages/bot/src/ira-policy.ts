@@ -239,6 +239,31 @@ function attackInReserve(
   );
 }
 
+/** Resources each reserved attack still lacks after floating resources and
+ * pitching the rest of the hand; zero or less means it is affordable. */
+function reservedAttackShortfalls(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView>,
+  accepts: (data: CardData | undefined) => boolean = () => true,
+): number[] {
+  const used = intentCard(intent, own);
+  const consumed = new Set([used?.instanceId, ...pitchIds(intent)]);
+  const me = input.view.players[input.seat];
+  const pitchable = me.hand.filter((card) => !consumed.has(card.instanceId));
+  const floating = me.resources + (me.chi ?? 0);
+  return reserveCards(input).flatMap((card) => {
+    const data = input.cards[card.cardId];
+    if (consumed.has(card.instanceId) || !isAttack(data) || !accepts(data)) return [];
+    const pitch = pitchable.reduce((total, candidate) =>
+      candidate.instanceId === card.instanceId
+        ? total
+        : total + Number(input.cards[candidate.cardId]?.pitch ?? 0),
+    0);
+    return [Number(data?.cost ?? 0) - floating - pitch];
+  });
+}
+
 /** Whether a reserved attack can still be paid for from floating resources
  * and the rest of the hand, so a granted action point would be used. */
 function affordableAttackInReserve(
@@ -248,21 +273,17 @@ function affordableAttackInReserve(
   extraResources = 0,
   accepts: (data: CardData | undefined) => boolean = () => true,
 ): boolean {
-  const used = intentCard(intent, own);
-  const consumed = new Set([used?.instanceId, ...pitchIds(intent)]);
-  const me = input.view.players[input.seat];
-  const pitchable = me.hand.filter((card) => !consumed.has(card.instanceId));
-  const floating = me.resources + (me.chi ?? 0) + extraResources;
-  return reserveCards(input).some((card) => {
-    const data = input.cards[card.cardId];
-    if (consumed.has(card.instanceId) || !isAttack(data) || !accepts(data)) return false;
-    const pitch = pitchable.reduce((total, candidate) =>
-      candidate.instanceId === card.instanceId
-        ? total
-        : total + Number(input.cards[candidate.cardId]?.pitch ?? 0),
-    0);
-    return floating + pitch >= Number(data?.cost ?? 0);
-  });
+  return reservedAttackShortfalls(intent, input, own, accepts).some((shortfall) => shortfall <= extraResources);
+}
+
+/** Whether playing this card would cost the pitch a reserved attack needs. */
+function reservedAttackNeedsPitch(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView>,
+  pitch: number,
+): boolean {
+  return reservedAttackShortfalls(intent, input, own).some((shortfall) => shortfall > 0 && shortfall <= pitch);
 }
 
 const cardOpportunity = opportunityValuer(iraSolverRules);
@@ -691,6 +712,9 @@ function scorePlay(
       score = previous === EDGE_KEY
         ? 18
         : onEdge && affordableAttackInReserve(intent, input, own, 0, (data) => !!data?.classes?.includes("ninja"))
+        ? -5
+        // Without the draw it is only +1{p}; pitching it to fund another attack deals more.
+        : reservedAttackNeedsPitch(intent, input, own, Number(data?.pitch ?? 0))
         ? -5
         : 10;
     } else {

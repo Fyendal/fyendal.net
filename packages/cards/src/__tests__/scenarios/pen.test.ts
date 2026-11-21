@@ -1342,6 +1342,31 @@ describe("PEN — import and set mechanics", () => {
     expect(aboveBase.state.players[0]!.weapons[0]!.counters?.power ?? 0).toBe(0);
   });
 
+  it("Courageous Crossing still triggers Riptide when no permanent has a +1 power counter", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "riptide, lurker of the deep|0",
+          hand: ["courageous crossing|3"],
+          equipment: NO_EQUIPMENT,
+        },
+        {
+          hero: "rhinar",
+          hand: ["raging onslaught|3"],
+          weapons: ["titan's fist|0"],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+    const attackerLife = g.state.players[1]!.life;
+    g.attackWithWeapon("titan's fist|0", { pitch: ["raging onslaught|3"] })
+      .blockWith("courageous crossing|3")
+      .settle();
+    expect(g.state.players[1]!.life).toBe(attackerLife - 1);
+  });
+
   it("Courageous Crossing creates Courage under the chosen hero's control", () => {
     const courage = (g: ReturnType<typeof scenario>, seat: number) =>
       g.state.players[seat]!.board.filter((card) => cardData[card.cardId]?.name === "Courage").length;
