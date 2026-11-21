@@ -32,7 +32,7 @@ import {
 } from "./gameLog.js";
 import { abilityList } from "./scripts.js";
 import type { ActivatedAbility } from "./scripts.js";
-import type { CardInstance, ChainLinkState, Modifier, PlayerState, StackLayer } from "./state.js";
+import type { CardInstance, ChainLinkState, DeclarationHookStep, Modifier, PlayerState, StackLayer } from "./state.js";
 
 import { controlledPermanents, observingHookSources } from "./sourceQueries.js";
 
@@ -441,15 +441,41 @@ export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime
     heroLast: true,
   }).filter((source) => source.instanceId !== card.instanceId);
 
-  runtime.events.runHook(state, seat, card, "onAttackDeclared", link);
-  for (const source of [card, ...observers]) {
-    runtime.events.runHook(state, seat, source, "onFriendlyAttackDeclared", link);
-  }
+  continueDeclarationHooks(state, runtime, [
+    { instanceId: card.instanceId, hook: "onAttackDeclared" },
+    ...[card, ...observers].map((source) => ({
+      instanceId: source.instanceId,
+      hook: "onFriendlyAttackDeclared" as const,
+    })),
+  ]);
+}
 
-  // A script may have paused declaration on a choice; resume via declareTail afterwards.
-  if (state.pendingDecision?.chooseHook) {
-    state.pendingDecision.resume = { kind: "after-declare" };
-    return;
+/** Run attack-declaration hooks in order. A hook that opens a decision pauses
+ * the rest, so a later hook's decision never overwrites it. */
+export function continueDeclarationHooks(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  steps: DeclarationHookStep[],
+): void {
+  const link = currentLink(state);
+  if (!link) return;
+  const seat = link.attacker;
+  for (let index = 0; index < steps.length; index++) {
+    const step = steps[index] as DeclarationHookStep;
+    const source = step.instanceId === link.attackingCard.instanceId
+      ? link.attackingCard
+      : observingHookSources(state, seat, {
+          board: true,
+          arsenal: true,
+          equipment: true,
+          weapons: true,
+          heroLast: true,
+        }).find((candidate) => candidate.instanceId === step.instanceId);
+    if (source) runtime.events.runHook(state, seat, source, step.hook, link);
+    if (state.pendingDecision?.chooseHook) {
+      state.pendingDecision.resume = { kind: "after-declare", remainingHooks: steps.slice(index + 1) };
+      return;
+    }
   }
   declareTail(state, runtime);
 }

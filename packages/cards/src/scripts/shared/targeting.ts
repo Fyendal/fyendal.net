@@ -1,6 +1,6 @@
 import type { CardInstance, DeepReadonly, ScriptCtx, ScriptPrompt, TriggerDef, TriggerTarget } from "@fyendal/engine";
 import type { GameMessage } from "@fyendal/shared";
-import { isAlly } from "./cards.js";
+import { allyControllerSeat, arenaAllies } from "./cards.js";
 import { commonOptionMessages, decisionPrompt } from "./messages.js";
 import { opponentSeat } from "./state.js";
 
@@ -61,7 +61,7 @@ function anyTargetIds(ctx: ScriptCtx, opts: { opposing?: boolean } = {}): number
     .filter((player) => !opts.opposing || player.seat !== ctx.seat)
     .flatMap((player) => [
       player.hero.instanceId,
-      ...player.board.filter((card) => isAlly(ctx, card)).map((card) => card.instanceId),
+      ...arenaAllies(ctx, player).map((card) => card.instanceId),
     ]);
 }
 
@@ -91,9 +91,9 @@ export function dealToAnyTarget(
   if (instanceId === undefined) return 0;
   const hero = ctx.state.players.find((player) => player.hero.instanceId === instanceId);
   if (hero) return ctx.dealDamage(hero.seat, amount, opts);
-  const controller = ctx.state.players.find((player) => player.board.some((card) => card.instanceId === instanceId));
-  if (!controller) return 0;
-  return ctx.dealDamage(controller.seat, amount, { ...opts, targetAllyId: instanceId });
+  const controller = allyControllerSeat(ctx, instanceId);
+  if (controller === undefined) return 0;
+  return ctx.dealDamage(controller, amount, { ...opts, targetAllyId: instanceId });
 }
 
 type HeroChoiceOption = "opposing hero" | "your hero";
@@ -162,8 +162,8 @@ export function requestAnyTargetChoice(
   const allies = opts.heroesOnly
     ? []
     : anyTargetIds(ctx, { opposing: opts.opposing }).flatMap((id) => {
-        const controller = ctx.state.players.find((player) => player.board.some((card) => card.instanceId === id));
-        return controller ? [{ option: `ally:${controller.seat}:${id}`, id }] : [];
+        const controller = allyControllerSeat(ctx, id);
+        return controller === undefined ? [] : [{ option: `ally:${controller}:${id}`, id }];
       });
   const options = [...(opts.optional ? ["no"] : []), ...heroes, ...allies.map((ally) => ally.option)];
   ctx.requestChoice(

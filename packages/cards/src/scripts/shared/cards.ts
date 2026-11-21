@@ -99,6 +99,17 @@ export function isAlly(ctx: ScriptCtx, card: Card): boolean {
   return hasCardSubtype(ctx, card, "ally");
 }
 
+/** Allies in a player's arena, including equipped (perched) ones, CR 8.3.39c. */
+export function arenaAllies(ctx: ScriptCtx, player: ScriptCtx["state"]["players"][number]): Card[] {
+  return [...player.board, ...player.weapons].filter((card) => isAlly(ctx, card));
+}
+
+/** Seat controlling the ally `instanceId`, on the board or equipped. */
+export function allyControllerSeat(ctx: ScriptCtx, instanceId: number): number | undefined {
+  return ctx.state.players.find((player) =>
+    arenaAllies(ctx, player).some((card) => card.instanceId === instanceId))?.seat;
+}
+
 export function isPirate(ctx: ScriptCtx, card: Card): boolean {
   return hasCardSubtype(ctx, card, "pirate");
 }

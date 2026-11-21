@@ -64,6 +64,23 @@ describe("OMN — Gauntlet of Sword and Sorcery", () => {
     expect(g.state.pendingDecision?.chooseHook).toBe("arcane-barrier");
     g.chooseOption(payment).blockWith().settle().expectLife(1, payment === "pay 0" ? 20 - 1 - 4 : 20 - 3);
   });
+
+  it("does not replace the attack's own when-attacks choice", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, hand: ["nimby|1"], deck: ["nimblism|1"],
+          equipment: { head: null, chest: null, arms: "gauntlet of sword and sorcery|0", legs: null } },
+        { hero: "dorinthea", resources: 1, weapons: [],
+          equipment: { head: "nullrune hood|0", chest: null, arms: null, legs: null } },
+      ],
+    });
+    g.activate("gauntlet of sword and sorcery|0").play("nimby|1", { settle: false });
+    while (!g.state.pendingDecision?.chooseHook && g.state.stack.length) g.passPriority();
+    expect(g.state.pendingDecision?.chooseHook).toBe("nimby-search");
+    g.chooseOption(String(g.state.players[0]!.deck[0]!.instanceId)).expectInZone(0, "nimblism|1", "hand");
+    expect(g.state.pendingDecision?.chooseHook).toBe("arcane-barrier");
+    g.chooseOption("pay 0").blockWith().settle().expectLife(1, 20 - 1 - 4);
+  });
 });
 
 describe("OMN — wager targeting", () => {

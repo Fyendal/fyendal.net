@@ -22,7 +22,7 @@ import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { createTokenFor, createTokensFor } from "./tokens.js";
 import { destroyPermanent, fireLeaveCombatChain, moveToGraveyard } from "./zoneMoves.js";
 import { currentLink, defendingSeatOf, findCardAnywhere, findPermanent, removeFromArray } from "./zoneQueries.js";
-import { drawCards } from "./cardLifecycle.js";
+import { drawCards, stampEnteringLife } from "./cardLifecycle.js";
 import { queuedAttackObjects } from "./attackQueue.js";
 import { takeAttackLayerOrigin } from "./stackCore.js";
 import { notePitch, payFromPools, pitchIntoPool, pitchProhibitedByEffect, pitchValueOfInstance } from "./resources.js";
@@ -1278,6 +1278,10 @@ export function dealAllyDamage(state: GameStateInternal,
   const src = findCardAnywhere(state, packet.sourceInstanceId);
   const found = findPermanent(state, packet.targetAllyId as number);
   const ally = found?.card;
+  // games created before equipped allies were stamped with life
+  if (ally && ally.life === undefined && state.players[found!.seat]?.weapons.includes(ally)) {
+    stampEnteringLife(state, ally);
+  }
   if (
     !found ||
     !ally ||

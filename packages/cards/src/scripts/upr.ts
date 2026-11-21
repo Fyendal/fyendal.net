@@ -20,6 +20,8 @@ import {
   hasCardSubtype,
   heroChoiceSeat,
   heroDamage,
+  allyControllerSeat,
+  arenaAllies,
   isAlly,
   isenhowlFrostbitesKey,
   isFused,
@@ -73,8 +75,8 @@ function livingTargets(ctx: ScriptCtx): number[] {
   return [
     ...ctx.state.players.map((player) => player.hero.instanceId),
     ...ctx.state.players.flatMap((player) =>
-      player.board
-        .filter((card) => isAlly(ctx, card) && card.life !== undefined)
+      arenaAllies(ctx, player)
+        .filter((card) => card.life !== undefined)
         .map((card) => card.instanceId),
     ),
   ];
@@ -101,9 +103,9 @@ function dealToTarget(ctx: ScriptCtx, option: string, amount: number, arcane = f
   const id = Number(option);
   const hero = ctx.state.players.find((player) => player.hero.instanceId === id);
   if (hero) return arcane ? dealArcane(ctx, hero.seat, amount) : ctx.dealDamage(hero.seat, amount);
-  const owner = ctx.state.players.find((player) => player.board.some((card) => card.instanceId === id));
-  if (!owner) return 0;
-  return arcane ? dealArcane(ctx, owner.seat, amount, id) : ctx.dealDamage(owner.seat, amount, { targetAllyId: id });
+  const owner = allyControllerSeat(ctx, id);
+  if (owner === undefined) return 0;
+  return arcane ? dealArcane(ctx, owner, amount, id) : ctx.dealDamage(owner, amount, { targetAllyId: id });
 }
 
 function consumeOwnMarker(ctx: ScriptCtx): void {
@@ -403,7 +405,7 @@ function singe(maxAllyTargets: number): CardScript {
       const target = heroChoiceSeat(ctx, option)!;
       ctx.setState("singeTarget", target);
       dealArcane(ctx, target, 1);
-      const allies = ctx.player(target).board.filter((card) => isAlly(ctx, card));
+      const allies = arenaAllies(ctx, ctx.player(target));
       if (!allies.length) return;
       const amount = ctx.previewArcaneDamage(1);
       ctx.requestCardChoices(

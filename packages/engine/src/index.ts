@@ -1,7 +1,7 @@
 import { createEngineRuntime, engineRuntime } from "./engineRuntime.js";
 import type { GameIntent, MeldSide } from "@fyendal/shared";
 import { activateAbility, answerChoice, answerChoices, playCard } from "./actions.js";
-import { declareTail } from "./attacks.js";
+import { continueDeclarationHooks } from "./attacks.js";
 import { assignDefenders, stageDefenders } from "./defense.js";
 import { scriptOf } from "./cardProperties.js";
 import { gameLogMessage, logCardValue, logPlayerValue, logPublic, nameOf } from "./gameLog.js";
@@ -127,7 +127,7 @@ function afterChoice(
   runtime: EngineRuntime,
   resume: PendingDecisionState["resume"],
 ): void {
-  if (resume?.kind === "after-declare") declareTail(state, runtime);
+  if (resume?.kind === "after-declare") continueDeclarationHooks(state, runtime, resume.remainingHooks ?? []);
   else if (resume?.kind === "start-reaction-step") beginReactionStep(state);
   else if (resume?.kind === "continue-stack") continueStack(state, runtime, resume.seat);
   else if (resume?.kind === "finish-wager-result") resumeWagerResult(state, runtime, resume.wagerIndex);

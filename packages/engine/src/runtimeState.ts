@@ -45,7 +45,13 @@ function makePlayer(seat: number, decklist: Decklist, state: GameStateInternal):
     inventory: (decklist.inventory ?? []).map(mk),
     board: [],
     equipment: {},
-    weapons: decklist.weaponIds.map(mk),
+    // equipped allies (perched, CR 8.3.39) are permanents with a life total (CR 8.2.8)
+    weapons: decklist.weaponIds.map((cardId) => {
+      const card = mk(cardId);
+      const life = state.cardsRef[cardId]?.life;
+      if (life !== undefined) card.life = life;
+      return card;
+    }),
     resources: 0,
     chi: 0,
     actionPoints: 0,

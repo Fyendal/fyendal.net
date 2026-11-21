@@ -724,6 +724,16 @@ function validateResume(value: unknown, code: string, path: string): void {
     const entry = exact(value, code, path, ["kind", "seat"]); integer(entry.seat, code, `${path}.seat`);
   } else if (kind === "game-setup") {
     const entry = exact(value, code, path, ["kind", "nextSeat"]); integer(entry.nextSeat, code, `${path}.nextSeat`);
+  } else if (kind === "after-declare") {
+    const entry = exact(value, code, path, ["kind"], ["remainingHooks"]);
+    optional(entry, "remainingHooks", (v, p) => {
+      if (!Array.isArray(v)) fail(code, p, "expected an array");
+      v.forEach((step, index) => {
+        const item = exact(step, code, `${p}[${index}]`, ["instanceId", "hook"]);
+        integer(item.instanceId, code, `${p}[${index}].instanceId`);
+        oneOf(item.hook, ["onAttackDeclared", "onFriendlyAttackDeclared"] as const, code, `${p}[${index}].hook`);
+      });
+    }, path);
   } else exact(value, code, path, ["kind"]);
 }
 

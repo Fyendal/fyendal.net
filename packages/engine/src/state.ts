@@ -895,6 +895,12 @@ export interface PendingArcane {
   queue?: PendingArcane[];
 }
 
+/** An attack-declaration hook still to run after a paused declaration. */
+export interface DeclarationHookStep {
+  instanceId: number;
+  hook: "onAttackDeclared" | "onFriendlyAttackDeclared";
+}
+
 export interface PendingDecisionState extends PendingDecision {
   /** Card instance whose script owns a "choose-target"/"optional-effect" decision */
   sourceInstanceId?: number;
@@ -1098,7 +1104,7 @@ export interface PendingDecisionState extends PendingDecision {
     | { kind: "finish-play"; seat: number; card: CardInstance; from: "hand" | "arsenal" | PlayableZone; targetAllyId?: number; boost?: boolean; boostCount?: number; asInstant?: boolean }
   | { kind: "finish-reaction"; seat: number; card: CardInstance; from: "hand" | "arsenal" | PlayableZone }
   | { kind: "finish-window-instant"; seat: number; card: CardInstance; from: "hand" | "arsenal" | PlayableZone }
-    | { kind: "after-declare" }
+    | { kind: "after-declare"; remainingHooks?: DeclarationHookStep[] }
     | { kind: "start-reaction-step" }
     | { kind: "after-resolution" }
     | { kind: "continue-stack"; seat?: number }

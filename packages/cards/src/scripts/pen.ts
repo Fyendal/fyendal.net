@@ -46,6 +46,7 @@ import {
   isDagger,
   isNonAttackAction,
   isSword,
+  arenaAllies,
   isAlly,
   isItem,
   hasLessLife,
@@ -187,7 +188,7 @@ function penArcaneSpell(
     onPlay(ctx) {
       const preview = ctx.previewArcaneDamage(damage(ctx));
       const allies = ctx.state.players.flatMap((player) =>
-        player.board.filter((card) => isAlly(ctx, card)).map((card) => ({ player, card })),
+        arenaAllies(ctx, player).map((card) => ({ player, card })),
       );
       ctx.requestChoice(
         "pen-arcane",

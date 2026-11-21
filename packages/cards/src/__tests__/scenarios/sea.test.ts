@@ -286,6 +286,36 @@ describe("SEA — High Seas heroes and cogs", () => {
     )).toBe(true);
   });
 
+  it("an equipped Polly Cranka can be targeted by any-target arcane damage", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["arc lightning|2"], resources: 2 },
+        { hero: "rhinar", heroKey: "puffin|0", weapons: ["polly cranka|0"] },
+      ],
+    });
+    const polly = g.state.players[1]!.weapons[0]!;
+    expect(polly.life).toBe(1);
+    g.play("arc lightning|2");
+    expect(g.state.pendingDecision?.options).toContain(String(polly.instanceId));
+    g.declareTarget(String(polly.instanceId))
+      .expectInZone(1, "polly cranka|0", "graveyard")
+      .expectLife(1, 20);
+  });
+
+  it("an equipped Polly Cranka without a stamped life total still takes damage", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["arc lightning|2"], resources: 2 },
+        { hero: "rhinar", heroKey: "puffin|0", weapons: ["polly cranka|0"] },
+      ],
+    });
+    const polly = g.state.players[1]!.weapons[0]!;
+    delete polly.life;
+    g.play("arc lightning|2")
+      .declareTarget(String(polly.instanceId))
+      .expectInZone(1, "polly cranka|0", "graveyard");
+  });
+
   it("Polly Cranka's crank does not refund a second action point", () => {
     const g = scenario({
       seats: [

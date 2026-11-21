@@ -195,8 +195,8 @@ describe("shared any-target choice", () => {
       self: { cardId: "TEST" },
       state: {
         players: [
-          { seat: 0, hero: { instanceId: 1 }, board: [{ instanceId: 2 }] },
-          { seat: 1, hero: { instanceId: 3 }, board: [{ instanceId: 4 }] },
+          { seat: 0, hero: { instanceId: 1 }, board: [{ instanceId: 2 }], weapons: [] },
+          { seat: 1, hero: { instanceId: 3 }, board: [{ instanceId: 4 }], weapons: [] },
         ],
       },
       cardTypes: () => ["ally"],
