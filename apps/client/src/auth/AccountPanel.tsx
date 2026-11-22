@@ -6,6 +6,7 @@ import { ModalSurface } from "../components/ModalSurface.js";
 import { PlayerBadgeMark } from "../game/PlayerBadge.js";
 import { useStore } from "../store.js";
 import { BadgeArt, badgeMessageIds, BadgePicker } from "./BadgePicker.js";
+import { KOFI_URL } from "../lobby/KofiLink.js";
 import { RecoveryEmailSetting } from "./RecoveryEmailSetting.js";
 import "../styles/account.css";
 
@@ -136,6 +137,15 @@ export function AccountPanel() {
             </div>
           ) : error?.action !== "badges" ? (
             <p className="muted" role="status">{intl.formatMessage({ id: "account.badge.loading" })}</p>
+          ) : null}
+          {cosmetics && !cosmetics.availableBadges.includes("supporter") ? (
+            <p className="account-badge-hint">
+              {intl.formatMessage({ id: "account.badge.supporter.hint" }, {
+                link: (chunks) => (
+                  <a href={KOFI_URL} target="_blank" rel="noopener noreferrer">{chunks}</a>
+                ),
+              })}
+            </p>
           ) : null}
           {note && <p className="account-feedback success" role="status">{note}</p>}
           {draftBadge === undefined ? errorFor("badges") : null}

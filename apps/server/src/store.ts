@@ -67,6 +67,7 @@ import { resolveDeckArt } from "@fyendal/cards/art";
 import {
   decodePresentedArena,
   decodeRoomClock,
+  isPlayerBadge,
   resolvedCardArt,
   MAX_MATCHMAKING_AVOID_HEROES,
   MAX_MATCHMAKING_AVOID_ROOM_CODES,
@@ -859,7 +860,7 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
       || row.queue_card_pool_mode === "future" || row.queue_card_pool_mode === "open")) {
       throw new CorruptRoomError(code, `seats[${index}].queue_card_pool_mode`, "expected a card-pool mode or null");
     }
-    if (!(row.selected_badge === null || row.selected_badge === "early-tester")) {
+    if (!(row.selected_badge === null || isPlayerBadge(row.selected_badge))) {
       throw new CorruptRoomError(code, `seats[${index}].selected_badge`, "expected a known badge or null");
     }
     if (!(row.playmat == null || playmatRef(row.playmat))) {
@@ -898,7 +899,7 @@ function decodeSeatRows(values: unknown[], code: string): [SeatRow | null, SeatR
       ...(typeof row.deck_name === "string" ? { deckName: row.deck_name } : {}),
       ...(typeof row.username === "string" ? { username: row.username } : {}),
       ...(row.user_id == null ? {} : { userId: Number(row.user_id) }),
-      ...(row.selected_badge === "early-tester" ? { badge: row.selected_badge } : {}),
+      ...(isPlayerBadge(row.selected_badge) ? { badge: row.selected_badge } : {}),
       ...(typeof row.playmat === "string" ? { playmat: row.playmat } : {}),
       ...(typeof row.hero_id === "string" ? { heroId: row.hero_id } : {}),
       ...(presented ? { presented } : {}),
@@ -1163,7 +1164,9 @@ export class PgRoomStore {
       `WITH seat_data AS (
          SELECT s.room_code, json_agg(s ORDER BY s.seat) AS seat_rows
          FROM (
-           SELECT rs.*, u.selected_badge, u.playmat
+           SELECT rs.*, u.playmat,
+                  CASE WHEN u.selected_badge = 'supporter' AND COALESCE(u.supporter_until, 0) <= $3
+                    THEN NULL ELSE u.selected_badge END AS selected_badge
            FROM room_seats AS rs
            LEFT JOIN users AS u ON u.id = rs.user_id
            WHERE rs.room_code = $1
@@ -1188,7 +1191,7 @@ export class PgRoomStore {
        LEFT JOIN seat_data ON seat_data.room_code = r.code
        LEFT JOIN presence_data ON presence_data.room_code = r.code
        WHERE r.code = $1 AND r.ruleset_version = $2`,
-      [code, this.rulesetVersion],
+      [code, this.rulesetVersion, this.now()],
     );
     if (!rows.length) return null;
     return toRoom(rows[0]);

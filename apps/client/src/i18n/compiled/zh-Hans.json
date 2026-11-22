@@ -69,6 +69,38 @@
       "value": "正在保存…"
     }
   ],
+  "account.badge.supporter.description": [
+    {
+      "type": 0,
+      "value": "授予每月在 Ko-fi 上支持 Fyendal 的玩家。"
+    }
+  ],
+  "account.badge.supporter.hint": [
+    {
+      "type": 0,
+      "value": "使用你的找回邮箱每月在 "
+    },
+    {
+      "type": 8,
+      "value": "link",
+      "children": [
+        {
+          "type": 0,
+          "value": "Ko-fi"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": " 上支持 Fyendal，即可获得一枚特别的宝石徽章。"
+    }
+  ],
+  "account.badge.supporter.name": [
+    {
+      "type": 0,
+      "value": "支持者宝石"
+    }
+  ],
   "account.badge.title": [
     {
       "type": 0,
@@ -142,7 +174,7 @@
   "account.email.description": [
     {
       "type": 0,
-      "value": "可选的已确认邮箱，仅用于重置密码。其他玩家永远看不到它。"
+      "value": "可选的已确认邮箱，用于重置密码和关联你在 Ko-fi 上的支持。其他玩家永远看不到它。"
     }
   ],
   "account.email.loading": [
@@ -31267,6 +31299,18 @@
     {
       "type": 0,
       "value": "对战记录"
+    }
+  ],
+  "kofi.cta": [
+    {
+      "type": 0,
+      "value": "帮助 Fyendal 持续运行"
+    }
+  ],
+  "kofi.title": [
+    {
+      "type": 0,
+      "value": "在 Ko-fi 上支持 Fyendal"
     }
   ],
   "landing.accountAccess": [

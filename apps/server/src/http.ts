@@ -5,6 +5,7 @@ import type { DeckArt, DeckPool, Format } from "@fyendal/shared";
 import { cardData, findPrinting, formatLegalityIssues, isDeckConstructionIssue } from "@fyendal/cards";
 import {
   decodeDeckArtRequest,
+  decodeKofiWebhook,
   decodeLeagueAvailabilityRequest,
   decodeLeagueIdRequest,
   decodeLeagueJoinRequest,
@@ -47,6 +48,7 @@ import { createPlayerReport } from "./playerReports.js";
 import { consoleError } from "./logging.js";
 import { getGlobalNotice } from "./globalNotice.js";
 import { isBetaTester } from "./betaTesters.js";
+import { kofiTokenMatches, recordKofiPayment } from "./kofi.js";
 import { getVersionUpdateNotice } from "./versionUpdateNotice.js";
 import { getAchievements } from "./achievements.js";
 import { isMatchFormat, listMatches, loadMatchRecords, parseMatchCursor } from "./matches.js";
@@ -178,6 +180,8 @@ export interface ApiDeps {
   fabraryClient?: FabraryClient;
   /** Recovery email transport; null disables recovery email. Defaults to EMAIL_PROVIDER. */
   emailSender?: EmailSender | null;
+  /** Ko-fi webhook verification token; null disables the webhook. */
+  kofiVerificationToken?: string | null;
   /** Throttles recovery and verification email per normalized target. */
   recoveryRateLimiter?: RateLimiter;
   /** Lets the WebSocket gateway immediately close sockets for a revoked token. */
@@ -282,6 +286,16 @@ function secureResponse(
 }
 
 function readBody(req: http.IncomingMessage): Promise<unknown> {
+  return readText(req).then((text) => {
+    try {
+      return JSON.parse(text) as unknown;
+    } catch {
+      throw new ClientError("invalid JSON");
+    }
+  });
+}
+
+function readText(req: http.IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     let size = 0;
@@ -294,13 +308,7 @@ function readBody(req: http.IncomingMessage): Promise<unknown> {
       }
       chunks.push(chunk);
     });
-    req.on("end", () => {
-      try {
-        resolve(JSON.parse(Buffer.concat(chunks).toString("utf8")));
-      } catch {
-        reject(new ClientError("invalid JSON"));
-      }
-    });
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
     req.on("error", reject);
   });
 }
@@ -381,6 +389,9 @@ export function createApiServer(deps: ApiDeps): http.Server {
   const accountLimiter = deps.accountRateLimiter ?? createRateLimiter();
   const fabraryClient = deps.fabraryClient ?? createFabraryClient();
   const emailSender = deps.emailSender !== undefined ? deps.emailSender : configuredEmailSender();
+  const kofiToken = deps.kofiVerificationToken !== undefined
+    ? deps.kofiVerificationToken
+    : process.env.KOFI_VERIFICATION_TOKEN || null;
   const recoveryLimiter = deps.recoveryRateLimiter ?? createRateLimiter(3, 60 * 60 * 1000);
   const noticeLimiter = deps.noticeRateLimiter ?? createRateLimiter(600);
   const replayShareLimiter = deps.replayShareRateLimiter ?? createRateLimiter(120);
@@ -1148,6 +1159,30 @@ export function createApiServer(deps: ApiDeps): http.Server {
           });
         })
         .catch((e) => internalError(res, e));
+      return;
+    }
+    // Ko-fi posts form-encoded `data` JSON and retries until it gets a 200.
+    if (req.method === "POST" && url.pathname === "/api/kofi/webhook" && kofiToken) {
+      readText(req)
+        .then(async (text) => {
+          const raw = new URLSearchParams(text).get("data");
+          let parsed: unknown = null;
+          try {
+            parsed = raw === null ? null : JSON.parse(raw);
+          } catch {
+            parsed = null;
+          }
+          const payment = decodeKofiWebhook(parsed);
+          if (!payment) return sendJson(res, 400, { ok: false, error: "invalid payload" });
+          if (!kofiTokenMatches(kofiToken, payment.verificationToken)) {
+            return sendJson(res, 403, { ok: false, error: "invalid token" });
+          }
+          await recordKofiPayment(deps.db, payment);
+          sendJson(res, 200, { ok: true });
+        })
+        .catch((e: unknown) => e instanceof ClientError
+          ? sendJson(res, 400, { ok: false, error: e.message })
+          : internalError(res, e));
       return;
     }
     const route = routes[url.pathname];

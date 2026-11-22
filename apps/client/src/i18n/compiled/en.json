@@ -69,6 +69,38 @@
       "value": "Saving…"
     }
   ],
+  "account.badge.supporter.description": [
+    {
+      "type": 0,
+      "value": "Awarded to players who support Fyendal monthly on Ko-fi."
+    }
+  ],
+  "account.badge.supporter.hint": [
+    {
+      "type": 0,
+      "value": "Support Fyendal monthly on "
+    },
+    {
+      "type": 8,
+      "value": "link",
+      "children": [
+        {
+          "type": 0,
+          "value": "Ko-fi"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": " with your recovery email to earn a special gem badge."
+    }
+  ],
+  "account.badge.supporter.name": [
+    {
+      "type": 0,
+      "value": "Supporter Gem"
+    }
+  ],
   "account.badge.title": [
     {
       "type": 0,
@@ -142,7 +174,7 @@
   "account.email.description": [
     {
       "type": 0,
-      "value": "An optional, confirmed address used only to reset your password. Other players never see it."
+      "value": "An optional, confirmed address used to reset your password and to match your Ko-fi support. Other players never see it."
     }
   ],
   "account.email.loading": [
@@ -32627,6 +32659,18 @@
     {
       "type": 0,
       "value": "Match History"
+    }
+  ],
+  "kofi.cta": [
+    {
+      "type": 0,
+      "value": "Help keep Fyendal running"
+    }
+  ],
+  "kofi.title": [
+    {
+      "type": 0,
+      "value": "Support Fyendal on Ko-fi"
     }
   ],
   "landing.accountAccess": [

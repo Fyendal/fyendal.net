@@ -3,6 +3,7 @@ import { createSession, hashPassword, passwordError, revokeAllSessionsIn, verify
 import { withTransaction, type Queryable } from "./db.js";
 import { insertEmailVerification, type NormalizedEmail, type PendingVerification } from "./emailVerification.js";
 import { hashToken, newToken } from "./tokenHash.js";
+import { refreshSupporterStatus } from "./kofi.js";
 
 const RESET_TTL_MS = 30 * 60 * 1000;
 /** Bounds the links in one reset email when many accounts share an address. */
@@ -69,7 +70,7 @@ export async function removeEmail(
   if (typeof user === "string") return { status: user };
   const previousEmail = await withTransaction(db, async (tx) => {
     const { rows } = await tx.query("SELECT email FROM users WHERE id = $1 FOR UPDATE", [userId]);
-    await tx.query("UPDATE users SET email = NULL, email_lc = NULL WHERE id = $1", [userId]);
+    await tx.query("UPDATE users SET email = NULL, email_lc = NULL, supporter_until = NULL WHERE id = $1", [userId]);
     await tx.query("DELETE FROM email_verifications WHERE user_id = $1", [userId]);
     await tx.query("DELETE FROM password_resets WHERE user_id = $1", [userId]);
     return typeof rows[0]?.email === "string" ? rows[0].email : null;
@@ -105,6 +106,7 @@ export async function confirmEmailVerification(
       pending.email,
       pending.email_lc,
     ]);
+    await refreshSupporterStatus(tx, userId);
     await tx.query("DELETE FROM password_resets WHERE user_id = $1", [userId]);
     const previousLc = typeof user.email_lc === "string" ? user.email_lc : null;
     return {

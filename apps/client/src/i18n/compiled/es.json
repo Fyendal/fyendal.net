@@ -69,6 +69,38 @@
       "value": "Guardando…"
     }
   ],
+  "account.badge.supporter.description": [
+    {
+      "type": 0,
+      "value": "Otorgada a los jugadores que apoyan a Fyendal cada mes en Ko-fi."
+    }
+  ],
+  "account.badge.supporter.hint": [
+    {
+      "type": 0,
+      "value": "Apoya a Fyendal cada mes en "
+    },
+    {
+      "type": 8,
+      "value": "link",
+      "children": [
+        {
+          "type": 0,
+          "value": "Ko-fi"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": " con tu correo de recuperación para obtener una insignia especial de gema."
+    }
+  ],
+  "account.badge.supporter.name": [
+    {
+      "type": 0,
+      "value": "Gema de apoyo"
+    }
+  ],
   "account.badge.title": [
     {
       "type": 0,
@@ -142,7 +174,7 @@
   "account.email.description": [
     {
       "type": 0,
-      "value": "Una dirección opcional y confirmada que solo se usa para restablecer tu contraseña. Los demás jugadores nunca la ven."
+      "value": "Una dirección opcional y confirmada que se usa para restablecer tu contraseña y vincular tu apoyo en Ko-fi. Los demás jugadores nunca la ven."
     }
   ],
   "account.email.loading": [
@@ -33519,6 +33551,18 @@
     {
       "type": 0,
       "value": "Historial de partidas"
+    }
+  ],
+  "kofi.cta": [
+    {
+      "type": 0,
+      "value": "Ayuda a mantener Fyendal en marcha"
+    }
+  ],
+  "kofi.title": [
+    {
+      "type": 0,
+      "value": "Apoya a Fyendal en Ko-fi"
     }
   ],
   "landing.accountAccess": [

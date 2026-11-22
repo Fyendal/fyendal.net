@@ -9,9 +9,10 @@ export interface UserRow {
   pass_hash: string;
   created_at: number;
   early_tester: boolean;
-  selected_badge: "early-tester" | null;
+  selected_badge: "early-tester" | "supporter" | null;
   email: string | null;
   email_lc: string | null;
+  supporter_until: number | null;
 }
 
 export interface Queryable {
@@ -1238,6 +1239,24 @@ export const MIGRATIONS: Migration[] = [
     ALTER TABLE pending_bot_starts
       ADD CONSTRAINT pending_bot_starts_bot_check
       CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia', 'boltyn', 'ira-sage', 'aurora', 'dorinthea', 'fang'));`,
+  },
+  {
+    version: 73,
+    // Ko-fi payments for the supporter badge; `supporter_until` spares room loads a join.
+    sql: `CREATE TABLE kofi_subscription_payments (
+      transaction_id TEXT PRIMARY KEY,
+      email_lc TEXT NOT NULL,
+      paid_at BIGINT NOT NULL CHECK (paid_at >= 0),
+      tier_name TEXT
+    );
+    CREATE INDEX kofi_subscription_payments_email_lc_idx ON kofi_subscription_payments (email_lc);
+    CREATE INDEX kofi_subscription_payments_paid_at_idx ON kofi_subscription_payments (paid_at);
+    ALTER TABLE users ADD COLUMN supporter_until BIGINT;
+    ALTER TABLE users DROP CONSTRAINT users_selected_badge_entitlement;
+    ALTER TABLE users ADD CONSTRAINT users_selected_badge_entitlement CHECK (
+      selected_badge IS NULL OR selected_badge = 'supporter'
+      OR (selected_badge = 'early-tester' AND early_tester = TRUE)
+    );`,
   },
 ];
 

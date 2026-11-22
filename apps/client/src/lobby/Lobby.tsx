@@ -8,6 +8,7 @@ import { Auth } from "../auth/AuthCard.js";
 import type { Format } from "@fyendal/shared";
 import { SiteFooter } from "../legal/SiteFooter.js";
 import { LobbyHeader } from "./LobbyHeader.js";
+import { KofiLink } from "./KofiLink.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { LanguagePicker } from "../i18n/LanguagePicker.js";
 import { SocialMenuButton, UnreadMessageBadge } from "../social/MobileSocialControls.js";
@@ -297,6 +298,7 @@ export function Lobby() {
               <a href="https://discord.gg/DpTjVbfPVv" target="_blank" rel="noopener noreferrer">
                 {intl.formatMessage({ id: "lobby.discordCommunity" })}
               </a>
+              <KofiLink placement="menu" />
               <FullscreenButton placement="menu" onToggle={() => setShowMobileMore(false)} />
             </div>
             <div className="mobile-more-group">

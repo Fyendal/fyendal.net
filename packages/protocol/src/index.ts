@@ -430,12 +430,15 @@ export interface AccountExport {
     username: string;
     createdAt: number;
     earlyTester: boolean;
+    /** End of the Ko-fi supporter entitlement matched by recovery email. */
+    supporterUntil: number | null;
     selectedBadge: PlayerBadge | null;
     playmat: string | null;
     betaTester: boolean;
     email: string | null;
     pendingEmail: string | null;
   };
+  kofiPayments: Array<{ paidAt: number; tierName: string | null }>;
   decks: Array<{
     id: string;
     name: string;
@@ -618,8 +621,8 @@ const EMOTE_MESSAGES = new Set([
   "Oops!",
 ]);
 
-function playerBadge(value: unknown): value is PlayerBadge {
-  return value === "early-tester";
+export function isPlayerBadge(value: unknown): value is PlayerBadge {
+  return value === "early-tester" || value === "supporter";
 }
 
 function object(value: unknown): JsonObject | null {
@@ -1836,7 +1839,7 @@ function playerProfile(value: unknown): boolean {
   const profile = object(value);
   return !!profile && exactKeys(profile, ["username", "badge", "playmat"], ["username", "badge"])
     && string(profile.username, MAX_SHORT_TEXT, false)
-    && (profile.badge === null || playerBadge(profile.badge))
+    && (profile.badge === null || isPlayerBadge(profile.badge))
     && optional(profile.playmat, playmatRef);
 }
 
@@ -2810,6 +2813,41 @@ function nullableEmail(value: unknown): value is string | null {
   return value === null || string(value, EMAIL_MAX_LENGTH, false);
 }
 
+/** The fields Fyendal reads from a Ko-fi webhook's `data` JSON. */
+export interface KofiWebhook {
+  verificationToken: string;
+  type: string;
+  isSubscriptionPayment: boolean;
+  transactionId: string;
+  timestamp: string;
+  email: string;
+  tierName: string | null;
+}
+
+/** Ko-fi adds payload fields over time, so unknown keys are ignored. */
+export const decodeKofiWebhook: Decoder<KofiWebhook> = (value) => {
+  const data = object(value);
+  if (!data) return null;
+  const tierName = data.tier_name ?? null;
+  return string(data.verification_token, MAX_SHORT_TEXT, false)
+    && string(data.type, MAX_SHORT_TEXT, false)
+    && typeof data.is_subscription_payment === "boolean"
+    && string(data.kofi_transaction_id, MAX_SHORT_TEXT, false)
+    && string(data.timestamp, 64, false)
+    && string(data.email, EMAIL_MAX_LENGTH)
+    && (tierName === null || string(tierName, MAX_SHORT_TEXT))
+    ? {
+      verificationToken: data.verification_token,
+      type: data.type,
+      isSubscriptionPayment: data.is_subscription_payment,
+      transactionId: data.kofi_transaction_id,
+      timestamp: data.timestamp,
+      email: data.email,
+      tierName: tierName || null,
+    }
+    : null;
+};
+
 export const decodeAccountEmailResponse: Decoder<AccountEmailResponse> = (value) => {
   const data = object(value);
   return !!data
@@ -2835,9 +2873,9 @@ export const decodeAccountCosmeticsResponse: Decoder<AccountCosmeticsResponse> =
   return !!data
     && exactKeys(data, ["ok", "availableBadges", "selectedBadge", "playmat"])
     && data.ok === true
-    && array(data.availableBadges, playerBadge, 32)
+    && array(data.availableBadges, isPlayerBadge, 32)
     && new Set(data.availableBadges).size === data.availableBadges.length
-    && (data.selectedBadge === null || playerBadge(data.selectedBadge))
+    && (data.selectedBadge === null || isPlayerBadge(data.selectedBadge))
     && (data.selectedBadge === null || data.availableBadges.includes(data.selectedBadge))
     && (data.playmat === null || playmatRef(data.playmat))
     ? value as AccountCosmeticsResponse
@@ -3152,16 +3190,18 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
       exported,
       ["exportedAt", "account", "decks", "deckPlays", "rooms", "matchmaking", "bugReports",
         "playerReports", "gameDays", "achievements", "replays", "matches", "heroRecords", "matchupRecords",
-        "friends", "friendRequests", "friendMessages", "leagues"],
+        "friends", "friendRequests", "friendMessages", "leagues", "kofiPayments"],
     ) && !!account
-    && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge", "playmat", "betaTester", "email", "pendingEmail"])
+    && exactKeys(account, ["username", "createdAt", "earlyTester", "supporterUntil", "selectedBadge", "playmat", "betaTester", "email", "pendingEmail"])
     && (account.playmat === null || playmatRef(account.playmat))
     && typeof account.betaTester === "boolean"
     && nullableEmail(account.email) && nullableEmail(account.pendingEmail)
     && string(exported.exportedAt, 64, false) && string(account.username, MAX_SHORT_TEXT, false)
     && nonNegativeInteger(account.createdAt) && typeof account.earlyTester === "boolean"
-    && (account.selectedBadge === null || playerBadge(account.selectedBadge))
-    && (account.selectedBadge === null || account.earlyTester === true)
+    && (account.selectedBadge === null || isPlayerBadge(account.selectedBadge))
+    && (account.supporterUntil === null || nonNegativeInteger(account.supporterUntil))
+    && (account.selectedBadge !== "early-tester" || account.earlyTester === true)
+    && (account.selectedBadge !== "supporter" || account.supporterUntil !== null)
     && array(exported.decks, (item): item is AccountExport["decks"][number] => exportDeck(item), MAX_DECKS)
     && array(exported.deckPlays, (item): item is DeckPlay => {
       const play = object(item);
@@ -3185,7 +3225,13 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
     }, MAX_SOCIAL_ITEMS)
     && array(exported.friendRequests, friendRequestSummary, MAX_SOCIAL_ITEMS)
     && array(exported.friendMessages, chatMessage, MAX_SOCIAL_ITEMS)
-    && array(exported.leagues, exportLeague, MAX_LEAGUES);
+    && array(exported.leagues, exportLeague, MAX_LEAGUES)
+    && array(exported.kofiPayments, (item): item is AccountExport["kofiPayments"][number] => {
+      const payment = object(item);
+      return !!payment && exactKeys(payment, ["paidAt", "tierName"])
+        && nonNegativeInteger(payment.paidAt)
+        && (payment.tierName === null || string(payment.tierName, MAX_SHORT_TEXT, false));
+    }, MAX_ROOMS);
   return valid ? value as AccountExportResponse : null;
 };
 

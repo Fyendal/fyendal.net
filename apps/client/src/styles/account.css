@@ -49,6 +49,8 @@
   border-radius: 6px;
 }
 .account-badge-current .account-badge-art { justify-self: center; }
+.account-badge-hint { margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.45; }
+.account-badge-hint a { color: var(--gold); }
 
 .account-badge-modal .modal-surface-description { font-size: 14px; }
 .account-badge-preview {

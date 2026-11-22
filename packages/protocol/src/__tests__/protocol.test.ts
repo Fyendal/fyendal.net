@@ -1671,7 +1671,7 @@ describe("replays and HTTP responses", () => {
       export: {
         exportedAt: "2026-01-01T00:00:00.000Z",
         account: {
-          username: "alice", createdAt: 1, earlyTester: true, selectedBadge: "early-tester", playmat: "monarch",
+          username: "alice", createdAt: 1, earlyTester: true, supporterUntil: null, selectedBadge: "early-tester", playmat: "monarch",
           betaTester: false, email: null, pendingEmail: null,
         },
         decks: [{
@@ -1775,6 +1775,7 @@ describe("replays and HTTP responses", () => {
         friendRequests: [{ username: "Carol", direction: "outgoing", createdAt: 2 }],
         friendMessages: [{ id: "1", friendUsername: "Bob", senderUsername: "alice", text: "hello", sentAt: 3, readAt: null }],
         leagues: [],
+        kofiPayments: [{ paidAt: 3, tierName: "Monthly" }],
       },
     })).not.toBeNull();
     const replaySummary = {

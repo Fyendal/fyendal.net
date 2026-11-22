@@ -1029,7 +1029,7 @@ export type PlayerReportReason =
 
 /** Cosmetic badge selected for public display. Entitlements are private
  * account data; this field exposes only the single active choice. */
-export type PlayerBadge = "early-tester";
+export type PlayerBadge = "early-tester" | "supporter";
 
 /** Public account presentation for one player in an active game. */
 export interface PlayerProfileView {

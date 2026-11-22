@@ -37,6 +37,7 @@ services:
       EMAIL_PROVIDER: ${EMAIL_PROVIDER:-none}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       EMAIL_FROM: ${EMAIL_FROM:-}
+      KOFI_VERIFICATION_TOKEN: ${KOFI_VERIFICATION_TOKEN:-}
       PORT: 8080
     depends_on:
       db:

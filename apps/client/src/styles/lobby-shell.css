@@ -166,6 +166,37 @@
 }
 .topbar-icon-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .topbar-icon-link svg { width: 23px; height: 23px; fill: currentColor; }
+/* Ko-fi is the bar's one coloured control so support reads apart from the utility icons. */
+.topbar-kofi-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 10px 0 4px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  font: 700 15px/1 var(--font-lobby-ui);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.topbar-kofi-link .kofi-link-text {
+  background: linear-gradient(90deg, #8fe0cc, #c7a6ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.topbar-kofi-link:hover,
+.topbar-kofi-link:focus-visible { border-color: #6d5a96; background: #ffffff08; }
+.topbar-kofi-link:focus-visible { outline: 2px solid #b48cf0; outline-offset: 2px; }
+.topbar-kofi-link img { flex: 0 0 auto; width: 28px; height: 28px; filter: drop-shadow(0 0 5px #8fe0cc55); }
+.kofi-link-heart { font-size: 13px; }
+@media (max-width: 899px) {
+  .topbar-kofi-link { width: 38px; justify-content: center; padding: 0; }
+  .topbar-kofi-link .kofi-link-text,
+  .topbar-kofi-link .kofi-link-heart { display: none; }
+}
+.mobile-more-group > .mobile-more-kofi { gap: 10px; color: #e6d6ff; }
+.mobile-more-kofi .kofi-link-text { flex: 1 1 auto; }
 .topbar-fullscreen-button { padding: 0; clip-path: none; }
 .topbar-fullscreen-button svg { fill: none; }
 .lobby-topbar .topbar-tools > .topbar-fullscreen-button { min-height: 38px; padding: 0; }
