@@ -92,7 +92,27 @@
     },
     {
       "type": 0,
-      "value": " with your recovery email to earn a special gem badge."
+      "value": " to earn a special gem badge."
+    }
+  ],
+  "account.badge.supporter.locked": [
+    {
+      "type": 0,
+      "value": "Unlocks with a monthly "
+    },
+    {
+      "type": 8,
+      "value": "link",
+      "children": [
+        {
+          "type": 0,
+          "value": "Ko-fi"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": " membership. Your Ko-fi email must match your recovery email."
     }
   ],
   "account.badge.supporter.name": [

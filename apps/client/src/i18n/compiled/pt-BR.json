@@ -92,7 +92,27 @@
     },
     {
       "type": 0,
-      "value": " com seu e-mail de recuperação para ganhar um emblema especial de gema."
+      "value": " para ganhar um emblema especial de gema."
+    }
+  ],
+  "account.badge.supporter.locked": [
+    {
+      "type": 0,
+      "value": "Desbloqueado com uma assinatura mensal no "
+    },
+    {
+      "type": 8,
+      "value": "link",
+      "children": [
+        {
+          "type": 0,
+          "value": "Ko-fi"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": ". Seu e-mail do Ko-fi precisa ser igual ao seu e-mail de recuperação."
     }
   ],
   "account.badge.supporter.name": [

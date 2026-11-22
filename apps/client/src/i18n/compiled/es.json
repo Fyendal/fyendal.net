@@ -92,7 +92,27 @@
     },
     {
       "type": 0,
-      "value": " con tu correo de recuperación para obtener una insignia especial de gema."
+      "value": " para obtener una insignia especial de gema."
+    }
+  ],
+  "account.badge.supporter.locked": [
+    {
+      "type": 0,
+      "value": "Se desbloquea con una membresía mensual en "
+    },
+    {
+      "type": 8,
+      "value": "link",
+      "children": [
+        {
+          "type": 0,
+          "value": "Ko-fi"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": ". Tu correo de Ko-fi debe coincidir con tu correo de recuperación."
     }
   ],
   "account.badge.supporter.name": [

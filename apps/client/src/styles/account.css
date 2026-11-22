@@ -103,6 +103,11 @@
 .account-badge-picker:disabled .account-badge-option { cursor: default; }
 .account-badge-check { color: var(--gold); font-size: 16px; visibility: hidden; }
 .account-badge-option.selected .account-badge-check { visibility: visible; }
+.account-badge-option.locked { border-style: dashed; cursor: default; }
+.account-badge-option.locked:hover { border-color: var(--border-subtle); background: none; }
+.account-badge-option.locked .account-badge-art { filter: grayscale(.85); opacity: .55; }
+.account-badge-option.locked a { color: var(--gold); }
+.account-badge-lock { color: var(--text-muted); font-size: 15px; }
 .account-badge-modal .account-feedback { margin-top: 12px; }
 .account-badge-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
 .account-badge-actions button { min-height: 40px; padding: 8px 18px; }

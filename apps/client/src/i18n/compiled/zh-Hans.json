@@ -78,7 +78,7 @@
   "account.badge.supporter.hint": [
     {
       "type": 0,
-      "value": "使用你的找回邮箱每月在 "
+      "value": "每月在 "
     },
     {
       "type": 8,
@@ -93,6 +93,26 @@
     {
       "type": 0,
       "value": " 上支持 Fyendal，即可获得一枚特别的宝石徽章。"
+    }
+  ],
+  "account.badge.supporter.locked": [
+    {
+      "type": 0,
+      "value": "通过 "
+    },
+    {
+      "type": 8,
+      "value": "link",
+      "children": [
+        {
+          "type": 0,
+          "value": "Ko-fi"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": " 每月会员解锁。你的 Ko-fi 邮箱必须与找回邮箱一致。"
     }
   ],
   "account.badge.supporter.name": [

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { PlayerBadge } from "@fyendal/shared";
 import { useIntl } from "react-intl";
 import { UiIcon } from "../components/UiIcon.js";
@@ -23,11 +24,14 @@ export function BadgePicker({
   selectedBadge,
   disabled = false,
   onSelect,
+  lockedBadges = [],
 }: {
   availableBadges: readonly PlayerBadge[];
   selectedBadge: PlayerBadge | null;
   disabled?: boolean;
   onSelect: (badge: PlayerBadge | null) => void;
+  /** Unearned badges shown with how to earn them; never selectable. */
+  lockedBadges?: ReadonlyArray<{ badge: PlayerBadge; requirement: ReactNode }>;
 }) {
   const intl = useIntl();
   return (
@@ -54,6 +58,16 @@ export function BadgePicker({
           </label>
         );
       })}
+      {lockedBadges.map(({ badge, requirement }) => (
+        <div className="account-badge-option locked" key={badge}>
+          <BadgeArt badge={badge} size={32} />
+          <span className="account-badge-copy">
+            <strong>{intl.formatMessage({ id: PLAYER_BADGE_DETAILS[badge].nameMessageId })}</strong>
+            <span>{requirement}</span>
+          </span>
+          <UiIcon name="lock" className="account-badge-lock" />
+        </div>
+      ))}
     </fieldset>
   );
 }

@@ -68,7 +68,11 @@
 .version-update-markdown {
   max-height: min(48vh, 420px);
   overflow: auto;
-  padding: 20px 4px 4px;
+  /* Overlay scrollbars sit on top of content, so reserve room on the right. */
+  padding: 20px 14px 4px 4px;
+  scrollbar-gutter: stable;
+  scrollbar-color: #6c512c transparent;
+  scrollbar-width: thin;
   color: var(--text-primary);
   font-size: 15px;
   line-height: 1.65;
