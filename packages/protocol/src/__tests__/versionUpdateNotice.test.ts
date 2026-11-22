@@ -29,13 +29,25 @@ describe("version update notice decoding", () => {
 describe("version update image sources", () => {
   it("accepts client screenshots with their encoded size", () => {
     expect(decodeVersionUpdateImageSource("/updates/2026-10-18/deck-grid.1280x720.webp"))
-      .toEqual({ kind: "screenshot", src: "/updates/2026-10-18/deck-grid.1280x720.webp", width: 1280, height: 720 });
+      .toEqual({
+        kind: "screenshot", src: "/updates/2026-10-18/deck-grid.1280x720.webp", width: 1280, height: 720,
+        displayWidth: null,
+      });
     expect(decodeVersionUpdateImageSource("/updates/v2/mobile.390x844.png")?.kind).toBe("screenshot");
   });
   it("accepts Fabrary card printings", () => {
     expect(decodeVersionUpdateImageSource("https://content.fabrary.net/cards/ROS254-MV.webp"))
-      .toEqual({ kind: "card", src: "https://content.fabrary.net/cards/ROS254-MV.webp", width: 450, height: 628 });
+      .toEqual({
+        kind: "card", src: "https://content.fabrary.net/cards/ROS254-MV.webp", width: 450, height: 628,
+        displayWidth: null,
+      });
     expect(decodeVersionUpdateImageSource("https://content.fabrary.net/cards/GEM119_BACK.webp")?.kind).toBe("card");
+  });
+  it("reads a display width from a #w= fragment and strips it from the source", () => {
+    expect(decodeVersionUpdateImageSource("/updates/1-6/sandbox.840x1012.webp#w=360"))
+      .toEqual({ kind: "screenshot", src: "/updates/1-6/sandbox.840x1012.webp", width: 840, height: 1012, displayWidth: 360 });
+    expect(decodeVersionUpdateImageSource("https://content.fabrary.net/cards/WTR001.webp#w=120"))
+      .toMatchObject({ kind: "card", src: "https://content.fabrary.net/cards/WTR001.webp", displayWidth: 120 });
   });
   it.each([
     undefined, "", "/updates/release/shot.webp", "/updates/release/shot.0x720.webp",
@@ -46,6 +58,9 @@ describe("version update image sources", () => {
     "https://example.com/updates/release/shot.1280x720.webp", "data:image/png;base64,AAAA",
     "http://content.fabrary.net/cards/WTR001.webp", "https://content.fabrary.net/heroes/dash.webp",
     "https://content.fabrary.net/cards/WTR001.png", "https://content.fabrary.net.evil.example/cards/WTR001.webp",
+    "/updates/release/shot.1280x720.webp#", "/updates/release/shot.1280x720.webp#w=30",
+    "/updates/release/shot.1280x720.webp#w=2001", "/updates/release/shot.1280x720.webp#w=50%",
+    "/updates/release/shot.1280x720.webp#h=200", "/updates/release/shot.1280x720.webp#w=360#w=400",
   ])("rejects %j", (src) => {
     expect(decodeVersionUpdateImageSource(src)).toBeNull();
   });

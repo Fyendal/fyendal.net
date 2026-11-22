@@ -144,6 +144,7 @@
 .version-update-figure-screenshot .version-update-image {
   display: block;
   width: 100%;
+  max-width: 100%;
   height: auto;
   border: 1px solid #4d3a23;
   border-radius: 6px;
@@ -152,6 +153,7 @@
 .version-update-figure-card .version-update-image {
   display: block;
   width: min(180px, 60%);
+  max-width: 100%;
   height: auto;
   border-radius: 4.5%;
 }

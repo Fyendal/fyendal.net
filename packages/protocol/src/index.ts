@@ -123,6 +123,8 @@ export interface VersionUpdateImage {
   src: string;
   width: number;
   height: number;
+  /** CSS width from a `#w=<px>` fragment; null keeps the default size. */
+  displayWidth: number | null;
 }
 
 const VERSION_UPDATE_SCREENSHOT =
@@ -133,17 +135,30 @@ const MAX_VERSION_UPDATE_IMAGE_SIDE = 4096;
 const CARD_IMAGE_WIDTH = 450;
 const CARD_IMAGE_HEIGHT = 628;
 
+const VERSION_UPDATE_DISPLAY_WIDTH = /^w=([1-9]\d{1,3})$/;
+const MIN_VERSION_UPDATE_DISPLAY_WIDTH = 40;
+const MAX_VERSION_UPDATE_DISPLAY_WIDTH = 2000;
+
 export function decodeVersionUpdateImageSource(value: unknown): VersionUpdateImage | null {
   if (!string(value, 300, false)) return null;
-  if (VERSION_UPDATE_CARD.test(value)) {
-    return { kind: "card", src: value, width: CARD_IMAGE_WIDTH, height: CARD_IMAGE_HEIGHT };
+  const hash = value.indexOf("#");
+  const src = hash === -1 ? value : value.slice(0, hash);
+  let displayWidth: number | null = null;
+  if (hash !== -1) {
+    const fragment = VERSION_UPDATE_DISPLAY_WIDTH.exec(value.slice(hash + 1));
+    if (!fragment) return null;
+    displayWidth = Number(fragment[1]);
+    if (displayWidth < MIN_VERSION_UPDATE_DISPLAY_WIDTH || displayWidth > MAX_VERSION_UPDATE_DISPLAY_WIDTH) return null;
   }
-  const screenshot = VERSION_UPDATE_SCREENSHOT.exec(value);
+  if (VERSION_UPDATE_CARD.test(src)) {
+    return { kind: "card", src, width: CARD_IMAGE_WIDTH, height: CARD_IMAGE_HEIGHT, displayWidth };
+  }
+  const screenshot = VERSION_UPDATE_SCREENSHOT.exec(src);
   if (!screenshot) return null;
   const width = Number(screenshot[1]);
   const height = Number(screenshot[2]);
   if (width > MAX_VERSION_UPDATE_IMAGE_SIDE || height > MAX_VERSION_UPDATE_IMAGE_SIDE) return null;
-  return { kind: "screenshot", src: value, width, height };
+  return { kind: "screenshot", src, width, height, displayWidth };
 }
 
 export const MAX_GLOBAL_NOTICE_LENGTH = 1_000;

@@ -47,6 +47,7 @@ function VersionUpdateImageFigure({ src, alt, title }: { src: unknown; alt?: str
       alt={label}
       width={image.width}
       height={image.height}
+      style={image.displayWidth === null ? undefined : { width: image.displayWidth }}
       loading="lazy"
       decoding="async"
       onError={() => setFailed(true)}
