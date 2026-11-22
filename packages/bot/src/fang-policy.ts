@@ -441,6 +441,17 @@ const RESPONSE_LOSS_WEIGHT: Record<FangMatchup["stance"], number> = {
   defensive: 1,
 };
 
+const isValiantDynamo = (card: CardView, input: BotPolicyInput): boolean =>
+  named(input.cards[card.cardId]) === "valiant dynamo";
+
+/** Both Veins swinging next turn repairs a fresh Dynamo in the end phase. */
+function veinsRefreshDynamo(card: CardView, input: BotPolicyInput): boolean {
+  const veins = input.view.players[input.seat].weapons.filter((weapon) =>
+    named(input.cards[weapon.cardId]) === "obsidian fire vein"
+  ).length;
+  return isValiantDynamo(card, input) && Number(card.defCounters ?? 0) === 0 && veins >= 2;
+}
+
 function scoreDefend(
   intent: Extract<GameIntent, { kind: "defend" }>,
   input: BotPolicyInput,
@@ -450,6 +461,9 @@ function scoreDefend(
     ...fangResponse,
     cardOpportunity,
     responseLossWeight: RESPONSE_LOSS_WEIGHT[matchupFor(input).stance],
+    // A worn Dynamo defends for 0 and repairs only one counter per end phase.
+    canUseDefender: (card, observed) => !isValiantDynamo(card, observed) || Number(card.defCounters ?? 0) === 0,
+    equipmentUseIsFree: veinsRefreshDynamo,
   });
 }
 

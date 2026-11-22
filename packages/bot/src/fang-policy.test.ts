@@ -273,4 +273,50 @@ describe("Fang policy", () => {
     // 1+1 base, +1 Vein each, +4 Hunt's End, +3 Blistering Blade, +2 Affirm Loyalty.
     expect(lifeBefore - state.players[1]!.life).toBeGreaterThanOrEqual(13);
   });
+
+  it("room 07977C: adds a fresh Valiant Dynamo to a block because both Veins repair it", () => {
+    const state = createGame({
+      decklists: [fangDeck(decklists.rhinar), decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 7977,
+      startPlayer: 1,
+    });
+    state.turn = 2;
+    // Relentless Pursuit, Provoke, Pledge Fealty, Savor Bloodshed.
+    replaceHand(state, 0, ["HNT229", "HNT117", "HNT164", "HNT198"]);
+    state.players[0]!.life = 23;
+    state.players[1]!.life = 9;
+    const view = projectStateFor(state, 0);
+    const dynamo = view.players[0].equipment.legs!;
+    expect(cardData[dynamo.cardId]?.name).toBe("Valiant Dynamo");
+    view.phase = "defend";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+    view.chain = [{
+      attackingCard: { instanceId: 97_977, cardId: "DYN005", owner: 1 },
+      defendingCards: [],
+      attackValue: 11,
+      defenseValue: 0,
+      damage: 11,
+      resolved: false,
+      reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [] },
+      ...[...view.players[0].hand, dynamo].map((card) => ({
+        kind: "stage-defenders" as const,
+        instanceIds: [card.instanceId],
+      })),
+    ];
+    const chosenIds = (): readonly number[] => {
+      const intent = chooseFangIntent({ seat: 0, view, legal, cards: cardData });
+      return intent.kind === "stage-defenders" || intent.kind === "defend" ? intent.instanceIds : [];
+    };
+
+    expect(chosenIds()).toContain(dynamo.instanceId);
+
+    view.players[0].equipment.legs = { ...dynamo, defense: 0, defCounters: 1 };
+    expect(chosenIds()).not.toContain(dynamo.instanceId);
+  });
 });

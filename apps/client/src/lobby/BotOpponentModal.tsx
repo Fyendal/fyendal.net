@@ -49,7 +49,6 @@ const BOTS: Readonly<Record<Format, readonly BotOption[]>> = {
       deckId: "bot-aurora-tempest",
       deckType: "elemental",
       descriptionId: "lobby.bot.aurora.description",
-      isNew: true,
     },
     {
       id: "ira",

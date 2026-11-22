@@ -4,17 +4,14 @@ import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 import { BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY, BOT_SHOW_BANNED_STORAGE_KEY } from "../storage.js";
 import type { StoreState } from "../store/types.js";
 
-const botModalStore = vi.hoisted(() => ({ state: { betaTester: false } as StoreState }));
-
 vi.mock("../store.js", () => ({
-  useStore: (selector: (state: StoreState) => unknown) => selector(botModalStore.state),
+  useStore: (selector: (state: StoreState) => unknown) => selector({ betaTester: false } as StoreState),
 }));
 
 import { BotOpponentModal } from "./BotOpponentModal.js";
 
 afterEach(() => {
   vi.unstubAllGlobals();
-  botModalStore.state = { betaTester: false } as StoreState;
 });
 
 describe("BotOpponentModal", () => {
@@ -60,36 +57,17 @@ describe("BotOpponentModal", () => {
     expect(html.match(/aria-hidden="true"/g)).toHaveLength(1);
   });
 
-  it("lists beta-only Fang first for beta testers and hides it from other players", () => {
-    const hidden = renderToStaticMarkup(
-      <TestI18nProvider>
-        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
-      </TestI18nProvider>,
-    );
-    expect(hidden).not.toContain("Dracai of Blades");
-
-    botModalStore.state = { betaTester: true } as StoreState;
+  it("lists Fang first with the only New ribbon", () => {
     const html = renderToStaticMarkup(
       <TestI18nProvider>
         <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
       </TestI18nProvider>,
     );
-    expect(html).toContain("Dracai of Blades");
+
     expect(html).toContain("A tempo deck that swings daggers and collects Fealty to finish his quest.");
-    expect(html.indexOf("Dracai of Blades")).toBeLessThan(html.indexOf("Legacy of Tempest"));
-  });
-
-  it("lists Aurora first with the only New ribbon", () => {
-    const html = renderToStaticMarkup(
-      <TestI18nProvider>
-        <BotOpponentModal format="cc" onSelect={vi.fn()} onClose={vi.fn()} />
-      </TestI18nProvider>,
-    );
-
-    expect(html).toContain("Legacy of Tempest");
     expect(html.indexOf("Legacy of Tempest")).toBeLessThan(html.indexOf("Scarlet Revenger"));
     expect(html.match(/class="bot-new-ribbon"/g)).toHaveLength(1);
-    expect(html).toMatch(/class="bot-opponent-card" data-modal-initial-focus="">.*?<span class="bot-new-ribbon">New<\/span>/);
+    expect(html).toMatch(/class="bot-opponent-card" data-modal-initial-focus="">.*?<span class="bot-new-ribbon">New<\/span><strong class="bot-opponent-name">Fang<\/strong>/);
   });
 
   it("lists Dorinthea first in Silver Age with the only New ribbon", () => {
