@@ -187,6 +187,7 @@ describe("client storage keys", () => {
       warnLethalPass: true,
       motionPreference: "system",
       playabilityCuePreference: "glow",
+      hoverPreviewMode: "always",
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
@@ -206,6 +207,7 @@ describe("client storage keys", () => {
       warnLethalPass: false,
       motionPreference: "reduced",
       playabilityCuePreference: "high-contrast",
+      hoverPreviewMode: "shift",
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: true,
@@ -225,6 +227,7 @@ describe("client storage keys", () => {
       warnLethalPass: false,
       motionPreference: "reduced",
       playabilityCuePreference: "high-contrast",
+      hoverPreviewMode: "shift",
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: true,
@@ -233,6 +236,11 @@ describe("client storage keys", () => {
       priorityAlertMode: "always-vs-players",
       standingOrders: {},
     });
+  });
+
+  it("falls back to always previewing on hover for an unknown mode", () => {
+    const stored = JSON.stringify({ ...DEFAULT_GAME_SETTINGS, hoverPreviewMode: "never" });
+    expect(loadGameSettings({ getItem: () => stored }).hoverPreviewMode).toBe("always");
   });
 
   it("migrates version 2 settings with the default motion preference", () => {
@@ -254,6 +262,7 @@ describe("client storage keys", () => {
       warnLethalPass: true,
       motionPreference: "system",
       playabilityCuePreference: "glow",
+      hoverPreviewMode: "always",
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
@@ -284,6 +293,7 @@ describe("client storage keys", () => {
       warnLethalPass: true,
       motionPreference: "reduced",
       playabilityCuePreference: "glow",
+      hoverPreviewMode: "always",
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
@@ -316,6 +326,7 @@ describe("client storage keys", () => {
       warnLethalPass: true,
       motionPreference: "full",
       playabilityCuePreference: "glow",
+      hoverPreviewMode: "always",
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: false,
@@ -407,6 +418,7 @@ describe("client storage keys", () => {
       version: 11,
       warnLethalPass: true,
       cardDisplayPreference: "square",
+      hoverPreviewMode: "always",
       playmat: "leather",
       botPlaymat: "leather",
       optionHotkeys: false,

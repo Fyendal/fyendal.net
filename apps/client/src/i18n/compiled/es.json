@@ -39208,6 +39208,36 @@
       "value": "Deshacer la última acción"
     }
   ],
+  "settings.hoverPreview": [
+    {
+      "type": 0,
+      "value": "Vista previa al pasar el ratón"
+    }
+  ],
+  "settings.hoverPreview.always": [
+    {
+      "type": 0,
+      "value": "Siempre"
+    }
+  ],
+  "settings.hoverPreview.alwaysDescription": [
+    {
+      "type": 0,
+      "value": "Apuntar a una carta muestra su vista previa a tamaño grande."
+    }
+  ],
+  "settings.hoverPreview.shift": [
+    {
+      "type": 0,
+      "value": "Mantener Shift"
+    }
+  ],
+  "settings.hoverPreview.shiftDescription": [
+    {
+      "type": 0,
+      "value": "Mantén Shift mientras apuntas a una carta para ver su vista previa a tamaño grande."
+    }
+  ],
   "settings.interface": [
     {
       "type": 0,

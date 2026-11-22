@@ -34,6 +34,8 @@ function baseProps(): DialogProps {
     onMotionPreferenceChange: vi.fn(),
     playabilityCuePreference: "high-contrast",
     onPlayabilityCuePreferenceChange: vi.fn(),
+    hoverPreviewMode: "always",
+    onHoverPreviewModeChange: vi.fn(),
     soundEffectsEnabled: true,
     onSoundEffectsEnabledChange: vi.fn(),
     soundEffectsVolume: 35,

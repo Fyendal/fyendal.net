@@ -98,7 +98,7 @@ import { useMatSeam } from "./board/useMatSeam.js";
 import { resolvePlaymat, type PlaymatId } from "../playmats.js";
 import { PriorityArrivalFlash } from "./board/priorityArrival.js";
 import { useGameViewport } from "./board/useGameViewport.js";
-import { FINE_HOVER_QUERY, tapInspectsCards } from "./board/viewportQueries.js";
+import { canHoverCards, tapInspectsCards } from "./board/viewportQueries.js";
 import { useHudReserve } from "./board/useHudReserve.js";
 import { useFullscreen } from "../components/useFullscreen.js";
 import { FullscreenNudge } from "./FullscreenNudge.js";
@@ -320,6 +320,8 @@ export function GameBoard() {
   });
   const [preview, setPreview] = useState<BoardPreview | null>(null);
   const previewTargetRef = useRef<HTMLElement | null>(null);
+  // Last element under the pointer, so pressing Shift previews it without a mouse move.
+  const hoverPointerTargetRef = useRef<HTMLElement | null>(null);
   // Created cards show only once the pointer has rested on the card, so a
   // sweep across the board shows the cards alone; they mount at once so their
   // art is loaded by then.
@@ -360,6 +362,7 @@ export function GameBoard() {
     cardDisplayPreference,
     motionPreference,
     playabilityCuePreference,
+    hoverPreviewMode,
     priorityWindowMode,
     skipPlayConfirmation,
     warnLethalPass,
@@ -376,6 +379,7 @@ export function GameBoard() {
     updateCardDisplayPreference,
     updateMotionPreference,
     updatePlayabilityCuePreference,
+    updateHoverPreviewMode,
     updateSkipPlayConfirmation,
     updateWarnLethalPass,
     updateOptionHotkeys,
@@ -393,6 +397,29 @@ export function GameBoard() {
     sendPriorityMode,
     sendStandingOrders,
   });
+  const showHoverPreviewRef = useRef<(target: HTMLElement) => void>(() => {});
+  useEffect(() => {
+    if (hoverPreviewMode !== "shift") return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Shift" || event.repeat) return;
+      // Typing a capital in chat must not pop the card left under the pointer.
+      if ((event.target as Element | null)?.closest?.("input, textarea, select, [contenteditable='true']")) return;
+      const target = hoverPointerTargetRef.current;
+      if (target?.isConnected && canHoverCards()) showHoverPreviewRef.current(target);
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (event.key === "Shift") setPreview(null);
+    };
+    const onBlur = () => setPreview(null);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, [hoverPreviewMode]);
   const standingOrders = useStandingOrders({
     view: authoritativeView,
     seats: spectating || yourSeat === null ? [] : soloGame ? [orientationSeat, 1 - orientationSeat] : [orientationSeat],
@@ -1410,8 +1437,17 @@ export function GameBoard() {
   // Require mouse movement: animations can fire mouseover when a card moves
   // under a stationary pointer, including Dash I/O's changing deck top.
   const onHoverCard = (e: React.MouseEvent) => {
-    if (!window.matchMedia(FINE_HOVER_QUERY).matches) return;
+    if (!canHoverCards()) return;
     const target = e.target as HTMLElement;
+    hoverPointerTargetRef.current = target;
+    if (hoverPreviewMode === "shift" && !e.shiftKey) {
+      setPreview(null);
+      return;
+    }
+    showHoverPreview(target);
+  };
+
+  const showHoverPreview = (target: HTMLElement) => {
     // Counter icons have their own focused tooltip. Suppress the large card
     // preview while the pointer is on one so the two surfaces never collide.
     if (target.closest(".c-ovl, .pitch-focus-card")) {
@@ -1482,6 +1518,7 @@ export function GameBoard() {
       ...(created ? { created: { ids: created.ids, dock: created.beside ? layout.side : "below" } } : {}),
     });
   };
+  showHoverPreviewRef.current = showHoverPreview;
 
   // Touch screens have no hover preview. Tapping an inert card or holding any
   // card opens the full-size sheet; a short tap on an actionable card acts.
@@ -1624,7 +1661,10 @@ export function GameBoard() {
         if (next instanceof Node && previewTargetRef.current?.contains(next)) return;
         setPreview(null);
       }}
-      onMouseLeave={() => setPreview(null)}
+      onMouseLeave={() => {
+        hoverPointerTargetRef.current = null;
+        setPreview(null);
+      }}
       {...cardLongPressHandlers}
       onClickCapture={onTableClickCapture}
       onClick={onTableClick}
@@ -2101,6 +2141,8 @@ export function GameBoard() {
         openSettingsTab="playmat"
         playabilityCuePreference={playabilityCuePreference}
         onPlayabilityCuePreferenceChange={updatePlayabilityCuePreference}
+        hoverPreviewMode={hoverPreviewMode}
+        onHoverPreviewModeChange={updateHoverPreviewMode}
         soundEffectsEnabled={soundEffectsEnabled}
         onSoundEffectsEnabledChange={updateSoundEffectsEnabled}
         soundEffectsVolume={soundEffectsVolume}

@@ -5,6 +5,7 @@ import { ModalSurface } from "../components/ModalSurface.js";
 import { LanguagePicker } from "../i18n/LanguagePicker.js";
 import type {
   CardDisplayPreference,
+  HoverPreviewMode,
   MotionPreference,
   PlayabilityCuePreference,
   PriorityAlertMode,
@@ -13,6 +14,7 @@ import type {
 import type { PlaymatId } from "../playmats.js";
 import { ControlIcon } from "./gameControls.js";
 import { PlaymatPicker } from "./PlaymatPicker.js";
+import { canHoverCards } from "./board/viewportQueries.js";
 import { SegmentedControl, SettingRow } from "./settingsControls.js";
 
 export type SettingsTab = "gameplay" | "interface" | "playmat" | "sound" | "match";
@@ -41,6 +43,10 @@ const CARD_DISPLAY_CHOICES: readonly Choice<CardDisplayPreference>[] = [
 const PLAYABILITY_CUE_CHOICES: readonly Choice<PlayabilityCuePreference>[] = [
   { value: "glow", labelId: "settings.playableCards.glow", descriptionId: "settings.playableCards.glowDescription" },
   { value: "high-contrast", labelId: "settings.playableCards.highContrast", descriptionId: "settings.playableCards.highContrastDescription" },
+];
+const HOVER_PREVIEW_CHOICES: readonly Choice<HoverPreviewMode>[] = [
+  { value: "always", labelId: "settings.hoverPreview.always", descriptionId: "settings.hoverPreview.alwaysDescription" },
+  { value: "shift", labelId: "settings.hoverPreview.shift", descriptionId: "settings.hoverPreview.shiftDescription" },
 ];
 const MOTION_CHOICES: readonly Choice<MotionPreference>[] = [
   { value: "system", labelId: "settings.motion.default", descriptionId: "settings.motion.defaultDescription" },
@@ -161,6 +167,8 @@ export function GameSettingsDialog({
   onMotionPreferenceChange,
   playabilityCuePreference,
   onPlayabilityCuePreferenceChange,
+  hoverPreviewMode,
+  onHoverPreviewModeChange,
   soundEffectsEnabled,
   onSoundEffectsEnabledChange,
   soundEffectsVolume,
@@ -201,6 +209,8 @@ export function GameSettingsDialog({
   onMotionPreferenceChange: (preference: MotionPreference) => void;
   playabilityCuePreference: PlayabilityCuePreference;
   onPlayabilityCuePreferenceChange: (preference: PlayabilityCuePreference) => void;
+  hoverPreviewMode: HoverPreviewMode;
+  onHoverPreviewModeChange: (mode: HoverPreviewMode) => void;
   soundEffectsEnabled: boolean;
   onSoundEffectsEnabledChange: (enabled: boolean) => void;
   soundEffectsVolume: number;
@@ -342,6 +352,15 @@ export function GameSettingsDialog({
                 value={playabilityCuePreference}
                 onChange={onPlayabilityCuePreferenceChange}
               />
+              {canHoverCards() ? (
+                <ChoiceRow
+                  nameId="settings.hoverPreview"
+                  groupLabelId="settings.hoverPreview"
+                  choices={HOVER_PREVIEW_CHOICES}
+                  value={hoverPreviewMode}
+                  onChange={onHoverPreviewModeChange}
+                />
+              ) : null}
               <ChoiceRow
                 nameId="settings.animations"
                 groupLabelId="settings.animations.preference"

@@ -5,6 +5,7 @@ import {
   loadGameSettings,
   saveGameSettings,
   type CardDisplayPreference,
+  type HoverPreviewMode,
   type MotionPreference,
   type PlayabilityCuePreference,
   type PriorityAlertMode,
@@ -106,6 +107,13 @@ export function useGameSettings({
       return next;
     });
   };
+  const updateHoverPreviewMode = (hoverPreviewMode: HoverPreviewMode) => {
+    setSettings((current) => {
+      const next = { ...current, hoverPreviewMode };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
   const updateSoundEffectsEnabled = (soundEffectsEnabled: boolean) => {
     setSettings((current) => {
       const next = { ...current, soundEffectsEnabled };
@@ -166,6 +174,7 @@ export function useGameSettings({
     updateCardDisplayPreference,
     updateMotionPreference,
     updatePlayabilityCuePreference,
+    updateHoverPreviewMode,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
     updatePriorityAlertMode,

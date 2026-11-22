@@ -36489,6 +36489,36 @@
       "value": "撤销上一步操作"
     }
   ],
+  "settings.hoverPreview": [
+    {
+      "type": 0,
+      "value": "悬停卡牌预览"
+    }
+  ],
+  "settings.hoverPreview.always": [
+    {
+      "type": 0,
+      "value": "始终"
+    }
+  ],
+  "settings.hoverPreview.alwaysDescription": [
+    {
+      "type": 0,
+      "value": "指针指向卡牌时显示大图预览。"
+    }
+  ],
+  "settings.hoverPreview.shift": [
+    {
+      "type": 0,
+      "value": "按住 Shift"
+    }
+  ],
+  "settings.hoverPreview.shiftDescription": [
+    {
+      "type": 0,
+      "value": "指向卡牌时按住 Shift 键才显示大图预览。"
+    }
+  ],
   "settings.interface": [
     {
       "type": 0,

@@ -4,6 +4,7 @@ import type { EmoteMessage, GameLogViewEntry, UndoTarget } from "@fyendal/shared
 import { cardData } from "@fyendal/cards/client";
 import type {
   CardDisplayPreference,
+  HoverPreviewMode,
   MotionPreference,
   PlayabilityCuePreference,
   PriorityAlertMode,
@@ -197,6 +198,8 @@ export function SideRail({
   onMotionPreferenceChange,
   playabilityCuePreference,
   onPlayabilityCuePreferenceChange,
+  hoverPreviewMode,
+  onHoverPreviewModeChange,
   soundEffectsEnabled,
   onSoundEffectsEnabledChange,
   soundEffectsVolume,
@@ -286,6 +289,8 @@ export function SideRail({
   onMotionPreferenceChange: (preference: MotionPreference) => void;
   playabilityCuePreference: PlayabilityCuePreference;
   onPlayabilityCuePreferenceChange: (preference: PlayabilityCuePreference) => void;
+  hoverPreviewMode: HoverPreviewMode;
+  onHoverPreviewModeChange: (mode: HoverPreviewMode) => void;
   soundEffectsEnabled: boolean;
   onSoundEffectsEnabledChange: (enabled: boolean) => void;
   soundEffectsVolume: number;
@@ -693,6 +698,8 @@ export function SideRail({
           onMotionPreferenceChange={onMotionPreferenceChange}
           playabilityCuePreference={playabilityCuePreference}
           onPlayabilityCuePreferenceChange={onPlayabilityCuePreferenceChange}
+          hoverPreviewMode={hoverPreviewMode}
+          onHoverPreviewModeChange={onHoverPreviewModeChange}
           soundEffectsEnabled={soundEffectsEnabled}
           onSoundEffectsEnabledChange={onSoundEffectsEnabledChange}
           soundEffectsVolume={soundEffectsVolume}

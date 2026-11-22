@@ -38314,6 +38314,36 @@
       "value": "Undo last action"
     }
   ],
+  "settings.hoverPreview": [
+    {
+      "type": 0,
+      "value": "Card preview on hover"
+    }
+  ],
+  "settings.hoverPreview.always": [
+    {
+      "type": 0,
+      "value": "Always"
+    }
+  ],
+  "settings.hoverPreview.alwaysDescription": [
+    {
+      "type": 0,
+      "value": "Pointing at a card shows its full-size preview."
+    }
+  ],
+  "settings.hoverPreview.shift": [
+    {
+      "type": 0,
+      "value": "Hold Shift"
+    }
+  ],
+  "settings.hoverPreview.shiftDescription": [
+    {
+      "type": 0,
+      "value": "Hold Shift while pointing at a card to show its full-size preview."
+    }
+  ],
   "settings.interface": [
     {
       "type": 0,

@@ -19,7 +19,12 @@ export function isTouchBoardViewport(): boolean {
     || (matches(PHONE_LANDSCAPE_QUERY) && matches("(pointer: coarse)"));
 }
 
+/** Pointer can hover, so cards preview without a tap. */
+export function canHoverCards(): boolean {
+  return matches(FINE_HOVER_QUERY);
+}
+
 /** Without hover a tap inspects inert cards, even on layouts too large for phones. */
 export function tapInspectsCards(): boolean {
-  return isTouchBoardViewport() || !matches(FINE_HOVER_QUERY);
+  return isTouchBoardViewport() || !canHoverCards();
 }

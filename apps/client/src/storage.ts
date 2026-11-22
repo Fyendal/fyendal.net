@@ -586,6 +586,7 @@ export type CardDisplayPreference = "square" | "full";
 export type MotionPreference = "system" | "full" | "reduced";
 export type PriorityAlertMode = "unfocused" | "always-vs-players" | "always";
 export type PlayabilityCuePreference = "glow" | "high-contrast";
+export type HoverPreviewMode = "always" | "shift";
 
 /** Functional card key → `chooseHook` → engine option id; asking is absence. */
 export type StandingOrders = SeatStandingOrders;
@@ -660,6 +661,7 @@ export interface GameSettings {
   cardDisplayPreference: CardDisplayPreference;
   motionPreference: MotionPreference;
   playabilityCuePreference: PlayabilityCuePreference;
+  hoverPreviewMode: HoverPreviewMode;
   soundEffectsEnabled: boolean;
   soundEffectsVolume: number;
   priorityAlertMode: PriorityAlertMode;
@@ -680,6 +682,7 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   cardDisplayPreference: "square",
   motionPreference: "system",
   playabilityCuePreference: "glow",
+  hoverPreviewMode: "always",
   soundEffectsEnabled: true,
   soundEffectsVolume: 35,
   priorityAlertMode: "always",
@@ -789,6 +792,7 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
         : true,
       motionPreference,
       playabilityCuePreference,
+      hoverPreviewMode: record.hoverPreviewMode === "shift" ? "shift" : "always",
       soundEffectsEnabled: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10 || record.version === 11
         ? record.soundEffectsEnabled as boolean
         : true,

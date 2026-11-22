@@ -40114,6 +40114,36 @@
       "value": "Desfazer última ação"
     }
   ],
+  "settings.hoverPreview": [
+    {
+      "type": 0,
+      "value": "Prévia de carta ao passar o mouse"
+    }
+  ],
+  "settings.hoverPreview.always": [
+    {
+      "type": 0,
+      "value": "Sempre"
+    }
+  ],
+  "settings.hoverPreview.alwaysDescription": [
+    {
+      "type": 0,
+      "value": "Apontar para uma carta mostra a prévia em tamanho grande."
+    }
+  ],
+  "settings.hoverPreview.shift": [
+    {
+      "type": 0,
+      "value": "Segurar Shift"
+    }
+  ],
+  "settings.hoverPreview.shiftDescription": [
+    {
+      "type": 0,
+      "value": "Segure Shift enquanto aponta para uma carta para ver a prévia em tamanho grande."
+    }
+  ],
   "settings.interface": [
     {
       "type": 0,

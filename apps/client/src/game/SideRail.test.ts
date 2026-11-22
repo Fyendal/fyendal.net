@@ -65,6 +65,8 @@ function sideRailProps(
     onCardDisplayPreferenceChange: vi.fn(),
     playabilityCuePreference: "glow",
     onPlayabilityCuePreferenceChange: vi.fn(),
+    hoverPreviewMode: "always",
+    onHoverPreviewModeChange: vi.fn(),
     soundEffectsEnabled: true,
     onSoundEffectsEnabledChange: vi.fn(),
     soundEffectsVolume: 35,
