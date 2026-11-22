@@ -48,9 +48,9 @@ describe("HNT — Sound the Alarm", () => {
     const offered = g.state.players[0]!.deck.filter((card) =>
       g.state.pendingDecision?.options?.includes(String(card.instanceId))
     );
-    expect(offered.map((card) => cardData[card.cardId]!.cardType)).toEqual([
-      "defense-reaction",
-      "defense-reaction",
+    expect(offered.map((card) => cardData[card.cardId]!.types)).toEqual([
+      ["defense-reaction"],
+      ["defense-reaction"],
     ]);
     // the revealed hand stays on the decision, so undo back to it shows it again
     expect(revealedView.pendingDecision?.revealedCards?.map((card) => card.cardId).sort()).toEqual(
@@ -489,6 +489,26 @@ describe("HNT — marked heroes and daggers", () => {
     expect(g.state.players[0]!.flags.completedContractThisTurn).toBe(true);
   });
 
+  it("Defang the Dragon completes its Contract when Flick Knives hits a marked Fang", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["defang the dragon|1"],
+          deck: ["wrecker romp|3"],
+          weapons: ["kunai of retribution|0"],
+          equipment: { arms: "flick knives|0" },
+        },
+        { hero: "dorinthea", heroKey: "fang|0", hand: ["wounding blow|3", "wounding blow|3"] },
+      ],
+    });
+    g.state.players[1]!.hero.scriptState = { marked: 1 };
+
+    g.play("defang the dragon|1").blockWith("wounding blow|3", "wounding blow|3")
+      .activate("flick knives|0").chooseCard("kunai of retribution|0").settle().expectHandSize(0, 1);
+    expect(g.state.players[0]!.flags.completedContractThisTurn).toBe(true);
+  });
+
   it("War Cry of Bellona gives Raydn +2{p} for every attack this turn", () => {
     const g = scenario({
       seats: [
@@ -752,6 +772,31 @@ describe("HNT — marked heroes and daggers", () => {
       effect.label.includes("prevent next 1 damage")
     )).toBe(false);
     g.expectHandSize(0, 0);
+  });
+
+  it.each([false, true])("Throw Dagger draws only if damage is dealt and destroys the dagger afterward (Ward: %s)", (ward) => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 1,
+          weapons: ["kunai of retribution|0", "kunai of retribution|0"],
+          hand: ["throw dagger|3"],
+          deck: ["head jab|1", "head jab|1"],
+        },
+        { hero: "dorinthea", board: ward ? ["auric shards|1"] : [] },
+      ],
+    });
+    g.attackWithWeapon("kunai of retribution|0").blockWith().react("throw dagger|3", { settle: false })
+      .passPriority().passPriority();
+    if (ward) {
+      expect(g.state.pendingDecision?.chooseHook).toBe("ward");
+      expect(g.state.players[0]!.weapons).toHaveLength(2);
+      g.chooseOption("destroy");
+    }
+    expect(g.state.players[0]!.weapons).toHaveLength(1);
+    g.expectHandSize(0, ward ? 0 : 1);
+    if (!ward) g.expectLife(1, 19);
   });
 
   it("Throw Dagger cannot be played without an off-link dagger", () => {

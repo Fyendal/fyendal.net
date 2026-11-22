@@ -108,6 +108,41 @@ describe("Kayo policy", () => {
     expect(cardName(chooseKayoIntent(input(state)), state)).toBe("Unflinching Foothold");
   });
 
+  it("destroys Skera Strapping to survive lethal arcane damage", () => {
+    let state = createGame({
+      decklists: [
+        { heroId: precon("bot-kayo-sage")!.pool.heroId, ...kayoPresentationFor({ heroId: "SBZ001", weaponIds: [], equipment: {} }) },
+        decklists.dorinthea,
+      ],
+      cards: cardData, scripts, seed: 721, startPlayer: 1,
+    });
+    state.turn = 3;
+    const kayo = state.players[0]!;
+    kayo.life = 4;
+    // Kayo's +1{p} makes the pitched Run Roughshod a 6-power card.
+    kayo.pitch = [{ instanceId: state.nextInstanceId++, cardId: findPrinting("Run Roughshod", 3)!.id, owner: 0 }];
+    const blaze = state.players[1]!;
+    const bolt = { instanceId: state.nextInstanceId++, cardId: findPrinting("Voltic Bolt", 1)!.id, owner: 1 as const };
+    blaze.hand = [bolt];
+    blaze.resources = 2;
+    blaze.actionPoints = 1;
+    state.activePlayer = 1;
+    state.priorityPlayer = 1;
+    state = apply(state, 1, legalIntents(state, 1).find((intent) =>
+      intent.kind === "play-card" && intent.instanceId === bolt.instanceId
+    )!);
+    for (let step = 0; step < 20 && (state.stack.length > 0 || state.pendingDecision); step++) {
+      const seat = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      const intent = seat === 0
+        ? chooseKayoIntent(input(state))
+        : legalIntents(state, 1).find((candidate) => candidate.kind === "choose" && candidate.optionId === "opposing hero")
+          ?? opponentPass(state, 1);
+      state = apply(state, seat, intent);
+    }
+    expect(state.players[0]!.life).toBeGreaterThan(0);
+    expect(state.players[0]!.equipment.arms).toBeUndefined();
+  });
+
   it.each([2, 3])("discards pitch-%s Agile Windup on turn zero before arsenaling Bare Fangs", (pitch) => {
     let state = game([["Agile Windup", pitch], ["Bare Fangs", 1], ["Bear Hug", 3], ["Rough Up", 1]], 1);
     const first = chooseKayoIntentWithTrace(input(state));

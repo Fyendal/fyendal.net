@@ -6,6 +6,7 @@ import { ClientBotPolicy } from "./client-task.js";
 import { isAdvertisedBotIntent } from "./intents.js";
 import { chooseIraIntent, chooseIraIntentWithTrace } from "./ira-policy.js";
 import { iraPresentation, iraSagePresentationFor, kayoPresentationFor } from "./sideboard.js";
+import { hasType } from "@fyendal/shared";
 
 function iraDeck(): Decklist {
   const pool = precon("precon-asr")!.pool;
@@ -87,6 +88,37 @@ describe("Ira policy", () => {
     }
     expect(decisions).toBeGreaterThan(1);
     expect(state.chain.at(-1)?.defendingEquipment).toHaveLength(1);
+  });
+
+  it("attacks with a weapon instead of playing a hand card into a lethal Exertion", () => {
+    const state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9131,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.life = 1;
+    replaceHand(state, 0, ["ASR007", "ASR015", "ASR022"]);
+    state.players[0]!.board.push({
+      instanceId: state.nextInstanceId++,
+      cardId: "SLV035",
+      owner: 0,
+      creatorSeat: 1,
+    });
+
+    const intent = chooseIraIntent({
+      seat: 0,
+      state,
+      view: projectStateFor(state, 0),
+      legal: legalIntents(state, 0),
+      cards: cardData,
+    });
+    expect(intent).toMatchObject({
+      kind: "activate-ability",
+      sourceInstanceId: state.players[0]!.weapons[0]!.instanceId,
+    });
   });
 
   it("uses an exact three-damage attack to clear untapped Sawbones", () => {
@@ -400,7 +432,7 @@ describe("Ira policy", () => {
     });
     const view = projectStateFor(state, 0);
     const equipment = Object.values(view.players[0].equipment).find((card) =>
-      card && cardData[card.cardId]?.cardType === "equipment"
+      card && hasType(cardData[card.cardId], "equipment")
     )!;
     const handCard = view.players[0].hand[0]!;
     view.priorityPlayer = 0;
@@ -503,6 +535,32 @@ describe("Ira policy", () => {
     expect(legacyTarget).toBe("Untamed");
   });
 
+  it("keeps Legacy of Ikaru off Edge of Autumn when its pitch funds the next attack", () => {
+    let state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9104,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["SEA227", "ASR026"]);
+    state.players[0]!.resources = 1;
+    state.players[1]!.hand = [];
+    const edge = legalIntents(state, 0).find((intent) =>
+      intent.kind === "activate-ability" &&
+      state.players[0]!.weapons.some((weapon) => weapon.instanceId === intent.sourceInstanceId)
+    )!;
+    state = apply(state, 0, edge);
+    state = advanceUntil(state, (candidate) => candidate.pendingDecision?.kind === "attack-reaction");
+
+    const legacy = state.players[0]!.hand.find((card) => card.cardId === "ASR026")!;
+    const legal = legalIntents(state, 0);
+    expect(legal.some((intent) => intent.kind === "play-card" && intent.instanceId === legacy.instanceId)).toBe(true);
+    const reaction = chooseIraIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state });
+    expect(reaction.kind === "play-card" && reaction.instanceId === legacy.instanceId).toBe(false);
+  });
+
   it("turns an Edge opener into a red Seek Vengeance combo link", () => {
     let state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],
@@ -601,6 +659,48 @@ describe("Ira policy", () => {
     },
   );
 
+  it.each([
+    { name: "nothing left to fund", hand: [], floating: 1, expected: "no" },
+    { name: "an attack already paid for", hand: ["ASR010"], floating: 2, expected: "no" },
+    { name: "an attack only the resource can pay for", hand: ["ASR010"], floating: 1, expected: "yes" },
+  ])("answers $expected to Robe of Autumn's Fall with $name", ({ hand, floating, expected }) => {
+    let state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9105,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, hand);
+    replaceHand(state, 1, []);
+    state.players[0]!.arsenal = [];
+    state.players[0]!.resources = floating;
+    state.players[0]!.equipment.chest = {
+      instanceId: state.nextInstanceId++,
+      cardId: "ASR004",
+      owner: 0,
+    };
+    state.players[1]!.equipment = {};
+    state = apply(state, 0, {
+      kind: "activate-ability",
+      sourceInstanceId: state.players[0]!.weapons.find((weapon) => weapon.cardId === "ASR002")!.instanceId,
+      abilityIndex: 0,
+      pitchInstanceIds: [],
+    });
+    state = advanceUntil(state, (candidate) =>
+      /destroy robe of autumn's fall/i.test(candidate.pendingDecision?.prompt ?? "")
+    );
+
+    const intent = chooseIraIntent({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal: legalIntents(state, 0),
+      cards: cardData,
+    });
+    expect(intent).toMatchObject({ kind: "choose", optionId: expected });
+  });
+
   it("uses Razor Reflex in its attack-reaction window", () => {
     let state = createGame({
       decklists: [iraDeck(), decklists.dorinthea],
@@ -664,6 +764,89 @@ describe("Ira policy", () => {
     expect(intent.kind).toBe("activate-ability");
     if (intent.kind !== "activate-ability") return;
     expect(state.players[0]!.equipment.legs?.instanceId).toBe(intent.sourceInstanceId);
+  });
+
+  it("keeps Double Cross Strap when no action point remains for the attack it would fund", () => {
+    let state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9112,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.equipment.chest = { instanceId: state.nextInstanceId++, cardId: "SFA007", owner: 0 };
+    replaceHand(state, 0, ["ASR007", "ASR012", "SEA226"]);
+    replaceHand(state, 1, []);
+    state.players[0]!.resources = 2;
+    for (const cardId of ["ASR007", "ASR012"]) {
+      const attack = state.players[0]!.hand.find((card) => card.cardId === cardId)!;
+      state = apply(state, 0, { kind: "play-card", instanceId: attack.instanceId, pitchInstanceIds: [] });
+      state = advanceUntil(state, (candidate) =>
+        candidate.phase === "action" && candidate.chain.at(-1)?.resolved === true &&
+        candidate.chain.at(-1)?.attackingCard.cardId === cardId
+      );
+    }
+
+    const view = projectStateFor(state, 0);
+    expect(view.players[0].actionPoints).toBe(0);
+    expect(view.players[0].resources).toBe(1);
+    const strap = state.players[0]!.equipment.chest!.instanceId;
+    const destroyStrap = { kind: "activate-ability", sourceInstanceId: strap };
+    const legal = legalIntents(state, 0);
+    expect(legal).toContainEqual(expect.objectContaining(destroyStrap));
+
+    const intent = chooseIraIntent({ seat: 0, view, legal, cards: cardData });
+    expect(intent).not.toMatchObject(destroyStrap);
+  });
+
+  it("blocks lethal when Nerve Scalpel weakens the planned defense reaction", () => {
+    let state = createGame({
+      decklists: [iraDeck(), iraDeck()],
+      cards: cardData,
+      scripts,
+      seed: 9112,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["ASR015", "ASR026"]);
+    replaceHand(state, 1, ["ASR009", "ASR009", "ASR015", "ASR018"]);
+    state.players[1]!.life = 2;
+    state.players[1]!.equipment = {};
+    state.modifiers.push({
+      id: state.nextModifierId++,
+      sourceInstanceId: state.players[0]!.weapons[0]!.instanceId,
+      sourceCardId: "OUT005",
+      seat: 1,
+      scope: "until-end-of-turn",
+      defense: -1,
+      appliesToCardType: "reaction",
+      once: true,
+    });
+    const [torrent, pitch] = state.players[0]!.hand;
+    state = apply(state, 0, {
+      kind: "play-card",
+      instanceId: torrent!.instanceId,
+      pitchInstanceIds: [pitch!.instanceId],
+    });
+    state = advanceUntil(state, (candidate) => candidate.pendingDecision?.kind === "defend");
+    const sinkBelow = state.players[1]!.hand.find((card) => card.cardId === "ASR018")!;
+    expect(projectStateFor(state, 1).pendingDecision?.reactionDefense)
+      .toContainEqual({ instanceId: sinkBelow.instanceId, defense: 3 });
+
+    const settled = (current: typeof state) =>
+      current.winner != null || current.chain.length === 0 || current.chain.at(-1)!.resolved;
+    for (let step = 0; step < 40 && !settled(state); step++) {
+      const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      const legal = legalIntents(state, actor);
+      const intent = actor === 1
+        ? chooseIraIntent({ seat: 1, view: projectStateFor(state, 1), legal, cards: cardData })
+        : legal.find((candidate) => candidate.kind === "pass")!;
+      state = apply(state, actor, intent);
+    }
+    expect(settled(state)).toBe(true);
+    expect(state.winner).toBeNull();
+    expect(state.players[1]!.life).toBeGreaterThan(0);
   });
 
   it("preserves Snapdragon Scalers when an underblocked attack will get go again on hit", () => {
@@ -883,6 +1066,54 @@ describe("Ira policy", () => {
 
     expect(chooseIraIntent({ seat: 0, view, legal, cards: cardData }))
       .toEqual({ kind: "pass" });
+  });
+
+  it("covers an early on-hit draw from hand instead of Okana Scar Wraps", () => {
+    const state = createGame({
+      decklists: [iraDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9105,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["ASR012", "ASR023", "ASR009", "ASR007"]);
+    state.players[0]!.arsenal = [{ instanceId: state.nextInstanceId++, cardId: "ASR012", owner: 0, faceDown: true }];
+    const view = projectStateFor(state, 0);
+    const wraps = view.players[0].equipment.arms!;
+    expect(cardData[wraps.cardId]?.name).toBe("Okana Scar Wraps");
+    const [thorns, , kick, vengeance] = view.players[0].hand;
+    view.phase = "defend";
+    view.activePlayer = 1;
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defend", prompt: "Choose defenders" };
+    view.players[1].resources = 2;
+    view.chain = [{
+      attackingCard: { instanceId: 99_201, cardId: "AHA002", owner: 1 },
+      defendingCards: [],
+      attackValue: 5,
+      defenseValue: 0,
+      damage: 5,
+      goAgain: true,
+      resolved: false,
+      reactions: [],
+      onHitEffects: [
+        {
+          sourceCardId: "HVY097",
+          text: "Whenever a weapon attack you control hits, you may pay {r}. If you do, create a Vigor token.",
+        },
+        { sourceCardId: "MPW030", text: "When this hits, draw 1 card." },
+      ],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "defend", instanceIds: [] },
+      { kind: "defend", instanceIds: [kick!.instanceId] },
+      { kind: "defend", instanceIds: [kick!.instanceId, wraps.instanceId] },
+      { kind: "defend", instanceIds: [vengeance!.instanceId, thorns!.instanceId] },
+    ];
+
+    expect(chooseIraIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "defend", instanceIds: [vengeance!.instanceId, thorns!.instanceId] });
   });
 
   it("keeps an offensive starter instead of making a nonlethal partial block", () => {
@@ -1198,19 +1429,18 @@ describe("SAGE Ira policy", () => {
     const paws = state.players[0]!.equipment.legs!.instanceId;
     const shuko = state.players[0]!.equipment.arms!.instanceId;
     const activated: number[] = [];
-    while (!activated.includes(paws)) {
-      const activate = chooseIraIntent(input());
-      expect(activate.kind).toBe("activate-ability");
-      if (activate.kind !== "activate-ability") return;
-      expect([paws, shuko]).toContain(activate.sourceInstanceId);
-      activated.push(activate.sourceInstanceId);
-      state = advanceUntil(apply(state, 0, activate), (current) =>
+    let intent = chooseIraIntent(input());
+    while (intent.kind === "activate-ability") {
+      expect([paws, shuko]).toContain(intent.sourceInstanceId);
+      activated.push(intent.sourceInstanceId);
+      state = advanceUntil(apply(state, 0, intent), (current) =>
         current.priorityPlayer === 0 && current.stack.length === 0
       );
       if (activated.length > 2) throw new Error("Ira did not make a Crouching Tiger");
+      intent = chooseIraIntent(input());
     }
-
-    const tiger = chooseIraIntent(input());
+    expect(activated).toContain(paws);
+    const tiger = intent;
     expect(tiger.kind).toBe("play-from-zone");
     if (tiger.kind !== "play-from-zone") return;
     expect(cardData[state.players[0]!.banish.find((card) => card.instanceId === tiger.instanceId)!.cardId]!.name)
@@ -1223,6 +1453,66 @@ describe("SAGE Ira policy", () => {
     expect(combo.kind).toBe("play-card");
     if (combo.kind !== "play-card") return;
     expect(state.players[0]!.hand.find((card) => card.instanceId === combo.instanceId)?.cardId).toBe("MST182");
+  });
+
+  it("makes the Crouching Tiger with Pouncing Paws before spending Tearing Shuko", () => {
+    const state = createGame({
+      decklists: [sageIra(), kayo()],
+      cards: cardData, scripts, seed: 9304, startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.weapons = [];
+    state.players[0]!.equipment.arms!.defCounters = 1;
+    state.players[0]!.equipment.legs!.defCounters = 1;
+    state.players[0]!.resources = 2;
+    // Ira's second-attack bonus is already spent, so only the Shuko pump makes the tiger worth playing.
+    state.players[0]!.flags.attacksDeclaredThisTurn = 2;
+    replaceHand(state, 0, ["SEA228"]);
+    const paws = state.players[0]!.equipment.legs!.instanceId;
+
+    expect(chooseIraIntent({
+      seat: 0, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state,
+    })).toMatchObject({ kind: "activate-ability", sourceInstanceId: paws });
+  });
+
+  it("follows an already active Tearing Shuko with Pouncing Paws and the pumped Crouching Tiger", () => {
+    let state = createGame({
+      decklists: [sageIra(), kayo()],
+      cards: cardData, scripts, seed: 9305, startPlayer: 0,
+    });
+    state.turn = 2;
+    state.players[0]!.weapons = [];
+    state.players[0]!.equipment.arms!.defCounters = 1;
+    state.players[0]!.equipment.legs!.defCounters = 1;
+    state.players[0]!.resources = 2;
+    state.players[0]!.flags.attacksDeclaredThisTurn = 2;
+    replaceHand(state, 0, ["SEA228"]);
+    state.players[1]!.hand = [];
+    const shuko = state.players[0]!.equipment.arms!.instanceId;
+    state = advanceUntil(
+      apply(state, 0, { kind: "activate-ability", sourceInstanceId: shuko, pitchInstanceIds: [], pitchRequired: 0 }),
+      (current) => current.priorityPlayer === 0 && current.stack.length === 0,
+    );
+
+    const attacks: string[] = [];
+    const lifeBefore = state.players[1]!.life;
+    for (let step = 0; step < 60 && state.turn === 2; step++) {
+      const actor = (state.pendingDecision?.player ?? state.priorityPlayer) as 0 | 1;
+      const legal = legalIntents(state, actor);
+      const intent = actor === 0
+        ? chooseIraIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData, state })
+        : legal.find((candidate) => candidate.kind === "defend" && candidate.instanceIds.length === 0) ??
+          legal.find((candidate) => candidate.kind === "pass")!;
+      const before = state.chain.length;
+      state = apply(state, actor, intent);
+      const link = state.chain.at(-1);
+      if (state.chain.length > before && link) {
+        attacks.push(cardData[link.attackingCard.cardId]!.name);
+      }
+    }
+    expect(attacks).toEqual(["Crouching Tiger", "Sirens of Safe Harbor"]);
+    // The pumped tiger adds at least its +2 over Sirens of Safe Harbor alone.
+    expect(lifeBefore - state.players[1]!.life).toBeGreaterThanOrEqual(6);
   });
 
   it("converts a Scar hand through its Crouching Tiger equipment instead of pitching Pouncing Qi to Edge", () => {

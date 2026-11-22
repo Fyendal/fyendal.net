@@ -12,6 +12,15 @@ describe("RoomVersionGate", () => {
     expect(gate.accept("spectators", 4)).toBe(false);
   });
 
+  it("lets one repeated projection through when asked", () => {
+    const gate = new RoomVersionGate();
+    expect(gate.accept("prep-state", 2)).toBe(true);
+    gate.allowRepeat("prep-state");
+    expect(gate.accept("prep-state", 2)).toBe(true);
+    expect(gate.accept("prep-state", 2)).toBe(false);
+    expect(gate.accept("prep-state", 1)).toBe(false);
+  });
+
   it("can reset when a socket enters a different room", () => {
     const gate = new RoomVersionGate();
     expect(gate.accept("state", 10)).toBe(true);

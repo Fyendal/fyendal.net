@@ -13,21 +13,27 @@ export interface StandingOrderBoard {
 /** Derived from the view alone: the server answers set orders before the client sees them. */
 export function useStandingOrders({
   view,
-  viewerSeat,
+  seats,
   orders,
   updateStandingOrder,
 }: {
   /** Authoritative live view, never an optimistic projection. */
   view: GameView | null;
-  viewerSeat: number | null;
+  /** Seats whose permanents take orders; solo controls both. */
+  seats: readonly number[];
   orders: StandingOrders;
   updateStandingOrder: (key: string, update: StandingOrderUpdate) => void;
 }): StandingOrderBoard {
-  const cards = useMemo(
-    () => view && viewerSeat !== null
-      ? standingOrderCardModels(view, viewerSeat, orders)
-      : new Map<string, StandingOrderCardModel>(),
-    [orders, view, viewerSeat],
-  );
+  const seatsKey = seats.join(",");
+  const cards = useMemo(() => {
+    const models = new Map<string, StandingOrderCardModel>();
+    if (!view) return models;
+    for (const seat of seatsKey === "" ? [] : seatsKey.split(",").map(Number)) {
+      for (const [key, model] of standingOrderCardModels(view, seat, orders)) {
+        if (!models.has(key)) models.set(key, model);
+      }
+    }
+    return models;
+  }, [orders, view, seatsKey]);
   return { cards, onSetOrder: updateStandingOrder };
 }

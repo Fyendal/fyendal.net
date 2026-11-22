@@ -2,7 +2,7 @@
  {
   "id": "OLA001",
   "name": "Olympia",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first time each of your attacks wins a wager, create a Gold token.",
   "classes": [
    "warrior"
@@ -14,7 +14,7 @@
  {
   "id": "OLA002",
   "name": "Cintari Saber",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nWhenever Cintari Saber is defended by 1 or more attack action cards, it gains +1{p} until end of turn.",
   "attack": 2,
   "classes": [
@@ -29,7 +29,7 @@
  {
   "id": "OLA003",
   "name": "Parry Blade",
-  "cardType": "weapon",
+  "types": ["weapon", "equipment"],
   "text": "Once per Turn Action - {r}: Attack\nThis gets +2{d} while defending a weapon attack.\nBlade Break",
   "attack": 2,
   "defense": 0,
@@ -48,7 +48,7 @@
  {
   "id": "OLA004",
   "name": "Prized Galea",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Olympia Specialization\nAttack Reaction - {r}, destroy this: Target weapon attack you control wagers a Gold token with the defending hero.\nTemper",
   "defense": 2,
   "classes": [
@@ -66,7 +66,7 @@
  {
   "id": "OLA005",
   "name": "Vigor Girth",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Create a Vigor token. Go again\nBlade Break",
   "defense": 1,
   "classes": [
@@ -84,7 +84,7 @@
  {
   "id": "OLA006",
   "name": "Beckon Applause",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If you control an Agility token, this gets +1{d}.\nIf you control a Vigor token, this gets +1{d}.\nTemper",
   "defense": 0,
   "classes": [
@@ -101,7 +101,7 @@
  {
   "id": "OLA007",
   "name": "Flat Trackers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Create an Agility token. Go again\nBlade Break",
   "defense": 1,
   "classes": [
@@ -119,7 +119,7 @@
  {
   "id": "OLA008",
   "name": "Rising Energy",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've drawn a card this turn, this costs {r} less to play.",
   "pitch": 1,
   "cost": 2,
@@ -137,7 +137,7 @@
  {
   "id": "OLA009",
   "name": "Rising Speed",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've drawn a card this turn, this gets go again.",
   "pitch": 1,
   "cost": 2,
@@ -158,7 +158,7 @@
  {
   "id": "OLA010",
   "name": "Wage Agility",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a hero, you may wager an Agility token with them.",
   "pitch": 1,
   "cost": 3,
@@ -179,7 +179,7 @@
  {
   "id": "OLA011",
   "name": "Wage Vigor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a hero, you may wager a Vigor token with them.",
   "pitch": 1,
   "cost": 3,
@@ -200,7 +200,7 @@
  {
   "id": "OLA012",
   "name": "Agile Engagement",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target Warrior attack gets +3{p}. If it's defended by an attack action card, create an Agility token.",
   "pitch": 1,
   "cost": 1,
@@ -213,7 +213,7 @@
  {
   "id": "OLA013",
   "name": "Fatal Engagement",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Play this only if an attack action card is defending this chain link.\nTarget attack gets +5{p}.",
   "pitch": 1,
   "cost": 2,
@@ -226,7 +226,7 @@
  {
   "id": "OLA014",
   "name": "Take the Upper Hand",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Play this only if you've wagered this chain link.\nTarget attack gets +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -239,7 +239,7 @@
  {
   "id": "OLA015",
   "name": "Edge Ahead",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Warrior attack this turn gets +3{p} and \"When this attacks a hero, you may wager an Agility token with them.\"\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -255,7 +255,7 @@
  {
   "id": "OLA016",
   "name": "Engaged Swiftblade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Warrior attack this turn gets +3{p} and \"If this is defended by an attack action card, this gets Go again.\"\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -271,7 +271,7 @@
  {
   "id": "OLA017",
   "name": "Hold 'em",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Warrior attack this turn gets +3{p} and \"When this attacks a hero, you may wager a Vigor token with them.\"\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -287,7 +287,7 @@
  {
   "id": "OLA018",
   "name": "Lead with Speed",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Brute or Warrior attack this turn gets +3{p}.\nCreate an Agility token.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -304,7 +304,7 @@
  {
   "id": "OLA019",
   "name": "Edge Ahead",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Warrior attack this turn gets +2{p} and \"When this attacks a hero, you may wager an Agility token with them.\"\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -320,7 +320,7 @@
  {
   "id": "OLA020",
   "name": "Lead with Speed",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Brute or Warrior attack this turn gets +2{p}.\nCreate an Agility token.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -337,7 +337,7 @@
  {
   "id": "OLA021",
   "name": "Wage Agility",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a hero, you may wager an Agility token with them.",
   "pitch": 3,
   "cost": 3,
@@ -358,7 +358,7 @@
  {
   "id": "OLA022",
   "name": "Wage Vigor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a hero, you may wager a Vigor token with them.",
   "pitch": 3,
   "cost": 3,
@@ -379,7 +379,7 @@
  {
   "id": "OLA023",
   "name": "Agile Engagement",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target Warrior attack gets +1{p}. If it's defended by an attack action card, create an Agility token.",
   "pitch": 3,
   "cost": 1,
@@ -392,7 +392,7 @@
  {
   "id": "OLA024",
   "name": "Cut the Deck",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target Warrior attack gets +1{p}. If it's defended by an attack action card, draw a card, then put a card from your hand or arsenal on the bottom of your deck.",
   "pitch": 3,
   "cost": 1,
@@ -405,7 +405,7 @@
  {
   "id": "OLA025",
   "name": "Edge Ahead",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Warrior attack this turn gets +1{p} and \"When this attacks a hero, you may wager an Agility token with them.\"\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -421,7 +421,7 @@
  {
   "id": "OLA026",
   "name": "Engaged Swiftblade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Warrior attack this turn gets +1{p} and \"If this is defended by an attack action card, this gets Go again.\"\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -437,7 +437,7 @@
  {
   "id": "OLA027",
   "name": "Hold 'em",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Warrior attack this turn gets +1{p} and \"When this attacks a hero, you may wager a Vigor token with them.\"\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -454,7 +454,7 @@
  {
   "id": "OLA028",
   "name": "Agility",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then your next attack this turn gets go again.",
   "classes": [
    "generic"
@@ -467,7 +467,7 @@
  {
   "id": "OLA029",
   "name": "Vigor",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then gain {r}.",
   "classes": [
    "generic"
@@ -480,7 +480,7 @@
  {
   "id": "OLA030",
   "name": "Gold",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
   "classes": [
    "generic"

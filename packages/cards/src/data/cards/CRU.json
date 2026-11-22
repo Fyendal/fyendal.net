@@ -2,7 +2,7 @@
  {
   "id": "CRU000",
   "name": "Arknight Shard",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "Legendary Viserai Specialization\nWhen you pitch Arknight Shard, create a Runechant token.",
   "pitch": 3,
   "classes": [
@@ -20,7 +20,7 @@
  {
   "id": "CRU001",
   "name": "Rhinar, Reckless Rampage",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
   "classes": [
    "brute"
@@ -35,7 +35,7 @@
  {
   "id": "CRU002",
   "name": "Kayo, Berserker Runt",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play an attack action card with base power 6 or more {p}, roll a 6 sided die. On;\n\n\n1 to 4 - Halve the attack's base {p}, rounded down.\n\n\n5 to 6 - Double the attack's base {p}.",
   "classes": [
    "brute"
@@ -47,7 +47,7 @@
  {
   "id": "CRU003",
   "name": "Romping Club",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nOnce per Turn Effect - When you discard a card with 6 or more {p}, Romping Club gains +1{p} until end of turn.",
   "attack": 4,
   "classes": [
@@ -62,7 +62,7 @@
  {
   "id": "CRU004",
   "name": "Mandible Claw",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nIf you have discarded a card with 6 or more {p} this turn, this card's attacks go again.",
   "attack": 3,
   "classes": [
@@ -77,7 +77,7 @@
  {
   "id": "CRU005",
   "name": "Mandible Claw",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nIf you have discarded a card with 6 or more {p} this turn, this card's attacks go again.",
   "attack": 3,
   "classes": [
@@ -92,7 +92,7 @@
  {
   "id": "CRU006",
   "name": "Skullhorn",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy Skullhorn: Draw a card then discard a random card. Go again\nArcane Barrier 2",
   "defense": 0,
   "classes": [
@@ -109,7 +109,7 @@
  {
   "id": "CRU007",
   "name": "Beast Within",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Beast Within is put into a graveyard from anywhere other than the combat chain, banish the top card of your deck and lose 1{h}. If it has 6 or more {p}, put it into your hand, otherwise, repeat this process.",
   "pitch": 2,
   "cost": 3,
@@ -126,7 +126,7 @@
  {
   "id": "CRU008",
   "name": "Massacre",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Massacre, if you have discarded a card with 6 or more {p} this turn, Massacre gains +2{p} and intimidate.\nIf Massacre is discarded to pay the cost of a Brute attack action card, intimidate.",
   "pitch": 1,
   "cost": 3,
@@ -146,7 +146,7 @@
  {
   "id": "CRU009",
   "name": "Argh... Smash!",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Roll a 6 sided die. Destroy up to X items, where X is half the number rolled, rounded down.\nGo again",
   "pitch": 2,
   "cost": 3,
@@ -162,7 +162,7 @@
  {
   "id": "CRU010",
   "name": "Barraging Big Horn",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Barraging Big Horn, discard a random card.\nWhile Barraging Big Horn is defended by less than 2 non-equipment cards, it has go again.",
   "pitch": 1,
   "cost": 2,
@@ -182,7 +182,7 @@
  {
   "id": "CRU011",
   "name": "Barraging Big Horn",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Barraging Big Horn, discard a random card.\nWhile Barraging Big Horn is defended by less than 2 non-equipment cards, it has go again.",
   "pitch": 2,
   "cost": 2,
@@ -202,7 +202,7 @@
  {
   "id": "CRU012",
   "name": "Barraging Big Horn",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Barraging Big Horn, discard a random card.\nWhile Barraging Big Horn is defended by less than 2 non-equipment cards, it has go again.",
   "pitch": 3,
   "cost": 2,
@@ -222,7 +222,7 @@
  {
   "id": "CRU013",
   "name": "Predatory Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have discarded a card with 6 or more {p} this turn, Predatory Assault gains dominate.",
   "pitch": 1,
   "cost": 2,
@@ -242,7 +242,7 @@
  {
   "id": "CRU014",
   "name": "Predatory Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have discarded a card with 6 or more {p} this turn, Predatory Assault gains dominate.",
   "pitch": 2,
   "cost": 2,
@@ -262,7 +262,7 @@
  {
   "id": "CRU015",
   "name": "Predatory Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have discarded a card with 6 or more {p} this turn, Predatory Assault gains dominate.",
   "pitch": 3,
   "cost": 2,
@@ -282,7 +282,7 @@
  {
   "id": "CRU016",
   "name": "Riled Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've discarded a card with 6 or more {p} this turn, this gets +1{p}.",
   "pitch": 1,
   "cost": 3,
@@ -299,7 +299,7 @@
  {
   "id": "CRU017",
   "name": "Riled Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've discarded a card with 6 or more {p} this turn, this gets +1{p}.",
   "pitch": 2,
   "cost": 3,
@@ -316,7 +316,7 @@
  {
   "id": "CRU018",
   "name": "Riled Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've discarded a card with 6 or more {p} this turn, this gets +1{p}.",
   "pitch": 3,
   "cost": 3,
@@ -333,7 +333,7 @@
  {
   "id": "CRU019",
   "name": "Swing Fist, Think Later",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Swing Fist, Think Later, discard a random card.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -353,7 +353,7 @@
  {
   "id": "CRU020",
   "name": "Swing Fist, Think Later",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Swing Fist, Think Later, discard a random card.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -373,7 +373,7 @@
  {
   "id": "CRU021",
   "name": "Swing Fist, Think Later",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Swing Fist, Think Later, discard a random card.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -393,7 +393,7 @@
  {
   "id": "CRU022",
   "name": "Bravo, Showstopper",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Action - {r}{r}: Until end of turn, your attack action cards with cost 3 or greater gains dominate. Go again",
   "classes": [
    "guardian"
@@ -405,7 +405,7 @@
  {
   "id": "CRU023",
   "name": "Anothos",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per turn Action - {r}{r}{r}: Attack\nWhile there are 2 or more cards with cost 3 or greater in your pitch zone, Anothos has +2{p}.",
   "attack": 4,
   "classes": [
@@ -420,7 +420,7 @@
  {
   "id": "CRU024",
   "name": "Sledge of Anvilheim",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Action - {r}{r}{r}{r}: Attack",
   "attack": 6,
   "classes": [
@@ -435,7 +435,7 @@
  {
   "id": "CRU025",
   "name": "Crater Fist",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}{r}{r}, destroy Crater Fist: Your attacks with crush gain +2{p} this turn. Go again\nTemper",
   "defense": 2,
   "classes": [
@@ -452,7 +452,7 @@
  {
   "id": "CRU026",
   "name": "Mangle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, destroy target equipment they control with a -1{d} counter.",
   "pitch": 1,
   "cost": 4,
@@ -472,7 +472,7 @@
  {
   "id": "CRU027",
   "name": "Righteous Cleansing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - If Righteous Cleansing deals 4 or more damage to a hero, look at the top 5 cards of their deck. Banish 1 or more cards with the same name from among them, then put the rest on top of their deck in any order.",
   "pitch": 2,
   "cost": 7,
@@ -492,7 +492,7 @@
  {
   "id": "CRU028",
   "name": "Stamp Authority",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Stamp Authority enters the arena, if you have 2 or more cards in your pitch zone with cost 3 or greater, your hero gains +1{i} until end of turn.\nWhile Stamp Authority is in the arena, attack action card effects do not trigger when they hit.\nAt the beginning of your action phase, destroy Stamp Authority.",
   "pitch": 3,
   "cost": 3,
@@ -508,7 +508,7 @@
  {
   "id": "CRU029",
   "name": "Towering Titan",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the beginning of your action phase, destroy Towering Titan then the next Guardian attack action card you play this turn gains +10{p}.",
   "pitch": 1,
   "cost": 9,
@@ -524,7 +524,7 @@
  {
   "id": "CRU030",
   "name": "Towering Titan",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the beginning of your action phase, destroy Towering Titan then the next Guardian attack action card you play this turn gains +9{p}.",
   "pitch": 2,
   "cost": 9,
@@ -540,7 +540,7 @@
  {
   "id": "CRU031",
   "name": "Towering Titan",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the beginning of your action phase, destroy Towering Titan then the next Guardian attack action card you play this turn gains +8{p}.",
   "pitch": 3,
   "cost": 9,
@@ -556,7 +556,7 @@
  {
   "id": "CRU032",
   "name": "Crush the Weak",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, they can't play attack action cards with 3 or less base {p} during their next action phase.",
   "pitch": 1,
   "cost": 3,
@@ -576,7 +576,7 @@
  {
   "id": "CRU033",
   "name": "Crush the Weak",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, they can't play attack action cards with 3 or less base {p} during their next action phase.",
   "pitch": 2,
   "cost": 3,
@@ -596,7 +596,7 @@
  {
   "id": "CRU034",
   "name": "Crush the Weak",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, they can't play attack action cards with 3 or less base {p} during their next action phase.",
   "pitch": 3,
   "cost": 3,
@@ -616,7 +616,7 @@
  {
   "id": "CRU035",
   "name": "Chokeslam",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, attack action cards they control can't gain {p} during their next action phase.",
   "pitch": 1,
   "cost": 4,
@@ -636,7 +636,7 @@
  {
   "id": "CRU036",
   "name": "Chokeslam",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, attack action cards they control can't gain {p} during their next action phase.",
   "pitch": 2,
   "cost": 4,
@@ -656,7 +656,7 @@
  {
   "id": "CRU037",
   "name": "Chokeslam",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, attack action cards they control can't gain {p} during their next action phase.",
   "pitch": 3,
   "cost": 4,
@@ -676,7 +676,7 @@
  {
   "id": "CRU038",
   "name": "Emerging Dominance",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the beginning of your action phase, destroy Emerging Dominance then the next Guardian attack action card you play this turn gains +3{p} and dominate.",
   "pitch": 1,
   "cost": 2,
@@ -692,7 +692,7 @@
  {
   "id": "CRU039",
   "name": "Emerging Dominance",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the beginning of your action phase, destroy Emerging Dominance then the next Guardian attack action card you play this turn gains +2{p} and dominate.",
   "pitch": 2,
   "cost": 2,
@@ -708,7 +708,7 @@
  {
   "id": "CRU040",
   "name": "Emerging Dominance",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the beginning of your action phase, destroy Emerging Dominance then the next Guardian attack action card you play this turn gains +1{p} and dominate.",
   "pitch": 3,
   "cost": 2,
@@ -724,7 +724,7 @@
  {
   "id": "CRU041",
   "name": "Blessing of Serenity",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next time your hero would be dealt {p} damage this turn, prevent 3 damage that source would deal.",
   "pitch": 1,
   "cost": 0,
@@ -736,7 +736,7 @@
  {
   "id": "CRU042",
   "name": "Blessing of Serenity",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next time your hero would be dealt {p} damage this turn, prevent 2 damage that source would deal.",
   "pitch": 2,
   "cost": 0,
@@ -748,7 +748,7 @@
  {
   "id": "CRU043",
   "name": "Blessing of Serenity",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next time your hero would be dealt {p} damage this turn, prevent 1 damage that source would deal.",
   "pitch": 3,
   "cost": 0,
@@ -760,7 +760,7 @@
  {
   "id": "CRU044",
   "name": "Seismic Surge",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn costs {r} less to play.",
   "classes": [
    "guardian"
@@ -773,7 +773,7 @@
  {
   "id": "CRU045",
   "name": "Katsu, the Wanderer",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first time an attack action card you control hits each turn, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it face up, then shuffle your deck. You may play it this turn.",
   "classes": [
    "ninja"
@@ -785,7 +785,7 @@
  {
   "id": "CRU046",
   "name": "Ira, Crimson Haze",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your second attack each turn gets +1{p}.",
   "classes": [
    "ninja"
@@ -797,7 +797,7 @@
  {
   "id": "CRU047",
   "name": "Benji, the Piercing Wind",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your attack action cards with 2 or less {p} can't be defended by cards from hand.\nThe first time an attack action card you control hits each turn, your next attack gains +1{p}.",
   "classes": [
    "ninja"
@@ -809,7 +809,7 @@
  {
   "id": "CRU048",
   "name": "Harmonized Kodachi",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nIf you have a card in your pitch zone with cost 0, this card's attacks get go again.",
   "attack": 1,
   "classes": [
@@ -827,7 +827,7 @@
  {
   "id": "CRU049",
   "name": "Harmonized Kodachi",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nIf you have a card in your pitch zone with cost 0, this card's attacks get go again.",
   "attack": 1,
   "classes": [
@@ -845,7 +845,7 @@
  {
   "id": "CRU050",
   "name": "Edge of Autumn",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack. Go again",
   "attack": 1,
   "classes": [
@@ -860,7 +860,7 @@
  {
   "id": "CRU051",
   "name": "Zephyr Needle",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack. Go again\nWhen this is defended by a card with {d} greater than this weapon attack's {p}, destroy this when the combat chain closes.",
   "attack": 2,
   "classes": [
@@ -875,7 +875,7 @@
  {
   "id": "CRU052",
   "name": "Zephyr Needle",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack. Go again\nWhen this is defended by a card with {d} greater than this weapon attack's {p}, destroy this when the combat chain closes.",
   "attack": 2,
   "classes": [
@@ -890,7 +890,7 @@
  {
   "id": "CRU053",
   "name": "Breeze Rider Boots",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When a Ninja attack action card you control hits, you may destroy Breeze Rider Boots. If you do, attack action cards with combo gain go again this turn.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -907,7 +907,7 @@
  {
   "id": "CRU054",
   "name": "Find Center",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Crane Dance was the last attack this combat chain, Find Center can't be defended by cards with {r} cost less than the number of chain links you control, and it gains \"If this hits, create a Zen State token.\"",
   "pitch": 3,
   "cost": 0,
@@ -927,7 +927,7 @@
  {
   "id": "CRU055",
   "name": "Flood of Force",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Rushing River or Flood of Force was the last attack this combat chain, when you attack with Flood of Force, reveal the top card of your deck. If it's a card with combo, put it into your hand then Flood of Force gains +3{p} and go again.",
   "pitch": 2,
   "cost": 0,
@@ -948,7 +948,7 @@
  {
   "id": "CRU056",
   "name": "Heron's Flight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Crane Dance was the last attack this combat chain, when you attack with Heron's Flight, it gains +2{p} and you choose 1;\n\nHeron's flight can only be defended by attack action cards.\nHeron's flight can only be defended by 'non-attack' action cards.",
   "pitch": 1,
   "cost": 0,
@@ -968,7 +968,7 @@
  {
   "id": "CRU057",
   "name": "Crane Dance",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Soulbead Strike was the last attack this combat chain, Crane Dance gains +1{p}, go again, and it can't be defended by attack action cards with base {p} greater than the number of chain links you control.",
   "pitch": 1,
   "cost": 0,
@@ -988,7 +988,7 @@
  {
   "id": "CRU058",
   "name": "Crane Dance",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Soulbead Strike was the last attack this combat chain, Crane Dance gains +1{p}, go again, and it can't be defended by attack action cards with base {p} greater than the number of chain links you control.",
   "pitch": 2,
   "cost": 0,
@@ -1008,7 +1008,7 @@
  {
   "id": "CRU059",
   "name": "Crane Dance",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Soulbead Strike was the last attack this combat chain, Crane Dance gains +1{p}, go again, and it can't be defended by attack action cards with base {p} greater than the number of chain links you control.",
   "pitch": 3,
   "cost": 0,
@@ -1028,7 +1028,7 @@
  {
   "id": "CRU060",
   "name": "Rushing River",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Torrent of Tempo was the last attack this combat chain, Rushing River gains +1{p}, go again, and \"If Rushing River hits, draw X cards then put X cards from your hand on top of your deck in any order, where X is the number of attacks that have hit this combat chain.\"",
   "pitch": 1,
   "cost": 0,
@@ -1049,7 +1049,7 @@
  {
   "id": "CRU061",
   "name": "Rushing River",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Torrent of Tempo was the last attack this combat chain, Rushing River gains +1{p}, go again, and \"If Rushing River hits, draw X cards then put X cards from your hand on top of your deck in any order, where X is the number of attacks that have hit this combat chain.\"",
   "pitch": 2,
   "cost": 0,
@@ -1070,7 +1070,7 @@
  {
   "id": "CRU062",
   "name": "Rushing River",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Torrent of Tempo was the last attack this combat chain, Rushing River gains +1{p}, go again, and \"If Rushing River hits, draw X cards then put X cards from your hand on top of your deck in any order, where X is the number of attacks that have hit this combat chain.\"",
   "pitch": 3,
   "cost": 0,
@@ -1091,7 +1091,7 @@
  {
   "id": "CRU063",
   "name": "Flying Kick",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played as chain link 3 or higher, it gets +2{p}.",
   "pitch": 1,
   "cost": 2,
@@ -1108,7 +1108,7 @@
  {
   "id": "CRU064",
   "name": "Flying Kick",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played as chain link 3 or higher, it gets +2{p}.",
   "pitch": 2,
   "cost": 2,
@@ -1125,7 +1125,7 @@
  {
   "id": "CRU065",
   "name": "Flying Kick",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played as chain link 3 or higher, it gets +2{p}.",
   "pitch": 3,
   "cost": 2,
@@ -1142,7 +1142,7 @@
  {
   "id": "CRU066",
   "name": "Soulbead Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, it gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -1162,7 +1162,7 @@
  {
   "id": "CRU067",
   "name": "Soulbead Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, it gets go again.",
   "pitch": 2,
   "cost": 0,
@@ -1182,7 +1182,7 @@
  {
   "id": "CRU068",
   "name": "Soulbead Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, it gets go again.",
   "pitch": 3,
   "cost": 0,
@@ -1202,7 +1202,7 @@
  {
   "id": "CRU069",
   "name": "Torrent of Tempo",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, it gets go again.",
   "pitch": 1,
   "cost": 1,
@@ -1222,7 +1222,7 @@
  {
   "id": "CRU070",
   "name": "Torrent of Tempo",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, it gets go again.",
   "pitch": 2,
   "cost": 1,
@@ -1242,7 +1242,7 @@
  {
   "id": "CRU071",
   "name": "Torrent of Tempo",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, it gets go again.",
   "pitch": 3,
   "cost": 1,
@@ -1262,7 +1262,7 @@
  {
   "id": "CRU072",
   "name": "Bittering Thorns",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, your next attack this turn gets +1{p}.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -1282,7 +1282,7 @@
  {
   "id": "CRU073",
   "name": "Salt the Wound",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This gets +1{p} for each attack that has hit this combat chain.",
   "pitch": 2,
   "cost": 0,
@@ -1299,7 +1299,7 @@
  {
   "id": "CRU074",
   "name": "Whirling Mist Blossom",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ira Specialization\nWhen this hits and it's the second or higher chain link in a row to hit, draw 2 cards.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -1320,7 +1320,7 @@
  {
   "id": "CRU075",
   "name": "Zen State",
-  "cardType": "token",
+  "types": ["token"],
   "text": "This enters the arena with a balance counter. At the beginning of your action phase, destroy this unless you remove a balance counter from it.\nIf you would be dealt damage, prevent 1 of that damage.",
   "classes": [
    "ninja"
@@ -1333,7 +1333,7 @@
  {
   "id": "CRU076",
   "name": "Dorinthea Ironsong",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per turn Effect - When a weapon you control hits, you may attack an additional time with that weapon this turn.",
   "classes": [
    "warrior"
@@ -1345,7 +1345,7 @@
  {
   "id": "CRU077",
   "name": "Kassai, Cintari Sellsword",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your second sword attack each turn costs {r} less.\nAt the beginning of your end phase, if you have attacked 2 or more times with weapons this turn, create a Copper token for each weapon attack that hit.",
   "classes": [
    "warrior"
@@ -1357,7 +1357,7 @@
  {
   "id": "CRU078",
   "name": "Dawnblade",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nThe second time this hits each turn, put a +1{p} counter on it.\nAt the beginning of your end phase, if this hasn't hit this turn, remove all +1{p} counters from it.",
   "attack": 3,
   "classes": [
@@ -1372,7 +1372,7 @@
  {
   "id": "CRU079",
   "name": "Cintari Saber",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nWhenever Cintari Saber is defended by 1 or more attack action cards, it gains +1{p} until end of turn.",
   "attack": 2,
   "classes": [
@@ -1387,7 +1387,7 @@
  {
   "id": "CRU080",
   "name": "Cintari Saber",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nWhenever Cintari Saber is defended by 1 or more attack action cards, it gains +1{p} until end of turn.",
   "attack": 2,
   "classes": [
@@ -1402,7 +1402,7 @@
  {
   "id": "CRU081",
   "name": "Courage of Bladehold",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy Courage of Bladehold: Your sword attacks cost {r} less this turn. Go again\nTemper",
   "defense": 2,
   "classes": [
@@ -1419,7 +1419,7 @@
  {
   "id": "CRU082",
   "name": "Twinning Blade",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "You may attack an additional time with target sword this turn.",
   "pitch": 2,
   "cost": 0,
@@ -1432,7 +1432,7 @@
  {
   "id": "CRU083",
   "name": "Unified Decree",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target weapon attack gains +3{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, look at the top card of your deck. If it's an attack reaction card, you may banish it. If you do, you may play it this combat chain.",
   "pitch": 2,
   "cost": 2,
@@ -1448,7 +1448,7 @@
  {
   "id": "CRU084",
   "name": "Spoils of War",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gains +2{p} and go again.\nWhenever a weapon you control hits this turn, create 2 Copper tokens.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -1464,7 +1464,7 @@
  {
   "id": "CRU085",
   "name": "Dauntless",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gains +3{p}.\nThe next defense reaction card the defending hero plays this turn costs an additional {r} to play.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -1480,7 +1480,7 @@
  {
   "id": "CRU086",
   "name": "Dauntless",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gains +2{p}.\nThe next defense reaction card the defending hero plays this turn costs an additional {r} to play.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -1496,7 +1496,7 @@
  {
   "id": "CRU087",
   "name": "Dauntless",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gains +1{p}.\nThe next defense reaction card the defending hero plays this turn costs an additional {r} to play.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -1512,7 +1512,7 @@
  {
   "id": "CRU088",
   "name": "Out for Blood",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target weapon attack gains +3{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, your next attack this turn gains +1{p}.",
   "pitch": 1,
   "cost": 1,
@@ -1528,7 +1528,7 @@
  {
   "id": "CRU089",
   "name": "Out for Blood",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target weapon attack gains +2{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, your next attack this turn gains +1{p}.",
   "pitch": 2,
   "cost": 1,
@@ -1544,7 +1544,7 @@
  {
   "id": "CRU090",
   "name": "Out for Blood",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target weapon attack gains +1{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, your next attack this turn gains +1{p}.",
   "pitch": 3,
   "cost": 1,
@@ -1560,7 +1560,7 @@
  {
   "id": "CRU091",
   "name": "Hit and Run",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets go again.\nIf you've attacked with a weapon this turn, your next attack this turn gets +3{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1576,7 +1576,7 @@
  {
   "id": "CRU092",
   "name": "Hit and Run",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets go again.\nIf you've attacked with a weapon this turn, your next attack this turn gets +2{p}.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1592,7 +1592,7 @@
  {
   "id": "CRU093",
   "name": "Hit and Run",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets go again.\nIf you've attacked with a weapon this turn, your next attack this turn gets +1{p}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1608,7 +1608,7 @@
  {
   "id": "CRU094",
   "name": "Push Forward",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +3{p}.\nIf you've attacked with a weapon this turn, your next attack this turn gets dominate.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -1624,7 +1624,7 @@
  {
   "id": "CRU095",
   "name": "Push Forward",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +2{p}.\nIf you've attacked with a weapon this turn, your next attack this turn gets dominate.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -1640,7 +1640,7 @@
  {
   "id": "CRU096",
   "name": "Push Forward",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +1{p}.\nIf you've attacked with a weapon this turn, your next attack this turn gets dominate.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -1656,7 +1656,7 @@
  {
   "id": "CRU097",
   "name": "Shiyana, Diamond Gemini",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may have specialization cards of any hero in your deck.\nAt the beginning of your action phase, Shiyana becomes a copy of target hero until the start of your next turn, and gains \"Cards you own are the class of your hero in addition to their other class types.\"",
   "classes": [
    "shapeshifter"
@@ -1668,7 +1668,7 @@
  {
   "id": "CRU098",
   "name": "Dash, Inventor Extraordinaire",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may start the game with a Mechanologist item with cost 2 or less in the arena.",
   "classes": [
    "mechanologist"
@@ -1680,7 +1680,7 @@
  {
   "id": "CRU099",
   "name": "Data Doll MKII",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever a Mechanologist item with cost 2 or less is put into your banished zone from your deck, put it into the arena.",
   "classes": [
    "mechanologist"
@@ -1692,7 +1692,7 @@
  {
   "id": "CRU100",
   "name": "Teklo Plasma Pistol",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Action - Remove a steam counter from Teklo Plasma Pistol: Attack\nAction - {r}: If there are no steam counters on Teklo Plasma Pistol, put a steam counter on it. Go again",
   "attack": 2,
   "classes": [
@@ -1707,7 +1707,7 @@
  {
   "id": "CRU101",
   "name": "Plasma Barrel Shot",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - Remove a steam counter from Plasma Barrel Shot: Attack\nAction - {r}{r}: If there are no steam counters on Plasma Barrel Shot, put a steam counter on it. Go again\nX is equal to 1 plus the number of times you have boosted this combat chain.",
   "classes": [
    "mechanologist"
@@ -1721,7 +1721,7 @@
  {
   "id": "CRU102",
   "name": "Viziertronic Model i",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - destroy Vizertronic Model i: Whenever you boost this turn, draw a card then put a card from your hand on top of your deck. Go again\nArcane Barrier 2",
   "defense": 0,
   "classes": [
@@ -1738,7 +1738,7 @@
  {
   "id": "CRU103",
   "name": "Meganetic Shockwave",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The defending hero must defend Meganetic Shockwave with X equipment they control, where X is the number of times you have boosted this combat chain.",
   "pitch": 3,
   "cost": 2,
@@ -1755,7 +1755,7 @@
  {
   "id": "CRU104",
   "name": "Absorption Dome",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Absorption Dome enters the arena with steam counters on it equal to the number of times you have boosted this turn.\nIf your hero would be dealt damage, remove that many steam counters from Absorption Dome instead, then prevent damage equal to the number of steam counters removed this way.\nWhen Absorption Dome has no steam counters on it, destroy it.",
   "pitch": 2,
   "cost": 0,
@@ -1770,7 +1770,7 @@
  {
   "id": "CRU105",
   "name": "Plasma Purifier",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Action - {r}: If there are no steam counters on Plasma Purifier, put a steam counter on it. Go again\nOnce per Turn Action - Remove a steam counter from Plasma Purifier: Target Mechanologist pistol you control gains +1{p} until end of turn. Go again",
   "pitch": 1,
   "cost": 2,
@@ -1785,7 +1785,7 @@
  {
   "id": "CRU106",
   "name": "High Speed Impact",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If High Speed Impact hits, the next attack you boost this combat chain gains dominate.\nBoost",
   "pitch": 1,
   "cost": 1,
@@ -1805,7 +1805,7 @@
  {
   "id": "CRU107",
   "name": "High Speed Impact",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If High Speed Impact hits, the next attack you boost this combat chain gains dominate.\nBoost",
   "pitch": 2,
   "cost": 1,
@@ -1825,7 +1825,7 @@
  {
   "id": "CRU108",
   "name": "High Speed Impact",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If High Speed Impact hits, the next attack you boost this combat chain gains dominate.\nBoost",
   "pitch": 3,
   "cost": 1,
@@ -1845,7 +1845,7 @@
  {
   "id": "CRU109",
   "name": "Combustible Courier",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Combustible Courier hits, the next attack you boost this combat chain gains +3{p}.\nBoost",
   "pitch": 1,
   "cost": 2,
@@ -1865,7 +1865,7 @@
  {
   "id": "CRU110",
   "name": "Combustible Courier",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Combustible Courier hits, the next attack you boost this combat chain gains +3{p}.\nBoost",
   "pitch": 2,
   "cost": 2,
@@ -1885,7 +1885,7 @@
  {
   "id": "CRU111",
   "name": "Combustible Courier",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Combustible Courier hits, the next attack you boost this combat chain gains +3{p}.\nBoost",
   "pitch": 3,
   "cost": 2,
@@ -1905,7 +1905,7 @@
  {
   "id": "CRU112",
   "name": "Overblast",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Overblast gains +X{p}, where X is the number of times you have boosted this combat chain.",
   "pitch": 1,
   "cost": 2,
@@ -1922,7 +1922,7 @@
  {
   "id": "CRU113",
   "name": "Overblast",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Overblast gains +X{p}, where X is the number of times you have boosted this combat chain.",
   "pitch": 2,
   "cost": 2,
@@ -1939,7 +1939,7 @@
  {
   "id": "CRU114",
   "name": "Overblast",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Overblast gains +X{p}, where X is the number of times you have boosted this combat chain.",
   "pitch": 3,
   "cost": 2,
@@ -1956,7 +1956,7 @@
  {
   "id": "CRU115",
   "name": "Teklovossen's Workshop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Opt X, where X is the number of times you have boosted this turn.\nReveal the top card of your deck. If it's a Mechanologist item card with cost 2 or less, put it into the arena.",
   "pitch": 1,
   "cost": 0,
@@ -1972,7 +1972,7 @@
  {
   "id": "CRU116",
   "name": "Teklovossen's Workshop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Opt X, where X is the number of times you have boosted this turn.\nReveal the top card of your deck. If it's a Mechanologist item card with cost 1 or less, put it into the arena.",
   "pitch": 2,
   "cost": 0,
@@ -1988,7 +1988,7 @@
  {
   "id": "CRU117",
   "name": "Teklovossen's Workshop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Opt X, where X is the number of times you have boosted this turn.\nReveal the top card of your deck. If it's a Mechanologist item card with cost 0, put it into the arena.",
   "pitch": 3,
   "cost": 0,
@@ -2004,7 +2004,7 @@
  {
   "id": "CRU118",
   "name": "Kavdaen, Trader of Skins",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - {r}{r}{r}: If a hero has more {h} than all other hero's, they lose 1{h} and create a Copper token. Then if a hero has less {h} than all other hero's, they gain 1{h}. Go again",
   "classes": [
    "merchant"
@@ -2016,7 +2016,7 @@
  {
   "id": "CRU119",
   "name": "Azalea, Ace in the Hole",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - 0: Put a card from your arsenal on the bottom of your deck. If you do, put the top card of your deck face up into your arsenal. If it's an arrow card, it gains dominate until end of turn. Go again",
   "classes": [
    "ranger"
@@ -2028,7 +2028,7 @@
  {
   "id": "CRU120",
   "name": "Death Dealer",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: If you have no cards in your arsenal, you may put an arrow card from your hand face up into your arsenal. If you do, draw a card. Go again",
   "classes": [
    "ranger"
@@ -2042,7 +2042,7 @@
  {
   "id": "CRU121",
   "name": "Red Liner",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - 0: If you have no cards in your arsenal, put an arrow card from your hand face up into your arsenal. Go again",
   "classes": [
    "ranger"
@@ -2056,7 +2056,7 @@
  {
   "id": "CRU122",
   "name": "Perch Grapplers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}{r}, destroy Perch Grapplers: Until end of turn, face up arrow cards played from arsenal gain go again. Go again\nBlade Break",
   "defense": 2,
   "classes": [
@@ -2073,7 +2073,7 @@
  {
   "id": "CRU123",
   "name": "Remorseless",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Remorseless is put into your arsenal face up, until end of turn it gains \"Defense reaction cards can't be played from arsenal to Remoreseless's chain link.\"\nIf Remorseless hits a hero, until the end of their next turn, whenever they play an action card, they lose 1{h}.",
   "pitch": 1,
   "cost": 1,
@@ -2091,7 +2091,7 @@
  {
   "id": "CRU124",
   "name": "Poison the Tips",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Until end of turn, arrows you control gain \"If this hits a hero, they discard a card.\"\nReload\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -2108,7 +2108,7 @@
  {
   "id": "CRU125",
   "name": "Feign Death",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Play Feign Death only if your hero has been dealt damage this turn.\nThe next time your hero would be dealt damage this turn, prevent it.",
   "pitch": 2,
   "cost": 1,
@@ -2120,7 +2120,7 @@
  {
   "id": "CRU126",
   "name": "Tripwire Trap",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Tripwire Trap can only be played from arsenal.\nWhen this defends, effects don't trigger when an attack hits this chain link unless the attacking hero pays {r}.",
   "pitch": 1,
   "cost": 0,
@@ -2136,7 +2136,7 @@
  {
   "id": "CRU127",
   "name": "Pitfall Trap",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Pitfall Trap can only be played from arsenal.\nWhen this defends, deal 2 damage to the attacking hero unless they pay {r}.",
   "pitch": 2,
   "cost": 0,
@@ -2152,7 +2152,7 @@
  {
   "id": "CRU128",
   "name": "Rockslide Trap",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Rockslide Trap can only be played from arsenal.\nWhen this defends, target attack gets -2{p}, unless the attacking hero pays {r}.",
   "pitch": 3,
   "cost": 0,
@@ -2168,7 +2168,7 @@
  {
   "id": "CRU129",
   "name": "Pathing Helix",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Pathing Helix hits and you have no cards in your arsenal, you may put a card from your hand face down into your arsenal.",
   "pitch": 1,
   "cost": 0,
@@ -2186,7 +2186,7 @@
  {
   "id": "CRU130",
   "name": "Pathing Helix",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Pathing Helix hits and you have no cards in your arsenal, you may put a card from your hand face down into your arsenal.",
   "pitch": 2,
   "cost": 0,
@@ -2204,7 +2204,7 @@
  {
   "id": "CRU131",
   "name": "Pathing Helix",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Pathing Helix hits and you have no cards in your arsenal, you may put a card from your hand face down into your arsenal.",
   "pitch": 3,
   "cost": 0,
@@ -2222,7 +2222,7 @@
  {
   "id": "CRU132",
   "name": "Sleep Dart",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Sleep Dart hits a hero, they lose all hero card effects and activated abilities until the end of their next turn.",
   "pitch": 1,
   "cost": 1,
@@ -2240,7 +2240,7 @@
  {
   "id": "CRU133",
   "name": "Sleep Dart",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Sleep Dart hits a hero, they lose all hero card effects and activated abilities until the end of their next turn.",
   "pitch": 2,
   "cost": 1,
@@ -2258,7 +2258,7 @@
  {
   "id": "CRU134",
   "name": "Sleep Dart",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Sleep Dart hits a hero, they lose all hero card effects and activated abilities until the end of their next turn.",
   "pitch": 3,
   "cost": 1,
@@ -2276,7 +2276,7 @@
  {
   "id": "CRU135",
   "name": "Increase the Tension",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next arrow attack this turn gains +3{p} and \"Defense reactions can't be played from hand this chain link.\"\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -2292,7 +2292,7 @@
  {
   "id": "CRU136",
   "name": "Increase the Tension",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next arrow attack this turn gains +2{p} and \"Defense reactions can't be played from hand this chain link.\"\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -2308,7 +2308,7 @@
  {
   "id": "CRU137",
   "name": "Increase the Tension",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next arrow attack this turn gains +1{p} and \"Defense reactions can't be played from hand this chain link.\"\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -2324,7 +2324,7 @@
  {
   "id": "CRU138",
   "name": "Viserai, Rune Blood",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a Runeblade card, if you've played another non-attack action card this turn, create a Runechant token.",
   "classes": [
    "runeblade"
@@ -2336,7 +2336,7 @@
  {
   "id": "CRU139",
   "name": "Nebula Blade",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nWhen this hits, create a Runechant token.\nIf you've played a non-attack action card this turn, this gets +3{p}.",
   "attack": 1,
   "classes": [
@@ -2351,7 +2351,7 @@
  {
   "id": "CRU140",
   "name": "Reaping Blade",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nIf a hero has more {h} than any other hero, they can't gain {h}.",
   "attack": 3,
   "classes": [
@@ -2366,7 +2366,7 @@
  {
   "id": "CRU141",
   "name": "Bloodsheath Skeleta",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: The next attack action card and non-attack action card you play this turn get \"This card costs {r} less to play for each Runechant you control.\"\nTemper",
   "defense": 2,
   "classes": [
@@ -2383,7 +2383,7 @@
  {
   "id": "CRU142",
   "name": "Dread Triptych",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Dread Triptych, if you've played a 'non-attack' action card this turn, create a Runechant token.\nWhen you attack with Dread Triptych, if you've dealt arcane damage this turn, create a Runechant token.\nIf Dread Triptych hits, create a Runechant token.",
   "pitch": 3,
   "cost": 3,
@@ -2400,7 +2400,7 @@
  {
   "id": "CRU143",
   "name": "Rattle Bones",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Banish target Runeblade attack action card from your graveyard. You may play it this turn.\nIf you have dealt arcane damage to an opposing hero this turn, you may play Rattle Bones as though it were an instant.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -2416,7 +2416,7 @@
  {
   "id": "CRU144",
   "name": "Runeblood Barrier",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this enters the arena, create 4 Runechant tokens.\nIf your hero would be dealt damage, instead destroy that many Runechant tokens you control and prevent 1 damage for each Runechant token destroyed this way.\nAt the beginning of your action phase, destroy this.",
   "pitch": 2,
   "cost": 3,
@@ -2432,7 +2432,7 @@
  {
   "id": "CRU145",
   "name": "Mauvrion Skies",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next runeblade attack action card you play this turn gains go again and \"If this hits, create 3 Runechant tokens.\"\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -2448,7 +2448,7 @@
  {
   "id": "CRU146",
   "name": "Mauvrion Skies",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next runeblade attack action card you play this turn gains go again and \"If this hits, create 2 Runechant tokens.\"\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -2464,7 +2464,7 @@
  {
   "id": "CRU147",
   "name": "Mauvrion Skies",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Runeblade attack action card you play this turn gets go again and \"When this hits, create a Runechant token.\"\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -2480,7 +2480,7 @@
  {
   "id": "CRU148",
   "name": "Consuming Volition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've dealt arcane damage this turn, this gets \"When this hits a hero, they discard a card.\"",
   "pitch": 1,
   "cost": 1,
@@ -2497,7 +2497,7 @@
  {
   "id": "CRU149",
   "name": "Consuming Volition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've dealt arcane damage this turn, this gets \"When this hits a hero, they discard a card.\"",
   "pitch": 2,
   "cost": 1,
@@ -2514,7 +2514,7 @@
  {
   "id": "CRU150",
   "name": "Consuming Volition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've dealt arcane damage this turn, this gets \"When this hits a hero, they discard a card.\"",
   "pitch": 3,
   "cost": 1,
@@ -2531,7 +2531,7 @@
  {
   "id": "CRU151",
   "name": "Meat and Greet",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create a Runechant token.\nIf you've dealt arcane damage to an opposing hero this turn, this gets go again.",
   "pitch": 1,
   "cost": 1,
@@ -2551,7 +2551,7 @@
  {
   "id": "CRU152",
   "name": "Meat and Greet",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create a Runechant token.\nIf you've dealt arcane damage to an opposing hero this turn, this gets go again.",
   "pitch": 2,
   "cost": 1,
@@ -2571,7 +2571,7 @@
  {
   "id": "CRU153",
   "name": "Meat and Greet",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create a Runechant token.\nIf you've dealt arcane damage to an opposing hero this turn, this gets go again.",
   "pitch": 3,
   "cost": 1,
@@ -2591,7 +2591,7 @@
  {
   "id": "CRU154",
   "name": "Sutcliffe's Research Notes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Reveal the top 3 cards of your deck. Create a Runechant token for each Runeblade attack action card revealed this way, then put the cards on top of your deck in any order.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -2607,7 +2607,7 @@
  {
   "id": "CRU155",
   "name": "Sutcliffe's Research Notes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Reveal the top 2 cards of your deck. Create a Runechant token for each Runeblade attack action card revealed this way, then put the cards on top of your deck in any order.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -2623,7 +2623,7 @@
  {
   "id": "CRU156",
   "name": "Sutcliffe's Research Notes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Reveal the top card of your deck. Create a Runechant token for each Runeblade attack action card revealed this way, then put the cards on top of your deck in any order.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -2639,7 +2639,7 @@
  {
   "id": "CRU157",
   "name": "Runechant",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
   "classes": [
    "runeblade"
@@ -2652,7 +2652,7 @@
  {
   "id": "CRU158",
   "name": "Kano, Dracai of Aether",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Instant - {r}{r}{r}: Look at the top card of your deck. If it's a 'non-attack' action card, you may banish it. If you do, you may play it this turn as though it were an instant.",
   "classes": [
    "wizard"
@@ -2664,7 +2664,7 @@
  {
   "id": "CRU159",
   "name": "Crucible of Aetherweave",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Instant - {r}: The next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.",
   "classes": [
    "wizard"
@@ -2678,7 +2678,7 @@
  {
   "id": "CRU160",
   "name": "Aether Conduit",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Deal 2 arcane damage to target hero.",
   "classes": [
    "wizard"
@@ -2692,7 +2692,7 @@
  {
   "id": "CRU161",
   "name": "Metacarpus Node",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever you play a card with an effect that deals arcane damage, you may pay {r}. If you do, instead it deals that much arcane damage plus 1, and destroy Metacarpus Node at the beginning of the end phase.\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -2709,7 +2709,7 @@
  {
   "id": "CRU162",
   "name": "Chain Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play your next Wizard 'non-attack' action card this turn as though it were an instant.\nIf you have played another Wizard 'non-attack' action card this turn, deal 3 arcane damage to each opposing hero.",
   "pitch": 2,
   "cost": 1,
@@ -2722,7 +2722,7 @@
  {
   "id": "CRU163",
   "name": "Gaze the Ages",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Opt 2\nIf you've played another Wizard non-attack action card this turn, put this into its owner's hand.",
   "pitch": 3,
   "cost": 0,
@@ -2738,7 +2738,7 @@
  {
   "id": "CRU164",
   "name": "Aetherize",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Negate target instant card with cost {r} or less.",
   "pitch": 3,
   "cost": 1,
@@ -2753,7 +2753,7 @@
  {
   "id": "CRU165",
   "name": "Cindering Foresight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If it's not your turn, you may play Cindering Foresight as though it were an instant.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.\nOpt 3",
   "pitch": 1,
   "cost": 0,
@@ -2769,7 +2769,7 @@
  {
   "id": "CRU166",
   "name": "Cindering Foresight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If it's not your turn, you may play Cindering Foresight as though it were an instant.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.\nOpt 2",
   "pitch": 2,
   "cost": 0,
@@ -2785,7 +2785,7 @@
  {
   "id": "CRU167",
   "name": "Cindering Foresight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If it's not your turn, you may play Cindering Foresight as though it were an instant.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.\nOpt 1",
   "pitch": 3,
   "cost": 0,
@@ -2801,8 +2801,8 @@
  {
   "id": "CRU168",
   "name": "Foreboding Bolt",
-  "cardType": "action",
-  "text": "Deal 3 damage to target hero.\nOpt 1",
+  "types": ["action"],
+  "text": "Deal 3 arcane damage to target hero.\nOpt 1",
   "pitch": 1,
   "cost": 1,
   "defense": 3,
@@ -2817,8 +2817,8 @@
  {
   "id": "CRU169",
   "name": "Foreboding Bolt",
-  "cardType": "action",
-  "text": "Deal 2 damage to target hero.\nOpt 1",
+  "types": ["action"],
+  "text": "Deal 2 arcane damage to target hero.\nOpt 1",
   "pitch": 2,
   "cost": 1,
   "defense": 3,
@@ -2833,8 +2833,8 @@
  {
   "id": "CRU170",
   "name": "Foreboding Bolt",
-  "cardType": "action",
-  "text": "Deal 1 damage to target hero.\nOpt 1",
+  "types": ["action"],
+  "text": "Deal 1 arcane damage to target hero.\nOpt 1",
   "pitch": 3,
   "cost": 1,
   "defense": 3,
@@ -2849,7 +2849,7 @@
  {
   "id": "CRU171",
   "name": "Rousing Aether",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to target hero.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.",
   "pitch": 1,
   "cost": 2,
@@ -2862,7 +2862,7 @@
  {
   "id": "CRU172",
   "name": "Rousing Aether",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.",
   "pitch": 2,
   "cost": 2,
@@ -2875,7 +2875,7 @@
  {
   "id": "CRU173",
   "name": "Rousing Aether",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.",
   "pitch": 3,
   "cost": 2,
@@ -2888,7 +2888,7 @@
  {
   "id": "CRU174",
   "name": "Snapback",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero.\nIf you have played another Wizard 'non-attack' action card this turn, you may play Snapback as though it were an instant.",
   "pitch": 1,
   "cost": 1,
@@ -2901,7 +2901,7 @@
  {
   "id": "CRU175",
   "name": "Snapback",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero.\nIf you have played another Wizard 'non-attack' action card this turn, you may play Snapback as though it were an instant.",
   "pitch": 2,
   "cost": 1,
@@ -2914,7 +2914,7 @@
  {
   "id": "CRU176",
   "name": "Snapback",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero.\nIf you have played another Wizard 'non-attack' action card this turn, you may play Snapback as though it were an instant.",
   "pitch": 3,
   "cost": 1,
@@ -2927,7 +2927,7 @@
  {
   "id": "CRU177",
   "name": "Talishar, the Lost Prince",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}, put a rust counter on Talishar, the Lost Prince: Attack\nAt the beginning of your end phase, if Talishar, the Lost Prince has 3 or more rust counters on it, destroy it.",
   "attack": 4,
   "classes": [
@@ -2942,7 +2942,7 @@
  {
   "id": "CRU178",
   "name": "Fyendal's Spring Tunic",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "At the start of your turn, if this has fewer than 3 energy counters, you may put an energy counter on it.\nInstant - Remove 3 energy counters from this: Gain {r}\nBlade Break",
   "defense": 1,
   "classes": [
@@ -2959,7 +2959,7 @@
  {
   "id": "CRU179",
   "name": "Gambler's Gloves",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If a hero would roll one or more 6 sided dice, instead after the roll you may destroy Gambler's Gloves. If you do, that hero rerolls all 6 sided dice rolled this way.",
   "defense": 0,
   "classes": [
@@ -2973,7 +2973,7 @@
  {
   "id": "CRU180",
   "name": "Coax a Commotion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, choose any number:\n\nEach hero creates a Quicken token.\nEach hero draws a card.\nEach hero gains 1{h}.",
   "pitch": 1,
   "cost": 0,
@@ -2990,7 +2990,7 @@
  {
   "id": "CRU181",
   "name": "Gorganian Tome",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Legendary\nDraw X cards, where X is 1 plus the number of Gorganian Tomes in all graveyards.\nGo again",
   "cost": 0,
   "classes": [
@@ -3005,7 +3005,7 @@
  {
   "id": "CRU182",
   "name": "Snag",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Attack action cards can't gain {p} from their own effects, or the effects of attack reaction cards this turn.",
   "pitch": 3,
   "cost": 0,
@@ -3017,7 +3017,7 @@
  {
   "id": "CRU183",
   "name": "Promise of Plenty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Promise of Plenty hits, each hero who doesn't have a card in their arsenal puts the top card of their deck face down into their arsenal.\nIf Promise of Plenty is played from arsenal, it gains go again.",
   "pitch": 1,
   "cost": 0,
@@ -3037,7 +3037,7 @@
  {
   "id": "CRU184",
   "name": "Promise of Plenty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Promise of Plenty hits, each hero who doesn't have a card in their arsenal puts the top card of their deck face down into their arsenal.\nIf Promise of Plenty is played from arsenal, it gains go again.",
   "pitch": 2,
   "cost": 0,
@@ -3057,7 +3057,7 @@
  {
   "id": "CRU185",
   "name": "Promise of Plenty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Promise of Plenty hits, each hero who doesn't have a card in their arsenal puts the top card of their deck face down into their arsenal.\nIf Promise of Plenty is played from arsenal, it gains go again.",
   "pitch": 3,
   "cost": 0,
@@ -3077,7 +3077,7 @@
  {
   "id": "CRU186",
   "name": "Lunging Press",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target attack action card gains +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -3090,7 +3090,7 @@
  {
   "id": "CRU187",
   "name": "Springboard Somersault",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "If Springboard Somersault is played from arsenal, it gains +2{d}.",
   "pitch": 2,
   "cost": 0,
@@ -3103,7 +3103,7 @@
  {
   "id": "CRU188",
   "name": "Cash In",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may destroy 4 Coppers, 2 Silvers, or 1 Gold you control rather than pay Cash In's {r} cost.\nDraw 2 cards.\nGo again",
   "pitch": 2,
   "cost": 4,
@@ -3119,7 +3119,7 @@
  {
   "id": "CRU189",
   "name": "Reinforce the Line",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target defending attack action card gains +4{d}.",
   "pitch": 1,
   "cost": 0,
@@ -3131,7 +3131,7 @@
  {
   "id": "CRU190",
   "name": "Reinforce the Line",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target defending attack action card gains +3{d}.",
   "pitch": 2,
   "cost": 0,
@@ -3143,7 +3143,7 @@
  {
   "id": "CRU191",
   "name": "Reinforce the Line",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target defending attack action card gets +2{d}.",
   "pitch": 3,
   "cost": 0,
@@ -3155,7 +3155,7 @@
  {
   "id": "CRU192",
   "name": "Brutal Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 1,
   "cost": 2,
@@ -3172,7 +3172,7 @@
  {
   "id": "CRU193",
   "name": "Brutal Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 2,
   "cost": 2,
@@ -3189,7 +3189,7 @@
  {
   "id": "CRU194",
   "name": "Brutal Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 3,
   "cost": 2,
@@ -3206,7 +3206,7 @@
  {
   "id": "CRU195",
   "name": "Cracked Bauble",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
   "pitch": 2,
   "classes": [
@@ -3217,7 +3217,7 @@
  {
   "id": "CRU196",
   "name": "Quicken",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gains go again.",
   "classes": [
    "generic"
@@ -3230,7 +3230,7 @@
  {
   "id": "CRU197",
   "name": "Copper",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Action - {r}{r}{r}{r}, destroy this: Draw a card. Go again",
   "classes": [
    "generic"

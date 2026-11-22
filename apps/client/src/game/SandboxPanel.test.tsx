@@ -1,0 +1,91 @@
+import type { ComponentProps } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it, vi } from "vitest";
+import { SandboxPanel, canOpenSandbox, sandboxCounterEdits, type SandboxSeat } from "./SandboxPanel.js";
+import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
+
+const SEATS: SandboxSeat[] = [
+  { seat: 0, heroName: "Dorinthea", life: 20, resources: 0 },
+  { seat: 1, heroName: "Rhinar", life: 18, resources: 2 },
+];
+
+function render(overrides: Partial<ComponentProps<typeof SandboxPanel>> = {}): string {
+  return renderToStaticMarkup(
+    <TestI18nProvider locale="en">
+      <SandboxPanel
+        seats={SEATS}
+        pending={false}
+        refusal={null}
+        onEdit={vi.fn(() => true)}
+        onClearRefusal={vi.fn()}
+        onClose={vi.fn()}
+        {...overrides}
+      />
+    </TestI18nProvider>,
+  );
+}
+
+describe("SandboxPanel", () => {
+  it("lists each zone with its card count when zones can be opened", () => {
+    const seats: SandboxSeat[] = [{ ...SEATS[0]!, zones: { hand: 4, deck: null, graveyard: 0, banish: 2 } }];
+    const html = render({ seats, onOpenZone: vi.fn() });
+    expect(html).toContain(">Cards</h3>");
+    expect(html).toMatch(/data-sandbox-zone="hand"[^>]*>Hand \(4\)</);
+    expect(html).toMatch(/data-sandbox-zone="deck"[^>]*disabled=""[^>]*>Deck \(0\)</);
+    expect(html).toMatch(/data-sandbox-zone="graveyard"[^>]*disabled=""[^>]*>Graveyard \(0\)</);
+    expect(html).toMatch(/data-sandbox-zone="banish"[^>]*>Banished \(2\)</);
+    expect(render({ seats })).not.toContain("data-sandbox-zone");
+    expect(render({ onOpenZone: vi.fn() })).not.toContain("data-sandbox-zone");
+  });
+
+  it("shows a tab per seat in solo games, labelled by hero", () => {
+    const html = render({ initialSeat: 1 });
+    expect(html).toContain('role="tablist"');
+    expect(html.match(/role="tab"/g)).toHaveLength(2);
+    expect(html).toMatch(/aria-selected="false"[^>]*>Dorinthea<\/button>/);
+    expect(html).toMatch(/aria-selected="true"[^>]*>Rhinar<\/button>/);
+    expect(html).toContain('value="18"');
+    expect(html).toContain('value="2"');
+  });
+
+  it("shows only the viewer's seat in a private room", () => {
+    const html = render({ seats: [SEATS[0]!] });
+    expect(html).not.toContain('role="tab"');
+    expect(html).toContain('class="sandbox-seat-name">Dorinthea</p>');
+    expect(html).not.toContain("Rhinar");
+    expect(html).toContain('value="20"');
+    expect(html).toContain('aria-label="Increase Life"');
+    expect(html).toContain('aria-label="Decrease Floating resources"');
+  });
+
+  it("disables Apply until something changes and shows a refusal reason", () => {
+    const html = render({ refusal: "SANDBOX_EDIT_UNAVAILABLE" });
+    expect(html).toMatch(/<button type="submit" class="btn-primary sandbox-apply" disabled="">Apply<\/button>/);
+    expect(html).toContain('role="alert"');
+    expect(html).toContain("That change isn&#x27;t allowed right now");
+    expect(render({ refusal: "SANDBOX_SEAT_FORBIDDEN" })).toContain("You can only edit your own hero.");
+  });
+
+  it("sends only the changed counters, life first", () => {
+    expect(sandboxCounterEdits(SEATS[1]!, { life: 18, resources: 2 })).toEqual([]);
+    expect(sandboxCounterEdits(SEATS[1]!, { life: 9, resources: 5 })).toEqual([
+      { kind: "set-life", life: 9 },
+      { kind: "set-resources", resources: 5 },
+    ]);
+  });
+});
+
+describe("canOpenSandbox", () => {
+  const live = { sandbox: true, botGame: false, spectating: false, replaying: false, yourSeat: 0, gameOver: false };
+  it("is available only to seated players in a live sandbox or bot game", () => {
+    expect(canOpenSandbox(live)).toBe(true);
+    expect(canOpenSandbox({ ...live, sandbox: false })).toBe(false);
+    expect(canOpenSandbox({ ...live, sandbox: false, botGame: true })).toBe(true);
+    expect(canOpenSandbox({ ...live, sandbox: false, botGame: true, spectating: true })).toBe(false);
+    expect(canOpenSandbox({ ...live, sandbox: false, botGame: true, gameOver: true })).toBe(false);
+    expect(canOpenSandbox({ ...live, spectating: true })).toBe(false);
+    expect(canOpenSandbox({ ...live, replaying: true })).toBe(false);
+    expect(canOpenSandbox({ ...live, yourSeat: null })).toBe(false);
+    expect(canOpenSandbox({ ...live, gameOver: true })).toBe(false);
+  });
+});

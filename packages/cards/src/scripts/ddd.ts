@@ -1,8 +1,8 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, isSwordAttack, yesNoPrompt } from "./shared-helpers.js";
+import { buffNextAttack, isSword, isSwordAttack, yesNoPrompt } from "./shared-helpers.js";
 
 function swordWeaponAttack(ctx: ScriptCtx): boolean {
-  return ctx.link?.attackCardType === "weapon" && ctx.cardTypes(ctx.link.attackingCard).includes("sword");
+  return ctx.link?.attackCardType === "weapon" && isSword(ctx, ctx.link.attackingCard);
 }
 
 export const ddd: Record<string, CardScript> = {

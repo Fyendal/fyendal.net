@@ -6,11 +6,13 @@ import { EndTurnPassToast } from "./EndTurnPassToast.js";
 
 const MESSAGE = "Opponent passed to end their turn. If you act, they will regain priority.";
 
-function renderToast(placement?: "divider" | "mobile-hand") {
+const YOURS = "You passed to end your turn. If the opponent acts, you will regain priority.";
+
+function renderToast(placement?: "divider" | "mobile-hand", passer?: "opponent" | "you") {
   return renderToStaticMarkup(createElement(
     IntlProvider,
-    { locale: "en", messages: { "game.turn.endPassPending": MESSAGE } },
-    createElement(EndTurnPassToast, placement ? { placement } : undefined),
+    { locale: "en", messages: { "game.turn.endPassPending": MESSAGE, "game.turn.endPassPendingYours": YOURS } },
+    createElement(EndTurnPassToast, { ...(placement ? { placement } : {}), ...(passer ? { passer } : {}) }),
   ));
 }
 
@@ -23,6 +25,14 @@ describe("EndTurnPassToast", () => {
     expect(html).toContain('role="status"');
     expect(html).toContain('aria-live="polite"');
     expect(html).toContain(MESSAGE);
+  });
+
+  it("moves to the opposing side and names you when your own seat passed in self-play", () => {
+    const html = renderToast("divider", "you");
+
+    expect(html).toContain("end-turn-pass-toast-divider end-turn-pass-toast-opposing");
+    expect(html).toContain(YOURS);
+    expect(renderToast()).not.toContain("end-turn-pass-toast-opposing");
   });
 
   it("supports positioning above the mobile hand", () => {

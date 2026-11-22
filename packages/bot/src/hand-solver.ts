@@ -91,6 +91,8 @@ export interface SolverCard {
   readonly onHit: number;
   /** Power an attack reaction adds to the current attack. */
   readonly reactionPower?: number;
+  /** Dynamic `reactionPower`, e.g. scaling with chain links already made. */
+  reactionPowerIn?(view: SolverView): number;
   /** Damage-equivalent value gained when played that is not damage: a card
    * drawn, a token, a mark. Not scaled by hit chance. */
   bonusIn?(view: SolverView): number;
@@ -119,6 +121,8 @@ export interface SolverCard {
 export interface SolverConfig {
   startResources?: number;
   startActionPoints?: number;
+  /** Actions that may still be played or activated this turn (a delayed cap). */
+  actionLimit?: number;
   startFlags?: SolverFlags;
   startPending?: readonly PendingEffect[];
   /** Chain links already opened this turn (mid-turn evaluation). */
@@ -126,11 +130,14 @@ export interface SolverConfig {
   /** Traits counted into `played:<trait>` / `links:<trait>` flags. Only the
    * traits hero rules read are tracked, keeping memo keys small. */
   trackedTraits?: readonly string[];
-  /** Probability used to scale on-hit value. */
-  hitChance?: number;
+  /** Probability used to scale on-hit value, flat or per attack. */
+  hitChance?: number | ((power: number, onHit: number) => number);
   /** Safety cap on explored states; the search is exact below it. */
   maxStates?: number;
 }
+
+/** Power assumed for the attack an attack reaction joins. */
+const REACTION_TARGET_POWER = 4;
 
 export type SolverStepKind = "play" | "weapon" | "activate" | "react";
 
@@ -160,6 +167,7 @@ interface TurnState {
   readonly used: number;
   readonly resources: number;
   readonly actionPoints: number;
+  readonly actionsLeft: number;
   readonly links: number;
   readonly lastAttack: number;
   readonly flags: SolverFlags;
@@ -244,10 +252,11 @@ export class HandSolver {
   private readonly cards: readonly SolverCard[];
   private readonly startResources: number;
   private readonly startActionPoints: number;
+  private readonly actionLimit: number;
   private readonly startFlags: SolverFlags;
   private readonly startPending: readonly PendingEffect[];
   private readonly startLinks: number;
-  private readonly hitChance: number;
+  private readonly hitChance: (power: number, onHit: number) => number;
   private readonly maxStates: number;
   private readonly tracked: ReadonlySet<string> | undefined;
   private readonly memo = new Map<string, Outcome>();
@@ -268,10 +277,12 @@ export class HandSolver {
     this.cards = cards;
     this.startResources = config.startResources ?? 0;
     this.startActionPoints = config.startActionPoints ?? 1;
+    this.actionLimit = config.actionLimit ?? Infinity;
     this.startFlags = config.startFlags ?? EMPTY_FLAGS;
     this.startPending = config.startPending ?? [];
     this.startLinks = config.startLinks ?? 0;
-    this.hitChance = config.hitChance ?? 0.6;
+    const hitChance = config.hitChance ?? 0.6;
+    this.hitChance = typeof hitChance === "number" ? () => hitChance : hitChance;
     this.maxStates = config.maxStates ?? 200_000;
     this.tracked = config.trackedTraits ? new Set(config.trackedTraits) : undefined;
     this.arsenalIndex = cards.findIndex((card) => card.zone === "arsenal");
@@ -340,6 +351,7 @@ export class HandSolver {
       used: 0,
       resources: this.startResources,
       actionPoints: this.startActionPoints,
+      actionsLeft: this.actionLimit,
       links: this.startLinks,
       lastAttack: -1,
       flags: this.startFlags,
@@ -366,7 +378,7 @@ export class HandSolver {
   }
 
   private key(state: TurnState): string {
-    return `${state.remaining}|${state.used}|${state.resources}|${state.actionPoints}|${state.links}|` +
+    return `${state.remaining}|${state.used}|${state.resources}|${state.actionPoints}|${state.actionsLeft}|${state.links}|` +
       `${state.lastAttack}|${this.flagsKey(state.flags)}|${pendingKey(state.pending)}`;
   }
 
@@ -445,7 +457,7 @@ export class HandSolver {
       default:
         return best;
     }
-    if (needsActionPoint && state.actionPoints < 1) return best;
+    if (needsActionPoint && (state.actionPoints < 1 || state.actionsLeft < 1)) return best;
 
     // Pending effects that this play consumes.
     let consumes: PendingEffect[] | undefined;
@@ -583,15 +595,17 @@ export class HandSolver {
         }
       }
       damage = Math.max(0, power);
-      onHit = ((card.onHitIn ? card.onHitIn(before) : card.onHit) + effectOnHit) * this.hitChance;
+      const landed = (card.onHitIn ? card.onHitIn(before) : card.onHit) + effectOnHit;
+      onHit = landed * this.hitChance(damage, landed);
       links++;
       lastAttack = index;
       counters.attacks = 1;
       this.count(counters, "links:", traits);
     } else if (kind === "react") {
-      damage = card.reactionPower ?? 0;
+      damage = card.reactionPowerIn ? card.reactionPowerIn(before) : card.reactionPower ?? 0;
       // A granted on-hit rider pays off only if the current attack connects.
-      onHit = (card.onHitIn?.(before) ?? 0) * this.hitChance;
+      const rider = card.onHitIn?.(before) ?? 0;
+      onHit = rider * this.hitChance(REACTION_TARGET_POWER + damage, rider);
     } else {
       goAgain = card.goAgainIn ? card.goAgainIn(before) : card.goAgain;
       // An action-speed play happens after the previous link resolved, so
@@ -623,6 +637,7 @@ export class HandSolver {
       used: persistent ? state.used | bit : state.used,
       resources,
       actionPoints,
+      actionsLeft: state.actionsLeft - (needsActionPoint ? 1 : 0),
       links,
       lastAttack,
       flags,

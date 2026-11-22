@@ -65,6 +65,20 @@ describe("SDO — Dawnblade", () => {
     s.expectLog("+1{p} counters are removed");
     expect(s.state.players[0]!.weapons[0]!.counters?.power).toBeUndefined();
   });
+
+  it("hitting an ally counts as a hit for the counter and the end-phase check", () => {
+    const s = scenario({
+      seats: [sdoSeat({ hand: [RED, RED, RED] }), { hero: "rhinar", hand: [], board: ["barnacle|2"] }],
+    });
+    s.state.players[0]!.weapons[0]!.counters = { power: 1 };
+    s.attackWithWeapon(DAWNBLADE, { pitch: [RED], targetAlly: "barnacle|2" }).settle();
+    s.state.players[0]!.actionPoints = 1;
+    s.attackWithWeapon(DAWNBLADE, { pitch: [RED] }).blockWith().settle()
+      .expectLog("gets a +1{p} counter");
+    expect(s.state.players[0]!.weapons[0]!.counters?.power).toBe(2);
+    s.endTurn().endTurn();
+    expect(s.state.players[0]!.weapons[0]!.counters?.power).toBe(2);
+  });
 });
 
 describe("SDO — attacks", () => {

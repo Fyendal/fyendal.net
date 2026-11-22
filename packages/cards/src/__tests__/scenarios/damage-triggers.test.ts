@@ -97,6 +97,14 @@ describe("damage-dealt triggers use the stack", () => {
     expect(named(g, 0, "Might")).toBe(0);
   });
 
+  it("Talk a Big Game offers numbers beyond a die roll", () => {
+    const g = scenario({ seats: [seat({ hand: ["talk a big game|3"] }), foe()] });
+
+    g.play("talk a big game|3");
+    expect(g.state.pendingDecision?.options).toHaveLength(99);
+    g.chooseOption("17").expectLog("chooses 17 for Talk a Big Game");
+  });
+
   it("Leech Vitality's rider gains life as a triggered layer", () => {
     const g = scenario({ seats: [seat({ hand: ["leech vitality|1", "wounding blow|1", BLUE] }), foe()] });
 

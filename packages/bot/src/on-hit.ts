@@ -51,7 +51,7 @@ const INFORMED_DISRUPTION_VALUE = DEFAULT_DRAW_VALUE + 1.5;
 /** A random card is an average card. */
 const RANDOM_DISRUPTION_VALUE = DEFAULT_DRAW_VALUE;
 /** The defender gives up the worst card in hand. */
-const FORCED_DISCARD_VALUE = DEFAULT_DRAW_VALUE * 0.75;
+export const FORCED_DISCARD_VALUE = DEFAULT_DRAW_VALUE * 0.75;
 /** Cards a whole-hand discard is assumed to take. */
 const WHOLE_HAND_CARDS = 3;
 /** Extra copies banished from deck or graveyard by a named-card effect. */
@@ -71,6 +71,8 @@ const LOCK_VALUE = 2;
 const MINOR_LOCK_VALUE = 1;
 const GAME_LOSS_VALUE = 40;
 const RESOURCE_TOKEN_VALUE = 2;
+/** Each {r} the attacker pays to enable an on-hit. */
+const PAID_RESOURCE_VALUE = 1;
 /** Attacker-side setup (soul, opt, counters). */
 const SETUP_VALUE = 1;
 const TEMPO_VALUE = 1;
@@ -109,12 +111,18 @@ export interface OnHitEvaluation {
   value: number;
   categories: readonly OnHitCategory[];
   cardDraw: number;
+  /** Damage the landed hit deals now, on top of its combat damage. */
+  immediateDamage: number;
   delayedDamage: number;
   handCardsLost: number;
   /** The part of `value` that prices `handCardsLost` as generic cards. */
   handLossValue: number;
   /** The selector least favorable to the defender among hand-loss effects. */
   handLossSelector?: HandLossSelector;
+  /** The landed hit removes the defender's hero card abilities. */
+  heroAbilitiesLost: boolean;
+  /** The part of `value` that prices `heroAbilitiesLost` generically. */
+  heroAbilityLossValue: number;
   destroysOccupiedArsenal: boolean;
   equipmentDamage: boolean;
   tokenCreation: boolean;
@@ -124,9 +132,12 @@ export const EMPTY_ON_HIT_EVALUATION: OnHitEvaluation = {
   value: 0,
   categories: [],
   cardDraw: 0,
+  immediateDamage: 0,
   delayedDamage: 0,
   handCardsLost: 0,
   handLossValue: 0,
+  heroAbilitiesLost: false,
+  heroAbilityLossValue: 0,
   destroysOccupiedArsenal: false,
   equipmentDamage: false,
   tokenCreation: false,
@@ -175,10 +186,13 @@ function combine(left: OnHitEvaluation, right: OnHitEvaluation): OnHitEvaluation
     value: left.value + right.value,
     categories: [...new Set([...left.categories, ...right.categories])],
     cardDraw: left.cardDraw + right.cardDraw,
+    immediateDamage: left.immediateDamage + right.immediateDamage,
     delayedDamage: left.delayedDamage + right.delayedDamage,
     handCardsLost: left.handCardsLost + right.handCardsLost,
     handLossValue: left.handLossValue + right.handLossValue,
     ...(handLossSelector ? { handLossSelector } : {}),
+    heroAbilitiesLost: left.heroAbilitiesLost || right.heroAbilitiesLost,
+    heroAbilityLossValue: left.heroAbilityLossValue + right.heroAbilityLossValue,
     destroysOccupiedArsenal: left.destroysOccupiedArsenal || right.destroysOccupiedArsenal,
     equipmentDamage: left.equipmentDamage || right.equipmentDamage,
     tokenCreation: left.tokenCreation || right.tokenCreation,
@@ -272,12 +286,14 @@ function cardAdvantage(text: string, context: OnHitValueContext): OnHitEvaluatio
 }
 
 function damage(text: string): OnHitEvaluation | undefined {
-  if (/they lose the game/.test(text)) return part("damage", GAME_LOSS_VALUE);
+  if (/they lose the game/.test(text)) {
+    return part("damage", GAME_LOSS_VALUE, { immediateDamage: GAME_LOSS_VALUE });
+  }
   const match = /(?:deal|deals|loses?)\D{0,24}(\d+)\s*(?:arcane\s+)?(?:damage|life|\{h\})/.exec(text);
   if (!match || /\byou lose\b/.test(text)) return undefined;
   const amount = Number(match[1]);
   const delayed = /(?:end phase|beginning of|next turn)/.test(text) ? amount : 0;
-  return part("damage", amount, { delayedDamage: delayed });
+  return part("damage", amount, { immediateDamage: amount - delayed, delayedDamage: delayed });
 }
 
 function tokens(text: string): OnHitEvaluation | undefined {
@@ -320,6 +336,9 @@ function permanentRemoval(text: string): OnHitEvaluation | undefined {
 function lock(text: string): OnHitEvaluation | undefined {
   const weakened = /their first attack during their next turn has -(\d+)\{p\}/.exec(text);
   if (weakened) return part("lock", Number(weakened[1]) * DEFAULT_HIT_CHANCE);
+  if (/lose all hero card abilities/.test(text)) {
+    return part("lock", LOCK_VALUE, { heroAbilitiesLost: true, heroAbilityLossValue: LOCK_VALUE });
+  }
   if (new RegExp(
     "(?:they|that hero|cards they own|attacks they control) (?:can't|lose all|lose and can't)" +
       "|costs? an additional \\{r\\}|is halved",
@@ -341,7 +360,7 @@ function setup(text: string): OnHitEvaluation | undefined {
   if (/put it into its owner's hand/.test(text)) return part("setup", PLAYABLE_CARD_VALUE);
   if (new RegExp(
     "into your (?:hero's )?soul|\\bopt \\d|look at the top card of your deck|sharpen" +
-      "|counter on (?:it|this|an item you control|a cog)|the crowd cheers you|equip a ",
+      "|counter on (?:it|this|an item you control|a cog)|the crowd cheers you|equip an? ",
   ).test(text)) {
     return part("setup", SETUP_VALUE);
   }
@@ -379,7 +398,7 @@ function selfEffect(text: string): OnHitEvaluation | undefined {
 
 function classifyText(rawText: string, context: OnHitValueContext): OnHitEvaluation | undefined {
   const text = rawText.trim().toLowerCase();
-  return sum([
+  const classified = sum([
     handDisruption(text, context),
     arsenalDisruption(text, context),
     cardAdvantage(text, context),
@@ -394,6 +413,11 @@ function classifyText(rawText: string, context: OnHitValueContext): OnHitEvaluat
     minorEffects(text),
     selfEffect(text),
   ]);
+  // The attacker's optional payment is spent on the hit, so it nets out.
+  const paid = /\byou may pay ((?:\{r\})+)/.exec(text)?.[1]!.match(/\{r\}/g)!.length ?? 0;
+  return classified && paid > 0
+    ? { ...classified, value: Math.max(0, classified.value - paid * PAID_RESOURCE_VALUE) }
+    : classified;
 }
 
 /** Structured engine tags, used when the display text is not recognized
@@ -403,7 +427,12 @@ function classifyImpact(impact: OnHitImpactView, context: OnHitValueContext): On
     ? part("arsenal-disruption", ARSENAL_DISRUPTION_VALUE, { destroysOccupiedArsenal: true })
     : part("arsenal-disruption", 0);
   return sum([
-    impact.damage ? part("damage", impact.damage, { delayedDamage: impact.delayedDamage ?? 0 }) : undefined,
+    impact.damage
+      ? part("damage", impact.damage, {
+        immediateDamage: impact.damage - (impact.delayedDamage ?? 0),
+        delayedDamage: impact.delayedDamage ?? 0,
+      })
+      : undefined,
     impact.drawCards ? drawn(impact.drawCards, context) : undefined,
     impact.discardCards
       ? handLoss("forced-discard", impact.discardCards, FORCED_DISCARD_VALUE, context)
@@ -434,4 +463,15 @@ export function evaluateOnHit(context: OnHitValueContext): OnHitEvaluation {
   return /when (?:this|you) hits|on hit/i.test(context.sourceText ?? "")
     ? part("unclassified", UNCLASSIFIED_VALUE)
     : EMPTY_ON_HIT_EVALUATION;
+}
+
+/** Damage the current link's public on-hit effects deal as soon as it hits. */
+export function immediateOnHitDamage(effects: readonly PublicOnHitEffect[]): number {
+  return evaluateOnHit({
+    effects,
+    attackerCanContinue: false,
+    attackerCanArsenal: false,
+    defenderHasHand: false,
+    defenderHasArsenal: false,
+  }).immediateDamage;
 }

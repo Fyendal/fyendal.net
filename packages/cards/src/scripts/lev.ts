@@ -1,5 +1,6 @@
 import type { CardScript } from "@fyendal/engine";
 import {
+  hasCardSubtype,
   isSixPlus,
   lessonCounter,
   mentorFlipTrigger,
@@ -21,7 +22,7 @@ export const lev: Record<string, CardScript> = {
           ctx.self.faceDown !== true &&
           !!played &&
           ctx.hasCardType(played, "action") &&
-          ctx.cardTypes(played).includes("attack"),
+          hasCardSubtype(ctx, played, "attack"),
         effect(ctx, played) {
           if (!played) return;
           const top = ctx.player(ctx.seat).deck[0];

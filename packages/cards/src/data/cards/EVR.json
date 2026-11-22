@@ -2,7 +2,7 @@
  {
   "id": "EVR000",
   "name": "Grandeur of Valahai",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "Legendary\nWhen you pitch Grandeur of Valahai, create a Seismic Surge token.",
   "pitch": 3,
   "classes": [
@@ -19,7 +19,7 @@
  {
   "id": "EVR001",
   "name": "Skull Crushers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever you roll a 5 or 6 on a die, your Brute attacks gain +1{p} this turn.\nWhenever you roll a 1 on a die, destroy Skull Crushers.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -36,7 +36,7 @@
  {
   "id": "EVR002",
   "name": "Swing Big",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When the combat chain closes, if this didn't hit, the defending hero creates a Quicken token.",
   "pitch": 1,
   "cost": 2,
@@ -53,7 +53,7 @@
  {
   "id": "EVR003",
   "name": "Ready to Roll",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Kayo Specialization\nIf you would roll 1 or more dice this turn, instead roll that many dice plus 1 and ignore the lowest roll.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -70,7 +70,7 @@
  {
   "id": "EVR004",
   "name": "Rolling Thunder",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Roll a 6 sided die. Your next Brute attack this turn gains +X{p}, where X the number rolled.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -86,7 +86,7 @@
  {
   "id": "EVR005",
   "name": "High Roller",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Intimidate\nIf you have rolled a 4, 5, or 6 on a die this turn, instead intimidate twice.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -103,7 +103,7 @@
  {
   "id": "EVR006",
   "name": "High Roller",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Intimidate\nIf you have rolled a 5 or 6 on a die this turn, instead intimidate twice.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -120,7 +120,7 @@
  {
   "id": "EVR007",
   "name": "High Roller",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Intimidate\nIf you have rolled a 6 on a die this turn, instead intimidate twice.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -137,7 +137,7 @@
  {
   "id": "EVR008",
   "name": "Bare Fangs",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
   "pitch": 1,
   "cost": 2,
@@ -153,7 +153,7 @@
  {
   "id": "EVR009",
   "name": "Bare Fangs",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
   "pitch": 2,
   "cost": 2,
@@ -169,7 +169,7 @@
  {
   "id": "EVR010",
   "name": "Bare Fangs",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
   "pitch": 3,
   "cost": 2,
@@ -185,7 +185,7 @@
  {
   "id": "EVR011",
   "name": "Wild Ride",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
   "pitch": 1,
   "cost": 2,
@@ -204,7 +204,7 @@
  {
   "id": "EVR012",
   "name": "Wild Ride",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
   "pitch": 2,
   "cost": 2,
@@ -223,7 +223,7 @@
  {
   "id": "EVR013",
   "name": "Wild Ride",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
   "pitch": 3,
   "cost": 2,
@@ -242,7 +242,7 @@
  {
   "id": "EVR014",
   "name": "Bad Beats",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Roll a 6 sided die. If the number rolled is a 4, 5, or 6, the next Brute attack action card you play this turn gains +5{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -258,7 +258,7 @@
  {
   "id": "EVR015",
   "name": "Bad Beats",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Roll a 6 sided die. If the number rolled is a 5 or 6, the next Brute attack action card you play this turn gains +5{p}.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -274,7 +274,7 @@
  {
   "id": "EVR016",
   "name": "Bad Beats",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Roll a 6 sided die. If the number rolled is a 6, the next Brute attack action card you play this turn gains +5{p}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -290,7 +290,7 @@
  {
   "id": "EVR017",
   "name": "Bravo, Star of the Show",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Earth, Ice, and Lightning\nAt the start of your turn, you may reveal an Earth, an Ice, and a Lightning card from your hand. If you do, the next attack action card with cost 3 or greater you play this turn gains +2{p}, dominate, and go again.",
   "classes": [
    "guardian"
@@ -310,7 +310,7 @@
  {
   "id": "EVR018",
   "name": "Stalagmite, Bastion of Isenloft",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever you defend with Stalagmite, create a Frostbite token under the attacking hero's control. Temper",
   "defense": 2,
   "classes": [
@@ -328,7 +328,7 @@
  {
   "id": "EVR019",
   "name": "Valda Brightaxe",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever an opponent draws a card during an action phase, create a Seismic Surge token for each card drawn this way.\nAt the start of your turn, if you control 3 or more Seismic Surge tokens, cards you own with crush gain dominate this turn.",
   "classes": [
    "guardian"
@@ -340,7 +340,7 @@
  {
   "id": "EVR020",
   "name": "Earthlore Bounty",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever you draw 1 or more cards from an action card effect, create that many Seismic Surge tokens.\nTemper",
   "defense": 2,
   "classes": [
@@ -357,7 +357,7 @@
  {
   "id": "EVR021",
   "name": "Pulverize",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Heave 3\nIf Pulverize hits a hero, their first attack during their next turn has -4{p}.",
   "pitch": 1,
   "cost": 10,
@@ -377,7 +377,7 @@
  {
   "id": "EVR022",
   "name": "Imposing Visage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Search your deck for an aura card with cost X or less, put it into the arena, then shuffle your deck.\nGo again",
   "pitch": 3,
   "defense": 3,
@@ -392,7 +392,7 @@
  {
   "id": "EVR023",
   "name": "Nerves of Steel",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Nerves of Steel enters the arena, remove a -1{d} counter from a chest equipment you control.\nBattleworn and temper on equipment you control doesn't trigger if it defends an attack with 2 or less {p}.\nWhen your hero is dealt damage, destroy Nerves of Steel.",
   "pitch": 3,
   "cost": 3,
@@ -408,7 +408,7 @@
  {
   "id": "EVR024",
   "name": "Thunder Quake",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Heave 3",
   "pitch": 1,
   "cost": 6,
@@ -428,7 +428,7 @@
  {
   "id": "EVR025",
   "name": "Thunder Quake",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Heave 3",
   "pitch": 2,
   "cost": 6,
@@ -448,7 +448,7 @@
  {
   "id": "EVR026",
   "name": "Thunder Quake",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Heave 3",
   "pitch": 3,
   "cost": 6,
@@ -468,7 +468,7 @@
  {
   "id": "EVR027",
   "name": "Macho Grande",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate",
   "pitch": 1,
   "cost": 7,
@@ -488,7 +488,7 @@
  {
   "id": "EVR028",
   "name": "Macho Grande",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate",
   "pitch": 2,
   "cost": 7,
@@ -508,7 +508,7 @@
  {
   "id": "EVR029",
   "name": "Macho Grande",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate",
   "pitch": 3,
   "cost": 7,
@@ -528,7 +528,7 @@
  {
   "id": "EVR030",
   "name": "Seismic Stir",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create 3 Seismic Surge tokens.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -544,7 +544,7 @@
  {
   "id": "EVR031",
   "name": "Seismic Stir",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create 2 Seismic Surge tokens.\nGo again",
   "pitch": 2,
   "cost": 2,
@@ -560,7 +560,7 @@
  {
   "id": "EVR032",
   "name": "Seismic Stir",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Seismic Surge token.\nGo again",
   "pitch": 3,
   "cost": 2,
@@ -576,7 +576,7 @@
  {
   "id": "EVR033",
   "name": "Steadfast",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Prevent the next 6 damage that would be dealt to your hero this turn by a source of your choice.",
   "pitch": 1,
   "cost": 3,
@@ -588,7 +588,7 @@
  {
   "id": "EVR034",
   "name": "Steadfast",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Prevent the next 5 damage that would be dealt to your hero this turn by a source of your choice.",
   "pitch": 2,
   "cost": 3,
@@ -600,7 +600,7 @@
  {
   "id": "EVR035",
   "name": "Steadfast",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Prevent the next 4 damage that would be dealt to your hero this turn by a source of your choice.",
   "pitch": 3,
   "cost": 3,
@@ -612,7 +612,7 @@
  {
   "id": "EVR036",
   "name": "Seismic Surge",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn costs {r} less to play.",
   "classes": [
    "guardian"
@@ -625,7 +625,7 @@
  {
   "id": "EVR037",
   "name": "Mask of the Pouncing Lynx",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When an attack action card you control hits, you may destroy Mask of the Pouncing Lynx. If you do, search your deck for an attack action card with 2 or less {p}, banish it, then shuffle. You may play it this turn.\nBlade Break",
   "defense": 2,
   "classes": [
@@ -642,7 +642,7 @@
  {
   "id": "EVR038",
   "name": "Break Tide",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Rushing River or Flood of Force was the last attack this combat chain, Break Tide gains +3{p}, dominate, and \"If Break Tide hits, banish the top card of your deck. Until the end of your next turn, you may play it.\"",
   "pitch": 2,
   "cost": 0,
@@ -663,7 +663,7 @@
  {
   "id": "EVR039",
   "name": "Spring Tidings",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Benji Specialization\nWhen Spring Tidings hits, draw a card for each other attack action card with 2 or less base {p} you control on the combat chain.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -684,7 +684,7 @@
  {
   "id": "EVR040",
   "name": "Winds of Eternity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Hundred Winds was the last attack this combat chain, this gets +2{p} and \"When this hits, shuffle all cards you own named Hundred Winds on the combat chain into your deck.\"",
   "pitch": 3,
   "cost": 0,
@@ -704,7 +704,7 @@
  {
   "id": "EVR041",
   "name": "Hundred Winds",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Hundred Winds was the last attack this combat chain, this attack gains +1{p} for each other card named Hundred Winds you control on this combat chain.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -725,7 +725,7 @@
  {
   "id": "EVR042",
   "name": "Hundred Winds",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Hundred Winds was the last attack this combat chain, this attack gains +1{p} for each other card named Hundred Winds you control on this combat chain.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -746,7 +746,7 @@
  {
   "id": "EVR043",
   "name": "Hundred Winds",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Hundred Winds was the last attack this combat chain, this attack gains +1{p} for each other card named Hundred Winds you control on this combat chain.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -767,7 +767,7 @@
  {
   "id": "EVR044",
   "name": "Ride the Tailwind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Ride the Tailwind hits, the next attack action card with 2 or less base {p} you play this combat chain gains go again.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -787,7 +787,7 @@
  {
   "id": "EVR045",
   "name": "Ride the Tailwind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Ride the Tailwind hits, the next attack action card with 2 or less base {p} you play this combat chain gains go again.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -807,7 +807,7 @@
  {
   "id": "EVR046",
   "name": "Ride the Tailwind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Ride the Tailwind hits, the next attack action card with 2 or less base {p} you play this combat chain gains go again.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -827,7 +827,7 @@
  {
   "id": "EVR047",
   "name": "Twin Twisters",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose 1:\n\nTwin Twisters gains \"When this hits, your next attack this combat chain gains +1{p}.\"\nTwin Twisters gains +1{p}.\n\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -847,7 +847,7 @@
  {
   "id": "EVR048",
   "name": "Twin Twisters",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose 1:\n\nTwin Twisters gains \"When this hits, your next attack this combat chain gains +1{p}.\"\nTwin Twisters gains +1{p}.\n\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -867,7 +867,7 @@
  {
   "id": "EVR049",
   "name": "Twin Twisters",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose 1:\n\nTwin Twisters gains \"When this hits, your next attack this combat chain gains +1{p}.\"\nTwin Twisters gains +1{p}.\n\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -887,7 +887,7 @@
  {
   "id": "EVR050",
   "name": "Wax On",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "While Wax On is defending an attack action card with cost 0, it gains +2{d}.",
   "pitch": 1,
   "cost": 0,
@@ -900,7 +900,7 @@
  {
   "id": "EVR051",
   "name": "Wax On",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "While Wax On is defending an attack action card with cost 0, it gains +2{d}.",
   "pitch": 2,
   "cost": 0,
@@ -913,7 +913,7 @@
  {
   "id": "EVR052",
   "name": "Wax On",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "While Wax On is defending an attack action card with cost 0, it gains +2{d}.",
   "pitch": 3,
   "cost": 0,
@@ -926,7 +926,7 @@
  {
   "id": "EVR053",
   "name": "Helm of Sharp Eye",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Attack Reaction - {r}, destroy this: Banish the top card of your deck. You may play it this combat chain. Activate this only if you control a weapon attack with {p} greater than twice its base.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -943,7 +943,7 @@
  {
   "id": "EVR054",
   "name": "Shatter",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Until end of turn, target 2H weapon gains \"Whenever this would deal {p} damage, instead you may destroy target defending equipment with {d} less than the damage that would be dealt this way.",
   "pitch": 2,
   "cost": 0,
@@ -956,7 +956,7 @@
  {
   "id": "EVR055",
   "name": "Blood on Her Hands",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Kassai Specialization\nAs an additional cost to play Blood on Her Hands, destroy any number of Copper you control. Choose that many modes. You may choose each mode twice;\n\nTarget 1H weapon's attacks get +1{p} this turn.\nTarget 1H weapon's attacks get go again this turn.\nTarget 1H weapon may attack twice this turn.\n\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -973,7 +973,7 @@
  {
   "id": "EVR056",
   "name": "Oath of Steel",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Whenever you attack with a weapon this turn, put a +1{p} counter on it.\nAt the beginning of your end phase, remove all +1{p} counters from weapons you control.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -989,7 +989,7 @@
  {
   "id": "EVR057",
   "name": "Slice and Dice",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your first sword or dagger attack this turn gets +1{p}.\nYour second sword or dagger attack this turn gets +3{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1005,7 +1005,7 @@
  {
   "id": "EVR058",
   "name": "Slice and Dice",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your first sword or dagger attack this turn gets +1{p}.\nYour second sword or dagger attack this turn gets +2{p}.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1021,7 +1021,7 @@
  {
   "id": "EVR059",
   "name": "Slice and Dice",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your first sword or dagger attack this turn gets +1{p}.\nYour second sword or dagger attack this turn gets +1{p}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1037,7 +1037,7 @@
  {
   "id": "EVR060",
   "name": "Blade Runner",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target 1H weapon attack gains go again.\nYour next weapon attack this turn gains +3{p}.",
   "pitch": 1,
   "cost": 1,
@@ -1050,7 +1050,7 @@
  {
   "id": "EVR061",
   "name": "Blade Runner",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target 1H weapon attack gains go again.\nYour next weapon attack this turn gains +2{p}.",
   "pitch": 2,
   "cost": 1,
@@ -1063,7 +1063,7 @@
  {
   "id": "EVR062",
   "name": "Blade Runner",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target 1H weapon attack gains go again.\nYour next weapon attack this turn gains +1{p}.",
   "pitch": 3,
   "cost": 1,
@@ -1076,7 +1076,7 @@
  {
   "id": "EVR063",
   "name": "In the Swing",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Play this only if you've attacked 2 or more times with weapons this turn.\nTarget weapon attack gets +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -1089,7 +1089,7 @@
  {
   "id": "EVR064",
   "name": "In the Swing",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Play this only if you've attacked 2 or more times with weapons this turn.\nTarget weapon attack gets +2{p}.",
   "pitch": 2,
   "cost": 0,
@@ -1102,7 +1102,7 @@
  {
   "id": "EVR065",
   "name": "In the Swing",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Play this only if you've attacked 2 or more times with weapons this turn.\nTarget weapon attack gets +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -1115,7 +1115,7 @@
  {
   "id": "EVR066",
   "name": "Outland Skirmish",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next 1H weapon attack this turn gains +3{p}.\nThe next time a weapon hits this turn, create a Copper token.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1131,7 +1131,7 @@
  {
   "id": "EVR067",
   "name": "Outland Skirmish",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next 1H weapon attack this turn gains +2{p}.\nThe next time a weapon hits this turn, create a Copper token.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1147,7 +1147,7 @@
  {
   "id": "EVR068",
   "name": "Outland Skirmish",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next 1H weapon attack this turn gains +1{p}.\nThe next time a weapon hits this turn, create a Copper token.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1163,7 +1163,7 @@
  {
   "id": "EVR069",
   "name": "Dissolution Sphere",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dissolution Sphere enters the arena with a steam counter on it.\nAt the beginning of your action phase, destroy Dissolution Sphere unless you remove a steam counter from it.\nWhenever your hero would be dealt exactly 1 damage, prevent it.",
   "pitch": 2,
   "cost": 2,
@@ -1178,7 +1178,7 @@
  {
   "id": "EVR070",
   "name": "Micro-processor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Data Doll Specialization\nOnce Per Turn Action - 0: Opt 1\nOnce Per Turn Action - 0: Draw a card then put a card from your hand on top of your deck.\nOnce Per Turn Action - 0: Banish the top card of your deck.\nThe first time you activate Micro-processor each turn, gain 1 action point.",
   "pitch": 3,
   "cost": 2,
@@ -1196,7 +1196,7 @@
  {
   "id": "EVR071",
   "name": "Signal Jammer",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Signal Jammer enters the arena with a steam counter on it.\nAt the beginning of your action phase, destroy Signal Jammer unless you remove a steam counter from it.\nEach hero can't play more than 1 'non-attack' action card each turn.",
   "pitch": 3,
   "cost": 0,
@@ -1211,7 +1211,7 @@
  {
   "id": "EVR072",
   "name": "Teklo Pounder",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This enters the arena with 3 steam counters on it. When this has none, destroy it.\nOnce per turn, when you boost an attack action card, remove a steam counter from this. If you do, the attack gets +2{p}.",
   "pitch": 3,
   "cost": 2,
@@ -1226,7 +1226,7 @@
  {
   "id": "EVR073",
   "name": "T-Bone",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control a card on the combat chain that was boosted, the defending hero must defend this with an equipment they control if able.\nBoost",
   "pitch": 1,
   "cost": 0,
@@ -1246,7 +1246,7 @@
  {
   "id": "EVR074",
   "name": "T-Bone",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control a card on the combat chain that was boosted, the defending hero must defend this with an equipment they control if able.\nBoost",
   "pitch": 2,
   "cost": 0,
@@ -1266,7 +1266,7 @@
  {
   "id": "EVR075",
   "name": "T-Bone",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control a card on the combat chain that was boosted, the defending hero must defend this with an equipment they control if able.\nBoost",
   "pitch": 3,
   "cost": 0,
@@ -1286,7 +1286,7 @@
  {
   "id": "EVR076",
   "name": "Payload",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have boosted this combat chain, Payload gains dominate.",
   "pitch": 1,
   "cost": 2,
@@ -1306,7 +1306,7 @@
  {
   "id": "EVR077",
   "name": "Payload",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have boosted this combat chain, Payload gains dominate.",
   "pitch": 2,
   "cost": 2,
@@ -1326,7 +1326,7 @@
  {
   "id": "EVR078",
   "name": "Payload",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have boosted this combat chain, Payload gains dominate.",
   "pitch": 3,
   "cost": 2,
@@ -1346,7 +1346,7 @@
  {
   "id": "EVR079",
   "name": "Zoom In",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Zoom in, opt X, where X is the number of times you have boosted this combat chain.\nBoost",
   "pitch": 1,
   "cost": 2,
@@ -1367,7 +1367,7 @@
  {
   "id": "EVR080",
   "name": "Zoom In",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Zoom in, opt X, where X is the number of times you have boosted this combat chain.\nBoost",
   "pitch": 2,
   "cost": 2,
@@ -1388,7 +1388,7 @@
  {
   "id": "EVR081",
   "name": "Zoom In",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Zoom in, opt X, where X is the number of times you have boosted this combat chain.\nBoost",
   "pitch": 3,
   "cost": 2,
@@ -1409,7 +1409,7 @@
  {
   "id": "EVR082",
   "name": "Rotary Ram",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Mechanologist attack action card you play this turn gains +3{p}.\nIf you have boosted this turn, put Rotary Ram on the bottom of your deck.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1425,7 +1425,7 @@
  {
   "id": "EVR083",
   "name": "Rotary Ram",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Mechanologist attack action card you play this turn gains +2{p}.\nIf you have boosted this turn, put Rotary Ram on the bottom of your deck.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1441,7 +1441,7 @@
  {
   "id": "EVR084",
   "name": "Rotary Ram",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Mechanologist attack action card you play this turn gains +1{p}.\nIf you have boosted this turn, put Rotary Ram on the bottom of your deck.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1457,7 +1457,7 @@
  {
   "id": "EVR085",
   "name": "Genis Wotchuneed",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - {r}{r}: Each other hero may put a card from their hand on the bottom of their deck. If they do, they draw a card and you create a Silver token. If you gain no Silver this way, draw a card. Go again",
   "classes": [
    "merchant"
@@ -1469,7 +1469,7 @@
  {
   "id": "EVR086",
   "name": "Silver Palms",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "At the start of each other hero's turn, if they have less {h} than you, they may draw a card. If they do, you create a Silver token.\nBlade Break",
   "defense": 2,
   "classes": [
@@ -1486,7 +1486,7 @@
  {
   "id": "EVR087",
   "name": "Dreadbore",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: You may put an arrow card from your hand face up into an empty arsenal zone you control. If you do, it gains +1{p} until end of turn. Go again\nArrows you control have \"Defense reactions can't be played from hand this chain link.\"",
   "classes": [
    "ranger"
@@ -1500,7 +1500,7 @@
  {
   "id": "EVR088",
   "name": "Battering Bolt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Battering Bolt hits a hero, they reveal their hand and discard all cards other than action cards. Then they lose 1{h} for each card discarded this way.",
   "pitch": 1,
   "cost": 2,
@@ -1518,7 +1518,7 @@
  {
   "id": "EVR089",
   "name": "Tri-shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may activate target bow you control 2 additional times this turn.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1534,7 +1534,7 @@
  {
   "id": "EVR090",
   "name": "Rain Razors",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Arrows have +2{p} while attacking this turn.",
   "pitch": 2,
   "cost": 0,
@@ -1546,7 +1546,7 @@
  {
   "id": "EVR091",
   "name": "Release the Tension",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next arrow attack this turn gains +3{p} and \"Defense reactions can't be played from arsenal this chain link.\"\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1562,7 +1562,7 @@
  {
   "id": "EVR092",
   "name": "Release the Tension",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next arrow attack this turn gains +2{p} and \"Defense reactions can't be played from arsenal this chain link.\"\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1578,7 +1578,7 @@
  {
   "id": "EVR093",
   "name": "Release the Tension",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next arrow attack this turn gains +1{p} and \"Defense reactions can't be played from arsenal this chain link.\"\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1594,7 +1594,7 @@
  {
   "id": "EVR094",
   "name": "Fatigue Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Fatigue Shot hits a hero, the base {p} of the first attack action card they play during their next turn is halved, rounded up.",
   "pitch": 1,
   "cost": 1,
@@ -1612,7 +1612,7 @@
  {
   "id": "EVR095",
   "name": "Fatigue Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Fatigue Shot hits a hero, the base {p} of the first attack action card they play during their next turn is halved, rounded up.",
   "pitch": 2,
   "cost": 1,
@@ -1630,7 +1630,7 @@
  {
   "id": "EVR096",
   "name": "Fatigue Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Fatigue Shot hits a hero, the base {p} of the first attack action card they play during their next turn is halved, rounded up.",
   "pitch": 3,
   "cost": 1,
@@ -1648,7 +1648,7 @@
  {
   "id": "EVR097",
   "name": "Timidity Point",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Timidity Point hits a hero, attacks they control lose and can't gain dominate during their next turn.",
   "pitch": 1,
   "cost": 1,
@@ -1666,7 +1666,7 @@
  {
   "id": "EVR098",
   "name": "Timidity Point",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Timidity Point hits a hero, attacks they control lose and can't gain dominate during their next turn.",
   "pitch": 2,
   "cost": 1,
@@ -1684,7 +1684,7 @@
  {
   "id": "EVR099",
   "name": "Timidity Point",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Timidity Point hits a hero, attacks they control lose and can't gain dominate during their next turn.",
   "pitch": 3,
   "cost": 1,
@@ -1702,7 +1702,7 @@
  {
   "id": "EVR100",
   "name": "Read the Glide Path",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next arrow attack this turn gains +3{p}.\nOpt 1\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1719,7 +1719,7 @@
  {
   "id": "EVR101",
   "name": "Read the Glide Path",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next arrow attack this turn gains +2{p}.\nOpt 1\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1736,7 +1736,7 @@
  {
   "id": "EVR102",
   "name": "Read the Glide Path",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next arrow attack this turn gains +1{p}.\nOpt 1\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1753,7 +1753,7 @@
  {
   "id": "EVR103",
   "name": "Vexing Quillhand",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Create 2 Runechant tokens. Go again\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -1770,7 +1770,7 @@
  {
   "id": "EVR104",
   "name": "Runic Reclamation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Runic Reclamation hits a hero, destroy target aura they control. If you do, create a Runechant token.",
   "pitch": 1,
   "cost": 3,
@@ -1787,7 +1787,7 @@
  {
   "id": "EVR105",
   "name": "Swarming Gloomveil",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played or created 1 or more auras this turn, Swarming Gloomveil gains go again. If you have played and/or created 2 or more, it gains +1{p}. If you have played and/or created 3 or more, it gains \"When this hits a hero, they can't prevent arcane damage from sources you control this turn.\"",
   "pitch": 1,
   "cost": 0,
@@ -1807,7 +1807,7 @@
  {
   "id": "EVR106",
   "name": "Revel in Runeblood",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played an attack action card and another non-attack action card this turn, create 4 Runechant tokens.\nAt the beginning of your end phase, destroy all Runechants you control.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1823,7 +1823,7 @@
  {
   "id": "EVR107",
   "name": "Runeblood Incantation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nRuneblood Incantation enters the arena with 3 verse counters on it.\nAt the beginning of your action phase, remove a verse counter from Runeblood Incantation. If you do create a Runechant token. Otherwise, destroy Runeblood Incantation.",
   "pitch": 1,
   "cost": 1,
@@ -1842,7 +1842,7 @@
  {
   "id": "EVR108",
   "name": "Runeblood Incantation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nRuneblood Incantation enters the arena with 2 verse counters on it.\nAt the beginning of your action phase, remove a verse counter from Runeblood Incantation. If you do create a Runechant token. Otherwise, destroy Runeblood Incantation.",
   "pitch": 2,
   "cost": 1,
@@ -1861,7 +1861,7 @@
  {
   "id": "EVR109",
   "name": "Runeblood Incantation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nRuneblood Incantation enters the arena with a verse counter on it.\nAt the beginning of your action phase, remove a verse counter from Runeblood Incantation. If you do create a Runechant token. Otherwise, destroy Runeblood Incantation.",
   "pitch": 3,
   "cost": 1,
@@ -1880,7 +1880,7 @@
  {
   "id": "EVR110",
   "name": "Drowning Dire",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played or created an aura this turn, Drowning Dire gains dominate.\nWhen Drowning Dire hits, you may put a 'non-attack' action card from your graveyard on the bottom of your deck.",
   "pitch": 1,
   "cost": 2,
@@ -1900,7 +1900,7 @@
  {
   "id": "EVR111",
   "name": "Drowning Dire",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played or created an aura this turn, Drowning Dire gains dominate.\nWhen Drowning Dire hits, you may put a 'non-attack' action card from your graveyard on the bottom of your deck.",
   "pitch": 2,
   "cost": 2,
@@ -1920,7 +1920,7 @@
  {
   "id": "EVR112",
   "name": "Drowning Dire",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played or created an aura this turn, Drowning Dire gains dominate.\nWhen Drowning Dire hits, you may put a 'non-attack' action card from your graveyard on the bottom of your deck.",
   "pitch": 3,
   "cost": 2,
@@ -1940,7 +1940,7 @@
  {
   "id": "EVR113",
   "name": "Reek of Corruption",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played or created an aura this turn, Reek of Corruption gains \"When this hits a hero, they discard a card.\"",
   "pitch": 1,
   "cost": 2,
@@ -1957,7 +1957,7 @@
  {
   "id": "EVR114",
   "name": "Reek of Corruption",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played or created an aura this turn, Reek of Corruption gains \"When this hits a hero, they discard a card.\"",
   "pitch": 2,
   "cost": 2,
@@ -1974,7 +1974,7 @@
  {
   "id": "EVR115",
   "name": "Reek of Corruption",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played or created an aura this turn, Reek of Corruption gains \"When this hits a hero, they discard a card.\"",
   "pitch": 3,
   "cost": 2,
@@ -1991,7 +1991,7 @@
  {
   "id": "EVR116",
   "name": "Shrill of Skullform",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played or created an aura this turn, Shrill of Skullform gains +3{p}.",
   "pitch": 1,
   "cost": 2,
@@ -2008,7 +2008,7 @@
  {
   "id": "EVR117",
   "name": "Shrill of Skullform",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played or created an aura this turn, Shrill of Skullform gains +3{p}.",
   "pitch": 2,
   "cost": 2,
@@ -2025,7 +2025,7 @@
  {
   "id": "EVR118",
   "name": "Shrill of Skullform",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played or created an aura this turn, Shrill of Skullform gains +3{p}.",
   "pitch": 3,
   "cost": 2,
@@ -2042,7 +2042,7 @@
  {
   "id": "EVR119",
   "name": "Runechant",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
   "classes": [
    "runeblade"
@@ -2055,7 +2055,7 @@
  {
   "id": "EVR120",
   "name": "Iyslander",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Ice\nIf it's not your turn, you may play blue 'non-attack' action cards from your arsenal as though they were an instant.\nWhenever you play an Ice card during an opponents turn, create a Frostbite token under their control.",
   "classes": [
    "wizard"
@@ -2073,7 +2073,7 @@
  {
   "id": "EVR121",
   "name": "Kraken's Aethervein",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Instant - {r}{r}{r}: Deal 1 arcane damage to target opposing hero. Draw a card for each arcane damage dealt this way.",
   "classes": [
    "wizard"
@@ -2087,7 +2087,7 @@
  {
   "id": "EVR122",
   "name": "Sigil of Parapets",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "While Sigil of Parapets is defending, whenever you play a Wizard card, Sigil of Parapet's gains +2{d}.",
   "pitch": 3,
   "cost": 1,
@@ -2100,7 +2100,7 @@
  {
   "id": "EVR123",
   "name": "Aether Wildfire",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to target opposing hero.\nIf Aether Wildfire is played during an opponents turn, until end of turn, action card effects that deal arcane damage instead deal that much arcane damage plus X, where X is the damage dealt by Aether Wildfire.",
   "pitch": 1,
   "cost": 2,
@@ -2113,7 +2113,7 @@
  {
   "id": "EVR124",
   "name": "Scour",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Destroy X target aura tokens and/or auras with cost 0 controlled by target hero. Then deal arcane damage to that hero equal to the number of auras destroyed this way.",
   "pitch": 3,
   "defense": 3,
@@ -2125,7 +2125,7 @@
  {
   "id": "EVR125",
   "name": "Emeritus Scolding",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to target hero. If Emeritus Scolding is played during an opponents turn, instead deal 6 arcane damage to them.",
   "pitch": 1,
   "cost": 2,
@@ -2138,7 +2138,7 @@
  {
   "id": "EVR126",
   "name": "Emeritus Scolding",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero. If Emeritus Scolding is played during an opponents turn, instead deal 5 arcane damage to them.",
   "pitch": 2,
   "cost": 2,
@@ -2151,7 +2151,7 @@
  {
   "id": "EVR127",
   "name": "Emeritus Scolding",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero. If Emeritus Scolding is played during an opponents turn, instead deal 4 arcane damage to them.",
   "pitch": 3,
   "cost": 2,
@@ -2164,7 +2164,7 @@
  {
   "id": "EVR128",
   "name": "Pry",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Target hero reveals 3 cards from their hand. If Pry is played during an opponents turn, instead they reveal all cards in their hand.\nYou may choose a card revealed this way. If you do, that hero puts it on the bottom of their deck then draws a card.",
   "pitch": 1,
   "cost": 0,
@@ -2177,7 +2177,7 @@
  {
   "id": "EVR129",
   "name": "Pry",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Target hero reveals 2 cards from their hand. If Pry is played during an opponents turn, instead they reveal all cards in their hand.\nYou may choose a card revealed this way. If you do, that hero puts it on the bottom of their deck then draws a card.",
   "pitch": 2,
   "cost": 0,
@@ -2190,7 +2190,7 @@
  {
   "id": "EVR130",
   "name": "Pry",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Target hero reveals a card from their hand. If Pry is played during an opponents turn, instead they reveal all cards in their hand.\nYou may choose a card revealed this way. If you do, that hero puts it on the bottom of their deck then draws a card.",
   "pitch": 3,
   "cost": 0,
@@ -2203,7 +2203,7 @@
  {
   "id": "EVR131",
   "name": "Pyroglyphic Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If your hero would be dealt arcane damage, prevent 3 arcane damage that source would deal.\nAt the beginning of your action phase, destroy Pyroglyphic Protection.",
   "pitch": 1,
   "cost": 2,
@@ -2219,7 +2219,7 @@
  {
   "id": "EVR132",
   "name": "Pyroglyphic Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If your hero would be dealt arcane damage, prevent 2 arcane damage that source would deal.\nAt the beginning of your action phase, destroy Pyroglyphic Protection.",
   "pitch": 2,
   "cost": 2,
@@ -2235,7 +2235,7 @@
  {
   "id": "EVR133",
   "name": "Pyroglyphic Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If your hero would be dealt arcane damage, prevent 1 arcane damage that source would deal.\nAt the beginning of your action phase, destroy Pyroglyphic Protection.",
   "pitch": 3,
   "cost": 2,
@@ -2251,7 +2251,7 @@
  {
   "id": "EVR134",
   "name": "Timekeeper's Whim",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 5 arcane damage to target hero.\nIf Timekeeper's Whim is played during an opponent's turn, put it on the bottom of its owner's deck.",
   "pitch": 1,
   "cost": 3,
@@ -2264,7 +2264,7 @@
  {
   "id": "EVR135",
   "name": "Timekeeper's Whim",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to target hero.\nIf Timekeeper's Whim is played during an opponent's turn, put it on the bottom of its owner's deck.",
   "pitch": 2,
   "cost": 3,
@@ -2277,7 +2277,7 @@
  {
   "id": "EVR136",
   "name": "Timekeeper's Whim",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero.\nIf Timekeeper's Whim is played during an opponent's turn, put it on the bottom of its owner's deck.",
   "pitch": 3,
   "cost": 3,
@@ -2290,7 +2290,7 @@
  {
   "id": "EVR137",
   "name": "Crown of Reflection",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Crown of Reflection: Destroy target Illusionist aura you control. If you do, you may put an Illusionist aura card from your hand into the arena with cost less than or equal the aura destroyed this way. Activate Crown of Reflection only during your action phase.\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -2307,7 +2307,7 @@
  {
   "id": "EVR138",
   "name": "Fractal Replication",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you play or defend with Fractal Replication, it gains the base abilities of all Illusionist attack action cards on the combat chain.\nFractal Replication's {p} is equal to the greatest base {p} among Illusionist attack action cards on the combat chain.\nFractal Replication's {d} is equal to the greatest base {d} among Illusionist attack action cards on the combat chain.",
   "pitch": 1,
   "cost": 0,
@@ -2322,7 +2322,7 @@
  {
   "id": "EVR139",
   "name": "Miraging Metamorph",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Miraging Metamorph is destroyed, create a token that's a copy of an aura you control.",
   "pitch": 1,
   "cost": 1,
@@ -2342,7 +2342,7 @@
  {
   "id": "EVR140",
   "name": "Shimmers of Silver",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per turn, when you attack with an Illusionist aura weapon, put a +1{p} counter on it.\nSpectra",
   "pitch": 3,
   "cost": 0,
@@ -2361,7 +2361,7 @@
  {
   "id": "EVR141",
   "name": "Haze Bending",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per turn, when this or an Illusionist non-token aura you control is destroyed, create a Spectral Shield token.\nSpectra",
   "pitch": 3,
   "cost": 0,
@@ -2380,7 +2380,7 @@
  {
   "id": "EVR142",
   "name": "Passing Mirage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your first Illusionist attack each turn loses and can't get phantasm.\nSpectra",
   "pitch": 3,
   "cost": 0,
@@ -2399,7 +2399,7 @@
  {
   "id": "EVR143",
   "name": "Pierce Reality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your first Illusionist attack action card you play each turn gets +2{p}.\nSpectra",
   "pitch": 3,
   "cost": 0,
@@ -2418,7 +2418,7 @@
  {
   "id": "EVR144",
   "name": "Coalescence Mirage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Coalescence Mirage is destroyed, you may put an Illusionist aura card with cost 0 from your hand into the arena.",
   "pitch": 1,
   "cost": 2,
@@ -2438,7 +2438,7 @@
  {
   "id": "EVR145",
   "name": "Coalescence Mirage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Coalescence Mirage is destroyed, you may put an Illusionist aura card with cost 0 from your hand into the arena.",
   "pitch": 2,
   "cost": 2,
@@ -2458,7 +2458,7 @@
  {
   "id": "EVR146",
   "name": "Coalescence Mirage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Coalescence Mirage is destroyed, you may put an Illusionist aura card with cost 0 from your hand into the arena.",
   "pitch": 3,
   "cost": 2,
@@ -2478,7 +2478,7 @@
  {
   "id": "EVR147",
   "name": "Phantasmal Haze",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Phantasmal Haze is destroyed, create a Spectral Shield token.",
   "pitch": 1,
   "cost": 3,
@@ -2498,7 +2498,7 @@
  {
   "id": "EVR148",
   "name": "Phantasmal Haze",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Phantasmal Haze is destroyed, create a Spectral Shield token.",
   "pitch": 2,
   "cost": 3,
@@ -2518,7 +2518,7 @@
  {
   "id": "EVR149",
   "name": "Phantasmal Haze",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Phantasmal Haze is destroyed, create a Spectral Shield token.",
   "pitch": 3,
   "cost": 3,
@@ -2538,7 +2538,7 @@
  {
   "id": "EVR150",
   "name": "Veiled Intentions",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nThe next attack action card you play this turn is Illusionist in addition to its other card, and gains +4{p}, phantasm, and \"When this is destroyed, draw a card.\"",
   "pitch": 1,
   "cost": 1,
@@ -2554,7 +2554,7 @@
  {
   "id": "EVR151",
   "name": "Veiled Intentions",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nThe next attack action card you play this turn is Illusionist in addition to its other card, and gains +3{p}, phantasm, and \"When this is destroyed, draw a card.\"",
   "pitch": 2,
   "cost": 1,
@@ -2570,7 +2570,7 @@
  {
   "id": "EVR152",
   "name": "Veiled Intentions",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nThe next attack action card you play this turn is Illusionist in addition to its other card, and gains +2{p}, phantasm, and \"When this is destroyed, draw a card.\"",
   "pitch": 3,
   "cost": 1,
@@ -2586,7 +2586,7 @@
  {
   "id": "EVR153",
   "name": "Spectral Shield",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Ward 1",
   "classes": [
    "illusionist"
@@ -2602,7 +2602,7 @@
  {
   "id": "EVR154",
   "name": "Arcanite Skullcap",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If you have less {h} than your opponent, Arcanite Skullcap gains +1{d} and Arcane Barrier 3.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -2620,7 +2620,7 @@
  {
   "id": "EVR155",
   "name": "Arcane Lantern",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "classes": [
    "generic"
@@ -2636,7 +2636,7 @@
  {
   "id": "EVR156",
   "name": "Bingo",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Bingo hits a hero, they reveal a card from their hand. If an attack action card is revealed this way, Bingo gains go again. If a 'non-attack' action card is revealed this way, draw a card.",
   "pitch": 1,
   "cost": 1,
@@ -2656,7 +2656,7 @@
  {
   "id": "EVR157",
   "name": "Firebreathing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - {r}: Firebreathing gains +1{p}. Activate this ability only while Firebreathing is attacking.",
   "pitch": 1,
   "cost": 2,
@@ -2673,7 +2673,7 @@
  {
   "id": "EVR158",
   "name": "Cash Out",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Cash Out, you may destroy any number of weapons, equipment and/or non-token items you control.\nCreate a Silver token for each permanent destroyed this way.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -2689,7 +2689,7 @@
  {
   "id": "EVR159",
   "name": "Knick Knack Bric-a-brac",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Knick Knack Bric-a-brac, you may destroy any number of Copper, Silver, and/or Gold you control.\nSearch your deck for a card with Amulet, Potion, or Talisman in its name, put it into the arena, then shuffle. For each 4 Copper, 2 Silver, and/or 1 Gold destroyed this way, repeat this process.",
   "pitch": 1,
   "cost": 3,
@@ -2702,7 +2702,7 @@
  {
   "id": "EVR160",
   "name": "This Round's on Me",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Each hero draws a card.\nUntil the start of your next turn, attacks that target you have -1{p}.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -2718,7 +2718,7 @@
  {
   "id": "EVR161",
   "name": "Life of the Party",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may discard or destroy a card you control named Crazy Brew rather than pay Life of the Party's {r} cost. If you do, choose all modes, otherwise choose 1 at random;\n\nThis gets \"When this hits, gain life 2{h}.\"\nThis gets +2{p}.\nThis gets go again.",
   "pitch": 1,
   "cost": 2,
@@ -2738,7 +2738,7 @@
  {
   "id": "EVR162",
   "name": "Life of the Party",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may discard or destroy a card you control named Crazy Brew rather than pay Life of the Party's {r} cost. If you do, choose all modes, otherwise choose 1 at random;\n\nThis gets \"When this hits, gain life 2{h}.\"\nThis gets +2{p}.\nThis gets go again.",
   "pitch": 2,
   "cost": 2,
@@ -2758,7 +2758,7 @@
  {
   "id": "EVR163",
   "name": "Life of the Party",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may discard or destroy a card you control named Crazy Brew rather than pay Life of the Party's {r} cost. If you do, choose all modes, otherwise choose 1 at random;\n\nThis gets \"When this hits, gain life 2{h}.\"\nThis gets +2{p}.\nThis gets go again.",
   "pitch": 3,
   "cost": 2,
@@ -2778,7 +2778,7 @@
  {
   "id": "EVR164",
   "name": "High Striker",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time an attack you control hits this turn, create 6 Copper tokens.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -2794,7 +2794,7 @@
  {
   "id": "EVR165",
   "name": "High Striker",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time an attack you control hits this turn, create 4 Copper tokens.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -2810,7 +2810,7 @@
  {
   "id": "EVR166",
   "name": "High Striker",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time an attack you control hits this turn, create 2 Copper tokens.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -2826,7 +2826,7 @@
  {
   "id": "EVR167",
   "name": "Pick a Card, Any Card",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Look at target opponent's hand then name a card.\nChoose a random card from their hand and reveal it. If it's the named card, create a Silver token. Repeat this process thrice.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -2842,7 +2842,7 @@
  {
   "id": "EVR168",
   "name": "Pick a Card, Any Card",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Look at target opponent's hand then name a card.\nChoose a random card from their hand and reveal it. If it's the named card, create a Silver token. Repeat this process twice.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -2858,7 +2858,7 @@
  {
   "id": "EVR169",
   "name": "Pick a Card, Any Card",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Look at target opponent's hand then name a card.\nChoose a random card from their hand and reveal it. If it's the named card, create a Silver token. Repeat this process once.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -2874,7 +2874,7 @@
  {
   "id": "EVR170",
   "name": "Smashing Good Time",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time an attack action card hits a hero this turn, you may destroy an item they control with cost 2 or less.\nIf Smashing Good Time is played from arsenal, the next attack action card you play this turn gains +3{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -2890,7 +2890,7 @@
  {
   "id": "EVR171",
   "name": "Smashing Good Time",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time an attack action card hits a hero this turn, you may destroy an item they control with cost 2 or less.\nIf Smashing Good Time is played from arsenal, the next attack action card you play this turn gains +2{p}.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -2906,7 +2906,7 @@
  {
   "id": "EVR172",
   "name": "Smashing Good Time",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time an attack action card hits a hero this turn, you may destroy an item they control with cost 2 or less.\nIf Smashing Good Time is played from arsenal, the next attack action card you play this turn gains +1{p}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -2922,7 +2922,7 @@
  {
   "id": "EVR173",
   "name": "Even Bigger Than That!",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Play Even Bigger Than That! only if you've dealt {p} this turn.\nOpt 3, then reveal the top card of your deck. If it has {p} greater than the amount of damage you've dealt this turn, create a Quicken token and draw a card.",
   "pitch": 1,
   "cost": 0,
@@ -2937,7 +2937,7 @@
  {
   "id": "EVR174",
   "name": "Even Bigger Than That!",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Play Even Bigger Than That! only if you've dealt {p} this turn.\nOpt 2, then reveal the top card of your deck. If it has {p} greater than the amount of damage you've dealt this turn, create a Quicken token and draw a card.",
   "pitch": 2,
   "cost": 0,
@@ -2952,7 +2952,7 @@
  {
   "id": "EVR175",
   "name": "Even Bigger Than That!",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Play Even Bigger Than That! only if you've dealt {p} this turn.\nOpt 1, then reveal the top card of your deck. If it has {p} greater than the amount of damage you've dealt this turn, create a Quicken token and draw a card.",
   "pitch": 3,
   "cost": 0,
@@ -2967,7 +2967,7 @@
  {
   "id": "EVR176",
   "name": "Amulet of Assertiveness",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAttack Reaction - Destroy Amulet of Assertiveness: Target attack gains \"When this hits, banish the top card of your deck. If it's an attack action card, you may play it this turn.\" Activate this ability only if you have 4 or more cards in hand.",
   "pitch": 2,
   "cost": 0,
@@ -2985,7 +2985,7 @@
  {
   "id": "EVR177",
   "name": "Amulet of Echoes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nInstant - Destroy Amulet of Echoes: Target hero discards 2 cards. Activate this ability only if they have played 2 or more cards with the same name this turn.",
   "pitch": 3,
   "cost": 0,
@@ -3003,7 +3003,7 @@
  {
   "id": "EVR178",
   "name": "Amulet of Havencall",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nDefense Reaction - Destroy Amulet of Havencall: Search your deck for a card named Rally the Rearguard, add it to this chain link as a defending card, then shuffle. Activate this ability only if you have no cards in hand.",
   "pitch": 3,
   "cost": 0,
@@ -3021,7 +3021,7 @@
  {
   "id": "EVR179",
   "name": "Amulet of Ignition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nInstant - Destroy Amulet of Ignition: The next ability you activate this turn costs {r} less. Activate this ability only if you haven't played a card or activated an ability this turn.",
   "pitch": 2,
   "cost": 0,
@@ -3039,7 +3039,7 @@
  {
   "id": "EVR180",
   "name": "Amulet of Intervention",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nInstant - Destroy Amulet of Intervention: Prevent the next 1 damage that would be dealt to your hero this turn. Activate this ability only while your hero is the target of a source that would deal damage equal to or greater than your hero's {h}.",
   "pitch": 3,
   "cost": 0,
@@ -3057,7 +3057,7 @@
  {
   "id": "EVR181",
   "name": "Amulet of Oblation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nInstant - Destroy Amulet of Oblation: Until end of turn, target attack action gains \"If this would be put into a graveyard, instead put it on the bottom of its owner's deck.\" Activate this ability only if a card has entered a graveyard this turn.",
   "pitch": 3,
   "cost": 0,
@@ -3075,7 +3075,7 @@
  {
   "id": "EVR182",
   "name": "Clarity Potion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Destroy Clarity Potion: Opt 2",
   "pitch": 3,
   "cost": 0,
@@ -3090,7 +3090,7 @@
  {
   "id": "EVR183",
   "name": "Healing Potion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Action - Destroy this: Gain 2{h}. Go again",
   "pitch": 3,
   "cost": 0,
@@ -3105,7 +3105,7 @@
  {
   "id": "EVR184",
   "name": "Potion of Seeing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Destroy Potion of Seeing: Look at target hero's hand.",
   "pitch": 3,
   "cost": 0,
@@ -3120,7 +3120,7 @@
  {
   "id": "EVR185",
   "name": "Potion of Déjà Vu",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Destroy Potion of Déjà Vu: Put all cards from your pitch zone on top of your deck in any order.",
   "pitch": 3,
   "cost": 0,
@@ -3135,7 +3135,7 @@
  {
   "id": "EVR186",
   "name": "Potion of Ironhide",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Destroy Potion of Ironhide: Attack action cards you own gain +1{d} this turn.",
   "pitch": 3,
   "cost": 0,
@@ -3150,7 +3150,7 @@
  {
   "id": "EVR187",
   "name": "Potion of Luck",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Destroy Potion of Luck: Shuffle your hand and arsenal into your deck then draw that many cards.",
   "pitch": 3,
   "cost": 0,
@@ -3165,7 +3165,7 @@
  {
   "id": "EVR188",
   "name": "Talisman of Balance",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your end phase, if you have less cards in arsenal than an opposing hero, destroy Talisman of Balance and put the top card of your deck into an empty arsenal zone you control.",
   "pitch": 3,
   "cost": 0,
@@ -3183,7 +3183,7 @@
  {
   "id": "EVR189",
   "name": "Talisman of Cremation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen you play a card from your banished zone, destroy Talisman of Cremation and name a card. Banish all cards with the chosen name from each opposing hero's graveyard.",
   "pitch": 3,
   "cost": 0,
@@ -3201,7 +3201,7 @@
  {
   "id": "EVR190",
   "name": "Talisman of Featherfoot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen an attack you control gains exactly +1{p} from an effect during the reaction step, destroy Talisman of Featherfoot and the attack gains go again.",
   "pitch": 2,
   "cost": 0,
@@ -3219,7 +3219,7 @@
  {
   "id": "EVR191",
   "name": "Talisman of Recompense",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhenever you pitch a card, if you would gain exactly one {r}, instead destroy Talisman of Recompense and gain {r}{r}{r}.",
   "pitch": 2,
   "cost": 0,
@@ -3237,7 +3237,7 @@
  {
   "id": "EVR192",
   "name": "Talisman of Tithes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nIf an opponent would draw 1 or more cards during your action phase, instead destroy Talisman of Tithes and they draw that many cards minus 1.",
   "pitch": 3,
   "cost": 0,
@@ -3255,7 +3255,7 @@
  {
   "id": "EVR193",
   "name": "Talisman of Warfare",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen a source you control deals exactly 2 damage to an opposing hero, destroy Talisman of Warfare and all cards in all arsenals.",
   "pitch": 2,
   "cost": 0,
@@ -3273,7 +3273,7 @@
  {
   "id": "EVR194",
   "name": "Copper",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Action - {r}{r}{r}{r}, destroy this: Draw a card. Go again",
   "classes": [
    "generic"
@@ -3286,7 +3286,7 @@
  {
   "id": "EVR195",
   "name": "Silver",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Action - {r}{r}{r}, destroy Silver: Draw a card. Go again",
   "classes": [
    "generic"
@@ -3299,7 +3299,7 @@
  {
   "id": "EVR196",
   "name": "Quicken",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gains go again.",
   "classes": [
    "generic"
@@ -3312,7 +3312,7 @@
  {
   "id": "EVR197",
   "name": "Frostbite",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Cards and abilities cost you an additional {r} to play or activate.\nAt the beginning of your end phase or when you play a card or activate an ability, destroy Frostbite.",
   "subtypes": [
    "elemental",

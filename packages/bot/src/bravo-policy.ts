@@ -2,6 +2,7 @@ import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import {
   chooseScoredIntent,
   committedEffectAmount,
+  currentAllyAttackIsAlreadyLethal,
   currentAttackIsOurs,
   currentLink,
   enforceSpectraPolicy,
@@ -10,7 +11,6 @@ import {
   isAttack,
   opponentDamageEffectOnStack,
   optionCard,
-  ownCards,
   pitchIds,
   preventableAttackDamage,
   resourcesAfterCost,
@@ -19,6 +19,7 @@ import {
   scoreDefenseIntent,
   scoreDefenseReaction,
   scoreSpendCardChoice,
+  scoreTacticalRoot,
   shouldPreserveOpeningHand,
   spendsOpeningArsenalReserve,
   visibleOpponentDamageAmount,
@@ -27,14 +28,15 @@ import {
 } from "./policy.js";
 import { abilitySource, type HeroSolverRules } from "./card-model.js";
 import { guardianPatch } from "./guardian-rules.js";
-import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
+import { arsenalValuer, defenseReactionWorthSpending, handResponse, opportunityValuer } from "./hand-value.js";
 import {
   chooseTacticalIntentWithTrace,
   type TacticalTurnPlan,
 } from "./tactical-turn-planner.js";
+import { hasType } from "@fyendal/shared";
 
 function attackCost(data: CardData): number {
-  return data.cardType === "weapon" ? 3 : Math.max(0, data.cost ?? 0);
+  return hasType(data, "weapon") ? 3 : Math.max(0, data.cost ?? 0);
 }
 
 function isWizardFatigueMatchup(input: BotPolicyInput): boolean {
@@ -57,9 +59,12 @@ function attackValue(data: CardData, input: BotPolicyInput): number {
 
 /** Arcane Polarity's life gain while held: the larger amount once arcane
  * damage has been dealt this turn. */
-function lifeGainAlternative(data: CardData, input: BotPolicyInput): number {
-  if (data.cardType !== "instant") return 0;
-  const arcaneTaken = input.view.turnFacts?.players[input.seat].arcaneDamageTaken === true;
+export function lifeGainAlternative(
+  data: CardData,
+  input: BotPolicyInput,
+  arcaneTaken = input.view.turnFacts?.players[input.seat].arcaneDamageTaken === true,
+): number {
+  if (!hasType(data, "instant")) return 0;
   return Number(
     (arcaneTaken ? /if you've been dealt arcane damage this turn, instead gain (\d+)\{h\}/i : /^gain (\d+)\{h\}/im)
       .exec(data.text)?.[1] ?? 0,
@@ -130,7 +135,7 @@ function committedOasisPrevention(input: BotPolicyInput): number {
   );
 }
 
-function damageWorthOasis(input: BotPolicyInput): number {
+export function damageWorthOasis(input: BotPolicyInput): number {
   const attack = Math.max(
     0,
     preventableAttackDamage(input) - (currentLink(input)?.damageToPrevent ?? 0),
@@ -185,13 +190,16 @@ function scoreDefend(
   });
 }
 
-function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
+/** Oasis Respite targets: the bot's own hero and the opposing damage source. */
+export function scoreOasisChoice(
+  intent: Extract<GameIntent, { kind: "choose" }>,
+  input: BotPolicyInput,
+): number | undefined {
   const decision = input.view.pendingDecision;
-  if (!decision) return 0;
-  if (decision.promptMessage?.id === "card.sly.oasis.hero.choose") {
+  if (decision?.promptMessage?.id === "card.sly.oasis.hero.choose") {
     return intent.optionId === "your hero" ? 100 : -100;
   }
-  if (decision.promptMessage?.id === "card.sly.damage.source.choose") {
+  if (decision?.promptMessage?.id === "card.sly.damage.source.choose") {
     const link = currentLink(input);
     const attackSource = link?.attackingCard.owner !== input.seat
       ? link?.attackingCard.instanceId
@@ -201,6 +209,14 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
     const desired = attackSource ?? stackSource;
     return desired !== undefined && intent.optionId === String(desired) ? 100 : -100;
   }
+  return undefined;
+}
+
+function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
+  const decision = input.view.pendingDecision;
+  if (!decision) return 0;
+  const oasis = scoreOasisChoice(intent, input);
+  if (oasis !== undefined) return oasis;
   if (decision.kind === "arsenal") {
     return scoreArsenalChoice(intent, input, arsenalValuer(bravoSolverRules));
   }
@@ -258,7 +274,7 @@ function scorePlay(
       const canAttack = attackData !== undefined &&
         floating + remainingSingleCardPitch(intent, input) >= attackCost(attackData);
       score = canAttack ? 40 + attackValue(attackData, input) : -100;
-    } else if (data.cardType === "weapon") {
+    } else if (hasType(data, "weapon")) {
       score = 8 + (data.attack ?? 0);
     } else {
       score = 2;
@@ -266,18 +282,22 @@ function scorePlay(
   } else if (isAttack(data)) {
     score = 20 + attackValue(data, input);
     if (intent.kind === "play-from-arsenal") score += 3;
-  } else if (data.cardType === "attack-reaction") {
+  } else if (hasType(data, "attack-reaction")) {
     const link = currentLink(input);
     if (!currentAttackIsOurs(input) || input.view.pendingDecision?.kind !== "attack-reaction") {
       score = -100;
     } else if (functional === "pummel|1" && link) {
       const damageAfterPummel = link.attackValue + 4 - link.defenseValue;
-      score = damageAfterPummel >= 4 ? 48 : damageAfterPummel > 0 ? 34 : -20;
+      score = currentAllyAttackIsAlreadyLethal(input)
+        ? -100
+        : damageAfterPummel >= 4 ? 48 : damageAfterPummel > 0 ? 34 : -20;
     } else {
       score = 8;
     }
-  } else if (data.cardType === "defense-reaction") {
-    score = scoreDefenseReaction(data, input);
+  } else if (hasType(data, "defense-reaction")) {
+    score = defenseReactionWorthSpending(card, input, bravoSolverRules, pitchIds(intent))
+      ? scoreDefenseReaction(data, input, card)
+      : -100;
   } else if (functional === "oasis respite|1") {
     score = oasisDamage > 0 ? 60 + Math.min(oasisDamage, 4) * 10 : -100;
   } else if (functional === "arcane polarity|1") {
@@ -331,8 +351,8 @@ export function chooseBravoIntentWithTrace(input: BotPolicyInput): BravoIntentDe
   const decision = chooseTacticalIntentWithTrace(input, reactive, {
     chooseForced: (forced) => chooseBravoReactiveIntent({ ...forced, state: undefined }),
     rules: bravoSolverRules,
-    rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
-    rootScore: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
+    rankCandidate: (intent, observed) => scoreTacticalRoot(intent, observed, scorePlay),
+    rootScore: (intent, observed) => scoreTacticalRoot(intent, observed, scorePlay),
   });
   const intent = enforceSpectraPolicy(input, decision.intent);
   return decision.plan ? { intent, plan: decision.plan } : { intent };

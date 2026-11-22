@@ -1,40 +1,28 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextArcaneDamageCard,
   buffNextAttack,
   commonOptionMessages,
+  createRunechants,
   decisionPrompt,
   dealArcane,
+  heroChoiceSeat,
+  isWizardNonAttack,
   localizedCardLog,
   opponentSeat,
   optN,
   optOnChoose,
+  requestHeroChoice,
+  runeCount,
+  spellbladeAssault,
   wizardActionAsInstant,
   heroDamage,
 } from "../shared-helpers.js";
-
-const RUNECHANT = "SVI034";
-
-function isRunechant(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.isRunechant(card);
-}
-
-function runeCount(ctx: ScriptCtx): number {
-  return ctx.state.players[ctx.seat]!.board.filter((card) => isRunechant(ctx, card)).length;
-}
-
-function createRunechants(ctx: ScriptCtx, count: number): void {
-  ctx.createTokens(RUNECHANT, count);
-}
 
 function runeDiscount(): CardScript {
   return {
     modifyPlayCost: (ctx, base) => Math.max(0, base - runeCount(ctx)),
   };
-}
-
-function spellbladeAssault(): CardScript {
-  return { onAttackDeclared: (ctx) => createRunechants(ctx, 2) };
 }
 
 function reduceToRunechant(): CardScript {
@@ -131,26 +119,21 @@ function targetHeroArcaneSpell(damage: number): CardScript {
     arcaneDamageEffectAmounts: [damage],
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      ctx.requestChoice(
+      requestHeroChoice(
+        ctx,
         `arc-target:${damage}`,
-        decisionPrompt(
-          `${ctx.data.name}: deal ${ctx.previewArcaneDamage(damage)} arcane damage to which hero?`,
-          "card.arc.arcane.hero.choose",
-          {
-            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(damage) },
-            optionMessages: commonOptionMessages("opposing hero", "your hero"),
-          },
-        ),
-        ["opposing hero", "your hero"],
-        undefined,
-        undefined,
-        "opposing hero",
+        `${ctx.data.name}: deal ${ctx.previewArcaneDamage(damage)} arcane damage to which hero?`,
+        "card.arc.arcane.hero.choose",
+        {
+          values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(damage) },
+          defaultOption: "opposing hero",
+        },
       );
     },
     onChoose(ctx, hook, option) {
       const match = /^arc-target:(\d+)$/.exec(hook);
-      if (!match) return;
-      dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), Number(match[1]));
+      const seat = match ? heroChoiceSeat(ctx, option) : undefined;
+      if (match && seat !== undefined) dealArcane(ctx, seat, Number(match[1]));
     },
   };
 }
@@ -172,12 +155,6 @@ function aetherSpindle(damage: number): CardScript {
       optOnChoose(ctx, hook, option);
     },
   });
-}
-
-function isWizardNonAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return (
-    ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack") && ctx.cardTypes(card).includes("wizard")
-  );
 }
 
 function reverberate(damage: number): CardScript {
@@ -298,7 +275,7 @@ export const arcArcane: Record<string, CardScript> = {
       destroySelfCost: true,
       label: "Destroy: gain 3 resources",
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 3);
+        ctx.gainResources(ctx.seat, 3);
         ctx.logPublic(
           localizedCardLog(ctx, `${ctx.data.name}: gained {r}{r}{r}`, "card.log.common.resources.gained", {
             amount: 3,

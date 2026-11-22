@@ -49,6 +49,29 @@ describe("MPW — import and Warrior mastery", () => {
       .expectHandSize(0, 1);
   });
 
+  it("Shatter the Weakpoint destroys equipment reduced to 0 defense by counters", () => {
+    const g = scenario({
+      seats: [
+        hala({ resources: 4, hand: ["shatter the weakpoint|1"] }),
+        { hero: "dorinthea", equipment: { ...NO_EQUIPMENT, legs: "valiant dynamo|0" } },
+      ],
+    });
+    g.state.players[1]!.equipment.legs!.defCounters = 1;
+    g.play("shatter the weakpoint|1").activate("durendal|0").blockWith().settle().chooseCard("valiant dynamo|0").settle();
+    expect(g.state.players[1]!.equipment.legs).toBeFalsy();
+  });
+
+  it("Shatter the Weakpoint can destroy an equipment-typed weapon with 0 defense", () => {
+    const g = scenario({
+      seats: [
+        hala({ resources: 4, hand: ["shatter the weakpoint|1"] }),
+        { hero: "dorinthea", weapons: ["parry blade|0"], equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("shatter the weakpoint|1").activate("durendal|0").blockWith().settle().chooseCard("parry blade|0").settle();
+    expect(g.state.players[1]!.weapons).toHaveLength(0);
+  });
+
   it("Blade Dance grants the weapon attack go again", () => {
     const g = scenario({
       seats: [

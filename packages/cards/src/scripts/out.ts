@@ -2,12 +2,18 @@ import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal
 import {
   armGrantedHitRider,
   buffNextAttack,
+  cardNamed,
+  chainHitRider,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
-  grantedHitRiderOn,
+  equippedCards,
+  faceUpGraveyard,
   heroChoiceSeat,
   heroTarget,
+  isAttackAction,
+  isDagger,
+  isOwnAttack,
   mergeSetScripts,
   ongoingLabel,
   opponentSeat,
@@ -24,42 +30,10 @@ import {
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { outHighRarity, uzuriAbility } from "./out/high-rarity.js";
+import { BLOODROT_POX, FRAILTY, INERTIA, PONDER } from "./tokens.js";
 
 // OUT — Outsiders common/rare cards and young heroes.
-const BLOODROT = "SAZ034";
-const FRAILTY = "SAZ035";
-const INERTIA = "SAZ036";
-const PONDER = "DYN244";
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, tag: string): boolean {
-  const key = tag.toLowerCase();
-  return ctx.cardTypes(card).includes(key) || (data(ctx, card).keywords ?? []).some((x) => x.toLowerCase() === key);
-}
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && has(ctx, card, "attack");
-}
-function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
-  const player = ctx.player(seat);
-  return [
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-    ...player.weapons.filter((card) => data(ctx, card).cardType === "equipment"),
-  ];
-}
-function isDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return has(ctx, card, "dagger");
-}
-function isStealth(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return has(ctx, card, "stealth");
-}
-function comboWith(ctx: ScriptCtx, ...names: string[]): boolean {
-  return previousAttackHasName(ctx, ...names);
-}
-function myAttack(ctx: ScriptCtx): boolean {
-  return !!ctx.link && !ctx.link.resolved && ctx.link.attacker === ctx.seat;
-}
 function tokenOnHit(tokenId: string): CardScript {
   return {
     canTriggerOnHit(ctx) {
@@ -95,57 +69,45 @@ function stealthToken(tokenId: string): CardScript {
 }
 function noDefenseReactions(): CardScript {
   return {
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "noDefenseReactions", true);
-    },
+    defenseReactionsProhibited: true,
   };
 }
 function stealthReaction(pump: number, token?: string): CardScript {
   return {
     canPlay(ctx) {
-      return myAttack(ctx) && ctx.link!.attackCardType === "action" && isStealth(ctx, ctx.link!.attackingCard);
+      return isOwnAttack(ctx) && ctx.link!.attackCardType === "action" &&
+        ctx.hasKeyword(ctx.link!.attackingCard, "stealth");
     },
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: pump });
       if (token) armGrantedHitRider(ctx);
     },
-    ...(token
-      ? {
-          canTriggerOnHit(ctx: ScriptCtx) {
-            return ctx.link?.targetAllyId === undefined && grantedHitRiderOn(ctx, ctx.link?.attackingCard);
-          },
-          onHit(ctx: ScriptCtx) {
-            ctx.createToken(token, opponentSeat(ctx));
-          },
-          onFriendlyEffectHitCondition: grantedHitRiderOn,
-          onFriendlyEffectHit(ctx: ScriptCtx, _source: DeepReadonly<CardInstance>, targetSeat: number) {
-            ctx.createToken(token, targetSeat);
-          },
-        }
-      : {}),
+    ...(token ? chainHitRider((ctx, seat) => ctx.createToken(token, seat)) : {}),
   };
 }
 function nextStealth(pump: number): CardScript {
+  const buffNextStealth = (ctx: ScriptCtx) =>
+    buffNextAttack(ctx, { attack: pump, appliesToKeyword: "stealth", expiresOnChainClose: true });
   return {
-    onAttackDeclared(ctx) {
-      buffNextAttack(ctx, { attack: pump, appliesToKeyword: "stealth", expiresOnChainClose: true });
-    },
+    nextAttackEffectIsStatic: true,
+    onAttackDeclared: buffNextStealth,
+    onBecameAttackingCard: buffNextStealth,
   };
 }
 function comboPower(name: string, power: number, reduction = 0): CardScript {
   return {
     modifyPlayCost(ctx, base) {
-      return comboWith(ctx, name) ? Math.max(0, base - reduction) : base;
+      return previousAttackHasName(ctx, name) ? Math.max(0, base - reduction) : base;
     },
     modifyAttack(ctx) {
-      return comboWith(ctx, name) ? power : 0;
+      return previousAttackHasName(ctx, name) ? power : 0;
     },
   };
 }
 function comboHit(name: string, effect: (ctx: ScriptCtx) => void): CardScript {
   return {
     canTriggerOnHit(ctx) {
-      return comboWith(ctx, name) && ctx.link?.targetAllyId === undefined;
+      return previousAttackHasName(ctx, name) && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
       effect(ctx);
@@ -157,9 +119,7 @@ function aimOnly(): CardScript {
 }
 function widowmaker(): CardScript {
   return {
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "noDefenseReactions", true);
-    },
+    defenseReactionsProhibited: true,
     modifyAttack(ctx) {
       return (ctx.link?.defendingCards.length ?? 0) + (ctx.link?.defendingEquipment.length ?? 0) < 2 ? 3 : 0;
     },
@@ -229,15 +189,16 @@ function infectiousHost(): CardScript {
     onAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId !== undefined) return;
       const owned = ctx.player(ctx.seat).board;
-      for (const token of [FRAILTY, INERTIA, BLOODROT])
-        if (owned.some((card) => card.cardId === token)) ctx.createToken(token, opponentSeat(ctx));
+      // Created tokens use the canonical printing, so match by name.
+      for (const [token, name] of [[FRAILTY, "Frailty"], [INERTIA, "Inertia"], [BLOODROT_POX, "Bloodrot Pox"]] as const)
+        if (owned.some((card) => cardNamed(ctx, card, name))) ctx.createToken(token, opponentSeat(ctx));
     },
   };
 }
 function lookingForScrap(): CardScript {
   return {
     declareAdditionalCost(ctx) {
-      const choices = ctx.player(ctx.seat).graveyard.filter((card) => ctx.basePower(card) === 1);
+      const choices = faceUpGraveyard(ctx).filter((card) => ctx.basePower(card) === 1);
       if (choices.length)
         ctx.requestCardChoice(
           "scrap",
@@ -293,7 +254,7 @@ function wreckHavoc(): CardScript {
       const card = ctx.player(opponentSeat(ctx)).arsenal[0];
       if (!card) return;
       ctx.setCardFaceDown(card.instanceId, false);
-      if (data(ctx, card).cardType === "defense-reaction" && !ctx.destroyPermanent(card.instanceId)) {
+      if (ctx.hasCardType(card, "defense-reaction") && !ctx.destroyPermanent(card.instanceId)) {
         ctx.moveToGraveyard(card.instanceId, "arsenal");
       }
     },
@@ -308,7 +269,7 @@ function deathTouch(): CardScript {
       return ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      requestDiseaseTokenChoice(ctx, "disease", [BLOODROT, FRAILTY, INERTIA]);
+      requestDiseaseTokenChoice(ctx, "disease", [BLOODROT_POX, FRAILTY, INERTIA]);
     },
     onChoose(ctx, hook, option) {
       if (hook === "disease") ctx.createToken(option, opponentSeat(ctx));
@@ -317,7 +278,7 @@ function deathTouch(): CardScript {
 }
 function virulentTouch(): CardScript {
   const resolve = (ctx: ScriptCtx) => {
-    if (ctx.link?.flags.defendedFromHand === true) ctx.createToken(BLOODROT, opponentSeat(ctx));
+    if (ctx.link?.flags.defendedFromHand === true) ctx.createToken(BLOODROT_POX, opponentSeat(ctx));
   };
   return {
     canPlay(ctx) {
@@ -389,7 +350,7 @@ function recoil(): CardScript {
     if (hand.length)
       ctx.requestCardChoice(
         "recoil",
-        decisionPrompt("Put a card from your hand on top of your deck", "card.out.hand.top"),
+        decisionPrompt("Put a card from your hand on top of your deck", "card.common.hand.card.top"),
         hand.map((card) => card.instanceId),
         seat,
       );
@@ -401,10 +362,10 @@ function recoilChoose(ctx: ScriptCtx, hook: string, option: string): void {
 function spinningWheel(): CardScript {
   return {
     modifyAttack(ctx) {
-      return comboWith(ctx, "twin twisters", "spinning wheel kick") ? 1 : 0;
+      return previousAttackHasName(ctx, "twin twisters", "spinning wheel kick") ? 1 : 0;
     },
     canTriggerOnHit(ctx) {
-      return comboWith(ctx, "twin twisters", "spinning wheel kick");
+      return previousAttackHasName(ctx, "twin twisters", "spinning wheel kick");
     },
     onHit(ctx) {
       ctx.setFlag("link", "attackToBottom", true);
@@ -436,7 +397,7 @@ function beLikeWater(): CardScript {
     },
   };
 }
-function bonds(pitch: number): CardScript {
+function bondsOfAncestry(pitch: number): CardScript {
   return {
     modifyPlayCost(ctx, base) {
       return previousAttackNameContains(ctx, "gustwave") ? Math.max(0, base - 2) : base;
@@ -444,7 +405,7 @@ function bonds(pitch: number): CardScript {
     onAttackDeclared(ctx) {
       if (!previousAttackNameContains(ctx, "gustwave")) return;
       ctx.grantGoAgain();
-      const combo = ctx.player(ctx.seat).graveyard.filter((card) => has(ctx, card, "combo"));
+      const combo = faceUpGraveyard(ctx).filter((card) => ctx.hasKeyword(card, "combo"));
       if (combo.length)
         ctx.requestCardChoice(
           `bonds-grave:${pitch}`,
@@ -456,7 +417,7 @@ function bonds(pitch: number): CardScript {
     },
     onChoose(ctx, hook, option) {
       if (!hook.startsWith("bonds-grave") || option === "pass") return;
-      const chosen = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
+      const chosen = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
       if (!chosen || !ctx.banish(chosen.instanceId)) return;
       const matches = ctx.player(ctx.seat).deck.filter((card) => sharesName(ctx, card, chosen));
       if (matches.length)
@@ -479,7 +440,7 @@ function bondsSearch(ctx: ScriptCtx, hook: string, option: string): void {
 function backHeel(): CardScript {
   return {
     replacePowerGain(ctx, amount) {
-      return amount > 0 && comboWith(ctx, "twin twisters") ? amount + 1 : amount;
+      return amount > 0 && previousAttackHasName(ctx, "twin twisters") ? amount + 1 : amount;
     },
   };
 }
@@ -546,7 +507,7 @@ function shortSharp(power: number): CardScript {
   return {
     canPlay(ctx) {
       return (
-        myAttack(ctx) &&
+        isOwnAttack(ctx) &&
         (isDagger(ctx, ctx.link!.attackingCard) ||
           (ctx.link!.attackCardType === "action" && ctx.basePower(ctx.link!.attackingCard) <= 2))
       );
@@ -636,7 +597,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "uzuri|0": uzuriAbility,
   "arakni, solitary confinement|0": {
     onFriendlyAttackDeclared(ctx) {
-      if (isStealth(ctx, ctx.link!.attackingCard) && ctx.getPlayerFlag(ctx.seat, "arakniStealth") !== true) {
+      if (ctx.hasKeyword(ctx.link!.attackingCard, "stealth") && ctx.getPlayerFlag(ctx.seat, "arakniStealth") !== true) {
         ctx.setPlayerFlag(ctx.seat, "arakniStealth", true);
         ctx.grantGoAgain();
       }
@@ -650,22 +611,16 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "sneak attack|3": { modifyAttack: (ctx) => (ctx.link?.flags.reactionPlayedOrActivated === true ? 4 : 0) },
   "spike with frailty|1": stealthReaction(3, FRAILTY),
   "spike with inertia|1": stealthReaction(3, INERTIA),
-  "infect|2": stealthToken(BLOODROT),
-  "infect|3": stealthToken(BLOODROT),
+  "infect|2": stealthToken(BLOODROT_POX),
+  "infect|3": stealthToken(BLOODROT_POX),
   "malign|1": {
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "unpreventable", true);
-    },
+    combatDamageUnpreventableAtLeast: 1,
   },
   "malign|2": {
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "unpreventable", true);
-    },
+    combatDamageUnpreventableAtLeast: 1,
   },
   "malign|3": {
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "unpreventable", true);
-    },
+    combatDamageUnpreventableAtLeast: 1,
   },
   "prowl|1": nextStealth(1),
   "prowl|2": nextStealth(1),
@@ -682,23 +637,23 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
 
   "mask of many faces|0": maskManyFaces,
   "bonds of ancestry|1": {
-    ...bonds(1),
+    ...bondsOfAncestry(1),
     onChoose(ctx, h, o) {
-      bonds(1).onChoose?.(ctx, h, o);
+      bondsOfAncestry(1).onChoose?.(ctx, h, o);
       bondsSearch(ctx, h, o);
     },
   },
   "bonds of ancestry|2": {
-    ...bonds(2),
+    ...bondsOfAncestry(2),
     onChoose(ctx, h, o) {
-      bonds(2).onChoose?.(ctx, h, o);
+      bondsOfAncestry(2).onChoose?.(ctx, h, o);
       bondsSearch(ctx, h, o);
     },
   },
   "bonds of ancestry|3": {
-    ...bonds(3),
+    ...bondsOfAncestry(3),
     onChoose(ctx, h, o) {
-      bonds(3).onChoose?.(ctx, h, o);
+      bondsOfAncestry(3).onChoose?.(ctx, h, o);
       bondsSearch(ctx, h, o);
     },
   },
@@ -740,11 +695,11 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "boulder trap|2": {
     canTriggerOnDefend: trapPower(),
     onDefend(ctx) {
-      const eq = equipmentCards(ctx, ctx.link!.attacker);
+      const eq = equippedCards(ctx, ctx.link!.attacker);
       if (eq.length)
         ctx.requestCardChoice(
           "boulder",
-          decisionPrompt("Put a -1 defense counter on equipment", "card.out.equipment.counter"),
+          decisionPrompt("Put a -1 defense counter on equipment", "card.common.equipment.defensecounter"),
           eq.map((card) => card.instanceId),
         );
     },
@@ -770,7 +725,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "falcon wing|1": aimOnly(),
   "falcon wing|2": aimOnly(),
   "falcon wing|3": aimOnly(),
-  "infecting shot|3": aimAttack(BLOODROT),
+  "infecting shot|3": aimAttack(BLOODROT_POX),
   "murkmire grapnel|2": aimAttack(undefined, true),
   "murkmire grapnel|3": aimAttack(undefined, true),
   "sedation shot|1": aimAttack(INERTIA),
@@ -870,14 +825,14 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
         const p = ctx.player(ctx.seat);
         ctx.requestCardChoice(
           "malicious-bottom",
-          decisionPrompt("Put a card from hand or arsenal on the bottom", "card.out.hand.arsenal.bottom"),
+          decisionPrompt("Put a card from hand or arsenal on the bottom", "card.common.handorarsenal.bottom"),
           [...p.hand, ...p.arsenal].map((card) => card.instanceId),
         );
       },
     },
     onChoose(ctx, h, o) {
       if (h !== "malicious-bottom" || !ctx.putOnDeckBottom(Number(o))) return;
-      const found = ctx.player(ctx.seat).deck.find((card) => isAttack(ctx, card));
+      const found = ctx.player(ctx.seat).deck.find((card) => isAttackAction(ctx, card));
       if (found) ctx.moveToHand(found.instanceId);
       ctx.shuffleDeck();
     },
@@ -912,7 +867,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
         (m) => m.sourceInstanceId === ctx.self.instanceId && m.scope === "chain-link",
       )!;
       ctx.consumeModifier(linked.id);
-      requestDiseaseTokenChoice(ctx, "disease", [BLOODROT, FRAILTY, INERTIA]);
+      requestDiseaseTokenChoice(ctx, "disease", [BLOODROT_POX, FRAILTY, INERTIA]);
     },
     onChoose(ctx, h, o) {
       if (h === "disease") ctx.createToken(o, opponentSeat(ctx));
@@ -927,7 +882,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
   "virulent touch|1": virulentTouch(),
   "virulent touch|2": virulentTouch(),
   "virulent touch|3": virulentTouch(),
-  "bloodrot trap|1": trap(trapReaction(), (ctx) => ctx.createToken(BLOODROT, ctx.link!.attacker)),
+  "bloodrot trap|1": trap(trapReaction(), (ctx) => ctx.createToken(BLOODROT_POX, ctx.link!.attacker)),
 
   "seeker's hood|0": seeker(),
   "seeker's gilet|0": seeker(),
@@ -969,7 +924,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
       timing: "attack-reaction",
       destroySelfCost: true,
       label: "Attack action +1",
-      canActivate: (ctx) => myAttack(ctx) && ctx.link!.attackCardType === "action",
+      canActivate: (ctx) => isOwnAttack(ctx) && ctx.link!.attackCardType === "action",
       onActivate(ctx) {
         ctx.addModifier({ scope: "chain-link", attack: 1 });
       },
@@ -983,7 +938,7 @@ export const out: Record<string, CardScript> = mergeSetScripts("OUT", outHighRar
       timing: "attack-reaction",
       destroySelfCost: true,
       label: "Small attack gains go again",
-      canActivate: (ctx) => myAttack(ctx) && ctx.basePower(ctx.link!.attackingCard) <= 1,
+      canActivate: (ctx) => isOwnAttack(ctx) && ctx.basePower(ctx.link!.attackingCard) <= 1,
       onActivate(ctx) {
         ctx.grantGoAgain();
       },

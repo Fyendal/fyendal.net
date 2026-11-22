@@ -191,6 +191,46 @@ describe("Blood Debt and Rune Gate", () => {
     }));
   });
 
+  it("random graveyard banish costs ignore face-down graveyard cards", () => {
+    for (const key of ["shadowrealm horror|1", "dread screamer|1"]) {
+      const short = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            hand: [key],
+            graveyard: ["wounding blow|1", "wounding blow|2", "raging onslaught|1"],
+            resources: 10,
+          },
+          { hero: "dorinthea" },
+        ],
+      });
+      short.state.players[0]!.graveyard[2]!.faceDown = true;
+      const card = short.state.players[0]!.hand[0]!;
+      expect(legalIntents(short.state, 0).some(
+        (intent) => intent.kind === "play-card" && intent.instanceId === card.instanceId,
+      )).toBe(false);
+
+      const g = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            hand: [key],
+            graveyard: ["raging onslaught|1", "wounding blow|1", "wounding blow|2", "wounding blow|3"],
+            resources: 10,
+          },
+          { hero: "dorinthea" },
+        ],
+      });
+      const hidden = g.state.players[0]!.graveyard[0]!;
+      hidden.faceDown = true;
+
+      g.play(key, { settle: false });
+
+      expect(g.state.players[0]!.graveyard.map((c) => c.instanceId)).toEqual([hidden.instanceId]);
+      expect(g.state.players[0]!.banish.filter((c) => !c.faceDown)).toHaveLength(3);
+    }
+  });
+
   it("Shadowrealm Horror gets go again only after banishing at least two 6-power cards", () => {
     const oneSix = scenario({
       seats: [
@@ -717,6 +757,22 @@ describe("Blood Debt and Rune Gate", () => {
     });
     levia.state.players[0]!.flags.banishedSixPlusThisTurn = true;
     levia.endTurn().expectLife(0, cardData[printingId("levia, shadowborn abomination|0")]!.life!);
+  });
+
+  it.each([
+    ["levia, shadowborn abomination|0"],
+    ["levia, redeemed|0"],
+  ])("Humble restores Blood Debt on %s through her next end phase", (heroKey) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["humble|1", "sigil of solace|3"] },
+        { hero: "rhinar", heroKey, banish: ["shadow of blasmophet|1"] },
+      ],
+    });
+    const life = cardData[printingId(heroKey)]!.life!;
+    g.play("humble|1", { pitch: ["sigil of solace|3"] }).blockWith().settle().endTurn();
+    g.state.players[1]!.flags.banishedSixPlusThisTurn = true;
+    g.endTurn().expectLife(1, life - 6 - 1);
   });
 
   it("Levia, Redeemed removes Blood Debt without a six-power banish", () => {

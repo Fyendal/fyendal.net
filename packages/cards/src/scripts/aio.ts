@@ -1,79 +1,20 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
-  commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  isItem,
   localizedCardLog,
+  maintenanceItem,
   ongoingLabel,
   yesNoPrompt,
+  hasLiveTurnEffect,
+  hasCardSubtype,
+  requestCrankSteam,
+  resolveCrankSteam,
 } from "./shared-helpers.js";
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function isItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasType(ctx, card, "item");
-}
-
 function isMech(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasType(ctx, card, "mechanologist");
-}
-
-function crankItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return isItem(ctx, card) && ctx.hasCrank(card);
-}
-
-function addSteamChoice(ctx: ScriptCtx, hook: string): void {
-  const items = ctx.player(ctx.seat).board.filter((card) => crankItem(ctx, card));
-  if (items.length)
-    ctx.requestCardChoice(
-      hook,
-      decisionPrompt("Put a steam counter on an item with crank", "card.aio.crankitem.steam"),
-      items.map((card) => card.instanceId),
-    );
-}
-
-function maintenanceItem(steam: number, extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    onEnterArena(ctx) {
-      ctx.setCounter("steam", steam);
-      extra.onEnterArena?.(ctx);
-    },
-    triggers: [
-      {
-        event: "start-of-turn",
-        whose: "subject",
-        label: "Remove a steam counter or destroy this",
-        labelMessage: decisionMessage("card.trigger.steam.maintain"),
-        effect(ctx) {
-          if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
-          else
-            ctx.requestChoice(
-              "aio-maintenance",
-              decisionPrompt("Remove a steam counter or destroy this?", "card.aio.maintenance.choose", {
-                optionMessages: commonOptionMessages("remove", "destroy"),
-              }),
-              ["remove", "destroy"],
-            );
-        },
-      },
-      ...(extra.triggers ?? []),
-    ],
-    onChoose(ctx, hook, option) {
-      if (hook === "aio-maintenance") {
-        if (option === "remove") ctx.setCounter("steam", Math.max(0, ctx.getCounter("steam") - 1));
-        else ctx.destroySelf();
-        return;
-      }
-      extra.onChoose?.(ctx, hook, option);
-    },
-  };
+  return hasCardSubtype(ctx, card, "mechanologist");
 }
 
 export const aio: Record<string, CardScript> = {
@@ -86,7 +27,7 @@ export const aio: Record<string, CardScript> = {
         ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
         isItem(ctx, card) &&
         isMech(ctx, card) &&
-        (data(ctx, card).cost ?? 0) <= 1
+        (ctx.cardData(card.cardId).cost ?? 0) <= 1
       );
     },
     modifyFriendlyCardPlayCost(ctx, card, zone, baseCost) {
@@ -94,7 +35,7 @@ export const aio: Record<string, CardScript> = {
         ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
         isItem(ctx, card) &&
         isMech(ctx, card) &&
-        (data(ctx, card).cost ?? 0) <= 1
+        (ctx.cardData(card.cardId).cost ?? 0) <= 1
         ? baseCost + 1
         : baseCost;
     },
@@ -104,7 +45,7 @@ export const aio: Record<string, CardScript> = {
         ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
         isItem(ctx, card) &&
         isMech(ctx, card) &&
-        (data(ctx, card).cost ?? 0) <= 1
+        (ctx.cardData(card.cardId).cost ?? 0) <= 1
       );
     },
     requiresFriendlyCardPlayAsInstant(ctx, card, zone) {
@@ -113,11 +54,11 @@ export const aio: Record<string, CardScript> = {
         ctx.getFlag("player", "dashTopItemPlayedThisTurn") !== true &&
         isItem(ctx, card) &&
         isMech(ctx, card) &&
-        (data(ctx, card).cost ?? 0) <= 1
+        (ctx.cardData(card.cardId).cost ?? 0) <= 1
       );
     },
     onFriendlyPlay(ctx, played, from) {
-      if (from === "deck" && isItem(ctx, played) && isMech(ctx, played) && (data(ctx, played).cost ?? 0) <= 1) {
+      if (from === "deck" && isItem(ctx, played) && isMech(ctx, played) && (ctx.cardData(played.cardId).cost ?? 0) <= 1) {
         ctx.setFlag("player", "dashTopItemPlayedThisTurn", true);
       }
     },
@@ -177,14 +118,8 @@ export const aio: Record<string, CardScript> = {
       },
     },
     onBoosted(ctx) {
-      const activated = ctx.state.modifiers.some(
-        (modifier) =>
-          modifier.sourceInstanceId === ctx.self.instanceId &&
-          modifier.scope === "until-end-of-turn" &&
-          !modifier.consumed,
-      );
-      if (!activated) return;
-      ctx.changeResources(ctx.seat, 1);
+      if (!hasLiveTurnEffect(ctx)) return;
+      ctx.gainResources(ctx.seat, 1);
       ctx.logPublic(
         localizedCardLog(ctx, "Heavy Industry Power Plant: gain {r}", "card.log.common.resources.gained", {
           amount: 1,
@@ -219,7 +154,7 @@ export const aio: Record<string, CardScript> = {
           if (isMech(ctx, top)) mech += 1;
           ctx.banish(top.instanceId);
         }
-        ctx.changeActionPoints(ctx.seat, mech);
+        ctx.gainActionPoints(ctx.seat, mech);
       },
     },
   },
@@ -230,14 +165,14 @@ export const aio: Record<string, CardScript> = {
         event: "card-banished-for-boost",
         sourceZone: "self",
         label: "Put a steam counter on an item with crank",
-        labelMessage: decisionMessage("card.aio.crankitem.steam"),
+        labelMessage: decisionMessage("card.common.crankitem.steam"),
         effect(ctx) {
-          addSteamChoice(ctx, "fast-furious-steam");
+          requestCrankSteam(ctx, "fast-furious-steam");
         },
       },
     ],
     onChoose(ctx, hook, option) {
-      if (hook === "fast-furious-steam") ctx.addCounter(Number(option), "steam", 1);
+      if (hook === "fast-furious-steam") resolveCrankSteam(ctx, option);
     },
   },
   "maximum velocity|1": {

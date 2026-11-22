@@ -7,14 +7,25 @@ import {
   commonOptionMessages,
   consumeDelayedEffect,
   dealArcane,
+  dealArcaneToAnyTargetChoice,
   decisionPrompt,
+  faceUpGraveyard,
+  hasCardSubtype,
+  isAlly,
+  isAttackAction,
+  isFused,
   isWeaponAttack,
   localizedCardLog,
   nextAttack,
   ongoingLabel,
   opponentSeat,
   pendingDelayedEffect,
+  playedLightning,
+  requestAnyTargetChoice,
+  splitScript,
+  withFusion,
 } from "./shared-helpers.js";
+import { EMBODIMENT_OF_EARTH, EMBODIMENT_OF_LIGHTNING, RUNECHANT } from "./tokens.js";
 
 // ── SBA (Silver Age: Briar precon) ──────────────────────────────────────────
 //
@@ -26,144 +37,14 @@ import {
 //   base cost, though both SBA splits cost 0)
 // - Guardwell (engine keyword), Quickstrike / Lightning Flow (label keywords)
 
-const EMBODIMENT_OF_EARTH = "SBA034";
-const EMBODIMENT_OF_LIGHTNING = "SBA035";
-const RUNECHANT = "SBA036";
-
 // dealArcane comes from shared-helpers (applies the "next arcane card +N" pool)
-
-/** "if you've played a Lightning card this turn" */
-function playedLightning(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "playedSubtype:lightning") === true;
-}
-
-function isFused(ctx: ScriptCtx): boolean {
-  return ctx.getState("fused") > 0;
-}
-
-/** Name-only identity check (any pitch variant — "a Nimblism"). */
-function requestAnyTarget(ctx: ScriptCtx, hook: string, amount: number): void {
-  const options = ["opposing hero", "your hero"];
-  const cardOptions: (number | null)[] = [null, null];
-  for (const player of ctx.state.players) {
-    for (const card of player.board) {
-      if (!ctx.cardTypes(card).includes("ally")) continue;
-      options.push(`ally:${player.seat}:${card.instanceId}`);
-      cardOptions.push(card.instanceId);
-    }
-  }
-  ctx.requestChoice(
-    hook,
-    decisionPrompt(
-      `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a target`,
-      "card.ros.arcane.target.choose",
-      {
-        values: {
-          card: { kind: "card", cardId: ctx.self.cardId },
-          amount: ctx.previewArcaneDamage(amount),
-        },
-        optionMessages: commonOptionMessages("opposing hero", "your hero"),
-      },
-    ),
-    options,
-    ctx.seat,
-    cardOptions,
-    "opposing hero",
-  );
-}
-
-function dealArcaneToTarget(ctx: ScriptCtx, option: string, amount: number): void {
-  const ally = /^ally:(\d+):(\d+)$/.exec(option);
-  if (ally) {
-    dealArcane(ctx, Number(ally[1]), amount, Number(ally[2]));
-    return;
-  }
-  dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), amount);
-}
-
-// ── Fusion ──────────────────────────────────────────────────────────────────
-
-/** Lightning Fusion: optional additional cost — reveal a Lightning card from
- *  hand; the played card becomes fused (8.3.17). The play pauses on the
- *  choice and resumes via finishPlayCard. */
-function fusionAdditionalCost(supertype: string) {
-  return (ctx: ScriptCtx) => {
-    const matches = ctx.player(ctx.seat).hand.filter((c) => ctx.cardTypes(c).includes(supertype.toLowerCase()));
-    if (matches.length === 0) return;
-    ctx.requestCardChoice(
-      "fusion",
-      decisionPrompt(`${ctx.data.name}: reveal a ${supertype} card from your hand to fuse?`, "card.sba.fusion.reveal", {
-        values: { card: { kind: "card", cardId: ctx.self.cardId }, type: supertype },
-        optionMessages: commonOptionMessages("no"),
-      }),
-      [...matches.map((c) => c.instanceId), "no"],
-    );
-  };
-}
-
-function fusionOnChoose(ctx: ScriptCtx, hook: string, option: string): void {
-  if (hook !== "fusion" || option === "no") return;
-  const card = ctx.player(ctx.seat).hand.find((c) => c.instanceId === Number(option));
-  if (!card) return;
-  ctx.setState("fused", 1);
-  ctx.setFlag("player", "fusedThisTurn", true);
-  for (const type of ["earth", "ice", "lightning"] as const) {
-    if (ctx.cardTypes(card).includes(type)) {
-      ctx.setFlag("player", `${type}FusedThisTurn`, true);
-    }
-  }
-  ctx.logPublic(
-    localizedCardLog(
-      ctx,
-      `${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`,
-      "card.log.common.fusion.revealed",
-      { revealed: { kind: "card", cardId: card.cardId } },
-      { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
-    ),
-  );
-}
-
-// ── Meld split cards ────────────────────────────────────────────────────────
-
-interface SplitSides {
-  leftName: string;
-  rightName: string;
-  left(ctx: ScriptCtx): void;
-  right(ctx: ScriptCtx): void;
-}
-
-/** Split card with Meld: the side is announced when the card is played — the
- *  client asks left/right/both and the choice rides the play intent
- *  (`CardInstance.meldSide`); "both" costs twice the base cost (CR 8.3.38).
- *  A melded card is a single stack layer that resolves twice with priority
- *  between (Rules Reprise 21), so the engine runs onPlay per half ("right" at
- *  stage 1, "left" at stage 2). */
-function splitScript({ leftName, rightName, left, right }: SplitSides): CardScript {
-  return {
-    meld: {
-      leftName,
-      rightName,
-      leftCardType: "action",
-      rightCardType: "instant",
-    },
-    onPlay(ctx) {
-      const side = ctx.self.meldSide;
-      if (side === "left") return left(ctx);
-      if (side === "right") return right(ctx);
-      if (side === "both") {
-        right(ctx);
-        return left(ctx);
-      }
-    },
-  };
-}
 
 // ── Crown of Dichotomy helpers ──────────────────────────────────────────────
 
 function isRunebladeAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, attack: boolean): boolean {
   if (!ctx.hasCardType(card, "action")) return false;
-  if (!ctx.cardTypes(card).includes("runeblade")) return false;
-  return ctx.cardTypes(card).includes("attack") === attack;
+  if (!hasCardSubtype(ctx, card, "runeblade")) return false;
+  return hasCardSubtype(ctx, card, "attack") === attack;
 }
 
 // ── the scripts ─────────────────────────────────────────────────────────────
@@ -196,7 +77,7 @@ export const sba: Record<string, CardScript> = {
         condition: (ctx, played) =>
           !!played &&
           ctx.hasCardType(played, "action") &&
-          !ctx.cardTypes(played).includes("attack") &&
+          !hasCardSubtype(ctx, played, "attack") &&
           Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) === 2,
         effect: (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING),
       },
@@ -210,7 +91,7 @@ export const sba: Record<string, CardScript> = {
       tap: true,
       canActivate(ctx) {
         return ctx.state.chain.some(
-          (l) => l.attacker === ctx.seat && ctx.cardTypes(l.attackingCard).includes("lightning"),
+          (l) => l.attacker === ctx.seat && hasCardSubtype(ctx, l.attackingCard, "lightning"),
         );
       },
     }),
@@ -244,7 +125,7 @@ export const sba: Record<string, CardScript> = {
     },
     onFriendlyPlay(ctx, played) {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
-      if (!ctx.cardTypes(played).includes("lightning")) return;
+      if (!hasCardSubtype(ctx, played, "lightning")) return;
       ctx.grantGoAgain();
     },
   },
@@ -277,14 +158,10 @@ export const sba: Record<string, CardScript> = {
       goAgain: false,
       destroySelfCost: true,
       canActivate(ctx) {
-        const p = ctx.player(ctx.seat);
-        return (
-          p.graveyard.some((c) => isRunebladeAction(ctx, c, true)) ||
-          p.graveyard.some((c) => isRunebladeAction(ctx, c, false))
-        );
+        return faceUpGraveyard(ctx).some((c) => isRunebladeAction(ctx, c, true) || isRunebladeAction(ctx, c, false));
       },
       onActivate(ctx) {
-        const attacks = ctx.player(ctx.seat).graveyard.filter((c) => isRunebladeAction(ctx, c, true));
+        const attacks = faceUpGraveyard(ctx).filter((c) => isRunebladeAction(ctx, c, true));
         if (attacks.length === 0) {
           crownPickNonAttack(ctx);
           return;
@@ -357,27 +234,23 @@ export const sba: Record<string, CardScript> = {
   },
 
   // Arcanic Shockwave — fused: 1 arcane when it attacks
-  "arcanic shockwave|1": {
-    additionalCost: fusionAdditionalCost("lightning"),
-    onChoose: fusionOnChoose,
+  "arcanic shockwave|1": withFusion("lightning", {
     triggers: [attackArcaneHeroTrigger(1, isFused)],
-  },
+  }),
 
   // Entwine Lightning — fused: gains go again (keyword pruned in index.ts)
-  "entwine lightning|1": {
-    additionalCost: fusionAdditionalCost("lightning"),
-    onChoose: fusionOnChoose,
+  "entwine lightning|1": withFusion("lightning", {
     onAttackDeclared(ctx) {
       if (!isFused(ctx)) return;
       ctx.grantGoAgain();
       ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gains go again (fused)`, "card.log.sba.fused.goagain"));
     },
-  },
+  }),
 
   // Jack Be Quick — may banish a Nimblism from graveyard for +1{p} and go again
   "jack be quick|1": {
     onAttackDeclared(ctx) {
-      const nimblisms = ctx.player(ctx.seat).graveyard.filter((c) => cardNamed(ctx, c, "Nimblism"));
+      const nimblisms = faceUpGraveyard(ctx).filter((c) => cardNamed(ctx, c, "Nimblism"));
       if (nimblisms.length === 0) return;
       ctx.requestCardChoice(
         "jack-banish",
@@ -396,7 +269,7 @@ export const sba: Record<string, CardScript> = {
         return;
       }
       if (hook !== "jack-banish" || option === "no") return;
-      const card = ctx.player(ctx.seat).graveyard.find((c) => c.instanceId === Number(option));
+      const card = faceUpGraveyard(ctx).find((c) => c.instanceId === Number(option));
       if (!card) return;
       ctx.banish(card.instanceId);
       ctx.setState("jackBuff", 1);
@@ -420,7 +293,7 @@ export const sba: Record<string, CardScript> = {
     onHit(ctx) {
       // "When this hits a hero, {u} an ally they control, then steal it until
       // the end of this action phase."
-      const allies = ctx.player(opponentSeat(ctx)).board.filter((c) => ctx.cardTypes(c).includes("ally"));
+      const allies = ctx.player(opponentSeat(ctx)).board.filter((c) => isAlly(ctx, c));
       if (allies.length === 0) return;
       if (allies.length === 1) {
         ctx.untap(allies[0]!.instanceId);
@@ -463,7 +336,7 @@ export const sba: Record<string, CardScript> = {
   // "Instant - {r}: This gets go again" while it attacks (keyword pruned).
   "path of same ends|1": {
     onAttackDeclared(ctx) {
-      dealArcane(ctx, opponentSeat(ctx), 1);
+      if (ctx.link?.targetAllyId === undefined) dealArcane(ctx, opponentSeat(ctx), 1);
     },
     onDamageDealt(ctx, _target, amount, arcane) {
       if (!arcane || amount <= 0) return;
@@ -591,13 +464,13 @@ export const sba: Record<string, CardScript> = {
         );
       },
       right(ctx) {
-        requestAnyTarget(ctx, "burn-up-shock-target", 1);
+        requestAnyTargetChoice(ctx, "burn-up-shock-target", 1);
       },
     }),
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [4, 1],
     onChoose(ctx, hook, option) {
-      if (hook === "burn-up-shock-target") dealArcaneToTarget(ctx, option, 1);
+      if (hook === "burn-up-shock-target") dealArcaneToAnyTargetChoice(ctx, option, 1);
     },
     canTriggerOnHit(ctx) {
       return (
@@ -737,7 +610,7 @@ export const sba: Record<string, CardScript> = {
         event: "card-played",
         label: "Destroy Embodiment of Lightning (attack gains go again)",
         condition: (ctx, played) =>
-          !!played && ctx.hasCardType(played, "action") && ctx.cardTypes(played).includes("attack"),
+          !!played && isAttackAction(ctx, played),
         effect(ctx) {
           ctx.destroySelf();
           ctx.grantGoAgain();
@@ -765,7 +638,7 @@ export const sba: Record<string, CardScript> = {
         event: "card-played",
         label: "Destroy Runechant: 1 arcane damage to the opposing hero",
         condition: (ctx, played) =>
-          !!played && ctx.hasCardType(played, "action") && ctx.cardTypes(played).includes("attack"),
+          !!played && isAttackAction(ctx, played),
         effect(ctx) {
           ctx.destroySelf();
           const unpreventable = ctx.getFlag("player", "nextRunechantUnpreventable") === true;
@@ -790,7 +663,7 @@ export const sba: Record<string, CardScript> = {
 // ── Crown of Dichotomy choice chain ─────────────────────────────────────────
 
 function crownPickNonAttack(ctx: ScriptCtx): void {
-  const nonAttacks = ctx.player(ctx.seat).graveyard.filter((c) => isRunebladeAction(ctx, c, false));
+  const nonAttacks = faceUpGraveyard(ctx).filter((c) => isRunebladeAction(ctx, c, false));
   if (nonAttacks.length === 0) {
     // only an attack action was available: straight to the top
     const picked = ctx.getState("crownAttack");

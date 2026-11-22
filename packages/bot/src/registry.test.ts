@@ -18,7 +18,7 @@ const opponent: Decklist = {
 
 describe("bot registry", () => {
   it("registers every bot with unique stable identity and deck mappings", () => {
-    expect(botDefinitions).toHaveLength(11);
+    expect(botDefinitions).toHaveLength(14);
     expect(new Set(botDefinitions.map(({ id }) => id)).size).toBe(botDefinitions.length);
     expect(new Set(botDefinitions.map(({ deckId }) => deckId)).size).toBe(botDefinitions.length);
     expect(Object.keys(BOT_DEFINITIONS).sort()).toEqual(
@@ -155,8 +155,10 @@ describe("bot registry", () => {
         { kind: "stage-defenders", instanceIds: [blockers[1]!.instanceId] },
       ];
 
+      // Block-first Dorinthea also spends the smaller blocker.
+      const expected = definition.id === "dorinthea" ? blockers : [blockers[1]!];
       expect(definition.chooseIntent({ seat: 0, view, legal, cards: cardData }), definition.id)
-        .toEqual({ kind: "stage-defenders", instanceIds: [blockers[1]!.instanceId] });
+        .toEqual({ kind: "stage-defenders", instanceIds: expected.map((card) => card.instanceId) });
     }
   });
 });

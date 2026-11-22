@@ -1,6 +1,6 @@
 import { cardData, decklists, scripts } from "@fyendal/cards";
 import { createGame, projectStateFor } from "@fyendal/engine";
-import type { CardData, CardView, GameIntent } from "@fyendal/shared";
+import type { CardData, CardView, GameIntent, GameMessage, GameView } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import {
   allyLethalThreshold,
@@ -14,20 +14,114 @@ import {
   nextTurnArsenalOpportunityCost,
   ownCards,
   plannedDefenseReactionPlan,
+  resourceGainClosesCost,
   responseEvaluation,
+  scoreDefenseReaction,
   scoreDefenseIntent,
   scoreDefenseIntentWithTrace,
+  scoreTacticalRoot,
+  shouldPreserveOpeningHand,
   spendsOpeningArsenalReserve,
   type BotPolicyInput,
   type BotPolicyScorers,
   wagerRewardValue,
 } from "./policy.js";
+import { defenseReactionThreat } from "./hand-value.js";
 import { botDefinitions } from "./registry.js";
 
 const NO_RESPONSE: BotPolicyScorers["response"] = {
   offensiveCards: () => [],
   evaluateResponse: () => responseEvaluation({}),
 };
+
+describe("Inertia trigger order", () => {
+  const FRAILTY = { id: "card.trigger.common.named.destroy", values: { target: "Frailty" } };
+  const INERTIA = { id: "card.trigger.common.inertia.destroy" };
+  const POX = { id: "card.trigger.common.bloodrotpox.destroy", values: { amount: 3, damage: 2 } };
+  const PONDER = { id: "card.trigger.common.ponder.destroy.draw" };
+  const POX_CARD = Object.keys(cardData).find((id) => cardData[id]!.name === "Bloodrot Pox")!;
+
+  function orderFor(messages: readonly GameMessage[], setup?: (view: GameView) => void): string[] | undefined {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 94_149,
+      startPlayer: 0,
+    });
+    const view = projectStateFor(state, 0);
+    view.players[0].hand = [];
+    const options = messages.map((_, index) => `${index}:0`);
+    view.pendingDecision = {
+      player: 0,
+      kind: "order-triggers",
+      prompt: "Order your triggered abilities",
+      options,
+      optionMessages: [...messages],
+    };
+    setup?.(view);
+    const intent = chooseSharedPolicyIntent({
+      seat: 0,
+      view,
+      legal: [{ kind: "order-triggers", optionIds: options }],
+      cards: cardData,
+    });
+    return intent?.kind === "order-triggers" ? intent.optionIds : undefined;
+  }
+
+  it("resolves draws after every Inertia, with other triggers first", () => {
+    expect(orderFor([FRAILTY, INERTIA, POX, PONDER, PONDER, FRAILTY, INERTIA, POX]))
+      .toEqual(["0:0", "2:0", "5:0", "7:0", "1:0", "6:0", "3:0", "4:0"]);
+  });
+
+  it("holds a lethal upkeep for the drawn cards when the hand is empty", () => {
+    expect(orderFor([POX, INERTIA, PONDER], (view) => {
+      view.players[0].life = 2;
+      view.players[0].board = [{ cardId: POX_CARD, instanceId: 900 } as CardView];
+    })).toEqual(["1:0", "2:0", "0:0"]);
+  });
+
+  it("leaves other trigger orders to the engine", () => {
+    expect(orderFor([FRAILTY, PONDER])).toBeUndefined();
+  });
+});
+
+describe("resource gain cost gap", () => {
+  it.each([
+    { label: "an empty hand", held: [] as string[], resources: 0, cost: 3, gain: 1, closes: false },
+    { label: "a yellow pitch", held: ["WTR007"], resources: 0, cost: 3, gain: 1, closes: true },
+    { label: "a blue pitch that already pays", held: ["MON140"], resources: 0, cost: 3, gain: 1, closes: false },
+    { label: "a floating resource and a yellow pitch", held: ["WTR007"], resources: 1, cost: 3, gain: 1, closes: false },
+    { label: "an empty hand, gaining two for two", held: [], resources: 0, cost: 2, gain: 2, closes: true },
+    { label: "an empty hand, gaining two for three", held: [], resources: 0, cost: 3, gain: 2, closes: false },
+  ])("closes a cost gap only by the gain, holding $label", ({ held, resources, cost, gain, closes }) => {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar], cards: cardData, scripts, seed: 1, startPlayer: 0,
+    });
+    const view = projectStateFor(state, 0);
+    let id = 10_000;
+    view.players[0].hand = held.map((cardId) => ({ instanceId: id++, cardId, owner: 0 }));
+    view.players[0].resources = resources;
+    const attack: CardView = { instanceId: id++, cardId: "SUP165", owner: 0 };
+    const input: BotPolicyInput = { seat: 0, view, legal: [], cards: cardData };
+    expect(resourceGainClosesCost(input, [{ card: attack, cost }], gain)).toBe(closes);
+  });
+});
+
+describe("tactical root score", () => {
+  it.each([
+    { label: "a declined play", intent: { kind: "play-card", instanceId: 1, pitchInstanceIds: [], pitchRequired: 0 }, play: -40, score: -40 },
+    { label: "pass under a cardless fallback", intent: { kind: "pass" }, play: -50, score: 0 },
+    { label: "close-chain under a cardless fallback", intent: { kind: "close-chain" }, play: -50, score: 1 },
+    { label: "a hero-raised close-chain", intent: { kind: "close-chain" }, play: 75, score: 75 },
+  ] as { label: string; intent: GameIntent; play: number; score: number }[])("scores $label", ({ intent, play, score }) => {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar], cards: cardData, scripts, seed: 1, startPlayer: 0,
+    });
+    const input: BotPolicyInput = { seat: 0, view: projectStateFor(state, 0), legal: [], cards: cardData };
+    expect(scoreTacticalRoot(intent, input, () => play)).toBe(score);
+  });
+});
 
 describe("lethal Arcane Barrier", () => {
   for (const bot of botDefinitions) {
@@ -141,6 +235,46 @@ describe("No Hero Stands Alone clash winner", () => {
   }
 });
 
+describe("Rake Back graveyard equip prize", () => {
+  function equipInput(): BotPolicyInput {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 94_152,
+      startPlayer: 1,
+    });
+    const view = projectStateFor(state, 0);
+    view.players[0].equipment = {
+      arms: { instanceId: 300_010, cardId: "AJV006", owner: 0 },
+    };
+    view.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Equip an equipment from your graveyard?",
+      promptMessage: { id: "card.aol.graveyard.equipment.equip" },
+      options: ["no", "300011", "300012"],
+      optionCards: [
+        null,
+        { instanceId: 300_011, cardId: "AJV006", owner: 0 },
+        { instanceId: 300_012, cardId: "FAB088", owner: 0 },
+      ],
+    };
+    return {
+      seat: 0,
+      view,
+      legal: ["no", "300011", "300012"].map((optionId) => ({ kind: "choose" as const, optionId })),
+      cards: cardData,
+    };
+  }
+
+  for (const bot of botDefinitions) {
+    it(`${bot.id} equips into an empty slot`, () => {
+      expect(bot.chooseIntent(equipInput())).toEqual({ kind: "choose", optionId: "300012" });
+    });
+  }
+});
+
 describe("non-lethal Arcane Barrier", () => {
   function barrierInput(hand: readonly string[], resources = 0) {
     const state = createGame({
@@ -216,7 +350,8 @@ describe("non-lethal Arcane Barrier", () => {
       .toEqual({ kind: "choose", optionId: "pay 1" });
   });
 
-  for (const bot of botDefinitions) {
+  // Dorinthea holds cards to block with while the opponent can still attack.
+  for (const bot of botDefinitions.filter((definition) => definition.id !== "dorinthea")) {
     it(`${bot.id} pitches surplus blue cards into Arcane Barrier`, () => {
       const input = barrierInput(["DVR027", "DVR027", "DVR027", "DVR027"]);
       expect(bot.chooseIntent(input)).toEqual({ kind: "choose", optionId: "pay 1" });
@@ -364,6 +499,21 @@ describe("opening-turn aggression", () => {
     input.legal = [allIn, { kind: "pass" }];
 
     expect(spendsOpeningArsenalReserve(allIn, input)).toBe(false);
+  });
+
+  it("attacks into a full opposing hand only when the opponent runs many instants", () => {
+    const { input, allIn, preserving } = openingInput();
+    input.view.players[1].handCount = 4;
+    const actions = Array.from({ length: 34 }, () => "ANQ031");
+    expect(cardData.WTR163?.types).toEqual(["instant"]);
+
+    expect(shouldPreserveOpeningHand(input)).toBe(true);
+    input.decklists = { opponent: [...actions, ...Array.from({ length: 4 }, () => "WTR163")] };
+    expect(shouldPreserveOpeningHand(input)).toBe(true);
+    input.decklists = { opponent: [...actions, ...Array.from({ length: 8 }, () => "WTR163")] };
+    expect(shouldPreserveOpeningHand(input)).toBe(false);
+    expect(spendsOpeningArsenalReserve(allIn, input)).toBe(true);
+    expect(spendsOpeningArsenalReserve(preserving, input)).toBe(false);
   });
 
   it("reserves the last card after the bot has attacked", () => {
@@ -566,7 +716,7 @@ function equipmentDefenseScores(options: {
     [equipmentCardId]: {
       id: equipmentCardId,
       name: options.equipmentName ?? "Test Durable Armor",
-      cardType: "equipment",
+      types: ["equipment"],
       text: (options.equipmentKeywords ?? ["Battleworn"]).join(". "),
       defense: options.equipmentDefense ?? 2,
       subtypes: ["head"],
@@ -575,7 +725,7 @@ function equipmentDefenseScores(options: {
     [attackCardId]: {
       id: attackCardId,
       name: "Test Attack",
-      cardType: options.attackType ?? "action",
+      types: [options.attackType ?? "action"],
       text: options.onHit ? "When this hits, draw a card." : "",
       ...(options.attackType === "weapon" ? {} : { subtypes: ["attack"] }),
       attack: 2,
@@ -639,7 +789,7 @@ function cycleDefenseFixture(
     TEST_CYCLE_ATTACK: {
       id: "TEST_CYCLE_ATTACK",
       name: "Test Cycle Attack",
-      cardType: "action",
+      types: ["action"],
       text: "",
       attack: options.attackValue ?? 3,
       subtypes: ["attack"],
@@ -649,7 +799,7 @@ function cycleDefenseFixture(
     cards[spec.id] = {
       id: spec.id,
       name: spec.id,
-      cardType: "action",
+      types: ["action"],
       text: "",
       attack: spec.attack,
       defense: spec.defense,
@@ -813,6 +963,26 @@ describe("shared Spectra targeting", () => {
     expect(enforceSpectraPolicy(setup.input, snatchHero)).toEqual(lavaSpectra);
   });
 
+  it("keeps a terminal attack on the hero when no block can stop lethal", () => {
+    const setup = spectraInput([]);
+    const opponent = setup.input.view.players[1];
+    opponent.handCount = 0;
+    opponent.arsenal = [];
+    opponent.equipment = {};
+    const lavaHero: GameIntent = {
+      kind: "play-card",
+      instanceId: setup.lava.instanceId,
+      pitchInstanceIds: [],
+    };
+    const lavaSpectra: GameIntent = { ...lavaHero, targetAllyId: setup.haze.instanceId };
+    setup.input.legal = [lavaSpectra, lavaHero, { kind: "pass" }];
+
+    opponent.life = 2;
+    expect(enforceSpectraPolicy(setup.input, lavaSpectra)).toEqual(lavaHero);
+    opponent.life = 3;
+    expect(enforceSpectraPolicy(setup.input, lavaHero)).toEqual(lavaSpectra);
+  });
+
   it("uses the final remaining attack to clear Spectra even when it has go again", () => {
     const setup = spectraInput([]);
     setup.input.view.players[0].hand = [setup.tag];
@@ -932,7 +1102,7 @@ describe("shared turn-cycle defense value", () => {
       TEST_VALUE_BLOCKER: {
         id: "TEST_VALUE_BLOCKER",
         name: "Test Value Blocker",
-        cardType: "action",
+        types: ["action"],
         text: "",
         pitch: 1,
         cost: 0,
@@ -943,7 +1113,7 @@ describe("shared turn-cycle defense value", () => {
       TEST_VALUE_ATTACK: {
         id: "TEST_VALUE_ATTACK",
         name: "Test Value Attack",
-        cardType: "action",
+        types: ["action"],
         text: "",
         attack: 4,
         subtypes: ["attack"],
@@ -1081,7 +1251,7 @@ describe("shared turn-cycle defense value", () => {
     const [defender, reaction, reactionPitch] = fixture.held;
     fixture.cards.PLANNED_REACTION = {
       ...fixture.cards.PLANNED_REACTION!,
-      cardType: "defense-reaction",
+      types: ["defense-reaction"],
       cost: 1,
       defense: 2,
     };
@@ -1094,7 +1264,7 @@ describe("shared turn-cycle defense value", () => {
     fixture.cards.CYCLE_EQUIPMENT = {
       id: "CYCLE_EQUIPMENT",
       name: "Cycle Equipment",
-      cardType: "equipment",
+      types: ["equipment"],
       text: "Battleworn",
       defense: 1,
       keywords: ["Battleworn"],
@@ -1202,9 +1372,103 @@ describe("projected defender defense", () => {
       ids.map((instanceId) => ({ instanceId, defense: 1, attack: 4 }));
     expect(score()).toMatchObject({ lethal: true, survives: false, stopsHit: false });
   });
+
+  it("does not reward surviving a lethal threat its own Piercing block creates", () => {
+    const fixture = cycleDefenseFixture([{ id: "PIERCED_BLOCKER", attack: 1, defense: 1 }], { attackValue: 1, life: 2 });
+    const [blocker] = fixture.held;
+    const score = (instanceIds: number[]) => scoreDefenseIntentWithTrace(
+      { kind: "defend", instanceIds },
+      fixture.input,
+      fixture.own,
+      fixture.model,
+    );
+    fixture.input.view.pendingDecision!.defenderDefense = [{ instanceId: blocker!.instanceId, defense: 1, attack: 2 }];
+    const pierced = score([blocker!.instanceId]);
+    expect(pierced).toMatchObject({ lethal: false, survives: true, stopsHit: false });
+    expect(pierced.score).toBeLessThan(score([]).score);
+
+    fixture.input.view.pendingDecision!.defenderDefense = [{ instanceId: blocker!.instanceId, defense: 1, attack: 3 }];
+    expect(score([blocker!.instanceId])).toMatchObject({ lethal: false, survives: false });
+    expect(score([blocker!.instanceId]).score).toBeLessThan(score([]).score);
+  });
+
+  it("counts on-hit damage toward a lethal hit", () => {
+    const fixture = cycleDefenseFixture([{ id: "SMALL_BLOCKER", attack: 4, defense: 2 }], {
+      attackValue: 1,
+      life: 2,
+      onHitText: "When this hits a hero, deal 1 arcane damage to them.",
+    });
+    const [blocker] = fixture.held;
+    const score = (instanceIds: number[]) => scoreDefenseIntentWithTrace(
+      { kind: "defend", instanceIds },
+      fixture.input,
+      fixture.own,
+      fixture.model,
+    );
+    expect(score([])).toMatchObject({ lethal: true, survives: false });
+    expect(score([blocker!.instanceId])).toMatchObject({ lethal: true, survives: true, stopsHit: true });
+    expect(score([blocker!.instanceId]).score).toBeGreaterThan(score([]).score);
+    expect(defenseReactionThreat(fixture.input)).toEqual({ incoming: 1, lethal: true });
+
+    fixture.input.view.players[0].life = 3;
+    expect(score([])).toMatchObject({ lethal: false, survives: true });
+    expect(defenseReactionThreat(fixture.input)).toEqual({ incoming: 1, lethal: false });
+  });
 });
 
 describe("planned prevention", () => {
+  it("gives a Mirage defense reaction no value against a 6-power non-Illusionist attack", () => {
+    const state = createGame({
+      decklists: [decklists.dorinthea, decklists.rhinar],
+      cards: cardData,
+      scripts,
+      seed: 9412,
+      startPlayer: 1,
+    });
+    const view = projectStateFor(state, 0);
+    const reaction = { instanceId: 94_121, cardId: "TEST_MIRAGE", owner: 0 };
+    view.players[0].hand = [reaction];
+    view.players[0].handCount = 1;
+    view.phase = "reaction";
+    view.pendingDecision = { player: 0, kind: "defense-reaction", prompt: "Defense reaction" };
+    const cards = {
+      ...cardData,
+      TEST_MIRAGE: {
+        id: "TEST_MIRAGE",
+        name: "Test Mirage",
+        types: ["defense-reaction" as const],
+        keywords: ["Mirage"],
+        text: "Mirage",
+        cost: 0,
+        defense: 4,
+      },
+      TEST_ATTACK: { id: "TEST_ATTACK", name: "Test Attack", types: ["action" as const], subtypes: ["attack"], text: "", classes: [] },
+      TEST_ILLUSION: { id: "TEST_ILLUSION", name: "Test Illusion", types: ["action" as const], subtypes: ["attack"], text: "", classes: ["illusionist"] },
+    } as BotPolicyInput["cards"];
+    const evaluate = (cardId: string, attackValue: number) => {
+      view.chain = [{
+        attackingCard: { instanceId: 94_122, cardId, owner: 1 },
+        defendingCards: [],
+        attackValue,
+        defenseValue: 0,
+        damage: attackValue,
+        resolved: false,
+        reactions: [],
+      }];
+      const input: BotPolicyInput = { seat: 0, view, legal: [], cards };
+      return {
+        planned: plannedDefenseReactionPlan(input, { kind: "defend", instanceIds: [] }).amount,
+        score: scoreDefenseReaction(cards.TEST_MIRAGE!, input),
+      };
+    };
+
+    expect(evaluate("TEST_ATTACK", 6)).toEqual({ planned: 0, score: -100 });
+    expect(evaluate("TEST_ATTACK", 5).planned).toBe(4);
+    expect(evaluate("TEST_ATTACK", 5).score).toBeGreaterThan(0);
+    expect(evaluate("TEST_ILLUSION", 6).planned).toBe(4);
+    expect(evaluate("TEST_ILLUSION", 6).score).toBeGreaterThan(0);
+  });
+
   it("accounts for pitching a hand card to play a defense reaction", () => {
     const state = createGame({
       decklists: [decklists.dorinthea, decklists.rhinar],
@@ -1235,7 +1499,7 @@ describe("planned prevention", () => {
       TEST_REACTION: {
         id: "TEST_REACTION",
         name: "Test Reaction",
-        cardType: "defense-reaction" as const,
+        types: ["defense-reaction" as const],
         text: "",
         cost: 1,
         defense: 4,
@@ -1243,7 +1507,7 @@ describe("planned prevention", () => {
       TEST_BLUE: {
         id: "TEST_BLUE",
         name: "Test Blue",
-        cardType: "action" as const,
+        types: ["action" as const],
         subtypes: ["attack"],
         text: "",
         pitch: 3 as const,
@@ -1460,7 +1724,7 @@ describe("public pump lethal", () => {
   it("plans defense reactions against the pumped total", () => {
     const fixture = pumpFixture({ cogs: 2 });
     for (const id of ["FIRST_BLOCKER", "SECOND_BLOCKER"]) {
-      fixture.cards[id] = { ...fixture.cards[id]!, cardType: "defense-reaction" };
+      fixture.cards[id] = { ...fixture.cards[id]!, types: ["defense-reaction"] };
     }
     // One 3-defense reaction survives the printed 4 at 2 life; the pumped 6
     // needs both.

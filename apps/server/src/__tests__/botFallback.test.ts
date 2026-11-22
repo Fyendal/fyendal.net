@@ -20,7 +20,7 @@ describe("conservative bot fallback", () => {
     } as unknown as BotPolicyInput["view"];
     const input: BotPolicyInput = {
       seat: 1, view: inputView,
-      cards: { ASR006: { id: "ASR006", name: "Snapdragon Scalers", cardType: "equipment", defense: 0, text: "" } },
+      cards: { ASR006: { id: "ASR006", name: "Snapdragon Scalers", types: ["equipment"], defense: 0, text: "" } },
       legal: [
         { kind: "stage-defenders", instanceIds: [hand.instanceId] },
         { kind: "stage-defenders", instanceIds: [equipment.instanceId] },
@@ -106,7 +106,7 @@ describe("conservative bot fallback", () => {
       seat: 1,
       view: inputView,
       cards: {
-        blocker: { id: "blocker", name: "Blocker", cardType: "action", defense: 3, text: "" },
+        blocker: { id: "blocker", name: "Blocker", types: ["action"], defense: 3, text: "" },
       },
       legal: [
         { kind: "defend", instanceIds: [1, 2] },

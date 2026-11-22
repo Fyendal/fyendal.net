@@ -5,7 +5,7 @@ import type { CardInstance, PlayerState } from "./state.js";
 import { isChiCard } from "./cardProperties.js";
 import { nameOf } from "./gameLog.js";
 import { removeFromArray } from "./zoneQueries.js";
-import { notePitch, payFromPools, pitchIntoPool, pitchProhibitedByEffect, pitchValueOfInstance, scriptedPaymentOptions } from "./resources.js";
+import { canPayFromHand, notePitch, payFromPools, pitchIntoPool, pitchProhibitedByEffect, pitchValueOfInstance } from "./resources.js";
 
 interface VariableResourceCost {
   base: number;
@@ -13,13 +13,14 @@ interface VariableResourceCost {
   minimum?: number;
   maximum?: number;
   canDeclareX?(x: number): boolean;
+  cardsForX?(x: number): number[];
 }
 
 type VariablePlayCost = NonNullable<CardScript["variablePlayCost"]>;
 type ResolvedVariablePlayCost = Omit<VariablePlayCost, "maximum" | "canDeclareX"> &
   VariableResourceCost;
 type VariableAbilityCost = NonNullable<ActivatedAbility["variableCost"]>;
-type ResolvedVariableAbilityCost = Omit<VariableAbilityCost, "maximum" | "canDeclareX"> &
+type ResolvedVariableAbilityCost = Omit<VariableAbilityCost, "maximum" | "canDeclareX" | "cardsForX"> &
   VariableResourceCost;
 
 type VariableResourceChoice = { x: number; cost: number };
@@ -65,6 +66,9 @@ export function resolveVariableAbilityCost(
     canDeclareX: variableCost.canDeclareX
       ? (x: number) => variableCost.canDeclareX!(ctx, x)
       : undefined,
+    cardsForX: variableCost.cardsForX
+      ? (x: number) => variableCost.cardsForX!(ctx, x)
+      : undefined,
   };
 }
 
@@ -87,11 +91,20 @@ export function variableResourceChoices(
   for (let x = minimum; x <= maximum; x++) {
     if (variableCost.canDeclareX && !variableCost.canDeclareX(x)) continue;
     const cost = costForBase(variableResourceCost(variableCost, x));
-    const payments = scriptedPaymentOptions(state, player, cost, `x:${x}`, [sourceInstanceId]);
-    if (Object.keys(payments).length === 0) break;
+    if (!canPayFromHand(state, player, cost, [sourceInstanceId])) break;
     choices[`X = ${x}`] = { x, cost };
   }
   return choices;
+}
+
+/** Parallel to the X choices: the cards each declaration lets the player play. */
+export function variableChoiceEnabledCardIds(
+  choices: Record<string, { x: number }>,
+  variableCost: VariableResourceCost,
+): { optionEnabledCardIds?: number[][] } {
+  const cardsForX = variableCost.cardsForX;
+  if (!cardsForX) return {};
+  return { optionEnabledCardIds: Object.values(choices).map((choice) => cardsForX(choice.x)) };
 }
 
 export function isValidVariableX(

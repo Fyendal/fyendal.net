@@ -5,12 +5,14 @@ import {
   commonOptionMessages,
   decisionPrompt,
   effectPutSelfFaceUpFromDeck,
+  faceUpGraveyard,
   localizedCardLog,
   optN,
   optOnChoose,
   opponentSeat,
   yesNoPrompt,
   ongoingLabel,
+  isNonAttackAction,
 } from "../shared-helpers.js";
 
 function vestOfTheFirstFist(): CardScript {
@@ -28,7 +30,7 @@ function vestOfTheFirstFist(): CardScript {
     onChoose(ctx, hook, option) {
       if (hook !== "vest-first-fist" || option !== "yes") return;
       ctx.destroySelf();
-      ctx.changeResources(ctx.seat, 2);
+      ctx.gainResources(ctx.seat, 2);
       ctx.logPublic(
         localizedCardLog(
           ctx,
@@ -137,8 +139,8 @@ function backAlleyBreakline(): CardScript {
 function cadaverousContraband(): CardScript {
   return {
     onHit(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
-        return ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack");
+      const cards = faceUpGraveyard(ctx).filter((card) => {
+        return isNonAttackAction(ctx, card);
       });
       if (cards.length === 0) return;
       ctx.requestCardChoice(
@@ -252,9 +254,7 @@ function rifting(): CardScript {
 
 function vigorRush(): CardScript {
   return {
-    onAttackDeclared(ctx) {
-      if (ctx.getFlag("player", "playedNonAttackAction") === true) ctx.grantGoAgain();
-    },
+    hasConditionalGoAgain: (ctx) => ctx.getFlag("player", "playedNonAttackAction") === true,
   };
 }
 
@@ -288,7 +288,7 @@ function sunKiss(life: number): CardScript {
       ctx.gainLife(ctx.seat, life);
       if (ctx.getFlag("player", "playedName:moon wish") !== true) return;
       ctx.drawCards(ctx.seat, 1);
-      ctx.gainActionPoint();
+      ctx.grantGoAgain();
     },
   };
 }

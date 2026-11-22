@@ -1,6 +1,7 @@
 import {
   collectCardEventTriggerLayers,
   fireCardBanished,
+  fireCardsBanished,
   fireCardLeavesGraveyard,
   fireFriendlyAttackLost,
   fireFriendlyDestroyed,
@@ -30,6 +31,7 @@ export function createScriptRuntime(runtime: EngineRuntime): ScriptRuntimeBindin
     events: Object.freeze({
       collectCardEventTriggerLayers: bindEvent(collectCardEventTriggerLayers),
       fireCardBanished: bindEvent(fireCardBanished),
+      fireCardsBanished: bindEvent(fireCardsBanished),
       fireCardLeavesGraveyard: bindEvent(fireCardLeavesGraveyard),
       fireFriendlyAttackLost: bindEvent(fireFriendlyAttackLost),
       fireFriendlyDestroyed: bindEvent(fireFriendlyDestroyed),

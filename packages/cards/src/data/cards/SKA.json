@@ -2,7 +2,7 @@
  {
   "id": "SKA001",
   "name": "Kayo",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You have 1 weapon zone.\nAttack action cards you own get +1{p} while they are in any zone other than the combat chain.\nThe first time you discard a card with 6 or more {p} during each of your action phases, create a Might token.",
   "classes": [
    "brute"
@@ -14,7 +14,7 @@
  {
   "id": "SKA002",
   "name": "Mandible Claw",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nIf you have discarded a card with 6 or more {p} this turn, this card's attacks go again.",
   "attack": 3,
   "classes": [
@@ -29,7 +29,7 @@
  {
   "id": "SKA003",
   "name": "Knucklehead",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Kayo Specialization \nAction - Destroy this: Roll a 6-sided die. Until end of turn, your base {i} is the number rolled.\nTemper",
   "defense": 2,
   "classes": [
@@ -47,7 +47,7 @@
  {
   "id": "SKA004",
   "name": "Nullrune Hood",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -64,7 +64,7 @@
  {
   "id": "SKA005",
   "name": "Nullrune Robe",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -81,7 +81,7 @@
  {
   "id": "SKA006",
   "name": "Predatory Plating",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Gain {r}. Activate this only if you control a card with 6 or more {p}.\nGuardwell",
   "defense": 2,
   "classes": [
@@ -98,7 +98,7 @@
  {
   "id": "SKA007",
   "name": "Blade Beckoner Gauntlets",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -115,7 +115,7 @@
  {
   "id": "SKA008",
   "name": "Nullrune Gloves",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -132,7 +132,7 @@
  {
   "id": "SKA009",
   "name": "Beaten Trackers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever you discard a random card with 6 or more {p}, you may destroy this. If you do, gain 1 action point.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -149,7 +149,7 @@
  {
   "id": "SKA010",
   "name": "Bare Fangs",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
   "pitch": 1,
   "cost": 2,
@@ -165,7 +165,7 @@
  {
   "id": "SKA011",
   "name": "Buckwild",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If there is a card with 6 or more {p} in your pitch zone, this gets go again.",
   "pitch": 1,
   "cost": 3,
@@ -185,7 +185,7 @@
  {
   "id": "SKA012",
   "name": "Clash of Agility",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends, clash with the attacking hero. The winner creates an Agility token.",
   "pitch": 1,
   "cost": 2,
@@ -206,7 +206,7 @@
  {
   "id": "SKA013",
   "name": "Clash of Might",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends, clash with the attacking hero. The winner creates a Might token.",
   "pitch": 1,
   "cost": 2,
@@ -227,7 +227,7 @@
  {
   "id": "SKA014",
   "name": "High Pitched Howl",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, if there is a card with 6 or more {p} in your pitch zone, create a Vigor token.",
   "pitch": 1,
   "cost": 2,
@@ -244,7 +244,7 @@
  {
   "id": "SKA015",
   "name": "Pulping",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets dominate.\nIf this is defended by fewer than 2 non-equipment cards, it gets go again.",
   "pitch": 1,
   "cost": 2,
@@ -264,7 +264,7 @@
  {
   "id": "SKA016",
   "name": "Rough Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, if there is a card with 6 or more {p} in your pitch zone, this gets +1{p}.",
   "pitch": 1,
   "cost": 2,
@@ -281,7 +281,7 @@
  {
   "id": "SKA017",
   "name": "Savage Feast",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Savage Feast discard a random card.\nWhen you attack with Savage Feast, if a card with 6 or more {p} was discarded as an additional cost to play it, draw a card.",
   "pitch": 1,
   "cost": 1,
@@ -298,7 +298,7 @@
  {
   "id": "SKA018",
   "name": "Strongest Survive",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, they discard a card unless they reveal a card from their hand with {p} greater than the damage dealt this way.",
   "pitch": 1,
   "cost": 3,
@@ -315,7 +315,7 @@
  {
   "id": "SKA019",
   "name": "Wild Ride",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
   "pitch": 1,
   "cost": 2,
@@ -334,7 +334,7 @@
  {
   "id": "SKA020",
   "name": "Test of Might",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, clash with the attacking hero. The winner creates a Might token.",
   "pitch": 1,
   "defense": 4,
@@ -350,7 +350,7 @@
  {
   "id": "SKA021",
   "name": "Bare Fangs",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
   "pitch": 2,
   "cost": 2,
@@ -366,7 +366,7 @@
  {
   "id": "SKA022",
   "name": "Clash of Might",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends, clash with the attacking hero. The winner creates a Might token.",
   "pitch": 2,
   "cost": 2,
@@ -387,7 +387,7 @@
  {
   "id": "SKA023",
   "name": "Strongest Survive",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, they discard a card unless they reveal a card from their hand with {p} greater than the damage dealt this way.",
   "pitch": 2,
   "cost": 3,
@@ -404,7 +404,7 @@
  {
   "id": "SKA024",
   "name": "Wild Ride",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
   "pitch": 2,
   "cost": 2,
@@ -423,7 +423,7 @@
  {
   "id": "SKA025",
   "name": "Agile Windup",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Create an Agility token.",
   "pitch": 3,
   "cost": 3,
@@ -441,7 +441,7 @@
  {
   "id": "SKA026",
   "name": "Bear Hug",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Play this only if you've pitched a card with 6 or more {p} this turn.",
   "pitch": 3,
   "cost": 2,
@@ -458,7 +458,7 @@
  {
   "id": "SKA027",
   "name": "Buckwild",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If there is a card with 6 or more {p} in your pitch zone, this gets go again.",
   "pitch": 3,
   "cost": 3,
@@ -478,7 +478,7 @@
  {
   "id": "SKA028",
   "name": "Rally the Coast Guard",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this only while this card is defending.",
   "pitch": 3,
   "cost": 3,
@@ -495,7 +495,7 @@
  {
   "id": "SKA029",
   "name": "Reincarnate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is discarded at random, put it on the bottom of its owner's deck.",
   "pitch": 3,
   "cost": 3,
@@ -512,7 +512,7 @@
  {
   "id": "SKA030",
   "name": "Run Roughshod",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Play this only if you've discarded a card with 6 or more {p} this turn.",
   "pitch": 3,
   "cost": 1,
@@ -529,7 +529,7 @@
  {
   "id": "SKA031",
   "name": "Smash Instinct",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, intimidate.",
   "pitch": 3,
   "cost": 3,
@@ -549,7 +549,7 @@
  {
   "id": "SKA032",
   "name": "Strongest Survive",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, they discard a card unless they reveal a card from their hand with {p} greater than the damage dealt this way.",
   "pitch": 3,
   "cost": 3,
@@ -566,7 +566,7 @@
  {
   "id": "SKA033",
   "name": "Unexpected Backhand",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you win a clash revealing this, deal 1 damage to the other hero.",
   "pitch": 3,
   "cost": 3,
@@ -583,7 +583,7 @@
  {
   "id": "SKA034",
   "name": "Agility",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then your next attack this turn gets go again.",
   "classes": [
    "generic"
@@ -593,7 +593,7 @@
  {
   "id": "SKA035",
   "name": "Might",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
   "classes": [
    "generic"
@@ -603,7 +603,7 @@
  {
   "id": "SKA036",
   "name": "Vigor",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then gain {r}.",
   "classes": [
    "generic"

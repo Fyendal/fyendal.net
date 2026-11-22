@@ -1,8 +1,12 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { bloodDebtScript as bloodDebt, decisionMessage, decisionPrompt } from "./shared-helpers.js";
-
-const RUNECHANT = "SBA036";
-const GATE = "IAR222";
+import {
+  bloodDebtScript as bloodDebt,
+  decisionMessage,
+  decisionPrompt,
+  hasCardSubtype,
+  isAttackAction,
+} from "./shared-helpers.js";
+import { GATE_TO_IARATHAEL, RUNECHANT } from "./tokens.js";
 
 function specializedRunechant(
   onUsurped: (ctx: ScriptCtx, attack: Parameters<NonNullable<CardScript["onUsurped"]>>[1]) => void,
@@ -33,7 +37,7 @@ function specializedRunechant(
         event: "card-played",
         label: "Destroy this and create a Runechant",
         condition: (ctx, played) =>
-          !!played && ctx.hasCardType(played, "action") && ctx.cardTypes(played).includes("attack"),
+          !!played && isAttackAction(ctx, played),
         effect(ctx) {
           ctx.destroySelf();
         },
@@ -44,7 +48,7 @@ function specializedRunechant(
 
 const ominousToll: CardScript = {
   onAttackDeclared(ctx) {
-    const zombies = ctx.player(ctx.seat).hand.filter((card) => ctx.cardTypes(card).includes("zombie"));
+    const zombies = ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, "zombie"));
     if (zombies.length > 0) {
       ctx.requestCardChoice(
         "gem-ominous-toll-discard",
@@ -59,8 +63,8 @@ const ominousToll: CardScript = {
     if (hook !== "gem-ominous-toll-discard" || option === "no") return;
     const card = ctx
       .player(ctx.seat)
-      .hand.find((candidate) => candidate.instanceId === Number(option) && ctx.cardTypes(candidate).includes("zombie"));
-    if (card && ctx.discardCard(ctx.seat, card.instanceId)) ctx.createToken(GATE);
+      .hand.find((candidate) => candidate.instanceId === Number(option) && hasCardSubtype(ctx, candidate, "zombie"));
+    if (card && ctx.discardCard(ctx.seat, card.instanceId)) ctx.createToken(GATE_TO_IARATHAEL);
   },
 };
 
@@ -109,7 +113,7 @@ export const gem: Record<string, CardScript> = {
 
   "runechant of greed|2": specializedRunechant((ctx) => ctx.drawCards(ctx.seat, 1)),
   "runechant of envy|2": specializedRunechant((ctx) => ctx.gainLife(ctx.seat, 1)),
-  "runechant of gluttony|2": specializedRunechant((ctx) => ctx.changeResources(ctx.seat, 1)),
+  "runechant of gluttony|2": specializedRunechant((ctx) => ctx.gainResources(ctx.seat, 1)),
   "runechant of lust|2": specializedRunechant((ctx) => ctx.createToken(RUNECHANT)),
   "runechant of pride|2": specializedRunechant((ctx, attack) => {
     ctx.addCardTempPower(attack.instanceId, 1);

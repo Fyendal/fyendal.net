@@ -424,7 +424,7 @@ function completeEndPhase(state: GameStateInternal, runtime: EngineRuntime): voi
   // CR 8.2.8b: during the end phase (either player's), every ally's life
   // total resets to its base life
   for (const p of state.players) {
-    for (const c of (p as PlayerState).board) {
+    for (const c of [...(p as PlayerState).board, ...(p as PlayerState).weapons]) {
       const printed = dataOf(state, c.cardId).life;
       const base = printed === undefined
         ? undefined

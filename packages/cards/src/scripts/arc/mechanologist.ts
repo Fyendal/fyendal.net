@@ -1,28 +1,19 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript } from "@fyendal/engine";
 import {
+  boostedThisTurn,
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  isMechanologistItemAtMost,
   localizedCardLog,
   optN,
   optOnChoose,
 } from "../shared-helpers.js";
 
-function boostedThisTurn(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "boostedThisTurn") === true;
-}
-
-function mechanicItemAtMost(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, maxCost: number): boolean {
-  const data = ctx.cardData(card.cardId);
-  return (
-    ctx.cardTypes(card).includes("mechanologist") && ctx.cardTypes(card).includes("item") && (data.cost ?? 0) <= maxCost
-  );
-}
-
 function pourTheMold(maxCost: number): CardScript {
   return {
     onPlay(ctx) {
-      const candidates = ctx.player(ctx.seat).hand.filter((card) => mechanicItemAtMost(ctx, card, maxCost));
+      const candidates = ctx.player(ctx.seat).hand.filter((card) => isMechanologistItemAtMost(ctx, card, maxCost));
       if (candidates.length === 0) return;
       ctx.requestCardChoice(
         "pour-item",
@@ -37,7 +28,7 @@ function pourTheMold(maxCost: number): CardScript {
     onChoose(ctx, hook, option) {
       if (hook !== "pour-item") return;
       const item = ctx.player(ctx.seat).hand.find((card) => card.instanceId === Number(option));
-      if (!item || !mechanicItemAtMost(ctx, item, maxCost) || !ctx.settleCard(item.instanceId)) return;
+      if (!item || !isMechanologistItemAtMost(ctx, item, maxCost) || !ctx.settleCard(item.instanceId)) return;
       if (boostedThisTurn(ctx)) ctx.addCounter(item.instanceId, "steam", 1);
       ctx.logPublic(
         localizedCardLog(

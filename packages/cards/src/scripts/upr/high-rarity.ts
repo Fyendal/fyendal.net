@@ -2,37 +2,39 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   cardNamed,
   commonOptionMessages,
+  controlledPermanents,
+  currentAttackDraconic,
   dealArcane,
   decisionPrompt,
+  draconicLinks,
+  equipmentZoneCards,
+  equippedCards,
+  faceUpGraveyard,
+  hasCardSubtype,
   hitHookLabel,
+  isAlly,
+  isAttackAction,
+  isFused,
+  isNonAttackAction,
   ongoingLabel,
   opponentSeat,
   requestDiscardChoice,
   resolveDiscardChoice,
+  withFusion,
   wizardActionAsInstant,
   yesNoPrompt,
 } from "../shared-helpers.js";
 import { dragonAttack } from "./dragon-attack.js";
+import { ASH, FROSTBITE } from "../tokens.js";
 
-const ASH = "UPR043";
-const FROSTBITE = "SIY035";
-
-function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type);
-}
 function isIceAffliction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return cardNamed(ctx, card, "frostbite") || (has(ctx, card, "ice") && has(ctx, card, "affliction"));
-}
-function equipped(player: ReturnType<ScriptCtx["player"]>): DeepReadonly<CardInstance>[] {
-  return Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card);
-}
-function isAttackCard(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && has(ctx, card, "attack");
+  return cardNamed(ctx, card, "frostbite") || (hasCardSubtype(ctx, card, "ice") &&
+    hasCardSubtype(ctx, card, "affliction"));
 }
 function ownIllusionistAttack(ctx: ScriptCtx): DeepReadonly<CardInstance> | undefined {
   const link = ctx.link;
   if (!link || link.attacker !== ctx.seat || link.flags.attackGone === true) return undefined;
-  return has(ctx, link.attackingCard, "illusionist") ? link.attackingCard : undefined;
+  return hasCardSubtype(ctx, link.attackingCard, "illusionist") ? link.attackingCard : undefined;
 }
 function controlledPhoenixFlames(ctx: ScriptCtx): number {
   return ctx.state.chain.filter((link) => link.attacker === ctx.seat && cardNamed(ctx, link.attackingCard, "phoenix flame"))
@@ -62,34 +64,13 @@ function revealRed(ctx: ScriptCtx, count: number): number {
   ctx.revealCards(cards.map((card) => card.instanceId));
   return cards.filter((card) => ctx.cardData(card.cardId).pitch === 1).length;
 }
-function fusedIce(): Pick<CardScript, "additionalCost" | "onChoose"> {
-  return {
-    additionalCost(ctx) {
-      const ice = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "ice"));
-      if (ice.length)
-        ctx.requestCardChoice(
-          "upr-high-fuse",
-          decisionPrompt("Reveal an Ice card to fuse?", "card.upr.ice.fusion.reveal", {
-            optionMessages: commonOptionMessages("no"),
-          }),
-          ["no", ...ice.map((card) => card.instanceId)],
-        );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "upr-high-fuse" && option !== "no") {
-        ctx.setState("fused", 1);
-        ctx.setFlag("player", "fusedThisTurn", true);
-      }
-    },
-  };
-}
 const dromai: CardScript = {
   replacePitchResources(ctx, card, amount) {
     if (ctx.cardData(card.cardId).pitch === 1) ctx.createToken(ASH);
     return amount;
   },
   onFriendlyActivate(ctx, activated) {
-    if (has(ctx, activated, "dragon") && ctx.playedThisTurn("red") > 0) ctx.grantGoAgain();
+    if (hasCardSubtype(ctx, activated, "dragon") && ctx.playedThisTurn("red") > 0) ctx.grantGoAgain();
   },
 };
 const fai: CardScript = {
@@ -117,10 +98,10 @@ const fai: CardScript = {
     goAgain: false,
     timing: "instant",
     oncePerTurn: true,
-    canActivate: (ctx) => ctx.player(ctx.seat).graveyard.some((card) => cardNamed(ctx, card, "phoenix flame")),
-    modifyCost: (ctx, base) => Math.max(0, base - ctx.chainLinksControlled(ctx.seat, "draconic")),
+    canActivate: (ctx) => faceUpGraveyard(ctx).some((card) => cardNamed(ctx, card, "phoenix flame")),
+    modifyCost: (ctx, base) => Math.max(0, base - draconicLinks(ctx)),
     onActivate(ctx) {
-      const flame = ctx.player(ctx.seat).graveyard.find((card) => cardNamed(ctx, card, "phoenix flame"));
+      const flame = faceUpGraveyard(ctx).find((card) => cardNamed(ctx, card, "phoenix flame"));
       if (flame) ctx.moveToHand(flame.instanceId);
     },
   },
@@ -131,27 +112,20 @@ const iyslander: CardScript = {
       zone === "arsenal" &&
       ctx.state.activePlayer !== ctx.seat &&
       ctx.cardData(card.cardId).pitch === 3 &&
-      has(ctx, card, "ice") &&
+      hasCardSubtype(ctx, card, "ice") &&
       ctx.hasCardType(card, "action") &&
-      !has(ctx, card, "attack")
+      !hasCardSubtype(ctx, card, "attack")
     );
   },
   triggers: [
     {
       event: "card-played",
       label: "Create a Frostbite",
-      condition: (ctx, card) => ctx.state.activePlayer !== ctx.seat && !!card && has(ctx, card, "ice"),
+      condition: (ctx, card) => ctx.state.activePlayer !== ctx.seat && !!card && hasCardSubtype(ctx, card, "ice"),
       effect: (ctx) => ctx.createToken(FROSTBITE, opponentSeat(ctx)),
     },
   ],
 };
-
-function equippedCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
-  return [
-    ...Object.values(ctx.player(seat).equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
-    ...ctx.player(seat).weapons.filter((card) => ctx.cardData(card.cardId).cardType === "equipment"),
-  ];
-}
 
 export const uprHighRarity: Record<string, CardScript> = {
   "blood of the dracai|1": {
@@ -170,7 +144,7 @@ export const uprHighRarity: Record<string, CardScript> = {
   "dromai, ash artist|0": dromai,
   "burn them all|1": {
     onFriendlyActivate(ctx, card) {
-      if (has(ctx, card, "dragon")) dealArcane(ctx, opponentSeat(ctx), 1);
+      if (hasCardSubtype(ctx, card, "dragon")) dealArcane(ctx, opponentSeat(ctx), 1);
     },
   },
   "invoke dracona optimai|1": invoke("UPR006B"),
@@ -253,16 +227,16 @@ export const uprHighRarity: Record<string, CardScript> = {
     },
     modifyAttack(ctx) {
       const attacking = ctx.link?.attackingCard;
-      if (!attacking || !ctx.currentAttackHasType("draconic")) return 0;
-      return ctx.basePower(attacking) < ctx.chainLinksControlled(ctx.seat, "draconic") ? 1 : 0;
+      if (!attacking || !currentAttackDraconic(ctx)) return 0;
+      return ctx.basePower(attacking) < draconicLinks(ctx) ? 1 : 0;
     },
   },
   "combustion point|1": {
     canPlay(ctx) {
       return (
         !!ctx.link &&
-        (ctx.cardTypes(ctx.link.attackingCard).includes("draconic") ||
-          ctx.cardTypes(ctx.link.attackingCard).includes("ninja"))
+        (hasCardSubtype(ctx, ctx.link.attackingCard, "draconic") ||
+          hasCardSubtype(ctx, ctx.link.attackingCard, "ninja"))
       );
     },
     onPlay(ctx) {
@@ -278,7 +252,7 @@ export const uprHighRarity: Record<string, CardScript> = {
       oncePerTurn: true,
       canActivate: (ctx) => ctx.playedThisTurn("red") > 0,
       onActivate(ctx) {
-        ctx.changeResources(
+        ctx.gainResources(
           ctx.seat,
           ctx.player(ctx.seat).pitch.filter((card) => ctx.cardData(card.cardId).pitch === 1).length,
         );
@@ -297,7 +271,7 @@ export const uprHighRarity: Record<string, CardScript> = {
           options: (ctx) =>
             ctx.state.players.flatMap((player) => [
               ...player.board.filter((card) => isIceAffliction(ctx, card) || ctx.isFrozen(card)),
-              ...[...player.weapons, ...player.arsenal, ...equipped(player)].filter((card) => ctx.isFrozen(card)),
+              ...[...player.weapons, ...player.arsenal, ...equipmentZoneCards(player)].filter((card) => ctx.isFrozen(card)),
             ]).map((card) => card.instanceId),
           prompt: () => decisionPrompt("Choose a frozen card or Ice permanent", "card.upr.frozen.ice.choose"),
         },
@@ -305,7 +279,7 @@ export const uprHighRarity: Record<string, CardScript> = {
           const id = ctx.playTargetInstanceId;
           if (id === undefined) return;
           const target = ctx.state.players
-            .flatMap((player) => [...player.board, ...player.weapons, ...player.arsenal, ...equipped(player)])
+            .flatMap((player) => [...player.board, ...player.weapons, ...player.arsenal, ...equipmentZoneCards(player)])
             .find((card) => card.instanceId === id);
           if (!target || !ctx.banish(ctx.self.instanceId)) return;
           if (isIceAffliction(ctx, target)) ctx.destroyPermanent(id);
@@ -359,44 +333,41 @@ export const uprHighRarity: Record<string, CardScript> = {
     },
   },
   "tome of firebrand|1": {
-    canPlay: (ctx) => ctx.chainLinksControlled(ctx.seat, "draconic") >= 4,
+    canPlay: (ctx) => draconicLinks(ctx) >= 4,
     onPlay(ctx) {
       ctx.drawCards(ctx.seat, 2);
     },
   },
   "iyslander, stormbind|0": iyslander,
-  "encase|1": {
-    ...fusedIce(),
+  "encase|1": withFusion("ice", {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [3],
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
       dealArcane(ctx, opponentSeat(ctx), 3);
     },
-  },
-  "freezing point|1": {
-    ...fusedIce(),
+  }),
+  "freezing point|1": withFusion("ice", {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [5],
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
       const opp = ctx.player(opponentSeat(ctx));
-      const frozen = [
-        ...opp.arsenal,
-        ...opp.board,
-        ...Object.values(opp.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
-      ].filter((card) => ctx.isFrozen(card)).length;
-      const ice = opp.board.filter((card) => has(ctx, card, "ice") && has(ctx, card, "affliction")).length;
+      const frozen = [...opp.arsenal, ...controlledPermanents(ctx, opp.seat)].filter((card) =>
+        ctx.isFrozen(card),
+      ).length;
+      const ice = opp.board.filter((card) =>
+        hasCardSubtype(ctx, card, "ice") && hasCardSubtype(ctx, card, "affliction")).length;
       dealArcane(
         ctx,
         opp.seat,
         5 +
-          (ctx.getState("fused")
+          (isFused(ctx)
             ? frozen + ice + opp.board.filter((card) => cardNamed(ctx, card, "frostbite")).length
             : 0),
       );
     },
-  },
+  }),
   "frost hex|3": {},
   "coronet peak|0": {
     activated: {
@@ -418,7 +389,7 @@ export const uprHighRarity: Record<string, CardScript> = {
           if (hand.length)
             ctx.requestCardChoice(
               "coronet-discard",
-              decisionPrompt("Choose a card to discard", "card.upr.discard.choose"),
+              decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
               hand.map((card) => card.instanceId),
               seat,
             );
@@ -431,7 +402,7 @@ export const uprHighRarity: Record<string, CardScript> = {
         if (hand.length)
           ctx.requestCardChoice(
             "coronet-discard",
-            decisionPrompt("Choose a card to discard", "card.upr.discard.choose"),
+            decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
             hand.map((card) => card.instanceId),
             opponentSeat(ctx),
           );
@@ -450,7 +421,7 @@ export const uprHighRarity: Record<string, CardScript> = {
         effect(ctx) {
           ctx.addCounter(ctx.self.instanceId, "flow", 1);
           const count = ctx.getCounter("flow");
-          const ice = ctx.player(ctx.seat).pitch.filter((card) => has(ctx, card, "ice"));
+          const ice = ctx.player(ctx.seat).pitch.filter((card) => hasCardSubtype(ctx, card, "ice"));
           if (ice.length < count) ctx.destroySelf();
           else
             ctx.requestCardChoices(
@@ -485,7 +456,8 @@ export const uprHighRarity: Record<string, CardScript> = {
         event: "card-played",
         label: "Remove a frost counter; opposing hero pays 2 or discards",
         condition: (ctx, card) =>
-          !!card && Number(card.scriptState?.fused ?? 0) > 0 && ctx.getCounter("frost") > 0 && has(ctx, card, "ice"),
+          !!card && Number(card.scriptState?.fused ?? 0) > 0 && ctx.getCounter("frost") > 0 &&
+            hasCardSubtype(ctx, card, "ice"),
         onTrigger(ctx) {
           ctx.addCounter(ctx.self.instanceId, "frost", -1);
         },
@@ -504,7 +476,7 @@ export const uprHighRarity: Record<string, CardScript> = {
         requestDiscardChoice(
           ctx,
           "chill-discard",
-          decisionPrompt("Choose a card to discard", "card.upr.discard.choose"),
+          decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
           opponentSeat(ctx),
         );
       else if (hook === "chill-discard") resolveDiscardChoice(ctx, option, opponentSeat(ctx));
@@ -512,7 +484,8 @@ export const uprHighRarity: Record<string, CardScript> = {
   },
   "ghostly touch|0": {
     onFriendlyAttackLost(ctx, card, cause) {
-      if (cause === "phantasm" && has(ctx, card, "illusionist")) ctx.addCounter(ctx.self.instanceId, "haunt", 1);
+      if (cause === "phantasm" &&
+        hasCardSubtype(ctx, card, "illusionist")) ctx.addCounter(ctx.self.instanceId, "haunt", 1);
     },
     activated: [
       {
@@ -535,7 +508,7 @@ export const uprHighRarity: Record<string, CardScript> = {
         goAgain: false,
         oncePerTurn: true,
         label: "Attack",
-        canActivate: (ctx) => has(ctx, ctx.self, "ally"),
+        canActivate: (ctx) => isAlly(ctx, ctx.self),
       },
     ],
   },
@@ -551,7 +524,7 @@ export const uprHighRarity: Record<string, CardScript> = {
   },
   "tiger stripe shuko|0": {
     onFriendlyPlay(ctx, card) {
-      if (!isAttackCard(ctx, card) || ctx.basePower(card) > 2) return;
+      if (!isAttackAction(ctx, card) || ctx.basePower(card) > 2) return;
       const count = Number(ctx.getFlag("player", "smallAttackCount")) + 1;
       ctx.setFlag("player", "smallAttackCount", count);
       if (count !== 2) return;
@@ -578,7 +551,7 @@ export const uprHighRarity: Record<string, CardScript> = {
     },
     onHit(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
-      if (top && ctx.banish(top.instanceId) && isAttackCard(ctx, top))
+      if (top && ctx.banish(top.instanceId) && isAttackAction(ctx, top))
         ctx.allowPlayFrom(top.instanceId, "banish", { untilEndOfNextTurn: true });
     },
   },
@@ -630,7 +603,7 @@ export const uprHighRarity: Record<string, CardScript> = {
       if (cards.length)
         ctx.requestCardChoice(
           "duplicity",
-          decisionPrompt("Choose a card to banish", "card.upr.card.banish.choose"),
+          decisionPrompt("Choose a card to banish", "card.common.card.banish.choose"),
           cards.map((card) => card.instanceId),
         );
     },
@@ -641,12 +614,12 @@ export const uprHighRarity: Record<string, CardScript> = {
   "rewind|3": {
     canPlay(ctx) {
       return ctx.state.stack.some(
-        (layer) => layer.card && ctx.hasCardType(layer.card, "action") && !has(ctx, layer.card, "attack"),
+        (layer) => layer.card && isNonAttackAction(ctx, layer.card),
       );
     },
     onPlay(ctx) {
       const targets = ctx.state.stack.flatMap((layer) =>
-        layer.card && ctx.hasCardType(layer.card, "action") && !has(ctx, layer.card, "attack") ? [layer.card] : [],
+        layer.card && isNonAttackAction(ctx, layer.card) ? [layer.card] : [],
       );
       if (targets.length)
         ctx.requestCardChoice(
@@ -659,7 +632,7 @@ export const uprHighRarity: Record<string, CardScript> = {
       if (hook !== "rewind-target") return;
       const id = Number(option);
       const owner = ctx.state.stack.find((layer) => layer.card?.instanceId === id)?.card?.owner;
-      if (owner !== undefined && ctx.negateStackCard(id) && ctx.moveToHand(id)) ctx.changeActionPoints(owner, 1);
+      if (owner !== undefined && ctx.negateStackCard(id) && ctx.moveToHand(id)) ctx.gainActionPoints(owner, 1);
     },
   },
   "crown of providence|0": {

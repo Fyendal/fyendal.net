@@ -83,6 +83,8 @@ export function motionTimelinePhase(event: GameMotionEvent): MotionTimelinePhase
   if (event.source.kind === "deck" && event.destination.kind === "hand") return "draw";
   if (event.source.kind === "attack-queue") return "queue-advance";
   if (event.destination.kind === "stack-layer" || event.destination.kind === "chain-attack") return "stack-entry";
+  // The chain float appears with its attack; an attacked ally joins it afterwards.
+  if (event.destination.kind === "chain-target") return "resolution";
   if (event.source.kind === "stack-layer") return "resolution";
   return "movement";
 }

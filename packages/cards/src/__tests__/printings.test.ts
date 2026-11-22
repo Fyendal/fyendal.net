@@ -57,7 +57,7 @@ describe("printing consistency", () => {
       const back = front.backId ? cardData[front.backId] : undefined;
       expect(back, `${front.id} (${front.name}) must link to an Inner Chi back face`).toMatchObject({
         name: "Inner Chi",
-        cardType: "resource",
+        types: ["resource"],
         pitch: 3,
         subtypes: expect.arrayContaining(["chi"]),
       });

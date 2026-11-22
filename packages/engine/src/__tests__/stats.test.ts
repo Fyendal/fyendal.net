@@ -105,12 +105,12 @@ describe("authoritative match stats", () => {
     });
   });
 
-  it("credits damage dealt to an opponent's ally as the defender's separate value", () => {
+  it("counts effect damage to an opponent's ally as threat and the defender's ally damage", () => {
     const state = makeGame(84);
     state.cardsRef = {
       ...state.cardsRef,
       TEST_ALLY: {
-        id: "TEST_ALLY", name: "Test Ally", cardType: "action",
+        id: "TEST_ALLY", name: "Test Ally", types: ["action"],
         subtypes: ["ally"], classes: ["generic"], life: 10, text: "",
       },
     };
@@ -124,6 +124,7 @@ describe("authoritative match stats", () => {
     makeCtx(state, engineRuntime, 0, source).dealDamage(1, 4, { targetAllyId: allyId });
 
     expect(state.gameStats.turns[0]).toMatchObject({
+      threatened: [4, 0],
       allyAbsorbed: [0, 4],
       blocked: [0, 0],
       damageDealt: [0, 0],
@@ -135,6 +136,81 @@ describe("authoritative match stats", () => {
     const ownSource = player(state, 1).hand.find((card) => card.instanceId === ownSourceId)!;
     makeCtx(state, engineRuntime, 1, ownSource).dealDamage(1, 1, { targetAllyId: allyId });
     expect(state.gameStats.turns[0]?.allyAbsorbed).toEqual([0, 4]);
+    expect(state.gameStats.turns[0]?.threatened).toEqual([4, 0]);
+  });
+
+  it("counts an attack on an opponent's ally as threat without hero damage or blocks", () => {
+    let state = makeGame(85);
+    state.cardsRef = {
+      ...state.cardsRef,
+      TEST_ALLY: {
+        id: "TEST_ALLY", name: "Test Ally", types: ["action"],
+        subtypes: ["ally"], classes: ["generic"], life: 6, text: "",
+      },
+    };
+    const attack = giveCard(state, 0, "ATK4");
+    giveCard(state, 1, "BLOCK3");
+    let result = applyIntent(state, 0, { kind: "play-card", instanceId: attack, pitchInstanceIds: [] });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    state = result.state;
+    const allyId = state.nextInstanceId++;
+    player(state, 1).board.push({ instanceId: allyId, cardId: "TEST_ALLY", owner: 1, life: 6 });
+    state.chain[0]!.targetAllyId = allyId;
+    result = applyIntent(state, 1, { kind: "defend", instanceIds: [] });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    state = result.state;
+    for (let passes = 0; passes < 4 && state.chain[0]?.resolved !== true; passes++) {
+      result = applyIntent(state, state.priorityPlayer, { kind: "pass" });
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      state = result.state;
+    }
+
+    expect(player(state, 1).life).toBe(20);
+    expect(player(state, 1).board.find((card) => card.instanceId === allyId)?.life).toBe(2);
+    expect(state.gameStats.turns[0]).toMatchObject({
+      attacks: [1, 0],
+      threatened: [4, 0],
+      blocked: [0, 0],
+      damageDealt: [0, 0],
+      allyAbsorbed: [0, 4],
+    });
+  });
+
+  it("credits an opponent-created token's self-damage to its creator", () => {
+    const state = makeGame(88);
+    const sourceId = giveCard(state, 0, "INSTANT");
+    const source = player(state, 0).hand.find((card) => card.instanceId === sourceId)!;
+    const created = makeCtx(state, engineRuntime, 0, source).createToken("TOKEN", 1)!;
+    const token = player(state, 1).board.find((card) => card.instanceId === created.instanceId)!;
+    expect(token.creatorSeat).toBe(0);
+
+    const tokenCtx = makeCtx(state, engineRuntime, 1, token);
+    tokenCtx.destroySelf();
+    tokenCtx.dealDamage(1, 2);
+
+    expect(player(state, 1).life).toBe(18);
+    expect(state.gameStats.turns[0]).toMatchObject({
+      threatened: [2, 0],
+      damageDealt: [2, 0],
+      lifeLost: [0, 0],
+    });
+  });
+
+  it("records self-inflicted effect damage as life lost", () => {
+    const state = makeGame(89);
+    const sourceId = giveCard(state, 0, "INSTANT");
+    const source = player(state, 0).hand.find((card) => card.instanceId === sourceId)!;
+    makeCtx(state, engineRuntime, 0, source).dealDamage(0, 3);
+
+    expect(player(state, 0).life).toBe(17);
+    expect(state.gameStats.turns[0]).toMatchObject({
+      threatened: [0, 0],
+      damageDealt: [0, 0],
+      lifeLost: [3, 0],
+    });
   });
 
   it("projects current-turn rules facts without requiring log inference", () => {

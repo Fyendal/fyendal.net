@@ -2,7 +2,7 @@
  {
   "id": "TNP001",
   "name": "Wild Ride",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
   "pitch": 1,
   "cost": 2,
@@ -21,7 +21,7 @@
  {
   "id": "TNP002",
   "name": "Wild Ride",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
   "pitch": 2,
   "cost": 2,
@@ -40,7 +40,7 @@
  {
   "id": "TNP003",
   "name": "Wild Ride",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
   "pitch": 3,
   "cost": 2,
@@ -59,7 +59,7 @@
  {
   "id": "TNP004",
   "name": "Infecting Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Infecting Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
   "pitch": 1,
   "cost": 1,
@@ -77,7 +77,7 @@
  {
   "id": "TNP005",
   "name": "Infecting Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Infecting Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
   "pitch": 2,
   "cost": 1,
@@ -95,7 +95,7 @@
  {
   "id": "TNP006",
   "name": "Infecting Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Infecting Shot has an aim counter, it has +1{p}.\nWhen this hits a hero, create a Bloodrot Pox token under their control.",
   "pitch": 3,
   "cost": 1,
@@ -113,7 +113,7 @@
  {
   "id": "TNP007",
   "name": "Emeritus Scolding",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to target hero. If Emeritus Scolding is played during an opponents turn, instead deal 6 arcane damage to them.",
   "pitch": 1,
   "cost": 2,
@@ -126,7 +126,7 @@
  {
   "id": "TNP008",
   "name": "Emeritus Scolding",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero. If Emeritus Scolding is played during an opponents turn, instead deal 5 arcane damage to them.",
   "pitch": 2,
   "cost": 2,
@@ -139,7 +139,7 @@
  {
   "id": "TNP009",
   "name": "Emeritus Scolding",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero. If Emeritus Scolding is played during an opponents turn, instead deal 4 arcane damage to them.",
   "pitch": 3,
   "cost": 2,
@@ -152,7 +152,7 @@
  {
   "id": "TNP010",
   "name": "Warrior's Valor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +3{p} and \"When this hits, it gets go again.\"\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -168,7 +168,7 @@
  {
   "id": "TNP011",
   "name": "Warrior's Valor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +2{p} and \"When this hits, it gets go again.\"\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -184,7 +184,7 @@
  {
   "id": "TNP012",
   "name": "Warrior's Valor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +1{p} and \"When this hits, it gets go again.\"\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -200,7 +200,7 @@
  {
   "id": "TNP013",
   "name": "Shred",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target card defending an Assassin attack gets -4{d} this combat chain.",
   "pitch": 1,
   "cost": 0,
@@ -213,7 +213,7 @@
  {
   "id": "TNP014",
   "name": "Shred",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target card defending an Assassin attack gets -3{d} this combat chain.",
   "pitch": 2,
   "cost": 0,
@@ -226,7 +226,7 @@
  {
   "id": "TNP015",
   "name": "Shred",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target card defending an Assassin attack gets -2{d} this combat chain.",
   "pitch": 3,
   "cost": 0,
@@ -239,7 +239,7 @@
  {
   "id": "TNP016",
   "name": "Spears of Surreality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -260,7 +260,7 @@
  {
   "id": "TNP017",
   "name": "Spears of Surreality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -281,7 +281,7 @@
  {
   "id": "TNP018",
   "name": "Spears of Surreality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -302,7 +302,7 @@
  {
   "id": "TNP019",
   "name": "Staunch Response",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "As an additional cost to play Staunch Response you may pay {r}{r}{r}{r}. If you do, Staunch Response gains +3{d}.",
   "pitch": 1,
   "cost": 2,
@@ -315,7 +315,7 @@
  {
   "id": "TNP020",
   "name": "Staunch Response",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "As an additional cost to play Staunch Response you may pay {r}{r}{r}{r}. If you do, Staunch Response gains +3{d}.",
   "pitch": 2,
   "cost": 2,
@@ -328,7 +328,7 @@
  {
   "id": "TNP021",
   "name": "Staunch Response",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "As an additional cost to play Staunch Response you may pay {r}{r}{r}{r}. If you do, Staunch Response gains +3{d}.",
   "pitch": 3,
   "cost": 2,
@@ -341,7 +341,7 @@
  {
   "id": "TNP022",
   "name": "Flic Flak",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "If the next card you defend with this turn is a card with combo, it gains +2{d}.",
   "pitch": 1,
   "cost": 0,
@@ -354,7 +354,7 @@
  {
   "id": "TNP023",
   "name": "Flic Flak",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "If the next card you defend with this turn is a card with combo, it gains +2{d}.",
   "pitch": 2,
   "cost": 0,
@@ -367,7 +367,7 @@
  {
   "id": "TNP024",
   "name": "Flic Flak",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "If the next card you defend with this turn is a card with combo, it gains +2{d}.",
   "pitch": 3,
   "cost": 0,
@@ -380,7 +380,7 @@
  {
   "id": "TNP025",
   "name": "Mauvrion Skies",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next runeblade attack action card you play this turn gains go again and \"If this hits, create 3 Runechant tokens.\"\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -396,7 +396,7 @@
  {
   "id": "TNP026",
   "name": "Mauvrion Skies",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next runeblade attack action card you play this turn gains go again and \"If this hits, create 2 Runechant tokens.\"\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -412,7 +412,7 @@
  {
   "id": "TNP027",
   "name": "Mauvrion Skies",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Runeblade attack action card you play this turn gets go again and \"When this hits, create a Runechant token.\"\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -428,7 +428,7 @@
  {
   "id": "TNP028",
   "name": "Zipper Hit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 1,
   "cost": 1,
@@ -448,7 +448,7 @@
  {
   "id": "TNP029",
   "name": "Zipper Hit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 2,
   "cost": 1,
@@ -468,7 +468,7 @@
  {
   "id": "TNP030",
   "name": "Zipper Hit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 3,
   "cost": 1,

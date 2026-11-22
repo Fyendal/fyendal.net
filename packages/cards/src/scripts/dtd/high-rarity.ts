@@ -1,6 +1,13 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import type { GameMessage } from "@fyendal/shared";
 import {
+  bothHeroSeats,
+  chargedThisTurn,
+  crushTriggered,
+  defendsTogetherWithCardFromHand,
+  duringActionPhase,
+  equippedCards,
+  faceUpGraveyard,
   hasBloodDebt,
   armDelayedEffect,
   attackAbility,
@@ -21,40 +28,37 @@ import {
   queueIntimidate,
   solflareTrigger,
   yesNoPrompt,
+  cardNamed,
+  hasCardSubtype,
+  isAttackAction,
+  isAura,
+  isItem,
 } from "../shared-helpers.js";
-
-const COURAGE = "DTD232";
-const EARTH = "ELE109";
-const ELOQUENCE = "DTD233";
-const LIGHTNING = "ELE110";
-const NASRETH = "DTD193";
-const PONDER = "DYN244";
-const QUICKEN = "DTD234";
-const RUNECHANT = "DTD214";
-const SEISMIC = "DTD204";
-const SPELLBANE = "DTD235";
-const SPECTRAL_SHIELD = "DTD220";
+import {
+  COURAGE,
+  ELOQUENCE,
+  EMBODIMENT_OF_EARTH,
+  EMBODIMENT_OF_LIGHTNING,
+  NASRETH,
+  PONDER,
+  QUICKEN,
+  RUNECHANT,
+  SEISMIC_SURGE,
+  SPECTRAL_SHIELD,
+  SPELLBANE_AEGIS,
+} from "../tokens.js";
 
 const UNITY_TOKEN_BY_HERO = [
   ["boltyn", COURAGE],
-  ["bravo", SEISMIC],
-  ["briar", EARTH],
+  ["bravo", SEISMIC_SURGE],
+  ["briar", EMBODIMENT_OF_EARTH],
   ["dorinthea", COURAGE],
-  ["lexi", LIGHTNING],
-  ["oldhim", SPELLBANE],
+  ["lexi", EMBODIMENT_OF_LIGHTNING],
+  ["oldhim", SPELLBANE_AEGIS],
   ["prism", SPECTRAL_SHIELD],
   ["shiyana", ELOQUENCE],
 ] as const;
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string) {
-  return ctx.cardTypes(card).some((candidate) => candidate.toLowerCase() === type.toLowerCase());
-}
-function named(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string) {
-  return ctx.cardNames(card).some((candidate) => candidate.toLowerCase() === name.toLowerCase());
-}
 function requestWidespreadBanish(ctx: ScriptCtx, zone: "hand" | "arsenal", startSeat = 0): void {
   for (let seat = startSeat; seat < ctx.state.players.length; seat++) {
     const player = ctx.player(seat);
@@ -90,17 +94,8 @@ function widespreadBanish(zone: "hand" | "arsenal"): CardScript {
     }),
   };
 }
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.hasCardType(card, "action") && has(ctx, card, "attack");
-}
-function defendsTogetherWithCardFromHand(ctx: ScriptCtx): boolean {
-  if (!ctx.link) return false;
-  const handDefenders = Number(ctx.link.flags.defendedFromHandCount ?? 0);
-  const selfWasFromHand = ctx.link.flags[`defendedFromHand:${ctx.self.instanceId}`] === true ? 1 : 0;
-  return handDefenders > selfWasFromHand;
-}
 function createUnityToken(ctx: ScriptCtx): void {
-  const heroName = data(ctx, ctx.player(ctx.seat).hero).name.toLowerCase();
+  const heroName = ctx.cardData(ctx.player(ctx.seat).hero.cardId).name.toLowerCase();
   const match = UNITY_TOKEN_BY_HERO.find(([name]) => heroName.includes(name));
   if (match) ctx.createToken(match[1]);
 }
@@ -129,16 +124,9 @@ function angel(effect: (ctx: ScriptCtx) => void): CardScript {
 function figment(label: string, labelMessage: GameMessage, effect: (ctx: ScriptCtx) => void): CardScript {
   return { triggers: [entersArenaTrigger(label, labelMessage, effect)] };
 }
-function duringActionPhase(ctx: ScriptCtx): boolean {
-  if (ctx.state.phase === "action" || ctx.state.phase === "defend" || ctx.state.phase === "reaction") return true;
-  return (
-    ctx.state.phase === "layer" &&
-    ctx.state.stackResume !== "begin-action-phase" &&
-    ctx.state.stackResume !== "end-phase"
-  );
-}
 function awakenFigment(ctx: ScriptCtx) {
-  const choices = ctx.player(ctx.seat).board.filter((card) => has(ctx, card, "figment") && data(ctx, card).backId);
+  const choices = ctx.player(ctx.seat).board.filter((card) =>
+    hasCardSubtype(ctx, card, "figment") && ctx.cardData(card.cardId).backId);
   if (choices.length)
     ctx.requestCardChoice(
       "prism-awaken",
@@ -150,7 +138,7 @@ function prismAdult(): CardScript {
   return {
     onCardPutIntoSoul(ctx, card) {
       if (!duringActionPhase(ctx) || !cardNameContains(ctx, card, "herald")) return;
-      const figments = ctx.player(ctx.seat).deck.filter((candidate) => has(ctx, candidate, "figment"));
+      const figments = ctx.player(ctx.seat).deck.filter((candidate) => hasCardSubtype(ctx, candidate, "figment"));
       if (figments.length)
         ctx.requestCardChoice(
           "prism-figment",
@@ -169,7 +157,7 @@ function prismAdult(): CardScript {
       oncePerTurn: true,
       label: "Awaken a Figment",
       canActivate: (ctx) =>
-        ctx.player(ctx.seat).board.some((card) => has(ctx, card, "figment") && !!data(ctx, card).backId),
+        ctx.player(ctx.seat).board.some((card) => hasCardSubtype(ctx, card, "figment") && !!ctx.cardData(card.cardId).backId),
       onActivate: awakenFigment,
     },
     onChoose(ctx, hook, option) {
@@ -179,7 +167,7 @@ function prismAdult(): CardScript {
       }
       if (hook === "prism-awaken") {
         const card = ctx.player(ctx.seat).board.find((candidate) => candidate.instanceId === Number(option));
-        const back = card ? data(ctx, card).backId : undefined;
+        const back = card ? ctx.cardData(card.cardId).backId : undefined;
         if (card && back) ctx.transformInto(back, [], card.instanceId);
       }
     },
@@ -257,6 +245,40 @@ function requestSkullChoice(ctx: ScriptCtx): void {
     );
 }
 
+const NORTHERN_WINDS_HOOK = "northern-winds";
+const NORTHERN_WINDS_STEP = "northernWindsStep";
+type NorthernWindsKind = "equipment" | "item" | "ally";
+
+/** Each hero in turn order, then equipment, item and ally. */
+function northernWindsSteps(ctx: ScriptCtx): [number, NorthernWindsKind][] {
+  return bothHeroSeats(ctx).flatMap((seat) =>
+    (["equipment", "item", "ally"] as const).map((kind): [number, NorthernWindsKind] => [seat, kind]));
+}
+
+function northernWindsCandidates(ctx: ScriptCtx, seat: number, kind: NorthernWindsKind): DeepReadonly<CardInstance>[] {
+  if (kind === "equipment") return equippedCards(ctx, seat);
+  return ctx.player(seat).board.filter((card) => hasCardSubtype(ctx, card, kind));
+}
+
+function continueNorthernWinds(ctx: ScriptCtx, from: number): void {
+  const steps = northernWindsSteps(ctx);
+  for (let step = from; step < steps.length; step++) {
+    const [seat, kind] = steps[step]!;
+    const candidates = northernWindsCandidates(ctx, seat, kind);
+    if (candidates.length === 0) continue;
+    ctx.setState(NORTHERN_WINDS_STEP, step);
+    ctx.requestCardChoice(
+      NORTHERN_WINDS_HOOK,
+      decisionPrompt(`${ctx.data.name}: freeze up to 1 ${kind}?`, "card.dtd.northernwinds.freeze", {
+        values: { card: { kind: "card", cardId: ctx.self.cardId }, kind, player: { kind: "player", seat } },
+        optionMessages: commonOptionMessages("pass"),
+      }),
+      ["pass", ...candidates.map((card) => card.instanceId)],
+    );
+    return;
+  }
+}
+
 export const dtdHighRarity: Record<string, CardScript> = {
   "light of sol|2": topYellowToSoul(),
   "prism, awakener of sol|0": prismAdult(),
@@ -332,9 +354,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     "Put a yellow action from your graveyard on top of your deck",
     decisionMessage("card.trigger.common.yellowaction.graveyard.decktop"),
     (ctx) => {
-      const cards = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => ctx.hasCardType(card, "action") && ctx.cardColor(card) === 2);
+      const cards = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "action") && ctx.cardColor(card) === 2);
       if (cards.length)
         ctx.requestCardChoice(
           "figment-top",
@@ -344,7 +364,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
   ),
   "avalon, archangel of rebirth|0": angel((ctx) => {
-    const cards = ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardColor(card) === 2);
+    const cards = faceUpGraveyard(ctx).filter((card) => ctx.cardColor(card) === 2);
     if (cards.length)
       ctx.requestCardChoice(
         "angel-top",
@@ -379,7 +399,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     ctx.createToken(COURAGE),
   ),
   "bellona, archangel of war|0": angel((ctx) => {
-    for (const card of ctx.player(ctx.seat).board.filter((candidate) => has(ctx, candidate, "angel")))
+    for (const card of ctx.player(ctx.seat).board.filter((candidate) => hasCardSubtype(ctx, candidate, "angel")))
       ctx.addCounter(card.instanceId, "power", 1);
   }),
   "soulbond resolve|0": {
@@ -387,7 +407,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
       amount: 1,
       oncePerTurn: true,
       firstDamageEventEachTurn: true,
-      condition: (ctx) => ctx.getFlag("player", "chargedThisTurn") === true,
+      condition: (ctx) => chargedThisTurn(ctx),
     },
     onDefend(ctx) {
       const hand = ctx.player(ctx.seat).hand;
@@ -404,7 +424,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
   },
   "banneret of courage|2": solflareToken(COURAGE),
   "banneret of gallantry|2": solflareToken(QUICKEN),
-  "banneret of protection|2": solflareToken(SPELLBANE),
+  "banneret of protection|2": solflareToken(SPELLBANE_AEGIS),
   "beckoning light|1": {
     additionalCost(ctx) {
       const hand = ctx.player(ctx.seat).hand;
@@ -430,7 +450,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
       );
     },
     onHit(ctx) {
-      const attacks = ctx.player(ctx.seat).graveyard.filter((card) => isAttack(ctx, card));
+      const attacks = faceUpGraveyard(ctx).filter((card) => isAttackAction(ctx, card));
       if (attacks.length)
         ctx.requestCardChoice(
           "beckon-top",
@@ -619,7 +639,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
         effect(ctx) {
           ctx.requestCardChoice(
             "vynnset-adult",
-            decisionPrompt("Banish a card", "card.dtd.card.banish"),
+            decisionPrompt("Banish a card", "card.common.card.banish"),
             ctx.player(ctx.seat).hand.map((card) => card.instanceId),
           );
         },
@@ -630,8 +650,8 @@ export const dtdHighRarity: Record<string, CardScript> = {
         condition: (ctx, card) =>
           !!card &&
           ctx.hasCardType(card, "action") &&
-          !has(ctx, card, "attack") &&
-          has(ctx, card, "shadow") &&
+          !hasCardSubtype(ctx, card, "attack") &&
+          hasCardSubtype(ctx, card, "shadow") &&
           ctx.player(ctx.seat).life > 1,
         effect(ctx) {
           ctx.requestChoice(
@@ -689,7 +709,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
   }),
   "oblivion|3": {
-    canPlay: (ctx) => ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "runechant")).length === 6,
+    canPlay: (ctx) => ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "runechant")).length === 6,
     onPlay(ctx) {
       ctx.createToken(NASRETH);
     },
@@ -752,20 +772,25 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
     canTriggerOnDefend: defendsTogetherWithCardFromHand,
     onDefend(ctx) {
-      ctx.createToken(EARTH);
+      ctx.createToken(EMBODIMENT_OF_EARTH);
     },
   },
   "northern winds|3": {
-    onPlay(ctx) {
-      for (const player of ctx.state.players)
-        for (const card of [...Object.values(player.equipment), ...player.board]
-          .filter((c): c is DeepReadonly<CardInstance> => !!c)
-          .slice(0, 3))
-          ctx.setCardState(card.instanceId, "frozenUntilTurn", ctx.state.turn + 1);
+    onPlay: (ctx) => continueNorthernWinds(ctx, 0),
+    onChoose(ctx, hook, option) {
+      if (hook !== NORTHERN_WINDS_HOOK) return;
+      const step = ctx.getState(NORTHERN_WINDS_STEP);
+      const [seat, kind] = northernWindsSteps(ctx)[step] ?? [];
+      if (seat !== undefined && kind !== undefined && option !== "pass") {
+        const card = northernWindsCandidates(ctx, seat, kind).find((c) => c.instanceId === Number(option));
+        // Played on your turn, so "until the start of your next turn" is two turns away.
+        if (card) ctx.setCardState(card.instanceId, "frozenUntilTurn", ctx.state.turn + 2);
+      }
+      continueNorthernWinds(ctx, step + 1);
     },
     canTriggerOnDefend: defendsTogetherWithCardFromHand,
     onDefend(ctx) {
-      ctx.createToken(SPELLBANE);
+      ctx.createToken(SPELLBANE_AEGIS);
     },
   },
   "call down the lightning|2": {
@@ -774,17 +799,17 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
     canTriggerOnDefend: defendsTogetherWithCardFromHand,
     onDefend(ctx) {
-      ctx.createToken(LIGHTNING);
+      ctx.createToken(EMBODIMENT_OF_LIGHTNING);
     },
   },
   "scowling flesh bag|0": { onDefend: queueIntimidate },
   "numbskull|1": { unmodifiableCharacteristics: ["cost", "power", "defense"] },
   "dig up dinner|3": {
     onPlay(ctx) {
-      const pool = [...ctx.player(ctx.seat).graveyard];
+      const pool = faceUpGraveyard(ctx);
       const chosen: DeepReadonly<CardInstance>[] = [];
       while (pool.length && chosen.length < 3) chosen.push(pool.splice(ctx.randomInt(pool.length), 1)[0]!);
-      const attacks = chosen.filter((card) => isAttack(ctx, card) && ctx.basePower(card) >= 6);
+      const attacks = chosen.filter((card) => isAttackAction(ctx, card) && ctx.basePower(card) >= 6);
       for (const card of attacks) ctx.putOnDeckBottom(card.instanceId);
       ctx.shuffleDeck();
       ctx.gainLife(ctx.seat, attacks.length);
@@ -792,9 +817,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
   },
   "star struck|2": {
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-    },
+    canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       ctx.addModifier({
         scope: "until-end-of-turn",
@@ -805,7 +828,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     },
     canTriggerOnDefend: defendsTogetherWithCardFromHand,
     onDefend(ctx) {
-      ctx.createToken(SEISMIC);
+      ctx.createToken(SEISMIC_SURGE);
     },
   },
   "bastion of unity|0": {
@@ -829,7 +852,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
   "chorus of ironsong|2": {
     onPlay(ctx) {
       const dawnblade = ctx.link?.attackingCard;
-      if (dawnblade && named(ctx, dawnblade, "dawnblade"))
+      if (dawnblade && cardNamed(ctx, dawnblade, "dawnblade"))
         ctx.addModifier({
           scope: "until-end-of-turn",
           attack: 1,
@@ -852,13 +875,13 @@ export const dtdHighRarity: Record<string, CardScript> = {
   },
   "bequest the vast beyond|1": {
     onPlay(ctx) {
-      const runechants = ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "runechant")).length;
+      const runechants = ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "runechant")).length;
       if (runechants > 0) buffNextAttack(ctx, { attackCostReduction: runechants, appliesToType: ["runeblade"] });
     },
   },
   "runic reckoning|1": {
     modifyPlayCost(ctx, base) {
-      return Math.max(0, base - ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "runechant")).length);
+      return Math.max(0, base - ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "runechant")).length);
     },
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: 3, appliesToType: ["runeblade"] });
@@ -869,7 +892,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
       const hand = ctx.player(opponentSeat(ctx)).hand;
       const revealedIds = hand.map((card) => card.instanceId);
       if (!ctx.revealCards(revealedIds, opponentSeat(ctx))) return;
-      const attacks = hand.filter((card) => isAttack(ctx, card));
+      const attacks = hand.filter((card) => isAttackAction(ctx, card));
       ctx.requestCardChoice(
         "inducement",
         decisionPrompt(
@@ -901,8 +924,8 @@ export const dtdHighRarity: Record<string, CardScript> = {
     onFriendlyDestroyed(ctx, card) {
       if (
         ctx.getPlayerFlag(ctx.seat, "diademTriggered") === true ||
-        data(ctx, card).cardType === "token" ||
-        !data(ctx, card).text.toLowerCase().includes("ward")
+        ctx.hasCardType(card, "token") ||
+        !ctx.cardData(card.cardId).text.toLowerCase().includes("ward")
       )
         return;
       ctx.setPlayerFlag(ctx.seat, "diademTriggered", true);
@@ -917,7 +940,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
     onPlay(ctx) {
       const hand = ctx.player(opponentSeat(ctx)).hand;
       for (const card of hand) ctx.lookAt(card.instanceId);
-      const attacks = hand.filter((card) => isAttack(ctx, card));
+      const attacks = hand.filter((card) => isAttackAction(ctx, card));
       if (attacks.length)
         ctx.requestCardChoice(
           "lost-thought",
@@ -931,7 +954,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
         ctx.revealCards([Number(option)], opponentSeat(ctx)) &&
         ctx.putOnDeckBottom(Number(option))
       )
-        ctx.createToken(PONDER, opponentSeat(ctx));
+        ctx.heroCreatesTokens(opponentSeat(ctx), PONDER);
     },
   },
   "censor|1": {
@@ -939,7 +962,7 @@ export const dtdHighRarity: Record<string, CardScript> = {
       return ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      ctx.requestNameChoice("censor-name", decisionPrompt("Name a card", "card.dtd.card.name"), ctx.seat);
+      ctx.requestNameChoice("censor-name", decisionPrompt("Name a card", "card.common.card.name"), ctx.seat);
     },
     onChoose(ctx, hook, option) {
       if (hook === "censor-name")
@@ -959,11 +982,11 @@ export const dtdHighRarity: Record<string, CardScript> = {
     onHit(ctx) {
       const items = ctx
         .player(opponentSeat(ctx))
-        .board.filter((card) => has(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= 2);
+        .board.filter((card) => isItem(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 2);
       if (items.length)
         ctx.requestCardChoice(
           "meeps",
-          decisionPrompt("Steal an item", "card.dtd.item.steal"),
+          decisionPrompt("Steal an item", "card.common.item.steal"),
           items.map((card) => card.instanceId),
         );
       else ctx.drawCards(ctx.seat, 1);
@@ -1001,9 +1024,9 @@ export const dtdHighRarity: Record<string, CardScript> = {
         .player(opponentSeat(ctx))
         .board.filter(
           (card) =>
-            has(ctx, card, "aura") &&
-            data(ctx, card).cardType !== "token" &&
-            (data(ctx, card).cost ?? 0) <= (ctx.link?.damage ?? 0),
+            isAura(ctx, card) &&
+            !ctx.hasCardType(card, "token") &&
+            (ctx.cardData(card.cardId).cost ?? 0) <= (ctx.link?.damage ?? 0),
         );
       if (auras.length)
         ctx.requestCardChoice(

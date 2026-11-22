@@ -10,6 +10,7 @@ import { createPool, defaultConnectionString, withTransaction } from "./db.js";
 import { decodePersistedState } from "./persistedState.js";
 import { appendReplayView, startReplay } from "./replays.js";
 import { assertSafeToSeed } from "./seedGuard.js";
+import { startClock } from "./clock.js";
 import { dehydrateState, hashReconnectToken } from "./store.js";
 
 type ManualSeat =
@@ -120,7 +121,7 @@ try {
     for (const [seatNumber, seat] of fixture.seats.entries()) {
       let userId: number | null = null;
       let username: string;
-      let deckId: string | null = null;
+      let deckId: string | null;
       let deckName = `${MANUAL_DECK_PREFIX}${fixture.title}`;
       if (seat.controller === "human") {
         const { rows } = await tx.query("SELECT id, username FROM users WHERE username_lc = $1", [seat.username.toLowerCase()]);
@@ -150,8 +151,8 @@ try {
     await tx.query(
       `INSERT INTO rooms
          (code, format, spectators, state, prep, ruleset_version, version, created_at, gc_at,
-          status, winner, is_private)
-       VALUES ($1, $2, '[]', $3, $4, $5, $7, $6, NULL, 'active', NULL, TRUE)`,
+          status, winner, is_private, clock, sandbox)
+       VALUES ($1, $2, '[]', $3, $4, $5, $7, $6, NULL, 'active', NULL, TRUE, $8, FALSE)`,
       [
         fixture.code,
         fixture.format,
@@ -162,6 +163,7 @@ try {
         // Recorded frames occupy the versions below the room's, so the next
         // commit appends after them.
         fixture.replay?.frames.length ?? 0,
+        JSON.stringify(startClock(fixture.state, Date.now())),
       ],
     );
     for (const seat of seatRows) {

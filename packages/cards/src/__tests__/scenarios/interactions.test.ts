@@ -145,7 +145,7 @@ describe("interactions — choice option projection", () => {
     const pd = projectStateFor(s.state, 0).pendingDecision;
     // X values are counter counts, not instances — instance 1 is a hero, so
     // resolving them as cards rendered the opposing hero's name as an option
-    expect(pd?.options).toEqual(["X = 0", "X = 1", "X = 2", "X = 3", "X = 4"]);
+    expect(pd?.options).toEqual(["X = 3"]);
     expect(pd?.optionCards).toBeUndefined();
   });
 });

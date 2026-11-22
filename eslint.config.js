@@ -10,6 +10,7 @@ export default tseslint.config(
       "**/node_modules/**",
       "**/*.config.{js,ts,mjs,mts}",
       "scripts/**",
+      "apps/server/.manual-room/**",
     ],
   },
   eslint.configs.recommended,

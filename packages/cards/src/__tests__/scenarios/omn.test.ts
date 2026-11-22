@@ -49,6 +49,40 @@ describe("OMN — Lionclaw Maul", () => {
   });
 });
 
+describe("OMN — Gauntlet of Sword and Sorcery", () => {
+  it.each(["pay 0", "pay 1"])("gives +1 power only if its damage survives Arcane Barrier: %s", (payment) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, hand: ["head jab|1"],
+          equipment: { head: null, chest: null, arms: "gauntlet of sword and sorcery|0", legs: null } },
+        { hero: "dorinthea", resources: 1, weapons: [],
+          equipment: { head: "nullrune hood|0", chest: null, arms: null, legs: null } },
+      ],
+    });
+    g.activate("gauntlet of sword and sorcery|0").play("head jab|1", { settle: false });
+    while (g.state.pendingDecision?.chooseHook !== "arcane-barrier" && g.state.stack.length) g.passPriority();
+    expect(g.state.pendingDecision?.chooseHook).toBe("arcane-barrier");
+    g.chooseOption(payment).blockWith().settle().expectLife(1, payment === "pay 0" ? 20 - 1 - 4 : 20 - 3);
+  });
+
+  it("does not replace the attack's own when-attacks choice", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, hand: ["nimby|1"], deck: ["nimblism|1"],
+          equipment: { head: null, chest: null, arms: "gauntlet of sword and sorcery|0", legs: null } },
+        { hero: "dorinthea", resources: 1, weapons: [],
+          equipment: { head: "nullrune hood|0", chest: null, arms: null, legs: null } },
+      ],
+    });
+    g.activate("gauntlet of sword and sorcery|0").play("nimby|1", { settle: false });
+    while (!g.state.pendingDecision?.chooseHook && g.state.stack.length) g.passPriority();
+    expect(g.state.pendingDecision?.chooseHook).toBe("nimby-search");
+    g.chooseOption(String(g.state.players[0]!.deck[0]!.instanceId)).expectInZone(0, "nimblism|1", "hand");
+    expect(g.state.pendingDecision?.chooseHook).toBe("arcane-barrier");
+    g.chooseOption("pay 0").blockWith().settle().expectLife(1, 20 - 1 - 4);
+  });
+});
+
 describe("OMN — wager targeting", () => {
   it("Pile Driver may wager with the defending hero when it attacks an ally", () => {
     const g = scenario({ seats: [
@@ -754,6 +788,29 @@ describe("OMN — import and set mechanics", () => {
       .settle()
       .expectAP(0, 0);
     expect(g.state.chain[0]?.goAgain).toBe(false);
+  });
+
+  it("Quick Succession's go again skips Star Fall and waits for an attack action card", () => {
+    const g = scenario({
+      seats: [
+        hero("aurora, emissary of lightning|0", {
+          weapons: ["star fall|0"],
+          hand: ["quick succession|3", "wrecker romp|3", "destructive fleetfoot|3"],
+        }),
+        foe(),
+      ],
+    });
+
+    g.play("quick succession|3")
+      .attackWithWeapon("star fall|0", { pitch: ["wrecker romp|3"] })
+      .blockWith()
+      .settle()
+      .expectAP(0, 1)
+      .play("destructive fleetfoot|3")
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
+    expect(g.state.chain.at(-1)?.goAgain).toBe(true);
   });
 
   it("Quick Succession offsets Ravenous Rabble's revealed pitch penalty", () => {

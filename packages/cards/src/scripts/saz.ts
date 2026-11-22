@@ -1,18 +1,27 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
+  armedBySelf,
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  equippedCards,
+  faceUpGraveyard,
   heroChoiceSeat,
   heroTarget,
+  isArrow,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
   optN,
   optOnChoose,
+  reload,
   requestHeroChoice,
+  resolveReload,
   spireSnipingScript,
+  isAlly,
+  isAttackAction,
 } from "./shared-helpers.js";
+import { BLOODROT_POX, FRAILTY, INERTIA } from "./tokens.js";
 
 // ── SAZ (Silver Age: Azalea precon, Chapter 2) ──────────────────────────────
 //
@@ -35,7 +44,7 @@ import {
 // - "Damage … can't be prevented" (Murkmire Grapnel) is the unpreventable
 //   link flag: resolveLink skips prevention shields and the Ward decision.
 // - "Defense reactions can't be played … this chain link": the
-//   noDefenseReactions link flag (Widowmaker) and the
+//   defenseReactionsProhibited script field (Widowmaker) and the
 //   Modifier.noDefenseReactionsFromArsenal field (Release the Tension),
 //   enforced in enumeration and validation via defenseReactionRestriction.
 // - Piercing 1 (Drill Shot) is scripted per CR 8.3.23 ("if this is defended
@@ -43,55 +52,9 @@ import {
 // - Reload (CR 8.5.23): optional "hand card → arsenal if arsenal is empty".
 // - Aim counters ride the generic named counters on the card instance.
 //
-const BLOODROT_POX = "SAZ034";
-const FRAILTY = "SAZ035";
-const INERTIA = "SAZ036";
-
-function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
-  const player = ctx.player(seat);
-  return [
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-    ...player.weapons.filter((card) => ctx.cardData(card.cardId).cardType === "equipment"),
-  ];
-}
-
-/** ctx.state is typed without the internal side tables; the runtime object has them. */
-
-function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("arrow");
-}
 
 function hasAimCounter(ctx: ScriptCtx): boolean {
   return (ctx.self.counters?.aim ?? 0) > 0;
-}
-
-/** The granted "when this hits a hero" effect rides the link that picked up
- *  this card's next-attack modifier (Lace with X / Drop the Anchor). */
-function armedBySelf(ctx: ScriptCtx): boolean {
-  return ctx.state.modifiers.some((m) => m.scope === "chain-link" && m.sourceInstanceId === ctx.self.instanceId);
-}
-
-/** Reload (CR 8.5.23): if the player's arsenal is empty, they may move a card
- *  from their hand to their arsenal. */
-function reload(ctx: ScriptCtx): void {
-  const p = ctx.player(ctx.seat);
-  if (p.arsenal.length > 0 || p.hand.length === 0) return;
-  ctx.requestCardChoice(
-    "reload",
-    decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.common.reload", {
-      optionMessages: commonOptionMessages("pass"),
-    }),
-    ["pass", ...p.hand.map((c) => c.instanceId)],
-  );
-}
-
-/** Handles the "reload" choice; returns true when the hook was a reload hook. */
-function reloadOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
-  if (hook !== "reload") return false;
-  if (option !== "pass") {
-    ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
-  }
-  return true;
 }
 
 /** "You may put an arrow card from your hand face up into your arsenal." */
@@ -299,7 +262,7 @@ export const saz: Record<string, CardScript> = {
       reload(ctx);
     },
     onChoose(ctx, hook, option) {
-      reloadOnChoose(ctx, hook, option);
+      resolveReload(ctx, hook, option);
     },
   },
 
@@ -315,7 +278,7 @@ export const saz: Record<string, CardScript> = {
       return ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      const equips = equipmentCards(ctx, opponentSeat(ctx));
+      const equips = equippedCards(ctx, opponentSeat(ctx));
       if (equips.length === 0) return;
       ctx.requestCardChoice(
         "drill-shot",
@@ -328,7 +291,7 @@ export const saz: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "drill-shot") return;
-      const eq = equipmentCards(ctx, opponentSeat(ctx)).find((c) => c.instanceId === Number(option));
+      const eq = equippedCards(ctx, opponentSeat(ctx)).find((c) => c.instanceId === Number(option));
       if (!eq) return;
       ctx.addCardDefenseCounters(eq.instanceId, 1);
       ctx.logPublic(
@@ -435,10 +398,7 @@ export const saz: Record<string, CardScript> = {
   "spire sniping|2": spireSnipingScript(),
 
   "widowmaker|2": {
-    // "Defense reactions can't be played to Widowmaker's chain link."
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "noDefenseReactions", true);
-    },
+    defenseReactionsProhibited: true,
     // "If Widowmaker is defended by fewer than 2 cards, it has +3{p}."
     modifyAttack(ctx) {
       const link = ctx.link;
@@ -473,7 +433,7 @@ export const saz: Record<string, CardScript> = {
       ctx.tap(opp.hero.instanceId);
       for (const c of opp.board) {
         const d = ctx.cardData(c.cardId);
-        if (ctx.cardTypes(c).includes("ally") && d.life !== undefined) ctx.tap(c.instanceId);
+        if (isAlly(ctx, c) && d.life !== undefined) ctx.tap(c.instanceId);
       }
     },
   ),
@@ -565,7 +525,7 @@ export const saz: Record<string, CardScript> = {
       reload(ctx);
     },
     onChoose(ctx, hook, option) {
-      reloadOnChoose(ctx, hook, option);
+      resolveReload(ctx, hook, option);
     },
   },
 
@@ -573,14 +533,14 @@ export const saz: Record<string, CardScript> = {
     // "Put target attack action card with cost 1 or less from your graveyard
     //  on top of your deck."
     canPlay: (ctx) =>
-      ctx.player(ctx.seat).graveyard.some((c) => {
+      faceUpGraveyard(ctx).some((c) => {
         const d = ctx.cardData(c.cardId);
-        return ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack") && (d.cost ?? 0) <= 1;
+        return isAttackAction(ctx, c) && (d.cost ?? 0) <= 1;
       }),
     onPlay(ctx) {
-      const targets = ctx.player(ctx.seat).graveyard.filter((c) => {
+      const targets = faceUpGraveyard(ctx).filter((c) => {
         const d = ctx.cardData(c.cardId);
-        return ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack") && (d.cost ?? 0) <= 1;
+        return isAttackAction(ctx, c) && (d.cost ?? 0) <= 1;
       });
       ctx.requestCardChoice(
         "memorial-ground",

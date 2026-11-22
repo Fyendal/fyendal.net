@@ -16,6 +16,7 @@
   font-size: 13px;
   text-align: center;
 }
+.decision-warning { color: var(--danger); font-weight: 600; }
 .decision-guidance-info {
   display: inline-grid;
   min-width: 15px;
@@ -235,6 +236,29 @@
 }
 .decision-choice-opponent .decision-choice-side { color: #f0a098; }
 .decision-choice-self .decision-choice-side { color: #8fc9a7; }
+/* Options that unlock cards show them at the row's trailing edge. */
+.decision-choice-enabled {
+  flex: 0 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+.decision-choice-enabled-names {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 0;
+  font-size: 13px;
+  text-align: right;
+}
+.decision-choice-enabled .card-zone {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 64px;
+}
+.decision-choice-enables { padding-block: 7px; }
 .decision-choice-chosen,
 .decision-choice-chosen:hover {
   justify-content: flex-start;
@@ -293,19 +317,103 @@
   flex-wrap: nowrap;
 }
 .decision-name-form > .btn-primary { align-self: center; flex: 0 0 auto; }
+.decision-choice:has(> .decision-number-form) {
+  width: min(340px, calc(100vw - var(--rail-w) - 32px));
+}
+.decision-choice:has(> .decision-number-form) > .decision-prompt { text-align: center; }
+.decision-number-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.number-dial {
+  --dial-step-h: 34px;
+  display: grid;
+  width: 116px;
+  border: 1px solid #6a5639;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #0f0b08, #19130e);
+  box-shadow: inset 0 2px 8px #000c, 0 1px 0 #e1d5be14;
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.number-dial:focus-within { border-color: var(--gold); }
+.number-dial-invalid,
+.number-dial-invalid:focus-within { border-color: #c4483b; }
+.number-dial-step {
+  display: grid;
+  place-items: center;
+  height: var(--dial-step-h);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  clip-path: none;
+  background: transparent;
+  color: var(--gold);
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color 100ms ease, color 100ms ease;
+}
+.number-dial-step:first-child { border-bottom: 1px solid #6a563955; }
+.number-dial-step:last-child { border-top: 1px solid #6a563955; }
+.number-dial-step:hover:not(:disabled) { background: #b8933f1f; color: #f0d48c; }
+.number-dial-step:active:not(:disabled) { background: #b8933f38; }
+.number-dial-step:disabled { color: #5b4b38; cursor: default; }
+.number-dial-step:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -3px;
+}
+.number-dial-value {
+  display: grid;
+  justify-items: center;
+  padding: 6px 0 7px;
+  cursor: text;
+}
+.number-dial-value > input {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #f3e6c8;
+  caret-color: var(--gold);
+  font: 500 44px/1 var(--font-card-name);
+  font-variant-numeric: lining-nums tabular-nums;
+  text-align: center;
+  text-shadow: 0 1px 0 #000, 0 0 18px #b8933f2e;
+}
+.number-dial-range {
+  margin-top: 3px;
+  color: var(--text-muted);
+  font: 500 11px/1 var(--font-lobby-ui);
+  font-variant-numeric: tabular-nums;
+}
+.number-dial-confirm {
+  min-width: 156px;
+  min-height: 42px;
+  padding: 0 20px;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
 .decision-name-combobox {
   position: relative;
   width: 100%;
 }
 .decision-name-combobox > input { width: 100%; }
+/* Four and a half rows, so the cut-off row shows there is more to scroll. */
 .decision-name-suggestions {
   position: absolute;
   z-index: 20;
   top: calc(100% + 4px);
   left: 0;
+  box-sizing: border-box;
   width: 100%;
-  max-height: min(320px, 42vh);
+  max-height: min(191px, 26dvh);
   overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid #806334;
   border-radius: 3px;
   background: #120c06;
@@ -328,8 +436,12 @@
   letter-spacing: normal;
 }
 .decision-name-suggestions button:last-child { border-bottom: 0; }
-.decision-name-suggestions button:hover,
-.decision-name-suggestion-active { background: #3a2812 !important; color: #ffd479; }
+/* Hover stays quieter than the highlight because only the highlight answers Enter. */
+@media (hover: hover) {
+  .decision-name-suggestions button:hover { background: #241809; }
+}
+.decision-name-suggestions button.decision-name-suggestion-active { background: #3a2812; color: #ffd479; }
+.decision-name-match { color: var(--text-muted); font-weight: 400; }
 .trigger-order-list {
   display: flex;
   flex-direction: column;
@@ -966,6 +1078,8 @@
   display: grid;
   justify-items: center;
   gap: 7px;
+  /* left:50% caps shrink-to-fit at half the viewport */
+  width: max-content;
   max-width: min(560px, calc(100vw - var(--rail-w) - 24px));
   transform: translateX(-50%);
   padding: 10px 14px 12px;
@@ -977,6 +1091,10 @@
   pointer-events: none;
   animation: deck-card-toast-in 220ms ease-out;
 }
+/* Solo desktop: the second seat's hand rests at the top edge. */
+.table.solo-board .deck-card-toast {
+  top: max(18px, env(safe-area-inset-top), calc(var(--solo-top-hand-bottom, 0px) + 12px));
+}
 .deck-card-toast-heading {
   box-sizing: border-box;
   padding: 0 24px;
@@ -984,8 +1102,8 @@
   font-family: var(--font-display);
   font-size: 14px;
   letter-spacing: 1.5px;
+  text-align: center;
   text-transform: uppercase;
-  white-space: nowrap;
 }
 /* the toast is pointer-events:none — interactive children opt back in */
 .deck-card-toast-close {
@@ -1428,3 +1546,96 @@
   grid-template-columns: 46px minmax(0, 1fr) auto;
   cursor: default;
 }
+
+/* Phone choice sheets can be hidden to look at the board; phone layouts show
+   the control (mobile-game.css) and the float swaps the sheet for a pill. */
+.decision-sheet-minimize {
+  display: none;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  width: 44px;
+  min-width: 0;
+  height: 44px;
+  min-height: 0;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-secondary);
+  font-size: 20px;
+}
+.decision-sheet-minimize:hover {
+  background: #ffffff12;
+  color: var(--text-primary);
+}
+.decision-sheet-minimize:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+.decision-sheet-restore {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 18px 8px 14px;
+  border: 1px solid #b8933f99;
+  border-radius: 999px;
+  background: #1e1812f5;
+  box-shadow: 0 8px 24px #000a, 0 0 0 3px #c9a62733;
+  clip-path: none;
+  color: var(--text-primary);
+  font: 600 15px/1 var(--font-lobby-ui);
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+.decision-sheet-restore:hover { border-color: var(--gold); }
+.decision-sheet-restore .ui-icon { font-size: 18px; color: var(--gold); }
+
+.decision-lethal { border-top: 3px solid var(--danger); }
+.lethal-tally {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #ffffff1f;
+}
+.lethal-tally-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 8px;
+  background: #00000059;
+  color: var(--text-primary);
+  font: 500 14px/1.2 var(--font-lobby-ui);
+}
+.lethal-tally-side strong { font-size: 32px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.lethal-tally-damage { color: var(--danger); }
+.decision-lethal .decision-choice-option { border-color: var(--danger); color: var(--danger); }
+.decision-lethal .decision-choice-option:hover:not(:disabled) { background: #ff7b7214; }
+
+/* "Don't ask again" modifies the target pick rather than being one; the rule
+   sets it apart from the choices above. */
+.decision-remember {
+  display: flex;
+  justify-content: center;
+  align-self: stretch;
+  padding-top: 12px;
+  border-top: 1px solid #6a563966;
+}
+.decision-remember .toggle-switch {
+  gap: 10px;
+  color: var(--text-secondary);
+  font: 500 13px/1.3 var(--font-lobby-ui);
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: normal;
+}
+.decision-remember .toggle-switch:has(input:checked) { color: var(--text-primary); }

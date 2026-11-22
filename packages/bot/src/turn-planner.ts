@@ -2,6 +2,8 @@ import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex, utf8ToBytes } from "@noble/hashes/utils.js";
 import { anyWindowAction, applyIntent, damageStepPriorityAttacker, legalIntents, projectStateFor, type GameState } from "@fyendal/engine";
 import type { GameIntent } from "@fyendal/shared";
+import { averageDrawValue } from "./card-ev.js";
+import { cardUses } from "./card-model.js";
 import {
   arsenalCardValue,
   equipmentValue,
@@ -9,7 +11,15 @@ import {
   heldCardValue,
   type HeroRulesFactory,
 } from "./hand-value.js";
-import { strategicPitchIntents, type BotPolicyInput } from "./policy.js";
+import { defenderProfile, hitChance, hitChanceAgainst } from "./hit-model.js";
+import { evaluateOnHit } from "./on-hit.js";
+import {
+  isOpeningTurn,
+  ownCards,
+  spendsOpeningArsenalReserve,
+  strategicPitchIntents,
+  type BotPolicyInput,
+} from "./policy.js";
 import { reserveLethalUpkeep } from "./upkeep.js";
 
 export const DEFAULT_MAX_SEARCH_NODES = 64;
@@ -153,7 +163,7 @@ export function evaluateOpponentResponse(
 }
 
 function opponentResponseTo(
-  root: TurnPlannerRoot,
+  root: Pick<TurnPlannerRoot, "opponentHandCount" | "opponentEquipmentDefense">,
   opponentLife: number,
   rawDamage: number,
   attackThreat: number,
@@ -226,6 +236,20 @@ export function futureOffenseRate(
   return responseWeightedDamage(response) / attackThreat;
 }
 
+/** Share of the bot's next-turn attack threat expected to land past blocks,
+ * judged while defending: the opponent attacking now refills its hand first. */
+export function nextTurnLandingRate(input: BotPolicyInput, attackThreat: number): number {
+  if (attackThreat <= 0) return 1;
+  const opponent = input.view.players[1 - input.seat]!;
+  const defenders = {
+    opponentHandCount: Math.max(opponent.handCount, input.cards[opponent.heroCardId]?.intellect ?? 4),
+    opponentEquipmentDefense: Object.values(opponent.equipment)
+      .flatMap((card) => card ? [card] : [])
+      .reduce((total, card) => total + Math.max(0, card.defense ?? input.cards[card.cardId]?.defense ?? 0), 0),
+  };
+  return opponentResponseTo(defenders, opponent.life, attackThreat, attackThreat, false).hitRate;
+}
+
 export interface TurnFutureValue {
   /** Points: POINTS_PER_DAMAGE × (held value + arsenal value). */
   score: number;
@@ -251,6 +275,10 @@ export function evaluateTurnFuture(
   rules: HeroRulesFactory,
 ): TurnFutureValue {
   const me = input.view.players[root.seat];
+  // Inertia bottoms hand and arsenal at the start of the end phase, so nothing carries over.
+  if (me.board.some((card) => input.cards[card.cardId]?.name.trim().toLowerCase() === "inertia")) {
+    return { score: 0, heldValue: 0, arsenalValue: 0, cardsHeld: 0 };
+  }
   const threat = [...me.hand, ...me.arsenal].reduce((total, card) =>
     total + heldCardOffense(card, input, rules), 0);
   const rate = futureOffenseRate(input, root, threat);
@@ -302,6 +330,7 @@ export interface TurnPlannerConfig<Evaluation extends TurnEvaluation> {
     input: BotPolicyInput,
     context: { root: TurnPlannerRoot; depth: number },
   ): readonly GameIntent[];
+  /** Added to a line's score; `-Infinity` vetoes the intent so it is never searched. */
   scoreIntent?(intent: GameIntent, input: BotPolicyInput): number;
   /** Root ordering before the strict candidate cap. Higher values are searched
    * first; omitted policies use a generic public card/action priority. */
@@ -332,6 +361,18 @@ interface SearchResult<Evaluation extends TurnEvaluation> {
   line: GameIntent[];
   checkpoints: TurnPlanCheckpoint[];
   evaluation: Evaluation;
+  /** The line ends the game with the planning seat losing. */
+  lost: boolean;
+}
+
+/** A losing line never beats a surviving one, whatever the policy scored it. */
+function isBetterResult<Evaluation extends TurnEvaluation>(
+  candidate: SearchResult<Evaluation>,
+  best: SearchResult<Evaluation> | undefined,
+): boolean {
+  if (!best) return true;
+  if (candidate.lost !== best.lost) return !candidate.lost;
+  return candidate.score > best.score;
 }
 
 interface SearchContext<Evaluation extends TurnEvaluation> {
@@ -342,6 +383,8 @@ interface SearchContext<Evaluation extends TurnEvaluation> {
   transitions: number;
   transitionLimit: number;
   publicGameId: string;
+  /** Average draw value, credited per set-aside draw as card-ev prices a drawn card. */
+  drawnCardValue: number;
   memo: Map<string, SearchResult<Evaluation>>;
   candidateTrace: TurnPlannerCandidateTrace;
 }
@@ -413,7 +456,11 @@ function applySimulationIntent(
   intent: GameIntent,
 ): ReturnType<typeof applyIntent> {
   const applied = applyIntent(state, seat, intent);
-  if (applied.ok) compactSimulationHistory(applied.state);
+  if (applied.ok) {
+    compactSimulationHistory(applied.state);
+    const adjustment = lineAdjustment.get(state);
+    if (adjustment) lineAdjustment.set(applied.state, adjustment);
+  }
   return applied;
 }
 
@@ -506,14 +553,83 @@ function opponentRolloutIntent(state: GameState): GameIntent | undefined {
   return legal.find((intent) => intent.kind === "choose");
 }
 
-/** A card left the deck for hand through a simulated draw rather than as the
- * option this intent chose: a search picks a known card, a draw does not. */
-function drewPrivately(before: GameState, after: GameState, intent: GameIntent, root: TurnPlannerRoot): boolean {
+/** Set aside cards a simulated draw put in hand: back to the deck bottom, so
+ * no decision reads them, credited at the average draw. A search picks a
+ * known card through its option and stays in hand. */
+function setAsideDraws<Evaluation extends TurnEvaluation>(
+  before: GameState,
+  after: GameState,
+  intent: GameIntent,
+  context: SearchContext<Evaluation>,
+): void {
+  const { root } = context;
   const held = new Set(before.players[root.seat].hand.map((card) => card.instanceId));
-  return after.players[root.seat].hand.some((card) =>
+  const player = after.players[root.seat];
+  const drawn = player.hand.filter((card) =>
     root.deckIds.has(card.instanceId) && !held.has(card.instanceId) &&
     !(intent.kind === "choose" && intent.optionId === String(card.instanceId))
   );
+  if (drawn.length === 0) return;
+  const ids = new Set(drawn.map((card) => card.instanceId));
+  player.hand = player.hand.filter((card) => !ids.has(card.instanceId));
+  player.deck.push(...drawn);
+  lineAdjustment.set(after, (lineAdjustment.get(after) ?? 0) + drawn.length * context.drawnCardValue);
+}
+
+/** Per line, damage equivalents added at scoring: set-aside draws, less the
+ * on-hit payoffs a real opponent's blocks would deny. */
+const lineAdjustment = new WeakMap<GameState, number>();
+
+/** Hit chance below which the simulated opponent blocks with armor. */
+const ARMOR_BLOCK_THRESHOLD = 0.5;
+
+/** The rollout opponent blocks the bot's attack with its smallest covering armor
+ * when the hit model expects it; otherwise the line is charged the denied on-hits. */
+function rolloutDefense<Evaluation extends TurnEvaluation>(
+  state: GameState,
+  context: SearchContext<Evaluation>,
+): GameState | undefined {
+  const { root } = context;
+  const opponent = 1 - root.seat;
+  if (state.pendingDecision?.kind !== "defend" || state.pendingDecision.player !== opponent) return undefined;
+  const input: BotPolicyInput = {
+    seat: root.seat,
+    view: projectStateFor(state, root.seat, context.publicGameId),
+    legal: [],
+    cards: root.cards,
+    ...(root.decklists ? { decklists: root.decklists } : {}),
+  };
+  const link = input.view.chain.at(-1);
+  if (!link || link.attackingCard.owner !== root.seat || link.defendingCards.length > 0) return undefined;
+  const defender = input.view.players[opponent]!;
+  const effects = link.onHitEffects ?? [];
+  const onHit = evaluateOnHit({
+    effects,
+    attackerCanContinue: link.goAgain === true,
+    attackerCanArsenal: input.view.players[root.seat].arsenal.length === 0,
+    defenderHasHand: defender.handCount > 0,
+    defenderHasArsenal: defender.arsenalCount > 0,
+  }).value;
+  const chance = hitChance(link.attackValue, onHit, defenderProfile(input));
+  const armor = Object.values(defender.equipment)
+    .flatMap((card) => card && (card.defense ?? 0) >= link.attackValue ? [card] : [])
+    .sort((left, right) => (left.defense ?? 0) - (right.defense ?? 0))[0];
+  if (armor && chance < ARMOR_BLOCK_THRESHOLD) {
+    const staged = applySimulationIntent(state, opponent, { kind: "stage-defenders", instanceIds: [armor.instanceId] });
+    const blocked = staged.ok
+      ? applySimulationIntent(staged.state, opponent, { kind: "defend", instanceIds: [armor.instanceId] })
+      : staged;
+    if (blocked.ok) {
+      context.transitions += 2;
+      return blocked.state;
+    }
+  }
+  const credited = effects.reduce((total, effect) =>
+    total + (effect.impact?.damage ?? 0) + (effect.impact?.delayedDamage ?? 0) +
+    (effect.impact?.drawCards ?? 0) * context.drawnCardValue, 0);
+  // Every rollout state belongs to one line, so the risk rides on it into the next transition.
+  if (credited > 0) lineAdjustment.set(state, (lineAdjustment.get(state) ?? 0) - (1 - chance) * credited);
+  return undefined;
 }
 
 function advanceForced<Evaluation extends TurnEvaluation>(
@@ -523,9 +639,7 @@ function advanceForced<Evaluation extends TurnEvaluation>(
 ): AdvancedState {
   let current = state;
   const { root, config } = context;
-  if (drewPrivately(entry.before, state, entry.intent, root)) {
-    return { kind: "terminal", state, complete: false };
-  }
+  setAsideDraws(entry.before, state, entry.intent, context);
   for (let step = 0; step < (config.maxForcedSteps ?? DEFAULT_MAX_FORCED_STEPS); step++) {
     if (current.phase === "game-over" || current.turn !== root.turn) {
       return { kind: "terminal", state: current, complete: true };
@@ -542,6 +656,11 @@ function advanceForced<Evaluation extends TurnEvaluation>(
       return { kind: "terminal", state: current, complete: false };
     }
     const actor = (current.pendingDecision?.player ?? current.priorityPlayer) as 0 | 1;
+    const defended = actor !== root.seat ? rolloutDefense(current, context) : undefined;
+    if (defended) {
+      current = defended;
+      continue;
+    }
     const intent = actor === root.seat
       ? config.chooseForced(observation(current, root, context.publicGameId))
       : opponentRolloutIntent(current);
@@ -556,8 +675,7 @@ function advanceForced<Evaluation extends TurnEvaluation>(
     if (!applied.ok) return { kind: "terminal", state: current, complete: false };
     const before = current;
     current = applied.state;
-    // Stop before a simulated private draw can influence another action.
-    if (drewPrivately(before, current, intent, root)) return { kind: "terminal", state: current, complete: false };
+    setAsideDraws(before, current, intent, context);
   }
   return { kind: "terminal", state: current, complete: false };
 }
@@ -604,10 +722,17 @@ function evaluateEnd<Evaluation extends TurnEvaluation>(
   context: SearchContext<Evaluation>,
   complete: boolean,
 ): Evaluation {
-  // A line cut short mid-turn (a tutor or draw, a budget) still holds its hand.
+  // A line the budget cut short still holds its hand.
   if (!complete) return evaluateHorizon(state, context);
   const input = observation(state, context.root, context.publicGameId);
-  return context.config.evaluateEnd(state, input, context.root, true);
+  return withLineAdjustment(state, context.config.evaluateEnd(state, input, context.root, true));
+}
+
+function withLineAdjustment<Evaluation extends TurnEvaluation>(state: GameState, evaluation: Evaluation): Evaluation {
+  const adjustment = lineAdjustment.get(state) ?? 0;
+  return adjustment !== 0 && state.winner === null
+    ? { ...evaluation, score: evaluation.score + adjustment * POINTS_PER_DAMAGE }
+    : evaluation;
 }
 
 function evaluateHorizon<Evaluation extends TurnEvaluation>(
@@ -615,16 +740,22 @@ function evaluateHorizon<Evaluation extends TurnEvaluation>(
   context: SearchContext<Evaluation>,
 ): Evaluation {
   const input = observation(state, context.root, context.publicGameId);
-  return context.config.evaluateHorizon
+  return withLineAdjustment(state, context.config.evaluateHorizon
     ? context.config.evaluateHorizon(state, input, context.root)
-    : context.config.evaluateEnd(state, input, context.root, false);
+    : context.config.evaluateEnd(state, input, context.root, false));
+}
+
+function keepOpeningArsenalReserve(candidates: GameIntent[], input: BotPolicyInput): GameIntent[] {
+  const own = ownCards(input);
+  const reserving = candidates.filter((intent) => !spendsOpeningArsenalReserve(intent, input, own));
+  return reserving.length > 0 ? reserving : candidates;
 }
 
 function plannerCandidates<Evaluation extends TurnEvaluation>(
   input: BotPolicyInput,
   context: SearchContext<Evaluation>,
   depth: number,
-): GameIntent[] {
+): { selected: GameIntent[]; deferred: GameIntent[] } {
   // Bot tasks omit draw negotiation, but speculative observations regenerate
   // legal intents from the engine. Keep offer/withdraw loops out of every
   // search depth so they cannot consume the budget or become a continuation.
@@ -632,12 +763,13 @@ function plannerCandidates<Evaluation extends TurnEvaluation>(
     intent.kind !== "concede" && intent.kind !== "stage-defenders" &&
     !intent.kind.endsWith("-draw")
   );
-  const strategic = strategicPitchIntents(
+  const pitched = strategicPitchIntents(
     generated,
     context.config.comparePitchOrder
       ? (left, right) => context.config.comparePitchOrder!(left, right, input)
       : undefined,
   );
+  const strategic = isOpeningTurn(input) ? keepOpeningArsenalReserve(pitched, input) : pitched;
   const requested = context.config.prepareCandidates?.(
     strategic,
     input,
@@ -645,7 +777,11 @@ function plannerCandidates<Evaluation extends TurnEvaluation>(
   ) ?? strategic;
   const legalCandidates = new Set(strategic);
   const prepared = [...new Set(requested)].filter((intent) => legalCandidates.has(intent));
-  const selectedBeforeRootLimit = prepared.length > 0 ? prepared : strategic;
+  // A vetoed candidate explored first would spend the node's budget and leave
+  // its -Infinity line as the node's best, sinking every line through it.
+  const selectedBeforeRootLimit = (prepared.length > 0 ? prepared : strategic).filter((intent) =>
+    context.config.scoreIntent?.(intent, input) !== Number.NEGATIVE_INFINITY
+  );
   const rootLimit = Math.min(
     context.config.maxRootCandidates ?? MAX_ROOT_CANDIDATES,
     Math.max(1, context.config.maxSearchNodes ?? DEFAULT_MAX_SEARCH_NODES),
@@ -688,7 +824,58 @@ function plannerCandidates<Evaluation extends TurnEvaluation>(
     context.candidateTrace.rootStrategic = strategic.length;
     context.candidateTrace.rootPrepared = selected.length;
   }
-  return selected;
+  return { selected, deferred: ordered.slice(selected.length) };
+}
+
+function endsTurn(intent: GameIntent): boolean {
+  return intent.kind === "pass" || intent.kind === "close-chain" || intent.kind === "concede" ||
+    intent.kind.endsWith("-draw");
+}
+
+/** The policy's top-ranked candidate, for greedy completion. */
+function bestRanked<Evaluation extends TurnEvaluation>(
+  candidates: readonly GameIntent[],
+  input: BotPolicyInput,
+  context: SearchContext<Evaluation>,
+): GameIntent[] {
+  let best: { intent: GameIntent; score: number } | undefined;
+  for (const intent of candidates) {
+    const score = context.config.rankCandidate?.(intent, input) ??
+      context.config.scoreIntent?.(intent, input) ??
+      genericCandidatePriority(intent, input);
+    if (!best || score > best.score) best = { intent, score };
+  }
+  return best ? [best.intent] : [];
+}
+
+/** Scores the line that starts with `intent`, searching on from a clean decision. */
+function lineResult<Evaluation extends TurnEvaluation>(
+  advanced: AdvancedState,
+  context: SearchContext<Evaluation>,
+  intent: GameIntent,
+  intentScore: number,
+  observationKey: string | undefined,
+  nextDepth: number,
+): SearchResult<Evaluation> {
+  const checkpoint = observationKey ? [{ observationKey, intent }] : [];
+  if (advanced.kind === "decision") {
+    const continuation = search(advanced.state, context, nextDepth);
+    return {
+      score: continuation.score + intentScore,
+      line: [intent, ...continuation.line],
+      checkpoints: [...checkpoint, ...continuation.checkpoints],
+      evaluation: continuation.evaluation,
+      lost: continuation.lost,
+    };
+  }
+  const evaluation = evaluateEnd(advanced.state, context, advanced.complete);
+  return {
+    score: evaluation.score + intentScore,
+    line: [intent],
+    checkpoints: checkpoint,
+    evaluation,
+    lost: advanced.state.winner === 1 - context.root.seat,
+  };
 }
 
 function search<Evaluation extends TurnEvaluation>(
@@ -697,58 +884,46 @@ function search<Evaluation extends TurnEvaluation>(
   depth: number,
 ): SearchResult<Evaluation> {
   const maxDepth = context.config.maxActionDepth ?? DEFAULT_MAX_ACTION_DEPTH;
-  if (context.nodes >= context.nodeLimit ||
-    context.transitions >= context.transitionLimit || depth >= maxDepth) {
-    const evaluation = evaluateHorizon(state, context);
-    return { score: evaluation.score, line: [], checkpoints: [], evaluation };
-  }
   // Projection and legal-intent generation are among the planner's heavier
   // operations. Build the observation once and reuse it for both the memo key
   // and candidate preparation.
   const observed = observation(state, context.root, context.publicGameId);
-  const key = stateKey(observed, depth);
+  if (context.transitions >= context.transitionLimit || depth >= maxDepth) {
+    // With nothing left but to end the turn, the line is finished, not a horizon.
+    const evaluation = observed.legal.every(endsTurn)
+      ? withLineAdjustment(state, context.config.evaluateEnd(state, observed, context.root, true))
+      : evaluateHorizon(state, context);
+    return { score: evaluation.score, line: [], checkpoints: [], evaluation, lost: false };
+  }
+  const key = `${stateKey(observed, depth)}|${lineAdjustment.get(state) ?? 0}`;
   const cached = context.memo.get(key);
   if (cached) return cached;
   const observedKey = context.config.recordCheckpoints
     ? botObservationKey(observed)
     : undefined;
 
-  const candidates = plannerCandidates(observed, context, depth);
+  // Past the node budget a line finishes greedily, so it ends as a real turn
+  // instead of an optimistic horizon estimate that can outscore finished lines.
+  const greedy = context.nodes >= context.nodeLimit;
+  const candidates = plannerCandidates(observed, context, depth).selected;
   let best: SearchResult<Evaluation> | undefined;
-  for (const intent of candidates) {
-    if (context.nodes >= context.nodeLimit || context.transitions >= context.transitionLimit) break;
-    context.nodes++;
+  for (const intent of greedy ? bestRanked(candidates, observed, context) : candidates) {
+    if (context.transitions >= context.transitionLimit) break;
+    if (!greedy) {
+      if (context.nodes >= context.nodeLimit) break;
+      context.nodes++;
+    }
     context.transitions++;
     const applied = applySimulationIntent(state, context.root.seat, intent);
     if (!applied.ok) continue;
     const intentScore = context.config.scoreIntent?.(intent, observed) ?? 0;
     const advanced = advanceForced(applied.state, context, { before: state, intent });
-    const result = advanced.kind === "decision"
-      ? (() => {
-          const continuation = search(advanced.state, context, depth + 1);
-          return {
-            score: continuation.score + intentScore,
-            line: [intent, ...continuation.line],
-            checkpoints: observedKey
-              ? [{ observationKey: observedKey, intent }, ...continuation.checkpoints]
-              : continuation.checkpoints,
-            evaluation: continuation.evaluation,
-          };
-        })()
-      : (() => {
-          const evaluation = evaluateEnd(advanced.state, context, advanced.complete);
-          return {
-            score: evaluation.score + intentScore,
-            line: [intent],
-            checkpoints: observedKey ? [{ observationKey: observedKey, intent }] : [],
-            evaluation,
-          };
-        })();
-    if (!best || result.score > best.score) best = result;
+    const result = lineResult(advanced, context, intent, intentScore, observedKey, depth + 1);
+    if (isBetterResult(result, best)) best = result;
   }
   const result = best ?? (() => {
     const evaluation = evaluateHorizon(state, context);
-    return { score: evaluation.score, line: [], checkpoints: [], evaluation };
+    return { score: evaluation.score, line: [], checkpoints: [], evaluation, lost: false };
   })();
   context.memo.set(key, result);
   return result;
@@ -787,6 +962,9 @@ export function planTurn<Evaluation extends TurnEvaluation>(
     transitions: 0,
     transitionLimit: config.maxTransitions ?? DEFAULT_MAX_SEARCH_TRANSITIONS,
     publicGameId: input.view.gameId,
+    drawnCardValue: averageDrawValue(
+      input, (data) => cardUses(data, input), 1, hitChanceAgainst(input, true),
+    ),
     memo: new Map(),
     candidateTrace: {
       decisions: 0,
@@ -798,13 +976,27 @@ export function planTurn<Evaluation extends TurnEvaluation>(
       rootPrepared: 0,
     },
   };
-  const rootCandidates = plannerCandidates(input, context, 0);
+  const { selected: rootCandidates, deferred } = plannerCandidates(input, context, 0);
   if (rootCandidates.length === 0) return undefined;
   const totalBudget = config.maxSearchNodes ?? DEFAULT_MAX_SEARCH_NODES;
   const totalTransitionBudget = config.maxTransitions ?? DEFAULT_MAX_SEARCH_TRANSITIONS;
   const rootObservationKey = config.recordCheckpoints ? botObservationKey(input) : undefined;
   let best: SearchResult<Evaluation> | undefined;
   const rootResults: TurnPlanRootResult<Evaluation>[] = [];
+  const exploreRoot = (intent: GameIntent, nodeLimit: number, transitionLimit: number): void => {
+    context.nodeLimit = nodeLimit;
+    context.transitionLimit = transitionLimit;
+    context.memo = new Map();
+    context.nodes++;
+    context.transitions++;
+    const applied = applySimulationIntent(simulation, input.seat, intent);
+    if (!applied.ok) return;
+    const intentScore = config.scoreIntent?.(intent, input) ?? 0;
+    const advanced = advanceForced(applied.state, context, { before: simulation, intent });
+    const result = lineResult(advanced, context, intent, intentScore, rootObservationKey, 1);
+    rootResults.push({ intent, score: result.score, evaluation: result.evaluation });
+    if (isBetterResult(result, best)) best = result;
+  };
   for (const [index, intent] of rootCandidates.entries()) {
     if (context.nodes >= totalBudget || context.transitions >= totalTransitionBudget) break;
     const rootsRemaining = rootCandidates.length - index;
@@ -812,45 +1004,22 @@ export function planTurn<Evaluation extends TurnEvaluation>(
     const rootBudget = index === 0 && config.firstRootNodeBudget !== undefined
       ? Math.max(1, Math.min(budgetRemaining, config.firstRootNodeBudget))
       : Math.max(1, Math.floor(budgetRemaining / rootsRemaining));
-    context.nodeLimit = Math.min(totalBudget, context.nodes + rootBudget);
     const transitionsRemaining = totalTransitionBudget - context.transitions;
     const rootTransitionBudget = index === 0 && config.firstRootTransitionBudget !== undefined
       ? Math.max(1, Math.min(transitionsRemaining, config.firstRootTransitionBudget))
       : Math.max(1, Math.floor(transitionsRemaining / rootsRemaining));
-    context.transitionLimit = Math.min(
-      totalTransitionBudget,
-      context.transitions + rootTransitionBudget,
+    exploreRoot(
+      intent,
+      Math.min(totalBudget, context.nodes + rootBudget),
+      Math.min(totalTransitionBudget, context.transitions + rootTransitionBudget),
     );
-    context.memo = new Map();
-    context.nodes++;
-    context.transitions++;
-    const applied = applySimulationIntent(simulation, input.seat, intent);
-    if (!applied.ok) continue;
-    const intentScore = config.scoreIntent?.(intent, input) ?? 0;
-    const advanced = advanceForced(applied.state, context, { before: simulation, intent });
-    const result = advanced.kind === "decision"
-      ? (() => {
-          const continuation = search(advanced.state, context, 1);
-          return {
-            score: continuation.score + intentScore,
-            line: [intent, ...continuation.line],
-            checkpoints: rootObservationKey
-              ? [{ observationKey: rootObservationKey, intent }, ...continuation.checkpoints]
-              : continuation.checkpoints,
-            evaluation: continuation.evaluation,
-          };
-        })()
-      : (() => {
-          const evaluation = evaluateEnd(advanced.state, context, advanced.complete);
-          return {
-            score: evaluation.score + intentScore,
-            line: [intent],
-            checkpoints: rootObservationKey ? [{ observationKey: rootObservationKey, intent }] : [],
-            evaluation,
-          };
-        })();
-    rootResults.push({ intent, score: result.score, evaluation: result.evaluation });
-    if (!best || result.score > best.score) best = result;
+  }
+  // Every capped root loses, so try lower-ranked roots until one survives.
+  const fallbackNodes = Math.max(1, Math.floor(totalBudget / rootCandidates.length));
+  const fallbackTransitions = Math.max(1, Math.floor(totalTransitionBudget / rootCandidates.length));
+  for (const intent of deferred) {
+    if (!best?.lost) break;
+    exploreRoot(intent, context.nodes + fallbackNodes, context.transitions + fallbackTransitions);
   }
   const first = best?.line[0];
   return first && best

@@ -10,6 +10,7 @@ import {
 } from "@fyendal/protocol";
 import type { Queryable } from "../db.js";
 import {
+  appendReplayView,
   deleteReplay,
   discardUnfinishedReplaysOtherRulesets,
   encodeReplayPayloads,
@@ -544,6 +545,27 @@ describe("server replay retention", () => {
     expect(seats.map((row) => decodeReplayResponse(
       JSON.parse(gunzipSync(row.payload).toString("utf8")),
     )?.replay.seat)).toEqual([0, 1]);
+  });
+
+  it("keeps the first frames and the final one when a recording passes the frame cap", async () => {
+    const game = await startedGame();
+    const room = (await store.getRoom(game.code))!;
+    const state = room.state!;
+    const move = { kind: "forward" as const, events: [] };
+    for (let step = 1; step <= 4; step++) {
+      expect(await appendReplayView(db, game.code, room.version + step, state, null, move)).toBeNull();
+    }
+    state.phase = "game-over";
+    state.winner = 0;
+    const id = await appendReplayView(db, game.code, room.version + 5, state, 0, move);
+    expect(id).toMatch(/^[a-f0-9]{24}$/);
+    expect(Number((await db.query("SELECT COUNT(*) AS n FROM replay_frames")).rows[0]!.n)).toBe(6);
+    expect(await finalizeReplay(db, id!, undefined, undefined, 3)).toBe(true);
+    expect((await listReplays(db, game.users[0]))[0]).toMatchObject({ id, frameCount: 3, winner: 0 });
+    const replay = await getReplay(db, game.users[0], id!);
+    if (replay?.version !== 2) throw new Error("expected a version 2 replay");
+    expect(replay.frames.map((frame) => frame.transition === null)).toEqual([true, false, true]);
+    expect(replay.frames.at(-1)!.view.winner).toBe(0);
   });
 
   it("loads large replay recordings in bounded frame batches", async () => {

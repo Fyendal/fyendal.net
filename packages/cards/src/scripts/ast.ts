@@ -11,13 +11,9 @@ import {
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
+  playedLightning,
 } from "./shared-helpers.js";
-
-const LIGHTNING = "AST028";
-
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
+import { EMBODIMENT_OF_LIGHTNING } from "./tokens.js";
 
 function instantCards(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
   return ctx.player(ctx.seat).hand.filter((card) => ctx.hasCardType(card, "instant"));
@@ -44,7 +40,7 @@ function revealInstantEquipment(effect: (ctx: ScriptCtx) => void): CardScript {
       ctx.logPublic(
         localizedCardLog(
           ctx,
-          `${ctx.data.name} reveals ${data(ctx, card).name}`,
+          `${ctx.data.name} reveals ${ctx.cardData(card.cardId).name}`,
           "card.log.common.card.revealed",
           { revealed: { kind: "card", cardId: card.cardId } },
           { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
@@ -55,8 +51,30 @@ function revealInstantEquipment(effect: (ctx: ScriptCtx) => void): CardScript {
   };
 }
 
+const SERENADE_MODES = [
+  { id: 1, name: "Embodiment", text: "Create an Embodiment of Lightning token", message: "card.ast.option.embodiment" },
+  { id: 2, name: "Search Skyzyk", text: "Search your deck for a Skyzyk", message: "card.ast.option.skyzyk" },
+  { id: 3, name: "Next attack +1", text: "Your next attack this turn gets +1{p}", message: "card.ast.option.attack" },
+] as const;
+
+type SerenadeMode = (typeof SERENADE_MODES)[number];
+
+function serenadeOption(mode: SerenadeMode): string {
+  return `${mode.id}: ${mode.name}`;
+}
+
+function serenadeOptionMessages() {
+  return Object.fromEntries(SERENADE_MODES.map((mode) => [serenadeOption(mode), decisionMessage(mode.message)]));
+}
+
+function serenadeModes(first: unknown, second: unknown): [SerenadeMode, SerenadeMode] | undefined {
+  const a = SERENADE_MODES.find((mode) => mode.id === first);
+  const b = SERENADE_MODES.find((mode) => mode.id === second);
+  return a && b ? [a, b] : undefined;
+}
+
 function applySerenadeChoices(ctx: ScriptCtx, choices: number[]): void {
-  if (choices.includes(1)) ctx.createToken(LIGHTNING);
+  if (choices.includes(1)) ctx.createToken(EMBODIMENT_OF_LIGHTNING);
   if (choices.includes(3)) buffNextAttack(ctx, { attack: 1 });
   if (!choices.includes(2)) return;
   const skyzyks = ctx.player(ctx.seat).deck.filter((card) => cardNamed(ctx, card, "skyzyk"));
@@ -77,9 +95,9 @@ export const ast: Record<string, CardScript> = {
       goAgain: false,
       timing: "instant",
       oncePerTurn: true,
-      canActivate: (ctx) => ctx.getFlag("player", "playedSubtype:lightning") === true,
+      canActivate: (ctx) => playedLightning(ctx),
       onActivate: (ctx) => {
-        ctx.createToken(LIGHTNING);
+        ctx.createToken(EMBODIMENT_OF_LIGHTNING);
       },
     },
   },
@@ -106,9 +124,9 @@ export const ast: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       destroySelfCost: true,
-      canActivate: (ctx) => ctx.getFlag("player", "playedSubtype:lightning") === true,
+      canActivate: (ctx) => playedLightning(ctx),
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
+        ctx.gainResources(ctx.seat, 1);
       },
     },
   },
@@ -116,11 +134,11 @@ export const ast: Record<string, CardScript> = {
     dealArcane(ctx, ctx.link?.attacker ?? opponentSeat(ctx), 1);
   }),
   "starlight striders|0": revealInstantEquipment((ctx) => {
-    ctx.createToken(LIGHTNING);
+    ctx.createToken(EMBODIMENT_OF_LIGHTNING);
   }),
   "photon rush|1": {
     onAttackDeclared(ctx) {
-      if (ctx.getFlag("player", "playedSubtype:lightning") === true) ctx.grantGoAgain();
+      if (playedLightning(ctx)) ctx.grantGoAgain();
     },
   },
   "arc lightning|2": {
@@ -139,7 +157,7 @@ export const ast: Record<string, CardScript> = {
         target: anyDamageTarget((ctx) =>
           decisionPrompt(
             `Arc Lightning: deal ${ctx.previewArcaneDamage(1)} arcane damage to any target`,
-            "card.ast.arcane.target.choose",
+            "card.common.arcane.anytarget.choose",
             { values: { amount: ctx.previewArcaneDamage(1) } },
           ),
         ),
@@ -152,14 +170,25 @@ export const ast: Record<string, CardScript> = {
       ctx.requestChoice(
         "serenade-first",
         decisionPrompt("Skyward Serenade: choose the first mode", "card.ast.serenade.mode.first", {
-          optionMessages: {
-            "1: Embodiment": decisionMessage("card.ast.option.embodiment"),
-            "2: Search Skyzyk": decisionMessage("card.ast.option.skyzyk"),
-            "3: Next attack +1": decisionMessage("card.ast.option.attack"),
-          },
+          optionMessages: serenadeOptionMessages(),
         }),
-        ["1: Embodiment", "2: Search Skyzyk", "3: Next attack +1"],
+        SERENADE_MODES.map(serenadeOption),
       );
+    },
+    stackLabel(card) {
+      const modes = serenadeModes(card.scriptState?.serenadeFirst, card.scriptState?.serenadeSecond);
+      if (!modes) return undefined;
+      return {
+        label: `Skyward Serenade: ${modes[0].text}; ${modes[1].text}`,
+        labelMessage: {
+          id: "card.ast.serenade.stack",
+          values: {
+            card: { kind: "card", cardId: card.cardId },
+            first: { kind: "term", id: modes[0].message },
+            second: { kind: "term", id: modes[1].message },
+          },
+        },
+      };
     },
     onPlay(ctx) {
       applySerenadeChoices(ctx, [ctx.getState("serenadeFirst"), ctx.getState("serenadeSecond")]);
@@ -171,18 +200,24 @@ export const ast: Record<string, CardScript> = {
         ctx.requestChoice(
           "serenade-second",
           decisionPrompt("Skyward Serenade: choose a different second mode", "card.ast.serenade.mode.second", {
-            optionMessages: {
-              "1: Embodiment": decisionMessage("card.ast.option.embodiment"),
-              "2: Search Skyzyk": decisionMessage("card.ast.option.skyzyk"),
-              "3: Next attack +1": decisionMessage("card.ast.option.attack"),
-            },
+            optionMessages: serenadeOptionMessages(),
           }),
-          [1, 2, 3]
-            .filter((mode) => mode !== first)
-            .map((mode) => `${mode}: ${mode === 1 ? "Embodiment" : mode === 2 ? "Search Skyzyk" : "Next attack +1"}`),
+          SERENADE_MODES.filter((mode) => mode.id !== first).map(serenadeOption),
         );
       } else if (hook === "serenade-second") {
         ctx.setState("serenadeSecond", Number(option[0]));
+        const modes = serenadeModes(ctx.getState("serenadeFirst"), ctx.getState("serenadeSecond"));
+        if (modes)
+          ctx.logPublic(localizedCardLog(
+            ctx,
+            `${ctx.cardData(ctx.player(ctx.seat).heroCardId).name} chooses ${modes[0].name} and ${modes[1].name} for ${ctx.data.name}`,
+            "card.log.ast.serenade.modes.chosen",
+            {
+              player: { kind: "player", seat: ctx.seat },
+              first: { kind: "term", id: modes[0].message },
+              second: { kind: "term", id: modes[1].message },
+            },
+          ));
       } else if (hook === "serenade-skyzyk") {
         const id = Number(option);
         const card = ctx.player(ctx.seat).deck.find((candidate) => candidate.instanceId === id);
@@ -190,7 +225,7 @@ export const ast: Record<string, CardScript> = {
         ctx.logPublic(
           localizedCardLog(
             ctx,
-            `${ctx.data.name} reveals ${data(ctx, card).name} and banishes it`,
+            `${ctx.data.name} reveals ${ctx.cardData(card.cardId).name} and banishes it`,
             "card.log.ast.search.banished",
             { result: { kind: "card", cardId: card.cardId } },
             { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "deck", to: "banish" },
@@ -218,7 +253,7 @@ export const ast: Record<string, CardScript> = {
   },
   "written in the stars|3": {
     onPlay(ctx) {
-      ctx.createToken(LIGHTNING);
+      ctx.createToken(EMBODIMENT_OF_LIGHTNING);
       if (ctx.getFlag("player", "arcaneDamageDealtThisTurn") === true) ctx.drawCards(ctx.seat, 1);
     },
   },

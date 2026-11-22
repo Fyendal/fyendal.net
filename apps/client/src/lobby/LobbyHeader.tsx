@@ -5,8 +5,10 @@ import { useStore } from "../store.js";
 import { LanguagePicker } from "../i18n/LanguagePicker.js";
 import { LobbyBrand } from "./GuestLanding.js";
 import { DiscordLink } from "./DiscordLink.js";
+import { KofiLink } from "./KofiLink.js";
 import { BugFixedNotification } from "./BugFixedNotification.js";
 import { FullscreenButton } from "../components/FullscreenButton.js";
+import { TopbarSocialSlot } from "../social/TopbarSocialSlot.js";
 
 export function LobbyHeader() {
   const intl = useIntl();
@@ -45,9 +47,11 @@ export function LobbyHeader() {
       ) : null}
       <div className="topbar-actions">
         <div className="topbar-tools">
+          <KofiLink />
           <LanguagePicker placement="header" />
           <DiscordLink />
           <FullscreenButton placement="header" />
+          {authUser ? <TopbarSocialSlot wideOnly /> : null}
         </div>
         {authUser ? (
           <div className="topbar-account">

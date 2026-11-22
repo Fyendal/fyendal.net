@@ -21,14 +21,15 @@ function paymentView(): GameView {
 }
 
 describe("pitch focus source", () => {
-  it("keeps a pitched play focused through boost, targets, and confirmation", () => {
-    for (const step of ["boost", "target", "close-chain", "confirm"] as const) {
+  it("keeps a pitched play focused through confirmation", () => {
+    for (const step of ["close-chain", "confirm"] as const) {
       expect(postPaymentPitchFocus(step, 1, "resource")).toBe(true);
       expect(postPaymentPitchFocus(step, 0, "resource")).toBe(false);
       expect(postPaymentPitchFocus(step, 1, "discard")).toBe(false);
     }
-    expect(postPaymentPitchFocus("method", 1, "resource")).toBe(false);
-    expect(postPaymentPitchFocus("payment", 1, "resource")).toBe(false);
+    for (const step of ["method", "ability", "boost", "target", "payment"] as const) {
+      expect(postPaymentPitchFocus(step, 1, "resource")).toBe(false);
+    }
 
     const view = paymentView();
     const selection = { kind: "play-hand" as const, instanceId: 2 };

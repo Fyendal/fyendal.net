@@ -26,6 +26,15 @@ describe("card art choices", () => {
       .toEqual({ highestRarity: true, picks: { ARC159: STANDARD_CARD_ART } });
   });
 
+  it("treats a Fabrary pin as the automatic choice under the player's picks", () => {
+    const pins = { ARC159: "HNT260" };
+    expect(shownCardArt(catalog, "ARC159", on, pins)).toBe("HNT260");
+    expect(shownCardArt(catalog, "ARC159", { ...off, picks: { ARC159: "DYN000-CF" } }, pins)).toBe("DYN000-CF");
+    expect(chooseCardArt(catalog, { ...off, picks: { ARC159: "DYN000-CF" } }, "ARC159", "HNT260", pins)).toEqual(off);
+    expect(chooseCardArt(catalog, off, "ARC159", undefined, pins))
+      .toEqual({ highestRarity: false, picks: { ARC159: STANDARD_CARD_ART } });
+  });
+
   it("reports the card's own printing as standard art", () => {
     expect(shownCardArt(catalog, "ARC159", { ...off, picks: { ARC159: "ARC159" } })).toBeUndefined();
     expect(shownCardArt(catalog, "ARC159", on)).toBe("DYN000-CF");
@@ -43,6 +52,15 @@ describe("card art choices", () => {
     expect(html.match(/aria-checked="true"/g)).toHaveLength(1);
     expect(html).toContain("Use auto");
     expect(html).toContain("Fabled, Cold Foil");
+    expect(html).toContain("Auto: the highest-rarity printing");
+  });
+
+  it("explains that the automatic printing comes from the Fabrary deck", () => {
+    const html = renderToStaticMarkup(createElement(TestI18nProvider, null,
+      createElement(CardArtVariants, {
+        catalog, cardId: "ARC159", art: on, defaults: { ARC159: "HNT260" }, onChange: () => {},
+      })));
+    expect(html).toContain("Auto: the printing your Fabrary deck uses");
   });
 });
 

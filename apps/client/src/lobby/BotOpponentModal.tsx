@@ -1,13 +1,18 @@
 import { useId, useRef, useState } from "react";
 import { useIntl } from "react-intl";
-import { FUTURE_SET_CODES, cardData, formatLegalityIssues, precon } from "@fyendal/cards/client";
+import { FUTURE_SET_CODES, cardData, formatLegalityIssues, isDeckConstructionIssue, precon } from "@fyendal/cards/client";
 import type { BotOpponent, Format } from "@fyendal/shared";
 import { BETA_BOT_OPPONENTS } from "@fyendal/protocol";
 import { heroImageUrl } from "./heroImage.js";
 import { cardImageUrl } from "../game/Card.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { ViewportTooltip } from "../components/ViewportTooltip.js";
-import { loadBotMatchmakingPreference, saveBotMatchmakingPreference } from "../storage.js";
+import {
+  loadBotMatchmakingPreference,
+  loadBotShowBannedPreference,
+  saveBotMatchmakingPreference,
+  saveBotShowBannedPreference,
+} from "../storage.js";
 import { useStore } from "../store.js";
 
 interface BotOption {
@@ -18,12 +23,33 @@ interface BotOption {
   deckId: string;
   deckType: DeckType;
   descriptionId: string;
+  /** Recently released; wears the "New" ribbon. */
+  isNew?: boolean;
 }
 
 type DeckType = "beginner" | "midrange" | "aggro" | "elemental" | "guardian" | "boss";
 
 const BOTS: Readonly<Record<Format, readonly BotOption[]>> = {
   cc: [
+    {
+      id: "fang",
+      name: "Fang",
+      title: "Dracai of Blades",
+      heroName: "Fang, Dracai of Blades",
+      deckId: "bot-fang-dracai",
+      deckType: "aggro",
+      descriptionId: "lobby.bot.fang.description",
+      isNew: true,
+    },
+    {
+      id: "aurora",
+      name: "Aurora",
+      title: "Legacy of Tempest",
+      heroName: "Aurora, Legacy of Tempest",
+      deckId: "bot-aurora-tempest",
+      deckType: "elemental",
+      descriptionId: "lobby.bot.aurora.description",
+    },
     {
       id: "ira",
       name: "Ira",
@@ -81,6 +107,16 @@ const BOTS: Readonly<Record<Format, readonly BotOption[]>> = {
   ],
   "silver-age": [
     {
+      id: "dorinthea",
+      name: "Dorinthea",
+      title: "Decimator Great Axe",
+      heroName: "Dorinthea",
+      deckId: "bot-dorinthea-sage",
+      deckType: "guardian",
+      descriptionId: "lobby.bot.dorinthea.description",
+      isNew: true,
+    },
+    {
       id: "kayo",
       name: "Kayo",
       title: "SAGE Kayo",
@@ -133,7 +169,8 @@ function botCardWarnings(bot: BotOption): { banned: string[]; future: string[] }
     ...(pool.sideboard ?? []),
   ];
   return {
-    banned: [...new Set(issues.filter((issue) => issue.kind !== "future-card").map((issue) => issue.cardName))],
+    banned: [...new Set(issues.flatMap((issue) =>
+      isDeckConstructionIssue(issue) || issue.kind === "future-card" ? [] : [issue.cardName]))],
     future: [...new Set(cardIds.flatMap((id) => {
       const card = cardData[id];
       return card?.set && FUTURE_SET_CODES.has(card.set) ? [card.name] : [];
@@ -151,8 +188,30 @@ export function BotOpponentModal(props: {
   onClose: () => void;
 }) {
   const intl = useIntl();
+  return (
+    <ModalSurface
+      className="bot-opponent-modal"
+      title={intl.formatMessage({ id: "lobby.bot.chooseOpponent" })}
+      onClose={props.onClose}
+    >
+      <BotOpponentPicker format={props.format} onSelect={props.onSelect} />
+    </ModalSurface>
+  );
+}
+
+/** The bot roster and its matchmaking switch, for any dialog that hosts it. */
+export function BotOpponentPicker(props: {
+  format: Format;
+  onSelect: (bot: BotOpponent, searchForPlayer: boolean) => void;
+}) {
+  const intl = useIntl();
   const betaTester = useStore((state) => state.betaTester);
-  const bots = BOTS[props.format].filter((bot) => betaTester || !BETA_BOT_OPPONENTS.has(bot.id));
+  const [showBanned, setShowBanned] = useState(() =>
+    typeof localStorage === "undefined" ? false : loadBotShowBannedPreference(localStorage)
+  );
+  const availableBots = BOTS[props.format].filter((bot) => betaTester || !BETA_BOT_OPPONENTS.has(bot.id));
+  const bannedBots = availableBots.filter((bot) => BOT_CARD_WARNINGS.get(bot.id)!.banned.length > 0);
+  const bots = showBanned ? availableBots : availableBots.filter((bot) => !bannedBots.includes(bot));
   const [searchForPlayer, setSearchForPlayer] = useState(() =>
     typeof localStorage === "undefined" ? true : loadBotMatchmakingPreference(localStorage)
   );
@@ -173,11 +232,7 @@ export function BotOpponentModal(props: {
 
   const activeWarnings = activeBot ? BOT_CARD_WARNINGS.get(activeBot) : undefined;
   return (
-    <ModalSurface
-      className="bot-opponent-modal"
-      title={intl.formatMessage({ id: "lobby.bot.chooseOpponent" })}
-      onClose={props.onClose}
-    >
+    <>
       <label className="bot-matchmaking-option">
         <span className="bot-matchmaking-copy">
           <strong>{intl.formatMessage({ id: "lobby.bot.searchForPlayer" })}</strong>
@@ -215,6 +270,9 @@ export function BotOpponentModal(props: {
               onClick={() => props.onSelect(bot.id, searchForPlayer)}
             >
               <BotArt bot={bot} />
+              {bot.isNew ? (
+                <span className="bot-new-ribbon">{intl.formatMessage({ id: "lobby.bot.new" })}</span>
+              ) : null}
               <strong className="bot-opponent-name">{bot.name}</strong>
               <small className="bot-opponent-title">{bot.title}</small>
               {warnings.banned.length > 0 || warnings.future.length > 0 ? (
@@ -224,20 +282,11 @@ export function BotOpponentModal(props: {
                   onPointerEnter={() => setHoveredBot(bot.id)}
                   onPointerLeave={() => setHoveredBot((current) => current === bot.id ? null : current)}
                 >
-                  {warnings.banned.length > 0 ? (
-                    <span className="deck-legality-hint banned">
-                      {intl.formatMessage({ id: "lobby.deck.includesBanned" }, {
-                        count: warnings.banned.length,
-                      })}
-                    </span>
-                  ) : null}
-                  {warnings.future.length > 0 ? (
-                    <span className="deck-legality-hint future">
-                      {intl.formatMessage({ id: "lobby.deck.includesFuture" }, {
-                        count: warnings.future.length,
-                      })}
-                    </span>
-                  ) : null}
+                  <span className={`deck-legality-hint ${warnings.banned.length > 0 ? "banned" : "future"}`}>
+                    {intl.formatMessage({
+                      id: warnings.banned.length > 0 ? "lobby.deck.needsPool.open" : "lobby.deck.needsPool.future",
+                    })}
+                  </span>
                 </span>
               ) : null}
               <span className="bot-opponent-foot">
@@ -252,6 +301,29 @@ export function BotOpponentModal(props: {
           );
         })}
       </div>
+      {bannedBots.length > 0 ? (
+        <p className="bot-banned-note">
+          <span>
+            {showBanned
+              ? intl.formatMessage({ id: "lobby.bot.bannedShown" })
+              : intl.formatMessage({ id: "lobby.bot.bannedHidden" }, {
+                  bots: intl.formatList(bannedBots.map((bot) => bot.name), { type: "conjunction" }),
+                  count: bannedBots.length,
+                })}
+          </span>
+          <button
+            type="button"
+            className="bot-banned-toggle"
+            onClick={() => {
+              const enabled = !showBanned;
+              setShowBanned(enabled);
+              if (typeof localStorage !== "undefined") saveBotShowBannedPreference(localStorage, enabled);
+            }}
+          >
+            {intl.formatMessage({ id: showBanned ? "lobby.bot.bannedHide" : "lobby.bot.bannedShow" })}
+          </button>
+        </p>
+      ) : null}
       {bots.map((bot) => {
         const warnings = BOT_CARD_WARNINGS.get(bot.id)!;
         return warnings.banned.length > 0 || warnings.future.length > 0 ? (
@@ -273,7 +345,7 @@ export function BotOpponentModal(props: {
             className="lobby-tooltip bot-card-warning-tooltip"
           />
         : null}
-    </ModalSurface>
+    </>
   );
 }
 

@@ -2,7 +2,7 @@
  {
   "id": "OXO001",
   "name": "Ironrot Helm",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -19,7 +19,7 @@
  {
   "id": "OXO002",
   "name": "Ironrot Plate",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -36,7 +36,7 @@
  {
   "id": "OXO003",
   "name": "Ironrot Gauntlet",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -53,7 +53,7 @@
  {
   "id": "OXO004",
   "name": "Ironrot Legs",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [

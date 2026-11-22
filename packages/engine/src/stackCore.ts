@@ -1,14 +1,23 @@
 import type { PlayableZone } from "@fyendal/shared";
+import { scriptOf } from "./cardProperties.js";
 import { nameOf } from "./gameLog.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardInstance, PlayerState } from "./state.js";
-import { opponent } from "./zoneQueries.js";
+import { currentLink, opponent } from "./zoneQueries.js";
 
 export type CardPlayOrigin = "hand" | "arsenal" | PlayableZone;
 /** Stable numeric codes for play origins kept in JSON-safe player flags. */
 export const CARD_PLAY_ORIGINS: readonly CardPlayOrigin[] = ["hand", "arsenal", "banish", "graveyard", "deck"];
 
 const attackLayerOriginKey = (instanceId: number) => `attackLayerOrigin:${instanceId}`;
+
+/** Records the active attack on a played card whose effect targets it. */
+export function recordAttackTarget(state: GameStateInternal, card: CardInstance): void {
+  const link = currentLink(state);
+  if (link && scriptOf(state, card.cardId, card)?.targetsAttackingCard) {
+    card.playTargetInstanceId = link.attackingCard.instanceId;
+  }
+}
 
 /** Push a played card onto the stack (instants, actions, reactions). */
 export function pushCardLayer(
@@ -23,6 +32,7 @@ export function pushCardLayer(
     optional?: boolean;
   },
 ): void {
+  recordAttackTarget(state, card);
   state.stack.unshift({
     sourceInstanceId: card.instanceId,
     seat,
@@ -43,6 +53,10 @@ export function pushAbilityLayer(
   label: string,
   opts?: { abilityIndex?: number; triggerIndex?: number; optional?: boolean; goAgain?: boolean; targetCardInstanceId?: number },
 ): void {
+  const targetCardInstanceId = opts?.targetCardInstanceId ??
+    (scriptOf(state, source.cardId, source)?.abilityTargetsAttackingCard
+      ? currentLink(state)?.attackingCard.instanceId
+      : undefined);
   state.stack.unshift({
     sourceInstanceId: source.instanceId,
     seat,
@@ -53,9 +67,7 @@ export function pushAbilityLayer(
     abilityCard: source,
     ...(opts?.abilityIndex && opts.abilityIndex > 0 ? { abilityIndex: opts.abilityIndex } : {}),
     ...(opts?.goAgain ? { goAgain: true } : {}),
-    ...(opts?.targetCardInstanceId !== undefined
-      ? { targetCardInstanceId: opts.targetCardInstanceId }
-      : {}),
+    ...(targetCardInstanceId !== undefined ? { targetCardInstanceId } : {}),
   });
 }
 

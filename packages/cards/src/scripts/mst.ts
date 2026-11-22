@@ -8,36 +8,41 @@ import {
   cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
+  controlledPermanents,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  equipmentZoneCards,
+  evoEquipment,
+  faceUpGraveyard,
+  hasCardSubtype,
+  heroChoiceSeat,
   hitHookLabel,
+  hyperDrivers,
+  isAttackAction,
+  isAura,
   isCard,
+  isNonAttackAction,
   leavesArenaTrigger,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
+  pitchedBlue,
+  playedAnotherBlue,
   previousAttackHasName,
+  reactionCount,
   requestDiscardChoice,
+  requestHeroChoice,
   resolveDiscardChoice,
   sharesName,
+  transcendIfBlue,
   yesNoPrompt,
 } from "./shared-helpers.js";
+import { hasType as hasPrintedType } from "@fyendal/shared";
+import { CROUCHING_TIGER, FANG_STRIKE, SLITHER, SPECTRAL_SHIELD } from "./tokens.js";
 
 // Part the Mistveil. Reprints reuse their existing functional-key scripts;
 // this module contains only identities first introduced by MST.
-const FANG_STRIKE = "MST023";
-const SLITHER = "MST024";
-const SPECTRAL_SHIELD = "MST158";
-const CROUCHING_TIGER = "MST188";
-
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-
-function pitchedBlue(ctx: ScriptCtx): boolean {
-  return ctx.pitchedThisTurn({ color: "blue" }) > 0;
-}
 
 function pitchedChiThisTurn(ctx: ScriptCtx): boolean {
   return ctx.pitchedThisTurn({ subtype: "chi" }) > 0;
@@ -47,7 +52,7 @@ function pitchedChiThisTurn(ctx: ScriptCtx): boolean {
  * play this"; a Chi pitched earlier in the turn does not count. */
 const recordsChiPitched: Pick<CardScript, "onPlayCostPaid"> = {
   onPlayCostPaid(ctx, paid) {
-    ctx.setState("chiPitched", paid.filter((card) => hasType(ctx, card, "chi")).length);
+    ctx.setState("chiPitched", paid.filter((card) => hasCardSubtype(ctx, card, "chi")).length);
   },
 };
 
@@ -55,55 +60,19 @@ function chiPitched(ctx: ScriptCtx): number {
   return ctx.getState("chiPitched");
 }
 
-function playedAnotherBlue(ctx: ScriptCtx): boolean {
-  return ctx.playedThisTurn("blue") >= 2;
-}
-
 function transcended(ctx: ScriptCtx): boolean {
   return ctx.getFlag("player", "transcendedThisTurn") === true;
 }
 
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: string): boolean {
-  const normalized = keyword.toLowerCase();
-  if ((card.suppressedKeywords ?? []).some((candidate) => candidate.toLowerCase() === normalized)) {
-    return false;
-  }
-  return [...(data(ctx, card).keywords ?? []), ...(card.grantedKeywords ?? [])].some(
-    (candidate) => candidate.toLowerCase() === normalized,
-  );
-}
-
-function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasType(ctx, card, "aura");
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
-}
-
 function isIllusionistAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return isAura(ctx, card) && hasType(ctx, card, "illusionist");
-}
-
-function instantEvoEquipment(extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    additionalCardTypes: ["instant"],
-    playableEquipment: true,
-    transformsEquipment: (ctx, equipped) => hasType(ctx, equipped, "base"),
-    playAsInstant: () => true,
-  };
+  return isAura(ctx, card) && hasCardSubtype(ctx, card, "illusionist");
 }
 
 function requestEvoRecall(ctx: ScriptCtx): void {
   const cards = ctx
     .player(ctx.seat)
     .banish.filter(
-      (card) => !card.faceDown && hasType(ctx, card, "mechanologist") && ctx.hasCardType(card, "action"),
+      (card) => !card.faceDown && hasCardSubtype(ctx, card, "mechanologist") && ctx.hasCardType(card, "action"),
     );
   if (cards.length)
     ctx.requestCardChoice(
@@ -129,13 +98,9 @@ function createSoloSpectralShield(ctx: ScriptCtx, counters: number): void {
     ctx.addCounter(shield.instanceId, "power", counters);
 }
 
-function supercellDrivers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Hyper Driver"));
-}
-
 function finishSupercell(ctx: ScriptCtx): void {
   const x = ctx.getState("supercellX");
-  const id = tokenNamed(ctx, "Hyper Driver");
+  const id = tokenIdNamed(ctx, "Hyper Driver");
   if (id) ctx.createToken(id, undefined, { steam: x });
   if (x < 3) return;
   const constructs = ctx
@@ -158,7 +123,7 @@ function requestSupercellTarget(ctx: ScriptCtx): void {
   const x = ctx.getState("supercellX");
   const chosenCount = ctx.getState("supercellTargetsChosen");
   const chosen = new Set(Array.from({ length: chosenCount }, (_, index) => ctx.getState(`supercellTarget:${index}`)));
-  const drivers = supercellDrivers(ctx).filter((card) => !chosen.has(card.instanceId));
+  const drivers = hyperDrivers(ctx).filter((card) => !chosen.has(card.instanceId));
   if (drivers.length === 0) return;
   ctx.requestCardChoice(
     "supercell-driver",
@@ -185,13 +150,18 @@ function createTigerInBanish(ctx: ScriptCtx, power = 0): void {
 
 function currentAttackIs(ctx: ScriptCtx, ...types: string[]): boolean {
   return (
-    !!ctx.link && ctx.link.attacker === ctx.seat && types.some((type) => hasType(ctx, ctx.link!.attackingCard, type))
+    !!ctx.link && ctx.link.attacker === ctx.seat && types.some((type) =>
+      hasCardSubtype(ctx, ctx.link!.attackingCard, type))
   );
+}
+
+function currentAttackActionIs(ctx: ScriptCtx, ...types: string[]): boolean {
+  return currentAttackIs(ctx, ...types) && isAttackAction(ctx, ctx.link!.attackingCard);
 }
 
 function mysticAssassinReaction(pump: number, token?: string): CardScript {
   return {
-    canPlay: (ctx) => currentAttackIs(ctx, "assassin", "mystic"),
+    canPlay: (ctx) => currentAttackActionIs(ctx, "assassin", "mystic"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: pump });
       if (token && pitchedBlue(ctx)) createInHand(ctx, token);
@@ -199,14 +169,8 @@ function mysticAssassinReaction(pump: number, token?: string): CardScript {
   };
 }
 
-function simpleAttackReaction(pump: number, token?: string): CardScript {
-  return {
-    canPlay: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat,
-    onPlay(ctx) {
-      if (pump) ctx.addModifier({ scope: "chain-link", attack: pump });
-      if (token) createInHand(ctx, token);
-    },
-  };
+function attackingWithAttackAction(ctx: ScriptCtx): boolean {
+  return !!ctx.link && isAttackAction(ctx, ctx.link.attackingCard);
 }
 
 function lastLifeCloak(): CardScript {
@@ -329,10 +293,6 @@ function blueDefenseBonus(amount: number): CardScript {
   return { modifyDefense: (ctx) => (playedAnotherBlue(ctx) ? amount : 0) };
 }
 
-function transcendIfBlue(ctx: ScriptCtx): void {
-  if (playedAnotherBlue(ctx)) ctx.transcend();
-}
-
 function topBanishDesire(matches: (ctx: ScriptCtx, card: DeepReadonly<CardInstance>) => boolean): CardScript {
   return {
     canTriggerOnHit(ctx) {
@@ -350,9 +310,7 @@ function topBanishDesire(matches: (ctx: ScriptCtx, card: DeepReadonly<CardInstan
 }
 
 function murkyWaterTraps(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return ctx
-    .player(ctx.seat)
-    .graveyard.filter((card) => hasType(ctx, card, "trap") && (data(ctx, card).cost ?? -1) >= 0);
+  return faceUpGraveyard(ctx).filter((card) => hasCardSubtype(ctx, card, "trap") && (ctx.cardData(card.cardId).cost ?? -1) >= 0);
 }
 
 function resolveMurkyWater(ctx: ScriptCtx, instanceIds: readonly number[]): void {
@@ -380,21 +338,21 @@ function bonds(kind: "pitch" | "name"): CardScript {
       const top = opponent.deck[0];
       if (!top) return;
       ctx.banish(top.instanceId);
-      if (opponent.graveyard.length) {
+      const graveyard = faceUpGraveyard(ctx, opponent.seat);
+      if (graveyard.length) {
         ctx.requestCardChoice(
           "bonds",
           decisionPrompt(
             "Choose a card in the defending hero's graveyard to banish",
             "card.mst.defendinghero.graveyard.banish",
           ),
-          opponent.graveyard.map((card) => card.instanceId),
+          graveyard.map((card) => card.instanceId),
         );
       }
     },
     onChoose(ctx, hook, option) {
       if (hook !== "bonds") return;
-      const opponent = ctx.player(opponentSeat(ctx));
-      const second = opponent.graveyard.find((card) => card.instanceId === Number(option));
+      const second = faceUpGraveyard(ctx, opponentSeat(ctx)).find((card) => card.instanceId === Number(option));
       if (!second) return;
       ctx.banish(second.instanceId);
     },
@@ -408,8 +366,7 @@ function doubleTrouble(): CardScript {
       return ctx.link?.targetAllyId === undefined && Number(ctx.getFlag("link", "reactionCount")) >= 2;
     },
     onHit(ctx) {
-      const opponent = ctx.player(opponentSeat(ctx));
-      for (const card of opponent.deck.slice(0, 2)) ctx.banish(card.instanceId);
+      ctx.banishCards(ctx.player(opponentSeat(ctx)).deck.slice(0, 2).map((card) => card.instanceId));
     },
   };
 }
@@ -424,7 +381,7 @@ function pickToPieces(): CardScript {
   };
 }
 
-function etchings(counters: number): CardScript {
+function astralEtchings(counters: number): CardScript {
   const wardAuras = (ctx: ScriptCtx) =>
     ctx.player(ctx.seat).board.filter((card) => isAura(ctx, card) && ctx.hasWard(card));
   return {
@@ -558,10 +515,10 @@ function vengeful(maxCost: number): CardScript {
       ),
     ],
     allowsFriendlyCardPlayAsInstant(ctx, card) {
-      return isAura(ctx, card) && (data(ctx, card).cost ?? 0) <= ctx.getState("vengefulMax");
+      return isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= ctx.getState("vengefulMax");
     },
     onFriendlyPlay(ctx, played) {
-      if (!isAura(ctx, played) || (data(ctx, played).cost ?? 0) > ctx.getState("vengefulMax")) return;
+      if (!isAura(ctx, played) || (ctx.cardData(played.cardId).cost ?? 0) > ctx.getState("vengefulMax")) return;
       if (!consumeDelayedEffect(ctx)) return;
       ctx.addCounter(played.instanceId, "power", 1);
     },
@@ -580,7 +537,7 @@ function aspectTiger(pitch: number): CardScript {
       if (
         !previous ||
         !ctx.hasCardType(previous, "action") ||
-        !hasType(ctx, previous, "attack") ||
+        !hasCardSubtype(ctx, previous, "attack") ||
         ctx.cardColor(previous) !== pitch
       )
         return;
@@ -598,6 +555,14 @@ function breedAnger(): CardScript {
       createTigerInBanish(ctx);
     },
   };
+}
+
+function maulPowerMode(ctx: ScriptCtx): boolean {
+  return !!ctx.link && ctx.link.attackCardType === "action" && ctx.basePower(ctx.link.attackingCard) <= 1;
+}
+
+function maulTigerMode(ctx: ScriptCtx): boolean {
+  return !!ctx.link && cardNamed(ctx, ctx.link.attackingCard, "Crouching Tiger");
 }
 
 function tigerOnHit(): CardScript {
@@ -623,7 +588,7 @@ function emissary(kind: "moon" | "tides" | "wind"): CardScript {
       if (hand.length)
         ctx.requestCardChoice(
           `emissary-${kind}`,
-          decisionPrompt("Put a card from your hand on the bottom of your deck?", "card.mst.hand.card.bottom", {
+          decisionPrompt("Put a card from your hand on the bottom of your deck?", "card.common.hand.card.bottom", {
             optionMessages: commonOptionMessages("pass"),
           }),
           ["pass", ...hand.map((card) => card.instanceId)],
@@ -642,7 +607,7 @@ function gravekeeping(): CardScript {
   return {
     onAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId !== undefined) return;
-      const grave = ctx.player(opponentSeat(ctx)).graveyard;
+      const grave = faceUpGraveyard(ctx, opponentSeat(ctx));
       if (grave.length)
         ctx.requestCardChoice(
           "gravekeeping",
@@ -679,8 +644,8 @@ function factFinding(): CardScript {
       const opponent = ctx.player(opponentSeat(ctx));
       const cards = [
         ...opponent.arsenal.filter((card) => card.faceDown),
-        ...Object.values(opponent.equipment).filter(
-          (card): card is DeepReadonly<CardInstance> => !!card && card.faceDown === true,
+        ...equipmentZoneCards(opponent).filter(
+          (card) => card.faceDown === true,
         ),
       ];
       if (cards.length)
@@ -701,7 +666,7 @@ function factFinding(): CardScript {
 export const mst: Record<string, CardScript> = {
   "nuu|0": {
     onAttackResolved(ctx) {
-      if (!ctx.link || !hasKeyword(ctx, ctx.link.attackingCard, "stealth")) return;
+      if (!ctx.link || !ctx.hasKeyword(ctx.link.attackingCard, "stealth")) return;
       const defenders = [...ctx.link.defendingCards, ...ctx.link.defendingEquipment];
       for (const defender of defenders) {
         if (ctx.hasCardType(defender, "action")) ctx.banish(defender.instanceId, { asAttackingCard: true });
@@ -759,7 +724,7 @@ export const mst: Record<string, CardScript> = {
       goAgain: false,
       timing: "attack-reaction",
       destroySelfCost: true,
-      canActivate: (ctx) => currentAttackIs(ctx, "assassin", "mystic"),
+      canActivate: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat,
       onActivate(ctx) {
         createInHand(ctx, FANG_STRIKE);
       },
@@ -772,26 +737,26 @@ export const mst: Record<string, CardScript> = {
       goAgain: false,
       timing: "attack-reaction",
       destroySelfCost: true,
-      canActivate: (ctx) => currentAttackIs(ctx, "assassin", "mystic"),
+      canActivate: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat,
       onActivate(ctx) {
         createInHand(ctx, SLITHER);
       },
     },
   },
   "tide chakra|1": {
-    canPlay: (ctx) => currentAttackIs(ctx, "assassin", "mystic"),
+    canPlay: (ctx) => currentAttackActionIs(ctx, "assassin", "mystic"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: transcended(ctx) ? 5 : 3 });
     },
   },
   "tide chakra|2": {
-    canPlay: (ctx) => currentAttackIs(ctx, "assassin", "mystic"),
+    canPlay: (ctx) => currentAttackActionIs(ctx, "assassin", "mystic"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: transcended(ctx) ? 4 : 2 });
     },
   },
   "tide chakra|3": {
-    canPlay: (ctx) => currentAttackIs(ctx, "assassin", "mystic"),
+    canPlay: (ctx) => currentAttackActionIs(ctx, "assassin", "mystic"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: transcended(ctx) ? 3 : 1 });
     },
@@ -805,9 +770,12 @@ export const mst: Record<string, CardScript> = {
   "venomous bite|1": mysticAssassinReaction(3, FANG_STRIKE),
   "venomous bite|2": mysticAssassinReaction(2, FANG_STRIKE),
   "venomous bite|3": mysticAssassinReaction(1, FANG_STRIKE),
-  "fang strike|0": simpleAttackReaction(1),
+  "fang strike|0": {
+    canPlay: attackingWithAttackAction,
+    onPlay: (ctx) => ctx.addModifier({ scope: "chain-link", attack: 1 }),
+  },
   "slither|0": {
-    canPlay: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat,
+    canPlay: attackingWithAttackAction,
     onPlay(ctx) {
       ctx.grantGoAgain();
     },
@@ -953,24 +921,30 @@ export const mst: Record<string, CardScript> = {
   "desires of flesh|3": topBanishDesire((ctx, card) => isAttackAction(ctx, card)),
   "impulsive desire|1": topBanishDesire(
     (ctx, card) =>
-      ["attack-reaction", "defense-reaction"].includes(data(ctx, card).cardType) || ctx.hasCardType(card, "instant"),
+      ctx.hasCardType(card, "attack-reaction") ||
+      ctx.hasCardType(card, "defense-reaction") ||
+      ctx.hasCardType(card, "instant"),
   ),
   "impulsive desire|2": topBanishDesire(
     (ctx, card) =>
-      ["attack-reaction", "defense-reaction"].includes(data(ctx, card).cardType) || ctx.hasCardType(card, "instant"),
+      ctx.hasCardType(card, "attack-reaction") ||
+      ctx.hasCardType(card, "defense-reaction") ||
+      ctx.hasCardType(card, "instant"),
   ),
   "impulsive desire|3": topBanishDesire(
     (ctx, card) =>
-      ["attack-reaction", "defense-reaction"].includes(data(ctx, card).cardType) || ctx.hasCardType(card, "instant"),
+      ctx.hasCardType(card, "attack-reaction") ||
+      ctx.hasCardType(card, "defense-reaction") ||
+      ctx.hasCardType(card, "instant"),
   ),
-  "mind's desire|1": topBanishDesire((ctx, card) => ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack")),
-  "mind's desire|2": topBanishDesire((ctx, card) => ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack")),
-  "mind's desire|3": topBanishDesire((ctx, card) => ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack")),
+  "mind's desire|1": topBanishDesire((ctx, card) => isNonAttackAction(ctx, card)),
+  "mind's desire|2": topBanishDesire((ctx, card) => isNonAttackAction(ctx, card)),
+  "mind's desire|3": topBanishDesire((ctx, card) => isNonAttackAction(ctx, card)),
   "pick to pieces|1": pickToPieces(),
   "pick to pieces|2": pickToPieces(),
   "pick to pieces|3": pickToPieces(),
-  "astral etchings|2": etchings(2),
-  "astral etchings|3": etchings(1),
+  "astral etchings|2": astralEtchings(2),
+  "astral etchings|3": astralEtchings(1),
   "essence of ancestry: body|1": essence(1),
   "essence of ancestry: soul|2": essence(2),
   "essence of ancestry: mind|3": essence(3),
@@ -1033,7 +1007,7 @@ export const mst: Record<string, CardScript> = {
 
 function intimateInducement(count: number): CardScript {
   return {
-    canPlay: (ctx) => currentAttackIs(ctx, "assassin", "mystic"),
+    canPlay: (ctx) => currentAttackActionIs(ctx, "assassin", "mystic"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
       const cards = ctx.player(opponentSeat(ctx)).deck.slice(0, count);
@@ -1045,7 +1019,7 @@ function intimateInducement(count: number): CardScript {
       if (cards.length)
         ctx.requestCardChoice(
           "induce-defender",
-          decisionPrompt("Choose a defending card", "card.mst.defending.card.choose"),
+          decisionPrompt("Choose a defending card", "card.common.defending.card.choose"),
           cards.map((card) => card.instanceId),
         );
     },
@@ -1053,7 +1027,7 @@ function intimateInducement(count: number): CardScript {
       if (hook === "induce-defender") {
         const chosen = Number(option);
         const card = ctx.player(opponentSeat(ctx)).deck.find((candidate) => candidate.instanceId === chosen);
-        if (card && ctx.cardColor(card) === 3) ctx.addCardTempDefense(chosen, -(data(ctx, card).defense ?? 0));
+        if (card && ctx.cardColor(card) === 3) ctx.addCardTempDefense(chosen, -(ctx.cardData(card.cardId).defense ?? 0));
         ctx.addDefenderFromDeck(chosen);
         const remaining: number[] = [];
         for (let i = 0; i < ctx.getState("induceCount"); i++) {
@@ -1099,7 +1073,7 @@ function truthsRetold(): CardScript {
       timing: "instant",
       turnsFaceUp: true,
       onActivate(ctx) {
-        const auras = ctx.player(ctx.seat).graveyard.filter((card) => isAura(ctx, card));
+        const auras = faceUpGraveyard(ctx).filter((card) => isAura(ctx, card));
         if (auras.length)
           ctx.requestCardChoice(
             "truths",
@@ -1125,7 +1099,7 @@ function zen(): CardScript {
       oncePerTurn: true,
       onActivate(ctx) {
         createInHand(ctx, CROUCHING_TIGER);
-        const combo = ctx.player(ctx.seat).deck.filter((card) => hasKeyword(ctx, card, "combo"));
+        const combo = ctx.player(ctx.seat).deck.filter((card) => ctx.hasKeyword(card, "combo"));
         if (combo.length)
           ctx.requestCardChoice(
             "zen-combo",
@@ -1177,7 +1151,7 @@ function koiKimono(): CardScript {
       ctx.logPublic(
         localizedCardLog(
           ctx,
-          `${ctx.data.name} reveals ${data(ctx, card).name} and puts it into hand`,
+          `${ctx.data.name} reveals ${ctx.cardData(card.cardId).name} and puts it into hand`,
           "card.log.mst.innerchi.found",
           { result: { kind: "card", cardId: card.cardId } },
           { kind: "card-moved", cardId: card.cardId, ownerSeat: ctx.seat, from: "deck", to: "hand" },
@@ -1229,7 +1203,7 @@ function artSoul(): CardScript {
 function maskWhiskers(): CardScript {
   return {
     onDefend(ctx) {
-      const combo = ctx.player(ctx.seat).graveyard.filter((card) => hasKeyword(ctx, card, "combo"));
+      const combo = faceUpGraveyard(ctx).filter((card) => ctx.hasKeyword(card, "combo"));
       if (combo.length)
         ctx.requestCardChoice(
           "whiskers",
@@ -1266,7 +1240,7 @@ function waterSeeds(): CardScript {
 function enigmaNewMoon(): CardScript {
   return {
     onGameStart(ctx) {
-      for (const equipment of Object.values(ctx.player(ctx.seat).equipment)) {
+      for (const equipment of equipmentZoneCards(ctx.player(ctx.seat))) {
         if (equipment) ctx.setCardFaceDown(equipment.instanceId, true);
       }
     },
@@ -1278,8 +1252,8 @@ function enigmaNewMoon(): CardScript {
       timing: "instant",
       label: "Turn face-down equipment face-up",
       onActivate(ctx) {
-        const equipment = Object.values(ctx.player(ctx.seat).equipment).filter(
-          (card): card is DeepReadonly<CardInstance> => !!card && card.faceDown === true,
+        const equipment = equipmentZoneCards(ctx.player(ctx.seat)).filter(
+          (card) => card.faceDown === true,
         );
         if (equipment.length)
           ctx.requestCardChoice(
@@ -1291,8 +1265,8 @@ function enigmaNewMoon(): CardScript {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "new-moon") return;
-      const card = Object.values(ctx.player(ctx.seat).equipment).find(
-        (candidate) => candidate?.instanceId === Number(option),
+      const card = equipmentZoneCards(ctx.player(ctx.seat)).find(
+        (candidate) => candidate.instanceId === Number(option),
       );
       if (!card || !ctx.setCardFaceDown(card.instanceId, false)) return;
       if (ctx.hasWard(card)) {
@@ -1306,13 +1280,12 @@ function enigmaNewMoon(): CardScript {
 mst["nuu, alluring desire|0"] = mst["nuu|0"]!;
 mst["zen, tamer of purpose|0"] = mst["zen|0"]!;
 
-const tokenNamed = (ctx: ScriptCtx, name: string): string | undefined =>
-  ctx.cardIdsNamed(name).find((cardId) => ctx.cardData(cardId).cardType === "token");
+const tokenIdNamed = (ctx: ScriptCtx, name: string): string | undefined =>
+  ctx.cardIdsNamed(name).find((cardId) => hasPrintedType(ctx.cardData(cardId), "token"));
 const createNamed = (ctx: ScriptCtx, name: string, count = 1): void => {
-  const id = tokenNamed(ctx, name);
+  const id = tokenIdNamed(ctx, name);
   if (id) ctx.createTokens(id, count);
 };
-const reactionCount = (ctx: ScriptCtx): number => Number(ctx.getFlag("link", "reactionCount"));
 
 function restlessCoalescenceSources(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
   return ctx
@@ -1345,7 +1318,7 @@ Object.assign(mst, {
         whose: "any",
         label: "Check Mistcloak Gully",
         effect(ctx) {
-          const pitched = ctx.pitchedThisTurn({ color: "blue" }) > 0;
+          const pitched = pitchedBlue(ctx);
           const played = ctx.playedThisTurn("blue") > 0;
           const defended = Number(ctx.getFlag("player", "defendedPitch:3")) > 0;
           if (pitched && played && defended) ctx.transcend();
@@ -1369,7 +1342,7 @@ Object.assign(mst, {
         if (hand.length)
           ctx.requestCardChoice(
             "mask-recurring-banish",
-            decisionPrompt("Choose a card to banish", "card.mst.card.banish"),
+            decisionPrompt("Choose a card to banish", "card.common.card.banish"),
             hand.map((card) => card.instanceId),
             target,
           );
@@ -1388,7 +1361,7 @@ Object.assign(mst, {
       for (const card of ctx.link.defendingCards.filter((candidate) => isAttackAction(ctx, candidate))) {
         if (ctx.banish(card.instanceId) && chiPitched(ctx) > 0)
           ctx.allowPlayFrom(card.instanceId, "banish", {
-            costReduction: data(ctx, card).cost ?? 0,
+            costReduction: ctx.cardData(card.cardId).cost ?? 0,
             untilChainClose: true,
           });
       }
@@ -1415,7 +1388,7 @@ Object.assign(mst, {
     onPlay(ctx) {
       createInHand(ctx, FANG_STRIKE);
       createInHand(ctx, SLITHER);
-      const grave = ctx.player(opponentSeat(ctx)).graveyard.slice(0, 2);
+      const grave = faceUpGraveyard(ctx, opponentSeat(ctx)).slice(0, 2);
       for (const card of grave) ctx.banish(card.instanceId);
       ctx.transcend();
     },
@@ -1463,7 +1436,7 @@ Object.assign(mst, {
       ctx.createTokens(SPECTRAL_SHIELD, 2);
       for (const aura of ctx
         .player(ctx.seat)
-        .board.filter((card) => isAura(ctx, card) && hasKeyword(ctx, card, "ward")))
+        .board.filter((card) => isAura(ctx, card) && ctx.hasKeyword(card, "ward")))
         ctx.addCounter(aura.instanceId, "power", 1);
       ctx.transcend();
     },
@@ -1471,7 +1444,7 @@ Object.assign(mst, {
   "three visits|1": { wardValue: (ctx) => ctx.pitchedThisTurn({ color: "blue" }) * 3 },
   "twelve petal kāṣāya|0": {
     onFriendlyPlay(ctx, played) {
-      if (cardNamed(ctx, played, "Inner Chi")) ctx.changeResources(ctx.seat, 1);
+      if (cardNamed(ctx, played, "Inner Chi")) ctx.gainResources(ctx.seat, 1);
     },
     activated: {
       cost: 0,
@@ -1619,7 +1592,7 @@ Object.assign(mst, {
       if (hand.length)
         ctx.requestCardChoice(
           "agony-name",
-          decisionPrompt("Choose a card", "card.mst.card.choose"),
+          decisionPrompt("Choose a card", "card.common.card.choose"),
           hand.map((card) => card.instanceId),
         );
     },
@@ -1628,7 +1601,7 @@ Object.assign(mst, {
       const target = opponentSeat(ctx);
       const chosen = ctx.player(target).hand.find((card) => card.instanceId === Number(option));
       if (!chosen) return;
-      for (const card of [...ctx.player(target).hand, ...ctx.player(target).deck, ...ctx.player(target).graveyard]
+      for (const card of [...ctx.player(target).hand, ...ctx.player(target).deck, ...faceUpGraveyard(ctx, target)]
         .filter((card) => sharesName(ctx, card, chosen))
         .slice(0, 3))
         ctx.banish(card.instanceId);
@@ -1665,13 +1638,13 @@ Object.assign(mst, {
       if (!ctx.link || ctx.link.attacker !== ctx.seat) return false;
       return (
         (ctx.link.attackCardType === "action" && ctx.basePower(ctx.link.attackingCard) <= 1) ||
-        hasKeyword(ctx, ctx.link.attackingCard, "stealth")
+        ctx.hasKeyword(ctx.link.attackingCard, "stealth")
       );
     },
     additionalCost(ctx) {
       if (!ctx.link) return;
       const powerMode = ctx.link.attackCardType === "action" && ctx.basePower(ctx.link.attackingCard) <= 1;
-      const banishMode = hasKeyword(ctx, ctx.link.attackingCard, "stealth");
+      const banishMode = ctx.hasKeyword(ctx.link.attackingCard, "stealth");
       if (powerMode && banishMode) {
         ctx.requestChoice(
           "just-a-nick-mode",
@@ -1689,7 +1662,7 @@ Object.assign(mst, {
     onPlay(ctx) {
       if (!ctx.link) return;
       const powerMode = ctx.link.attackCardType === "action" && ctx.basePower(ctx.link.attackingCard) <= 1;
-      const banishMode = hasKeyword(ctx, ctx.link.attackingCard, "stealth");
+      const banishMode = ctx.hasKeyword(ctx.link.attackingCard, "stealth");
       const selectedMode = ctx.getState("justANickMode");
       if (powerMode && (!banishMode || selectedMode === 1 || selectedMode === 3)) {
         ctx.addModifier({ scope: "chain-link", attack: 5 });
@@ -1769,10 +1742,52 @@ Object.assign(mst, {
     },
   },
   "maul|2": {
-    canPlay: (ctx) => !!ctx.link && ctx.link.attacker === ctx.seat,
+    canPlay(ctx) {
+      if (!ctx.link || ctx.link.attacker !== ctx.seat) return false;
+      return maulPowerMode(ctx) || maulTigerMode(ctx);
+    },
+    additionalCost(ctx) {
+      if (!maulPowerMode(ctx) || !maulTigerMode(ctx)) return;
+      ctx.requestChoice(
+        "maul-mode",
+        decisionPrompt("Maul: choose 1 or both", "card.mst.maul.mode", {
+          optionMessages: {
+            power: decisionMessage("card.mst.maul.option.power"),
+            tigers: decisionMessage("card.mst.maul.option.tigers"),
+            both: decisionMessage("common.option.both"),
+          },
+        }),
+        ["power", "tigers", "both"],
+      );
+    },
     onPlay(ctx) {
-      if (!ctx.link) return;
-      if (ctx.basePower(ctx.link.attackingCard) <= 1) ctx.addModifier({ scope: "chain-link", attack: 3 });
+      const powerMode = maulPowerMode(ctx);
+      const tigerMode = maulTigerMode(ctx);
+      const selectedMode = ctx.getState("maulMode");
+      if (powerMode && (!tigerMode || selectedMode === 1 || selectedMode === 3)) {
+        ctx.addModifier({ scope: "chain-link", attack: 3 });
+      }
+      if (tigerMode && (!powerMode || selectedMode === 2 || selectedMode === 3)) {
+        ctx.addModifier({
+          scope: "chain-link",
+          onHitScriptHook: {
+            hook: "maul-hit",
+            ...hitHookLabel(
+              "create 2 Crouching Tigers in your banished zone; you may play them this turn",
+              "card.effect.mst.maul",
+            ),
+          },
+        });
+      }
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "maul-mode") return;
+      ctx.setState("maulMode", option === "power" ? 1 : option === "tigers" ? 2 : 3);
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook !== "maul-hit") return;
+      createTigerInBanish(ctx);
+      createTigerInBanish(ctx);
     },
   },
   "territorial domain|3": {
@@ -1791,7 +1806,7 @@ Object.assign(mst, {
       requestDiscardChoice(
         ctx,
         "rowdy-self-discard",
-        decisionPrompt("Choose a card to discard", "card.mst.card.discard"),
+        decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
         ctx.seat,
       );
     },
@@ -1800,7 +1815,7 @@ Object.assign(mst, {
         requestDiscardChoice(
           ctx,
           "rowdy-opponent-discard",
-          decisionPrompt("Choose a card to discard", "card.mst.card.discard"),
+          decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
           opponentSeat(ctx),
         );
       else if (hook === "rowdy-opponent-discard") resolveDiscardChoice(ctx, option, opponentSeat(ctx));
@@ -1811,7 +1826,7 @@ Object.assign(mst, {
     onHit(ctx) {
       const hand = ctx.player(opponentSeat(ctx)).hand;
       for (const card of hand) ctx.lookAt(card.instanceId);
-      const eligible = hand.filter((card) => data(ctx, card).defense === undefined);
+      const eligible = hand.filter((card) => ctx.cardData(card.cardId).defense === undefined);
       if (eligible.length)
         ctx.requestCardChoice(
           "weakest-card",
@@ -1834,11 +1849,7 @@ Object.assign(mst, {
     onPlay(ctx) {
       createNamed(ctx, "Gold");
       const player = ctx.player(ctx.seat);
-      const gold = [
-        ...player.board,
-        ...player.weapons,
-        ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-      ].filter((card) => ctx.cardNames(card).includes("gold")).length;
+      const gold = controlledPermanents(ctx, player.seat).filter((card) => ctx.cardNames(card).includes("gold")).length;
       if (gold >= 3) createNamed(ctx, "Might", gold);
     },
   },
@@ -1848,7 +1859,7 @@ Object.assign(mst, {
       base: 0,
       stateKey: "supercellX",
       prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
-      maximum: (ctx) => supercellDrivers(ctx).length,
+      maximum: (ctx) => hyperDrivers(ctx).length,
     },
     onPlay(ctx) {
       if (ctx.getState("supercellX") > 0) requestSupercellTarget(ctx);
@@ -1856,7 +1867,7 @@ Object.assign(mst, {
     },
     onChoose(ctx, hook, option) {
       if (hook === "supercell-driver") {
-        const target = supercellDrivers(ctx).find((card) => card.instanceId === Number(option));
+        const target = hyperDrivers(ctx).find((card) => card.instanceId === Number(option));
         if (!target) return;
         const x = ctx.getState("supercellX");
         const chosenCount = ctx.getState("supercellTargetsChosen");
@@ -1881,7 +1892,7 @@ Object.assign(mst, {
       if (construct && ctx.putOnDeckBottom(construct.instanceId)) ctx.shuffleDeck();
     },
   },
-  "evo recall|3": instantEvoEquipment({
+  "evo recall|3": evoEquipment({
     triggers: [
       entersArenaTrigger(
         "Put up to 1 Mechanologist action card from your banished zone on top of your deck",
@@ -1893,7 +1904,7 @@ Object.assign(mst, {
       if (hook === "recall-card" && option !== "no") ctx.putOnDeckTop(Number(option));
     },
   }),
-  "evo heartdrive|3": instantEvoEquipment({
+  "evo heartdrive|3": evoEquipment({
     triggers: [
       entersArenaTrigger(
         "The next attack action card you play this turn costs 1 less to play",
@@ -1908,30 +1919,21 @@ Object.assign(mst, {
       ),
     ],
   }),
-  "evo shortcircuit|3": instantEvoEquipment({
+  "evo shortcircuit|3": evoEquipment({
     triggers: [
       entersArenaTrigger("Deal 1 damage", decisionMessage("card.trigger.common.damage.deal", { amount: 1 }), (ctx) =>
-        ctx.requestChoice(
-          "shortcircuit-target",
-          decisionPrompt("Deal 1 damage to which hero?", "card.mst.hero.damage.choose", {
-            values: { amount: 1 },
-            optionMessages: {
-              "opposing hero": decisionMessage("common.option.opponent"),
-              "your hero": decisionMessage("card.mst.option.yourhero"),
-            },
-          }),
-          ["opposing hero", "your hero"],
-          undefined,
-          undefined,
-          "opposing hero",
-        ),
+        requestHeroChoice(ctx, "shortcircuit-target", "Deal 1 damage to which hero?", "card.mst.hero.damage.choose", {
+          values: { amount: 1 },
+          defaultOption: "opposing hero",
+        }),
       ),
     ],
     onChoose(ctx, hook, option) {
-      if (hook === "shortcircuit-target") ctx.dealDamage(option === "your hero" ? ctx.seat : opponentSeat(ctx), 1);
+      const seat = hook === "shortcircuit-target" ? heroChoiceSeat(ctx, option) : undefined;
+      if (seat !== undefined) ctx.dealDamage(seat, 1);
     },
   }),
-  "evo speedslip|3": instantEvoEquipment({
+  "evo speedslip|3": evoEquipment({
     triggers: [
       entersArenaTrigger(
         "The next attack action card you play this turn gets boost",
@@ -2003,11 +2005,11 @@ Object.assign(mst, {
   },
   "dust from stillwater shrine|1": { materialKeywords: ["phantasm"] },
   "shadowrealm horror|1": bloodDebt({
-    canPlay: (ctx) => ctx.player(ctx.seat).graveyard.length >= 3,
+    canPlay: (ctx) => faceUpGraveyard(ctx).length >= 3,
     additionalCost(ctx) {
       let sixPlusBanished = 0;
       const banished: number[] = [];
-      const graveyard = [...ctx.player(ctx.seat).graveyard];
+      const graveyard = faceUpGraveyard(ctx);
       const selected: typeof graveyard = [];
       for (let picked = 0; picked < 3 && graveyard.length > 0; picked++) {
         selected.push(graveyard.splice(ctx.randomInt(graveyard.length), 1)[0]!);

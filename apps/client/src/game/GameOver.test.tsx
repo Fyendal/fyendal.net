@@ -25,6 +25,81 @@ function finishedView(): GameView {
 }
 
 describe("GameOver player statistics", () => {
+  it("shows game length and both players' time in the header", () => {
+    const view = finishedView();
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <GameOver
+          view={view}
+          seat={0}
+          spectating={false}
+          recordedViews={[view]}
+          onWatchReplay={null}
+          onDownloadReplay={null}
+          onBackToLobby={() => undefined}
+          onClose={() => undefined}
+          botSeat={1}
+          clock={{ seatMs: [90_000, 30_000] }}
+        />
+      </TestI18nProvider>,
+    );
+    expect(html).toContain("Gravy Bones (bot)</span>");
+    expect(html).toContain('aria-label="Game length 2:00"');
+    expect(html).toContain('<strong aria-hidden="true">2:00</strong>');
+    expect(html).toContain('aria-label="Dash I/O used 1:30"');
+    expect(html).toContain('<strong aria-hidden="true">1:30</strong>');
+    expect(html).toContain('aria-label="Gravy Bones used 0:30"');
+    expect(html).toContain('<strong aria-hidden="true">0:30</strong>');
+    expect(html.match(/gameover-clock-portrait/g)).toHaveLength(2);
+    expect(html).not.toContain("<th>Time</th>");
+  });
+
+  it("describes replay retention on the replay buttons instead of in the body", () => {
+    const view = finishedView();
+    const render = (replaying: boolean) => renderToStaticMarkup(
+      <TestI18nProvider>
+        <GameOver
+          view={view}
+          seat={0}
+          spectating={false}
+          replaying={replaying}
+          recordedViews={[view]}
+          onWatchReplay={replaying ? null : () => undefined}
+          onDownloadReplay={() => undefined}
+          onBackToLobby={() => undefined}
+          onClose={() => undefined}
+        />
+      </TestI18nProvider>,
+    );
+    const live = render(false);
+    const retention = /<span id="([^"]+)" hidden="">This replay will be available/.exec(live);
+    expect(retention).not.toBeNull();
+    expect(live.match(new RegExp(`aria-describedby="${retention![1]}"`, "g"))).toHaveLength(2);
+    expect(live).toContain('aria-label="Export replay"');
+    expect(live).toContain('aria-label="Watch replay"');
+    expect(live).not.toContain("<p");
+    expect(render(true)).not.toContain("This replay will be available");
+  });
+
+  it("omits time without a clock", () => {
+    const view = finishedView();
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <GameOver
+          view={view}
+          seat={0}
+          spectating={false}
+          recordedViews={[view]}
+          onWatchReplay={null}
+          onDownloadReplay={null}
+          onBackToLobby={() => undefined}
+          onClose={() => undefined}
+        />
+      </TestI18nProvider>,
+    );
+    expect(html).not.toContain("gameover-clock");
+  });
+
   it("shows a draw without naming a winner", () => {
     const view = { ...finishedView(), winner: null };
     const html = renderToStaticMarkup(
@@ -66,6 +141,54 @@ describe("GameOver player statistics", () => {
     );
     expect(html).toContain("<button>Back to lobby</button>");
     expect(html).toContain('<button class="btn-primary">Play again</button>');
+  });
+
+  it("names the winning hero without victory or defeat in solo", () => {
+    const view = finishedView();
+    const render = (solo: boolean) => renderToStaticMarkup(
+      <TestI18nProvider>
+        <GameOver
+          view={view}
+          seat={0}
+          spectating={false}
+          recordedViews={[view]}
+          onWatchReplay={null}
+          onDownloadReplay={null}
+          onBackToLobby={() => undefined}
+          onPlayAgain={() => undefined}
+          onClose={() => undefined}
+          solo={solo}
+        />
+      </TestI18nProvider>,
+    );
+    const solo = render(true);
+    expect(solo).toContain('<h2 class="gameover-headline">Gravy Bones wins!</h2>');
+    expect(solo).toContain("Match complete");
+    expect(solo).not.toContain("Defeat");
+    expect(solo).toContain('<button class="btn-primary">Play again</button>');
+    expect(render(false)).toContain("Defeat");
+  });
+
+  it("offers the replay in a solo game", () => {
+    const view = finishedView();
+    const html = renderToStaticMarkup(
+      <TestI18nProvider>
+        <GameOver
+          view={view}
+          seat={0}
+          spectating={false}
+          recordedViews={[view]}
+          onWatchReplay={() => undefined}
+          onDownloadReplay={() => undefined}
+          onBackToLobby={() => undefined}
+          onPlayAgain={() => undefined}
+          onClose={() => undefined}
+          solo
+        />
+      </TestI18nProvider>,
+    );
+    expect(html).toContain("Watch replay");
+    expect(html).not.toContain("Defeat");
   });
 
   it("presents heroes as a switcher and labels the single selected stats panel", () => {

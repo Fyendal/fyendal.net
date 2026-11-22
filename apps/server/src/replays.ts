@@ -8,6 +8,7 @@ import {
   type GameState,
 } from "@fyendal/engine";
 import {
+  decodeGameClockSummary,
   decodeReplayPendingAchievements,
   type ReplayPendingAchievements,
   decodeReplayResponse,
@@ -19,7 +20,7 @@ import {
   type ReplayServerNote,
   type ReplaySummary,
 } from "@fyendal/protocol";
-import type { Format, ReplayFile } from "@fyendal/shared";
+import type { Format, GameClockSummary, ReplayFile } from "@fyendal/shared";
 import { awardHistoryAchievements } from "./achievements.js";
 import { type Queryable, withTransaction } from "./db.js";
 import { tryAcquireLease } from "./leases.js";
@@ -78,6 +79,7 @@ export async function startReplay(
     state: GameState;
     roomVersion: number;
     participants: [ReplayStartParticipant, ReplayStartParticipant];
+    sandbox?: boolean;
     createdAt?: number;
   },
 ): Promise<void> {
@@ -86,8 +88,8 @@ export async function startReplay(
   await db.query(
     `INSERT INTO replay_games
       (id, room_code, ruleset_version, format, hero_0_id, hero_1_id,
-       winner, status, created_at, finished_at, expires_at, frame_count)
-     VALUES ($1,$2,$3,$4,$5,$6,NULL,'recording',$7,NULL,NULL,NULL)`,
+       winner, status, created_at, finished_at, expires_at, frame_count, sandbox)
+     VALUES ($1,$2,$3,$4,$5,$6,NULL,'recording',$7,NULL,NULL,NULL,$8)`,
     [
       id,
       input.roomCode,
@@ -96,6 +98,7 @@ export async function startReplay(
       input.participants[0].heroId,
       input.participants[1].heroId,
       createdAt,
+      input.sandbox === true,
     ],
   );
   for (const participant of input.participants) {
@@ -125,6 +128,7 @@ export async function appendReplayView(
   } | null,
   now = Date.now(),
   pendingAchievements: ReplayPendingAchievements | null = null,
+  clock: GameClockSummary | null = null,
 ): Promise<string | null> {
   let view: string;
   let projectedTransition: string | null;
@@ -171,9 +175,14 @@ export async function appendReplayView(
   if (state.phase === "game-over") {
     const finalized = await db.query(
       `UPDATE replay_games
-       SET winner=$2, status='finalizing', finished_at=$3, expires_at=$4, pending_achievements=$5::jsonb
+       SET winner=$2, status='finalizing', finished_at=$3, expires_at=$4, pending_achievements=$5::jsonb,
+           clock=$6::jsonb
        WHERE id=$1 AND status='recording' RETURNING id`,
-      [id, winner, now, now + REPLAY_TTL_MS, pendingAchievements ? JSON.stringify(pendingAchievements) : null],
+      [
+        id, winner, now, now + REPLAY_TTL_MS,
+        pendingAchievements ? JSON.stringify(pendingAchievements) : null,
+        clock ? JSON.stringify(clock) : null,
+      ],
     );
     return finalized.rows.length ? id : null;
   }
@@ -265,54 +274,63 @@ async function replayFiles(
   replay: Record<string, unknown>,
   yieldControl: () => Promise<void> = yieldToEventLoop,
   waitForCapacity: () => Promise<void> = async () => {},
+  maxViews = MAX_REPLAY_VIEWS,
 ): Promise<GameViewBuild> {
   const id = String(replay.id);
   const frames: ReplayFrames = [];
   const rowsRoomVersions: number[] = [];
   let yieldedAt = performance.now();
   let afterRoomVersion = -1;
-  while (true) {
+  const push = async (row: Record<string, unknown>, keepTransition: boolean) => {
+    const roomVersion = safeInteger(row.room_version, "replay room version");
+    if (roomVersion <= afterRoomVersion) throw new Error(`replay ${id} frames are out of order`);
+    const frameIndex = frames.length;
+    const view = decodeGameView(row.view);
+    if (!view) {
+      throw new Error(`replay ${id} frame ${frameIndex + 1} (room version ${roomVersion}) failed view validation: ${
+        JSON.stringify(describeRejected(row.view))
+      }`);
+    }
+    let transition: ReplayFrames[number]["transition"] = null;
+    if (row.transition != null && keepTransition) {
+      transition = decodeReplayTransition(row.transition, frameIndex);
+      if (!transition) {
+        // A transition only drives playback animation; keep the replay.
+        console.warn(JSON.stringify({
+          severity: "WARNING", event: "replay_transition_dropped",
+          replayId: id, frameIndex, roomVersion, ...describeRejected(row.transition),
+        }));
+      }
+    }
+    frames.push({ view, transition });
+    rowsRoomVersions.push(roomVersion);
+    afterRoomVersion = roomVersion;
+    if (performance.now() - yieldedAt >= REPLAY_YIELD_BUDGET_MS) {
+      await yieldControl();
+      yieldedAt = performance.now();
+    }
+  };
+  const load = async (order: "ASC" | "DESC", limit: number) => {
     await waitForCapacity();
     const { rows } = await db.query(
       `SELECT room_version, view, transition FROM replay_frames
        WHERE replay_id = $1 AND room_version > $2
-       ORDER BY room_version LIMIT $3`,
-      [id, afterRoomVersion, REPLAY_FRAME_BATCH_SIZE],
+       ORDER BY room_version ${order} LIMIT $3`,
+      [id, afterRoomVersion, limit],
     );
-    if (frames.length + rows.length > MAX_REPLAY_VIEWS) {
-      throw new Error(`replay ${id} has too many frames`);
-    }
-    for (const row of rows) {
-      const roomVersion = safeInteger(row.room_version, "replay room version");
-      if (roomVersion <= afterRoomVersion) throw new Error(`replay ${id} frames are out of order`);
-      const frameIndex = frames.length;
-      const view = decodeGameView(row.view);
-      if (!view) {
-        throw new Error(`replay ${id} frame ${frameIndex + 1} (room version ${roomVersion}) failed view validation: ${
-          JSON.stringify(describeRejected(row.view))
-        }`);
-      }
-      let transition: ReplayFrames[number]["transition"] = null;
-      if (row.transition != null) {
-        transition = decodeReplayTransition(row.transition, frameIndex);
-        if (!transition) {
-          // A transition only drives playback animation; keep the replay.
-          console.warn(JSON.stringify({
-            severity: "WARNING", event: "replay_transition_dropped",
-            replayId: id, frameIndex, roomVersion, ...describeRejected(row.transition),
-          }));
-        }
-      }
-      frames.push({ view, transition });
-      rowsRoomVersions.push(roomVersion);
-      afterRoomVersion = roomVersion;
-      if (performance.now() - yieldedAt >= REPLAY_YIELD_BUDGET_MS) {
-        await yieldControl();
-        yieldedAt = performance.now();
-      }
-    }
-    if (rows.length < REPLAY_FRAME_BATCH_SIZE) break;
+    return rows as Record<string, unknown>[];
+  };
+  // Over the cap, keep the first maxViews - 1 frames and the final one; later frames are never loaded.
+  while (frames.length < maxViews - 1) {
+    const limit = Math.min(REPLAY_FRAME_BATCH_SIZE, maxViews - 1 - frames.length);
+    const rows = await load("ASC", limit);
+    for (const row of rows) await push(row, true);
+    if (rows.length < limit) return { frames, roomVersions: rowsRoomVersions };
   }
+  const next = await load("ASC", 2);
+  if (next.length === 1) await push(next[0]!, true);
+  // Frames were skipped, so the final frame's transition has no matching start.
+  else if (next.length > 1) await push((await load("DESC", 1))[0]!, false);
   return { frames, roomVersions: rowsRoomVersions };
 }
 
@@ -338,14 +356,16 @@ export async function encodeReplayPayloads(
   frames: ReplayFrames,
   participants: readonly ReplayParticipantSeat[],
   yieldControl: () => Promise<void> = yieldToEventLoop,
+  clock: GameClockSummary | null = null,
 ): Promise<ReplayParticipantPayload[]> {
   const framesJson = Buffer.from(JSON.stringify(frames));
+  const clockJson = clock ? `"clock":${JSON.stringify(clock)},` : "";
   const payloads: ReplayParticipantPayload[] = [];
   for (const participant of participants) {
     if (payloads.length > 0) await yieldControl();
-    // Byte-identical to JSON.stringify({ ok: true, replay: { version: 2, seat, frames } }).
+    // Byte-identical to JSON.stringify({ ok: true, replay: { version: 2, seat, clock?, frames } }).
     const response = Buffer.concat([
-      Buffer.from(`{"ok":true,"replay":{"version":2,"seat":${participant.seat},"frames":`),
+      Buffer.from(`{"ok":true,"replay":{"version":2,"seat":${participant.seat},${clockJson}"frames":`),
       framesJson,
       REPLAY_RESPONSE_SUFFIX,
     ]);
@@ -359,10 +379,11 @@ export async function finalizeReplay(
   replayIdValue: string,
   waitForCapacity: () => Promise<void> = async () => {},
   yieldControl: () => Promise<void> = yieldToEventLoop,
+  maxViews = MAX_REPLAY_VIEWS,
 ): Promise<boolean> {
   await waitForCapacity();
   const { rows } = await db.query(
-    `SELECT id, winner, room_code, pending_achievements
+    `SELECT id, winner, room_code, pending_achievements, clock
      FROM replay_games WHERE id = $1 AND status = 'finalizing'`,
     [replayIdValue],
   );
@@ -377,6 +398,8 @@ export async function finalizeReplay(
   if (replay.pending_achievements != null && !pendingAchievements) {
     throw new Error(`replay ${String(replay.id)} has invalid pending achievements`);
   }
+  const clock = replay.clock == null ? null : decodeGameClockSummary(replay.clock);
+  if (replay.clock != null && !clock) throw new Error(`replay ${String(replay.id)} has an invalid clock`);
   await waitForCapacity();
   const participants = await db.query(
     "SELECT user_id, seat FROM replay_participants WHERE replay_id = $1 ORDER BY seat",
@@ -393,13 +416,13 @@ export async function finalizeReplay(
     };
   });
   if (!decodedParticipants.length) throw new Error(`replay ${String(replay.id)} has no participants`);
-  const built = await replayFiles(db, replay, yieldControl, waitForCapacity);
+  const built = await replayFiles(db, replay, yieldControl, waitForCapacity, maxViews);
   const views = built.frames.map((frame) => frame.view);
   const finalView = views.at(-1);
   if (!finalView || finalView.winner !== replay.winner) {
     throw new Error(`replay ${String(replay.id)} winner mismatch`);
   }
-  const payloads = await encodeReplayPayloads(built.frames, decodedParticipants, yieldControl);
+  const payloads = await encodeReplayPayloads(built.frames, decodedParticipants, yieldControl, clock);
   await yieldControl();
   await waitForCapacity();
   await withTransaction(db, async (tx) => {
@@ -413,7 +436,7 @@ export async function finalizeReplay(
     await tx.query(
       `UPDATE replay_games
        SET status='ready', frame_count=$2,
-           finalization_attempts=0, finalization_retry_at=NULL, pending_achievements=NULL
+           finalization_attempts=0, finalization_retry_at=NULL, pending_achievements=NULL, clock=NULL
        WHERE id=$1 AND status='finalizing'`,
       [replay.id, payloads[0]?.frames ?? 0],
     );
@@ -661,7 +684,7 @@ export async function listReplays(
 ): Promise<ReplaySummary[]> {
   const { rows } = await db.query(
     `SELECT g.id, g.format, g.hero_0_id, g.hero_1_id, p.seat, g.winner,
-            g.finished_at, g.expires_at, g.frame_count, p.favorite,
+            g.finished_at, g.expires_at, g.frame_count, p.favorite, g.sandbox,
             s.token AS share_token, s.visibility AS share_visibility,
             s.include_notes AS share_include_notes
      FROM replay_games g
@@ -690,6 +713,8 @@ export async function listReplays(
       frameCount: safeInteger(row.frame_count, "replay frame count"),
       favorite: row.favorite === true,
       share: replayShareFromRow(row),
+      // Sent only when true: older clients reject unknown summary keys.
+      ...(row.sandbox === true ? { sandbox: true as const } : {}),
     };
   });
 }
@@ -958,6 +983,7 @@ export function attachReplayNotes(file: ReplayFile, notes: readonly ReplayServer
   return {
     version: 3,
     seat: file.seat,
+    ...(file.version !== 1 && file.clock ? { clock: file.clock } : {}),
     frames: file.version === 1
       ? file.views.map((view) => ({ view, transition: null }))
       : file.frames,

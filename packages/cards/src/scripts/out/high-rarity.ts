@@ -1,31 +1,26 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  bothHeroSeats,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
-  equipWithSilver,
+  faceUpGraveyard,
+  hasCardSubtype,
+  isArrow,
+  isAttackAction,
+  isDagger,
   localizedLog,
   ongoingLabel,
   opponentSeat,
   previousAttackHasName,
   sharesName,
   yesNoPrompt,
+  silverEquipment,
 } from "../shared-helpers.js";
+import { BLOODROT_POX, FRAILTY, INERTIA, PONDER } from "../tokens.js";
 
-const BLOODROT = "SAZ034";
-const FRAILTY = "SAZ035";
-const INERTIA = "SAZ036";
-const PONDER = "DYN244";
-function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type);
-}
-function namedCard(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, name: string): boolean {
-  return ctx.cardNames(card).includes(name.toLowerCase());
-}
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && has(ctx, card, "attack");
-}
 function dagger(extra: CardScript = {}): CardScript {
   return {
     ...extra,
@@ -57,15 +52,6 @@ function chooseDiscard(ctx: ScriptCtx, hook: string, seat: number): void {
     );
 }
 const ABYSSAL_DEPTHS_HOOK = "abyssal-depths";
-function graveyardChest(extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    triggers: [equipWithSilver(2)],
-  };
-}
-function combo(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "combo");
-}
 function flickKnivesDaggers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
   const activeAttackId = ctx.link?.attackingCard.instanceId;
   const candidates = [
@@ -84,18 +70,22 @@ function flickKnivesDaggers(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
   return candidates.filter(
     (card, index) =>
       card.instanceId !== activeAttackId &&
-      has(ctx, card, "dagger") &&
+      isDagger(ctx, card) &&
       candidates.findIndex((candidate) => candidate.instanceId === card.instanceId) === index,
   );
 }
-function codexBloodrotChoice(ctx: ScriptCtx, seat: number): void {
-  if (seat > 1) {
+function codexHeroIndex(ctx: ScriptCtx, hook: string): number {
+  return bothHeroSeats(ctx).indexOf(Number(hook.split(":")[1]));
+}
+function codexBloodrotChoice(ctx: ScriptCtx, index: number): void {
+  const seat = bothHeroSeats(ctx)[index];
+  if (seat === undefined) {
     ctx.createToken(PONDER);
-    ctx.createToken(BLOODROT, opponentSeat(ctx));
+    ctx.createToken(BLOODROT_POX, opponentSeat(ctx));
     return;
   }
   const player = ctx.player(seat);
-  if (!player.hand.length || !ctx.hasArsenalSpace(seat)) return codexBloodrotChoice(ctx, seat + 1);
+  if (!player.hand.length || !ctx.hasArsenalSpace(seat)) return codexBloodrotChoice(ctx, index + 1);
   ctx.requestCardChoice(
     `codex-bloodrot:${seat}`,
     decisionPrompt("Choose a card for arsenal", "card.out.arsenal.card.choose"),
@@ -103,21 +93,21 @@ function codexBloodrotChoice(ctx: ScriptCtx, seat: number): void {
     seat,
   );
 }
-function codexFrailtyChoice(ctx: ScriptCtx, seat: number): void {
-  if (seat > 1) {
-    const first = [0, 1].find(
-      (target) => ctx.getState(`codexFrailtyMoved:${target}`) > 0 && ctx.player(target).hand.length,
-    );
-    if (first !== undefined) chooseDiscard(ctx, `codex-frailty-discard:${first}`, first);
-    else {
-      ctx.createToken(PONDER);
-      ctx.createToken(FRAILTY, opponentSeat(ctx));
-    }
-    return;
+function codexFrailtyDiscard(ctx: ScriptCtx, fromIndex: number): void {
+  const seat = bothHeroSeats(ctx).slice(fromIndex).find(
+    (target) => ctx.getState(`codexFrailtyMoved:${target}`) > 0 && ctx.player(target).hand.length,
+  );
+  if (seat !== undefined) chooseDiscard(ctx, `codex-frailty-discard:${seat}`, seat);
+  else {
+    ctx.createToken(PONDER);
+    ctx.createToken(FRAILTY, opponentSeat(ctx));
   }
-  const player = ctx.player(seat);
-  const attacks = player.graveyard.filter((card) => !card.faceDown && isAttack(ctx, card));
-  if (!attacks.length || !ctx.hasArsenalSpace(seat)) return codexFrailtyChoice(ctx, seat + 1);
+}
+function codexFrailtyChoice(ctx: ScriptCtx, index: number): void {
+  const seat = bothHeroSeats(ctx)[index];
+  if (seat === undefined) return codexFrailtyDiscard(ctx, 0);
+  const attacks = faceUpGraveyard(ctx, seat).filter((card) => isAttackAction(ctx, card));
+  if (!attacks.length || !ctx.hasArsenalSpace(seat)) return codexFrailtyChoice(ctx, index + 1);
   ctx.requestCardChoice(
     `codex-frailty:${seat}`,
     decisionPrompt("Choose an attack for arsenal", "card.out.arsenal.attack.choose"),
@@ -149,9 +139,7 @@ export const uzuriAbility: CardScript = {
       !!ctx.link &&
       ctx.link.attacker === ctx.seat &&
       ctx.link.flags.attackGone !== true &&
-      (ctx.cardData(ctx.link.attackingCard.cardId).keywords ?? []).some(
-        (keyword) => keyword.toLowerCase() === "stealth",
-      ) &&
+      ctx.hasKeyword(ctx.link.attackingCard, "stealth") &&
       ctx.player(ctx.seat).hand.length > 0,
     onCostPaid(ctx, paidCards) {
       ctx.setFlag("player", UZURI_BANISHED_CARD, paidCards.at(-1)?.instanceId ?? 0);
@@ -177,10 +165,10 @@ export const outHighRarity: Record<string, CardScript> = {
       {
         event: "card-pitched",
         sourceZone: "pitch",
-        label: "Create a random adverse aura",
+        label: "Create a random disease token",
         condition: (ctx, pitched) => pitched?.instanceId === ctx.self.instanceId,
         effect(ctx) {
-          const tokens = [BLOODROT, FRAILTY, INERTIA];
+          const tokens = [BLOODROT_POX, FRAILTY, INERTIA];
           ctx.createToken(tokens[ctx.randomInt(tokens.length)]!, opponentSeat(ctx));
         },
       },
@@ -258,7 +246,7 @@ export const outHighRarity: Record<string, CardScript> = {
       });
     },
   }),
-  "redback shroud|0": graveyardChest({
+  "redback shroud|0": silverEquipment({
     activated: {
       cost: 0,
       isAttack: false,
@@ -277,7 +265,7 @@ export const outHighRarity: Record<string, CardScript> = {
     onHit(ctx) {
       ctx.requestChoice(
         "shake-color",
-        decisionPrompt("Choose a color", "card.out.color.choose", {
+        decisionPrompt("Choose a color", "card.common.color.choose", {
           optionMessages: {
             red: decisionMessage("card.common.option.red"),
             yellow: decisionMessage("card.common.option.yellow"),
@@ -313,7 +301,7 @@ export const outHighRarity: Record<string, CardScript> = {
   "spreading plague|2": {
     onPlay(ctx) {
       const count = (ctx.link?.defendingCards.length ?? 0) + (ctx.link?.defendingEquipment.length ?? 0);
-      ctx.createTokens(BLOODROT, count, opponentSeat(ctx));
+      ctx.createTokens(BLOODROT_POX, count, opponentSeat(ctx));
     },
   },
   "cyclone roundhouse|2": {
@@ -370,7 +358,7 @@ export const outHighRarity: Record<string, CardScript> = {
         const combos = ctx
           .player(ctx.seat)
           .deck.filter((card) =>
-            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "combo"),
+            ctx.hasKeyword(card, "combo"),
           );
         if (combos.length)
           ctx.requestCardChoice(
@@ -391,9 +379,7 @@ export const outHighRarity: Record<string, CardScript> = {
       destroySelfCost: true,
       canActivate: (ctx) =>
         !!ctx.link &&
-        (ctx.cardData(ctx.link.attackingCard.cardId).keywords ?? []).some(
-          (keyword) => keyword.toLowerCase() === "combo",
-        ),
+        ctx.hasKeyword(ctx.link.attackingCard, "combo"),
       onActivate(ctx) {
         ctx.addModifier({ scope: "chain-link", attack: 1 });
       },
@@ -401,7 +387,7 @@ export const outHighRarity: Record<string, CardScript> = {
   },
   "visit the floating dojo|3": {
     onPlay(ctx) {
-      const strikes = ctx.player(ctx.seat).graveyard.filter((card) => namedCard(ctx, card, "surging strike"));
+      const strikes = faceUpGraveyard(ctx).filter((card) => cardNamed(ctx, card, "surging strike"));
       if (strikes.length)
         ctx.requestCardChoice(
           "dojo-strike",
@@ -409,7 +395,7 @@ export const outHighRarity: Record<string, CardScript> = {
           strikes.map((card) => card.instanceId),
         );
       else {
-        const combos = ctx.player(ctx.seat).graveyard.filter((card) => combo(ctx, card));
+        const combos = faceUpGraveyard(ctx).filter((card) => ctx.hasKeyword(card, "combo"));
         if (combos.length)
           ctx.requestCardChoice(
             "dojo-combo",
@@ -434,7 +420,7 @@ export const outHighRarity: Record<string, CardScript> = {
         if (option === "top") ctx.putOnDeckTop(id);
         else ctx.putOnDeckBottom(id);
         if (isStrike) {
-          const combos = ctx.player(ctx.seat).graveyard.filter((card) => combo(ctx, card) && card.instanceId !== id);
+          const combos = faceUpGraveyard(ctx).filter((card) => ctx.hasKeyword(card, "combo") && card.instanceId !== id);
           if (combos.length)
             ctx.requestCardChoice(
               "dojo-combo",
@@ -455,7 +441,7 @@ export const outHighRarity: Record<string, CardScript> = {
         oncePerTurn: true,
         label: "Load an arrow",
         onActivate(ctx) {
-          arsenalFromHand(ctx, "castaway-load", (card) => has(ctx, card, "arrow"));
+          arsenalFromHand(ctx, "castaway-load", (card) => isArrow(ctx, card));
         },
       },
       {
@@ -465,11 +451,11 @@ export const outHighRarity: Record<string, CardScript> = {
         timing: "instant",
         oncePerTurn: true,
         label: "Turn an arrow face up",
-        canActivate: (ctx) => ctx.player(ctx.seat).arsenal.some((card) => card.faceDown && has(ctx, card, "arrow")),
+        canActivate: (ctx) => ctx.player(ctx.seat).arsenal.some((card) => card.faceDown && isArrow(ctx, card)),
         onActivate(ctx) {
           const card = ctx
             .player(ctx.seat)
-            .arsenal.find((candidate) => candidate.faceDown && has(ctx, candidate, "arrow"));
+            .arsenal.find((candidate) => candidate.faceDown && isArrow(ctx, candidate));
           if (card) {
             ctx.turnArsenalFaceUp(card.instanceId);
             ctx.addCounter(card.instanceId, "aim", 1);
@@ -499,7 +485,7 @@ export const outHighRarity: Record<string, CardScript> = {
       },
     },
     onChoose(ctx, hook, option) {
-      if (hook === "trench-bottom" && ctx.putOnDeckBottom(Number(option))) ctx.changeResources(ctx.seat, 1);
+      if (hook === "trench-bottom" && ctx.putOnDeckBottom(Number(option))) ctx.gainResources(ctx.seat, 1);
     },
   },
   "quiver of abyssal depths|0": {
@@ -510,7 +496,7 @@ export const outHighRarity: Record<string, CardScript> = {
       timing: "instant",
       destroySelfCost: true,
       onActivate(ctx) {
-        const arrows = ctx.player(ctx.seat).graveyard.filter((card) => has(ctx, card, "arrow"));
+        const arrows = faceUpGraveyard(ctx).filter((card) => isArrow(ctx, card));
         if (!arrows.length) {
           ctx.shuffleDeck();
           return;
@@ -547,7 +533,7 @@ export const outHighRarity: Record<string, CardScript> = {
       onActivate(ctx) {
         const top = ctx.player(ctx.seat).deck[0];
         if (top) ctx.lookAt(top.instanceId);
-        if (top && has(ctx, top, "arrow") && ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: true }))
+        if (top && isArrow(ctx, top) && ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: true }))
           ctx.destroySelf();
       },
     },
@@ -601,7 +587,7 @@ export const outHighRarity: Record<string, CardScript> = {
       const top = ctx.player(seat).deck[0];
       if (!top) return;
       ctx.moveToGraveyard(top.instanceId, "deck");
-      ctx.loseLife(seat, ctx.player(seat).graveyard.filter((card) => sharesName(ctx, card, top)).length);
+      ctx.loseLife(seat, faceUpGraveyard(ctx, seat).filter((card) => sharesName(ctx, card, top)).length);
     },
   },
   "melting point|1": {
@@ -651,12 +637,12 @@ export const outHighRarity: Record<string, CardScript> = {
   "concealed blade|3": {
     canPlay: (ctx) =>
       ctx.link?.attackCardType === "action" &&
-      (has(ctx, ctx.link.attackingCard, "assassin") || has(ctx, ctx.link.attackingCard, "ninja")),
+      (hasCardSubtype(ctx, ctx.link.attackingCard, "assassin") || hasCardSubtype(ctx, ctx.link.attackingCard, "ninja")),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
     },
     onHit(ctx) {
-      const daggers = (ctx.player(ctx.seat).inventory ?? []).filter((card) => has(ctx, card, "dagger"));
+      const daggers = (ctx.player(ctx.seat).inventory ?? []).filter((card) => isDagger(ctx, card));
       if (daggers.length)
         ctx.requestCardChoice(
           "concealed-dagger",
@@ -679,42 +665,35 @@ export const outHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (!hook.startsWith("codex-bloodrot:")) return;
-      const seat = Number(hook.split(":")[1]);
-      if (ctx.putIntoArsenal(Number(option), "hand", { faceUp: false })) codexBloodrotChoice(ctx, seat + 1);
+      ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
+      codexBloodrotChoice(ctx, codexHeroIndex(ctx, hook) + 1);
     },
   },
   "codex of frailty|2": {
     onPlay(ctx) {
+      // Script state survives zone moves, so clear a previous play's marks.
+      for (const seat of bothHeroSeats(ctx)) ctx.setState(`codexFrailtyMoved:${seat}`, 0);
       codexFrailtyChoice(ctx, 0);
     },
     onChoose(ctx, hook, option) {
       if (hook.startsWith("codex-frailty-discard:")) {
-        const seat = Number(hook.split(":")[1]);
-        ctx.discardCard(seat, Number(option));
-        const next = [0, 1].find(
-          (target) =>
-            target > seat && ctx.getState(`codexFrailtyMoved:${target}`) > 0 && ctx.player(target).hand.length,
-        );
-        if (next !== undefined) chooseDiscard(ctx, `codex-frailty-discard:${next}`, next);
-        else {
-          ctx.createToken(PONDER);
-          ctx.createToken(FRAILTY, opponentSeat(ctx));
-        }
+        ctx.discardCard(Number(hook.split(":")[1]), Number(option));
+        codexFrailtyDiscard(ctx, codexHeroIndex(ctx, hook) + 1);
         return;
       }
       if (!hook.startsWith("codex-frailty:")) return;
       const seat = Number(hook.split(":")[1]);
       if (ctx.putIntoArsenal(Number(option), "graveyard", { faceUp: false }))
         ctx.setState(`codexFrailtyMoved:${seat}`, 1);
-      codexFrailtyChoice(ctx, seat + 1);
+      codexFrailtyChoice(ctx, codexHeroIndex(ctx, hook) + 1);
     },
   },
   "codex of inertia|2": {
     onPlay(ctx) {
-      for (const player of ctx.state.players) {
-        const top = player.deck[0];
+      for (const seat of bothHeroSeats(ctx)) {
+        const top = ctx.player(seat).deck[0];
         if (top && ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: false }))
-          chooseDiscard(ctx, `codex-discard:${player.seat}`, player.seat);
+          chooseDiscard(ctx, `codex-discard:${seat}`, seat);
       }
       ctx.createToken(PONDER);
       ctx.createToken(INERTIA, opponentSeat(ctx));
@@ -766,7 +745,7 @@ export const outHighRarity: Record<string, CardScript> = {
   "gore belching|1": {
     onAttackDeclared(ctx) {
       const deck = ctx.player(ctx.seat).deck;
-      const card = deck.find((candidate) => isAttack(ctx, candidate));
+      const card = deck.find((candidate) => isAttackAction(ctx, candidate));
       if (card) {
         ctx.banish(card.instanceId);
         ctx.addModifier({ scope: "chain-link", attack: -(ctx.cardData(card.cardId).attack ?? 0) });
@@ -786,9 +765,8 @@ export const outHighRarity: Record<string, CardScript> = {
           "card.effect.out.burdensofthepast",
         ),
       });
-      const count = ctx
-        .player(target)
-        .graveyard.filter((card) => ctx.cardData(card.cardId).cardType === "defense-reaction").length;
+      const count = faceUpGraveyard(ctx, target)
+        .filter((card) => ctx.hasCardType(card, "defense-reaction")).length;
       if (count >= 10) ctx.drawCards(ctx.seat, 1);
     },
   },

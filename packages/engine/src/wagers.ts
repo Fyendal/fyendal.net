@@ -75,7 +75,12 @@ function continueWagerPrizes(state: GameStateInternal,
     const cardId = wager.rewardCardIds[cursor]!;
     cursor++;
     link.flags[`wagerRewardCursor:${wagerIndex}`] = cursor;
-    createTokenFor(state, runtime, winningPlayer, cardId, { kind: "wager", sourceCardId: source.cardId });
+    // CR 8.5.46b: the winner creates the prize, whoever controls the wager.
+    createTokenFor(state, runtime, winningPlayer, cardId, {
+      kind: "wager",
+      sourceCardId: source.cardId,
+      creatorSeat: winner,
+    });
     if (state.pendingDecision?.chooseHook) {
       state.pendingDecision.resume = { kind: "continue-wager-prizes", wagerIndex };
       return;
@@ -267,6 +272,24 @@ export function resumeWagerLossReplacements(
   } else {
     runtime.dispatchFlow("continueStack", state, link.attacker);
   }
+}
+
+/** Wagers resolve in the Damage Step, before go again pays out (CR 8.5.46). */
+export function queueWagerResults(state: GameStateInternal,
+  runtime: EngineRuntime, link: ChainLinkState): boolean {
+  if (!link.wagers?.length || link.flags.wagerResultsQueued === true) return false;
+  link.flags.wagerResultsQueued = true;
+  const layers: StackLayer[] = link.wagers.map((wager, wagerIndex) => ({
+    sourceInstanceId: wager.source.instanceId,
+    seat: wager.controllerSeat,
+    triggerIndex: -2000 - wagerIndex,
+    label: `Resolve wager: ${wager.rewardLabel}`,
+    optional: false,
+    engineEffect: { kind: "wager-result", wagerIndex },
+  }));
+  state.phase = "layer";
+  runtime.dispatchFlow("queueTriggeredLayers", state, [{ seat: link.attacker, layers }], "finish-link-resolution");
+  return true;
 }
 
 /** Resolve one wager after the chain link's hit result is known (CR 8.5.46). */

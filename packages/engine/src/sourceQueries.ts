@@ -2,8 +2,9 @@ import { dataOf, scriptOf } from "./cardProperties.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { CardScript } from "./scripts.js";
-import type { CardInstance, PlayerState } from "./state.js";
-import { findCardAnywhere, globalCardInstances } from "./zoneQueries.js";
+import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
+import { defendingSeatOf, findCardAnywhere, globalCardInstances } from "./zoneQueries.js";
+import { hasType } from "@fyendal/shared";
 
 /** Permanents controlled by `seat` in the standard iteration order: hero,
  *  weapons, equipment, board. Used for untap, ability enumeration, and
@@ -115,10 +116,21 @@ export function observingHookSources(
   return [...sources.values()];
 }
 
+/** Face-up attacks this seat controls that are still on the combat chain,
+ * where their abilities stay functional after their link resolves. An attack
+ * still on the stack is outside the arena (CR 1.7.4, 3.0.5b). */
+export function functionalChainAttackLinks(state: GameStateInternal, seat: number): ChainLinkState[] {
+  return state.chain.filter((link) =>
+    link.attacker === seat &&
+    link.flags.attackStepBegan === true &&
+    link.flags.attackGone !== true &&
+    !link.attackingCard.faceDown
+  );
+}
+
 /** Sources that observe their controller's Contract events: active arena
  * observers plus face-up attacks and defense reactions on the combat chain,
- * which stay functional there outside their owner's ordinary zones. An attack
- * still on the stack is outside the arena (CR 1.7.4, 3.0.5b). */
+ * which stay functional there outside their owner's ordinary zones. */
 export function contractObserverSources(state: GameStateInternal, seat: number): CardInstance[] {
   const sources = new Map<number, CardInstance>();
   for (const source of observingHookSources(state, seat, {
@@ -127,18 +139,15 @@ export function contractObserverSources(state: GameStateInternal, seat: number):
     equipment: true,
     weapons: true,
   })) sources.set(source.instanceId, source);
+  for (const { attackingCard } of functionalChainAttackLinks(state, seat)) {
+    sources.set(attackingCard.instanceId, attackingCard);
+  }
   for (const link of state.chain) {
-    if (
-      link.attacker === seat &&
-      link.flags.attackStepBegan === true &&
-      link.flags.attackGone !== true &&
-      !link.attackingCard.faceDown
-    ) sources.set(link.attackingCard.instanceId, link.attackingCard);
-    for (const reaction of [...link.defendingCards, ...link.reactions]) {
+    const defending = defendingSeatOf(link) === seat ? link.defendingCards : [];
+    for (const reaction of [...defending, ...link.reactions.filter((card) => card.owner === seat)]) {
       if (
-        reaction.owner === seat &&
         !reaction.faceDown &&
-        dataOf(state, reaction.cardId).cardType === "defense-reaction"
+        hasType(dataOf(state, reaction.cardId), "defense-reaction")
       ) sources.set(reaction.instanceId, reaction);
     }
   }

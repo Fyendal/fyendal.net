@@ -95,6 +95,28 @@ describe("DVR — Dawnblade / Dorinthea hero", () => {
       .expectLife(1, 14);
   });
 
+  it("Refraction Bolters' go again lets Dawnblade attack an additional time", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          hand: ["en garde|1", "en garde|1"],
+          equipment: { legs: "refraction bolters|0" },
+        },
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    g.attackWithWeapon(undefined, { pitch: ["en garde|1"] })
+      .blockWith()
+      .settle()
+      .chooseOption("yes")
+      .expectLog("Dorinthea's ability: Dawnblade may attack an additional time this turn")
+      .expectAP(0, 1)
+      .expectNoEquipment(0, "legs")
+      .attackWithWeapon(undefined, { pitch: ["en garde|1"] })
+      .expectAttackValue(3); // 2 + 1 (Dawnblade's second attack this turn)
+  });
+
   it("Glistening Steelblade puts counters on the original Dawnblade", () => {
     const g = scenario({
       seats: [

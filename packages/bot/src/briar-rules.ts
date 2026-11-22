@@ -1,15 +1,17 @@
 import type { CardData, CardView } from "@fyendal/shared";
+import { hitChanceAgainst, TYPICAL_ATTACK_POWER } from "./hit-model.js";
 import { expectedTopPitch } from "./card-ev.js";
 import { combineEffects, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
 import type { PendingEffect, SolverCard, SolverView } from "./hand-solver.js";
 import type { BotPolicyInput } from "./policy.js";
+import { hasType } from "@fyendal/shared";
 
 const named = (data: CardData | undefined): string => data?.name.trim().toLowerCase() ?? "";
 
 /** Damage-equivalent of stealing an opposing item for the action phase. */
 const STEAL_ITEM_VALUE = 2;
 
-function runechantPending(prefix: string, count: number): PendingEffect[] {
+export function runechantPending(prefix: string, count: number): PendingEffect[] {
   // Every Runechant fires on the next attack action card or weapon attack.
   return Array.from({ length: count }, (_, index) => ({
     key: `${prefix}.runechant.${index}`,
@@ -18,7 +20,7 @@ function runechantPending(prefix: string, count: number): PendingEffect[] {
   }));
 }
 
-function embodimentOfLightning(key: string): PendingEffect {
+export function embodimentOfLightning(key: string): PendingEffect {
   return {
     key,
     uses: 1,
@@ -27,10 +29,9 @@ function embodimentOfLightning(key: string): PendingEffect {
   };
 }
 
-/** Hand-value rules for Briar: Runechants, the second non-attack action
- * Embodiment of Lightning, Lightning Fusion, conditional go again, Star Fall,
- * Quick Succession and the Burn Up meld. */
-export function briarSolverRules(input: BotPolicyInput): HeroSolverRules {
+/** Solver patches for the Lightning and generic Runeblade cards Briar and
+ * Aurora share: conditional go again, Quick Succession and the Burn Up meld. */
+export function lightningCardPatcher(input: BotPolicyInput): (data: CardData, card: CardView) => SolverCardPatch {
   const me = input.view.players[input.seat];
   const opponent = input.view.players[1 - input.seat]!;
   const arsenalIds = new Set(me.arsenal.map((card) => card.instanceId));
@@ -38,6 +39,7 @@ export function briarSolverRules(input: BotPolicyInput): HeroSolverRules {
     input.cards[card.cardId]?.keywords?.some((keyword) => keyword.toLowerCase() === "lightning fusion")
   ).map((card) => card.instanceId));
   const topPitch = expectedTopPitch(input);
+  const futureHit = hitChanceAgainst(input, true);
   const opponentHasItem = opponent.board.some((card) =>
     input.cards[card.cardId]?.subtypes?.some((subtype) => subtype.toLowerCase() === "item")
   );
@@ -56,7 +58,8 @@ export function briarSolverRules(input: BotPolicyInput): HeroSolverRules {
         return {
           bonusIn: () => 1,
           after: () => ({ pending: [{ key: `burn#${card.instanceId}`, uses: 1, onHit: 4 }] }),
-          uses: { pump: 1 + 4 * 0.6 },
+          // It pays off on whichever attack hits next, so no single attack draws the blocks.
+          uses: { pump: 1 + 4 * futureHit(TYPICAL_ATTACK_POWER, 0) },
         };
       case "lightning press":
         return {
@@ -141,7 +144,13 @@ export function briarSolverRules(input: BotPolicyInput): HeroSolverRules {
         return {};
     }
   };
+  return cardPatch;
+}
 
+/** Hand-value rules for Briar: Runechants, the second non-attack action
+ * Embodiment of Lightning and the shared Lightning card patches. */
+export function briarSolverRules(input: BotPolicyInput): HeroSolverRules {
+  const cardPatch = lightningCardPatcher(input);
   return {
     name: "briar",
     trackedTraits: ["lightning"],
@@ -161,7 +170,7 @@ export function briarSolverRules(input: BotPolicyInput): HeroSolverRules {
     },
     card(data, card) {
       const patch = cardPatch(data, card);
-      if (data.cardType !== "action" || (data.subtypes ?? []).some((subtype) => subtype.toLowerCase() === "attack")) {
+      if (!hasType(data, "action") || (data.subtypes ?? []).some((subtype) => subtype.toLowerCase() === "attack")) {
         return patch;
       }
       // Briar: the second 'non-attack' action card each turn creates an

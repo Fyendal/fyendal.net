@@ -1,19 +1,11 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { cardNamed, opponentSeat } from "./shared-helpers.js";
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).some((candidate) => candidate.toLowerCase() === type);
-}
-
-function hasContract(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract");
-}
+import { cardNamed, hasCardSubtype, opponentSeat } from "./shared-helpers.js";
 
 function applyContractBonus(ctx: ScriptCtx, attacking: DeepReadonly<CardInstance>, duringAttack = false): void {
   if (
     !ctx.hasCardType(attacking, "action") ||
-    !ctx.cardTypes(attacking).includes("attack") ||
-    !hasContract(ctx, attacking) ||
+    !hasCardSubtype(ctx, attacking, "attack") ||
+    !ctx.hasKeyword(attacking, "contract") ||
     ctx.getPlayerFlag(ctx.seat, "handContractAttackThisTurn") === true
   )
     return;
@@ -21,7 +13,7 @@ function applyContractBonus(ctx: ScriptCtx, attacking: DeepReadonly<CardInstance
   ctx.setPlayerFlag(ctx.seat, "handContractAttackThisTurn", true);
   if (duringAttack) {
     ctx.grantGoAgain();
-    if (hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "royal")) {
+    if (hasCardSubtype(ctx, ctx.player(opponentSeat(ctx)).hero, "royal")) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
     }
     return;
@@ -30,7 +22,7 @@ function applyContractBonus(ctx: ScriptCtx, attacking: DeepReadonly<CardInstance
     scope: "next-attack",
     appliesToInstanceId: attacking.instanceId,
     goAgain: true,
-    ...(hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "royal") ? { attack: 1 } : {}),
+    ...(hasCardSubtype(ctx, ctx.player(opponentSeat(ctx)).hero, "royal") ? { attack: 1 } : {}),
   });
 }
 
@@ -58,6 +50,7 @@ export const ark: Record<string, CardScript> = {
         event: "end-of-turn",
         whose: "subject",
         label: "Destroy a Silver or put this on the bottom and draw",
+        condition: (ctx) => ctx.self.faceDown !== true,
         effect(ctx) {
           const silver = ctx.player(ctx.seat).board.find((card) => cardNamed(ctx, card, "Silver"));
           if (silver) ctx.destroyPermanent(silver.instanceId);

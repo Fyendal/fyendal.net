@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import type { DeckArt, DeckPool, EquipmentSlot, Format } from "@fyendal/shared";
+import type { CardData, DeckArt, DeckPool, EquipmentSlot, Format } from "@fyendal/shared";
 import {
   cardData,
   equipmentFitsSlot,
@@ -7,14 +7,14 @@ import {
   isImplemented,
   isWeaponZoneCard,
   MIN_DECK_SIZE,
-  normalizeCardName,
   precon,
 } from "@fyendal/cards";
 import { normalizeDeckArt } from "@fyendal/cards/art";
 import { deckArt, type FabraryMatchup } from "@fyendal/protocol";
 export { validatePresentation } from "@fyendal/cards";
 import { withTransaction, type Queryable } from "./db.js";
-import { parseFabraryDeckUrl, type FabraryClient, type FabraryDeckResult } from "./fabrary.js";
+import { parseFabraryDeckUrl, type FabraryClient, type FabraryDeckResult, type FabraryPin } from "./fabrary.js";
+import { hasType, objectKind } from "@fyendal/shared";
 
 /**
  * Saved user decks ("cc" / "silver-age" formats). Users import Fabrary export
@@ -62,7 +62,7 @@ interface ParsedLine {
   section: Section;
 }
 
-/** Largest quantity one export line may claim (pools max out at 80 cards). */
+/** Largest quantity one export line may claim; a stored zone holds at most 100 cards. */
 const MAX_LINE_QTY = 99;
 
 /**
@@ -114,7 +114,6 @@ export function parseDecklistText(text: string): ParsedLine[] {
       : undefined;
     // Clamp absurd quantities at parse time: validateDeck expands qty into
     // per-copy array pushes, so an unclamped "999999999x …" line is a DoS.
-    // Anything over the cap still fails validation (copies/pool-size limits).
     out.push({ qty: Math.min(Number(m[1]), MAX_LINE_QTY), name: m[2]!, pitch, section });
   }
   return out;
@@ -122,23 +121,37 @@ export function parseDecklistText(text: string): ParsedLine[] {
 
 // ── Validation ──────────────────────────────────────────────────────────────
 
-/** Maximum registered pool size (all non-hero cards: weapons + equipment +
- *  deck + sideboard). */
-const MAX_POOL_SIZE: Record<Format, number> = {
-  cc: 80,
-  "silver-age": 55,
-};
-/** Weapons a player may present for one game: up to 2 one-hand weapons, or a
- *  single two-hand weapon alone — except that a quiver may accompany a
- *  two-hander bow (CR 8.2.15a; at most one quiver, 8.2.15b). */
-const MAX_COPIES: Record<Format, number> = {
-  cc: 3,
-  "silver-age": 2,
-};
+/** Hard per-zone cap on a stored pool; `decodeDeckPool` rejects anything larger. */
+const MAX_ZONE_CARDS = 100;
 const EQUIPMENT_SLOTS: EquipmentSlot[] = ["head", "chest", "arms", "legs"];
 const INVENTORY_FRONT_ID_BY_BACK_ID = new Map(
   Object.values(cardData).flatMap((card) => card.backId ? [[card.backId, card.id] as const] : []),
 );
+
+// Demi-heroes are registered inventory cards despite sharing the hero card
+// type. Fabrary lists Levia, Redeemed among arena cards alongside Levia's
+// starting hero, so it must not be mistaken for a second hero.
+function isInventoryHero(card: CardData): boolean {
+  return hasType(card, "hero") && /\bwhile this is in your inventory\b/i.test(card.text);
+}
+
+/** The printing id a deck stores for a card its list names. Fabrary may
+ * identify the back face of a double-faced inventory card; the deck stores its
+ * front so every deck holds the same physical printing (Blasmophet, Levia
+ * Consumed -> Levia, Redeemed). */
+function poolCardId(card: CardData): string {
+  return isInventoryHero(card) ? INVENTORY_FRONT_ID_BY_BACK_ID.get(card.id) ?? card.id : card.id;
+}
+
+/** Fabrary pins as printing id -> image id, kept only for valid images of cards in the pool. */
+function fabraryDeckArt(pool: DeckPool, pins: FabraryPin[]): Record<string, string> {
+  const picks: Record<string, string> = {};
+  for (const pin of pins) {
+    const card = findPrinting(pin.name, pin.pitch);
+    if (card) picks[poolCardId(card)] = pin.image;
+  }
+  return normalizeDeckArt(pool, { highestRarity: false, picks }).picks;
+}
 
 export type ValidationResult =
   | { ok: true; decklist: DeckPool; heroName: string }
@@ -148,8 +161,9 @@ export type ValidationResult =
  * Resolve parsed lines against the card pool and validate its stable shape.
  * Strict on purpose: every card must resolve AND be implemented (scripted or
  * curated vanilla) — the missing/unimplemented lists double as the card
- * implementation TODO. The result is the registered pool (DeckPool); in-game
- * legality of the presented 60/40 is checked per game by validatePresentation.
+ * implementation TODO. Copy and pool-size limits are not checked here: they
+ * are card-pool rules (formatLegalityIssues) applied when a game starts, and
+ * the presented 60/40 is checked per game by validatePresentation.
  */
 export function validateDeck(lines: ParsedLine[], format: Format): ValidationResult {
   const missing = new Set<string>();
@@ -163,7 +177,6 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
   const inventoryPool: string[] = [];
   const deck: string[] = [];
   const sideboard: string[] = [];
-  const copies = new Map<string, number>(); // functional identity → count
 
   for (const line of lines) {
     const card = findPrinting(line.name, line.pitch);
@@ -175,16 +188,14 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
       unimplemented.add(card.name);
       continue;
     }
-    if (card.cardType === "hero") {
-      // Demi-heroes are registered inventory cards despite sharing the hero
-      // card type. Fabrary lists Levia, Redeemed among arena cards alongside
-      // Levia's starting hero, so it must not be mistaken for a second hero.
-      if (/\bwhile this is in your inventory\b/i.test(card.text)) {
-        // Fabrary may identify the back face of a double-faced inventory card.
-        // Store its front face so every deck holds the same physical printing
-        // (Blasmophet, Levia Consumed -> Levia, Redeemed).
-        const inventoryId = INVENTORY_FRONT_ID_BY_BACK_ID.get(card.id) ?? card.id;
-        for (let i = 0; i < line.qty; i++) inventoryPool.push(inventoryId);
+    // Before the weapon branch: Graphene Chelicera is a weapon token.
+    if (hasType(card, "token")) {
+      errors.push(`${card.name} is a token and cannot be in a deck`);
+      continue;
+    }
+    if (objectKind(card) === "hero") {
+      if (isInventoryHero(card)) {
+        for (let i = 0; i < line.qty; i++) inventoryPool.push(poolCardId(card));
         continue;
       }
       if (heroId) {
@@ -199,10 +210,8 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
       for (let i = 0; i < line.qty; i++) weaponIds.push(card.id);
       continue;
     }
-    // Evos are playable equipment cards: they begin in the main deck and are
-    // equipped only after being played. Arena equipment has no `evo` subtype
-    // and belongs in the registered equipment pool.
-    if (card.cardType === "equipment" && !card.subtypes?.includes("evo")) {
+    // Evos are deck cards (objectKind "deck") equipped only after being played.
+    if (objectKind(card) === "equipment") {
       const slot = EQUIPMENT_SLOTS.find((s) => equipmentFitsSlot(card, s));
       if (!slot) {
         errors.push(`${card.name}: unknown equipment slot`);
@@ -211,36 +220,22 @@ export function validateDeck(lines: ParsedLine[], format: Format): ValidationRes
       for (let i = 0; i < line.qty; i++) equipmentPool.push(card.id);
       continue;
     }
-    if (card.cardType === "token") {
-      errors.push(`${card.name} is a token and cannot be in a deck`);
-      continue;
-    }
     const target = line.section === "sideboard" ? sideboard : deck;
     for (let i = 0; i < line.qty; i++) target.push(card.id);
-    const unlimited = card.keywords?.some(
-      (keyword) => keyword.trim().toLowerCase() === "unlimited",
-    ) === true;
-    if (!unlimited) {
-      const key = normalizeCardName(card.name) + "|" + (card.pitch ?? 0);
-      copies.set(key, (copies.get(key) ?? 0) + line.qty);
-    }
   }
 
   if (!heroId) errors.push("no hero found in the decklist");
-  const maxCopies = MAX_COPIES[format];
-  for (const [key, n] of copies) {
-    if (n > maxCopies) errors.push(`too many copies of ${key.split("|")[0]} (${n}, max ${maxCopies})`);
-  }
   const min = MIN_DECK_SIZE[format];
   if (min && deck.length + sideboard.length < min) {
     errors.push(
       `card pool too small (${deck.length + sideboard.length} main-deck cards, ${format} requires at least ${min})`,
     );
   }
-  const max = MAX_POOL_SIZE[format];
-  const poolSize = weaponIds.length + equipmentPool.length + inventoryPool.length + deck.length + sideboard.length;
-  if (max && poolSize > max) {
-    errors.push(`card pool too large (${poolSize} cards, ${format} allows at most ${max})`);
+  const zones = { weapons: weaponIds, equipment: equipmentPool, inventory: inventoryPool, deck, sideboard };
+  for (const [zone, ids] of Object.entries(zones)) {
+    if (ids.length > MAX_ZONE_CARDS) {
+      errors.push(`too many ${zone} cards (${ids.length}, at most ${MAX_ZONE_CARDS})`);
+    }
   }
   if (missing.size || unimplemented.size || errors.length) {
     return {
@@ -287,7 +282,7 @@ function dbString(value: unknown, path: string, max = MAX_DB_STRING): string {
   return value;
 }
 
-function dbStringArray(value: unknown, path: string, max = 100): string[] {
+function dbStringArray(value: unknown, path: string, max = MAX_ZONE_CARDS): string[] {
   if (!Array.isArray(value) || value.length > max) {
     return corruptDeck(path, `expected an array of at most ${max} card ids`);
   }
@@ -418,6 +413,7 @@ export type FreshDeckResult =
     deck: DeckRow;
     matchups: FabraryMatchup[];
     selectedMatchupId?: string;
+    fabraryArt: Record<string, string>;
   }
   | {
     ok: false;
@@ -459,7 +455,7 @@ export async function resolveFreshDeck(
     if (matchupId !== undefined) {
       return { ok: false, status: 400, error: "this deck has no Fabrary matchups" };
     }
-    return { ok: true, deck: existing, matchups: [] };
+    return { ok: true, deck: existing, matchups: [], fabraryArt: {} };
   }
 
   const fetched = await fabraryClient.fetchDeck(existing.fabraryUrl, matchupId);
@@ -468,7 +464,7 @@ export async function resolveFreshDeck(
     // list falls back to the last successfully saved pool. Matchup variants
     // have no saved copy, and a 404 means the source deck is gone or private.
     if (matchupId === undefined && STALE_FALLBACK_STATUSES.has(fetched.status)) {
-      return { ok: true, deck: existing, matchups: [] };
+      return { ok: true, deck: existing, matchups: [], fabraryArt: {} };
     }
     return fabraryFailure(fetched);
   }
@@ -490,12 +486,14 @@ export async function resolveFreshDeck(
     decklist: validation.decklist,
     heroName: validation.heroName,
   };
+  const fabraryArt = fabraryDeckArt(validation.decklist, fetched.deck.pins);
   if (matchupId !== undefined) {
     return {
       ok: true,
       deck: refreshed,
       matchups: fetched.deck.matchups,
       selectedMatchupId: matchupId,
+      fabraryArt,
     };
   }
 
@@ -515,7 +513,7 @@ export async function resolveFreshDeck(
   );
   const saved = await getDeck(db, existing.id);
   if (!saved) return { ok: false, status: 404, error: "deck not found" };
-  return { ok: true, deck: saved, matchups: fetched.deck.matchups };
+  return { ok: true, deck: saved, matchups: fetched.deck.matchups, fabraryArt };
 }
 
 export async function listDecks(db: Queryable, userId: number): Promise<DeckRow[]> {
@@ -580,7 +578,7 @@ export async function resolveFabraryPlayDeck(
     const saved = STALE_FALLBACK_STATUSES.has(fetched.status)
       ? findLinkedDeck(await listDecks(db, userId), format, source.canonicalUrl)
       : undefined;
-    return saved ? { ok: true, deck: saved, matchups: [] } : fabraryFailure(fetched);
+    return saved ? { ok: true, deck: saved, matchups: [], fabraryArt: {} } : fabraryFailure(fetched);
   }
   const validation = validateDeck(parseDecklistText(fetched.deck.text), format);
   if (!validation.ok) {
@@ -602,7 +600,10 @@ export async function resolveFabraryPlayDeck(
       return { ok: false, status: 422, error: "invalid deck", errors: result.errors,
         missing: result.missing, unimplemented: result.unimplemented };
     }
-    return { ok: true, deck: result.deck, matchups: fetched.deck.matchups };
+    return {
+      ok: true, deck: result.deck, matchups: fetched.deck.matchups,
+      fabraryArt: fabraryDeckArt(result.deck.decklist, fetched.deck.pins),
+    };
   });
 }
 

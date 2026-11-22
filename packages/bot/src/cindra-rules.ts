@@ -3,6 +3,7 @@ import { BLOCK_USE_RATE, PITCH_FUNDING_RATE, expectedTopPitch } from "./card-ev.
 import { cardTraits, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
 import type { PendingEffect, SolverCard, SolverView } from "./hand-solver.js";
 import { isAttack, type BotPolicyInput } from "./policy.js";
+import { hasType } from "@fyendal/shared";
 
 const named = (data: CardData | undefined): string => data?.name.trim().toLowerCase() ?? "";
 
@@ -84,7 +85,7 @@ export function cindraSolverRules(input: BotPolicyInput): HeroSolverRules {
       const power = card.attack ?? data.attack ?? 0;
       const patch: SolverCardPatch = {};
       const traits = cardTraits(data, card);
-      if (data.cardType === "action" && traits.includes("attack") && !traits.includes("draconic")) {
+      if (hasType(data, "action") && traits.includes("attack") && !traits.includes("draconic")) {
         // Enflame the Firebrand at 3+ Draconic links makes every attack Draconic.
         const asDraconic = [...traits, "draconic"];
         patch.traitsIn = (view) => view.flag("allDraconic") > 0 ? asDraconic : traits;

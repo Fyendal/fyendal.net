@@ -39,7 +39,13 @@ export function motionCombatPresentation(
       }
     }
   }
-  const stack = waiting?.stack ?? current.stack;
+  // A resolved layer leaving for another zone can wait behind earlier cues;
+  // keep its float until it departs.
+  const departing = waiting ? undefined : batches.find((batch) => batch.flights.some((flight) => (
+    flight.sourceMaskPresentationKey !== undefined && !startedFlightIds.has(flight.id)
+  )))?.sourceCombatPresentation;
+  const retained = waiting ?? departing;
+  const stack = retained?.stack ?? current.stack;
   const deferStack = stack.length > 0 && stack.every((layer, index) => {
     if (!layer.card) return false;
     const key = motionPresentationKey({ kind: "stack-layer", index }, layer.card.instanceId);
@@ -48,7 +54,7 @@ export function motionCombatPresentation(
   });
   return {
     ...current,
-    ...(waiting ? { stack, queue: waiting.queue, context: waiting.context } : {}),
+    ...(retained ? { stack, queue: retained.queue, context: retained.context } : {}),
     deferChain: waiting !== undefined || (chainFlight !== undefined && !startedFlightIds.has(chainFlight.id)),
     deferStack,
   };

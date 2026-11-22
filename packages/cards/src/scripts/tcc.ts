@@ -1,28 +1,20 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
+  boulderDrop,
   buffNextAttack,
   cardNamed,
   decisionMessage,
   decisionPrompt,
+  equippedEvos,
+  faceUpGraveyard,
+  hasCardSubtype,
+  isAttackAction,
   opponentSeat,
   payForDefenseBoost,
   previousAttackHasName,
 } from "./shared-helpers.js";
-
-const COPPER = "TCC103";
-const CROUCHING_TIGER = "TCC104";
-const MIGHT = "TCC105";
-const QUICKEN = "TCC106";
-const VIGOR = "TCC107";
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).some((candidate) => candidate.toLowerCase() === type);
-}
-
-function equippedEvos(ctx: ScriptCtx): number {
-  return ctx.countEquipped("evo");
-}
+import { COPPER, CROUCHING_TIGER, MIGHT, QUICKEN, VIGOR } from "./tokens.js";
 
 function guardianAura(power: number, reduction = 0): CardScript {
   return {
@@ -42,33 +34,6 @@ function guardianAura(power: number, reduction = 0): CardScript {
         },
       },
     ],
-  };
-}
-
-function boulderDrop(): CardScript {
-  return {
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-    },
-    onHit(ctx) {
-      const target = opponentSeat(ctx);
-      const hand = ctx.player(target).hand;
-      if (hand.length) {
-        ctx.requestCardChoice(
-          "boulder-drop-top",
-          decisionPrompt(
-            `${ctx.data.name}: put a card from your hand on top of your deck`,
-            "card.tcc.boulder.hand.top",
-            { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
-          ),
-          hand.map((card) => card.instanceId),
-          target,
-        );
-      }
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "boulder-drop-top") ctx.putOnDeckTop(Number(option));
-    },
   };
 }
 
@@ -94,7 +59,7 @@ function destroyForEveryone(kind: "draw" | "might" | "quicken" | "vigor"): CardS
       onActivate(ctx) {
         for (const player of ctx.state.players) {
           if (kind === "draw") ctx.drawCards(player.seat, 1);
-          else ctx.createToken(kind === "might" ? MIGHT : kind === "quicken" ? QUICKEN : VIGOR, player.seat);
+          else ctx.heroCreatesTokens(player.seat, kind === "might" ? MIGHT : kind === "quicken" ? QUICKEN : VIGOR);
         }
       },
     },
@@ -153,9 +118,9 @@ function tigerEyeReflex(): CardScript {
 
 export const tcc: Record<string, CardScript> = {
   "professor teklovossen|0": {
-    allowsFriendlyCardPlayFrom: (ctx, card, zone) => zone === "banish" && hasType(ctx, card, "evo"),
+    allowsFriendlyCardPlayFrom: (ctx, card, zone) => zone === "banish" && hasCardSubtype(ctx, card, "evo"),
     modifyFriendlyCardPlayCost(ctx, card, _zone, base) {
-      return hasType(ctx, card, "evo") ? Math.max(0, base - (ctx.state.players.length - 1)) : base;
+      return hasCardSubtype(ctx, card, "evo") ? Math.max(0, base - (ctx.state.players.length - 1)) : base;
     },
   },
   "teklo blaster|0": { activated: attackAbility(3) },
@@ -190,7 +155,7 @@ export const tcc: Record<string, CardScript> = {
       {
         event: "card-played",
         label: "Create Copper tokens",
-        condition: (ctx, played) => !!played && hasType(ctx, played, "song"),
+        condition: (ctx, played) => !!played && hasCardSubtype(ctx, played, "song"),
         effect: (ctx) => ctx.createTokens(COPPER, ctx.state.players.length - 1),
       },
     ],
@@ -223,7 +188,7 @@ export const tcc: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "jinglewood-token") return;
       const token = option === "Might" ? MIGHT : option === "Quicken" ? QUICKEN : VIGOR;
-      ctx.createToken(token, opponentSeat(ctx));
+      ctx.heroCreatesTokens(opponentSeat(ctx), token);
       ctx.createToken(COPPER);
     },
   },
@@ -239,8 +204,8 @@ export const tcc: Record<string, CardScript> = {
   },
   "encore|2": {
     onPlay(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
-        return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack") && hasType(ctx, card, "bard");
+      const cards = faceUpGraveyard(ctx).filter((card) => {
+        return isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "bard");
       });
       if (cards.length) {
         ctx.requestCardChoice(
@@ -311,8 +276,8 @@ export const tcc: Record<string, CardScript> = {
   // the pending choice routes back to the song's own functional script.
   "song of yesteryears|3": {
     ...song((ctx, target) => {
-      const attacks = ctx.player(target).graveyard.filter((card) => {
-        return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
+      const attacks = faceUpGraveyard(ctx, target).filter((card) => {
+        return isAttackAction(ctx, card);
       });
       if (attacks.length)
         ctx.requestCardChoice(

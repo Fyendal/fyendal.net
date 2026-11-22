@@ -43,8 +43,8 @@ function sortedCards(cards: readonly CardView[]): CardView[] {
 }
 
 /** A private search includes contextual looked-at cards plus a smaller set of
- * selectable card options. It needs a full zone-style dialog rather than the
- * compact decision float. */
+ * selectable card options, possibly none. It needs a full zone-style dialog
+ * rather than the compact decision float. */
 export function isCardSearchOverlayDecision(
   decision: PendingDecision | null,
 ): decision is CardSearchDecision {
@@ -52,7 +52,7 @@ export function isCardSearchOverlayDecision(
     && decision.minimumSelections !== undefined
     && decision.maximumSelections !== undefined
     && (decision.lookedCards?.length ?? 0) > 0
-    && (decision.optionCards?.some(Boolean) ?? false);
+    && ((decision.optionCards?.some(Boolean) ?? false) || decision.maximumSelections === 0);
 }
 
 export function cardSearchOverlayModel(

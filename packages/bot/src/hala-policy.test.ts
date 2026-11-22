@@ -81,6 +81,39 @@ function advanceUntil(
   throw new Error("state did not reach expected point");
 }
 
+/** Plays out seat 0's current turn with the Hala bot against a passive
+ * opponent and returns the bot's open-priority action-phase intents. */
+function cleanHalaActions(initial: ReturnType<typeof createGame>): GameIntent[] {
+  const turn = initial.turn;
+  let current = initial;
+  const cleanActions: GameIntent[] = [];
+  for (let step = 0; step < 120 && current.turn === turn; step++) {
+    const actor = (current.pendingDecision?.player ?? current.priorityPlayer) as 0 | 1;
+    const legal = legalIntents(current, actor);
+    const cleanAction = actor === 0 && current.phase === "action" &&
+      current.pendingDecision === null && current.stack.length === 0;
+    const intent = actor === 0
+      ? chooseHalaIntent({
+          seat: 0,
+          view: projectStateFor(current, 0),
+          legal,
+          cards: cardData,
+          state: current,
+        })
+      : current.pendingDecision?.kind === "defend"
+      ? legal.find((candidate) => candidate.kind === "defend" && candidate.instanceIds.length === 0)
+      : legal.find((candidate) => candidate.kind === "choose" &&
+          ["no", "decline", "pass", "pay 0"].includes(candidate.optionId)) ??
+        legal.find((candidate) => candidate.kind === "pass") ??
+        legal.find((candidate) => candidate.kind === "close-chain") ??
+        legal.find((candidate) => candidate.kind === "order-triggers");
+    if (!intent) throw new Error(`no Hala rollout intent for ${current.phase}`);
+    if (cleanAction) cleanActions.push(intent);
+    current = apply(current, actor, intent);
+  }
+  return cleanActions;
+}
+
 function chooseRerebracePayment(options: {
   counters: number;
   resolvingCardId?: string;
@@ -187,6 +220,34 @@ describe("Hala policy", () => {
     expect(decision.plan?.evaluation.complete).toBe(true);
     expect(decision.plan?.evaluation.damage).toBeGreaterThan(0);
     expect(applyIntent(state, 0, decision.intent).ok).toBe(true);
+  });
+
+  it("attacks with Zenith Blade instead of passing while holding Toe the Line", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9403,
+      startPlayer: 0,
+    });
+    state.turn = 8;
+    replaceHand(state, 0, ["MPW028", "MPW074", "MPW074", "PEN048"]);
+    state.players[0]!.resources = 0;
+    const blade = state.players[0]!.weapons[0]!;
+    blade.scriptState = { sharpenedTurn: 6 };
+
+    const decision = chooseHalaIntentWithTrace({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal: legalIntents(state, 0),
+      cards: cardData,
+      state,
+    });
+    expect(decision.intent).toMatchObject({
+      kind: "activate-ability",
+      sourceInstanceId: blade.instanceId,
+    });
+    expect(decision.plan?.evaluation.damage).toBeGreaterThan(0);
   });
 
   it("preserves its opening hand and prioritizes a Flurry generator for arsenal", () => {
@@ -499,6 +560,79 @@ describe("Hala policy", () => {
       state.log.map((entry) => entry.publicText).join("\n")).toHaveLength(2);
   });
 
+  it("searches pitching Olé rather than And Again for a sharpened Zenith swing", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9345,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["MPW028", "MPW046"]);
+    const [andAgain, ole] = state.players[0]!.hand;
+    state.players[0]!.hero.tapped = true;
+    const blade = state.players[0]!.weapons[0]!;
+    blade.counters = { power: 1 };
+    blade.scriptState = { sharpenedTurn: state.turn };
+
+    const decision = chooseHalaIntentWithTrace({
+      seat: 0,
+      view: projectStateFor(state, 0),
+      legal: legalIntents(state, 0),
+      cards: cardData,
+      state,
+    });
+    // Pitching Olé keeps And Again for a second sharpened swing.
+    const olePitch = decision.plan?.rootResults.find((result) =>
+      result.intent.kind === "activate-ability" &&
+      result.intent.sourceInstanceId === blade.instanceId &&
+      result.intent.pitchInstanceIds?.[0] === ole!.instanceId
+    );
+    expect(olePitch?.evaluation).toMatchObject({ complete: true, damage: 8 });
+    expect(decision.plan?.rootResults.some((result) =>
+      result.intent.kind === "activate-ability" &&
+      result.intent.pitchInstanceIds?.[0] === andAgain!.instanceId
+    )).toBe(true);
+    expect(decision.intent.kind).toBe("activate-ability");
+  });
+
+  it("defends a weapon attack with Blunten to discard the attacker's last card", () => {
+    let state = createGame({
+      decklists: [halaDeck(), halaDeck()],
+      cards: cardData,
+      scripts,
+      seed: 9346,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["MPW046", "SEA226"]);
+    replaceHand(state, 1, ["PEN049", "HNT117", "MPW105", "MPW121"]);
+    const blunten = state.players[1]!.hand[0]!;
+    const attacker = state.players[0]!;
+    attacker.hero.tapped = true;
+    const blade = attacker.weapons[0]!;
+    blade.counters = { power: 1 };
+    blade.scriptState = { sharpenedTurn: state.turn };
+    const swing = legalIntents(state, 0).find((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === blade.instanceId &&
+      intent.pitchInstanceIds?.includes(attacker.hand[0]!.instanceId)
+    );
+    if (!swing) throw new Error("Zenith Blade cannot attack");
+    state = advanceUntil(apply(state, 0, swing), (current) =>
+      current.pendingDecision?.kind === "defend" && current.pendingDecision.player === 1
+    );
+
+    const intent = chooseHalaIntent({
+      seat: 1,
+      view: projectStateFor(state, 1),
+      legal: legalIntents(state, 1),
+      cards: cardData,
+      decklists: decklistsFromState(state, 1),
+    });
+    expect(intent).toMatchObject({ instanceIds: expect.arrayContaining([blunten.instanceId]) });
+  });
+
   it("pitches a blue so a Flurry turn can pay for both Zenith Blade attacks", () => {
     const state = createGame({
       decklists: [halaDeck(), decklists.dorinthea],
@@ -667,33 +801,7 @@ describe("Hala policy", () => {
     const bladeId = state.players[0]!.weapons[0]!.instanceId;
     const heroId = state.players[0]!.hero.instanceId;
 
-    let current = state;
-    const cleanActions: GameIntent[] = [];
-    for (let step = 0; step < 120 && current.turn === 2; step++) {
-      const actor = (current.pendingDecision?.player ?? current.priorityPlayer) as 0 | 1;
-      const legal = legalIntents(current, actor);
-      const cleanAction = actor === 0 && current.phase === "action" &&
-        current.pendingDecision === null && current.stack.length === 0;
-      const intent = actor === 0
-        ? chooseHalaIntent({
-            seat: 0,
-            view: projectStateFor(current, 0),
-            legal,
-            cards: cardData,
-            state: current,
-          })
-        : current.pendingDecision?.kind === "defend"
-        ? legal.find((candidate) => candidate.kind === "defend" && candidate.instanceIds.length === 0)
-        : legal.find((candidate) => candidate.kind === "choose" &&
-            ["no", "decline", "pass", "pay 0"].includes(candidate.optionId)) ??
-          legal.find((candidate) => candidate.kind === "pass") ??
-          legal.find((candidate) => candidate.kind === "close-chain") ??
-          legal.find((candidate) => candidate.kind === "order-triggers");
-      if (!intent) throw new Error(`no sharpener rollout intent for ${current.phase}`);
-      if (cleanAction) cleanActions.push(intent);
-      current = apply(current, actor, intent);
-    }
-
+    const cleanActions = cleanHalaActions(state);
     const brimmingIndex = cleanActions.findIndex((intent) =>
       intent.kind === "play-card" && intent.instanceId === brimmingId
     );
@@ -710,6 +818,27 @@ describe("Hala policy", () => {
     expect(cleanActions.slice(swordIndex + 1).some((intent) =>
       intent.kind === "activate-ability" && intent.sourceInstanceId === heroId
     )).toBe(false);
+  });
+
+  it("pitches the yellow Edict to fund the Flurry swing from room EA470E", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 93203,
+      startPlayer: 0,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["MPW130", "PEN049", "MPW103", "MPW104"]);
+    const yellowEdictId = state.players[0]!.hand.find((card) => card.cardId === "MPW104")!.instanceId;
+    const bladeId = state.players[0]!.weapons[0]!.instanceId;
+
+    const swings = cleanHalaActions(state).filter((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === bladeId
+    );
+    expect(swings).toHaveLength(2);
+    expect(swings.flatMap((intent) => "pitchInstanceIds" in intent ? intent.pitchInstanceIds : []))
+      .toContain(yellowEdictId);
   });
 
   it("pitches an arsenal-worthy setup card to kill an ally with Zenith", () => {
@@ -779,9 +908,9 @@ describe("Hala policy", () => {
     });
   });
 
-  it("plays an arsenaled Edict then pitches Big Blinder to kill the replay ally", () => {
+  it("keeps an unfundable Flurry Edict and pitches Big Blinder to kill the replay ally", () => {
     const gravy = gravyDeck();
-    let state = createGame({
+    const state = createGame({
       decklists: [halaDeck(gravy), gravy],
       cards: cardData,
       scripts,
@@ -803,21 +932,7 @@ describe("Hala policy", () => {
     });
     const anka = addOpponentAlly(state, "SEA262", 3);
     const blinder = state.players[0]!.hand[0]!;
-    const edict = state.players[0]!.arsenal[0]!;
     const blade = state.players[0]!.weapons[0]!;
-
-    const setup = chooseHalaIntent({
-      seat: 0,
-      view: projectStateFor(state, 0),
-      legal: legalIntents(state, 0),
-      cards: cardData,
-      state,
-    });
-    expect(setup).toMatchObject({ kind: "play-from-arsenal", instanceId: edict.instanceId });
-    state = advanceUntil(apply(state, 0, setup), (candidate) =>
-      candidate.phase === "action" && candidate.priorityPlayer === 0 &&
-      candidate.pendingDecision === null && candidate.stack.length === 0
-    );
 
     expect(chooseHalaIntent({
       seat: 0,
@@ -2997,6 +3112,87 @@ describe("Hala policy", () => {
     expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }).kind).toBe(expectedKind);
   });
 
+  it("room 66F097: does not wear Valiant Dynamo when Piercing raises the attack by its defense", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9317,
+      startPlayer: 1,
+    });
+    state.turn = 4;
+    replaceHand(state, 0, ["MPW046", "ASB016", "MPW025", "HVY209"]);
+    const view = projectStateFor(state, 0);
+    const dynamo = view.players[0].equipment.legs!;
+    expect(cardData[dynamo.cardId]?.name).toBe("Valiant Dynamo");
+    view.phase = "defend";
+    view.priorityPlayer = 0;
+    view.pendingDecision = {
+      player: 0,
+      kind: "defend",
+      prompt: "Choose defenders",
+      defenderDefense: [{ instanceId: dynamo.instanceId, defense: 1, attack: 2 }],
+    };
+    view.chain = [{
+      attackingCard: { instanceId: 90_519, cardId: "OUT009", owner: 1 },
+      defendingCards: [],
+      attackValue: 1,
+      defenseValue: 0,
+      damage: 1,
+      resolved: false,
+      reactions: [],
+    }];
+    const legal: GameIntent[] = [
+      { kind: "stage-defenders", instanceIds: [dynamo.instanceId] },
+      { kind: "defend", instanceIds: [] },
+    ];
+
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData })).toEqual({ kind: "defend", instanceIds: [] });
+  });
+
+  it.each([
+    ["adds no defense once Toe the Line covers the attack", 2, 40, false, "pass"],
+    ["still blocks damage Toe the Line leaves uncovered", 3, 40, false, "play-card"],
+    ["still blocks when a public pump beats Toe the Line at lethal", 2, 1, true, "play-card"],
+  ] as const)("room 66F097: %s", (_label, damage, life, publicPump, expectedKind) => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9326,
+      startPlayer: 1,
+    });
+    state.turn = 4;
+    replaceHand(state, 0, ["ASB016", "MPW074"]);
+    const [sink, toe] = state.players[0]!.hand;
+    const view = projectStateFor(state, 0);
+    view.players[0].life = life;
+    if (publicPump) {
+      view.players[1].arsenal = [{ instanceId: 90_521, cardId: "ZEN028", owner: 1 }];
+      view.players[1].arsenalCount = 1;
+      view.players[1].resources = 3;
+    }
+    view.phase = "reaction";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "defense-reaction", prompt: "Play a defense reaction or pass" };
+    view.chain = [{
+      attackingCard: { instanceId: 90_520, cardId: "OUT009", owner: 1 },
+      defendingCards: [],
+      attackValue: damage,
+      defenseValue: 0,
+      damage,
+      resolved: false,
+      reactions: [],
+    }];
+    view.stack = [{ card: toe!, seat: 0, label: "Toe the Line", optional: false }];
+    const legal: GameIntent[] = [
+      { kind: "play-card", instanceId: sink!.instanceId, pitchInstanceIds: [] },
+      { kind: "pass" },
+    ];
+
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }).kind).toBe(expectedKind);
+  });
+
   it.each([
     ["room 40E071: activates Zenith for the Flurry swing instead of spending And Again...", 3,
       ["MPW030", "PEN056", "MPW103", "MPW028"], "plays And Again"],
@@ -3108,6 +3304,38 @@ describe("Hala policy", () => {
       optional: false,
     });
     expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData })).toEqual({ kind: "pass" });
+  });
+
+  it("uses Ripple Away on Skyward Serenade only when its declared modes create a token", () => {
+    const state = createGame({
+      decklists: [halaDeck(), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 9306,
+      startPlayer: 1,
+    });
+    state.turn = 2;
+    replaceHand(state, 0, ["HVY209", "MPW046"]);
+    const view = projectStateFor(state, 0);
+    view.phase = "layer";
+    view.priorityPlayer = 0;
+    view.pendingDecision = { player: 0, kind: "priority-window", prompt: "Play an instant or pass" };
+    view.stack = [{
+      card: { instanceId: 9013, cardId: "AST023", owner: 1 },
+      seat: 1,
+      label: "Skyward Serenade: Search your deck for a Skyzyk; Your next attack this turn gets +1{p}",
+      optional: false,
+    }];
+    const rippleId = view.players[0].hand[0]!.instanceId;
+    const legal: GameIntent[] = [
+      { kind: "activate-ability", sourceInstanceId: rippleId, pitchInstanceIds: [] },
+      { kind: "pass" },
+    ];
+
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData })).toEqual({ kind: "pass" });
+    view.stack[0]!.label = "Skyward Serenade: Create an Embodiment of Lightning token; Search your deck for a Skyzyk";
+    expect(chooseHalaIntent({ seat: 0, view, legal, cards: cardData }))
+      .toMatchObject({ kind: "activate-ability", sourceInstanceId: rippleId });
   });
 
   it("keeps Ripple without a future Zenith resource, but spends it with Vigor", () => {

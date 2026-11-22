@@ -54,6 +54,9 @@ export interface CardInstance {
   scriptState?: Record<string, number>;
   /** Public name chosen for an active name-prohibition effect. */
   chosenName?: string;
+  /** Opponent whose effect created this token; stats-only credit for the
+   *  damage it later deals to its own controller (Bloodrot Pox). */
+  creatorSeat?: number;
   /** Extra zones this card may be played from, granted by an effect (e.g. a
    *  searched card banished face up with "you may play it this turn").
    *  Cleared at end of turn. */
@@ -280,9 +283,10 @@ export interface StackLayer {
     | { kind: "gain-action-points"; amount: number }
     | { kind: "lose-life"; amount: number }
     | { kind: "phantasm-destroy" }
+    | { kind: "mirage-destroy" }
     | { kind: "spectra-destroy" }
     | { kind: "watery-grave" }
-    /** A wager delayed until the current chain link resolves. */
+    /** A wager result delayed until the Damage Step. */
     | { kind: "wager-result"; wagerIndex: number }
     /** A hit-triggered script hook. The source is snapshotted when the hit
      * event occurs so the triggered layer remains independent if its source
@@ -432,7 +436,7 @@ export interface ChainLinkState {
   /** Public reward description for each wager completed on this link. */
   wagerRewards?: string[];
   /** Wagers generated on this link. Their winners and prizes are resolved
-   * after hit/miss is known at chain-link resolution (CR 8.5.46). */
+   * after hit/miss is known in the Damage Step (CR 8.5.46). */
   wagers?: PendingWager[];
   flags: Record<string, number | boolean>;
 }
@@ -704,6 +708,8 @@ export interface Modifier {
   onPreventCreateToken?: string;
   /** attack bonus applies only while defended by fewer than N non-equipment cards (Barraging Beatdown) */
   defendedLessThanNonEquip?: number;
+  /** attack bonus applies only while the modifier seat has intimidated at least N times this turn (Smell Fear) */
+  intimidatedAtLeastThisTurn?: number;
   appliesTo?: "any" | "attack" | "weapon" | "sword" | "attack-action";
   /** `attack` also changes matching cards' {p} while they defend ("while
    *  attacking and defending"). */
@@ -738,6 +744,15 @@ export interface Modifier {
   /** Restrict an attack modifier to a hero whose name starts with this value;
    * attacks targeting allies do not match. */
   appliesToTargetNamePrefix?: string;
+  /** Restrict a play-cost reduction to attacks targeting a hero who controls a
+   *  permanent with this class/subtype; attacks targeting allies do not match. */
+  appliesToTargetControllingType?: string;
+  /** Tokens with this subtype can't be created under this modifier's seat. */
+  prohibitsTokenCreationOfType?: string;
+  /** Opponents can't create tokens under this modifier's seat. */
+  prohibitsOpponentTokenCreation?: boolean;
+  /** Controller of the generating effect, recorded only when it isn't `seat`. */
+  creatorSeat?: number;
   /** Restrict an attack modifier to attacks targeting a currently marked hero. */
   appliesToMarkedHero?: boolean;
   /** negative subtype filter (e.g. "attack" for "'non-attack' action cards") */
@@ -854,6 +869,8 @@ export interface PendingArcane {
    * evaluated before Ward; choosing pay 0 or having no payable option closes
    * it for the rest of the original damage event. */
   arcaneBarrierResolved?: true;
+  /** Spellvoid was declined; it is not offered again for this event. */
+  spellvoidDeclined?: true;
   /** Quell sources already paid for during this damage event. */
   usedQuellSourceIds?: number[];
   /** Ward sources present when this event first offered Ward (CR 6.4.3).
@@ -862,6 +879,8 @@ export interface PendingArcane {
   wardSourceIds?: number[];
   /** Discard-prevention modifiers already applied during this damage event. */
   usedDiscardDamagePreventionModifierIds?: number[];
+  /** Counter-paid optional prevention sources already applied to this event. */
+  usedOptionalDamagePreventionSourceIds?: number[];
   /** Soul-banish prevention sources already applied to this original event. */
   usedSoulDamagePreventionSourceIds?: number[];
   /** Source currently awaiting its controller's soul-card selection. */
@@ -874,6 +893,12 @@ export interface PendingArcane {
   /** further packets queued behind this one (several sources can deal arcane
    *  damage in a single hook sweep; choices resolve one at a time) */
   queue?: PendingArcane[];
+}
+
+/** An attack-declaration hook still to run after a paused declaration. */
+export interface DeclarationHookStep {
+  instanceId: number;
+  hook: "onAttackDeclared" | "onFriendlyAttackDeclared";
 }
 
 export interface PendingDecisionState extends PendingDecision {
@@ -895,6 +920,9 @@ export interface PendingDecisionState extends PendingDecision {
   /** Parallel to options: a live card instance id or registered card id to
    *  render for that option, null for literal string options. */
   cardOptions?: (number | string | null)[];
+  /** Parallel to options: the cards choosing that option lets the deciding
+   *  player play. Projected only to them. */
+  optionEnabledCardIds?: number[][];
   /** Cards a look-at effect floats for the deciding player (chooseHook
    *  "engine-look"), or the surviving look context carried into a follow-up
    *  scripted choice. Rendered as non-interactive card images; projected only
@@ -1006,6 +1034,8 @@ export interface PendingDecisionState extends PendingDecision {
     later: { seat: number; layers: StackLayer[] }[];
     /** Existing lower stack retained while newly pending triggers are ordered. */
     baseStack?: StackLayer[];
+    /** Player who regains priority once these triggers are placed (CR 1.11.5). */
+    prioritySeat?: number;
   };
   /** Engine-owned private ordering decision (chooseHook
    *  "engine-deck-bottom-order"). Cards remain in their original zones until
@@ -1057,10 +1087,24 @@ export interface PendingDecisionState extends PendingDecision {
         targetCardInstanceId?: number;
         declaredVariableX?: number;
       }
+    | {
+        kind: "continue-window-instant-after-declaration";
+        seat: number;
+        instanceId: number;
+        pitchInstanceIds: number[];
+        from: "hand" | "arsenal" | PlayableZone;
+        meldSide?: MeldSide;
+        targetAllyId?: number;
+        boost?: boolean;
+        boostCount?: number;
+        alternativeCostCardInstanceIds?: number[];
+        targetCardInstanceId?: number;
+        declaredVariableX?: number;
+      }
     | { kind: "finish-play"; seat: number; card: CardInstance; from: "hand" | "arsenal" | PlayableZone; targetAllyId?: number; boost?: boolean; boostCount?: number; asInstant?: boolean }
   | { kind: "finish-reaction"; seat: number; card: CardInstance; from: "hand" | "arsenal" | PlayableZone }
   | { kind: "finish-window-instant"; seat: number; card: CardInstance; from: "hand" | "arsenal" | PlayableZone }
-    | { kind: "after-declare" }
+    | { kind: "after-declare"; remainingHooks?: DeclarationHookStep[] }
     | { kind: "start-reaction-step" }
     | { kind: "after-resolution" }
     | { kind: "continue-stack"; seat?: number }

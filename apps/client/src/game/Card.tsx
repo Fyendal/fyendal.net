@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { CardView } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
+import { UiIcon } from "../components/UiIcon.js";
 import { ViewportTooltip } from "../components/ViewportTooltip.js";
 import {
   hasLegacySquareCardFrame,
@@ -12,6 +13,7 @@ import {
 } from "./cardImageUrl.js";
 import { cardFrontFaceId } from "./cardPreviewFaces.js";
 import { MARKED_TOKEN_ID, cardBadges, registerCardBadges } from "./cardBadges.js";
+import { hasType, primaryType } from "@fyendal/shared";
 
 const PITCH_CLASS: Record<number, string> = {
   1: "pitch-red",
@@ -152,7 +154,8 @@ export function CardArtwork({
   const name = data?.name ?? cardId;
   const imageUrls = resolveCardImageUrls(cardId, data, false, artImage);
   const failedAttempts = imageFailure?.cardId === cardId ? imageFailure.attempts : 0;
-  const showImg = cardId !== "" && failedAttempts < imageUrls.length;
+  const imageUrl = cardId !== "" ? imageUrls[failedAttempts] : undefined;
+  const showImg = imageUrl !== undefined;
 
   return (
     <span
@@ -176,8 +179,10 @@ export function CardArtwork({
       </span>
       {showImg ? (
         <img
-          className="card-artwork-image"
-          src={imageUrls[failedAttempts]}
+          className={isMarvelCardImageUrl(imageUrl)
+            ? "card-artwork-image card-artwork-full-bleed"
+            : "card-artwork-image"}
+          src={imageUrl}
           alt=""
           draggable={false}
           loading="eager"
@@ -216,6 +221,7 @@ export function CardFace({
   label,
   accessibleLabel,
   chainSourceLabel,
+  attackTargetLabel,
   explanation,
   motionKey,
   motionZoneAnchor,
@@ -266,6 +272,8 @@ export function CardFace({
   accessibleLabel?: string;
   /** Marks the arena card that supplied the current combat-chain attack. */
   chainSourceLabel?: string;
+  /** Marks an ally or Spectra permanent the current combat-chain attack targets. */
+  attackTargetLabel?: string;
   /** Availability context shown on hover or keyboard focus. */
   explanation?: string;
   /** Stable viewer-safe presentation key used only for board motion geometry. */
@@ -287,6 +295,7 @@ export function CardFace({
   const [imageFailure, setImageFailure] = useState<{ cardId: string; attempts: number } | null>(null);
   const badges = cardBadges(card, {
     goAgain, dominate, overpower, veil, undefendable, showFaceUp, wagered, wagerRewards, boundCardNames,
+    attackTarget: attackTargetLabel !== undefined,
   });
   const marked = badges.some((badge) => badge.placement === "token");
   const overlays = badges.flatMap((badge) => badge.placement === "overlay" ? [badge] : []);
@@ -333,9 +342,9 @@ export function CardFace({
   const tallEquipmentFrame = imageUrl !== undefined && !fullBleedArt && hasTallEquipmentCardFrame(imageUrl);
   const attack = card.attack ?? data?.attack;
   const defense = card.defense ?? data?.defense;
-  const squareHero = data?.cardType === "hero";
-  const printedArenaFrame = squareHero || data?.cardType === "weapon" ||
-    data?.cardType === "equipment" || data?.cardType === "token";
+  const squareHero = data !== undefined && hasType(data, "hero");
+  const printedArenaFrame = squareHero || hasType(data, "weapon") ||
+    hasType(data, "equipment") || hasType(data, "token");
   // A transformed back face (Nitro Mechanoid) has no pitch; show its front's.
   const frontFaceId = cardFrontFaceId(card.cardId);
   const stripPitch = data?.pitch ?? (frontFaceId ? cardData[frontFaceId]?.pitch : undefined);
@@ -398,7 +407,7 @@ export function CardFace({
         <>
           <span
             className={`board-square-media${legacySquareFrame ? " board-square-media-legacy" : ""}`}
-            data-card-type={!marvelArt ? data?.cardType : undefined}
+            data-card-type={!marvelArt && data ? primaryType(data) : undefined}
             aria-hidden="true"
           >
             {showImg ? (
@@ -444,8 +453,8 @@ export function CardFace({
             <span className="board-square-accessible-name">{name}</span>
           ) : (
             <div
-              className={`board-square-name${data?.cardType === "hero" ? " board-square-name-hero" : ""}`}
-              data-card-type={data?.cardType}
+              className={`board-square-name${hasType(data, "hero") ? " board-square-name-hero" : ""}`}
+              data-card-type={data ? primaryType(data) : undefined}
               data-pitch={squarePitch}
               title={name}
             >
@@ -507,7 +516,7 @@ export function CardFace({
           <div className="c-name">{name}</div>
           {size === "preview" && data && (
             <div className="c-type">
-              {data.cardType}
+              {data.types.join(" ")}
               {data.pitch ? ` · pitch ${data.pitch}` : ""}
             </div>
           )}
@@ -524,6 +533,11 @@ export function CardFace({
       {chainSourceLabel ? (
         <div className="card-chain-source-badge" title={chainSourceLabel}>
           {chainSourceLabel}
+        </div>
+      ) : null}
+      {attackTargetLabel ? (
+        <div className="card-attack-target-badge" role="img" aria-label={attackTargetLabel} title={attackTargetLabel}>
+          <UiIcon name="target" />
         </div>
       ) : null}
       {marked ? (

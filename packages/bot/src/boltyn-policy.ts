@@ -1,4 +1,5 @@
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
+import { landedOnHit } from "./hit-model.js";
 import {
   chooseScoredIntent,
   currentAttackIsOurs,
@@ -9,10 +10,13 @@ import {
   functionalKey as key,
   intentCard,
   isAttack,
+  isOpeningTurn,
   optionCard,
   ownCards,
   pitchIds,
   pitchValue,
+  plannedDefenseReactionPlan,
+  resourceGainClosesCost,
   resourcePaymentPitchIds,
   scoreArsenalChoice,
   scoreBinaryChoice,
@@ -27,9 +31,18 @@ import {
   type ResponseModel,
 } from "./policy.js";
 import { weaponCost } from "./card-model.js";
-import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
+import {
+  arsenalValuer,
+  defenseReactionStopsEnough,
+  defenseReactionThreat,
+  defenseReactionWorthSpending,
+  handResponse,
+  opportunityValuer,
+  reserveDamageLost,
+} from "./hand-value.js";
 import { planTacticalTurn, type TacticalTurnPlan } from "./tactical-turn-planner.js";
 import { futureOffenseRate, POINTS_PER_DAMAGE } from "./turn-planner.js";
+import { keepsLethalUpkeepReserve } from "./upkeep.js";
 import { adjustValueBreakdown } from "./value.js";
 import {
   BANNERET_OF_SWORDSMANSHIP,
@@ -74,6 +87,7 @@ import {
   isLight,
   isYellow,
 } from "./boltyn-rules.js";
+import { hasType } from "@fyendal/shared";
 
 /** Pivot-turn payoffs: blocking with them is a last resort. */
 const POWER_CARDS = new Set([
@@ -104,6 +118,11 @@ function soulBanishedThisChain(input: BotPolicyInput): number {
 
 function soulCount(input: BotPolicyInput): number {
   return me(input).soul.length;
+}
+
+/** Soul cards the hero ability can turn into go again. */
+function goAgainSoul(input: BotPolicyInput): number {
+  return me(input).heroAbilitiesLost ? 0 : soulCount(input);
 }
 
 function raydn(input: BotPolicyInput): CardView | undefined {
@@ -208,7 +227,7 @@ function aggressorStance(input: BotPolicyInput): boolean {
 
 function resourceCost(data: CardData | undefined): number {
   if (!data) return 0;
-  return data.cardType === "weapon" ? weaponCost(data) : Math.max(0, data.cost ?? 0);
+  return hasType(data, "weapon") ? weaponCost(data) : Math.max(0, data.cost ?? 0);
 }
 
 /** Hand cards left to charge once this intent has spent its card and pitch. */
@@ -289,7 +308,7 @@ function goAgainExpected(
   if (key(data) === "bravery of the blade|1") {
     return charged(input) || chargeableAfter(intent, input, own).length > 0;
   }
-  return soulCount(input) > 0 && attackWillBePumped(data, card, intent, input, own);
+  return goAgainSoul(input) > 0 && attackWillBePumped(data, card, intent, input, own);
 }
 
 // Each damage per held card above a fair return weighs a block's lost offense more.
@@ -316,6 +335,7 @@ function scoreDefend(intent: DefendIntent, input: BotPolicyInput, own: ReadonlyM
   return scoreDefenseIntent(intent, input, own, {
     ...boltynResponse,
     cardOpportunity,
+    pricesHeroAbilityLoss: true,
     responseLossWeight: responseLossWeight(input),
     equipmentUseIsFree(card, observed) {
       // Solforge Gauntlet settles into the soul when the chain closes.
@@ -326,8 +346,10 @@ function scoreDefend(intent: DefendIntent, input: BotPolicyInput, own: ReadonlyM
       const chosenIds = new Set(candidate.chosen.map((card) => card.instanceId));
       const chosenKeys = candidate.chosen.map((card) => key(observed.cards[card.cardId]));
       const handLeft = me(observed).hand.filter((card) => !chosenIds.has(card.instanceId));
-      const yellowLeft = handLeft.some((card) => isYellow(observed.cards[card.cardId]));
-      const anyLeft = handLeft.length > 0;
+      // Cards the block's planned defense reactions spend cannot also be charged.
+      const chargeable = handLeft.filter((card) => !candidate.consumedIds.has(card.instanceId));
+      const yellowLeft = chargeable.some((card) => isYellow(observed.cards[card.cardId]));
+      const anyLeft = chargeable.length > 0;
       let adjustment = 0;
       // A grace-equipment block becomes soul, and a yellow charge a draw or a Quicken.
       if (chosenKeys.includes(HELM_OF_HALOS_GRACE) && anyLeft) {
@@ -339,7 +361,7 @@ function scoreDefend(intent: DefendIntent, input: BotPolicyInput, own: ReadonlyM
       if (chosenKeys.includes(SOULBOND_RESOLVE) && anyLeft) adjustment += SOUL_VALUE + 0.5;
       if (chosenKeys.includes(CIRCLET)) {
         const opponent = observed.view.players[1 - observed.seat]!;
-        if (opponent.banish.some((card) => !card.faceDown && observed.cards[card.cardId]?.cardType === "action")) {
+        if (opponent.banish.some((card) => !card.faceDown && hasType(observed.cards[card.cardId], "action"))) {
           adjustment += 1.5;
         }
       }
@@ -347,10 +369,24 @@ function scoreDefend(intent: DefendIntent, input: BotPolicyInput, own: ReadonlyM
         // The Tunic is the V of the Vanguard engine, not a one-point blocker.
         if (chosenKeys.includes(FYENDALS_SPRING_TUNIC)) adjustment -= 5;
         // A block spends a power card as surely as a charge, so it pays the charge price over its held value.
-        for (const card of candidate.chosen) {
-          if (!POWER_CARDS.has(key(observed.cards[card.cardId]))) continue;
-          const unpaid = cardChargeCost(card, observed, cardOpportunity) - cardOpportunity(card, observed);
-          adjustment -= Math.max(1.5, unpaid);
+        const powerPrice = (card: CardView) => POWER_CARDS.has(key(observed.cards[card.cardId]))
+          ? Math.max(1.5, cardChargeCost(card, observed, cardOpportunity) - cardOpportunity(card, observed))
+          : 0;
+        for (const card of candidate.chosen) adjustment -= powerPrice(card);
+        // A landed hit that takes hand cards spends them just the same.
+        const { handCardsLost, handLossSelector } = candidate.onHit;
+        if (!candidate.stopsHit && candidate.incoming > 0 && handCardsLost > 0 && handLossSelector) {
+          const prices = handLeft
+            .filter((card) => !candidate.consumedIds.has(card.instanceId))
+            .map(powerPrice)
+            .sort((left, right) => right - left);
+          const lost = Math.min(handCardsLost, prices.length);
+          const total = (picked: readonly number[]) => picked.reduce((sum, price) => sum + price, 0);
+          adjustment -= handLossSelector === "attacker"
+            ? total(prices.slice(0, lost))
+            : handLossSelector === "defender"
+            ? total(prices.slice(prices.length - lost))
+            : prices.length > 0 ? total(prices) * lost / prices.length : 0;
         }
         adjustment -= chosenKeys.filter((functional) => functional.startsWith("beaming bravado|")).length * 0.5;
       }
@@ -361,14 +397,25 @@ function scoreDefend(intent: DefendIntent, input: BotPolicyInput, own: ReadonlyM
   });
 }
 
+/** Damage a charged card would have stopped through the planned defense reactions; Infinity when it costs survival. */
+function defenseLostToCharge(card: CardView, input: BotPolicyInput): number {
+  const planned = (pitchInstanceIds: number[]) =>
+    plannedDefenseReactionPlan(input, { kind: "defend", instanceIds: [], pitchInstanceIds }).amount;
+  const kept = planned([]);
+  const without = planned([card.instanceId]);
+  if (without >= kept) return 0;
+  const { incoming, lethal } = defenseReactionThreat(input);
+  return lethal ? Infinity : Math.min(incoming, kept) - Math.min(incoming, without);
+}
+
 /** Value of the turn's first charge: Raydn's +3, Lumina's extra swing, the card's riders. */
 function firstChargeValue(sourceKey: string, input: BotPolicyInput, raydnReachable: boolean): number {
   if (charged(input)) return 0;
   let value = raydnReachable ? 3 : 0;
   if (raydnReachable && holds(input, LUMINA_ASCENSION)) value += 3;
-  if (sourceKey.startsWith("bolt of courage|")) value += CARD_DRAW_VALUE * 0.6;
-  if (sourceKey.startsWith("engulfing light|")) value += SOUL_VALUE * 0.6;
-  if (sourceKey === "bravery of the blade|1") value += 2 + COURAGE_TOKEN_VALUE * 0.6;
+  if (sourceKey.startsWith("bolt of courage|")) value += landedOnHit(input, CARD_DRAW_VALUE);
+  if (sourceKey.startsWith("engulfing light|")) value += landedOnHit(input, SOUL_VALUE);
+  if (sourceKey === "bravery of the blade|1") value += 2 + landedOnHit(input, COURAGE_TOKEN_VALUE);
   if (sourceKey === SAVING_GRACE) value += 2;
   if (holds(input, BEACON_OF_VICTORY) && soulCount(input) > 0) value += BEACON_SEARCH_VALUE * 0.5;
   if (holds(input, COURAGEOUS_STEELHAND)) value += 2;
@@ -421,7 +468,10 @@ function scoreChargeOption(intent: ChooseIntent, input: BotPolicyInput): number 
   const data = input.cards[card.cardId];
   const sourceKey = promptSourceKey(input);
   const ourTurn = input.view.activePlayer === input.seat;
-  let gain = SOUL_VALUE - cardChargeCost(card, input, cardOpportunity);
+  const defenseLost = ourTurn ? 0 : defenseLostToCharge(card, input);
+  if (defenseLost === Infinity) return -50;
+  if (!ourTurn && sourceKey === SAVING_GRACE) return savingGraceChargeGain(card, input) - defenseLost;
+  let gain = SOUL_VALUE - cardChargeCost(card, input, cardOpportunity) - defenseLost;
   // Spirit of Eirina enters the arena instead of the soul: a free setup.
   if (key(data) === SPIRIT_OF_EIRINA && boardCount(input, "spirit of eirina") === 0) gain += SPIRIT_OF_EIRINA_VALUE;
   if (boardCount(input, "blessing of bellona") > 0) gain += COURAGE_TOKEN_VALUE;
@@ -436,7 +486,7 @@ function scoreChargeOption(intent: ChooseIntent, input: BotPolicyInput): number 
     const sources = others.filter((held) => isAttack(input.cards[held.cardId])).length +
       me(input).arsenal.filter((held) => isAttack(input.cards[held.cardId])).length +
       (raydnAvailable(input) ? 1 : 0);
-    const fuel = soulCount(input) + 1 + boardCount(input, "quicken");
+    const fuel = (me(input).heroAbilitiesLost ? 0 : soulCount(input) + 1) + boardCount(input, "quicken");
     const attacksLeft = 1 + Math.max(0, Math.min(sources, fuel));
     gain += isLight(data) ? attacksLeft : 0;
     // The chain needs attacks to carry the pump.
@@ -445,7 +495,6 @@ function scoreChargeOption(intent: ChooseIntent, input: BotPolicyInput): number 
   }
   if (ourTurn) gain += firstChargeValue(sourceKey, input, raydnReachableAfter(sourceKey, card, input));
   else if (sourceKey === SOULBOND_RESOLVE) gain += 1;
-  else if (sourceKey === SAVING_GRACE && !charged(input)) gain += 2;
   return gain;
 }
 
@@ -565,38 +614,49 @@ function scoreChoice(intent: ChooseIntent, input: BotPolicyInput): number {
   return card ? 10 - cardOpportunity(card, input) : 1;
 }
 
-/** Resources a card playable now still needs beyond what is floating. */
-function resourcesWanted(input: BotPolicyInput): number {
-  const player = me(input);
+/** Reserve cards that can spend resources now, with their costs. */
+function resourceWants(input: BotPolicyInput): { card: CardView; cost: number }[] {
   const ourTurn = input.view.activePlayer === input.seat;
   const reacting = input.view.pendingDecision?.kind === "defense-reaction";
-  const costs = reserve(input).flatMap((card) => {
+  return reserve(input).flatMap((card) => {
     const data = input.cards[card.cardId];
     // A defense reaction only spends resources in the opponent's reaction step.
-    const usable = ourTurn ? data?.cardType !== "defense-reaction" : reacting && data?.cardType === "defense-reaction";
-    return usable ? [resourceCost(data)] : [];
+    const usable = ourTurn ? !hasType(data, "defense-reaction") : reacting && hasType(data, "defense-reaction");
+    return usable ? [{ card, cost: resourceCost(data) }] : [];
   });
-  const needed = Math.max(0, ...costs);
-  return Math.max(0, needed - player.resources);
 }
 
-/** The ability is offered again while its go-again layer is still pending. */
-function heroAbilityPending(input: BotPolicyInput): boolean {
+/** Resources a card playable now still needs beyond what is floating. */
+function resourcesWanted(input: BotPolicyInput): number {
+  const needed = Math.max(0, ...resourceWants(input).map(({ cost }) => cost));
+  return Math.max(0, needed - me(input).resources);
+}
+
+/** Go-again sources are offered again while one of their layers is still pending. */
+function goAgainLayerPending(input: BotPolicyInput): boolean {
   const heroId = me(input).heroInstanceId;
-  return input.view.stack.some((layer) => layer.seat === input.seat && layer.card?.instanceId === heroId);
+  return input.view.stack.some((layer) =>
+    layer.seat === input.seat && !!layer.card &&
+    (layer.card.instanceId === heroId || key(input.cards[layer.card.cardId]) === SNAPDRAGON_SCALERS)
+  );
 }
 
 function scoreHeroAbility(input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
   const link = currentLink(input);
   if (!link || link.resolved || !currentAttackIsOurs(input) || !canGainGoAgain(link)) return -100;
-  if (input.view.pendingDecision?.kind !== "attack-reaction" || heroAbilityPending(input)) return -100;
+  if (input.view.pendingDecision?.kind !== "attack-reaction" || goAgainLayerPending(input)) return -100;
   const pass: GameIntent = { kind: "pass" };
   const sword = raydn(input);
   const swordWorthSwinging = raydnAvailable(input) &&
     (charged(input) || luminaActive(input) || (sword?.attack ?? 0) > 0 || boardCount(input, "courage") > 0 ||
       vBuffActive(input) || holds(input, LUMINA_ASCENSION));
-  const sources = attackSourcesAfter(pass, input, own);
-  const others = sources - (raydnAvailable(input) ? 1 : 0);
+  const swordSource = raydnAvailable(input) ? 1 : 0;
+  let others = attackSourcesAfter(pass, input, own) - swordSource;
+  // The opening turn keeps a hand card back for arsenal once it has attacked.
+  if (isOpeningTurn(input) && !shouldPreserveOpeningHand(input)) {
+    others = Math.min(others, Math.max(0, me(input).hand.length - 1));
+  }
+  const sources = others + swordSource;
   if (others === 0 && !swordWorthSwinging) return -100;
   // Floating action points, such as Lumina's go again, already carry every remaining attack.
   if (me(input).actionPoints >= sources) return -100;
@@ -619,16 +679,29 @@ function raydnSwingSecured(intent: GameIntent, input: BotPolicyInput, own: Reado
 }
 
 function raydnSwingPower(card: CardView, input: BotPolicyInput): number {
-  return (card.attack ?? 0) + (charged(input) ? 3 : 0) + (luminaActive(input) ? 1 : 0) +
-    (boardCount(input, "courage") > 0 ? 1 : 0);
+  return Math.max(0, (card.attack ?? 0) + (charged(input) ? 3 : 0) + (luminaActive(input) ? 1 : 0) +
+    (boardCount(input, "courage") > 0 ? 1 : 0) - boardCount(input, "frailty"));
 }
 
-/** A 0-power swing that opens no reaction window for Roaring Beam, a lethal Beacon or a Warband charge. */
+/** Holds every named card, and a lethal upkeep's reserve lets them all be played. */
+function canSpend(input: BotPolicyInput, ...functionals: readonly string[]): boolean {
+  const held = functionals.flatMap((functional) =>
+    reserve(input).find((card) => key(input.cards[card.cardId]) === functional)?.instanceId ?? []
+  );
+  return held.length === functionals.length && keepsLethalUpkeepReserve(input, held);
+}
+
+/** Roaring Beam charges only from an empty soul, which Beacon of Victory can make. */
+function roaringBeamCanCharge(input: BotPolicyInput): boolean {
+  return soulCount(input) === 0 ? canSpend(input, ROARING_BEAM) : canSpend(input, ROARING_BEAM, BEACON_OF_VICTORY);
+}
+
+/** A 0-power swing that opens no reaction window for a charging Roaring Beam, a lethal Beacon or a Warband charge. */
 function emptyRaydnSwing(input: BotPolicyInput): boolean {
   const sword = raydn(input);
   if (!sword || raydnSwingPower(sword, input) > 0) return false;
-  return !holds(input, ROARING_BEAM) && !ongoingFrom(input, WARBAND_OF_BELLONA) &&
-    !(holds(input, BEACON_OF_VICTORY) && soulCount(input) >= input.view.players[1 - input.seat]!.life);
+  return !roaringBeamCanCharge(input) && !ongoingFrom(input, WARBAND_OF_BELLONA) &&
+    !(canSpend(input, BEACON_OF_VICTORY) && soulCount(input) >= input.view.players[1 - input.seat]!.life);
 }
 
 function scoreRaydn(
@@ -641,7 +714,7 @@ function scoreRaydn(
   const further = attackSourcesAfter(intent, input, own) > 0;
   if (power === 0) return emptyRaydnSwing(input) ? -5 : 3;
   let score = power + (ongoingFrom(input, IRONSONG_VERSUS) ? 2 : 0);
-  if (further && (boardCount(input, "quicken") > 0 || soulCount(input) > 0)) score += 10;
+  if (further && (boardCount(input, "quicken") > 0 || goAgainSoul(input) > 0)) score += 10;
   // Set-up first: a charge, Lumina or Edict makes the swing bigger.
   if (!charged(input) && me(input).hand.some((held) => isChargeAttack(input.cards[held.cardId]))) score -= 4;
   // Every held Lumina resolves first; an instant one follows the swing instead.
@@ -650,6 +723,45 @@ function scoreRaydn(
   }
   if (holds(input, EDICT_OF_STEEL)) score -= 5;
   return score;
+}
+
+/** Soul and Blessing value a charge on the opponent's turn adds besides its -2. */
+function defensiveChargeBonus(card: CardView, input: BotPolicyInput): number {
+  return SOUL_VALUE +
+    (boardCount(input, "blessing of bellona") > 0 ? COURAGE_TOKEN_VALUE : 0) +
+    (boardCount(input, "blessing of suraya") > 0 ? PONDER_TOKEN_VALUE : 0) +
+    (key(input.cards[card.cardId]) === BANNERET_OF_SWORDSMANSHIP ? FLURRY_TOKEN_VALUE : 0);
+}
+
+/** The shared defense-reaction test, with Saving Grace charged only when the -2 beats the charged card. */
+function boltynDefenseReactionWorthSpending(
+  intent: GameIntent,
+  card: CardView,
+  data: CardData,
+  input: BotPolicyInput,
+  chargeable: readonly CardView[],
+): boolean {
+  const grace = key(data) === SAVING_GRACE;
+  const defense = Math.max(0, card.defense ?? data.defense ?? 0);
+  // An earlier charge this turn already gives Saving Grace its -2.
+  const plainDefense = defense + (grace && charged(input) ? 2 : 0);
+  if (defenseReactionWorthSpending(card, input, boltynSolverRules, pitchIds(intent), plainDefense)) return true;
+  if (!grace || charged(input) || !defenseReactionStopsEnough(input, defense + 2)) return false;
+  const { incoming } = defenseReactionThreat(input);
+  return chargeable.some((charge) =>
+    Math.min(incoming, defense + 2) + defensiveChargeBonus(charge, input) >
+      reserveDamageLost(input, boltynSolverRules, new Set([card.instanceId, charge.instanceId, ...pitchIds(intent)]))
+  );
+}
+
+/** Saving Grace's charge on the opponent's turn: the -2 it adds and the soul against the charged card. */
+function savingGraceChargeGain(card: CardView, input: BotPolicyInput): number {
+  const grace = input.view.pendingDecision?.preStackSource?.card;
+  const graceDefense = grace ? Math.max(0, grace.defense ?? input.cards[grace.cardId]?.defense ?? 0) : 0;
+  const remaining = Math.max(0, defenseReactionThreat(input).incoming - graceDefense);
+  const prevented = charged(input) ? 0 : Math.min(2, remaining);
+  return prevented + defensiveChargeBonus(card, input) -
+    reserveDamageLost(input, boltynSolverRules, new Set([card.instanceId]), grace?.instanceId);
 }
 
 function scoreAttackReaction(data: CardData, input: BotPolicyInput, own: ReadonlyMap<number, CardView>): number {
@@ -667,11 +779,11 @@ function scoreAttackReaction(data: CardData, input: BotPolicyInput, own: Readonl
     // Uncharged it trades a soul card and the search for +1: hold it for a charged turn.
     if (!charged(input) && !lethal && !combo) return -100;
     return 8 + (charged(input) || combo ? 12 : 0) + (lethal ? 30 : 0) +
-      (canGainGoAgain(link) && further && soul >= 2 ? 4 : 0);
+      (canGainGoAgain(link) && further && goAgainSoul(input) >= 2 ? 4 : 0);
   }
   if (functional === ROARING_BEAM) return soul === 0 ? 14 : further ? 6 : 2;
   if (functional === COURAGEOUS_STEELHAND) {
-    return charged(input) ? 9 + (canGainGoAgain(link) && soul >= 1 && further ? 6 : 0) : -100;
+    return charged(input) ? 9 + (canGainGoAgain(link) && goAgainSoul(input) >= 1 && further ? 6 : 0) : -100;
   }
   return 4;
 }
@@ -706,8 +818,9 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
       score = opening ? -100 : scoreRaydn(card, intent, input, own);
     } else if (functional === FYENDALS_SPRING_TUNIC) {
       // Unneeded resource sources rank below pass so the root cap still compares passing.
-      score = resourcesWanted(input) > 0
-        ? (ourTurn && holds(input, V_OF_THE_VANGUARD) && player.hand.length >= 4 ? 50 : 25)
+      // Paying V of the Vanguard frees its pitch card to charge; otherwise the {r} must close a cost gap.
+      score = ourTurn && holds(input, V_OF_THE_VANGUARD) && player.hand.length >= 4 && resourcesWanted(input) > 0 ? 50
+        : resourceGainClosesCost(input, resourceWants(input), 1) ? 25
         : -100;
     } else if (functional === IRONSONG_VERSUS) {
       score = ourTurn && !opening && raydnSwingSecured(intent, input, own) ? 8 : -20;
@@ -723,11 +836,12 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     } else if (functional === SNAPDRAGON_SCALERS) {
       const link = currentLink(input);
       score = currentAttackIsOurs(input) && !!link && canGainGoAgain(link) &&
-          input.view.pendingDecision?.kind === "attack-reaction" && further
+          input.view.pendingDecision?.kind === "attack-reaction" && further &&
+          !goAgainLayerPending(input)
         ? 28
         : -100;
     } else if (functional === ENERGY_POTION) {
-      score = resourcesWanted(input) > 0 ? 15 : -100;
+      score = resourceGainClosesCost(input, resourceWants(input), 2) ? 15 : -100;
     } else {
       score = -100;
     }
@@ -741,7 +855,8 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     // Light charges pump V and feed the hero ability that extends it.
     const lights = chargeable.filter((held) => isLight(input.cards[held.cardId])).length;
     const pumped = lights > 0 || boardCount(input, "courage") > 0 || vBuffActive(input);
-    const goAgain = boardCount(input, "quicken") > 0 || (pumped && (soul >= 1 || lights > 0));
+    const goAgain = boardCount(input, "quicken") > 0 ||
+      (pumped && !player.heroAbilitiesLost && (soul >= 1 || lights > 0));
     score = 3 + Math.min(lights, 2) + (goAgain && further ? 14 : 0) +
       (chargeable.length >= 3 ? 10 + 3 * chargeable.length : 0);
   } else if (functional === LUMINA_ASCENSION && !ourTurn) {
@@ -757,10 +872,12 @@ function scorePlay(intent: GameIntent, input: BotPolicyInput, own: ReadonlyMap<n
     const banished = soulBanishedThisChain(input);
     score = 3 + 2 * Math.min(3, banished) +
       (banished === 0 && soul >= 3 && holds(input, CELESTIAL_CATACLYSM) ? -3 : 0);
-  } else if (data.cardType === "attack-reaction") {
+  } else if (hasType(data, "attack-reaction")) {
     score = scoreAttackReaction(data, input, own);
-  } else if (data.cardType === "defense-reaction") {
-    score = scoreDefenseReaction(data, input) + (functional === SAVING_GRACE && chargeable.length > 0 ? 4 : 0);
+  } else if (hasType(data, "defense-reaction")) {
+    score = boltynDefenseReactionWorthSpending(intent, card, data, input, chargeable)
+      ? scoreDefenseReaction(data, input, card) + (functional === SAVING_GRACE && chargeable.length > 0 ? 4 : 0)
+      : -100;
   } else if (isAttack(data)) {
     score = card.attack ?? data.attack ?? 0;
     const goAgain = goAgainExpected(data, card, intent, input, own);

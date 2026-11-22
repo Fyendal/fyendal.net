@@ -17,7 +17,7 @@ import {
   nameOf,
 } from "./gameLog.js";
 
-import { recordAttackStats, recordHeroDamage } from "./stats.js";
+import { recordAttackStats, recordDamageTakenFromTypes, recordHeroDamage } from "./stats.js";
 import type { AdditionalTargetHit, ChainLinkState, PendingArcane, PlayerState } from "./state.js";
 
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
@@ -49,13 +49,17 @@ function dispatchSuppressedHitObservers(state: GameStateInternal,
   }
 }
 
-/** Record that the link's attack hit this turn, as `hitType:<class/subtype>`
- * flags on the attacking player, so "if a <subtype> has hit this turn" checks
- * also see hits from before their source entered the arena. */
+/** Record that the link's attack hit this turn, as `hitType:<card type/class/
+ * subtype>` flags on the attacking player, so "if a <type> has hit this turn"
+ * checks also see hits from before their source entered the arena, and count
+ * each hit-event (hero or ally) per attacking object as `attackHits:<instanceId>`. */
 function recordAttackHit(state: GameStateInternal, link: ChainLinkState): void {
   const attacker = state.players[link.attacker] as PlayerState;
   const live = findCardAnywhere(state, link.attackingCard.instanceId)?.card ?? link.attackingCard;
+  attacker.flags[`hitType:${link.attackCardType}`] = true;
   for (const type of cardTypesOf(state, live)) attacker.flags[`hitType:${type}`] = true;
+  const hitsKey = `attackHits:${link.attackingCard.instanceId}`;
+  attacker.flags[hitsKey] = (Number(attacker.flags[hitsKey]) || 0) + 1;
 }
 
 function applyHit(
@@ -69,6 +73,8 @@ function applyHit(
   defender.life -= link.damage;
   if (link.damage > 0) defender.flags.lostLifeThisTurn = true;
   recordHeroDamage(state, link.attacker, link.damage);
+  const liveAttack = findCardAnywhere(state, link.attackingCard.instanceId)?.card ?? link.attackingCard;
+  recordDamageTakenFromTypes(defender, cardTypesOf(state, liveAttack), link.damage);
   logPublic(
     state,
     gameLogMessage(
@@ -342,6 +348,7 @@ function applyCombatDamage(
   targetSeat = opponent(link.attacker),
 ): boolean {
   link.damage = damage;
+  link.flags.combatDamageDealt = true;
   // Effects such as Flick Knives can make the active chain link hit during
   // the Reaction Step even when the attack itself is fully defended. Preserve
   // that aggregate result while resolving the attack's combat damage.
@@ -439,6 +446,7 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
     // on-hit hooks still fire; scripts whose text says "hits a hero" filter
     // out links with targetAllyId.
     const targetAlly = defenderPlayer.board.find((c) => c.instanceId === link.targetAllyId);
+    recordAttackStats(state, link.attacker, defenderPlayer.seat, damage, 0);
     if (!targetAlly) {
       logPublic(state, gameLogMessage(
         `${nameOf(state, link.attackingCard.cardId)} finds no target (the ally is gone)`,
@@ -446,6 +454,7 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
         { card: logCardValue(link.attackingCard.cardId) },
       ));
       link.damage = 0;
+      link.flags.combatDamageDealt = true;
       dealAdditionalTargetDamage(state, runtime, link, after);
       if ((link.additionalTargetHits?.length ?? 0) > 0) {
         link.hit = true;
@@ -463,6 +472,7 @@ export function resolveLink(state: GameStateInternal, runtime: EngineRuntime): v
         combat: true,
       });
       link.damage = dealt;
+      link.flags.combatDamageDealt = true;
       dealAdditionalTargetDamage(state, runtime, link, after);
       link.hit = dealt > 0 || (link.additionalTargetHits?.length ?? 0) > 0;
       if (dealt > 0) {

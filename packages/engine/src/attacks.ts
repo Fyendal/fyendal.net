@@ -1,5 +1,6 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
+import { takeInstantBoostResult } from "./boost.js";
 import {
   cardColorOf,
   cardHasType,
@@ -12,7 +13,6 @@ import {
 } from "./cardProperties.js";
 import {
   conditionalModifierGrantsGoAgain,
-  conditionalScriptGrantsGoAgain,
   modifierApplies,
   modifierAppliesTo,
 } from "./combatModifiers.js";
@@ -30,13 +30,13 @@ import {
   logPublic,
   nameOf,
 } from "./gameLog.js";
-import { abilityList, activatedFlagKey } from "./scripts.js";
+import { abilityList } from "./scripts.js";
 import type { ActivatedAbility } from "./scripts.js";
-import type { CardInstance, ChainLinkState, Modifier, PlayerState, StackLayer } from "./state.js";
+import type { CardInstance, ChainLinkState, DeclarationHookStep, Modifier, PlayerState, StackLayer } from "./state.js";
 
 import { controlledPermanents, observingHookSources } from "./sourceQueries.js";
 
-import { activationCostReductionForCard, actionAbilityRestrictedByModifier } from "./abilityRules.js";
+import { activationCostReductionForCard, actionAbilityRestrictedByModifier, grantedAuraAttackAvailable, recordGrantedAuraAttack } from "./abilityRules.js";
 import {
   clearTemporaryObjectEffects,
   consumeNextActionGoAgain,
@@ -48,12 +48,14 @@ import { weaponAttacksProhibited } from "./combatRestrictions.js";
 
 import {
   currentLink,
+  liveDefendingEquipment,
   opponent,
   removeFromArray,
 } from "./zoneQueries.js";
 import type { CardPlayOrigin } from "./stackCore.js";
 import { transitionZone } from "./transitions.js";
 import { ATTACKS_QUEUED_ABOVE_LAYER, dequeueAttack, enqueueAttack, type DeferredAttackLayer, type QueuedAttack } from "./attackQueue.js";
+import { hasType } from "@fyendal/shared";
 
 function replacePowerGain(
   state: GameStateInternal,
@@ -70,7 +72,7 @@ function replacePowerGain(
     runtime.makeCtx(state, link.attacker, link.attackingCard, link),
     amount,
   ) ?? amount;
-  for (const defender of link.defendingEquipment) {
+  for (const defender of liveDefendingEquipment(state, link)) {
     const next = scriptOf(state, defender.cardId, defender)?.replacePowerGain?.(
       runtime.makeCtx(state, opponent(link.attacker), defender, link),
       replaced,
@@ -86,12 +88,16 @@ function attachNextAttackModifiers(
   runtime: EngineRuntime,
   link: ChainLinkState,
 ): void {
+  const printed = dataOf(state, link.attackingCard.cardId).attack ?? 0;
+  const basePower = basePowerOf(state, runtime, link.attacker, link.attackingCard, printed);
   const attach = (mod: Modifier): void => {
     if (mod.attackFromBasePower) {
-      const printed = dataOf(state, link.attackingCard.cardId).attack ?? 0;
-      mod.attack = basePowerOf(state, runtime, link.attacker, link.attackingCard, printed);
+      mod.attack = basePower;
       delete mod.attackFromBasePower;
     }
+    // The base-power condition is checked once here; later re-filtering reads printed power.
+    delete mod.minBasePower;
+    delete mod.maxBasePower;
     if (mod.attack !== undefined && mod.attack > 0) {
       mod.attack = replacePowerGain(state, runtime, link, mod.attack);
     }
@@ -115,17 +121,21 @@ function attachNextAttackModifiers(
   // Type grants attach first so another next-attack modifier can match the
   // resulting type (for example, an attack made Illusionist this turn).
   for (const mod of state.modifiers) {
-    if (mod.scope === "next-attack" && mod.grantType && modifierApplies(state, mod, link)) {
+    if (mod.scope === "next-attack" && mod.grantType && modifierApplies(state, mod, link, basePower)) {
       attach(mod);
     }
   }
   for (const mod of state.modifiers) {
-    if (mod.scope === "next-attack" && modifierApplies(state, mod, link)) {
+    if (mod.scope === "next-attack" && modifierApplies(state, mod, link, basePower)) {
       attach(mod);
     }
   }
-  // combat-chain grants ("your attacks are Draconic this combat chain") stamp
-  // every matching attack declared while they are active
+  stampCombatChainGrantedTypes(state, link);
+}
+
+/** Combat-chain grants ("your attacks are Draconic this combat chain") stamp
+ * every matching attack that comes onto the chain while they are active. */
+function stampCombatChainGrantedTypes(state: GameStateInternal, link: ChainLinkState): void {
   for (const mod of state.modifiers) {
     if (mod.scope === "combat-chain" && mod.grantType && modifierApplies(state, mod, link)) {
       link.flags[`grantedType:${mod.grantType.toLowerCase()}`] = true;
@@ -143,7 +153,7 @@ export function isAuraAttacker(
   if (card.faceDown) return false;
   if (!grantsAuraAttackMarker(state, player, card)) return false;
   const abilityIndex = abilityList(scriptOf(state, card.cardId, card)).length;
-  return !player.flags[activatedFlagKey(card.instanceId, abilityIndex)];
+  return grantedAuraAttackAvailable(player, card.instanceId, abilityIndex);
 }
 
 /** The resource cost of a weapon/aura attack activation after the ability's
@@ -206,9 +216,10 @@ export function attackActivationCost(
 /**
  * Activate a granted aura attack: during their action phase, a matching ready
  * board card attacks like a weapon (it stays in play, doesn't tap) for 1 action
- * point + the marker's {r} cost, once per turn per aura. The granted ability
- * can have go again directly, or gain it from a +1{p} counter when the marker
- * has goAgainWithPowerCounter (also re-evaluated at link resolution).
+ * point + the marker's {r} cost, once per turn per aura unless an effect such
+ * as Flurry raises its attack limit. The granted ability can have go again
+ * directly, or gain it from a +1{p} counter when the marker has
+ * goAgainWithPowerCounter (also re-evaluated at link resolution).
  */
 export function activateAuraAttack(
   state: GameStateInternal,
@@ -242,7 +253,7 @@ export function activateAuraAttack(
   consumeFirstAttackExtraCost(state, player);
   player.actionPoints -= 1;
   noteActionPlayedOrActivated(player);
-  player.flags[activatedFlagKey(card.instanceId, grantedIndex)] = true;
+  recordGrantedAuraAttack(player, card.instanceId, grantedIndex);
   (card.scriptState ??= {}).attacked = 1;
   runtime.events.fireOnFriendlyActivate(state, seat, card, "action");
   // Observers may grant go again specifically to this action activation.
@@ -400,8 +411,7 @@ export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime
   if (inherentGoAgain) runtime.events.grantLinkGoAgain(state, link, true);
   if (
     innateGoAgain ||
-    conditionalModifierGrantsGoAgain(state, link, computeAttack(state, runtime, link)) ||
-    conditionalScriptGrantsGoAgain(state, runtime, link)
+    conditionalModifierGrantsGoAgain(state, link, computeAttack(state, runtime, link))
   ) {
     runtime.events.grantLinkGoAgain(state, link);
   }
@@ -431,15 +441,41 @@ export function beginAttackStep(state: GameStateInternal, runtime: EngineRuntime
     heroLast: true,
   }).filter((source) => source.instanceId !== card.instanceId);
 
-  runtime.events.runHook(state, seat, card, "onAttackDeclared", link);
-  for (const source of [card, ...observers]) {
-    runtime.events.runHook(state, seat, source, "onFriendlyAttackDeclared", link);
-  }
+  continueDeclarationHooks(state, runtime, [
+    { instanceId: card.instanceId, hook: "onAttackDeclared" },
+    ...[card, ...observers].map((source) => ({
+      instanceId: source.instanceId,
+      hook: "onFriendlyAttackDeclared" as const,
+    })),
+  ]);
+}
 
-  // A script may have paused declaration on a choice; resume via declareTail afterwards.
-  if (state.pendingDecision?.chooseHook) {
-    state.pendingDecision.resume = { kind: "after-declare" };
-    return;
+/** Run attack-declaration hooks in order. A hook that opens a decision pauses
+ * the rest, so a later hook's decision never overwrites it. */
+export function continueDeclarationHooks(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  steps: DeclarationHookStep[],
+): void {
+  const link = currentLink(state);
+  if (!link) return;
+  const seat = link.attacker;
+  for (let index = 0; index < steps.length; index++) {
+    const step = steps[index] as DeclarationHookStep;
+    const source = step.instanceId === link.attackingCard.instanceId
+      ? link.attackingCard
+      : observingHookSources(state, seat, {
+          board: true,
+          arsenal: true,
+          equipment: true,
+          weapons: true,
+          heroLast: true,
+        }).find((candidate) => candidate.instanceId === step.instanceId);
+    if (source) runtime.events.runHook(state, seat, source, step.hook, link);
+    if (state.pendingDecision?.chooseHook) {
+      state.pendingDecision.resume = { kind: "after-declare", remainingHooks: steps.slice(index + 1) };
+      return;
+    }
   }
   declareTail(state, runtime);
 }
@@ -458,7 +494,7 @@ export function attackFromDeck(
   if (index < 0) return false;
   const card = player.deck[index] as CardInstance;
   const data = dataOf(state, card.cardId);
-  if (data.cardType !== "action" || !(data.subtypes ?? []).includes("attack")) return false;
+  if (!hasType(data, "action") || !(data.subtypes ?? []).includes("attack")) return false;
   player.deck.splice(index, 1);
   declareAttack(state, runtime, seat, card, "action");
   return true;
@@ -599,9 +635,12 @@ export function startNextQueuedAttack(
         continue;
       }
       const origin = queued.cardOrigin;
+      const boost = takeInstantBoostResult(card);
       startQueuedAttack(state, runtime, seat, card, queued.targetAllyId, queued.layer ?? {
         cardType: "action",
         flags: {
+          ...(boost.boosted ? { boosted: true } : {}),
+          ...(boost.boostSucceeded ? { grantedGoAgainAtLayer: true } : {}),
           ...(origin === "arsenal" ? { fromArsenal: true } : {}),
           ...(origin === "banish" ? { fromBanish: true } : {}),
           ...(origin !== "hand" && origin !== "arsenal" ? { fromOutsideHandOrArsenal: true } : {}),
@@ -688,6 +727,7 @@ export function attackWithPermanent(
   instanceId: number,
   targetAllyId?: number,
   targetDeclared = false,
+  deferToStack = false,
 ): boolean {
   const player = state.players[seat] as PlayerState;
   const weapon = player.weapons.find((card) => card.instanceId === instanceId);
@@ -734,7 +774,7 @@ export function attackWithPermanent(
   }
 
   if (!attackTargetIsLegal(state, runtime, seat, targetAllyId)) return false;
-  if (state.stack.length > 0 || state.resolving.length > 0 || currentLink(state)) {
+  if (deferToStack || state.stack.length > 0 || state.resolving.length > 0 || currentLink(state)) {
     enqueueAttack(player, { instanceId, ...(targetAllyId !== undefined ? { targetAllyId } : {}) });
     // Attack (with) targets as it queues the attack (CR 8.5.38), so Spectra
     // triggers now rather than when the attack reaches the chain (8.3.14b).
@@ -789,7 +829,7 @@ function replaceAttackFromPlayerZone(
   const replacementData = dataOf(state, replacement.cardId);
   if (
     replacement.faceDown === true ||
-    replacementData.cardType !== "action" ||
+    !hasType(replacementData, "action") ||
     !(replacementData.subtypes ?? []).includes("attack") ||
     (replacementData.cost ?? 0) > maximumCost
   ) return false;
@@ -801,12 +841,28 @@ function replaceAttackFromPlayerZone(
     player.board.some((card) => card.instanceId === previous.instanceId);
   if (!previousIsInArena) return false;
   source.splice(index, 1);
+  const staticNextAttack = scriptOf(state, previous.cardId, previous)?.nextAttackEffectIsStatic === true;
+  // Effects on the previous attack end with it; cost and defense effects concern the link.
+  const endsWithPreviousAttack = (modifier: Modifier): boolean =>
+    modifier.scope === "next-attack"
+      ? staticNextAttack && modifier.sourceInstanceId === previous.instanceId
+      : modifier.scope === "chain-link" &&
+        modifier.playCostReduction === undefined &&
+        (modifier.defense === undefined || modifier.attack !== undefined) &&
+        modifierApplies(state, modifier, link);
+  state.modifiers = state.modifiers.filter((modifier) => !endsWithPreviousAttack(modifier));
+  for (const flag of Object.keys(link.flags)) {
+    if (flag.startsWith("grantedType:")) delete link.flags[flag];
+  }
   link.attackingCard = replacement;
   link.attackCardType = "action";
   // The replacement was never played, so the previous card's play origin no longer applies.
   delete link.flags.fromArsenal;
   delete link.flags.fromBanish;
   link.flags.fromOutsideHandOrArsenal = true;
+  stampCombatChainGrantedTypes(state, link);
+  // Go again belonged to the previous card; link-wide grants arrive with its leave triggers.
+  link.goAgain = false;
   if (previousCardType === "action") {
     const previousOwner = state.players[previous.owner] as PlayerState;
     clearTemporaryObjectEffects(previous);
@@ -845,11 +901,15 @@ function replaceAttackFromPlayerZone(
       ),
     );
   }
+  runtime.events.runHook(state, seat, replacement, "onBecameAttackingCard", link);
   return true;
 }
 
 /** Tail of the attack event: attack-declared triggers, then Attack Step priority. */
 export function declareTail(state: GameStateInternal, runtime: EngineRuntime): void {
+  // An intimidate from an attack-declared effect happens as it resolves, before the layer-step priority window.
+  const link = currentLink(state);
+  if (link) runtime.dispatchFlow("consumeQueuedIntimidate", state, link.attacker);
   runtime.dispatchFlow("enterAttackWindow", state);
 }
 

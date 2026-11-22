@@ -4,8 +4,10 @@ import type { EmoteMessage, GameLogViewEntry, UndoTarget } from "@fyendal/shared
 import { cardData } from "@fyendal/cards/client";
 import type {
   CardDisplayPreference,
+  HoverPreviewMode,
   MotionPreference,
   PlayabilityCuePreference,
+  PriorityAlertMode,
   PriorityWindowMode,
 } from "../storage.js";
 import type { PlaymatId } from "../playmats.js";
@@ -17,7 +19,8 @@ import {
 } from "./logCardRefs.js";
 import { ControlIcon, undoWithoutFocus } from "./gameControls.js";
 import { HeroEmote } from "./HeroEmote.js";
-import { BugReportDialog, GameSettingsDialog } from "./SideRailDialogs.js";
+import { BugReportDialog } from "./SideRailDialogs.js";
+import { GameSettingsDialog, type SettingsTab } from "./GameSettingsDialog.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { TooltipButton } from "../components/TooltipButton.js";
 import { UiIcon } from "../components/UiIcon.js";
@@ -26,6 +29,7 @@ import { GameMessageText } from "../i18n/GameMessage.js";
 import { BackgroundMatchSearch } from "../matchmaking/BackgroundMatchSearch.js";
 import { MAX_REPLAY_NOTE_LENGTH } from "@fyendal/protocol";
 import { SocialMenuButton, UnreadMessageBadge } from "../social/MobileSocialControls.js";
+import { hasType } from "@fyendal/shared";
 
 type StructuredLogEntry = Extract<GameLogViewEntry, { message: unknown }>;
 
@@ -84,7 +88,7 @@ function LogLines({
                       ? " log-card-ref-friendly"
                       : friendlyHeroName !== opponentHeroName && name === opponentHeroName
                         ? " log-card-ref-opponent"
-                        : card?.cardType === "token"
+                        : hasType(card, "token")
                           ? " log-card-ref-token"
                           : ""
                   }`}
@@ -173,10 +177,15 @@ export function SideRail({
   onLessGuidanceChange,
   skipPlayConfirmation,
   onSkipPlayConfirmationChange,
+  warnLethalPass,
+  onWarnLethalPassChange,
   optionHotkeys,
   onOptionHotkeysChange,
   skipBotDelay = false,
   onSkipBotDelayChange = null,
+  showGameClock,
+  onShowGameClockChange,
+  gameClock = null,
   cardDisplayPreference,
   onCardDisplayPreferenceChange,
   playmat,
@@ -184,14 +193,19 @@ export function SideRail({
   botPlaymat,
   onBotPlaymatChange,
   openSettingsSignal = 0,
+  openSettingsTab = "gameplay",
   motionPreference,
   onMotionPreferenceChange,
   playabilityCuePreference,
   onPlayabilityCuePreferenceChange,
+  hoverPreviewMode,
+  onHoverPreviewModeChange,
   soundEffectsEnabled,
   onSoundEffectsEnabledChange,
   soundEffectsVolume,
   onSoundEffectsVolumeChange,
+  priorityAlertMode,
+  onPriorityAlertModeChange,
   log,
   logEntries,
   friendlyHeroName,
@@ -251,10 +265,16 @@ export function SideRail({
   onLessGuidanceChange: (enabled: boolean) => void;
   skipPlayConfirmation: boolean;
   onSkipPlayConfirmationChange: (enabled: boolean) => void;
+  warnLethalPass: boolean;
+  onWarnLethalPassChange: (enabled: boolean) => void;
   optionHotkeys: boolean;
   onOptionHotkeysChange: (enabled: boolean) => void;
   skipBotDelay?: boolean;
   onSkipBotDelayChange?: ((enabled: boolean) => void) | null;
+  showGameClock: boolean;
+  onShowGameClockChange: (enabled: boolean) => void;
+  /** Rendered only while the viewer has the clock enabled. */
+  gameClock?: ReactNode;
   cardDisplayPreference: CardDisplayPreference;
   onCardDisplayPreferenceChange: (preference: CardDisplayPreference) => void;
   playmat: PlaymatId;
@@ -263,14 +283,20 @@ export function SideRail({
   onBotPlaymatChange: (playmat: PlaymatId) => void;
   /** Bumped by the board to open the settings dialog from outside the rail. */
   openSettingsSignal?: number;
+  /** Tab the signal opens on. */
+  openSettingsTab?: SettingsTab;
   motionPreference: MotionPreference;
   onMotionPreferenceChange: (preference: MotionPreference) => void;
   playabilityCuePreference: PlayabilityCuePreference;
   onPlayabilityCuePreferenceChange: (preference: PlayabilityCuePreference) => void;
+  hoverPreviewMode: HoverPreviewMode;
+  onHoverPreviewModeChange: (mode: HoverPreviewMode) => void;
   soundEffectsEnabled: boolean;
   onSoundEffectsEnabledChange: (enabled: boolean) => void;
   soundEffectsVolume: number;
   onSoundEffectsVolumeChange: (volume: number) => void;
+  priorityAlertMode: PriorityAlertMode;
+  onPriorityAlertModeChange: (mode: PriorityAlertMode) => void;
   log: string[];
   logEntries?: GameLogViewEntry[];
   friendlyHeroName: string;
@@ -288,15 +314,15 @@ export function SideRail({
   onOpenSocial?: () => void;
 }) {
   const intl = useIntl();
-  const [showSettings, setShowSettings] = useState(false);
+  const [showSettings, setShowSettings] = useState<SettingsTab | null>(null);
   const [showBugReport, setShowBugReport] = useState(false);
   const [showMobileLog, setShowMobileLog] = useState(false);
   const [showUtilities, setShowUtilities] = useState(false);
   useEffect(() => {
     if (!openSettingsSignal) return;
     setShowUtilities(false);
-    setShowSettings(true);
-  }, [openSettingsSignal]);
+    setShowSettings(openSettingsTab);
+  }, [openSettingsSignal, openSettingsTab]);
   const [editingNote, setEditingNote] = useState<{
     roomVersion: number;
     frame: number;
@@ -520,7 +546,7 @@ export function SideRail({
             className="rail-icon"
             aria-label={intl.formatMessage({ id: "settings.title" })}
             title={intl.formatMessage({ id: "settings.title" })}
-            onClick={() => setShowSettings(true)}
+            onClick={() => setShowSettings("gameplay")}
           >
             <ControlIcon kind="settings" />
           </button>
@@ -585,6 +611,7 @@ export function SideRail({
         </div>
       )}
 
+      {showGameClock ? gameClock : null}
       {!replaying && connectionIssueVisible && (
         <div className="toast">{intl.formatMessage({ id: "game.connection.lost" })}</div>
       )}
@@ -653,10 +680,14 @@ export function SideRail({
           onLessGuidanceChange={onLessGuidanceChange}
           skipPlayConfirmation={skipPlayConfirmation}
           onSkipPlayConfirmationChange={onSkipPlayConfirmationChange}
+          warnLethalPass={warnLethalPass}
+          onWarnLethalPassChange={onWarnLethalPassChange}
           optionHotkeys={optionHotkeys}
           onOptionHotkeysChange={onOptionHotkeysChange}
           skipBotDelay={skipBotDelay}
           onSkipBotDelayChange={onSkipBotDelayChange}
+          showGameClock={showGameClock}
+          onShowGameClockChange={onShowGameClockChange}
           cardDisplayPreference={cardDisplayPreference}
           onCardDisplayPreferenceChange={onCardDisplayPreferenceChange}
           playmat={playmat}
@@ -667,11 +698,16 @@ export function SideRail({
           onMotionPreferenceChange={onMotionPreferenceChange}
           playabilityCuePreference={playabilityCuePreference}
           onPlayabilityCuePreferenceChange={onPlayabilityCuePreferenceChange}
+          hoverPreviewMode={hoverPreviewMode}
+          onHoverPreviewModeChange={onHoverPreviewModeChange}
           soundEffectsEnabled={soundEffectsEnabled}
           onSoundEffectsEnabledChange={onSoundEffectsEnabledChange}
           soundEffectsVolume={soundEffectsVolume}
           onSoundEffectsVolumeChange={onSoundEffectsVolumeChange}
-          onClose={() => setShowSettings(false)}
+          priorityAlertMode={priorityAlertMode}
+          onPriorityAlertModeChange={onPriorityAlertModeChange}
+          initialTab={showSettings}
+          onClose={() => setShowSettings(null)}
         />
       ) : null}
 
@@ -792,7 +828,7 @@ export function SideRail({
               <button
                 onClick={() => {
                   setShowUtilities(false);
-                  setShowSettings(true);
+                  setShowSettings("gameplay");
                 }}
               >
                 {intl.formatMessage({ id: "settings.title" })}

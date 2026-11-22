@@ -14,8 +14,8 @@ import {
 import { TestI18nProvider } from "../i18n/TestI18nProvider.js";
 
 describe("bot practice nudge", () => {
-  it("offers a bot after 10 seconds of matchmaking", () => {
-    expect(BOT_PRACTICE_NUDGE_DELAY_MS).toBe(10_000);
+  it("offers a bot after 30 seconds of matchmaking", () => {
+    expect(BOT_PRACTICE_NUDGE_DELAY_MS).toBe(30_000);
   });
 
   it("only offers a bot to an unmatched player while searching", () => {

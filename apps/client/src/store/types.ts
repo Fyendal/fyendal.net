@@ -27,6 +27,9 @@ import type {
   EmoteMessage,
   SeatStandingOrders,
   LeagueMembership,
+  GameClockSummary,
+  GameClockView,
+  ManualEdit,
 } from "@fyendal/shared";
 import type {
   AccountExport,
@@ -162,6 +165,8 @@ export interface StoreState {
   chatMessages: Record<string, ChatMessage[]>;
   chatHasMore: Record<string, boolean>;
   friendInviteTarget: string | null;
+  /** Friends invited into the current room's open seat. */
+  roomFriendInvites: string[];
   setSocialOpen: (open: boolean) => void;
   clearSocialError: () => void;
   sendFriendRequest: (username: string) => void;
@@ -176,7 +181,7 @@ export interface StoreState {
   markChatRead: (username: string) => void;
   beginFriendInvite: (username: string) => void;
   cancelFriendInvite: () => void;
-  createFriendRoom: (username: string, format: Format, deckId: string) => void;
+  createFriendRoom: (username: string, format: Format, deckId: string, sandbox?: boolean) => void;
   /** Takes your seat in a league match's room; the server creates it on first entry. */
   enterLeagueRoom: (matchId: string, deckId: string) => void;
   dismissFriendGameInvite: (inviteId: string) => void;
@@ -227,6 +232,14 @@ export interface StoreState {
   browserBotStatus: "fallback" | "refresh-required" | null;
   retryBrowserBot: () => void;
   botGame: boolean;
+  /** One account controls both seats of this private room. */
+  soloGame: boolean;
+  /** Unrecorded sandbox room: a private opt-in or a solo game. */
+  sandbox: boolean;
+  /** Error code of the last refused sandbox edit, shown in the sandbox panel. */
+  sandboxEditRefusal: SandboxEditRefusal | null;
+  /** Solo games: the owner's seat, fixed at the bottom of the board while `yourSeat` follows the acting seat. */
+  boardSeat: 0 | 1 | null;
   playerProfiles: [PlayerProfileView, PlayerProfileView] | null;
   /** Per-seat printing id -> image id the server shared with this viewer. */
   cardArt: [Record<string, string>, Record<string, string>] | null;
@@ -242,8 +255,15 @@ export interface StoreState {
    * Presentation only; null means render the authoritative staged cards. */
   pendingDefenderStageIds: number[] | null;
   lastActionAt: [number, number] | null;
+  /** Server game clock and the `performance.now()` at which it arrived. */
+  clock: GameClockView | null;
+  clockReceivedAt: number | null;
   /** This seat's armed pass shortcut, optimistic until the server's next state. */
   passUntil: PassUntilMode | null;
+  /** Pass shortcuts keep passing over the opponent's new plays. */
+  passUntilIgnorePlays: boolean;
+  /** Passing now would end this seat's turn with a usable action point. */
+  endTurnWarning: boolean;
   opponentConnected: boolean;
   latestEmote: EmoteEvent | null;
   rooms: RoomSummary[];
@@ -267,11 +287,19 @@ export interface StoreState {
     format: Format,
     deckId: string,
     visibility?: "private" | "public",
+    /** Private rooms only. */
+    sandbox?: boolean,
   ) => void;
   createBotRoom: (format: Format, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
   playBotFromPrep: (format: Format, deckId: string, bot?: BotOpponent, searchForPlayer?: boolean) => void;
   /** End the finished bot game and start a new one with the same deck and bot. */
   playBotAgain: () => void;
+  /** Private room where this account prepares and plays both seats. */
+  createSoloRoom: (format: Format, deckId: string, opponentDeckId: string) => void;
+  /** Solo prep only: view and act as the given seat. */
+  switchSoloSeat: (seat: 0 | 1) => void;
+  /** End the finished solo game and start a new one with the same decks. */
+  playSoloAgain: () => void;
   joinRoom: (code: string, deckId?: string, spectate?: boolean) => void;
   inspectRoom: (code: string) => void;
   dismissInvite: (resetUrl?: boolean) => void;
@@ -290,17 +318,32 @@ export interface StoreState {
   presentArena: (arena: PresentedArena) => void;
   presentDeck: (deck: PresentedDeck) => void;
   prepUnready: () => void;
+  /** A deck switch from its request until the new deck's pool has loaded. */
+  deckSwitch: { deckId: string; deckName: string } | null;
+  /** An opponent took the seat before the requested switch committed. */
+  deckSwitchLocked: boolean;
+  /** Swap the seat's saved deck while no opponent has joined. */
+  changeRoomDeck: (deckId: string, deckName: string) => void;
+  dismissDeckSwitchLocked: () => void;
+  inviteFriendToRoom: (username: string) => void;
   chooseFirst: (first: boolean) => void;
   /** True when the command was sent or intentionally queued. */
   sendIntent: (intent: GameIntent) => boolean;
   sendPriorityMode: (mode: PriorityWindowMode) => void;
   sendStandingOrders: (orders: SeatStandingOrders) => void;
   sendTokenSkip: (kind: TokenSkipKind, enabled: boolean) => void;
+  /** Choose a trigger target and repeat it for that source's later declarations. */
+  sendRememberedTarget: (optionId: string) => boolean;
   /** Arm a pass shortcut, or cancel it with null. */
   sendPassUntil: (mode: PassUntilMode | null) => void;
+  /** Remembered across games; re-arms an armed shortcut with the new choice. */
+  setPassUntilIgnorePlays: (ignore: boolean) => void;
   sendEmote: (message: EmoteMessage) => void;
   kickSpectator: (username: string) => void;
   undo: (target?: UndoTarget) => void;
+  /** True when the edit was sent; one versioned command at a time. */
+  sendSandboxEdit: (seat: 0 | 1, edit: ManualEdit) => boolean;
+  clearSandboxEditRefusal: () => void;
   claimVictory: () => void;
   leave: () => void;
 
@@ -308,6 +351,8 @@ export interface StoreState {
   replayViews: GameView[] | null;
   replayTransitions: Array<Omit<GameTransitionView, "fromVersion"> | null> | null;
   replayStep: number;
+  /** Final clock of the replay being watched; null for legacy replays. */
+  replayClock: GameClockSummary | null;
   replayNotes: ReplayServerNote[];
   activeSavedReplayId: string | null;
   /** Set while watching someone's replay through a share link. */
@@ -353,7 +398,11 @@ export interface PreReplaySnapshot {
   view: GameView | null;
   legal: GameIntent[];
   actionCandidates: GameIntent[];
+  endTurnWarning: boolean;
   yourSeat: number | null;
+  boardSeat: 0 | 1 | null;
+  soloGame: boolean;
+  sandbox: boolean;
   spectating: boolean;
   spectatorCount: number;
   spectatorUsernames: Array<string | null>;
@@ -361,3 +410,5 @@ export interface PreReplaySnapshot {
   /** Per-seat printing id -> image id the server shared with this viewer. */
   cardArt: [Record<string, string>, Record<string, string>] | null;
 }
+
+export type SandboxEditRefusal = Extract<ErrorCode, `SANDBOX_${string}`>;

@@ -34,6 +34,7 @@ export function DeckArtModal(props: { deck: DeckSummary; onClose: () => void }) 
   })));
   const catalog = useCardArtCatalog();
   const [pool, setPool] = useState<DeckPool | null>(null);
+  const [defaults, setDefaults] = useState<Record<string, string> | undefined>();
   const [loadError, setLoadError] = useState<string | null>(null);
   const [art, setArt] = useState<DeckArt>(props.deck.art);
   const [open, setOpen] = useState<string | null>(null);
@@ -47,8 +48,10 @@ export function DeckArtModal(props: { deck: DeckSummary; onClose: () => void }) 
     let active = true;
     void loadDeckDetail(props.deck.id).then((result) => {
       if (!active) return;
-      if (result.ok) setPool(result.deck.decklist);
-      else setLoadError(result.error);
+      if (result.ok) {
+        setPool(result.deck.decklist);
+        setDefaults(result.deck.fabraryArt);
+      } else setLoadError(result.error);
     });
     return () => { active = false; };
   }, [loadDeckDetail, props.deck.id]);
@@ -113,6 +116,7 @@ export function DeckArtModal(props: { deck: DeckSummary; onClose: () => void }) 
             catalog={catalog}
             pool={pool}
             art={art}
+            defaults={defaults}
             open={open}
             filter={filter}
             query={query.trim().toLowerCase()}
@@ -141,6 +145,7 @@ function DeckArtGroups(props: {
   catalog: CardArtCatalog;
   pool: DeckPool;
   art: DeckArt;
+  defaults?: Readonly<Record<string, string>>;
   open: string | null;
   filter: ArtFilter;
   query: string;
@@ -148,7 +153,7 @@ function DeckArtGroups(props: {
   onChange: (art: DeckArt) => void;
 }) {
   const intl = useIntl();
-  const { catalog, pool, art } = props;
+  const { catalog, pool, art, defaults } = props;
   const cards = catalog.deckPoolCardIds(pool)
     .filter((cardId) => cardData[cardId])
     .sort((a, b) => cardData[a]!.name.localeCompare(cardData[b]!.name));
@@ -192,7 +197,7 @@ function DeckArtGroups(props: {
                   onClick={() => props.onOpen(expanded ? null : cardId)}
                 >
                   <span className="deck-art-tile-frame">
-                    <CardArtwork cardId={cardId} artImage={shownCardArt(catalog, cardId, art)} alt="" />
+                    <CardArtwork cardId={cardId} artImage={shownCardArt(catalog, cardId, art, defaults)} alt="" />
                     {single ? null : <span className="deck-art-tile-count">{count}</span>}
                   </span>
                   <span className="deck-art-tile-name">{name}</span>
@@ -202,7 +207,13 @@ function DeckArtGroups(props: {
                 </button>
                 {expanded ? (
                   <DeckArtDetail cardId={cardId}>
-                    <CardArtVariants catalog={catalog} cardId={cardId} art={art} onChange={props.onChange} />
+                    <CardArtVariants
+                      catalog={catalog}
+                      cardId={cardId}
+                      art={art}
+                      defaults={defaults}
+                      onChange={props.onChange}
+                    />
                   </DeckArtDetail>
                 ) : null}
               </Fragment>

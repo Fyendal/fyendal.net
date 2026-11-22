@@ -2,9 +2,10 @@ import http from "node:http";
 import { promisify } from "node:util";
 import { gunzip as gunzipCallback, gzip as gzipCallback } from "node:zlib";
 import type { DeckArt, DeckPool, Format } from "@fyendal/shared";
-import { cardData, findPrinting, formatLegalityIssues } from "@fyendal/cards";
+import { cardData, findPrinting, formatLegalityIssues, isDeckConstructionIssue } from "@fyendal/cards";
 import {
   decodeDeckArtRequest,
+  decodeKofiWebhook,
   decodeLeagueAvailabilityRequest,
   decodeLeagueIdRequest,
   decodeLeagueJoinRequest,
@@ -16,6 +17,7 @@ import {
   MATCH_OPPONENT_FILTERS,
   REPLAY_SHARE_TOKEN_RE,
   type MatchListFilters,
+  type DeckConstructionIssue,
 } from "@fyendal/protocol";
 import type { Queryable } from "./db.js";
 import {
@@ -46,6 +48,7 @@ import { createPlayerReport } from "./playerReports.js";
 import { consoleError } from "./logging.js";
 import { getGlobalNotice } from "./globalNotice.js";
 import { isBetaTester } from "./betaTesters.js";
+import { kofiTokenMatches, recordKofiPayment } from "./kofi.js";
 import { getVersionUpdateNotice } from "./versionUpdateNotice.js";
 import { getAchievements } from "./achievements.js";
 import { isMatchFormat, listMatches, loadMatchRecords, parseMatchCursor } from "./matches.js";
@@ -86,6 +89,7 @@ import {
   requestPasswordReset,
   resetPassword,
 } from "./recovery.js";
+import { hasType } from "@fyendal/shared";
 
 const BODY_LIMIT = 16 * 1024; // 16kb cap on JSON bodies (decklist exports)
 const RATE_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
@@ -176,6 +180,8 @@ export interface ApiDeps {
   fabraryClient?: FabraryClient;
   /** Recovery email transport; null disables recovery email. Defaults to EMAIL_PROVIDER. */
   emailSender?: EmailSender | null;
+  /** Ko-fi webhook verification token; null disables the webhook. */
+  kofiVerificationToken?: string | null;
   /** Throttles recovery and verification email per normalized target. */
   recoveryRateLimiter?: RateLimiter;
   /** Lets the WebSocket gateway immediately close sockets for a revoked token. */
@@ -280,6 +286,16 @@ function secureResponse(
 }
 
 function readBody(req: http.IncomingMessage): Promise<unknown> {
+  return readText(req).then((text) => {
+    try {
+      return JSON.parse(text) as unknown;
+    } catch {
+      throw new ClientError("invalid JSON");
+    }
+  });
+}
+
+function readText(req: http.IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     let size = 0;
@@ -292,13 +308,7 @@ function readBody(req: http.IncomingMessage): Promise<unknown> {
       }
       chunks.push(chunk);
     });
-    req.on("end", () => {
-      try {
-        resolve(JSON.parse(Buffer.concat(chunks).toString("utf8")));
-      } catch {
-        reject(new ClientError("invalid JSON"));
-      }
-    });
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
     req.on("error", reject);
   });
 }
@@ -336,12 +346,17 @@ function deckOut(d: {
   heroName: string; decklist: DeckPool; updatedAt: number; art: DeckArt;
 }): Record<string, unknown> {
   const legality = formatLegalityIssues(cardData, d.decklist, d.format);
+  const cardIssues = legality.flatMap((issue) => isDeckConstructionIssue(issue) ? [] : [issue]);
   const bannedCards = [...new Set(
-    legality.filter((issue) => issue.kind !== "future-card").map((issue) => issue.cardName),
+    cardIssues.filter((issue) => issue.kind !== "future-card").map((issue) => issue.cardName),
   )];
   const futureCards = [...new Set(
-    legality.filter((issue) => issue.kind === "future-card").map((issue) => issue.cardName),
+    cardIssues.filter((issue) => issue.kind === "future-card").map((issue) => issue.cardName),
   )];
+  const constructionIssues = legality.flatMap((issue): DeckConstructionIssue[] => !isDeckConstructionIssue(issue) ? []
+    : issue.kind === "too-many-copies"
+      ? [{ kind: issue.kind, cardName: issue.cardName, count: issue.count, limit: issue.limit }]
+      : [{ kind: issue.kind, count: issue.count, limit: issue.limit }]);
   return {
     id: d.id,
     name: d.name,
@@ -358,6 +373,7 @@ function deckOut(d: {
     updatedAt: d.updatedAt,
     ...(bannedCards.length > 0 ? { bannedCards } : {}),
     ...(futureCards.length > 0 ? { futureCards } : {}),
+    ...(constructionIssues.length > 0 ? { constructionIssues } : {}),
     art: d.art,
   };
 }
@@ -373,6 +389,9 @@ export function createApiServer(deps: ApiDeps): http.Server {
   const accountLimiter = deps.accountRateLimiter ?? createRateLimiter();
   const fabraryClient = deps.fabraryClient ?? createFabraryClient();
   const emailSender = deps.emailSender !== undefined ? deps.emailSender : configuredEmailSender();
+  const kofiToken = deps.kofiVerificationToken !== undefined
+    ? deps.kofiVerificationToken
+    : process.env.KOFI_VERIFICATION_TOKEN || null;
   const recoveryLimiter = deps.recoveryRateLimiter ?? createRateLimiter(3, 60 * 60 * 1000);
   const noticeLimiter = deps.noticeRateLimiter ?? createRateLimiter(600);
   const replayShareLimiter = deps.replayShareRateLimiter ?? createRateLimiter(120);
@@ -592,7 +611,7 @@ export function createApiServer(deps: ApiDeps): http.Server {
       // A public preview does not validate playability or save account data.
       const lines = parseDecklistText(fetched.deck.text);
       const hero = lines.map((line) => findPrinting(line.name, line.pitch)).find((card) =>
-        card?.cardType === "hero" && !/\bwhile this is in your inventory\b/i.test(card.text));
+        card !== undefined && hasType(card, "hero") && !/\bwhile this is in your inventory\b/i.test(card.text));
       const heroName = hero?.name ?? lines.find((line) => line.section === "hero")?.name ?? null;
       return { status: 200, body: { ok: true, deck: { name: fetched.deck.name, heroName } } };
     },
@@ -1127,7 +1146,7 @@ export function createApiServer(deps: ApiDeps): http.Server {
               error: detail.length > 0 ? `${refreshed.error}: ${detail.join("; ")}` : refreshed.error,
             });
           }
-          const { deck, matchups, selectedMatchupId } = refreshed;
+          const { deck, matchups, selectedMatchupId, fabraryArt } = refreshed;
           sendJson(res, 200, {
             ok: true,
             deck: {
@@ -1135,10 +1154,35 @@ export function createApiServer(deps: ApiDeps): http.Server {
               decklist: deck.decklist,
               ...(matchups.length > 0 ? { matchups } : {}),
               ...(selectedMatchupId ? { selectedMatchupId } : {}),
+              ...(Object.keys(fabraryArt).length > 0 ? { fabraryArt } : {}),
             },
           });
         })
         .catch((e) => internalError(res, e));
+      return;
+    }
+    // Ko-fi posts form-encoded `data` JSON and retries until it gets a 200.
+    if (req.method === "POST" && url.pathname === "/api/kofi/webhook" && kofiToken) {
+      readText(req)
+        .then(async (text) => {
+          const raw = new URLSearchParams(text).get("data");
+          let parsed: unknown = null;
+          try {
+            parsed = raw === null ? null : JSON.parse(raw);
+          } catch {
+            parsed = null;
+          }
+          const payment = decodeKofiWebhook(parsed);
+          if (!payment) return sendJson(res, 400, { ok: false, error: "invalid payload" });
+          if (!kofiTokenMatches(kofiToken, payment.verificationToken)) {
+            return sendJson(res, 403, { ok: false, error: "invalid token" });
+          }
+          await recordKofiPayment(deps.db, payment);
+          sendJson(res, 200, { ok: true });
+        })
+        .catch((e: unknown) => e instanceof ClientError
+          ? sendJson(res, 400, { ok: false, error: e.message })
+          : internalError(res, e));
       return;
     }
     const route = routes[url.pathname];

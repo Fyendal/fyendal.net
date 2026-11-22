@@ -2,7 +2,7 @@
  {
   "id": "SLY001",
   "name": "Lyath Goldmane",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The base {p} and {d} of cards you control are halved, rounded up.\nInstant - {r}{r}, {t}: The crowd boos you. Defending action cards you control get +1{d} this turn.\nWhenever the crowd boos you, create a Might token.",
   "classes": [
    "guardian"
@@ -17,7 +17,7 @@
  {
   "id": "SLY002",
   "name": "Titan's Fist",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf there is a card with cost 3 or greater in your pitch zone, Titan's Fist has +1{p}.",
   "attack": 3,
   "classes": [
@@ -32,7 +32,7 @@
  {
   "id": "SLY003",
   "name": "Arcane Lantern",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "classes": [
    "generic"
@@ -48,7 +48,7 @@
  {
   "id": "SLY004",
   "name": "Stonewall Impasse",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, clash with the attacking hero. If you win, this gets +1{d} until end of turn.\nTemper",
   "defense": 1,
   "classes": [
@@ -66,7 +66,7 @@
  {
   "id": "SLY005",
   "name": "Blade Beckoner Helm",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -83,7 +83,7 @@
  {
   "id": "SLY006",
   "name": "Nullrune Hood",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -100,7 +100,7 @@
  {
   "id": "SLY007",
   "name": "Blade Beckoner Plating",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -117,7 +117,7 @@
  {
   "id": "SLY008",
   "name": "Nullrune Robe",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -134,7 +134,7 @@
  {
   "id": "SLY009",
   "name": "Line Crossers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If you have the same {h} as a hero, it also counts as you having more {h} than them, and them having less {h} than you.\nBlade Break",
   "defense": 1,
   "subtypes": [
@@ -149,7 +149,7 @@
  {
   "id": "SLY010",
   "name": "Stand Strong",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}{r}{r}, destroy this: Create a Confidence token. Activate this only if you control an aura of suspense. Go again\nBlade Break",
   "defense": 1,
   "classes": [
@@ -166,7 +166,7 @@
  {
   "id": "SLY011",
   "name": "Mocking Blow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a hero, if you have more {h} than them, the crowd boos you.\nIf you've been booed this turn, this gets +4{p}.",
   "pitch": 1,
   "cost": 0,
@@ -184,7 +184,7 @@
  {
   "id": "SLY012",
   "name": "Drag Down",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "When this defends an attack, it gets -3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -197,7 +197,7 @@
  {
   "id": "SLY013",
   "name": "Prime the Crowd",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gets +4{p}.\nThe crowd cheers each Revered hero.\nThe crowd boos each Reviled hero.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -215,7 +215,7 @@
  {
   "id": "SLY014",
   "name": "Sadistic Scowl",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack this turn gets +5{p}.\nIntimidate target hero.\nGo again",
   "pitch": 1,
   "cost": 3,
@@ -232,7 +232,7 @@
  {
   "id": "SLY015",
   "name": "Villainous Pose",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack this turn gets +4{p}.\nThe crowd boos you.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -249,7 +249,7 @@
  {
   "id": "SLY016",
   "name": "Act of Glory",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +6{p}.",
   "pitch": 1,
   "cost": 4,
@@ -265,7 +265,7 @@
  {
   "id": "SLY017",
   "name": "Edge of Their Seats",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +5{p}.",
   "pitch": 1,
   "cost": 3,
@@ -281,7 +281,7 @@
  {
   "id": "SLY018",
   "name": "Tension in the Air",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +4{p}.",
   "pitch": 1,
   "cost": 2,
@@ -297,7 +297,7 @@
  {
   "id": "SLY019",
   "name": "Oasis Respite",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Prevent the next 4 damage that would be dealt to target hero this turn by a source of your choice. If they have less life than each other hero, they may gain 1{h}.",
   "pitch": 1,
   "cost": 1,
@@ -309,7 +309,7 @@
  {
   "id": "SLY020",
   "name": "Mocking Blow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a hero, if you have more {h} than them, the crowd boos you.\nIf you've been booed this turn, this gets +3{p}.",
   "pitch": 2,
   "cost": 0,
@@ -327,7 +327,7 @@
  {
   "id": "SLY021",
   "name": "Short Shrift",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this has {p} greater than its base, it gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, they discard a card.",
   "pitch": 2,
   "cost": 0,
@@ -347,7 +347,7 @@
  {
   "id": "SLY022",
   "name": "Walk in My Shoes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this has {p} greater than its base, it gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, until the end of their next turn, the base {p} and {d} of attack action cards they control are halved, rounded up.",
   "pitch": 2,
   "cost": 0,
@@ -368,7 +368,7 @@
  {
   "id": "SLY023",
   "name": "Wee Wrecking Ball",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this has {p} greater than its base, it gets +1{p}.\nCrush - When this deals 4 or more damage to a hero, destroy a card in their arsenal.",
   "pitch": 2,
   "cost": 0,
@@ -388,7 +388,7 @@
  {
   "id": "SLY024",
   "name": "Brothers in Arms",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends, you may pay {r}. If you do, it gets +2{d}.",
   "pitch": 3,
   "cost": 2,
@@ -405,7 +405,7 @@
  {
   "id": "SLY025",
   "name": "Full of Bravado",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or defends, if you control an aura of suspense, create a Confidence token.",
   "pitch": 3,
   "cost": 3,
@@ -422,7 +422,7 @@
  {
   "id": "SLY026",
   "name": "Goon Beatdown",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 3 or more auras, this gets +3{p} and \"When this hits a hero, the crowd boos you.\"",
   "pitch": 3,
   "cost": 0,
@@ -440,7 +440,7 @@
  {
   "id": "SLY027",
   "name": "Goon Tactics",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 3 or more auras, this gets +3{p} and \"When this hits a hero, destroy the top card of their deck.\"",
   "pitch": 3,
   "cost": 0,
@@ -455,7 +455,7 @@
  {
   "id": "SLY028",
   "name": "Mocking Blow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a hero, if you have more {h} than them, the crowd boos you.\nIf you've been booed this turn, this gets +2{p}.",
   "pitch": 3,
   "cost": 0,
@@ -473,7 +473,7 @@
  {
   "id": "SLY029",
   "name": "Power Play",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played from arsenal, it gets +5{p}.",
   "pitch": 3,
   "cost": 3,
@@ -490,7 +490,7 @@
  {
   "id": "SLY030",
   "name": "Booze!",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen this enters or leaves the arena, the crowd boos you.\nAt the start of your turn, destroy this.",
   "pitch": 3,
   "cost": 0,
@@ -507,7 +507,7 @@
  {
   "id": "SLY031",
   "name": "Concealed Object",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "When this enters the arena, the crowd boos you.\nInstant - {t}: Target attack gets +1{p}.\nAt the beginning of your end phase, destroy this.",
   "pitch": 3,
   "cost": 0,
@@ -523,7 +523,7 @@
  {
   "id": "SLY032",
   "name": "Edge of Their Seats",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Suspense\nWhen this leaves the arena, your next attack this turn gets +3{p}.",
   "pitch": 3,
   "cost": 3,
@@ -539,7 +539,7 @@
  {
   "id": "SLY033",
   "name": "The Suspense is Killing Me",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Suspense\nYour first attack each turn gets +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -555,7 +555,7 @@
  {
   "id": "SLY034",
   "name": "Confidence",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then the next attack card you play this turn can't be defended by more than 2 non-block cards.",
   "classes": [
    "generic"
@@ -565,7 +565,7 @@
  {
   "id": "SLY035",
   "name": "Might",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
   "classes": [
    "generic"

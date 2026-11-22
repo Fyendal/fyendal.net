@@ -1,47 +1,29 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextArcaneDamageCard,
-  buffNextAttack,
   commonOptionMessages,
+  createRunechants,
   dealArcane,
-  type DecisionPromptOptions,
   decisionPrompt,
+  hasCardSubtype,
+  heroChoiceSeat,
+  isAttackAction,
+  isNonAttackAction,
+  mauvrionSkies,
   opponentSeat,
   optN,
   optOnChoose,
+  requestAnyTargetChoice,
   wizardActionAsInstant,
 } from "../shared-helpers.js";
-
-const COPPER = "CRU197";
-const RUNECHANT = "CRU157";
-
-function createRunechants(ctx: ScriptCtx, count: number): void {
-  ctx.createTokens(RUNECHANT, count);
-}
-
-function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack");
-}
+import { COPPER } from "../tokens.js";
 
 function isRunebladeAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return (
     ctx.hasCardType(card, "action") &&
-    ctx.cardTypes(card).includes("attack") &&
-    ctx.cardTypes(card).includes("runeblade")
+    hasCardSubtype(ctx, card, "attack") &&
+    hasCardSubtype(ctx, card, "runeblade")
   );
-}
-
-function mauvrionSkies(runechants: number): CardScript {
-  return {
-    onPlay(ctx) {
-      buffNextAttack(ctx, {
-        goAgain: true,
-        appliesTo: "attack-action",
-        appliesToClass: "runeblade",
-        onHitCreateToken: { cardId: RUNECHANT, count: runechants },
-      });
-    },
-  };
 }
 
 function consumingVolition(): CardScript {
@@ -117,46 +99,18 @@ function researchNotes(count: number): CardScript {
   };
 }
 
-function requestHeroTarget(
-  ctx: ScriptCtx,
-  hook: string,
-  fallback: string,
-  id: string,
-  values?: DecisionPromptOptions["values"],
-): void {
-  ctx.requestChoice(
-    hook,
-    decisionPrompt(fallback, id, {
-      values,
-      optionMessages: commonOptionMessages("opposing hero", "your hero"),
-    }),
-    ["opposing hero", "your hero"],
-    undefined,
-    undefined,
-    "opposing hero",
-  );
-}
-
-function chosenHero(ctx: ScriptCtx, option: string): number {
-  return option === "your hero" ? ctx.seat : opponentSeat(ctx);
-}
-
 function forebodingBolt(damage: number): CardScript {
   return {
+    arcaneDamageEffect: true,
+    arcaneDamageEffectAmounts: [damage],
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      requestHeroTarget(
-        ctx,
-        `foreboding-target:${damage}`,
-        `${ctx.data.name}: choose a hero`,
-        "card.cru.foreboding.hero.choose",
-        { card: { kind: "card", cardId: ctx.self.cardId } },
-      );
+      requestAnyTargetChoice(ctx, `foreboding-target:${damage}`, damage, { heroesOnly: true });
     },
     onChoose(ctx, hook, option) {
       const match = /^foreboding-target:(\d+)$/.exec(hook);
       if (match) {
-        ctx.dealDamage(chosenHero(ctx, option), Number(match[1]));
+        dealArcane(ctx, heroChoiceSeat(ctx, option)!, Number(match[1]));
         optN(ctx, 1);
         return;
       }
@@ -171,19 +125,12 @@ function rousingAether(damage: number): CardScript {
     arcaneDamageEffectAmounts: [damage],
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      const amount = ctx.previewArcaneDamage(damage);
-      requestHeroTarget(
-        ctx,
-        `rousing-target:${damage}`,
-        `${ctx.data.name}: deal ${amount} arcane damage to a hero`,
-        "card.cru.arcane.hero.choose",
-        { card: { kind: "card", cardId: ctx.self.cardId }, amount },
-      );
+      requestAnyTargetChoice(ctx, `rousing-target:${damage}`, damage, { heroesOnly: true });
     },
     onChoose(ctx, hook, option) {
       const match = /^rousing-target:(\d+)$/.exec(hook);
       if (!match) return;
-      dealArcane(ctx, chosenHero(ctx, option), Number(match[1]));
+      dealArcane(ctx, heroChoiceSeat(ctx, option)!, Number(match[1]));
       buffNextArcaneDamageCard(ctx, 1);
     },
   };
@@ -196,18 +143,11 @@ function snapback(damage: number): CardScript {
     playAsInstant: (ctx) =>
       wizardActionAsInstant(ctx) || ctx.getFlag("player", "playedClassType:wizard:non-attack-action") === true,
     onPlay(ctx) {
-      const amount = ctx.previewArcaneDamage(damage);
-      requestHeroTarget(
-        ctx,
-        `snapback-target:${damage}`,
-        `${ctx.data.name}: deal ${amount} arcane damage to a hero`,
-        "card.cru.arcane.hero.choose",
-        { card: { kind: "card", cardId: ctx.self.cardId }, amount },
-      );
+      requestAnyTargetChoice(ctx, `snapback-target:${damage}`, damage, { heroesOnly: true });
     },
     onChoose(ctx, hook, option) {
       const match = /^snapback-target:(\d+)$/.exec(hook);
-      if (match) dealArcane(ctx, chosenHero(ctx, option), Number(match[1]));
+      if (match) dealArcane(ctx, heroChoiceSeat(ctx, option)!, Number(match[1]));
     },
   };
 }
@@ -231,11 +171,11 @@ function reinforceTheLine(defense: number): CardScript {
   return {
     canPlay: (ctx) =>
       ctx.link?.defendingCards.some((card) => {
-        return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
+        return isAttackAction(ctx, card);
       }) === true,
     onPlay(ctx) {
       const defenders = (ctx.link?.defendingCards ?? []).filter((card) => {
-        return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
+        return isAttackAction(ctx, card);
       });
       if (defenders.length > 0) {
         ctx.requestCardChoice(
@@ -267,7 +207,7 @@ export const cruArcaneGeneric: Record<string, CardScript> = {
           const currentIsNonAttack = isNonAttackAction(ctx, played);
           const priorNonAttacks =
             Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) - (currentIsNonAttack ? 1 : 0);
-          return ctx.cardTypes(played).includes("runeblade") && priorNonAttacks > 0;
+          return hasCardSubtype(ctx, played, "runeblade") && priorNonAttacks > 0;
         },
         effect: (ctx) => createRunechants(ctx, 1),
       },
@@ -336,18 +276,11 @@ export const cruArcaneGeneric: Record<string, CardScript> = {
       oncePerTurn: true,
       label: "Deal 2 arcane damage",
       onActivate(ctx) {
-        const amount = ctx.previewArcaneDamage(2);
-        requestHeroTarget(
-          ctx,
-          "conduit-target",
-          `Aether Conduit: deal ${amount} arcane damage to a hero`,
-          "card.cru.arcane.hero.choose",
-          { card: { kind: "card", cardId: ctx.self.cardId }, amount },
-        );
+        requestAnyTargetChoice(ctx, "conduit-target", 2, { heroesOnly: true });
       },
     },
     onChoose(ctx, hook, option) {
-      if (hook === "conduit-target") dealArcane(ctx, chosenHero(ctx, option), 2);
+      if (hook === "conduit-target") dealArcane(ctx, heroChoiceSeat(ctx, option)!, 2);
     },
   },
 
@@ -405,7 +338,7 @@ export const cruArcaneGeneric: Record<string, CardScript> = {
         if (comparison !== 0) {
           const higher = comparison > 0 ? ctx.seat : other;
           ctx.loseLife(higher, 1);
-          ctx.createToken(COPPER, higher);
+          ctx.heroCreatesTokens(higher, COPPER);
         }
         const after = ctx.compareLife(ctx.seat, other);
         if (after !== 0) {

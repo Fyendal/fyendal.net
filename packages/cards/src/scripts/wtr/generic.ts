@@ -5,26 +5,27 @@ import {
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  faceUpGraveyard,
   localizedLog,
   nextAttack,
   opponentSeat,
   requestDiscardChoice,
   resolveDiscardChoice,
   resourceAbility,
+  hasLessLife,
 } from "../shared-helpers.js";
+import { QUICKEN } from "../tokens.js";
 
 // ── WTR generic class cards ─────────────────────────────────────────────────
 //
 // These are the generic (class = "generic") cards from Welcome to Rathe that
 // need scripted behaviour beyond the engine's keyword handling.
 
-const QUICKEN_TOKEN_ID = "DVR028";
-
 function cardInGraveyard(
   ctx: ScriptCtx,
   name: string,
 ): { readonly instanceId: number; readonly cardId: string } | undefined {
-  return ctx.player(ctx.seat).graveyard.find((c) => cardNamed(ctx, c, name));
+  return faceUpGraveyard(ctx).find((c) => cardNamed(ctx, c, name));
 }
 
 function currentLinkData(ctx: ScriptCtx) {
@@ -127,13 +128,13 @@ const crazyBrewScript = (): CardScript => ({
     );
     if (roll <= 2) {
       ctx.loseLife(ctx.seat, 2);
-      ctx.gainActionPoint();
+      ctx.grantAbilityGoAgain();
     } else if (roll <= 4) {
       ctx.gainLife(ctx.seat, 2);
-      ctx.gainActionPoint();
+      ctx.grantAbilityGoAgain();
     } else {
-      ctx.changeResources(ctx.seat, 2);
-      ctx.changeActionPoints(ctx.seat, 2);
+      ctx.gainResources(ctx.seat, 2);
+      ctx.gainActionPoints(ctx.seat, 2);
       buffNextAttack(ctx, { attack: 2 });
     }
   },
@@ -191,7 +192,7 @@ const flockScript = (): CardScript => {
         );
     },
     onAttackDeclared(ctx) {
-      ctx.createToken(QUICKEN_TOKEN_ID);
+      ctx.createToken(QUICKEN);
     },
   };
 };
@@ -306,23 +307,33 @@ const hopeMerchantsHoodScript = (): CardScript => ({
 // ── Nimble Strike ───────────────────────────────────────────────────────────
 
 const nimbleStrikeScript = (): CardScript => ({
-  additionalCost(ctx) {
-    const nimblism = cardInGraveyard(ctx, "Nimblism");
-    if (!nimblism) return;
-    if (ctx.banish(nimblism.instanceId)) {
-      ctx.setState("nimblismBanished", 1);
-      ctx.logPublic(
-        localizedLog(
-          `${ctx.data.name}: banishes Nimblism from graveyard`,
-          "card.log.common.card.banished.from.graveyard",
-          {
-            card: { kind: "card", cardId: ctx.self.cardId },
-            result: { kind: "card", cardId: nimblism.cardId },
-          },
-          { kind: "card-moved", cardId: nimblism.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "banish" },
-        ),
+  declareAdditionalCost(ctx) {
+    const nimblisms = faceUpGraveyard(ctx).filter((c) => cardNamed(ctx, c, "Nimblism"));
+    if (nimblisms.length)
+      ctx.requestCardChoice(
+        "nimble-strike-banish",
+        decisionPrompt("Banish a Nimblism for +1 power and go again?", "card.sea.jacknimble.nimblism.banish", {
+          optionMessages: commonOptionMessages("pass"),
+        }),
+        ["pass", ...nimblisms.map((c) => c.instanceId)],
       );
-    }
+  },
+  onChoose(ctx, hook, option) {
+    if (hook !== "nimble-strike-banish" || option === "pass") return;
+    const nimblism = faceUpGraveyard(ctx).find((c) => c.instanceId === Number(option) && cardNamed(ctx, c, "Nimblism"));
+    if (!nimblism || !ctx.banish(nimblism.instanceId)) return;
+    ctx.setState("nimblismBanished", 1);
+    ctx.logPublic(
+      localizedLog(
+        `${ctx.data.name}: banishes Nimblism from graveyard`,
+        "card.log.common.card.banished.from.graveyard",
+        {
+          card: { kind: "card", cardId: ctx.self.cardId },
+          result: { kind: "card", cardId: nimblism.cardId },
+        },
+        { kind: "card-moved", cardId: nimblism.cardId, ownerSeat: ctx.seat, from: "graveyard", to: "banish" },
+      ),
+    );
   },
   modifyAttack(ctx) {
     return ctx.getState("nimblismBanished") ? 1 : 0;
@@ -432,10 +443,6 @@ function applyPummelClubHammer(ctx: ScriptCtx, buff: number): void {
 
 function applyPummelDiscard(ctx: ScriptCtx, buff: number): void {
   ctx.addModifier({ scope: "chain-link", attack: buff });
-  // The until-end-of-turn marker is needed so the engine calls this reaction
-  // card's onHit hook when the attack resolves. The link flag keeps the effect
-  // tied to the attack Pummel was actually played on.
-  ctx.addModifier({ scope: "until-end-of-turn", appliesTo: "attack-action" });
   ctx.setFlag("link", "pummelDiscardMode", true);
   ctx.logPublic(
     localizedLog(
@@ -551,7 +558,7 @@ const scarForAScarScript = (): CardScript => ({
       event: "card-played",
       sourceZone: "self",
       label: "Gain go again",
-      condition: (ctx) => ctx.player(ctx.seat).life < ctx.player(opponentSeat(ctx)).life,
+      condition: (ctx) => hasLessLife(ctx),
       effect(ctx, played) {
         if (!played) return;
         ctx.grantGoAgain(played.instanceId);
@@ -695,7 +702,7 @@ const timesnapPotionScript = (): CardScript => ({
     goAgain: false,
     destroySelfCost: true,
     onActivate(ctx) {
-      ctx.changeActionPoints(ctx.seat, 2);
+      ctx.gainActionPoints(ctx.seat, 2);
       ctx.logPublic(
         localizedLog(`${ctx.data.name}: gained 2 action points`, "card.log.common.actionpoints.gained", {
           card: { kind: "card", cardId: ctx.self.cardId },
@@ -730,7 +737,7 @@ const woundedBullScript = (): CardScript => ({
       event: "card-played",
       sourceZone: "self",
       label: "Gain +1 power",
-      condition: (ctx) => ctx.player(ctx.seat).life < ctx.player(opponentSeat(ctx)).life,
+      condition: (ctx) => hasLessLife(ctx),
       effect(ctx, played) {
         if (played) ctx.addCardTempPower(played.instanceId, 1);
       },

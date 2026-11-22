@@ -11,12 +11,14 @@ import type {
 import { scriptPromptParts } from "./scriptPresentation.js";
 import { abilityList, oncePerTurnEffectFlagKey } from "./scripts.js";
 import type { CardInstance, ChainLinkState, EnterArsenalZone, PendingArcane, PendingDecisionState, PlayerState } from "./state.js";
+import type { BanishBatch } from "./zoneMoves.js";
 import { queueDecisionBehindCrank } from "./decisionQueue.js";
 import { queuedAttackObjects } from "./attackQueue.js";
 import { rngInt } from "./rng.js";
 import { arcaneDamageCardsPlayedThisTurn, pitchedThisTurn, playedThisTurn } from "./turnRecords.js";
-import { heroAbilitiesDisabled } from "./stateQueries.js";
+import { equipmentZoneEmpty, heroAbilitiesDisabled } from "./stateQueries.js";
 import {
+  cardAbilitiesSuppressed,
   cardColorOf,
   cardCostOf,
   cardHasType,
@@ -24,11 +26,15 @@ import {
   cardNamesOf,
   cardTypesOf,
   dataOf,
+  grantedBaseAbilityCardIds,
   hasWardKeyword,
+  instanceHasKeyword,
+  isClassOrTalentSupertype,
   scriptOf,
   veilBlocksDefender,
 } from "./cardProperties.js";
 
+import { departedAttackTarget } from "./layerTargets.js";
 import {
   cardCeasesToExistLogMessage,
   cardDestroyedLogMessage,
@@ -46,22 +52,25 @@ import {
 import {
   chainLinkForAttack,
   currentLink,
+  defendingSeatOf,
   findCard,
   findCardAnywhere,
   findPermanent,
   globalCardInstances,
+  liveDefendingEquipment,
   opponent,
   removeFromArray,
 } from "./zoneQueries.js";
 
 import { contractObserverSources, controlledPermanents, hookSources } from "./sourceQueries.js";
-import { FROZEN_WHILE_SOURCE_IN_ARENA, isFrozen } from "./ruleQueries.js";
+import { FROZEN_WHILE_SOURCE_IN_ARENA, inActionPhase, isFrozen } from "./ruleQueries.js";
 import { arsenalCapacity, clearMovedCardPlayPermissions, clearPrivateZonePlacement, clearTemporaryObjectEffects, hasCrank, resetActivatedAbilityUsage, stampEnteringLife } from "./cardLifecycle.js";
 import {
   transitionZone,
   transitionZoneFromEngineZone,
   transitionZoneIsPrivate,
 } from "./transitions.js";
+import { hasType } from "@fyendal/shared";
 
 /** Reveal a group as one event. Reveals make the selected identities public
  * for the event but do not move or otherwise mutate the cards. */
@@ -335,7 +344,7 @@ function publishAttackPowerChange(
       runtime.makeCtx(state, link.attacker, link.attackingCard, link),
       changed,
     ) ?? changed;
-    for (const defender of link.defendingEquipment) {
+    for (const defender of liveDefendingEquipment(state, link)) {
       const next = scriptOf(state, defender.cardId, defender)?.replacePowerGain?.(
         runtime.makeCtx(state, opponent(link.attacker), defender, link),
         replaced,
@@ -417,6 +426,16 @@ export function makeCtx(
   tokenCreationCause: TokenCreationContext = { kind: "effect", sourceCardId: self.cardId },
 ): ScriptCtx {
   const player = state.players[seat] as PlayerState;
+  // CR 5.3.4b: only the effect on a departed target attack fails. Its last
+  // known information answers the card's conditions (CR 1.2.3).
+  const goneAttackId = departedAttackTarget(state, self, link);
+  if (link && goneAttackId !== undefined) {
+    link = {
+      ...link,
+      attackingCard: findCardAnywhere(state, goneAttackId)?.card ?? { ...link.attackingCard, instanceId: goneAttackId },
+      flags: { ...link.flags },
+    };
+  }
   const creationCause: TokenCreationContext = {
     ...tokenCreationCause,
     creatorSeat: tokenCreationCause.creatorSeat ?? seat,
@@ -443,6 +462,41 @@ export function makeCtx(
     ) return "activated-ability";
     return "other";
   };
+  const banishOne = (
+    instanceId: number,
+    opts?: { faceDown?: boolean; asAttackingCard?: boolean },
+    batch?: BanishBatch,
+  ): boolean => {
+    const before = findCardAnywhere(state, instanceId);
+    const source = opts?.asAttackingCard && link?.attacker === seat && link.flags.attackGone !== true
+      ? link.attackingCard
+      : self;
+    const moved = runtime.commands.banishCard(
+      state,
+      instanceId,
+      seat,
+      opts?.faceDown,
+      deckMoveEffectSource(),
+      batch,
+    );
+    if (moved && before && before.card.owner !== seat) {
+      fireFriendlyBanishesOpponentCard(state, runtime, seat, before.card);
+    }
+    if (moved && before) {
+      const ownScript = scriptOf(state, source.cardId, source);
+      const scripts = new Set(ownScript ? [ownScript] : []);
+      if (!cardAbilitiesSuppressed(state, source)) {
+        for (const inheritedId of grantedBaseAbilityCardIds(source)) {
+          const inherited = state.scriptsRef[inheritedId];
+          if (inherited) scripts.add(inherited);
+        }
+      }
+      for (const script of scripts) {
+        script.onBanishedCard?.(runtime.makeCtx(state, seat, source, currentLink(state)), before.card);
+      }
+    }
+    return moved;
+  };
   const requestScriptedChoice = (
     hook: string,
     prompt: ScriptPrompt,
@@ -459,8 +513,9 @@ export function makeCtx(
         ? existing
         : undefined;
     // An empty option list would deadlock the game on an unanswerable
-    // decision — the effect simply finds no target and fizzles.
-    if (options.length === 0) {
+    // decision — the effect simply finds no target and fizzles. An optional
+    // search still shows the searched cards and is answered with no picks.
+    if (options.length === 0 && !(details.minimumSelections === 0 && details.lookedCardIds?.length)) {
       logPublic(state, gameLogMessage(
         `(fizzled, no options: ${presentation.fallback})`,
         "engine.log.decision.fizzles.no.options",
@@ -475,6 +530,7 @@ export function makeCtx(
         : "choose-target",
       prompt: presentation.fallback,
       ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
+      ...(presentation.warningMessage ? { warningMessage: presentation.warningMessage } : {}),
       ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
       ...(presentation.chosenOptions ? { chosenOptions: presentation.chosenOptions } : {}),
       ...(presentation.chosenOptionMessages
@@ -610,7 +666,13 @@ export function makeCtx(
     ...((playTargetInstanceId ?? self.playTargetInstanceId) !== undefined
       ? { playTargetInstanceId: playTargetInstanceId ?? self.playTargetInstanceId }
       : {}),
-    addModifier(m, source) {
+    addModifier(modifier, source) {
+      const m = goneAttackId !== undefined &&
+        modifier.scope === "chain-link" &&
+        modifier.appliesToInstanceId === undefined &&
+        modifier.playCostReduction === undefined
+        ? { ...modifier, appliesToInstanceId: goneAttackId }
+        : modifier;
       const observed = observeAttackPower(state, runtime);
       const active = currentLink(state);
       const origin = source ?? self;
@@ -622,7 +684,7 @@ export function makeCtx(
         Number(m.attack ?? 0) > 0 &&
         targetLink?.attackCardType === "action" &&
         state.players.some((candidate) => candidate.flags.suppressAttackPowerEffectGains === true) &&
-        (origin.instanceId === targetLink.attackingCard.instanceId || originData.cardType === "attack-reaction");
+        (origin.instanceId === targetLink.attackingCard.instanceId || hasType(originData, "attack-reaction"));
       const attack =
         Number(m.attack ?? 0) > 0 &&
         targetLink &&
@@ -655,6 +717,10 @@ export function makeCtx(
         publishAttackPowerChange(state, runtime, observed, origin);
         return;
       }
+      const modifierSeat =
+        m.seat ??
+        (m.appliesToInstanceId !== undefined ? targetLink?.attacker : undefined) ??
+        seat;
       state.modifiers.push({
         ...m,
         createdTurn: state.turn,
@@ -662,10 +728,8 @@ export function makeCtx(
         ...(effectiveAttack !== undefined ? { attack: effectiveAttack } : {}),
         id: state.nextModifierId++,
         sourceInstanceId: origin.instanceId,
-        seat:
-          m.seat ??
-          (m.appliesToInstanceId !== undefined ? targetLink?.attacker : undefined) ??
-          seat,
+        seat: modifierSeat,
+        ...(modifierSeat !== seat ? { creatorSeat: seat } : {}),
       });
       if (Number(m.attack ?? 0) > 0 || Number(m.defense ?? 0) > 0) {
         for (const candidate of state.players as PlayerState[]) {
@@ -673,6 +737,9 @@ export function makeCtx(
         }
       }
       publishAttackPowerChange(state, runtime, observed, origin);
+    },
+    equipmentZoneEmpty(targetSeat, slot) {
+      return equipmentZoneEmpty(state.players[targetSeat] as PlayerState, slot);
     },
     player(targetSeat) {
       return state.players[targetSeat] as PlayerState;
@@ -684,26 +751,27 @@ export function makeCtx(
       const target = state.players[targetSeat] as PlayerState;
       return target.arsenal.length < arsenalCapacity(state, targetSeat);
     },
-    changeResources(targetSeat, delta) {
+    gainResources(targetSeat, amount) {
       const target = state.players[targetSeat] as PlayerState;
-      target.resources = Math.max(0, target.resources + delta);
-      if (delta > 0) {
+      target.resources = Math.max(0, target.resources + amount);
+      if (amount > 0) {
         for (const candidate of state.players as PlayerState[]) {
           candidate.flags.cardEffectResourceLifeOrStatGainThisTurn = true;
         }
       }
     },
-    changeChi(targetSeat, delta) {
+    gainChi(targetSeat, amount) {
       const target = state.players[targetSeat] as PlayerState;
-      target.chi = Math.max(0, target.chi + delta);
+      target.chi = Math.max(0, target.chi + amount);
     },
-    changeActionPoints(targetSeat, delta) {
+    gainActionPoints(targetSeat, amount) {
+      if (amount > 0 && !inActionPhase(state, targetSeat)) return;
       const target = state.players[targetSeat] as PlayerState;
-      target.actionPoints = Math.max(0, target.actionPoints + delta);
+      target.actionPoints = Math.max(0, target.actionPoints + amount);
     },
     grantAdditionalActivation(instanceId, count = 1) {
       const found = findCardAnywhere(state, instanceId);
-      if (!found || count <= 0) return;
+      if (!found || count <= 0 || instanceId === goneAttackId) return;
       const abilities = abilityList(scriptOf(state, found.card.cardId, found.card));
       const target = state.players[found.seat] as PlayerState;
       for (let index = 0; index < abilities.length; index++) {
@@ -714,13 +782,10 @@ export function makeCtx(
     setAttackActivationLimit(instanceId, limit) {
       const found = findCardAnywhere(state, instanceId);
       if (!found || !Number.isSafeInteger(limit) || limit <= 0) return;
-      const abilities = abilityList(scriptOf(state, found.card.cardId, found.card));
+      // Not gated on printed attack abilities: granted aura attacks read it too.
       const target = state.players[found.seat] as PlayerState;
-      for (let index = 0; index < abilities.length; index++) {
-        if (abilities[index]?.isAttack !== true) continue;
-        const key = runtime.commands.setAttackActivationLimitKey(instanceId);
-        target.flags[key] = Math.max(Number(target.flags[key] || 0), limit);
-      }
+      const key = runtime.commands.setAttackActivationLimitKey(instanceId);
+      target.flags[key] = Math.max(Number(target.flags[key] || 0), limit);
     },
     allowAbilitiesAsInstant(type) {
       player.flags[`abilitiesAsInstant:${type.toLowerCase()}`] = true;
@@ -940,10 +1005,11 @@ export function makeCtx(
         const card = removeFromArray(chainLink.defendingCards, instanceId);
         if (!card) continue;
         runtime.commands.moveToGraveyard(state, card, "chain", seat, undefined, true);
-        runtime.commands.fireLeaveCombatChain(state, card.owner, card, "defending", true);
+        const defenderSeat = defendingSeatOf(chainLink);
+        runtime.commands.fireLeaveCombatChain(state, defenderSeat, card, "defending", true);
         logPublic(state, cardDestroyedLogMessage(state, card.cardId));
-        runtime.events.runHook(state, card.owner, card, "onDestroyed", chainLink);
-        runtime.events.fireFriendlyDestroyed(state, card.owner, card, seat);
+        runtime.events.runHook(state, defenderSeat, card, "onDestroyed", chainLink);
+        runtime.events.fireFriendlyDestroyed(state, defenderSeat, card, seat);
         return true;
       }
       return false;
@@ -1094,7 +1160,7 @@ export function makeCtx(
           }
         : undefined);
       if (!found) return false;
-      if (found.fromArena && dataOf(state, found.card.cardId).cardType === "token") {
+      if (found.fromArena && hasType(dataOf(state, found.card.cardId), "token")) {
         runtime.commands.fireLeaveArena(state, found.owner.seat, found.card, "cease-to-exist");
         logPublic(state, cardCeasesToExistLogMessage(state, found.card.cardId));
         return true;
@@ -1214,7 +1280,7 @@ export function makeCtx(
     },
     addCardTempPower(instanceId, delta) {
       const found = findCardAnywhere(state, instanceId);
-      if (!found) return false;
+      if (!found || instanceId === goneAttackId) return false;
       const observed = observeAttackPower(state, runtime);
       const active = currentLink(state);
       const targetLink = chainLinkForAttack(state, instanceId);
@@ -1225,7 +1291,7 @@ export function makeCtx(
         (active.flags.cannotGainPower === true ||
           (state.players[active.attacker] as PlayerState).flags.attacksCannotGainPower === true ||
           (state.players.some((candidate) => candidate.flags.suppressAttackPowerEffectGains === true) &&
-            (self.instanceId === instanceId || dataOf(state, self.cardId).cardType === "attack-reaction")));
+            (self.instanceId === instanceId || hasType(dataOf(state, self.cardId), "attack-reaction"))));
       let adjusted =
         suppressGain
           ? 0
@@ -1236,7 +1302,7 @@ export function makeCtx(
             ) ?? delta
           : delta;
       if (adjusted > 0 && state.phase !== "reaction" && active?.attackingCard.instanceId === instanceId) {
-        for (const defender of active.defendingEquipment) {
+        for (const defender of liveDefendingEquipment(state, active)) {
           const next = scriptOf(state, defender.cardId, defender)?.replacePowerGain?.(
             runtime.makeCtx(state, opponent(active.attacker), defender, active),
             adjusted,
@@ -1353,7 +1419,7 @@ export function makeCtx(
     },
     becomeCardCopy(instanceId, sourceCardId) {
       const found = findCardAnywhere(state, instanceId);
-      if (!found || !state.cardsRef[sourceCardId]) return false;
+      if (!found || !state.cardsRef[sourceCardId] || instanceId === goneAttackId) return false;
       found.card.copyOriginalCardId ??= found.card.cardId;
       found.card.cardId = sourceCardId;
       delete found.card.grantedBaseAbilitiesCardId;
@@ -1409,7 +1475,7 @@ export function makeCtx(
     },
     grantCardKeyword(instanceId, keyword) {
       const found = findCardAnywhere(state, instanceId);
-      if (!found) return false;
+      if (!found || instanceId === goneAttackId) return false;
       const active = currentLink(state);
       if (active?.flags.attackAbilitiesSuppressed === true && active.attackingCard.instanceId === instanceId) {
         return false;
@@ -1429,7 +1495,7 @@ export function makeCtx(
     },
     suppressCardKeyword(instanceId, keyword) {
       const found = findCardAnywhere(state, instanceId);
-      if (!found) return false;
+      if (!found || instanceId === goneAttackId) return false;
       const normalized = keyword.toLowerCase();
       const keywords = (found.card.suppressedKeywords ??= []);
       if (!keywords.includes(normalized)) keywords.push(normalized);
@@ -1478,7 +1544,10 @@ export function makeCtx(
       return runtime.commands.defendingDefenseOf(state, observed, link);
     },
     currentAttackPower() {
-      return link ? runtime.commands.computeAttack(state, link) : 0;
+      if (!link) return 0;
+      // chain-link modifiers expire at resolution; the snapshot keeps their power
+      if (link.resolved && link.finalAttack !== undefined) return link.finalAttack;
+      return runtime.commands.computeAttack(state, link);
     },
     currentAttackHasDominate() {
       return link ? runtime.commands.attackHasDominate(state, link) : false;
@@ -1576,9 +1645,11 @@ export function makeCtx(
       recordLifeLost(state, targetSeat, lost);
       if (requested > 0) target.flags.lostLifeThisTurn = true;
     },
+    canGainActionPoint() {
+      return inActionPhase(state, seat);
+    },
     gainActionPoint() {
-      // CR 8.5.7b: a non-turn-player cannot gain action points
-      if (seat !== state.activePlayer) return;
+      if (!inActionPhase(state, seat)) return;
       player.actionPoints += 1;
       logPublic(state, gameLogMessage(
         `${nameOf(state, player.heroCardId)} gains an action point`,
@@ -1644,10 +1715,17 @@ export function makeCtx(
     },
     grantGoAgain(targetAttackInstanceId) {
       if (targetAttackInstanceId === undefined && grantPlayedCardGoAgain()) return;
+      if (targetAttackInstanceId === undefined && goneAttackId !== undefined) return;
       const target = targetAttackInstanceId === undefined
         ? link
         : chainLinkForAttack(state, targetAttackInstanceId);
       if (target && target.flags.attackGone !== true) runtime.events.grantLinkGoAgain(state, target);
+    },
+    grantAbilityGoAgain() {
+      const layer = state.stack.find(
+        (candidate) => candidate.ability === true && candidate.sourceInstanceId === self.instanceId,
+      );
+      if (layer) layer.goAgain = true;
     },
     grantChainLinkGoAgain(chainLinkIndex) {
       if (!Number.isSafeInteger(chainLinkIndex) || chainLinkIndex < 0) return;
@@ -1665,7 +1743,7 @@ export function makeCtx(
     },
     wager(withSeat, rewardCardIds, rewardLabel) {
       const activeLink = currentLink(state);
-      if (!activeLink || activeLink.attacker !== seat || !state.players[withSeat]) return;
+      if (!activeLink || activeLink.attacker !== seat || !state.players[withSeat] || goneAttackId !== undefined) return;
       activeLink.flags.wagered = true;
       activeLink.flags.wagerCount = Number(activeLink.flags.wagerCount ?? 0) + 1;
       const tokenNames = rewardCardIds.map((cardId) => nameOf(state, cardId));
@@ -1928,6 +2006,11 @@ export function makeCtx(
         },
       ));
     },
+    completeContract() {
+      player.flags.completedContractThisTurn = true;
+      player.flags.contractCompletionsThisTurn = (Number(player.flags.contractCompletionsThisTurn) || 0) + 1;
+      runtime.events.queueTriggeredEvent(state, "contract-completed", seat);
+    },
     transcend() {
       // the resolving card leaves the stack-resolution flow into its owner's
       // hand, flipped (back face active) — returnSelfToHand precedent
@@ -1987,29 +2070,16 @@ export function makeCtx(
         instanceId,
         seat,
         deckMoveEffectSource(),
+        seat,
       );
     },
     banish(instanceId, opts) {
-      const before = findCardAnywhere(state, instanceId);
-      const source = opts?.asAttackingCard && link?.attacker === seat && link.flags.attackGone !== true
-        ? link.attackingCard
-        : self;
-      const moved = runtime.commands.banishCard(
-        state,
-        instanceId,
-        seat,
-        opts?.faceDown,
-        deckMoveEffectSource(),
-      );
-      if (moved && before && before.card.owner !== seat) {
-        fireFriendlyBanishesOpponentCard(state, runtime, seat, before.card);
-      }
-      if (moved && before) {
-        scriptOf(state, source.cardId, source)?.onBanishedCard?.(
-          runtime.makeCtx(state, seat, source, currentLink(state)),
-          before.card,
-        );
-      }
+      return banishOne(instanceId, opts);
+    },
+    banishCards(instanceIds, opts) {
+      const batch: BanishBatch = [];
+      const moved = instanceIds.filter((instanceId) => banishOne(instanceId, opts, batch)).length;
+      runtime.events.fireCardsBanished(state, batch);
       return moved;
     },
     banishAllDefendingCardsOnChainClose() {
@@ -2039,14 +2109,16 @@ export function makeCtx(
       }
       let chainCard: CardInstance | undefined;
       let defendingCard: CardInstance | undefined;
+      let defenderSeat: number | undefined;
       for (const link of state.chain) {
         const defending = removeFromArray(link.defendingCards, self.instanceId);
+        if (defending && !defendingCard) defenderSeat = defendingSeatOf(link);
         defendingCard ??= defending;
         chainCard ??= defending ?? removeFromArray(link.reactions, self.instanceId);
       }
       const card = removed?.card ?? attackingCard ?? chainCard;
       if (!card) return false;
-      if (removed?.fromArena && dataOf(state, card.cardId).cardType === "token") {
+      if (removed?.fromArena && hasType(dataOf(state, card.cardId), "token")) {
         runtime.commands.fireLeaveArena(state, removed.owner.seat, card, "cease-to-exist");
         logPublic(state, cardCeasesToExistLogMessage(state, card.cardId));
         return true;
@@ -2067,11 +2139,12 @@ export function makeCtx(
         runtime.commands.fireLeaveCombatChain(state, attackerSeat, card, "attacking");
       }
       if (!removed && card === defendingCard) {
-        runtime.commands.fireLeaveCombatChain(state, card.owner, card, "defending");
+        runtime.commands.fireLeaveCombatChain(state, defenderSeat ?? card.owner, card, "defending");
       }
       return true;
     },
     addCounter(instanceId, kind, delta) {
+      if (instanceId === goneAttackId) return;
       updateCardCopies(state, runtime, self, instanceId, (card) => {
         const counters = (card.counters ??= {});
         counters[kind] = (counters[kind] ?? 0) + delta;
@@ -2083,6 +2156,7 @@ export function makeCtx(
       });
     },
     setCardCounter(instanceId, kind, value) {
+      if (instanceId === goneAttackId) return;
       updateCardCopies(state, runtime, self, instanceId, (card) => {
         (card.counters ??= {})[kind] = value;
       });
@@ -2096,6 +2170,7 @@ export function makeCtx(
       });
     },
     setCardBasePower(instanceId, power) {
+      if (instanceId === goneAttackId) return;
       updateCardCopies(state, runtime, self, instanceId, (card) => {
         card.basePowerOverride = { power, sourceInstanceId: self.instanceId, sourceCardId: self.cardId };
       });
@@ -2234,6 +2309,23 @@ export function makeCtx(
         initialState,
       );
     },
+    heroCreatesTokens(heroSeat, cardId, count = 1) {
+      return runtime.commands.createTokensFor(
+        state,
+        state.players[heroSeat] as PlayerState,
+        cardId,
+        count,
+        { ...creationCause, creatorSeat: heroSeat },
+      );
+    },
+    createOwnedTokenUnder(controllerSeat, cardId) {
+      return runtime.commands.createTokenFor(
+        state,
+        state.players[controllerSeat] as PlayerState,
+        cardId,
+        { ...creationCause, ownerSeat: seat },
+      );
+    },
     createCardInHand(cardId, targetSeat) {
       const target =
         targetSeat === undefined ? player : (state.players[targetSeat] as PlayerState);
@@ -2286,6 +2378,7 @@ export function makeCtx(
 
       const subcards: CardInstance[] = [];
       const transformEvents: { seat: number; from: CardInstance }[] = [];
+      const transformedNames: string[] = [];
       for (const found of transformed) {
         const entry = found!;
         if (entry.card.instanceId === existingPermanentInstanceId) {
@@ -2297,6 +2390,7 @@ export function makeCtx(
           // CR 3.0.14c: its sub-cards go under the permanent beside it.
           subcards.push(...(entry.card.subcards ?? []), subcard);
           transformEvents.push({ seat: entry.seat, from: subcard });
+          transformedNames.push(nameOf(state, subcard.cardId));
           continue;
         }
         const equipmentSlot = Object.entries(entry.controller.equipment)
@@ -2314,6 +2408,7 @@ export function makeCtx(
         };
         subcards.push(...(removed.subcards ?? []), subcard);
         transformEvents.push({ seat: entry.seat, from: subcard });
+        transformedNames.push(nameOf(state, subcard.cardId));
       }
 
       if (permanent) {
@@ -2339,12 +2434,12 @@ export function makeCtx(
       } else permanent = runtime.commands.createTokenFor(state, player, cardId, creationCause);
       if (!permanent) return undefined;
       (permanent.subcards ??= []).push(...subcards);
-      if (subcards.length > 0) {
+      if (transformedNames.length > 0) {
         logPublic(state, gameLogMessage(
-          `${subcards.map((card) => nameOf(state, card.cardId)).join(" and ")} transforms into ${nameOf(state, cardId)}`,
+          `${transformedNames.join(" and ")} transforms into ${nameOf(state, cardId)}`,
           "engine.log.cards.transform.into",
           {
-            cards: subcards.map((card) => nameOf(state, card.cardId)).join(" and "),
+            cards: transformedNames.join(" and "),
             result: logCardValue(cardId),
           },
         ));
@@ -2401,6 +2496,10 @@ export function makeCtx(
       const found = findCardAnywhere(state, card.instanceId)?.card;
       return cardTypesOf(state, found ?? card as CardInstance);
     },
+    hasClassOrTalent(card) {
+      const found = findCardAnywhere(state, card.instanceId)?.card;
+      return cardTypesOf(state, found ?? card as CardInstance).some(isClassOrTalentSupertype);
+    },
     isRunechant(card) {
       const found = findCardAnywhere(state, card.instanceId)?.card;
       const target = found ?? card as CardInstance;
@@ -2411,6 +2510,9 @@ export function makeCtx(
       const target = found?.card ?? card as CardInstance;
       const controller = state.players[found?.seat ?? seat] as PlayerState;
       return hasCrank(state, runtime, controller, target);
+    },
+    hasKeyword(card, keyword) {
+      return instanceHasKeyword(state, findCardAnywhere(state, card.instanceId)?.card ?? card as CardInstance, keyword);
     },
     hasWard(card) {
       return hasWardKeyword(state, findCardAnywhere(state, card.instanceId)?.card ?? card as CardInstance);
@@ -2580,13 +2682,7 @@ export function makeCtx(
       return true;
     },
     canPayResources(cost, excludeInstanceIds = []) {
-      return Object.keys(runtime.commands.scriptedPaymentOptions(
-        state,
-        state.players[seat] as PlayerState,
-        cost,
-        "paid",
-        excludeInstanceIds,
-      )).length > 0;
+      return runtime.commands.canPayFromHand(state, state.players[seat] as PlayerState, cost, excludeInstanceIds);
     },
     requestPaymentFrom(sourceInstanceId, hook, prompt, cost, choiceSeat) {
       const found = findCardAnywhere(state, sourceInstanceId);
@@ -2783,7 +2879,7 @@ export function makeCtx(
       ) as PlayerState | undefined;
       if (!owner || owner.seat === current.attacker) return false;
       const card = owner.arsenal.find((candidate) => candidate.instanceId === instanceId);
-      if (!card || dataOf(state, card.cardId).cardType !== "action") return false;
+      if (!card || !hasType(dataOf(state, card.cardId), "action")) return false;
       if (veilBlocksDefender(state, current, card)) return false;
       removeFromArray(owner.arsenal, instanceId);
       delete card.faceDown;
@@ -2879,7 +2975,7 @@ export function makeCtx(
       const live = Object.values(owner.equipment).find(
         (candidate) => candidate?.instanceId === self.instanceId,
       );
-      if (!live || dataOf(state, live.cardId).cardType !== "equipment") return false;
+      if (!live || !hasType(dataOf(state, live.cardId), "equipment")) return false;
       if (current.defendingEquipment.some((candidate) => candidate.instanceId === live.instanceId)) {
         return false;
       }
@@ -2977,7 +3073,7 @@ export function makeCtx(
       if (privateSource) {
         logPrivate(
           state,
-          found.owner.seat,
+          found.fromZone === "deck" ? seat : found.owner.seat,
           detail,
           gameLogMessage(
             `a card is put on the ${toBottom ? "bottom" : "top"} of the deck`,
@@ -3031,7 +3127,7 @@ export function makeCtx(
       if (privateSource) {
         logPrivate(
           state,
-          found.owner.seat,
+          found.fromZone === "deck" ? seat : found.owner.seat,
           detail,
           gameLogMessage(
             `a card is put ${depth}${suffix} from the top of the deck`,
@@ -3045,7 +3141,7 @@ export function makeCtx(
       return true;
     },
     putOnDeckBottom(instanceId) {
-      return runtime.commands.putCardOnDeckBottom(state, instanceId);
+      return runtime.commands.putCardOnDeckBottom(state, instanceId, false, seat);
     },
     shuffleIntoDeck(instanceIds) {
       return runtime.commands.shuffleCardsIntoDeck(state, instanceIds);
@@ -3079,7 +3175,7 @@ export function makeCtx(
       const target =
         tokenSeat === undefined ? player : (state.players[tokenSeat] as PlayerState);
       const d = dataOf(state, cardId);
-      if (d.cardType === "weapon") {
+      if (hasType(d, "weapon")) {
         const occupiedZones = target.weapons.reduce(
           (total, weapon) => total + weaponHands(state, target, weapon.cardId),
           0,
@@ -3104,11 +3200,11 @@ export function makeCtx(
         ));
         return token;
       }
-      if (d.cardType === "equipment") {
+      if (hasType(d, "equipment")) {
         const slot = (["head", "chest", "arms", "legs"] as const).find((s) =>
           (d.subtypes ?? []).includes(s),
         );
-        if (!slot || target.equipment[slot]) {
+        if (!slot || !equipmentZoneEmpty(target, slot)) {
           logPublic(state, gameLogMessage(
             `${d.name} can't be equipped (no free equipment zone)`,
             "engine.log.card.equip.failed.no.equipment.zone",
@@ -3142,7 +3238,7 @@ export function makeCtx(
       if (!owner || !card) return false;
       const d = dataOf(state, card.cardId);
       // Off-hands are equipment permanents equipped in a weapon zone.
-      if (d.cardType === "weapon" || (d.cardType === "equipment" && (d.subtypes ?? []).includes("off-hand"))) {
+      if (hasType(d, "weapon") || (hasType(d, "equipment") && (d.subtypes ?? []).includes("off-hand"))) {
         const hands = weaponHands(state, owner, card.cardId);
         const occupied = owner.weapons.reduce((total, weapon) =>
           total + weaponHands(state, owner, weapon.cardId), 0);
@@ -3160,11 +3256,11 @@ export function makeCtx(
         runtime.events.fireFriendlyEnterArena(state, owner.seat, card, "graveyard");
         return true;
       }
-      if (d.cardType === "equipment") {
+      if (hasType(d, "equipment")) {
         const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
           (d.subtypes ?? []).includes(candidate),
         );
-        if (!slot || owner.equipment[slot]) return false;
+        if (!slot || !equipmentZoneEmpty(owner, slot)) return false;
         removeFromArray(owner.graveyard, instanceId);
         owner.equipment[slot] = card;
         resetActivatedAbilityUsage(owner, card.instanceId);
@@ -3184,18 +3280,18 @@ export function makeCtx(
       const card = player.banish.find((candidate) => candidate.instanceId === instanceId);
       if (!card) return false;
       const d = dataOf(state, card.cardId);
-      if (d.cardType === "weapon") {
+      if (hasType(d, "weapon")) {
         const hands = weaponHands(state, player, card.cardId);
         const occupied = player.weapons.reduce((total, weapon) =>
           total + weaponHands(state, player, weapon.cardId), 0);
         if (occupied + hands > 2) return false;
         removeFromArray(player.banish, instanceId);
         player.weapons.push(card);
-      } else if (d.cardType === "equipment") {
+      } else if (hasType(d, "equipment")) {
         const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
           (d.subtypes ?? []).includes(candidate),
         );
-        if (!slot || player.equipment[slot]) return false;
+        if (!slot || !equipmentZoneEmpty(player, slot)) return false;
         removeFromArray(player.banish, instanceId);
         player.equipment[slot] = card;
       } else return false;
@@ -3215,18 +3311,18 @@ export function makeCtx(
       const card = inventory.find((candidate) => candidate.instanceId === instanceId);
       if (!card) return false;
       const d = dataOf(state, card.cardId);
-      if (d.cardType === "weapon") {
+      if (hasType(d, "weapon")) {
         const hands = weaponHands(state, player, card.cardId);
         const occupied = player.weapons.reduce((total, weapon) =>
           total + weaponHands(state, player, weapon.cardId), 0);
         if (occupied + hands > 2) return false;
         removeFromArray(inventory, instanceId);
         player.weapons.push(card);
-      } else if (d.cardType === "equipment") {
+      } else if (hasType(d, "equipment")) {
         const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
           (d.subtypes ?? []).includes(candidate),
         );
-        if (!slot || player.equipment[slot]) return false;
+        if (!slot || !equipmentZoneEmpty(player, slot)) return false;
         removeFromArray(inventory, instanceId);
         player.equipment[slot] = card;
       } else return false;
@@ -3245,7 +3341,7 @@ export function makeCtx(
         (slot) => opposing.equipment[slot]?.instanceId === instanceId,
       );
       if (ordinarySlot) {
-        if (player.equipment[ordinarySlot]) return false;
+        if (!equipmentZoneEmpty(player, ordinarySlot)) return false;
         const card = opposing.equipment[ordinarySlot];
         if (!card) return false;
         delete opposing.equipment[ordinarySlot];
@@ -3270,7 +3366,7 @@ export function makeCtx(
       if (weaponIndex < 0) return false;
       const card = opposing.weapons[weaponIndex] as CardInstance;
       const d = dataOf(state, card.cardId);
-      if (d.cardType !== "equipment") return false;
+      if (!hasType(d, "equipment")) return false;
       const hands = weaponHands(state, player, card.cardId);
       const occupiedHands = player.weapons.reduce((total, weapon) =>
         total + weaponHands(state, player, weapon.cardId), 0);
@@ -3295,7 +3391,7 @@ export function makeCtx(
       const owner = state.players.find((candidate) =>
         Object.values(candidate.equipment).some((card) => card?.instanceId === instanceId),
       ) as PlayerState | undefined;
-      if (!owner || owner.equipment[slot]) return false;
+      if (!owner || !equipmentZoneEmpty(owner, slot)) return false;
       const current = (Object.keys(owner.equipment) as EquipmentSlot[]).find(
         (candidate) => owner.equipment[candidate]?.instanceId === instanceId,
       );
@@ -3340,7 +3436,7 @@ export function makeCtx(
         (nextCardId !== registeredCardId && registered.backId !== nextCardId)
       ) return false;
       const next = state.cardsRef[nextCardId];
-      if (!next || next.cardType !== "hero") return false;
+      if (!next || !hasType(next, "hero")) return false;
       removeFromArray(inventory, instanceId);
       const oldHero = player.hero;
       const oldHeroCardId = player.heroCardId;
@@ -3367,7 +3463,7 @@ export function makeCtx(
     },
     becomeHeroUntilNextTurn(cardId) {
       const next = state.cardsRef[cardId];
-      if (!next || next.cardType !== "hero") return;
+      if (!next || !hasType(next, "hero")) return;
       player.hero.originalHeroCardId ??= player.heroCardId;
       player.hero.temporaryHeroOriginalCardId ??= player.hero.cardId;
       player.hero.temporaryHeroUntilTurn = state.turn +
@@ -3726,7 +3822,7 @@ export function fireOnDiscard(
   const payingBruteAttackCost = state.resolving.some((card) => {
     if (Number(card.scriptState?.payingAdditionalCost ?? 0) !== 1) return false;
     const resolvingData = dataOf(state, card.cardId);
-    return resolvingData.cardType === "action" &&
+    return hasType(resolvingData, "action") &&
       (resolvingData.subtypes ?? []).includes("attack") &&
       cardTypesOf(state, card).includes("brute");
   });

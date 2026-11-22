@@ -1,6 +1,7 @@
 import type { CardData, CardView, ChainLinkView, PlayerView } from "@fyendal/shared";
 import { unseenCounts } from "./deck-knowledge.js";
 import type { BotPolicyInput } from "./policy.js";
+import { hasType as hasPrintedType } from "@fyendal/shared";
 
 /**
  * Damage the attacker can still add to the current opposing attack from
@@ -47,7 +48,7 @@ export function publicCombatThreat(input: BotPolicyInput, defended = false): Pub
 /** Combat damage the current opposing attack deals before new blocks once the
  * attacker spends every public pump. */
 export function threatenedCombatDamage(input: BotPolicyInput, defended = false): number {
-  const link = opposingLink(input);
+  const link = opposingHeroLink(input);
   return link ? pumpedDamage(link, publicCombatThreat(input, defended).attackBonus) : 0;
 }
 
@@ -63,9 +64,10 @@ function pumpedDamage(link: ChainLinkView, bonus: number): number {
   return Math.max(0, link.damage, link.attackValue + bonus - link.defenseValue);
 }
 
-function opposingLink(input: BotPolicyInput): ChainLinkView | undefined {
+/** The unresolved opposing attack aimed at this hero, not at one of their allies. */
+export function opposingHeroLink(input: BotPolicyInput): ChainLinkView | undefined {
   const link = [...input.view.chain].reverse().find((candidate) => !candidate.resolved);
-  return link && link.attackingCard.owner !== input.seat ? link : undefined;
+  return link && link.attackingCard.owner !== input.seat && link.targetAllyName === undefined ? link : undefined;
 }
 
 interface Unit {
@@ -253,8 +255,9 @@ function instantUnits(context: Context, data: CardData): Unit[] {
 /** A face-up arsenal instant or attack reaction that pumps the current attack. */
 function arsenalUnits(context: Context, card: CardView): Unit[] {
   const data = context.input.cards[card.cardId];
-  if (data?.cardType === "instant") return instantUnits(context, data);
-  if (data?.cardType !== "attack-reaction") return [];
+  if (!data) return [];
+  if (hasPrintedType(data, "instant")) return instantUnits(context, data);
+  if (!hasPrintedType(data, "attack-reaction")) return [];
   const sentence = (data.text ?? "").toLowerCase().split(/[.\n]/).find((part) =>
     /attack[^.]*\b(?:gets|gains) \+\d+\{p\}/.test(part) && !/next attack|counter/.test(part)
   );
@@ -296,8 +299,8 @@ function poolSizes(context: Context): Map<string, number> {
 }
 
 function computeThreat(input: BotPolicyInput, defended: boolean): PublicCombatThreat {
-  const link = opposingLink(input);
-  if (!link || link.targetAlly || link.targetAllyName) return NO_THREAT;
+  const link = opposingHeroLink(input);
+  if (!link) return NO_THREAT;
   const attacker = input.view.players[1 - input.seat]!;
   const attackingCard = link.attackingCard;
   const permanents = [
@@ -309,7 +312,7 @@ function computeThreat(input: BotPolicyInput, defended: boolean): PublicCombatTh
     input,
     link,
     attacker,
-    attackIsAction: input.cards[attackingCard.cardId]?.cardType === "action",
+    attackIsAction: hasPrintedType(input.cards[attackingCard.cardId], "action"),
     permanents,
   };
   const sources = [

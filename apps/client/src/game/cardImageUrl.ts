@@ -2,6 +2,7 @@ import { cardData, cardList } from "@fyendal/cards/client";
 import marvelArt from "./marvelArt.json" with { type: "json" };
 import marvelArtFaces from "./marvelArtFaces.json" with { type: "json" };
 import marvelFramedFronts from "./marvelFramedFronts.json" with { type: "json" };
+import { hasType, primaryType, type CardData } from "@fyendal/shared";
 
 const IMG_BASE = "https://content.fabrary.net/cards";
 
@@ -10,7 +11,7 @@ const IMG_BASE = "https://content.fabrary.net/cards";
 const BLACK_BORDER_ART_FOR_1HP = new Map<string, string>();
 const originalArtByCard = new Map<string, string>();
 const artKey = (card: CardImageData) =>
-  `${card.cardType}|${card.name.trim().toLowerCase().replace(/\s+/g, " ")}|${card.pitch ?? 0}`;
+  `${primaryType(card)}|${card.name.trim().toLowerCase().replace(/\s+/g, " ")}|${card.pitch ?? 0}`;
 const MARVEL_ART_BY_CARD: Readonly<Record<string, string>> = marvelArt;
 const MARVEL_IMAGE_IDS = new Set(Object.values(MARVEL_ART_BY_CARD));
 /** Hero Marvel objects whose back is a textless art face (audited offline). */
@@ -50,8 +51,16 @@ const FABRARY_IMAGE_ID_OVERRIDES: Readonly<Record<string, string>> = {
   AMA004: "AMA004-RF",
   AMA005: "AMA005-RF",
   AMA006: "AMA006-RF",
+  AMG002: "AMG002-RF",
+  AMG003: "AMG003-RF",
+  AMG004: "AMG004-RF",
+  AMG005: "AMG005-RF",
   AMO001: "AMO001-RF",
   AMO002: "AMO002-RF",
+  AMO003: "AMO003-RF",
+  AMO004: "AMO004-RF",
+  AMO005: "AMO005-RF",
+  AMO006: "AMO006-RF",
   AZS001: "AZS001-RF",
   AZS002: "AZS002-RF",
   AZS003: "AZS003-RF",
@@ -85,6 +94,10 @@ const FABRARY_IMAGE_ID_OVERRIDES: Readonly<Record<string, string>> = {
   FAB486: "FAB486-RF",
   FAB487: "FAB487-RF",
   FAB489: "FAB489-MV",
+  FAB529: "FAB529-CF",
+  FAB530: "FAB530-RF",
+  FAB531: "FAB531-RF",
+  FAB532: "FAB532-RF",
   GEM105: "GEM105-MV",
   GEM110: "GEM110-CF",
   GEM112: "GEM112-RF",
@@ -123,12 +136,16 @@ const FABRARY_IMAGE_ID_OVERRIDES: Readonly<Record<string, string>> = {
   LSS023: "LSS023-RF",
   LSS024: "LSS024-CF",
   MPA002: "MPA002-MV",
+  MPA006: "MPA006-RF",
+  MPA007: "MPA007-RF",
+  MPA008: "MPA008-RF",
   MPG129: "MPG129-CF",
   MPW010: "MPW010-RF",
   MPW011: "MPW011-RF",
   MPW012: "MPW012-RF",
   MPW155: "MPW155-MV",
   MPW156: "MPW156-MV",
+  OBK238: "OBK238-RF",
   OMN000: "OMN000-RF",
   OMN086: "OMN086-RF",
   OMN141: "OMN141-RF",
@@ -141,6 +158,8 @@ const FABRARY_IMAGE_ID_OVERRIDES: Readonly<Record<string, string>> = {
   ROS255: "ROS255-MV",
   ROS256: "ROS256-MV",
   ROS257: "AJV028",
+  SPW001: "SPW001-RF",
+  SPW003: "SPW003-RF",
 };
 
 /** Functionally identical token printings may have different art. Keep tokens
@@ -179,14 +198,10 @@ const FABRARY_BACK_FACE_AT_BASE_ID: ReadonlySet<string> = new Set([
   "WTR225B",
 ]);
 
-export interface CardImageData {
-  cardType: string;
-  name: string;
-  pitch?: number;
-}
+export type CardImageData = Pick<CardData, "types" | "name" | "pitch">;
 
 function standardCardImageUrl(cardId: string, data?: CardImageData): string {
-  const tokenKey = data?.cardType === "token"
+  const tokenKey = data && hasType(data, "token")
     ? `${data.name.trim().toLowerCase().replace(/\s+/g, " ")}|${data.pitch ?? 0}`
     : undefined;
   const canonicalCardId = tokenKey ? CANONICAL_TOKEN_ART_IDS[tokenKey] ?? cardId : cardId;
@@ -278,6 +293,13 @@ const LEGACY_FRAME_SETS = new Set([
   "FAI", "HER", "MON", "OUT", "UPR", "WTR",
 ]);
 const LEGACY_FRAME_PROMOS = new Set(["FAB005", "FAB087", "FAB124"]);
+
+/** Token printings whose Fabrary image is a sheet of two sideways half cards. */
+const HALF_CARD_SHEET_PRINTINGS = new Set(["SUP239", "SUP240", "SUP241", "SUP242"]);
+
+export function isHalfCardSheetPrinting(cardId: string): boolean {
+  return HALF_CARD_SHEET_PRINTINGS.has(cardId);
+}
 
 export function hasLegacySquareCardFrame(url: string): boolean {
   const printingId = /\/cards\/([A-Z0-9]+)(?:[-_]\w+)?\.webp(?:[?#]|$)/i.exec(url)?.[1];

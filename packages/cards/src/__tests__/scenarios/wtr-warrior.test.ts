@@ -340,6 +340,25 @@ describe("WTR — Nature's Path Pilgrimage", () => {
 });
 
 describe("WTR — equipment / defense reactions", () => {
+  it("Braveforge Bracers activates after a weapon hits an ally", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          hand: [],
+          resources: 2,
+          equipment: { arms: "braveforge bracers|0" },
+        },
+        { hero: "rhinar", hand: [], board: ["barnacle|2"] },
+      ],
+    });
+    expect(() => g.activate("braveforge bracers|0")).toThrow(/no legal intent/);
+    g.attackWithWeapon(undefined, { targetAlly: "barnacle|2" });
+    g.state.players[0]!.actionPoints = 1;
+    g.activate("braveforge bracers|0");
+    expect(g.state.modifiers.some((m) => m.scope === "next-attack" && m.appliesTo === "weapon")).toBe(true);
+  });
+
   it("Refraction Bolters can destroy itself to grant go again", () => {
     const g = scenario({
       seats: [

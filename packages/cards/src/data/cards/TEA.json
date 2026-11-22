@@ -2,7 +2,7 @@
  {
   "id": "TEA001",
   "name": "Dorinthea Ironsong",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per turn Effect - When a weapon you control hits, you may attack an additional time with that weapon this turn.",
   "classes": [
    "warrior"
@@ -14,7 +14,7 @@
  {
   "id": "TEA002",
   "name": "Dorinthea",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per turn Effect - When a weapon you control hits, you may attack an additional time with that weapon this turn.",
   "classes": [
    "warrior"
@@ -26,7 +26,7 @@
  {
   "id": "TEA003",
   "name": "Dawnblade",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nThe second time this hits each turn, put a +1{p} counter on it.\nAt the beginning of your end phase, if this hasn't hit this turn, remove all +1{p} counters from it.",
   "attack": 3,
   "classes": [
@@ -41,7 +41,7 @@
  {
   "id": "TEA004",
   "name": "Hope Merchant's Hood",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Shuffle any number of cards from your hand into your deck, then draw that many cards.",
   "defense": 0,
   "classes": [
@@ -55,7 +55,7 @@
  {
   "id": "TEA005",
   "name": "Ironrot Plate",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -72,7 +72,7 @@
  {
   "id": "TEA006",
   "name": "Ironrot Gauntlet",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -89,7 +89,7 @@
  {
   "id": "TEA007",
   "name": "Refraction Bolters",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When a weapon attack you control hits, you may destroy this. If you do, the attack gets go again.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -106,7 +106,7 @@
  {
   "id": "TEA008",
   "name": "Biting Blade",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target weapon attack gains +3{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, weapons you control gain +1{p} until end of turn",
   "pitch": 1,
   "cost": 2,
@@ -122,7 +122,7 @@
  {
   "id": "TEA009",
   "name": "Stroke of Foresight",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target weapon attack gains +3{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, draw a card, then put a card from your hand on the top or bottom of your deck.",
   "pitch": 1,
   "cost": 1,
@@ -138,7 +138,7 @@
  {
   "id": "TEA010",
   "name": "Overpower",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target weapon attack gains +4{p}\nReprise - If the defending hero has defended with a card from their hand this chain link, instead it gains +6{p}.",
   "pitch": 1,
   "cost": 3,
@@ -154,7 +154,7 @@
  {
   "id": "TEA011",
   "name": "Steelblade Shunt",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "If Steelblade Shunt defends a weapon attack, deal 1 damage to the attacking hero.",
   "pitch": 1,
   "cost": 1,
@@ -167,7 +167,7 @@
  {
   "id": "TEA012",
   "name": "Driving Blade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gains +3{p} and go again.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -183,7 +183,7 @@
  {
   "id": "TEA013",
   "name": "Nature's Path Pilgrimage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +3{p} and \"When this hits and you have no cards in your arsenal, reveal the top card of your deck. If it's an action card, put it face down into your arsenal.\"\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -199,7 +199,7 @@
  {
   "id": "TEA014",
   "name": "Sharpen Steel",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +3{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -215,7 +215,7 @@
  {
   "id": "TEA015",
   "name": "Wounding Blow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 1,
   "cost": 0,
@@ -232,7 +232,7 @@
  {
   "id": "TEA016",
   "name": "Razor Reflex",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Choose 1;\n- Target dagger or sword weapon attack gets +3{p}.\n- Target attack action card with cost 1 or less gets +3{p} and \"When this hits, it gets go again.\"",
   "pitch": 1,
   "cost": 1,
@@ -245,7 +245,7 @@
  {
   "id": "TEA017",
   "name": "Stroke of Foresight",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target weapon attack gains +2{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, draw a card, then put a card from your hand on the top or bottom of your deck.",
   "pitch": 2,
   "cost": 1,
@@ -261,7 +261,7 @@
  {
   "id": "TEA018",
   "name": "Warrior's Valor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +2{p} and \"When this hits, it gets go again.\"\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -277,7 +277,7 @@
  {
   "id": "TEA019",
   "name": "Springboard Somersault",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "If Springboard Somersault is played from arsenal, it gains +2{d}.",
   "pitch": 2,
   "cost": 0,
@@ -290,7 +290,7 @@
  {
   "id": "TEA020",
   "name": "Biting Blade",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target weapon attack gains +1{p}.\nReprise - If the defending hero has defended with a card from their hand this chain link, weapons you control gain +1{p} until end of turn",
   "pitch": 3,
   "cost": 2,
@@ -306,7 +306,7 @@
  {
   "id": "TEA021",
   "name": "Ironsong Response",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Reprise - If the defending hero has defended with a card from their hand this chain link, target weapon attack gains +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -322,7 +322,7 @@
  {
   "id": "TEA022",
   "name": "Driving Blade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gains +1{p} and go again.\nGo again",
   "pitch": 3,
   "cost": 2,
@@ -338,7 +338,7 @@
  {
   "id": "TEA023",
   "name": "Nature's Path Pilgrimage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +1{p} and \"When this hits and you have no cards in your arsenal, reveal the top card of your deck. If it's an action card, put it face down into your arsenal.\"\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -354,7 +354,7 @@
  {
   "id": "TEA024",
   "name": "Sharpen Steel",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +1{p}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -370,7 +370,7 @@
  {
   "id": "TEA025",
   "name": "Warrior's Valor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +1{p} and \"When this hits, it gets go again.\"\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -386,7 +386,7 @@
  {
   "id": "TEA026",
   "name": "Flock of the Feather Walkers",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Flock of the Feather Walkers, reveal a card in your hand with cost 1 or less.\nWhen you attack with Flock of the Feather Walkers, create a Quicken token.",
   "pitch": 3,
   "cost": 1,
@@ -403,7 +403,7 @@
  {
   "id": "TEA027",
   "name": "Scour the Battlescape",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.\nIf Scour the Battlescape is played from arsenal, it gains go again.",
   "pitch": 3,
   "cost": 0,
@@ -423,7 +423,7 @@
  {
   "id": "TEA028",
   "name": "Energy Potion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Destroy this: Gain {r}{r}",
   "pitch": 3,
   "cost": 0,
@@ -438,7 +438,7 @@
  {
   "id": "TEA029",
   "name": "Sigil of Solace",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Gain 1{h}",
   "pitch": 3,
   "cost": 0,
@@ -450,7 +450,7 @@
  {
   "id": "TEA030",
   "name": "Quicken",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gains go again.",
   "classes": [
    "generic"

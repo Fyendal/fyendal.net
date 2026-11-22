@@ -105,13 +105,15 @@ describe("PrepPresentation equipment controls", () => {
     expect(full).toContain('aria-label="Move one copy of Up the Ante to Inventory"');
     // Every copy is already in: the add stepper waits, disabled.
     expect(full).toMatch(/Move one copy of Up the Ante to Main deck" class="prep-step" disabled=""/);
-    expect(full).not.toContain("Restore registered deck");
-    expect(full).not.toContain(" changed\"");
+    expect(full).not.toContain("Reset deck");
     expect(full).toContain("3 blue");
+    // The bar shows shares; the figures beside it carry the counts, zeros muted.
+    expect(full).toContain('class="prep-pitch-3" style="flex-grow:3"></span>');
+    expect(full).toContain('<span class="empty"><i class="prep-pitch prep-pitch-1"></i>0</span>');
+    expect(full).toContain('<span><i class="prep-pitch prep-pitch-3"></i>3</span>');
 
     const trimmed = render(new Map([["HVY103", 2]]), 2);
-    expect(trimmed).toContain("Restore registered deck");
-    expect(trimmed.match(/class="prep-row changed"/g)).toHaveLength(2);
+    expect(trimmed).toContain("Reset deck");
     expect(trimmed).not.toMatch(/to Main deck" class="prep-step" disabled=""/);
     // The inventory row steps the same card from its own side.
     expect(trimmed.match(/aria-label="Move one copy of Up the Ante to Main deck"/g)).toHaveLength(2);
@@ -222,6 +224,87 @@ describe("PrepPresentation equipment controls", () => {
     expect(html).toContain("主牌组（0 / 至少 60 张）");
     expect(html).toContain("备牌区中没有卡牌");
   });
+  describe("cards view", () => {
+    const renderDeck = (compact: boolean, inventoryCount = 3) => renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PrepPresentation, {
+      sections: "deck",
+      showHero: true,
+      compact,
+      pool: { heroId: "HVY195", weaponIds: [], equipmentPool: [], deck: ["WTR218", "WTR219", "WTR219"] },
+      selection: {
+        forDeck: "deck",
+        weaponIndexes: [],
+        equipment: {},
+        // Nimblism is split; Sink Below keeps its one registered copy.
+        main: new Map([["WTR218", 1], ["WTR219", 1]]),
+      },
+      selectionKey: "deck",
+      locked: false,
+      mainCount: 2,
+      minimumMainCount: 60,
+      inventoryCount,
+      poolMainEntries: [["WTR219", 2], ["WTR218", 1]],
+      fixedInventoryCounts: inventoryCount > 1 ? new Map([["WTR215", 1]]) : new Map(),
+      onToggleWeapon: vi.fn(),
+      onToggleEquipment: vi.fn(),
+      onMoveMainCopy: vi.fn(),
+      onRestoreMain: vi.fn(),
+      onInspectCard: vi.fn(),
+    })));
+
+    afterEach(() => vi.unstubAllGlobals());
+
+    it("defaults to the list on a fine pointer and offers the switch", () => {
+      vi.stubGlobal("localStorage", { getItem: () => null, setItem: vi.fn() });
+      const html = renderDeck(false);
+      expect(html).toContain('role="group" aria-label="View"');
+      expect(html).toContain('aria-pressed="true">List</button>');
+      // On a desktop the inventory column follows the chosen view.
+      expect(html).toContain("prep-row");
+      expect(html).not.toContain("prep-tile");
+    });
+
+    it("renders a remembered cards view as whole-card buttons with copy pips", () => {
+      vi.stubGlobal("localStorage", { getItem: () => "cards", setItem: vi.fn() });
+      const html = renderDeck(false);
+      expect(html).toContain('aria-pressed="true">Cards</button>');
+      expect(html).not.toContain("prep-step");
+      expect(html).not.toContain("prep-ledger-head");
+      const [main, inventory] = html.split("prep-inventory-zone");
+      expect(main).toContain('class="prep-tile" data-cardid="WTR219"');
+      expect(main).toContain('aria-label="Move one copy of Nimblism to Inventory"');
+      // One of Nimblism's two copies is here: one lit pip, one hollow.
+      expect(main).toContain(
+        '<span class="prep-tile-count">1</span><span class="prep-tile-pips"><i class="on last"></i><i></i></span></span><span class="prep-sr-only">1 copy</span>',
+      );
+      expect(inventory).toContain('aria-label="Move one copy of Nimblism to Main deck"');
+      // Inventory-only cards show as a locked, unpressable tile.
+      expect(inventory).toContain('class="prep-tile fixed" data-cardid="WTR215"');
+      expect(inventory).toContain('<span class="prep-tile-face" role="img" aria-label="Sink Below"');
+      expect(inventory).toContain("prep-tile-lock");
+    });
+
+    it("docks inventory on phones as a collapsed bar in either view", () => {
+      vi.stubGlobal("localStorage", { getItem: () => "list", setItem: vi.fn() });
+      const html = renderDeck(true);
+      expect(html).not.toContain("prep-inventory-zone");
+      expect(html).toContain('class="prep-tray"');
+      expect(html).toContain('aria-label="Inventory (3)"');
+      expect(html).toContain('aria-label="Show all" aria-expanded="false"');
+      const tray = html.split('class="prep-tray"')[1];
+      expect(tray).not.toContain("prep-tile");
+      expect(tray).not.toContain("prep-row");
+      // The main deck still lists rows in list view.
+      expect(html.split("prep-tray")[0]).toContain('class="prep-copies">1<');
+    });
+
+    it("explains the empty tray instead of offering to expand it", () => {
+      vi.stubGlobal("localStorage", { getItem: () => "cards", setItem: vi.fn() });
+      const html = renderDeck(true, 0);
+      expect(html).toContain("Cards you set aside go here.");
+      expect(html).not.toContain("Show all");
+    });
+  });
+
   describe("deck sorting", () => {
     const renderDeck = () => renderToStaticMarkup(createElement(TestI18nProvider, null, createElement(PrepPresentation, {
       sections: "deck",
@@ -248,26 +331,37 @@ describe("PrepPresentation equipment controls", () => {
       onInspectCard: vi.fn(),
     })));
     const order = (html: string, zone: number) =>
-      [...html.split("prep-deck-zone")[zone + 1]!.matchAll(/class="prep-row[^"]*" data-cardid="([^"]+)"/g)].map((m) => m[1]);
+      [...html.split("prep-deck-zone")[zone + 1]!.matchAll(/class="prep-(?:row|tile)[^"]*" data-cardid="([^"]+)"/g)].map((m) => m[1]);
 
     afterEach(() => vi.unstubAllGlobals());
 
-    it("sorts both zones by name, then pitch, by default", () => {
-      vi.stubGlobal("localStorage", { getItem: () => null, setItem: vi.fn() });
+    it("groups both zones by pitch by default, ignoring a pre-v2 name choice", () => {
+      vi.stubGlobal("localStorage", {
+        getItem: (key: string) => (key === "fyendal-prep-sort" ? "name" : null),
+        setItem: vi.fn(),
+      });
       const html = renderDeck();
       expect(html).toContain('role="group" aria-label="Sort by"');
-      expect(html).toContain('aria-pressed="true">Name</button>');
-      expect(html).not.toContain("Zone order");
-      expect(order(html, 0)).toEqual(["WTR218", "WTR219"]);
-      expect(order(html, 1)).toEqual(["WTR219", "WTR215", "WTR217"]);
-    });
-
-    it("restores a remembered pitch sort", () => {
-      vi.stubGlobal("localStorage", { getItem: () => "pitch", setItem: vi.fn() });
-      const html = renderDeck();
       expect(html).toContain('aria-pressed="true"><span class="card-sort-pips"');
+      // Each group names its color and totals its copies.
+      expect(html).toContain('prep-pitch-2" aria-hidden="true"></i>Yellow<span class="prep-group-count">1</span></span>');
+      expect(html).toContain('prep-pitch-3" aria-hidden="true"></i>Blue<span class="prep-group-count">1</span></span>');
+      expect(html).toContain('prep-pitch-legend');
       expect(order(html, 0)).toEqual(["WTR218", "WTR219"]);
       expect(order(html, 1)).toEqual(["WTR215", "WTR219", "WTR217"]);
+    });
+
+    it("restores a remembered name sort", () => {
+      vi.stubGlobal("localStorage", {
+        getItem: (key: string) => (key === "fyendal-prep-sort-v2" ? "name" : null),
+        setItem: vi.fn(),
+      });
+      const html = renderDeck();
+      expect(html).toContain('aria-pressed="true">Name</button>');
+      expect(html).not.toContain("Zone order");
+      expect(html).not.toContain("prep-group-title");
+      expect(order(html, 0)).toEqual(["WTR218", "WTR219"]);
+      expect(order(html, 1)).toEqual(["WTR219", "WTR215", "WTR217"]);
     });
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluateOnHit, type OnHitValueContext } from "./on-hit.js";
+import { evaluateOnHit, immediateOnHitDamage, SIGNIFICANT_ON_HIT_VALUE, type OnHitValueContext } from "./on-hit.js";
 
 const base: Omit<OnHitValueContext, "effects"> = {
   sourceText: "",
@@ -27,6 +27,18 @@ const MARK = "When this hits a hero, mark them.";
 const DIG = "When this hits, destroy this zombie.\"";
 
 describe("on-hit valuation", () => {
+  it("separates immediate on-hit damage from delayed damage", () => {
+    expect(immediateOnHitDamage([{ text: "When this hits a hero, deal 1 arcane damage to them." }])).toBe(1);
+    expect(immediateOnHitDamage([{ text: "Scripted summary", impact: { damage: 3, delayedDamage: 2 } }])).toBe(1);
+    expect(immediateOnHitDamage([{ text: "When this hits a hero, they draw a card." }])).toBe(0);
+  });
+
+  it("nets an optional resource payment out of the on-hit value", () => {
+    const grains = "Whenever a weapon attack you control hits, you may pay {r}. If you do, create a Vigor token.";
+    expect(value(grains)).toBe(value("When this hits, create a Vigor token.") - 1);
+    expect(value(grains)).toBeLessThan(SIGNIFICANT_ON_HIT_VALUE);
+  });
+
   it("ranks informed disruption highest and self-destruction lowest", () => {
     const ranked = [BONDS, SURGICAL, COMMAND, RANDOM, PUMMEL, MARK, DIG].map((text) => value(text));
     expect(ranked).toEqual([...ranked].sort((left, right) => right - left));
@@ -50,6 +62,7 @@ describe("on-hit valuation", () => {
     ["When this hits, it gets go again.", ["tempo"]],
     ["When this hits, your next attack this turn gets +1{p}.", ["pump"]],
     [MARK, ["mark"]],
+    ["Whenever an attack you control hits, you may equip an Edge of Autumn from your banished zone.", ["setup"]],
     ["When this hits a hero, banish the top card of their deck.", ["deck-disruption"]],
     [DIG, ["self-destruction"]],
     ["When this hits, something unprecedented happens.", ["unclassified"]],
@@ -125,5 +138,12 @@ describe("on-hit valuation", () => {
       handCardsLost: 1,
       destroysOccupiedArsenal: true,
     });
+  });
+
+  it("marks a hero ability lock separately from its flat estimate", () => {
+    expect(evaluateOnHit({
+      ...base,
+      effects: [{ text: "When this hits a hero, they lose all hero card abilities until the end of their next turn." }],
+    })).toMatchObject({ value: 2, heroAbilitiesLost: true, heroAbilityLossValue: 2 });
   });
 });

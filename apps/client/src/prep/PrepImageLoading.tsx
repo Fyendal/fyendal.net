@@ -24,17 +24,18 @@ const NO_ART: CardImageArt = {};
 
 /** The deck's chosen art for preloading, or null while the art catalog loads. */
 export function useDeckImageArt(
-  deck: { id: string; decklist: DeckPool; art?: DeckArt } | null,
+  deck: { id: string; decklist: DeckPool; art?: DeckArt; fabraryArt?: Record<string, string> } | null,
   enabled: boolean,
 ): CardImageArt | null {
-  const custom = enabled && !!deck && !deck.id.startsWith("precon-") && deckArtIsCustom(deck.art);
+  const custom = enabled && !!deck && !deck.id.startsWith("precon-") && deckArtIsCustom(deck.art, deck.fabraryArt);
   const catalog = useCardArtCatalog(custom);
   const pool = deck?.decklist;
   const art = deck?.art;
+  const defaults = deck?.fabraryArt;
   return useMemo(() => {
     if (!custom || !pool || !art) return NO_ART;
-    return catalog ? catalog.resolveDeckArt(pool, art) : null;
-  }, [custom, catalog, pool, art]);
+    return catalog ? catalog.resolveDeckArt(pool, art, defaults) : null;
+  }, [custom, catalog, pool, art, defaults]);
 }
 
 export function PrepDeckLoading({ onCancel }: { onCancel: () => void }) {
@@ -119,6 +120,65 @@ export function PrepImageLoading({
           </button>
         </div>
       </section>
+    </div>
+  );
+}
+
+/**
+ * A deck switch inside the room: the arena panel waits in place, so the open
+ * seat and its invites stay on screen. The hero appears once the pool loads.
+ */
+export function PrepDeckSwitchLoading({
+  deckName,
+  heroId,
+  art,
+  progress,
+  onSkip,
+}: {
+  deckName: string;
+  /** Null while the server and pool requests are still in flight. */
+  heroId: string | null;
+  art: CardImageArt | null;
+  progress: CardImagePreload | null;
+  onSkip?: () => void;
+}) {
+  const intl = useIntl();
+  const ratio = progress && progress.total > 0 ? progress.settled / progress.total : 0;
+  return (
+    <div className="prep-deck-switch" role="status">
+      <div
+        className={`prep-image-loading-hero prep-deck-switch-hero${heroId && art ? "" : " pending"}`}
+        style={{ "--prep-load-ratio": ratio } as CSSProperties}
+        aria-hidden="true"
+      >
+        {heroId && art ? (
+          <>
+            <CardArtwork className="prep-image-loading-base" cardId={heroId} artImage={art[heroId]} alt="" />
+            <CardArtwork className="prep-image-loading-fill" cardId={heroId} artImage={art[heroId]} alt="" />
+          </>
+        ) : null}
+      </div>
+      <div className="prep-deck-switch-copy">
+        <p className="prep-deck-switch-title">
+          {intl.formatMessage({ id: "prep.deckSwitch.title" }, { deck: deckName })}
+        </p>
+        <div className={`prep-image-loading-meter${progress ? "" : " indeterminate"}`} aria-hidden="true">
+          <span style={progress ? { transform: `scaleX(${ratio})` } : undefined} />
+        </div>
+        <p className="muted prep-deck-switch-count">
+          {progress
+            ? intl.formatMessage(
+                { id: "prep.imageLoading.progress" },
+                { settled: progress.settled, total: progress.total },
+              )
+            : intl.formatMessage({ id: "prep.deckSwitch.loadingDeck" })}
+        </p>
+        {onSkip ? (
+          <button type="button" className="lobby-create-action" onClick={onSkip}>
+            {intl.formatMessage({ id: "prep.deckSwitch.showNow" })}
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }

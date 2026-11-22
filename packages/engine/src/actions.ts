@@ -14,6 +14,7 @@ import {
   isArrowData,
   isAttackActionData,
   meldSideHasType,
+  grantedBaseAbilityCardIds,
   scriptOf,
 } from "./cardProperties.js";
 import { answerClashDecision } from "./clash.js";
@@ -41,6 +42,7 @@ import {
   removeFromArray,
 } from "./zoneQueries.js";
 import { closeChain } from "./combatChain.js";
+import { boostDeclarationError, payBoosts } from "./boost.js";
 import { finishReactionPlay, playReaction } from "./reactions.js";
 import { answerWagerLossReplacementOrder } from "./wagers.js";
 import {
@@ -48,6 +50,7 @@ import {
   payCost,
   resolveVariableAbilityCost,
   resolveVariablePlayCost,
+  variableChoiceEnabledCardIds,
   variableResourceChoices,
   variableResourceCost,
 } from "./costs.js";
@@ -64,6 +67,7 @@ import {
   deferTriggerLayers,
   finishStackCardResolution,
   finishWindowInstantPlay,
+  playWindowInstant,
 } from "./triggers.js";
 import {
   answerTokenCreationReplacement,
@@ -71,23 +75,23 @@ import {
   answerTokenReplacementPlayerOrder,
   resumePendingTokenCreations,
 } from "./tokens.js";
-import { answerDeckBottomOrder, enterBanish } from "./zoneMoves.js";
+import { answerDeckBottomOrder } from "./zoneMoves.js";
 import { answerUniqueChoice, UNIQUE_CHOICE_HOOK } from "./unique.js";
-import { lingeringModifierSources } from "./sourceQueries.js";
 import { continueFollowUpDecisions } from "./decisionQueue.js";
 
 import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts, prepareDestroySubcardCost } from "./abilityRules.js";
-import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
+import { consumeNextActionGoAgain, noteActionPlayedOrActivated, startPlayScriptState } from "./cardLifecycle.js";
 import { answerArcaneBarrier } from "./damageResolution.js";
 import { answerAttackTargetDamageOrder } from "./damage.js";
 import { answerDieRollReplacement } from "./dieRoll.js";
-import { boostCountForCardPlay, cardPlayRestrictedByModifier, playOriginRestricted, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone, notePlayPermissionSource, playFromZoneRequiresInstant } from "./playRules.js";
+import { cardPlayRestrictedByModifier, playOriginRestricted, cardPlayCost, cardPlayReductionForSeat, payAlternativePlayCost, preparePlayTarget, canPlayAsInstant, canRuneGate, consumeAttackCostReductions, mayPlayFromArsenal, mayPlayFromZone, notePlayPermissionSource, playFromZoneRequiresInstant } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, scriptedPaymentOptions } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, consumeFirstActionExtraCost, controlsBow, firstActionExtraCost, firstAttackExtraCost, consumeFirstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { nonAttackActionCardLimitReached } from "./restrictions.js";
 import { attackActionPlayRestricted, weaponAttacksProhibited } from "./combatRestrictions.js";
 import { recordAnnouncedAttackTarget, pushAbilityLayer, pushCardLayer } from "./stackCore.js";
+import { hasType } from "@fyendal/shared";
 
 export function playCard(
   state: GameStateInternal,
@@ -134,9 +138,7 @@ export function playCard(
   }
   const data = instanceDataOf(state, card);
   if (isFrozen(state, card)) return `${nameOf(state, card.cardId)} is frozen`;
-  const playableEquipment =
-    data.cardType === "equipment" && scriptOf(state, card.cardId, card)?.playableEquipment === true;
-  if (data.cardType !== "action" && data.cardType !== "instant" && !playableEquipment) {
+  if (!hasType(data, "action") && !hasType(data, "instant")) {
     return "only action and instant cards can be played in the action phase";
   }
   const script = scriptOf(state, card.cardId, card);
@@ -154,7 +156,7 @@ export function playCard(
     if (!controlsBow(state, player)) return "arrow cards can only be played while you control a bow";
   }
   const instantPermission = canPlayAsInstant(state, runtime, seat, card, undefined, from);
-  if (asInstant === true && (selectedMeldAction || (data.cardType !== "instant" && !instantPermission))) {
+  if (asInstant === true && (selectedMeldAction || (!hasType(data, "instant") && !instantPermission))) {
     return `${nameOf(state, card.cardId)} cannot be played as an instant`;
   }
   if (
@@ -170,7 +172,7 @@ export function playCard(
   // action method is impossible because the player has no action point.
   const isInstant =
     !selectedMeldAction && (
-      data.cardType === "instant" ||
+      hasType(data, "instant") ||
       asInstant === true ||
       (asInstant === undefined && player.actionPoints < 1 && instantPermission)
     );
@@ -195,27 +197,16 @@ export function playCard(
   ) {
     return "cannot pitch an alternative-cost card";
   }
-  const availableBoosts = isAttackActionData(data) ? boostCountForCardPlay(state, seat, card) : 0;
-  const canBoost = availableBoosts > 0;
-  if (boost && !canBoost) return `${nameOf(state, card.cardId)} cannot boost`;
-  if (!boost && boostCount !== undefined) return "cannot declare a Boost count without boosting";
-  const declaredBoostCount = boost ? (boostCount ?? 1) : 0;
-  const maximumBoosts = canBoost ? availableBoosts : 0;
-  if (
-    !Number.isSafeInteger(declaredBoostCount) ||
-    declaredBoostCount < 0 ||
-    declaredBoostCount > maximumBoosts
-  ) return `${nameOf(state, card.cardId)} cannot boost ${declaredBoostCount} times`;
-  if (player.deck.length < declaredBoostCount) {
-    return `cannot boost ${declaredBoostCount} times with only ${player.deck.length} card(s) in deck`;
-  }
+  const boostErr = boostDeclarationError(state, seat, card, boost, boostCount);
+  if (boostErr) return boostErr;
+  if (!additionalCostDeclared) startPlayScriptState(player, card);
   if (script?.canPlay && !script.canPlay(runtime.makeCtx(state, seat, card, undefined, from === "arsenal"))) {
     return `${nameOf(state, card.cardId)} cannot be played now`;
   }
   // Meld (CR 8.3.38): "both" sets the asset-cost to twice the base cost
   // before increases and decreases. The side announcement was validated and
   // stamped above so it could also determine the play method and AP cost.
-  const isAttackAction = data.cardType === "action" && (data.subtypes ?? []).includes("attack");
+  const isAttackAction = hasType(data, "action") && (data.subtypes ?? []).includes("attack");
   if (targetAllyId !== undefined && !isAttackAction) return "only attacks declare an attack target";
   if (isAttackAction && !attackTargetIsLegal(state, runtime, seat, targetAllyId)) return "not a legal attack target";
   const targetErr = preparePlayTarget(
@@ -436,7 +427,7 @@ export function finishPlayCard(
     meldSideHasType(state, card, card.meldSide, "action");
   const isInstant =
     !selectedMeldAction && (
-      data.cardType === "instant" ||
+      hasType(data, "instant") ||
       asInstant === true ||
       (asInstant === undefined && player.actionPoints < 1 && instantPermission)
     );
@@ -457,129 +448,9 @@ export function finishPlayCard(
   );
 
   if (isAttackActionData(data)) {
-    let boosted = false;
-    let boostSucceeded = false;
-    if (boost) {
-      const declaredBoostCount = boostCount ?? 1;
-      for (let boostIndex = 0; boostIndex < declaredBoostCount; boostIndex++) {
-        const banished = player.deck.shift();
-        if (!banished) break;
-        const boostEventNextId = state.nextInstanceId;
-        state.resolving.push(banished);
-        const activeBoostSources = [player.hero, ...player.weapons, ...Object.values(player.equipment), ...player.board]
-          .filter((source): source is CardInstance => source !== undefined && !source.faceDown);
-        const boostSources = [
-          ...activeBoostSources,
-          ...lingeringModifierSources(state, seat).filter(
-            (candidate) => !activeBoostSources.some((source) => source.instanceId === candidate.instanceId),
-          ),
-        ];
-        const replaced = boostSources.some((source) =>
-          scriptOf(state, source.cardId, source)?.replaceBoostBanish?.(
-            runtime.makeCtx(state, seat, source), card, banished,
-          ) === true,
-        );
-        // A source replacement takes over the whole Boost movement. Otherwise
-        // the deck top's own self-replacement may add the top card of each
-        // other hero's deck to the same banishment.
-        const banishedForBoost: CardInstance[] = [];
-        if (!replaced) {
-          banishedForBoost.push(banished);
-          if (scriptOf(state, banished.cardId, banished)?.boostBanishesOtherDeckTops === true) {
-            for (const other of state.players) {
-              if (other.seat === seat) continue;
-              const top = other.deck.shift();
-              if (top) banishedForBoost.push(top);
-            }
-          }
-        }
-        for (const moved of banishedForBoost) {
-          removeFromArray(state.resolving, moved.instanceId);
-          enterBanish(state, runtime, moved, "deck", seat);
-          deferEventTriggers(
-            state, runtime,
-            "card-banished-for-boost",
-            seat,
-            boostEventNextId,
-            moved,
-          );
-          // Boost's banish is an effect-cost of the action card (CR 1.14.1,
-          // 8.3.9), so it counts as an action card effect moving the card.
-          if (!moved.faceDown) {
-            deferEventTriggers(
-              state, runtime,
-              "card-moved-from-deck-by-effect",
-              moved.owner,
-              boostEventNextId,
-              moved,
-              { from: "deck", to: "banish", causedBySeat: seat, effectSource: "action-card" },
-            );
-          }
-          // Track the effective types actually banished for Boost. Card
-          // scripts use these per-turn markers for conditions such as "if an
-          // Evo has been banished from boosting this turn"; replacement
-          // effects deliberately do not create the marker.
-          for (const type of cardTypesOf(state, moved)) {
-            player.flags[`boostedSubtype:${type}`] = true;
-          }
-          if (moved.owner !== seat) player.flags.boostBanishedOpponentCard = true;
-          // Per-object marker for "a card you've banished from boosting this
-          // turn"; enterBanish clears it when the card becomes a new object.
-          player.flags[`banishedFromBoost:${moved.instanceId}`] = true;
-          const banishPower = scriptOf(state, card.cardId, card)?.boostBanishPowerBonus?.(
-            runtime.makeCtx(state, seat, card),
-            moved,
-          ) ?? 0;
-          if (banishPower !== 0) card.tempPower = (card.tempPower ?? 0) + banishPower;
-        }
-        boosted = true;
-        boostSucceeded = boostSucceeded ||
-          (replaced ? [banished] : banishedForBoost).some((moved) =>
-            cardTypesOf(state, moved).includes("mechanologist")
-          );
-        player.flags.boostedThisTurn = true;
-        player.flags.boostCountThisTurn = (Number(player.flags.boostCountThisTurn) || 0) + 1;
-        player.flags.boostCountThisChain = (Number(player.flags.boostCountThisChain) || 0) + 1;
-        player.flags.lastBoostedCardInstanceId = banished.instanceId;
-        const boostMods = state.modifiers.filter(
-          (m) =>
-            (m.scope === "until-end-of-turn" || m.scope === "combat-chain") &&
-            m.seat === seat &&
-            !m.consumed &&
-            (m.onBoostAttack !== undefined || m.onBoostDominate === true),
-        );
-        for (const boostMod of boostMods) {
-          if (boostMod.onBoostAttack !== undefined) {
-            card.tempPower = (card.tempPower ?? 0) + Number(boostMod.onBoostAttack);
-          }
-          if (boostMod.onBoostDominate === true) {
-            (card.grantedKeywords ??= []).push("dominate");
-          }
-          boostMod.consumed = true;
-        }
-        for (const moved of banishedForBoost) {
-          scriptOf(state, moved.cardId, moved)?.onBanishedForBoost?.(
-            runtime.makeCtx(state, moved.owner, moved),
-            card,
-          );
-        }
-        deferEventTriggers(
-          state, runtime,
-          "card-boosted",
-          seat,
-          boostEventNextId,
-          card,
-        );
-        for (const src of boostSources) {
-          scriptOf(state, src.cardId, src)?.onBoosted?.(runtime.makeCtx(state, seat, src), card, banished);
-        }
-        logPublic(state, gameLogMessage(
-          `${logNameOf(state, card.cardId)} boosts`,
-          "engine.log.card.boosts",
-          { card: logCardValue(card.cardId) },
-        ));
-      }
-    }
+    const { boosted, boostSucceeded } = boost
+      ? payBoosts(state, runtime, seat, card, boostCount ?? 1)
+      : { boosted: false, boostSucceeded: false };
     deferTriggerLayers(state, playedTriggers);
     declareAttack(
       state, runtime,
@@ -652,7 +523,13 @@ export function activateAbility(
   const isBanishSource = !!permanent && player.banish.some(
     (candidate) => candidate.instanceId === permanent.instanceId,
   );
-  if (!permanent || (!isPermanentSource(player, permanent.instanceId) && !isBanishSource && !chainAttack && !sharedActionSource)) {
+  const isGraveyardSource = !!permanent && player.graveyard.some(
+    (candidate) => candidate.instanceId === permanent.instanceId,
+  );
+  if (!permanent || (
+    !isPermanentSource(player, permanent.instanceId) &&
+    !isBanishSource && !isGraveyardSource && !chainAttack && !sharedActionSource
+  )) {
     const result = activateFromHandAbility(state, runtime, {
       mode: "action",
       seat,
@@ -696,7 +573,7 @@ export function activateAbility(
   if (ability.isAttack && cardHasType(state, card, "weapon") && weaponAttacksProhibited(player)) {
     return "cannot attack with weapons this turn";
   }
-  if ((ability.fromBanish === true) !== isBanishSource || ability.fromGraveyard) {
+  if ((ability.fromBanish === true) !== isBanishSource || (ability.fromGraveyard === true) !== isGraveyardSource) {
     return "ability is not usable from this zone";
   }
   // Cloaked: a face-down permanent's abilities are non-functional EXCEPT
@@ -772,6 +649,7 @@ export function activateAbility(
       ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
       ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
       options,
+      ...variableChoiceEnabledCardIds(choices, resolvedVariableCost),
       sourceInstanceId: card.instanceId,
       chooseHook: "engine-variable-activation-x",
       variableActivationCost: {
@@ -957,14 +835,18 @@ function dispatchScriptChoice(
   sourceInstanceId: number | undefined,
   tokenCreationCause: TokenCreationContext | undefined,
   scriptSourceSnapshot: PendingDecisionState["scriptSourceSnapshot"],
+  resume: PendingDecisionState["resume"],
   visit: (script: CardScript, ctx: ScriptCtx) => void,
 ): void {
   if (sourceInstanceId === undefined) return;
   const owner = findCardAnywhere(state, sourceInstanceId) ?? scriptSourceSnapshot;
   if (!owner) return;
+  // A resolving card reports its owner, but its suspended play belongs to whoever played it.
+  const controllerSeat =
+    resume && "card" in resume && resume.card.instanceId === sourceInstanceId ? resume.seat : owner.seat;
   const ctx = runtime.makeCtx(
     state,
-    owner.seat,
+    controllerSeat,
     owner.card,
     currentLink(state),
     undefined,
@@ -974,11 +856,7 @@ function dispatchScriptChoice(
   );
   const script = scriptOf(state, owner.card.cardId, owner.card);
   if (script) visit(script, ctx);
-  const inheritedIds = [
-    ...(owner.card.grantedBaseAbilitiesCardId ? [owner.card.grantedBaseAbilitiesCardId] : []),
-    ...(owner.card.grantedBaseAbilitiesCardIds ?? []),
-  ];
-  for (const inheritedId of inheritedIds) {
+  for (const inheritedId of grantedBaseAbilityCardIds(owner.card)) {
     const inherited = state.scriptsRef[inheritedId];
     if (inherited) visit(inherited, ctx);
   }
@@ -990,12 +868,13 @@ function resolveScriptChoice(
   sourceInstanceId: number | undefined,
   hook: string | undefined,
   result: string,
+  resume: PendingDecisionState["resume"],
   tokenCreationCause?: TokenCreationContext,
   scriptSourceSnapshot?: PendingDecisionState["scriptSourceSnapshot"],
 ): void {
   if (!hook) return;
   dispatchScriptChoice(
-    state, runtime, sourceInstanceId, tokenCreationCause, scriptSourceSnapshot,
+    state, runtime, sourceInstanceId, tokenCreationCause, scriptSourceSnapshot, resume,
     (script, ctx) => script.onChoose?.(ctx, hook, result),
   );
 }
@@ -1006,12 +885,13 @@ function resolveScriptChoices(
   sourceInstanceId: number | undefined,
   hook: string | undefined,
   optionIds: readonly string[],
+  resume: PendingDecisionState["resume"],
   tokenCreationCause?: TokenCreationContext,
   scriptSourceSnapshot?: PendingDecisionState["scriptSourceSnapshot"],
 ): void {
   if (!hook) return;
   dispatchScriptChoice(
-    state, runtime, sourceInstanceId, tokenCreationCause, scriptSourceSnapshot,
+    state, runtime, sourceInstanceId, tokenCreationCause, scriptSourceSnapshot, resume,
     (script, ctx) => script.onChooseMany?.(ctx, hook, optionIds),
   );
 }
@@ -1099,6 +979,25 @@ function continueAfterScriptedChoice(
       true,
     );
   }
+  if (resume?.kind === "continue-window-instant-after-declaration") {
+    return playWindowInstant(
+      state,
+      runtime,
+      resume.seat,
+      resume.instanceId,
+      resume.from === "arsenal",
+      resume.pitchInstanceIds,
+      resume.meldSide,
+      resume.targetCardInstanceId,
+      resume.from === "hand" || resume.from === "arsenal" ? undefined : resume.from,
+      resume.declaredVariableX,
+      resume.alternativeCostCardInstanceIds,
+      resume.targetAllyId,
+      resume.boost ?? false,
+      resume.boostCount,
+      true,
+    );
+  }
   if (resume?.kind === "finish-play") {
     const idx = state.resolving.findIndex((c) => c.instanceId === resume.card.instanceId);
     // The resolving copy is authoritative: the callback may have written
@@ -1174,6 +1073,7 @@ export function answerChoices(
     srcId,
     hook,
     optionIds,
+    resume,
     tokenCreationCause,
     scriptSourceSnapshot,
   );
@@ -1206,6 +1106,11 @@ export function answerChoice(
     );
     if (!registered) return "not a registered card name";
     resolvedOption = registered.name;
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, (state.players[seat] as PlayerState).heroCardId)} names ${resolvedOption}`,
+      "engine.log.player.named.card",
+      { player: logPlayerValue(seat), name: resolvedOption },
+    ));
   }
   const srcId = pd.sourceInstanceId;
   const hook = pd.chooseHook;
@@ -1246,7 +1151,10 @@ export function answerChoice(
       return "invalid attack target";
     }
     state.pendingDecision = null;
-    if (!attackWithPermanent(state, runtime, seat, srcId, targetAllyId, true)) {
+    // A pending stack continuation starts the queued attack; declaring it here
+    // too would let that continuation reset the new attack's steps.
+    const deferToStack = resume?.kind === "continue-stack";
+    if (!attackWithPermanent(state, runtime, seat, srcId, targetAllyId, true, deferToStack)) {
       return "effect-driven attack is no longer legal";
     }
   } else if (hook === UNIQUE_CHOICE_HOOK) {
@@ -1265,8 +1173,10 @@ export function answerChoice(
     if (optionId === "yes" && found) {
       const steam = found?.card.counters?.steam ?? 0;
       if (found && steam > 0) {
-        if (steam === 1) delete found.card.counters?.steam;
-        else (found.card.counters ??= {}).steam = steam - 1;
+        // Keep an explicit 0 for the destroy-at-zero marker so state-based actions destroy it.
+        if (steam === 1 && scriptOf(state, found.card.cardId, found.card)?.destroyAtZeroCounter !== "steam") {
+          delete found.card.counters?.steam;
+        } else (found.card.counters ??= {}).steam = steam - 1;
         logPublic(state, gameLogMessage(
           `${nameOf(state, found.card.cardId)} is cranked: remove a steam counter`,
           "engine.log.card.cranked",
@@ -1304,6 +1214,7 @@ export function answerChoice(
         srcId,
         hook,
         noPitch.result,
+        resume,
         tokenCreationCause,
         scriptSourceSnapshot,
       );
@@ -1357,6 +1268,7 @@ export function answerChoice(
       srcId,
       hook,
       picked ? picked.result : "declined",
+      resume,
       tokenCreationCause,
       scriptSourceSnapshot,
     );
@@ -1368,6 +1280,7 @@ export function answerChoice(
       srcId,
       hook,
       resolvedOption,
+      resume,
       tokenCreationCause,
       scriptSourceSnapshot,
     );

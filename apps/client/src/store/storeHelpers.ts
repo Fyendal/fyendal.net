@@ -22,6 +22,10 @@ export function initialStoreProjection(
     spectatorUsernames: [],
     spectatorKicked: false,
     botGame: false,
+    soloGame: false,
+    sandbox: false,
+    sandboxEditRefusal: null,
+    boardSeat: null,
     playerProfiles: null,
     cardArt: null,
     view: null,
@@ -32,11 +36,15 @@ export function initialStoreProjection(
     pendingInteraction: null,
     pendingDefenderStageIds: null,
     lastActionAt: null,
+    clock: null,
+    clockReceivedAt: null,
     passUntil: null,
+    endTurnWarning: false,
     replayFrames: 0,
     replayViews: null,
     replayTransitions: null,
     replayStep: 0,
+    replayClock: null,
     replayNotes: [],
     activeSavedReplayId: null,
     activeSharedReplay: null,
@@ -75,6 +83,9 @@ export function initialStoreProjection(
     chatMessages: {},
     chatHasMore: {},
     friendInviteTarget: null,
+    roomFriendInvites: [],
+    deckSwitch: null,
+    deckSwitchLocked: false,
     prepDeck: null,
     prep: null,
     cardPoolModes: lobbySettings.cardPoolModes,
@@ -100,6 +111,10 @@ export function clearedRoomProjection(): Pick<
   | "spectatorUsernames"
   | "spectatorKicked"
   | "botGame"
+  | "soloGame"
+  | "sandbox"
+  | "sandboxEditRefusal"
+  | "boardSeat"
   | "playerProfiles"
   | "cardArt"
   | "view"
@@ -110,13 +125,17 @@ export function clearedRoomProjection(): Pick<
   | "pendingInteraction"
   | "pendingDefenderStageIds"
   | "lastActionAt"
+  | "clock"
+  | "clockReceivedAt"
   | "passUntil"
+  | "endTurnWarning"
   | "opponentConnected"
   | "latestEmote"
   | "replayFrames"
   | "replayViews"
   | "replayTransitions"
   | "replayStep"
+  | "replayClock"
   | "replayNotes"
   | "activeSavedReplayId"
   | "activeSharedReplay"
@@ -132,6 +151,9 @@ export function clearedRoomProjection(): Pick<
   | "matchAcceptanceRole"
   | "prep"
   | "prepDeck"
+  | "roomFriendInvites"
+  | "deckSwitch"
+  | "deckSwitchLocked"
   | "error"
   | "connectionIssueVisible"
 > {
@@ -144,6 +166,10 @@ export function clearedRoomProjection(): Pick<
     spectatorUsernames: [],
     spectatorKicked: false,
     botGame: false,
+    soloGame: false,
+    sandbox: false,
+    sandboxEditRefusal: null,
+    boardSeat: null,
     playerProfiles: null,
     cardArt: null,
     view: null,
@@ -154,13 +180,17 @@ export function clearedRoomProjection(): Pick<
     pendingInteraction: null,
     pendingDefenderStageIds: null,
     lastActionAt: null,
+    clock: null,
+    clockReceivedAt: null,
     passUntil: null,
+    endTurnWarning: false,
     opponentConnected: true,
     latestEmote: null,
     replayFrames: 0,
     replayViews: null,
     replayTransitions: null,
     replayStep: 0,
+    replayClock: null,
     replayNotes: [],
     activeSavedReplayId: null,
     activeSharedReplay: null,
@@ -176,6 +206,9 @@ export function clearedRoomProjection(): Pick<
     matchAcceptanceRole: null,
     prep: null,
     prepDeck: null,
+    roomFriendInvites: [],
+    deckSwitch: null,
+    deckSwitchLocked: false,
     error: null,
     connectionIssueVisible: false,
   };

@@ -2,7 +2,7 @@
  {
   "id": "DDD001",
   "name": "Dorinthea, Quicksilver Prodigy",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first time your Dawnblade, Resplendent's attack gets go again each turn, you may attack an additional time with it this turn.",
   "classes": [
    "warrior"
@@ -14,7 +14,7 @@
  {
   "id": "DDD002",
   "name": "Dawnblade, Resplendent",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nThe second time you attack with this each turn, it gets +1{p} until end of turn.",
   "attack": 2,
   "classes": [
@@ -29,7 +29,7 @@
  {
   "id": "DDD003",
   "name": "Ironrot Helm",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -46,7 +46,7 @@
  {
   "id": "DDD004",
   "name": "Blossom of Spring",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Gain {r}. Go again",
   "defense": 0,
   "classes": [
@@ -60,7 +60,7 @@
  {
   "id": "DDD005",
   "name": "Squire's Bracers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When your sword attack hits, you may destroy this. If you do, the sword's next attack this turn gets +2{p}.",
   "defense": 0,
   "classes": [
@@ -74,7 +74,7 @@
  {
   "id": "DDD006",
   "name": "Cutting Couriers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When your sword attack hits, you may destroy this. If you do, the attack gets go again.",
   "defense": 0,
   "classes": [
@@ -88,7 +88,7 @@
  {
   "id": "DDD007",
   "name": "In the Swing",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Play this only if you've attacked 2 or more times with weapons this turn.\nTarget weapon attack gets +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -101,7 +101,7 @@
  {
   "id": "DDD008",
   "name": "Run Through",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target sword attack gets go again.\nYour next sword attack this turn gets +3{p}.",
   "pitch": 1,
   "cost": 1,
@@ -114,7 +114,7 @@
  {
   "id": "DDD009",
   "name": "Thrust",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target sword attack gains +3{p}.",
   "pitch": 1,
   "cost": 1,
@@ -127,7 +127,7 @@
  {
   "id": "DDD010",
   "name": "Warrior's Valor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gets +3{p} and \"When this hits, it gets go again.\"\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -143,7 +143,7 @@
  {
   "id": "DDD011",
   "name": "Back for Seconds",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target sword attack gets +2{p}. If it's your second attack this turn, instead it gets +3{p}.",
   "pitch": 2,
   "cost": 1,
@@ -156,7 +156,7 @@
  {
   "id": "DDD012",
   "name": "Blade Rush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your first sword attack this turn gets go again.\nYour second sword attack this turn gets +1{p}.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -172,7 +172,7 @@
  {
   "id": "DDD013",
   "name": "Blade Flash",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target sword attack gains go again.",
   "pitch": 3,
   "cost": 1,
@@ -185,7 +185,7 @@
  {
   "id": "DDD014",
   "name": "Shove Off",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Choose a non-equipment card defending a sword attack you control. Return it to its owner's hand.",
   "pitch": 3,
   "cost": 1,
@@ -198,7 +198,7 @@
  {
   "id": "DDD015",
   "name": "Steel on Steel",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "While this is defending a weapon attack, this gets +1{d}.",
   "pitch": 3,
   "cost": 0,
@@ -211,7 +211,7 @@
  {
   "id": "DDD016",
   "name": "Trot Along",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack with 3 or less base {p} this turn gets go again.\nGo again",
   "pitch": 3,
   "cost": 0,

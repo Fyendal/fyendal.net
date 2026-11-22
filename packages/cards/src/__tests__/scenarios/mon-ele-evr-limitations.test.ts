@@ -165,6 +165,18 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
     unlocked.play("exude confidence|1").blockWith("raging onslaught|1").passPriority();
     expect(legalIntents(unlocked.state, 1).some((intent) => intent.kind === "play-card")).toBe(true);
   });
+  it("Exude Confidence keeps the defender locked out for later chain links", () => {
+    const g = scenario({ seats: [
+      { hero: "rhinar", hand: ["exude confidence|1", "raging onslaught|1"], resources: 3, equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", hand: ["sink below|1", "oasis respite|1"], resources: 1, equipment: NO_EQUIPMENT },
+    ] });
+    g.play("exude confidence|1").blockWith().passPriority().settle();
+    g.state.players[0]!.actionPoints = 1;
+    g.play("raging onslaught|1");
+    expect(g.state.chain).toHaveLength(2);
+    g.blockWith();
+    expect(legalIntents(g.state, 1).some((intent) => intent.kind === "play-card")).toBe(false);
+  });
   it("Soul Shield settles into its hero's soul", () => {
     const g = scenario({ seats: [
       { hero: "rhinar", hand: ["head jab|1"], equipment: NO_EQUIPMENT },
@@ -424,7 +436,11 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
       { hero: "rhinar", hand: ["blossoming spellblade|1", "pulse of candlehold|2", "blink|3"], graveyard: ["nimblism|1"], resources: 3, equipment: NO_EQUIPMENT },
       { hero: "dorinthea", equipment: NO_EQUIPMENT },
     ] });
-    g.play("blossoming spellblade|1").chooseOption("both").declareTarget(1).chooseCard("nimblism|1");
+    g.play("blossoming spellblade|1")
+      .chooseCard("pulse of candlehold|2")
+      .chooseCard("pulse of candlehold|2")
+      .declareTarget(1)
+      .chooseCard("nimblism|1");
     expect(g.state.players[0]!.banish).toEqual(expect.arrayContaining([
       expect.objectContaining({ playableAsInstant: true, temporaryGraveyardReplacement: "banish" }),
     ]));
@@ -438,7 +454,12 @@ describe("Monarch, Tales of Aria, and Everfest rules regression coverage", () =>
       { hero: "rhinar", weapons: ["death dealer|0"], hand: ["ice storm|1", "blizzard|3", "blink|3"], arsenal: ["head shot|1"], resources: 1, equipment: NO_EQUIPMENT },
       { hero: "dorinthea", life: 20, equipment: NO_EQUIPMENT },
     ] });
-    g.play("ice storm|1").chooseOption("both").play("head shot|1", { fromArsenal: true }).blockWith().settle();
+    g.play("ice storm|1")
+      .chooseCard("blizzard|3")
+      .chooseCard("blink|3")
+      .play("head shot|1", { fromArsenal: true })
+      .blockWith()
+      .settle();
     expect(g.state.players[1]!.life).toBe(12);
     expect(g.state.players[1]!.board.filter((card) => cardData[card.cardId]?.name === "Frostbite")).toHaveLength(8);
   });

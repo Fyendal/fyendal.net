@@ -1,13 +1,13 @@
 import { BrowserBotNotice } from "../bot/BrowserBotNotice.js";
 import { useMatchAchievements } from "../achievements/useMatchAchievements.js";
 import { AchievementToast } from "../achievements/AchievementToast.js";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useIntl } from "react-intl";
 import { useShallow } from "zustand/react/shallow";
 import type { CardView, GameIntent, MeldSide, PassUntilMode } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
 import { useStore } from "../store.js";
-import { cardPreviewSize, CardArtProvider, CardBack, CardFace, SquareCardPresentation } from "./Card.js";
+import { cardPreviewSize, CardArtProvider, SquareCardPresentation } from "./Card.js";
 import { ChainFloat } from "./ChainFloat.js";
 import { EndTurnPassToast } from "./EndTurnPassToast.js";
 import { StatusFloat, type PrimaryAction } from "./StatusFloat.js";
@@ -27,12 +27,16 @@ import {
 import { useDeckCardFeedback } from "./DeckCardToast.js";
 import { SideRail } from "./SideRail.js";
 import { ShareReplayDialog, savedReplayDaysLeft } from "../history/ShareReplayDialog.js";
+import { SandboxPanel, canOpenSandbox, type SandboxSeat, type SandboxZone } from "./SandboxPanel.js";
+import { SandboxConvertConfirm } from "./SandboxConvertConfirm.js";
+import { DeckOrderEditor, DeckRevealConfirm } from "./board/DeckOrderEditor.js";
+import { loadDeckOrderRevealAccepted, saveDeckOrderRevealAccepted } from "../storage.js";
 import {
   canAddPaymentCard,
   canAddResourcePaymentPitch,
   offeredMeldSides,
   selectedDefendIntent,
-  selectedResourcePaymentOption,
+  resourcePaymentIntent,
 } from "./legalSelection.js";
 import { arrangeBoundBoardCards, equipmentStackCards } from "./boardGroups.js";
 import { chainDefenderIds, presentedHandCount as presentedDefenderHandCount } from "./defenderState.js";
@@ -44,6 +48,7 @@ import { causalStatus, gameHasPriority, gameTimingLabel } from "./causalExplanat
 import { visibleDeckTop } from "./visibleDeckTop.js";
 import {
   abilityIndexes,
+  blockingEquipmentByPlay,
   handCardSelection,
   nonAttackActionPlayIds,
   useActionAnnouncement,
@@ -58,21 +63,32 @@ import {
   toggleBoundedCardChoice,
 } from "./decisionPresentation.js";
 import { shouldHidePriorityGuidance } from "./decisionPass.js";
+import { lethalPassRisk } from "./lethalPass.js";
 import { hoverSurfaceLayout } from "./hoverSurfaceLayout.js";
 import { readEffectHint, sameEffectHint } from "./effects/effectHint.js";
 import { cardPreviewSurfaceSize } from "./cardPreviewFaces.js";
+import {
+  CREATED_CARDS_DWELL_MS,
+  CREATED_PANEL_GAP,
+  CREATED_PANEL_WIDTH,
+  createdCardsFor,
+  preloadCreatedCardArt,
+} from "./createdCards.js";
 import { skippableTokenRun } from "./tokenSkip.js";
 import { PassUntilControl } from "./PassUntilControl.js";
 import { chainLinkOpen, passUntilPaused } from "./passUntil.js";
+import { usePassUntilHint } from "./passUntilHint.js";
 import { useStandingOrders } from "./useStandingOrders.js";
 import { standingOrderKey } from "./standingOrders.js";
 import { PlayerNameplate } from "./PlayerNameplate.js";
 import { OpponentActions } from "../social/OpponentActions.js";
+import { setSocialAnchor } from "../social/socialAnchor.js";
 import { shouldShowIdleVictoryClaim } from "./idleVictory.js";
 import { MobileHandToggle } from "./MobileHandToggle.js";
 import { useMobileCardLongPress } from "./mobileCardLongPress.js";
 import { EffectLedger, type EffectLedgerTarget } from "./effects/EffectLedger.js";
 import { EffectHeroesContext, effectHeroes } from "./effects/effectHeroes.js";
+import { splitByPlacement } from "./effects/effectModel.js";
 import { abilityLabelForSource, deriveBoardLegalState } from "./board/boardModel.js";
 import { useGameSettings } from "./board/useGameSettings.js";
 import { PlaymatArt } from "./PlaymatArt.js";
@@ -82,28 +98,28 @@ import { useMatSeam } from "./board/useMatSeam.js";
 import { resolvePlaymat, type PlaymatId } from "../playmats.js";
 import { PriorityArrivalFlash } from "./board/priorityArrival.js";
 import { useGameViewport } from "./board/useGameViewport.js";
-import { isTouchBoardViewport } from "./board/viewportQueries.js";
+import { canHoverCards, tapInspectsCards } from "./board/viewportQueries.js";
 import { useHudReserve } from "./board/useHudReserve.js";
 import { useFullscreen } from "../components/useFullscreen.js";
 import { FullscreenNudge } from "./FullscreenNudge.js";
 import { useIdleVictoryPrompt } from "./board/useIdleVictoryPrompt.js";
 import { useGameShortcuts } from "./board/useGameShortcuts.js";
-import { shouldWarnBeforeEndTurn } from "./endTurnWarning.js";
 import type { BoardOverlay } from "./board/BoardPrimitives.js";
 import { heroCard } from "./board/heroCard.js";
 import { PlayerHalf } from "./board/PlayerHalf.js";
-import { PlayerHand } from "./board/PlayerHand.js";
-import { handFanSlotStyle } from "./board/handFan.js";
+import { PlayerHand, type PlayerHandInteraction } from "./board/PlayerHand.js";
+import { OpponentHand } from "./board/OpponentHand.js";
+import { boardSeats, seatInteractive } from "./board/boardSeats.js";
+import { boardFeedback, soloSides } from "./board/soloControl.js";
+import { useSoloSeatInputLock } from "./board/useSoloSeatInputLock.js";
 import { handPlayWindow } from "./board/handOrder.js";
 import { BoardOverlays, type BoardPreview } from "./board/BoardOverlays.js";
+import type { ZoneOverlayMoves } from "./board/ZoneOverlay.js";
+import { editableOverlaySource } from "./board/SandboxCardMoves.js";
+import { GameClockPanel } from "./GameClockPanel.js";
 import { optimisticInteractionHiddenIds } from "./pendingInteraction.js";
 import { optimisticDefenderView } from "./optimisticDefenderStaging.js";
 import { optimisticInteractionView } from "./optimisticInteraction.js";
-import {
-  motionLocationKey,
-  opaqueMotionPresentationKey,
-  motionPresentationKey,
-} from "./motion/motionTypes.js";
 import { GameMotionLayer } from "./motion/GameMotionLayer.js";
 import { useGameMotion } from "./motion/useGameMotion.js";
 import { useGameSounds } from "./sound/useGameSounds.js";
@@ -128,7 +144,7 @@ const EMPTY_INSTANCE_IDS: ReadonlySet<number> = new Set();
 
 export function GameBoard() {
   const intl = useIntl();
-  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, spectating, spectatorCount, spectatorUsernames, botGame, betaTester, sendIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, passUntil, sendPassUntil, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
+  const { view: authoritativeView, viewUpdate: authoritativeViewUpdate, playerProfiles, updateAccountCosmetics, cardArt, legal, actionCandidates, roomCommandPending, pendingInteraction, pendingDefenderStageIds, yourSeat, boardSeat: soloBoardSeat, spectating, spectatorCount, spectatorUsernames, botGame, soloGame, sandbox, betaTester, sendIntent: sendStoreIntent, sendPriorityMode, sendStandingOrders, sendTokenSkip, sendRememberedTarget, passUntil, passUntilIgnorePlays, endTurnWarning, sendPassUntil, setPassUntilIgnorePlays, sendEmote, kickSpectator, latestEmote, undo, error, leave, playBotAgain, playSoloAgain, opponentConnected, connected, connectionIssueVisible, roomCode, screen, replayFrames, replayViews, replayStep, replayNotes, setLiveReplayNote, watchReplay, downloadReplay, closeReplay, getRecordedViews, lastActionAt, clock, clockReceivedAt, replayClock, claimVictory, reportBug, reportOpponent, backgroundSearching, stopBackgroundMatchmaking, authUser, authToken, setLobbyRail, unreadMessageCount, setSocialOpen } = useStore(
     useShallow((state) => ({
       view: state.view,
       viewUpdate: state.viewUpdate,
@@ -141,17 +157,24 @@ export function GameBoard() {
       pendingInteraction: state.pendingInteraction,
       pendingDefenderStageIds: state.pendingDefenderStageIds,
       yourSeat: state.yourSeat,
+      boardSeat: state.boardSeat,
       spectating: state.spectating,
       spectatorCount: state.spectatorCount,
       spectatorUsernames: state.spectatorUsernames,
       botGame: state.botGame,
+      soloGame: state.soloGame,
+      sandbox: state.sandbox,
       betaTester: state.betaTester,
       sendIntent: state.sendIntent,
       sendPriorityMode: state.sendPriorityMode,
       sendStandingOrders: state.sendStandingOrders,
       sendTokenSkip: state.sendTokenSkip,
+      sendRememberedTarget: state.sendRememberedTarget,
       passUntil: state.passUntil,
+      endTurnWarning: state.endTurnWarning,
       sendPassUntil: state.sendPassUntil,
+      passUntilIgnorePlays: state.passUntilIgnorePlays,
+      setPassUntilIgnorePlays: state.setPassUntilIgnorePlays,
       sendEmote: state.sendEmote,
       kickSpectator: state.kickSpectator,
       latestEmote: state.latestEmote,
@@ -159,6 +182,7 @@ export function GameBoard() {
       error: state.error,
       leave: state.leave,
       playBotAgain: state.playBotAgain,
+      playSoloAgain: state.playSoloAgain,
       opponentConnected: state.opponentConnected,
       connected: state.connected,
       connectionIssueVisible: state.connectionIssueVisible,
@@ -174,6 +198,9 @@ export function GameBoard() {
       closeReplay: state.closeReplay,
       getRecordedViews: state.getRecordedViews,
       lastActionAt: state.lastActionAt,
+      clock: state.clock,
+      clockReceivedAt: state.clockReceivedAt,
+      replayClock: state.replayClock,
       claimVictory: state.claimVictory,
       reportBug: state.reportBug,
       reportOpponent: state.reportOpponent,
@@ -186,6 +213,25 @@ export function GameBoard() {
       setSocialOpen: state.setSocialOpen,
     })),
   );
+  const passHint = usePassUntilHint(connected && !spectating && screen !== "replay", passUntil !== null);
+  const notePassHintIntent = passHint.noteIntent;
+  // Solo: input built for one seat never acts for the next.
+  const { locked: seatInputLocked, allows: seatInputAllows } =
+    useSoloSeatInputLock(soloGame && connected && !spectating && screen !== "replay", yourSeat);
+  // "Don't ask again" covers one trigger source this turn; clicks and Space both route through it.
+  const [rememberTargetKey, setRememberTargetKey] = useState<string | null>(null);
+  const triggerTargetSource = authoritativeView?.pendingDecision?.triggerTarget?.sourceInstanceId;
+  const triggerTargetKey = triggerTargetSource === undefined ? null : `${authoritativeView!.turn}:${triggerTargetSource}`;
+  const rememberingTarget = triggerTargetKey !== null && triggerTargetKey === rememberTargetKey;
+  const sendIntent = useCallback((intent: GameIntent) => {
+    if (!seatInputAllows()) return false;
+    if (rememberingTarget && intent.kind === "choose" && /^\d+$/.test(intent.optionId)) {
+      return sendRememberedTarget(intent.optionId);
+    }
+    const sent = sendStoreIntent(intent);
+    if (sent) notePassHintIntent(intent);
+    return sent;
+  }, [sendStoreIntent, sendRememberedTarget, notePassHintIntent, seatInputAllows, rememberingTarget]);
   // Only a saved copy the account owns can be shared; replays opened from a
   // file, another player's link, or straight from the room have no saved id.
   const savedReplayShare = useStore(useShallow((state) => {
@@ -200,11 +246,37 @@ export function GameBoard() {
     };
   }));
   const [replayShareOpen, setReplayShareOpen] = useState(false);
+  const [sandboxOpen, setSandboxOpen] = useState(false);
+  const [deckEditorSeat, setDeckEditorSeat] = useState<0 | 1 | null>(null);
+  const [deckRevealSeat, setDeckRevealSeat] = useState<0 | 1 | null>(null);
+  const { sendSandboxEdit, sandboxEditRefusal, clearSandboxEditRefusal } = useStore(useShallow((state) => ({
+    sendSandboxEdit: state.sendSandboxEdit,
+    sandboxEditRefusal: state.sandboxEditRefusal,
+    clearSandboxEditRefusal: state.clearSandboxEditRefusal,
+  })));
+  // A bot game's first sandbox edit waits on this confirm; `then` runs once the room is sandbox.
+  const [sandboxConvert, setSandboxConvert] = useState<
+    { send: () => boolean | void; then?: () => void; sending: boolean } | null
+  >(null);
+  useEffect(() => {
+    if (!sandboxConvert?.sending) return;
+    if (sandbox) {
+      sandboxConvert.then?.();
+      setSandboxConvert(null);
+    } else if (!connected) {
+      setSandboxConvert(null);
+    }
+  }, [sandboxConvert, sandbox, connected]);
+  // Neither bot nor self-play has a human opponent for draws, idle claims or friend actions.
+  const practiceGame = botGame || soloGame;
+  // `yourSeat` is the acting seat; the board stays on `orientationSeat`.
+  const { boardSeat: orientationSeat, actingSeat } = boardSeats({ soloGame, boardSeat: soloBoardSeat, yourSeat });
+  const feedback = boardFeedback({ soloGame, spectating, yourSeat });
   const { view, update: viewUpdate } = useOpponentPlayPresentation({
     view: authoritativeView,
     update: authoritativeViewUpdate,
     viewerSeat: spectating ? null : yourSeat,
-    enabled: connected && screen !== "replay",
+    enabled: connected && screen !== "replay" && feedback.opponentPlayBuffered,
     scope: `${roomCode}:${authUser}:${screen}:${spectating}`,
   });
   const tableRef = useRef<HTMLDivElement>(null);
@@ -248,6 +320,23 @@ export function GameBoard() {
   });
   const [preview, setPreview] = useState<BoardPreview | null>(null);
   const previewTargetRef = useRef<HTMLElement | null>(null);
+  // Last element under the pointer, so pressing Shift previews it without a mouse move.
+  const hoverPointerTargetRef = useRef<HTMLElement | null>(null);
+  // Created cards show only once the pointer has rested on the card, so a
+  // sweep across the board shows the cards alone; they mount at once so their
+  // art is loaded by then.
+  const [createdDwelled, setCreatedDwelled] = useState(false);
+  const previewHasCreated = preview?.created !== undefined;
+  useEffect(() => {
+    setCreatedDwelled(false);
+    if (!previewHasCreated) return;
+    const timer = window.setTimeout(() => setCreatedDwelled(true), CREATED_CARDS_DWELL_MS);
+    return () => window.clearTimeout(timer);
+  }, [preview?.id, previewHasCreated]);
+  const shownPreview = useMemo(
+    () => (preview?.created && !createdDwelled ? { ...preview, createdPending: true } : preview),
+    [preview, createdDwelled],
+  );
   // The preview sits above the ledger, so drop the chip preview that was
   // showing when the slot was clicked.
   const openEffectLedger = (target: EffectLedgerTarget) => {
@@ -273,12 +362,16 @@ export function GameBoard() {
     cardDisplayPreference,
     motionPreference,
     playabilityCuePreference,
+    hoverPreviewMode,
     priorityWindowMode,
     skipPlayConfirmation,
+    warnLethalPass,
     optionHotkeys,
     skipBotDelay,
+    showGameClock,
     soundEffectsEnabled,
     soundEffectsVolume,
+    priorityAlertMode,
     playmat,
     botPlaymat,
     updatePriorityWindowMode,
@@ -286,11 +379,15 @@ export function GameBoard() {
     updateCardDisplayPreference,
     updateMotionPreference,
     updatePlayabilityCuePreference,
+    updateHoverPreviewMode,
     updateSkipPlayConfirmation,
+    updateWarnLethalPass,
     updateOptionHotkeys,
     updateSkipBotDelay,
+    updateShowGameClock,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
+    updatePriorityAlertMode,
     updatePlaymat,
     updateBotPlaymat,
     standingOrders: standingOrderSettings,
@@ -300,9 +397,32 @@ export function GameBoard() {
     sendPriorityMode,
     sendStandingOrders,
   });
+  const showHoverPreviewRef = useRef<(target: HTMLElement) => void>(() => {});
+  useEffect(() => {
+    if (hoverPreviewMode !== "shift") return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Shift" || event.repeat) return;
+      // Typing a capital in chat must not pop the card left under the pointer.
+      if ((event.target as Element | null)?.closest?.("input, textarea, select, [contenteditable='true']")) return;
+      const target = hoverPointerTargetRef.current;
+      if (target?.isConnected && canHoverCards()) showHoverPreviewRef.current(target);
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (event.key === "Shift") setPreview(null);
+    };
+    const onBlur = () => setPreview(null);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, [hoverPreviewMode]);
   const standingOrders = useStandingOrders({
     view: authoritativeView,
-    viewerSeat: spectating ? null : yourSeat,
+    seats: spectating || yourSeat === null ? [] : soloGame ? [orientationSeat, 1 - orientationSeat] : [orientationSeat],
     orders: standingOrderSettings,
     updateStandingOrder,
   });
@@ -351,6 +471,7 @@ export function GameBoard() {
   const [gameOverDismissed, setGameOverDismissed] = useState(false);
   const [confirmSkipArsenal, setConfirmSkipArsenal] = useState(false);
   const [confirmEndTurn, setConfirmEndTurn] = useState(false);
+  const [confirmLethalPass, setConfirmLethalPass] = useState(false);
   // Arming a turn-wide shortcut on the seat's own action phase ends it, so it shares the warning.
   const [confirmPassUntil, setConfirmPassUntil] = useState<PassUntilMode | null>(null);
   const [boundedChoiceSelection, setBoundedChoiceSelection] = useState<{
@@ -376,7 +497,9 @@ export function GameBoard() {
     viewUpdate,
     enabled: soundEffectsEnabled && screen !== "replay",
     volume: soundEffectsVolume,
-    seat: spectating ? null : yourSeat,
+    seat: feedback.priorityAlertSeat,
+    priorityAlertMode,
+    botGame: practiceGame,
     achievementToastVisible: matchAchievements.toast.length > 0,
   });
   const arsenalDecisionKey =
@@ -385,9 +508,10 @@ export function GameBoard() {
       : null;
   useEffect(() => setGameOverDismissed(false), [winnerNow]);
   useEffect(() => setConfirmSkipArsenal(false), [arsenalDecisionKey]);
-  // Any authoritative update (including undo) dismisses a pending end-turn warning.
+  // Any authoritative update (including undo) dismisses a pending pass warning.
   useEffect(() => {
     setConfirmEndTurn(false);
+    setConfirmLethalPass(false);
     setConfirmPassUntil(null);
   }, [authoritativeView]);
   // the combat chain window's on-screen rect, reported by ChainFloat so the
@@ -405,29 +529,40 @@ export function GameBoard() {
   });
   // idle-opponent prompt: no messages flow while the opponent is idle, so a
   // slow local tick re-evaluates their last-activity stamp
-  const { now, dismissedFor: idleDismissedFor, dismiss: dismissIdleVictory } =
+  const { now, snoozedUntil: idleSnoozedUntil, snooze: snoozeIdleVictory } =
     useIdleVictoryPrompt();
   const derived = useMemo(
-    () => deriveBoardLegalState(actionCandidates, legal, roomCommandPending),
-    [actionCandidates, legal, roomCommandPending],
+    () => deriveBoardLegalState(actionCandidates, legal, roomCommandPending || seatInputLocked),
+    [actionCandidates, legal, roomCommandPending, seatInputLocked],
   );
 
   const playerView = view !== null && yourSeat !== null ? view.players[yourSeat] : undefined;
   const playerHand = playerView?.hand ?? [];
-  const chainClosingPlayIds = derived.canCloseChain && playerView
-    ? nonAttackActionPlayIds([
+  const playableCards = playerView
+    ? [
       ...playerView.hand,
       ...playerView.arsenal,
       ...playerView.graveyard,
       ...playerView.banish,
       ...(playerView.visibleDeckTop ? [playerView.visibleDeckTop] : []),
-    ])
+    ]
+    : [];
+  const chainClosingPlayIds = derived.canCloseChain
+    ? nonAttackActionPlayIds(playableCards)
     : new Set<number>();
+  const blockingEquipment = blockingEquipmentByPlay(playableCards, playerView?.equipment ?? {});
+  // Hovering a held card is the common case for created cards; have their art
+  // cached before the pointer dwells.
+  const arsenal = playerView?.arsenal;
+  useEffect(() => {
+    preloadCreatedCardArt([...playerHand, ...(arsenal ?? [])].map((card) => card.cardId));
+  }, [playerHand, arsenal]);
   const announcement = useActionAnnouncement({
     actionCandidates,
     legalIntents: legal,
     hand: playerHand,
     chainClosingPlayIds,
+    blockingEquipment,
     skipPlayConfirmation,
     sendIntent,
   });
@@ -441,6 +576,7 @@ export function GameBoard() {
     alternativeCostCardInstanceIds,
     additionalCostConfirmed,
     actionStep,
+    equipBlockedBy,
     alternativeCostSets,
     stagedAdditionalCost: stagedAdditionalCostDefinition,
     stagedAdditionalCostCandidateIds,
@@ -472,6 +608,10 @@ export function GameBoard() {
     toggleAdditionalCostCard,
     confirmAdditionalCost,
   } = announcement;
+  // Solo: a selection begun for one seat never carries to the next.
+  useEffect(() => {
+    if (soloGame) resetSel();
+  }, [actingSeat, resetSel, soloGame]);
   const undoAndDismissAnnouncement: typeof undo = (target) => {
     resetSel();
     undo(target);
@@ -519,31 +659,34 @@ export function GameBoard() {
   const passHotkeyEnabled =
     hotkeyIntent !== null &&
     !roomCommandPending &&
+    !seatInputLocked &&
     connected &&
     view !== null &&
     screen !== "replay" &&
     !spectating &&
     yourSeat !== null;
-  const warnBeforeEndTurn =
-    screen !== "replay" &&
-    !spectating &&
-    shouldWarnBeforeEndTurn(authoritativeView, yourSeat, actionCandidates);
   // Choosing a card or ability instead also dismisses it.
   useEffect(() => {
     if (sel.kind === "none") return;
     setConfirmEndTurn(false);
+    setConfirmLethalPass(false);
     setConfirmPassUntil(null);
   }, [sel.kind]);
+  const lethalRisk = warnLethalPass && view !== null && yourSeat !== null && !spectating && screen !== "replay"
+    ? lethalPassRisk(view, yourSeat, legal)
+    : null;
   useGameShortcuts({
-    passEnabled: passHotkeyEnabled && !confirmEndTurn && confirmPassUntil === null,
+    passEnabled: passHotkeyEnabled && !confirmEndTurn && !confirmLethalPass && confirmPassUntil === null,
     hotkeyIntent,
     pendingDecision: view?.pendingDecision ?? null,
     setConfirmArsenalSkip: setConfirmSkipArsenal,
-    warnBeforeEndTurn,
+    warnBeforeLethalPass: lethalRisk !== null,
+    setConfirmLethalPass,
+    warnBeforeEndTurn: endTurnWarning,
     setConfirmEndTurn,
     onSend: sendIntent,
     onReset: resetSel,
-    actionShortcutEnabled: actionShortcutReady,
+    actionShortcutEnabled: actionShortcutReady && !seatInputLocked,
     actionStep,
     onSelectDefaultBoost: () => {
       if (defaultBoostCount !== null) selectBoost(defaultBoostCount);
@@ -558,7 +701,7 @@ export function GameBoard() {
   // what we see at once. A choice made here waits for the server to echo it
   // before the account copy may override it again.
   const ownsPlaymat = !spectating && !replaying && yourSeat !== null;
-  const matSeat: 0 | 1 = yourSeat === 1 ? 1 : 0;
+  const matSeat: 0 | 1 = orientationSeat;
   const pendingPlaymatRef = useRef<PlaymatId | null>(null);
   const carriedPlaymatRef = useRef(false);
   const chooseOwnPlaymat = (next: PlaymatId) => {
@@ -600,7 +743,7 @@ export function GameBoard() {
 
   if (!view || !presentedView || (yourSeat === null && !spectating)) return null;
   const causal = causalStatus(view, spectating ? null : yourSeat);
-  const seat: 0 | 1 = yourSeat === 1 ? 1 : 0; // spectators watch from seat 0's side of the table
+  const seat = orientationSeat;
   const liveNoteFrame = !replaying && replayFrames > 0 ? replayFrames - 1 : null;
   const liveNoteRoomVersion = !replaying && viewUpdate.source === "live"
     ? viewUpdate.roomVersion ?? null
@@ -610,15 +753,119 @@ export function GameBoard() {
     : replayNotes.find((note) =>
         note.roomVersion === liveNoteRoomVersion
         || (note.roomVersion === undefined && note.frame === liveNoteFrame))?.text ?? null;
-  const canSendEmote = !spectating && !replaying && connected;
-  const authoritativeMe = view.players[seat]!;
+  const canSendEmote = !spectating && !replaying && connected && !soloGame;
+  // Sandbox tools are desktop-only for now.
+  const canSandbox = !mobileFloatViewport && !mobileLandscapeViewport
+    && canOpenSandbox({ sandbox, botGame, spectating, replaying, yourSeat, gameOver: view.phase === "game-over" });
+  const confirmSandbox = canSandbox && !sandbox
+    ? (send: () => boolean | void, then?: () => void) => {
+        clearSandboxEditRefusal();
+        setSandboxConvert({ send, then, sending: false });
+      }
+    : undefined;
+  const sandboxSeats: SandboxSeat[] = (soloGame ? [seat, 1 - seat] : [yourSeat ?? seat]).map((candidate) => {
+    const player = view.players[candidate]!;
+    return {
+      seat: candidate as 0 | 1,
+      heroName: player.heroName,
+      life: player.life,
+      resources: player.resources,
+      zones: {
+        hand: player.hand.length,
+        // An unconverted bot game reveals the deck on conversion.
+        deck: player.deck?.length ?? (sandbox ? null : player.deckCount),
+        graveyard: player.graveyard.length,
+        banish: player.banish.filter((card) => !card.faceDown).length,
+      },
+    };
+  });
+  const seatEditable = (seatIndex: number) => canSandbox
+    && sandboxSeats.some((candidate) => candidate.seat === seatIndex);
+  const deckEditable = (seatIndex: number) => seatEditable(seatIndex) && view.players[seatIndex]?.deck !== undefined;
+  // Before conversion the deck is hidden; opening the editor converts and reveals it.
+  const deckEditOffered = (seatIndex: number) => seatEditable(seatIndex)
+    && (!!confirmSandbox || view.players[seatIndex]?.deck !== undefined);
+  const openDeckEditor = (seatIndex: number) => {
+    clearSandboxEditRefusal();
+    if (confirmSandbox) {
+      confirmSandbox(
+        () => sendSandboxEdit(seatIndex as 0 | 1, { kind: "reveal-deck" }),
+        () => {
+          if (typeof localStorage !== "undefined") saveDeckOrderRevealAccepted(localStorage, view.gameId);
+          setDeckEditorSeat(seatIndex as 0 | 1);
+        },
+      );
+      return;
+    }
+    const accepted = typeof localStorage !== "undefined" && loadDeckOrderRevealAccepted(localStorage, view.gameId);
+    if (accepted) setDeckEditorSeat(seatIndex as 0 | 1);
+    else setDeckRevealSeat(seatIndex as 0 | 1);
+  };
+  const overlaySource = editableOverlaySource(
+    overlay?.source,
+    canSandbox,
+    sandboxSeats.map((candidate) => candidate.seat),
+  );
+  const shownOverlay = overlay && overlaySource
+    ? { ...overlay, cards: view.players[overlaySource.seat]![overlaySource.zone] }
+    : overlay;
+  const overlayMoves: ZoneOverlayMoves | undefined = overlaySource
+    ? {
+        zone: overlaySource.zone,
+        pending: roomCommandPending,
+        refusal: sandboxEditRefusal,
+        onMove: (instanceId, to) => {
+          clearSandboxEditRefusal();
+          const move = () => sendSandboxEdit(overlaySource.seat as 0 | 1, { kind: "move-card", instanceId, to });
+          if (confirmSandbox) confirmSandbox(move);
+          else move();
+        },
+      }
+    : undefined;
+  const openSandboxZone = (seatIndex: 0 | 1, zone: SandboxZone) => {
+    setSandboxOpen(false);
+    if (zone === "deck") {
+      openDeckEditor(seatIndex);
+      return;
+    }
+    clearSandboxEditRefusal();
+    const player = view.players[seatIndex]!;
+    setOverlay({
+      title: intl.formatMessage({ id: "game.sandbox.zoneTitle" }, { hero: player.heroName, zone }),
+      cards: player[zone],
+      source: { seat: seatIndex, zone },
+      inactiveZone: zone !== "hand",
+      showOwnedFaceDownIdentities: true,
+    });
+  };
+  const deckEditorPlayer = deckEditorSeat !== null && deckEditable(deckEditorSeat)
+    ? view.players[deckEditorSeat]!
+    : null;
+  const openSandbox = () => {
+    clearSandboxEditRefusal();
+    setSandboxOpen(true);
+  };
   const me = presentedView.players[seat]!;
   const opp = presentedView.players[seat === 0 ? 1 : 0]!;
+  const authoritativeActor = view.players[actingSeat]!;
+  const actor = presentedView.players[actingSeat]!;
+  const actorOpp = presentedView.players[actingSeat === 0 ? 1 : 0]!;
+  const topInteractive = soloGame && seatInteractive(opp.seat, yourSeat, spectating || replaying);
+  const bottomInert = soloGame && !seatInteractive(me.seat, yourSeat, spectating || replaying);
+  const sides = soloSides({
+    soloGame,
+    watching: spectating || replaying,
+    gameOver: view.phase === "game-over",
+    boardSeat: seat,
+    actingSeat: yourSeat,
+  });
+  const soloBoard = soloGame && !spectating;
+  const phoneBoard = mobileFloatViewport || mobileLandscapeViewport;
   const arenaPaymentCandidateIds = new Set(
     sel.kind !== "none" &&
       actionStep === "payment" &&
       (!stagedAdditionalCostDefinition || additionalCostConfirmed)
-      ? me.board
+      ? actor.board
           .filter((card) =>
             pitchSel.includes(card.instanceId) ||
             canAddPaymentCard(selectedPaymentVariants, pitchSel, card.instanceId)
@@ -627,14 +874,15 @@ export function GameBoard() {
       : [],
   );
   const authoritativeVisibleDeckTop = !spectating
-    ? visibleDeckTop(authoritativeMe, deckCardFeedback.shuffledSeats.has(authoritativeMe.seat))
+    ? visibleDeckTop(authoritativeActor, deckCardFeedback.shuffledSeats.has(authoritativeActor.seat))
     : undefined;
-  const myVisibleDeckTop = !spectating
-    ? visibleDeckTop(me, deckCardFeedback.shuffledSeats.has(me.seat))
+  const deckTopFor = (player: typeof me) => !spectating
+    ? visibleDeckTop(player, deckCardFeedback.shuffledSeats.has(player.seat))
     : undefined;
+  const actorVisibleDeckTop = deckTopFor(actor);
   const optimisticallyHiddenIds = optimisticInteractionHiddenIds(
     !spectating && !replaying ? (pendingInteraction?.intent ?? null) : null,
-    authoritativeMe,
+    authoritativeActor,
     authoritativeVisibleDeckTop,
   ) ?? EMPTY_INSTANCE_IDS;
   const hiddenHandIds = new Set(optimisticallyHiddenIds);
@@ -642,7 +890,7 @@ export function GameBoard() {
   const presentedHandCount = presentedDefenderHandCount(presentedView, seat, hiddenHandIds);
   const presentedOppHandCount = presentedDefenderHandCount(presentedView, opp.seat);
   const pd = presentedView.pendingDecision;
-  const myDecision = !spectating && pd !== null && pd.player === seat;
+  const myDecision = !spectating && pd !== null && pd.player === actingSeat;
   const showCardSearchOverlay = myDecision && isCardSearchOverlayDecision(pd);
   const pendingPreStackPlayId = (() => {
     const intent = !spectating && !replaying ? pendingInteraction?.intent : undefined;
@@ -657,14 +905,15 @@ export function GameBoard() {
   const preStackSelectedInstanceId = pendingPreStackPlayId
     ?? (myDecision ? (pd.preStackSource?.card.instanceId ?? null) : null);
   const resourcePayment = myDecision ? pd.resourcePayment : undefined;
+  const handPitchValue = (instanceId: number) => {
+    const card = actor.hand.find((candidate) => candidate.instanceId === instanceId);
+    return card ? (cardData[card.cardId]?.pitch ?? 0) : 0;
+  };
   const resourcePaymentSelected = resourcePayment
-    ? pitchSel.reduce((total, instanceId) => {
-        const card = me.hand.find((candidate) => candidate.instanceId === instanceId);
-        return total + (card ? (cardData[card.cardId]?.pitch ?? 0) : 0);
-      }, 0)
+    ? pitchSel.reduce((total, instanceId) => total + handPitchValue(instanceId), 0)
     : 0;
   const resourcePaymentRequired = resourcePayment
-    ? Math.max(0, resourcePayment.cost - me.resources - (me.chi ?? 0))
+    ? Math.max(0, resourcePayment.cost - actor.resources - (actor.chi ?? 0))
     : 0;
   const livePriority: PriorityPresentation = {
     gameId: presentedView.gameId,
@@ -686,14 +935,14 @@ export function GameBoard() {
   // Gate the viewer's affordances only while a hand-off to them is in flight;
   // their own plays never wait.
   const awaitingHandoff = presentedPriority !== livePriority
-    && presentedPriority.holder !== seat
-    && presentedPriority.priorityPlayer !== seat;
+    && presentedPriority.holder !== actingSeat
+    && presentedPriority.priorityPlayer !== actingSeat;
   // An open resource payment is a hand-card choice, rather than an invitation
   // to start another play or ability from the arena or inactive zones.
   const boardActionState = choosingPitch || awaitingHandoff
     ? deriveBoardLegalState([], legal, true)
     : derived;
-  const myTurn = view.activePlayer === seat;
+  const myTurn = view.activePlayer === actingSeat;
   const activeHeroName = view.players[view.activePlayer]?.heroName ?? "";
   const turnLabel = spectating
     ? intl.formatMessage({ id: "game.turn.named" }, { player: activeHeroName })
@@ -701,13 +950,17 @@ export function GameBoard() {
       ? intl.formatMessage({ id: "game.turn.yours" })
       : intl.formatMessage({ id: "game.turn.opponent" });
   const hasActiveCombatChain = presentedView.chain.length > 0;
-  const activeChainAttackerInstanceId = hasActiveCombatChain
-    ? presentedView.chain[presentedView.chain.length - 1]!.attackingCard.instanceId
-    : null;
+  const activeChainLink = presentedView.chain.at(-1);
+  const activeChainAttackerInstanceId = activeChainLink?.attackingCard.instanceId ?? null;
+  const activeChainTargetInstanceIds: ReadonlySet<number> = new Set([
+    ...(activeChainLink?.targetAlly ? [activeChainLink.targetAlly.instanceId] : []),
+    ...(activeChainLink?.additionalTargets ?? []).map((target) => target.ally.instanceId),
+  ]);
   const optionCardLabels = cardChoiceLocationLabels(
-    me.heroInstanceId,
-    opp.heroInstanceId,
-    me.weapons.map((weapon) => weapon.instanceId),
+    actor.heroInstanceId,
+    actorOpp.heroInstanceId,
+    actor.weapons.map((weapon) => weapon.instanceId),
+    actor.arsenal.map((card) => card.instanceId),
     {
       yourHero: intl.formatMessage(
         { id: "game.zone.mine" },
@@ -719,21 +972,27 @@ export function GameBoard() {
       ),
       leftWeapon: intl.formatMessage({ id: "game.zone.weapon.left" }),
       rightWeapon: intl.formatMessage({ id: "game.zone.weapon.right" }),
+      yourArsenal: intl.formatMessage(
+        { id: "game.zone.mine" },
+        { zone: intl.formatMessage({ id: "game.zone.arsenal" }) },
+      ),
     },
   );
   const showPriorityFloat = !spectating && !replaying && presentedPriority.priorityPlayer !== null;
-  const hasOwnPriority = showPriorityFloat && presentedPriority.priorityPlayer === seat;
+  const hasOwnPriority = showPriorityFloat && presentedPriority.priorityPlayer === actingSeat;
   const priorityHolder = presentedPriority.holder;
   const priorityHolderName = priorityHolder === null
     ? ""
     : (presentedView.players[priorityHolder]?.heroName ?? "");
-  const priorityLabel = presentedPriority.priorityPlayer === seat ? "YOUR PRIORITY" : "OPPONENT'S PRIORITY";
+  const priorityLabel = presentedPriority.priorityPlayer === actingSeat ? "YOUR PRIORITY" : "OPPONENT'S PRIORITY";
   const priorityTimingLabel = presentedPriority.timingLabel;
   const showEndTurnPassToast =
     !spectating &&
     !replaying &&
     view.endTurnPassPending === true &&
-    view.activePlayer !== seat;
+    view.activePlayer !== actingSeat;
+  // Self-play: the opposing seat answers your pass, so the notice moves to its side.
+  const endTurnPasser = soloGame && actingSeat !== orientationSeat ? "you" : "opponent";
   const timingFloat = showPriorityFloat ? (
     <PriorityFloat
       turn={view.turn}
@@ -765,22 +1024,23 @@ export function GameBoard() {
   // Only the seat the game is NOT waiting on may claim — the idle player must
   // be the one holding up the game (their turn or their pending decision), so
   // you never see this off your own inaction.
-  const waitingOnOpp = pd !== null ? pd.player !== seat : view.activePlayer !== seat;
+  const waitingOnOpp = pd !== null ? pd.player !== actingSeat : view.activePlayer !== actingSeat;
   const oppLastAction = !spectating && yourSeat !== null ? (lastActionAt?.[1 - seat] ?? 0) : 0;
   const oppIdleMs = oppLastAction > 0 ? now - oppLastAction : 0;
   const showIdleToast = shouldShowIdleVictoryClaim({
-    botGame,
+    botGame: practiceGame,
     replaying,
     gameOver: view.phase === "game-over",
     waitingOnOpponent: waitingOnOpp,
     opponentLastAction: oppLastAction,
     opponentIdleMs: oppIdleMs,
-    dismissedFor: idleDismissedFor,
+    now,
+    snoozedUntil: idleSnoozedUntil,
   });
 
   /** Short authoritative UI label projected for one of a source's abilities. */
   const abilityLabel = (sourceInstanceId: number, index: number) =>
-    abilityLabelForSource(me, view.chain, sourceInstanceId, index);
+    abilityLabelForSource(actor, view.chain, sourceInstanceId, index);
 
   const clickActivate = (sourceInstanceId: number) => () => {
     const indexes = abilityIndexes(actionCandidates, sourceInstanceId);
@@ -795,13 +1055,17 @@ export function GameBoard() {
     if (sendIntent(intent)) resetSel();
   };
   const requestPass = () => {
-    if (roomCommandPending) return;
+    if (roomCommandPending || !seatInputAllows()) return;
     const intent = { kind: "pass" } as const;
     if (shouldConfirmArsenalPass(pd, intent)) {
       setConfirmSkipArsenal(true);
       return;
     }
-    if (warnBeforeEndTurn) {
+    if (lethalRisk) {
+      setConfirmLethalPass(true);
+      return;
+    }
+    if (endTurnWarning) {
       setConfirmEndTurn(true);
       return;
     }
@@ -815,11 +1079,11 @@ export function GameBoard() {
   const choosingArsenal = !replaying && myDecision && pd !== null && pd.kind === "arsenal";
   /** scripted card-picks whose options all live in my hand (Death Dealer,
    *  Reload, …): the card is clicked in the hand row — instanceId → optionId */
-  const handPick = replaying || !myDecision ? null : handCardChoiceOptions(pd, me.hand);
+  const handPick = replaying || !myDecision ? null : handCardChoiceOptions(pd, actor.hand);
   const boundedCardChoice = replaying || !myDecision ? null : boundedCardChoiceModel(pd);
   const boundedHandPick = replaying || !myDecision
     ? null
-    : boundedHandCardChoiceOptions(pd, me.hand);
+    : boundedHandCardChoiceOptions(pd, actor.hand);
   const toggleBoundedChoice = (optionId: string) => {
     if (!boundedCardChoice || boundedChoiceKey === null) return;
     setBoundedChoiceSelection((current) => {
@@ -844,6 +1108,7 @@ export function GameBoard() {
   const unstage = (id: number) => stage([...stagedIds].filter((x) => x !== id));
 
   const onHandClick = (c: CardView) => {
+    if (!seatInputAllows()) return;
     if (defending) {
       stage([...stagedIds, c.instanceId]);
       return;
@@ -867,10 +1132,10 @@ export function GameBoard() {
         togglePitch(c.instanceId);
         return;
       }
-      if (!canAddResourcePaymentPitch(resourcePayment, pitchSel, c.instanceId)) return;
-      const nextPitch = [...pitchSel, c.instanceId];
-      const paymentOption = selectedResourcePaymentOption(resourcePayment, nextPitch);
-      if (paymentOption) send({ kind: "choose", optionId: paymentOption.optionId });
+      const floating = actor.resources + (actor.chi ?? 0);
+      if (!canAddResourcePaymentPitch(resourcePayment, floating, pitchSel, c.instanceId, handPitchValue)) return;
+      const payment = resourcePaymentIntent(resourcePayment, floating, [...pitchSel, c.instanceId], handPitchValue);
+      if (payment) send(payment);
       else togglePitch(c.instanceId);
       return;
     }
@@ -896,7 +1161,7 @@ export function GameBoard() {
           pitchSel,
           c.instanceId,
           (instanceId) => {
-            const card = playerHand.find((candidate) => candidate.instanceId === instanceId);
+            const card = actor.hand.find((candidate) => candidate.instanceId === instanceId);
             return card ? (cardData[card.cardId]?.pitch ?? 0) : 0;
           },
         )
@@ -909,10 +1174,10 @@ export function GameBoard() {
 
   const selCardId: string | undefined = (() => {
     if (sel.kind === "play-hand" || sel.kind === "choose-hand-action") {
-      return me.hand.find((x) => x.instanceId === sel.instanceId)?.cardId;
+      return actor.hand.find((x) => x.instanceId === sel.instanceId)?.cardId;
     }
     if (sel.kind === "play-arsenal") {
-      return me.arsenal.find((x) => x.instanceId === sel.instanceId)?.cardId;
+      return actor.arsenal.find((x) => x.instanceId === sel.instanceId)?.cardId;
     }
     if (sel.kind === "play-zone") {
       return [
@@ -920,20 +1185,20 @@ export function GameBoard() {
           ...player.banish,
           ...player.graveyard,
         ]),
-        ...(myVisibleDeckTop ? [myVisibleDeckTop] : []),
+        ...(actorVisibleDeckTop ? [actorVisibleDeckTop] : []),
       ].find((x) => x.instanceId === sel.instanceId)?.cardId;
     }
     if (sel.kind === "activate") {
       const id = sel.sourceInstanceId;
-      if (id === me.heroInstanceId) return me.heroCardId;
+      if (id === actor.heroInstanceId) return actor.heroCardId;
       return [
-        ...me.hand,
-        ...me.arsenal,
-        ...me.weapons,
-        ...Object.values(me.equipment),
-        ...me.board,
-        ...me.graveyard,
-        ...me.banish,
+        ...actor.hand,
+        ...actor.arsenal,
+        ...actor.weapons,
+        ...Object.values(actor.equipment),
+        ...actor.board,
+        ...actor.graveyard,
+        ...actor.banish,
         ...view.chain.flatMap((link) => [
           link.attackingCard,
           ...link.defendingCards,
@@ -983,10 +1248,10 @@ export function GameBoard() {
     if (allyIds.size === 0) return [];
     return [
       ...(heroOffered
-        ? [{ id: null as number | null, label: opp.heroName, card: heroCard(opp) }]
+        ? [{ id: null as number | null, label: actorOpp.heroName, card: heroCard(actorOpp) }]
         : []),
       ...[...allyIds].flatMap((id) => {
-        const card = opp.board.find((candidate) => candidate.instanceId === id);
+        const card = actorOpp.board.find((candidate) => candidate.instanceId === id);
         return card
           ? [{
               id: id as number | null,
@@ -1045,10 +1310,10 @@ export function GameBoard() {
     ];
   })();
   const controlledCards = [
-    ...me.hand,
-    ...me.board,
-    ...me.weapons,
-    ...Object.values(me.equipment).filter((card): card is CardView => card !== undefined),
+    ...actor.hand,
+    ...actor.board,
+    ...actor.weapons,
+    ...Object.values(actor.equipment).filter((card): card is CardView => card !== undefined),
   ];
   const alternativeCostChoices = [...alternativeCostSets.entries()].map(([key, instanceIds]) => ({
     key,
@@ -1058,11 +1323,11 @@ export function GameBoard() {
     ),
   }));
   const stagedAdditionalCost = stagedAdditionalCostDefinition ? (() => {
-    const handCards = me.hand.filter((card) => stagedAdditionalCostCandidateIds.has(card.instanceId));
+    const handCards = actor.hand.filter((card) => stagedAdditionalCostCandidateIds.has(card.instanceId));
     const arenaCards = [
-      ...me.board,
-      ...me.weapons,
-      ...Object.values(me.equipment).filter((card): card is CardView => card !== undefined),
+      ...actor.board,
+      ...actor.weapons,
+      ...Object.values(actor.equipment).filter((card): card is CardView => card !== undefined),
     ].filter((card) => stagedAdditionalCostCandidateIds.has(card.instanceId));
     return {
       cardLabel: stagedAdditionalCostDefinition.cardLabel,
@@ -1126,39 +1391,63 @@ export function GameBoard() {
             : "pass";
   const primaryActionDisabled =
     roomCommandPending ||
+    seatInputLocked ||
     awaitingHandoff ||
     !connected ||
     (defending ? defendIntent === null : !derived.canPass);
+  // Keep a disabled Pass while a choice carries its own answers, so the HUD
+  // and phone bar don't reflow.
+  const shownPrimaryAction: PrimaryAction | null = primaryAction ??
+    (spectating || replaying || view.phase === "game-over" ? null : "pass");
   const passUntilAvailable = connected && !spectating && !replaying && view.phase !== "game-over";
   const armPassUntil = (mode: PassUntilMode) => {
-    if (mode !== "chain-link" && warnBeforeEndTurn) {
+    passHint.close(true);
+    if (mode !== "chain-link" && endTurnWarning) {
       setConfirmPassUntil(mode);
       return;
     }
     sendPassUntil(mode);
   };
+  // The server's turn latch also stops where the end-turn warning would ask.
+  const passUntilWaiting = passUntilPaused(view, actingSeat, passUntil, legal) || (passUntil === "turn" && endTurnWarning);
   const passUntilControl = (placement: "hud" | "toolbar") => passUntilAvailable ? (
     <PassUntilControl
       mode={passUntil}
       linkOpen={chainLinkOpen(view)}
-      paused={passUntilPaused(view, seat, passUntil)}
-      hotkeys={placement === "hud"}
+      paused={passUntilWaiting}
+      disabled={seatInputLocked}
+      hotkeys={placement === "hud" && !confirmLethalPass}
+      spacePasses={hotkeyIntent !== null}
       placement={placement}
+      hint={passHint.open}
+      onHintClose={passHint.close}
+      ignorePlays={passUntilIgnorePlays}
+      onIgnorePlaysChange={setPassUntilIgnorePlays}
       onArm={armPassUntil}
       onCancel={() => sendPassUntil(null)}
     />
   ) : null;
   const triggerPrimaryAction = defending
     ? () => {
-        if (defendIntent) send(defendIntent);
+        if (lethalRisk) setConfirmLethalPass(true);
+        else if (defendIntent) send(defendIntent);
       }
     : requestPass;
 
   // Require mouse movement: animations can fire mouseover when a card moves
   // under a stationary pointer, including Dash I/O's changing deck top.
   const onHoverCard = (e: React.MouseEvent) => {
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (!canHoverCards()) return;
     const target = e.target as HTMLElement;
+    hoverPointerTargetRef.current = target;
+    if (hoverPreviewMode === "shift" && !e.shiftKey) {
+      setPreview(null);
+      return;
+    }
+    showHoverPreview(target);
+  };
+
+  const showHoverPreview = (target: HTMLElement) => {
     // Counter icons have their own focused tooltip. Suppress the large card
     // preview while the pointer is on one so the two surfaces never collide.
     if (target.closest(".c-ovl, .pitch-focus-card")) {
@@ -1208,28 +1497,33 @@ export function GameBoard() {
     // A ledger row previews its source beside the ledger rather than over it.
     const ledger = el.closest<HTMLElement>(".effect-ledger")?.getBoundingClientRect();
     const anchor = ledger ? new DOMRect(ledger.left, r.top, ledger.width, r.height) : r;
+    const created = createdCardsFor(cardId, previewSurfaceSize.width, window.innerWidth);
+    const createdSpan = created?.beside ? CREATED_PANEL_WIDTH + CREATED_PANEL_GAP : 0;
     const layout = hoverSurfaceLayout(
       anchor,
       { width: window.innerWidth, height: window.innerHeight },
-      previewSurfaceSize,
+      { ...previewSurfaceSize, width: previewSurfaceSize.width + createdSpan },
       240, // keep the card preview clear of the side panel when space permits
     );
     // Contextual card explanations use the preview side.
     el.dataset.previewSide = layout.side;
     setPreview({
       id: cardId,
-      x: layout.x,
+      // The source stays next to the hovered card; created cards sit beyond it.
+      x: layout.side === "left" ? layout.x + createdSpan : layout.x,
       y: layout.y,
       size: previewSize,
       ...(badges ? { badges } : {}),
       ...(effect ? { effect } : {}),
+      ...(created ? { created: { ids: created.ids, dock: created.beside ? layout.side : "below" } } : {}),
     });
   };
+  showHoverPreviewRef.current = showHoverPreview;
 
   // Touch screens have no hover preview. Tapping an inert card or holding any
   // card opens the full-size sheet; a short tap on an actionable card acts.
   const onTableClick = (e: React.MouseEvent) => {
-    if (!isTouchBoardViewport()) return;
+    if (!tapInspectsCards()) return;
     const target = e.target as HTMLElement;
     if (target.closest("button, .card-clickable, .overlay")) return;
     const card = target.closest<HTMLElement>("[data-cardid]");
@@ -1246,7 +1540,7 @@ export function GameBoard() {
     if (event.defaultPrevented) return;
 
     const insideChoiceSurface = target.closest(
-      "#player-hand, .decision-float, .card-search-overlay, .pitch-focus-card",
+      "#player-hand, .opp-hand-interactive, .decision-float, .card-search-overlay, .pitch-focus-card",
     ) !== null;
     const dismissal = handChoiceDismissal(
       sel.kind === "play-hand" || sel.kind === "choose-hand-action",
@@ -1290,7 +1584,9 @@ export function GameBoard() {
     <PlayerNameplate
       placement="opponent"
       profile={playerProfiles[1 - seat]!}
-      actions={authUser && roomCode && !spectating && !botGame && !replaying ? (
+      name={soloGame ? opp.heroName : undefined}
+      acting={sides?.top === "acting"}
+      actions={authUser && roomCode && !spectating && !practiceGame && !replaying ? (
         <OpponentActions
           username={playerProfiles[1 - seat]!.username}
           roomCode={roomCode}
@@ -1300,49 +1596,53 @@ export function GameBoard() {
     />
   ) : null;
   const selfNameplate = playerProfiles ? (
-    <PlayerNameplate placement="self" profile={playerProfiles[seat]!} />
+    <PlayerNameplate
+      placement="self"
+      profile={playerProfiles[seat]!}
+      name={soloGame ? me.heroName : undefined}
+      acting={sides?.bottom === "acting"}
+      actions={authUser && !spectating && !replaying && !mobileFloatViewport && !mobileLandscapeViewport ? (
+        <span ref={setSocialAnchor} className="nameplate-social-slot" />
+      ) : null}
+    />
   ) : null;
-  const oppHandRevealed = view.phase === "game-over" || replaying;
+  const handInteraction: PlayerHandInteraction = {
+    legalState: boardActionState,
+    legalIntents: legal,
+    selection: sel,
+    preStackSelectedInstanceId,
+    pitchSelection: pitchSel,
+    choosingPitch,
+    focusedSourceInstanceId: pitchSource?.fromHand ? pitchSource.card.instanceId : null,
+    selectedPaymentVariants:
+      stagedAdditionalCostDefinition && !additionalCostConfirmed
+        ? []
+        : selectedPaymentVariants,
+    resourcePayment,
+    stagedIds,
+    optimisticallyHiddenIds,
+    defending,
+    choosingArsenal,
+    handPick,
+    boundedHandPick,
+    selectedBoundedChoiceOptionIds,
+    onCardClick: onHandClick,
+    onActivate: (instanceId) => clickActivate(instanceId)(),
+    onSelect: setSel,
+  };
   const oppHand = (
-    <div
-      className={`opp-hand${oppHandRevealed ? " opp-hand-revealed" : ""}`}
-      data-motion-zone={motionLocationKey({ kind: "hand", seat: opp.seat })}
-      role="group"
-      aria-label={intl.formatMessage({ id: "game.hand.opponentCount" }, { count: presentedOppHandCount })}
-      style={{
-        "--fan-n": Math.max(1, oppHandRevealed ? opp.hand.length : presentedOppHandCount),
-      } as CSSProperties}
-    >
-      {oppHandRevealed
-        ? opp.hand.map((card, i) => (
-            <CardFace
-              key={card.instanceId}
-              card={card}
-              style={handFanSlotStyle(i)}
-              motionKey={motionPresentationKey(
-                { kind: "hand", seat: opp.seat },
-                card.instanceId,
-              )}
-            />
-          ))
-        : Array.from({ length: presentedOppHandCount }, (_, i) => (
-            <CardBack
-              key={i}
-              label=""
-              size="hand"
-              style={handFanSlotStyle(i)}
-              motionKey={opaqueMotionPresentationKey(
-                { kind: "hand", seat: opp.seat },
-                i,
-              )}
-              motionZoneAnchor={i === presentedOppHandCount - 1
-                ? motionLocationKey({ kind: "hand", seat: opp.seat })
-                : undefined}
-            />
-          ))}
-      {presentedOppHandCount === 0 && <span className="muted">opponent has no cards in hand</span>}
-      <span className="opp-hand-count" aria-hidden="true">{presentedOppHandCount}</span>
-    </div>
+    <OpponentHand
+      view={presentedView}
+      player={opp}
+      presentedCount={presentedOppHandCount}
+      revealed={view.phase === "game-over" || replaying}
+      solo={soloGame && !spectating}
+      side={sides?.top ?? null}
+      wings={!phoneBoard}
+      effectsBelow={splitByPlacement(view.ongoing.filter((effect) => effect.seat === opp.seat)).slot.length > 0}
+      steadyLegalState={topInteractive ? deriveBoardLegalState(actionCandidates, legal, false) : null}
+      interaction={topInteractive ? handInteraction : null}
+    />
   );
   return (
     <EffectHeroesContext.Provider value={effectHeroList}>
@@ -1350,7 +1650,7 @@ export function GameBoard() {
     <SquareCardPresentation enabled={squareCardsEnabled}>
     <div
       ref={tableRef}
-      className={`table${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${compactHud ? " hud-is-compact" : ""}${hasPlaymat ? " has-playmat" : ""}`}
+      className={`table${soloBoard ? " solo-board" : ""}${seatInputLocked ? " seat-input-locked" : ""}${railCollapsed ? " rail-is-collapsed" : ""}${view.phase === "game-over" ? " game-is-over" : ""}${hasActiveCombatChain ? " has-active-combat-chain" : ""}${mobileHandIsHidden ? " mobile-hand-is-hidden" : ""}${compactHud ? " hud-is-compact" : ""}${hasPlaymat ? " has-playmat" : ""}`}
       data-playability-cue={playabilityCuePreference}
       data-motion-preference={motionPreference}
       onMouseMove={onHoverCard}
@@ -1361,7 +1661,10 @@ export function GameBoard() {
         if (next instanceof Node && previewTargetRef.current?.contains(next)) return;
         setPreview(null);
       }}
-      onMouseLeave={() => setPreview(null)}
+      onMouseLeave={() => {
+        hoverPointerTargetRef.current = null;
+        setPreview(null);
+      }}
       {...cardLongPressHandlers}
       onClickCapture={onTableClickCapture}
       onClick={onTableClick}
@@ -1372,7 +1675,7 @@ export function GameBoard() {
         exiting={matchAchievements.toastExiting}
         onViewAchievements={() => { leave(); setLobbyRail("achievements"); }}
       />
-      <PriorityArrivalFlash hasOwnPriority={hasOwnPriority} />
+      <PriorityArrivalFlash hasOwnPriority={feedback.priorityAlertSeat !== null && hasOwnPriority} />
       {playmatHint.visible
         ? <PlaymatHintToast onChoose={playmatHint.choose} onDismiss={playmatHint.dismiss} />
         : null}
@@ -1384,7 +1687,7 @@ export function GameBoard() {
           <PitchFocus
             key={pitchSource.card.instanceId}
             source={pitchSource}
-            seat={seat}
+            seat={actingSeat}
             motionPreference={motionPreference}
             getStackFocusOrigin={gameMotion.getStackFocusOrigin}
             getHandFocusOrigin={gameMotion.getHandFocusOrigin}
@@ -1404,11 +1707,16 @@ export function GameBoard() {
         <PlayerHalf
           player={opp}
           mine={false}
+          interactive={topInteractive}
+          revealsFaceDown={soloGame && !spectating}
+          handOverEffects={soloBoard && !phoneBoard}
           mirrored
           holdsPriority={priorityHolder === opp.seat}
+          priorityPulse={topInteractive && hasOwnPriority}
           ongoing={view.ongoing.filter((effect) => effect.seat === opp.seat)}
           gameOver={view.phase === "game-over"}
           replaying={replaying}
+          visibleDeckTop={soloGame ? deckTopFor(opp) : undefined}
           deckShuffling={deckCardFeedback.shuffledSeats.has(opp.seat)}
           interaction={playerHalfInteraction}
           latestEmote={latestEmote}
@@ -1418,9 +1726,12 @@ export function GameBoard() {
           compactBoard={compactBoard}
           cardDisplayPreference={cardDisplayPreference}
           activeChainAttackerInstanceId={activeChainAttackerInstanceId}
+          activeChainTargetInstanceIds={activeChainTargetInstanceIds}
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
           onOpenEffects={openEffectLedger}
+          standingOrders={soloBoard ? standingOrders : undefined}
+          onEditDeck={deckEditOffered(opp.seat) ? () => openDeckEditor(opp.seat) : undefined}
         />
 
         {/* center divider: a brass-inlay strip marking the seam */}
@@ -1432,7 +1743,7 @@ export function GameBoard() {
           ) : null}
           <div className="mat-divider-center">
             {showEndTurnPassToast && !mobileFloatViewport
-              ? <EndTurnPassToast placement="divider" />
+              ? <EndTurnPassToast placement="divider" passer={endTurnPasser} />
               : null}
             {timingFloat}
             <div className="mat-divider-mini-dock" ref={setSplitLineMiniHost} />
@@ -1447,13 +1758,14 @@ export function GameBoard() {
           // whenever that arsenal contains only face-down cards. Replays keep
           // their recorded player perspective while exposing replay data.
           mine={!spectating || replaying}
+          interactive={bottomInert ? false : undefined}
           mirrored={false}
           holdsPriority={priorityHolder === me.seat}
-          priorityPulse={hasOwnPriority}
+          priorityPulse={!bottomInert && hasOwnPriority}
           ongoing={view.ongoing.filter((effect) => effect.seat === me.seat)}
           gameOver={view.phase === "game-over"}
           replaying={replaying}
-          visibleDeckTop={myVisibleDeckTop}
+          visibleDeckTop={deckTopFor(me)}
           deckShuffling={deckCardFeedback.shuffledSeats.has(me.seat)}
           interaction={playerHalfInteraction}
           latestEmote={latestEmote}
@@ -1463,10 +1775,12 @@ export function GameBoard() {
           compactBoard={compactBoard}
           cardDisplayPreference={cardDisplayPreference}
           activeChainAttackerInstanceId={activeChainAttackerInstanceId}
+          activeChainTargetInstanceIds={activeChainTargetInstanceIds}
           onSendEmote={sendEmote}
           onOpenOverlay={setOverlay}
           onOpenEffects={openEffectLedger}
           standingOrders={standingOrders}
+          onEditDeck={deckEditOffered(me.seat) ? () => openDeckEditor(me.seat) : undefined}
         />
 
         <PlayerHand
@@ -1477,36 +1791,16 @@ export function GameBoard() {
           spectating={spectating}
           replaying={replaying}
           motionPreference={motionPreference}
+          inert={bottomInert}
           interaction={{
-            legalState: boardActionState,
-            legalIntents: legal,
-            selection: sel,
-            preStackSelectedInstanceId,
-            pitchSelection: pitchSel,
-            choosingPitch,
-            focusedSourceInstanceId: pitchSource?.fromHand ? pitchSource.card.instanceId : null,
-            selectedPaymentVariants:
-              stagedAdditionalCostDefinition && !additionalCostConfirmed
-                ? []
-                : selectedPaymentVariants,
-            resourcePayment,
-            stagedIds,
-            optimisticallyHiddenIds,
-            defending,
-            choosingArsenal,
-            handPick,
-            boundedHandPick,
-            selectedBoundedChoiceOptionIds,
-            onCardClick: onHandClick,
-            onActivate: (instanceId) => clickActivate(instanceId)(),
-            onSelect: setSel,
+            ...handInteraction,
             onHandDrop: (instanceId, action) => {
               if (action === "play") {
                 playHandFromDrop(instanceId);
                 return;
               }
               // Blocking and arsenal drops act exactly like clicking the card.
-              const card = me.hand.find((candidate) => candidate.instanceId === instanceId);
+              const card = actor.hand.find((candidate) => candidate.instanceId === instanceId);
               if (card) onHandClick(card);
             },
             onDragStart: (action) => {
@@ -1543,7 +1837,7 @@ export function GameBoard() {
       />
 
       {showEndTurnPassToast && mobileFloatViewport
-        ? <EndTurnPassToast placement="mobile-hand" />
+        ? <EndTurnPassToast placement="mobile-hand" passer={endTurnPasser} />
         : null}
 
       {/* ── floating status window: life + remaining AP + pass.
@@ -1566,13 +1860,15 @@ export function GameBoard() {
         logEntries={view.logEntries}
         activeHeroName={activeHeroName}
         actionPoints={view.players[view.activePlayer]!.actionPoints}
-        myResources={me.resources}
-        primaryAction={primaryAction}
-        passDisabled={primaryActionDisabled}
+        // Floating resources belong to whoever is paying: the acting seat in solo.
+        myResources={actor.resources + (actor.chi ?? 0)}
+        primaryAction={shownPrimaryAction}
+        passDisabled={primaryAction === null || primaryActionDisabled}
         onPass={triggerPrimaryAction}
         passUntil={passUntilControl("hud")}
         onUndo={mobileLandscapeViewport && canUndo ? () => undoAndDismissAnnouncement("last-action") : null}
         undoDisabled={roomCommandPending}
+        onOpenSandbox={canSandbox ? openSandbox : null}
         rail={mobileLandscapeViewport
           ? {
               oppIdentity: oppNameplate,
@@ -1630,9 +1926,24 @@ export function GameBoard() {
 
       {/* ── floating decision window: prompts, choices, pitch selection ── */}
       {gameMotion.turnStartUiReady ? <DecisionFloat
-        viewerSeat={seat}
+        viewerSeat={actingSeat}
         optionHotkeys={optionHotkeys}
-        endTurnConfirmation={(confirmEndTurn || confirmPassUntil !== null) && warnBeforeEndTurn
+        placement={sides?.top === "acting" && !phoneBoard ? "top" : "bottom"}
+        lethalConfirmation={confirmLethalPass && lethalRisk
+          ? {
+              risk: lethalRisk,
+              action: defending
+                ? stagedIds.size > 0 ? "confirm-blocks" : "confirm-no-blocks"
+                : "pass",
+              onConfirm: () => {
+                setConfirmLethalPass(false);
+                if (!defending) send({ kind: "pass" });
+                else if (defendIntent) send(defendIntent);
+              },
+              onCancel: () => setConfirmLethalPass(false),
+            }
+          : null}
+        endTurnConfirmation={(confirmEndTurn || confirmPassUntil !== null) && endTurnWarning
           ? {
               onConfirm: () => {
                 setConfirmEndTurn(false);
@@ -1656,7 +1967,7 @@ export function GameBoard() {
           optionCardLabels,
           canPass: derived.canPass,
           defendPitchIds,
-          hand: me.hand,
+          hand: actor.hand,
           defendSel: [...stagedIds],
           selectedPitchIds: pitchSel,
           onTogglePitch: togglePitch,
@@ -1665,6 +1976,10 @@ export function GameBoard() {
           confirmSkipArsenal,
           onRequestPass: requestPass,
           onDisableGuidance: () => updateLessGuidance(true),
+          rememberTarget: {
+            on: rememberingTarget,
+            onChange: (on: boolean) => setRememberTargetKey(on ? triggerTargetKey : null),
+          },
           onConfirmSkipArsenal: () => send({ kind: "pass" }),
           onCancelSkipArsenal: () => setConfirmSkipArsenal(false),
           ...(boundedCardChoice
@@ -1683,6 +1998,7 @@ export function GameBoard() {
           sel,
           selCardId,
           step: actionStep,
+          equipBlockedBy,
           autoCommitPending,
           abilityChoices: sel.kind === "activate"
             ? selectedAbilityIndexes.map((index) => ({
@@ -1745,7 +2061,7 @@ export function GameBoard() {
         onUndo={canUndo ? undoAndDismissAnnouncement : null}
         undoDisabled={roomCommandPending}
         onLeave={leave}
-        leaveAction={botGame && !spectating ? "end-game" : "leave"}
+        leaveAction={practiceGame && !spectating ? "end-game" : "leave"}
         onConcede={
           !spectating && !replaying && view.phase !== "game-over"
             ? () => send({ kind: "concede" })
@@ -1753,7 +2069,7 @@ export function GameBoard() {
         }
         drawOfferSeat={view.drawOfferSeat}
         drawSeat={seat}
-        onDrawIntent={!spectating && !replaying && !botGame && view.phase !== "game-over"
+        onDrawIntent={!spectating && !replaying && !practiceGame && view.phase !== "game-over"
           ? (kind) => send({ kind })
           : null}
         spectating={spectating}
@@ -1767,7 +2083,7 @@ export function GameBoard() {
           view.phase === "game-over"
             ? view.winner === null
               ? intl.formatMessage({ id: "game.result.draw" })
-              : spectating
+              : spectating || soloGame
               ? intl.formatMessage({ id: "game.result.namedWinner" }, { winner: winnerName })
               : view.winner === seat
                 ? intl.formatMessage({ id: "game.result.victory" })
@@ -1797,9 +2113,21 @@ export function GameBoard() {
         onLessGuidanceChange={updateLessGuidance}
         skipPlayConfirmation={skipPlayConfirmation}
         onSkipPlayConfirmationChange={updateSkipPlayConfirmation}
+        warnLethalPass={warnLethalPass}
+        onWarnLethalPassChange={updateWarnLethalPass}
         optionHotkeys={optionHotkeys}
         onOptionHotkeysChange={updateOptionHotkeys}
         skipBotDelay={skipBotDelay}
+        showGameClock={showGameClock}
+        onShowGameClockChange={updateShowGameClock}
+        gameClock={clock && clockReceivedAt !== null && !replaying ? (
+          <GameClockPanel
+            clock={clock}
+            receivedAt={clockReceivedAt}
+            seats={seat === 0 ? [me, opp] : [opp, me]}
+            viewerSeat={seat}
+          />
+        ) : null}
         onSkipBotDelayChange={betaTester && botGame && !spectating ? updateSkipBotDelay : null}
         motionPreference={motionPreference}
         onMotionPreferenceChange={updateMotionPreference}
@@ -1810,12 +2138,17 @@ export function GameBoard() {
         botPlaymat={botPlaymat}
         onBotPlaymatChange={updateBotPlaymat}
         openSettingsSignal={openSettingsSignal}
+        openSettingsTab="playmat"
         playabilityCuePreference={playabilityCuePreference}
         onPlayabilityCuePreferenceChange={updatePlayabilityCuePreference}
+        hoverPreviewMode={hoverPreviewMode}
+        onHoverPreviewModeChange={updateHoverPreviewMode}
         soundEffectsEnabled={soundEffectsEnabled}
         onSoundEffectsEnabledChange={updateSoundEffectsEnabled}
         soundEffectsVolume={soundEffectsVolume}
         onSoundEffectsVolumeChange={updateSoundEffectsVolume}
+        priorityAlertMode={priorityAlertMode}
+        onPriorityAlertModeChange={updatePriorityAlertMode}
         log={view.log}
         logEntries={view.logEntries}
         friendlyHeroName={me.heroName}
@@ -1823,13 +2156,61 @@ export function GameBoard() {
         viewerSeat={seat}
         roomCode={roomCode}
         onInspectCard={setInspectedCardId}
-        mobilePrimaryAction={primaryAction}
-        mobilePrimaryActionDisabled={primaryActionDisabled}
+        mobilePrimaryAction={shownPrimaryAction}
+        mobilePrimaryActionDisabled={primaryAction === null || primaryActionDisabled}
         onMobilePrimaryAction={triggerPrimaryAction}
         mobilePassUntil={passUntilControl("toolbar")}
         backgroundSearching={backgroundSearching}
         onStopBackgroundSearch={stopBackgroundMatchmaking}
       />
+      {sandboxOpen && canSandbox ? (
+        <SandboxPanel
+          seats={sandboxSeats}
+          initialSeat={yourSeat as 0 | 1}
+          pending={roomCommandPending}
+          refusal={sandboxEditRefusal}
+          onEdit={sendSandboxEdit}
+          onClearRefusal={clearSandboxEditRefusal}
+          onOpenZone={openSandboxZone}
+          confirmFirst={confirmSandbox}
+          onClose={() => setSandboxOpen(false)}
+        />
+      ) : null}
+      {sandboxConvert && canSandbox ? (
+        <SandboxConvertConfirm
+          sending={sandboxConvert.sending}
+          refusal={sandboxConvert.sending ? sandboxEditRefusal : null}
+          onCancel={() => setSandboxConvert(null)}
+          onConfirm={() => {
+            clearSandboxEditRefusal();
+            // False means another room command is in flight; the viewer may confirm again.
+            if (sandboxConvert.send() !== false) setSandboxConvert({ ...sandboxConvert, sending: true });
+          }}
+        />
+      ) : null}
+      {deckRevealSeat !== null && deckEditable(deckRevealSeat) ? (
+        <DeckRevealConfirm
+          mine={deckRevealSeat === seat}
+          onCancel={() => setDeckRevealSeat(null)}
+          onConfirm={() => {
+            if (typeof localStorage !== "undefined") saveDeckOrderRevealAccepted(localStorage, view.gameId);
+            setDeckEditorSeat(deckRevealSeat);
+            setDeckRevealSeat(null);
+          }}
+        />
+      ) : null}
+      {deckEditorPlayer ? (
+        <DeckOrderEditor
+          key={deckEditorPlayer.seat}
+          heroName={deckEditorPlayer.heroName}
+          deck={deckEditorPlayer.deck!}
+          pending={roomCommandPending}
+          refusal={sandboxEditRefusal}
+          onEdit={(edit) => sendSandboxEdit(deckEditorPlayer.seat as 0 | 1, edit)}
+          onClearRefusal={clearSandboxEditRefusal}
+          onClose={() => setDeckEditorSeat(null)}
+        />
+      ) : null}
       {replayShareOpen && savedReplayShare.replayId ? (
         <ShareReplayDialog
           replayId={savedReplayShare.replayId}
@@ -1843,9 +2224,9 @@ export function GameBoard() {
           key={`${pd?.prompt ?? "search"}:${pd?.options?.join(":") ?? "choice"}`}
           decision={pd}
           zoneCounts={{
-            hand: opp.handCount,
-            deck: opp.deckCount,
-            arsenal: opp.arsenalCount,
+            hand: actorOpp.handCount,
+            deck: actorOpp.deckCount,
+            arsenal: actorOpp.arsenalCount,
           }}
           {...(boundedCardChoice
             ? {
@@ -1872,8 +2253,9 @@ export function GameBoard() {
       ) : null}
 
       <BoardOverlays
-        preview={pitchSource && preview?.id === pitchSource.card.cardId ? null : preview}
-        overlay={showCardSearchOverlay ? null : overlay}
+        preview={pitchSource && preview?.id === pitchSource.card.cardId ? null : shownPreview}
+        overlay={showCardSearchOverlay ? null : shownOverlay}
+        overlayMoves={showCardSearchOverlay ? undefined : overlayMoves}
         inspectedCardId={inspectedCardId}
         seat={seat}
         yourSeat={yourSeat}
@@ -1881,11 +2263,9 @@ export function GameBoard() {
         showIdleVictory={showIdleToast}
         opponentHeroName={opp.heroName}
         opponentIdleMs={oppIdleMs}
-        onClaimVictory={() => {
-          claimVictory();
-          dismissIdleVictory(oppLastAction);
-        }}
-        onDismissIdleVictory={() => dismissIdleVictory(oppLastAction)}
+        idleVictoryClaimPending={roomCommandPending}
+        onClaimVictory={claimVictory}
+        onDismissIdleVictory={snoozeIdleVictory}
         gameView={view}
         spectating={spectating}
         replaying={replaying}
@@ -1897,17 +2277,22 @@ export function GameBoard() {
         onWatchReplay={watchReplay}
         onDownloadReplay={downloadReplay}
         onLeave={leave}
-        onPlayAgain={botGame && !spectating && connected ? playBotAgain : null}
+        onPlayAgain={!spectating && connected
+          ? botGame ? playBotAgain : soloGame ? playSoloAgain : null
+          : null}
+        soloGame={soloGame && !spectating}
         onCloseReplay={closeReplay}
         onDismissGameOver={() => setGameOverDismissed(true)}
         onCloseOverlay={() => setOverlay(null)}
         onInspectCard={setInspectedCardId}
         opponentUsername={playerProfiles?.[1 - seat]?.username ?? null}
-        botGame={botGame}
+        practiceGame={practiceGame}
+        gameOverClock={replaying ? replayClock : clock}
+        botSeat={botGame && !replaying && yourSeat !== null ? (yourSeat === 0 ? 1 : 0) : null}
         drawOfferSeat={view.drawOfferSeat}
-        onAcceptDraw={!spectating && !replaying && !botGame && view.phase !== "game-over"
+        onAcceptDraw={!spectating && !replaying && !practiceGame && view.phase !== "game-over"
           ? () => send({ kind: "accept-draw" }) : null}
-        onDeclineDraw={!spectating && !replaying && !botGame && view.phase !== "game-over"
+        onDeclineDraw={!spectating && !replaying && !practiceGame && view.phase !== "game-over"
           ? () => send({ kind: "decline-draw" }) : null}
         standingOrders={inspectedStandingOrders
           ? { model: inspectedStandingOrders, onSetOrder: standingOrders.onSetOrder }

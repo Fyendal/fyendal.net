@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { legalIntents, projectStateFor } from "@fyendal/engine";
+import { cardData } from "../../index.js";
 import { printingId, scenario } from "../harness.js";
 
 const BLUE = "raging onslaught|3";
@@ -245,7 +246,7 @@ describe("ELE — Fusion and Elemental heroes", () => {
     g.play("oaken old|1");
 
     expect(g.state.pendingDecision).toMatchObject({
-      prompt: "Reveal an Ice card to fuse Oaken Old?",
+      prompt: "Oaken Old: reveal an Ice card to fuse?",
       options: ["no", String(iceId)],
       cardOptions: [null, iceId],
     });
@@ -256,7 +257,7 @@ describe("ELE — Fusion and Elemental heroes", () => {
     g.chooseCard(ICE);
 
     expect(g.state.pendingDecision).toMatchObject({
-      prompt: "Reveal an Earth card to fuse Oaken Old?",
+      prompt: "Oaken Old: reveal an Earth card to fuse?",
       options: ["no", String(earthId)],
       cardOptions: [null, earthId],
     });
@@ -939,5 +940,23 @@ describe("ELE — Thump", () => {
     g.play("flicker wisp|2").chooseCard(LIGHTNING).settle().expectLife(1, 18);
     g.play("sting of sorcery|3").play("ball lightning|1").declareTarget(1).settle().expectLife(1, 15);
     g.blockWith().settle().expectLife(1, 11);
+  });
+
+  it("Coat of Frost creates Frostbite under the chosen hero's control", () => {
+    for (const [option, seat] of [["your hero", 0], ["opposing hero", 1]] as const) {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", equipment: { chest: "coat of frost|0" } },
+          { hero: "dorinthea" },
+        ],
+      });
+      g.activate("coat of frost|0");
+      expect(g.state.pendingDecision?.defaultOption).toBe("opposing hero");
+      g.chooseOption(option);
+      const frostbites = (s: number) =>
+        g.state.players[s]!.board.filter((card) => cardData[card.cardId]?.name === "Frostbite").length;
+      expect(frostbites(seat)).toBe(1);
+      expect(frostbites(1 - seat)).toBe(0);
+    }
   });
 });

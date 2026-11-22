@@ -14,7 +14,10 @@ const ZERO_TO_SIXTY = "zero to sixty|1";
 const ZIPPER_HIT = "zipper hit|1";
 const PROWL = "prowl|1";
 const KISS_OF_DEATH = "kiss of death|1";
+const KICKBACK = "kickback|1";
 const FILLER = "raging onslaught|1";
+const GYROSTRIDERS = "cogwerx gyrostriders|0";
+const HUXLEY_TRIGGER = "Tap this hero to play the banished card as though it were an instant this turn";
 const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 const BLOODROT_POX = "bloodrot pox|0";
 const FRAILTY = "frailty|0";
@@ -170,6 +173,61 @@ describe("Outbreak heroes", () => {
       expect(game.state.pendingDecision?.kind).not.toBe("optional-effect");
     });
 
+    it("triggers while tapped, so an instant untap lets Huxley tap as the layer resolves", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar", heroKey: HUXLEY, heroTapped: true, hand: [ZERO_TO_SIXTY], deck: [PROWL], weapons: [],
+          equipment: { ...NO_EQUIPMENT, legs: GYROSTRIDERS },
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(ZERO_TO_SIXTY, { boost: true, settle: false });
+      expect(game.stackLabels()).toContain(HUXLEY_TRIGGER);
+      game.activate(GYROSTRIDERS, { ability: 0 });
+      expect(game.state.pendingDecision?.kind).toBe("optional-effect");
+      game.chooseOption("yes").blockWith();
+
+      expect(game.state.players[0]!.hero.tapped).toBe(true);
+      expect(banishedPlayIntents(game, 0, PROWL)).toContainEqual(expect.objectContaining({ asInstant: true }));
+    });
+
+    it("offers nothing when its trigger resolves while Huxley is still tapped", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar", heroKey: HUXLEY, heroTapped: true, hand: [ZERO_TO_SIXTY], deck: [PROWL], weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(ZERO_TO_SIXTY, { boost: true });
+
+      expect(game.state.pendingDecision?.kind).not.toBe("optional-effect");
+      expect(banishedPlayIntents(game, 0, PROWL)).toEqual([]);
+    });
+
+    it("names the banished card in each prompt of a double boost", () => {
+      const game = scenario({ seats: [
+        {
+          hero: "rhinar", heroKey: HUXLEY, hand: ["twin drive|1"], deck: [PROWL, KICKBACK], resources: 2, weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+      const target = (key: string) => ({ kind: "card", cardId: printingId(key) });
+      const promptTarget = () => game.state.pendingDecision?.promptMessage?.values?.target;
+
+      game.play("twin drive|1", { boost: true, boostCount: 2, settle: false });
+      expect(projectStateFor(game.state, 1).stack.map((layer) => layer.labelMessage?.values?.target))
+        .toEqual([target(PROWL), target(KICKBACK)]);
+
+      game.settle();
+      expect(promptTarget()).toEqual(target(PROWL));
+      game.chooseOption("no");
+      expect(promptTarget()).toEqual(target(KICKBACK));
+    });
+
     it("queues a stealth attack played during the boosted attack's reaction step behind that attack", () => {
       const game = huxleyGame(PROWL);
 
@@ -293,6 +351,54 @@ describe("Outbreak heroes", () => {
       expect(game.state.chain[1]?.flags.boosted).toBe(true);
       game.blockWith().settle();
       game.expectLife(1, 13).expectAP(0, 0);
+    });
+
+    // Zero to Sixty boosts Kickback; a second Zero to Sixty under it is the Mechanologist card Kickback boosts.
+    const huxleyKickbackGame = () => scenario({ seats: [
+      { hero: "rhinar", heroKey: HUXLEY, hand: [ZERO_TO_SIXTY], deck: [KICKBACK, ZERO_TO_SIXTY], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    const expectBoostedKickbackLink = (game: ReturnType<typeof scenario>) => {
+      const link = game.state.chain.find((candidate) => candidate.attackingCard.cardId === printingId(KICKBACK));
+      expect(link?.flags.boosted).toBe(true);
+      expect(link?.goAgain).toBe(true);
+      game.expectLog("Kickback boosts");
+    };
+
+    it("lets a banished stealth attack boost when played above the boosted attack-layer", () => {
+      const game = huxleyKickbackGame();
+
+      game.play(ZERO_TO_SIXTY, { boost: true }).doRaw({ kind: "choose", optionId: "yes" });
+      for (let guard = 0; guard < 6 && banishedPlayIntents(game, 0, KICKBACK).length === 0; guard++) {
+        game.passPriority();
+      }
+      expect(game.state.pendingDecision?.kind).toBe("priority-window");
+      expect(banishedPlayIntents(game, 0, KICKBACK)).toContainEqual(
+        expect.objectContaining({ asInstant: true, boost: true }),
+      );
+
+      game.play(KICKBACK, { fromZone: "banish", asInstant: true, boost: true, settle: false });
+      expect(game.state.players[0]!.deck).toHaveLength(0);
+      game.passPriority().passPriority().settle();
+
+      expectBoostedKickbackLink(game);
+    });
+
+    it("lets a banished stealth attack boost when played during the reaction step", () => {
+      const game = huxleyKickbackGame();
+
+      game.play(ZERO_TO_SIXTY, { boost: true }).chooseOption("yes").blockWith();
+      expect(game.state.phase).toBe("reaction");
+      expect(banishedPlayIntents(game, 0, KICKBACK)).toContainEqual(
+        expect.objectContaining({ asInstant: true, boost: true }),
+      );
+
+      game.play(KICKBACK, { fromZone: "banish", asInstant: true, boost: true, settle: false });
+      expect(game.state.players[0]!.deck).toHaveLength(0);
+      game.passPriority().passPriority().settle().blockWith().settle();
+
+      expectBoostedKickbackLink(game);
     });
 
     it("puts Kiss of Death played above a boosted Zero to Sixty on the combat chain first", () => {
@@ -602,6 +708,7 @@ describe("Outbreak cards", () => {
   const EXTINCTION = "extinction level event|1";
   const SWAP_SPIT = "swap spit|1";
   const BLUE = "raging onslaught|3";
+  const CHANGE_OF_MIND = "change of mind|3";
 
   describe("Bootlegger Bust-Up", () => {
     const boosted = (deckTop: string) => {
@@ -627,6 +734,33 @@ describe("Outbreak cards", () => {
       ] });
       game.play(BOOTLEGGER, { boostCount: 0 }).expectAttackValue(6);
       game.expectDeckTop(0, FILLER);
+    });
+
+    const minBoost = (deck: string[]) => scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: MIN,
+        hand: [BOOTLEGGER, CHANGE_OF_MIND],
+        deck,
+        resources: 3,
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    it("re-reads banished cards' classes when Min flips after boosting", () => {
+      const game = minBoost([FILLER]).play(BOOTLEGGER, { boost: true, settle: false }).react(CHANGE_OF_MIND);
+      expect(heroName(game, 0)).toBe("Min, Mad");
+      game.expectAttackValue(10).blockWith().settle().expectLife(1, 10).expectAP(0, 1);
+    });
+
+    it("loses the bonus when a flip makes the banished card Mechanologist", () => {
+      const game = minBoost(Array<string>(8).fill(BLUE)).endTurn().endTurn();
+      expect(heroName(game, 0)).toBe("Min, Mad");
+      game.play(BOOTLEGGER, { boost: true, settle: false, pitch: [BLUE] }).react(CHANGE_OF_MIND);
+      expect(heroName(game, 0)).toBe("Min, Genius");
+      game.expectAttackValue(6).blockWith().settle().expectLife(1, 14).expectAP(0, 0);
     });
 
     it.each([
@@ -693,6 +827,105 @@ describe("Outbreak cards", () => {
 
       expect(boardNames(game, 0)).toEqual(["Frailty"]);
       game.expectLife(0, 30);
+    });
+  });
+
+  describe("Codex of Exertion", () => {
+    const CODEX = "codex of exertion|2";
+
+    it("returns each hero's arsenal card to hand, draws for each, and creates the tokens", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [CODEX], arsenal: [FILLER], deck: [ZIPPER_HIT], weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: [], arsenalFaceDown: [PROWL], deck: [BLUE], weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(CODEX);
+
+      game.expectInZone(0, FILLER, "hand").expectInZone(0, ZIPPER_HIT, "hand").expectHandSize(0, 2);
+      game.expectInZone(1, PROWL, "hand").expectInZone(1, BLUE, "hand").expectHandSize(1, 2);
+      expect(boardNames(game, 0)).toEqual(["Ponder"]);
+      expect(boardNames(game, 1)).toEqual(["Exertion"]);
+      game.expectAP(0, 1).expectNoLog("Prowl");
+    });
+
+    it("does not draw for a hero with an empty arsenal", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [CODEX], deck: [ZIPPER_HIT], weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: [], arsenal: [PROWL], deck: [BLUE], weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(CODEX);
+
+      game.expectHandSize(0, 0).expectDeckTop(0, ZIPPER_HIT);
+      game.expectInZone(1, PROWL, "hand").expectInZone(1, BLUE, "hand");
+    });
+
+    it("lets a hero with several arsenal cards choose which to return", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [CODEX], deck: [ZIPPER_HIT], weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: [], arsenal: [PROWL, BLUE], deck: [FILLER], weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(CODEX);
+      expect(game.state.pendingDecision?.player).toBe(1);
+      game.chooseCard(BLUE);
+
+      game.expectInZone(1, BLUE, "hand").expectInZone(1, PROWL, "arsenal").expectInZone(1, FILLER, "hand");
+      expect(boardNames(game, 1)).toEqual(["Exertion"]);
+    });
+  });
+
+  describe("Cogwerx Gyrostriders", () => {
+    const GYROSTRIDERS = "cogwerx gyrostriders|0";
+    const legs = (game: ReturnType<typeof scenario>) => game.state.players[0]!.equipment.legs;
+    const gyroGame = (seat: Partial<SeatSpec> = {}) => scenario({ seats: [
+      { hero: "rhinar", weapons: [], equipment: { ...NO_EQUIPMENT, legs: GYROSTRIDERS }, ...seat },
+      { hero: "dorinthea", hand: [], weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+    const destroyIntents = (game: ReturnType<typeof scenario>) => legalIntents(game.state, 0).filter((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === legs(game)?.instanceId &&
+      intent.abilityIndex === 1
+    );
+
+    it("taps to untap your hero, then stays tapped through your end phase", () => {
+      const game = gyroGame({ heroTapped: true });
+
+      game.activate(GYROSTRIDERS, { ability: 0 });
+      expect(game.state.players[0]!.hero.tapped ?? false).toBe(false);
+      expect(legs(game)?.tapped).toBe(true);
+
+      game.endTurn();
+      expect(legs(game)?.tapped).toBe(true);
+      game.endTurn().endTurn();
+      expect(legs(game)?.tapped).toBe(true);
+    });
+
+    it("can't use the destroy ability after untapping the hero this turn", () => {
+      const game = gyroGame({ heroTapped: true });
+      expect(destroyIntents(game)).not.toEqual([]);
+
+      game.activate(GYROSTRIDERS, { ability: 0 });
+
+      expect(destroyIntents(game)).toEqual([]);
+    });
+
+    it("gives the next attack action played from arsenal go again", () => {
+      const game = gyroGame({ arsenal: [FILLER], resources: 3 });
+
+      game.activate(GYROSTRIDERS, { ability: 1 });
+      game.expectNoEquipment(0, "legs");
+      game.play(FILLER, { fromArsenal: true }).blockWith().settle();
+
+      game.expectLife(1, 13).expectAP(0, 1);
+    });
+
+    it("does not give go again to an attack action played from hand", () => {
+      const game = gyroGame({ hand: [FILLER], resources: 3 });
+
+      game.activate(GYROSTRIDERS, { ability: 1 });
+      game.play(FILLER).blockWith().settle();
+
+      game.expectLife(1, 13).expectAP(0, 0);
     });
   });
 
@@ -1026,6 +1259,32 @@ describe("Outbreak cards", () => {
     it("does nothing on hit without a disease token", () => {
       hitWith([]).expectLife(1, 17);
     });
+
+    it("gives the hit hero a disease token from the yellow printing", () => {
+      const yellow = "patient zero|2";
+      const game = scenario({ seats: [
+        { hero: "rhinar", hand: [yellow], board: [FRAILTY], weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] }).play(yellow).blockWith().settle();
+
+      game.expectLife(1, 18);
+      expect(boardNames(game, 0)).toEqual([]);
+      expect(boardNames(game, 1)).toEqual(["Frailty"]);
+    });
+  });
+
+  describe("Rocket-Powered Arrow", () => {
+    const ROCKET = "rocket-powered arrow|1";
+
+    it("boosts from arsenal with a bow and gets go again from a Mechanologist banish", () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", arsenal: [ROCKET], deck: [ZIPPER_HIT], resources: 1, weapons: [DEATH_DEALER], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+      ] });
+
+      game.play(ROCKET, { fromArsenal: true, boost: true }).expectAttackValue(5).blockWith().settle();
+      game.expectLife(1, 15).expectAP(0, 1);
+    });
   });
 
   describe("Curative Ceremony", () => {
@@ -1227,7 +1486,8 @@ describe("Outbreak cards", () => {
 
     // Dawnblade attack defended by a card and equipment; Rhinar holds `streets`
     // and gets priority after Dorinthea passes.
-    const weaponAttack = (streets: string) => scenario({
+    const weaponAttack = (streets: string, seed = 1) => scenario({
+      seed,
       active: 1,
       seats: [
         { hero: "rhinar", hand: [FILLER, streets], weapons: [], equipment: { ...NO_EQUIPMENT, chest: TUNIC } },
@@ -1242,11 +1502,19 @@ describe("Outbreak cards", () => {
         .expectFinalAttack(10).expectLog("Raging Streets").expectLife(1, 10);
     });
 
-    it("never chooses a weapon attack's proxy or defending equipment", () => {
-      weaponAttack(QUIET_STREETS).react(QUIET_STREETS)
-        .expectFinalAttack(3).expectFinalDefense(1).expectLife(0, 18);
-      weaponAttack(RAGING_STREETS).react(RAGING_STREETS)
-        .expectFinalAttack(3).expectFinalDefense(7).expectLife(0, 20);
+    it("can choose a weapon attack's source but never defending equipment", () => {
+      const equipmentOnly = (streets: string) => scenario({
+        active: 1,
+        seats: [
+          { hero: "rhinar", hand: [streets], weapons: [], equipment: { ...NO_EQUIPMENT, chest: TUNIC } },
+          { hero: "dorinthea", resources: 1, weapons: ["dawnblade|0"], equipment: NO_EQUIPMENT },
+        ],
+      }).attackWithWeapon("dawnblade|0").blockWith(TUNIC).passPriority();
+
+      equipmentOnly(QUIET_STREETS).react(QUIET_STREETS)
+        .expectFinalAttack(0).expectFinalDefense(1).expectLife(0, 20);
+      equipmentOnly(RAGING_STREETS).react(RAGING_STREETS)
+        .expectFinalAttack(6).expectFinalDefense(1).expectLife(0, 15);
     });
 
     it("attributes the change to itself in the attack and defense breakdowns", () => {
@@ -1257,7 +1525,11 @@ describe("Outbreak cards", () => {
           .chain.at(-1);
 
       expect(resolveStreets(actionAttack(RAGING_STREETS))?.attackModifiers).toEqual([raging]);
-      expect(resolveStreets(weaponAttack(RAGING_STREETS))?.defenseModifiers).toEqual([raging]);
+      // The weapon and the defending card are both eligible, so sweep seeds.
+      const links = Array.from({ length: 12 }, (_, seed) => resolveStreets(weaponAttack(RAGING_STREETS, seed)));
+      expect(links.some((link) => link?.defenseModifiers?.length === 1 &&
+        link.defenseModifiers?.[0]?.sourceCardId === raging.sourceCardId)).toBe(true);
+      expect(links.some((link) => link?.attackModifiers?.length === 1)).toBe(true);
     });
 
     it("does nothing without an active chain link", () => {
@@ -1265,6 +1537,73 @@ describe("Outbreak cards", () => {
         { hero: "rhinar", hand: [QUIET_STREETS], weapons: [], equipment: NO_EQUIPMENT },
         { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
       ] }).play(QUIET_STREETS).expectNoLog("gets -3 power");
+    });
+  });
+
+  describe("Virulent Cascade", () => {
+    const CASCADE = "virulent cascade|1";
+    const DISEASES = ["Exertion", "Inertia", "Bloodrot Pox"];
+    const cascade = (defenderBoard: string[]) => scenario({ seats: [
+      { hero: "rhinar", hand: [CASCADE], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", board: defenderBoard, weapons: [], equipment: NO_EQUIPMENT },
+    ] }).play(CASCADE);
+
+    it("creates a random disease token that infects you in time for +1 power and go again", () => {
+      const game = cascade([FRAILTY]).expectLog("at random").expectAttackValue(4);
+      expect(boardNames(game, 0)).toHaveLength(1);
+      expect(DISEASES).toContain(boardNames(game, 0)[0]);
+      game.blockWith().settle().expectLife(1, 16).expectAP(0, 1);
+    });
+
+    it("gets nothing when the defending hero is not infected", () => {
+      const game = cascade([]).expectAttackValue(3);
+      expect(DISEASES).toContain(boardNames(game, 0)[0]);
+      game.blockWith().settle().expectLife(1, 17).expectAP(0, 0);
+    });
+  });
+
+  describe("Eidetic Endpoint", () => {
+    const ENDPOINT = "eidetic endpoint|1";
+    const azaleaArsenals = (deckTop: string) => scenario({ seats: [
+      { hero: "rhinar", heroKey: AZALEA, arsenal: [FILLER], deck: [deckTop], weapons: [], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", arsenalFaceDown: [PROWL], weapons: [], equipment: NO_EQUIPMENT },
+    ] }).activate(AZALEA).chooseCard(FILLER);
+
+    it("turns every face-down arsenal card face up when put face up into your arsenal", () => {
+      azaleaArsenals(ENDPOINT).expectInZone(0, ENDPOINT, "arsenal").expectFaceDown(1, PROWL, false);
+    });
+
+    it("does not trigger when another card enters the arsenal", () => {
+      azaleaArsenals(PROWL).expectInZone(0, PROWL, "arsenal").expectFaceDown(1, PROWL, true);
+    });
+  });
+
+  describe("Change of Mind", () => {
+    const CHANGE = "change of mind|3";
+    const minGame = () => scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: MIN,
+        hand: [CHANGE, ZERO_TO_SIXTY],
+        deck: Array<string>(8).fill(FILLER),
+        weapons: [],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", weapons: [], equipment: NO_EQUIPMENT },
+    ] });
+
+    it("flips into the ▽ face and gives your next attack +2 power", () => {
+      const game = minGame().play(CHANGE);
+      expect(heroName(game, 0)).toBe("Min, Mad");
+      game.expectResources(0, 0).play(ZERO_TO_SIXTY, { boostCount: 0 }).expectAttackValue(6);
+    });
+
+    it("flips into the △ face and gains {r}{r}", () => {
+      const game = minGame().endTurn().endTurn();
+      expect(heroName(game, 0)).toBe("Min, Mad");
+      game.play(CHANGE);
+      expect(heroName(game, 0)).toBe("Min, Genius");
+      game.expectResources(0, 2).play(ZERO_TO_SIXTY, { boostCount: 0 }).expectAttackValue(4);
     });
   });
 });

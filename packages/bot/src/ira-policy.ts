@@ -1,8 +1,8 @@
 import type { GameState } from "@fyendal/engine";
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
 import {
-  allyLethalThreshold,
   chooseScoredIntent,
+  currentAllyAttackIsAlreadyLethal,
   currentAttackIsOurs,
   currentLink,
   enforceAllyTargetPolicy,
@@ -35,11 +35,19 @@ import {
   type TurnPlan,
   type TurnPlannerRoot,
 } from "./turn-planner.js";
-import { BLOCK_USE_RATE } from "./card-ev.js";
+import { BLOCK_USE_RATE, PITCH_FUNDING_RATE } from "./card-ev.js";
 import { abilitySource, weaponCost, type HeroSolverRules, type SolverCardPatch } from "./card-model.js";
 import type { PendingEffect, SolverCard, SolverFlags, SolverStep, SolverView } from "./hand-solver.js";
-import { arsenalValuer, handDamage, handResponse, opportunityValuer, solveHand } from "./hand-value.js";
+import {
+  arsenalValuer,
+  defenseReactionWorthSpending,
+  handDamage,
+  handResponse,
+  opportunityValuer,
+  solveHand,
+} from "./hand-value.js";
 import { iraPresentation } from "./sideboard.js";
+import { hasType } from "@fyendal/shared";
 
 const BLOSSOM_KEY = "whirling mist blossom|2";
 const EDGE_KEY = "edge of autumn|0";
@@ -108,7 +116,7 @@ function previousAttackKey(input: BotPolicyInput): string {
 
 /** Aspect of Tiger's Combo: a red attack action card was the last attack. */
 function isRedAttackAction(data: CardData | undefined): boolean {
-  return data?.cardType === "action" && isAttack(data) && data.pitch === 1;
+  return data !== undefined && hasType(data, "action") && isAttack(data) && data.pitch === 1;
 }
 
 function isTigerCombo(functional: string): boolean {
@@ -130,13 +138,8 @@ function currentAttackHasOrWillGetGoAgain(input: BotPolicyInput): boolean {
   return link.onHitEffects?.some((effect) => /\bgo again\b/i.test(effect.text)) === true;
 }
 
-function currentAllyAttackIsAlreadyLethal(input: BotPolicyInput): boolean {
-  const link = currentLink(input);
-  return !!link?.targetAlly && link.attackValue >= allyLethalThreshold(link.targetAlly, input);
-}
-
 function likelyGoAgain(functional: string, data: CardData, previous: string, input: BotPolicyInput): boolean {
-  if (data.cardType === "weapon") return functional === "edge of autumn|0";
+  if (hasType(data, "weapon")) return functional === "edge of autumn|0";
   if (data.keywords?.includes("Go again")) return true;
   if (functional.startsWith("scar for a scar|")) {
     return input.view.players[input.seat].life < input.view.players[1 - input.seat]!.life;
@@ -154,7 +157,7 @@ function likelyGoAgain(functional: string, data: CardData, previous: string, inp
 
 function resourceCost(data: CardData | undefined): number {
   if (!data) return 0;
-  return data.cardType === "weapon" ? weaponCost(data) : Math.max(0, data.cost ?? 0);
+  return hasType(data, "weapon") ? weaponCost(data) : Math.max(0, data.cost ?? 0);
 }
 
 function isAttackSource(candidate: GameIntent, own: ReadonlyMap<number, CardView>, input: BotPolicyInput): boolean {
@@ -163,7 +166,7 @@ function isAttackSource(candidate: GameIntent, own: ReadonlyMap<number, CardView
     candidate.kind !== "play-from-zone" && candidate.kind !== "activate-ability"
   ) return false;
   const data = input.cards[intentCard(candidate, own)?.cardId ?? ""];
-  return isAttack(data) || data?.cardType === "weapon";
+  return isAttack(data) || hasType(data, "weapon");
 }
 
 /** Whether another attack stays legal and affordable once this intent spends
@@ -236,6 +239,31 @@ function attackInReserve(
   );
 }
 
+/** Resources each reserved attack still lacks after floating resources and
+ * pitching the rest of the hand; zero or less means it is affordable. */
+function reservedAttackShortfalls(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView>,
+  accepts: (data: CardData | undefined) => boolean = () => true,
+): number[] {
+  const used = intentCard(intent, own);
+  const consumed = new Set([used?.instanceId, ...pitchIds(intent)]);
+  const me = input.view.players[input.seat];
+  const pitchable = me.hand.filter((card) => !consumed.has(card.instanceId));
+  const floating = me.resources + (me.chi ?? 0);
+  return reserveCards(input).flatMap((card) => {
+    const data = input.cards[card.cardId];
+    if (consumed.has(card.instanceId) || !isAttack(data) || !accepts(data)) return [];
+    const pitch = pitchable.reduce((total, candidate) =>
+      candidate.instanceId === card.instanceId
+        ? total
+        : total + Number(input.cards[candidate.cardId]?.pitch ?? 0),
+    0);
+    return [Number(data?.cost ?? 0) - floating - pitch];
+  });
+}
+
 /** Whether a reserved attack can still be paid for from floating resources
  * and the rest of the hand, so a granted action point would be used. */
 function affordableAttackInReserve(
@@ -245,21 +273,17 @@ function affordableAttackInReserve(
   extraResources = 0,
   accepts: (data: CardData | undefined) => boolean = () => true,
 ): boolean {
-  const used = intentCard(intent, own);
-  const consumed = new Set([used?.instanceId, ...pitchIds(intent)]);
-  const me = input.view.players[input.seat];
-  const pitchable = me.hand.filter((card) => !consumed.has(card.instanceId));
-  const floating = me.resources + (me.chi ?? 0) + extraResources;
-  return reserveCards(input).some((card) => {
-    const data = input.cards[card.cardId];
-    if (consumed.has(card.instanceId) || !isAttack(data) || !accepts(data)) return false;
-    const pitch = pitchable.reduce((total, candidate) =>
-      candidate.instanceId === card.instanceId
-        ? total
-        : total + Number(input.cards[candidate.cardId]?.pitch ?? 0),
-    0);
-    return floating + pitch >= Number(data?.cost ?? 0);
-  });
+  return reservedAttackShortfalls(intent, input, own, accepts).some((shortfall) => shortfall <= extraResources);
+}
+
+/** Whether playing this card would cost the pitch a reserved attack needs. */
+function reservedAttackNeedsPitch(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  own: ReadonlyMap<number, CardView>,
+  pitch: number,
+): boolean {
+  return reservedAttackShortfalls(intent, input, own).some((shortfall) => shortfall > 0 && shortfall <= pitch);
 }
 
 const cardOpportunity = opportunityValuer(iraSolverRules);
@@ -281,6 +305,20 @@ const IRA_SECOND_ATTACK: PendingEffect = {
 
 function nextTigerPump(source: string, power: number, uses = 1): PendingEffect {
   return { key: source, uses, power, appliesTo: (card) => card.name === "Crouching Tiger" };
+}
+
+const TIGER_PUMP_POWER: Readonly<Record<string, number>> = {
+  "tearing shuko|0": 2,
+  "growl|1": 1,
+  "untamed|1": 1,
+};
+
+/** Next-Crouching-Tiger pumps already active this turn. */
+function activeTigerPumps(input: BotPolicyInput): PendingEffect[] {
+  return input.view.ongoing.flatMap((effect, index) => {
+    const power = effect.seat === input.seat ? TIGER_PUMP_POWER[key(input.cards[effect.cardId])] : undefined;
+    return power ? [nextTigerPump(`active-pump#${index}`, power)] : [];
+  });
 }
 
 /** Hand-value rules: the second-attack bonus, on-hit go again (assumed to
@@ -310,6 +348,10 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
     };
   };
   const blessings = me.board.filter((card) => key(input.cards[card.cardId]) === "blessing of qi|1").length;
+  // The solver's held cards exclude the banished zone.
+  const banishedTiger = me.banish.some((card) =>
+    card.playableFromSourceCardId !== undefined && key(input.cards[card.cardId]) === TIGER_KEY
+  );
   return {
     name: "ira",
     trackedTraits: [],
@@ -320,7 +362,8 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
     },
     startPending(observed, nextTurn) {
       const pending = nextTurn || attacksThisTurn(observed) < 2 ? [IRA_SECOND_ATTACK] : [];
-      return nextTurn && blessings > 0 ? [...pending, nextTigerPump("blessing-of-qi", 3, blessings)] : pending;
+      if (!nextTurn) return [...pending, ...activeTigerPumps(observed)];
+      return blessings > 0 ? [...pending, nextTigerPump("blessing-of-qi", 3, blessings)] : pending;
     },
     abilities() {
       const tiger = input.cards[CROUCHING_TIGER_ID];
@@ -352,7 +395,13 @@ function iraSolverRules(input: BotPolicyInput): HeroSolverRules {
         return { ...destroy, after: (view) => ({ flags: makeTigers(view, 1) }) };
       }
       if (functional === "tearing shuko|0") {
-        return { ...destroy, after: () => ({ pending: [nextTigerPump(`shuko#${card.instanceId}`, 2)] }) };
+        return {
+          ...destroy,
+          // Only with a tiger to pump; a worn-out Shuko is otherwise a free, pointless step.
+          canPlay: (view) =>
+            banishedTiger || view.flag("tigers") > 0 || view.held.some((held) => held.name === "Crouching Tiger"),
+          after: () => ({ pending: [nextTigerPump(`shuko#${card.instanceId}`, 2)] }),
+        };
       }
       if (functional === "blood scent|0") {
         return {
@@ -496,6 +545,21 @@ function atActionDecision(input: BotPolicyInput): boolean {
     input.view.players[input.seat].actionPoints > 0;
 }
 
+/** Hand value one more floating resource adds this turn; it is lost at end of
+ * turn. Solved as if the hitting link had resolved, for its go again and combos. */
+function extraResourceValue(input: BotPolicyInput): number {
+  const me = input.view.players[input.seat];
+  const actionPoints = me.actionPoints + (currentLink(input)?.goAgain ? 1 : 0);
+  const chain = input.view.chain.map((link) => ({ ...link, resolved: true }));
+  const valueWith = (resources: number) => {
+    const players: typeof input.view.players = [...input.view.players];
+    players[input.seat] = { ...me, resources, actionPoints };
+    const view = { ...input.view, chain, players };
+    return solveHand(reserveCards(input), { ...input, view }, iraSolverRules).value;
+  };
+  return valueWith(me.resources + 1) - valueWith(me.resources);
+}
+
 function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: BotPolicyInput): number {
   const decision = input.view.pendingDecision;
   if (!decision) return 0;
@@ -520,6 +584,11 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   }
   if (/equip an edge of autumn/i.test(decision.prompt)) {
     return intent.optionId === "pass" ? -20 : 100;
+  }
+  if (/destroy robe of autumn's fall/i.test(decision.prompt)) {
+    // A kept Robe funds a later Edge hit instead.
+    if (intent.optionId !== "yes") return 0;
+    return extraResourceValue(input) > PITCH_FUNDING_RATE ? 10 : -2;
   }
   if (/discard/i.test(decision.prompt)) {
     return scoreSpendCardChoice(intent, input, cardOpportunity, 20, -5);
@@ -548,7 +617,7 @@ function scorePlay(
   let score = 0;
 
   if (intent.kind === "activate-ability") {
-    if (data.cardType === "weapon") {
+    if (hasType(data, "weapon")) {
       // A weapon swing that cannot continue the chain is only a fallback;
       // a competing attack for the last action point is scored on power.
       score = furtherAttack ? 30 : alternativeAttackNow(intent, input, own) ? data.attack ?? 0 : 7;
@@ -585,8 +654,9 @@ function scorePlay(
     } else if (functional === "tearing shuko|0") {
       score = atActionDecision(input) && tigerInReserve(input) ? 6 : -100;
     } else if (functional === "blood scent|0" || functional === "double cross strap|0") {
-      // Only worth destroying when the resource pays for a reserved attack.
-      score = !affordableAttackInReserve(intent, input, own) && affordableAttackInReserve(intent, input, own, 1)
+      // Only worth destroying when the resource pays for a reserved attack Ira can still play.
+      score = canPlayActionNow(input) && !affordableAttackInReserve(intent, input, own) &&
+          affordableAttackInReserve(intent, input, own, 1)
         ? 16
         : -100;
     } else {
@@ -629,7 +699,7 @@ function scorePlay(
     }
     if (functional.startsWith("snatch|")) score += 4;
     if (intent.kind === "play-from-arsenal") score += 2;
-  } else if (data.cardType === "attack-reaction") {
+  } else if (hasType(data, "attack-reaction")) {
     if (!currentAttackIsOurs(input) || input.view.pendingDecision?.kind !== "attack-reaction") {
       score = -100;
     } else if (functional.startsWith("razor reflex|")) {
@@ -643,12 +713,17 @@ function scorePlay(
         ? 18
         : onEdge && affordableAttackInReserve(intent, input, own, 0, (data) => !!data?.classes?.includes("ninja"))
         ? -5
+        // Without the draw it is only +1{p}; pitching it to fund another attack deals more.
+        : reservedAttackNeedsPitch(intent, input, own, Number(data?.pitch ?? 0))
+        ? -5
         : 10;
     } else {
       score = 8;
     }
-  } else if (data.cardType === "defense-reaction") {
-    score = scoreDefenseReaction(data, input);
+  } else if (hasType(data, "defense-reaction")) {
+    score = defenseReactionWorthSpending(card, input, iraSolverRules, pitchIds(intent))
+      ? scoreDefenseReaction(data, input, card)
+      : -100;
   } else if (functional === "energy potion|3") {
     score = furtherAttack ? -15 : 3;
   } else if (functional === "blessing of qi|1") {
@@ -660,10 +735,12 @@ function scorePlay(
     const link = currentLink(input);
     const target = link?.defendingCards.some((defender) => {
       const defending = input.cards[defender.cardId];
-      return defender.owner === input.seat && defending?.cardType === "action" && isAttack(defending);
+      return defender.owner === input.seat && hasType(defending, "action") && isAttack(defending);
     }) === true;
     score = !currentAttackIsOurs(input) && target
-      ? scoreDefenseReaction({ ...data, defense: 4 }, input)
+      ? defenseReactionWorthSpending(card, input, iraSolverRules, pitchIds(intent), 4)
+        ? scoreDefenseReaction({ ...data, defense: 4 }, input)
+        : -100
       : -100;
   }
 

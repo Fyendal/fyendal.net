@@ -2,7 +2,7 @@
  {
   "id": "PSM001",
   "name": "Prism",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {r}{r}, banish a card from Prism's soul: Create a Spectral Shield token.",
   "classes": [
    "illusionist"
@@ -17,7 +17,7 @@
  {
   "id": "PSM002",
   "name": "The Librarian",
-  "cardType": "mentor",
+  "types": ["mentor"],
   "text": "While The Librarian is face down in arsenal, at the start of your turn, you may turn him face up.\nWhile The Librarian is face up in arsenal, once per turn when you create a Spectral Shield token, draw a card and put a lesson counter on The Librarian. Then if there are 3 or more lesson counters on him, banish him, search your deck for a specialization card, put it face up into arsenal, and shuffle.",
   "defense": 3,
   "classes": [
@@ -28,7 +28,7 @@
  {
   "id": "PSM003",
   "name": "Iris of Reality",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "During your action phase, Illusionist auras you control are weapons with 4{p} and Once per Turn Action - {r}{r}{r}: Attack. Go again",
   "classes": [
    "illusionist"
@@ -42,7 +42,7 @@
  {
   "id": "PSM004",
   "name": "Halo of Illumination",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - {r}, destroy Halo of Illumination: Put a card from your hand into your hero's soul. If it's a Light card, draw a card.\nSpellvoid 2",
   "defense": 0,
   "subtypes": [
@@ -57,7 +57,7 @@
  {
   "id": "PSM005",
   "name": "Heartened Cross Strap",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: The next attack action card you play this turn costs {r}{r} less to play. Go again",
   "defense": 0,
   "classes": [
@@ -71,7 +71,7 @@
  {
   "id": "PSM006",
   "name": "Dream Weavers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy Dream Weavers: The next Illusionist attack action card you play this turn loses and can't gain phantasm. Go again\nSpellvoid 1",
   "defense": 0,
   "classes": [
@@ -88,7 +88,7 @@
  {
   "id": "PSM007",
   "name": "Spell Fray Leggings",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Spellvoid 1",
   "defense": 0,
   "classes": [
@@ -105,7 +105,7 @@
  {
   "id": "PSM008",
   "name": "Herald of Judgment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Prism Specialization\nWhen this hits, put it into your hero's soul and the defending hero can't play cards from their banished zone during their next action phase.\nPhantasm",
   "pitch": 2,
   "cost": 2,
@@ -127,7 +127,7 @@
  {
   "id": "PSM009",
   "name": "Herald of Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
   "pitch": 1,
   "cost": 2,
@@ -148,7 +148,7 @@
  {
   "id": "PSM010",
   "name": "Herald of Ravages",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and deal 1 arcane damage to target hero.\nPhantasm",
   "pitch": 1,
   "cost": 2,
@@ -169,7 +169,7 @@
  {
   "id": "PSM011",
   "name": "Herald of Rebirth",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and put up to 1 card with phantasm from your graveyard on top of your deck.\nPhantasm",
   "pitch": 1,
   "cost": 2,
@@ -190,7 +190,7 @@
  {
   "id": "PSM012",
   "name": "Herald of Tenacity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate\nWhen this hits, put it into your hero's soul.\nPhantasm",
   "pitch": 1,
   "cost": 2,
@@ -212,7 +212,7 @@
  {
   "id": "PSM013",
   "name": "Wartune Herald",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul.\nPhantasm",
   "pitch": 1,
   "cost": 1,
@@ -233,7 +233,7 @@
  {
   "id": "PSM014",
   "name": "Merciful Retribution",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Whenever an aura or attack action card you control is destroyed, deal 1 arcane damage to target hero. If it's a non-token Light card, put it into your soul.\nSpectra",
   "pitch": 2,
   "cost": 4,
@@ -252,7 +252,7 @@
  {
   "id": "PSM015",
   "name": "Ode to Wrath",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Whenever a source you control deals damage to an opponent, they lose 1 {h}.\nIllusionist attack action cards you control get go again.\nSpectra",
   "pitch": 2,
   "cost": 4,
@@ -271,7 +271,7 @@
  {
   "id": "PSM016",
   "name": "Herald of Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
   "pitch": 3,
   "cost": 2,
@@ -292,7 +292,7 @@
  {
   "id": "PSM017",
   "name": "Herald of Ravages",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and deal 1 arcane damage to target hero.\nPhantasm",
   "pitch": 3,
   "cost": 2,
@@ -313,7 +313,7 @@
  {
   "id": "PSM018",
   "name": "Herald of Rebirth",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and put up to 1 card with phantasm from your graveyard on top of your deck.\nPhantasm",
   "pitch": 3,
   "cost": 2,
@@ -334,7 +334,7 @@
  {
   "id": "PSM019",
   "name": "Herald of Tenacity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate\nWhen this hits, put it into your hero's soul.\nPhantasm",
   "pitch": 3,
   "cost": 2,
@@ -356,7 +356,7 @@
  {
   "id": "PSM020",
   "name": "Wartune Herald",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul.\nPhantasm",
   "pitch": 3,
   "cost": 1,
@@ -377,7 +377,7 @@
  {
   "id": "PSM021",
   "name": "Illuminate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Illuminate hits, put it into your hero's soul.",
   "pitch": 1,
   "cost": 0,
@@ -392,7 +392,7 @@
  {
   "id": "PSM022",
   "name": "Seek Enlightenment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +3{p} and \"If this hits, put it into your hero's soul.\"\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -408,7 +408,7 @@
  {
   "id": "PSM023",
   "name": "Rising Solartide",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Rising Solartide hits, put it into your hero's soul.",
   "pitch": 2,
   "cost": 1,
@@ -423,7 +423,7 @@
  {
   "id": "PSM024",
   "name": "Illuminate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Illuminate hits, put it into your hero's soul.",
   "pitch": 3,
   "cost": 0,
@@ -438,7 +438,7 @@
  {
   "id": "PSM025",
   "name": "Phantasmify",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn is Illusionist in addition to its other class types, and gains +5{p} and phantasm.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -454,7 +454,7 @@
  {
   "id": "PSM026",
   "name": "Prismatic Shield",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Create 3 Spectral Shield tokens.",
   "pitch": 1,
   "cost": 3,
@@ -466,7 +466,7 @@
  {
   "id": "PSM027",
   "name": "Enigma Chimera",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm",
   "pitch": 2,
   "cost": 2,
@@ -486,7 +486,7 @@
  {
   "id": "PSM028",
   "name": "Enigma Chimera",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm",
   "pitch": 3,
   "cost": 2,
@@ -506,7 +506,7 @@
  {
   "id": "PSM029",
   "name": "Spears of Surreality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -527,7 +527,7 @@
  {
   "id": "PSM030",
   "name": "Spectral Shield",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Ward 1",
   "classes": [
    "illusionist"

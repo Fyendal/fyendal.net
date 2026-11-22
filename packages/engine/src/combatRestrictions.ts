@@ -4,7 +4,8 @@ import { basePowerOf, computeAttack, currentPowerOf, grantsAuraAttackMarker } fr
 import type { GameStateInternal } from "./runtimeState.js";
 import { activeModifiers } from "./combatModifiers.js";
 import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
-import { currentLink, opponent } from "./zoneQueries.js";
+import { opponent } from "./zoneQueries.js";
+import { hasType } from "@fyendal/shared";
 
 /** Whether a turn-scoped effect prohibits this player from attacking with
  * weapons. Callers still identify whether the proposed attack source is a
@@ -23,7 +24,7 @@ export function attackActionPlayRestricted(
   card: CardInstance,
 ): boolean {
   const data = instanceDataOf(state, card);
-  if (data.cardType !== "action" || !(data.subtypes ?? []).includes("attack")) return false;
+  if (!hasType(data, "action") || !(data.subtypes ?? []).includes("attack")) return false;
   if (attackBasePowerRestricted(state, runtime, player.seat, card)) return true;
   const until = Number(player.hero.scriptState?.attackActionBasePowerLimitUntilTurn ?? 0);
   if (until !== state.turn) return false;
@@ -60,17 +61,20 @@ export function defendingHeroCannotRespondBelowPower(
   runtime: EngineRuntime,
   seat: number,
 ): boolean {
-  const link = currentLink(state);
-  if (!link || seat !== opponent(link.attacker)) return false;
-  if (scriptOf(state, link.attackingCard.cardId, link.attackingCard)?.defendingHeroCannotRespondBelowPower !== true) {
-    return false;
-  }
-  const attackPower = computeAttack(state, runtime, link);
-  return !link.defendingCards.some((card) => currentPowerOf(state, runtime, card, link) >= attackPower);
+  // the lock covers every later link of the combat chain, not just the Exude link
+  return state.chain.some((link) => {
+    if (seat !== opponent(link.attacker)) return false;
+    if (scriptOf(state, link.attackingCard.cardId, link.attackingCard)?.defendingHeroCannotRespondBelowPower !== true) {
+      return false;
+    }
+    const attackPower = computeAttack(state, runtime, link);
+    return !link.defendingCards.some((card) => currentPowerOf(state, runtime, card, link) >= attackPower);
+  });
 }
 
 /** Defense-reaction restrictions on the link: "defense reactions can't be
- *  played to this chain link" (link flag noDefenseReactions) and "defense
+ *  played to this chain link" (the attacking card's script or link flag
+ *  noDefenseReactions) and "defense
  *  reactions can't be played from arsenal this chain link" (a modifier riding
  *  the link). Consulted in enumeration AND validation. */
 export function defenseReactionRestriction(
@@ -80,6 +84,7 @@ export function defenseReactionRestriction(
   return {
     all:
       link.flags.noDefenseReactions === true ||
+      scriptOf(state, link.attackingCard.cardId, link.attackingCard)?.defenseReactionsProhibited === true ||
       (state.players[link.attacker] as PlayerState).flags.noDefenseReactionsThisTurn === true,
     fromArsenal: activeModifiers(state, link, ["chain-link"]).some(
       (m) => m.noDefenseReactionsFromArsenal === true,

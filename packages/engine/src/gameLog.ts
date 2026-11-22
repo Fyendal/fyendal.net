@@ -124,6 +124,18 @@ export function logForSeats(state: GameStateInternal, entry: GameLogEntry): void
   });
 }
 
+/** Matches the persisted-state and wire decoders; a longer value corrupts the room. */
+export const MAX_LOG_MESSAGE_VALUE_TEXT = 256;
+
+function boundedMessageValues(values: NonNullable<GameMessage["values"]>): NonNullable<GameMessage["values"]> {
+  return Object.fromEntries(Object.entries(values).map(([key, value]) => [
+    key,
+    typeof value === "string" && value.length > MAX_LOG_MESSAGE_VALUE_TEXT
+      ? `${value.slice(0, MAX_LOG_MESSAGE_VALUE_TEXT - 1)}…`
+      : value,
+  ]));
+}
+
 /** Build the locale-independent payload shape used by engine log producers.
  * Call sites supply the English fallback so diagnostics, older clients, and
  * replay exports remain useful without a locale catalog. */
@@ -137,7 +149,7 @@ export function gameLogMessage(
     fallback,
     message: {
       id,
-      ...(values === undefined ? {} : { values }),
+      ...(values === undefined ? {} : { values: boundedMessageValues(values) }),
     },
     ...(event === undefined ? {} : { event }),
   };

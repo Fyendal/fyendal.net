@@ -1,55 +1,26 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
+  attackedWithWeapon,
+  buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  isAttackAction,
+  isSword,
+  isWeaponAttack,
   localizedCardLog,
   opponentSeat,
   previousAttackHasName,
 } from "../shared-helpers.js";
-
-const COPPER = "CRU197";
-type CardRef = DeepReadonly<CardInstance>;
-
-function comboWith(ctx: ScriptCtx, name: string): boolean {
-  return previousAttackHasName(ctx, name);
-}
-
-function isAttackAction(ctx: ScriptCtx, card: CardRef): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
-}
-
-function hasCombo(ctx: ScriptCtx, card: CardRef): boolean {
-  return (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "combo");
-}
-
-function isWeaponAttack(ctx: ScriptCtx): boolean {
-  return ctx.link?.attackCardType === "weapon";
-}
-
-function isSword(ctx: ScriptCtx, card: CardRef): boolean {
-  return ctx.cardTypes(card).includes("sword");
-}
-
-function attackedWithWeapon(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "attackedWithWeaponThisTurn") === true;
-}
+import { COPPER } from "../tokens.js";
 
 function weaponAttacks(ctx: ScriptCtx): number {
   return Number(ctx.getFlag("player", "weaponAttackCount")) || 0;
 }
 
-function nextAttack(ctx: ScriptCtx, attack = 0, appliesTo?: "any" | "weapon"): void {
-  ctx.addModifier({
-    scope: "next-attack",
-    ...(attack !== 0 ? { attack } : {}),
-    ...(appliesTo ? { appliesTo } : {}),
-  });
-}
-
 export function bitteringThorns(): CardScript {
   return {
     onHit(ctx) {
-      nextAttack(ctx, 1);
+      buffNextAttack(ctx, { attack: 1 });
     },
   };
 }
@@ -65,7 +36,7 @@ function hitGoAgain(): CardScript {
 function craneDance(): CardScript {
   return {
     onAttackDeclared(ctx) {
-      if (!comboWith(ctx, "soulbead strike")) return;
+      if (!previousAttackHasName(ctx, "soulbead strike")) return;
       ctx.setFlag("link", "craneCombo", true);
       ctx.grantGoAgain();
       ctx.logPublic(
@@ -100,7 +71,7 @@ function rushingRiver(): CardScript {
   };
   return {
     onAttackDeclared(ctx) {
-      if (!comboWith(ctx, "torrent of tempo")) return;
+      if (!previousAttackHasName(ctx, "torrent of tempo")) return;
       ctx.setFlag("link", "rushingCombo", true);
       ctx.grantGoAgain();
     },
@@ -138,7 +109,7 @@ function flyingKick(): CardScript {
 function dauntless(attack: number): CardScript {
   return {
     onPlay(ctx) {
-      nextAttack(ctx, attack, "weapon");
+      buffNextAttack(ctx, { attack, appliesTo: "weapon" });
       const defender = opponentSeat(ctx);
       const current = Number(ctx.getPlayerFlag(defender, "nextDefenseReactionExtraCost"));
       ctx.setPlayerFlag(defender, "nextDefenseReactionExtraCost", current + 1);
@@ -158,7 +129,7 @@ function hitAndRun(attack: number): CardScript {
   return {
     onPlay(ctx) {
       ctx.addModifier({ scope: "next-attack", appliesTo: "weapon", goAgain: true });
-      if (attackedWithWeapon(ctx)) nextAttack(ctx, attack, "any");
+      if (attackedWithWeapon(ctx)) buffNextAttack(ctx, { attack, appliesTo: "any" });
     },
   };
 }
@@ -166,7 +137,7 @@ function hitAndRun(attack: number): CardScript {
 function pushForward(attack: number): CardScript {
   return {
     onPlay(ctx) {
-      nextAttack(ctx, attack, "weapon");
+      buffNextAttack(ctx, { attack, appliesTo: "weapon" });
       if (attackedWithWeapon(ctx)) {
         ctx.addModifier({ scope: "next-attack", dominate: true });
       }
@@ -199,14 +170,14 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook === "katsu-discard") {
         if (option === "pass" || !ctx.discardCard(ctx.seat, Number(option))) return;
-        const combo = ctx.state.players[ctx.seat]!.deck.filter((card) => hasCombo(ctx, card));
+        const combo = ctx.state.players[ctx.seat]!.deck.filter((card) => ctx.hasKeyword(card, "combo"));
         if (combo.length === 0) {
           ctx.shuffleDeck(ctx.seat);
           return;
         }
         ctx.requestCardChoice(
           "katsu-search",
-          decisionPrompt("Katsu: choose a combo card to banish face up", "card.cru.katsu.combo.choose"),
+          decisionPrompt("Katsu: choose a combo card to banish face up", "card.common.katsu.combo.choose"),
           combo.map((card) => card.instanceId),
         );
         return;
@@ -246,7 +217,7 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
     },
     onHit(ctx) {
       ctx.setFlag("player", "benjiHitUsed", true);
-      nextAttack(ctx, 1);
+      buffNextAttack(ctx, { attack: 1 });
     },
     onSuppressedHit(ctx) {
       if (ctx.link?.attackCardType === "action") {
@@ -397,7 +368,7 @@ export const cruNinjaWarrior: Record<string, CardScript> = {
     canPlay: isWeaponAttack,
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
-      if (ctx.getFlag("link", "defendedFromHand") === true) nextAttack(ctx, 1);
+      if (ctx.getFlag("link", "defendedFromHand") === true) buffNextAttack(ctx, { attack: 1 });
     },
   },
   "hit and run|1": hitAndRun(3),

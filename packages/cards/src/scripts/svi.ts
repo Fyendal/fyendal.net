@@ -1,16 +1,25 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
+  createRunechants,
   dealArcane,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
-  isCard,
+  faceUpGraveyard,
+  hasCardSubtype,
+  isAura,
+  isNonAttackAction,
   leavesArenaTrigger,
   localizedCardLog,
+  maleficIncantation,
+  mauvrionSkies,
   opponentSeat,
+  playedOrCreatedAura,
+  runeCount,
+  spellbladeAssault,
 } from "./shared-helpers.js";
 
 // ── SVI (Silver Age Chapter 1: Viserai precon) ──────────────────────────────
@@ -19,69 +28,8 @@ import {
 // hooks, and granted on-hit riders for both hero and ally hits. Sigil of
 // Silphidae and Mauvrion Skies therefore use their printed timing directly.
 
-const RUNECHANT = "SVI034";
-
-function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("aura");
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
-}
-
-function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack");
-}
-
-function runeCount(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length;
-}
-
-function playedOrCreatedAura(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "playedSubtype:aura") === true || ctx.getFlag("player", "createdSubtype:aura") === true;
-}
-
-function createRunechants(ctx: ScriptCtx, count: number): void {
-  ctx.createTokens(RUNECHANT, count);
-}
-
 function auraActivityAttackBonus(amount: number): CardScript {
   return { modifyAttack: (ctx) => (playedOrCreatedAura(ctx) ? amount : 0) };
-}
-
-function spellbladeAssault(): CardScript {
-  return { onAttackDeclared: (ctx) => createRunechants(ctx, 2) };
-}
-
-function maleficIncantation(verses: number): CardScript {
-  return {
-    destroyAtZeroCounter: "verse",
-    onEnterArena(ctx) {
-      ctx.setCounter("verse", verses);
-    },
-    triggers: [
-      {
-        event: "card-played",
-        label: "Remove a verse counter and create a Runechant",
-        condition(ctx, played) {
-          const onceKey = `maleficUsed:${ctx.self.instanceId}`;
-          return (
-            !!played &&
-            isAttackAction(ctx, played) &&
-            ctx.getFlag("player", onceKey) !== true &&
-            ctx.getCounter("verse") > 0
-          );
-        },
-        onTrigger(ctx) {
-          ctx.setFlag("player", `maleficUsed:${ctx.self.instanceId}`, true);
-        },
-        effect(ctx) {
-          ctx.setCounter("verse", ctx.getCounter("verse") - 1);
-          createRunechants(ctx, 1);
-        },
-      },
-    ],
-  };
 }
 
 function condemnToSlaughter(amount: number): CardScript {
@@ -128,23 +76,8 @@ function condemnToSlaughter(amount: number): CardScript {
   };
 }
 
-function mauvrionSkies(runechants: number): CardScript {
-  return {
-    onPlay(ctx) {
-      buffNextAttack(ctx, {
-        goAgain: true,
-        appliesTo: "attack-action",
-        appliesToClass: "runeblade",
-        onHitCreateToken: { cardId: RUNECHANT, count: runechants },
-      });
-    },
-  };
-}
-
 function sigilOfSilphidaeTrigger(ctx: ScriptCtx): void {
-  const auras = ctx
-    .player(ctx.seat)
-    .graveyard.filter((card) => card.instanceId !== ctx.self.instanceId && isAura(ctx, card));
+  const auras = faceUpGraveyard(ctx).filter((card) => card.instanceId !== ctx.self.instanceId && isAura(ctx, card));
   if (auras.length === 0) return;
   ctx.requestCardChoice(
     "silphidae-banish",
@@ -174,7 +107,7 @@ export const svi: Record<string, CardScript> = {
           const currentIsNonAttack = isNonAttackAction(ctx, played);
           const priorNonAttacks =
             Number(ctx.getFlag("player", "nonAttackActionsPlayedThisTurn")) - (currentIsNonAttack ? 1 : 0);
-          return ctx.cardTypes(played).includes("runeblade") && priorNonAttacks > 0;
+          return hasCardSubtype(ctx, played, "runeblade") && priorNonAttacks > 0;
         },
         effect: (ctx) => createRunechants(ctx, 1),
       },
@@ -214,9 +147,7 @@ export const svi: Record<string, CardScript> = {
         maximum: 10,
         prompt: decisionPrompt("Choose X", "engine.decision.x.choose"),
         canDeclareX(ctx, x) {
-          return ctx
-            .player(ctx.seat)
-            .graveyard.some((card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === x);
+          return faceUpGraveyard(ctx).some((card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === x);
         },
       },
       isAttack: false,
@@ -224,9 +155,8 @@ export const svi: Record<string, CardScript> = {
       destroySelfCost: true,
       onActivate(ctx) {
         const x = ctx.getState("beckoningX");
-        const auras = ctx
-          .player(ctx.seat)
-          .graveyard.filter((card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === x);
+        const auras = faceUpGraveyard(ctx)
+          .filter((card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === x);
         ctx.requestCardChoice(
           "beckoning-return",
           decisionPrompt(
@@ -245,7 +175,7 @@ export const svi: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "beckoning-return") return;
-      const aura = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
+      const aura = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
       if (!aura || !isAura(ctx, aura)) return;
       ctx.moveToHand(aura.instanceId);
       ctx.logPublic(
@@ -281,7 +211,7 @@ export const svi: Record<string, CardScript> = {
 
   "runic fellingsong|1": {
     onAttackDeclared(ctx) {
-      const auras = ctx.player(ctx.seat).graveyard.filter((card) => isAura(ctx, card));
+      const auras = faceUpGraveyard(ctx).filter((card) => isAura(ctx, card));
       if (auras.length > 0) {
         ctx.requestCardChoice(
           "fellingsong-banish",

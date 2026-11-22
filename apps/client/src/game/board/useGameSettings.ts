@@ -5,8 +5,10 @@ import {
   loadGameSettings,
   saveGameSettings,
   type CardDisplayPreference,
+  type HoverPreviewMode,
   type MotionPreference,
   type PlayabilityCuePreference,
+  type PriorityAlertMode,
   type PriorityWindowMode,
   type StandingOrderUpdate,
 } from "../../storage.js";
@@ -54,6 +56,13 @@ export function useGameSettings({
       return next;
     });
   };
+  const updateWarnLethalPass = (warnLethalPass: boolean) => {
+    setSettings((current) => {
+      const next = { ...current, warnLethalPass };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
   const updateOptionHotkeys = (optionHotkeys: boolean) => {
     setSettings((current) => {
       const next = { ...current, optionHotkeys };
@@ -64,6 +73,13 @@ export function useGameSettings({
   const updateSkipBotDelay = (skipBotDelay: boolean) => {
     setSettings((current) => {
       const next = { ...current, skipBotDelay };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
+  const updateShowGameClock = (showGameClock: boolean) => {
+    setSettings((current) => {
+      const next = { ...current, showGameClock };
       saveGameSettings(localStorage, next);
       return next;
     });
@@ -91,6 +107,13 @@ export function useGameSettings({
       return next;
     });
   };
+  const updateHoverPreviewMode = (hoverPreviewMode: HoverPreviewMode) => {
+    setSettings((current) => {
+      const next = { ...current, hoverPreviewMode };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
   const updateSoundEffectsEnabled = (soundEffectsEnabled: boolean) => {
     setSettings((current) => {
       const next = { ...current, soundEffectsEnabled };
@@ -101,6 +124,13 @@ export function useGameSettings({
   const updateSoundEffectsVolume = (soundEffectsVolume: number) => {
     setSettings((current) => {
       const next = { ...current, soundEffectsVolume };
+      saveGameSettings(localStorage, next);
+      return next;
+    });
+  };
+  const updatePriorityAlertMode = (priorityAlertMode: PriorityAlertMode) => {
+    setSettings((current) => {
+      const next = { ...current, priorityAlertMode };
       saveGameSettings(localStorage, next);
       return next;
     });
@@ -137,13 +167,17 @@ export function useGameSettings({
     updatePriorityWindowMode,
     updateLessGuidance,
     updateSkipPlayConfirmation,
+    updateWarnLethalPass,
     updateOptionHotkeys,
     updateSkipBotDelay,
+    updateShowGameClock,
     updateCardDisplayPreference,
     updateMotionPreference,
     updatePlayabilityCuePreference,
+    updateHoverPreviewMode,
     updateSoundEffectsEnabled,
     updateSoundEffectsVolume,
+    updatePriorityAlertMode,
     updatePlaymat,
     updateBotPlaymat,
     updateStandingOrder,

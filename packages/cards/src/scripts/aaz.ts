@@ -1,34 +1,19 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript } from "@fyendal/engine";
 import {
   buffNextAttack,
-  commonOptionMessages,
   decisionMessage,
   decisionPrompt,
+  isArrow,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
+  reload,
+  resolveReload,
   yesNoPrompt,
 } from "./shared-helpers.js";
 
-function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("arrow");
-}
-
 function hasAim(card: { readonly counters?: Readonly<Record<string, number>> }): boolean {
   return (card.counters?.aim ?? 0) > 0;
-}
-
-function reload(ctx: ScriptCtx): void {
-  const player = ctx.player(ctx.seat);
-  if (player.arsenal.length === 0 && player.hand.length > 0) {
-    ctx.requestCardChoice(
-      "aaz-reload",
-      decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.aaz.reload.arsenal", {
-        optionMessages: commonOptionMessages("pass"),
-      }),
-      ["pass", ...player.hand.map((card) => card.instanceId)],
-    );
-  }
 }
 
 export const aaz: Record<string, CardScript> = {
@@ -75,7 +60,7 @@ export const aaz: Record<string, CardScript> = {
         return ctx.player(ctx.seat).arsenal.some((card) => card.faceDown && isArrow(ctx, card));
       },
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
+        ctx.gainResources(ctx.seat, 1);
         ctx.destroyAtEndPhase(ctx.self.instanceId);
       },
     },
@@ -95,7 +80,7 @@ export const aaz: Record<string, CardScript> = {
         const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
         ctx.requestCardChoice(
           "sharp-shooters",
-          decisionPrompt("Put an arrow face up into your arsenal", "card.aaz.arrow.arsenal.faceup"),
+          decisionPrompt("Put an arrow face up into your arsenal", "card.common.arrow.arsenal.faceup"),
           arrows.map((card) => card.instanceId),
         );
       },
@@ -226,8 +211,8 @@ export const aaz: Record<string, CardScript> = {
         ctx.shuffleDeck();
         ctx.putOnDeckTop(id);
         reload(ctx);
-      } else if (hook === "aaz-reload" && option !== "pass") {
-        ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
+      } else {
+        resolveReload(ctx, hook, option);
       }
     },
   },

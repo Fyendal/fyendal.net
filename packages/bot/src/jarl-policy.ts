@@ -1,6 +1,8 @@
 import type { CardData, CardView, GameIntent } from "@fyendal/shared";
+import { landedOnHit } from "./hit-model.js";
 import {
   chooseScoredIntent,
+  currentAllyAttackIsAlreadyLethal,
   currentLink,
   effectIsCommitted,
   enforceAllyTargetPolicy,
@@ -11,14 +13,15 @@ import {
   isAttack,
   opponentDamageEffectOnStack,
   optionCard,
-  ownCards,
   pitchIds,
+  reactionDefense,
   resourcePaymentPitchIds,
   scoreArsenalChoice,
   scoreBinaryChoice,
   scoreDefenseIntent,
   scoreDefenseReaction,
   scoreSpendCardChoice,
+  scoreTacticalRoot,
   shouldPreserveOpeningHand,
   spendsOpeningArsenalReserve,
   visibleOpponentDamageAmount,
@@ -28,12 +31,19 @@ import {
 import { threatenedAttackDamage } from "./public-threat.js";
 import type { HeroSolverRules } from "./card-model.js";
 import { cardsCanFuse, guardianPatch } from "./guardian-rules.js";
-import { arsenalValuer, handResponse, opportunityValuer } from "./hand-value.js";
+import {
+  arsenalValuer,
+  defenseReactionStopsEnough,
+  defenseReactionWorthSpending,
+  handResponse,
+  opportunityValuer,
+} from "./hand-value.js";
 import { adjustValueBreakdown } from "./value.js";
 import {
   chooseTacticalIntentWithTrace,
   type TacticalTurnPlan,
 } from "./tactical-turn-planner.js";
+import { hasType } from "@fyendal/shared";
 
 const AGGRO_HERO_NAMES = [
   "arakni, marionette",
@@ -59,6 +69,13 @@ function hasSubtype(data: CardData | undefined, subtype: string): boolean {
   return data?.subtypes?.some((value) => value.toLowerCase() === subtype) === true;
 }
 
+/** Channel Lake Frigid dies at its first end phase without an Ice card in the pitch zone. */
+function pitchHoldsIce(input: BotPolicyInput, pitching: readonly number[] = []): boolean {
+  const me = input.view.players[input.seat];
+  const pitched = me.hand.filter((card) => pitching.includes(card.instanceId));
+  return [...me.pitch, ...pitched].some((card) => hasSubtype(input.cards[card.cardId], "ice"));
+}
+
 function earthBanished(input: BotPolicyInput): number {
   return input.view.players[input.seat].banish.filter((card) =>
     hasSubtype(input.cards[card.cardId], "earth")
@@ -81,7 +98,7 @@ function breaksOakenFusion(input: BotPolicyInput, spent: ReadonlySet<number>): b
 }
 
 function attackCost(data: CardData): number {
-  return Math.max(0, data.cost ?? (data.cardType === "weapon" ? 3 : 0));
+  return Math.max(0, data.cost ?? (hasType(data, "weapon") ? 3 : 0));
 }
 
 function attackValue(data: CardData, input: BotPolicyInput): number {
@@ -123,7 +140,7 @@ function jarlSolverRules(input: BotPolicyInput): HeroSolverRules {
             appliesTo: (target, view) => view.hasTrait(target, "guardian"),
           }],
         });
-        patch.uses = { pump: 1 + TEAR_ASUNDER_ON_HIT * 0.6 };
+        patch.uses = { pump: 1 + landedOnHit(input, TEAR_ASUNDER_ON_HIT, true) };
       }
       return patch;
     },
@@ -222,7 +239,10 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   if (decision.resourcePayment) {
     const ids = resourcePaymentPitchIds(intent, input) ?? [];
     const own = new Map(input.view.players[input.seat].hand.map((held) => [held.instanceId, held]));
-    return 30 - ids.reduce((total, id) => {
+    const source = decision.preStackSource?.card;
+    const paysForLake = source !== undefined && key(input.cards[source.cardId]) === "imposing visage|3" &&
+      decision.resourcePayment.cost >= 5;
+    return (paysForLake && pitchHoldsIce(input, ids) ? 100 : 0) + 30 - ids.reduce((total, id) => {
       const held = own.get(id);
       return total + (held ? cardOpportunity(held, input) : 0);
     }, 0);
@@ -237,11 +257,12 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   }
   if (prompt === "choose x") {
     // Imposing Visage, the deck's only X card, fetches Channel Lake Frigid
-    // (X = 2) into aggro when affordable and Crumble to Eternity (X = 0)
-    // otherwise; an X in between pays for nothing.
+    // (X = 2) into aggro when affordable with an Ice pitch and Crumble to
+    // Eternity (X = 0) otherwise; an X in between pays for nothing.
     const value = declaredX(intent.optionId);
     const offered = (decision.options ?? []).map(declaredX);
-    const desired = opponentIsAggro(input) && offered.includes(2) ? 2 : 0;
+    const handIds = input.view.players[input.seat].hand.map((held) => held.instanceId);
+    const desired = opponentIsAggro(input) && offered.includes(2) && pitchHoldsIce(input, handIds) ? 2 : 0;
     return value === undefined ? -100 : 30 - Math.abs(value - desired) * 10;
   }
   if (prompt.includes("fuse")) {
@@ -257,7 +278,7 @@ function scoreChoice(intent: Extract<GameIntent, { kind: "choose" }>, input: Bot
   }
   if (prompt.includes("choose an aura")) {
     const functional = card ? key(input.cards[card.cardId]) : "";
-    if (functional === "channel lake frigid|3") return opponentIsAggro(input) ? 100 : 20;
+    if (functional === "channel lake frigid|3") return opponentIsAggro(input) && pitchHoldsIce(input) ? 100 : 20;
     if (functional === "crumble to eternity|3") return opponentIsAggro(input) ? 70 : 100;
     return card ? 10 : -20;
   }
@@ -311,8 +332,28 @@ function opponentEquipment(input: BotPolicyInput): CardView[] {
   const opponent = input.view.players[1 - input.seat]!;
   return [
     ...Object.values(opponent.equipment).filter((card): card is CardView => card !== undefined),
-    ...opponent.weapons.filter((card) => input.cards[card.cardId]?.cardType === "equipment"),
+    ...opponent.weapons.filter((card) => hasType(input.cards[card.cardId], "equipment")),
   ];
+}
+
+const EQUIPMENT_SLOTS = ["head", "chest", "arms", "legs"] as const;
+
+/** Jarl's Frostbite trigger fizzles unless an opponent equipment zone is exposed. */
+function opponentHasExposedZone(input: BotPolicyInput): boolean {
+  const opponent = input.view.players[1 - input.seat]!;
+  return EQUIPMENT_SLOTS.some((slot) =>
+    !opponent.equipment[slot] && !opponent.board.some((card) => card.counters?.[`frostZone:${slot}`])
+  );
+}
+
+function scoreBlizzard(intent: GameIntent, input: BotPolicyInput): number {
+  const targetId = "targetCardInstanceId" in intent ? intent.targetCardInstanceId : undefined;
+  const target = input.view.chain.find((link) =>
+    !link.resolved && link.attackingCard.instanceId === targetId
+  );
+  if (!target || target.attackingCard.owner === input.seat) return -100;
+  const value = (target.goAgain === true ? 40 : 0) + (opponentHasExposedZone(input) ? 15 : 0);
+  return value > 0 ? value : -100;
 }
 
 function compass(input: BotPolicyInput): CardView | undefined {
@@ -343,7 +384,7 @@ function gravyAttackTargetAdjustment(
   const allies = input.view.players[1 - input.seat]!.board.filter((candidate) =>
     hasSubtype(input.cards[candidate.cardId], "ally")
   );
-  if (allies.length === 0) return data.cardType === "weapon" ? 0 : -45;
+  if (allies.length === 0) return hasType(data, "weapon") ? 0 : -45;
   if (intent.targetAllyId === undefined) return -120;
 
   const target = allies.find((candidate) => candidate.instanceId === intent.targetAllyId);
@@ -386,7 +427,7 @@ function hasAffordableAttack(input: BotPolicyInput, spent: ReadonlySet<number>, 
     isAttack(input.cards[card.cardId]) && canPay(card, false));
   const weaponAttack = me.weapons.some((card) => {
     const data = input.cards[card.cardId];
-    return data?.cardType === "weapon" && (data.attack ?? 0) > 0 &&
+    return data !== undefined && hasType(data, "weapon") && (data.attack ?? 0) > 0 &&
       !(card.usedAbilityIndexes ?? []).includes(0) && canPay(card, false);
   });
   return handAttack || arsenalAttack || weaponAttack;
@@ -442,17 +483,17 @@ function shouldActivateOmnisBoots(input: BotPolicyInput, boots: CardView): boole
 
 function wastesStackedDefenseReaction(data: CardData, input: BotPolicyInput): boolean {
   const link = currentLink(input);
-  if (!link || data.cardType !== "defense-reaction" ||
+  if (!link || !hasType(data, "defense-reaction") ||
     input.view.pendingDecision?.kind !== "defense-reaction") return false;
 
   // Let committed reactions finish their choices and defense bonuses before
   // spending another card. Passing with a layer pending resolves that layer;
   // Jarl gets another reaction window before combat damage, even at low life.
   if (input.view.stack.some((layer) => layer.seat === input.seat && layer.card &&
-    input.cards[layer.card.cardId]?.cardType === "defense-reaction")) return true;
+    hasType(input.cards[layer.card.cardId], "defense-reaction"))) return true;
 
   const alreadyReacted = link.reactions.some((card) => card.owner === input.seat &&
-    input.cards[card.cardId]?.cardType === "defense-reaction");
+    hasType(input.cards[card.cardId], "defense-reaction"));
   if (!alreadyReacted) return false;
 
   const incoming = incomingAttackDamage(input);
@@ -463,7 +504,7 @@ function wastesStackedDefenseReaction(data: CardData, input: BotPolicyInput): bo
 }
 
 function shouldSaveDefenseReaction(data: CardData, input: BotPolicyInput): boolean {
-  if (data.cardType !== "defense-reaction" ||
+  if (!hasType(data, "defense-reaction") ||
     input.view.pendingDecision?.kind !== "defense-reaction") return false;
 
   const link = currentLink(input);
@@ -484,7 +525,7 @@ function shouldActivateRippleAway(input: BotPolicyInput): boolean {
   const layer = input.view.stack[0];
   if (!layer?.card || layer.seat === input.seat) return false;
   const source = input.cards[layer.card.cardId];
-  if (source?.cardType !== "action") return false;
+  if (!source || !hasType(source, "action")) return false;
   if (/\b(wager|clash)\b/i.test(layer.label)) return false;
 
   // A queued token trigger is already committed, even if its printed ability
@@ -557,7 +598,7 @@ function scorePlay(
         ? 90 : -100;
     } else if (functional === "ripple away|3") {
       score = shouldActivateRippleAway(input) ? 80 : -100;
-    } else if (data.cardType === "weapon") {
+    } else if (hasType(data, "weapon")) {
       score = 24 + (data.attack ?? 0);
     } else {
       score = -100;
@@ -571,13 +612,15 @@ function scorePlay(
   } else if (opening) {
     score = -100;
   } else if (functional === "channel lake frigid|3") {
-    score = aggro ? 58 : 18;
+    score = !pitchHoldsIce(input, pitchIds(intent)) ? -100 : aggro ? 58 : 18;
   } else if (functional === "oaken old|1") {
     score = 65;
   } else if (functional === "felling of the crown|1") {
     score = earthBanished(input) >= 4 ? 62 : 12;
   } else if (functional === "rootbound carapace|1") {
-    score = scoreDefenseReaction(data, input) + (earthBanished(input) < 4 ? 12 : 2);
+    score = defenseReactionStopsEnough(input, reactionDefense(card, input))
+      ? scoreDefenseReaction(data, input, card) + (earthBanished(input) < 4 ? 12 : 2)
+      : -100;
   } else if (functional === "tear asunder|3") {
     const secondCycle = (card.pitchCount ?? 0) > 0;
     score = secondCycle && remainingBlueCount(intent, input, own) >= 1 ? 60 : 4;
@@ -598,7 +641,8 @@ function scorePlay(
   } else if (functional === "pummel|1") {
     const link = currentLink(input);
     const deficit = link ? link.defenseValue - link.attackValue : Number.POSITIVE_INFINITY;
-    score = link?.attackingCard.owner === input.seat && deficit < 4
+    score = link?.attackingCard.owner === input.seat && deficit < 4 &&
+        !currentAllyAttackIsAlreadyLethal(input)
       ? 62 + Math.max(0, input.view.players[1 - input.seat]!.handCount) * 2
       : -100;
   } else if (functional === "sprout strength|1") {
@@ -606,8 +650,12 @@ function scorePlay(
     score = attackFollowsPlay(intent, input, own) ? 70 : -100;
   } else if (functional === "fruits of the forest|3") {
     score = 5;
-  } else if (data.cardType === "defense-reaction") {
-    score = scoreDefenseReaction(data, input);
+  } else if (functional === "blizzard|3") {
+    score = scoreBlizzard(intent, input);
+  } else if (hasType(data, "defense-reaction")) {
+    score = defenseReactionWorthSpending(card, input, jarlSolverRules, pitchIds(intent))
+      ? scoreDefenseReaction(data, input, card)
+      : -100;
   } else if (isAttack(data)) {
     score = gravy && functional === "mangle|1" && compassIsMarked
       ? 275
@@ -615,7 +663,7 @@ function scorePlay(
     if (functional === "ancient earth oak|1") score += 8;
     if (functional === "ice aged oak|3") score += 6;
     if (functional === "glacial footsteps|3") score += 7;
-  } else if (data.cardType === "instant") {
+  } else if (hasType(data, "instant")) {
     score = 8;
   } else {
     score = 10;
@@ -646,7 +694,7 @@ function scorePlay(
     if (keys.has("oaken old|1") &&
       (keys.has("crumble to eternity|3") || keys.has("pulse of isenloft|3"))) score += 8;
   }
-  if (isAttack(data) || data.cardType === "weapon") {
+  if (isAttack(data) || hasType(data, "weapon")) {
     score += gravyAttackTargetAdjustment(intent, card, data, input);
   }
   return score;
@@ -677,8 +725,8 @@ export function chooseJarlIntentWithTrace(input: BotPolicyInput): JarlIntentDeci
   const decision = chooseTacticalIntentWithTrace(input, reactive, {
     chooseForced: (forced) => chooseJarlReactiveIntent({ ...forced, state: undefined }),
     rules: jarlSolverRules,
-    rankCandidate: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
-    rootScore: (intent, observed) => scorePlay(intent, observed, ownCards(observed)),
+    rankCandidate: (intent, observed) => scoreTacticalRoot(intent, observed, scorePlay),
+    rootScore: (intent, observed) => scoreTacticalRoot(intent, observed, scorePlay),
   });
   const intent = enforceAllyTargetPolicy(input, enforceSpectraPolicy(input, decision.intent), {
     preserveHeroTarget(card) {

@@ -8,8 +8,10 @@ import playPoster from "../../../assets/play-poster.jpg";
 import { deckChoicesFor, deckIsLegalForRoom, sortDecksForPicker } from "./DeckGrid.js";
 import { DeckDropdown } from "./CreateRoomModal.js";
 import { RoomCard } from "./RoomCard.js";
-import { BotOpponentModal } from "./BotOpponentModal.js";
+import { SoloModeModal } from "./SoloModeModal.js";
 import { CardPoolHelp } from "./CardPoolHelp.js";
+import { SandboxSwitch } from "./SandboxSwitch.js";
+import { OpponentPicker, startMessageId } from "./OpponentPicker.js";
 import { formatSelectLabel } from "./FormatBadge.js";
 import { deckCardPool, pairableSearchers } from "../matchmaking/pairableSearchers.js";
 
@@ -21,6 +23,7 @@ export function Home() {
     cardPoolModes,
     createBotRoom,
     createRoom,
+    createSoloRoom,
     decks,
     decksLoading,
     deckPlayedAt,
@@ -37,6 +40,7 @@ export function Home() {
     cardPoolModes: state.cardPoolModes,
     createBotRoom: state.createBotRoom,
     createRoom: state.createRoom,
+    createSoloRoom: state.createSoloRoom,
     decks: state.decks,
     decksLoading: state.decksLoading,
     deckPlayedAt: state.deckPlayedAt,
@@ -60,8 +64,10 @@ export function Home() {
       ? "find-match"
       : loadHomeGameMode(localStorage, authUser)
   );
-  const [choosingBot, setChoosingBot] = useState(false);
+  const [choosingSolo, setChoosingSolo] = useState(false);
+  const [sandbox, setSandbox] = useState(false);
   const cardPoolId = useId();
+  const opponentLabelId = useId();
 
   if (decksLoading) {
     return <div className="panel home-panel"><p className="muted" role="status">{intl.formatMessage({ id: "lobby.loadingDecks" })}</p></div>;
@@ -91,9 +97,9 @@ export function Home() {
     if (mode === "find-match") {
       queueJoin(format, selectedDeck.id);
     } else if (mode === "invite-friend") {
-      createRoom(format, selectedDeck.id, "private");
+      createRoom(format, selectedDeck.id, "private", sandbox);
     } else {
-      setChoosingBot(true);
+      setChoosingSolo(true);
     }
   };
 
@@ -116,7 +122,7 @@ export function Home() {
         </section>
       ) : null}
 
-      <section className="home-play" aria-label={intl.formatMessage({ id: "lobby.home.start" })}>
+      <section className="home-play" aria-label={intl.formatMessage({ id: "lobby.home.play" })}>
         <div className="home-play-poster">
           <img
             src={playPoster}
@@ -182,57 +188,50 @@ export function Home() {
           </div>
 
           <div className="home-play-field home-play-mode-field">
-            <span>{intl.formatMessage({ id: "lobby.home.gameMode" })}</span>
-            <div className="home-play-mode-segments" role="group" aria-label={intl.formatMessage({ id: "lobby.home.gameMode" })}>
-              {(["find-match", "invite-friend", "bot"] as const).map((gameMode) => (
-                <button
-                  key={gameMode}
-                  type="button"
-                  aria-pressed={mode === gameMode}
-                  disabled={queuedFormat !== null}
-                  onClick={() => selectMode(gameMode)}
-                >
-                  {intl.formatMessage({ id: gameMode === "find-match"
-                    ? "lobby.action.findMatch"
-                    : gameMode === "invite-friend"
-                      ? "lobby.action.inviteFriend"
-                      : "lobby.action.playBot" })}
-                </button>
-              ))}
-            </div>
+            <span id={opponentLabelId}>{intl.formatMessage({ id: "lobby.home.opponent" })}</span>
+            <OpponentPicker
+              mode={mode}
+              disabled={queuedFormat !== null}
+              labelledBy={opponentLabelId}
+              searching={queuedFormat === null ? searching : 0}
+              onChange={selectMode}
+            />
+            {mode === "invite-friend" ? <SandboxSwitch checked={sandbox} onChange={setSandbox} /> : null}
           </div>
 
           <div className="home-play-actions">
-            {searching > 0 ? (
-              <p className="home-play-live">
-                <span className="home-play-live-dot" aria-hidden="true" />
-                {intl.formatMessage(
-                  { id: queuedFormat === format ? "lobby.home.othersSearchingNow" : "lobby.home.searchingNow" },
-                  { count: searching },
-                )}
-              </p>
-            ) : null}
             {queuedFormat !== null ? (
               <button type="button" className="btn-primary" onClick={queueLeave}>
                 {intl.formatMessage({ id: "lobby.action.cancelSearch" })}
               </button>
             ) : (
               <button type="submit" className="btn-cta" disabled={!selectedDeck}>
-                {intl.formatMessage({ id: "lobby.home.start" })}
+                {intl.formatMessage({ id: startMessageId(mode) })}
               </button>
             )}
+            {searching > 0 && queuedFormat === format ? (
+              <p className="home-play-live">
+                <span className="home-play-live-dot" aria-hidden="true" />
+                {intl.formatMessage({ id: "lobby.home.othersSearchingNow" }, { count: searching })}
+              </p>
+            ) : null}
           </div>
         </form>
       </section>
 
-      {choosingBot && selectedDeck ? (
-        <BotOpponentModal
+      {choosingSolo && selectedDeck ? (
+        <SoloModeModal
           format={format}
-          onSelect={(bot, searchForPlayer) => {
+          deckId={selectedDeck.id}
+          onSelectBot={(bot, searchForPlayer) => {
             createBotRoom(format, selectedDeck.id, bot, searchForPlayer);
-            setChoosingBot(false);
+            setChoosingSolo(false);
           }}
-          onClose={() => setChoosingBot(false)}
+          onStartSolo={(opponentDeckId) => {
+            createSoloRoom(format, selectedDeck.id, opponentDeckId);
+            setChoosingSolo(false);
+          }}
+          onClose={() => setChoosingSolo(false)}
         />
       ) : null}
     </div>

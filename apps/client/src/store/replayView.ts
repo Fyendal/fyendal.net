@@ -1,5 +1,5 @@
 import type { ReplayFile } from "@fyendal/shared";
-import { replayFileNotes, replayFileTransitions, replayFileViews } from "@fyendal/protocol";
+import { replayFileClock, replayFileNotes, replayFileTransitions, replayFileViews } from "@fyendal/protocol";
 import type { PreReplaySnapshot, StoreState } from "./types.js";
 
 export function snapshotBeforeReplay(state: StoreState): PreReplaySnapshot | null {
@@ -8,7 +8,11 @@ export function snapshotBeforeReplay(state: StoreState): PreReplaySnapshot | nul
     view: state.view,
     legal: state.legal,
     actionCandidates: state.actionCandidates,
+    endTurnWarning: state.endTurnWarning,
     yourSeat: state.yourSeat,
+    boardSeat: state.boardSeat,
+    soloGame: state.soloGame,
+    sandbox: state.sandbox,
     spectating: state.spectating,
     spectatorCount: state.spectatorCount,
     spectatorUsernames: state.spectatorUsernames,
@@ -27,12 +31,14 @@ export function replayViewerProjection(
     replayViews: views,
     replayTransitions: replayFileTransitions(file),
     replayStep: 0,
+    replayClock: replayFileClock(file),
     replayNotes: replayFileNotes(file),
     activeSavedReplayId: savedReplayId,
     activeSharedReplay: null,
     view: views[0]!,
     legal: [],
     actionCandidates: [],
+    endTurnWarning: false,
     yourSeat: file.seat,
     spectating: true,
     spectatorCount: 0,
@@ -40,6 +46,9 @@ export function replayViewerProjection(
     playerProfiles: null,
     cardArt: null,
     botGame: false,
+    soloGame: false,
+    sandbox: false,
+    boardSeat: null,
     error: null,
   };
 }

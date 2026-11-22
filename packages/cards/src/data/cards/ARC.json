@@ -2,7 +2,7 @@
  {
   "id": "ARC000",
   "name": "Eye of Ophidia",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "Legendary\nWhen you pitch Eye of Ophidia, opt 2.",
   "pitch": 3,
   "classes": [
@@ -20,7 +20,7 @@
  {
   "id": "ARC001",
   "name": "Dash, Inventor Extraordinaire",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may start the game with a Mechanologist item with cost 2 or less in the arena.",
   "classes": [
    "mechanologist"
@@ -32,7 +32,7 @@
  {
   "id": "ARC002",
   "name": "Dash",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may start the game with a Mechanologist item with cost 2 or less in the arena.",
   "classes": [
    "mechanologist"
@@ -44,7 +44,7 @@
  {
   "id": "ARC003",
   "name": "Teklo Plasma Pistol",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Action - Remove a steam counter from Teklo Plasma Pistol: Attack\nAction - {r}: If there are no steam counters on Teklo Plasma Pistol, put a steam counter on it. Go again",
   "attack": 2,
   "classes": [
@@ -59,7 +59,7 @@
  {
   "id": "ARC004",
   "name": "Teklo Foundry Heart",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Once per Turn Action - {r}: Banish the top 2 cards of your deck. Gain {r} for each Mechanologist card banished this way. Activate this ability only if you've boosted this turn. Go again\nBattleworn",
   "defense": 2,
   "classes": [
@@ -76,7 +76,7 @@
  {
   "id": "ARC005",
   "name": "Achilles Accelerator",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Achilles Accelerator: Gain 1 action point. Activate this ability only if you have boosted this turn.\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -93,7 +93,7 @@
  {
   "id": "ARC006",
   "name": "High Octane",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Whenever you boost a card this turn, gain 1 action point.\nDraw a card.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -109,7 +109,7 @@
  {
   "id": "ARC007",
   "name": "Teklo Core",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dash Specialization\nTeklo Core enters the arena with 2 steam counters on it. When Teklo Core has no steam counters on it, destroy it.\nAt the beginning of your action phase, remove a steam counter from Teklo Core and gain {r}{r}.",
   "pitch": 3,
   "cost": 0,
@@ -127,7 +127,7 @@
  {
   "id": "ARC008",
   "name": "Maximum Velocity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Play this only if you've boosted 3 or more times this turn.",
   "pitch": 1,
   "cost": 2,
@@ -144,7 +144,7 @@
  {
   "id": "ARC009",
   "name": "Spark of Genius",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dash Specialization\nSearch your deck for a Mechanologist item card with cost X, put it into the arena, then shuffle your deck.\nIf you have boosted this turn, draw a card.",
   "pitch": 2,
   "defense": 3,
@@ -159,7 +159,7 @@
  {
   "id": "ARC010",
   "name": "Induction Chamber",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Action - {r}: If there are no steam counters on Induction Chamber, put a steam counter on it. Go again\nOnce per Turn Attack Reaction - Remove a steam counter from Induction Chamber: Target Mechanologist pistol attack gains go again.",
   "pitch": 1,
   "cost": 2,
@@ -174,7 +174,7 @@
  {
   "id": "ARC011",
   "name": "Pedal to the Metal",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Pedal to the Metal hits, your next attack this turn gains dominate.\nBoost",
   "pitch": 1,
   "cost": 2,
@@ -194,7 +194,7 @@
  {
   "id": "ARC012",
   "name": "Pedal to the Metal",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Pedal to the Metal hits, your next attack this turn gains dominate.\nBoost",
   "pitch": 2,
   "cost": 2,
@@ -214,7 +214,7 @@
  {
   "id": "ARC013",
   "name": "Pedal to the Metal",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Pedal to the Metal hits, your next attack this turn gains dominate.\nBoost",
   "pitch": 3,
   "cost": 2,
@@ -234,7 +234,7 @@
  {
   "id": "ARC014",
   "name": "Pour the Mold",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put a Mechanologist item with cost 2 or less from your hand into the arena.\nIf you have boosted this turn, put a steam counter on it.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -250,7 +250,7 @@
  {
   "id": "ARC015",
   "name": "Pour the Mold",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put a Mechanologist item with cost 1 or less from your hand into the arena.\nIf you have boosted this turn, put a steam counter on it.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -266,7 +266,7 @@
  {
   "id": "ARC016",
   "name": "Pour the Mold",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put a Mechanologist item with cost 0 from your hand into the arena.\nIf you have boosted this turn, put a steam counter on it.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -282,7 +282,7 @@
  {
   "id": "ARC017",
   "name": "Aether Sink",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Aether Sink enters the arena with a steam counter on it.\nAction - {r}: If there are no steam counters on Aether Sink, put a steam counter on it. Go again\nInstant - Remove a steam counter from Aether Sink: Aether Sink gains Arcane Barrier 2 until end of turn.",
   "pitch": 2,
   "cost": 1,
@@ -297,7 +297,7 @@
  {
   "id": "ARC018",
   "name": "Cognition Nodes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Action - {r}: If there are no steam counters on Cognition Nodes, put a steam counter on it. Go again\nOnce per Turn Attack Reaction - Remove a steam counter from Cognition Nodes: Target attack action card gains \"When this hits, put it on the bottom of its owner's deck.\"",
   "pitch": 3,
   "cost": 1,
@@ -312,7 +312,7 @@
  {
   "id": "ARC019",
   "name": "Convection Amplifier",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Convection Amplifier enters the arena with 2 steam counters on it. When Convection Amplifier has no steam counters on it, destroy it.\nAction - Remove a steam counter from Convection Amplifier: The next attack action card you play this turn gains dominate. Go again",
   "pitch": 1,
   "cost": 0,
@@ -327,7 +327,7 @@
  {
   "id": "ARC020",
   "name": "Over Loop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
   "pitch": 1,
   "cost": 2,
@@ -347,7 +347,7 @@
  {
   "id": "ARC021",
   "name": "Over Loop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
   "pitch": 2,
   "cost": 2,
@@ -367,7 +367,7 @@
  {
   "id": "ARC022",
   "name": "Over Loop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
   "pitch": 3,
   "cost": 2,
@@ -387,7 +387,7 @@
  {
   "id": "ARC023",
   "name": "Throttle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 1,
   "cost": 2,
@@ -407,7 +407,7 @@
  {
   "id": "ARC024",
   "name": "Throttle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 2,
   "cost": 2,
@@ -427,7 +427,7 @@
  {
   "id": "ARC025",
   "name": "Throttle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 3,
   "cost": 2,
@@ -447,7 +447,7 @@
  {
   "id": "ARC026",
   "name": "Zero to Sixty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 1,
   "cost": 0,
@@ -467,7 +467,7 @@
  {
   "id": "ARC027",
   "name": "Zero to Sixty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 2,
   "cost": 0,
@@ -487,7 +487,7 @@
  {
   "id": "ARC028",
   "name": "Zero to Sixty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 3,
   "cost": 0,
@@ -507,7 +507,7 @@
  {
   "id": "ARC029",
   "name": "Zipper Hit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 1,
   "cost": 1,
@@ -527,7 +527,7 @@
  {
   "id": "ARC030",
   "name": "Zipper Hit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 2,
   "cost": 1,
@@ -547,7 +547,7 @@
  {
   "id": "ARC031",
   "name": "Zipper Hit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 3,
   "cost": 1,
@@ -567,7 +567,7 @@
  {
   "id": "ARC032",
   "name": "Locked and Loaded",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Mechanologist attack action card you play this turn gains +3{p}.\nIf you have boosted this turn, opt 1.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -584,7 +584,7 @@
  {
   "id": "ARC033",
   "name": "Locked and Loaded",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Mechanologist attack action card you play this turn gains +2{p}.\nIf you have boosted this turn, opt 1.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -601,7 +601,7 @@
  {
   "id": "ARC034",
   "name": "Locked and Loaded",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Mechanologist attack action card you play this turn gains +1{p}.\nIf you have boosted this turn, opt 1.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -618,7 +618,7 @@
  {
   "id": "ARC035",
   "name": "Dissipation Shield",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dissipation Shield enters the arena with 4 steam counters on it.\nAt the beginning of your action phase, destroy Dissipation Shield unless you remove a steam counter from it.\nInstant - Destroy Dissipation Shield: The next time your hero would be dealt damage this turn, prevent X damage, where X is the number of steam counters on Dissipation Shield.",
   "pitch": 2,
   "cost": 2,
@@ -633,7 +633,7 @@
  {
   "id": "ARC036",
   "name": "Hyper Driver",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This enters the arena with 3 steam counters. When it has none, destroy it.\nOnce per turn, when you boost a card, remove a steam counter from this and gain {r}.",
   "pitch": 1,
   "cost": 1,
@@ -648,7 +648,7 @@
  {
   "id": "ARC037",
   "name": "Optekal Monocle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Optekal Monocle enters the arena with 5 steam counters on it. When Optekal Monocle has no steam counters on it, destroy it.\nAction - Remove a steam counter from Optekal Monocle: Opt 1. Go again",
   "pitch": 3,
   "cost": 0,
@@ -663,7 +663,7 @@
  {
   "id": "ARC038",
   "name": "Azalea, Ace in the Hole",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - 0: Put a card from your arsenal on the bottom of your deck. If you do, put the top card of your deck face up into your arsenal. If it's an arrow card, it gains dominate until end of turn. Go again",
   "classes": [
    "ranger"
@@ -675,7 +675,7 @@
  {
   "id": "ARC039",
   "name": "Azalea",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - 0: Put a card from your arsenal on the bottom of your deck. If you do, put the top card of your deck face up into your arsenal. If it's an arrow card, it gains dominate until end of turn. Go again",
   "classes": [
    "ranger"
@@ -687,7 +687,7 @@
  {
   "id": "ARC040",
   "name": "Death Dealer",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: If you have no cards in your arsenal, you may put an arrow card from your hand face up into your arsenal. If you do, draw a card. Go again",
   "classes": [
    "ranger"
@@ -701,7 +701,7 @@
  {
   "id": "ARC041",
   "name": "Skullbone Crosswrap",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Once per Turn Action - Turn a face down card in your arsenal face up: Opt 1. Go again\nArcane Barrier 1\nBlade Break",
   "defense": 1,
   "classes": [
@@ -719,7 +719,7 @@
  {
   "id": "ARC042",
   "name": "Bull's Eye Bracers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy Bull's Eye Bracers: If you have no cards in your arsenal, you may put an arrow card from your hand face up into your arsenal. It gains +1{p} until end of turn. Go again\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -736,7 +736,7 @@
  {
   "id": "ARC043",
   "name": "Red in the Ledger",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Azalea Specialization\nIf Red in the Ledger hits a hero, they can't play or activate more than 1 action during their next turn.",
   "pitch": 1,
   "cost": 1,
@@ -757,7 +757,7 @@
  {
   "id": "ARC044",
   "name": "Three of a Kind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Draw 3 cards. Until end of turn, you may only play cards from arsenal.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -773,7 +773,7 @@
  {
   "id": "ARC045",
   "name": "Endless Arrow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into its owner's hand.",
   "pitch": 1,
   "cost": 0,
@@ -791,7 +791,7 @@
  {
   "id": "ARC046",
   "name": "Nock the Deathwhistle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Azalea Specialization\nSearch your deck for an arrow card, reveal it, then shuffle your deck and put it on top of your deck.\nReload\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -809,7 +809,7 @@
  {
   "id": "ARC047",
   "name": "Rapid Fire",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Until end of turn, arrows you control gain go again.\nReload\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -826,7 +826,7 @@
  {
   "id": "ARC048",
   "name": "Take Cover",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Reload",
   "pitch": 1,
   "cost": 0,
@@ -842,7 +842,7 @@
  {
   "id": "ARC049",
   "name": "Take Cover",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Reload",
   "pitch": 2,
   "cost": 0,
@@ -858,7 +858,7 @@
  {
   "id": "ARC050",
   "name": "Take Cover",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Reload",
   "pitch": 3,
   "cost": 0,
@@ -874,7 +874,7 @@
  {
   "id": "ARC051",
   "name": "Silver the Tip",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have no cards in your arsenal, look at the top 4 cards of your deck. You may put an arrow card from among them face up into your arsenal, then put the rest on the bottom of your deck in any order.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -890,7 +890,7 @@
  {
   "id": "ARC052",
   "name": "Silver the Tip",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have no cards in your arsenal, look at the top 3 cards of your deck. You may put an arrow card from among them face up into your arsenal, then put the rest on the bottom of your deck in any order.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -906,7 +906,7 @@
  {
   "id": "ARC053",
   "name": "Silver the Tip",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have no cards in your arsenal, look at the top 2 cards of your deck. You may put an arrow card from among them face up into your arsenal, then put the rest on the bottom of your deck in any order.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -922,7 +922,7 @@
  {
   "id": "ARC054",
   "name": "Take Aim",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Ranger attack action card you play this turn, gains +3{p}.\nReload\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -939,7 +939,7 @@
  {
   "id": "ARC055",
   "name": "Take Aim",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Ranger attack action card you play this turn, gains +2{p}.\nReload\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -956,7 +956,7 @@
  {
   "id": "ARC056",
   "name": "Take Aim",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Ranger attack action card you play this turn, gains +1{p}.\nReload\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -973,7 +973,7 @@
  {
   "id": "ARC057",
   "name": "Head Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is put into your arsenal face up, it gains +2{p} until end of turn.",
   "pitch": 1,
   "cost": 1,
@@ -991,7 +991,7 @@
  {
   "id": "ARC058",
   "name": "Head Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is put into your arsenal face up, it gains +2{p} until end of turn.",
   "pitch": 2,
   "cost": 1,
@@ -1009,7 +1009,7 @@
  {
   "id": "ARC059",
   "name": "Head Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is put into your arsenal face up, it gains +2{p} until end of turn.",
   "pitch": 3,
   "cost": 1,
@@ -1027,7 +1027,7 @@
  {
   "id": "ARC060",
   "name": "Hamstring Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Hamstring Shot hits a hero, their first attack during their next turn costs an additional {r}.",
   "pitch": 1,
   "cost": 1,
@@ -1045,7 +1045,7 @@
  {
   "id": "ARC061",
   "name": "Hamstring Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Hamstring Shot hits a hero, their first attack during their next turn costs an additional {r}.",
   "pitch": 2,
   "cost": 1,
@@ -1063,7 +1063,7 @@
  {
   "id": "ARC062",
   "name": "Hamstring Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Hamstring Shot hits a hero, their first attack during their next turn costs an additional {r}.",
   "pitch": 3,
   "cost": 1,
@@ -1081,7 +1081,7 @@
  {
   "id": "ARC063",
   "name": "Ridge Rider Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Ridge Rider Shot is put into your arsenal face up, opt 1.",
   "pitch": 1,
   "cost": 0,
@@ -1102,7 +1102,7 @@
  {
   "id": "ARC064",
   "name": "Ridge Rider Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Ridge Rider Shot is put into your arsenal face up, opt 1.",
   "pitch": 2,
   "cost": 0,
@@ -1123,7 +1123,7 @@
  {
   "id": "ARC065",
   "name": "Ridge Rider Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Ridge Rider Shot is put into your arsenal face up, opt 1.",
   "pitch": 3,
   "cost": 0,
@@ -1144,7 +1144,7 @@
  {
   "id": "ARC066",
   "name": "Salvage Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it on the bottom of its owner's deck.",
   "pitch": 1,
   "cost": 1,
@@ -1162,7 +1162,7 @@
  {
   "id": "ARC067",
   "name": "Salvage Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it on the bottom of its owner's deck.",
   "pitch": 2,
   "cost": 1,
@@ -1180,7 +1180,7 @@
  {
   "id": "ARC068",
   "name": "Salvage Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it on the bottom of its owner's deck.",
   "pitch": 3,
   "cost": 1,
@@ -1198,7 +1198,7 @@
  {
   "id": "ARC069",
   "name": "Searing Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Searing Shot hits a hero, they lose 1{h}.",
   "pitch": 1,
   "cost": 0,
@@ -1216,7 +1216,7 @@
  {
   "id": "ARC070",
   "name": "Searing Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Searing Shot hits a hero, they lose 1{h}.",
   "pitch": 2,
   "cost": 0,
@@ -1234,7 +1234,7 @@
  {
   "id": "ARC071",
   "name": "Searing Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Searing Shot hits a hero, they lose 1{h}.",
   "pitch": 3,
   "cost": 0,
@@ -1252,7 +1252,7 @@
  {
   "id": "ARC072",
   "name": "Sic 'Em Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 1,
   "cost": 1,
@@ -1273,7 +1273,7 @@
  {
   "id": "ARC073",
   "name": "Sic 'Em Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 2,
   "cost": 1,
@@ -1294,7 +1294,7 @@
  {
   "id": "ARC074",
   "name": "Sic 'Em Shot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 3,
   "cost": 1,
@@ -1315,7 +1315,7 @@
  {
   "id": "ARC075",
   "name": "Viserai, Rune Blood",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a Runeblade card, if you've played another non-attack action card this turn, create a Runechant token.",
   "classes": [
    "runeblade"
@@ -1327,7 +1327,7 @@
  {
   "id": "ARC076",
   "name": "Viserai",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a Runeblade card, if you have played another 'non-attack' action card this turn, create a Runechant token.",
   "classes": [
    "runeblade"
@@ -1339,7 +1339,7 @@
  {
   "id": "ARC077",
   "name": "Nebula Blade",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nWhen this hits, create a Runechant token.\nIf you've played a non-attack action card this turn, this gets +3{p}.",
   "attack": 1,
   "classes": [
@@ -1354,7 +1354,7 @@
  {
   "id": "ARC078",
   "name": "Grasp of the Arknight",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Once per Turn Action - {r}{r}: Create a Runechant token. This ability costs an additional {r} to activate for each Runechant you control. Go again\nBattleworn",
   "defense": 2,
   "classes": [
@@ -1371,7 +1371,7 @@
  {
   "id": "ARC079",
   "name": "Crown of Dichotomy",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}, destroy Crown of Dichotomy: Put target Runeblade attack action card and target Runeblade 'non-attack' action card from your graveyard on top of your deck in any order.\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -1388,7 +1388,7 @@
  {
   "id": "ARC080",
   "name": "Arknight Ascendancy",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Viserai Specialization\nThis costs {r} less to play for each Runechant you control.\nWhen this hits, create Runechant tokens equal to the damage dealt this way.\nDominate",
   "pitch": 1,
   "cost": 6,
@@ -1409,7 +1409,7 @@
  {
   "id": "ARC081",
   "name": "Mordred Tide",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Until end of turn, if you would create one or more Runechant tokens, instead create that many plus 1.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1425,7 +1425,7 @@
  {
   "id": "ARC082",
   "name": "Ninth Blade of the Blood Oath",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This costs {r} less to play for each Runechant you control.",
   "pitch": 2,
   "cost": 9,
@@ -1442,7 +1442,7 @@
  {
   "id": "ARC083",
   "name": "Become the Arknight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Viserai Specialization\nYou may discard an action card. If you discard an attack action card this way, search your deck for a Runeblade non-attack action card, reveal it, and put it into your hand. If you discard a non-attack action card this way, search your deck for a Runeblade attack action card, reveal it, and put it into your hand. Shuffle. Go again",
   "pitch": 3,
   "cost": 0,
@@ -1459,7 +1459,7 @@
  {
   "id": "ARC084",
   "name": "Tome of the Arknight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Reveal the top 2 cards of your deck. If you reveal an attack action card and a non-attack action card this way, put them into your hand.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -1475,7 +1475,7 @@
  {
   "id": "ARC085",
   "name": "Spellblade Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Spellblade Assault, create 2 Runechant tokens.",
   "pitch": 1,
   "cost": 2,
@@ -1492,7 +1492,7 @@
  {
   "id": "ARC086",
   "name": "Spellblade Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Spellblade Assault, create 2 Runechant tokens.",
   "pitch": 2,
   "cost": 2,
@@ -1509,7 +1509,7 @@
  {
   "id": "ARC087",
   "name": "Spellblade Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Spellblade Assault, create 2 Runechant tokens.",
   "pitch": 3,
   "cost": 2,
@@ -1526,7 +1526,7 @@
  {
   "id": "ARC088",
   "name": "Reduce to Runechant",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Reduce to Runechant costs {r} less to play for each Runechant you control.\nCreate a Runechant token.",
   "pitch": 1,
   "cost": 1,
@@ -1539,7 +1539,7 @@
  {
   "id": "ARC089",
   "name": "Reduce to Runechant",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Reduce to Runechant costs {r} less to play for each Runechant you control.\nCreate a Runechant token.",
   "pitch": 2,
   "cost": 1,
@@ -1552,7 +1552,7 @@
  {
   "id": "ARC090",
   "name": "Reduce to Runechant",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Reduce to Runechant costs {r} less to play for each Runechant you control.\nCreate a Runechant token.",
   "pitch": 3,
   "cost": 1,
@@ -1565,7 +1565,7 @@
  {
   "id": "ARC091",
   "name": "Oath of the Arknight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Runeblade attack this turn gains +3{p}.\nCreate a Runechant token.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -1581,7 +1581,7 @@
  {
   "id": "ARC092",
   "name": "Oath of the Arknight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Runeblade attack this turn gains +2{p}.\nCreate a Runechant token.\nGo again",
   "pitch": 2,
   "cost": 2,
@@ -1597,7 +1597,7 @@
  {
   "id": "ARC093",
   "name": "Oath of the Arknight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Runeblade attack this turn gains +1{p}.\nCreate a Runechant token.\nGo again",
   "pitch": 3,
   "cost": 2,
@@ -1613,7 +1613,7 @@
  {
   "id": "ARC094",
   "name": "Amplify the Arknight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This costs {r} less to play for each Runechant you control.",
   "pitch": 1,
   "cost": 3,
@@ -1630,7 +1630,7 @@
  {
   "id": "ARC095",
   "name": "Amplify the Arknight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Amplify the Arknight costs {r} less to play for each Runechant you control.",
   "pitch": 2,
   "cost": 3,
@@ -1647,7 +1647,7 @@
  {
   "id": "ARC096",
   "name": "Amplify the Arknight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This costs {r} less to play for each Runechant you control.",
   "pitch": 3,
   "cost": 3,
@@ -1664,7 +1664,7 @@
  {
   "id": "ARC097",
   "name": "Drawn to the Dark Dimension",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This costs {r} less to play for each Runechant you control.\nWhen this attacks, draw a card.",
   "pitch": 1,
   "cost": 2,
@@ -1681,7 +1681,7 @@
  {
   "id": "ARC098",
   "name": "Drawn to the Dark Dimension",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Drawn to the Dark Dimension costs {r} less to play for each Runechant you control.\nDraw a card.",
   "pitch": 2,
   "cost": 2,
@@ -1698,7 +1698,7 @@
  {
   "id": "ARC099",
   "name": "Drawn to the Dark Dimension",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Drawn to the Dark Dimension costs {r} less to play for each Runechant you control.\nDraw a card.",
   "pitch": 3,
   "cost": 2,
@@ -1715,7 +1715,7 @@
  {
   "id": "ARC100",
   "name": "Rune Flash",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This costs {r} less to play for each Runechant token you control.\nGo again",
   "pitch": 1,
   "cost": 3,
@@ -1735,7 +1735,7 @@
  {
   "id": "ARC101",
   "name": "Rune Flash",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Flash costs {r} less to play for each Runechant you control.\nGo again",
   "pitch": 2,
   "cost": 3,
@@ -1755,7 +1755,7 @@
  {
   "id": "ARC102",
   "name": "Rune Flash",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This costs {r} less to play for each Runechant token you control.\nGo again",
   "pitch": 3,
   "cost": 3,
@@ -1775,7 +1775,7 @@
  {
   "id": "ARC103",
   "name": "Spellblade Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Runechant token.",
   "pitch": 1,
   "cost": 1,
@@ -1792,7 +1792,7 @@
  {
   "id": "ARC104",
   "name": "Spellblade Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Runechant token.",
   "pitch": 2,
   "cost": 1,
@@ -1809,7 +1809,7 @@
  {
   "id": "ARC105",
   "name": "Spellblade Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Runechant token.",
   "pitch": 3,
   "cost": 1,
@@ -1826,7 +1826,7 @@
  {
   "id": "ARC106",
   "name": "Bloodspill Invocation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen an attack action card you control hits, destroy Bloodspill Invocation then create 3 Runechant tokens.\nWhen your hero is dealt damage, destroy Bloodspill Invocation.",
   "pitch": 1,
   "cost": 1,
@@ -1845,7 +1845,7 @@
  {
   "id": "ARC107",
   "name": "Bloodspill Invocation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen an attack action card you control hits, destroy Bloodspill Invocation then create 2 Runechant tokens.\nWhen your hero is dealt damage, destroy Bloodspill Invocation.",
   "pitch": 2,
   "cost": 1,
@@ -1864,7 +1864,7 @@
  {
   "id": "ARC108",
   "name": "Bloodspill Invocation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen an attack action card you control hits, destroy Bloodspill Invocation then create a Runechant token.\nWhen your hero is dealt damage, destroy Bloodspill Invocation.",
   "pitch": 3,
   "cost": 1,
@@ -1883,7 +1883,7 @@
  {
   "id": "ARC109",
   "name": "Read the Runes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create 3 Runechant tokens.",
   "pitch": 1,
   "cost": 0,
@@ -1896,7 +1896,7 @@
  {
   "id": "ARC110",
   "name": "Read the Runes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create 2 Runechant tokens.",
   "pitch": 2,
   "cost": 0,
@@ -1909,7 +1909,7 @@
  {
   "id": "ARC111",
   "name": "Read the Runes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Runechant token.",
   "pitch": 3,
   "cost": 0,
@@ -1922,7 +1922,7 @@
  {
   "id": "ARC112",
   "name": "Runechant",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
   "classes": [
    "runeblade"
@@ -1935,7 +1935,7 @@
  {
   "id": "ARC113",
   "name": "Kano, Dracai of Aether",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Instant - {r}{r}{r}: Look at the top card of your deck. If it's a 'non-attack' action card, you may banish it. If you do, you may play it this turn as though it were an instant.",
   "classes": [
    "wizard"
@@ -1947,7 +1947,7 @@
  {
   "id": "ARC114B",
   "name": "Kano",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Instant - {r}{r}{r}: Look at the top card of your deck. If it's a 'non-attack' action card, you may banish it. If you do, you may play it this turn as though it were an instant.",
   "classes": [
    "wizard"
@@ -1959,7 +1959,7 @@
  {
   "id": "ARC115B",
   "name": "Crucible of Aetherweave",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Instant - {r}: The next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.",
   "classes": [
    "wizard"
@@ -1973,7 +1973,7 @@
  {
   "id": "ARC116",
   "name": "Storm Striders",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - {r}, destroy Storm Striders: You may play your next Wizard 'non-attack' action card this turn as though it were an instant.\nArcane Barrier 2",
   "defense": 0,
   "classes": [
@@ -1990,7 +1990,7 @@
  {
   "id": "ARC117",
   "name": "Robe of Rapture",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy Robe of Rapture: Gain {r}{r}{r}.\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -2007,7 +2007,7 @@
  {
   "id": "ARC118",
   "name": "Blazing Aether",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Kano Specialization\nDeal X arcane damage to target hero, where X is the amount of arcane damage you have dealt to that hero this turn.",
   "pitch": 1,
   "cost": 0,
@@ -2023,7 +2023,7 @@
  {
   "id": "ARC119",
   "name": "Sonic Boom",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target opposing hero.\nIf Sonic Boom deals damage, look at the top card of your deck. If it's a Wizard 'non-attack' action card, you may banish it. If you do, you may play it this turn as though it were an instant and it costs X resource points less to play, where X is the damage dealt by Sonic Boom.",
   "pitch": 2,
   "cost": 2,
@@ -2036,7 +2036,7 @@
  {
   "id": "ARC120",
   "name": "Forked Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to two target heroes. You may target the same hero twice.",
   "pitch": 1,
   "cost": 3,
@@ -2049,7 +2049,7 @@
  {
   "id": "ARC121",
   "name": "Lesson in Lava",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Kano Specialization\nDeal 3 arcane damage to target opposing hero.\nIf Lesson in Lava deals damage, you may search your deck for a Wizard card with {r} cost equal to or less than the damage dealt by Lesson in Lava, reveal it, then shuffle your deck and put it on top of your deck.",
   "pitch": 2,
   "cost": 1,
@@ -2065,7 +2065,7 @@
  {
   "id": "ARC122",
   "name": "Tome of Aetherwind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose 2. You may choose the same mode more than once;\n\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.\nDraw a card.",
   "pitch": 1,
   "cost": 0,
@@ -2078,7 +2078,7 @@
  {
   "id": "ARC123",
   "name": "Absorb in Aether",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "The next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 2.",
   "pitch": 1,
   "cost": 1,
@@ -2091,7 +2091,7 @@
  {
   "id": "ARC124",
   "name": "Absorb in Aether",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "The next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 2.",
   "pitch": 2,
   "cost": 1,
@@ -2104,7 +2104,7 @@
  {
   "id": "ARC125",
   "name": "Absorb in Aether",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "The next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 2.",
   "pitch": 3,
   "cost": 1,
@@ -2117,7 +2117,7 @@
  {
   "id": "ARC126",
   "name": "Aether Spindle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to target opposing hero.\nOpt X, where X is the damage dealt by Aether Spindle.",
   "pitch": 1,
   "cost": 2,
@@ -2133,7 +2133,7 @@
  {
   "id": "ARC127",
   "name": "Aether Spindle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target opposing hero.\nOpt X, where X is the damage dealt by Aether Spindle.",
   "pitch": 2,
   "cost": 2,
@@ -2149,7 +2149,7 @@
  {
   "id": "ARC128",
   "name": "Aether Spindle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target opposing hero.\nOpt X, where X is the damage dealt by Aether Spindle.",
   "pitch": 3,
   "cost": 2,
@@ -2165,7 +2165,7 @@
  {
   "id": "ARC129",
   "name": "Stir the Aetherwinds",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play your next Wizard 'non-attack' action card this turn as though it were an instant and if it has an effect that deals arcane damage, instead that effect deals that much arcane damage plus 3.",
   "pitch": 1,
   "cost": 2,
@@ -2178,7 +2178,7 @@
  {
   "id": "ARC130",
   "name": "Stir the Aetherwinds",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play your next Wizard 'non-attack' action card this turn as though it were an instant and if it has an effect that deals arcane damage, instead that effect deals that much arcane damage plus 2.",
   "pitch": 2,
   "cost": 2,
@@ -2191,7 +2191,7 @@
  {
   "id": "ARC131",
   "name": "Stir the Aetherwinds",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play your next Wizard 'non-attack' action card this turn as though it were an instant and if it has an effect that deals arcane damage, instead that effect deals that much arcane damage plus 1.",
   "pitch": 3,
   "cost": 2,
@@ -2204,7 +2204,7 @@
  {
   "id": "ARC132",
   "name": "Aether Flare",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target opposing hero.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus X, where X is the damage dealt by Aether Flare.",
   "pitch": 1,
   "cost": 1,
@@ -2217,7 +2217,7 @@
  {
   "id": "ARC133",
   "name": "Aether Flare",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target opposing hero.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus X, where X is the damage dealt by Aether Flare.",
   "pitch": 2,
   "cost": 1,
@@ -2230,7 +2230,7 @@
  {
   "id": "ARC134",
   "name": "Aether Flare",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target opposing hero.\nThe next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus X, where X is the damage dealt by Aether Flare.",
   "pitch": 3,
   "cost": 1,
@@ -2243,7 +2243,7 @@
  {
   "id": "ARC135",
   "name": "Index",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Look at the top 5 cards of your deck. Put 1 card from among them on top of your deck, and the rest on the bottom of your deck in any order.",
   "pitch": 1,
   "cost": 0,
@@ -2256,7 +2256,7 @@
  {
   "id": "ARC136",
   "name": "Index",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Look at the top 4 cards of your deck. Put 1 card from among them on top of your deck, and the rest on the bottom of your deck in any order.",
   "pitch": 2,
   "cost": 0,
@@ -2269,7 +2269,7 @@
  {
   "id": "ARC137",
   "name": "Index",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Look at the top 3 cards of your deck. Put 1 card from among them on top of your deck, and the rest on the bottom of your deck in any order.",
   "pitch": 3,
   "cost": 0,
@@ -2282,7 +2282,7 @@
  {
   "id": "ARC138",
   "name": "Reverberate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target opposing hero.\nIf Reverberate deals damage, you may banish a Wizard 'non-attack' action card from your hand with {r} cost less than or equal to the damage dealt by Reverberate. If you do, you may play it this turn as though it were an instant.",
   "pitch": 1,
   "cost": 1,
@@ -2295,7 +2295,7 @@
  {
   "id": "ARC139",
   "name": "Reverberate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target opposing hero.\nIf Reverberate deals damage, you may banish a Wizard 'non-attack' action card from your hand with {r} cost less than or equal to the damage dealt by Reverberate. If you do, you may play it this turn as though it were an instant.",
   "pitch": 2,
   "cost": 1,
@@ -2308,7 +2308,7 @@
  {
   "id": "ARC140",
   "name": "Reverberate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target opposing hero.\nIf Reverberate deals damage, you may banish a Wizard 'non-attack' action card from your hand with {r} cost less than or equal to the damage dealt by Reverberate. If you do, you may play it this turn as though it were an instant.",
   "pitch": 3,
   "cost": 1,
@@ -2321,7 +2321,7 @@
  {
   "id": "ARC141",
   "name": "Scalding Rain",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to target hero.",
   "pitch": 1,
   "cost": 1,
@@ -2334,7 +2334,7 @@
  {
   "id": "ARC142",
   "name": "Scalding Rain",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero.",
   "pitch": 2,
   "cost": 1,
@@ -2347,7 +2347,7 @@
  {
   "id": "ARC143",
   "name": "Scalding Rain",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero.",
   "pitch": 3,
   "cost": 1,
@@ -2360,7 +2360,7 @@
  {
   "id": "ARC144",
   "name": "Zap",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero.",
   "pitch": 1,
   "cost": 0,
@@ -2373,7 +2373,7 @@
  {
   "id": "ARC145",
   "name": "Zap",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero.",
   "pitch": 2,
   "cost": 0,
@@ -2386,7 +2386,7 @@
  {
   "id": "ARC146",
   "name": "Zap",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero.",
   "pitch": 3,
   "cost": 0,
@@ -2399,7 +2399,7 @@
  {
   "id": "ARC147",
   "name": "Voltic Bolt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 5 arcane damage to target hero.",
   "pitch": 1,
   "cost": 2,
@@ -2412,7 +2412,7 @@
  {
   "id": "ARC148",
   "name": "Voltic Bolt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to target hero.",
   "pitch": 2,
   "cost": 2,
@@ -2425,7 +2425,7 @@
  {
   "id": "ARC149",
   "name": "Voltic Bolt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero.",
   "pitch": 3,
   "cost": 2,
@@ -2438,7 +2438,7 @@
  {
   "id": "ARC150",
   "name": "Arcanite Skullcap",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If you have less {h} than your opponent, Arcanite Skullcap gains +1{d} and Arcane Barrier 3.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -2456,7 +2456,7 @@
  {
   "id": "ARC151",
   "name": "Talismanic Lens",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Talismanic Lens: Opt 2",
   "defense": 0,
   "classes": [
@@ -2470,7 +2470,7 @@
  {
   "id": "ARC152",
   "name": "Vest of the First Fist",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When an attack action card you control hits, you may destroy Vest of the First Fist. If you do, gain {r}{r}.",
   "defense": 0,
   "classes": [
@@ -2484,7 +2484,7 @@
  {
   "id": "ARC153",
   "name": "Bracers of Belief",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy Bracers of Belief: Reveal the top card of your deck. If you do, the next attack action card you play this turn, gains +X{p}, where X is 3 minus the pitch value of the card revealed this way. Go again",
   "defense": 0,
   "classes": [
@@ -2498,7 +2498,7 @@
  {
   "id": "ARC154",
   "name": "Mage Master Boots",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}, destroy this: The next non-attack action card you play this turn gets go again. Go again",
   "defense": 0,
   "classes": [
@@ -2512,7 +2512,7 @@
  {
   "id": "ARC155",
   "name": "Nullrune Hood",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -2529,7 +2529,7 @@
  {
   "id": "ARC156",
   "name": "Nullrune Robe",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -2546,7 +2546,7 @@
  {
   "id": "ARC157",
   "name": "Nullrune Gloves",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -2563,7 +2563,7 @@
  {
   "id": "ARC158",
   "name": "Nullrune Boots",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -2580,7 +2580,7 @@
  {
   "id": "ARC159",
   "name": "Command and Conquer",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Defense reaction cards can't be played this chain link. When this hits a hero, destroy all cards in their arsenal.",
   "pitch": 1,
   "cost": 2,
@@ -2597,7 +2597,7 @@
  {
   "id": "ARC160",
   "name": "Art of War",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Choose 2;\n\nAttack action cards you control gain +1{p} and +1{d} this turn.\nThe next attack action card you play this turn gains go again.\nUntil end of turn, you may defend with attack action cards from arsenal.\nYou may banish an attack action card from your hand. If you do, draw 2 cards.",
   "pitch": 2,
   "cost": 1,
@@ -2609,7 +2609,7 @@
  {
   "id": "ARC161",
   "name": "Pursuit of Knowledge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, your hero gets +1{i} until end of turn.",
   "pitch": 3,
   "cost": 2,
@@ -2626,7 +2626,7 @@
  {
   "id": "ARC162",
   "name": "Chains of Eminence",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen Chains of Eminence enters the arena, name a card. The named card can't be pitched, played or used to defend while Chains of Eminence is in the arena.\nAt the beginning of your action phase, destroy Chains of Eminence",
   "pitch": 1,
   "cost": 0,
@@ -2645,7 +2645,7 @@
  {
   "id": "ARC163",
   "name": "Rusted Relic",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Arcane Barrier 1",
   "pitch": 3,
   "cost": 0,
@@ -2663,7 +2663,7 @@
  {
   "id": "ARC164",
   "name": "Life for a Life",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.\nWhen this hits, gain 1{h}.",
   "pitch": 1,
   "cost": 1,
@@ -2683,7 +2683,7 @@
  {
   "id": "ARC165",
   "name": "Life for a Life",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.\nWhen this hits, gain 1{h}.",
   "pitch": 2,
   "cost": 1,
@@ -2703,7 +2703,7 @@
  {
   "id": "ARC166",
   "name": "Life for a Life",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.\nWhen this hits, gain 1{h}.",
   "pitch": 3,
   "cost": 1,
@@ -2723,7 +2723,7 @@
  {
   "id": "ARC167",
   "name": "Enchanting Melody",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nIf your hero would be dealt damage, instead destroy Enchanting Melody and prevent 4 damage that source would deal.\nAt the beginning of your end phase, destroy Enchanting Melody unless you have played a 'non-attack' action card this turn.",
   "pitch": 1,
   "cost": 2,
@@ -2742,7 +2742,7 @@
  {
   "id": "ARC168",
   "name": "Enchanting Melody",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nIf your hero would be dealt damage, instead destroy Enchanting Melody and prevent 3 damage that source would deal.\nAt the beginning of your end phase, destroy Enchanting Melody unless you have played a 'non-attack' action card this turn.",
   "pitch": 2,
   "cost": 2,
@@ -2761,7 +2761,7 @@
  {
   "id": "ARC169",
   "name": "Enchanting Melody",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nIf your hero would be dealt damage, instead destroy Enchanting Melody and prevent 2 damage that source would deal.\nAt the beginning of your end phase, destroy Enchanting Melody unless you have played a 'non-attack' action card this turn.",
   "pitch": 3,
   "cost": 2,
@@ -2780,7 +2780,7 @@
  {
   "id": "ARC170",
   "name": "Plunder Run",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time an attack action card you control hits this turn, draw a card.\nIf Plunder Run is played from arsenal, the next attack action card you play this turn gains +3{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -2796,7 +2796,7 @@
  {
   "id": "ARC171",
   "name": "Plunder Run",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time an attack action card you control hits this turn, draw a card.\nIf Plunder Run is played from arsenal, the next attack action card you play this turn gains +2{p}.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -2812,7 +2812,7 @@
  {
   "id": "ARC172",
   "name": "Plunder Run",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time an attack action card you control hits this turn, draw a card.\nIf Plunder Run is played from arsenal, the next attack action card you play this turn gains +1{p}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -2828,7 +2828,7 @@
  {
   "id": "ARC173",
   "name": "Eirina's Prayer",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Reveal the top card of your deck. Prevent the next X arcane damage that would be dealt to your hero this turn, where X is 6 minus the pitch value of the card revealed this way.",
   "pitch": 1,
   "cost": 1,
@@ -2840,7 +2840,7 @@
  {
   "id": "ARC174",
   "name": "Eirina's Prayer",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Reveal the top card of your deck. Prevent the next X arcane damage that would be dealt to your hero this turn, where X is 5 minus the pitch value of the card revealed this way.",
   "pitch": 2,
   "cost": 1,
@@ -2852,7 +2852,7 @@
  {
   "id": "ARC175",
   "name": "Eirina's Prayer",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Reveal the top card of your deck. Prevent the next X arcane damage that would be dealt to your hero this turn, where X is 4 minus the pitch value of the card revealed this way.",
   "pitch": 3,
   "cost": 1,
@@ -2864,7 +2864,7 @@
  {
   "id": "ARC176",
   "name": "Back Alley Breakline",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an activated ability or action card effect puts Back Alley Breakline face up into a zone from your deck, gain 1 action point.",
   "pitch": 1,
   "cost": 1,
@@ -2881,7 +2881,7 @@
  {
   "id": "ARC177",
   "name": "Back Alley Breakline",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an activated ability or action card effect puts Back Alley Breakline face up into a zone from your deck, gain 1 action point.",
   "pitch": 2,
   "cost": 1,
@@ -2898,7 +2898,7 @@
  {
   "id": "ARC178",
   "name": "Back Alley Breakline",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an activated ability or action card effect puts Back Alley Breakline face up into a zone from your deck, gain 1 action point.",
   "pitch": 3,
   "cost": 1,
@@ -2915,7 +2915,7 @@
  {
   "id": "ARC179",
   "name": "Cadaverous Contraband",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Cadaverous Contraband hits, you may put a 'non-attack' action card from your graveyard on top of your deck.",
   "pitch": 1,
   "cost": 2,
@@ -2932,7 +2932,7 @@
  {
   "id": "ARC180",
   "name": "Cadaverous Contraband",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Cadaverous Contraband hits, you may put a 'non-attack' action card from your graveyard on top of your deck.",
   "pitch": 2,
   "cost": 2,
@@ -2949,7 +2949,7 @@
  {
   "id": "ARC181",
   "name": "Cadaverous Contraband",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Cadaverous Contraband hits, you may put a 'non-attack' action card from your graveyard on top of your deck.",
   "pitch": 3,
   "cost": 2,
@@ -2966,7 +2966,7 @@
  {
   "id": "ARC182",
   "name": "Fervent Forerunner",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Fervent Forerunner hits, opt 2.\nIf Fervent Forerunner is played from arsenal, it gains go again.",
   "pitch": 1,
   "cost": 0,
@@ -2987,7 +2987,7 @@
  {
   "id": "ARC183",
   "name": "Fervent Forerunner",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Fervent Forerunner hits, opt 2.\nIf Fervent Forerunner is played from arsenal, it gains go again.",
   "pitch": 2,
   "cost": 0,
@@ -3008,7 +3008,7 @@
  {
   "id": "ARC184",
   "name": "Fervent Forerunner",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Fervent Forerunner hits, opt 2.\nIf Fervent Forerunner is played from arsenal, it gains go again.",
   "pitch": 3,
   "cost": 0,
@@ -3029,7 +3029,7 @@
  {
   "id": "ARC185",
   "name": "Moon Wish",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may put a card from your hand on top of your deck rather than pay Moon Wish's {r} cost.\nIf Moon Wish hits, search your deck for a card named Sun Kiss, reveal it, put it into your hand, then shuffle your deck.",
   "pitch": 1,
   "cost": 2,
@@ -3046,7 +3046,7 @@
  {
   "id": "ARC186",
   "name": "Moon Wish",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may put a card from your hand on top of your deck rather than pay Moon Wish's {r} cost.\nIf Moon Wish hits, search your deck for a card named Sun Kiss, reveal it, put it into your hand, then shuffle your deck.",
   "pitch": 2,
   "cost": 2,
@@ -3063,7 +3063,7 @@
  {
   "id": "ARC187",
   "name": "Moon Wish",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may put a card from your hand on top of your deck rather than pay Moon Wish's {r} cost.\nIf Moon Wish hits, search your deck for a card named Sun Kiss, reveal it, put it into your hand, then shuffle your deck.",
   "pitch": 3,
   "cost": 2,
@@ -3080,7 +3080,7 @@
  {
   "id": "ARC188",
   "name": "Push the Point",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If the last attack on this combat chain hit, Push the Point gains +2{p}.",
   "pitch": 1,
   "cost": 1,
@@ -3097,7 +3097,7 @@
  {
   "id": "ARC189",
   "name": "Push the Point",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If the last attack on this combat chain hit, Push the Point gains +2{p}.",
   "pitch": 2,
   "cost": 1,
@@ -3114,7 +3114,7 @@
  {
   "id": "ARC190",
   "name": "Push the Point",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If the last attack on this combat chain hit, Push the Point gains +2{p}.",
   "pitch": 3,
   "cost": 1,
@@ -3131,7 +3131,7 @@
  {
   "id": "ARC191",
   "name": "Ravenous Rabble",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -3151,7 +3151,7 @@
  {
   "id": "ARC192",
   "name": "Ravenous Rabble",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -3171,7 +3171,7 @@
  {
   "id": "ARC193",
   "name": "Ravenous Rabble",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -3191,7 +3191,7 @@
  {
   "id": "ARC194",
   "name": "Rifting",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Rifting hits, you may play your next 'non-attack' action card this turn as though it were an instant.",
   "pitch": 1,
   "cost": 2,
@@ -3208,7 +3208,7 @@
  {
   "id": "ARC195",
   "name": "Rifting",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Rifting hits, you may play your next 'non-attack' action card this turn as though it were an instant.",
   "pitch": 2,
   "cost": 2,
@@ -3225,7 +3225,7 @@
  {
   "id": "ARC196",
   "name": "Rifting",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Rifting hits, you may play your next 'non-attack' action card this turn as though it were an instant.",
   "pitch": 3,
   "cost": 2,
@@ -3242,7 +3242,7 @@
  {
   "id": "ARC197",
   "name": "Vigor Rush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played a 'non-attack' action card this turn, Vigor Rush gains go again.",
   "pitch": 1,
   "cost": 1,
@@ -3262,7 +3262,7 @@
  {
   "id": "ARC198",
   "name": "Vigor Rush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played a 'non-attack' action card this turn, Vigor Rush gains go again.",
   "pitch": 2,
   "cost": 1,
@@ -3282,7 +3282,7 @@
  {
   "id": "ARC199",
   "name": "Vigor Rush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played a 'non-attack' action card this turn, Vigor Rush gains go again.",
   "pitch": 3,
   "cost": 1,
@@ -3302,7 +3302,7 @@
  {
   "id": "ARC200",
   "name": "Fate Foreseen",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Opt 1",
   "pitch": 1,
   "cost": 0,
@@ -3318,7 +3318,7 @@
  {
   "id": "ARC201",
   "name": "Fate Foreseen",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Opt 1",
   "pitch": 2,
   "cost": 0,
@@ -3334,7 +3334,7 @@
  {
   "id": "ARC202",
   "name": "Fate Foreseen",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Opt 1",
   "pitch": 3,
   "cost": 0,
@@ -3350,7 +3350,7 @@
  {
   "id": "ARC203",
   "name": "Come to Fight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +3{p}.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -3366,7 +3366,7 @@
  {
   "id": "ARC204",
   "name": "Come to Fight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +2{p}.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -3382,7 +3382,7 @@
  {
   "id": "ARC205",
   "name": "Come to Fight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +1{p}.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -3398,7 +3398,7 @@
  {
   "id": "ARC206",
   "name": "Force Sight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +3{p}.\nIf Force Sight is played from arsenal, opt 2.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -3415,7 +3415,7 @@
  {
   "id": "ARC207",
   "name": "Force Sight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +2{p}.\nIf Force Sight is played from arsenal, opt 2.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -3432,7 +3432,7 @@
  {
   "id": "ARC208",
   "name": "Force Sight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +1{p}.\nIf Force Sight is played from arsenal, opt 2.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -3449,7 +3449,7 @@
  {
   "id": "ARC209",
   "name": "Lead the Charge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time you play an action card with cost 0 or greater this turn, gain 1 action point.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -3465,7 +3465,7 @@
  {
   "id": "ARC210",
   "name": "Lead the Charge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time you play an action card with cost 1 or greater this turn, gain 1 action point.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -3481,7 +3481,7 @@
  {
   "id": "ARC211",
   "name": "Lead the Charge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time you play an action card with cost 2 or greater this turn, gain 1 action point.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -3497,7 +3497,7 @@
  {
   "id": "ARC212",
   "name": "Sun Kiss",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Gain 3{h}.\nIf you have played a card named Moon Wish this turn, draw a card and Sun Kiss gains go again.",
   "pitch": 1,
   "cost": 0,
@@ -3513,7 +3513,7 @@
  {
   "id": "ARC213",
   "name": "Sun Kiss",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Gain 2{h}.\nIf you have played a card named Moon Wish this turn, draw a card and Sun Kiss gains go again.",
   "pitch": 2,
   "cost": 0,
@@ -3529,7 +3529,7 @@
  {
   "id": "ARC214",
   "name": "Sun Kiss",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Gain 1{h}.\nIf you have played a card named Moon Wish this turn, draw a card and Sun Kiss gains go again.",
   "pitch": 3,
   "cost": 0,
@@ -3545,7 +3545,7 @@
  {
   "id": "ARC215",
   "name": "Whisper of the Oracle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Opt 4\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -3562,7 +3562,7 @@
  {
   "id": "ARC216",
   "name": "Whisper of the Oracle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Opt 3\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -3579,7 +3579,7 @@
  {
   "id": "ARC217",
   "name": "Whisper of the Oracle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Opt 2\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -3596,7 +3596,7 @@
  {
   "id": "ARC218",
   "name": "Cracked Bauble",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
   "pitch": 2,
   "classes": [

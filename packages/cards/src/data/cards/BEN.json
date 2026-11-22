@@ -2,7 +2,7 @@
  {
   "id": "BEN001",
   "name": "Benji, the Piercing Wind",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your attack action cards with 2 or less {p} can't be defended by cards from hand.\nThe first time an attack action card you control hits each turn, your next attack gains +1{p}.",
   "classes": [
    "ninja"
@@ -14,7 +14,7 @@
  {
   "id": "BEN002",
   "name": "Harmonized Kodachi",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nIf you have a card in your pitch zone with cost 0, this card's attacks get go again.",
   "attack": 1,
   "classes": [
@@ -32,7 +32,7 @@
  {
   "id": "BEN003",
   "name": "Mask of Shifting Perspectives",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Attack Reaction - Destroy Mask of Shifting Perspectives: Whenever a dagger hits this turn, you may put a card from your hand on the bottom of your deck. If you do, draw a card.",
   "defense": 1,
   "classes": [
@@ -50,7 +50,7 @@
  {
   "id": "BEN004",
   "name": "Silken Gi",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Silken Gi: The next attack action card you play this turn has -1{p} and costs {r} less to play.",
   "classes": [
    "generic"
@@ -63,7 +63,7 @@
  {
   "id": "BEN005",
   "name": "Fisticuffs",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Attack Reaction - {r}{r}, destroy Fisticuffs: Target attack action card gains +1{p}.",
   "classes": [
    "generic"
@@ -76,7 +76,7 @@
  {
   "id": "BEN006",
   "name": "Fleet Foot Sandals",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Attack Reaction - Destroy Fleet Foot Sandals: Target attack with 1 or less base {p} gains go again.",
   "classes": [
    "generic"
@@ -89,7 +89,7 @@
  {
   "id": "BEN007",
   "name": "Bleed Out",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Bleed Out costs X resource points less to play, where X is the total damage you've dealt with daggers this combat chain.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -110,7 +110,7 @@
  {
   "id": "BEN008",
   "name": "Back Heel Kick",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Twin Twisters was the last attack this combat chain, while this is face-up in any zone and would gain {p}, instead it gains that much plus 1.",
   "pitch": 1,
   "cost": 0,
@@ -130,7 +130,7 @@
  {
   "id": "BEN009",
   "name": "Twin Twisters",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose 1:\n\nTwin Twisters gains \"When this hits, your next attack this combat chain gains +1{p}.\"\nTwin Twisters gains +1{p}.\n\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -150,7 +150,7 @@
  {
   "id": "BEN010",
   "name": "Head Jab",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 1,
   "cost": 0,
@@ -170,7 +170,7 @@
  {
   "id": "BEN011",
   "name": "Feisty Locals",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this is defended by an action card, this gets +2{p}.",
   "pitch": 1,
   "cost": 0,
@@ -187,7 +187,7 @@
  {
   "id": "BEN012",
   "name": "Spring Load",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, if you have no cards in hand, it gains +3{p}.",
   "pitch": 1,
   "cost": 1,
@@ -204,7 +204,7 @@
  {
   "id": "BEN013",
   "name": "Short and Sharp",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Choose 1;\n- Target dagger attack gains +3{p}.\n- Target attack action card with 2 or less base {p} gains +3{p}.",
   "pitch": 1,
   "cost": 1,
@@ -218,7 +218,7 @@
  {
   "id": "BEN014",
   "name": "Back Heel Kick",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Twin Twisters was the last attack this combat chain, while this is face-up in any zone and would gain {p}, instead it gains that much plus 1.",
   "pitch": 2,
   "cost": 0,
@@ -238,7 +238,7 @@
  {
   "id": "BEN015",
   "name": "Twin Twisters",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose 1:\n\nTwin Twisters gains \"When this hits, your next attack this combat chain gains +1{p}.\"\nTwin Twisters gains +1{p}.\n\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -258,7 +258,7 @@
  {
   "id": "BEN016",
   "name": "One-Two Punch",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Head Jab was the last attack this combat chain, this has \"When this hits a hero, deal 2 damage to them.\"",
   "pitch": 2,
   "cost": 0,
@@ -278,7 +278,7 @@
  {
   "id": "BEN017",
   "name": "Head Jab",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 2,
   "cost": 0,
@@ -298,7 +298,7 @@
  {
   "id": "BEN018",
   "name": "Be Like Water",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, you may pay {r}. If you do, choose Head Jab, Surging Strike, or Twin Twisters. This gains the chosen name.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -318,7 +318,7 @@
  {
   "id": "BEN019",
   "name": "Plunge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, your next dagger attack this turn gains +1{p}.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -339,7 +339,7 @@
  {
   "id": "BEN020",
   "name": "Salt the Wound",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This gets +1{p} for each attack that has hit this combat chain.",
   "pitch": 2,
   "cost": 0,
@@ -356,7 +356,7 @@
  {
   "id": "BEN021",
   "name": "Be Like Water",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, you may pay {r}. If you do, choose Head Jab, Surging Strike, or Twin Twisters. This gains the chosen name.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -376,7 +376,7 @@
  {
   "id": "BEN022",
   "name": "One-Two Punch",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Head Jab was the last attack this combat chain, this has \"When this hits a hero, deal 2 damage to them.\"",
   "pitch": 3,
   "cost": 0,
@@ -396,7 +396,7 @@
  {
   "id": "BEN023",
   "name": "Recoil",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Head Jab was the last attack this combat chain, this has \"When this hits a hero, they put a card from their hand on top of their deck.\"",
   "pitch": 3,
   "cost": 0,
@@ -416,7 +416,7 @@
  {
   "id": "BEN024",
   "name": "Head Jab",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 3,
   "cost": 0,
@@ -436,7 +436,7 @@
  {
   "id": "BEN025",
   "name": "Soulbead Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, it gets go again.",
   "pitch": 3,
   "cost": 0,
@@ -456,7 +456,7 @@
  {
   "id": "BEN026",
   "name": "Lunging Press",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target attack action card gains +1{p}.",
   "pitch": 3,
   "cost": 0,

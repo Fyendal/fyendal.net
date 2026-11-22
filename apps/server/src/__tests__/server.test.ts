@@ -12,6 +12,7 @@ import type { Queryable } from "../db.js";
 import { getDeck, importDeck, listDeckPlays } from "../decks.js";
 import { PgRoomStore } from "../store.js";
 import { freshDb } from "./testdb.js";
+import { hasType, objectKind } from "@fyendal/shared";
 
 const PORT = 18901;
 let wss: ReturnType<typeof createGameServer>;
@@ -769,15 +770,62 @@ describe("server rooms over websocket", () => {
     a.ws.close();
   });
 
-  it("creates the selected Silver Age Ira bot room only for beta testers", async () => {
+  it("creates the selected Classic Constructed Aurora bot room", async () => {
     const a = await authedClient();
-    a.sendMsg({ type: "create-bot-room", format: "silver-age", deckId: "precon-sly", bot: "ira-sage" });
-    expect(await a.next((message) => message.type === "error"))
-      .toMatchObject({ type: "error", message: "choose a silver-age bot" });
-    await db.query(
-      "INSERT INTO beta_testers (user_id, added_at) SELECT id, 1 FROM users WHERE username_lc = $1",
-      [a.username.toLowerCase()],
+    a.sendMsg({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "aurora" });
+    await a.next((message) => message.type === "room-created");
+    const prep = await a.next(
+      (message) => message.type === "prep-state" && message.prep.seats[1]?.username === "Aurora Bot",
     );
+    expect(prep).toMatchObject({
+      type: "prep-state",
+      prep: {
+        format: "cc", botGame: true,
+        seats: [expect.anything(), { username: "Aurora Bot", heroName: "Aurora, Legacy of Tempest", connected: true }],
+      },
+    });
+    a.sendMsg({ type: "leave-room", endGame: true });
+    await a.next((message) => message.type === "left");
+    a.ws.close();
+  });
+
+  it("creates the selected Classic Constructed Fang bot room", async () => {
+    const a = await authedClient();
+    a.sendMsg({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "fang" });
+    await a.next((message) => message.type === "room-created");
+    const prep = await a.next(
+      (message) => message.type === "prep-state" && message.prep.seats[1]?.username === "Fang Bot",
+    );
+    expect(prep).toMatchObject({
+      type: "prep-state",
+      prep: {
+        format: "cc", botGame: true,
+        seats: [expect.anything(), { username: "Fang Bot", heroName: "Fang, Dracai of Blades", connected: true }],
+      },
+    });
+    a.sendMsg({ type: "leave-room", endGame: true });
+    await a.next((message) => message.type === "left");
+    a.ws.close();
+  });
+
+  it("creates the selected Silver Age Dorinthea bot room", async () => {
+    const a = await authedClient();
+    a.sendMsg({ type: "create-bot-room", format: "silver-age", deckId: "precon-sly", bot: "dorinthea" });
+    await a.next((message) => message.type === "room-created");
+    const prep = await a.next(
+      (message) => message.type === "prep-state" && message.prep.seats[1]?.username === "Dorinthea Bot",
+    );
+    expect(prep).toMatchObject({
+      type: "prep-state",
+      prep: { format: "silver-age", botGame: true, seats: [expect.anything(), { username: "Dorinthea Bot", connected: true }] },
+    });
+    a.sendMsg({ type: "leave-room", endGame: true });
+    await a.next((message) => message.type === "left");
+    a.ws.close();
+  });
+
+  it("creates the selected Silver Age Ira bot room", async () => {
+    const a = await authedClient();
     a.sendMsg({ type: "create-bot-room", format: "silver-age", deckId: "precon-sly", bot: "ira-sage" });
     await a.next((message) => message.type === "room-created");
     const prep = await a.next(
@@ -1396,9 +1444,87 @@ describe("lobby and matchmaking", () => {
     expect(prepA.prep.seats[0]?.heroId).toBe(heroId);
     expect(prepA.prep.seats[1]?.heroId).toBe(heroId);
     expect(prepA.prep.startPlayer).toBeNull();
+    expect(prepA.prep.sandbox).toBeUndefined();
+    expect((await db.query("SELECT sandbox FROM rooms WHERE code = $1", [created.code])).rows[0])
+      .toEqual({ sandbox: false });
     await startGameOverWs(a, b, prepA);
 
     a.ws.close();
+    b.ws.close();
+  });
+
+  it("rejects sandbox on public rooms", async () => {
+    const host = await authedClient();
+    host.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb", sandbox: true });
+    const err = (await host.next((m) => m.type === "error")) as Extract<ServerMessage, { type: "error" }>;
+    expect(err.message).toBe("sandbox rooms must be private");
+    host.ws.close();
+  });
+
+  it("flags private sandbox rooms in prep and game state", async () => {
+    const host = await authedClient();
+    host.sendMsg({ type: "create-room", format: "cc", deckId: "precon-asb", private: true, sandbox: true });
+    const created = (await host.next((m) => m.type === "room-created")) as Extract<
+      ServerMessage,
+      { type: "room-created" }
+    >;
+    expect((await db.query("SELECT sandbox FROM rooms WHERE code = $1", [created.code])).rows[0])
+      .toEqual({ sandbox: true });
+    const guest = await authedClient();
+    guest.sendMsg({ type: "join-room", code: created.code, deckId: "precon-asr" });
+    await guest.next((m) => m.type === "joined");
+    const prep = (await host.next(
+      (m) => m.type === "prep-state" && m.prep.die !== null && m.prep.yourDeckId !== undefined,
+    )) as Extract<ServerMessage, { type: "prep-state" }>;
+    expect(prep.prep.sandbox).toBe(true);
+    await startGameOverWs(host, guest, prep);
+    const state = (await guest.next((m) => m.type === "state")) as Extract<ServerMessage, { type: "state" }>;
+    expect(state.sandbox).toBe(true);
+    host.ws.close();
+    guest.ws.close();
+  });
+
+  it("reconnecting to a matchmade opener resumes its search", async () => {
+    const a = await authedClient();
+    a.sendMsg({ type: "queue-join", format: "cc", deckId: "precon-asb" });
+    const created = (await a.next((m) => m.type === "room-created")) as Extract<
+      ServerMessage,
+      { type: "room-created" }
+    >;
+    const closed = new Promise<void>((resolve) => a.ws.once("close", () => resolve()));
+    a.ws.close();
+    await closed;
+    const entries = async () =>
+      Number((await db.query("SELECT COUNT(*) AS count FROM matchmaking_entries")).rows[0]!.count);
+    await expect.poll(entries).toBe(0);
+
+    const again = await client();
+    again.sendMsg({ type: "auth", token: a.authToken });
+    await again.next((m) => m.type === "authed");
+    again.sendMsg({ type: "join-room", code: created.code, token: created.token });
+    expect(await again.next((m) => m.type === "joined")).toMatchObject({ code: created.code, resumed: true });
+    await again.next((m) => m.type === "queued");
+    expect(await entries()).toBe(1);
+
+    const lobby = await authedClient();
+    lobby.sendMsg({ type: "list-rooms" });
+    await lobby.next((m) => m.type === "queue-status" && m.counts.cc.legal.legal === 1);
+
+    const b = await authedClient();
+    b.sendMsg({ type: "queue-join", format: "cc", deckId: "precon-asb" });
+    const joined = (await b.next((m) => m.type === "joined")) as Extract<ServerMessage, { type: "joined" }>;
+    expect(joined.code).toBe(created.code);
+
+    b.inbox.length = 0;
+    again.sendMsg({ type: "leave-room" });
+    await again.next((m) => m.type === "left");
+    // The survivor goes back into the queue before leaving it.
+    await b.next((m) => m.type === "queued");
+    b.sendMsg({ type: "leave-room" });
+    await b.next((m) => m.type === "left");
+    await expect.poll(entries).toBe(0);
+    again.ws.close();
+    lobby.ws.close();
     b.ws.close();
   });
 
@@ -1491,16 +1617,17 @@ describe("lobby and matchmaking", () => {
 
 describe("cc prep room", () => {
   const printings = Object.values(cardData);
-  const hero = printings.find((c) => c.cardType === "hero" && c.name.includes("Rhinar"))!;
+  const hero = printings.find((c) => hasType(c, "hero") && c.name.includes("Rhinar"))!;
   const ccIssuesFor = (id: string) => formatLegalityIssues(
     cardData,
     { heroId: hero.id, weaponIds: [], equipmentPool: [], deck: [id], sideboard: [] },
     "cc",
   );
-  const weapon = printings.find((c) => c.cardType === "weapon" && ccIssuesFor(c.id).length === 0)!;
+  const weapon = printings.find((c) =>
+    hasType(c, "weapon") && !hasType(c, "token") && ccIssuesFor(c.id).length === 0)!;
   const deckCards = printings.filter(
     (c) =>
-      !["hero", "weapon", "equipment", "token"].includes(c.cardType) &&
+      objectKind(c) === "deck" &&
       ccIssuesFor(c.id).length === 0,
   );
 

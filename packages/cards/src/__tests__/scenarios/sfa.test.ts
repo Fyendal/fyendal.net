@@ -488,7 +488,7 @@ describe("SFA — banish-and-play on hit", () => {
       .expectInZone(0, RONIN, "banish");
     expect(projectStateFor(s.state, 1).logEntries).toContainEqual(expect.objectContaining({
       message: {
-        id: "card.log.sfa.banished.power",
+        id: "card.log.common.banished.power",
         values: {
           amount: 1,
           result: { kind: "card", cardId: printingId(RONIN) },

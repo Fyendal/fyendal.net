@@ -1,6 +1,7 @@
 import type { CardData, Decklist, DeckPool, Format, PresentedDeck } from "@fyendal/shared";
 import { decodeCardDataList } from "./cardData.js";
 import { functionalKey, functionalKeyOf } from "./functional.js";
+import * as canonicalTokens from "./scripts/tokens.js";
 import cards1HP from "./data/cards/1HP.json" with { type: "json" };
 import cardsAAC from "./data/cards/AAC.json" with { type: "json" };
 import cardsAHA from "./data/cards/AHA.json" with { type: "json" };
@@ -47,6 +48,7 @@ import cardsLGS from "./data/cards/LGS.json" with { type: "json" };
 import cardsMON from "./data/cards/MON.json" with { type: "json" };
 import cardsMST from "./data/cards/MST.json" with { type: "json" };
 import cardsMPA from "./data/cards/MPA.json" with { type: "json" };
+import cardsMPB from "./data/cards/MPB.json" with { type: "json" };
 import cardsMPG from "./data/cards/MPG.json" with { type: "json" };
 import cardsMPW from "./data/cards/MPW.json" with { type: "json" };
 import cardsOBK from "./data/cards/OBK.json" with { type: "json" };
@@ -127,19 +129,20 @@ import rawPreconsJson from "./data/precons.json" with { type: "json" };
 import { validateArenaAgainstCards, validatePresentationAgainstCards } from "./presentation.js";
 export { equipmentFitsSlot, isWeaponZoneCard } from "./equipment.js";
 export { functionalKey, functionalKeyOf } from "./functional.js";
-import { formatLegalityIssues } from "./formatLegality.js";
+import { FUTURE_SET_CODES, formatLegalityIssues } from "./formatLegality.js";
 export {
   CLASSIC_CONSTRUCTED_LEGALITY_CHECKED_ON,
   FUTURE_SET_CODES,
   SILVER_AGE_LEGALITY_CHECKED_ON,
   formatLegalityErrors,
   formatLegalityIssues,
+  isDeckConstructionIssue,
   type FormatLegalityIssue,
 } from "./formatLegality.js";
 export {
   arenaWeaponIssue,
-  EXACT_DECK_SIZE,
   MIN_DECK_SIZE,
+  presentedDeckSize,
 } from "./presentation.js";
 export type { PresentationResult } from "./presentation.js";
 
@@ -496,6 +499,8 @@ const KEYWORD_OVERRIDES: Record<string, string[]> = {
   "sic 'em shot|1": [],
   "sic 'em shot|2": [],
   "sic 'em shot|3": [],
+  // Nourishing Emptiness only has dominate while no attack action is in its controller's graveyard.
+  "nourishing emptiness|1": [],
   // CRU conditional keywords are granted by scripts only after their printed
   // conditions are satisfied.
   "barraging big horn|1": [],
@@ -767,6 +772,7 @@ const rawCardList = decodeCardDataList([
   ...cardsAMO,
   ...cardsAMG,
   ...cardsMPA,
+  ...cardsMPB,
   ...cardsOBK,
   ...cardsMPG,
   ...cardsMPW,
@@ -856,9 +862,13 @@ export const cardList = rawCardList.map((c) => {
   };
 });
 
-export const cardData: Record<string, CardData> = Object.fromEntries(
-  cardList.map((c) => [c.id, c]),
-);
+const canonicalTokenIds = new Set<string>(Object.values(canonicalTokens));
+
+// The engine creates every token as the first same-name printing in this record.
+export const cardData: Record<string, CardData> = Object.fromEntries([
+  ...cardList.filter((c) => canonicalTokenIds.has(c.id)),
+  ...cardList.filter((c) => !canonicalTokenIds.has(c.id)),
+].map((c) => [c.id, c]));
 
 /** Validate arena cards independently of the later main-deck selection. */
 export function validateArena(
@@ -893,7 +903,7 @@ export function warnOnInconsistentPrintings(printings: CardData[]): void {
     if (group) group.push(c);
     else groups.set(key, [c]);
   }
-  const FIELDS = ["color", "pitch", "cost", "attack", "defense", "cardType", "classes", "subtypes", "keywords"] as const;
+  const FIELDS = ["color", "pitch", "cost", "attack", "defense", "types", "classes", "subtypes", "keywords"] as const;
   for (const [key, group] of groups) {
     if (group.length < 2) continue;
     const first = group[0]!;
@@ -929,7 +939,9 @@ export function normalizeCardName(name: string): string {
 
 const byFunctionalKey = new Map<string, CardData>();
 const byName = new Map<string, CardData[]>();
-for (const c of cardList) {
+const isUnreleased = (card: CardData) => !!card.set && FUTURE_SET_CODES.has(card.set);
+// An unreleased reprint must not make imported decks resolve to a future printing.
+for (const c of [...cardList.filter((card) => !isUnreleased(card)), ...cardList.filter(isUnreleased)]) {
   const n = normalizeCardName(c.name);
   const key = functionalKey(n, c.pitch);
   if (!byFunctionalKey.has(key)) byFunctionalKey.set(key, c);

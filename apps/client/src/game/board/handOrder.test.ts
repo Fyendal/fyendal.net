@@ -4,6 +4,7 @@ import {
   handDragScrollSpeed,
   handDragStarted,
   handDragLocation,
+  handDragTargetIndex,
   handDropAction,
   handDropOnOwnArsenal,
   handPlayDropTargetAllowed,
@@ -73,6 +74,18 @@ describe("hand drag gestures", () => {
     expect(handDragStarted(50, 50, 50, 30)).toBe(true);
     expect(handDragStarted(50, 50, 61, 54)).toBe(true);
     expect(handDragStarted(50, 50, 30, 54)).toBe(true);
+  });
+
+  it("passes a neighbour after most of a slot step and needs a return trip to swap back", () => {
+    const slots = [100, 200, 300, 400];
+    expect(handDragTargetIndex(255, slots, 1)).toBe(1);
+    expect(handDragTargetIndex(265, slots, 1)).toBe(2);
+    expect(handDragTargetIndex(135, slots, 1)).toBe(0);
+    expect(handDragTargetIndex(375, slots, 1)).toBe(3);
+    // Swapped into the slot at 300, a card at 265 stays there until it drifts back past 240.
+    expect(handDragTargetIndex(265, slots, 2)).toBe(2);
+    expect(handDragTargetIndex(245, slots, 2)).toBe(2);
+    expect(handDragTargetIndex(235, slots, 2)).toBe(1);
   });
 
   it("scrolls at either edge with bounded speed and leaves the center still", () => {

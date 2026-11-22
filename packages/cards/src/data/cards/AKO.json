@@ -2,7 +2,7 @@
  {
   "id": "AKO001",
   "name": "Kayo, Armed and Dangerous",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You have 1 weapon zone.\nAttack action cards you own get +1{p} while they are in any zone other than the combat chain.\nThe first time you discard a card with 6 or more {p} during each of your action phases, create a Might token.",
   "classes": [
    "brute"
@@ -14,7 +14,7 @@
  {
   "id": "AKO002",
   "name": "Mandible Claw",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nIf you have discarded a card with 6 or more {p} this turn, this card's attacks go again.",
   "attack": 3,
   "classes": [
@@ -29,7 +29,7 @@
  {
   "id": "AKO003",
   "name": "Knucklehead",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Kayo Specialization \nAction - Destroy this: Roll a 6-sided die. Until end of turn, your base {i} is the number rolled.\nTemper",
   "defense": 2,
   "classes": [
@@ -47,7 +47,7 @@
  {
   "id": "AKO004",
   "name": "Savage Sash",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Attack action cards with 6 or more {p} cost you {r} less to play this turn. Go again\nTemper",
   "defense": 2,
   "classes": [
@@ -64,7 +64,7 @@
  {
   "id": "AKO005",
   "name": "Hide Tanner",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When you discard a random card with 6 or more {p}, you may destroy this. If you do, create 2 Might tokens.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -81,7 +81,7 @@
  {
   "id": "AKO006",
   "name": "Beaten Trackers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever you discard a random card with 6 or more {p}, you may destroy this. If you do, gain 1 action point.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -98,7 +98,7 @@
  {
   "id": "AKO007",
   "name": "Bare Fangs",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
   "pitch": 1,
   "cost": 2,
@@ -114,7 +114,7 @@
  {
   "id": "AKO008",
   "name": "Clash of Agility",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends, clash with the attacking hero. The winner creates an Agility token.",
   "pitch": 1,
   "cost": 2,
@@ -135,7 +135,7 @@
  {
   "id": "AKO009",
   "name": "Humble",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, they lose all hero card abilities until the end of their next turn.",
   "pitch": 1,
   "cost": 2,
@@ -152,7 +152,7 @@
  {
   "id": "AKO010",
   "name": "Pulping",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets dominate.\nIf this is defended by fewer than 2 non-equipment cards, it gets go again.",
   "pitch": 1,
   "cost": 2,
@@ -172,7 +172,7 @@
  {
   "id": "AKO011",
   "name": "Rally the Rearguard",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this ability only while this is defending.",
   "pitch": 1,
   "cost": 2,
@@ -189,7 +189,7 @@
  {
   "id": "AKO012",
   "name": "Savage Beatdown",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Play this only if you've discarded a card with 6 or more {p} this turn.\nAs an additional cost to play this, discard a random card.\nIf the discarded card has 6 or more {p}, this gets +6{p}.",
   "pitch": 1,
   "cost": 3,
@@ -206,7 +206,7 @@
  {
   "id": "AKO013",
   "name": "Strength Rules All",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, turn a card in their arsenal face-up, then banish an attack action card in their arsenal with {p} less than the damage dealt this way.",
   "pitch": 1,
   "cost": 2,
@@ -223,7 +223,7 @@
  {
   "id": "AKO014",
   "name": "Wild Ride",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets go again.",
   "pitch": 1,
   "cost": 2,
@@ -242,7 +242,7 @@
  {
   "id": "AKO015",
   "name": "Wreck Havoc",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Defense reactions can't be played to this chain link.\nWhen this hits a hero, you may turn a card in their arsenal face up, then destroy a defense reaction in their arsenal.",
   "pitch": 1,
   "cost": 2,
@@ -259,7 +259,7 @@
  {
   "id": "AKO016",
   "name": "Bare Fangs",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
   "pitch": 2,
   "cost": 2,
@@ -275,7 +275,7 @@
  {
   "id": "AKO017",
   "name": "Agile Windup",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Create an Agility token.",
   "pitch": 3,
   "cost": 3,
@@ -293,7 +293,7 @@
  {
   "id": "AKO018",
   "name": "Assault and Battery",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create an Agility token.",
   "pitch": 3,
   "cost": 3,
@@ -313,7 +313,7 @@
  {
   "id": "AKO019",
   "name": "Battlefront Bastion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends alone, prevent the next 1 damage that would be dealt to you this turn.",
   "pitch": 3,
   "cost": 3,
@@ -330,7 +330,7 @@
  {
   "id": "AKO020",
   "name": "Mighty Windup",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Create a Might token.",
   "pitch": 3,
   "cost": 3,
@@ -348,7 +348,7 @@
  {
   "id": "AKO021",
   "name": "Pound Town",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create a Might token.",
   "pitch": 3,
   "cost": 3,
@@ -368,7 +368,7 @@
  {
   "id": "AKO022",
   "name": "Reincarnate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is discarded at random, put it on the bottom of its owner's deck.",
   "pitch": 3,
   "cost": 3,
@@ -385,7 +385,7 @@
  {
   "id": "AKO023",
   "name": "Riled Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've discarded a card with 6 or more {p} this turn, this gets +1{p}.",
   "pitch": 3,
   "cost": 3,
@@ -402,7 +402,7 @@
  {
   "id": "AKO024",
   "name": "Run Roughshod",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Play this only if you've discarded a card with 6 or more {p} this turn.",
   "pitch": 3,
   "cost": 1,
@@ -419,7 +419,7 @@
  {
   "id": "AKO025",
   "name": "Smash Instinct",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, intimidate.",
   "pitch": 3,
   "cost": 3,
@@ -439,7 +439,7 @@
  {
   "id": "AKO026",
   "name": "Wrecker Romp",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, discard a random card.",
   "pitch": 3,
   "cost": 2,
@@ -456,7 +456,7 @@
  {
   "id": "AKO027",
   "name": "Agility",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then your next attack this turn gets go again.",
   "classes": [
    "generic"
@@ -469,7 +469,7 @@
  {
   "id": "AKO028",
   "name": "Might",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
   "classes": [
    "generic"

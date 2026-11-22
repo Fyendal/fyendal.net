@@ -150,6 +150,22 @@ export function canPayRequiredHandCardsForAdditionalCost(
   ).length >= required;
 }
 
+/** Whether hand pitches and the floating pools can cover `cost`. Pitching in
+ * any order and stopping once covered never overpitches, so the total decides. */
+export function canPayFromHand(
+  state: GameStateInternal,
+  paying: PlayerState,
+  cost: number,
+  excludeInstanceIds: readonly number[] = [],
+): boolean {
+  return paying.hand.reduce(
+    (total, card) => excludeInstanceIds.includes(card.instanceId) || pitchProhibitedByEffect(state, paying, card)
+      ? total
+      : total + pitchValueOfInstance(state, card),
+    paying.resources + paying.chi,
+  ) >= cost;
+}
+
 /** Enumerate legal hand-card payments for a scripted resource cost. The
  * labels are presentation-only option ids; the attached card ids remain the
  * authority used when the choice is applied. */

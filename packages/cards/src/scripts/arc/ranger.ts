@@ -1,42 +1,22 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  isArrow,
   localizedCardLog,
   opponentSeat,
   optN,
   optOnChoose,
+  reload,
+  resolveReload,
 } from "../shared-helpers.js";
-
-function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("arrow");
-}
-
-/** Reload: if the arsenal is empty, optionally put a hand card there face down. */
-function reload(ctx: ScriptCtx): void {
-  const player = ctx.state.players[ctx.seat]!;
-  if (player.arsenal.length > 0 || player.hand.length === 0) return;
-  ctx.requestCardChoice(
-    "arc-reload",
-    decisionPrompt("Reload: put a card from your hand into your arsenal?", "card.common.reload", {
-      optionMessages: commonOptionMessages("pass"),
-    }),
-    ["pass", ...player.hand.map((card) => card.instanceId)],
-  );
-}
-
-function reloadOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
-  if (hook !== "arc-reload") return false;
-  if (option !== "pass") ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
-  return true;
-}
 
 function reloadScript(): CardScript {
   return {
     onPlay: reload,
     onChoose(ctx, hook, option) {
-      reloadOnChoose(ctx, hook, option);
+      resolveReload(ctx, hook, option);
     },
   };
 }
@@ -125,7 +105,7 @@ function takeAim(attack: number): CardScript {
       reload(ctx);
     },
     onChoose(ctx, hook, option) {
-      reloadOnChoose(ctx, hook, option);
+      resolveReload(ctx, hook, option);
     },
   };
 }

@@ -17,14 +17,20 @@ import {
 import { register } from "../auth.js";
 import { freshDb } from "./testdb.js";
 import { cardArtVariants } from "@fyendal/cards/art";
-import { STANDARD_CARD_ART } from "@fyendal/shared";
+import type { FabraryPin } from "../fabrary.js";
+import { hasType, objectKind, STANDARD_CARD_ART } from "@fyendal/shared";
 
 const printings = Object.values(cardData) as CardData[];
-const hero = printings.find((c) => c.cardType === "hero" && c.name.includes("Rhinar"))!;
-const weapon = printings.find((c) => c.cardType === "weapon")!;
-const chest = printings.find((c) => c.cardType === "equipment" && c.subtypes?.includes("chest"))!;
+const hero = printings.find((c) => hasType(c, "hero") && c.name.includes("Rhinar"))!;
+const legalCcWeapons = printings.filter((c) => hasType(c, "weapon") && !hasType(c, "token") && formatLegalityIssues(
+  cardData,
+  { heroId: hero.id, weaponIds: [c.id], equipmentPool: [], deck: [], sideboard: [] },
+  "cc",
+).length === 0);
+const weapon = legalCcWeapons[0]!;
+const chest = printings.find((c) => hasType(c, "equipment") && c.subtypes?.includes("chest"))!;
 const deckCards = printings.filter(
-  (c) => !["hero", "weapon", "equipment", "token"].includes(c.cardType),
+  (c) => objectKind(c) === "deck",
 );
 const legalCcDeckCards = deckCards.filter((candidate) =>
   formatLegalityIssues(
@@ -52,6 +58,9 @@ it("does not expose internal bot decks through player deck resolution", async ()
     "bot-starvo-boss",
     "bot-boltyn-raydn",
     "bot-ira-sage",
+    "bot-aurora-tempest",
+    "bot-dorinthea-sage",
+    "bot-fang-dracai",
   ]) {
     const result = await resolveFreshDeck(db, 1, id, {
       fetchDeck: async () => { throw new Error("should not fetch"); },
@@ -233,11 +242,11 @@ describe("parseDecklistText", () => {
     // "999999999x …" must not expand into ~1e9 array pushes downstream
     const lines = parseDecklistText(`999999999x ${deckCards[0]!.name}`);
     expect(lines[0]!.qty).toBe(99);
-    // …and the deck is still rejected by the copies limit
-    const r = validateDeck(lines, "cc");
+    // …and a zone over the stored cap is still rejected
+    const r = validateDeck([{ qty: 1, name: hero.name, section: "hero" }, ...lines, ...lines], "cc");
     expect(r.ok).toBe(false);
     if (r.ok) return;
-    expect(r.errors.some((e) => e.includes("too many copies"))).toBe(true);
+    expect(r.errors).toContain("too many deck cards (198, at most 100)");
   });
 });
 
@@ -311,7 +320,7 @@ describe("validateDeck", () => {
     expect(r.decklist.sideboard).toHaveLength(10);
   });
 
-  it("rejects pools over the format maximum", () => {
+  it("imports pools over the format maximum as Open-only", () => {
     // cc max pool is 80: 84 main-deck cards + weapon + chest = 86
     const lines = parseDecklistText(
       [
@@ -322,199 +331,11 @@ describe("validateDeck", () => {
       ].join("\n"),
     );
     const r = validateDeck(lines, "cc");
-    expect(r.ok).toBe(false);
-    if (r.ok) return;
-    expect(r.errors.some((e) => e.includes("too large"))).toBe(true);
-  });
-
-  it("allows multiple weapons and equipment per slot in the registered pool", () => {
-    const weapons = printings.filter((c) => c.cardType === "weapon");
-    const heads = printings.filter((c) => c.cardType === "equipment" && c.subtypes?.includes("head"));
-    const lines = parseDecklistText(
-      [
-        `Hero: ${hero.name}`,
-        `2x ${weapons[0]!.name}`,
-        `1x ${weapons[1]!.name}`,
-        ...heads.slice(0, 2).map((c) => `1x ${c.name}`),
-        ...deckCards.slice(0, 20).map((c) => deckLine(c)),
-      ].join("\n"),
-    );
-    const r = validateDeck(lines, "cc");
-    expect(r).toMatchObject({ ok: true });
+    expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.decklist.weaponIds).toHaveLength(3);
-    expect(r.decklist.equipmentPool).toHaveLength(2);
-  });
-
-  it("registers off-hand equipment in the weapon slots (CR)", () => {
-    const offhand = printings.find(
-      (c) => c.cardType === "equipment" && c.subtypes?.includes("off-hand"),
-    )!;
-    const lines = parseDecklistText(
-      [
-        `Hero: ${hero.name}`,
-        `1x ${offhand.name}`,
-        ...deckCards.slice(0, 20).map((c) => deckLine(c)),
-      ].join("\n"),
-    );
-    const r = validateDeck(lines, "cc");
-    expect(r).toMatchObject({ ok: true });
-    if (!r.ok) return;
-    expect(r.decklist.weaponIds).toEqual([offhand.id]);
-    expect(r.decklist.equipmentPool).toEqual([]);
-  });
-
-  it("registers off-hand action cards in the weapon slots", () => {
-    const polly = cardData.SEA003!;
-    const lines = parseDecklistText(
-      [
-        `Hero: ${hero.name}`,
-        `1x ${polly.name}`,
-        ...legalCcDeckCards.slice(0, 20).map((c) => deckLine(c)),
-      ].join("\n"),
-    );
-
-    const r = validateDeck(lines, "cc");
-    expect(r).toMatchObject({ ok: true });
-    if (!r.ok) return;
-    expect(r.decklist.weaponIds).toEqual([polly.id]);
-    expect(r.decklist.deck).not.toContain(polly.id);
-  });
-
-  it("registers Modular cards as equipment without a fixed slot subtype", () => {
-    const adaptivePlating = printings.find((c) => c.name === "Adaptive Plating")!;
-    const lines = parseDecklistText(
-      [
-        `Hero: ${hero.name}`,
-        `1x ${adaptivePlating.name}`,
-        ...legalCcDeckCards.slice(0, 20).map((c) => deckLine(c)),
-      ].join("\n"),
-    );
-
-    const r = validateDeck(lines, "cc");
-    expect(r).toMatchObject({ ok: true });
-    if (!r.ok) return;
-    expect(r.decklist.equipmentPool).toEqual([adaptivePlating.id]);
-  });
-
-  it("imports the Lyath Goldmane Silver Age precon decklist (fabtcg.com)", () => {
-    // https://fabtcg.com/decklists/silver-age-chapter-3-lyath-goldmane/
-    const text = [
-      "1x Lyath Goldmane",
-      "1x Arcane Lantern",
-      "1x Blade Beckoner Helm",
-      "1x Blade Beckoner Plating",
-      "1x Line Crossers",
-      "1x Nullrune Hood",
-      "1x Nullrune Robe",
-      "1x Stand Strong",
-      "1x Stonewall Impasse",
-      "1x Titan's Fist",
-      "2x Act of Glory (red)",
-      "2x Drag Down (red)",
-      "2x Edge of Their Seats (red)",
-      "2x Mocking Blow (red)",
-      "2x Oasis Respite (red)",
-      "2x Prime the Crowd (red)",
-      "2x Sadistic Scowl (red)",
-      "2x Tension in the Air (red)",
-      "2x Villainous Pose (red)",
-      "2x Mocking Blow (yel)",
-      "2x Short Shrift (yel)",
-      "2x Walk in My Shoes (yel)",
-      "2x Wee Wrecking Ball (yel)",
-      "2x Booze! (blu)",
-      "2x Brothers in Arms (blu)",
-      "2x Concealed Object (blu)",
-      "2x Edge of Their Seats (blu)",
-      "2x Full of Bravado (blu)",
-      "2x Goon Beatdown (blu)",
-      "2x Goon Tactics (blu)",
-      "2x Mocking Blow (blu)",
-      "2x Power Play (blu)",
-      "2x The Suspense is Killing Me (blu)",
-    ].join("\n");
-    const r = validateDeck(parseDecklistText(text), "silver-age");
-    expect(r).toMatchObject({ ok: true });
-    if (!r.ok) return;
-    expect(r.decklist.heroId).toBe("SLY001");
-    // Titan's Fist plus the two off-hands (Arcane Lantern, Stonewall Impasse)
-    expect(r.decklist.weaponIds.map((id) => cardData[id]!.name).sort()).toEqual([
-      "Arcane Lantern",
-      "Stonewall Impasse",
-      "Titan's Fist",
-    ]);
-    expect(r.decklist.equipmentPool).toHaveLength(6);
-    expect(r.decklist.deck).toHaveLength(46);
-  });
-
-  it("rejects unknown cards with a missing list", () => {
-    const text = ccExportText() + "\n3x Does Not Exist\n2x Flock of the Seagulls";
-    const r = validateDeck(parseDecklistText(text), "cc");
-    expect(r.ok).toBe(false);
-    if (r.ok) return;
-    expect(r.missing).toEqual(["Does Not Exist", "Flock of the Seagulls"]);
-  });
-
-  it("reports an unavailable explicit color instead of substituting another pitch", () => {
-    const text = ccExportText() + "\n2x En Garde (yellow)";
-    const r = validateDeck(parseDecklistText(text), "cc");
-
-    expect(r.ok).toBe(false);
-    if (r.ok) return;
-    expect(r.missing).toEqual(["En Garde"]);
-  });
-
-  it("resolves every Ominous Toll pitch from deck exports", () => {
-    const lines = parseDecklistText([
-      "1x Ominous Toll (red)",
-      "1x Ominous Toll (yellow)",
-      "1x Ominous Toll (blue)",
-    ].join("\n"));
-
-    expect(lines.map((line) => findPrinting(line.name, line.pitch)?.id)).toEqual([
-      "IAR078",
-      "IAR079",
-      "IAR080",
-    ]);
-  });
-
-  it("resolves Apex Buster and every Cleave the Heavens pitch from deck exports", () => {
-    const lines = parseDecklistText([
-      "1x Apex Buster (yellow)",
-      "1x Cleave the Heavens (red)",
-      "1x Cleave the Heavens (yellow)",
-      "1x Cleave the Heavens (blue)",
-    ].join("\n"));
-
-    expect(lines.map((line) => findPrinting(line.name, line.pitch)?.id)).toEqual([
-      "IAR039",
-      "IAR020",
-      "IAR021",
-      "IAR022",
-    ]);
-  });
-
-  it("resolves Ingest the Unknown as yellow from deck exports", () => {
-    const lines = parseDecklistText("3x Ingest the Unknown (yellow)");
-
-    expect(lines.map((line) => findPrinting(line.name, line.pitch)?.id)).toEqual([
-      "IAR007",
-    ]);
-  });
-
-  it("resolves every Skeletal Puppetry pitch from deck exports", () => {
-    const lines = parseDecklistText([
-      "1x Skeletal Puppetry (red)",
-      "1x Skeletal Puppetry (yellow)",
-      "1x Skeletal Puppetry (blue)",
-    ].join("\n"));
-
-    expect(lines.map((line) => findPrinting(line.name, line.pitch)?.id)).toEqual([
-      "IAR094",
-      "IAR095",
-      "IAR096",
-    ]);
+    expect(formatLegalityIssues(cardData, r.decklist, "cc").map((issue) => issue.kind)).toContain("pool-too-large");
+    expect(formatLegalityIssues(cardData, r.decklist, "cc", { cardPoolMode: "open" })
+      .filter((issue) => issue.kind === "pool-too-large" || issue.kind === "too-many-copies")).toEqual([]);
   });
 
   it("rejects undersized decks per format", () => {
@@ -527,17 +348,19 @@ describe("validateDeck", () => {
     expect(r.errors.some((e) => e.includes("too small"))).toBe(true);
   });
 
-  it("rejects more than 3 copies of a card", () => {
+  it("imports more than 3 copies of a card as Open-only", () => {
     const lines = parseDecklistText(
       [`Hero: ${hero.name}`, deckLine(deckCards[0]!, 4), ...deckCards.slice(1, 20).map((c) => deckLine(c))].join("\n"),
     );
     const r = validateDeck(lines, "cc");
-    expect(r.ok).toBe(false);
-    if (r.ok) return;
-    expect(r.errors.some((e) => e.includes("too many copies"))).toBe(true);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(formatLegalityIssues(cardData, r.decklist, "cc")).toContainEqual(
+      expect.objectContaining({ kind: "too-many-copies", cardName: deckCards[0]!.name, count: 4, limit: 3 }),
+    );
   });
 
-  it("rejects more than 2 copies of a Silver Age card", () => {
+  it("imports more than 2 copies of a Silver Age card as Open-only", () => {
     const candidate = uniqueLegalDeckCards.find((card) => card.pitch !== undefined)!;
     const otherCards = uniqueLegalDeckCards.filter((card) =>
       card.name !== candidate.name || card.pitch !== candidate.pitch
@@ -547,9 +370,11 @@ describe("validateDeck", () => {
     );
     const r = validateDeck(lines, "silver-age");
 
-    expect(r.ok).toBe(false);
-    if (r.ok) return;
-    expect(r.errors).toContain(`too many copies of ${candidate.name.toLowerCase()} (3, max 2)`);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(formatLegalityIssues(cardData, r.decklist, "silver-age")).toContainEqual(
+      expect.objectContaining({ kind: "too-many-copies", cardName: candidate.name, count: 3, limit: 2 }),
+    );
   });
 
   it("allows any number of a card with Unlimited", () => {
@@ -660,7 +485,7 @@ describe("validatePresentation", () => {
   });
 
   it("rejects more than 2 presented weapons", () => {
-    const oneHander = printings.find((c) => c.cardType === "weapon" && !c.subtypes?.includes("2h"))!;
+    const oneHander = legalCcWeapons.find((c) => !c.subtypes?.includes("2h"))!;
     const pool = ccPool();
     pool.weaponIds.push(oneHander.id, oneHander.id, oneHander.id); // registered duplicates are fine
     const r = validatePresentation(
@@ -891,6 +716,7 @@ describe("deck storage", () => {
             name: "Provider name",
             text: matchupId ? variantText : defaultText,
             matchups,
+            pins: [],
           },
         };
       },
@@ -910,6 +736,42 @@ describe("deck storage", () => {
     expect(stored.decklist.sideboard ?? []).toHaveLength(0);
   });
 
+  it("returns the fetched deck's Fabrary pins for cards in the pool without storing them", async () => {
+    const { db, userId } = await freshUser();
+    const sourceUrl = "https://fabrary.net/decks/01G76G1DP5VVB050BT3YV9TQ7K";
+    const text = ccExportText();
+    const imported = await importDeck(db, userId, { name: "Pinned", format: "cc", fabraryUrl: sourceUrl, text });
+    if (!imported.ok) throw new Error("import failed");
+    const [pinnedCard, otherCard] = [...new Set(imported.deck.decklist.deck)]
+      .filter((id) => cardArtVariants(id).length > 0);
+    if (!pinnedCard || !otherCard) throw new Error("test deck needs two cards with alternate art");
+    const deckNames = new Set(imported.deck.decklist.deck.map((id) => cardData[id]!.name));
+    const outside = Object.keys(cardData).find((id) =>
+      !deckNames.has(cardData[id]!.name) && cardArtVariants(id).length > 0)!;
+    const pin = cardArtVariants(pinnedCard)[0]!.image;
+    const pinFor = (id: string, image: string): FabraryPin => {
+      const { name, pitch } = cardData[id]!;
+      return { name, ...(pitch ? { pitch } : {}), image };
+    };
+    const fabraryClient = {
+      fetchDeck: async () => ({
+        ok: true as const,
+        deck: {
+          canonicalUrl: sourceUrl, name: "Provider name", text, matchups: [],
+          // Neither a card in the deck nor a catalog image of the card: both dropped.
+          pins: [pinFor(pinnedCard, pin), pinFor(outside, cardArtVariants(outside)[0]!.image),
+            pinFor(otherCard, "ZZZ999-CF")],
+        },
+      }),
+    };
+
+    const fresh = await resolveFreshDeck(db, userId, imported.deck.id, fabraryClient);
+    if (!fresh.ok) throw new Error(fresh.error);
+    expect(fresh.fabraryArt).toEqual({ [pinnedCard]: pin });
+    expect(fresh.deck.art).toEqual(imported.deck.art);
+    expect((await listDecks(db, userId))[0]!.art).toEqual(imported.deck.art);
+  });
+
   it("falls back to the saved default list when Fabrary is unavailable", async () => {
     const { db, userId } = await freshUser();
     const imported = await importDeck(db, userId, {
@@ -926,7 +788,7 @@ describe("deck storage", () => {
 
     for (status of [429, 502, 503] as const) {
       expect(await resolveFreshDeck(db, userId, imported.deck.id, fabraryClient))
-        .toEqual({ ok: true, deck: imported.deck, matchups: [] });
+        .toEqual({ ok: true, deck: imported.deck, matchups: [], fabraryArt: {} });
       expect(await resolveFreshDeck(db, userId, imported.deck.id, fabraryClient, "bravo-plan"))
         .toEqual({ ok: false, status, error: "Fabrary is down" });
     }

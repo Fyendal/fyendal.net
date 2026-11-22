@@ -426,6 +426,39 @@ describe("Armory Decks — AIO, AJV, and AST", () => {
       .expectFinalAttack(4);
   });
 
+  it("Arc Lightning's target declaration defaults to the opposing hero", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["arc lightning|2"], resources: 2, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2");
+    const decision = g.state.pendingDecision;
+    expect(decision?.chooseHook).toBe("trigger-target");
+    expect(decision?.defaultOption).toBe(String(g.state.players[1]!.hero.instanceId));
+  });
+
+  it("Arc Lightning's go again is used up by a melded action half", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["arc lightning|2", "burn up // shock|1", "nimby|1"],
+          resources: 2,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2").declareTarget(1);
+    g.play("burn up // shock|1", { meldSide: "both" });
+    g.expectLog("Burn Up // Shock gains go again");
+    g.chooseOption("opposing hero").settle();
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+    g.declareTarget(1).play("nimby|1").expectNoLog("Nimby gains go again");
+  });
+
   it("Aurora creates Embodiment of Lightning after a Lightning card was played", () => {
     const g = scenario({
       seats: [
@@ -489,6 +522,19 @@ describe("Armory Decks — AMX, AGB, and ASR", () => {
     expect(driver?.counters?.steam).toBe(4);
   });
 
+  it("Cranking a blue Hyper Driver's only steam counter destroys it", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "maxx 'the hype' nitro|0", hand: ["hyper driver|3"], resources: 1, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("hyper driver|3").chooseOption("yes");
+    const player = g.state.players[0]!;
+    expect(player.board.some((card) => functionalKeyOf(cardData[card.cardId]!) === "hyper driver|3")).toBe(false);
+    expect(player.graveyard.some((card) => functionalKeyOf(cardData[card.cardId]!) === "hyper driver|3")).toBe(true);
+  });
+
   it("Clamp Press gives a Heart Wrencher attack +2 power", () => {
     const g = scenario({
       seats: [
@@ -523,6 +569,26 @@ describe("Armory Decks — AMX, AGB, and ASR", () => {
     g.state.players[0]!.flags.crankedThisTurn = true;
 
     g.attackWithWeapon("banksy|0").expectAttackValue(5);
+  });
+
+  it("Banksy's hit adds steam to a Hyper Driver only while Maxx grants it Crank", () => {
+    const setup = (heroKey?: string) => {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", heroKey, weapons: ["banksy|0"], board: ["hyper driver|0"], resources: 1, equipment: NO_EQUIPMENT },
+          { hero: "dorinthea", equipment: NO_EQUIPMENT },
+        ],
+      });
+      g.state.players[0]!.flags.crankedThisTurn = true;
+      g.attackWithWeapon("banksy|0").blockWith().settle();
+      return g;
+    };
+
+    const granted = setup("maxx 'the hype' nitro|0");
+    granted.chooseCard("hyper driver|0");
+    expect(granted.state.players[0]!.board[0]!.counters?.steam).toBe(1);
+
+    expect(setup().state.pendingDecision?.chooseHook).not.toBe("banksy-steam");
   });
 
   it("Construct Bank Breaker transforms a wrench and three Hyper Drivers into the equipped back face", () => {
@@ -1473,6 +1539,293 @@ describe("Armory Decks — rules regression coverage", () => {
     expect(g.state.pendingDecision?.prompt).toContain("Arc Lightning");
   });
 
+  it("Skyward Serenade publishes its declared modes before anyone can respond", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["skyward serenade|2"], resources: 0, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("skyward serenade|2").chooseOption("search");
+    const declared = applyIntent(g.state, 0, { kind: "choose", optionId: "3: Next attack +1" });
+    if (!declared.ok) throw new Error(declared.error);
+    const view = projectStateFor(declared.state, 1);
+    expect(view.stack[0]).toMatchObject({
+      card: { cardId: printingId("skyward serenade|2") },
+      label: "Skyward Serenade: Search your deck for a Skyzyk; Your next attack this turn gets +1{p}",
+      labelMessage: {
+        id: "card.ast.serenade.stack",
+        values: {
+          first: { kind: "term", id: "card.ast.option.skyzyk" },
+          second: { kind: "term", id: "card.ast.option.attack" },
+        },
+      },
+    });
+    expect(view.logEntries?.find(
+      (entry) => "message" in entry && entry.message.id === "card.log.ast.serenade.modes.chosen",
+    )).toBeDefined();
+  });
+
+  it("Arc Lightning triggers when Sun Kiss gains go again as an instant", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["arc lightning|2", "moon wish|1", "sun kiss|1"],
+          resources: 9,
+          equipment: { ...NO_EQUIPMENT, legs: "spellbound creepers|0" },
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2").declareTarget(1);
+    g.play("moon wish|1");
+    g.blockWith().activate("spellbound creepers|0", { settle: false }).passPriority().passPriority();
+    const lifeBefore = g.state.players[1]!.life;
+    g.react("sun kiss|1", { settle: false }).passPriority().passPriority();
+    g.expectAP(0, 1);
+    expect(g.state.chain).toHaveLength(1);
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+    g.declareTarget(1).expectLife(1, lifeBefore - 6);
+  });
+
+  it("Sun Kiss does not gain go again without Moon Wish", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["sun kiss|1"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("sun kiss|1").expectAP(0, 0);
+  });
+
+  it("Arc Lightning triggers when Succumb to Temptation resolves go again as an instant", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["arc lightning|2", "ravenous rabble|1", "succumb to temptation|2"],
+          resources: 9,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2").declareTarget(1);
+    g.play("ravenous rabble|1");
+    g.blockWith().react("succumb to temptation|2", { settle: false }).passPriority().passPriority();
+    g.expectAP(0, 1);
+    expect(g.state.chain).toHaveLength(1);
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+  });
+
+  it.each<[string, string[], (g: ReturnType<typeof scenario>) => void]>([
+    ["arc ramp|1", ["lightning flow|0"], (g) => g.settle().chooseCard("lightning flow|0")],
+    ["aethersling|1", [], (g) => g.settle().chooseOption("hero").chooseOption("yes")],
+    ["sonata galaxia|1", [], (g) => g.chooseOption("X = 2").chooseCard("malefic incantation|1")],
+  ])("Arc Lightning triggers when %s gets go again from its own effect", (key, board, resolve) => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["arc lightning|2", "nimblism|1", key],
+          board,
+          deck: ["malefic incantation|1"],
+          resources: 9,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2").declareTarget(1);
+    g.play("nimblism|1").declareTarget(1);
+    g.play(key, { settle: false });
+    resolve(g);
+    g.expectAP(0, 1);
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+  });
+
+  it.each([
+    "aether quickening|1",
+    "aether quickening|3",
+    "trailblazing aether|1",
+  ])("Arc Lightning triggers when %s gets go again from Surge", (key) => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["crucible of aetherweave|0"],
+          hand: ["arc lightning|2", "nimblism|1", key],
+          resources: 9,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2").declareTarget(1);
+    g.play("nimblism|1").declareTarget(1);
+    g.activate("crucible of aetherweave|0");
+    g.play(key).chooseOption("opposing hero");
+    g.expectAP(0, 1);
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+  });
+
+  it("Compass of Sunken Depths gives only the first watery grave card go again, which triggers Arc Lightning", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "gravy bones|0",
+          weapons: ["compass of sunken depths|0"],
+          hand: ["arc lightning|2", "nimblism|3"],
+          graveyard: ["barnacle|2", "barnacle|2"],
+          resources: 9,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2").declareTarget(1);
+    g.play("nimblism|3").declareTarget(1);
+    g.play("barnacle|2", { fromZone: "graveyard" });
+    g.expectAP(0, 1);
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+    g.declareTarget(1);
+    g.play("barnacle|2", { fromZone: "graveyard" }).expectAP(0, 0);
+    expect(g.stackLabels()).toEqual([]);
+  });
+
+  it.each([false, true])("Arc Lightning triggers when Crazy Brew rolls go again (die replacement: %s)", (gloves) => {
+    const g = scenario({
+      seed: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["arc lightning|2"],
+          board: ["crazy brew|3"],
+          resources: 1,
+          equipment: gloves ? { ...NO_EQUIPMENT, arms: "gambler's gloves|0" } : NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("arc lightning|2").declareTarget(1);
+    g.activate("crazy brew|3");
+    if (gloves) g.chooseOption("keep").settle();
+    g.expectLog("Crazy Brew: rolled").expectAP(0, 1);
+    expect(g.stackLabels()).toEqual(["Deal 1 arcane damage to any target"]);
+  });
+
+  it("Back Alley Breakline gains no action point when an effect puts it into hand", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["sand sketched plan|3"],
+          deck: ["back alley breakline|3", "back alley breakline|3"],
+          resources: 9,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("sand sketched plan|3").chooseCard("back alley breakline|3").settle();
+    g.expectAP(0, 0).expectNoLog("Back Alley Breakline triggers");
+  });
+
+  describe("Phantasmal Footsteps", () => {
+    const FOOTSTEPS = { ...NO_EQUIPMENT, legs: "phantasmal footsteps|0" };
+
+    it("offers an action point when phantasm destroys an Illusionist attack", () => {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", resources: 3, hand: ["enigma chimera|3"], equipment: FOOTSTEPS },
+          { hero: "dorinthea", hand: ["wrecker romp|1"], equipment: NO_EQUIPMENT },
+        ],
+      });
+      g.play("enigma chimera|3").blockWith("wrecker romp|1").settle();
+      expect(g.state.pendingDecision?.warningMessage).toBeUndefined();
+      g.chooseOption("pay 1").expectAP(0, 1);
+    });
+
+    it("warns that no action point will be gained outside its controller's action phase", () => {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", hand: ["raging onslaught|1", "apex buster|2"], resources: 9, equipment: NO_EQUIPMENT },
+          { hero: "dorinthea", hand: ["enigma chimera|3"], resources: 1, equipment: FOOTSTEPS },
+        ],
+      });
+      g.play("raging onslaught|1").blockWith("enigma chimera|3");
+      g.activate("apex buster|2").chooseCard("enigma chimera|3").settle();
+      expect(g.state.pendingDecision?.player).toBe(1);
+      expect(g.state.pendingDecision?.warningMessage?.id).toBe("card.common.actionpoint.nogain");
+      g.chooseOption("pay 1").expectAP(1, 0);
+    });
+
+    it("offers an action point when an effect other than phantasm destroys the attack", () => {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", resources: 3, hand: ["enigma chimera|3"], equipment: FOOTSTEPS },
+          { hero: "dorinthea", hand: ["burn bare|0"], equipment: NO_EQUIPMENT },
+        ],
+      });
+      g.play("enigma chimera|3").blockWith().passPriority().activate("burn bare|0").settle();
+      g.chooseOption("pay 1").expectAP(0, 1);
+    });
+
+    it("uses its once-per-turn limit even when the payment is declined", () => {
+      const g = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            resources: 9,
+            hand: ["enigma chimera|3", "enigma chimera|3"],
+            board: ["timesnap potion|3"],
+            equipment: FOOTSTEPS,
+          },
+          { hero: "dorinthea", hand: ["wrecker romp|1", "wrecker romp|1"], equipment: NO_EQUIPMENT },
+        ],
+      });
+      g.activate("timesnap potion|3").expectAP(0, 2);
+      g.play("enigma chimera|3").blockWith("wrecker romp|1").settle();
+      g.chooseOption("no");
+      g.play("enigma chimera|3").blockWith("wrecker romp|1").settle();
+      expect(g.state.pendingDecision?.chooseHook).toBeUndefined();
+      g.expectAP(0, 0);
+    });
+  });
+
+  it("Temporal Wobble gives the action point to the negated card's controller", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["come to fight|1", "temporal wobble|1"],
+          board: ["sigil of lightning|3", "sigil of lightning|3"],
+          resources: 9,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("come to fight|1", { settle: false }).react("temporal wobble|1", { targetCard: "come to fight|1" });
+    g.expectInZone(0, "come to fight|1", "graveyard").expectAP(0, 1);
+    expect(g.state.players[1]!.actionPoints).toBe(0);
+  });
+
+  it("gains no action point outside the player's action phase", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", board: ["diamond amulet|3"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: ["come to fight|1"], resources: 9, equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.play("come to fight|1", { settle: false }).passPriority();
+    g.activate("diamond amulet|3");
+    expect(g.state.players[0]!.actionPoints).toBe(0);
+  });
+
   it("Hidden Agenda turns its arsenal arrow face up as an activation cost", () => {
     const g = scenario({
       seats: [
@@ -1522,8 +1875,12 @@ describe("Armory Decks — rules regression coverage", () => {
         { hero: "rhinar", hand: ["head jab|1", "head jab|1"], equipment: NO_EQUIPMENT },
       ],
     });
-    g.play("red in the ledger|1", { fromArsenal: true }).blockWith().settle().endTurn();
+    g.play("red in the ledger|1", { fromArsenal: true }).blockWith().settle();
+    const limitedTurn = g.state.turn + 1;
+    expect(projectStateFor(g.state, 0).turnFacts?.players[1].actionLimit).toEqual({ turn: limitedTurn, remaining: 1 });
+    g.endTurn();
     g.play("head jab|1").blockWith().settle();
+    expect(projectStateFor(g.state, 1).turnFacts?.players[1].actionLimit).toEqual({ turn: limitedTurn, remaining: 0 });
     const second = g.state.players[1]!.hand.find((card) => card.cardId === printingId("head jab|1"));
     expect(legalIntents(g.state, 1).some((intent) => intent.kind === "play-card" && intent.instanceId === second?.instanceId)).toBe(false);
   });
@@ -1644,6 +2001,25 @@ describe("Armory Decks — rules regression coverage", () => {
     });
     g.play("infect|1").blockWith().settle().play("horrors of the past|2").blockWith().settle();
     expect(g.state.players[1]!.board.filter((card) => functionalKeyOf(cardData[card.cardId]!) === "bloodrot pox|0")).toHaveLength(2);
+  });
+
+  it("Horrors of the Past rewards red banishes from inherited Art of Desire: Body", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "arakni, 5l!p3d 7hru 7h3 cr4x|0",
+          hand: ["art of desire: body|1", "horrors of the past|2"],
+          deck: ["wounding blow|3", "wounding blow|3"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", deck: ["wounding blow|1", "wounding blow|1"], equipment: NO_EQUIPMENT },
+      ],
+    });
+    const life = g.state.players[0]!.life;
+    g.play("art of desire: body|1").blockWith().settle().expectZoneSize(0, "hand", 2).expectLife(0, life + 1);
+    g.play("horrors of the past|2").blockWith().settle().expectZoneSize(0, "hand", 2).expectLife(0, life + 2);
+    expect(g.state.players[1]!.banish).toHaveLength(2);
   });
 
   it("Horrors of the Past resolves choices from inherited base abilities", () => {
@@ -2074,6 +2450,34 @@ describe("Armory Decks — rules regression coverage", () => {
     g.chooseOption("remove 2").chooseOption("go again").chooseOption("additional attack").chooseOption("discount");
     expect(g.state.chain.at(-1)!.attackingCard.counters?.power).toBeUndefined();
     expect(g.state.players[0]!.actionPoints).toBe(1);
+  });
+
+  it("Polished Blade's additional attack stacks with Flurry", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          weapons: ["zenith blade|0"],
+          board: ["flurry|0"],
+          hand: ["polished blade|1"],
+          resources: 3,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.state.players[0]!.actionPoints = 2;
+    const weaponId = g.state.players[0]!.weapons[0]!.instanceId;
+
+    g.attackWithWeapon("zenith blade|0").blockWith().settle();
+    g.state.players[0]!.weapons[0]!.counters = { power: 2 };
+    g.attackWithWeapon("zenith blade|0").blockWith().react("polished blade|1")
+      .chooseOption("remove 2").chooseOption("go again").chooseOption("additional attack")
+      .chooseOption("activation discount").settle();
+
+    expect(legalIntents(g.state, 0).some((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === weaponId
+    )).toBe(true);
   });
 
   it("Indefensibly Honed damages the hero when the sharpened sword is defended", () => {

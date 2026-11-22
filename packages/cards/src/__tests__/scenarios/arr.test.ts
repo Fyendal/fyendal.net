@@ -165,3 +165,37 @@ describe("ARR — Beast Within", () => {
       .expectNoLog("Beast Within triggers");
   });
 });
+
+describe("ARR — Smell Fear", () => {
+  it.each([
+    { bellows: 1, power: 10 },
+    { bellows: 0, power: 7 },
+  ])("checks its intimidate count on the next Brute attack, not on resolution ($bellows later intimidates)", ({ bellows, power }) => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          hand: ["smell fear|2", "wrecker romp|3", ...Array(bellows).fill("clearing bellow|3"), "smash with big tree|1"],
+          resources: 3,
+        },
+        { hero: "rhinar", hand: ["dodge|3", "dodge|3", "dodge|3"] },
+      ],
+    });
+
+    g.play("smell fear|2").chooseCard("wrecker romp|3").expectPendingReturn(1, 1);
+    for (let i = 0; i < bellows; i++) g.play("clearing bellow|3");
+    g.play("smash with big tree|1").expectAttackValue(power);
+  });
+
+  it("counts an intimidate from the attack itself", () => {
+    const g = scenario({
+      seats: [
+        { hero: "dorinthea", hand: ["smell fear|2", "wrecker romp|3", "pack hunt|1"], resources: 3 },
+        { hero: "rhinar", hand: ["dodge|3", "dodge|3", "dodge|3"] },
+      ],
+    });
+
+    g.play("smell fear|2").chooseCard("wrecker romp|3");
+    g.play("pack hunt|1").expectPendingReturn(1, 2).expectAttackValue(9);
+  });
+});

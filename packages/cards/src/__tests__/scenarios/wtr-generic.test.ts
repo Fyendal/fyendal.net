@@ -210,6 +210,7 @@ describe("WTR generic — attacks", () => {
       ],
     });
     g.play("nimble strike|1")
+      .chooseCard("nimblism|1")
       .expectLog("banishes Nimblism from graveyard")
       .expectAttackValue(5) // 4 + 1
       .blockWith()
@@ -217,6 +218,23 @@ describe("WTR generic — attacks", () => {
       .expectAP(0, 1)
       .expectInZone(0, "nimblism|1", "banish")
       .expectLife(1, 15);
+  });
+
+  it("Nimble Strike may decline to banish Nimblism", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["nimble strike|1", "raging onslaught|2"], graveyard: ["nimblism|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    g.play("nimble strike|1")
+      .chooseOption("pass")
+      .expectAttackValue(4)
+      .blockWith()
+      .settle()
+      .expectAP(0, 0)
+      .expectInZone(0, "nimblism|1", "graveyard")
+      .expectLife(1, 16);
   });
 
   it("Scar for a Scar gains go again when at less life", () => {
@@ -239,6 +257,34 @@ describe("WTR generic — attacks", () => {
       .settle()
       .expectAP(0, 1)
       .expectLife(1, 16);
+  });
+
+  it("Scar for a Scar gains go again at tied life against Line Crossers", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", life: 8, hand: ["scar for a scar|1"] },
+        { hero: "dorinthea", life: 8, hand: [], equipment: { arms: "line crossers|0" } },
+      ],
+    });
+    g.play("scar for a scar|1")
+      .expectLog("gains go again (less life than opponent)")
+      .blockWith()
+      .settle()
+      .expectAP(0, 1);
+  });
+
+  it("Scar for a Scar has no go again at tied life", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", life: 8, hand: ["scar for a scar|1"] },
+        { hero: "dorinthea", life: 8, hand: [] },
+      ],
+    });
+    g.play("scar for a scar|1")
+      .expectNoLog("gains go again")
+      .blockWith()
+      .settle()
+      .expectAP(0, 0);
   });
 
   it("Scour the Battlescape bottoms a card and draws, and gains go again from arsenal", () => {
@@ -642,6 +688,8 @@ describe("WTR generic — reactions", () => {
       .expectFinalAttack(10) // 6 + 4
       .expectHandSize(1, 1) // discarded one card on hit
       .expectLife(1, 10);
+    const effects = projectStateFor(g.state, 0).ongoing;
+    expect(effects.filter((effect) => effect.cardId === printingId("pummel|1"))).toEqual([]);
   });
 
   it("Razor Reflex buffs a sword weapon attack", () => {

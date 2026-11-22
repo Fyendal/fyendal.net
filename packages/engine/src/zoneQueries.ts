@@ -5,6 +5,11 @@ export function opponent(seat: number): number {
   return seat === 0 ? 1 : 0;
 }
 
+/** The defending hero controls a link's defending cards, even ones they don't own. */
+export function defendingSeatOf(link: ChainLinkState): number {
+  return opponent(link.attacker);
+}
+
 /** Find a card instance in any of a player's zones, including nested cards. */
 export function findCard(
   player: PlayerState,
@@ -72,11 +77,10 @@ export function findCardAnywhere(
     if (link.attackingCard.instanceId === instanceId) {
       return { seat: link.attacker, card: link.attackingCard };
     }
-    for (const card of [
-      ...link.defendingCards,
-      ...link.defendingEquipment,
-      ...link.reactions,
-    ]) {
+    for (const card of [...link.defendingCards, ...link.defendingEquipment]) {
+      if (card.instanceId === instanceId) return { seat: defendingSeatOf(link), card };
+    }
+    for (const card of link.reactions) {
       if (card.instanceId === instanceId) return { seat: card.owner, card };
     }
   }
@@ -89,6 +93,12 @@ export function findCardAnywhere(
     }
   }
   return undefined;
+}
+
+/** A link's defending equipment as the live arena objects, which hold script
+ * state; the link's own entries are detached copies after a state clone. */
+export function liveDefendingEquipment(state: GameStateInternal, link: ChainLinkState): CardInstance[] {
+  return link.defendingEquipment.map((card) => findCardAnywhere(state, card.instanceId)?.card ?? card);
 }
 
 export function findCardOrSubcard(

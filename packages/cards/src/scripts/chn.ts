@@ -1,5 +1,6 @@
 import type { CardScript } from "@fyendal/engine";
 import {
+  hasCardSubtype,
   lessonCounter,
   mentorFlipTrigger,
   mentorSpecializationPayoff,
@@ -20,7 +21,7 @@ export const chn: Record<string, CardScript> = {
           ctx.self.faceDown !== true &&
           !!played &&
           ctx.hasCardType(played, "action") &&
-          !ctx.cardTypes(played).includes("attack"),
+          !hasCardSubtype(ctx, played, "attack"),
         effect(ctx) {
           for (const player of ctx.state.players) ctx.dealDamage(player.seat, 1, { arcane: true });
         },

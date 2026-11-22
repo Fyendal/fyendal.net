@@ -11,6 +11,9 @@ export type TriggerEvent =
   | "card-discarded"
   | "card-banished"
   | "card-banished-for-boost"
+  /** One or more of the subject's cards were banished from one zone by the
+   * same event; raised once after the per-card "card-banished" events. */
+  | "cards-banished"
   | "card-boosted"
   | "card-put-into-graveyard"
   | "card-charged"
@@ -35,7 +38,9 @@ export type TriggerEvent =
   /** The subject removed a steam counter from an item they control for Crank. */
   | "card-cranked"
   /** The subject gained control of an opposing permanent by stealing it. */
-  | "card-stolen";
+  | "card-stolen"
+  /** The subject completed a contract (CR 8.5.39a). */
+  | "contract-completed";
 
 /** Event-specific facts captured when a triggered ability is generated. */
 export interface TriggerEventContext {
@@ -52,7 +57,7 @@ export interface TriggerEventContext {
   /** Last-known combat status of a card that left the arena by leaving the
    * combat chain while attacking or defending (CR 3.1.1, 7.0.5a). */
   readonly combatRole?: "attacking" | "defending";
-  readonly to?: "arsenal" | "banish" | "soul" | "hand" | "arena" | "graveyard" | "pitch" | "deck" | "subcard" | "cease-to-exist";
+  readonly to?: "arsenal" | "banish" | "soul" | "hand" | "arena" | "graveyard" | "pitch" | "deck" | "subcard" | "cease-to-exist" | "removed-from-game";
   /** A hero or ally was dealt positive damage after prevention. */
   readonly damage?: DamageEventContext;
   /** 1-based count of the subject's cranks this turn, for "card-cranked". */
@@ -93,4 +98,6 @@ export interface TokenCreationContext {
   readonly sourceCardId?: string;
   /** Seat whose effect creates the tokens, when they may land under another hero. */
   readonly creatorSeat?: number;
+  /** Owner when it isn't the hero the tokens land under. */
+  readonly ownerSeat?: number;
 }

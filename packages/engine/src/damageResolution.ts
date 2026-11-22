@@ -1,7 +1,8 @@
+import type { CounterKind } from "@fyendal/shared";
 import type { EngineRuntime } from "./runtimePorts.js";
 import { cardAbilitiesSuppressed, cardColorOf, cardHasName, cardTypesOf, currentWardValue, dataOf, instanceDataOf, instanceKeywordValues, numberedKeywordValue, scriptOf } from "./cardProperties.js";
 
-import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
+import { controlledPermanents, functionalChainAttackLinks, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 
 import {
   cardDestroyedLogMessage,
@@ -14,16 +15,19 @@ import {
 import type { GameStateInternal } from "./runtimeState.js";
 
 import type { CardInstance, Modifier, PendingArcane, PlayerState, StackLayer } from "./state.js";
-import { recordAllyAbsorbed, recordEffectThreat, recordHeroDamage, recordLifeGained } from "./stats.js";
+import {
+  recordAllyAbsorbed, recordDamageTakenFromTypes, recordEffectThreat, recordHeroDamage, recordLifeGained, recordLifeLost,
+} from "./stats.js";
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { createTokenFor, createTokensFor } from "./tokens.js";
 import { destroyPermanent, fireLeaveCombatChain, moveToGraveyard } from "./zoneMoves.js";
-import { currentLink, findCardAnywhere, findPermanent, removeFromArray } from "./zoneQueries.js";
-import { drawCards } from "./cardLifecycle.js";
+import { currentLink, defendingSeatOf, findCardAnywhere, findPermanent, removeFromArray } from "./zoneQueries.js";
+import { drawCards, stampEnteringLife } from "./cardLifecycle.js";
 import { queuedAttackObjects } from "./attackQueue.js";
 import { takeAttackLayerOrigin } from "./stackCore.js";
 import { notePitch, payFromPools, pitchIntoPool, pitchProhibitedByEffect, pitchValueOfInstance } from "./resources.js";
 import { removeMarkOnOpponentHit, snapshotSerializable } from "./ruleQueries.js";
+import { hasType } from "@fyendal/shared";
 
 /** Locate a card instance anywhere in the game (zones, permanents, chain, resolving). */
 /** Reduce source-aware lingering-effect records alongside their authoritative
@@ -457,6 +461,19 @@ function effectSourceIsAlly(
     (!!source && (dataOf(state, source.card.cardId).subtypes ?? []).includes("ally"));
 }
 
+/** Seat credited with hero effect damage in match stats: the source's
+ * controller, or the opponent whose token damages its own controller. */
+function statsCreditSeat(
+  state: GameStateInternal,
+  packet: PendingArcane,
+  source: ReturnType<typeof findCardAnywhere>,
+): number | undefined {
+  if (effectSourceIsAlly(state, packet, source)) return undefined;
+  if (packet.targetSeat !== packet.sourceSeat) return packet.sourceSeat;
+  const creator = (source?.card ?? packet.sourceSnapshot)?.creatorSeat;
+  return creator !== undefined && creator !== packet.targetSeat ? creator : undefined;
+}
+
 /** Complete a "source deals damage, then destroy it" effect. Permanents leave
  * the arena normally; attack action cards on an earlier chain link retain
  * last-known link information while the physical card goes to graveyard.
@@ -551,8 +568,13 @@ function queueEffectHitTriggers(
     weapons: true,
   });
   const link = currentLink(state);
-  // The active attack observes hits "this chain link" by its controller's other sources.
-  const attack = link?.attacker === packet.sourceSeat ? [link.attackingCard] : [];
+  // Attacks stay functional on the combat chain, so earlier links observe the hit too.
+  const attack = [
+    ...(link?.attacker === packet.sourceSeat ? [link.attackingCard] : []),
+    ...functionalChainAttackLinks(state, packet.sourceSeat)
+      .filter((other) => other.flags.attackAbilitiesSuppressed !== true)
+      .map((other) => other.attackingCard),
+  ];
   const observers = [...active, ...lingeringModifierSources(state, packet.sourceSeat), ...attack].filter(
     (candidate, index, all) => all.findIndex((source) => source.instanceId === candidate.instanceId) === index,
   );
@@ -605,9 +627,10 @@ function applyEffectDamage(state: GameStateInternal,
     target.life -= packet.amount;
     target.flags.lostLifeThisTurn = true;
     noteEffectDamageDealer(state, packet, found, true);
-    if (packet.targetSeat !== packet.sourceSeat && !effectSourceIsAlly(state, packet, found)) {
-      recordHeroDamage(state, packet.sourceSeat, packet.amount);
-    }
+    if (found) recordDamageTakenFromTypes(target, cardTypesOf(state, found.card), packet.amount);
+    const credit = statsCreditSeat(state, packet, found);
+    if (credit !== undefined) recordHeroDamage(state, credit, packet.amount);
+    else if (packet.targetSeat === packet.sourceSeat) recordLifeLost(state, packet.targetSeat, packet.amount);
     target.flags.damageTakenThisTurn = true;
     if (packet.arcane) {
       target.flags.arcaneDamageTakenThisTurn = true;
@@ -742,17 +765,28 @@ function fireFriendlyDamageDealt(
  *  (8.3.15: "If you would be
  *  dealt arcane damage, you may destroy this to prevent N of that damage").
  *  Face-down (Cloaked) equipment's abilities are non-functional. Equipment
- *  whose value is not a fixed number ("Spellvoid X, where X is …") provides it
- *  via the spellvoidValue script hook. */
+ *  whose value is variable or conditional provides it via the spellvoidValue
+ *  script hook, which overrides the printed keyword. */
+function spellvoidSources(player: PlayerState): CardInstance[] {
+  return [
+    ...Object.values(player.equipment).filter((card): card is CardInstance => card !== undefined),
+    // off-hand equipment sits in the weapon zone
+    ...player.weapons,
+    ...player.board,
+  ];
+}
+
 function spellvoidPieces(state: GameStateInternal,
   runtime: EngineRuntime, player: PlayerState): { id: number; n: number }[] {
   const out: { id: number; n: number }[] = [];
-  const sources = [
-    ...Object.values(player.equipment).filter((card): card is CardInstance => card !== undefined),
-    ...player.board,
-  ];
-  for (const eq of sources) {
+  for (const eq of spellvoidSources(player)) {
     if (eq.faceDown || cardAbilitiesSuppressed(state, eq)) continue;
+    const dynamic = scriptOf(state, eq.cardId, eq)?.spellvoidValue;
+    if (dynamic) {
+      const n = dynamic(runtime.makeCtx(state, player.seat, eq));
+      if (n > 0) out.push({ id: eq.instanceId, n });
+      continue;
+    }
     let matched = false;
     for (const value of instanceKeywordValues(state, eq, "spellvoid")) {
       if (value === "x") continue;
@@ -766,12 +800,6 @@ function spellvoidPieces(state: GameStateInternal,
         .some((source) => scriptOf(state, source.cardId, source)?.grantsSpellvoidToRunechants === true)
     ) {
       out.push({ id: eq.instanceId, n: 1 });
-      continue;
-    }
-    const dynamic = scriptOf(state, eq.cardId, eq)?.spellvoidValue;
-    if (dynamic) {
-      const n = dynamic(runtime.makeCtx(state, player.seat, eq));
-      if (n > 0) out.push({ id: eq.instanceId, n });
     }
   }
   return out;
@@ -830,24 +858,52 @@ function openQuellDecision(state: GameStateInternal, packet: PendingArcane): boo
   return true;
 }
 
+interface OptionalDamagePreventionPiece {
+  option: string;
+  id: number;
+  amount: number;
+  moveSource?: "destroy" | "banish";
+  /** Permanent paying a removeCounter replacement, and the counter removed. */
+  payId?: number;
+  counter?: CounterKind;
+}
+
 function optionalDamagePreventionPieces(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   player: PlayerState,
   packet: PendingArcane,
-): { id: number; amount: number; moveSource: "destroy" | "banish" }[] {
-  return controlledPermanents(state, player.seat, { faceDownEquipment: false })
-    .flatMap((source) => {
-      const replacement = scriptOf(state, source.cardId, source)?.optionalDamagePrevention;
-      const sourceHeroMatches = !replacement?.damageSourceHeroType || (
-        packet.sourceSeat !== undefined &&
-        cardTypesOf(state, (state.players[packet.sourceSeat] as PlayerState).hero)
-          .includes(replacement.damageSourceHeroType.toLowerCase())
-      );
-      return replacement && replacement.amount > 0 &&
-          (!replacement.arcaneOnly || packet.arcane) && sourceHeroMatches
-        ? [{ id: source.instanceId, amount: replacement.amount, moveSource: replacement.moveSource }]
+): OptionalDamagePreventionPiece[] {
+  const used = new Set(packet.usedOptionalDamagePreventionSourceIds ?? []);
+  const permanents = controlledPermanents(state, player.seat, { faceDownEquipment: false });
+  return permanents.flatMap((source): OptionalDamagePreventionPiece[] => {
+    const replacement = scriptOf(state, source.cardId, source)?.optionalDamagePrevention;
+    const sourceHeroMatches = !replacement?.damageSourceHeroType || (
+      packet.sourceSeat !== undefined &&
+      cardTypesOf(state, (state.players[packet.sourceSeat] as PlayerState).hero)
+        .includes(replacement.damageSourceHeroType.toLowerCase())
+    );
+    if (!replacement || replacement.amount <= 0 || (replacement.arcaneOnly && !packet.arcane) || !sourceHeroMatches) {
+      return [];
+    }
+    const counterCost = replacement.removeCounter;
+    if (!counterCost) {
+      return replacement.moveSource
+        ? [{ option: `use ${source.instanceId}`, id: source.instanceId, amount: replacement.amount, moveSource: replacement.moveSource }]
         : [];
-    });
+    }
+    if (used.has(source.instanceId)) return [];
+    const ctx = runtime.makeCtx(state, player.seat, source);
+    return permanents
+      .filter((card) => (card.counters?.[counterCost.key] ?? 0) > 0 && counterCost.from(ctx, card))
+      .map((card) => ({
+        option: `use ${source.instanceId} ${card.instanceId}`,
+        id: source.instanceId,
+        amount: replacement.amount,
+        payId: card.instanceId,
+        counter: counterCost.key,
+      }));
+  });
 }
 
 function discardDamagePreventionPieces(
@@ -869,7 +925,7 @@ function discardDamagePreventionPieces(
       amount <= 0
     ) return [];
     const cards = player.hand.filter(
-      (card) => instanceDataOf(state, card).cardType.toLowerCase() === cardType.toLowerCase(),
+      (card) => instanceDataOf(state, card).types.some((type) => type === cardType.toLowerCase()),
     );
     return cards.length > 0 ? [{
       modifierId: modifier.id,
@@ -918,11 +974,12 @@ function openDiscardDamagePrevention(
  * event; applying one re-opens the choice if more remain. */
 function openOptionalDamagePrevention(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   packet: PendingArcane,
 ): boolean {
   if (packet.amount <= 0 || packet.unpreventable) return false;
   const target = state.players[packet.targetSeat] as PlayerState;
-  const pieces = optionalDamagePreventionPieces(state, target, packet);
+  const pieces = optionalDamagePreventionPieces(state, runtime, target, packet);
   if (pieces.length === 0) return false;
   state.pendingDecision = {
     player: target.seat,
@@ -932,9 +989,9 @@ function openOptionalDamagePrevention(
       id: "engine.decision.damage.prevent",
       values: { amount: packet.amount },
     },
-    options: [...pieces.map((piece) => `use ${piece.id}`), "decline"],
+    options: [...pieces.map((piece) => piece.option), "decline"],
     optionMessages: [...pieces.map(() => null), { id: "common.option.decline" }],
-    cardOptions: [...pieces.map((piece) => piece.id as number | null), null],
+    cardOptions: [...pieces.map((piece) => (piece.payId ?? piece.id) as number | null), null],
     sourceInstanceId: packet.sourceInstanceId,
     chooseHook: "optional-damage-prevention",
     arcane: packet,
@@ -1075,33 +1132,40 @@ function tryOpenBarrierDecision(state: GameStateInternal,
   return true;
 }
 
-/** Open the arcane-damage prevention decisions for a packet: Spellvoid first
- *  (destroy an equipment to prevent N — optional, "you may destroy"), then
- *  Arcane Barrier. Returns false when neither applies and the damage should be
- *  applied immediately. */
-function openArcaneDecision(state: GameStateInternal,
+/** Offer the target's optional Spellvoid decision; returns false when no
+ *  piece applies or it was declined for this event. */
+function openSpellvoidDecision(state: GameStateInternal,
   runtime: EngineRuntime, packet: PendingArcane): boolean {
+  if (!packet.arcane || packet.amount <= 0 || packet.spellvoidDeclined) return false;
   const target = state.players[packet.targetSeat] as PlayerState;
   const pieces = spellvoidPieces(state, runtime, target);
-  if (packet.amount > 0 && pieces.length > 0) {
-    state.pendingDecision = {
-      player: packet.targetSeat,
-      kind: "choose-target",
-      prompt: `Spellvoid: you would be dealt ${packet.amount} arcane damage — destroy an equipment with Spellvoid to prevent some of it?`,
-      promptMessage: {
-        id: "engine.decision.damage.spellvoid",
-        values: { amount: packet.amount },
-      },
-      options: [...pieces.map((p) => `destroy ${p.id}`), "decline"],
-      optionMessages: [...pieces.map(() => null), { id: "common.option.decline" }],
-      cardOptions: [...pieces.map((p) => p.id as number | null), null],
-      sourceInstanceId: packet.sourceInstanceId,
-      chooseHook: "spellvoid",
-      arcane: packet,
-    };
-    return true;
-  }
-  return tryOpenBarrierDecision(state, runtime, packet);
+  if (pieces.length === 0) return false;
+  state.pendingDecision = {
+    player: packet.targetSeat,
+    kind: "choose-target",
+    prompt: `Spellvoid: you would be dealt ${packet.amount} arcane damage — destroy an equipment with Spellvoid to prevent some of it?`,
+    promptMessage: {
+      id: "engine.decision.damage.spellvoid",
+      values: { amount: packet.amount },
+    },
+    options: [...pieces.map((p) => `destroy ${p.id}`), "decline"],
+    optionMessages: [...pieces.map(() => null), { id: "common.option.decline" }],
+    cardOptions: [...pieces.map((p) => p.id as number | null), null],
+    sourceInstanceId: packet.sourceInstanceId,
+    chooseHook: "spellvoid",
+    arcane: packet,
+  };
+  return true;
+}
+
+/** The target orders its own prevention effects (CR 6.5.5): Arcane Barrier,
+ *  then optional Spellvoid, both before the mandatory Ward. */
+function continuePlayerPrevention(state: GameStateInternal,
+  runtime: EngineRuntime, packet: PendingArcane): number {
+  if (packet.amount > 0 && packet.arcane && tryOpenBarrierDecision(state, runtime, packet)) return 0;
+  if (openSpellvoidDecision(state, runtime, packet)) return 0;
+  if (packet.amount > 0 && openWardDecision(state, runtime, packet)) return 0;
+  return finishHeroDamage(state, runtime, packet);
 }
 
 /** Process queued arcane packets one at a time (a new prevention decision pauses the rest). */
@@ -1186,29 +1250,9 @@ function finishHeroDamage(
   return packet.amount;
 }
 
-/** After a Spellvoid answer: continue the packet through any remaining
- *  prevention decisions (Spellvoid again after a destroy, Arcane Barrier
- *  unless declined into it), then apply and drain the queue. */
-function continueArcaneDamage(
-  state: GameStateInternal,
-  runtime: EngineRuntime,
-  packet: PendingArcane,
-  allowSpellvoid: boolean,
-): void {
-  if (packet.amount > 0) {
-    const opened = allowSpellvoid
-      ? openArcaneDecision(state, runtime, packet)
-      : tryOpenBarrierDecision(state, runtime, packet);
-    if (opened) return;
-  }
-  finishHeroDamage(state, runtime, packet);
-}
-
 /** After a Ward answer: Ward is mandatory — re-offer it while damage and
  *  sources remain (one source destroyed at a time, the player only picks the
- *  order), then continue the packet — combat damage resumes the paused
- *  chain-link resolution; arcane damage falls through to the remaining
- *  Spellvoid / Arcane Barrier decisions; anything else applies. */
+ *  order), then finish the packet; combat damage resumes the paused link. */
 function continueAfterWard(state: GameStateInternal,
   runtime: EngineRuntime, packet: PendingArcane): void {
   if (!packet.unpreventable && packet.amount > 0) {
@@ -1216,11 +1260,7 @@ function continueAfterWard(state: GameStateInternal,
     const source = findCardAnywhere(state, packet.sourceInstanceId)?.card;
     packet.amount = applyPitchSourcePrevention(state, target, packet.amount, source);
   }
-  if (packet.amount > 0 && openWardDecision(state, runtime, packet)) return;
-  if (packet.amount > 0 && packet.arcane) {
-    if (openArcaneDecision(state, runtime, packet)) return;
-  }
-  finishHeroDamage(state, runtime, packet);
+  continuePlayerPrevention(state, runtime, packet);
 }
 
 /**
@@ -1238,6 +1278,10 @@ export function dealAllyDamage(state: GameStateInternal,
   const src = findCardAnywhere(state, packet.sourceInstanceId);
   const found = findPermanent(state, packet.targetAllyId as number);
   const ally = found?.card;
+  // games created before equipped allies were stamped with life
+  if (ally && ally.life === undefined && state.players[found!.seat]?.weapons.includes(ally)) {
+    stampEnteringLife(state, ally);
+  }
   if (
     !found ||
     !ally ||
@@ -1254,6 +1298,11 @@ export function dealAllyDamage(state: GameStateInternal,
   applyBoundArcaneCardBonus(state, packet);
   applyArcaneAmp(state, packet);
   packet.amount += effectDamageBonus(state, packet);
+  if (!packet.combat) {
+    // combat damage to an ally is already counted by the chain link's attack stats
+    const credit = statsCreditSeat(state, packet, src);
+    if (credit !== undefined) recordEffectThreat(state, credit, packet.amount);
+  }
   const sourceWide = sourceWidePrevention(state, src?.card, packet.unpreventable !== true);
   if (sourceWide && src) {
     const prevented = packet.amount;
@@ -1377,14 +1426,14 @@ export function effectDamageBonus(state: GameStateInternal, packet: PendingArcan
     if (mod.appliesTo === "weapon" || mod.appliesTo === "sword") return sum;
     if (
       mod.appliesTo === "attack" &&
-      data.cardType !== "weapon" &&
-      (data.cardType !== "action" || !(data.subtypes ?? []).includes("attack"))
+      !hasType(data, "weapon") &&
+      (!hasType(data, "action") || !(data.subtypes ?? []).includes("attack"))
     ) return sum;
     if (
       mod.appliesTo === "attack-action" &&
-      (data.cardType !== "action" || !(data.subtypes ?? []).includes("attack"))
+      (!hasType(data, "action") || !(data.subtypes ?? []).includes("attack"))
     ) return sum;
-    if (mod.appliesToCardType && data.cardType !== mod.appliesToCardType) return sum;
+    if (mod.appliesToCardType && !data.types.some((type) => type === mod.appliesToCardType)) return sum;
     if (mod.appliesToPitch !== undefined && cardColorOf(state, source) !== mod.appliesToPitch) return sum;
     if (mod.appliesToClass && !tags.has(mod.appliesToClass.toLowerCase())) return sum;
     if (mod.appliesToSubtype) {
@@ -1476,11 +1525,9 @@ function applyHeroDamageRedirect(
 
 /**
  * Deal effect damage. A prevention shield ("the next time you would be dealt
- *  damage this turn, prevent N") soaks first. Arcane Barrier is offered before
- *  Ward so its controller can choose to pay before Ward's mandatory
- *  destroy-to-prevent replacement applies; choosing pay 0 declines Arcane
- *  Barrier for this event. Ward applies to any remaining damage (combat damage
- *  opens the same decision from resolveLink), then Spellvoid is offered. The damage is deferred until it is
+ *  damage this turn, prevent N") soaks first, then the target's own
+ *  Arcane Barrier / Spellvoid / Ward decisions (continuePlayerPrevention;
+ *  combat damage opens Ward from resolveLink). The damage is deferred until it is
  *  answered (or queued behind an already-open prevention decision), and the
  *  result reaches scripts via onDamageDealt. Ally targets bypass all of that
  *  (see dealAllyDamage). Returns the damage dealt
@@ -1497,10 +1544,7 @@ function continueHeroDamageAfterQuell(
     arcane: packet.arcane,
     preventable: !packet.unpreventable,
   });
-  if (packet.amount > 0 && packet.arcane && tryOpenBarrierDecision(state, runtime, packet)) return 0;
-  if (packet.amount > 0 && openWardDecision(state, runtime, packet)) return 0;
-  if (packet.amount > 0 && packet.arcane && openArcaneDecision(state, runtime, packet)) return 0;
-  return finishHeroDamage(state, runtime, packet);
+  return continuePlayerPrevention(state, runtime, packet);
 }
 
 function continueAfterPaidQuell(state: GameStateInternal,
@@ -1515,7 +1559,7 @@ function continueAfterOptionalDamagePrevention(
   packet: PendingArcane,
   offerAnother: boolean,
 ): void {
-  if (offerAnother && openOptionalDamagePrevention(state, packet)) return;
+  if (offerAnother && openOptionalDamagePrevention(state, runtime, packet)) return;
   if (openQuellDecision(state, packet)) return;
   continueHeroDamageAfterQuell(state, runtime, packet);
 }
@@ -1527,7 +1571,7 @@ function continueAfterSoulDamagePrevention(
 ): void {
   if (openSoulDamagePrevention(state, runtime, packet)) return;
   if (openDiscardDamagePrevention(state, packet)) return;
-  if (openOptionalDamagePrevention(state, packet)) return;
+  if (openOptionalDamagePrevention(state, runtime, packet)) return;
   if (openQuellDecision(state, packet)) return;
   continueHeroDamageAfterQuell(state, runtime, packet);
 }
@@ -1539,7 +1583,7 @@ function continueAfterDiscardDamagePrevention(
   offerAnother: boolean,
 ): void {
   if (offerAnother && openDiscardDamagePrevention(state, packet)) return;
-  if (openOptionalDamagePrevention(state, packet)) return;
+  if (openOptionalDamagePrevention(state, runtime, packet)) return;
   if (openQuellDecision(state, packet)) return;
   continueHeroDamageAfterQuell(state, runtime, packet);
 }
@@ -1609,7 +1653,7 @@ export function beginHeroDamage(state: GameStateInternal,
     const transient = [
       ...state.resolving.filter((card) => card.owner === target.seat),
       ...(link?.attackingCard.owner === target.seat ? [link.attackingCard] : []),
-      ...(link?.defendingCards.filter((card) => card.owner === target.seat) ?? []),
+      ...(link && defendingSeatOf(link) === target.seat ? link.defendingCards : []),
     ];
     const seen = new Set<number>();
     const activePrevention = transient.reduce((sum, source) => {
@@ -1643,7 +1687,7 @@ export function beginHeroDamage(state: GameStateInternal,
   }
   if (openSoulDamagePrevention(state, runtime, packet)) return 0;
   if (openDiscardDamagePrevention(state, packet)) return 0;
-  if (openOptionalDamagePrevention(state, packet)) return 0;
+  if (openOptionalDamagePrevention(state, runtime, packet)) return 0;
   if (openQuellDecision(state, packet)) return 0;
   return continueHeroDamageAfterQuell(state, runtime, packet);
 }
@@ -1662,13 +1706,8 @@ export function dealEffectDamage(state: GameStateInternal,
   applyBoundArcaneCardBonus(state, packet);
   applyArcaneAmp(state, packet);
   packet.amount += effectDamageBonus(state, packet);
-  const sourceLocation = findCardAnywhere(state, packet.sourceInstanceId);
-  if (
-    packet.targetSeat !== packet.sourceSeat &&
-    !effectSourceIsAlly(state, packet, sourceLocation)
-  ) {
-    recordEffectThreat(state, packet.sourceSeat, packet.amount);
-  }
+  const credit = statsCreditSeat(state, packet, findCardAnywhere(state, packet.sourceInstanceId));
+  if (credit !== undefined) recordEffectThreat(state, credit, packet.amount);
   return beginHeroDamage(state, runtime, packet);
 }
 
@@ -1694,8 +1733,7 @@ function finishArcanePacket(state: GameStateInternal,
       { hero: logCardValue(heroCardId) },
     ));
   }
-  if (arc.amount > 0 && openWardDecision(state, runtime, arc)) return;
-  continueArcaneDamage(state, runtime, arc, true);
+  continuePlayerPrevention(state, runtime, arc);
 }
 
 function pitchableHandOptions(state: GameStateInternal, player: PlayerState): string[] {
@@ -1855,15 +1893,17 @@ export function answerArcaneBarrier(
       continueAfterOptionalDamagePrevention(state, runtime, arc, false);
       return undefined;
     }
-    const id = Number(optionId.slice("use ".length));
-    const piece = optionalDamagePreventionPieces(state, player, arc)
-      .find((candidate) => candidate.id === id);
+    const piece = optionalDamagePreventionPieces(state, runtime, player, arc)
+      .find((candidate) => candidate.option === optionId);
     if (!piece) return "prevention source not found";
     const source = controlledPermanents(state, seat, { faceDownEquipment: false })
-      .find((candidate) => candidate.instanceId === id);
+      .find((candidate) => candidate.instanceId === piece.id);
     if (!source) return "prevention source not found";
     state.pendingDecision = null;
-    if (piece.moveSource === "destroy") destroyPermanent(state, runtime, seat, source);
+    if (piece.payId !== undefined && piece.counter) {
+      runtime.makeCtx(state, seat, source).addCounter(piece.payId, piece.counter, -1);
+      (arc.usedOptionalDamagePreventionSourceIds ??= []).push(piece.id);
+    } else if (piece.moveSource === "destroy") destroyPermanent(state, runtime, seat, source);
     else runtime.makeCtx(state, seat, source).banish(source.instanceId);
     const prevented = Math.min(piece.amount, arc.amount);
     arc.amount -= prevented;
@@ -2014,10 +2054,7 @@ export function answerArcaneBarrier(
     if (!pd.options?.includes(optionId)) return "invalid option";
     if (optionId !== "decline") {
       const id = Number(optionId.slice("destroy ".length));
-      const eq = [
-        ...Object.values(player.equipment).filter((card): card is CardInstance => card !== undefined),
-        ...player.board,
-      ].find((card) => card.instanceId === id);
+      const eq = spellvoidSources(player).find((card) => card.instanceId === id);
       if (!eq) return "Spellvoid source not found";
       const piece = spellvoidPieces(state, runtime, player).find((p) => p.id === id);
       if (!piece) return "Spellvoid source not found";
@@ -2036,13 +2073,12 @@ export function answerArcaneBarrier(
           ...(arc.unpreventable ? {} : { amount: prevented }),
         },
       ));
-      // further Spellvoid pieces may still apply to the rest of the packet
-      continueArcaneDamage(state, runtime, arc, true);
+      continuePlayerPrevention(state, runtime, arc);
       return undefined;
     }
     state.pendingDecision = null;
-    // declined Spellvoid: fall through to the Arcane Barrier decision
-    continueArcaneDamage(state, runtime, arc, false);
+    arc.spellvoidDeclined = true;
+    continuePlayerPrevention(state, runtime, arc);
     return undefined;
   }
   if (pd.chooseHook === "arcane-barrier") {

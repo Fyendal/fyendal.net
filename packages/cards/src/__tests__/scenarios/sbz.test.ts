@@ -8,7 +8,7 @@
  * are answered with doRaw.
  */
 import { describe, expect, it } from "vitest";
-import { legalIntents } from "@fyendal/engine";
+import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { scenario } from "../harness.js";
 
 const BLAZE = "blaze, firemind|0";
@@ -107,6 +107,25 @@ describe("SBZ — Blaze, Firemind", () => {
     expect(s.state.players[0]!.hero.counters?.energy).toBe(4);
   });
 
+  it("gains no energy counters from opting while her abilities are disabled", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: BLAZE,
+          weapons: [],
+          hand: ["whisper of the oracle|1"],
+          deck: ["voltic bolt|1", "snapback|1", "emeritus scolding|1", "look tuff|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.flags.disableHeroAbilities = true;
+    s.play("whisper of the oracle|1");
+    s.chooseOption("top").chooseOption("top").chooseOption("top").chooseOption("top");
+    expect(s.state.players[0]!.hero.counters?.energy ?? 0).toBe(0);
+  });
+
   it("removes X counters to let a matching Wizard action be played as an instant on the opponent's turn", () => {
     const s = scenario({
       seats: [
@@ -172,6 +191,59 @@ describe("SBZ — Blaze, Firemind", () => {
     s.expectInZone(0, "nucleus aetherbolt|1", "banish");
   });
 
+  it("offers only the X values that match a hand card, and shows that card to the deciding player", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: BLAZE,
+          weapons: [],
+          hand: ["aether spindle|2", "aether spindle|3", FODDER],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.hero.counters = { energy: 3 };
+
+    s.activate(BLAZE);
+
+    const [yellow, blue] = s.state.players[0]!.hand.map((card) => card.instanceId);
+    const enabled = (seat: number) =>
+      projectStateFor(s.state, seat).pendingDecision?.optionEnabledCards?.map((cards) =>
+        cards.map((card) => card.instanceId));
+    expect(s.state.pendingDecision?.options).toEqual(["X = 2", "X = 3"]);
+    expect(enabled(0)).toEqual([[blue], [yellow]]);
+    expect(enabled(1)).toBeUndefined();
+  });
+
+  it("offers X for Foreboding Bolt", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: BLAZE, weapons: [], hand: ["foreboding bolt|1", FODDER] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.hero.counters = { energy: 3 };
+
+    s.activate(BLAZE);
+
+    expect(s.state.pendingDecision?.options).toEqual(["X = 3"]);
+  });
+
+  it("cannot be activated when no X matches a hand card", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: BLAZE, weapons: [], hand: ["aether spindle|2", FODDER] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.state.players[0]!.hero.counters = { energy: 2 };
+    const heroId = s.state.players[0]!.hero.instanceId;
+
+    expect(legalIntents(s.state, 0).some((intent) =>
+      intent.kind === "activate-ability" && intent.sourceInstanceId === heroId)).toBe(false);
+  });
+
   it.each([
     ["aether arc|3", 1],
     ["voltic bolt|2", 4],
@@ -223,7 +295,7 @@ describe("SBZ — the next-arcane +N pool", () => {
     });
     s.activate("crucible of aetherweave|0", { pitch: [] });
     s.play("voltic bolt|1", { pitch: [] }); // stops at the target choice
-    expect(s.state.pendingDecision?.prompt).toBe("Voltic Bolt: deal 6 arcane damage to which target?");
+    expect(s.state.pendingDecision?.prompt).toBe("Voltic Bolt: deal 6 arcane damage to a hero");
     s.chooseOption("opposing hero");
     s.expectLog("Voltic Bolt would deal 6 arcane damage to Dorinthea")
       .expectLife(1, 20 - 6); // 5 + 1
@@ -245,7 +317,7 @@ describe("SBZ — the next-arcane +N pool", () => {
     s.play("voltic bolt|1", { pitch: [], settle: false }); // window opens (Amp is live)
     s.activate("photon splicing|3", { settle: false }); // discard: Amp 1
     s.settle(); // Amp resolves, then Voltic Bolt — stops at its target choice
-    expect(s.state.pendingDecision?.prompt).toBe("Voltic Bolt: deal 6 arcane damage to which target?");
+    expect(s.state.pendingDecision?.prompt).toBe("Voltic Bolt: deal 6 arcane damage to a hero");
     s.chooseOption("opposing hero");
     s.expectLog("Voltic Bolt would deal 6 arcane damage to Dorinthea")
       .expectLife(1, 20 - 6)

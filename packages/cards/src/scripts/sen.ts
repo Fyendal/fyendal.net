@@ -1,13 +1,21 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
+  createdThisTurn,
   decisionMessage,
   decisionPrompt,
   destroyedTrigger,
+  faceUpGraveyard,
+  hasCardSubtype,
+  isAura,
   isCard,
   leavesArenaTrigger,
   localizedCardLog,
   opponentSeat,
+  pitchedBlue,
+  transcendIfBlue,
+  warnIfNoActionPoint,
 } from "./shared-helpers.js";
+import { GOLD, SPECTRAL_SHIELD } from "./tokens.js";
 
 // ── SEN (Silver Age: Enigma precon) ─────────────────────────────────────────
 //
@@ -35,12 +43,6 @@ import {
 //   createTokenFor) powering Fluid Motion / Manifest Muscle, and clash with
 //   an opponent winner (Test of Strength — engine: requestClash and the
 //   optional seat param on ctx.createToken).
-const SPECTRAL_SHIELD = "SEN037";
-const GOLD = "SEN036";
-
-function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("aura");
-}
 
 /** Auras with ward on the controller's board (Spectral Shield, Waning/Waxing, …). */
 function wardAuras(ctx: ScriptCtx) {
@@ -49,21 +51,6 @@ function wardAuras(ctx: ScriptCtx) {
 
 function controlsSpectralShield(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).board.some((c) => isCard(ctx, c.cardId, "Spectral Shield"));
-}
-
-function createdThisTurn(ctx: ScriptCtx): boolean {
-  return (Number(ctx.getFlag("player", "createdThisTurn")) || 0) > 0;
-}
-
-function pitchedBlue(ctx: ScriptCtx): boolean {
-  return ctx.pitchedThisTurn({ color: "blue" }) > 0;
-}
-
-/** "If you've played another blue card this turn, transcend." The resolving
- *  card is blue and noteCardPlayed has already counted it, so >= 2 means
- *  another blue card was played this turn. */
-function transcendIfBlue(ctx: ScriptCtx): void {
-  if (ctx.playedThisTurn("blue") >= 2) ctx.transcend();
 }
 
 /** A transcend instant: the printed effect, then the conditional transcend.
@@ -184,10 +171,10 @@ export const sen: Record<string, CardScript> = {
     onFriendlyAttackLost(ctx) {
       ctx.requestPayment(
         "stilettos-pay",
-        decisionPrompt(
+        warnIfNoActionPoint(ctx, decisionPrompt(
           "Silent Stilettos: pay {r}{r}{r} to destroy it and gain 1 action point?",
           "card.sen.stilettos.pay.actionpoint",
-        ),
+        )),
         3,
       );
     },
@@ -249,7 +236,7 @@ export const sen: Record<string, CardScript> = {
       const otherIllusionistAura = ctx
         .player(ctx.seat)
         .board.some(
-          (c) => c.instanceId !== shield.instanceId && isAura(ctx, c) && ctx.cardTypes(c).includes("illusionist"),
+          (c) => c.instanceId !== shield.instanceId && isAura(ctx, c) && hasCardSubtype(ctx, c, "illusionist"),
         );
       if (!otherIllusionistAura) ctx.addCounter(shield.instanceId, "power", 3);
     },
@@ -308,15 +295,14 @@ export const sen: Record<string, CardScript> = {
   },
 
   "test of strength|1": {
-    // Clash with the attacking hero; the winner creates a Gold token (which may
-    // be the opponent — requestClash + createToken's seat param).
+    // Clash with the attacking hero; the winner, who may be the opponent, creates a Gold token.
     onDefend(ctx) {
       const attacker = ctx.link?.attacker;
       if (attacker === undefined) return;
       ctx.requestClash(attacker, "test-of-strength");
     },
     onClashResult(ctx, hook, winner) {
-      if (hook === "test-of-strength" && winner >= 0) ctx.createToken(GOLD, winner);
+      if (hook === "test-of-strength" && winner >= 0) ctx.heroCreatesTokens(winner, GOLD);
     },
   },
 
@@ -377,11 +363,11 @@ export const sen: Record<string, CardScript> = {
       ctx.requestCardChoice(
         "pass-over",
         decisionPrompt("Pass Over: banish a card from the opponent's graveyard", "card.sen.opponent.graveyard.banish"),
-        ctx.player(opponentSeat(ctx)).graveyard.map((c) => c.instanceId),
+        faceUpGraveyard(ctx, opponentSeat(ctx)).map((c) => c.instanceId),
       );
     },
     {
-      canPlay: (ctx) => ctx.player(opponentSeat(ctx)).graveyard.length > 0,
+      canPlay: (ctx) => faceUpGraveyard(ctx, opponentSeat(ctx)).length > 0,
       onChoose(ctx, hook, option) {
         if (hook !== "pass-over") return;
         ctx.banish(Number(option));
@@ -392,7 +378,7 @@ export const sen: Record<string, CardScript> = {
 
   "preserve tradition|3": transcendInstant(
     (ctx) => {
-      const actions = ctx.player(ctx.seat).graveyard.filter((c) => ctx.hasCardType(c, "action"));
+      const actions = faceUpGraveyard(ctx).filter((c) => ctx.hasCardType(c, "action"));
       ctx.requestCardChoice(
         "preserve-tradition",
         decisionPrompt(
@@ -403,10 +389,10 @@ export const sen: Record<string, CardScript> = {
       );
     },
     {
-      canPlay: (ctx) => ctx.player(ctx.seat).graveyard.some((c) => ctx.hasCardType(c, "action")),
+      canPlay: (ctx) => faceUpGraveyard(ctx).some((c) => ctx.hasCardType(c, "action")),
       onChoose(ctx, hook, option) {
         if (hook !== "preserve-tradition") return;
-        const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
+        const card = faceUpGraveyard(ctx).find((candidate) => candidate.instanceId === Number(option));
         if (!card) return;
         ctx.putOnDeckBottom(Number(option));
         ctx.logPublic(

@@ -10,6 +10,7 @@ import { BotOpponentModal } from "../lobby/BotOpponentModal.js";
 import { CardPoolModeControl } from "../lobby/CardPoolModeControl.js";
 import { FormatName } from "../lobby/FormatBadge.js";
 import { deckErrorMessages } from "../lobby/deckErrors.js";
+import { deckConstructionMessages } from "../lobby/DeckGrid.js";
 
 export function FabraryPlayPage() {
   const intl = useIntl();
@@ -44,7 +45,8 @@ export function FabraryPlayPage() {
   const mode = request ? modes[request.format] : "legal";
   const banned = deck?.bannedCards ?? [];
   const future = deck?.futureCards ?? [];
-  const blocked = (mode !== "open" && banned.length > 0) || (mode === "legal" && future.length > 0);
+  const openOnly = banned.length > 0 || (deck?.constructionIssues?.length ?? 0) > 0;
+  const blocked = (mode !== "open" && openOnly) || (mode === "legal" && future.length > 0);
   const failures = pending.result && !pending.result.ok
     ? deckErrorMessages(pending.result, intl.formatMessage({ id: "play.error.import" }), {
       unknownCards: (cards) => intl.formatMessage({ id: "lobby.deck.error.unknownCards" }, { cards }),
@@ -120,9 +122,12 @@ export function FabraryPlayPage() {
                   <span className="fabrary-play-label">{intl.formatMessage({ id: "lobby.cardPool.title" })}</span>
                   <CardPoolModeControl value={mode} disabled={starting}
                     onChange={(value) => { setShowBots(false); setMode(request.format, value); }} />
+                  {deck && mode !== "open" ? deckConstructionMessages(intl, deck).map((message) => (
+                    <p key={message} className="fabrary-play-mode-hint">{message}</p>
+                  )) : null}
                   {blocked ? (
                     <p className="fabrary-play-mode-hint" role="status">
-                      {intl.formatMessage({ id: banned.length > 0 ? "play.banned" : "play.future" })}
+                      {intl.formatMessage({ id: openOnly ? "play.banned" : "play.future" })}
                     </p>
                   ) : null}
                 </div>

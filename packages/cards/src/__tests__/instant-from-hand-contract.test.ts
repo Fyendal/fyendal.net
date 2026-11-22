@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ActivatedAbility, CardScript } from "@fyendal/engine";
 import { cardList, isImplemented, scripts } from "../index.js";
+import { hasType } from "@fyendal/shared";
 
 function abilitiesOf(script: CardScript | undefined): ActivatedAbility[] {
   if (!script?.activated) return [];
@@ -18,7 +19,7 @@ describe("action cards with from-hand instant abilities", () => {
   it("register every implemented printed mode as an instant from-hand ability", () => {
     const mismatches = cardList
       .filter((card) =>
-        card.cardType === "action" &&
+        hasType(card, "action") &&
         isImplemented(card) &&
         hasPrintedDiscardFromHandInstant(card.text)
       )

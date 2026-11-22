@@ -32,6 +32,20 @@ describe("SKA — Kayo and equipment", () => {
       .expectAP(0, 1);
   });
 
+  it("Beaten Trackers warns that no action point will be gained off-turn", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        { ...kayo, hand: ["raging onslaught|1", "raging onslaught|1"], equipment: { legs: "beaten trackers|0" } },
+        { hero: "dorinthea", hand: ["crippling crush|1"], resources: 9 },
+      ],
+    });
+
+    g.play("crippling crush|1").blockWith().settle();
+    expect(g.state.pendingDecision?.player).toBe(0);
+    expect(g.state.pendingDecision?.warningMessage?.id).toBe("card.common.actionpoint.nogain");
+  });
+
   it("Mandible Claw has go again after a 6-power discard", () => {
     const g = scenario({
       seats: [

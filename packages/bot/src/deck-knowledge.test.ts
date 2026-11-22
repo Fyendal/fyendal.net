@@ -84,6 +84,20 @@ describe("card values", () => {
     // A block card can never leave arsenal: it only wastes the slot.
     const block = defaultCardUses(findPrinting("Crash and Bash", 1)!);
     expect(arsenalValue(block, 0)).toBe(-DEAD_ARSENAL_COST);
+    // An Ambush block card still defends from arsenal.
+    const tigerEye = defaultCardUses(findPrinting("Tiger Eye Reflex", 2)!);
+    expect(tigerEye.ambush).toBe(true);
+    expect(arsenalValue(tigerEye, 0)).toBeGreaterThan(0);
+  });
+
+  it("models every Evo as equipment, not as an action-point play", () => {
+    for (const name of ["Evo Smoothbore", "Evo Engine Room", "Evo Command Center"]) {
+      const data = findPrinting(name, 2)!;
+      expect(data.types).toEqual(["equipment", "action"]);
+      expect(defaultCardUses(data).kind).toBe("equipment");
+    }
+    expect(defaultCardUses(findPrinting("Evo Recall", 3)!).kind).toBe("equipment");
+    expect(defaultCardUses(findPrinting("Parry Blade")!).kind).toBe("weapon");
   });
 
   it("charges blue cards that cannot defend from arsenal", () => {

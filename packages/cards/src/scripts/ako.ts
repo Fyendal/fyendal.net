@@ -1,19 +1,14 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { discardSixPlusPayoff, isSixPlus, localizedCardLog, opponentSeat, yesNoPrompt } from "./shared-helpers.js";
-
-const MIGHT = "AKO028";
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
-}
-
-function isOnCombatChain(ctx: ScriptCtx, instanceId: number): boolean {
-  return ctx.state.chain.some((link) =>
-    [link.attackingCard, ...link.defendingCards, ...link.defendingEquipment, ...link.reactions].some(
-      (card) => card.instanceId === instanceId,
-    ),
-  );
-}
+import type { CardScript } from "@fyendal/engine";
+import {
+  discardSixPlusPayoff,
+  isAttackAction,
+  isOnCombatChain,
+  isSixPlus,
+  localizedCardLog,
+  opponentSeat,
+  yesNoPrompt,
+} from "./shared-helpers.js";
+import { MIGHT } from "./tokens.js";
 
 export const ako: Record<string, CardScript> = {
   "kayo, armed and dangerous|0": {

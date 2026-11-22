@@ -2,7 +2,10 @@ import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
   buffNextAttack,
+  countAuras,
+  crushTriggered,
   decisionPrompt,
+  equipmentZoneCards,
   heroChoiceSeat,
   isWeaponAttack,
   localizedCardLog,
@@ -16,7 +19,10 @@ import {
   suspenseAura,
   suspenseNextAttackBuff,
   yesNoPrompt,
+  isSuspenseAura,
+  hasMoreLife,
 } from "./shared-helpers.js";
+import { CONFIDENCE, MIGHT } from "./tokens.js";
 
 // ── SLY (Silver Age: Lyath Goldmane precon) ─────────────────────────────────
 //
@@ -37,28 +43,11 @@ import {
 //   engine: ctx.compareLife + the lifeTiebreak script marker), and the
 //   Confidence defender limit (engine: Modifier.maxNonBlockDefenders).
 
-const CONFIDENCE = "SLY034";
-const MIGHT = "SLY035";
 const BOO = crowdTrigger("boo");
-
-/** ctx.state is typed without the internal side tables; the runtime object has them. */
-
-function hasKeyword(ctx: ScriptCtx, cardId: string, keyword: string): boolean {
-  return (ctx.cardData(cardId).keywords ?? []).some((k) => k.toLowerCase() === keyword.toLowerCase());
-}
-
-/** Auras you control (aura-subtype board cards: Suspense auras, Booze!, tokens). */
-function countAuras(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).board.filter((c) => ctx.cardTypes(c).includes("aura")).length;
-}
 
 /** An "aura of suspense" is an aura with the Suspense keyword (SUP notes). */
 function controlsSuspenseAura(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).board.some((c) => hasKeyword(ctx, c.cardId, "suspense"));
-}
-
-function crushTriggered(ctx: ScriptCtx): boolean {
-  return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.hit && ctx.link.damage >= 4;
+  return ctx.player(ctx.seat).board.some((c) => isSuspenseAura(ctx, c));
 }
 
 /** Nameable damage sources for Oasis Respite's "source of your choice":
@@ -71,7 +60,7 @@ function damageSourceCandidates(ctx: ScriptCtx): number[] {
   for (const layer of ctx.state.stack) ids.push(layer.sourceInstanceId);
   for (const p of ctx.state.players) {
     ids.push(p.hero.instanceId);
-    for (const c of [...p.weapons, ...p.board, ...Object.values(p.equipment).filter((card) => card !== undefined)]) {
+    for (const c of [...p.weapons, ...p.board, ...equipmentZoneCards(p)]) {
       if (!c.faceDown) ids.push(c.instanceId);
     }
   }
@@ -92,11 +81,14 @@ function oasisRespite(amount: number): CardScript {
         const target = heroChoiceSeat(ctx, option);
         if (target === undefined) return;
         ctx.setState("oasisTarget", target);
+        const ownHero = target === ctx.seat;
         ctx.requestCardChoice(
           "source",
-          decisionPrompt(`Prevent the next ${amount} damage from which source?`, "card.sly.damage.source.choose", {
-            values: { amount },
-          }),
+          decisionPrompt(
+            `Prevent the next ${amount} damage to ${ownHero ? "your hero" : "the opposing hero"} from which source?`,
+            "card.sly.damage.source.choose",
+            { values: { amount, target: ownHero ? "self" : "opposing" } },
+          ),
           damageSourceCandidates(ctx),
         );
         return;
@@ -138,12 +130,12 @@ function aboveBase(ctx: ScriptCtx): boolean {
  * destroyAtZeroCounter marker adds the state-based "when this has no
  * suspense counters, destroy it" net for counters removed any other way.
  */
-function suspense(): CardScript {
+function slySuspense(): CardScript {
   return suspenseAura({ logCounterRemoval: true });
 }
 
 /** Suspense aura whose leave trigger buffs the next attack. */
-function suspenseBuff(n: number): CardScript {
+function slySuspenseBuff(n: number): CardScript {
   return suspenseAura({ leaves: suspenseNextAttackBuff(n), logCounterRemoval: true });
 }
 
@@ -151,7 +143,7 @@ function suspenseBuff(n: number): CardScript {
 function mockingBlow(n: number): CardScript {
   return {
     onAttackDeclared(ctx) {
-      if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0) ctx.crowdBoo(ctx.seat);
+      if (hasMoreLife(ctx)) ctx.crowdBoo(ctx.seat);
     },
     modifyAttack(ctx) {
       return ctx.getFlag("player", "booedThisTurn") ? n : 0;
@@ -326,13 +318,13 @@ export const sly: Record<string, CardScript> = {
     },
   },
 
-  "act of glory|1": suspenseBuff(6),
-  "edge of their seats|1": suspenseBuff(5),
-  "edge of their seats|3": suspenseBuff(3),
-  "tension in the air|1": suspenseBuff(4),
+  "act of glory|1": slySuspenseBuff(6),
+  "edge of their seats|1": slySuspenseBuff(5),
+  "edge of their seats|3": slySuspenseBuff(3),
+  "tension in the air|1": slySuspenseBuff(4),
 
   "the suspense is killing me|3": {
-    ...suspense(),
+    ...slySuspense(),
     modifyFriendlyAttack(ctx) {
       return Number(ctx.getFlag("player", "attacksDeclaredThisTurn")) === 1 ? 1 : 0;
     },

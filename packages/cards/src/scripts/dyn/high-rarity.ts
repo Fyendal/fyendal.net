@@ -1,7 +1,7 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, ScriptDecisionPrompt } from "@fyendal/engine";
 import {
   anyDamageTarget,
-  bottomOrKeepPrompt,
+  attackingWeapon,
   buffNextArcaneDamageCard,
   buffNextAttack,
   cardNamed,
@@ -14,9 +14,14 @@ import {
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
-  equipWithSilver,
+  equippedCards,
+  hasCardSubtype,
   heroDamage,
   hitHookLabel,
+  isArrow,
+  isAttackAction,
+  isNonAttackAction,
+  isSword,
   leavesArenaTrigger,
   ongoingLabel,
   opponentSeat,
@@ -24,26 +29,18 @@ import {
   previousAttackHasName,
   withdrawNextArcaneDamageCard,
   yesNoPrompt,
+  isItem,
+  silverEquipment,
 } from "../shared-helpers.js";
+import { COPPER, CROUCHING_TIGER, GOLD, PONDER, SILVER, SPELLBANE_AEGIS } from "../tokens.js";
 
-const CROUCHING_TIGER = "DYN065";
-const SILVER = "DYN245";
-const PONDER = "DYN244";
+/** "Put the looked-at card on the bottom?" with bottom/keep options. */
+export function bottomOrKeepPrompt(fallback = "Put the looked-at card on the bottom?"): ScriptDecisionPrompt {
+  return decisionPrompt(fallback, "card.common.lookedcard.bottom", {
+    optionMessages: commonOptionMessages("bottom", "keep"),
+  });
+}
 
-function has(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type);
-}
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && has(ctx, card, "attack");
-}
-function weapon(cost: number, extra: CardScript = {}): CardScript {
-  const base = { cost, isAttack: true, goAgain: false, oncePerTurn: true } as const;
-  const activated = extra.activated;
-  return {
-    ...extra,
-    activated: !activated || Array.isArray(activated) ? (activated ?? base) : { ...base, ...activated },
-  };
-}
 function discardChoice(ctx: ScriptCtx, hook: string, seat = opponentSeat(ctx)): void {
   const hand = ctx.player(seat).hand;
   if (hand.length)
@@ -54,24 +51,21 @@ function discardChoice(ctx: ScriptCtx, hook: string, seat = opponentSeat(ctx)): 
       seat,
     );
 }
-function arcane(amount: number, extra?: (ctx: ScriptCtx, dealt: number) => void): CardScript {
+function arcane(amount: number, onDealt?: (ctx: ScriptCtx, dealt: number) => void): CardScript {
   return {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [amount],
     onPlay(ctx) {
-      const dealt = dealArcane(ctx, opponentSeat(ctx), amount);
-      extra?.(ctx, dealt);
+      dealArcane(ctx, opponentSeat(ctx), amount);
+    },
+    // Not dealArcane's result: it is 0 while an Arcane Barrier decision defers the damage.
+    onDamageDealt(ctx, _target, dealt) {
+      onDealt?.(ctx, dealt);
     },
   };
 }
-function graveyardAssassinEquipment(extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    triggers: [equipWithSilver(2)],
-  };
-}
 function typedPermanents(ctx: ScriptCtx, seat: number, type: string): readonly DeepReadonly<CardInstance>[] {
-  return ctx.player(seat).board.filter((card) => has(ctx, card, type));
+  return ctx.player(seat).board.filter((card) => hasCardSubtype(ctx, card, type));
 }
 function advanceDiabolic(ctx: ScriptCtx, stage: "ally" | "aura", seat: number): void {
   if (seat > 1) {
@@ -98,7 +92,7 @@ function advanceDiabolic(ctx: ScriptCtx, stage: "ally" | "aura", seat: number): 
 function warhornPermanents(ctx: ScriptCtx, seat: number): readonly DeepReadonly<CardInstance>[] {
   return ctx
     .player(seat)
-    .board.filter((card) => ["ally", "aura", "item", "landmark"].some((type) => has(ctx, card, type)));
+    .board.filter((card) => ["ally", "aura", "item", "landmark"].some((type) => hasCardSubtype(ctx, card, type)));
 }
 function finishHarpoonReveal(ctx: ScriptCtx, ids: number[]): void {
   const x = ctx.getState("harpoonX");
@@ -134,7 +128,7 @@ function advanceWarhorn(ctx: ScriptCtx, afterSeat: number): void {
       `warhorn:${next}`,
       decisionPrompt("Choose a permanent to destroy", "card.dyn.warhorn.permanent.choose"),
       warhornPermanents(ctx, next).map((card) => card.instanceId),
-      has(ctx, ctx.player(ctx.seat).hero, "royal") ? ctx.seat : next,
+      hasCardSubtype(ctx, ctx.player(ctx.seat).hero, "royal") ? ctx.seat : next,
     );
     return;
   }
@@ -153,7 +147,7 @@ export const dynHighRarity: Record<string, CardScript> = {
   "dust from the golden plains|1": { materialKeywords: ["phantasm"] },
   "dust from the red desert|1": { materialKeywords: ["phantasm"] },
   "dust from the shadow crypts|1": { materialKeywords: ["phantasm"] },
-  "rok|0": weapon(3, {
+  "rok|0": attackingWeapon(3, {
     activated: {
       cost: 3,
       isAttack: true,
@@ -173,7 +167,7 @@ export const dynHighRarity: Record<string, CardScript> = {
         label: "Gain 1 resource",
         condition: (ctx, discarded, eventContext) =>
           eventContext?.atRandom === true && discarded?.instanceId === ctx.self.instanceId,
-        effect: (ctx) => ctx.changeResources(ctx.seat, 1),
+        effect: (ctx) => ctx.gainResources(ctx.seat, 1),
       },
     ],
   },
@@ -234,10 +228,7 @@ export const dynHighRarity: Record<string, CardScript> = {
     onGrantedHit(ctx, hook) {
       if (hook !== "buckle-hit") return;
       const player = ctx.player(opponentSeat(ctx));
-      const equipment = [
-        ...Object.values(player.equipment),
-        ...player.weapons.filter((card) => ctx.cardData(card.cardId).cardType === "equipment"),
-      ].filter((card): card is DeepReadonly<CardInstance> => card !== undefined && (card.defCounters ?? 0) > 0);
+      const equipment = equippedCards(ctx, player.seat).filter((card) => (card.defCounters ?? 0) > 0);
       if (equipment.length === 1) ctx.destroyPermanent(equipment[0]!.instanceId);
       else if (equipment.length > 1)
         ctx.requestCardChoice(
@@ -313,15 +304,15 @@ export const dynHighRarity: Record<string, CardScript> = {
       return cardNamed(ctx, card, "lumina ascension");
     },
   },
-  "jubeel, spellbane|0": weapon(1, {
+  "jubeel, spellbane|0": attackingWeapon(1, {
     canTriggerOnHit: (ctx) =>
       ctx.link?.targetAllyId === undefined &&
       !ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, "spellbane aegis")),
     onHit(ctx) {
-      ctx.createToken("DYN246");
+      ctx.createToken(SPELLBANE_AEGIS);
     },
   }),
-  "merciless battleaxe|0": weapon(3, {
+  "merciless battleaxe|0": attackingWeapon(3, {
     onAttackDeclared(ctx) {
       if ((ctx.link?.attackingCard.tempPower ?? 0) + (ctx.data.attack ?? 0) > 2 * (ctx.data.attack ?? 0))
         ctx.setFlag("link", "overpower", true);
@@ -369,7 +360,7 @@ export const dynHighRarity: Record<string, CardScript> = {
             options: (ctx) =>
               ctx
                 .player(ctx.seat)
-                .weapons.filter((card) => has(ctx, card, "sword"))
+                .weapons.filter((card) => isSword(ctx, card))
                 .map((card) => card.instanceId),
             prompt: () => decisionPrompt("Choose target sword you control", "card.dyn.ironsong.sword.target"),
           },
@@ -379,7 +370,7 @@ export const dynHighRarity: Record<string, CardScript> = {
         "Remove all +1 power counters from swords you control",
         decisionMessage("card.trigger.dyn.ironsongpride.counters.remove"),
         (ctx) => {
-          for (const sword of ctx.player(ctx.seat).weapons.filter((card) => has(ctx, card, "sword")))
+          for (const sword of ctx.player(ctx.seat).weapons.filter((card) => isSword(ctx, card)))
             ctx.setCardCounter(sword.instanceId, "power", 0);
         },
       ),
@@ -408,7 +399,7 @@ export const dynHighRarity: Record<string, CardScript> = {
         label: "Put a steam counter on Hanabi Blaster",
         condition: (ctx, played) =>
           !!played &&
-          (ctx.cardData(played.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "boost") &&
+          ctx.hasKeyword(played, "boost") &&
           Number(ctx.getFlag("player", "playedKeywordCount:boost")) === 3,
         effect(ctx) {
           ctx.addCounter(ctx.self.instanceId, "steam", 1);
@@ -469,8 +460,8 @@ export const dynHighRarity: Record<string, CardScript> = {
           return (
             !!pendingDelayedEffect(ctx, { match: (modifier) => modifier.onBoostAttack === undefined }) &&
             !!card &&
-            has(ctx, card, "mechanologist") &&
-            has(ctx, card, "item") &&
+            hasCardSubtype(ctx, card, "mechanologist") &&
+            isItem(ctx, card) &&
             (ctx.cardData(card.cardId).cost ?? 99) <= 2
           );
         },
@@ -482,8 +473,8 @@ export const dynHighRarity: Record<string, CardScript> = {
             triggeredCard && ctx.player(ctx.seat).banish.find((card) => card.instanceId === triggeredCard.instanceId);
           if (
             item &&
-            has(ctx, item, "mechanologist") &&
-            has(ctx, item, "item") &&
+            hasCardSubtype(ctx, item, "mechanologist") &&
+            isItem(ctx, item) &&
             (ctx.cardData(item.cardId).cost ?? 99) <= 2
           )
             ctx.settleCard(item.instanceId);
@@ -495,10 +486,10 @@ export const dynHighRarity: Record<string, CardScript> = {
     const mechanologistEquipment = (ctx: ScriptCtx) =>
       (["head", "chest", "arms", "legs"] as const).flatMap((slot) => {
         const card = ctx.player(ctx.seat).equipment[slot];
-        return card && has(ctx, card, "mechanologist") ? [card] : [];
+        return card && hasCardSubtype(ctx, card, "mechanologist") ? [card] : [];
       });
     const mechanologistWeapons = (ctx: ScriptCtx) =>
-      ctx.player(ctx.seat).weapons.filter((card) => has(ctx, card, "mechanologist"));
+      ctx.player(ctx.seat).weapons.filter((card) => hasCardSubtype(ctx, card, "mechanologist"));
     const hyperDrivers = (ctx: ScriptCtx) =>
       ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "hyper driver"));
     // The chosen weapon rides in the driver hook suffix so the resumable
@@ -568,7 +559,6 @@ export const dynHighRarity: Record<string, CardScript> = {
     };
   })(),
   "nitro mechanoid|0": {
-    additionalCardTypes: ["equipment"],
     activated: {
       cost: 0,
       isAttack: true,
@@ -596,8 +586,8 @@ export const dynHighRarity: Record<string, CardScript> = {
     },
     onFriendlyEnterArena(ctx, card) {
       if (
-        !has(ctx, card, "mechanologist") ||
-        !has(ctx, card, "item") ||
+        !hasCardSubtype(ctx, card, "mechanologist") ||
+        !isItem(ctx, card) ||
         (ctx.cardData(card.cardId).cost ?? 99) > 2 ||
         ctx.getCounter("steam") <= 0
       )
@@ -621,8 +611,8 @@ export const dynHighRarity: Record<string, CardScript> = {
       const target = ctx.player(ctx.seat).board.find((card) => card.instanceId === targetId);
       if (
         !target ||
-        !has(ctx, target, "mechanologist") ||
-        !has(ctx, target, "item") ||
+        !hasCardSubtype(ctx, target, "mechanologist") ||
+        !isItem(ctx, target) ||
         (ctx.cardData(target.cardId).cost ?? 99) > 2
       )
         return;
@@ -636,8 +626,8 @@ export const dynHighRarity: Record<string, CardScript> = {
       if (!source || !ctx.link?.defendingEquipment.length) return false;
       const sourceTypes = ctx.cardTypes(source);
       return (
-        has(ctx, source, "gun") ||
-        (ctx.cardData(source.cardId).cardType === "weapon" &&
+        hasCardSubtype(ctx, source, "gun") ||
+        (ctx.hasCardType(source, "weapon") &&
           sourceTypes.includes("mechanologist") &&
           sourceTypes.includes("pistol"))
       );
@@ -670,7 +660,7 @@ export const dynHighRarity: Record<string, CardScript> = {
         defaultOption: "yes",
         condition: (ctx, played) =>
           !!played &&
-          (ctx.cardData(played.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract"),
+          ctx.hasKeyword(played, "contract"),
         effect(ctx) {
           const top = ctx.player(opponentSeat(ctx)).deck[0];
           if (!top) return;
@@ -686,27 +676,28 @@ export const dynHighRarity: Record<string, CardScript> = {
       }
     },
   },
-  "blacktek whisperers|0": graveyardAssassinEquipment({
+  "blacktek whisperers|0": silverEquipment({
     activated: {
       cost: 0,
       isAttack: false,
       goAgain: false,
       timing: "attack-reaction",
       destroySelfCost: true,
-      canActivate: (ctx) => !!ctx.link && has(ctx, ctx.link.attackingCard, "assassin"),
+      canActivate: (ctx) => !!ctx.link && hasCardSubtype(ctx, ctx.link.attackingCard, "assassin"),
       onActivate(ctx) {
         ctx.addModifier({ scope: "chain-link", onHitGoAgain: true });
       },
     },
   }),
-  "mask of perdition|0": graveyardAssassinEquipment({
+  "mask of perdition|0": silverEquipment({
     activated: {
       cost: 0,
       isAttack: false,
       goAgain: false,
       timing: "attack-reaction",
       destroySelfCost: true,
-      canActivate: (ctx) => ctx.link?.attackCardType === "action" && has(ctx, ctx.link.attackingCard, "assassin"),
+      canActivate: (ctx) =>
+        ctx.link?.attackCardType === "action" && hasCardSubtype(ctx, ctx.link.attackingCard, "assassin"),
       onActivate(ctx) {
         ctx.addModifier({ scope: "chain-link" });
       },
@@ -718,7 +709,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       ),
     onHit(ctx) {
       const top = ctx.player(opponentSeat(ctx)).deck[0];
-      if (top) ctx.banish(top.instanceId);
+      if (top) ctx.banish(top.instanceId, { asAttackingCard: true });
     },
   }),
   "eradicate|2": {
@@ -726,7 +717,7 @@ export const dynHighRarity: Record<string, CardScript> = {
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
     onHit(ctx) {
       const count = Math.max(0, ctx.link?.damage ?? 0);
-      for (const card of ctx.player(opponentSeat(ctx)).deck.slice(0, count)) ctx.banish(card.instanceId);
+      ctx.banishCards(ctx.player(opponentSeat(ctx)).deck.slice(0, count).map((card) => card.instanceId));
     },
   },
   "leave no witnesses|1": {
@@ -738,11 +729,25 @@ export const dynHighRarity: Record<string, CardScript> = {
       const opp = ctx.player(opponentSeat(ctx));
       const top = opp.deck[0];
       if (top) ctx.banish(top.instanceId);
-      const arsenal = opp.arsenal[0];
-      if (arsenal) {
-        ctx.setCardFaceDown(arsenal.instanceId, false);
-        ctx.banish(arsenal.instanceId);
-      }
+      if (!opp.arsenal.length) return;
+      ctx.requestCardChoice(
+        "leave-no-witnesses-arsenal",
+        decisionPrompt(
+          `${ctx.data.name}: banish up to 1 card in the opponent's arsenal`,
+          "card.dyn.witnesses.arsenal.banish",
+          {
+            values: { card: { kind: "card", cardId: ctx.self.cardId } },
+            optionMessages: commonOptionMessages("pass"),
+          },
+        ),
+        ["pass", ...opp.arsenal.map((card) => card.instanceId)],
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "leave-no-witnesses-arsenal" || option === "pass") return;
+      const id = Number(option);
+      ctx.setCardFaceDown(id, false);
+      ctx.banish(id);
     },
   },
   "regicide|3": {
@@ -756,7 +761,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       return !ctx.cardNames(defending).some((name) => names.has(name));
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && has(ctx, ctx.player(opponentSeat(ctx)).hero, "royal");
+      return ctx.link?.targetAllyId === undefined && hasCardSubtype(ctx, ctx.player(opponentSeat(ctx)).hero, "royal");
     },
     onHit(ctx) {
       ctx.loseGame(opponentSeat(ctx));
@@ -802,7 +807,7 @@ export const dynHighRarity: Record<string, CardScript> = {
         const top = ctx.player(ctx.seat).deck[0];
         if (top) ctx.lookAt(top.instanceId);
         const cards = [...ctx.player(ctx.seat).hand, ...ctx.player(ctx.seat).deck.slice(0, 1)].filter((card) =>
-          has(ctx, card, "arrow"),
+          isArrow(ctx, card),
         );
         if (cards.length)
           ctx.requestCardChoice(
@@ -821,7 +826,7 @@ export const dynHighRarity: Record<string, CardScript> = {
     },
     // A separate trigger, so arrows any effect loads from the deck qualify.
     // It resolves after the loading effect; skip an arrow that has since left.
-    canTriggerOnEnterArsenal: (ctx, card, from) => from === "deck" && has(ctx, card, "arrow"),
+    canTriggerOnEnterArsenal: (ctx, card, from) => from === "deck" && isArrow(ctx, card),
     onEnterArsenal(ctx, card) {
       if (ctx.player(ctx.seat).arsenal.some((held) => held.instanceId === card.instanceId && !held.faceDown))
         ctx.addCounter(card.instanceId, "aim", 1);
@@ -917,8 +922,8 @@ export const dynHighRarity: Record<string, CardScript> = {
   "cryptic crossing|2": {
     onPlayCostPaid(ctx, cards) {
       ctx.setState("mixedPitch",
-        cards.some((card) => isAttack(ctx, card)) &&
-          cards.some((card) => !isAttack(ctx, card) && ctx.hasCardType(card, "action"))
+        cards.some((card) => isAttackAction(ctx, card)) &&
+          cards.some((card) => isNonAttackAction(ctx, card))
           ? 1
           : 0,
       );
@@ -948,9 +953,9 @@ export const dynHighRarity: Record<string, CardScript> = {
   },
   "diabolic ultimatum|1": {
     onPlayCostPaid(ctx, cards) {
-      ctx.setState("diabolicAlly", cards.some(isAttack.bind(undefined, ctx)) ? 1 : 0);
+      ctx.setState("diabolicAlly", cards.some((card) => isAttackAction(ctx, card)) ? 1 : 0);
       ctx.setState("diabolicAura",
-        cards.some((card) => ctx.hasCardType(card, "action") && !has(ctx, card, "attack")) ? 1 : 0,
+        cards.some((card) => isNonAttackAction(ctx, card)) ? 1 : 0,
       );
     },
     onPlay(ctx) {
@@ -1028,7 +1033,7 @@ export const dynHighRarity: Record<string, CardScript> = {
         condition: (ctx) => ["action", "layer", "reaction"].includes(ctx.state.phase),
         target: anyDamageTarget((ctx) => {
           const amount = ctx.previewArcaneDamage(1);
-          return decisionPrompt(`Choose a target for ${amount} arcane damage`, "card.dyn.brainstorm.target.choose", {
+          return decisionPrompt(`Choose a target for ${amount} arcane damage`, "card.common.arcane.damage.target", {
             values: { amount },
           });
         }),
@@ -1067,7 +1072,7 @@ export const dynHighRarity: Record<string, CardScript> = {
   },
   "celestial kimono|0": {
     onFriendlyDestroyed(ctx, card) {
-      if (card.instanceId === ctx.self.instanceId || has(ctx, card, "ward")) ctx.changeResources(ctx.seat, 1);
+      if (card.instanceId === ctx.self.instanceId || hasCardSubtype(ctx, card, "ward")) ctx.gainResources(ctx.seat, 1);
     },
   },
   "phantasmal symbiosis|2": {
@@ -1106,7 +1111,7 @@ export const dynHighRarity: Record<string, CardScript> = {
   "crown of dominion|0": {
     equippedHeroTypes: ["royal"],
     onGameStart(ctx) {
-      ctx.createToken("DYN243");
+      ctx.createToken(GOLD);
     },
   },
   "imperial edict|1": {
@@ -1117,7 +1122,7 @@ export const dynHighRarity: Record<string, CardScript> = {
       oncePerTurn: false,
       destroySelfCost: true,
       onActivate(ctx) {
-        if (has(ctx, ctx.player(ctx.seat).hero, "royal"))
+        if (hasCardSubtype(ctx, ctx.player(ctx.seat).hero, "royal"))
           ctx.revealCards(
             ctx.player(opponentSeat(ctx)).hand.map((card) => card.instanceId),
             opponentSeat(ctx),
@@ -1141,9 +1146,9 @@ export const dynHighRarity: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       oncePerTurn: false,
+      shuffleSelfIntoDeckCost: true,
       onActivate(ctx) {
-        ctx.putOnDeckBottom(ctx.self.instanceId);
-        ctx.createToken(has(ctx, ctx.player(ctx.seat).hero, "royal") ? "DYN243" : "DYN247");
+        ctx.createToken(hasCardSubtype(ctx, ctx.player(ctx.seat).hero, "royal") ? GOLD : COPPER);
       },
     },
   },

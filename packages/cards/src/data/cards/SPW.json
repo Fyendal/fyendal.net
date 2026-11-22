@@ -2,7 +2,7 @@
  {
   "id": "SPW001",
   "name": "Killjoy, the Crooked Blade",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may attack any opposing hero.\nWhenever you steal a Gold, the crowd boos you.\nThe first time the crowd boos you each turn, each hero with more {h} than you loses 1{h}.",
   "classes": [
    "warrior"
@@ -21,7 +21,7 @@
  {
   "id": "SPW002",
   "name": "Cutpurse Rapier",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nWhen this hits a hero, steal a Gold token they control.",
   "attack": 3,
   "classes": [
@@ -40,7 +40,7 @@
  {
   "id": "SPW003",
   "name": "Zane, Broadly Beloved",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may equip 2H swords as though they were 1H.\nWhenever you win a wager, the crowd cheers you.\nThe first time the crowd cheers you each turn, each hero draws a card.",
   "classes": [
    "warrior"
@@ -58,7 +58,7 @@
  {
   "id": "SPW004",
   "name": "Celebrant Broadsword",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nIf you've been cheered this turn, this card's attacks get go again.",
   "attack": 3,
   "classes": [

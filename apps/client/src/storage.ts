@@ -7,10 +7,17 @@ export const ROOM_SESSION_STORAGE_KEY = "fyendal-room-session";
 export const REPLAY_STORAGE_PREFIX = "fyendal-replay-";
 export const GAME_SETTINGS_STORAGE_KEY = "fyendal-game-settings";
 export const BOT_MATCHMAKING_PREFERENCE_STORAGE_KEY = "fyendal-bot-matchmaking-preference";
-const PREP_SORT_STORAGE_KEY = "fyendal-prep-sort";
+export const BOT_SHOW_BANNED_STORAGE_KEY = "fyendal-bot-show-banned";
+export const SOLO_BOTH_SIDES_SEEN_STORAGE_KEY = "fyendal-solo-both-sides-seen";
+// v2 drops every earlier choice so pitch becomes everyone's default once.
+const PREP_SORT_STORAGE_KEY = "fyendal-prep-sort-v2";
+const PREP_VIEW_STORAGE_KEY = "fyendal-prep-view";
 const HOME_GAME_MODE_STORAGE_PREFIX = "fyendal-home-game-mode-";
 const HOME_FORMAT_STORAGE_PREFIX = "fyendal-home-format-";
-export type HomeGameMode = "find-match" | "invite-friend" | "bot";
+const HOME_SOLO_OPPONENT_DECK_STORAGE_PREFIX = "fyendal-home-solo-opponent-deck-";
+/** Stored values predate the Private switch: "invite-friend" is a private player game.
+ * "solo" was stored as "bot" before self-play joined bot practice under it. */
+export type HomeGameMode = "find-match" | "invite-friend" | "solo";
 /** Legacy browser-wide key. Read once to migrate it to the signed-in account. */
 export const LOBBY_SETTINGS_STORAGE_KEY = "fyendal-lobby-settings";
 const LOBBY_SETTINGS_STORAGE_PREFIX = `${LOBBY_SETTINGS_STORAGE_KEY}-`;
@@ -57,7 +64,8 @@ export function loadHomeGameMode(
   if (!username) return "find-match";
   try {
     const mode = storage.getItem(homeGameModeStorageKey(username));
-    return mode === "invite-friend" || mode === "bot" ? mode : "find-match";
+    if (mode === "bot" || mode === "solo") return "solo";
+    return mode === "invite-friend" ? mode : "find-match";
   } catch {
     return "find-match";
   }
@@ -73,6 +81,38 @@ export function saveHomeGameMode(
     storage.setItem(homeGameModeStorageKey(username), mode);
   } catch {
     // A blocked/full localStorage must not prevent changing the game mode.
+  }
+}
+
+function homeSoloOpponentDeckStorageKey(username: string, format: Format): string {
+  return `${HOME_SOLO_OPPONENT_DECK_STORAGE_PREFIX}${format}-${username.toLowerCase()}`;
+}
+
+/** The deck last chosen for the other seat of a self-play game in this format. */
+export function loadHomeSoloOpponentDeck(
+  storage: Pick<Storage, "getItem">,
+  username: string | null,
+  format: Format,
+): string | null {
+  if (!username) return null;
+  try {
+    return storage.getItem(homeSoloOpponentDeckStorageKey(username, format)) || null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveHomeSoloOpponentDeck(
+  storage: Pick<Storage, "setItem">,
+  username: string | null,
+  format: Format,
+  deckId: string,
+): void {
+  if (!username) return;
+  try {
+    storage.setItem(homeSoloOpponentDeckStorageKey(username, format), deckId);
+  } catch {
+    // A blocked/full localStorage must not prevent starting the game.
   }
 }
 
@@ -92,6 +132,45 @@ export function saveFullscreenNudgeSeen(storage: Pick<Storage, "setItem">): void
     storage.setItem(FULLSCREEN_NUDGE_STORAGE_KEY, "1");
   } catch {
     // Session dismissal still works when storage is unavailable.
+  }
+}
+
+const PASS_UNTIL_HINT_STORAGE_KEY = "fyendal-pass-until-hint";
+
+/** Games the keep-passing hint has opened in; it retires at its cap. */
+export function loadPassUntilHintGames(storage: Pick<Storage, "getItem">): number {
+  try {
+    const games = Number(storage.getItem(PASS_UNTIL_HINT_STORAGE_KEY));
+    return Number.isInteger(games) && games > 0 ? games : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function savePassUntilHintGames(storage: Pick<Storage, "setItem">, games: number): void {
+  try {
+    storage.setItem(PASS_UNTIL_HINT_STORAGE_KEY, String(games));
+  } catch {
+    // The hint still closes for this game when storage is unavailable.
+  }
+}
+
+const PASS_UNTIL_IGNORE_PLAYS_STORAGE_KEY = "fyendal-pass-until-ignore-plays";
+
+export function loadPassUntilIgnorePlays(storage: Pick<Storage, "getItem">): boolean {
+  try {
+    return storage.getItem(PASS_UNTIL_IGNORE_PLAYS_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function savePassUntilIgnorePlays(storage: Pick<Storage, "setItem" | "removeItem">, ignore: boolean): void {
+  try {
+    if (ignore) storage.setItem(PASS_UNTIL_IGNORE_PLAYS_STORAGE_KEY, "1");
+    else storage.removeItem(PASS_UNTIL_IGNORE_PLAYS_STORAGE_KEY);
+  } catch {
+    // The choice still holds for this session when storage is unavailable.
   }
 }
 
@@ -127,9 +206,9 @@ export type PrepSortOrder = "name" | "pitch";
 
 export function loadPrepSortOrder(storage: Pick<Storage, "getItem">): PrepSortOrder {
   try {
-    return storage.getItem(PREP_SORT_STORAGE_KEY) === "pitch" ? "pitch" : "name";
+    return storage.getItem(PREP_SORT_STORAGE_KEY) === "name" ? "name" : "pitch";
   } catch {
-    return "name";
+    return "pitch";
   }
 }
 
@@ -141,6 +220,31 @@ export function savePrepSortOrder(
     storage.setItem(PREP_SORT_STORAGE_KEY, order);
   } catch {
     // A blocked/full localStorage must not prevent re-sorting.
+  }
+}
+
+export type PrepViewMode = "cards" | "list";
+
+export function loadPrepViewMode(
+  storage: Pick<Storage, "getItem">,
+  fallback: PrepViewMode,
+): PrepViewMode {
+  try {
+    const mode = storage.getItem(PREP_VIEW_STORAGE_KEY);
+    return mode === "cards" || mode === "list" ? mode : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export function savePrepViewMode(
+  storage: Pick<Storage, "setItem">,
+  mode: PrepViewMode,
+): void {
+  try {
+    storage.setItem(PREP_VIEW_STORAGE_KEY, mode);
+  } catch {
+    // A blocked/full localStorage must not prevent switching views.
   }
 }
 
@@ -175,6 +279,58 @@ export function saveBotMatchmakingPreference(
     }));
   } catch {
     // A blocked/full localStorage should not prevent changing the checkbox.
+  }
+}
+
+export function loadBotShowBannedPreference(storage: Pick<Storage, "getItem">): boolean {
+  try {
+    return storage.getItem(BOT_SHOW_BANNED_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function saveBotShowBannedPreference(storage: Pick<Storage, "setItem">, show: boolean): void {
+  try {
+    storage.setItem(BOT_SHOW_BANNED_STORAGE_KEY, show ? "1" : "0");
+  } catch {
+    // A blocked/full localStorage should not prevent changing the toggle.
+  }
+}
+
+/** Whether this browser has opened the self-play tab; until then it wears an unseen dot. */
+export function loadSoloBothSidesSeen(storage: Pick<Storage, "getItem">): boolean {
+  try {
+    return storage.getItem(SOLO_BOTH_SIDES_SEEN_STORAGE_KEY) === "1";
+  } catch {
+    return true;
+  }
+}
+
+export function saveSoloBothSidesSeen(storage: Pick<Storage, "setItem">): void {
+  try {
+    storage.setItem(SOLO_BOTH_SIDES_SEEN_STORAGE_KEY, "1");
+  } catch {
+    // A blocked/full localStorage only means the dot returns next time.
+  }
+}
+
+const DECK_ORDER_REVEAL_STORAGE_KEY = "fyendal-deck-order-reveal-game";
+
+/** Whether the draw-order reveal was accepted in this game; only the latest game is kept. */
+export function loadDeckOrderRevealAccepted(storage: Pick<Storage, "getItem">, gameId: string): boolean {
+  try {
+    return storage.getItem(DECK_ORDER_REVEAL_STORAGE_KEY) === gameId;
+  } catch {
+    return false;
+  }
+}
+
+export function saveDeckOrderRevealAccepted(storage: Pick<Storage, "setItem">, gameId: string): void {
+  try {
+    storage.setItem(DECK_ORDER_REVEAL_STORAGE_KEY, gameId);
+  } catch {
+    // Without storage the prompt simply returns next time.
   }
 }
 
@@ -428,7 +584,9 @@ export function saveLobbySettings(
 export type { PriorityWindowMode };
 export type CardDisplayPreference = "square" | "full";
 export type MotionPreference = "system" | "full" | "reduced";
+export type PriorityAlertMode = "unfocused" | "always-vs-players" | "always";
 export type PlayabilityCuePreference = "glow" | "high-contrast";
+export type HoverPreviewMode = "always" | "shift";
 
 /** Functional card key → `chooseHook` → engine option id; asking is absence. */
 export type StandingOrders = SeatStandingOrders;
@@ -499,13 +657,17 @@ export interface GameSettings {
   priorityWindowMode: PriorityWindowMode;
   lessGuidance: boolean;
   skipPlayConfirmation: boolean;
+  warnLethalPass: boolean;
   cardDisplayPreference: CardDisplayPreference;
   motionPreference: MotionPreference;
   playabilityCuePreference: PlayabilityCuePreference;
+  hoverPreviewMode: HoverPreviewMode;
   soundEffectsEnabled: boolean;
   soundEffectsVolume: number;
+  priorityAlertMode: PriorityAlertMode;
   optionHotkeys: boolean;
   skipBotDelay: boolean;
+  showGameClock: boolean;
   standingOrders: StandingOrders;
   playmat: PlaymatId;
   botPlaymat: PlaymatId;
@@ -516,13 +678,17 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   priorityWindowMode: "always-pause",
   lessGuidance: true,
   skipPlayConfirmation: true,
+  warnLethalPass: true,
   cardDisplayPreference: "square",
   motionPreference: "system",
   playabilityCuePreference: "glow",
+  hoverPreviewMode: "always",
   soundEffectsEnabled: true,
   soundEffectsVolume: 35,
+  priorityAlertMode: "always",
   optionHotkeys: false,
   skipBotDelay: false,
+  showGameClock: true,
   standingOrders: {},
   playmat: DEFAULT_PLAYMAT,
   botPlaymat: DEFAULT_PLAYMAT,
@@ -621,16 +787,24 @@ export function loadGameSettings(storage: Pick<Storage, "getItem">): GameSetting
       skipPlayConfirmation: typeof record.skipPlayConfirmation === "boolean"
         ? record.skipPlayConfirmation
         : true,
+      warnLethalPass: typeof record.warnLethalPass === "boolean"
+        ? record.warnLethalPass
+        : true,
       motionPreference,
       playabilityCuePreference,
+      hoverPreviewMode: record.hoverPreviewMode === "shift" ? "shift" : "always",
       soundEffectsEnabled: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10 || record.version === 11
         ? record.soundEffectsEnabled as boolean
         : true,
       soundEffectsVolume: record.version === 4 || record.version === 5 || record.version === 6 || record.version === 7 || record.version === 8 || record.version === 9 || record.version === 10 || record.version === 11
         ? record.soundEffectsVolume as number
         : 35,
+      priorityAlertMode: record.priorityAlertMode === "unfocused" || record.priorityAlertMode === "always-vs-players"
+        ? record.priorityAlertMode
+        : "always",
       optionHotkeys: typeof record.optionHotkeys === "boolean" ? record.optionHotkeys : false,
       skipBotDelay: typeof record.skipBotDelay === "boolean" ? record.skipBotDelay : false,
+      showGameClock: typeof record.showGameClock === "boolean" ? record.showGameClock : true,
       standingOrders,
       // A mat retired from the catalog falls back alone instead of resetting everything.
       playmat: isPlaymatId(record.playmat) ? record.playmat : DEFAULT_PLAYMAT,

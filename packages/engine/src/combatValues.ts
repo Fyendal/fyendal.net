@@ -5,7 +5,6 @@ import type { CardScript } from "./scripts.js";
 import {
   cardAbilitiesSuppressed,
   cardColorOf,
-  cardHasType,
   cardNamesOf,
   cardTypesOf,
   currentWardValue,
@@ -13,6 +12,7 @@ import {
   hasWardKeyword,
   instanceHasKeyword,
   instanceKeywordValues,
+  grantedBaseAbilityCardIds,
   scriptOf,
 } from "./cardProperties.js";
 import {
@@ -24,9 +24,10 @@ import {
   modifierAppliesToDefense,
 } from "./combatModifiers.js";
 import type { BasePowerSource, CardInstance, ChainLinkState, CombatValueModifier, Modifier, PlayerState } from "./state.js";
-import { findCardAnywhere, opponent } from "./zoneQueries.js";
+import { defendingSeatOf, findCardAnywhere, opponent } from "./zoneQueries.js";
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
+import { hasType } from "@fyendal/shared";
 
 function matchingOneShotDefenseCards(
   state: GameStateInternal,
@@ -35,7 +36,7 @@ function matchingOneShotDefenseCards(
   defenders: readonly CardInstance[],
 ): CardInstance[] {
   let matching = defenders.filter((card) => {
-    if (modifier.seat !== card.owner) return false;
+    if (modifier.seat !== defendingSeatOf(link)) return false;
     const equipment = link.defendingEquipment.some(
       (candidate) => candidate.instanceId === card.instanceId,
     );
@@ -62,7 +63,8 @@ function matchingOneShotDefenseCards(
 }
 
 /** Consume delayed "the next time they defend" effects at the defend event
- * boundary and attach their adjustment to exactly the matching cards. */
+ * boundary and attach their adjustment to exactly the matching cards. The
+ * attachment lasts while the card defends, through close-of-chain Temper. */
 export function applyOneShotDefenseModifiers(
   state: GameStateInternal,
   link: ChainLinkState,
@@ -84,8 +86,8 @@ export function applyOneShotDefenseModifiers(
         id: state.nextModifierId++,
         sourceInstanceId: modifier.sourceInstanceId,
         ...(modifier.sourceCardId ? { sourceCardId: modifier.sourceCardId } : {}),
-        seat: card.owner,
-        scope: "chain-link",
+        seat: defendingSeatOf(link),
+        scope: "combat-chain",
         defense: modifier.defense,
         appliesToInstanceId: card.instanceId,
         ...(modifier.appliesToEquipment ? { appliesToEquipment: true } : {}),
@@ -223,7 +225,7 @@ export function attackNonBlockDefenderCount(
   link: ChainLinkState,
 ): number {
   return [...link.defendingCards, ...link.defendingEquipment].filter(
-    (card) => dataOf(state, card.cardId).cardType !== "block",
+    (card) => !hasType(dataOf(state, card.cardId), "block"),
   ).length;
 }
 
@@ -285,6 +287,34 @@ export function chainLinkNumber(
   return index < 0 ? state.chain.length : index + 1;
 }
 
+/** Attack scriptState key per card its own Boost banished; the value is the
+ * bonus at banish time, kept as last-known information. */
+export const BOOST_BANISHED_PREFIX = "boostBanished:";
+
+/** `boostBanishPowerBonus` is continuous: re-read each card while it is
+ * still the banished object, else use its recorded value. */
+function boostBanishBonus(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  card: CardInstance,
+): number {
+  const hook = scriptOf(state, card.cardId, card)?.boostBanishPowerBonus;
+  if (!card.scriptState || !hook) return 0;
+  const booster = state.players[seat] as PlayerState;
+  let total = 0;
+  for (const [key, snapshot] of Object.entries(card.scriptState)) {
+    if (!key.startsWith(BOOST_BANISHED_PREFIX)) continue;
+    const instanceId = Number(key.slice(BOOST_BANISHED_PREFIX.length));
+    const stillBanished = booster.flags[`banishedFromBoost:${instanceId}`] === true;
+    const banished = stillBanished
+      ? state.players.flatMap((player) => player.banish).find((candidate) => candidate.instanceId === instanceId)
+      : undefined;
+    total += banished ? hook(runtime.makeCtx(state, seat, card), banished) : snapshot;
+  }
+  return total;
+}
+
 export function conditionalAttackBonus(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -296,11 +326,10 @@ export function conditionalAttackBonus(
   const suppressOwn =
     link.attackCardType === "action" &&
     state.players.some((candidate) => candidate.flags.suppressAttackPowerEffectGains === true);
-  const own = suppressOwn ? 0 : script?.modifyAttack?.(runtime.makeCtx(state, seat, card, link)) ?? 0;
-  const inherited = [
-    ...(card.grantedBaseAbilitiesCardId ? [card.grantedBaseAbilitiesCardId] : []),
-    ...(card.grantedBaseAbilitiesCardIds ?? []),
-  ].reduce((sum, cardId) => sum + (state.scriptsRef[cardId]?.modifyAttack?.(
+  const own = suppressOwn
+    ? 0
+    : (script?.modifyAttack?.(runtime.makeCtx(state, seat, card, link)) ?? 0) + boostBanishBonus(state, runtime, seat, card);
+  const inherited = grantedBaseAbilityCardIds(card).reduce((sum, cardId) => sum + (state.scriptsRef[cardId]?.modifyAttack?.(
     runtime.makeCtx(state, seat, card, link),
   ) ?? 0), 0);
   return own + inherited;
@@ -398,6 +427,7 @@ function attackValueAdjustments(
   state: GameStateInternal,
   runtime: EngineRuntime,
   link: ChainLinkState,
+  excludeInstanceId?: number,
 ): AttackValueAdjustment[] {
   const out: AttackValueAdjustment[] = [];
   const data = dataOf(state, link.attackingCard.cardId);
@@ -418,6 +448,10 @@ function attackValueAdjustments(
       modifier.defendedLessThanNonEquip !== undefined &&
       link.defendingCards.length >= modifier.defendedLessThanNonEquip
     ) continue;
+    if (
+      modifier.intimidatedAtLeastThisTurn !== undefined &&
+      (Number(state.players[modifier.seat]?.flags.intimidateCountThisTurn) || 0) < modifier.intimidatedAtLeastThisTurn
+    ) continue;
     if (modifier.attack) {
       add(findCardAnywhere(state, modifier.sourceInstanceId)?.card, modifier.attack);
     }
@@ -434,7 +468,9 @@ function attackValueAdjustments(
     add(findCardAnywhere(state, piercing.sourceInstanceId)?.card, piercing.amount);
   }
 
-  add(link.attackingCard, conditionalAttackBonus(state, runtime, link.attacker, link.attackingCard, link));
+  if (link.attackingCard.instanceId !== excludeInstanceId) {
+    add(link.attackingCard, conditionalAttackBonus(state, runtime, link.attacker, link.attackingCard, link));
+  }
   if (!heroAbilitiesDisabled(state, link.attacker)) {
     add(attacker.hero, conditionalAttackBonus(state, runtime, link.attacker, attacker.hero, link));
   }
@@ -448,7 +484,10 @@ function attackValueAdjustments(
     weapons: true,
   });
   for (const source of attackerSources) {
-    if (source.instanceId === link.attackingCard.instanceId) continue;
+    if (
+      source.instanceId === link.attackingCard.instanceId ||
+      source.instanceId === excludeInstanceId
+    ) continue;
     const hook = scriptOf(state, source.cardId, source)?.modifyFriendlyAttack;
     if (hook) {
       add(
@@ -475,13 +514,14 @@ function attackValueAdjustments(
   }
   for (const source of link.defendingCards) {
     const hook = scriptOf(state, source.cardId, source)?.modifyOpposingAttack;
-    if (hook) add(source, hook(runtime.makeCtx(state, source.owner, source, link), link.attackingCard));
+    if (hook) add(source, hook(runtime.makeCtx(state, defenderSeat, source, link), link.attackingCard));
   }
 
   for (const modifier of state.modifiers) {
     if (modifier.scope !== "until-end-of-turn" && modifier.scope !== "static") continue;
     if (!modifierApplies(state, modifier, link)) continue;
     if (modifier.sourceInstanceId === link.attackingCard.instanceId) continue;
+    if (modifier.sourceInstanceId === excludeInstanceId) continue;
     const found = findCardAnywhere(state, modifier.sourceInstanceId);
     if (!found) continue;
     const hook = scriptOf(state, found.card.cardId, found.card)?.modifyAttack;
@@ -536,10 +576,13 @@ function defendingCardModifiers(
     if (
       modifier.scope !== "until-end-of-turn" &&
       modifier.scope !== "static" &&
-      !(modifier.scope === "chain-link" && modifier.appliesToInstanceId !== undefined)
+      !(
+        (modifier.scope === "chain-link" || modifier.scope === "combat-chain") &&
+        modifier.appliesToInstanceId !== undefined
+      )
     ) return false;
     if (
-      modifier.seat !== card.owner ||
+      modifier.seat !== defendingSeatOf(link) ||
       !modifierAppliesToDefense(state, modifier, data, color, card)
     ) return false;
     if (!modifier.appliesToFirstDefenderOnly) return true;
@@ -572,7 +615,8 @@ function defendingEquipmentModifiers(
     (
       modifier.scope === "static" ||
       modifier.scope === "until-end-of-turn" ||
-      modifier.scope === "chain-link"
+      modifier.scope === "chain-link" ||
+      (modifier.scope === "combat-chain" && modifier.appliesToInstanceId !== undefined)
     )
   );
 }
@@ -622,7 +666,7 @@ export function defenseValueModifiers(
       defendingCardDefenseAdjustment(
         link,
         scriptOf(state, card.cardId, card)?.modifyDefense?.(
-          runtime.makeCtx(state, card.owner, card, link),
+          runtime.makeCtx(state, defendingSeatOf(link), card, link),
         ) ?? 0,
       ),
     );
@@ -686,7 +730,7 @@ export function defenseValueModifiers(
 }
 
 function isAttackActionData(data: CardData): boolean {
-  return data.cardType === "action" && (data.subtypes ?? []).includes("attack");
+  return hasType(data, "action") && (data.subtypes ?? []).includes("attack");
 }
 
 /**
@@ -767,7 +811,7 @@ export function currentPowerOf(
       modifier.attack &&
       !modifier.consumed &&
       (modifier.scope === "until-end-of-turn" || modifier.scope === "static") &&
-      modifier.seat === card.owner &&
+      modifier.seat === defenderSeat &&
       modifierAppliesToDefense(state, modifier, data, color, card)
     ) power += modifier.attack;
   }
@@ -982,7 +1026,7 @@ function defendingCardDefense(
   let defense = defendingCardBaseDefense(
     link,
     printed,
-    baseDefenseOf(state, runtime, card.owner, card, raw),
+    baseDefenseOf(state, runtime, defendingSeatOf(link), card, raw),
   );
   defense += defendingCardDefenseAdjustment(link, Number(card.counters?.defense ?? 0));
   for (const source of attackingDefenseModifierSources(state, link)) {
@@ -1000,7 +1044,7 @@ function defendingCardDefense(
   defense += defendingCardDefenseAdjustment(
     link,
     scriptOf(state, card.cardId, card)?.modifyDefense?.(
-      runtime.makeCtx(state, card.owner, card, link),
+      runtime.makeCtx(state, defendingSeatOf(link), card, link),
     ) ?? 0,
   );
   for (const modifier of activeModifiers(state, link, ["chain-link", "until-end-of-turn"])) {
@@ -1041,16 +1085,16 @@ export function noteAttackDefendedBy(
 ): boolean {
   const defendingData = dataOf(state, defending.cardId);
   const defendingColor = cardColorOf(state, defending);
+  const defender = state.players[defendingSeatOf(link)] as PlayerState;
   if (defendingColor > 0) {
-    const owner = state.players[defending.owner] as PlayerState;
-    owner.flags[`defendedPitch:${defendingColor}`] =
-      (Number(owner.flags[`defendedPitch:${defendingColor}`]) || 0) + 1;
+    defender.flags[`defendedPitch:${defendingColor}`] =
+      (Number(defender.flags[`defendedPitch:${defendingColor}`]) || 0) + 1;
   }
   if (
-    defendingData.cardType === "action" &&
+    hasType(defendingData, "action") &&
     (defendingData.subtypes ?? []).includes("attack")
   ) {
-    (state.players[defending.owner] as PlayerState).flags.defendedWithAttackActionThisTurn = true;
+    defender.flags.defendedWithAttackActionThisTurn = true;
   }
   const defense = link.defendingEquipment.some(
     (card) => card.instanceId === defending.instanceId,
@@ -1134,18 +1178,51 @@ export function equipmentDefense(
   return Math.max(0, modified);
 }
 
-/** `link` as it would stand with an uncommitted staged set declared as
- * defenders, without moving cards or firing defend hooks. */
-export function linkWithStagedDefenders(
+/** State and link with `staged` declared as defenders, moved out of hand and
+ * arsenal onto the chain, so scripts reading `ctx.state` see where they are. */
+export function stagedDefenderPreview(
   state: GameStateInternal,
   link: ChainLinkState,
   staged: readonly CardInstance[],
-): ChainLinkState {
-  return {
+): { state: GameStateInternal; link: ChainLinkState } {
+  // Keyed on zone: an Evo defending from hand is a card, not equipment.
+  const fromArena = new Set(state.players.flatMap((player) => [
+    ...Object.values(player.equipment),
+    ...player.weapons,
+  ]).flatMap((card) => card ? [card.instanceId] : []));
+  const stagedLink: ChainLinkState = {
     ...link,
-    defendingCards: [...link.defendingCards, ...staged.filter((card) => !cardHasType(state, card, "equipment"))],
-    defendingEquipment: [...link.defendingEquipment, ...staged.filter((card) => cardHasType(state, card, "equipment"))],
+    defendingCards: [...link.defendingCards, ...staged.filter((card) => !fromArena.has(card.instanceId))],
+    defendingEquipment: [...link.defendingEquipment, ...staged.filter((card) => fromArena.has(card.instanceId))],
   };
+  const stagedIds = new Set(staged.map((card) => card.instanceId));
+  const withoutStaged = (player: PlayerState): PlayerState => ({
+    ...player,
+    hand: player.hand.filter((card) => !stagedIds.has(card.instanceId)),
+    arsenal: player.arsenal.filter((card) => !stagedIds.has(card.instanceId)),
+  });
+  return {
+    state: {
+      ...state,
+      players: [withoutStaged(state.players[0]), withoutStaged(state.players[1])],
+      chain: state.chain.map((chainLink) => chainLink === link ? stagedLink : chainLink),
+    },
+    link: stagedLink,
+  };
+}
+
+/** Mirage (8.3.25): is this defender on a non-Illusionist attack with 6 or more
+ *  {p}? Re-evaluated when the triggered layer resolves (CR 5.3.2a). */
+export function mirageConditionMet(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  link: ChainLinkState,
+  card: CardInstance,
+): boolean {
+  return !link.resolved && link.flags.attackGone !== true &&
+    instanceHasKeyword(state, card, "mirage") &&
+    !cardTypesOf(state, link.attackingCard).includes("illusionist") &&
+    computeAttack(state, runtime, link) >= 6;
 }
 
 /** Defense contributed by an uncommitted staged set if those cards became
@@ -1158,9 +1235,12 @@ export function stagedDefenseTotal(
   link: ChainLinkState,
   staged: CardInstance[],
 ): number {
-  const cards = staged.filter((card) => !cardHasType(state, card, "equipment"));
-  const equipment = staged.filter((card) => cardHasType(state, card, "equipment"));
-  const stagedLink = linkWithStagedDefenders(state, link, staged);
+  const { state: stagedState, link: stagedLink } = stagedDefenderPreview(state, link, staged);
+  const equipment = staged.filter((card) => stagedLink.defendingEquipment.includes(card));
+  // A Mirage defender is destroyed before damage, so it adds no defense.
+  const cards = staged.filter((card) =>
+    !equipment.includes(card) && !mirageConditionMet(stagedState, runtime, stagedLink, card)
+  );
   // Preview the attachments that applyOneShotDefenseModifiers would create
   // if this staged set became the next defend event, without consuming the
   // live delayed modifiers or advancing the state's modifier id.
@@ -1178,8 +1258,8 @@ export function stagedDefenseTotal(
         id: previewId--,
         sourceInstanceId: modifier.sourceInstanceId,
         ...(modifier.sourceCardId ? { sourceCardId: modifier.sourceCardId } : {}),
-        seat: card.owner,
-        scope: "chain-link",
+        seat: defendingSeatOf(stagedLink),
+        scope: "combat-chain",
         defense: modifier.defense,
         appliesToInstanceId: card.instanceId,
         ...(modifier.appliesToEquipment ? { appliesToEquipment: true } : {}),
@@ -1187,8 +1267,8 @@ export function stagedDefenseTotal(
     }
   }
   const previewState: GameStateInternal = previewModifiers.length > 0
-    ? { ...state, modifiers: [...state.modifiers, ...previewModifiers] }
-    : state;
+    ? { ...stagedState, modifiers: [...state.modifiers, ...previewModifiers] }
+    : stagedState;
   return cards.reduce(
     (total, card) => total + defendingCardDefense(previewState, runtime, stagedLink, card),
     0,
@@ -1228,12 +1308,10 @@ export function grantsAuraAttackMarker(
 }
 
 /**
- * The attack's current bonus over its base {p}: modifier-granted plus
- * script-granted contributions from the attacking object, hero, reactions,
- * friendly continuous sources, and lingering effect sources.
- * `excludeInstanceId` drops a card's own conditional contribution, so "if
- * this has {p} greater than its base" does not count the bonus the check
- * itself would grant (and cannot recurse).
+ * The attack's current bonus over its base {p}, from the same adjustments as
+ * `computeAttack`. `excludeInstanceId` drops a card's own conditional
+ * contribution, so "if this has {p} greater than its base" does not count the
+ * bonus the check itself would grant (and cannot recurse).
  */
 export function attackBonusAboveBase(
   state: GameStateInternal,
@@ -1243,54 +1321,6 @@ export function attackBonusAboveBase(
 ): number {
   if (scriptOf(state, link.attackingCard.cardId, link.attackingCard)
     ?.unmodifiableCharacteristics?.includes("power")) return 0;
-  let n = activeModifiers(state, link, [
-    "chain-link",
-    "combat-chain",
-    "until-end-of-turn",
-    "static",
-  ])
-    .reduce((total, modifier) => total + (modifier.attack ?? 0), 0);
-  // +1{p} counters and this-turn power grants on the attacking card are
-  // above-base too
-  const liveAttack =
-    findCardAnywhere(state, link.attackingCard.instanceId)?.card ?? link.attackingCard;
-  n += liveAttack.counters?.power ?? 0;
-  n += liveAttack.tempPower ?? 0;
-  const attacker = state.players[link.attacker] as PlayerState;
-  if (link.attackingCard.instanceId !== excludeInstanceId) {
-    n += conditionalAttackBonus(state, runtime, link.attacker, link.attackingCard, link);
-  }
-  if (!heroAbilitiesDisabled(state, link.attacker)) {
-    n += conditionalAttackBonus(state, runtime, link.attacker, attacker.hero, link);
-  }
-  for (const r of link.reactions) {
-    n += conditionalAttackBonus(state, runtime, link.attacker, r, link);
-  }
-  for (const source of hookSources(state, link.attacker, {
-    board: true,
-    equipment: true,
-    weapons: true,
-  })) {
-    if (
-      source.instanceId === link.attackingCard.instanceId ||
-      source.instanceId === excludeInstanceId
-    ) continue;
-    const hook = scriptOf(state, source.cardId, source)?.modifyFriendlyAttack;
-    if (hook) {
-      n += hook(runtime.makeCtx(state, link.attacker, source, link), link.attackingCard);
-    }
-  }
-  for (const mod of state.modifiers) {
-    if (mod.scope !== "until-end-of-turn" && mod.scope !== "static") continue;
-    if (!modifierApplies(state, mod, link)) continue;
-    if (mod.sourceInstanceId === link.attackingCard.instanceId) continue;
-    if (mod.sourceInstanceId === excludeInstanceId) continue;
-    const src = findCardAnywhere(state, mod.sourceInstanceId);
-    if (!src) continue;
-    const script = scriptOf(state, src.card.cardId, src.card);
-    if (script?.modifyAttack) {
-      n += script.modifyAttack(runtime.makeCtx(state, src.seat, src.card, link));
-    }
-  }
-  return n;
+  return attackValueAdjustments(state, runtime, link, excludeInstanceId)
+    .reduce((total, adjustment) => total + adjustment.amount, 0);
 }

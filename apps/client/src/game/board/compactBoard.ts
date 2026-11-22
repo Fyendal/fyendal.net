@@ -10,10 +10,8 @@ export function shouldUseCompactBoard(
 ): boolean {
   if (viewportWidth <= 700) return false;
 
-  const squareSize = viewportWidth >= 1600 && viewportHeight >= 900
-    ? Math.min(viewportHeight * 0.12, viewportWidth * 0.1005)
-    : clamp(84, viewportHeight * 0.12, 165);
-  const columnGap = clamp(10, viewportHeight * 0.0135, 15);
+  const squareSize = clamp(84, viewportHeight * 0.12, 165);
+  const columnGap = clamp(6, viewportHeight * 0.008, 9);
   const firstSpacer = clamp(6, viewportWidth * 0.008, 16);
   const minimumSquareWidth = 7 * squareSize + 8 * columnGap + firstSpacer;
 

@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { cardData, cardList } from "@fyendal/cards/client";
+import { primaryType } from "@fyendal/shared";
 import { CardArtwork, CardFace } from "./Card.js";
 import { isMarvelCardImageUrl, resolveCardImageUrl, resolveCardImageUrls } from "./cardImageUrl.js";
 import marvelArt from "./marvelArt.json" with { type: "json" };
@@ -63,7 +64,7 @@ describe("internal Marvel artwork selection", () => {
   it("covers only imported identities and applies each entry to every matching printing", () => {
     const byKey = new Map<string, string[]>();
     for (const card of cardList) {
-      const key = `${card.cardType}|${card.name.trim().toLowerCase().replace(/\s+/g, " ")}|${card.pitch ?? 0}`;
+      const key = `${primaryType(card)}|${card.name.trim().toLowerCase().replace(/\s+/g, " ")}|${card.pitch ?? 0}`;
       byKey.set(key, [...byKey.get(key) ?? [], card.id]);
     }
     expect(Object.keys(marvelArt).length).toBeGreaterThan(300);
@@ -90,6 +91,13 @@ describe("internal Marvel artwork selection", () => {
     const preview = renderToStaticMarkup(createElement(CardArtwork, { cardId: "DYN148", alt: "Cut to the Chase" }));
     expect(preview).toContain("DYN148.webp");
     expect(preview).not.toContain("TNP031-MV.webp");
+  });
+
+  it("marks chosen full-bleed Marvel artwork for its drawn rim", () => {
+    const artwork = (artImage?: string) =>
+      renderToStaticMarkup(createElement(CardArtwork, { cardId: "WTR159", artImage, alt: "" }));
+    expect(artwork("ANQ000-MV")).toContain('class="card-artwork-image card-artwork-full-bleed"');
+    expect(artwork()).toContain('class="card-artwork-image"');
   });
 
   it("falls back to ordinary Malice artwork after her GEM Marvel", () => {

@@ -6,7 +6,8 @@ Fyendal is a TypeScript/pnpm monorepo for playing Flesh and Blood. Read
 
 ## Folder structure
 
-- `packages/shared` — types and stable protocol error codes only.
+- `packages/shared` — types, stable protocol error codes, and small runtime
+  helpers.
 - `packages/protocol` — exhaustive runtime decoders for wire, HTTP, `GameView`,
   replay, and database JSON. Parse untrusted JSON as `unknown` and decode it
   here; never cast.
@@ -56,12 +57,19 @@ Fyendal is a TypeScript/pnpm monorepo for playing Flesh and Blood. Read
 `packages/engine/DESIGN.md` is the full reference. In short:
 
 - Games change only through `applyIntent`; `legalIntents` is the authority and
-  every returned intent must apply. All randomness uses the seeded RNG, and
-  state must survive a JSON round trip.
+  every returned intent must apply. The one exception is `applyManualEdit`,
+  the silent sandbox-room edit entry point, which is never a `GameIntent`.
+  All randomness uses the seeded RNG, and state must survive a JSON round
+  trip.
 - The engine never references a printing id, card name, class, or hero. Add
   the narrowest generic hook or `ScriptCtx` command instead.
 - Card scripts read deeply readonly state and mutate only through `ScriptCtx`.
   Scripts are keyed by `name lowercase|pitch`, so reprints reuse them.
+- Reuse before writing. Before scripting a mechanic, check `scripts/shared/`
+  (module map in `scripts/README.md`) and search other sets for it. A
+  mechanic a second set needs moves into `shared/` rather than being copied.
+  Query cards with `ctx.hasKeyword`/`ctx.hasCardType`/`ctx.cardNames`, never
+  printed data. Token ids come only from `scripts/tokens.ts`.
 - Played cards and abilities use the stack; go again grants its action point
   at resolution; resolved links stay until the chain closes.
 - Mechanics live in focused modules (combat in `attacks.ts`, `defense.ts`,
@@ -137,7 +145,7 @@ Hand valuation:
   `localizedCardLog`. Every new `TriggerDef` supplies `labelMessage` (and
   `publicLogMessage` for a custom `publicLog`). Option values are never
   translated.
-- zh-Hans keeps `go again`, `On hit`, `Links`/`Chain`, and `arsenal`, and
+- zh-Hans keeps `go again`, `On hit`, `Links`/`Chain`, `arsenal`, and `steam`, and
   renders `压制 (dominate)` and `灵气 (Aura)`.
 - pt-BR and es keep FaB-defined terms in English (keywords, zones, card types,
   Action Point, Intellect, classes, talents, card and token names, phases,

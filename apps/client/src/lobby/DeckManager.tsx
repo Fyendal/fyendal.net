@@ -92,7 +92,9 @@ export function DeckManager() {
                       ? "Banned cards"
                       : d.futureCards?.length
                         ? "Future cards"
-                        : "Current"}
+                        : d.constructionIssues?.length
+                          ? "Over deck limits"
+                          : "Current"}
                 </td>
                 <td className="room-actions">
                   <button

@@ -3,27 +3,25 @@ import {
   armDelayedEffect,
   attackAbility,
   buffNextAttack,
-  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
+  controlsVox,
+  decay,
   decisionPrompt,
+  faceUpGraveyard,
   hitHookLabel,
   ongoingLabel,
+  hasLiveTurnEffect,
+  hasCardSubtype,
+  skeletalPuppetry,
+  isAlly,
 } from "./shared-helpers.js";
+import { GATE_TO_IARATHAEL } from "./tokens.js";
 
 const CORRUPTED_CORPSE = "IAR090";
-const GATE = "IAR222";
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
 
 function zombies(ctx: ScriptCtx, zone: readonly DeepReadonly<CardInstance>[]) {
-  return zone.filter((card) => !card.faceDown && hasType(ctx, card, "zombie"));
-}
-
-function controlsVox(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).weapons.some((card) => cardNamed(ctx, card, "Vox Necropolis"));
+  return zone.filter((card) => !card.faceDown && hasCardSubtype(ctx, card, "zombie"));
 }
 
 function grantDestroyingZombieAttack(ctx: ScriptCtx, power: number): void {
@@ -41,7 +39,7 @@ function destroyingZombieAttack(
   return {
     onFriendlyAttackDeclared(ctx) {
       const link = ctx.link;
-      if (!link || link.attacker !== ctx.seat || !hasType(ctx, link.attackingCard, "zombie")) return;
+      if (!link || link.attacker !== ctx.seat || !hasCardSubtype(ctx, link.attackingCard, "zombie")) return;
       if (!consumeDelayedEffect(ctx)) return;
       ctx.setFlag("link", marker, (Number(ctx.getFlag("link", marker)) || 0) + 1);
     },
@@ -58,44 +56,6 @@ function destroyingZombieAttack(
 const undeadGraspAttack = destroyingZombieAttack("amaUndeadGrasp");
 const digForSoulsAttack = destroyingZombieAttack("amaDigForSouls");
 
-function decay(): Pick<CardScript, "triggers"> {
-  return {
-    triggers: [
-      {
-        event: "end-of-turn",
-        whose: "subject",
-        label: "Decay",
-        labelMessage: { id: "card.trigger.common.decay" },
-        effect(ctx) {
-          const life = ctx.self.life ?? 0;
-          if (life <= 1) {
-            ctx.destroySelf();
-            return;
-          }
-          ctx.setState("lifePenalty", ctx.getState("lifePenalty") + 1);
-          ctx.setPermanentLife(ctx.self.instanceId, life - 1);
-        },
-      },
-    ],
-  };
-}
-
-function skeletalPuppetry(power: number): CardScript {
-  return {
-    alternativePlayCost: {
-      kind: "discard-hand-subtype",
-      subtype: "ally",
-    },
-    onPlay(ctx) {
-      buffNextAttack(ctx, {
-        attack: power,
-        appliesToSubtype: "ally",
-        goAgain: true,
-      });
-    },
-  };
-}
-
 export const ama: Record<string, CardScript> = {
   "malice, domina of the dead|0": {
     activated: {
@@ -103,9 +63,9 @@ export const ama: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       tap: true,
-      canActivate: (ctx) => zombies(ctx, ctx.player(ctx.seat).graveyard).length > 0,
+      canActivate: (ctx) => zombies(ctx, faceUpGraveyard(ctx)).length > 0,
       onActivate(ctx) {
-        const choices = zombies(ctx, ctx.player(ctx.seat).graveyard);
+        const choices = zombies(ctx, faceUpGraveyard(ctx));
         ctx.requestCardChoice(
           "ama-malice-zombie",
           decisionPrompt("Choose a zombie in your graveyard", "card.common.zombie.graveyard.choose"),
@@ -117,7 +77,7 @@ export const ama: Record<string, CardScript> = {
       if (hook === "ama-malice-zombie") ctx.allowPlayFrom(Number(option), "graveyard");
     },
     onFriendlyDestroyed(ctx, destroyed) {
-      if (!hasType(ctx, destroyed, "zombie") || !hasType(ctx, destroyed, "ally")) return;
+      if (!hasCardSubtype(ctx, destroyed, "zombie") || !isAlly(ctx, destroyed)) return;
       ctx.banish(destroyed.instanceId, { faceDown: true });
       ctx.createCardInBanish(CORRUPTED_CORPSE);
     },
@@ -128,7 +88,7 @@ export const ama: Record<string, CardScript> = {
       if (
         ctx.state.phase !== "action" ||
         (from !== "graveyard" && from !== "banish") ||
-        !hasType(ctx, played, "zombie")
+        !hasCardSubtype(ctx, played, "zombie")
       )
         return;
       ctx.setCardState(played.instanceId, "voxAttackOnEnter", 1);
@@ -187,15 +147,10 @@ export const ama: Record<string, CardScript> = {
         condition: (ctx, card) =>
           !!card &&
           card.owner === ctx.seat &&
-          hasType(ctx, card, "zombie") &&
-          ctx.state.modifiers.some(
-            (modifier) =>
-              modifier.sourceInstanceId === ctx.self.instanceId &&
-              modifier.scope === "until-end-of-turn" &&
-              !modifier.consumed,
-          ),
+          hasCardSubtype(ctx, card, "zombie") &&
+          hasLiveTurnEffect(ctx),
         effect(ctx) {
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
         },
       },
     ],
@@ -316,7 +271,7 @@ export const ama: Record<string, CardScript> = {
       if (hook !== "ama-clambering-discard" || option === "no") return;
       const zombie = ctx
         .player(ctx.seat)
-        .hand.find((card) => card.instanceId === Number(option) && hasType(ctx, card, "zombie"));
+        .hand.find((card) => card.instanceId === Number(option) && hasCardSubtype(ctx, card, "zombie"));
       if (!zombie || !ctx.discardCard(ctx.seat, zombie.instanceId)) return;
       ctx.addCardTempPower(ctx.self.instanceId, 3);
       ctx.grantGoAgain();
@@ -341,7 +296,7 @@ export const ama: Record<string, CardScript> = {
 
   "rites of nightfall|3": {
     onPlay(ctx) {
-      ctx.createToken(GATE);
+      ctx.createToken(GATE_TO_IARATHAEL);
     },
   },
 
@@ -361,7 +316,7 @@ export const ama: Record<string, CardScript> = {
       if (hook !== "ama-solace-graveyard" || option === "no") return;
       const selected = ctx.player(ctx.seat).banish.find((card) => card.instanceId === Number(option) && !card.faceDown);
       if (!selected) return;
-      const isZombie = hasType(ctx, selected, "zombie");
+      const isZombie = hasCardSubtype(ctx, selected, "zombie");
       if (ctx.moveToGraveyard(selected.instanceId, "banish") && isZombie) {
         ctx.gainLife(ctx.seat, 1);
       }

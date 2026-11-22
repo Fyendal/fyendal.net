@@ -2,7 +2,7 @@
  {
   "id": "KAT001",
   "name": "Katsu",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first time an attack action card you control hits each turn, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it face up, then shuffle your deck. You may play it this turn.",
   "classes": [
    "ninja"
@@ -14,7 +14,7 @@
  {
   "id": "KAT002",
   "name": "Harmonized Kodachi",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nIf you have a card in your pitch zone with cost 0, this card's attacks get go again.",
   "attack": 1,
   "classes": [
@@ -32,7 +32,7 @@
  {
   "id": "KAT003",
   "name": "Mask of Many Faces",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - {r}, destroy Mask of Many Faces: Name a card. The next attack action card you play this turn gains that name.\nBlade Break",
   "defense": 1,
   "classes": [
@@ -49,7 +49,7 @@
  {
   "id": "KAT004",
   "name": "Blossom of Spring",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Gain {r}. Go again",
   "defense": 0,
   "classes": [
@@ -63,7 +63,7 @@
  {
   "id": "KAT005",
   "name": "Fisticuffs",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Attack Reaction - {r}{r}, destroy Fisticuffs: Target attack action card gains +1{p}.",
   "classes": [
    "generic"
@@ -76,7 +76,7 @@
  {
   "id": "KAT006",
   "name": "Quelling Slippers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Quell 1",
   "defense": 0,
   "classes": [
@@ -93,7 +93,7 @@
  {
   "id": "KAT007",
   "name": "Bonds of Ancestry",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If a card with Gustwave in its name was the last attack this combat chain, this costs {r}{r} less to play, and has go again and \"When this attacks, you may banish a card with combo from your graveyard. If you do, search your deck for a card with the same name, banish it, then shuffle. You may play it this combat chain.\"",
   "pitch": 1,
   "cost": 2,
@@ -114,7 +114,7 @@
  {
   "id": "KAT008",
   "name": "Descendent Gustwave",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Surging Strike was the last attack this combat chain, this costs {r} less to play and has +2{p}.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -135,7 +135,7 @@
  {
   "id": "KAT009",
   "name": "Whelming Gustwave",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
   "pitch": 1,
   "cost": 0,
@@ -156,7 +156,7 @@
  {
   "id": "KAT010",
   "name": "Surging Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 1,
   "cost": 2,
@@ -176,7 +176,7 @@
  {
   "id": "KAT011",
   "name": "Fluster Fist",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Open the Center was the last attack this combat chain, Fluster Fist gains +1{p} for each attack that has hit this combat chain.",
   "pitch": 1,
   "cost": 0,
@@ -196,7 +196,7 @@
  {
   "id": "KAT012",
   "name": "Open the Center",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Head Jab was the last attack this combat chain, Open the Center gains +1{p}, go again, and dominate.",
   "pitch": 1,
   "cost": 2,
@@ -218,7 +218,7 @@
  {
   "id": "KAT013",
   "name": "Head Jab",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 1,
   "cost": 0,
@@ -238,7 +238,7 @@
  {
   "id": "KAT014",
   "name": "Be Like Water",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, you may pay {r}. If you do, choose Head Jab, Surging Strike, or Twin Twisters. This gains the chosen name.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -258,7 +258,7 @@
  {
   "id": "KAT015",
   "name": "Scar for a Scar",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -278,7 +278,7 @@
  {
   "id": "KAT016",
   "name": "One-Two Punch",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Head Jab was the last attack this combat chain, this has \"When this hits a hero, deal 2 damage to them.\"",
   "pitch": 2,
   "cost": 0,
@@ -298,7 +298,7 @@
  {
   "id": "KAT017",
   "name": "Head Jab",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 2,
   "cost": 0,
@@ -318,7 +318,7 @@
  {
   "id": "KAT018",
   "name": "Descendent Gustwave",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Surging Strike was the last attack this combat chain, this costs {r} less to play and has +2{p}.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -339,7 +339,7 @@
  {
   "id": "KAT019",
   "name": "Surging Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 2,
   "cost": 2,
@@ -359,7 +359,7 @@
  {
   "id": "KAT020",
   "name": "Be Like Water",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, you may pay {r}. If you do, choose Head Jab, Surging Strike, or Twin Twisters. This gains the chosen name.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -379,7 +379,7 @@
  {
   "id": "KAT021",
   "name": "One-Two Punch",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Head Jab was the last attack this combat chain, this has \"When this hits a hero, deal 2 damage to them.\"",
   "pitch": 3,
   "cost": 0,
@@ -399,7 +399,7 @@
  {
   "id": "KAT022",
   "name": "Head Jab",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 3,
   "cost": 0,
@@ -419,7 +419,7 @@
  {
   "id": "KAT023",
   "name": "Whelming Gustwave",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Surging Strike was the last attack this combat chain, Whelming Gustwave gains +1{p}, go again, and \"If this hits, draw a card.\"",
   "pitch": 3,
   "cost": 0,
@@ -440,7 +440,7 @@
  {
   "id": "KAT024",
   "name": "Surging Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 3,
   "cost": 2,
@@ -460,7 +460,7 @@
  {
   "id": "KAT025",
   "name": "Be Like Water",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, you may pay {r}. If you do, choose Head Jab, Surging Strike, or Twin Twisters. This gains the chosen name.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -480,7 +480,7 @@
  {
   "id": "KAT026",
   "name": "Lunging Press",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target attack action card gains +1{p}.",
   "pitch": 3,
   "cost": 0,

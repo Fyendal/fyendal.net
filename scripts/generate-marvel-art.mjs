@@ -7,7 +7,7 @@
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
-import { cardTypeOf } from "./lib/carddata.mjs";
+import { primaryTypeOf } from "./lib/carddata.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const source = process.argv[2];
@@ -46,7 +46,7 @@ const directory = join(root, "packages/cards/src/data/cards");
 for (const file of readdirSync(directory).filter((file) => file.endsWith(".json"))) {
   for (const value of list(JSON.parse(readFileSync(join(directory, file), "utf8")), file)) {
     const card = record(value, file);
-    localKeys.add(key(text(card.cardType, file), text(card.name, file), pitchNumber(card.pitch, file)));
+    localKeys.add(key(text(list(card.types, file)[0], file), text(card.name, file), pitchNumber(card.pitch, file)));
     localNames.add(text(card.name, file));
   }
 }
@@ -59,7 +59,7 @@ for (const value of list(JSON.parse(readFileSync(source, "utf8")), source)) {
   const types = list(card.types, name).map((type) => text(type, name));
   const keywords = list(card.card_keywords ?? [], name).map((keyword) => text(keyword, name));
   if (types.includes("Placeholder Card")) continue;
-  const identity = key(cardTypeOf(types, keywords), name, pitchNumber(card.pitch, name));
+  const identity = key(primaryTypeOf(types, keywords), name, pitchNumber(card.pitch, name));
   if (!localKeys.has(identity)) continue;
   for (const value of list(card.printings, name)) {
     const printing = record(value, name);

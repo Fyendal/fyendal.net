@@ -93,6 +93,35 @@ describe("attack float motion lifecycle", () => {
     expect(motionCombatPresentation(onStack, queue, new Set(["trigger:connector"])).deferStack).toBe(false);
   });
 
+  it("keeps a resolved spell's stack until it departs for the graveyard behind earlier cues", () => {
+    const spell = { instanceId: 43, cardId: "PEN238", owner: 0 };
+    const spellLayer = { card: spell, seat: 0, label: "Strike Twice", optional: false };
+    const spellStack = { chain: [], stack: [spellLayer], queue: [] };
+    const resolved = { chain: [], stack: [], queue: [] };
+    const allyDeath: GameMotionBatch = {
+      id: "ally", connectors: [], durationMs: 320,
+      combatPresentation: resolved, sourceCombatPresentation: spellStack,
+      flights: [{
+        id: "ally:flight", phase: "result", mode: "move", start: rect(0), end: rect(100),
+        visual: { kind: "face", card }, count: 1, showCount: false, delayMs: 0,
+      }],
+    };
+    const spellLeaves: GameMotionBatch = {
+      ...allyDeath, id: "spell",
+      flights: [{
+        ...allyDeath.flights[0]!, id: "spell:flight", visual: { kind: "face", card: spell },
+        sourceMaskPresentationKey: "stack:layer:43", holdAtSource: true,
+      }],
+    };
+    const queue = { active: allyDeath, pending: [spellLeaves] };
+    expect(motionCombatPresentation(resolved, queue, none).stack).toEqual(spellStack.stack);
+    const leaving = completeMotionBatch(queue, allyDeath.id);
+    expect(motionCombatPresentation(resolved, leaving, none).stack).toEqual(spellStack.stack);
+    expect(motionCombatPresentation(resolved, leaving, new Set(["spell:flight"]))).toEqual({
+      ...resolved, deferChain: false, deferStack: false,
+    });
+  });
+
   it("settles immediately after cancellation or with motion disabled", () => {
     expect(motionCombatPresentation(current, EMPTY_MOTION_BATCH_QUEUE, none)).toEqual({
       ...current, deferChain: false, deferStack: false,

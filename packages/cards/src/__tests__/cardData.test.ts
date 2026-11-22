@@ -10,7 +10,7 @@ describe("card data decoding", () => {
     expect(decodeCardDataList([{
       id: "TST001",
       name: "Variable Weapon",
-      cardType: "weapon",
+      types: ["weapon"],
       text: "X is determined by the card script.",
     }])).toHaveLength(1);
   });
@@ -20,7 +20,7 @@ describe("card data decoding", () => {
       id: "TST002",
       name: "Unpitchable Yellow",
       color: 2,
-      cardType: "action",
+      types: ["action"],
       text: "This card can't be pitched.",
     }])).toHaveLength(1);
   });
@@ -30,18 +30,35 @@ describe("card data decoding", () => {
       expect(() => decodeCardDataList([{
         id: "TST001",
         name: "Invalid Weapon",
-        cardType: "weapon",
+        types: ["weapon"],
         text: "",
         attack,
       }], "fixture")).toThrow("fixture[0].attack");
     }
   });
 
+  it("requires distinct types in canonical order", () => {
+    for (const types of [[], ["action", "equipment"], ["instant", "instant"], ["evo"], "action"]) {
+      expect(() => decodeCardDataList([{
+        id: "TST003",
+        name: "Bad Types",
+        types,
+        text: "",
+      }], "fixture")).toThrow("fixture[0].types");
+    }
+    expect(decodeCardDataList([{
+      id: "TST003",
+      name: "Equipment Instant",
+      types: ["equipment", "instant"],
+      text: "",
+    }])).toHaveLength(1);
+  });
+
   it("rejects unknown fields instead of silently widening CardData", () => {
     expect(() => decodeCardDataList([{
       id: "TST001",
       name: "Unknown Field",
-      cardType: "action",
+      types: ["action"],
       text: "",
       power: 3,
     }], "fixture")).toThrow("fixture[0].power");

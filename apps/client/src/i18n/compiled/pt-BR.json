@@ -69,6 +69,58 @@
       "value": "Salvando…"
     }
   ],
+  "account.badge.supporter.description": [
+    {
+      "type": 0,
+      "value": "Concedido a jogadores que apoiam o Fyendal todo mês no Ko-fi."
+    }
+  ],
+  "account.badge.supporter.hint": [
+    {
+      "type": 0,
+      "value": "Apoie o Fyendal todo mês no "
+    },
+    {
+      "type": 8,
+      "value": "link",
+      "children": [
+        {
+          "type": 0,
+          "value": "Ko-fi"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": " para ganhar um emblema especial de gema."
+    }
+  ],
+  "account.badge.supporter.locked": [
+    {
+      "type": 0,
+      "value": "Desbloqueado com uma assinatura mensal no "
+    },
+    {
+      "type": 8,
+      "value": "link",
+      "children": [
+        {
+          "type": 0,
+          "value": "Ko-fi"
+        }
+      ]
+    },
+    {
+      "type": 0,
+      "value": ". Seu e-mail do Ko-fi precisa ser igual ao seu e-mail de recuperação."
+    }
+  ],
+  "account.badge.supporter.name": [
+    {
+      "type": 0,
+      "value": "Gema de apoio"
+    }
+  ],
   "account.badge.title": [
     {
       "type": 0,
@@ -142,7 +194,7 @@
   "account.email.description": [
     {
       "type": 0,
-      "value": "Um endereço opcional e confirmado, usado apenas para redefinir sua senha. Outros jogadores nunca o veem."
+      "value": "Um endereço opcional e confirmado, usado para redefinir sua senha e vincular seu apoio no Ko-fi. Outros jogadores nunca o veem."
     }
   ],
   "account.email.loading": [
@@ -307,6 +359,18 @@
       "value": "Contra Todas as Probabilidades"
     }
   ],
+  "achievements.beataurora.description": [
+    {
+      "type": 0,
+      "value": "Derrote o Aurora Bot em um jogo de treino."
+    }
+  ],
+  "achievements.beataurora.name": [
+    {
+      "type": 0,
+      "value": "Derrote o Aurora Bot"
+    }
+  ],
   "achievements.beatboltyn.description": [
     {
       "type": 0,
@@ -353,6 +417,30 @@
     {
       "type": 0,
       "value": "Derrote o Cindra Bot"
+    }
+  ],
+  "achievements.beatdorinthea.description": [
+    {
+      "type": 0,
+      "value": "Derrote o Dorinthea Bot em um jogo de treino."
+    }
+  ],
+  "achievements.beatdorinthea.name": [
+    {
+      "type": 0,
+      "value": "Derrote o Dorinthea Bot"
+    }
+  ],
+  "achievements.beatfang.description": [
+    {
+      "type": 0,
+      "value": "Derrote o Fang Bot em um jogo de treino."
+    }
+  ],
+  "achievements.beatfang.name": [
+    {
+      "type": 0,
+      "value": "Derrote o Fang Bot"
     }
   ],
   "achievements.beathala.description": [
@@ -1093,22 +1181,10 @@
       "value": "Escolha uma carta da sua mão para fazer banish"
     }
   ],
-  "card.aac.item.steal": [
-    {
-      "type": 0,
-      "value": "Roube um item"
-    }
-  ],
   "card.aac.stealthattack.copy": [
     {
       "type": 0,
       "value": "Fazer banish de um ataque stealth para que o alvo se torne uma cópia dele?"
-    }
-  ],
-  "card.aaz.arrow.arsenal.faceup": [
-    {
-      "type": 0,
-      "value": "Coloque uma carta arrow com a face para cima no seu arsenal"
     }
   ],
   "card.aaz.arrow.search": [
@@ -1145,12 +1221,6 @@
     {
       "type": 0,
       "value": "Escolha uma cor de que o herói defensor não pode fazer pitch"
-    }
-  ],
-  "card.aaz.reload.arsenal": [
-    {
-      "type": 0,
-      "value": "Reload: colocar uma carta da sua mão no seu arsenal?"
     }
   ],
   "card.agb.anka.card.discard": [
@@ -1235,12 +1305,6 @@
       "value": " e destruir esta carta para fazer sharpen uma vez adicional?"
     }
   ],
-  "card.aha.sword.sharpen": [
-    {
-      "type": 0,
-      "value": "Escolha uma arma sword para fazer sharpen"
-    }
-  ],
   "card.aha.sword.sharpen.named": [
     {
       "type": 1,
@@ -1255,12 +1319,6 @@
     {
       "type": 0,
       "value": "Escolha uma arma sword para fazer sharpen duas vezes"
-    }
-  ],
-  "card.aio.crankitem.steam": [
-    {
-      "type": 0,
-      "value": "Coloque um marcador de steam em um item com crank"
     }
   ],
   "card.aio.deck.top.banish": [
@@ -1281,12 +1339,6 @@
     {
       "type": 0,
       "value": " de recurso para +1 de defesa?"
-    }
-  ],
-  "card.aio.maintenance.choose": [
-    {
-      "type": 0,
-      "value": "Remover um marcador de steam ou destruir esta carta?"
     }
   ],
   "card.aio.symbiosisshot.steam": [
@@ -1379,80 +1431,6 @@
       "value": "Escolha uma zona de equipamento exposta para Frostbite"
     }
   ],
-  "card.ajv.fusion.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": revelar cartas Earth e/ou Ice para fusion?"
-    }
-  ],
-  "card.ajv.fusion.option.both": [
-    {
-      "type": 0,
-      "value": "Revelar "
-    },
-    {
-      "type": 1,
-      "value": "first"
-    },
-    {
-      "type": 0,
-      "value": " e "
-    },
-    {
-      "type": 1,
-      "value": "second"
-    },
-    {
-      "type": 0,
-      "value": " para Earth e Ice"
-    }
-  ],
-  "card.ajv.fusion.option.both.single": [
-    {
-      "type": 0,
-      "value": "Revelar "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " para Earth e Ice"
-    }
-  ],
-  "card.ajv.fusion.option.earth": [
-    {
-      "type": 0,
-      "value": "Revelar "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " para Earth"
-    }
-  ],
-  "card.ajv.fusion.option.ice": [
-    {
-      "type": 0,
-      "value": "Revelar "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " para Ice"
-    }
-  ],
   "card.ajv.ice.hero.choose": [
     {
       "type": 0,
@@ -1489,6 +1467,12 @@
       "value": "Colocar uma carta zombie no seu cemitério?"
     }
   ],
+  "card.amg.quickdigit.item.optional": [
+    {
+      "type": 0,
+      "value": "Colocar na arena um item de custo 0 da sua mão?"
+    }
+  ],
   "card.amg.revere.shuffle.choose": [
     {
       "type": 0,
@@ -1499,6 +1483,12 @@
     {
       "type": 0,
       "value": "Escolha uma doença para curar"
+    }
+  ],
+  "card.amo.pickyourpoison.choose": [
+    {
+      "type": 0,
+      "value": "Escolha um token de doença. Os outros dois são criados sob o seu controle"
     }
   ],
   "card.amx.banisheditem.arena": [
@@ -1517,12 +1507,6 @@
     {
       "type": 0,
       "value": "Remover um marcador de steam ou destruir Clamp Press?"
-    }
-  ],
-  "card.amx.crankitem.steam": [
-    {
-      "type": 0,
-      "value": "Coloque um marcador de steam em um item com crank"
     }
   ],
   "card.amx.hyperdriver.choose": [
@@ -1571,18 +1555,6 @@
     {
       "type": 0,
       "value": "Escolha uma carta do arsenal para destruir"
-    }
-  ],
-  "card.aol.card.discard": [
-    {
-      "type": 0,
-      "value": "Descarte uma carta"
-    }
-  ],
-  "card.aol.deck.card.top": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta para colocar no topo"
     }
   ],
   "card.aol.defender.nonequipment.banish": [
@@ -1651,51 +1623,6 @@
       "value": "Devolver uma aura que você controla para a mão do dono?"
     }
   ],
-  "card.aps.card.discard.choose": [
-    {
-      "type": 0,
-      "value": "Escolha "
-    },
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "=0": {
-          "value": [
-            {
-              "type": 0,
-              "value": "nenhuma carta"
-            }
-          ]
-        },
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "uma carta"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " cartas"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " para descartar"
-    }
-  ],
   "card.aps.crowd.cheer": [
     {
       "type": 0,
@@ -1720,12 +1647,6 @@
     {
       "type": 0,
       "value": "Coloque um marcador de suspense em uma aura"
-    }
-  ],
-  "card.aps.suspense.counter.add.optional": [
-    {
-      "type": 0,
-      "value": "Colocar um marcador de suspense em uma aura de suspense?"
     }
   ],
   "card.aps.suspense.remove.defense": [
@@ -2058,20 +1979,6 @@
       "value": "Procure Whirling Mist Blossom para fazer banish"
     }
   ],
-  "card.ast.arcane.target.choose": [
-    {
-      "type": 0,
-      "value": "Cause "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane a qualquer alvo"
-    }
-  ],
   "card.ast.instant.reveal": [
     {
       "type": 1,
@@ -2126,6 +2033,28 @@
       "value": "Skyward Serenade: escolha um segundo modo diferente"
     }
   ],
+  "card.ast.serenade.stack": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "first"
+    },
+    {
+      "type": 0,
+      "value": "; "
+    },
+    {
+      "type": 1,
+      "value": "second"
+    }
+  ],
   "card.ast.skyzyk.search": [
     {
       "type": 0,
@@ -2178,10 +2107,138 @@
       "value": "Miraging Metamorph: escolha uma aura para copiar"
     }
   ],
+  "card.common.actionpoint.nogain": [
+    {
+      "type": 0,
+      "value": "Atenção: você não vai ganhar um Action Point porque não é a sua action phase."
+    }
+  ],
+  "card.common.arcane.anytarget.choose": [
+    {
+      "type": 0,
+      "value": "Cause "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de dano arcane a qualquer alvo"
+    }
+  ],
+  "card.common.arcane.damage.target": [
+    {
+      "type": 0,
+      "value": "Escolha um alvo para "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de dano arcane"
+    }
+  ],
+  "card.common.arcane.hero.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": escolha um herói para receber "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de dano arcane"
+    }
+  ],
+  "card.common.arcane.target.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": escolha um alvo para "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de dano arcane"
+    }
+  ],
   "card.common.arrow.arsenal": [
     {
       "type": 0,
       "value": "Colocar uma carta arrow da sua mão com a face para cima no seu arsenal?"
+    }
+  ],
+  "card.common.arrow.arsenal.faceup": [
+    {
+      "type": 0,
+      "value": "Coloque uma carta arrow com a face para cima no seu arsenal"
+    }
+  ],
+  "card.common.arsenal.faceup": [
+    {
+      "type": 0,
+      "value": "Vire com a face para cima uma carta do arsenal que está com a face para baixo"
+    }
+  ],
+  "card.common.attack.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": fazer banish de um ataque elegível?"
+    }
+  ],
+  "card.common.attack.banish.discount": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": faça banish de uma carta de attack action com custo menor que "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "; ela custa 1 a menos para jogar e você pode jogá-la neste turno"
+    }
+  ],
+  "card.common.attack.banish.power": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": faça banish de uma carta de attack action com custo menor que "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": "; ela recebe +1 de poder e você pode jogá-la neste turno"
     }
   ],
   "card.common.attack.target.choose": [
@@ -2194,10 +2251,94 @@
       "value": ": escolha o ataque alvo"
     }
   ],
+  "card.common.attack.target.upto": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": escolha até 1 ataque alvo"
+    }
+  ],
+  "card.common.aura.destroy": [
+    {
+      "type": 0,
+      "value": "Destrua uma aura"
+    }
+  ],
+  "card.common.aura.destroy.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destrua uma aura"
+    }
+  ],
+  "card.common.auratoken.destroy.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": destrua um token de aura"
+    }
+  ],
+  "card.common.auratoken.steal": [
+    {
+      "type": 0,
+      "value": "Roube um token de aura"
+    }
+  ],
+  "card.common.beatchest.discard": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": descartar uma carta com "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " ou mais de poder para beat chest?"
+    }
+  ],
   "card.common.bonus.choose": [
     {
       "type": 0,
       "value": "Escolha um bônus"
+    }
+  ],
+  "card.common.card.banish": [
+    {
+      "type": 0,
+      "value": "Faça banish de uma carta"
+    }
+  ],
+  "card.common.card.banish.choose": [
+    {
+      "type": 0,
+      "value": "Escolha uma carta para fazer banish"
+    }
+  ],
+  "card.common.card.choose": [
+    {
+      "type": 0,
+      "value": "Escolha uma carta"
+    }
+  ],
+  "card.common.card.discard": [
+    {
+      "type": 0,
+      "value": "Descarte uma carta"
     }
   ],
   "card.common.card.discard.choose": [
@@ -2206,10 +2347,97 @@
       "value": "Escolha uma carta para descartar"
     }
   ],
+  "card.common.card.discard.choose.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": escolha uma carta para descartar"
+    }
+  ],
   "card.common.card.name": [
     {
       "type": 0,
       "value": "Nomeie uma carta"
+    }
+  ],
+  "card.common.card.name.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": nomeie uma carta"
+    }
+  ],
+  "card.common.card.top.choose": [
+    {
+      "type": 0,
+      "value": "Escolha uma carta para colocar no topo"
+    }
+  ],
+  "card.common.cards.discard.choose": [
+    {
+      "type": 0,
+      "value": "Escolha "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "nenhuma carta"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "uma carta"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cartas"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " para descartar"
+    }
+  ],
+  "card.common.charge.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": escolha uma carta da sua mão para fazer charge, ou recuse"
+    }
+  ],
+  "card.common.color.choose": [
+    {
+      "type": 0,
+      "value": "Escolha uma cor"
     }
   ],
   "card.common.cost.arsenalarrow.faceup": [
@@ -2228,6 +2456,12 @@
     {
       "type": 0,
       "value": "Escolha uma aura da qual remover um marcador de suspense"
+    }
+  ],
+  "card.common.cost.auratoken.destroy": [
+    {
+      "type": 0,
+      "value": "Destrua um token de aura"
     }
   ],
   "card.common.cost.bluearrow.faceup": [
@@ -2380,16 +2614,322 @@
       "value": "Descarte uma carta zombie"
     }
   ],
+  "card.common.crankitem.steam": [
+    {
+      "type": 0,
+      "value": "Coloque um marcador de steam em um item com crank"
+    }
+  ],
+  "card.common.decompose.action": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": escolha a carta de action para fazer banish"
+    }
+  ],
+  "card.common.decompose.earth.first": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": fazer decompose? Escolha a primeira carta Earth para fazer banish"
+    }
+  ],
+  "card.common.decompose.earth.second": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": escolha a segunda carta Earth para fazer banish"
+    }
+  ],
+  "card.common.defending.card.choose": [
+    {
+      "type": 0,
+      "value": "Escolha uma carta defensora"
+    }
+  ],
+  "card.common.discard.pay": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": pagar "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 6,
+      "value": "amount",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "recursos"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "recurso"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "recursos"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " ou descartar uma carta?"
+    }
+  ],
+  "card.common.discardormill.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": descartar uma carta ou destruir a carta do topo do seu deck?"
+    }
+  ],
   "card.common.disease.token.choose": [
     {
       "type": 0,
       "value": "Escolha um token de doença"
     }
   ],
+  "card.common.equipment.defensecounter": [
+    {
+      "type": 0,
+      "value": "Coloque um marcador de -1 de defesa em um equipamento"
+    }
+  ],
+  "card.common.fusion.multiple": [
+    {
+      "type": 0,
+      "value": "Revelar cartas "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " e/ou "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    },
+    {
+      "type": 0,
+      "value": " para fazer fuse?"
+    }
+  ],
+  "card.common.fusion.option.both": [
+    {
+      "type": 0,
+      "value": "Revelar "
+    },
+    {
+      "type": 1,
+      "value": "first"
+    },
+    {
+      "type": 0,
+      "value": " e "
+    },
+    {
+      "type": 1,
+      "value": "second"
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " e "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    }
+  ],
+  "card.common.fusion.option.both.single": [
+    {
+      "type": 0,
+      "value": "Revelar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 1,
+      "value": "firstType"
+    },
+    {
+      "type": 0,
+      "value": " e "
+    },
+    {
+      "type": 1,
+      "value": "secondType"
+    },
+    {
+      "type": 0,
+      "value": " ao mesmo tempo"
+    }
+  ],
+  "card.common.fusion.option.single": [
+    {
+      "type": 0,
+      "value": "Revelar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    }
+  ],
+  "card.common.fusion.reveal.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": revelar uma carta "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " para fazer fuse?"
+    }
+  ],
+  "card.common.hand.bottom": [
+    {
+      "type": 0,
+      "value": "Coloque uma carta da mão no fundo"
+    }
+  ],
+  "card.common.hand.card.banish": [
+    {
+      "type": 0,
+      "value": "Faça banish de uma carta da sua mão"
+    }
+  ],
+  "card.common.hand.card.bottom": [
+    {
+      "type": 0,
+      "value": "Coloque uma carta da sua mão no fundo"
+    }
+  ],
+  "card.common.hand.card.top": [
+    {
+      "type": 0,
+      "value": "Coloque uma carta da sua mão no topo do seu deck"
+    }
+  ],
+  "card.common.hand.card.top.named": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": coloque uma carta da sua mão no topo do seu deck"
+    }
+  ],
+  "card.common.handorarsenal.bottom": [
+    {
+      "type": 0,
+      "value": "Coloque uma carta da mão ou do arsenal no fundo"
+    }
+  ],
+  "card.common.heroally.tap": [
+    {
+      "type": 0,
+      "value": "Vire (tap) o herói ou ally alvo"
+    }
+  ],
   "card.common.hyperdriver.steam.add": [
     {
       "type": 0,
       "value": "Coloque um marcador de steam em um Hyper Driver"
+    }
+  ],
+  "card.common.item.destroy.defense": [
+    {
+      "type": 0,
+      "value": "Destruir um item para +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de defesa?"
+    }
+  ],
+  "card.common.item.steal": [
+    {
+      "type": 0,
+      "value": "Roube um item"
+    }
+  ],
+  "card.common.katsu.combo.choose": [
+    {
+      "type": 0,
+      "value": "Katsu: escolha uma carta de combo para fazer banish com a face para cima"
     }
   ],
   "card.common.levia.transform": [
@@ -2402,6 +2942,18 @@
     {
       "type": 0,
       "value": "Colocar a carta olhada no fundo?"
+    }
+  ],
+  "card.common.maintenance.choose": [
+    {
+      "type": 0,
+      "value": "Remover um marcador de steam ou destruir esta carta?"
+    }
+  ],
+  "card.common.mode.choose": [
+    {
+      "type": 0,
+      "value": "Escolha um modo"
     }
   ],
   "card.common.opt": [
@@ -2508,6 +3060,20 @@
       "value": "Amarela"
     }
   ],
+  "card.common.pitch.card.bottom": [
+    {
+      "type": 0,
+      "value": "Coloque uma carta "
+    },
+    {
+      "type": 1,
+      "value": "type"
+    },
+    {
+      "type": 0,
+      "value": " do pitch no fundo"
+    }
+  ],
   "card.common.reload": [
     {
       "type": 0,
@@ -2534,6 +3100,12 @@
       "value": " para equipar esta dagger?"
     }
   ],
+  "card.common.scrap.choose": [
+    {
+      "type": 0,
+      "value": "Fazer scrap de um item ou equipamento do seu cemitério?"
+    }
+  ],
   "card.common.specialization.arsenal": [
     {
       "type": 1,
@@ -2542,6 +3114,24 @@
     {
       "type": 0,
       "value": ": escolha uma carta de Specialization para colocar com a face para cima no arsenal"
+    }
+  ],
+  "card.common.spire.order.next": [
+    {
+      "type": 0,
+      "value": "Escolha a próxima carta para devolver ao topo do seu deck; a última carta devolvida fica no topo"
+    }
+  ],
+  "card.common.suspense.counter.add": [
+    {
+      "type": 0,
+      "value": "Colocar um marcador de suspense em uma aura de suspense?"
+    }
+  ],
+  "card.common.sword.sharpen": [
+    {
+      "type": 0,
+      "value": "Escolha uma arma sword para fazer sharpen"
     }
   ],
   "card.common.target.card": [
@@ -2560,6 +3150,12 @@
       "value": ": escolha o herói alvo"
     }
   ],
+  "card.common.token.create.choose": [
+    {
+      "type": 0,
+      "value": "Criar qual token?"
+    }
+  ],
   "card.common.ward.x.choose": [
     {
       "type": 0,
@@ -2570,24 +3166,6 @@
     {
       "type": 0,
       "value": "Escolha uma carta zombie no seu cemitério"
-    }
-  ],
-  "card.cru.arcane.hero.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha um herói para receber "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane"
     }
   ],
   "card.cru.breeze.boots.destroy": [
@@ -2678,16 +3256,6 @@
       "value": "Unified Decree: fazer banish da carta do topo?"
     }
   ],
-  "card.cru.foreboding.hero.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha um herói"
-    }
-  ],
   "card.cru.heron.defense.choose": [
     {
       "type": 0,
@@ -2714,12 +3282,6 @@
     {
       "type": 0,
       "value": ": fazer banish da carta do topo e permitir que ela seja jogada como instant?"
-    }
-  ],
-  "card.cru.katsu.combo.choose": [
-    {
-      "type": 0,
-      "value": "Katsu: escolha uma carta de combo para fazer banish com a face para cima"
     }
   ],
   "card.cru.katsu.discard": [
@@ -2782,12 +3344,6 @@
     {
       "type": 0,
       "value": ": escolha uma carta de attack action defensora"
-    }
-  ],
-  "card.cru.reload.card.choose": [
-    {
-      "type": 0,
-      "value": "Reload: colocar uma carta no arsenal?"
     }
   ],
   "card.cru.research.order.choose": [
@@ -2952,18 +3508,6 @@
       "value": "Virar uma carta na zona banished com a face para baixo?"
     }
   ],
-  "card.dtd.card.banish": [
-    {
-      "type": 0,
-      "value": "Faça banish de uma carta"
-    }
-  ],
-  "card.dtd.card.name": [
-    {
-      "type": 0,
-      "value": "Nomeie uma carta"
-    }
-  ],
   "card.dtd.charge.choose": [
     {
       "type": 0,
@@ -2974,12 +3518,6 @@
     {
       "type": 0,
       "value": "Fazer charge de uma carta?"
-    }
-  ],
-  "card.dtd.charge.soul.optional": [
-    {
-      "type": 0,
-      "value": "Fazer charge da soul do seu herói?"
     }
   ],
   "card.dtd.defender.defense.halve": [
@@ -3024,18 +3562,6 @@
       "value": "Escolha uma carta da sua mão para fazer banish"
     }
   ],
-  "card.dtd.hand.card.banish": [
-    {
-      "type": 0,
-      "value": "Faça banish de uma carta da sua mão"
-    }
-  ],
-  "card.dtd.item.steal": [
-    {
-      "type": 0,
-      "value": "Roube um item"
-    }
-  ],
   "card.dtd.lance.mode": [
     {
       "type": 0,
@@ -3064,6 +3590,58 @@
     {
       "type": 0,
       "value": "+2 de poder"
+    }
+  ],
+  "card.dtd.northernwinds.freeze": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": aplicar freeze em até 1 "
+    },
+    {
+      "type": 5,
+      "value": "kind",
+      "options": {
+        "equipment": {
+          "value": [
+            {
+              "type": 0,
+              "value": "equipment"
+            }
+          ]
+        },
+        "item": {
+          "value": [
+            {
+              "type": 0,
+              "value": "item"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "ally"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " controlado por "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": "?"
     }
   ],
   "card.dtd.option.peace": [
@@ -3144,20 +3722,6 @@
       "value": "Colocar a carta amarela revelada na sua soul?"
     }
   ],
-  "card.dyn.aetherslash.target.choose": [
-    {
-      "type": 0,
-      "value": "Cause "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane a qualquer alvo"
-    }
-  ],
   "card.dyn.arakni.opponenttop.look": [
     {
       "type": 0,
@@ -3168,20 +3732,6 @@
     {
       "type": 0,
       "value": "Escolha um herói para receber "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane"
-    }
-  ],
-  "card.dyn.brainstorm.target.choose": [
-    {
-      "type": 0,
-      "value": "Escolha um alvo para "
     },
     {
       "type": 1,
@@ -3226,12 +3776,6 @@
     {
       "type": 0,
       "value": "Escolha uma aura para destruir"
-    }
-  ],
-  "card.dyn.drill.equipment.counter": [
-    {
-      "type": 0,
-      "value": "Coloque um marcador de -1 de defesa em um equipamento"
     }
   ],
   "card.dyn.harpoon.defender.choose": [
@@ -3399,12 +3943,6 @@
       "value": "Descarte uma carta ou receba 1 de dano"
     }
   ],
-  "card.dyn.shred.defender.choose": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta defensora"
-    }
-  ],
   "card.dyn.suraya.shield.choose": [
     {
       "type": 0,
@@ -3415,12 +3953,6 @@
     {
       "type": 0,
       "value": "Escolha uma carta da mão do oponente para fazer banish"
-    }
-  ],
-  "card.dyn.tessen.hand.bottom": [
-    {
-      "type": 0,
-      "value": "Coloque uma carta da mão no fundo"
     }
   ],
   "card.dyn.tranquil.aura.banish": [
@@ -3445,6 +3977,16 @@
     {
       "type": 0,
       "value": "Escolha um off-hand Guardian"
+    }
+  ],
+  "card.dyn.witnesses.arsenal.banish": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": faça banish de até 1 carta do arsenal do oponente"
     }
   ],
   "card.effect.aac.invertersnightcowl": [
@@ -3475,6 +4017,30 @@
     {
       "type": 0,
       "value": "destrua o zombie atacante quando ele acertar"
+    }
+  ],
+  "card.effect.amg.heartpump": [
+    {
+      "type": 0,
+      "value": "ganhe 1 recurso sempre que for feito banish de 1 ou mais cartas do deck de um oponente"
+    }
+  ],
+  "card.effect.amo.actonintel": [
+    {
+      "type": 0,
+      "value": "o herói atingido faz banish de uma carta da própria mão"
+    }
+  ],
+  "card.effect.amo.isolationvestment": [
+    {
+      "type": 0,
+      "value": "Cartas Assassin attack action que têm como alvo um herói infectado custam 1 a menos para jogar"
+    }
+  ],
+  "card.effect.amo.plaguemask": [
+    {
+      "type": 0,
+      "value": "tokens de doença não podem ser criados sob o seu controle"
     }
   ],
   "card.effect.aol.bellybuster": [
@@ -4121,10 +4687,48 @@
       "value": "olhe a carta do topo do seu deck e você pode fazer banish dela"
     }
   ],
+  "card.effect.mpa.actonintelhaunts": [
+    {
+      "type": 0,
+      "value": "faça banish da carta do topo do deck do herói atingido"
+    }
+  ],
+  "card.effect.mpa.actonintelplans": [
+    {
+      "type": 0,
+      "value": "o herói atingido faz banish de uma carta do próprio arsenal"
+    }
+  ],
+  "card.effect.mpa.bountybrim": [
+    {
+      "type": 0,
+      "value": "sempre que você completar um contract, crie um token Silver"
+    }
+  ],
+  "card.effect.mpa.easyprey": [
+    {
+      "type": 0,
+      "value": "+"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de poder enquanto ataca um herói infectado"
+    }
+  ],
+  "card.effect.mpa.murdersprees": [
+    {
+      "type": 0,
+      "value": "na próxima vez que você completar um contract, ganhe um Action Point"
+    }
+  ],
   "card.effect.mpa.outbreak": [
     {
       "type": 0,
-      "value": "crie um token Frailty, um Inertia e um Bloodrot Pox sob o controle do herói atingido"
+      "value": "quando acertar um herói, crie um token Frailty, um Inertia e um Bloodrot Pox sob o controle desse jogador"
     }
   ],
   "card.effect.mpa.phial": [
@@ -4133,16 +4737,40 @@
       "value": "crie um token Frailty, Inertia ou Bloodrot Pox sob o controle do herói atingido"
     }
   ],
+  "card.effect.mpa.plaguewardens": [
+    {
+      "type": 0,
+      "value": "quando acertar um herói, dê a esse jogador uma doença que você controla"
+    }
+  ],
   "card.effect.mpa.prolongedillness": [
     {
       "type": 0,
       "value": "sempre que um token de doença for destruído, se for o primeiro com esse nome, crie uma cópia dele sob o controle do mesmo herói"
     }
   ],
+  "card.effect.mpa.scoutingcloak": [
+    {
+      "type": 0,
+      "value": "sempre que você completar um contract, ganhe 1 de vida"
+    }
+  ],
+  "card.effect.mpa.selfdetermination": [
+    {
+      "type": 0,
+      "value": "oponentes não podem criar tokens sob o seu controle"
+    }
+  ],
   "card.effect.mpa.sickeningweakness": [
     {
       "type": 0,
       "value": "cartas em defesa recebem -1 de defesa neste chain link"
+    }
+  ],
+  "card.effect.mpa.wristcuff": [
+    {
+      "type": 0,
+      "value": "a próxima carta de attack action Assassin que você jogar ganha \"quando esta acertar um herói, crie um token Frailty, Inertia ou Bloodrot Pox sob o controle desse jogador\""
     }
   ],
   "card.effect.mpw.allin": [
@@ -4203,6 +4831,12 @@
     {
       "type": 0,
       "value": "faça banish da carta do topo do deck do herói defensor"
+    }
+  ],
+  "card.effect.mst.maul": [
+    {
+      "type": 0,
+      "value": "crie 2 Crouching Tigers na sua zona banished; você pode jogá-los neste turno"
     }
   ],
   "card.effect.mst.nuu": [
@@ -4587,12 +5221,6 @@
       "value": "Coloque uma carta do arsenal com a face para baixo no fundo"
     }
   ],
-  "card.ele.arsenal.faceup": [
-    {
-      "type": 0,
-      "value": "Vire com a face para cima uma carta do arsenal que está com a face para baixo"
-    }
-  ],
   "card.ele.attack.bottom": [
     {
       "type": 1,
@@ -4601,12 +5229,6 @@
     {
       "type": 0,
       "value": ": colocar uma carta de attack action no fundo?"
-    }
-  ],
-  "card.ele.bonus.choose": [
-    {
-      "type": 0,
-      "value": "Escolha um bônus"
     }
   ],
   "card.ele.breakground.arsenal.bottom": [
@@ -4657,16 +5279,6 @@
       "value": " de defesa?"
     }
   ],
-  "card.ele.discard.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha uma carta para descartar"
-    }
-  ],
   "card.ele.dominate.pay": [
     {
       "type": 0,
@@ -4715,142 +5327,6 @@
     {
       "type": 0,
       "value": " ou o ataque ganha dominate"
-    }
-  ],
-  "card.ele.fusion.multiple": [
-    {
-      "type": 0,
-      "value": "Revelar cartas "
-    },
-    {
-      "type": 1,
-      "value": "firstType"
-    },
-    {
-      "type": 0,
-      "value": " e/ou "
-    },
-    {
-      "type": 1,
-      "value": "secondType"
-    },
-    {
-      "type": 0,
-      "value": " para fazer fuse?"
-    }
-  ],
-  "card.ele.fusion.option.both": [
-    {
-      "type": 0,
-      "value": "Revelar "
-    },
-    {
-      "type": 1,
-      "value": "first"
-    },
-    {
-      "type": 0,
-      "value": " e "
-    },
-    {
-      "type": 1,
-      "value": "second"
-    },
-    {
-      "type": 0,
-      "value": " para "
-    },
-    {
-      "type": 1,
-      "value": "firstType"
-    },
-    {
-      "type": 0,
-      "value": " e "
-    },
-    {
-      "type": 1,
-      "value": "secondType"
-    }
-  ],
-  "card.ele.fusion.option.both.single": [
-    {
-      "type": 0,
-      "value": "Revelar "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " para "
-    },
-    {
-      "type": 1,
-      "value": "firstType"
-    },
-    {
-      "type": 0,
-      "value": " e "
-    },
-    {
-      "type": 1,
-      "value": "secondType"
-    },
-    {
-      "type": 0,
-      "value": " ao mesmo tempo"
-    }
-  ],
-  "card.ele.fusion.option.single": [
-    {
-      "type": 0,
-      "value": "Revelar "
-    },
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " para "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    }
-  ],
-  "card.ele.fusion.reveal": [
-    {
-      "type": 0,
-      "value": "Revelar uma carta "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    },
-    {
-      "type": 0,
-      "value": " para fazer fuse?"
-    }
-  ],
-  "card.ele.fusion.reveal.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": revelar uma carta "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    },
-    {
-      "type": 0,
-      "value": " para fazer fuse?"
     }
   ],
   "card.ele.goagain.give.pay": [
@@ -4993,18 +5469,6 @@
       "value": ": colocar uma carta de action que não é ataque no fundo?"
     }
   ],
-  "card.ele.oaken.fusion.earth": [
-    {
-      "type": 0,
-      "value": "Revelar uma carta Earth para fazer fuse de Oaken Old?"
-    }
-  ],
-  "card.ele.oaken.fusion.ice": [
-    {
-      "type": 0,
-      "value": "Revelar uma carta Ice para fazer fuse de Oaken Old?"
-    }
-  ],
   "card.ele.oaken.order": [
     {
       "type": 0,
@@ -5037,74 +5501,6 @@
     {
       "type": 1,
       "value": "p"
-    }
-  ],
-  "card.ele.pay.or.discard": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": pagar "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " "
-    },
-    {
-      "type": 6,
-      "value": "amount",
-      "options": {
-        "=0": {
-          "value": [
-            {
-              "type": 0,
-              "value": "recursos"
-            }
-          ]
-        },
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "recurso"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "recursos"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " ou descartar uma carta?"
-    }
-  ],
-  "card.ele.pitch.card.bottom": [
-    {
-      "type": 0,
-      "value": "Coloque uma carta "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    },
-    {
-      "type": 0,
-      "value": " do pitch no fundo"
     }
   ],
   "card.ele.plume.earth.return": [
@@ -5197,12 +5593,6 @@
       "value": "Ragamuffin's Hat: coloque uma carta no topo ou no fundo do seu deck"
     }
   ],
-  "card.ele.reload": [
-    {
-      "type": 0,
-      "value": "Reload: colocar uma carta da sua mão no seu arsenal?"
-    }
-  ],
   "card.ele.shelter.defender.choose": [
     {
       "type": 0,
@@ -5241,24 +5631,6 @@
       "value": "?"
     }
   ],
-  "card.evo.card.discard": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta para descartar"
-    }
-  ],
-  "card.evo.crankitem.steam.add": [
-    {
-      "type": 0,
-      "value": "Coloque um marcador de steam em um item com crank"
-    }
-  ],
-  "card.evo.crankitem.steam.add.optional": [
-    {
-      "type": 0,
-      "value": "Colocar um marcador de steam em um item com crank?"
-    }
-  ],
   "card.evo.defender.banish": [
     {
       "type": 1,
@@ -5273,12 +5645,6 @@
     {
       "type": 0,
       "value": "Ganhe o controle de um item controlado pelo herói defensor"
-    }
-  ],
-  "card.evo.emboldened.arsenal.choose": [
-    {
-      "type": 0,
-      "value": "Vire com a face para cima uma carta do arsenal que está com a face para baixo"
     }
   ],
   "card.evo.emboldened.option.arsenal": [
@@ -5369,6 +5735,12 @@
       "value": "Escolha uma zona de equipamento"
     }
   ],
+  "card.evo.fabricate.hand.banish": [
+    {
+      "type": 0,
+      "value": "Fazer banish de um Evo da mão para comprar uma carta?"
+    }
+  ],
   "card.evo.fabricate.mode.first": [
     {
       "type": 0,
@@ -5409,20 +5781,6 @@
     {
       "type": 0,
       "value": "Escolha um equipamento Evo para colocar Fabricate sob ele"
-    }
-  ],
-  "card.evo.galvanize.item": [
-    {
-      "type": 0,
-      "value": "Destruir um item para +"
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de defesa?"
     }
   ],
   "card.evo.graveyard.items.banish": [
@@ -5477,12 +5835,6 @@
     {
       "type": 0,
       "value": "Fazer banish de uma carta da mão para comprar uma carta?"
-    }
-  ],
-  "card.evo.hand.card.top": [
-    {
-      "type": 0,
-      "value": "Coloque uma carta da sua mão no topo do seu deck"
     }
   ],
   "card.evo.hyperdriver.arena.optional": [
@@ -5607,12 +5959,6 @@
       "value": " para fazer reset"
     }
   ],
-  "card.evo.maintenance.choose": [
-    {
-      "type": 0,
-      "value": "Remover um marcador de steam ou destruir esta carta?"
-    }
-  ],
   "card.evo.matching.item.top": [
     {
       "type": 0,
@@ -5681,12 +6027,6 @@
     {
       "type": 0,
       "value": "Nenhuma carta revelada pode defender"
-    }
-  ],
-  "card.evo.scrap.choose": [
-    {
-      "type": 0,
-      "value": "Fazer scrap de um item ou equipamento do seu cemitério?"
     }
   ],
   "card.evo.scrap.choose.many": [
@@ -6051,16 +6391,6 @@
       "value": "lightning"
     }
   ],
-  "card.evr.card.name": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": nomeie uma carta"
-    }
-  ],
   "card.evr.card.reveal": [
     {
       "type": 0,
@@ -6107,65 +6437,10 @@
       "value": "Escolha a próxima carta do pitch para colocar no topo (a última escolha termina no topo)"
     }
   ],
-  "card.evr.discard.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha uma carta para descartar"
-    }
-  ],
   "card.evr.dreadbore.arrow.load": [
     {
       "type": 0,
       "value": "Colocar uma carta arrow da sua mão com a face para cima no arsenal?"
-    }
-  ],
-  "card.evr.echoes.discard.choose": [
-    {
-      "type": 0,
-      "value": "Escolha "
-    },
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "=0": {
-          "value": [
-            {
-              "type": 0,
-              "value": "nenhuma carta"
-            }
-          ]
-        },
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "uma carta"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " cartas"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " para descartar"
     }
   ],
   "card.evr.echoes.hero.choose": [
@@ -6330,6 +6605,58 @@
       "value": ": colocar uma carta revelada no fundo do deck do dono dela?"
     }
   ],
+  "card.evr.scour.auras.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": escolha "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "nenhuma aura"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " aura"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " auras"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " para destruir"
+    }
+  ],
   "card.evr.seeing.hero.choose": [
     {
       "type": 0,
@@ -6430,28 +6757,6 @@
       "value": " para virar com a face para baixo"
     }
   ],
-  "card.hnt.card.choose": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta"
-    }
-  ],
-  "card.hnt.card.name": [
-    {
-      "type": 0,
-      "value": "Nomeie uma carta"
-    }
-  ],
-  "card.hnt.card.name.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": nomeie uma carta"
-    }
-  ],
   "card.hnt.dagger.choose": [
     {
       "type": 0,
@@ -6516,12 +6821,6 @@
       "value": " armas dagger Draconic do seu cemitério"
     }
   ],
-  "card.hnt.equipment.defensecounter": [
-    {
-      "type": 0,
-      "value": "Coloque um marcador de -1 de defesa em um equipamento"
-    }
-  ],
   "card.hnt.graveyard.power.banish.opponent": [
     {
       "type": 0,
@@ -6548,12 +6847,6 @@
     {
       "type": 0,
       "value": " de poder do seu cemitério?"
-    }
-  ],
-  "card.hnt.hand.card.banish": [
-    {
-      "type": 0,
-      "value": "Faça banish de uma carta da sua mão"
     }
   ],
   "card.hnt.ignite.discount": [
@@ -6766,24 +7059,6 @@
       "value": "Colocar uma carta de attack action do seu cemitério no topo?"
     }
   ],
-  "card.hvy.beatchest.discard": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": descartar uma carta com "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " ou mais de poder para beat chest?"
-    }
-  ],
   "card.hvy.betsy.pay": [
     {
       "type": 0,
@@ -6850,22 +7125,10 @@
       "value": "Quantos Gold você quer destruir?"
     }
   ],
-  "card.hvy.hand.arsenal.bottom": [
-    {
-      "type": 0,
-      "value": "Coloque uma carta da mão ou do arsenal no fundo"
-    }
-  ],
   "card.hvy.hand.keep": [
     {
       "type": 0,
       "value": "Escolha uma carta para manter"
-    }
-  ],
-  "card.hvy.hand.top": [
-    {
-      "type": 0,
-      "value": "Coloque uma carta da sua mão no topo do seu deck"
     }
   ],
   "card.hvy.item.control": [
@@ -7098,18 +7361,6 @@
       "value": "Remover um marcador de +1 de poder para aplicar mark no herói atingido?"
     }
   ],
-  "card.iar.hand.banish": [
-    {
-      "type": 0,
-      "value": "Faça banish de uma carta da sua mão"
-    }
-  ],
-  "card.iar.hand.banish.choose": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta para fazer banish"
-    }
-  ],
   "card.iar.hand.banish.optional": [
     {
       "type": 0,
@@ -7120,24 +7371,6 @@
     {
       "type": 0,
       "value": "Descarte qualquer número de outras cartas"
-    }
-  ],
-  "card.iar.item.crank.steam.choose": [
-    {
-      "type": 0,
-      "value": "Colocar um marcador de steam em um item com crank?"
-    }
-  ],
-  "card.iar.looter.discard.choose": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta para descartar"
-    }
-  ],
-  "card.iar.malice.zombie.choose": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta zombie no seu cemitério"
     }
   ],
   "card.iar.mark.ally.bind.choose": [
@@ -7488,6 +7721,36 @@
       "value": "; essa carta pode ser jogada neste turno"
     }
   ],
+  "card.log.ast.serenade.modes.chosen": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " escolhe “"
+    },
+    {
+      "type": 1,
+      "value": "first"
+    },
+    {
+      "type": 0,
+      "value": "” e “"
+    },
+    {
+      "type": 1,
+      "value": "second"
+    },
+    {
+      "type": 0,
+      "value": "” para "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "card.log.common.actionpoints.gained": [
     {
       "type": 1,
@@ -7637,6 +7900,58 @@
       "value": "card"
     }
   ],
+  "card.log.common.banished.discount": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": a carta banished "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " custa "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " a menos — você pode jogá-la neste turno"
+    }
+  ],
+  "card.log.common.banished.power": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": a carta banished "
+    },
+    {
+      "type": 1,
+      "value": "result"
+    },
+    {
+      "type": 0,
+      "value": " ganha +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de poder — você pode jogá-la neste turno"
+    }
+  ],
   "card.log.common.blooddebt.triggered": [
     {
       "type": 0,
@@ -7723,6 +8038,16 @@
     {
       "type": 1,
       "value": "revealed"
+    }
+  ],
+  "card.log.common.chokeslam.suppressed": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": cartas de attack action do oponente não podem ganhar poder durante a próxima action phase dele"
     }
   ],
   "card.log.common.damage.next.prevented": [
@@ -7951,24 +8276,6 @@
       "value": ")"
     }
   ],
-  "card.log.common.fusion.revealed": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": " recebe fusion (revela "
-    },
-    {
-      "type": 1,
-      "value": "revealed"
-    },
-    {
-      "type": 0,
-      "value": ")"
-    }
-  ],
   "card.log.common.goagain.from.arsenal": [
     {
       "type": 1,
@@ -8065,6 +8372,32 @@
       },
       "offset": 0,
       "pluralType": "cardinal"
+    }
+  ],
+  "card.log.common.hyperdriver.counter": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": Hyper Driver ganha um marcador de steam ("
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " → "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    },
+    {
+      "type": 0,
+      "value": ")"
     }
   ],
   "card.log.common.intimidate": [
@@ -8541,6 +8874,20 @@
     {
       "type": 0,
       "value": " de poder e dominate"
+    }
+  ],
+  "card.log.dtd.decimator.halved": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " reduz à metade a defesa base de "
+    },
+    {
+      "type": 1,
+      "value": "target"
     }
   ],
   "card.log.dtd.diplomacy.mode.chosen": [
@@ -9127,6 +9474,24 @@
     {
       "type": 0,
       "value": " de defesa neste chain link"
+    }
+  ],
+  "card.log.obk.virulentcascade.token": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " escolhe "
+    },
+    {
+      "type": 1,
+      "value": "token"
+    },
+    {
+      "type": 0,
+      "value": " aleatoriamente"
     }
   ],
   "card.log.out.banish.faceup": [
@@ -11861,16 +12226,6 @@
       "value": ": escolha +2 de poder ou go again para o seu próximo ataque elegível"
     }
   ],
-  "card.mon.charge.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha uma carta da sua mão para fazer charge, ou recuse"
-    }
-  ],
   "card.mon.defending.hand.bottom": [
     {
       "type": 0,
@@ -12213,16 +12568,100 @@
       "value": "count"
     }
   ],
+  "card.mpa.bountybrim.silver": [
+    {
+      "type": 0,
+      "value": "Crie um token Silver"
+    }
+  ],
   "card.mpa.continuedcoercion.goagain": [
     {
       "type": 0,
       "value": "Ataques recebem go again neste chain link"
     }
   ],
+  "card.mpa.emergencyservices.cure": [
+    {
+      "type": 0,
+      "value": "Cure qualquer número de doenças com nomes diferentes"
+    }
+  ],
   "card.mpa.flipscript.power": [
     {
       "type": 0,
       "value": "Ataques recebem +1 de poder neste chain link"
+    }
+  ],
+  "card.mpa.hotzone.bloodrot": [
+    {
+      "type": 0,
+      "value": "Crie um token Bloodrot Pox sob o seu controle"
+    }
+  ],
+  "card.mpa.painfulchoice.banish": [
+    {
+      "type": 0,
+      "value": "Escolha uma carta da sua mão para fazer banish, ou "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " recebe +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de poder"
+    }
+  ],
+  "card.mpa.painfulchoice.bottom": [
+    {
+      "type": 0,
+      "value": "Painful Choice: colocar uma carta da sua mão no fundo do seu deck?"
+    }
+  ],
+  "card.mpa.painfulchoice.option.power": [
+    {
+      "type": 0,
+      "value": "Dar +"
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " de poder"
+    }
+  ],
+  "card.mpa.painfulchoice.trigger": [
+    {
+      "type": 0,
+      "value": "Você pode colocar uma carta da sua mão no fundo do seu deck"
+    }
+  ],
+  "card.mpa.patronslockbox.carriers": [
+    {
+      "type": 0,
+      "value": "Destrua esta carta. Se fizer isso, crie um token Frailty, Inertia ou Bloodrot Pox sob o controle de um herói oponente"
+    }
+  ],
+  "card.mpa.patronslockbox.serums": [
+    {
+      "type": 0,
+      "value": "Destrua esta carta. Se fizer isso, ganhe 1 Action Point"
+    }
+  ],
+  "card.mpa.patronslockbox.valuables": [
+    {
+      "type": 0,
+      "value": "Destrua esta carta. Se fizer isso, crie 2 tokens Silver"
     }
   ],
   "card.mpa.prolonged.copy": [
@@ -12237,10 +12676,70 @@
       "value": "Escolha uma carta da mão do herói defensor para fazer banish"
     }
   ],
+  "card.mpa.repeatrecon.bottom": [
+    {
+      "type": 0,
+      "value": "Colocar uma carta de attack action com custo 2 do seu cemitério no fundo do seu deck?"
+    }
+  ],
+  "card.mpa.repeatrecon.trigger": [
+    {
+      "type": 0,
+      "value": "Você pode colocar uma carta de attack action com custo 2 do seu cemitério no fundo do seu deck"
+    }
+  ],
   "card.mpa.sickeningrot.pay": [
     {
       "type": 0,
       "value": "Sickening Rot: pagar 3 recursos ou receber 2 de dano?"
+    }
+  ],
+  "card.mpa.spikeslasher.discount": [
+    {
+      "type": 0,
+      "value": "Cartas attack reaction custam "
+    },
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " a menos para jogar neste chain link"
+    }
+  ],
+  "card.mpa.stimtekvest.destroy": [
+    {
+      "type": 0,
+      "value": "Destruir esta carta para ganhar 2 recursos?"
+    }
+  ],
+  "card.mpb.babaza.mode.choose": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": escolha 1"
+    }
+  ],
+  "card.mpb.option.agility": [
+    {
+      "type": 0,
+      "value": "Crie um token Agility"
+    }
+  ],
+  "card.mpb.option.intimidate": [
+    {
+      "type": 0,
+      "value": "Faça intimidate no herói alvo"
+    }
+  ],
+  "card.mpb.option.might": [
+    {
+      "type": 0,
+      "value": "Crie um token Might"
     }
   ],
   "card.mpg.arsenal.card.bottom": [
@@ -12263,16 +12762,6 @@
     {
       "type": 0,
       "value": "Fearless Confrontation: escolha um ataque"
-    }
-  ],
-  "card.mpg.aura.destroy": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": destrua uma aura"
     }
   ],
   "card.mpg.aura.steal": [
@@ -12391,12 +12880,6 @@
       "value": "Annexation of the Forge: equipe um equipamento oponente"
     }
   ],
-  "card.mpw.aura.destroy": [
-    {
-      "type": 0,
-      "value": "Destrua uma aura"
-    }
-  ],
   "card.mpw.blunt.counter.remove": [
     {
       "type": 0,
@@ -12449,12 +12932,6 @@
       "value": ": escolha uma sword"
     }
   ],
-  "card.mpw.token.create.choose": [
-    {
-      "type": 0,
-      "value": "Criar qual token?"
-    }
-  ],
   "card.mpw.tokens.destroy": [
     {
       "type": 0,
@@ -12477,24 +12954,6 @@
     {
       "type": 0,
       "value": "Escolha uma carta azul para defender"
-    }
-  ],
-  "card.mst.card.banish": [
-    {
-      "type": 0,
-      "value": "Faça banish de uma carta"
-    }
-  ],
-  "card.mst.card.choose": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta"
-    }
-  ],
-  "card.mst.card.discard": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta para descartar"
     }
   ],
   "card.mst.card.nodefense.choose": [
@@ -12521,12 +12980,6 @@
       "value": "Nomeie um Crouching Tiger"
     }
   ],
-  "card.mst.defending.card.choose": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta defensora"
-    }
-  ],
   "card.mst.defendinghero.graveyard.banish": [
     {
       "type": 0,
@@ -12549,12 +13002,6 @@
     {
       "type": 0,
       "value": "Escolha uma carta com a face para baixo para olhar"
-    }
-  ],
-  "card.mst.hand.card.bottom": [
-    {
-      "type": 0,
-      "value": "Coloque uma carta da sua mão no fundo"
     }
   ],
   "card.mst.hero.damage.choose": [
@@ -12601,6 +13048,24 @@
       "value": "Faça banish de uma carta da mesma cor"
     }
   ],
+  "card.mst.maul.mode": [
+    {
+      "type": 0,
+      "value": "Maul: escolha 1 ou ambos"
+    }
+  ],
+  "card.mst.maul.option.power": [
+    {
+      "type": 0,
+      "value": "A carta de attack action recebe +3 de poder"
+    }
+  ],
+  "card.mst.maul.option.tigers": [
+    {
+      "type": 0,
+      "value": "O Crouching Tiger ganha \"Quando isto acertar, crie 2 Crouching Tigers na sua zona banished. Você pode jogá-los neste turno\""
+    }
+  ],
   "card.mst.mechanologist.action.top": [
     {
       "type": 0,
@@ -12617,12 +13082,6 @@
     {
       "type": 0,
       "value": "Escolha 3 traps para fazer banish com a face para baixo"
-    }
-  ],
-  "card.mst.option.yourhero": [
-    {
-      "type": 0,
-      "value": "Seu herói"
     }
   ],
   "card.mst.remaining.bottommost.choose": [
@@ -12788,6 +13247,12 @@
       "value": "Esta carta recebe veil"
     }
   ],
+  "card.obk.codex.arsenal.hand": [
+    {
+      "type": 0,
+      "value": "Coloque uma carta do seu arsenal na sua mão"
+    }
+  ],
   "card.obk.cureall.disease.cure": [
     {
       "type": 0,
@@ -12830,44 +13295,10 @@
       "value": "Devolva uma carta de action defensora"
     }
   ],
-  "card.omn.arcane.target.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": cause "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane a um alvo"
-    }
-  ],
   "card.omn.arrow.arsenal": [
     {
       "type": 0,
       "value": "Colocar uma carta arrow no arsenal?"
-    }
-  ],
-  "card.omn.attack.target.upto": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha até 1 ataque alvo"
-    }
-  ],
-  "card.omn.aura.destroy": [
-    {
-      "type": 0,
-      "value": "Destrua uma aura"
     }
   ],
   "card.omn.aura.holo.counter": [
@@ -12886,44 +13317,10 @@
       "value": "Criar uma cópia token de uma aura?"
     }
   ],
-  "card.omn.aura.token.destroy": [
-    {
-      "type": 0,
-      "value": "Destrua um token de aura"
-    }
-  ],
-  "card.omn.aura.token.destroy.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": destrua um token de aura"
-    }
-  ],
-  "card.omn.aura.token.steal": [
-    {
-      "type": 0,
-      "value": "Roube um token de aura"
-    }
-  ],
-  "card.omn.card.discard": [
-    {
-      "type": 0,
-      "value": "Descarte uma carta"
-    }
-  ],
   "card.omn.cog.search.arena": [
     {
       "type": 0,
       "value": "Procurar um cog no seu deck para colocar na arena?"
-    }
-  ],
-  "card.omn.color.choose": [
-    {
-      "type": 0,
-      "value": "Escolha uma cor"
     }
   ],
   "card.omn.flow.destroy": [
@@ -12996,12 +13393,6 @@
       "value": "Embaralhar uma carta de instant no seu deck?"
     }
   ],
-  "card.omn.hand.card.bottom": [
-    {
-      "type": 0,
-      "value": "Coloque uma carta da sua mão no fundo"
-    }
-  ],
   "card.omn.hero.tap.bonus": [
     {
       "type": 1,
@@ -13040,12 +13431,6 @@
     {
       "type": 0,
       "value": "Colocar uma carta de instant Lightning no topo?"
-    }
-  ],
-  "card.omn.mode.choose": [
-    {
-      "type": 0,
-      "value": "Escolha um modo"
     }
   ],
   "card.omn.option.blue": [
@@ -13094,12 +13479,6 @@
     {
       "type": 0,
       "value": "Amarela"
-    }
-  ],
-  "card.omn.permanent.scrap": [
-    {
-      "type": 0,
-      "value": "Fazer scrap de um item ou equipamento do seu cemitério?"
     }
   ],
   "card.omn.red.action.banish": [
@@ -13164,12 +13543,6 @@
       "value": "Nomeie outra carta"
     }
   ],
-  "card.out.color.choose": [
-    {
-      "type": 0,
-      "value": "Escolha uma cor"
-    }
-  ],
   "card.out.combo.banish": [
     {
       "type": 0,
@@ -13206,12 +13579,6 @@
       "value": "Pagar 1 por +1 de defesa e blade break?"
     }
   ],
-  "card.out.equipment.counter": [
-    {
-      "type": 0,
-      "value": "Coloque um marcador de -1 de defesa em um equipamento"
-    }
-  ],
   "card.out.flickknives.dagger.choose": [
     {
       "type": 0,
@@ -13224,22 +13591,10 @@
       "value": "Colocar uma carta da mão com a face para baixo no arsenal?"
     }
   ],
-  "card.out.hand.arsenal.bottom": [
-    {
-      "type": 0,
-      "value": "Coloque uma carta da mão ou do arsenal no fundo"
-    }
-  ],
   "card.out.hand.bottom.draw": [
     {
       "type": 0,
       "value": "Colocar uma carta da mão no fundo para comprar?"
-    }
-  ],
-  "card.out.hand.top": [
-    {
-      "type": 0,
-      "value": "Coloque uma carta da sua mão no topo do seu deck"
     }
   ],
   "card.out.hurl.dagger.choose": [
@@ -13450,7 +13805,7 @@
       "value": "Devolva um ally"
     }
   ],
-  "card.pen.arcane.hero.choose": [
+  "card.pen.arcane.target.choose": [
     {
       "type": 1,
       "value": "card"
@@ -13465,7 +13820,7 @@
     },
     {
       "type": 0,
-      "value": " de dano arcane a qual herói?"
+      "value": " de dano arcane a qual alvo?"
     }
   ],
   "card.pen.arrow.arsenal": [
@@ -13524,12 +13879,6 @@
       "value": "Coloque um marcador de +1 de poder em uma aura"
     }
   ],
-  "card.pen.auratoken.destroy": [
-    {
-      "type": 0,
-      "value": "Destrua um token de aura"
-    }
-  ],
   "card.pen.auratoken.target.choose": [
     {
       "type": 0,
@@ -13554,28 +13903,10 @@
       "value": "Devolver um ally do seu cemitério?"
     }
   ],
-  "card.pen.card.banish": [
-    {
-      "type": 0,
-      "value": "Faça banish de uma carta"
-    }
-  ],
-  "card.pen.card.discard": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta para descartar"
-    }
-  ],
   "card.pen.card.fifthfromtop": [
     {
       "type": 0,
       "value": "Coloque uma carta em quinto lugar a partir do topo"
-    }
-  ],
-  "card.pen.card.name": [
-    {
-      "type": 0,
-      "value": "Nomeie uma carta"
     }
   ],
   "card.pen.cloaked.equipment.facedown.choose": [
@@ -13626,12 +13957,6 @@
       "value": " com cloaked para virar com a face para baixo"
     }
   ],
-  "card.pen.color.choose": [
-    {
-      "type": 0,
-      "value": "Escolha uma cor"
-    }
-  ],
   "card.pen.combatchain.card.choose": [
     {
       "type": 0,
@@ -13662,28 +13987,6 @@
     {
       "type": 0,
       "value": "Fazer banish da carta do topo e jogá-la como uma instant?"
-    }
-  ],
-  "card.pen.decompose.action": [
-    {
-      "type": 0,
-      "value": "Escolha a carta de action"
-    }
-  ],
-  "card.pen.decompose.earth.first": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": fazer decompose? Escolha a primeira carta Earth"
-    }
-  ],
-  "card.pen.decompose.earth.second": [
-    {
-      "type": 0,
-      "value": "Escolha a segunda carta Earth"
     }
   ],
   "card.pen.deeprecesses.banish": [
@@ -13784,22 +14087,16 @@
       "value": " Ash para manter Haboob?"
     }
   ],
-  "card.pen.hand.card.banish": [
-    {
-      "type": 0,
-      "value": "Faça banish de uma carta da sua mão"
-    }
-  ],
   "card.pen.hand.fifthfromtop": [
     {
       "type": 0,
       "value": "Coloque uma carta da mão em quinto lugar a partir do topo"
     }
   ],
-  "card.pen.heroally.tap": [
+  "card.pen.hyperdriver.search.arena": [
     {
       "type": 0,
-      "value": "Vire (tap) o herói ou ally alvo"
+      "value": "Procurar um Hyper Driver no seu deck e colocá-lo na arena?"
     }
   ],
   "card.pen.instant.discard": [
@@ -13812,20 +14109,6 @@
     {
       "type": 0,
       "value": "Faça banish de uma carta de instant ou de uma carta amarela"
-    }
-  ],
-  "card.pen.item.destroy.defense": [
-    {
-      "type": 0,
-      "value": "Destruir um item para +"
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de defesa?"
     }
   ],
   "card.pen.livinglegend.hero.name": [
@@ -13886,12 +14169,6 @@
     {
       "type": 0,
       "value": "Rend Flesh: remover um marcador de +1 de poder para que o herói atingido perca 2 de vida?"
-    }
-  ],
-  "card.pen.scrap.choose": [
-    {
-      "type": 0,
-      "value": "Fazer scrap de um item ou equipamento do seu cemitério?"
     }
   ],
   "card.pen.seismic.resources.pay": [
@@ -13962,12 +14239,6 @@
       "value": "Fazer banish desta carta do seu cemitério em vez de criar Frostbite"
     }
   ],
-  "card.pen.sword.sharpen": [
-    {
-      "type": 0,
-      "value": "Escolha uma arma sword para fazer sharpen"
-    }
-  ],
   "card.pen.token.aura.counters.remove": [
     {
       "type": 0,
@@ -14002,42 +14273,6 @@
     {
       "type": 0,
       "value": "Descartar uma carta para vencer o wager em vez disso?"
-    }
-  ],
-  "card.ros.arcane.hero.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": cause "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane a um herói"
-    }
-  ],
-  "card.ros.arcane.target.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": cause "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane a um alvo"
     }
   ],
   "card.ros.arsenal.card.bottom": [
@@ -14086,12 +14321,6 @@
       "value": " aura no fundo do deck do dono dela"
     }
   ],
-  "card.ros.aura.destroy": [
-    {
-      "type": 0,
-      "value": "Destrua uma aura"
-    }
-  ],
   "card.ros.aura.destroy.eligible": [
     {
       "type": 0,
@@ -14136,48 +14365,6 @@
       "value": "Devolver uma aura elegível à mão do dono dela?"
     }
   ],
-  "card.ros.card.discard": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta para descartar"
-    }
-  ],
-  "card.ros.decompose.action": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha a carta de action para fazer banish"
-    }
-  ],
-  "card.ros.decompose.earth.first": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": fazer decompose? Escolha a primeira carta Earth para fazer banish"
-    }
-  ],
-  "card.ros.decompose.earth.second": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha a segunda carta Earth para fazer banish"
-    }
-  ],
-  "card.ros.hand.card.bottom": [
-    {
-      "type": 0,
-      "value": "Coloque uma carta da sua mão no fundo do seu deck"
-    }
-  ],
   "card.ros.intimidated.card.graveyard": [
     {
       "type": 0,
@@ -14212,12 +14399,6 @@
     {
       "type": 0,
       "value": "Runechant"
-    }
-  ],
-  "card.ros.option.yourhero": [
-    {
-      "type": 0,
-      "value": "Seu herói"
     }
   ],
   "card.ros.plan.hand.shuffle": [
@@ -14280,12 +14461,6 @@
     {
       "type": 0,
       "value": "Devolver uma aura Sigil do seu cemitério?"
-    }
-  ],
-  "card.ros.token.create": [
-    {
-      "type": 0,
-      "value": "Criar qual token?"
     }
   ],
   "card.sar.blackwidow.hand.banish": [
@@ -14378,12 +14553,6 @@
       "value": "Scout the Periphery: olhe a carta do topo do deck do herói alvo"
     }
   ],
-  "card.saz.spire.order.next": [
-    {
-      "type": 0,
-      "value": "Escolha a próxima carta para devolver ao topo do seu deck; a última carta devolvida fica no topo"
-    }
-  ],
   "card.sba.crown.attack.top": [
     {
       "type": 0,
@@ -14402,24 +14571,6 @@
       "value": "Crown of Providence: escolha qual carta fica no topo"
     }
   ],
-  "card.sba.fusion.reveal": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": revelar uma carta "
-    },
-    {
-      "type": 1,
-      "value": "type"
-    },
-    {
-      "type": 0,
-      "value": " da sua mão para fazer fuse?"
-    }
-  ],
   "card.sba.jack.ally.steal": [
     {
       "type": 0,
@@ -14430,16 +14581,6 @@
     {
       "type": 0,
       "value": "Jack Be Quick: fazer banish de um Nimblism do seu cemitério para +1 de poder e go again?"
-    }
-  ],
-  "card.sbl.charge.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha uma carta da sua mão para fazer charge ou recuse"
     }
   ],
   "card.sbl.charge.required": [
@@ -14498,38 +14639,10 @@
       "value": "Crash and Bash: revelar uma carta com crush para criar um Seismic Surge?"
     }
   ],
-  "card.sbr.hand.card.top": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": coloque uma carta da sua mão no topo do seu deck"
-    }
-  ],
   "card.sbr.thunderquake.heave": [
     {
       "type": 0,
       "value": "Thunder Quake: pagar 3 recursos para fazer heave dela com a face para cima no seu arsenal?"
-    }
-  ],
-  "card.sbz.arcane.target.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha um alvo para "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane"
     }
   ],
   "card.sbz.blaze.action.banish": [
@@ -14616,18 +14729,6 @@
       "value": "Fazer banish de uma carta arrow?"
     }
   ],
-  "card.sea.arrow.hand.arsenal": [
-    {
-      "type": 0,
-      "value": "Colocar uma carta arrow da sua mão com a face para cima no seu arsenal?"
-    }
-  ],
-  "card.sea.arrow.hand.arsenal.required": [
-    {
-      "type": 0,
-      "value": "Coloque uma carta arrow com a face para cima no seu arsenal"
-    }
-  ],
   "card.sea.arrow.top.arsenal": [
     {
       "type": 1,
@@ -14674,12 +14775,6 @@
       "value": "Desvirar (untap) um bow que você controla?"
     }
   ],
-  "card.sea.cog.maintenance.choose": [
-    {
-      "type": 0,
-      "value": "Remover um marcador de steam ou destruir esta carta?"
-    }
-  ],
   "card.sea.cog.steam.add": [
     {
       "type": 0,
@@ -14714,20 +14809,6 @@
       "value": "Virar (tap) um cog para colocar esta carta no fundo do seu deck?"
     }
   ],
-  "card.sea.damage.arcane.target": [
-    {
-      "type": 0,
-      "value": "Escolha um alvo para "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane"
-    }
-  ],
   "card.sea.damage.target.choose": [
     {
       "type": 0,
@@ -14744,16 +14825,6 @@
     {
       "type": 0,
       "value": "Destrua uma carta defensora"
-    }
-  ],
-  "card.sea.discardormill.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": descartar uma carta ou destruir a carta do topo do seu deck?"
     }
   ],
   "card.sea.gofish.card.choose": [
@@ -14790,12 +14861,6 @@
     {
       "type": 0,
       "value": "Desvire (untap) outro herói alvo"
-    }
-  ],
-  "card.sea.heroally.tap": [
-    {
-      "type": 0,
-      "value": "Vire (tap) o herói ou ally alvo"
     }
   ],
   "card.sea.hoist.ally.tap": [
@@ -15052,42 +15117,6 @@
       "value": " marcadores de +1 de poder em uma aura com ward que você controla"
     }
   ],
-  "card.sfa.attack.banish.discount": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": faça banish de uma carta de attack action com custo menor que "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": "; ela custa 1 a menos para jogar e você pode jogá-la neste turno"
-    }
-  ],
-  "card.sfa.attack.banish.power": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": faça banish de uma carta de attack action com custo menor que "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": "; ela recebe +1 de poder e você pode jogá-la neste turno"
-    }
-  ],
   "card.sfa.dragonfire.target": [
     {
       "type": 0,
@@ -15138,16 +15167,6 @@
       "value": "Carrion Crown: descarte um ally"
     }
   ],
-  "card.sgb.discardormill.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": descartar uma carta ou destruir a carta do topo do seu deck?"
-    }
-  ],
   "card.sgb.gravy.discard.choose": [
     {
       "type": 0,
@@ -15190,24 +15209,6 @@
       "value": "Golden Tipple: descartar uma carta amarela para comprar uma carta e criar um Gold?"
     }
   ],
-  "card.siy.arcane.target.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha um alvo para "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano arcane"
-    }
-  ],
   "card.siy.brainfreeze.action.choose": [
     {
       "type": 0,
@@ -15246,84 +15247,10 @@
       "value": "Cold Snap: escolha um herói"
     }
   ],
-  "card.siy.discard.choose": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": escolha uma carta para descartar"
-    }
-  ],
-  "card.siy.discard.pay": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": pagar "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " "
-    },
-    {
-      "type": 6,
-      "value": "amount",
-      "options": {
-        "=0": {
-          "value": [
-            {
-              "type": 0,
-              "value": "recursos"
-            }
-          ]
-        },
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "recurso"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "recursos"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    },
-    {
-      "type": 0,
-      "value": " ou descartar uma carta?"
-    }
-  ],
   "card.siy.frostspike.zone.choose": [
     {
       "type": 0,
       "value": "Frost Spike: escolha uma zona de equipamento exposta"
-    }
-  ],
-  "card.siy.fusion.reveal": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": revelar uma carta Ice da sua mão para fusion?"
     }
   ],
   "card.siy.iceeternal.hero.choose": [
@@ -15421,16 +15348,42 @@
   ],
   "card.sly.damage.source.choose": [
     {
-      "type": 0,
-      "value": "Prevenir os próximos "
-    },
-    {
-      "type": 1,
-      "value": "amount"
-    },
-    {
-      "type": 0,
-      "value": " de dano de qual fonte?"
+      "type": 5,
+      "value": "target",
+      "options": {
+        "self": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Prevenir os próximos "
+            },
+            {
+              "type": 1,
+              "value": "amount"
+            },
+            {
+              "type": 0,
+              "value": " de dano ao seu herói de qual fonte?"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Prevenir os próximos "
+            },
+            {
+              "type": 1,
+              "value": "amount"
+            },
+            {
+              "type": 0,
+              "value": " de dano ao herói oponente de qual fonte?"
+            }
+          ]
+        }
+      }
     }
   ],
   "card.sly.oasis.hero.choose": [
@@ -15501,38 +15454,6 @@
       "value": "Coloque outra aura alvo no fundo do deck do dono dela"
     }
   ],
-  "card.sup.aura.destroy": [
-    {
-      "type": 0,
-      "value": "Destrua uma aura"
-    }
-  ],
-  "card.sup.aura.destroy.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": destrua uma aura"
-    }
-  ],
-  "card.sup.aura.token.destroy": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": destrua um token de aura"
-    }
-  ],
-  "card.sup.aura.token.steal": [
-    {
-      "type": 0,
-      "value": "Roube um token de aura"
-    }
-  ],
   "card.sup.beacon.mode.choose": [
     {
       "type": 1,
@@ -15549,18 +15470,6 @@
     {
       "type": 0,
       "value": " restantes)"
-    }
-  ],
-  "card.sup.card.top.choose": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta para colocar no topo"
-    }
-  ],
-  "card.sup.color.choose": [
-    {
-      "type": 0,
-      "value": "Escolha uma cor"
     }
   ],
   "card.sup.combat.card.reduce": [
@@ -15629,12 +15538,6 @@
     {
       "type": 0,
       "value": "Desperte um Figment"
-    }
-  ],
-  "card.sup.hand.bottom": [
-    {
-      "type": 0,
-      "value": "Coloque uma carta da mão no fundo"
     }
   ],
   "card.sup.hero.abilities.discard": [
@@ -15803,6 +15706,12 @@
       "value": "Boo"
     }
   ],
+  "card.sup.option.cheater.damage": [
+    {
+      "type": 0,
+      "value": "Causar 2 de dano a menos que descarte"
+    }
+  ],
   "card.sup.option.courage": [
     {
       "type": 0,
@@ -15951,12 +15860,6 @@
       "value": "Coloque uma carta 6+ no topo"
     }
   ],
-  "card.sup.suspense.counter.add": [
-    {
-      "type": 0,
-      "value": "Colocar um marcador de suspense em uma aura de suspense?"
-    }
-  ],
   "card.sup.suspense.counter.change": [
     {
       "type": 1,
@@ -15971,6 +15874,12 @@
     {
       "type": 0,
       "value": "Escolha um token Toughness ou Vigor para roubar"
+    }
+  ],
+  "card.sup.token.steal.confidence.choose": [
+    {
+      "type": 0,
+      "value": "Escolha um token Confidence ou Toughness para roubar"
     }
   ],
   "card.sup.top.color.guess": [
@@ -16077,16 +15986,6 @@
       "value": "Coloque uma carta de attack action no fundo do seu deck"
     }
   ],
-  "card.tcc.boulder.hand.top": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": coloque uma carta da sua mão no topo do seu deck"
-    }
-  ],
   "card.tcc.encore.attack.return": [
     {
       "type": 0,
@@ -16172,7 +16071,7 @@
   "card.trigger.common.adverseaura.random": [
     {
       "type": 0,
-      "value": "Crie uma Aura adversa aleatória"
+      "value": "Crie um token de doença aleatório"
     }
   ],
   "card.trigger.common.agentofchaos.random": [
@@ -17571,6 +17470,12 @@
       "value": "Cada herói embaralha o próprio deck e coloca a carta do topo no próprio arsenal"
     }
   ],
+  "card.trigger.common.hyperdriver.boost": [
+    {
+      "type": 0,
+      "value": "Remova um marcador de steam e ganhe 1 recurso"
+    }
+  ],
   "card.trigger.common.illusionist.chain.abilities": [
     {
       "type": 0,
@@ -18440,6 +18345,20 @@
       "value": " Silver para equipar esta carta"
     }
   ],
+  "card.trigger.common.silver.equip.blocked": [
+    {
+      "type": 0,
+      "value": "Atenção: não é possível equipar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " porque a zona desse equipamento não está vazia. A carta continua no seu cemitério, e o Silver será destruído mesmo assim."
+    }
+  ],
   "card.trigger.common.silver.equip.optional": [
     {
       "type": 0,
@@ -18496,6 +18415,12 @@
     {
       "type": 0,
       "value": "Coloque um marcador de steam nesta carta"
+    }
+  ],
+  "card.trigger.common.steam.maintain": [
+    {
+      "type": 0,
+      "value": "Remova um marcador de steam ou destrua esta carta"
     }
   ],
   "card.trigger.common.steam.remove": [
@@ -18840,16 +18765,16 @@
       "value": "Remova um marcador de -1 de defesa do seu equipamento de peito"
     }
   ],
-  "card.trigger.hyperdriver.boost": [
-    {
-      "type": 0,
-      "value": "Remova um marcador de steam e ganhe 1 recurso"
-    }
-  ],
   "card.trigger.iar.mark.neverest": [
     {
       "type": 0,
       "value": "Vire uma carta banished com a face para baixo para criar um Corrupted Corpse"
+    }
+  ],
+  "card.trigger.mpb.fury.destroy": [
+    {
+      "type": 0,
+      "value": "Destrua Fury; você fez beat chest neste turno"
     }
   ],
   "card.trigger.mst.essence.prevent.blue": [
@@ -18940,6 +18865,20 @@
     {
       "type": 0,
       "value": "Vire (tap) este herói para jogar a carta banished como se fosse uma instant neste turno"
+    }
+  ],
+  "card.trigger.obk.huxley.instant.card": [
+    {
+      "type": 0,
+      "value": "Vire (tap) este herói para jogar a carta "
+    },
+    {
+      "type": 1,
+      "value": "target"
+    },
+    {
+      "type": 0,
+      "value": " como se fosse uma instant neste turno"
     }
   ],
   "card.trigger.obk.incubator.pox": [
@@ -19074,12 +19013,6 @@
     {
       "type": 1,
       "value": "token"
-    }
-  ],
-  "card.trigger.steam.maintain": [
-    {
-      "type": 0,
-      "value": "Remova um marcador de steam ou destrua esta carta"
     }
   ],
   "card.trigger.sup.turnheads.tap": [
@@ -19222,16 +19155,6 @@
       "value": ": escolha um Ash para transformar"
     }
   ],
-  "card.upr.attack.banish": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": fazer banish de um ataque elegível?"
-    }
-  ],
   "card.upr.azvolai.targets": [
     {
       "type": 0,
@@ -19252,12 +19175,6 @@
     {
       "type": 0,
       "value": " alvos"
-    }
-  ],
-  "card.upr.card.banish.choose": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta para fazer banish"
     }
   ],
   "card.upr.card.bottom.draw": [
@@ -19282,12 +19199,6 @@
     {
       "type": 0,
       "value": " de dano a qualquer alvo"
-    }
-  ],
-  "card.upr.discard.choose": [
-    {
-      "type": 0,
-      "value": "Escolha uma carta para descartar"
     }
   ],
   "card.upr.discard.draw": [
@@ -19409,22 +19320,6 @@
       "value": " no fundo do seu deck"
     }
   ],
-  "card.upr.ice.fusion.reveal": [
-    {
-      "type": 0,
-      "value": "Revelar uma carta Ice para fazer fuse?"
-    }
-  ],
-  "card.upr.ice.fusion.reveal.named": [
-    {
-      "type": 1,
-      "value": "card"
-    },
-    {
-      "type": 0,
-      "value": ": revelar uma carta Ice da sua mão para fazer fuse?"
-    }
-  ],
   "card.upr.kyloria.item.control": [
     {
       "type": 0,
@@ -19447,12 +19342,6 @@
     {
       "type": 0,
       "value": "Escolha uma carta da mão do oponente para fazer banish"
-    }
-  ],
-  "card.upr.option.you": [
-    {
-      "type": 0,
-      "value": "Você"
     }
   ],
   "card.upr.pay.or.discard": [
@@ -19563,12 +19452,6 @@
       "value": "Enlightened Strike: coloque uma carta da mão no fundo do seu deck"
     }
   ],
-  "card.wtr.estrike.mode.choose": [
-    {
-      "type": 0,
-      "value": "Escolha um modo"
-    }
-  ],
   "card.wtr.estrike.option.draw": [
     {
       "type": 0,
@@ -19597,12 +19480,6 @@
     {
       "type": 0,
       "value": "Hope Merchant's Hood: escolha qualquer número de cartas da sua mão para embaralhar no seu deck"
-    }
-  ],
-  "card.wtr.katsu.combo.choose": [
-    {
-      "type": 0,
-      "value": "Katsu: escolha uma carta de combo para fazer banish com a face para cima"
     }
   ],
   "card.wtr.katsu.discard": [
@@ -20011,6 +19888,12 @@
     {
       "type": 0,
       "value": "Seu herói"
+    }
+  ],
+  "common.sandbox.badge": [
+    {
+      "type": 0,
+      "value": "Sandbox · fora das estatísticas"
     }
   ],
   "common.shortcut.space": [
@@ -21739,6 +21622,24 @@
     {
       "type": 0,
       "value": " a mais"
+    }
+  ],
+  "engine.effect.part.attack.intimidated.at.least": [
+    {
+      "type": 1,
+      "value": "attack"
+    },
+    {
+      "type": 0,
+      "value": " de poder se você fez intimidate "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " ou mais vezes neste turno"
     }
   ],
   "engine.effect.part.attack.lightly.defended": [
@@ -25597,6 +25498,20 @@
       "value": " é virada (tap)"
     }
   ],
+  "engine.log.card.target.illegal": [
+    {
+      "type": 0,
+      "value": "O efeito com alvo de "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " falha (seu alvo não é mais válido)"
+    }
+  ],
   "engine.log.card.transcends.to.hand": [
     {
       "type": 1,
@@ -27135,6 +27050,292 @@
       "value": " não pode ganhar vida enquanto estiver à frente na vida"
     }
   ],
+  "engine.log.manual.card.moved": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " move "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 5,
+      "value": "from",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "da mão"
+            }
+          ]
+        },
+        "deck": {
+          "value": [
+            {
+              "type": 0,
+              "value": "do deck"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "do cemitério"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "da zona banished"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 5,
+      "value": "to",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a mão"
+            }
+          ]
+        },
+        "deckTop": {
+          "value": [
+            {
+              "type": 0,
+              "value": "o topo do deck"
+            }
+          ]
+        },
+        "deckBottom": {
+          "value": [
+            {
+              "type": 0,
+              "value": "o fundo do deck"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "o cemitério"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a zona banished"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine.log.manual.card.moved.hidden": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " move uma carta "
+    },
+    {
+      "type": 5,
+      "value": "from",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "da mão"
+            }
+          ]
+        },
+        "deck": {
+          "value": [
+            {
+              "type": 0,
+              "value": "do deck"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "do cemitério"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "da zona banished"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 5,
+      "value": "to",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a mão"
+            }
+          ]
+        },
+        "deckTop": {
+          "value": [
+            {
+              "type": 0,
+              "value": "o topo do deck"
+            }
+          ]
+        },
+        "deckBottom": {
+          "value": [
+            {
+              "type": 0,
+              "value": "o fundo do deck"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "o cemitério"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "a zona banished"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine.log.manual.deck.reordered": [
+    {
+      "type": 0,
+      "value": "O deck de "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " foi reordenado"
+    }
+  ],
+  "engine.log.manual.deck.shuffled": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " embaralha o próprio deck"
+    }
+  ],
+  "engine.log.manual.life": [
+    {
+      "type": 0,
+      "value": "A vida de "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " foi alterada de "
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    }
+  ],
+  "engine.log.manual.resources": [
+    {
+      "type": 0,
+      "value": "Os recursos flutuantes de "
+    },
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " foram alterados de "
+    },
+    {
+      "type": 1,
+      "value": "from"
+    },
+    {
+      "type": 0,
+      "value": " para "
+    },
+    {
+      "type": 1,
+      "value": "to"
+    }
+  ],
+  "engine.log.mirage.fizzles.condition.failed": [
+    {
+      "type": 0,
+      "value": "Mirage resolve sem efeito porque sua condição não é mais atendida"
+    }
+  ],
   "engine.log.payment.paid": [
     {
       "type": 1,
@@ -27458,6 +27659,20 @@
       "value": " de vida"
     }
   ],
+  "engine.log.player.named.card": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " nomeia "
+    },
+    {
+      "type": 1,
+      "value": "name"
+    }
+  ],
   "engine.log.player.shuffles.deck": [
     {
       "type": 1,
@@ -27755,6 +27970,24 @@
     {
       "type": 1,
       "value": "card"
+    }
+  ],
+  "engine.log.token.creation.prohibited": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " não pode ser criado sob o controle de "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    },
+    {
+      "type": 0,
+      "value": " neste turno"
     }
   ],
   "engine.log.token.creation.reduced": [
@@ -28076,6 +28309,16 @@
       "pluralType": "cardinal"
     }
   ],
+  "engine.log.trigger.mirage": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " ativa o trigger de Mirage"
+    }
+  ],
   "engine.log.trigger.on.friendly.hit": [
     {
       "type": 0,
@@ -28296,6 +28539,12 @@
     {
       "type": 0,
       "value": "Quando colocada virada para cima no arsenal"
+    }
+  ],
+  "engine.term.mirage.destroy": [
+    {
+      "type": 0,
+      "value": "Mirage — destrua esta carta"
     }
   ],
   "engine.term.triggered.ability": [
@@ -28680,6 +28929,18 @@
     {
       "type": 0,
       "value": " de dano arcane"
+    }
+  ],
+  "game.card.badge.attackTarget": [
+    {
+      "type": 0,
+      "value": "Alvo do ataque"
+    }
+  ],
+  "game.card.badge.attackTarget.detail": [
+    {
+      "type": 0,
+      "value": "O ataque atual tem esta carta como alvo"
     }
   ],
   "game.card.badge.attacked": [
@@ -29397,6 +29658,22 @@
       "value": "Desfazer todos os bloqueios"
     }
   ],
+  "game.clock.title": [
+    {
+      "type": 0,
+      "value": "Relógio da partida"
+    }
+  ],
+  "game.clock.total": [
+    {
+      "type": 0,
+      "value": "Tempo de partida "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
   "game.concede": [
     {
       "type": 0,
@@ -29443,6 +29720,32 @@
     {
       "type": 0,
       "value": "Mais controles do jogo"
+    }
+  ],
+  "game.createdCards.back": [
+    {
+      "type": 0,
+      "value": "Voltar para "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.createdCards.title": [
+    {
+      "type": 0,
+      "value": "Cria"
+    }
+  ],
+  "game.createdCards.view": [
+    {
+      "type": 0,
+      "value": "Cria "
+    },
+    {
+      "type": 1,
+      "value": "card"
     }
   ],
   "game.decision.action.confirm": [
@@ -29863,6 +30166,16 @@
       "value": "Aplique um efeito de substituição. Os que ainda se aplicarem depois serão oferecidos em seguida."
     }
   ],
+  "game.decision.enabledCards.named": [
+    {
+      "type": 0,
+      "value": "Permite que você jogue "
+    },
+    {
+      "type": 1,
+      "value": "cards"
+    }
+  ],
   "game.decision.endTurn.action": [
     {
       "type": 0,
@@ -29875,6 +30188,90 @@
       "value": "Você ainda tem um Action Point. Tem certeza de que quer encerrar o turno?"
     }
   ],
+  "game.decision.equipFails.noBase.warning": [
+    {
+      "type": 0,
+      "value": "Atenção: não é possível equipar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " porque você não tem um equipamento base nesse espaço. A carta vai para o seu cemitério."
+    }
+  ],
+  "game.decision.equipFails.warning": [
+    {
+      "type": 0,
+      "value": "Atenção: não é possível equipar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " porque "
+    },
+    {
+      "type": 1,
+      "value": "equipped"
+    },
+    {
+      "type": 0,
+      "value": " é um equipamento que não é base nesse espaço. A carta vai para o seu cemitério."
+    }
+  ],
+  "game.decision.lethal.action.confirm-blocks": [
+    {
+      "type": 0,
+      "value": "Confirmar bloqueios mesmo assim"
+    }
+  ],
+  "game.decision.lethal.action.confirm-no-blocks": [
+    {
+      "type": 0,
+      "value": "Confirmar sem bloqueios mesmo assim"
+    }
+  ],
+  "game.decision.lethal.action.pass": [
+    {
+      "type": 0,
+      "value": "Passar mesmo assim"
+    }
+  ],
+  "game.decision.lethal.context.defend": [
+    {
+      "type": 0,
+      "value": "Você ainda tem cartas para bloquear."
+    }
+  ],
+  "game.decision.lethal.context.reaction": [
+    {
+      "type": 0,
+      "value": "Você ainda pode jogar uma carta ou usar uma habilidade."
+    }
+  ],
+  "game.decision.lethal.damage": [
+    {
+      "type": 0,
+      "value": "de dano"
+    }
+  ],
+  "game.decision.lethal.life": [
+    {
+      "type": 0,
+      "value": "de vida"
+    }
+  ],
+  "game.decision.lethal.prompt": [
+    {
+      "type": 0,
+      "value": "Este ataque derrotaria você."
+    }
+  ],
   "game.decision.name.choose": [
     {
       "type": 0,
@@ -29885,6 +30282,60 @@
     {
       "type": 0,
       "value": "Comece a digitar o nome de uma carta"
+    }
+  ],
+  "game.decision.number.choose": [
+    {
+      "type": 0,
+      "value": "Escolher "
+    },
+    {
+      "type": 1,
+      "value": "value"
+    }
+  ],
+  "game.decision.number.decrease": [
+    {
+      "type": 0,
+      "value": "Diminuir"
+    }
+  ],
+  "game.decision.number.increase": [
+    {
+      "type": 0,
+      "value": "Aumentar"
+    }
+  ],
+  "game.decision.number.label": [
+    {
+      "type": 0,
+      "value": "Número de "
+    },
+    {
+      "type": 1,
+      "value": "minimum"
+    },
+    {
+      "type": 0,
+      "value": " a "
+    },
+    {
+      "type": 1,
+      "value": "maximum"
+    }
+  ],
+  "game.decision.number.range": [
+    {
+      "type": 1,
+      "value": "minimum"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "maximum"
     }
   ],
   "game.decision.opt.bottom": [
@@ -30005,6 +30456,16 @@
       "value": " está decidindo…"
     }
   ],
+  "game.decision.rememberTarget": [
+    {
+      "type": 0,
+      "value": "Não perguntar de novo para "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
   "game.decision.removeCard": [
     {
       "type": 0,
@@ -30031,6 +30492,18 @@
     {
       "type": 1,
       "value": "maximum"
+    }
+  ],
+  "game.decision.sheet.hide": [
+    {
+      "type": 0,
+      "value": "Ocultar escolha"
+    }
+  ],
+  "game.decision.sheet.show": [
+    {
+      "type": 0,
+      "value": "Mostrar escolha"
     }
   ],
   "game.decision.target.opponent": [
@@ -30175,6 +30648,180 @@
     {
       "type": 1,
       "value": "name"
+    }
+  ],
+  "game.deckOrder.apply": [
+    {
+      "type": 0,
+      "value": "Aplicar ordem"
+    }
+  ],
+  "game.deckOrder.changed": [
+    {
+      "type": 0,
+      "value": "O deck mudou. Sua ordem foi mantida para as cartas que continuam nele, e as cartas novas foram colocadas no fundo."
+    }
+  ],
+  "game.deckOrder.edit": [
+    {
+      "type": 0,
+      "value": "Editar ordem de compra"
+    }
+  ],
+  "game.deckOrder.editNamed": [
+    {
+      "type": 0,
+      "value": "Editar a ordem de compra de "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
+  "game.deckOrder.empty": [
+    {
+      "type": 0,
+      "value": "O deck está vazio."
+    }
+  ],
+  "game.deckOrder.instructions": [
+    {
+      "type": 0,
+      "value": "A carta 1 é a próxima a ser comprada. Arraste as cartas para reordenar ou selecione uma carta e use as setas do teclado. Pressione H, G ou B para mover a carta selecionada para a mão, o cemitério ou a zona banished."
+    }
+  ],
+  "game.deckOrder.label": [
+    {
+      "type": 0,
+      "value": "Ordem do deck, carta do topo primeiro"
+    }
+  ],
+  "game.deckOrder.moveToBottom": [
+    {
+      "type": 0,
+      "value": "Mover "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " para o fundo"
+    }
+  ],
+  "game.deckOrder.moveToTop": [
+    {
+      "type": 0,
+      "value": "Mover "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " para o topo"
+    }
+  ],
+  "game.deckOrder.position": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ", posição "
+    },
+    {
+      "type": 1,
+      "value": "position"
+    },
+    {
+      "type": 0,
+      "value": " de "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    }
+  ],
+  "game.deckOrder.refusal": [
+    {
+      "type": 0,
+      "value": "O deck não pode mudar agora. Tente de novo quando não houver escolha ou pagamento em andamento."
+    }
+  ],
+  "game.deckOrder.reveal.confirm": [
+    {
+      "type": 0,
+      "value": "Mostrar ordem de compra"
+    }
+  ],
+  "game.deckOrder.reveal.description": [
+    {
+      "type": 0,
+      "value": "Isto mostra todas as cartas restantes "
+    },
+    {
+      "type": 5,
+      "value": "owner",
+      "options": {
+        "mine": {
+          "value": [
+            {
+              "type": 0,
+              "value": "no seu deck"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "no deck do seu oponente"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": ", em ordem de compra."
+    }
+  ],
+  "game.deckOrder.reveal.title": [
+    {
+      "type": 0,
+      "value": "Ver a ordem de compra?"
+    }
+  ],
+  "game.deckOrder.shuffle": [
+    {
+      "type": 0,
+      "value": "Embaralhar"
+    }
+  ],
+  "game.deckOrder.title": [
+    {
+      "type": 0,
+      "value": "Ordem de compra de "
+    },
+    {
+      "type": 1,
+      "value": "hero"
+    }
+  ],
+  "game.deckOrder.toBottom": [
+    {
+      "type": 0,
+      "value": "Para o fundo"
+    }
+  ],
+  "game.deckOrder.toTop": [
+    {
+      "type": 0,
+      "value": "Para o topo"
     }
   ],
   "game.deckToast.arsenalFromBanish": [
@@ -30684,6 +31331,78 @@
       "pluralType": "cardinal"
     }
   ],
+  "game.hand.playableFrom.effect": [
+    {
+      "type": 0,
+      "value": "Um efeito de carta ativo permite jogar esta carta "
+    },
+    {
+      "type": 5,
+      "value": "zone",
+      "options": {
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "do seu Cemitério"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "da sua zona Banished"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "game.hand.playableFrom.source": [
+    {
+      "type": 0,
+      "value": "A habilidade de "
+    },
+    {
+      "type": 1,
+      "value": "source"
+    },
+    {
+      "type": 0,
+      "value": " permite jogar esta carta "
+    },
+    {
+      "type": 5,
+      "value": "zone",
+      "options": {
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "do seu Cemitério"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "da sua zona Banished"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
   "game.hand.reorderHint": [
     {
       "type": 0,
@@ -31045,6 +31764,16 @@
       "value": "Voltar ao lobby"
     }
   ],
+  "game.over.botName": [
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": " (bot)"
+    }
+  ],
   "game.over.matchComplete": [
     {
       "type": 0,
@@ -31127,12 +31856,6 @@
       "value": "Passando o próximo chain link"
     }
   ],
-  "game.passUntil.armed.opponent": [
-    {
-      "type": 0,
-      "value": "Passando até o oponente agir"
-    }
-  ],
   "game.passUntil.armed.turn": [
     {
       "type": 0,
@@ -31158,13 +31881,55 @@
   "game.passUntil.chainLink.detail": [
     {
       "type": 0,
-      "value": "Passa e não bloqueia até o chain link resolver. Ainda para em outras escolhas e antes de um ataque letal."
+      "value": "Passa e não bloqueia até o chain link resolver. Para quando o oponente joga ou ativa algo a que você pode responder e antes de um ataque letal."
     }
   ],
   "game.passUntil.heading": [
     {
       "type": 0,
       "value": "Continuar passando até"
+    }
+  ],
+  "game.passUntil.hint.close": [
+    {
+      "type": 0,
+      "value": "Fechar dica"
+    }
+  ],
+  "game.passUntil.hint.reason": [
+    {
+      "type": 0,
+      "value": "Passando muito?"
+    }
+  ],
+  "game.passUntil.hint.tap": [
+    {
+      "type": 0,
+      "value": "Toque para continuar passando"
+    }
+  ],
+  "game.passUntil.hint.tapDetail": [
+    {
+      "type": 0,
+      "value": "até o chain link ou o turno acabar"
+    }
+  ],
+  "game.passUntil.hold": [
+    {
+      "type": 0,
+      "value": "Segure"
+    }
+  ],
+  "game.passUntil.ignorePlays": [
+    {
+      "type": 0,
+      "value": "Ignorar as jogadas do oponente"
+    }
+  ],
+  "game.passUntil.ignorePlays.detail": [
+    {
+      "type": 0,
+      "value": "Continua passando mesmo quando o oponente joga ou ativa algo a que você poderia responder. Ainda para antes de um ataque letal."
     }
   ],
   "game.passUntil.nextChainLink": [
@@ -31177,18 +31942,6 @@
     {
       "type": 0,
       "value": "Continuar passando"
-    }
-  ],
-  "game.passUntil.opponent": [
-    {
-      "type": 0,
-      "value": "O oponente agir"
-    }
-  ],
-  "game.passUntil.opponent.detail": [
-    {
-      "type": 0,
-      "value": "Passa até a próxima carta, habilidade ou ataque dele, ou até seu turno começar. Nunca bloqueia por você."
     }
   ],
   "game.passUntil.paused": [
@@ -31212,7 +31965,7 @@
   "game.passUntil.turn.detail": [
     {
       "type": 0,
-      "value": "Passa em todas as janelas e não bloqueia até o turno acabar. Ainda para em outras escolhas e antes de um ataque letal."
+      "value": "Passa em todas as janelas e não bloqueia até o turno acabar. Para quando o oponente joga ou ativa algo a que você pode responder e antes de um ataque letal."
     }
   ],
   "game.playerNumber": [
@@ -31552,6 +32305,348 @@
     {
       "type": 1,
       "value": "code"
+    }
+  ],
+  "game.sandbox.apply": [
+    {
+      "type": 0,
+      "value": "Aplicar"
+    }
+  ],
+  "game.sandbox.applying": [
+    {
+      "type": 0,
+      "value": "Aplicando…"
+    }
+  ],
+  "game.sandbox.cards": [
+    {
+      "type": 0,
+      "value": "Cartas"
+    }
+  ],
+  "game.sandbox.convert.confirm": [
+    {
+      "type": 0,
+      "value": "Ativar Sandbox"
+    }
+  ],
+  "game.sandbox.convert.confirming": [
+    {
+      "type": 0,
+      "value": "Ativando…"
+    }
+  ],
+  "game.sandbox.convert.description": [
+    {
+      "type": 0,
+      "value": "As ferramentas de Sandbox permitem editar a sua própria vida, recursos, deck e cartas. Esta partida deixa de contar para o histórico, as estatísticas e as conquistas, e isso não pode ser desfeito."
+    }
+  ],
+  "game.sandbox.convert.title": [
+    {
+      "type": 0,
+      "value": "Transformar esta partida em Sandbox?"
+    }
+  ],
+  "game.sandbox.decrease": [
+    {
+      "type": 0,
+      "value": "Diminuir "
+    },
+    {
+      "type": 1,
+      "value": "field"
+    }
+  ],
+  "game.sandbox.description": [
+    {
+      "type": 0,
+      "value": "As mudanças valem para os dois jogadores, aparecem no registro da partida e podem ser desfeitas."
+    }
+  ],
+  "game.sandbox.increase": [
+    {
+      "type": 0,
+      "value": "Aumentar "
+    },
+    {
+      "type": 1,
+      "value": "field"
+    }
+  ],
+  "game.sandbox.life": [
+    {
+      "type": 0,
+      "value": "Vida"
+    }
+  ],
+  "game.sandbox.move.banish": [
+    {
+      "type": 0,
+      "value": "Banish"
+    }
+  ],
+  "game.sandbox.move.banishNamed": [
+    {
+      "type": 0,
+      "value": "Fazer banish de "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    }
+  ],
+  "game.sandbox.move.deckBottom": [
+    {
+      "type": 0,
+      "value": "Fundo do deck"
+    }
+  ],
+  "game.sandbox.move.deckBottomNamed": [
+    {
+      "type": 0,
+      "value": "Colocar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " no fundo do deck"
+    }
+  ],
+  "game.sandbox.move.deckTop": [
+    {
+      "type": 0,
+      "value": "Topo do deck"
+    }
+  ],
+  "game.sandbox.move.deckTopNamed": [
+    {
+      "type": 0,
+      "value": "Colocar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " no topo do deck"
+    }
+  ],
+  "game.sandbox.move.empty": [
+    {
+      "type": 0,
+      "value": "Não há mais cartas aqui."
+    }
+  ],
+  "game.sandbox.move.graveyard": [
+    {
+      "type": 0,
+      "value": "Cemitério"
+    }
+  ],
+  "game.sandbox.move.graveyardNamed": [
+    {
+      "type": 0,
+      "value": "Colocar "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " no cemitério"
+    }
+  ],
+  "game.sandbox.move.hand": [
+    {
+      "type": 0,
+      "value": "Para a mão"
+    }
+  ],
+  "game.sandbox.move.handNamed": [
+    {
+      "type": 0,
+      "value": "Mover "
+    },
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": " para a mão"
+    }
+  ],
+  "game.sandbox.move.instructions": [
+    {
+      "type": 0,
+      "value": "Os movimentos são silenciosos: nada é ativado. Cada movimento aparece no registro da partida e pode ser desfeito."
+    }
+  ],
+  "game.sandbox.open": [
+    {
+      "type": 0,
+      "value": "Ferramentas de sandbox"
+    }
+  ],
+  "game.sandbox.range": [
+    {
+      "type": 1,
+      "value": "minimum"
+    },
+    {
+      "type": 0,
+      "value": "–"
+    },
+    {
+      "type": 1,
+      "value": "maximum"
+    }
+  ],
+  "game.sandbox.refusal.move": [
+    {
+      "type": 0,
+      "value": "Essa carta não pode ser movida agora. Tente de novo quando a stack estiver vazia e nenhuma escolha ou pagamento estiver em andamento."
+    }
+  ],
+  "game.sandbox.refusal.required": [
+    {
+      "type": 0,
+      "value": "As ferramentas de sandbox só estão disponíveis em partidas sandbox."
+    }
+  ],
+  "game.sandbox.refusal.seat": [
+    {
+      "type": 0,
+      "value": "Você só pode editar o seu próprio hero."
+    }
+  ],
+  "game.sandbox.refusal.unavailable": [
+    {
+      "type": 0,
+      "value": "Essa mudança não é permitida agora. Os recursos flutuantes não podem mudar durante um pagamento."
+    }
+  ],
+  "game.sandbox.reset": [
+    {
+      "type": 0,
+      "value": "Redefinir"
+    }
+  ],
+  "game.sandbox.resources": [
+    {
+      "type": 0,
+      "value": "Recursos flutuantes"
+    }
+  ],
+  "game.sandbox.seats": [
+    {
+      "type": 0,
+      "value": "Hero a editar"
+    }
+  ],
+  "game.sandbox.title": [
+    {
+      "type": 0,
+      "value": "Sandbox"
+    }
+  ],
+  "game.sandbox.zoneButton": [
+    {
+      "type": 5,
+      "value": "zone",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Mão"
+            }
+          ]
+        },
+        "deck": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Deck"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Cemitério"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Banished"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " ("
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "game.sandbox.zoneTitle": [
+    {
+      "type": 5,
+      "value": "zone",
+      "options": {
+        "hand": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Mão"
+            }
+          ]
+        },
+        "graveyard": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Cemitério"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Zona banished"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": 0,
+      "value": " de "
+    },
+    {
+      "type": 1,
+      "value": "hero"
     }
   ],
   "game.search.instructions": [
@@ -32176,6 +33271,36 @@
       "value": "Resumo do jogo"
     }
   ],
+  "game.time.gameLength": [
+    {
+      "type": 0,
+      "value": "Duração da partida "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "game.time.playerUsed": [
+    {
+      "type": 1,
+      "value": "player"
+    },
+    {
+      "type": 0,
+      "value": " usou "
+    },
+    {
+      "type": 1,
+      "value": "time"
+    }
+  ],
+  "game.time.title": [
+    {
+      "type": 0,
+      "value": "Tempo"
+    }
+  ],
   "game.timing.actionPhase": [
     {
       "type": 0,
@@ -32366,6 +33491,12 @@
     {
       "type": 0,
       "value": "O oponente passou para encerrar o turno. Se você agir, a prioridade volta para o oponente."
+    }
+  ],
+  "game.turn.endPassPendingYours": [
+    {
+      "type": 0,
+      "value": "Você passou para encerrar o turno. Se o oponente agir, a prioridade volta para você."
     }
   ],
   "game.turn.named": [
@@ -33108,10 +34239,28 @@
       "value": "Derrota"
     }
   ],
+  "history.result.sandbox": [
+    {
+      "type": 0,
+      "value": "Sandbox"
+    }
+  ],
   "history.result.win": [
     {
       "type": 0,
       "value": "Vitória"
+    }
+  ],
+  "history.sandboxReplays.note": [
+    {
+      "type": 0,
+      "value": "Partidas de sandbox e partidas em que você joga pelos dois lados ficam salvas como replay, mas não contam para o seu histórico nem para as suas estatísticas."
+    }
+  ],
+  "history.sandboxReplays.title": [
+    {
+      "type": 0,
+      "value": "Replays de sandbox"
     }
   ],
   "history.stat.allGames": [
@@ -33208,6 +34357,18 @@
     {
       "type": 0,
       "value": "Histórico de partidas"
+    }
+  ],
+  "kofi.cta": [
+    {
+      "type": 0,
+      "value": "Ajude a manter o Fyendal no ar"
+    }
+  ],
+  "kofi.title": [
+    {
+      "type": 0,
+      "value": "Apoie o Fyendal no Ko-fi"
     }
   ],
   "landing.accountAccess": [
@@ -34464,12 +35625,6 @@
       "value": "Buscar partida"
     }
   ],
-  "lobby.action.inviteFriend": [
-    {
-      "type": 0,
-      "value": "Convidar amigo"
-    }
-  ],
   "lobby.action.join": [
     {
       "type": 0,
@@ -34480,6 +35635,12 @@
     {
       "type": 0,
       "value": "Jogar contra bot"
+    }
+  ],
+  "lobby.action.playSolo": [
+    {
+      "type": 0,
+      "value": "Jogar solo"
     }
   ],
   "lobby.action.rejoin": [
@@ -34498,6 +35659,80 @@
     {
       "type": 0,
       "value": "Assistir"
+    }
+  ],
+  "lobby.bot.aurora.description": [
+    {
+      "type": 0,
+      "value": "Um deck aggro que planeja grandes turnos de Arc Lightning com ataques sem fim."
+    }
+  ],
+  "lobby.bot.bannedHidden": [
+    {
+      "type": 0,
+      "value": "Ocultamos "
+    },
+    {
+      "type": 1,
+      "value": "bots"
+    },
+    {
+      "type": 0,
+      "value": " porque "
+    },
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "os decks incluem"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 0,
+              "value": "o deck inclui"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 0,
+              "value": "os decks incluem"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " cartas banidas."
+    }
+  ],
+  "lobby.bot.bannedHide": [
+    {
+      "type": 0,
+      "value": "Ocultar"
+    }
+  ],
+  "lobby.bot.bannedShow": [
+    {
+      "type": 0,
+      "value": "Mostrar"
+    }
+  ],
+  "lobby.bot.bannedShown": [
+    {
+      "type": 0,
+      "value": "Mostrando bots com cartas banidas."
     }
   ],
   "lobby.bot.boltyn.description": [
@@ -34530,6 +35765,18 @@
       "value": "Um deck rápido de redline feito para manter a pressão."
     }
   ],
+  "lobby.bot.dorinthea.description": [
+    {
+      "type": 0,
+      "value": "Um deck defensivo que bloqueia com paciência e ataca com Decimator Great Axe todo turno."
+    }
+  ],
+  "lobby.bot.fang.description": [
+    {
+      "type": 0,
+      "value": "Um deck tempo que ataca com adagas e coleta Fealty para concluir sua missão."
+    }
+  ],
   "lobby.bot.hala.description": [
     {
       "type": 0,
@@ -34545,7 +35792,7 @@
   "lobby.bot.irasage.description": [
     {
       "type": 0,
-      "value": "Um deck de valor que encadeia combos de Crouching Tiger com Edge of Autumn."
+      "value": "Um deck de valor que troca carta por carta com eficiência e vence jogos longos."
     }
   ],
   "lobby.bot.jarl.description": [
@@ -34564,6 +35811,12 @@
     {
       "type": 0,
       "value": "Um deck agressivo que monta Gates para turnos explosivos de Bloodrush."
+    }
+  ],
+  "lobby.bot.new": [
+    {
+      "type": 0,
+      "value": "Novo"
     }
   ],
   "lobby.bot.searchForPlayer": [
@@ -34695,7 +35948,7 @@
   "lobby.cardPool.openDescription": [
     {
       "type": 0,
-      "value": "Todas as cartas implementadas, incluindo cartas banidas e heróis Living Legend."
+      "value": "Todas as cartas implementadas, incluindo cartas banidas e heróis Living Legend, sem limite de cópias nem tamanho máximo de deck."
     }
   ],
   "lobby.cardPool.title": [
@@ -34878,6 +36131,24 @@
     {
       "type": 0,
       "value": "Auto"
+    }
+  ],
+  "lobby.deck.art.autoHint.fabrary": [
+    {
+      "type": 0,
+      "value": "Auto: a impressão que o seu deck do Fabrary usa. Escolha outra para trocá-la."
+    }
+  ],
+  "lobby.deck.art.autoHint.rarest": [
+    {
+      "type": 0,
+      "value": "Auto: a impressão de maior raridade, porque a arte de maior raridade está ativada. Escolha outra para trocá-la."
+    }
+  ],
+  "lobby.deck.art.autoHint.standard": [
+    {
+      "type": 0,
+      "value": "Auto: a impressão padrão. Escolha outra para trocá-la."
     }
   ],
   "lobby.deck.art.chooseFor": [
@@ -35274,6 +36545,50 @@
       "value": "Confirmar exclusão"
     }
   ],
+  "lobby.deck.construction.poolTooLarge": [
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " cartas no pool de cartas (limite "
+    },
+    {
+      "type": 1,
+      "value": "limit"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
+  "lobby.deck.construction.tooManyCopies": [
+    {
+      "type": 1,
+      "value": "card"
+    },
+    {
+      "type": 0,
+      "value": ": "
+    },
+    {
+      "type": 1,
+      "value": "count"
+    },
+    {
+      "type": 0,
+      "value": " cópias (limite "
+    },
+    {
+      "type": 1,
+      "value": "limit"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
   "lobby.deck.createImport": [
     {
       "type": 0,
@@ -35549,66 +36864,6 @@
       "value": "Importando…"
     }
   ],
-  "lobby.deck.includesBanned": [
-    {
-      "type": 0,
-      "value": "Inclui "
-    },
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "carta banida"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "cartas banidas"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
-  "lobby.deck.includesFuture": [
-    {
-      "type": 0,
-      "value": "Inclui "
-    },
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "one": {
-          "value": [
-            {
-              "type": 0,
-              "value": "carta futura"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 0,
-              "value": "cartas futuras"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
   "lobby.deck.keep": [
     {
       "type": 0,
@@ -35637,6 +36892,18 @@
     {
       "type": 0,
       "value": "Requer atenção"
+    }
+  ],
+  "lobby.deck.needsPool.future": [
+    {
+      "type": 0,
+      "value": "Requer Futuro"
+    }
+  ],
+  "lobby.deck.needsPool.open": [
+    {
+      "type": 0,
+      "value": "Requer Aberto"
     }
   ],
   "lobby.deck.openFabrary": [
@@ -35822,10 +37089,10 @@
       "value": "Escolha um formato, um deck e um modo de jogo para começar."
     }
   ],
-  "lobby.home.gameMode": [
+  "lobby.home.createRoom": [
     {
       "type": 0,
-      "value": "Modo de jogo"
+      "value": "Criar sala"
     }
   ],
   "lobby.home.importCc": [
@@ -35844,6 +37111,92 @@
     {
       "type": 0,
       "value": "Gerenciar decks"
+    }
+  ],
+  "lobby.home.opponent": [
+    {
+      "type": 0,
+      "value": "Oponente"
+    }
+  ],
+  "lobby.home.opponentAnyone": [
+    {
+      "type": 0,
+      "value": "Qualquer pessoa"
+    }
+  ],
+  "lobby.home.opponentAnyoneHint": [
+    {
+      "type": 0,
+      "value": "Você joga com a próxima pessoa na fila."
+    }
+  ],
+  "lobby.home.opponentAnyoneLiveHint": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Ninguém na fila agora."
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " pessoa na fila agora."
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " pessoas na fila agora."
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
+    },
+    {
+      "type": 0,
+      "value": " Você joga com a próxima pessoa na fila."
+    }
+  ],
+  "lobby.home.opponentPrivate": [
+    {
+      "type": 0,
+      "value": "Privada"
+    }
+  ],
+  "lobby.home.opponentPrivateHint": [
+    {
+      "type": 0,
+      "value": "Só quem tiver seu link pode entrar."
+    }
+  ],
+  "lobby.home.opponentSolo": [
+    {
+      "type": 0,
+      "value": "Solo"
+    }
+  ],
+  "lobby.home.opponentSoloHint": [
+    {
+      "type": 0,
+      "value": "Treine contra um bot ou jogue pelos dois lados."
     }
   ],
   "lobby.home.othersSearchingNow": [
@@ -35894,6 +37247,12 @@
       "pluralType": "cardinal"
     }
   ],
+  "lobby.home.play": [
+    {
+      "type": 0,
+      "value": "Jogar"
+    }
+  ],
   "lobby.home.playCc": [
     {
       "type": 0,
@@ -35910,52 +37269,6 @@
     {
       "type": 0,
       "value": "Voltar às salas"
-    }
-  ],
-  "lobby.home.searchingNow": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "=0": {
-          "value": [
-            {
-              "type": 0,
-              "value": "Ninguém na fila"
-            }
-          ]
-        },
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " pessoa na fila"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " pessoas na fila"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
-  "lobby.home.start": [
-    {
-      "type": 0,
-      "value": "Começar"
     }
   ],
   "lobby.home.tryPrecon": [
@@ -36193,7 +37506,7 @@
   "lobby.openCardPoolNote": [
     {
       "type": 0,
-      "value": "Esta sala permite todas as cartas implementadas, incluindo cartas banidas e heróis Living Legend."
+      "value": "Esta sala permite todas as cartas implementadas, incluindo cartas banidas e heróis Living Legend, sem limite de cópias nem tamanho máximo de deck."
     }
   ],
   "lobby.room.loadingState": [
@@ -36300,6 +37613,72 @@
     {
       "type": 0,
       "value": "Suas salas"
+    }
+  ],
+  "lobby.sandbox.description": [
+    {
+      "type": 0,
+      "value": "Os jogadores podem editar a própria vida, recursos, deck e mão. A partida fica salva como replay, mas não conta para o histórico nem para as estatísticas."
+    }
+  ],
+  "lobby.sandbox.descriptionPrivateOnly": [
+    {
+      "type": 0,
+      "value": "Só para salas privadas. Os jogadores podem editar a própria vida, recursos, deck e mão. A partida fica salva como replay, mas não conta para o histórico nem para as estatísticas."
+    }
+  ],
+  "lobby.sandbox.label": [
+    {
+      "type": 0,
+      "value": "Sandbox"
+    }
+  ],
+  "lobby.solo.bot": [
+    {
+      "type": 0,
+      "value": "Treinar contra bot"
+    }
+  ],
+  "lobby.solo.bothSides": [
+    {
+      "type": 0,
+      "value": "Jogar pelos dois lados"
+    }
+  ],
+  "lobby.solo.bothSidesDescription": [
+    {
+      "type": 0,
+      "value": "Controle os dois jogadores em uma partida privada para testar jogadas e confrontos."
+    }
+  ],
+  "lobby.solo.importDeck": [
+    {
+      "type": 0,
+      "value": "Importar outro deck"
+    }
+  ],
+  "lobby.solo.opponentDeck": [
+    {
+      "type": 0,
+      "value": "Deck do oponente"
+    }
+  ],
+  "lobby.solo.start": [
+    {
+      "type": 0,
+      "value": "Começar partida"
+    }
+  ],
+  "lobby.solo.title": [
+    {
+      "type": 0,
+      "value": "Treino solo"
+    }
+  ],
+  "lobby.solo.yourDeck": [
+    {
+      "type": 0,
+      "value": "Seu deck"
     }
   ],
   "lobby.waiting.forOpponent": [
@@ -36682,6 +38061,38 @@
       "value": "Equipamento virado para baixo"
     }
   ],
+  "prep.arena.gaps.back": [
+    {
+      "type": 0,
+      "value": "Voltar"
+    }
+  ],
+  "prep.arena.gaps.confirm": [
+    {
+      "type": 0,
+      "value": "Travar mesmo assim"
+    }
+  ],
+  "prep.arena.gaps.description": [
+    {
+      "type": 0,
+      "value": "Você não selecionou nada para "
+    },
+    {
+      "type": 1,
+      "value": "zones"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "prep.arena.gaps.title": [
+    {
+      "type": 0,
+      "value": "Travar cartas de arena?"
+    }
+  ],
   "prep.arena.lock": [
     {
       "type": 0,
@@ -36804,16 +38215,44 @@
       "value": "Copiado!"
     }
   ],
-  "prep.copyInviteTitle": [
+  "prep.deckSwitch.loadingDeck": [
     {
       "type": 0,
-      "value": "Copiar URL de convite da sala"
+      "value": "Preparando seu deck…"
     }
   ],
-  "prep.copyUrl": [
+  "prep.deckSwitch.opponentFirst": [
+    {
+      "type": 1,
+      "value": "opponent"
+    },
     {
       "type": 0,
-      "value": "Copiar URL"
+      "value": " entrou antes da troca de deck, então você vai jogar com "
+    },
+    {
+      "type": 1,
+      "value": "deck"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
+  "prep.deckSwitch.showNow": [
+    {
+      "type": 0,
+      "value": "Mostrar cartas agora"
+    }
+  ],
+  "prep.deckSwitch.title": [
+    {
+      "type": 0,
+      "value": "Carregando "
+    },
+    {
+      "type": 1,
+      "value": "deck"
     }
   ],
   "prep.defaultDeck": [
@@ -37039,6 +38478,58 @@
       "value": "Plano de confronto do Fabrary"
     }
   ],
+  "prep.openSeat.addFriends": [
+    {
+      "type": 0,
+      "value": "Adicionar amigo"
+    }
+  ],
+  "prep.openSeat.copyLink": [
+    {
+      "type": 0,
+      "value": "Copiar link de convite"
+    }
+  ],
+  "prep.openSeat.invite": [
+    {
+      "type": 0,
+      "value": "Convidar"
+    }
+  ],
+  "prep.openSeat.inviteFriend": [
+    {
+      "type": 0,
+      "value": "Convidar "
+    },
+    {
+      "type": 1,
+      "value": "username"
+    }
+  ],
+  "prep.openSeat.inviteFriends": [
+    {
+      "type": 0,
+      "value": "Convidar um amigo"
+    }
+  ],
+  "prep.openSeat.invited": [
+    {
+      "type": 0,
+      "value": "Convite enviado"
+    }
+  ],
+  "prep.openSeat.offline": [
+    {
+      "type": 0,
+      "value": "Offline"
+    }
+  ],
+  "prep.openSeat.searching": [
+    {
+      "type": 0,
+      "value": "Procurando um oponente"
+    }
+  ],
   "prep.opponent": [
     {
       "type": 0,
@@ -37079,47 +38570,22 @@
       "value": "Todos os confrontos"
     }
   ],
-  "prep.othersInQueue": [
+  "prep.pitch.blue": [
     {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "=0": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " outros na fila"
-            }
-          ]
-        },
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " outro na fila"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " outros na fila"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
+      "type": 0,
+      "value": "Azuis"
+    }
+  ],
+  "prep.pitch.red": [
+    {
+      "type": 0,
+      "value": "Vermelhas"
+    }
+  ],
+  "prep.pitch.yellow": [
+    {
+      "type": 0,
+      "value": "Amarelas"
     }
   ],
   "prep.practiceChooseFirst": [
@@ -37166,6 +38632,46 @@
     {
       "type": 0,
       "value": "Poder"
+    }
+  ],
+  "prep.presentation.copyCount": [
+    {
+      "type": 6,
+      "value": "count",
+      "options": {
+        "=0": {
+          "value": [
+            {
+              "type": 0,
+              "value": "Nenhuma cópia"
+            }
+          ]
+        },
+        "one": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cópia"
+            }
+          ]
+        },
+        "other": {
+          "value": [
+            {
+              "type": 7
+            },
+            {
+              "type": 0,
+              "value": " cópias"
+            }
+          ]
+        }
+      },
+      "offset": 0,
+      "pluralType": "cardinal"
     }
   ],
   "prep.presentation.emptyInventory": [
@@ -37353,7 +38859,7 @@
   "prep.presentation.restore": [
     {
       "type": 0,
-      "value": "Restaurar o deck registrado"
+      "value": "Redefinir deck"
     }
   ],
   "prep.presentation.selectCard": [
@@ -37498,6 +39004,82 @@
       "value": "arma"
     }
   ],
+  "prep.solo.arenaWaiting": [
+    {
+      "type": 0,
+      "value": "Estas cartas de arena estão travadas. Mude para o outro jogador para travar as dele."
+    }
+  ],
+  "prep.solo.chooseFirst": [
+    {
+      "type": 0,
+      "value": "Você joga pelos dois lados: escolha quem começa."
+    }
+  ],
+  "prep.solo.opponentFirst": [
+    {
+      "type": 0,
+      "value": "O oponente joga primeiro"
+    }
+  ],
+  "prep.solo.seatsAria": [
+    {
+      "type": 0,
+      "value": "Jogadores"
+    }
+  ],
+  "prep.solo.status.arena": [
+    {
+      "type": 0,
+      "value": "Escolhendo cartas de arena"
+    }
+  ],
+  "prep.solo.status.arena-locked": [
+    {
+      "type": 0,
+      "value": "Cartas de arena travadas"
+    }
+  ],
+  "prep.solo.status.ready": [
+    {
+      "type": 0,
+      "value": "Tudo pronto"
+    }
+  ],
+  "prep.solo.status.sideboarding": [
+    {
+      "type": 0,
+      "value": "Ajustando o deck"
+    }
+  ],
+  "prep.solo.status.turn-order": [
+    {
+      "type": 0,
+      "value": "Escolhendo a ordem de turno"
+    }
+  ],
+  "prep.solo.turnOrder.opponentFirst": [
+    {
+      "type": 0,
+      "value": "O oponente joga "
+    },
+    {
+      "type": 8,
+      "value": "order",
+      "children": [
+        {
+          "type": 0,
+          "value": "primeiro"
+        }
+      ]
+    }
+  ],
+  "prep.solo.youFirst": [
+    {
+      "type": 0,
+      "value": "Você joga primeiro"
+    }
+  ],
   "prep.status.ready": [
     {
       "type": 0,
@@ -37563,6 +39145,24 @@
       "value": " — Preparação"
     }
   ],
+  "prep.tray.done": [
+    {
+      "type": 0,
+      "value": "Concluído"
+    }
+  ],
+  "prep.tray.hint": [
+    {
+      "type": 0,
+      "value": "As cartas que você separar ficam aqui."
+    }
+  ],
+  "prep.tray.showAll": [
+    {
+      "type": 0,
+      "value": "Mostrar tudo"
+    }
+  ],
   "prep.turnOrder.first": [
     {
       "type": 0,
@@ -37611,6 +39211,24 @@
     {
       "type": 0,
       "value": "Herói desconhecido"
+    }
+  ],
+  "prep.view.cards": [
+    {
+      "type": 0,
+      "value": "Cartas"
+    }
+  ],
+  "prep.view.label": [
+    {
+      "type": 0,
+      "value": "Exibição"
+    }
+  ],
+  "prep.view.list": [
+    {
+      "type": 0,
+      "value": "Lista"
     }
   ],
   "prep.waitingOpponent": [
@@ -38310,18 +39928,6 @@
       "value": "Preferência de animação"
     }
   ],
-  "settings.animations.tooltip": [
-    {
-      "type": 0,
-      "value": "O padrão segue a configuração de movimento reduzido do seu sistema operacional."
-    }
-  ],
-  "settings.audioVisuals": [
-    {
-      "type": 0,
-      "value": "Áudio e visual"
-    }
-  ],
   "settings.cardDisplay": [
     {
       "type": 0,
@@ -38334,16 +39940,22 @@
       "value": "Carta inteira"
     }
   ],
+  "settings.cardDisplay.fullDescription": [
+    {
+      "type": 0,
+      "value": "As cartas na mesa mostram a face inteira."
+    }
+  ],
   "settings.cardDisplay.square": [
     {
       "type": 0,
       "value": "Quadrada"
     }
   ],
-  "settings.close": [
+  "settings.cardDisplay.squareDescription": [
     {
       "type": 0,
-      "value": "Fechar configurações"
+      "value": "As cartas na mesa são recortadas em arte quadrada com nome e valores."
     }
   ],
   "settings.concede.action": [
@@ -38358,6 +39970,18 @@
       "value": "Desistir do jogo?"
     }
   ],
+  "settings.concede.description": [
+    {
+      "type": 0,
+      "value": "Encerra a partida como derrota para você."
+    }
+  ],
+  "settings.concede.title": [
+    {
+      "type": 0,
+      "value": "Desistir"
+    }
+  ],
   "settings.concede.yes": [
     {
       "type": 0,
@@ -38370,22 +39994,10 @@
       "value": "Confirmar ações"
     }
   ],
-  "settings.confirmActions.aria": [
+  "settings.confirmActions.description": [
     {
       "type": 0,
-      "value": "Confirmar ações ao jogar cartas ou ativar habilidades"
-    }
-  ],
-  "settings.confirmActions.tooltip": [
-    {
-      "type": 0,
-      "value": "Pede confirmação ao jogar cartas ou ativar habilidades."
-    }
-  ],
-  "settings.danger": [
-    {
-      "type": 0,
-      "value": "Zona de perigo"
+      "value": "Pede confirmação antes de jogar uma carta ou ativar uma habilidade."
     }
   ],
   "settings.draw.accept": [
@@ -38460,12 +40072,6 @@
       "value": "Desmarque Mostrar orientações nas Configurações ou selecione Desativar agora."
     }
   ],
-  "settings.history": [
-    {
-      "type": 0,
-      "value": "Histórico do jogo"
-    }
-  ],
   "settings.history.previousTurnStart": [
     {
       "type": 0,
@@ -38508,6 +40114,48 @@
       "value": "Desfazer última ação"
     }
   ],
+  "settings.hoverPreview": [
+    {
+      "type": 0,
+      "value": "Prévia de carta ao passar o mouse"
+    }
+  ],
+  "settings.hoverPreview.always": [
+    {
+      "type": 0,
+      "value": "Sempre"
+    }
+  ],
+  "settings.hoverPreview.alwaysDescription": [
+    {
+      "type": 0,
+      "value": "Apontar para uma carta mostra a prévia em tamanho grande."
+    }
+  ],
+  "settings.hoverPreview.shift": [
+    {
+      "type": 0,
+      "value": "Segurar Shift"
+    }
+  ],
+  "settings.hoverPreview.shiftDescription": [
+    {
+      "type": 0,
+      "value": "Segure Shift enquanto aponta para uma carta para ver a prévia em tamanho grande."
+    }
+  ],
+  "settings.interface": [
+    {
+      "type": 0,
+      "value": "Interface"
+    }
+  ],
+  "settings.match": [
+    {
+      "type": 0,
+      "value": "Partida"
+    }
+  ],
   "settings.motion.default": [
     {
       "type": 0,
@@ -38517,7 +40165,7 @@
   "settings.motion.defaultDescription": [
     {
       "type": 0,
-      "value": "Padrão: segue a configuração de movimento reduzido do seu sistema operacional"
+      "value": "Segue a configuração de movimento reduzido do seu sistema operacional."
     }
   ],
   "settings.motion.full": [
@@ -38529,7 +40177,7 @@
   "settings.motion.fullDescription": [
     {
       "type": 0,
-      "value": "Completa: mostra o deslocamento das cartas e as animações de conexão"
+      "value": "Mostra o deslocamento das cartas e as animações de conexão."
     }
   ],
   "settings.motion.reduced": [
@@ -38541,7 +40189,7 @@
   "settings.motion.reducedDescription": [
     {
       "type": 0,
-      "value": "Reduzida: oculta o deslocamento das cartas e as conexões; mantém os esmaecimentos locais das cartas"
+      "value": "Oculta o deslocamento das cartas e as conexões, mantendo só os esmaecimentos locais."
     }
   ],
   "settings.optionHotkeys": [
@@ -38550,13 +40198,7 @@
       "value": "Atalhos de opções"
     }
   ],
-  "settings.optionHotkeys.aria": [
-    {
-      "type": 0,
-      "value": "Escolher opções dos avisos com Q W E R A S D F"
-    }
-  ],
-  "settings.optionHotkeys.tooltip": [
+  "settings.optionHotkeys.description": [
     {
       "type": 0,
       "value": "Pressione Q W E R A S D F para escolher opções nos avisos."
@@ -38580,16 +40222,22 @@
       "value": "Brilho"
     }
   ],
+  "settings.playableCards.glowDescription": [
+    {
+      "type": 0,
+      "value": "Um halo verde suave marca as cartas que você pode jogar agora."
+    }
+  ],
   "settings.playableCards.highContrast": [
     {
       "type": 0,
       "value": "Alto contraste"
     }
   ],
-  "settings.playableCards.tooltip": [
+  "settings.playableCards.highContrastDescription": [
     {
       "type": 0,
-      "value": "Brilho adiciona um halo verde discreto. Alto contraste usa um contorno nítido."
+      "value": "Um contorno nítido marca as cartas que você pode jogar agora."
     }
   ],
   "settings.playmat": [
@@ -38709,7 +40357,7 @@
   "settings.playmat.side": [
     {
       "type": 0,
-      "value": "Qual lado"
+      "value": "Lado"
     }
   ],
   "settings.playmat.yours": [
@@ -38736,6 +40384,12 @@
       "value": "Sempre pausar"
     }
   ],
+  "settings.priority.alwaysPauseDescription": [
+    {
+      "type": 0,
+      "value": "Para em toda janela de prioridade e de reaction, mesmo quando nada puder ser jogado."
+    }
+  ],
   "settings.priority.autoPass": [
     {
       "type": 0,
@@ -38745,7 +40399,7 @@
   "settings.priority.autoPassDescription": [
     {
       "type": 0,
-      "value": "Passar automaticamente: passa a prioridade imediatamente quando nenhum instant, reaction ou habilidade do tabuleiro puder ser usado"
+      "value": "Passa a prioridade por você sempre que nenhum instant, reaction ou habilidade do tabuleiro puder ser usado."
     }
   ],
   "settings.priority.behavior": [
@@ -38754,13 +40408,67 @@
       "value": "Comportamento de prioridade"
     }
   ],
+  "settings.priorityAlert": [
+    {
+      "type": 0,
+      "value": "Alerta de prioridade"
+    }
+  ],
+  "settings.priorityAlert.always": [
+    {
+      "type": 0,
+      "value": "Sempre"
+    }
+  ],
+  "settings.priorityAlert.alwaysDescription": [
+    {
+      "type": 0,
+      "value": "Toca contra qualquer oponente, mesmo com o jogo em foco."
+    }
+  ],
+  "settings.priorityAlert.alwaysVsPlayers": [
+    {
+      "type": 0,
+      "value": "Contra pessoas"
+    }
+  ],
+  "settings.priorityAlert.alwaysVsPlayersDescription": [
+    {
+      "type": 0,
+      "value": "Sempre toca contra oponentes humanos. Contra bots, só com o jogo fora de foco."
+    }
+  ],
+  "settings.priorityAlert.unfocused": [
+    {
+      "type": 0,
+      "value": "Fora de foco"
+    }
+  ],
+  "settings.priorityAlert.unfocusedDescription": [
+    {
+      "type": 0,
+      "value": "Toca quando a prioridade volta para você com o jogo fora de foco."
+    }
+  ],
+  "settings.showGameClock": [
+    {
+      "type": 0,
+      "value": "Mostrar relógio da partida"
+    }
+  ],
+  "settings.showGameClock.description": [
+    {
+      "type": 0,
+      "value": "Conta o tempo da partida e de cada jogador para você treinar o ritmo de torneio."
+    }
+  ],
   "settings.showGuidance": [
     {
       "type": 0,
       "value": "Mostrar orientações"
     }
   ],
-  "settings.showGuidance.tooltip": [
+  "settings.showGuidance.description": [
     {
       "type": 0,
       "value": "Mostra avisos das janelas de prioridade e de reaction."
@@ -38772,16 +40480,16 @@
       "value": "Jogadas instantâneas do bot"
     }
   ],
-  "settings.skipBotDelay.aria": [
-    {
-      "type": 0,
-      "value": "Pular a pausa de um segundo do bot de treino"
-    }
-  ],
-  "settings.skipBotDelay.tooltip": [
+  "settings.skipBotDelay.description": [
     {
       "type": 0,
       "value": "Beta: o bot de treino age assim que decide, sem a pausa de um segundo."
+    }
+  ],
+  "settings.sound": [
+    {
+      "type": 0,
+      "value": "Som"
     }
   ],
   "settings.soundEffects": [
@@ -38790,16 +40498,22 @@
       "value": "Efeitos sonoros"
     }
   ],
-  "settings.soundEffects.tooltip": [
+  "settings.soundEffects.description": [
     {
       "type": 0,
-      "value": "Toca sons sutis das cartas e avisa quando a prioridade voltar para você enquanto o jogo estiver fora de foco."
+      "value": "Toca sons sutis das cartas e o alerta de prioridade."
     }
   ],
   "settings.title": [
     {
       "type": 0,
       "value": "Configurações"
+    }
+  ],
+  "settings.undo": [
+    {
+      "type": 0,
+      "value": "Desfazer"
     }
   ],
   "settings.volume": [
@@ -38814,6 +40528,18 @@
       "value": "Volume dos efeitos sonoros"
     }
   ],
+  "settings.warnLethalPass": [
+    {
+      "type": 0,
+      "value": "Avisar antes de dano letal"
+    }
+  ],
+  "settings.warnLethalPass.description": [
+    {
+      "type": 0,
+      "value": "Pede confirmação antes de passar ou bloquear quando um ataque derrotaria você e ainda é possível responder."
+    }
+  ],
   "social.accept": [
     {
       "type": 0,
@@ -38824,6 +40550,12 @@
     {
       "type": 0,
       "value": "Aceitar amizade"
+    }
+  ],
+  "social.addByUsername": [
+    {
+      "type": 0,
+      "value": "Adicionar por nome de usuário"
     }
   ],
   "social.addFriend": [
@@ -38934,49 +40666,6 @@
       "value": "Nenhum jogador tem esse nome de usuário."
     }
   ],
-  "social.friendCount": [
-    {
-      "type": 6,
-      "value": "count",
-      "options": {
-        "=0": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " amigos"
-            }
-          ]
-        },
-        "one": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " amigo"
-            }
-          ]
-        },
-        "other": {
-          "value": [
-            {
-              "type": 7
-            },
-            {
-              "type": 0,
-              "value": " amigos"
-            }
-          ]
-        }
-      },
-      "offset": 0,
-      "pluralType": "cardinal"
-    }
-  ],
   "social.friends": [
     {
       "type": 0,
@@ -39057,6 +40746,17 @@
     {
       "type": 0,
       "value": "Online"
+    }
+  ],
+  "social.onlineCount": [
+    {
+      "type": 2,
+      "value": "count",
+      "style": null
+    },
+    {
+      "type": 0,
+      "value": " online"
     }
   ],
   "social.open": [
@@ -39154,12 +40854,6 @@
       },
       "offset": 0,
       "pluralType": "cardinal"
-    }
-  ],
-  "social.username": [
-    {
-      "type": 0,
-      "value": "Nome de usuário"
     }
   ],
   "versionUpdate.dismiss": [

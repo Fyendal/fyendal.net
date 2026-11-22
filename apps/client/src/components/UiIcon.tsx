@@ -9,6 +9,7 @@ export type UiIconName =
   | "chevron-left"
   | "chevron-right"
   | "chevron-up"
+  | "clock"
   | "close"
   | "download"
   | "edit"
@@ -21,6 +22,7 @@ export type UiIconName =
   | "external-link"
   | "flag"
   | "flag-filled"
+  | "friends"
   | "fullscreen"
   | "grip"
   | "image"
@@ -39,13 +41,18 @@ export type UiIconName =
   | "plus"
   | "search"
   | "share"
+  | "shuffle"
   | "skip-forward"
+  | "solo"
   | "star"
   | "star-outline"
+  | "swap"
+  | "target"
+  | "to-bottom"
+  | "to-top"
   | "trash"
   | "user-add"
-  | "user-pending"
-  | "watch";
+  | "user-pending";
 
 export function UiIcon({ name, className }: { name: UiIconName; className?: string }) {
   return (

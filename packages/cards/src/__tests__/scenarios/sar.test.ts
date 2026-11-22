@@ -209,6 +209,28 @@ describe("SAR — daggers", () => {
     expect(s.state.players[1]!.life).toBe(18); // 1 (Huntsman hit) + 1 (Danger Digits)
   });
 
+  it("a destroyed Graphene Chelicera ceases to exist instead of entering the graveyard", () => {
+    const s = scenario({
+      seats: [
+        arakniSeat({
+          weapons: [HUNTSMAN, GRAPHENE],
+          equipment: { ...NO_EQUIPMENT, arms: "danger digits|0" },
+          hand: [BLUE, BLUE],
+        }),
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    s.attackWithWeapon(HUNTSMAN, { pitch: [BLUE] })
+      .blockWith()
+      .activate("danger digits|0")
+      .chooseCard(GRAPHENE)
+      .chooseOption("no");
+    expect(s.state.players[0]!.weapons.map((card) => card.cardId)).toEqual([printingId(HUNTSMAN)]);
+    s.expectLog("Graphene Chelicera is destroyed")
+      .expectNotInZone(0, GRAPHENE, "graveyard")
+      .expectNotInZone(0, GRAPHENE, "banish");
+  });
+
   it("Danger Digits lets a destroyed Mark of the Huntsman mark the hero it hit", () => {
     const s = scenario({
       seats: [
@@ -475,6 +497,22 @@ describe("SAR — reaction pumps", () => {
       .expectFinalDefense(0) // 2 − 2
       .expectLife(1, 17); // the full 3 through
   });
+
+  it("Shred's -2{d} still applies when Temper checks at chain close", () => {
+    const s = scenario({
+      seats: [
+        arakniSeat({ hand: ["mark the prey|1", "shred|3"] }),
+        { hero: "rhinar", hand: [], equipment: { ...NO_EQUIPMENT, arms: "steelbraid buckler|0" } },
+      ],
+    });
+    s.play("mark the prey|1")
+      .blockWith("steelbraid buckler|0")
+      .react("shred|3")
+      .chooseCard("steelbraid buckler|0")
+      .expectFinalDefense(0)
+      .endTurn()
+      .expectNoEquipment(1, "arms");
+  });
 });
 
 describe("SAR — chaos actions", () => {
@@ -681,6 +719,52 @@ describe("SAR — traps", () => {
       .settle();
     s.expectInZone(0, "inertia|0", "board");
     expect(markedCount(s, 0)).toBe(0); // Den wasn't played
+  });
+
+  it("Inertia Trap counts Piercing against defending equipment as above base", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, weapons: ["spider's bite|0"] },
+        { hero: "dorinthea", hand: ["inertia trap|1"], equipment: { head: "ironrot helm|0" } },
+      ],
+    });
+    s.attackWithWeapon("spider's bite|0")
+      .blockWith("ironrot helm|0")
+      .passPriority()
+      .react("inertia trap|1")
+      .settle();
+    s.expectInZone(0, "inertia|0", "board");
+  });
+
+  it("Inertia Trap does nothing when Piercing has no equipment to pierce", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, weapons: ["spider's bite|0"] },
+        { hero: "dorinthea", hand: ["inertia trap|1"], equipment: { head: "ironrot helm|0" } },
+      ],
+    });
+    s.attackWithWeapon("spider's bite|0")
+      .blockWith()
+      .passPriority()
+      .react("inertia trap|1")
+      .settle();
+    expect(s.state.players[0]!.board).toHaveLength(0);
+  });
+
+  it("Inertia Trap does nothing when suppressed Piercing leaves the attack at base", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, weapons: ["spider's bite|0"] },
+        { hero: "dorinthea", hand: ["inertia trap|1"], equipment: { head: "ironrot helm|0" } },
+      ],
+    });
+    s.state.players[0]!.flags.attacksCannotGainPower = true;
+    s.attackWithWeapon("spider's bite|0")
+      .blockWith("ironrot helm|0")
+      .passPriority()
+      .react("inertia trap|1")
+      .settle();
+    expect(s.state.players[0]!.board).toHaveLength(0);
   });
 
   it("Den of the Spider marks the attacking hero when the attack is above base", () => {

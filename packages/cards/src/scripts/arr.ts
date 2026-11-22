@@ -1,56 +1,18 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackIntimidateTrigger,
+  beatChest,
   buffNextAttack,
-  commonOptionMessages,
   decisionPrompt,
   isSixPlus,
   opponentSeat,
   queueIntimidate,
   yesNoPrompt,
 } from "./shared-helpers.js";
+import { AGILITY, MIGHT } from "./tokens.js";
 
-const AGILITY = "ARR029";
-const MIGHT = "ARR030";
-
-function beatChest(extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    additionalCost(ctx) {
-      const sixes = ctx.player(ctx.seat).hand.filter((card) => isSixPlus(ctx, card));
-      if (sixes.length) {
-        ctx.requestCardChoice(
-          "arr-beat-chest",
-          decisionPrompt(
-            `${ctx.data.name}: discard a card with 6 or more power to beat chest?`,
-            "card.arr.beatchest.discard",
-            {
-              values: { card: { kind: "card", cardId: ctx.self.cardId } },
-              optionMessages: commonOptionMessages("no"),
-            },
-          ),
-          ["no", ...sixes.map((card) => card.instanceId)],
-        );
-      }
-      extra.additionalCost?.(ctx);
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "arr-beat-chest") {
-        ctx.setFlag("player", "discardingToBeatChest", true);
-        const attackAction = ctx.hasCardType(ctx.self, "action") && ctx.cardTypes(ctx.self).includes("attack");
-        if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", true);
-        const discarded = option !== "no" && ctx.discardCard(ctx.seat, Number(option));
-        ctx.setFlag("player", "discardingToBeatChest", false);
-        if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", false);
-        if (discarded) {
-          ctx.setFlag("player", "beatenChestThisTurn", true);
-          ctx.setCardState(ctx.self.instanceId, "beatChestPaid", 1);
-        }
-        return;
-      }
-      extra.onChoose?.(ctx, hook, option);
-    },
-  };
+function arrBeatChest(extra: CardScript = {}): CardScript {
+  return beatChest(extra, { hook: "arr-beat-chest", messageId: "card.arr.beatchest.discard" });
 }
 
 function noChest(ctx: ScriptCtx): boolean {
@@ -69,7 +31,7 @@ function grantBareDestructionPayoff(ctx: ScriptCtx): void {
 }
 
 function bareSwing(): CardScript {
-  return beatChest({
+  return arrBeatChest({
     modifyAttack(ctx) {
       return ctx.getFlag("player", "beatenChestThisTurn") === true && noChest(ctx) ? 2 : 0;
     },
@@ -77,14 +39,15 @@ function bareSwing(): CardScript {
 }
 
 function smellFear(amount: number): CardScript {
-  return beatChest({
+  return arrBeatChest({
     onPlay(ctx) {
       if (ctx.getFlag("player", "beatenChestThisTurn") === true) queueIntimidate(ctx);
-      const resolved = Number(ctx.getFlag("player", "intimidateCountThisTurn")) || 0;
-      const pending = Number(ctx.getFlag("player", "pendingIntimidate")) || 0;
-      if (resolved + pending >= 2) {
-        buffNextAttack(ctx, { attack: amount, appliesTo: "attack", appliesToClass: "brute" });
-      }
+      buffNextAttack(ctx, {
+        attack: amount,
+        appliesTo: "attack",
+        appliesToClass: "brute",
+        intimidatedAtLeastThisTurn: 2,
+      });
     },
   });
 }
@@ -117,7 +80,7 @@ export const arr: Record<string, CardScript> = {
       },
     ],
   },
-  "bare destruction|1": beatChest({
+  "bare destruction|1": arrBeatChest({
     onAttackDeclared(ctx) {
       if (ctx.getFlag("player", "beatenChestThisTurn") !== true || !noChest(ctx)) return;
       grantBareDestructionPayoff(ctx);

@@ -1,6 +1,6 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import type { CardCostSelection, CardData, GameIntent, MeldSide, PlayableZone } from "@fyendal/shared";
+import type { CardCostSelection, CardData, CardType, GameIntent, MeldSide, PlayableZone } from "@fyendal/shared";
 import type { CardInstance, PlayerState } from "./state.js";
 import {
   activatedAbilitiesSuppressed,
@@ -16,7 +16,7 @@ import {
   scriptOf,
   veilBlocksDefender,
 } from "./cardProperties.js";
-import { currentLink, findCardAnywhere, heroSoulCards } from "./zoneQueries.js";
+import { currentLink, defendingSeatOf, findCardAnywhere, heroSoulCards } from "./zoneQueries.js";
 import { enumeratePitchSequences } from "./pitchSequences.js";
 import {
   attackablePermanents,
@@ -48,6 +48,7 @@ import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, controlsBow, firstAttackExtraCost, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { nonAttackActionCardLimitReached, opposingActionsProhibited, ownedCardActionProhibited } from "./restrictions.js";
 import { attackActionPlayRestricted, defendingHeroCannotRespondBelowPower, defenseReactionRestriction, weaponAttacksProhibited } from "./combatRestrictions.js";
+import { hasType } from "@fyendal/shared";
 
 /** Valid subsets, smallest first, capped for search and the wire; the greedy
  *  largest set survives the cap. */
@@ -389,6 +390,13 @@ function playIntentsWithPitches(
     );
 }
 
+/** Declarable Boost counts for a play, 0 meaning no Boost. */
+function boostChoices(state: GameStateInternal, player: PlayerState, card: CardInstance): number[] {
+  if (!isAttackActionData(instanceDataOf(state, card))) return [0];
+  const maximum = Math.min(player.deck.length, boostCountForCardPlay(state, player.seat, card));
+  return Array.from({ length: Math.max(0, maximum) + 1 }, (_, count) => count);
+}
+
 function markInstantPlayMethod(
   candidates: GameIntent[],
   enabled: boolean,
@@ -424,9 +432,7 @@ function playIntentsForCard(
   if (card.faceDown && from !== "arsenal") return [];
   if (isFrozen(state, card)) return [];
   const data = instanceDataOf(state, card);
-  const playableEquipment =
-    data.cardType === "equipment" && scriptOf(state, card.cardId, card)?.playableEquipment === true;
-  if (data.cardType !== "action" && data.cardType !== "instant" && !playableEquipment) return [];
+  if (!hasType(data, "action") && !hasType(data, "instant")) return [];
   if (player.actionPoints < 1 && !canPlayAsInstant(state, runtime, player.seat, card, undefined, from)) return [];
   if (attackActionPlayRestricted(state, runtime, player, card)) return [];
   if (nonAttackActionCardLimitReached(state, player, card)) return [];
@@ -441,10 +447,10 @@ function playIntentsForCard(
   // mirror playCard's effective cost so the offered pitches match what
   // applyIntent will accept (extra cost from Debilitate, reduction from
   // Heartened Cross Strap, ...); Meld "both" doubles the base cost first
-  const isAttackAction = data.cardType === "action" && (data.subtypes ?? []).includes("attack");
+  const isAttackAction = hasType(data, "action") && (data.subtypes ?? []).includes("attack");
   const withPlayMethods = (intents: GameIntent[]): GameIntent[] => {
     const presented = withPreStackPresentation(script, intents);
-    if (data.cardType === "instant") return presented;
+    if (hasType(data, "instant")) return presented;
     if (!canPlayAsInstant(state, runtime, player.seat, card, undefined, from)) return presented;
     const instantIntents = presented.flatMap((intent): GameIntent[] => {
       if (
@@ -487,6 +493,7 @@ function playIntentsForCard(
   if (cardTargets.length === 0) return [];
   if (sides.length === 0) {
     const intents: GameIntent[] = [];
+    const boosts = boostChoices(state, player, card);
     for (const targetAllyId of targets) for (const targetCardInstanceId of cardTargets) {
       const effectiveCost = cardPlayCost(state, runtime, player.seat, card, undefined, {
         ...(script?.variablePlayCost ? { baseCostOverride: script.variablePlayCost.base +
@@ -498,45 +505,22 @@ function playIntentsForCard(
         targetCardInstanceId,
         targetAllyId,
       });
-      intents.push(...announceAttackTarget(deferVariablePayment(playIntentsWithPitches(
-        state,
-        player,
-        card,
-        from,
-        6,
-        effectiveCost,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        targetCardInstanceId,
-        includeUnaffordable,
-      )), targetAllyId));
-      if (
-        isAttackAction &&
-        boostCountForCardPlay(state, player.seat, card) > 0 &&
-        player.deck.length > 0
-      ) {
-        const maximumBoosts = Math.min(
-          player.deck.length,
-          boostCountForCardPlay(state, player.seat, card),
+      for (const boostCount of boosts) {
+        const pitched = playIntentsWithPitches(
+          state,
+          player,
+          card,
+          from,
+          6,
+          effectiveCost,
+          undefined,
+          boostCount > 0 ? true : undefined,
+          boostCount > 0 ? boostCount : undefined,
+          undefined,
+          targetCardInstanceId,
+          includeUnaffordable,
         );
-        for (let boostCount = 1; boostCount <= maximumBoosts; boostCount++) {
-          intents.push(...announceAttackTarget(playIntentsWithPitches(
-            state,
-            player,
-            card,
-            from,
-            6,
-            effectiveCost,
-            undefined,
-            true,
-            boostCount,
-            undefined,
-            targetCardInstanceId,
-            includeUnaffordable,
-          ), targetAllyId));
-        }
+        intents.push(...announceAttackTarget(boostCount > 0 ? pitched : deferVariablePayment(pitched), targetAllyId));
       }
       for (const alternativeCostCardInstanceIds of alternativeCosts) {
         const alternativeCost = cardPlayCost(state, runtime, player.seat, card, undefined, {
@@ -547,45 +531,21 @@ function playIntentsForCard(
           targetCardInstanceId,
           targetAllyId,
         });
-        intents.push(...announceAttackTarget(playIntentsWithPitches(
-          state,
-          player,
-          card,
-          from,
-          6,
-          alternativeCost,
-          undefined,
-          undefined,
-          undefined,
-          alternativeCostCardInstanceIds,
-          targetCardInstanceId,
-          includeUnaffordable,
-        ), targetAllyId));
-        if (
-          isAttackAction &&
-          boostCountForCardPlay(state, player.seat, card) > 0 &&
-          player.deck.length > 0
-        ) {
-          const maximumBoosts = Math.min(
-            player.deck.length,
-            boostCountForCardPlay(state, player.seat, card),
-          );
-          for (let boostCount = 1; boostCount <= maximumBoosts; boostCount++) {
-            intents.push(...announceAttackTarget(playIntentsWithPitches(
-              state,
-              player,
-              card,
-              from,
-              6,
-              alternativeCost,
-              undefined,
-              true,
-              boostCount,
-              alternativeCostCardInstanceIds,
-              targetCardInstanceId,
-              includeUnaffordable,
-            ), targetAllyId));
-          }
+        for (const boostCount of boosts) {
+          intents.push(...announceAttackTarget(playIntentsWithPitches(
+            state,
+            player,
+            card,
+            from,
+            6,
+            alternativeCost,
+            undefined,
+            boostCount > 0 ? true : undefined,
+            boostCount > 0 ? boostCount : undefined,
+            alternativeCostCardInstanceIds,
+            targetCardInstanceId,
+            includeUnaffordable,
+          ), targetAllyId));
         }
       }
     }
@@ -837,6 +797,9 @@ function windowAbilityIntents(
           .filter((candidate) => candidate.instanceId !== card.instanceId).length < ability.discardCost.count
       ) continue;
       if (!canPayActivatedEffectCardCosts(state, player, card, ability)) continue;
+      if (!variableAbilityHasChoice(
+        state, runtime, player, card, ability, includeUnaffordable, link,
+      )) continue;
       const resourceCost = abilityResourceCost(state, runtime, player.seat, card, ability, link);
       const cardTargets: Array<number | undefined> = ability.targetCardOptions
         ? activatedAbilityTargetOptions(state, runtime, player.seat, card, ability, link)
@@ -875,7 +838,7 @@ function defendingCardAbilityIntents(
   if (opposingInstantsProhibited(state, player.seat)) return intents;
   for (const link of state.chain) {
     for (const card of link.defendingCards) {
-      if (card.owner !== player.seat || activatedAbilitiesSuppressed(state, card)) continue;
+      if (defendingSeatOf(link) !== player.seat || activatedAbilitiesSuppressed(state, card)) continue;
       const ability = scriptOf(state, card.cardId, card)?.defenseAbility;
       if (!ability || (ability.oncePerTurn && player.flags[`defAbility:${card.instanceId}`])) continue;
       if (ability.discard !== 1) continue;
@@ -934,7 +897,7 @@ function reactionIntents(
   const instantsProhibited = opposingInstantsProhibited(state, player.seat);
   // an attack targeting a non-hero object can't be answered with defense
   // reactions (CR 8.2.8d / 8.3.14a) — instants are still fine
-  const wanted: CardData["cardType"][] = isAttacker
+  const wanted: CardType[] = isAttacker
     ? ["attack-reaction", "instant"]
     : link.targetAllyId !== undefined
       ? ["instant"]
@@ -965,7 +928,7 @@ function reactionIntents(
       const data = instanceDataOf(state, card);
       const script = scriptOf(state, card.cardId, card);
       const asInstant = canPlayAsInstant(state, runtime, player.seat, card, link, fromZone ?? (fromArsenal ? "arsenal" : "hand"));
-      if (instantsProhibited && (data.cardType === "instant" || asInstant)) continue;
+      if (instantsProhibited && (hasType(data, "instant") || asInstant)) continue;
       // Arsenal is a private zone, but its owner may play cards from it (CR
       // 3.3.4 / 5.1.1a). Face-down cards in other zones remain inert unless an
       // explicit permission makes them playable (such as a banished trap).
@@ -973,16 +936,16 @@ function reactionIntents(
       if (isFrozen(state, card)) continue;
       if (cardPlayRestrictedByModifier(state, player.seat, card)) continue;
       if (playOriginRestricted(player, fromZone ?? (fromArsenal ? "arsenal" : "hand"))) continue;
-      if (!wanted.includes(data.cardType)) {
+      if (!data.types.some((type) => wanted.includes(type))) {
         // an action playable "as though it were an instant" counts as an instant here
         if (!asInstant) continue;
       }
       const fromHand = !fromArsenal && !fromZone;
-      if (blockHandDefReacts && fromHand && data.cardType === "defense-reaction") continue;
-      if (nonBlockDefenderLimitReached && data.cardType === "defense-reaction") continue;
-      if (data.cardType === "defense-reaction" && veilBlocksDefender(state, link, card)) continue;
+      if (blockHandDefReacts && fromHand && hasType(data, "defense-reaction")) continue;
+      if (nonBlockDefenderLimitReached && hasType(data, "defense-reaction")) continue;
+      if (hasType(data, "defense-reaction") && veilBlocksDefender(state, link, card)) continue;
       // "defense reactions can't be played to this chain link" / "...from arsenal"
-      if (!isAttacker && data.cardType === "defense-reaction") {
+      if (!isAttacker && hasType(data, "defense-reaction")) {
         if (
           drRestriction.all ||
           (fromArsenal && drRestriction.fromArsenal) ||
@@ -995,7 +958,7 @@ function reactionIntents(
       ) continue;
       // scripted defend legality ("only defend an attack with 3 or less base
       // {p}") also gates playing a defense reaction onto the link
-      if (!isAttacker && data.cardType === "defense-reaction") {
+      if (!isAttacker && hasType(data, "defense-reaction")) {
         const canDefend = script?.canDefend;
         if (canDefend && !canDefend(runtime.makeCtx(state, player.seat, card, link))) continue;
         if (!attackAllowsDefender(state, runtime, link, card, fromHand)) continue;
@@ -1021,10 +984,11 @@ function reactionIntents(
         : [undefined];
       const allyTargets = isAttackActionData(data) ? attackTargets(state, runtime, player) : [undefined];
       const markInstantMethod = (candidates: GameIntent[]): GameIntent[] =>
-        markInstantPlayMethod(candidates, data.cardType === "action" && asInstant);
+        markInstantPlayMethod(candidates, hasType(data, "action") && asInstant);
       const firstCardIntent = intents.length;
+      const boosts = boostChoices(state, player, card);
       for (const meldSide of meldSides) {
-        for (const targetAllyId of allyTargets) for (const targetCardInstanceId of cardTargets) {
+        for (const targetAllyId of allyTargets) for (const targetCardInstanceId of cardTargets) for (const boostCount of boosts) {
           const regularIntents = announceAttackTarget(markInstantMethod(playIntentsWithPitches(
             state,
             player,
@@ -1041,8 +1005,8 @@ function reactionIntents(
               targetAllyId,
             }),
             meldSide,
-            undefined,
-            undefined,
+            boostCount > 0 ? true : undefined,
+            boostCount > 0 ? boostCount : undefined,
             undefined,
             targetCardInstanceId,
             includeUnaffordable,
@@ -1071,8 +1035,8 @@ function reactionIntents(
                 targetAllyId,
               }),
               meldSide,
-              undefined,
-              undefined,
+              boostCount > 0 ? true : undefined,
+              boostCount > 0 ? boostCount : undefined,
               alternativeCostCardInstanceIds,
               targetCardInstanceId,
               includeUnaffordable,
@@ -1148,22 +1112,26 @@ function abilityIntents(
     ...player.banish.filter((card) =>
       abilityList(scriptOf(state, card.cardId, card)).some((ability) => ability.fromBanish === true)
     ),
+    ...player.graveyard.filter((card) =>
+      abilityList(scriptOf(state, card.cardId, card)).some((ability) => ability.fromGraveyard === true)
+    ),
   ];
   for (const card of sources) {
     if (activatedAbilitiesSuppressed(state, card)) continue;
     if (isFrozen(state, card)) continue;
     const script = scriptOf(state, card.cardId, card);
     const abilities = abilityList(script);
+    const fromBanish = player.banish.some((candidate) => candidate.instanceId === card.instanceId);
+    const fromGraveyard = player.graveyard.some((candidate) => candidate.instanceId === card.instanceId);
     for (let ai = 0; ai < abilities.length; ai++) {
       const ability = abilities[ai]!;
-      if (!controlledIds.has(card.instanceId) &&
-        !player.banish.some((source) => source.instanceId === card.instanceId) &&
+      if (!controlledIds.has(card.instanceId) && !fromBanish && !fromGraveyard &&
         (ability.anyHeroAction !== true || (ability.timing ?? "action") !== "action")) continue;
       if (ability.fromHand) continue;
       if (ability.isAttack && player.flags[`cannotAttackInstance:${card.instanceId}`] === true) continue;
       if (ability.isAttack && cardHasType(state, card, "weapon") && weaponAttacksProhibited(player)) continue;
-      const fromBanish = player.banish.some((candidate) => candidate.instanceId === card.instanceId);
-      if ((ability.fromBanish === true) !== fromBanish || ability.fromGraveyard) continue;
+      if ((ability.fromBanish === true) !== fromBanish) continue;
+      if ((ability.fromGraveyard === true) !== fromGraveyard) continue;
       // Cloaked: while face-down, only abilities that turn the card face up
       // as part of their cost function (CR 8.3.36)
       if (card.faceDown && !ability.turnsFaceUp && !ability.usableWhileFaceDown) continue;
@@ -1320,8 +1288,8 @@ function abilityIntents(
       }
     }
   }
-  // granted aura attacks: matching board auras attack as weapons, once per
-  // turn each, for 1 AP + the marker's {r} cost
+  // granted aura attacks: matching board auras attack as weapons, within
+  // their attack limit, for 1 AP + the marker's {r} cost
   if (player.actionPoints >= 1 && !actionLimitReached(state, player)) {
     for (const card of player.board) {
       if (weaponAttacksProhibited(player)) continue;
@@ -1460,7 +1428,7 @@ function enumerateIntents(
           const markInstantMethod = (candidates: GameIntent[]): GameIntent[] =>
             markInstantPlayMethod(
               candidates,
-              instanceDataOf(state, card).cardType === "action",
+              hasType(instanceDataOf(state, card), "action"),
             );
           const meldSides: Array<MeldSide | undefined> = script?.meld
             ? (["left", "right", "both"] as MeldSide[]).filter(
@@ -1484,8 +1452,9 @@ function enumerateIntents(
           const allyTargets = isAttackActionData(instanceDataOf(state, card))
             ? attackTargets(state, runtime, player)
             : [undefined];
+          const boosts = boostChoices(state, player, card);
           for (const meldSide of meldSides) {
-            for (const targetAllyId of allyTargets) for (const targetCardInstanceId of cardTargets) {
+            for (const targetAllyId of allyTargets) for (const targetCardInstanceId of cardTargets) for (const boostCount of boosts) {
               const regularIntents = announceAttackTarget(markInstantMethod(playIntentsWithPitches(
                 state,
                 player,
@@ -1503,8 +1472,8 @@ function enumerateIntents(
                   perCardReduction: cardPlayReductionForSeat(card, seat),
                 }),
                 meldSide,
-                undefined,
-                undefined,
+                boostCount > 0 ? true : undefined,
+                boostCount > 0 ? boostCount : undefined,
                 undefined,
                 targetCardInstanceId,
                 includeUnaffordable,
@@ -1534,8 +1503,8 @@ function enumerateIntents(
                     perCardReduction: cardPlayReductionForSeat(card, seat),
                   }),
                   meldSide,
-                  undefined,
-                  undefined,
+                  boostCount > 0 ? true : undefined,
+                  boostCount > 0 ? boostCount : undefined,
                   alternativeCostCardInstanceIds,
                   targetCardInstanceId,
                   includeUnaffordable,
@@ -1639,6 +1608,8 @@ function resourceSourceAmount(
   const found = findCardAnywhere(state, intent.sourceInstanceId);
   if (!found) return 0;
   const ability = effectiveAbilityList(state, seat, found.card)[intent.abilityIndex ?? 0];
+  // A reaction-timed source is gone once its window closes, so skipping it forfeits the gain.
+  if (ability?.timing === "attack-reaction" || ability?.timing === "defense-reaction") return 0;
   return ability?.resourceSource ?? 0;
 }
 

@@ -1,5 +1,6 @@
 import type { CardScript } from "@fyendal/engine";
 import {
+  hasCardSubtype,
   lessonCounter,
   mentorFlipTrigger,
   mentorSpecializationPayoff,
@@ -13,7 +14,7 @@ export const bol: Record<string, CardScript> = {
     activeWhileFaceUpInArsenal: true,
     triggers: [mentorFlipTrigger()],
     onFriendlyAttackDeclared(ctx) {
-      if (ctx.link?.attackCardType === "weapon" && ctx.cardTypes(ctx.link.attackingCard).includes("1h"))
+      if (ctx.link?.attackCardType === "weapon" && hasCardSubtype(ctx, ctx.link.attackingCard, "1h"))
         ctx.addModifier({ scope: "chain-link", attack: 1 });
     },
     canTriggerOnHit(ctx) {

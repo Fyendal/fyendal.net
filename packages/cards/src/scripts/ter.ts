@@ -1,17 +1,12 @@
-import type { CardScript, DeepReadonly, CardInstance, ScriptCtx } from "@fyendal/engine";
-import { decisionMessage, decisionPrompt, yesNoPrompt } from "./shared-helpers.js";
-
-const MIGHT = "TER028";
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).some((candidate) => candidate.toLowerCase() === type);
-}
+import type { CardScript } from "@fyendal/engine";
+import { decisionMessage, decisionPrompt, hasCardSubtype, isAttackAction, yesNoPrompt } from "./shared-helpers.js";
+import { MIGHT } from "./tokens.js";
 
 function earthBond(extra: CardScript): CardScript {
   return {
     ...extra,
     onPlayCostPaid(ctx, paid) {
-      ctx.setState("earth-bond", paid.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
+      ctx.setState("earth-bond", paid.some((card) => hasCardSubtype(ctx, card, "earth")) ? 1 : 0);
       extra.onPlayCostPaid?.(ctx, paid);
     },
   };
@@ -68,7 +63,7 @@ export const ter: Record<string, CardScript> = {
       {
         event: "end-of-turn",
         whose: "any",
-        condition: (ctx) => ctx.player(ctx.seat).pitch.some((card) => hasType(ctx, card, "earth")),
+        condition: (ctx) => ctx.player(ctx.seat).pitch.some((card) => hasCardSubtype(ctx, card, "earth")),
         label: "Pay {r} to create a Might",
         effect(ctx) {
           ctx.requestPayment(
@@ -93,7 +88,7 @@ export const ter: Record<string, CardScript> = {
       oncePerTurn: true,
       label: "Attack",
       onCostPaid(ctx, paid) {
-        ctx.setState("earth-pitched", paid.some((card) => hasType(ctx, card, "earth")) ? 1 : 0);
+        ctx.setState("earth-pitched", paid.some((card) => hasCardSubtype(ctx, card, "earth")) ? 1 : 0);
       },
     },
     onAttackDeclared(ctx) {
@@ -105,7 +100,7 @@ export const ter: Record<string, CardScript> = {
       {
         event: "card-played",
         label: "Destroy this to give the attack +1?",
-        condition: (ctx, played) => !!played && ctx.hasCardType(played, "action") && hasType(ctx, played, "attack"),
+        condition: (ctx, played) => !!played && isAttackAction(ctx, played),
         effect(ctx, played) {
           if (!played) return;
           ctx.setState("hard-knuckle-attack", played.instanceId);

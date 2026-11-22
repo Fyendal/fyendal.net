@@ -2,7 +2,7 @@
  {
   "id": "RHI001",
   "name": "Rhinar",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
   "classes": [
    "brute"
@@ -17,7 +17,7 @@
  {
   "id": "RHI002",
   "name": "Ball Breaker",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nIf you've discarded a card with 6 or more {p} this turn, this gets +1{p}.",
   "attack": 3,
   "classes": [
@@ -32,7 +32,7 @@
  {
   "id": "RHI003",
   "name": "Mandible Claw",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nIf you have discarded a card with 6 or more {p} this turn, this card's attacks go again.",
   "attack": 3,
   "classes": [
@@ -47,7 +47,7 @@
  {
   "id": "RHI004",
   "name": "Monstrous Veil",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Rhinar Specialization\nAction - Destroy this: Draw a card then discard a random card. Go again\nBattleworn",
   "defense": 1,
   "classes": [
@@ -65,7 +65,7 @@
  {
   "id": "RHI005",
   "name": "Raw Meat",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If you control an Agility token, this gets +1{d}.\nIf you control a Might token, this gets +1{d}.\nTemper",
   "defense": 0,
   "classes": [
@@ -82,7 +82,7 @@
  {
   "id": "RHI006",
   "name": "Gauntlet of Might",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Create a Might token. Go again\nBlade Break",
   "defense": 1,
   "classes": [
@@ -100,7 +100,7 @@
  {
   "id": "RHI007",
   "name": "Flat Trackers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Create an Agility token. Go again\nBlade Break",
   "defense": 1,
   "classes": [
@@ -118,7 +118,7 @@
  {
   "id": "RHI008",
   "name": "Agile Windup",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Create an Agility token.",
   "pitch": 1,
   "cost": 3,
@@ -136,7 +136,7 @@
  {
   "id": "RHI009",
   "name": "Assault and Battery",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create an Agility token.",
   "pitch": 1,
   "cost": 3,
@@ -156,7 +156,7 @@
  {
   "id": "RHI010",
   "name": "Bare Fangs",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Bare Fangs gains +2{p}.",
   "pitch": 1,
   "cost": 2,
@@ -172,7 +172,7 @@
  {
   "id": "RHI011",
   "name": "Beast Mode",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've intimidated this turn, this gets +2{p}.",
   "pitch": 1,
   "cost": 3,
@@ -189,7 +189,7 @@
  {
   "id": "RHI012",
   "name": "Mighty Windup",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Create a Might token.",
   "pitch": 1,
   "cost": 3,
@@ -207,7 +207,7 @@
  {
   "id": "RHI013",
   "name": "Pack Hunt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, intimidate.",
   "pitch": 1,
   "cost": 2,
@@ -227,7 +227,7 @@
  {
   "id": "RHI014",
   "name": "Pound Town",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create a Might token.",
   "pitch": 1,
   "cost": 3,
@@ -247,7 +247,7 @@
  {
   "id": "RHI015",
   "name": "Rawhide Rumble",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Beat Chest\nWhen this attacks a hero, if you've beaten chest this turn, intimidate them.",
   "pitch": 1,
   "cost": 2,
@@ -268,7 +268,7 @@
  {
   "id": "RHI016",
   "name": "Bonebreaker Bellow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Beat Chest\nYour next Brute attack this turn gains +3{p}. If you've beaten chest this turn, instead it gains +5{p}.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -285,7 +285,7 @@
  {
   "id": "RHI017",
   "name": "Agile Windup",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Create an Agility token.",
   "pitch": 2,
   "cost": 3,
@@ -303,7 +303,7 @@
  {
   "id": "RHI018",
   "name": "Mighty Windup",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Create a Might token.",
   "pitch": 2,
   "cost": 3,
@@ -321,7 +321,7 @@
  {
   "id": "RHI019",
   "name": "Pack Call",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends, reveal the top card of your deck. If it has 6 or more {p}, put it on top. Otherwise, put it on the bottom.",
   "pitch": 2,
   "cost": 3,
@@ -338,7 +338,7 @@
  {
   "id": "RHI020",
   "name": "Bonebreaker Bellow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Beat Chest\nYour next Brute attack this turn gains +2{p}. If you've beaten chest this turn, instead it gains +4{p}.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -355,7 +355,7 @@
  {
   "id": "RHI021",
   "name": "Assault and Battery",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create an Agility token.",
   "pitch": 3,
   "cost": 3,
@@ -375,7 +375,7 @@
  {
   "id": "RHI022",
   "name": "Pack Hunt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, intimidate.",
   "pitch": 3,
   "cost": 2,
@@ -395,7 +395,7 @@
  {
   "id": "RHI023",
   "name": "Pound Town",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Beat Chest\nWhen this attacks, if you've beaten chest this turn, create a Might token.",
   "pitch": 3,
   "cost": 3,
@@ -415,7 +415,7 @@
  {
   "id": "RHI024",
   "name": "Bonebreaker Bellow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Beat Chest\nYour next Brute attack this turn gains +1{p}. If you've beaten chest this turn, instead it gains +3{p}.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -432,7 +432,7 @@
  {
   "id": "RHI025",
   "name": "Lead with Power",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Brute or Guardian attack this turn gets +1{p}.\nCreate a Might token.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -449,7 +449,7 @@
  {
   "id": "RHI026",
   "name": "Lead with Speed",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Brute or Warrior attack this turn gets +1{p}.\nCreate an Agility token.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -466,7 +466,7 @@
  {
   "id": "RHI027",
   "name": "Smashback Alehorn",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create an Agility and a Might token.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -482,7 +482,7 @@
  {
   "id": "RHI028",
   "name": "Might",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
   "classes": [
    "generic"
@@ -495,7 +495,7 @@
  {
   "id": "RHI029",
   "name": "Agility",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then your next attack this turn gets go again.",
   "classes": [
    "generic"

@@ -13,6 +13,10 @@ notice Markdown:
   `.webp`, `.png`, `.jpg`, or `.avif`. Prefer WebP; keep each file under 500 KB.
 - Alt text is required; images without it are not shown.
 - Card art may use `https://content.fabrary.net/cards/<printing>.webp`.
+- Screenshots fill the notice width and cards show at 180 px by default. End
+  the address with `#w=<px>` (40–2000) to set the displayed width instead,
+  for example `/updates/1-6/sandbox.840x1012.webp#w=360`. Images never grow
+  past the notice width.
 - Deploy the client before publishing a notice that references new images, and
   remove a folder only after its notice has been replaced.
 

@@ -29,7 +29,7 @@ describe("cardImageUrl", () => {
       const imageUrl = cardImageUrl(card.id);
       const equivalentArtUrls = originals
         .filter((original) => original.name === card.name
-          && original.pitch === card.pitch && original.cardType === card.cardType)
+          && original.pitch === card.pitch && original.types.join() === card.types.join())
         .map((original) => cardImageUrl(original.id));
       expect(imageUrl, `${card.id} (${card.name})`).toMatch(/\/cards\/(?:WTR|ARC|CRU)/);
       expect(equivalentArtUrls, `${card.id} (${card.name})`).toContain(imageUrl);
@@ -78,11 +78,14 @@ describe("cardImageUrl", () => {
     ["AMA004", "AMA004-RF"],
     ["AMA005", "AMA005-RF"],
     ["AMA006", "AMA006-RF"],
+    ["AMG002", "AMG002-RF"],
     ["AMO001", "AMO001-RF"],
     ["AMO002", "AMO002-RF"],
     ["AZS001", "AZS001-RF"],
     ["AZS002", "AZS002-RF"],
     ["DYN092B", "GEM119_BACK"],
+    ["SPW001", "SPW001-RF"],
+    ["SPW003", "SPW003-RF"],
     ["FAB337", "SEA080"],
     ["FAB464", "FAB464-MV"],
     ["FAB469", "FAB469-CF"],
@@ -764,7 +767,6 @@ describe("CardFace counter icons", () => {
 
   it.each([
     "fused",
-    "fusedEarth",
     "fused:ice",
   ] as const)("renders any truthy %s state as one icon without a number", (counter) => {
     const html = renderToStaticMarkup(createElement(CardFace, {

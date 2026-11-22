@@ -1,6 +1,8 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import { evrHighRarity } from "./evr/high-rarity.js";
 import {
+  boostedThisTurn,
+  boostsThisChain,
   buffNextAttack,
   canHeave,
   cardNamed,
@@ -9,7 +11,11 @@ import {
   decisionPrompt,
   destroyedTrigger,
   discardSixPlusPayoff,
+  effectiveCardName,
+  equipmentZoneCards,
+  faceUpGraveyard,
   heroChoiceSeat,
+  isAttackAction,
   isCard,
   isWeaponAttack,
   localizedCardLog,
@@ -17,6 +23,7 @@ import {
   opponentSeat,
   optN,
   optOnChoose,
+  playedOrCreatedAura,
   previousAttackHasName,
   requestHeroChoice,
   resolveDiscardChoice,
@@ -24,44 +31,28 @@ import {
   weaponAttackCount,
   opposingHeroDamage,
   ongoingLabel,
+  hasCardSubtype,
+  isAura,
+  isDagger,
+  isNonAttackAction,
+  isSword,
+  isItem,
 } from "./shared-helpers.js";
-
-const COPPER = "EVR194";
-const SILVER = "EVR195";
-const QUICKEN = "EVR196";
-const SEISMIC_SURGE = "EVR036";
-const RUNECHANT = "EVR119";
-const SPECTRAL_SHIELD = "EVR153";
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
-}
-
-function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasType(ctx, card, "aura");
-}
-
-function auraActivity(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "playedSubtype:aura") === true || ctx.getFlag("player", "createdSubtype:aura") === true;
-}
+import { COPPER, QUICKEN, RUNECHANT, SEISMIC_SURGE, SILVER, SPECTRAL_SHIELD } from "./tokens.js";
 
 function makeCopies(ctx: ScriptCtx, cardId: string, count: number): void {
   ctx.createTokens(cardId, count);
 }
 
 function currentWeaponIsOneHanded(ctx: ScriptCtx): boolean {
-  return isWeaponAttack(ctx) && !!ctx.link && hasType(ctx, ctx.link.attackingCard, "1h");
+  return isWeaponAttack(ctx) && !!ctx.link && hasCardSubtype(ctx, ctx.link.attackingCard, "1h");
 }
 
 function currentWeaponIsSwordOrDagger(ctx: ScriptCtx): boolean {
   return (
     isWeaponAttack(ctx) &&
     !!ctx.link &&
-    (hasType(ctx, ctx.link.attackingCard, "sword") || hasType(ctx, ctx.link.attackingCard, "dagger"))
+    (isSword(ctx, ctx.link.attackingCard) || isDagger(ctx, ctx.link.attackingCard))
   );
 }
 
@@ -142,7 +133,7 @@ function steadfast(amount: number): CardScript {
       const publicSources = ctx.state.players.flatMap((player) => [
         player.hero,
         ...player.weapons,
-        ...Object.values(player.equipment).filter((card) => card !== undefined),
+        ...equipmentZoneCards(player),
         ...player.board,
       ]);
       const options = [
@@ -297,14 +288,14 @@ function outlandSkirmish(amount: number): CardScript {
   };
 }
 
-function boostedLinks(ctx: ScriptCtx): number {
-  return ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted === true).length;
+function controlsBoostedLink(ctx: ScriptCtx): boolean {
+  return ctx.state.chain.some((link) => link.attacker === ctx.seat && link.flags.boosted === true);
 }
 
 function payload(): CardScript {
   return {
     onAttackDeclared(ctx) {
-      if (boostedLinks(ctx) > 0) ctx.addModifier({ scope: "chain-link", dominate: true });
+      if (boostsThisChain(ctx) > 0) ctx.addModifier({ scope: "chain-link", dominate: true });
     },
   };
 }
@@ -312,7 +303,7 @@ function payload(): CardScript {
 function zoomIn(): CardScript {
   return {
     onAttackDeclared(ctx) {
-      const count = boostedLinks(ctx);
+      const count = boostsThisChain(ctx);
       if (count > 0) optN(ctx, count);
     },
     onChoose(ctx, hook, option) {
@@ -325,7 +316,7 @@ function rotaryRam(amount: number): CardScript {
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: amount, appliesTo: "attack-action", appliesToClass: "mechanologist" });
-      if (ctx.getFlag("player", "boostedThisTurn") === true) ctx.putOnDeckBottom(ctx.self.instanceId);
+      if (boostedThisTurn(ctx)) ctx.putOnDeckBottom(ctx.self.instanceId);
     },
   };
 }
@@ -439,11 +430,11 @@ function runebloodIncantation(verses: number): CardScript {
 function drowningDire(): CardScript {
   return {
     onAttackDeclared(ctx) {
-      if (auraActivity(ctx)) ctx.addModifier({ scope: "chain-link", dominate: true });
+      if (playedOrCreatedAura(ctx)) ctx.addModifier({ scope: "chain-link", dominate: true });
     },
     onHit(ctx) {
-      const options = ctx.player(ctx.seat).graveyard.filter((card) => {
-        return ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack");
+      const options = faceUpGraveyard(ctx).filter((card) => {
+        return isNonAttackAction(ctx, card);
       });
       if (options.length === 0) return;
       ctx.requestCardChoice(
@@ -465,7 +456,7 @@ function drowningDire(): CardScript {
 function reekOfCorruption(): CardScript {
   return {
     canTriggerOnHit(ctx) {
-      return auraActivity(ctx) && ctx.link?.targetAllyId === undefined;
+      return playedOrCreatedAura(ctx) && ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
       const target = opponentSeat(ctx);
@@ -473,7 +464,7 @@ function reekOfCorruption(): CardScript {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "reek-discard",
-          decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.evr.discard.choose", {
+          decisionPrompt(`${ctx.data.name}: choose a card to discard`, "card.common.card.discard.choose.named", {
             values: { card: { kind: "card", cardId: ctx.self.cardId } },
           }),
           hand.map((card) => card.instanceId),
@@ -639,8 +630,8 @@ function hazeBending(): CardScript {
         undefined,
         (ctx, destroyed) =>
           destroyed.instanceId !== ctx.self.instanceId &&
-          ctx.cardData(destroyed.cardId).cardType !== "token" &&
-          hasType(ctx, destroyed, "illusionist") &&
+          !ctx.hasCardType(destroyed, "token") &&
+          hasCardSubtype(ctx, destroyed, "illusionist") &&
           isAura(ctx, destroyed),
       ),
       trigger("self", (ctx, destroyed) => destroyed.instanceId === ctx.self.instanceId),
@@ -655,7 +646,8 @@ function coalescenceMirage(): CardScript {
         .player(ctx.seat)
         .hand.filter(
           (card) =>
-            hasType(ctx, card, "illusionist") && isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) === 0,
+            hasCardSubtype(ctx, card, "illusionist") && isAura(ctx, card) &&
+              (ctx.cardData(card.cardId).cost ?? 0) === 0,
         );
       if (auras.length > 0) {
         ctx.requestCardChoice(
@@ -778,10 +770,10 @@ function pickACard(repeats: number): CardScript {
       const hand = ctx.player(target).hand;
       if (hand.length === 0) return;
       hand.forEach((card) => ctx.lookAt(card.instanceId));
-      const names = [...new Set(hand.map((card) => ctx.cardData(card.cardId).name))];
+      const names = [...new Set(hand.flatMap((card) => effectiveCardName(ctx, card) ?? []))];
       ctx.requestChoice(
         "pick-name",
-        decisionPrompt(`${ctx.data.name}: name a card`, "card.evr.card.name", {
+        decisionPrompt(`${ctx.data.name}: name a card`, "card.common.card.name.named", {
           values: { card: { kind: "card", cardId: ctx.self.cardId } },
         }),
         names,
@@ -835,7 +827,7 @@ function smashingGoodTime(amount: number): CardScript {
       ctx.setState("smashingReady", 0);
       const items = ctx
         .player(opponentSeat(ctx))
-        .board.filter((card) => hasType(ctx, card, "item") && (ctx.cardData(card.cardId).cost ?? 0) <= 2);
+        .board.filter((card) => isItem(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 2);
       if (items.length > 0) {
         ctx.requestCardChoice(
           "smashing-item",
@@ -961,7 +953,7 @@ const amuletEchoes: CardScript = {
       "echoes-discard",
       decisionPrompt(
         count === 1 ? "Choose a card to discard" : `Choose ${count} cards to discard`,
-        "card.evr.echoes.discard.choose",
+        "card.common.cards.discard.choose",
         { values: { count } },
       ),
       hand.map((card) => card.instanceId),
@@ -1210,7 +1202,7 @@ const talismanCremation: CardScript = {
           ...new Set(
             ctx.state.players
               .filter((player) => player.seat !== ctx.seat)
-              .flatMap((player) => player.graveyard.map((card) => ctx.cardData(card.cardId).name)),
+              .flatMap((player) => faceUpGraveyard(ctx, player.seat).flatMap((card) => effectiveCardName(ctx, card) ?? [])),
           ),
         ];
         if (names.length > 0)
@@ -1226,7 +1218,7 @@ const talismanCremation: CardScript = {
     if (hook !== "cremation-name") return;
     for (const player of ctx.state.players) {
       if (player.seat === ctx.seat) continue;
-      for (const card of [...player.graveyard]) {
+      for (const card of faceUpGraveyard(ctx, player.seat)) {
         if (cardNamed(ctx, card, option)) ctx.banish(card.instanceId);
       }
     }
@@ -1371,17 +1363,17 @@ export const evr: Record<string, CardScript> = mergeSetScripts("EVR", evrHighRar
 
   "t-bone|1": {
     onAttackDeclared(ctx) {
-      if (boostedLinks(ctx) > 0) ctx.setFlag("link", "mustDefendWithEquipment", true);
+      if (controlsBoostedLink(ctx)) ctx.setFlag("link", "mustDefendWithEquipment", true);
     },
   },
   "t-bone|2": {
     onAttackDeclared(ctx) {
-      if (boostedLinks(ctx) > 0) ctx.setFlag("link", "mustDefendWithEquipment", true);
+      if (controlsBoostedLink(ctx)) ctx.setFlag("link", "mustDefendWithEquipment", true);
     },
   },
   "t-bone|3": {
     onAttackDeclared(ctx) {
-      if (boostedLinks(ctx) > 0) ctx.setFlag("link", "mustDefendWithEquipment", true);
+      if (controlsBoostedLink(ctx)) ctx.setFlag("link", "mustDefendWithEquipment", true);
     },
   },
   "payload|1": payload(),
@@ -1428,7 +1420,7 @@ export const evr: Record<string, CardScript> = mergeSetScripts("EVR", evrHighRar
   "haze bending|3": hazeBending(),
   "passing mirage|3": {
     onFriendlyPlay(ctx, played) {
-      if (!isAttackAction(ctx, played) || !hasType(ctx, played, "illusionist")) return;
+      if (!isAttackAction(ctx, played) || !hasCardSubtype(ctx, played, "illusionist")) return;
       const key = `passingMirage:${ctx.self.instanceId}`;
       if (ctx.getFlag("player", key) === true) return;
       ctx.setFlag("player", key, true);
@@ -1437,7 +1429,7 @@ export const evr: Record<string, CardScript> = mergeSetScripts("EVR", evrHighRar
   },
   "pierce reality|3": {
     onFriendlyPlay(ctx, played) {
-      if (!isAttackAction(ctx, played) || !hasType(ctx, played, "illusionist")) return;
+      if (!isAttackAction(ctx, played) || !hasCardSubtype(ctx, played, "illusionist")) return;
       const key = `pierceReality:${ctx.self.instanceId}`;
       if (ctx.getFlag("player", key) === true) return;
       ctx.setFlag("player", key, true);

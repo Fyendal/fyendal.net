@@ -1,5 +1,11 @@
 import type { GameStateInternal } from "./runtimeState.js";
+import type { EquipmentSlot } from "@fyendal/shared";
 import type { PlayerState } from "./state.js";
+
+/** CR 3.0.1a: a token placed in an equipment zone also keeps that zone from being empty. */
+export function equipmentZoneEmpty(player: PlayerState, slot: EquipmentSlot): boolean {
+  return !player.equipment[slot] && !player.board.some((card) => card.scriptState?.[`frostZone:${slot}`]);
+}
 
 /** Whether this hero's text box is currently treated as empty. */
 export function heroAbilitiesDisabled(state: GameStateInternal, seat: number): boolean {

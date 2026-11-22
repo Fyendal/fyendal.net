@@ -109,13 +109,21 @@ function modifierPhrases(state: GameStateInternal, m: Modifier): Phrase[] {
   }
   if (m.attack) {
     const attack = signed(m.attack);
-    parts.push(m.defendedLessThanNonEquip === undefined
-      ? phrase(`${attack} power`, "engine.effect.part.attack", { attack })
-      : phrase(
+    if (m.defendedLessThanNonEquip !== undefined) {
+      parts.push(phrase(
         `${attack} power while defended by fewer than ${m.defendedLessThanNonEquip} non-equipment cards`,
         "engine.effect.part.attack.lightly.defended",
         { attack, defenders: m.defendedLessThanNonEquip },
       ));
+    } else if (m.intimidatedAtLeastThisTurn !== undefined) {
+      parts.push(phrase(
+        `${attack} power if you've intimidated ${m.intimidatedAtLeastThisTurn} or more times this turn`,
+        "engine.effect.part.attack.intimidated.at.least",
+        { attack, count: m.intimidatedAtLeastThisTurn },
+      ));
+    } else {
+      parts.push(phrase(`${attack} power`, "engine.effect.part.attack", { attack }));
+    }
   }
   if (m.piercing) parts.push(phrase(`piercing ${m.piercing}`, "engine.effect.part.piercing", { piercing: m.piercing }));
   if (m.defense) {

@@ -10,6 +10,7 @@ import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { cardTypesOf } from "./lib/carddata.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const [, , setIdArg, snapshotPath, baselineRef] = process.argv;
@@ -117,22 +118,11 @@ function numeric(value) {
   return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : undefined;
 }
 
-function cardTypeOf(core) {
+function cardTypesOfCore(core) {
   const types = core.core_types.map((type) => type.name_en ?? type.name);
   const subtypes = core.core_subtypes.map((type) => type.name_en ?? type.name);
-  if (types.includes("Hero")) return "hero";
-  if (types.includes("Weapon")) return "weapon";
-  if (types.includes("Equipment")) return "equipment";
-  if (types.includes("Attack Reaction")) return "attack-reaction";
-  if (types.includes("Defense Reaction")) return "defense-reaction";
-  if (types.includes("Instant")) return "instant";
-  if (types.includes("Resource")) return "resource";
-  if (types.includes("Block")) return "block";
-  if (types.includes("Mentor")) return "mentor";
-  if (types.includes("Token") || subtypes.includes("Token")) return "token";
-  if (types.includes("Action")) return "action";
-  if (subtypes.includes("Ally")) return "action";
-  throw new Error(`unsupported Card Vault type line: ${core.typebox}`);
+  // Card Vault lists Token and Ally as subtypes on some type lines.
+  return cardTypesOf([...types, ...subtypes.filter((type) => type === "Token" || type === "Ally")]);
 }
 
 function normalizedPrintId(printId) {
@@ -149,7 +139,7 @@ function toCardData(print, detail, core, backFace = false) {
   const data = {
     id: `${normalizedPrintId(print.print_id)}${backFace ? "B" : ""}`,
     name: backFace ? core.name : print.printed_name,
-    cardType: cardTypeOf(core),
+    types: cardTypesOfCore(core),
     text: normalizeText(rulesText),
   };
   const pitch = numeric(printedFace?.printed_pitch ?? core.pitch);

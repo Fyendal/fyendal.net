@@ -1,5 +1,12 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
+  chargedThisTurn,
+  controlsVox,
+  crushTriggered,
+  decay,
+  effectiveCardName,
+  equipmentZoneCards,
+  faceUpGraveyard,
   hasBloodDebt,
   ampNextArcane,
   anyDamageTarget,
@@ -9,13 +16,14 @@ import {
   cardNameContains,
   cardNamed,
   channelLightning,
-  chargeDeclineMessages,
   commonOptionMessages,
   dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  isAttackAction,
   localizedCardLog,
+  markHero,
   optN,
   optOnChoose,
   opponentSeat,
@@ -23,41 +31,38 @@ import {
   requestDiscardChoice,
   revealTopSixPlusStays,
   resolveDiscardChoice,
+  skeletalPuppetry,
   suspenseAura,
   hitHookLabel,
-  isChargeDecline,
   ongoingLabel,
-  optionalChargeOptions,
   resourceAbility,
   solflareTrigger,
+  hasCardSubtype,
+  isAura,
+  isDagger,
+  isNonAttackAction,
+  chargeAttack,
+  isAlly,
+  requestCrankSteam,
+  resolveCrankSteam,
 } from "./shared-helpers.js";
+import {
+  BLASMOPHET_INSATIABLE_HUNGER,
+  COURAGE,
+  EMBODIMENT_OF_EARTH,
+  FLURRY,
+  FROSTBITE,
+  GATE_TO_IARATHAEL,
+  GOLDEN_COG,
+  GRAPHENE_CHELICERA,
+  LIGHTNING_FLOW,
+  PONDER,
+  RUNECHANT,
+  SPECTRAL_SHIELD,
+} from "./tokens.js";
 
-const RUNECHANT = "SBA036";
-const GATE = "IAR222";
-const BLASMOPHET = "IAR221";
 const CORRUPTED_CORPSE = "IAR090";
-const COURAGE = "DTD232";
-const EMBODIMENT_OF_EARTH = "AJV028";
-const FROSTBITE = "AJV029";
-const FLURRY = "SBL036";
-const GOLDEN_COG = "SEA042";
-const GRAPHENE_CHELICERA = "SAR033";
-const LIGHTNING_FLOW = "OMN203";
-const PONDER = "DYN244";
-const SPECTRAL_SHIELD = "SEN037";
 const EQUIPMENT_SLOTS = ["head", "chest", "arms", "legs"] as const;
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
-}
-
-function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack");
-}
 
 /** "When this hits" — any hit, including an attack aimed at an ally. */
 function selfHits(ctx: ScriptCtx): boolean {
@@ -70,10 +75,7 @@ function selfHitsHero(ctx: ScriptCtx): boolean {
 }
 
 function exposedEquipmentSlots(ctx: ScriptCtx, seat: number): readonly string[] {
-  const player = ctx.player(seat);
-  return EQUIPMENT_SLOTS.filter(
-    (slot) => !player.equipment[slot] && !player.board.some((card) => card.scriptState?.[`frostZone:${slot}`]),
-  );
+  return EQUIPMENT_SLOTS.filter((slot) => ctx.equipmentZoneEmpty(seat, slot));
 }
 
 function createFrostbitesInExposedZones(ctx: ScriptCtx, seat: number): void {
@@ -83,13 +85,13 @@ function createFrostbitesInExposedZones(ctx: ScriptCtx, seat: number): void {
 }
 
 function paidWithType(ctx: ScriptCtx, paid: readonly DeepReadonly<CardInstance>[], type: string): boolean {
-  return paid.some((card) => hasType(ctx, card, type));
+  return paid.some((card) => hasCardSubtype(ctx, card, type));
 }
 
 function firstHeadBangingAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   if (!isAttackAction(ctx, card)) return false;
-  const guardian = hasType(ctx, card, "guardian");
-  const revered = hasType(ctx, card, "revered");
+  const guardian = hasCardSubtype(ctx, card, "guardian");
+  const revered = hasCardSubtype(ctx, card, "revered");
   if (!guardian && !revered) return false;
   const guardianCount = Number(ctx.getFlag("player", "playedAttackActionTypeCount:guardian"));
   const reveredCount = Number(ctx.getFlag("player", "playedAttackActionTypeCount:revered"));
@@ -108,34 +110,8 @@ function grantHeadBangingHit(ctx: ScriptCtx, attackInstanceId: number): void {
   });
 }
 
-function controlsVox(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).weapons.some((card) => cardNamed(ctx, card, "Vox Necropolis"));
-}
-
 function controlsBlasmophet(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, "Blasmophet, the Insatiable Hunger"));
-}
-
-function decay(): Pick<CardScript, "triggers"> {
-  return {
-    triggers: [
-      {
-        event: "end-of-turn",
-        whose: "subject",
-        label: "Decay",
-        labelMessage: { id: "card.trigger.common.decay" },
-        effect(ctx) {
-          const life = ctx.self.life ?? 0;
-          if (life <= 1) {
-            ctx.destroySelf();
-            return;
-          }
-          ctx.setState("lifePenalty", ctx.getState("lifePenalty") + 1);
-          ctx.setPermanentLife(ctx.self.instanceId, life - 1);
-        },
-      },
-    ],
-  };
 }
 
 function zombieAttack() {
@@ -154,7 +130,7 @@ function resolveMarkEffect(ctx: ScriptCtx, effect: MarkEffect): void {
     return;
   }
   if (effect === "ushering") {
-    ctx.createToken(GATE);
+    ctx.createToken(GATE_TO_IARATHAEL);
     return;
   }
   const banished = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown);
@@ -187,7 +163,7 @@ function markOf(effect: MarkEffect): CardScript {
     onEnterArena(ctx) {
       const allies = ctx
         .player(ctx.seat)
-        .board.filter((card) => card.instanceId !== ctx.self.instanceId && hasType(ctx, card, "ally"));
+        .board.filter((card) => card.instanceId !== ctx.self.instanceId && isAlly(ctx, card));
       if (allies.length === 0) {
         ctx.destroySelf();
         return;
@@ -219,7 +195,7 @@ function markOf(effect: MarkEffect): CardScript {
         condition: (ctx, left, event) =>
           !!left &&
           left.instanceId === ctx.self.boundToInstanceId &&
-          hasType(ctx, left, "ally") &&
+          isAlly(ctx, left) &&
           (event?.to === "graveyard" || event?.to === "cease-to-exist"),
         effect(ctx) {
           resolveMarkEffect(ctx, effect);
@@ -245,8 +221,8 @@ function restlessTemplar(): CardScript {
   const condition = (ctx: ScriptCtx, left: DeepReadonly<CardInstance> | undefined, to: string | undefined): boolean =>
     !!left &&
     left.owner === ctx.seat &&
-    hasType(ctx, left, "zombie") &&
-    (ctx.cardData(left.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "decay") &&
+    hasCardSubtype(ctx, left, "zombie") &&
+    ctx.hasKeyword(left, "decay") &&
     (to === "graveyard" || to === "cease-to-exist");
   const gateTrigger = (sourceZone?: "self"): TriggerDef => ({
     event: "card-left-arena",
@@ -256,7 +232,7 @@ function restlessTemplar(): CardScript {
     condition: (ctx, left, event) =>
       condition(ctx, left, event?.to) && (sourceZone !== "self" || left?.instanceId === ctx.self.instanceId),
     effect(ctx: ScriptCtx) {
-      ctx.createToken(GATE);
+      ctx.createToken(GATE_TO_IARATHAEL);
     },
   });
   return {
@@ -280,7 +256,7 @@ function restlessLooter(): CardScript {
           if (hand.length > 0) {
             ctx.requestCardChoice(
               "iar-looter-discard",
-              decisionPrompt("Choose a card to discard", "card.iar.looter.discard.choose"),
+              decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
               hand.map((card) => card.instanceId),
             );
           }
@@ -301,7 +277,7 @@ function violentGusto(): CardScript {
   return {
     onAttackDeclared(ctx) {
       if (!selfHitsHero(ctx)) return;
-      const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "aura"));
+      const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card));
       if (auras.length === 0) return;
       ctx.requestCardChoice(
         "iar-violent-gusto-aura",
@@ -316,7 +292,7 @@ function violentGusto(): CardScript {
       const chosen = ctx.self.chosenName?.toLowerCase();
       if (!chosen) return;
       for (const aura of [...ctx.player(opponentSeat(ctx)).board]) {
-        if (hasType(ctx, aura, "aura") && ctx.cardNames(aura).includes(chosen)) {
+        if (isAura(ctx, aura) && ctx.cardNames(aura).includes(chosen)) {
           ctx.moveToHand(aura.instanceId);
         }
       }
@@ -325,9 +301,10 @@ function violentGusto(): CardScript {
       if (hook !== "iar-violent-gusto-aura" || option === "no") return;
       const aura = ctx
         .player(opponentSeat(ctx))
-        .board.find((card) => card.instanceId === Number(option) && hasType(ctx, card, "aura"));
+        .board.find((card) => card.instanceId === Number(option) && isAura(ctx, card));
       if (!aura) return;
-      ctx.setChosenName(ctx.cardData(aura.cardId).name);
+      const name = effectiveCardName(ctx, aura);
+      if (name) ctx.setChosenName(name);
       ctx.moveToHand(aura.instanceId);
     },
   };
@@ -364,7 +341,7 @@ function requestForsakenStrikeMode(ctx: ScriptCtx): void {
 
 function applyForsakenStrikeModes(ctx: ScriptCtx): void {
   const [gate, power, goAgain] = FORSAKEN_STRIKE_MODES.map((mode) => ctx.getState(mode.stateKey) > 0);
-  if (gate) ctx.createToken(GATE);
+  if (gate) ctx.createToken(GATE_TO_IARATHAEL);
   if (power) ctx.addCardTempPower(ctx.self.instanceId, 2);
   if (goAgain) ctx.grantGoAgain();
   // Counters survive zone changes; clear them so a later play starts fresh.
@@ -494,7 +471,7 @@ function cleaveTheHeavens(): CardScript {
       fromHand: true,
       fromHandMove: "banish",
       onActivate(ctx) {
-        ctx.createToken(GATE);
+        ctx.createToken(GATE_TO_IARATHAEL);
       },
     },
   });
@@ -533,7 +510,7 @@ function rumblingHunger(): CardScript {
   return bloodDebt({
     canTriggerOnHit: (ctx) => selfHits(ctx) && ctx.getFlag("player", "banishedSixPlusThisTurn") === true,
     onHit(ctx) {
-      ctx.createToken(BLASMOPHET);
+      ctx.createToken(BLASMOPHET_INSATIABLE_HUNGER);
       ctx.grantGoAgain();
     },
   });
@@ -611,15 +588,6 @@ function commitToCorruption(attack: number): CardScript {
   };
 }
 
-function skeletalPuppetry(attack: number): CardScript {
-  return {
-    alternativePlayCost: { kind: "discard-hand-subtype", subtype: "ally" },
-    onPlay(ctx) {
-      buffNextAttack(ctx, { attack, appliesToSubtype: "ally", goAgain: true });
-    },
-  };
-}
-
 type AllyPaymentPayoff = "discard" | "life";
 
 function allyPaymentOnHit(payoff: AllyPaymentPayoff): CardScript {
@@ -627,8 +595,8 @@ function allyPaymentOnHit(payoff: AllyPaymentPayoff): CardScript {
     canTriggerOnHit: (ctx) => selfHitsHero(ctx),
     onHit(ctx) {
       const allies = [
-        ...ctx.player(ctx.seat).board.filter((card) => hasType(ctx, card, "ally")),
-        ...ctx.player(ctx.seat).hand.filter((card) => hasType(ctx, card, "ally")),
+        ...ctx.player(ctx.seat).board.filter((card) => isAlly(ctx, card)),
+        ...ctx.player(ctx.seat).hand.filter((card) => isAlly(ctx, card)),
       ];
       if (allies.length === 0) return;
       ctx.requestCardChoice(
@@ -669,7 +637,7 @@ function shadowakeGloomblade(): CardScript {
       ...usurp(),
       canTriggerOnHit: selfHits,
       onHit(ctx) {
-        ctx.createToken(GATE);
+        ctx.createToken(GATE_TO_IARATHAEL);
       },
       onChoose(ctx, hook, option) {
         resolveUsurp(ctx, hook, option);
@@ -707,7 +675,8 @@ function rallyTheShadowHorde(): CardScript {
 function permanentInterment(): CardScript {
   return bloodDebt({
     onAttackDeclared(ctx) {
-      const shadow = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && hasType(ctx, card, "shadow"));
+      const shadow = ctx.player(ctx.seat).banish.filter((card) =>
+        !card.faceDown && hasCardSubtype(ctx, card, "shadow"));
       if (shadow.length > 0) {
         ctx.requestXPayment(
           "iar-permanent-interment-pay",
@@ -720,7 +689,8 @@ function permanentInterment(): CardScript {
     onChoose(ctx, hook, option) {
       if (hook !== "iar-permanent-interment-pay") return;
       const amount = Number(option.slice(2));
-      const shadow = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && hasType(ctx, card, "shadow"));
+      const shadow = ctx.player(ctx.seat).banish.filter((card) =>
+        !card.faceDown && hasCardSubtype(ctx, card, "shadow"));
       if (amount > 0) {
         ctx.requestCardChoices(
           "iar-permanent-interment-cards",
@@ -766,7 +736,7 @@ function stepThroughRealms(attack: number): CardScript {
       });
     },
     onGrantedHit(ctx, hook) {
-      if (hook === "iar-step-through-realms") ctx.createToken(GATE);
+      if (hook === "iar-step-through-realms") ctx.createToken(GATE_TO_IARATHAEL);
     },
   };
 }
@@ -775,10 +745,10 @@ function damTheShadowake(): CardScript {
   return {
     canTriggerOnDefend(ctx) {
       const attacker = ctx.link?.attacker;
-      return attacker !== undefined && hasType(ctx, ctx.player(attacker).hero, "shadow");
+      return attacker !== undefined && hasCardSubtype(ctx, ctx.player(attacker).hero, "shadow");
     },
     onDefend(ctx) {
-      ctx.createToken(GATE);
+      ctx.createToken(GATE_TO_IARATHAEL);
     },
   };
 }
@@ -821,27 +791,10 @@ function cogwerxProngBot(): CardScript {
     },
     canTriggerOnHit: selfHitsHero,
     onHit(ctx) {
-      const items = ctx
-        .player(ctx.seat)
-        .board.filter(
-          (card) =>
-            hasType(ctx, card, "item") &&
-            (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "crank"),
-        );
-      if (items.length > 0) {
-        ctx.requestCardChoice(
-          "iar-prong-bot-steam",
-          decisionPrompt("Put a steam counter on an item with crank?", "card.iar.item.crank.steam.choose", {
-            optionMessages: commonOptionMessages("no"),
-          }),
-          ["no", ...items.map((card) => card.instanceId)],
-        );
-      }
+      requestCrankSteam(ctx, "iar-prong-bot-steam", true);
     },
     onChoose(ctx, hook, option) {
-      if (hook === "iar-prong-bot-steam" && option !== "no") {
-        ctx.addCounter(Number(option), "steam", 1);
-      }
+      if (hook === "iar-prong-bot-steam" && option !== "no") resolveCrankSteam(ctx, option);
     },
   };
 }
@@ -849,10 +802,10 @@ function cogwerxProngBot(): CardScript {
 function freshFromTheForge(): CardScript {
   return {
     canPlay(ctx) {
-      return !!ctx.link && hasType(ctx, ctx.link.attackingCard, "dagger");
+      return !!ctx.link && isDagger(ctx, ctx.link.attackingCard);
     },
     onPlay(ctx) {
-      for (const dagger of ctx.player(ctx.seat).weapons.filter((card) => hasType(ctx, card, "dagger"))) {
+      for (const dagger of ctx.player(ctx.seat).weapons.filter((card) => isDagger(ctx, card))) {
         ctx.addCounter(dagger.instanceId, "power", 1);
         ctx.setCardState(dagger.instanceId, "sharpenedTurn", ctx.state.turn);
         ctx.setFlag(
@@ -900,15 +853,7 @@ function freshFromTheForge(): CardScript {
       }
       ctx.addCounter(dagger.instanceId, "power", -1);
       const target = opponentSeat(ctx);
-      const hero = ctx.player(target).hero;
-      if (Number(hero.scriptState?.marked ?? 0) === 0) {
-        ctx.addCardState(hero.instanceId, "marked", 1);
-        ctx.logPublic(
-          localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
-            target: { kind: "card", cardId: hero.cardId },
-          }),
-        );
-      }
+      markHero(ctx, target);
     },
   };
 }
@@ -952,7 +897,7 @@ type ZombieDiscardPayoff = "corpse" | "next-attack" | "recover";
 function zombieDiscardAttack(payoff: ZombieDiscardPayoff): CardScript {
   return {
     onAttackDeclared(ctx) {
-      const zombies = ctx.player(ctx.seat).hand.filter((card) => hasType(ctx, card, "zombie"));
+      const zombies = ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, "zombie"));
       if (zombies.length === 0) return;
       ctx.requestCardChoice(
         "iar-zombie-discard",
@@ -967,7 +912,7 @@ function zombieDiscardAttack(payoff: ZombieDiscardPayoff): CardScript {
         if (option === "no") return;
         const zombie = ctx
           .player(ctx.seat)
-          .hand.find((card) => card.instanceId === Number(option) && hasType(ctx, card, "zombie"));
+          .hand.find((card) => card.instanceId === Number(option) && hasCardSubtype(ctx, card, "zombie"));
         if (!zombie || !ctx.discardCard(ctx.seat, zombie.instanceId)) return;
         if (payoff === "corpse") {
           ctx.createCardInBanish(CORRUPTED_CORPSE);
@@ -1045,7 +990,7 @@ function forbiddenHarvest(): CardScript {
           .player(ctx.seat)
           .banish.find((candidate) => candidate.instanceId === Number(option) && !candidate.faceDown);
         if (!card) continue;
-        const isShadow = hasType(ctx, card, "shadow");
+        const isShadow = hasCardSubtype(ctx, card, "shadow");
         if (!ctx.setCardFaceDown(card.instanceId, true)) continue;
         if (isShadow) shadow++;
       }
@@ -1092,7 +1037,7 @@ function murmuringGloomblade(): CardScript {
 function gateOnHit(): CardScript {
   return bloodDebt({
     onHit(ctx) {
-      ctx.createToken(GATE);
+      ctx.createToken(GATE_TO_IARATHAEL);
     },
   });
 }
@@ -1116,11 +1061,11 @@ function shadowrealmHandBanish(payoff: ShadowrealmHandPayoff): CardScript {
       if (hook !== "iar-shadowrealm-hand" || option === "no") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      const shadow = hasType(ctx, card, "shadow");
+      const shadow = hasCardSubtype(ctx, card, "shadow");
       if (!ctx.banish(card.instanceId) || !shadow) return;
       if (payoff === "go-again") ctx.grantGoAgain();
       else if (payoff === "power") ctx.addCardTempPower(ctx.self.instanceId, 2);
-      else ctx.createToken(GATE);
+      else ctx.createToken(GATE_TO_IARATHAEL);
     },
   });
 }
@@ -1247,8 +1192,8 @@ function shadowrealmStrength(payoff: number | "go-again"): CardScript {
       const selected = ctx.player(ctx.seat).banish.find((card) => card.instanceId === instanceId && !card.faceDown);
       if (!selected) return;
       if (!ctx.moveToGraveyard(instanceId, "banish")) return;
-      const moved = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === instanceId);
-      if (moved && ctx.cardTypes(moved).includes("zombie")) {
+      const moved = faceUpGraveyard(ctx).find((card) => card.instanceId === instanceId);
+      if (moved && hasCardSubtype(ctx, moved, "zombie")) {
         buffNextAttack(ctx, payoff === "go-again" ? { goAgain: true } : { attack: payoff });
       }
     },
@@ -1268,7 +1213,7 @@ function traverseToFront(ctx: ScriptCtx): void {
 function recordFirstViseraiBloodDebtAttack(ctx: ScriptCtx, played: DeepReadonly<CardInstance>): boolean {
   if (
     ctx.getFlag("player", "iarViseraiBloodDebtAttackPlayed") === true ||
-    !hasType(ctx, played, "attack") ||
+    !hasCardSubtype(ctx, played, "attack") ||
     !isBloodDebtAction(ctx, played)
   )
     return false;
@@ -1325,7 +1270,7 @@ function replaceActionPhaseDrawWithPonder(ctx: ScriptCtx, drawingSeat: number, c
   if (!["action", "defend", "reaction", "layer"].includes(ctx.state.phase) || count <= 0) {
     return count;
   }
-  ctx.createTokens(PONDER, count, drawingSeat);
+  ctx.heroCreatesTokens(drawingSeat, PONDER, count);
   return 0;
 }
 
@@ -1348,7 +1293,7 @@ function darkestHour(attack: number): CardScript {
 function countdownToExtinction(): CardScript {
   return bloodDebt({
     onAttackDeclared(ctx) {
-      ctx.createToken(GATE);
+      ctx.createToken(GATE_TO_IARATHAEL);
     },
     canTriggerOnHit: (ctx) => selfHits(ctx) && ctx.canSearchDeck(),
     onHit(ctx) {
@@ -1513,7 +1458,7 @@ export const iar: Record<string, CardScript> = {
     },
     canTriggerOnHit: selfHits,
     onHit(ctx) {
-      ctx.createToken(BLASMOPHET);
+      ctx.createToken(BLASMOPHET_INSATIABLE_HUNGER);
     },
   }),
   "beckoning hunger|2": bloodDebt({
@@ -1523,7 +1468,7 @@ export const iar: Record<string, CardScript> = {
     },
     canTriggerOnHit: selfHits,
     onHit(ctx) {
-      ctx.createToken(BLASMOPHET);
+      ctx.createToken(BLASMOPHET_INSATIABLE_HUNGER);
     },
   }),
   "beckoning hunger|3": bloodDebt({
@@ -1533,7 +1478,7 @@ export const iar: Record<string, CardScript> = {
     },
     canTriggerOnHit: selfHits,
     onHit(ctx) {
-      ctx.createToken(BLASMOPHET);
+      ctx.createToken(BLASMOPHET_INSATIABLE_HUNGER);
     },
   }),
 
@@ -1560,12 +1505,12 @@ export const iar: Record<string, CardScript> = {
       goAgain: true,
       tap: true,
       canActivate: (ctx) =>
-        ctx.player(ctx.seat).graveyard.some((card) => !card.faceDown && hasType(ctx, card, "zombie")),
+        faceUpGraveyard(ctx).some((card) => hasCardSubtype(ctx, card, "zombie")),
       onActivate(ctx) {
-        const zombies = ctx.player(ctx.seat).graveyard.filter((card) => !card.faceDown && hasType(ctx, card, "zombie"));
+        const zombies = faceUpGraveyard(ctx).filter((card) => hasCardSubtype(ctx, card, "zombie"));
         ctx.requestCardChoice(
           "iar-malice-zombie",
-          decisionPrompt("Choose a zombie in your graveyard", "card.iar.malice.zombie.choose"),
+          decisionPrompt("Choose a zombie in your graveyard", "card.common.zombie.graveyard.choose"),
           zombies.map((card) => card.instanceId),
         );
       },
@@ -1574,7 +1519,7 @@ export const iar: Record<string, CardScript> = {
       if (hook === "iar-malice-zombie") ctx.allowPlayFrom(Number(option), "graveyard");
     },
     onFriendlyDestroyed(ctx, destroyed) {
-      if (!hasType(ctx, destroyed, "zombie") || !hasType(ctx, destroyed, "ally")) return;
+      if (!hasCardSubtype(ctx, destroyed, "zombie") || !isAlly(ctx, destroyed)) return;
       ctx.banish(destroyed.instanceId, { faceDown: true });
       ctx.createCardInBanish(CORRUPTED_CORPSE);
     },
@@ -1619,7 +1564,8 @@ export const iar: Record<string, CardScript> = {
         whose: "any",
         label: "Put a zombie from banish into graveyard or destroy this",
         effect(ctx) {
-          const zombies = ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && hasType(ctx, card, "zombie"));
+          const zombies = ctx.player(ctx.seat).banish.filter((card) =>
+            !card.faceDown && hasCardSubtype(ctx, card, "zombie"));
           if (zombies.length === 0) {
             ctx.destroySelf();
             return;
@@ -1647,8 +1593,8 @@ export const iar: Record<string, CardScript> = {
   "bone barrier|3": {
     onDefend(ctx) {
       const allies = [
-        ...ctx.player(ctx.seat).board.filter((card) => hasType(ctx, card, "ally")),
-        ...ctx.player(ctx.seat).hand.filter((card) => hasType(ctx, card, "ally")),
+        ...ctx.player(ctx.seat).board.filter((card) => isAlly(ctx, card)),
+        ...ctx.player(ctx.seat).hand.filter((card) => isAlly(ctx, card)),
       ];
       if (allies.length > 0) {
         ctx.requestCardChoice(
@@ -1693,7 +1639,7 @@ export const iar: Record<string, CardScript> = {
       const target = opponentSeat(ctx);
       ctx.requestCardChoice(
         "iar-magister-hand",
-        decisionPrompt("Choose a card to banish", "card.iar.hand.banish.choose"),
+        decisionPrompt("Choose a card to banish", "card.common.card.banish.choose"),
         ctx.player(target).hand.map((card) => card.instanceId),
         target,
       );
@@ -1764,7 +1710,7 @@ export const iar: Record<string, CardScript> = {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "iar-shadow-lord-banish",
-          decisionPrompt("Banish a card from your hand", "card.iar.hand.banish"),
+          decisionPrompt("Banish a card from your hand", "card.common.hand.card.banish"),
           hand.map((card) => card.instanceId),
         );
       }
@@ -1773,11 +1719,11 @@ export const iar: Record<string, CardScript> = {
       if (hook !== "iar-shadow-lord-banish") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      const runeblade = hasType(ctx, card, "runeblade");
-      const shadow = hasType(ctx, card, "shadow");
+      const runeblade = hasCardSubtype(ctx, card, "runeblade");
+      const shadow = hasCardSubtype(ctx, card, "shadow");
       if (!ctx.banish(card.instanceId)) return;
       if (runeblade) ctx.createToken(RUNECHANT);
-      if (shadow) ctx.createToken(GATE);
+      if (shadow) ctx.createToken(GATE_TO_IARATHAEL);
     },
   },
 
@@ -1809,7 +1755,7 @@ export const iar: Record<string, CardScript> = {
       canTriggerOnHit: selfHitsHero,
       onHitTarget: {
         options: (ctx) =>
-          ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "aura")).map((card) => card.instanceId),
+          ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card)).map((card) => card.instanceId),
         prompt: () =>
           decisionPrompt("Banish an aura permanent they control?", "card.iar.bloodsong.aura.banish", {
             optionMessages: commonOptionMessages("pass"),
@@ -1913,7 +1859,7 @@ export const iar: Record<string, CardScript> = {
         if (ctx.getFlag("link", "fromBanish") !== true) return;
         if (!ctx.canSearchDeck()) return;
         const auras = ctx.player(ctx.seat).deck.filter((card) => {
-          return cardNameContains(ctx, card, "runechant") && hasType(ctx, card, "aura");
+          return cardNameContains(ctx, card, "runechant") && isAura(ctx, card);
         });
         if (auras.length === 0) {
           ctx.shuffleDeck();
@@ -1972,10 +1918,10 @@ export const iar: Record<string, CardScript> = {
   "open the gate to i'arathael|1": bloodDebt({
     canTriggerOnHit: selfHits,
     onHit(ctx) {
-      ctx.createToken(GATE);
+      ctx.createToken(GATE_TO_IARATHAEL);
     },
     onSelfBanished(ctx, from) {
-      if (from === "hand" || from === "deck") ctx.createToken(GATE);
+      if (from === "hand" || from === "deck") ctx.createToken(GATE_TO_IARATHAEL);
     },
   }),
 
@@ -2011,7 +1957,7 @@ export const iar: Record<string, CardScript> = {
 
   "planar chaos|1": {
     onPlay(ctx) {
-      ctx.createToken(GATE);
+      ctx.createToken(GATE_TO_IARATHAEL);
       ctx.setFlag("player", "iarPlanarChaosGate", true);
     },
   },
@@ -2130,7 +2076,7 @@ export const iar: Record<string, CardScript> = {
     onAttackDeclared(ctx) {
       const ponders = ctx
         .player(ctx.seat)
-        .board.filter((card) => cardNamed(ctx, card, "Ponder") && ctx.cardData(card.cardId).cardType === "token");
+        .board.filter((card) => cardNamed(ctx, card, "Ponder") && ctx.hasCardType(card, "token"));
       if (ponders.length > 0) {
         ctx.requestCardChoice(
           "iar-rush-ponder",
@@ -2149,11 +2095,11 @@ export const iar: Record<string, CardScript> = {
           (card) =>
             card.instanceId === Number(option) &&
             cardNamed(ctx, card, "Ponder") &&
-            ctx.cardData(card.cardId).cardType === "token",
+            ctx.hasCardType(card, "token"),
         );
       if (!target || !ctx.destroyPermanent(target.instanceId)) return;
       ctx.drawCards(ctx.seat, 1);
-      ctx.changeActionPoints(ctx.seat, 1);
+      ctx.gainActionPoints(ctx.seat, 1);
     },
   },
 
@@ -2161,13 +2107,13 @@ export const iar: Record<string, CardScript> = {
     playTargetOptions(ctx) {
       return ctx.state.players
         .flatMap((player) => player.board)
-        .filter((card) => hasType(ctx, card, "ally"))
+        .filter((card) => isAlly(ctx, card))
         .map((card) => card.instanceId);
     },
     onPlay(ctx) {
       const target = ctx.state.players
         .flatMap((player) => player.board)
-        .find((card) => card.instanceId === ctx.playTargetInstanceId && hasType(ctx, card, "ally"));
+        .find((card) => card.instanceId === ctx.playTargetInstanceId && isAlly(ctx, card));
       if (!target) return;
       ctx.addModifier({
         scope: "until-end-of-turn",
@@ -2189,7 +2135,7 @@ export const iar: Record<string, CardScript> = {
         if (!top) return;
         const matches = ctx.cardColor(top) === 1;
         ctx.banish(top.instanceId);
-        if (matches) ctx.createToken(GATE);
+        if (matches) ctx.createToken(GATE_TO_IARATHAEL);
       });
     },
   },
@@ -2204,7 +2150,7 @@ export const iar: Record<string, CardScript> = {
         if (!top) return;
         const matches = ctx.cardColor(top) === 2;
         ctx.banish(top.instanceId);
-        if (matches) ctx.createToken(GATE);
+        if (matches) ctx.createToken(GATE_TO_IARATHAEL);
       });
     },
   },
@@ -2219,7 +2165,7 @@ export const iar: Record<string, CardScript> = {
         if (!top) return;
         const matches = ctx.cardColor(top) === 3;
         ctx.banish(top.instanceId);
-        if (matches) ctx.createToken(GATE);
+        if (matches) ctx.createToken(GATE_TO_IARATHAEL);
       });
     },
   },
@@ -2257,7 +2203,7 @@ export const iar: Record<string, CardScript> = {
 
   "unbound by shadow|1": bloodDebt({
     onAttackDeclared(ctx) {
-      if (ctx.getFlag("link", "fromBanish") === true) ctx.createToken(GATE);
+      if (ctx.getFlag("link", "fromBanish") === true) ctx.createToken(GATE_TO_IARATHAEL);
     },
   }),
 
@@ -2285,7 +2231,7 @@ export const iar: Record<string, CardScript> = {
       if (hand.length > 0) {
         ctx.requestCardChoice(
           "iar-harbinger-banish",
-          decisionPrompt("Banish a card from your hand", "card.iar.hand.banish"),
+          decisionPrompt("Banish a card from your hand", "card.common.hand.card.banish"),
           hand.map((card) => card.instanceId),
         );
       }
@@ -2294,12 +2240,12 @@ export const iar: Record<string, CardScript> = {
       if (hook !== "iar-harbinger-banish") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      const shadow = hasType(ctx, card, "shadow");
+      const shadow = hasCardSubtype(ctx, card, "shadow");
       if (ctx.banish(card.instanceId) && shadow) ctx.setState("iarHarbingerShadow", 1);
     },
     canTriggerOnHit: (ctx) => !!ctx.link && ctx.getState("iarHarbingerShadow") > 0,
     onHit(ctx) {
-      ctx.createTokens(GATE, 2);
+      ctx.createTokens(GATE_TO_IARATHAEL, 2);
     },
   }),
 
@@ -2438,11 +2384,11 @@ export const iar: Record<string, CardScript> = {
       {
         event: "card-entered-arena",
         label: "Pay 2 and tap this for the ally's first attack?",
-        condition: (ctx, entered) => !!entered && hasType(ctx, entered, "ally"),
+        condition: (ctx, entered) => !!entered && isAlly(ctx, entered),
         effect(ctx, entered) {
           if (!entered) return;
-          const liveAndUntapped = Object.values(ctx.player(ctx.seat).equipment).some(
-            (card) => card?.instanceId === ctx.self.instanceId && !card.tapped,
+          const liveAndUntapped = equipmentZoneCards(ctx.player(ctx.seat)).some(
+            (card) => card.instanceId === ctx.self.instanceId && !card.tapped,
           );
           if (!liveAndUntapped) return;
           ctx.setState("iarDanseAlly", entered.instanceId);
@@ -2524,7 +2470,7 @@ export const iar: Record<string, CardScript> = {
   },
 
   "crushing headache|1": {
-    canTriggerOnHit: (ctx) => selfHitsHero(ctx) && (ctx.link?.damage ?? 0) >= 4,
+    canTriggerOnHit: (ctx) => selfHits(ctx) && crushTriggered(ctx),
     onHit(ctx) {
       const target = opponentSeat(ctx);
       const hand = [...ctx.player(target).hand];
@@ -2561,30 +2507,13 @@ export const iar: Record<string, CardScript> = {
     },
   },
 
-  "bravery of the blade|1": {
-    additionalCost(ctx) {
-      const hand = ctx.player(ctx.seat).hand;
-      if (hand.length === 0) return;
-      ctx.requestCardChoice(
-        "iar-bravery-charge",
-        decisionPrompt("Charge your hero's soul?", "card.dtd.charge.soul.optional", {
-          optionMessages: chargeDeclineMessages,
-        }),
-        optionalChargeOptions(ctx),
-      );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "iar-bravery-charge" && !isChargeDecline(option)) {
-        const charged = ctx.charge(Number(option));
-        if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
-      }
-    },
-    hasConditionalGoAgain: (ctx) => ctx.getFlag("player", "chargedThisTurn") === true,
-    canTriggerOnHit: (ctx) => selfHits(ctx) && ctx.getFlag("player", "chargedThisTurn") === true,
+  "bravery of the blade|1": chargeAttack({
+    hasConditionalGoAgain: (ctx) => chargedThisTurn(ctx),
+    canTriggerOnHit: (ctx) => selfHits(ctx) && chargedThisTurn(ctx),
     onHit(ctx) {
       ctx.createToken(COURAGE);
     },
-  },
+  }),
 
   "head banging chorus|2": {
     // Static ability: an attack played before this entered the arena still
@@ -2709,7 +2638,7 @@ export const iar: Record<string, CardScript> = {
   "goremass summoning|3": {
     onPlay(ctx) {
       if (ctx.getFlag("player", "banishedSixPlusThisTurn") === true) {
-        ctx.createToken(BLASMOPHET);
+        ctx.createToken(BLASMOPHET_INSATIABLE_HUNGER);
       }
     },
   },
@@ -2730,7 +2659,7 @@ export const iar: Record<string, CardScript> = {
         tap: true,
         label: "Gain 1 resource",
         onActivate(ctx) {
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
         },
       },
       ...zombieAttack().map((ability) => ({ ...ability, label: "Attack" })),
@@ -2817,11 +2746,7 @@ export const iar: Record<string, CardScript> = {
     hasConditionalGoAgain: (ctx) => Number(ctx.getFlag("player", "banishedThisTurn")) > 0,
   },
   "rumbling of i'arathael|1": {
-    onAttackDeclared(ctx) {
-      if (Number(ctx.getFlag("player", "banishedThisTurn")) > 0) {
-        ctx.setFlag("link", "overpower", true);
-      }
-    },
+    hasConditionalOverpower: (ctx) => Number(ctx.getFlag("player", "banishedThisTurn")) > 0,
   },
   "whispers within|1": {
     onDefend(ctx) {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   measureMotionAnchors,
+  unrotatedMotionRect,
   motionFlightDurationMs,
   reducedMotionBatch,
   resolveMotionBatch,
@@ -26,6 +27,35 @@ function anchors({
 }): MotionAnchorSnapshot {
   return { cards: new Map(cards), zones: new Map(zones) };
 }
+
+describe("unrotatedMotionRect", () => {
+  // Bounding box of a 100x140 card turned 9deg.
+  const cos = Math.cos(9 * Math.PI / 180);
+  const sin = Math.sin(9 * Math.PI / 180);
+  const width = 100 * cos + 140 * sin;
+  const height = 100 * sin + 140 * cos;
+  const bounds = { left: 10, top: 20, width, height };
+
+  it("recovers the real card and its angle around the same centre", () => {
+    const rect = unrotatedMotionRect(bounds, `matrix(${cos}, ${sin}, ${-sin}, ${cos}, 0, 12)`, 100, 140);
+    expect(rect.width).toBeCloseTo(100);
+    expect(rect.height).toBeCloseTo(140);
+    expect(rect.rotation).toBeCloseTo(9);
+    expect(rect.left + rect.width / 2).toBeCloseTo(bounds.left + width / 2);
+    expect(rect.top + rect.height / 2).toBeCloseTo(bounds.top + height / 2);
+  });
+
+  it("draws a flipped revealed card upright with only its fan tilt", () => {
+    const rect = unrotatedMotionRect(bounds, `matrix(${-cos}, ${-sin}, ${sin}, ${-cos}, 0, 0)`, 100, 140);
+    expect(rect.rotation).toBeCloseTo(9);
+  });
+
+  it("leaves upright and untransformed cards alone", () => {
+    const flat = { left: 1, top: 2, width: 100, height: 140 };
+    expect(unrotatedMotionRect(flat, "none", 100, 140)).toBe(flat);
+    expect(unrotatedMotionRect(flat, "matrix(1, 0, 0, 1, 0, 40)", 100, 140)).toBe(flat);
+  });
+});
 
 describe("motion geometry", () => {
   it("slides surviving hand cards together as cards depart", () => {

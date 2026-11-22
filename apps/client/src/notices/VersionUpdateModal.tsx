@@ -27,6 +27,11 @@ export function seenUpdate(username: string, id: string): boolean {
   catch { return false; }
 }
 
+function markUpdateSeen(username: string, id: string): void {
+  try { localStorage.setItem(versionUpdateSeenKey(username, id), "1"); }
+  catch { /* In-session dismissal still works when storage is unavailable. */ }
+}
+
 /** Markdown images render inside paragraphs, so the figure is built from
  * spans. Sources outside the protocol allowlist, and images without alt text,
  * are dropped. A failed load falls back to the caption or alt text. */
@@ -47,6 +52,7 @@ function VersionUpdateImageFigure({ src, alt, title }: { src: unknown; alt?: str
       alt={label}
       width={image.width}
       height={image.height}
+      style={image.displayWidth === null ? undefined : { width: image.displayWidth }}
       loading="lazy"
       decoding="async"
       onError={() => setFailed(true)}
@@ -123,6 +129,31 @@ export function VersionUpdateDialog({ notice, onDismiss }: {
   );
 }
 
+/** The shared `/release-notes` link: shows the current update to anyone,
+ * including signed-out visitors and players who already dismissed it. */
+export function ReleaseNotesModal({ username, onClose }: { username: string | null; onClose: () => void }) {
+  const [notice, setNotice] = useState<VersionUpdateNotice | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void apiVersionUpdateNotice(controller.signal).then((result) => {
+      if (controller.signal.aborted) return;
+      if (result.ok && result.notice) setNotice(result.notice);
+      else onClose();
+    }).catch(() => {
+      if (!controller.signal.aborted) onClose();
+    });
+    return () => controller.abort();
+  }, [onClose]);
+
+  if (!notice) return null;
+  const dismiss = () => {
+    if (username) markUpdateSeen(username, notice.id);
+    onClose();
+  };
+  return <VersionUpdateDialog notice={notice} onDismiss={dismiss} />;
+}
+
 export function VersionUpdateModal({ username }: { username: string }) {
   const [notice, setNotice] = useState<VersionUpdateNotice | null>(null);
   const [dismissedId, setDismissedId] = useState<string | null>(null);
@@ -140,8 +171,7 @@ export function VersionUpdateModal({ username }: { username: string }) {
   if (!notice || notice.id === dismissedId || seenUpdate(username, notice.id)) return null;
   const dismiss = () => {
     setDismissedId(notice.id);
-    try { localStorage.setItem(versionUpdateSeenKey(username, notice.id), "1"); }
-    catch { /* Session dismissal still works when storage is unavailable. */ }
+    markUpdateSeen(username, notice.id);
   };
   return <VersionUpdateDialog notice={notice} onDismiss={dismiss} />;
 }

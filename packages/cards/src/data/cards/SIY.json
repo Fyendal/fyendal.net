@@ -2,7 +2,7 @@
  {
   "id": "SIY001",
   "name": "Iyslander",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Ice\nIf it's not your turn, you may play blue 'non-attack' action cards from your arsenal as though they were an instant.\nWhenever you play an Ice card during an opponents turn, create a Frostbite token under their control.",
   "classes": [
    "wizard"
@@ -20,7 +20,7 @@
  {
   "id": "SIY002",
   "name": "Crucible of Aetherweave",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Instant - {r}: The next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 1.",
   "classes": [
    "wizard"
@@ -34,7 +34,7 @@
  {
   "id": "SIY003",
   "name": "Blade Beckoner Helm",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -51,7 +51,7 @@
  {
   "id": "SIY004",
   "name": "Nullrune Hood",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -68,7 +68,7 @@
  {
   "id": "SIY005",
   "name": "Spellfire Cloak",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Spellfire Cloak: Gain {r}. Activate this ability only during an opponent's turn.\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -85,7 +85,7 @@
  {
   "id": "SIY006",
   "name": "Blade Beckoner Gauntlets",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -102,7 +102,7 @@
  {
   "id": "SIY007",
   "name": "Nullrune Gloves",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -119,7 +119,7 @@
  {
   "id": "SIY008",
   "name": "Aetherstorm Wellingtons",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 2",
   "defense": 0,
   "classes": [
@@ -136,7 +136,7 @@
  {
   "id": "SIY009",
   "name": "Blade Beckoner Boots",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -153,7 +153,7 @@
  {
   "id": "SIY010",
   "name": "Fyendal's Fighting Spirit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}.",
   "pitch": 1,
   "cost": 3,
@@ -170,7 +170,7 @@
  {
   "id": "SIY011",
   "name": "Look Tuff",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, it gets -1{p} unless you pay {r}.",
   "pitch": 1,
   "cost": 3,
@@ -187,7 +187,7 @@
  {
   "id": "SIY012",
   "name": "Wounded Bull",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you play this, if you have less {h} than an opposing hero, this gains +1{p}.",
   "pitch": 1,
   "cost": 3,
@@ -204,7 +204,7 @@
  {
   "id": "SIY013",
   "name": "Absorb in Aether",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "The next card you play this turn with an effect that deals arcane damage, instead deals that much arcane damage plus 2.",
   "pitch": 1,
   "cost": 1,
@@ -217,7 +217,7 @@
  {
   "id": "SIY014",
   "name": "Aether Icevein",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 5 arcane damage to any target. If Aether Icevein was fused and deals damage to a hero, they discard a card unless they pay {r}{r}.",
   "pitch": 1,
   "cost": 3,
@@ -236,7 +236,7 @@
  {
   "id": "SIY015",
   "name": "Polar Cap",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 4 arcane damage to any target. If Polar Cap was fused and deals damage to a hero, create a Frostbite token under their control.",
   "pitch": 1,
   "cost": 2,
@@ -255,7 +255,7 @@
  {
   "id": "SIY016",
   "name": "Ice Bolt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 5 arcane damage to any target.",
   "pitch": 1,
   "cost": 2,
@@ -271,7 +271,7 @@
  {
   "id": "SIY017",
   "name": "On the Horizon",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, look at the top card of your deck.",
   "pitch": 1,
   "defense": 4,
@@ -283,7 +283,7 @@
  {
   "id": "SIY018",
   "name": "Aether Icevein",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 4 arcane damage to any target. If Aether Icevein was fused and deals damage to a hero, they discard a card unless they pay {r}{r}.",
   "pitch": 2,
   "cost": 3,
@@ -302,7 +302,7 @@
  {
   "id": "SIY019",
   "name": "Brothers in Arms",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends, you may pay {r}. If you do, it gets +2{d}.",
   "pitch": 3,
   "cost": 2,
@@ -319,7 +319,7 @@
  {
   "id": "SIY020",
   "name": "Aether Hail",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to any target.",
   "pitch": 3,
   "cost": 1,
@@ -335,7 +335,7 @@
  {
   "id": "SIY021",
   "name": "Aether Icevein",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 3 arcane damage to any target. If Aether Icevein was fused and deals damage to a hero, they discard a card unless they pay {r}{r}.",
   "pitch": 3,
   "cost": 3,
@@ -354,7 +354,7 @@
  {
   "id": "SIY022",
   "name": "Arcane Twining",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to any target.\nInstant - Discard this: Amp 1",
   "pitch": 3,
   "cost": 0,
@@ -367,7 +367,7 @@
  {
   "id": "SIY023",
   "name": "Brain Freeze",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nTarget opponent reveals their hand. If Brain Freeze was fused, put an action card with cost 0 from their hand on top of their deck.",
   "pitch": 3,
   "cost": 0,
@@ -386,7 +386,7 @@
  {
   "id": "SIY024",
   "name": "Cold Snap",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Target hero may pay {r}. If they don't, freeze a card in their arsenal or an ally they control until the start of your next turn.\nIf Cold Snap is played from arsenal, draw a card.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -402,7 +402,7 @@
  {
   "id": "SIY025",
   "name": "Emeritus Scolding",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero. If Emeritus Scolding is played during an opponents turn, instead deal 4 arcane damage to them.",
   "pitch": 3,
   "cost": 2,
@@ -415,7 +415,7 @@
  {
   "id": "SIY026",
   "name": "Frosting",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to any target.",
   "pitch": 3,
   "cost": 0,
@@ -431,7 +431,7 @@
  {
   "id": "SIY027",
   "name": "Ice Bolt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to any target.",
   "pitch": 3,
   "cost": 2,
@@ -447,7 +447,7 @@
  {
   "id": "SIY028",
   "name": "Ice Eternal",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Iyslander Specialization\nIce Fusion\nCreate X Frostbite tokens under target hero's control. Then, if Ice Eternal was fused, deal arcane damage to that hero equal to the number of Frostbites they control.",
   "pitch": 3,
   "defense": 3,
@@ -466,7 +466,7 @@
  {
   "id": "SIY029",
   "name": "Photon Splicing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to any target.\nInstant - Discard this: Amp 1",
   "pitch": 3,
   "cost": 1,
@@ -479,7 +479,7 @@
  {
   "id": "SIY030",
   "name": "Pyroglyphic Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If your hero would be dealt arcane damage, prevent 1 arcane damage that source would deal.\nAt the beginning of your action phase, destroy Pyroglyphic Protection.",
   "pitch": 3,
   "cost": 2,
@@ -492,7 +492,7 @@
  {
   "id": "SIY031",
   "name": "Stir the Aetherwinds",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play your next Wizard 'non-attack' action card this turn as though it were an instant and if it has an effect that deals arcane damage, instead that effect deals that much arcane damage plus 1.",
   "pitch": 3,
   "cost": 2,
@@ -505,7 +505,7 @@
  {
   "id": "SIY032",
   "name": "Voltic Bolt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to target hero.",
   "pitch": 3,
   "cost": 2,
@@ -518,7 +518,7 @@
  {
   "id": "SIY033",
   "name": "Winter's Bite",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Target hero discards a card unless they pay {r}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -534,7 +534,7 @@
  {
   "id": "SIY034",
   "name": "Frost Spike",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Create a Frostbite token in an exposed head, chest, arms, or legs zone.",
   "pitch": 3,
   "cost": 0,
@@ -549,7 +549,7 @@
  {
   "id": "SIY035",
   "name": "Frostbite",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Cards and abilities cost you an additional {r} to play or activate.\nAt the beginning of your end phase or when you play a card or activate an ability, destroy Frostbite.",
   "subtypes": [
    "elemental"

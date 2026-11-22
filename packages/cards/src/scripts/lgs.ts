@@ -1,7 +1,9 @@
 import type { CardScript } from "@fyendal/engine";
 import {
+  crushTriggered,
   discardSixPlusPayoff,
   decisionPrompt,
+  equippedCards,
   isSixPlus,
   lessonCounter,
   localizedCardLog,
@@ -10,8 +12,7 @@ import {
   opponentSeat,
   queueIntimidate,
 } from "./shared-helpers.js";
-
-const RUNECHANT = "SBA036";
+import { RUNECHANT } from "./tokens.js";
 
 function jackOLantern(pitch: 1 | 2 | 3): CardScript {
   return {
@@ -48,12 +49,10 @@ export const lgs: Record<string, CardScript> = {
   },
   "batter to a pulp|1": {
     combatDamageUnpreventableAtLeast: 4,
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-    },
+    canTriggerOnHit: crushTriggered,
     onHit(ctx) {
-      const equipment = Object.values(ctx.player(opponentSeat(ctx)).equipment).filter(
-        (card) => card !== undefined && (ctx.cardData(card.cardId).defense ?? 0) === 0,
+      const equipment = equippedCards(ctx, opponentSeat(ctx)).filter(
+        (card) => (ctx.cardData(card.cardId).defense ?? 0) === 0,
       );
       if (equipment.length) {
         ctx.requestCardChoice(

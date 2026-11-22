@@ -21,6 +21,7 @@ describe("Classic Constructed shared decks", () => {
       "precon-aha",
       "precon-azs",
       "precon-aol",
+      "precon-amo",
     ]);
     expect(precon("precon-ako")?.name).toBe("Armory Deck: Kayo");
   });
@@ -47,7 +48,7 @@ describe("Classic Constructed shared decks", () => {
   it("registers complete 60-card pools containing only implemented cards", () => {
     for (const deck of precons.filter((candidate) => candidate.format === "cc")) {
       expect(deck.pool.deck, `${deck.id} main deck`).toHaveLength(60);
-      expect(cardData[deck.pool.heroId]?.cardType, `${deck.id} hero`).toBe("hero");
+      expect(cardData[deck.pool.heroId]?.types, `${deck.id} hero`).toContain("hero");
       for (const id of [
         ...deck.pool.weaponIds,
         ...deck.pool.equipmentPool,
@@ -177,6 +178,46 @@ describe("Classic Constructed shared decks", () => {
     expect(names.filter((name) => name === "Saving Grace")).toHaveLength(3);
   });
 
+  it("keeps the complete Aurora pool internal, legal and implemented", () => {
+    const aurora = precon("bot-aurora-tempest");
+    expect(aurora).toMatchObject({ name: "Aurora, Legacy of Tempest", format: "cc", botOnly: true });
+    expect(preconsForFormat("cc").map((deck) => deck.id)).not.toContain("bot-aurora-tempest");
+    const pool = aurora!.pool;
+    expect(pool.heroId).toBe("OMN047");
+    expect(pool.weaponIds).toEqual(["SBA002"]);
+    expect(pool.deck).toHaveLength(60);
+    expect(pool.sideboard).toHaveLength(10);
+    expect(pool.equipmentPool).toHaveLength(9);
+    expect(formatLegalityIssues(cardData, pool, "cc")).toEqual([]);
+    for (const id of [...pool.weaponIds, ...pool.equipmentPool, ...pool.deck, ...pool.sideboard!]) {
+      expect(cardData[id], id).toBeTruthy();
+      expect(isImplemented(cardData[id]!), id).toBe(true);
+    }
+    const names = [...pool.deck, ...pool.sideboard!].map((id) => cardData[id]!.name);
+    expect(names.filter((name) => name === "Arc Lightning")).toHaveLength(3);
+    expect(names.filter((name) => name === "Lightning Surge")).toHaveLength(4);
+    expect(names.filter((name) => name === "Scar for a Scar")).toHaveLength(3);
+  });
+
+  it("keeps the complete Fang pool internal, legal and implemented", () => {
+    const fang = precon("bot-fang-dracai");
+    expect(fang).toMatchObject({ name: "Fang, Dracai of Blades", format: "cc", botOnly: true });
+    expect(preconsForFormat("cc").map((deck) => deck.id)).not.toContain("bot-fang-dracai");
+    const pool = fang!.pool;
+    expect(pool.heroId).toBe("HNT098");
+    expect(pool.weaponIds).toEqual(["HNT100", "HNT100"]);
+    expect(pool.deck).toHaveLength(60);
+    expect(pool.sideboard).toHaveLength(11);
+    expect(pool.equipmentPool).toHaveLength(7);
+    expect(formatLegalityIssues(cardData, pool, "cc")).toEqual([]);
+    for (const id of [...pool.weaponIds, ...pool.equipmentPool, ...pool.deck, ...pool.sideboard!]) {
+      expect(cardData[id], id).toBeTruthy();
+      expect(isImplemented(cardData[id]!), id).toBe(true);
+    }
+    const blue = pool.deck.filter((id) => cardData[id]!.pitch === 3);
+    expect(blue).toHaveLength(15);
+  });
+
   it("registers the open-pool Starvo boss only for the practice bot", () => {
     const starvo = precon("bot-starvo-boss");
     expect(starvo).toMatchObject({
@@ -198,6 +239,23 @@ describe("Classic Constructed shared decks", () => {
 });
 
 describe("Silver Age bot decks", () => {
+  it("keeps the complete SAGE Dorinthea pool internal, legal and implemented", () => {
+    const dorinthea = precon("bot-dorinthea-sage");
+    expect(dorinthea).toMatchObject({ name: "SAGE Dorinthea", format: "silver-age", botOnly: true });
+    expect(preconsForFormat("silver-age").map((deck) => deck.id)).not.toContain("bot-dorinthea-sage");
+    const pool = dorinthea!.pool;
+    expect(cardData[pool.heroId]?.name).toBe("Dorinthea");
+    expect(pool.weaponIds.map((id) => cardData[id]?.name)).toEqual(["Decimator Great Axe"]);
+    expect(pool.equipmentPool).toHaveLength(8);
+    expect(pool.deck).toHaveLength(46);
+    expect(formatLegalityIssues(cardData, pool, "silver-age")).toEqual([]);
+    for (const id of [...pool.weaponIds, ...pool.equipmentPool, ...pool.deck]) {
+      expect(cardData[id], id).toBeTruthy();
+      expect(isImplemented(cardData[id]!), id).toBe(true);
+    }
+  });
+
+
   it("keeps the complete SAGE Ira pool internal, legal and implemented", () => {
     const ira = precon("bot-ira-sage");
     expect(ira).toMatchObject({ name: "SAGE Ira", format: "silver-age", botOnly: true });

@@ -1,9 +1,13 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  boostedThisTurn,
+  boostsThisChain,
   cardNamed,
   decisionMessage,
   decisionPrompt,
+  hasCardSubtype,
   hyperDriverCounterFromBoostBanish,
+  isItem,
   localizedCardLog,
   opponentSeat,
 } from "./shared-helpers.js";
@@ -22,7 +26,7 @@ function firstHyperDriver(ctx: ScriptCtx) {
   return ctx.player(ctx.seat).board.find((c) => isHyperDriver(ctx, c));
 }
 
-function addHyperSteam(ctx: ScriptCtx, instanceId: number): void {
+function addSteamToHyperDriver(ctx: ScriptCtx, instanceId: number): void {
   const driver = ctx.player(ctx.seat).board.find((c) => c.instanceId === instanceId && isHyperDriver(ctx, c));
   if (!driver) return;
   const steam = driver.counters?.steam ?? 0;
@@ -31,7 +35,7 @@ function addHyperSteam(ctx: ScriptCtx, instanceId: number): void {
     localizedCardLog(
       ctx,
       `${ctx.data.name}: Hyper Driver gains a steam counter (${steam} → ${steam + 1})`,
-      "card.log.sda.hyperdriver.counter",
+      "card.log.common.hyperdriver.counter",
       { from: steam, to: steam + 1 },
     ),
   );
@@ -39,10 +43,6 @@ function addHyperSteam(ctx: ScriptCtx, instanceId: number): void {
 
 function controlsHyperDriver(ctx: ScriptCtx): boolean {
   return firstHyperDriver(ctx) !== undefined;
-}
-
-function boostedLinks(ctx: ScriptCtx): number {
-  return ctx.state.chain.filter((l) => l.attacker === ctx.seat && l.flags.boosted === true).length;
 }
 
 const hyperCounterFromBanish = hyperDriverCounterFromBoostBanish();
@@ -58,7 +58,7 @@ export const sda: Record<string, CardScript> = {
       const candidates = p.deck.filter((card) => {
         const data = ctx.cardData(card.cardId);
         return (
-          ctx.cardTypes(card).includes("mechanologist") && ctx.cardTypes(card).includes("item") && (data.cost ?? 0) <= 2
+          hasCardSubtype(ctx, card, "mechanologist") && isItem(ctx, card) && (data.cost ?? 0) <= 2
         );
       });
       if (candidates.length === 0) return;
@@ -123,7 +123,7 @@ export const sda: Record<string, CardScript> = {
     ],
     modifyAttack(ctx) {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return 0;
-      return 1 + boostedLinks(ctx);
+      return 1 + boostsThisChain(ctx);
     },
   },
 
@@ -156,7 +156,7 @@ export const sda: Record<string, CardScript> = {
       timing: "instant",
       destroySelfCost: true,
       label: "Destroy: gain 1 action point",
-      canActivate: (ctx) => ctx.getFlag("player", "boostedThisTurn") === true,
+      canActivate: (ctx) => boostedThisTurn(ctx),
       onActivate(ctx) {
         ctx.gainActionPoint();
       },
@@ -175,7 +175,7 @@ export const sda: Record<string, CardScript> = {
   "jump start|3": jumpStart,
   "rev up|1": jumpStart,
   "out pace|1": { cannotBeDefendedByEquipment: true },
-  "overblast|1": { modifyAttack: boostedLinks },
+  "overblast|1": { modifyAttack: boostsThisChain },
   "under loop|1": {
     onHit(ctx) {
       ctx.setFlag("link", "attackToBottom", true);
@@ -186,7 +186,7 @@ export const sda: Record<string, CardScript> = {
     onPlay(ctx) {
       const drivers = ctx.player(ctx.seat).board.filter((card) => isHyperDriver(ctx, card));
       if (drivers.length === 1) {
-        addHyperSteam(ctx, drivers[0]!.instanceId);
+        addSteamToHyperDriver(ctx, drivers[0]!.instanceId);
       } else if (drivers.length > 1) {
         ctx.requestCardChoice(
           "re-charge-hyper-driver",
@@ -205,7 +205,7 @@ export const sda: Record<string, CardScript> = {
       );
     },
     onChoose(ctx, hook, option) {
-      if (hook === "re-charge-hyper-driver") addHyperSteam(ctx, Number(option));
+      if (hook === "re-charge-hyper-driver") addSteamToHyperDriver(ctx, Number(option));
     },
   },
 
@@ -229,7 +229,7 @@ export const sda: Record<string, CardScript> = {
       return (
         ctx.link?.targetAllyId === undefined &&
         ctx.link?.attackCardType === "action" &&
-        ctx.cardTypes(ctx.link.attackingCard).includes("mechanologist")
+        hasCardSubtype(ctx, ctx.link.attackingCard, "mechanologist")
       );
     },
     onHit(ctx) {
@@ -247,7 +247,7 @@ export const sda: Record<string, CardScript> = {
       {
         event: "card-boosted",
         label: "Remove a steam counter and gain 1 resource",
-        labelMessage: decisionMessage("card.trigger.hyperdriver.boost"),
+        labelMessage: decisionMessage("card.trigger.common.hyperdriver.boost"),
         condition(ctx) {
           return (
             ctx.getFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`) !== true && ctx.getCounter("steam") > 0
@@ -260,7 +260,7 @@ export const sda: Record<string, CardScript> = {
           const steam = ctx.getCounter("steam");
           if (steam <= 0) return;
           ctx.setCounter("steam", steam - 1);
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
           ctx.logPublic(
             localizedCardLog(
               ctx,

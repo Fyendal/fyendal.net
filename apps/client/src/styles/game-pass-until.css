@@ -128,8 +128,8 @@
 }
 .pass-until-option:focus-visible { box-shadow: inset 0 0 0 1px #ffd47980; }
 /* The armed mode carries a gold notch on its leading edge. */
-.pass-until-option[aria-checked="true"] { background: #ffd47917; color: var(--gold); }
-.pass-until-option[aria-checked="true"]::before {
+.pass-until-option[role="menuitemradio"][aria-checked="true"] { background: #ffd47917; color: var(--gold); }
+.pass-until-option[role="menuitemradio"][aria-checked="true"]::before {
   content: "";
   position: absolute;
   inset: 8px auto 8px 0;
@@ -142,7 +142,7 @@
   height: 16px;
   color: var(--bronze);
 }
-.pass-until-option[aria-checked="true"] .pass-until-option-icon { color: var(--gold); }
+.pass-until-option[role="menuitemradio"][aria-checked="true"] .pass-until-option-icon { color: var(--gold); }
 .pass-until-option-name { font-size: 13px; font-weight: 600; line-height: 1.3; white-space: nowrap; }
 .pass-until-keys {
   display: inline-flex;
@@ -165,13 +165,37 @@
   color: #cfc3adcc;
   font: 700 10px/1 var(--font-lobby-ui);
 }
+.pass-until-hold {
+  color: #cfc3adcc;
+  font: 600 10px/1 var(--font-lobby-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.pass-until-option-toggle {
+  grid-template-columns: 16px 1fr;
+  margin-top: 4px;
+}
+.pass-until-option-toggle .pass-until-option-name { font-weight: 500; white-space: normal; }
+.pass-until-checkbox {
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--bronze);
+  border-radius: 3px;
+  color: var(--gold);
+}
+.pass-until-option-toggle[aria-checked="true"] .pass-until-checkbox { border-color: var(--gold); background: #ffd47922; }
+.pass-until-checkbox .ui-icon { width: 10px; height: 10px; }
 .pass-until-option-stop {
-  display: block;
+  display: flex;
+  justify-content: space-between;
   margin-top: 4px;
   color: #ff9a8f;
   font-size: 13px;
   font-weight: 600;
 }
+.pass-until-option-toggle::after,
 .pass-until-option-stop::after {
   content: "";
   position: absolute;
@@ -230,8 +254,147 @@
   color: var(--gold);
 }
 
+/* Hint: after a run of passes the menu opens unasked with its keys lit, the
+   toggle rings twice, and the Hold keycap acts out the hold. */
+.pass-until-toggle-hint,
+.pass-until-toggle-hint:hover {
+  border-color: var(--gold);
+  background: #ffd4791a;
+  color: var(--gold);
+  animation: pass-until-ring 1s ease-out 2;
+}
+@keyframes pass-until-ring {
+  from { box-shadow: 0 0 0 0 #ffd479b3; }
+  to { box-shadow: 0 0 0 10px #ffd47900; }
+}
+.pass-until-menu-peek {
+  border-color: #ffd479b3;
+  box-shadow: 0 16px 40px #000c, 0 0 0 3px #ffd47914;
+  transform-origin: top right;
+  animation: pass-until-peek-in 220ms cubic-bezier(.2, .9, .3, 1.2);
+}
+.pass-until-menu-peek.pass-until-menu-above { transform-origin: bottom right; }
+/* Grows out of the toggle so it reads as coming from there. */
+@keyframes pass-until-peek-in {
+  from { opacity: 0; transform: scale(.6); }
+}
+.pass-until-heading-hint {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 3px 4px 10px;
+  color: var(--text-secondary);
+}
+.pass-until-hint-reason {
+  display: block;
+  margin-bottom: 1px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+.pass-until-hint-close {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-muted);
+}
+.pass-until-hint-close:hover { background: #ffd47912; color: var(--text-primary); }
+.pass-until-hint-close:focus-visible { outline: 2px solid var(--focus-ring); }
+.pass-until-hint-close > * { width: 10px; height: 10px; }
+.pass-until-menu-peek .pass-until-keycap,
+.pass-until-menu-peek .shortcut-key {
+  border-color: var(--gold);
+  background: #ffd4791f;
+  color: var(--gold);
+}
+.pass-until-menu-peek .pass-until-hold { color: var(--gold); }
+
+/* Holding Space fills the keycap on Pass. */
+.pass-until-key-hold,
+.btn-pass .shortcut-key { overflow: hidden; }
+.pass-until-key-hold::before,
+.btn-pass .shortcut-key::before { z-index: 1; }
+.pass-until-key-hold::after,
+.btn-pass .shortcut-key::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.btn-pass:has(+ .pass-until-holding) .shortcut-key {
+  border-color: var(--gold);
+  color: #2a1a08;
+  transition: border-color 0s 150ms, color 200ms 250ms;
+}
+/* Waits out a tap, then fills for the rest of the 500ms hold. */
+.btn-pass:has(+ .pass-until-holding) .shortcut-key::after {
+  transform: scaleX(1);
+  transition: transform 350ms linear 150ms;
+}
+.pass-until-menu-peek .pass-until-key-hold { animation: pass-until-hold-ink 2.4s infinite; }
+.pass-until-menu-peek .pass-until-key-hold::after { animation: pass-until-hold-fill 2.4s ease-in-out infinite; }
+@keyframes pass-until-hold-fill {
+  0%, 12% { transform: scaleX(0); opacity: 1; }
+  55%, 78% { transform: scaleX(1); opacity: 1; }
+  92%, 100% { transform: scaleX(1); opacity: 0; }
+}
+@keyframes pass-until-hold-ink {
+  0%, 28% { color: var(--gold); }
+  48%, 80% { color: #2a1a08; }
+  95%, 100% { color: var(--gold); }
+}
+
+/* Phones: the hint is a bubble over the toggle that opens the sheet. */
+.pass-until-hint-bubble {
+  position: fixed;
+  z-index: 1000;
+  display: grid;
+  gap: 2px;
+  max-width: calc(100vw - 24px);
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid #ffd479b3;
+  border-radius: 8px;
+  background: var(--surface-panel);
+  box-shadow: 0 16px 40px #000c, 0 0 0 3px #ffd47914;
+  clip-path: none;
+  color: var(--text-primary);
+  font: 600 14px/1.3 var(--font-lobby-ui);
+  letter-spacing: normal;
+  text-align: start;
+  text-transform: none;
+  animation: pass-until-menu-up 120ms ease-out;
+}
+.pass-until-hint-bubble small { color: var(--text-secondary); font-size: 12.5px; font-weight: 500; }
+
 @media (prefers-reduced-motion: reduce) {
   .pass-until-run,
-  .pass-until-menu { animation: none; }
+  .pass-until-menu,
+  .pass-until-hint-bubble,
+  .pass-until-toggle-hint,
+  .pass-until-menu-peek .pass-until-key-hold,
+  .pass-until-menu-peek .pass-until-key-hold::after { animation: none; }
+  .pass-until-menu-peek .pass-until-key-hold { color: #2a1a08; }
+  .pass-until-menu-peek .pass-until-key-hold::after { transform: scaleX(.7); }
 }
-.table[data-motion-preference="reduced"] .pass-until-run { animation: none; }
+.table[data-motion-preference="reduced"] .pass-until-run,
+.table[data-motion-preference="reduced"] .pass-until-toggle-hint { animation: none; }
+/* The peek is portalled out of the table that carries the preference. */
+body:has(.table[data-motion-preference="reduced"]) .pass-until-menu-peek { animation: none; }
+body:has(.table[data-motion-preference="reduced"]) .pass-until-menu-peek .pass-until-key-hold {
+  color: #2a1a08;
+  animation: none;
+}
+body:has(.table[data-motion-preference="reduced"]) .pass-until-menu-peek .pass-until-key-hold::after {
+  transform: scaleX(.7);
+  animation: none;
+}

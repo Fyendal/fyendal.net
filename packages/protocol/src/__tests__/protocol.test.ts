@@ -12,6 +12,7 @@ import {
   decodePlayerReportResponse,
   decodeApiError,
   decodeClientMessage,
+  decodeManualEdit,
   decodeDeckDetailResponse,
   decodeDeckInvalidResponse,
   decodeDeckArtRequest,
@@ -21,7 +22,9 @@ import {
   decodeGameView,
   decodeGameLogViewEntry,
   decodeGameMessage,
+  decodeGameClockSummary,
   decodeLoginResponse,
+  decodeRoomClock,
   decodeOkResponse,
   decodeReplayFile,
   decodeReplayNoteInput,
@@ -115,7 +118,7 @@ describe("semantic game messages", () => {
     "engine.decision.token.playerorder",
     "engine.decision.token.next",
     "engine.decision.wager.next",
-    "card.sea.damage.arcane.target",
+    "card.common.arcane.damage.target",
     "card.sea.target.card",
     "card.sea.treasure.counter.add",
     "card.sea.treasure.counter.remove",
@@ -352,6 +355,8 @@ const gameView = () => ({
     stagedDefense: 3,
     stagedAttack: 5,
     stagedAttackModifiers: [{ sourceCardId: "WTR001", amount: 1 }],
+    defenderDefense: [{ instanceId: 1, defense: 3, attack: 5, triggersPhantasm: true }],
+    reactionDefense: [{ instanceId: 1, defense: 3 }],
   },
   winner: null,
   log: ["started"],
@@ -394,9 +399,12 @@ describe("client messages", () => {
     { type: "chat-send", username: "Alice_1", text: "hello", clientMessageId: "message-123" },
     { type: "chat-read", username: "Alice_1", throughId: "123" },
     { type: "create-friend-room", username: "Alice_1", format: "cc", deckId: "deck" },
+    { type: "create-friend-room", username: "Alice_1", format: "cc", deckId: "deck", sandbox: true },
     { type: "friend-game-invite-dismiss", inviteId: "invite-123" },
     { type: "create-room", format: "cc", deckId: "precon-asr" },
     { type: "create-room", format: "silver-age", deckId: "deck", private: true },
+    { type: "create-room", format: "cc", deckId: "deck", private: true, sandbox: false },
+    { type: "create-room", format: "cc", deckId: "deck", private: true, sandbox: true },
     { type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "briar" },
     { type: "create-bot-room", format: "silver-age", deckId: "precon-ska", bot: "kayo" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira" },
@@ -405,9 +413,16 @@ describe("client messages", () => {
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "levia" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "starvo" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "boltyn" },
+    { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "aurora" },
     { type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "ira-sage" },
+    { type: "create-bot-room", format: "silver-age", deckId: "precon-sba", bot: "dorinthea" },
+    { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "fang" },
     { type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "ira", searchForPlayer: true, avoidRoomCodes: ["ABC123"] },
     { type: "create-bot-room", deckId: "precon-sba" },
+    { type: "create-solo-room", format: "cc", deckId: "deck", opponentDeckId: "precon-asr" },
+    { type: "create-solo-room", format: "silver-age", deckId: "precon-sba", opponentDeckId: "precon-sba", cardPoolMode: "open" },
+    { type: "solo-seat", seat: 0 },
+    { type: "solo-seat", seat: 1 },
     { type: "join-room", code: "ABC123", token: "seat-token", deckId: "deck", spectate: false },
     { type: "inspect-room", code: "ABC123" },
     { type: "list-rooms" },
@@ -432,6 +447,8 @@ describe("client messages", () => {
     { type: "runechant-skip", enabled: true },
     { type: "runechant-skip", enabled: false },
     { type: "seismic-surge-skip", enabled: true },
+    { type: "remember-target", optionId: "12" },
+    { type: "remember-target", optionId: "12", commandId: "00000000-0000-4000-8000-000000000001", expectedVersion: 3 },
     { type: "leave-room" },
     { type: "leave-room", endGame: true },
     { type: "undo" },
@@ -481,6 +498,7 @@ describe("client messages", () => {
     { kind: "defend", instanceIds: [1], pitchInstanceIds: [2] },
     { kind: "stage-defenders", instanceIds: [1] },
     { kind: "choose", optionId: "yes" },
+    { kind: "choose", optionId: "pay 3", pitchInstanceIds: [4, 5] },
     { kind: "choose-many", optionIds: ["11", "12", "13"] },
     { kind: "order-triggers", optionIds: ["41:0", "42:0"] },
     { kind: "skip-runechant" },
@@ -530,6 +548,54 @@ describe("client messages", () => {
     }
   });
 
+  it("decodes sandbox edits with exact keys", () => {
+    expect(decodeClientMessage({ type: "sandbox-edit", seat: 0, edit: { kind: "set-life", life: 12 } })).not.toBeNull();
+    expect(decodeClientMessage({
+      type: "sandbox-edit", seat: 1, edit: { kind: "set-resources", resources: 3 }, commandId: "00000000-0000-4000-8000-000000000001", expectedVersion: 4,
+    })).not.toBeNull();
+    expect(decodeManualEdit({ kind: "set-life", life: 5 })).toEqual({ kind: "set-life", life: 5 });
+    expect(decodeManualEdit({ kind: "reorder-deck", instanceIds: [3, 0, 7] })).toEqual({ kind: "reorder-deck", instanceIds: [3, 0, 7] });
+    expect(decodeManualEdit({ kind: "reorder-deck", instanceIds: Array.from({ length: 256 }, (_, i) => i) })).not.toBeNull();
+    expect(decodeManualEdit({ kind: "shuffle-deck" })).toEqual({ kind: "shuffle-deck" });
+    expect(decodeManualEdit({ kind: "reveal-deck" })).toEqual({ kind: "reveal-deck" });
+    for (const to of ["hand", "deck-top", "deck-bottom", "graveyard", "banish"]) {
+      expect(decodeManualEdit({ kind: "move-card", instanceId: 4, to })).toEqual({ kind: "move-card", instanceId: 4, to });
+    }
+    for (const edit of [
+      { kind: "set-life" },
+      { kind: "set-life", life: 1.5 },
+      { kind: "set-life", life: "5" },
+      { kind: "set-life", life: 5, extra: true },
+      { kind: "set-life", resources: 5 },
+      { kind: "set-resources", resources: Number.MAX_SAFE_INTEGER + 1 },
+      { kind: "set-chi", chi: 1 },
+      { kind: "reorder-deck" },
+      { kind: "reorder-deck", instanceIds: [1, -2] },
+      { kind: "reorder-deck", instanceIds: [1, 2.5] },
+      { kind: "reorder-deck", instanceIds: ["1"] },
+      { kind: "reorder-deck", instanceIds: Array.from({ length: 257 }, (_, i) => i) },
+      { kind: "reorder-deck", instanceIds: [1], extra: 1 },
+      { kind: "shuffle-deck", seed: 1 },
+      { kind: "reveal-deck", seat: 0 },
+      { kind: "move-card", instanceId: 4 },
+      { kind: "move-card", instanceId: -1, to: "hand" },
+      { kind: "move-card", instanceId: "4", to: "hand" },
+      { kind: "move-card", instanceId: 4, to: "deck" },
+      { kind: "move-card", instanceId: 4, to: "arsenal" },
+      { kind: "move-card", instanceId: 4, to: "hand", seat: 1 },
+      null,
+      [],
+    ]) {
+      expect(decodeManualEdit(edit)).toBeNull();
+      expect(decodeClientMessage({ type: "sandbox-edit", seat: 0, edit })).toBeNull();
+    }
+    for (const seat of [2, -1, "0", null, undefined]) {
+      expect(decodeClientMessage({ type: "sandbox-edit", seat, edit: { kind: "set-life", life: 5 } })).toBeNull();
+    }
+    expect(decodeClientMessage({ type: "sandbox-edit", seat: 0, edit: { kind: "set-life", life: 5 }, extra: 1 })).toBeNull();
+    expect(decodeClientMessage({ type: "sandbox-edit", seat: 0, edit: { kind: "set-life", life: 5 }, commandId: "00000000-0000-4000-8000-000000000001" })).toBeNull();
+  });
+
   it("rejects unknown fields, unsafe integers, oversized data, bad nesting, and non-literal Boost", () => {
     expect(decodeClientMessage({ type: "list-rooms", extra: true })).toBeNull();
     expect(decodeClientMessage({ type: "create-bot-room", format: "classic-battles", deckId: "precon-asr" })).toBeNull();
@@ -538,6 +604,16 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "queue-join", format: "cc" })).toBeNull();
     expect(decodeClientMessage({ type: "join-room", code: "ABC123", hero: "rhinar" })).toBeNull();
     expect(decodeClientMessage({ type: "create-bot-room", format: "cc", deckId: "precon-asr", bot: "unknown" })).toBeNull();
+    // Bot rooms convert on first sandbox edit; creation takes no flag.
+    expect(decodeClientMessage({ type: "create-bot-room", format: "cc", deckId: "precon-asr", sandbox: true })).toBeNull();
+    expect(decodeClientMessage({ type: "create-solo-room", format: "cc", deckId: "deck" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-solo-room", deckId: "deck", opponentDeckId: "deck" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-solo-room", format: "cc", deckId: "deck", opponentDeckId: "" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-solo-room", format: "cc", deckId: "deck", opponentDeckId: "deck", bot: "ira" })).toBeNull();
+    for (const seat of [2, -1, "0", null, 0.5, undefined]) {
+      expect(decodeClientMessage({ type: "solo-seat", seat })).toBeNull();
+    }
+    expect(decodeClientMessage({ type: "solo-seat" })).toBeNull();
     expect(decodeClientMessage({ type: "auth", token: "x".repeat(129) })).toBeNull();
     expect(decodeClientMessage({ type: "friend-request", username: "has space" })).toBeNull();
     expect(decodeClientMessage({ type: "chat-send", username: "Alice", text: "x".repeat(1_001), clientMessageId: "message-1" })).toBeNull();
@@ -545,7 +621,10 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "chat-read", username: "Alice", throughId: "9007199254740992" })).not.toBeNull();
     expect(decodeClientMessage({ type: "chat-read", username: "Alice", throughId: "1.5" })).toBeNull();
     expect(decodeClientMessage({ type: "create-friend-room", username: "Alice", format: "classic-battles", deckId: "deck" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-friend-room", username: "Alice", format: "cc", deckId: "deck", sandbox: "yes" })).toBeNull();
+    expect(decodeClientMessage({ type: "create-room", format: "cc", deckId: "deck", private: true, sandbox: 1 })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "choose", optionId: "x".repeat(257) } })).toBeNull();
+    expect(decodeClientMessage({ type: "intent", intent: { kind: "choose", optionId: "pay 3", pitchInstanceIds: [-1] } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: Number.MAX_SAFE_INTEGER + 1, pitchInstanceIds: [] } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: 1, pitchInstanceIds: [], pitchRequired: -1 } })).toBeNull();
     expect(decodeClientMessage({ type: "intent", intent: { kind: "play-card", instanceId: 1, pitchInstanceIds: [], deferPlayPresentation: false } })).toBeNull();
@@ -577,6 +656,8 @@ describe("client messages", () => {
     expect(decodeClientMessage({ type: "runechant-skip" })).toBeNull();
     expect(decodeClientMessage({ type: "runechant-skip", enabled: "yes" })).toBeNull();
     expect(decodeClientMessage({ type: "seismic-surge-skip" })).toBeNull();
+    expect(decodeClientMessage({ type: "remember-target" })).toBeNull();
+    expect(decodeClientMessage({ type: "remember-target", optionId: 12 })).toBeNull();
     expect(decodeClientMessage({ type: "undo", target: "entire-game" })).toBeNull();
     expect(decodeClientMessage({ type: "emote", message: "custom text" })).toBeNull();
     expect(decodeClientMessage({ type: "emote", message: "Well played!" })).toBeNull();
@@ -604,14 +685,38 @@ describe("GameView and server messages", () => {
     Object.assign(malformed.turnFacts.players[0]!, { banishedSixPlusThisTurn: "yes" });
     expect(decodeGameView(malformed)).toBeNull();
   });
+
+  it("accepts the lost hero abilities fact and rejects malformed values", () => {
+    const view = gameView();
+    Object.assign(view.players[0]!, { heroAbilitiesLost: true });
+    expect(decodeGameView(view)).not.toBeNull();
+    Object.assign(view.players[0]!, { heroAbilitiesLost: false });
+    expect(decodeGameView(view)).toBeNull();
+  });
+
+  it("accepts defender defense entries without the optional phantasm flag", () => {
+    const view = gameView();
+    view.pendingDecision.defenderDefense = [{ instanceId: 1, defense: 3, attack: 5 }] as never;
+    expect(decodeGameView(view)).not.toBeNull();
+    view.pendingDecision.defenderDefense = [{ instanceId: 1, defense: 3, attack: 5, triggersPhantasm: false }] as never;
+    expect(decodeGameView(view)).toBeNull();
+  });
+  it("rejects reaction defense entries with extra or negative values", () => {
+    const view = gameView();
+    view.pendingDecision.reactionDefense = [{ instanceId: 1, defense: -1 }] as never;
+    expect(decodeGameView(view)).toBeNull();
+    view.pendingDecision.reactionDefense = [{ instanceId: 1, defense: 3, attack: 5 }] as never;
+    expect(decodeGameView(view)).toBeNull();
+  });
   it("accepts the public soul turn facts and rejects malformed values", () => {
     const current = gameView();
     Object.assign(current.turnFacts.players[0]!, {
       chargesThisTurn: 2, yellowSoulThisTurn: true, soulBanishedThisChain: 1, weaponAttacksProhibited: true,
+      actionLimit: { turn: 4, remaining: 1 },
     });
     expect(decodeGameView(current)).not.toBeNull();
     for (const malformed of [{ chargesThisTurn: -1 }, { yellowSoulThisTurn: "yes" }, { soulBanishedThisChain: 1.5 },
-      { weaponAttacksProhibited: 1 }]) {
+      { weaponAttacksProhibited: 1 }, { actionLimit: { turn: 4 } }, { actionLimit: { turn: 4, remaining: -1 } }]) {
       const view = gameView();
       Object.assign(view.turnFacts.players[0]!, malformed);
       expect(decodeGameView(view), JSON.stringify(malformed)).toBeNull();
@@ -916,6 +1021,7 @@ describe("GameView and server messages", () => {
           id: "engine.decision.crank",
           values: { card: { kind: "card", cardId: "SEA123" } },
         },
+        warningMessage: { id: "card.trigger.common.silver.equip.blocked" },
         options: ["yes", "no"],
         optionMessages: [{ id: "common.option.yes" }, { id: "common.option.no" }],
       },
@@ -1174,6 +1280,8 @@ describe("GameView and server messages", () => {
       { type: "game-started", version: 1 },
       { type: "state", version: 1, view: gameView(), transition: { fromVersion: 0, kind: "forward", events: [{ kind: "move", from: { kind: "deck", seat: 0, position: "top" }, to: { kind: "hand", seat: 0 }, count: 1 }] }, playerProfiles, yourSeat: 0, legal: [{ kind: "play-card", instanceId: 1, pitchInstanceIds: [], boost: true }], actionCandidates: [{ kind: "play-card", instanceId: 2, pitchInstanceIds: [], pitchRequired: 4, deferPlayPresentation: true }], spectators: 2, lastActionAt: [0, 1], botGame: true },
       { type: "state", version: 3, view: gameView(), transition: { fromVersion: 2, kind: "replace", restoreVersion: 1, events: [] }, playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 1] },
+      { type: "state", version: 4, view: gameView(), playerProfiles, yourSeat: 1, legal: [], lastActionAt: [0, 1], soloGame: true, boardSeat: 0 },
+      { type: "state", version: 5, view: gameView(), playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 1], sandbox: true },
       { type: "spectators", count: 2, version: 1 },
       { type: "spectator-list", usernames: ["Alice", null], version: 1 },
       { type: "opponent-disconnected", version: 1 }, { type: "opponent-reconnected", version: 1 },
@@ -1206,8 +1314,17 @@ describe("GameView and server messages", () => {
           ready: false, arenaLocked: false, connected: true, accepted: false,
         })),
         die: { rolls: [3, 5], winner: 1 }, startPlayer: null,
-        cardPoolMode: "open", deadlineAt: 30_000, deadlinePhase: "accept",
+        cardPoolMode: "open", sandbox: true, deadlineAt: 30_000, deadlinePhase: "accept",
       } },
+      { type: "prep-state", version: 2, prep: {
+        format: "cc", phase: "accept", yourSeat: 1, soloGame: true,
+        seats: [0, 1].map((seat) => ({
+          username: `Player ${seat}`, heroId: `HERO${seat}`, heroName: `Hero ${seat}`,
+          ready: false, arenaLocked: false, connected: true, accepted: false,
+        })),
+        die: { rolls: [3, 5], winner: 1 }, startPlayer: null,
+      } },
+      { type: "left", playAgainSolo: { format: "silver-age", deckId: "deck", opponentDeckId: "precon-sba" } },
       { type: "left" }, { type: "left", playAgain: { format: "cc", deckId: "precon-asb", bot: "hala" } },
       { type: "error", code: "ROOM_NOT_FOUND", message: "gone" },
     ];
@@ -1220,7 +1337,23 @@ describe("GameView and server messages", () => {
       { format: "draft", deckId: "precon-asb", bot: "hala" },
       { format: "cc", bot: "hala" },
       { format: "cc", deckId: "precon-asb", bot: "hala", extra: true },
+      { format: "cc", deckId: "precon-asb", bot: "hala", sandbox: true },
     ]) expect(decodeServerMessage({ type: "left", playAgain })).toBeNull();
+    for (const playAgainSolo of [
+      { format: "cc", deckId: "deck" },
+      { format: "draft", deckId: "deck", opponentDeckId: "deck" },
+      { format: "cc", deckId: "deck", opponentDeckId: "deck", bot: "hala" },
+    ]) expect(decodeServerMessage({ type: "left", playAgainSolo })).toBeNull();
+    expect(decodeServerMessage({
+      type: "left",
+      playAgain: { format: "cc", deckId: "precon-asb", bot: "hala" },
+      playAgainSolo: { format: "cc", deckId: "deck", opponentDeckId: "deck" },
+    })).toBeNull();
+    expect(decodeServerMessage({ type: "state", version: 1, view: gameView(), playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 1], soloGame: "yes" })).toBeNull();
+    expect(decodeServerMessage({ type: "state", version: 1, view: gameView(), playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 1], soloGame: true, boardSeat: 2 })).toBeNull();
+    for (const sandbox of [false, "yes", 1]) {
+      expect(decodeServerMessage({ type: "state", version: 1, view: gameView(), playerProfiles, yourSeat: 0, legal: [], lastActionAt: [0, 1], sandbox })).toBeNull();
+    }
   });
 
   it("decodes arena stages and rejects premature reveals and malformed commitments", () => {
@@ -1290,6 +1423,48 @@ describe("GameView and server messages", () => {
     expect(decodeServerMessage({ ...task, view: null })).toBeNull();
     expect(decodeBotTaskEnvelope({ ...task, view: null })).toEqual({ type: "bot-fallback-needed", code: "ABC123", version: 7, runtimeId: "a".repeat(64), delayMs: 1_000 });
     expect(decodeBotTaskEnvelope({ ...task, code: "abc" })).toBeNull();
+  });
+});
+
+describe("game clock decoding", () => {
+  const summary = { seatMs: [9_000, 6_000] };
+
+  it("decodes the persisted room clock exhaustively", () => {
+    const clock = { awaiting: 1, since: 1_700_000_000_000, seatMs: [9_000, 6_000] };
+    expect(decodeRoomClock(clock)).toEqual(clock);
+    expect(decodeRoomClock({ ...clock, awaiting: null })).not.toBeNull();
+    expect(decodeRoomClock({ ...clock, awaiting: 2 })).toBeNull();
+    expect(decodeRoomClock({ ...clock, since: -1 })).toBeNull();
+    expect(decodeRoomClock({ ...clock, seatMs: [1.5, 0] })).toBeNull();
+    expect(decodeRoomClock({ ...clock, extra: true })).toBeNull();
+    const { since: _since, ...withoutSince } = clock;
+    expect(decodeRoomClock(withoutSince)).toBeNull();
+  });
+
+  it("decodes the final clock summary", () => {
+    expect(decodeGameClockSummary(summary)).toEqual(summary);
+    expect(decodeGameClockSummary({ ...summary, awaiting: null })).toBeNull();
+    expect(decodeGameClockSummary({ seatMs: [0] })).toBeNull();
+  });
+
+  it("accepts an optional clock on state messages", () => {
+    const base = { type: "state", version: 1, view: gameView(), playerProfiles, yourSeat: null, legal: [], lastActionAt: [0, 0] };
+    const live = { awaiting: 0, seatMs: [1_000, 0] };
+    expect(decodeServerMessage(base)).not.toBeNull();
+    expect(decodeServerMessage({ ...base, clock: live })).not.toBeNull();
+    expect(decodeServerMessage({ ...base, clock: { ...live, awaiting: null } })).not.toBeNull();
+    expect(decodeServerMessage({ ...base, clock: { seatMs: [0, 0] } })).toBeNull();
+    expect(decodeServerMessage({ ...base, clock: { ...live, since: 1 } })).toBeNull();
+    expect(decodeServerMessage({ ...base, clock: { ...live, seatMs: [-1, 0] } })).toBeNull();
+  });
+
+  it("keeps a replay's final clock and accepts replays without one", () => {
+    const frames = [{ view: gameView(), transition: null }];
+    expect(decodeReplayFile({ version: 2, seat: 0, clock: summary, frames })).toMatchObject({ clock: summary });
+    expect(decodeReplayFile({ version: 3, seat: 0, clock: summary, frames, notes: [] })).toMatchObject({ clock: summary });
+    expect(decodeReplayFile({ version: 2, seat: 0, frames })).not.toHaveProperty("clock");
+    expect(decodeReplayFile({ version: 2, seat: 0, clock: { seatMs: null }, frames })).toBeNull();
+    expect(decodeReplayFile({ version: 1, seat: 0, clock: summary, views: [gameView()] })).toBeNull();
   });
 });
 
@@ -1389,6 +1564,22 @@ describe("replays and HTTP responses", () => {
       decks: [{ ...summary, bannedCards: ["Art of War"], futureCards: ["Tomorrow's Attack"] }],
       plays: [{ deckId: summary.id, playedAt: 123 }],
     })).not.toBeNull();
+    expect(decodeDecksResponse({
+      ok: true,
+      decks: [{
+        ...summary,
+        constructionIssues: [
+          { kind: "too-many-copies", cardName: "Wounded Bull", count: 3, limit: 2 },
+          { kind: "pool-too-large", count: 60, limit: 55 },
+        ],
+      }],
+      plays: [],
+    })).not.toBeNull();
+    expect(decodeDecksResponse({
+      ok: true,
+      decks: [{ ...summary, constructionIssues: [{ kind: "pool-too-large", count: 60 }] }],
+      plays: [],
+    })).toBeNull();
     expect(decodeDecksResponse({ ok: true, decks: [], plays: [{ deckId: "precon-sba", playedAt: -1 }] })).toBeNull();
     expect(decodeDecksResponse({ ok: true, decks: [] })).toBeNull();
     const withArt = (art: unknown) => decodeDeckResponse({ ok: true, deck: { ...summary, art } });
@@ -1415,6 +1606,10 @@ describe("replays and HTTP responses", () => {
         selectedMatchupId: "bravo-plan",
       },
     })).not.toBeNull();
+    const withPins = (fabraryArt: unknown) =>
+      decodeDeckDetailResponse({ ok: true, deck: { ...summary, decklist: pool, fabraryArt } });
+    expect(withPins({ HNT215: "FAB294-MV" })).toMatchObject({ deck: { fabraryArt: { HNT215: "FAB294-MV" } } });
+    expect(withPins({ HNT215: "../evil" })).toBeNull();
     expect(decodeDeckInvalidResponse({ ok: false, errors: ["bad"], missing: [], unimplemented: [] })).not.toBeNull();
     expect(decodeAccountCosmeticsResponse({
       ok: true,
@@ -1448,7 +1643,7 @@ describe("replays and HTTP responses", () => {
         "full-hand", "overkill", "healthy-victory", "last-life",
         "five-strike-turn", "iron-wall", "second-wind", "long-game", "against-the-odds", "empty-tank",
         "beat-bravo", "beat-briar", "beat-kayo", "beat-cindra", "beat-ira", "beat-hala",
-        "beat-jarl", "beat-levia", "beat-starvo", "beat-boltyn", "beat-ira-sage",
+        "beat-jarl", "beat-levia", "beat-starvo", "beat-boltyn", "beat-ira-sage", "beat-aurora", "beat-dorinthea", "beat-fang",
       ].map((id) => ({ id, percent: 12.5 })),
     };
     for (const id of [
@@ -1476,7 +1671,7 @@ describe("replays and HTTP responses", () => {
       export: {
         exportedAt: "2026-01-01T00:00:00.000Z",
         account: {
-          username: "alice", createdAt: 1, earlyTester: true, selectedBadge: "early-tester", playmat: "monarch",
+          username: "alice", createdAt: 1, earlyTester: true, supporterUntil: null, selectedBadge: "early-tester", playmat: "monarch",
           betaTester: false, email: null, pendingEmail: null,
         },
         decks: [{
@@ -1580,6 +1775,7 @@ describe("replays and HTTP responses", () => {
         friendRequests: [{ username: "Carol", direction: "outgoing", createdAt: 2 }],
         friendMessages: [{ id: "1", friendUsername: "Bob", senderUsername: "alice", text: "hello", sentAt: 3, readAt: null }],
         leagues: [],
+        kofiPayments: [{ paidAt: 3, tierName: "Monthly" }],
       },
     })).not.toBeNull();
     const replaySummary = {
@@ -1595,6 +1791,9 @@ describe("replays and HTTP responses", () => {
       share: null,
     };
     expect(decodeReplaysResponse({ ok: true, replays: [replaySummary] })).not.toBeNull();
+    expect(decodeReplaysResponse({ ok: true, replays: [{ ...replaySummary, sandbox: true }] })?.replays[0]?.sandbox)
+      .toBe(true);
+    expect(decodeReplaysResponse({ ok: true, replays: [{ ...replaySummary, sandbox: false }] })).toBeNull();
     const share = { token: "AbCdEfGhIjKlMnOpQr_-12", visibility: "public", includeNotes: true };
     expect(decodeReplaysResponse({ ok: true, replays: [{ ...replaySummary, share }] })).not.toBeNull();
     expect(decodeReplaysResponse({

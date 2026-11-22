@@ -232,6 +232,58 @@ describe("MON — Light Illusionist", () => {
       .expectFinalAttack(8);
   });
 
+  describe("defender projection", () => {
+    const projected = (s: ReturnType<typeof scenario>, key: string) => {
+      const view = projectStateFor(s.state, 1);
+      const card = view.players[1].hand.find((held) => held.cardId === printingId(key));
+      const decision = view.pendingDecision;
+      return decision?.kind === "defend"
+        ? decision.defenderDefense?.find((entry) => entry.instanceId === card?.instanceId)
+        : undefined;
+    };
+
+    it("flags a six-power defender against Phantasm", () => {
+      const s = scenario({
+        seats: [prismSeat({ hand: ["enigma chimera|1", BLUE] }), { hero: "dorinthea", hand: [SIX, BLUE] }],
+      });
+      s.play("enigma chimera|1", { pitch: [BLUE] });
+      expect(projected(s, SIX)?.triggersPhantasm).toBe(true);
+      expect(projected(s, BLUE)?.triggersPhantasm).toBeUndefined();
+    });
+
+    it("counts Herald of Triumph's -1 power on the defender", () => {
+      const s = scenario({
+        seats: [prismSeat({ hand: ["herald of triumph|1", BLUE] }), { hero: "dorinthea", hand: [SIX, SEVEN] }],
+      });
+      s.play("herald of triumph|1", { pitch: [BLUE] });
+      expect(projected(s, SIX)?.triggersPhantasm).toBeUndefined();
+      expect(projected(s, SEVEN)?.triggersPhantasm).toBe(true);
+    });
+
+    it("drops Kayo's off-chain power from a projected defender", () => {
+      const s = scenario({
+        seats: [
+          prismSeat({ hand: ["herald of triumph|1", BLUE] }),
+          { hero: "rhinar", heroKey: "kayo|0", hand: [SIX, SEVEN] },
+        ],
+      });
+      s.play("herald of triumph|1", { pitch: [BLUE] });
+      expect(projected(s, SIX)?.triggersPhantasm).toBeUndefined();
+      expect(projected(s, SEVEN)?.triggersPhantasm).toBe(true);
+    });
+
+    it("drops the flag once Dream Weavers removes Phantasm", () => {
+      const s = scenario({
+        seats: [
+          prismSeat({ equipment: { arms: "dream weavers|0" }, hand: ["enigma chimera|1", BLUE] }),
+          { hero: "dorinthea", hand: [SEVEN] },
+        ],
+      });
+      s.activate("dream weavers|0").play("enigma chimera|1", { pitch: [BLUE] });
+      expect(projected(s, SEVEN)?.triggersPhantasm).toBeUndefined();
+    });
+  });
+
   it("Dream Weavers suppresses phantasm granted by Phantasmify", () => {
     const s = scenario({
       seats: [
@@ -548,6 +600,28 @@ describe("MON — Shadow Brute and Blood Debt", () => {
       .settle()
       .endTurn()
       .expectLife(1, 13);
+  });
+
+  it("Hooves of the Shadowbeast warns that no action point will be gained off-turn", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        leviaSeat({
+          resources: 1,
+          equipment: { arms: "ebon fold|0", legs: "hooves of the shadowbeast|0" },
+          hand: ["consuming aftermath|1"],
+          deck: [BLUE],
+        }),
+        { hero: "dorinthea", hand: ["come to fight|1"], resources: 1 },
+      ],
+    });
+
+    s.play("come to fight|1", { settle: false })
+      .passPriority()
+      .activate("ebon fold|0")
+      .chooseCard("consuming aftermath|1");
+    expect(s.state.pendingDecision?.warningMessage?.id).toBe("card.common.actionpoint.nogain");
+    s.chooseOption("yes").expectAP(0, 0);
   });
 
   it("Hooves of the Shadowbeast can destroy itself after a 6-power card is banished", () => {

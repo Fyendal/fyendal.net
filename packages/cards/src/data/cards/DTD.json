@@ -2,7 +2,7 @@
  {
   "id": "DTD000",
   "name": "Light of Sol",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "Legendary\nWhen this is pitched, reveal the top card of your deck. If it's yellow, you may put it into your hero's soul.",
   "pitch": 2,
   "subtypes": [
@@ -17,7 +17,7 @@
  {
   "id": "DTD001",
   "name": "Prism, Awakener of Sol",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever a card with Herald in its name is put into Prism's soul during an action phase, you may search your deck for a figment, put it into the arena, then shuffle.\nOnce per Turn Instant - {r}{r}, banish a card from Prism's soul: Awaken target figment you control.",
   "classes": [
    "illusionist"
@@ -32,7 +32,7 @@
  {
   "id": "DTD002",
   "name": "Prism, Advent of Thrones",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever a card with Herald in its name is put into Prism's soul during an action phase, you may search your deck for a figment, put it into the arena, then shuffle.\nOnce per Turn Instant - {r}{r}, banish a card from Prism's soul: Awaken target figment you control.",
   "classes": [
    "illusionist"
@@ -47,7 +47,7 @@
  {
   "id": "DTD003",
   "name": "Luminaris, Celestial Fury",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Instant - {r}{r}: Target angel attack or attack action card with Herald in its name gets go again.",
   "classes": [
    "illusionist"
@@ -66,7 +66,7 @@
  {
   "id": "DTD004",
   "name": "Empyrean Rapture",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If a card with Herald in its name has been put into your hero's soul during your turn, the first hero ability you activate that turn costs {r}{r} less to activate.\nOnce per Turn Instant - {r}: This gets ward 1 until end of turn.",
   "classes": [
    "illusionist"
@@ -80,7 +80,7 @@
  {
   "id": "DTD005",
   "name": "Figment of Erudition",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nWhen this enters the arena, create a Ponder token.",
   "pitch": 2,
   "cost": 4,
@@ -100,7 +100,7 @@
  {
   "id": "DTD005B",
   "name": "Suraya, Archangel of Erudition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per Turn Action - {r}{r}: Attack\nWhen Suraya attacks, you may banish a card from your hero's soul. If you do, draw 2 cards.\nWard 4",
   "attack": 4,
   "subtypes": [
@@ -117,7 +117,7 @@
  {
   "id": "DTD006",
   "name": "Figment of Judgment",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nWhen this enters the arena, you may turn a card in any banished zone face-down.",
   "pitch": 2,
   "cost": 4,
@@ -137,7 +137,7 @@
  {
   "id": "DTD006B",
   "name": "Themis, Archangel of Judgment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per Turn Action - {r}{r}: Attack\nWhen Themis attacks, you may banish a card from your hero's soul. If you do, turn a card in any banished zone face-down.\nWard 4",
   "attack": 4,
   "subtypes": [
@@ -154,7 +154,7 @@
  {
   "id": "DTD007",
   "name": "Figment of Protection",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nWhen this enters the arena, create a Spectral Shield token.",
   "pitch": 2,
   "cost": 4,
@@ -174,7 +174,7 @@
  {
   "id": "DTD007B",
   "name": "Aegis, Archangel of Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per Turn Action - {r}{r}: Attack\nWhen Aegis attacks, you may banish a card from your hero's soul. If you do, create 2 Spectral Shield tokens.\nWard 4",
   "attack": 4,
   "subtypes": [
@@ -191,7 +191,7 @@
  {
   "id": "DTD008",
   "name": "Figment of Ravages",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nWhen this enters the arena, deal 1 arcane damage to any target.",
   "pitch": 2,
   "cost": 4,
@@ -211,7 +211,7 @@
  {
   "id": "DTD008B",
   "name": "Sekem, Archangel of Ravages",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per Turn Action - {r}{r}: Attack\nWhen Sekem attacks, you may banish a card from your hero's soul. If you do, deal 2 arcane damage to any target.\nWard 4",
   "attack": 4,
   "subtypes": [
@@ -228,7 +228,7 @@
  {
   "id": "DTD009",
   "name": "Figment of Rebirth",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nWhen this enters the arena, you may put a yellow action card from your graveyard on top of your deck.",
   "pitch": 2,
   "cost": 4,
@@ -248,7 +248,7 @@
  {
   "id": "DTD009B",
   "name": "Avalon, Archangel of Rebirth",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per Turn Action - {r}{r}: Attack\nWhen Avalon attacks, you may banish a card from your hero's soul. If you do, put a yellow card from your graveyard on top of your deck.\nWard 4",
   "attack": 4,
   "subtypes": [
@@ -265,7 +265,7 @@
  {
   "id": "DTD010",
   "name": "Figment of Tenacity",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nWhen this enters the arena, your next attack this turn gets dominate.",
   "pitch": 2,
   "cost": 4,
@@ -285,7 +285,7 @@
  {
   "id": "DTD010B",
   "name": "Metis, Archangel of Tenacity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per Turn Action - {r}{r}: Attack\nWhen Metis attacks, you may banish a card from your hero's soul. If you do, your attacks this turn get dominate.\nWard 4",
   "attack": 4,
   "subtypes": [
@@ -303,7 +303,7 @@
  {
   "id": "DTD011",
   "name": "Figment of Triumph",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nWhen this enters the arena, attack action cards your opponents control get -1{p} this turn.",
   "pitch": 2,
   "cost": 4,
@@ -323,7 +323,7 @@
  {
   "id": "DTD011B",
   "name": "Victoria, Archangel of Triumph",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per Turn Action - {r}{r}: Attack\nWhen Victoria attacks, you may banish a card from your hero's soul. If you do, attack action cards your opponents control get -1{p} until the start of your next turn.\nWard 4",
   "attack": 4,
   "subtypes": [
@@ -340,7 +340,7 @@
  {
   "id": "DTD012",
   "name": "Figment of War",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nWhen this enters the arena, create a Courage token.",
   "pitch": 2,
   "cost": 4,
@@ -360,7 +360,7 @@
  {
   "id": "DTD012B",
   "name": "Bellona, Archangel of War",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per Turn Action - {r}{r}: Attack\nWhen Bellona attacks, you may banish a card from your hero's soul. If you do, put a +1{p} counter on each Angel you control.\nWard 4",
   "attack": 4,
   "subtypes": [
@@ -377,7 +377,7 @@
  {
   "id": "DTD013",
   "name": "Herald of Judgment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Prism Specialization\nWhen this hits, put it into your hero's soul and the defending hero can't play cards from their banished zone during their next action phase.\nPhantasm",
   "pitch": 2,
   "cost": 2,
@@ -399,7 +399,7 @@
  {
   "id": "DTD014",
   "name": "Herald of Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
   "pitch": 1,
   "cost": 2,
@@ -420,7 +420,7 @@
  {
   "id": "DTD015",
   "name": "Herald of Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
   "pitch": 2,
   "cost": 2,
@@ -441,7 +441,7 @@
  {
   "id": "DTD016",
   "name": "Herald of Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
   "pitch": 3,
   "cost": 2,
@@ -462,7 +462,7 @@
  {
   "id": "DTD017",
   "name": "Herald of Ravages",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and deal 1 arcane damage to target hero.\nPhantasm",
   "pitch": 1,
   "cost": 2,
@@ -483,7 +483,7 @@
  {
   "id": "DTD018",
   "name": "Herald of Ravages",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and deal 1 arcane damage to target hero.\nPhantasm",
   "pitch": 2,
   "cost": 2,
@@ -504,7 +504,7 @@
  {
   "id": "DTD019",
   "name": "Herald of Ravages",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and deal 1 arcane damage to target hero.\nPhantasm",
   "pitch": 3,
   "cost": 2,
@@ -525,7 +525,7 @@
  {
   "id": "DTD020",
   "name": "Herald of Rebirth",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and put up to 1 card with phantasm from your graveyard on top of your deck.\nPhantasm",
   "pitch": 1,
   "cost": 2,
@@ -546,7 +546,7 @@
  {
   "id": "DTD021",
   "name": "Herald of Rebirth",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and put up to 1 card with phantasm from your graveyard on top of your deck.\nPhantasm",
   "pitch": 2,
   "cost": 2,
@@ -567,7 +567,7 @@
  {
   "id": "DTD022",
   "name": "Herald of Rebirth",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and put up to 1 card with phantasm from your graveyard on top of your deck.\nPhantasm",
   "pitch": 3,
   "cost": 2,
@@ -588,7 +588,7 @@
  {
   "id": "DTD023",
   "name": "Herald of Tenacity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate\nWhen this hits, put it into your hero's soul.\nPhantasm",
   "pitch": 1,
   "cost": 2,
@@ -610,7 +610,7 @@
  {
   "id": "DTD024",
   "name": "Herald of Tenacity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate\nWhen this hits, put it into your hero's soul.\nPhantasm",
   "pitch": 2,
   "cost": 2,
@@ -632,7 +632,7 @@
  {
   "id": "DTD025",
   "name": "Herald of Tenacity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate\nWhen this hits, put it into your hero's soul.\nPhantasm",
   "pitch": 3,
   "cost": 2,
@@ -654,7 +654,7 @@
  {
   "id": "DTD026",
   "name": "Herald of Triumph",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Attack action cards have -1{p} while defending this.\nWhen this hits, put it into your hero's soul.\nPhantasm",
   "pitch": 1,
   "cost": 2,
@@ -675,7 +675,7 @@
  {
   "id": "DTD027",
   "name": "Herald of Triumph",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Attack action cards get -1{p} while defending this.\nWhen this hits, put it into your soul.\nPhantasm",
   "pitch": 2,
   "cost": 2,
@@ -696,7 +696,7 @@
  {
   "id": "DTD028",
   "name": "Herald of Triumph",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Attack action cards get -1{p} while defending this.\nWhen this hits, put it into your soul.\nPhantasm",
   "pitch": 3,
   "cost": 2,
@@ -717,7 +717,7 @@
  {
   "id": "DTD029",
   "name": "Wartune Herald",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul.\nPhantasm",
   "pitch": 1,
   "cost": 1,
@@ -738,7 +738,7 @@
  {
   "id": "DTD030",
   "name": "Wartune Herald",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul.\nPhantasm",
   "pitch": 2,
   "cost": 1,
@@ -759,7 +759,7 @@
  {
   "id": "DTD031",
   "name": "Wartune Herald",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul.\nPhantasm",
   "pitch": 3,
   "cost": 1,
@@ -780,7 +780,7 @@
  {
   "id": "DTD032",
   "name": "Angelic Descent",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target attack action card with Herald in its name gets go again.\nYour next angel attack this turn gets +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -795,7 +795,7 @@
  {
   "id": "DTD033",
   "name": "Angelic Descent",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target attack action card with Herald in its name gets go again.\nYour next angel attack this turn gets +2{p}.",
   "pitch": 2,
   "cost": 0,
@@ -810,7 +810,7 @@
  {
   "id": "DTD034",
   "name": "Angelic Descent",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target attack action card with Herald in its name gets go again.\nYour next angel attack this turn gets +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -825,7 +825,7 @@
  {
   "id": "DTD035",
   "name": "Angelic Wrath",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target attack action card with Herald in its name gets +4{p}",
   "pitch": 1,
   "cost": 0,
@@ -840,7 +840,7 @@
  {
   "id": "DTD036",
   "name": "Angelic Wrath",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target attack action card with Herald in its name gets +3{p}",
   "pitch": 2,
   "cost": 0,
@@ -855,7 +855,7 @@
  {
   "id": "DTD037",
   "name": "Angelic Wrath",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target attack action card with Herald in its name gets +2{p}",
   "pitch": 3,
   "cost": 0,
@@ -870,7 +870,7 @@
  {
   "id": "DTD038",
   "name": "Celestial Reprimand",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target card defending an attack with Herald in its name gets -3{p} this combat chain.",
   "pitch": 1,
   "cost": 0,
@@ -885,7 +885,7 @@
  {
   "id": "DTD039",
   "name": "Celestial Reprimand",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target card defending an attack with Herald in its name gets -2{p} this combat chain.",
   "pitch": 2,
   "cost": 0,
@@ -900,7 +900,7 @@
  {
   "id": "DTD040",
   "name": "Celestial Reprimand",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target card defending an attack with Herald in its name gets -1{p} this combat chain.",
   "pitch": 3,
   "cost": 0,
@@ -915,7 +915,7 @@
  {
   "id": "DTD041",
   "name": "Celestial Resolve",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target attack action card with Herald in its name gets +5{d}.",
   "pitch": 1,
   "cost": 0,
@@ -930,7 +930,7 @@
  {
   "id": "DTD042",
   "name": "Celestial Resolve",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target attack action card with Herald in its name gets +4{d}.",
   "pitch": 2,
   "cost": 0,
@@ -945,7 +945,7 @@
  {
   "id": "DTD043",
   "name": "Celestial Resolve",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target attack action card with Herald in its name gets +3{d}.",
   "pitch": 3,
   "cost": 0,
@@ -960,7 +960,7 @@
  {
   "id": "DTD044",
   "name": "Ser Boltyn, Breaker of Dawn",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If you've charged this turn, your attacks get +1{p} while defended by an attack action card.\nAttack Reaction - Banish a card from Boltyn's soul: Target attack with {p} greater than its base {p} gains go again.",
   "classes": [
    "warrior"
@@ -975,7 +975,7 @@
  {
   "id": "DTD045",
   "name": "Boltyn",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If you've charged this turn, your attacks get +1{p} while defended by an attack action card.\nAttack Reaction - Banish a card from Boltyn's soul: Target attack with {p} greater than its base {p} gains go again.",
   "classes": [
    "warrior"
@@ -990,7 +990,7 @@
  {
   "id": "DTD046",
   "name": "Beaming Blade",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nIf a yellow card has been put into your hero's soul this turn, this gets +5{p}.",
   "attack": 0,
   "classes": [
@@ -1006,7 +1006,7 @@
  {
   "id": "DTD047",
   "name": "Soulbond Resolve",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, you may charge your hero's soul.\nThe first time you would be dealt damage each turn, if you've charged this turn, prevent 1 of that damage.\nTemper",
   "defense": 2,
   "classes": [
@@ -1025,7 +1025,7 @@
  {
   "id": "DTD048",
   "name": "Banneret of Courage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Solflare - When this is charged to your hero's soul, create a Courage token.",
   "pitch": 2,
   "cost": 1,
@@ -1046,7 +1046,7 @@
  {
   "id": "DTD049",
   "name": "Banneret of Gallantry",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Solflare - When this is charged to your hero's soul, create a Quicken token.",
   "pitch": 2,
   "cost": 1,
@@ -1067,7 +1067,7 @@
  {
   "id": "DTD050",
   "name": "Banneret of Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Solflare - When this is charged to your hero's soul, create a Spellbane Aegis token.",
   "pitch": 2,
   "cost": 1,
@@ -1088,7 +1088,7 @@
  {
   "id": "DTD051",
   "name": "Beckoning Light",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, you may charge your hero's soul.\nIf a yellow card is charged this way, whenever an attack action card hits this combat chain, you may put an attack action card from your graveyard on top of your deck.",
   "pitch": 1,
   "cost": 0,
@@ -1109,7 +1109,7 @@
  {
   "id": "DTD052",
   "name": "Spirit of War",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, you may charge your hero's soul.\nIf a yellow card is charged this way, whenever an attack action card hits this combat chain, create a Courage token.",
   "pitch": 1,
   "cost": 0,
@@ -1130,7 +1130,7 @@
  {
   "id": "DTD053",
   "name": "Prayer of Bellona",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack this turn gets +2{p}.\nReveal the top card of your deck. If it's yellow, put it into your hand, then charge your hero's soul.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -1150,7 +1150,7 @@
  {
   "id": "DTD054",
   "name": "Banneret of Resilience",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Solflare - When this is charged to your hero's soul, the next action card you defend with this turn gets +1{d}.",
   "pitch": 2,
   "cost": 0,
@@ -1171,7 +1171,7 @@
  {
   "id": "DTD055",
   "name": "Banneret of Salvation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Solflare - When this is charged to your hero's soul, the next time you hit this turn, gain 1{h}.",
   "pitch": 2,
   "cost": 0,
@@ -1192,7 +1192,7 @@
  {
   "id": "DTD056",
   "name": "Banneret of Vigor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Solflare - When this is charged to your hero's soul, the next time you hit this turn, gain {r}.",
   "pitch": 2,
   "cost": 0,
@@ -1213,7 +1213,7 @@
  {
   "id": "DTD057",
   "name": "Beaming Bravado",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, you may charge your hero's soul.\nIf a yellow card is charged this way, this gets +1{p}",
   "pitch": 1,
   "cost": 0,
@@ -1234,7 +1234,7 @@
  {
   "id": "DTD058",
   "name": "Beaming Bravado",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, you may charge your hero's soul.\nIf a yellow card is charged this way, this gets +1{p}",
   "pitch": 2,
   "cost": 0,
@@ -1255,7 +1255,7 @@
  {
   "id": "DTD059",
   "name": "Beaming Bravado",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, you may charge your hero's soul.\nIf a yellow card is charged this way, this gets +1{p}",
   "pitch": 3,
   "cost": 0,
@@ -1276,7 +1276,7 @@
  {
   "id": "DTD060",
   "name": "V for Valor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Attack Reaction - {r}, destroy this, charge your hero's soul: Target attack gains +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -1293,7 +1293,7 @@
  {
   "id": "DTD061",
   "name": "V for Valor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Attack Reaction - {r}, destroy this, charge your hero's soul: Target attack gains +2{p}.",
   "pitch": 2,
   "cost": 0,
@@ -1310,7 +1310,7 @@
  {
   "id": "DTD062",
   "name": "V for Valor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Attack Reaction - {r}, destroy this, charge your hero's soul: Target attack gains +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -1327,7 +1327,7 @@
  {
   "id": "DTD063",
   "name": "Glaring Impact",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, you may charge your hero's soul.\nIf a yellow card is charged this way, this gets overpower.",
   "pitch": 1,
   "cost": 1,
@@ -1349,7 +1349,7 @@
  {
   "id": "DTD064",
   "name": "Glaring Impact",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, you may charge your hero's soul.\nIf a yellow card is charged this way, this gets overpower.",
   "pitch": 2,
   "cost": 1,
@@ -1371,7 +1371,7 @@
  {
   "id": "DTD065",
   "name": "Glaring Impact",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, you may charge your hero's soul.\nIf a yellow card is charged this way, this gets overpower.",
   "pitch": 3,
   "cost": 1,
@@ -1393,7 +1393,7 @@
  {
   "id": "DTD066",
   "name": "Light the Way",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, you may charge your hero's soul.\nWhen this hits, if a yellow card was charged this way, this gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -1415,7 +1415,7 @@
  {
   "id": "DTD067",
   "name": "Light the Way",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, you may charge your hero's soul.\nWhen this hits, if a yellow card was charged this way, this gets go again.",
   "pitch": 2,
   "cost": 0,
@@ -1437,7 +1437,7 @@
  {
   "id": "DTD068",
   "name": "Light the Way",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, you may charge your hero's soul.\nWhen this hits, if a yellow card was charged this way, this gets go again.",
   "pitch": 3,
   "cost": 0,
@@ -1459,7 +1459,7 @@
  {
   "id": "DTD069",
   "name": "Resounding Courage",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target Light Warrior attack gets +3{p}.\nIf you've charged this turn, create a Courage token.",
   "pitch": 1,
   "cost": 1,
@@ -1475,7 +1475,7 @@
  {
   "id": "DTD070",
   "name": "Resounding Courage",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target Light Warrior attack gets +2{p}.\nIf you've charged this turn, create a Courage token.",
   "pitch": 2,
   "cost": 1,
@@ -1491,7 +1491,7 @@
  {
   "id": "DTD071",
   "name": "Resounding Courage",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target Light Warrior attack gets +1{p}.\nIf you've charged this turn, create a Courage token.",
   "pitch": 3,
   "cost": 1,
@@ -1507,7 +1507,7 @@
  {
   "id": "DTD072",
   "name": "Charge of the Light Brigade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack you charge to play this turn gets +3{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1526,7 +1526,7 @@
  {
   "id": "DTD073",
   "name": "Charge of the Light Brigade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack you charge to play this turn gets +2{p}.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1545,7 +1545,7 @@
  {
   "id": "DTD074",
   "name": "Charge of the Light Brigade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack you charge to play this turn gets +1{p}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1564,7 +1564,7 @@
  {
   "id": "DTD075",
   "name": "Radiant View",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Banish this and a card from your hero's soul: Prevent the next 2 damage that would be dealt to your hero this turn.",
   "subtypes": [
    "light",
@@ -1575,7 +1575,7 @@
  {
   "id": "DTD076",
   "name": "Radiant Raiment",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Banish this and a card from your hero's soul: Prevent the next 2 damage that would be dealt to your hero this turn.",
   "subtypes": [
    "light",
@@ -1586,7 +1586,7 @@
  {
   "id": "DTD077",
   "name": "Radiant Touch",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Banish this and a card from your hero's soul: Prevent the next 2 damage that would be dealt to your hero this turn.",
   "subtypes": [
    "light",
@@ -1597,7 +1597,7 @@
  {
   "id": "DTD078",
   "name": "Radiant Flow",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Banish this and a card from your hero's soul: Prevent the next 2 damage that would be dealt to your hero this turn.",
   "subtypes": [
    "light",
@@ -1608,7 +1608,7 @@
  {
   "id": "DTD079",
   "name": "United We Stand",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Unity - When this defends together with a card from hand, if Boltyn is in your party, create a Courage token under his control. Then repeat for Bravo and Seismic Surge, Briar and Embodiment of Earth, Dorinthea and Courage, Lexi and Embodiment of Lightning, Oldhim and Spellbane Aegis, Prism and Spectral Shield, and Shiyana and Eloquence.",
   "pitch": 2,
   "cost": 3,
@@ -1626,7 +1626,7 @@
  {
   "id": "DTD080",
   "name": "Lumina Lance",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "As an additional cost to play this, banish up to 3 cards from your hero's soul.  Choose that many modes;\n\nTarget Light attack gets +2{p}.\nTarget Light attack gets \"When this hits, draw a card.\"\nTarget Light attack gets \"When this hits, it gets go again.\"",
   "pitch": 2,
   "cost": 0,
@@ -1639,7 +1639,7 @@
  {
   "id": "DTD081",
   "name": "Radiant Forcefield",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "If your hero would be dealt damage, banish a card from your hero's soul to prevent 1 of that damage.\nWhen there are no cards in your hero's soul, destroy this.",
   "pitch": 2,
   "cost": 0,
@@ -1652,7 +1652,7 @@
  {
   "id": "DTD082",
   "name": "Lay to Rest",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a Shadow hero, it gets +1{p}.\nWhen this hits a hero, you may turn a card in their banished zone face-down.",
   "pitch": 1,
   "cost": 1,
@@ -1667,7 +1667,7 @@
  {
   "id": "DTD083",
   "name": "Lay to Rest",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a Shadow hero, it gets +1{p}.\nWhen this hits a hero, you may turn a card in their banished zone face-down.",
   "pitch": 2,
   "cost": 1,
@@ -1682,7 +1682,7 @@
  {
   "id": "DTD084",
   "name": "Lay to Rest",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a Shadow hero, it gets +1{p}.\nWhen this hits a hero, you may turn a card in their banished zone face-down.",
   "pitch": 3,
   "cost": 1,
@@ -1697,7 +1697,7 @@
  {
   "id": "DTD085",
   "name": "Blessing of Salvation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If a card has been put into you hero's soul this turn, you may play this as though it were and instant.\nGain 3{h}",
   "pitch": 1,
   "cost": 1,
@@ -1710,7 +1710,7 @@
  {
   "id": "DTD086",
   "name": "Blessing of Salvation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If a card has been put into you hero's soul this turn, you may play this as though it were and instant.\nGain 2{h}",
   "pitch": 2,
   "cost": 1,
@@ -1723,7 +1723,7 @@
  {
   "id": "DTD087",
   "name": "Blessing of Salvation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If a card has been put into you hero's soul this turn, you may play this as though it were and instant.\nGain 1{h}",
   "pitch": 3,
   "cost": 1,
@@ -1736,7 +1736,7 @@
  {
   "id": "DTD088",
   "name": "Cleansing Light",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If a card has been put into your hero's soul this turn, you may play this as though it were an instant.\nDestroy target red aura.",
   "pitch": 1,
   "cost": 3,
@@ -1749,7 +1749,7 @@
  {
   "id": "DTD089",
   "name": "Cleansing Light",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If a card has been put into your hero's soul this turn, you may play this as though it were an instant.\nDestroy target yellow aura.",
   "pitch": 2,
   "cost": 3,
@@ -1762,7 +1762,7 @@
  {
   "id": "DTD090",
   "name": "Cleansing Light",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If a card has been put into your hero's soul this turn, you may play this as though it were an instant.\nDestroy target blue aura.",
   "pitch": 3,
   "cost": 3,
@@ -1775,7 +1775,7 @@
  {
   "id": "DTD091",
   "name": "Blistering Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have a yellow card in your pitch zone, this gets go again.",
   "pitch": 1,
   "cost": 2,
@@ -1793,7 +1793,7 @@
  {
   "id": "DTD092",
   "name": "Blistering Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have a yellow card in your pitch zone, this gets go again.",
   "pitch": 2,
   "cost": 2,
@@ -1811,7 +1811,7 @@
  {
   "id": "DTD093",
   "name": "Blistering Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have a yellow card in your pitch zone, this gets go again.",
   "pitch": 3,
   "cost": 2,
@@ -1829,7 +1829,7 @@
  {
   "id": "DTD094",
   "name": "Defender of Daybreak",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends a Shadow attack, non-equipment Light cards get +1{d} this combat chain.",
   "pitch": 1,
   "cost": 0,
@@ -1844,7 +1844,7 @@
  {
   "id": "DTD095",
   "name": "Defender of Daybreak",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends a Shadow attack, non-equipment Light cards get +1{d} this combat chain.",
   "pitch": 2,
   "cost": 0,
@@ -1859,7 +1859,7 @@
  {
   "id": "DTD096",
   "name": "Defender of Daybreak",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends a Shadow attack, non-equipment Light cards get +1{d} this combat chain.",
   "pitch": 3,
   "cost": 0,
@@ -1874,7 +1874,7 @@
  {
   "id": "DTD097",
   "name": "Searing Ray",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have a yellow card in your pitch zone, this gets +2{p}.",
   "pitch": 1,
   "cost": 1,
@@ -1889,7 +1889,7 @@
  {
   "id": "DTD098",
   "name": "Searing Ray",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have a yellow card in your pitch zone, this gets +2{p}.",
   "pitch": 2,
   "cost": 1,
@@ -1904,7 +1904,7 @@
  {
   "id": "DTD099",
   "name": "Searing Ray",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have a yellow card in your pitch zone, this gets +2{p}.",
   "pitch": 3,
   "cost": 1,
@@ -1919,7 +1919,7 @@
  {
   "id": "DTD100",
   "name": "Break of Dawn",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next time a Shadow source would deal damage this turn, prevent 4 of that damage.",
   "pitch": 1,
   "cost": 0,
@@ -1931,7 +1931,7 @@
  {
   "id": "DTD101",
   "name": "Break of Dawn",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next time a Shadow source would deal damage this turn, prevent 3 of that damage.",
   "pitch": 2,
   "cost": 0,
@@ -1943,7 +1943,7 @@
  {
   "id": "DTD102",
   "name": "Break of Dawn",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next time a Shadow source would deal damage this turn, prevent 2 of that damage.",
   "pitch": 3,
   "cost": 0,
@@ -1955,8 +1955,8 @@
  {
   "id": "DTD103",
   "name": "Levia, Shadowborn Abomination",
-  "cardType": "hero",
-  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, cards you own lose blood debt during the end phase.",
+  "types": ["hero"],
+  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, you don't lose {h} from blood debt during the end phase.",
   "classes": [
    "brute"
   ],
@@ -1970,8 +1970,8 @@
  {
   "id": "DTD104",
   "name": "Levia",
-  "cardType": "hero",
-  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, cards you own lose blood debt during the end phase.",
+  "types": ["hero"],
+  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, you don't lose {h} from blood debt during the end phase.",
   "classes": [
    "brute"
   ],
@@ -1985,7 +1985,7 @@
  {
   "id": "DTD105",
   "name": "Hell Hammer",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nWhen the combat chain closes, if this attacked, banish it.\nBlood Debt",
   "attack": 6,
   "classes": [
@@ -2004,7 +2004,7 @@
  {
   "id": "DTD106",
   "name": "Spoiled Skull",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}, banish this: Target 3 action cards with different names in your banished zone and chose one at random. You may play it this turn. Go again\nArcane Barrier 1\nBlood Debt",
   "classes": [
    "brute"
@@ -2023,7 +2023,7 @@
  {
   "id": "DTD107",
   "name": "Diabolic Offering",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If a card with 6 ore more {p} has been put into your banished zone this turn, Daibolic Offering's {p} and {d} are 6, otherwise they are 0.\nBlood Debt",
   "pitch": 3,
   "cost": 1,
@@ -2042,7 +2042,7 @@
  {
   "id": "DTD108",
   "name": "Shaden Death Hydra",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, it deals X damage to you, where X is 13 minus the number of cards with blood debt in your banished zone.\nBlood Debt",
   "pitch": 2,
   "cost": 6,
@@ -2063,7 +2063,7 @@
  {
   "id": "DTD109",
   "name": "Slithering Shadowpede",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was banished from your hand this turn, you may play it from your banished zone.\nBlood Debt",
   "pitch": 1,
   "cost": 1,
@@ -2083,7 +2083,7 @@
  {
   "id": "DTD110",
   "name": "Expendable Limbs",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "As an additional cost to play this, banish a random card from your hand.\nIf a card with 6 or more {p} is banished this way, you may play it from your banished zone during your next action phase.",
   "pitch": 3,
   "cost": 0,
@@ -2099,7 +2099,7 @@
  {
   "id": "DTD111",
   "name": "Blood Dripping Frenzy",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish your hand.\nDraw a card for each card with blood debt banished this way.\nYour Brute and Shadow attacks get +X{p} this turn where X is the number of cards with 6 or more {p} banished this way.\nGo again",
   "pitch": 3,
   "cost": 2,
@@ -2118,7 +2118,7 @@
  {
   "id": "DTD112",
   "name": "Ram Raider",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from your hand. If a card with 6 or more {p} is banished this way, this gets go again.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -2140,7 +2140,7 @@
  {
   "id": "DTD113",
   "name": "Ram Raider",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from your hand. If a card with 6 or more {p} is banished this way, this gets go again.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -2162,7 +2162,7 @@
  {
   "id": "DTD114",
   "name": "Ram Raider",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from your hand. If a card with 6 or more {p} is banished this way, this gets go again.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -2184,7 +2184,7 @@
  {
   "id": "DTD115",
   "name": "Wall Breaker",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've banished a card with 6 or more {p} this turn, this gets overpower.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -2206,7 +2206,7 @@
  {
   "id": "DTD116",
   "name": "Wall Breaker",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've banished a card with 6 or more {p} this turn, this gets overpower.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -2228,7 +2228,7 @@
  {
   "id": "DTD117",
   "name": "Wall Breaker",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've banished a card with 6 or more {p} this turn, this gets overpower.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -2250,7 +2250,7 @@
  {
   "id": "DTD118",
   "name": "Shaden Scream",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from hand.\nYour next Brute or Shadow attack this turn gets +5{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -2269,7 +2269,7 @@
  {
   "id": "DTD119",
   "name": "Shaden Scream",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from hand.\nYour next Brute or Shadow attack this turn gets +4{p}.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -2288,7 +2288,7 @@
  {
   "id": "DTD120",
   "name": "Shaden Scream",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from hand.\nYour next Brute or Shadow attack this turn gets +3{p}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -2307,7 +2307,7 @@
  {
   "id": "DTD121",
   "name": "Battlefield Breaker",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've banished a card with 6 or more {p} this turn, this gets +1{p}.\nBlood Debt",
   "pitch": 1,
   "cost": 3,
@@ -2328,7 +2328,7 @@
  {
   "id": "DTD122",
   "name": "Battlefield Breaker",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've banished a card with 6 or more {p} this turn, this gets +1{p}.\nBlood Debt",
   "pitch": 2,
   "cost": 3,
@@ -2349,7 +2349,7 @@
  {
   "id": "DTD123",
   "name": "Battlefield Breaker",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've banished a card with 6 or more {p} this turn, this gets +1{p}.\nBlood Debt",
   "pitch": 3,
   "cost": 3,
@@ -2370,7 +2370,7 @@
  {
   "id": "DTD124",
   "name": "Shaden Swing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from your hand.\nBlood Debt",
   "pitch": 1,
   "cost": 1,
@@ -2391,7 +2391,7 @@
  {
   "id": "DTD125",
   "name": "Shaden Swing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from your hand.\nBlood Debt",
   "pitch": 2,
   "cost": 1,
@@ -2412,7 +2412,7 @@
  {
   "id": "DTD126",
   "name": "Shaden Swing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from your hand.\nBlood Debt",
   "pitch": 3,
   "cost": 1,
@@ -2433,7 +2433,7 @@
  {
   "id": "DTD127",
   "name": "Tribute to Demolition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from your hand.\nIf a card with 6 or more {p} is banished this way, this gets +2{p}.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -2454,7 +2454,7 @@
  {
   "id": "DTD128",
   "name": "Tribute to Demolition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from your hand.\nIf a card with 6 or more {p} is banished this way, this gets +2{p}.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -2475,7 +2475,7 @@
  {
   "id": "DTD129",
   "name": "Tribute to Demolition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from your hand.\nIf a card with 6 or more {p} is banished this way, this gets +2{p}.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -2496,7 +2496,7 @@
  {
   "id": "DTD130",
   "name": "Tribute to the Legions of Doom",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from your hand.\nIf a card with 6 or more {p} is banished this way, this gets +2{p}.\nBlood Debt",
   "pitch": 1,
   "cost": 3,
@@ -2517,7 +2517,7 @@
  {
   "id": "DTD131",
   "name": "Tribute to the Legions of Doom",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from your hand.\nIf a card with 6 or more {p} is banished this way, this gets +2{p}.\nBlood Debt",
   "pitch": 2,
   "cost": 3,
@@ -2538,7 +2538,7 @@
  {
   "id": "DTD132",
   "name": "Tribute to the Legions of Doom",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish a random card from your hand.\nIf a card with 6 or more {p} is banished this way, this gets +2{p}.\nBlood Debt",
   "pitch": 3,
   "cost": 3,
@@ -2559,7 +2559,7 @@
  {
   "id": "DTD133",
   "name": "Vynnset, Iron Maiden",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "At the start of your turn, banish a card from your hand. If you do, create a Runechant token.\nWhenever you play a Shadow non-attack action card, you may pay {h}. If you do, the next Runechant effect that would deal damage this turn can't be prevented.",
   "classes": [
    "runeblade"
@@ -2574,7 +2574,7 @@
  {
   "id": "DTD134",
   "name": "Vynnset",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "At the start of your turn, banish a card from your hand. If you do, create a Runechant token.\nWhenever you play a Shadow non-attack action card, you may pay {h}. If you do, the next Runechant effect that would deal damage this turn can't be prevented.",
   "classes": [
    "runeblade"
@@ -2589,7 +2589,7 @@
  {
   "id": "DTD135",
   "name": "Flail of Agony",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Vynnset Specialization\nOnce per Turn Action - {h}: Attack\nWhen this hits, create a Runechant token.",
   "attack": 1,
   "classes": [
@@ -2608,7 +2608,7 @@
  {
   "id": "DTD136",
   "name": "Grimoire of the Haunt",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - {r}, banish this: Create an Eloquence token.\nArcane Barrier 1\nBlood Debt",
   "classes": [
    "runeblade"
@@ -2626,7 +2626,7 @@
  {
   "id": "DTD137",
   "name": "Widespread Annihilation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nWhen the combat chain closes, each hero who has lost {h} this turn banishes a card from their hand.\nBlood Debt",
   "pitch": 3,
   "cost": 4,
@@ -2648,7 +2648,7 @@
  {
   "id": "DTD138",
   "name": "Widespread Destruction",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nWhen the combat chain closes, each hero who has lost {h} this turn banishes a card from their arsenal.\nBlood Debt",
   "pitch": 2,
   "cost": 3,
@@ -2670,7 +2670,7 @@
  {
   "id": "DTD139",
   "name": "Widespread Ruin",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nWhen the combat chain closes, each hero who has lost {h} this turn banishes the top card of their deck.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -2692,7 +2692,7 @@
  {
   "id": "DTD140",
   "name": "Funeral Moon",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play this from your banished zone.\nIf a hero has lost {h} this turn, you may play this as though it were an instant.\nCreate a Runechant token.\nBlood Debt",
   "pitch": 1,
   "cost": 0,
@@ -2711,7 +2711,7 @@
  {
   "id": "DTD141",
   "name": "Requiem for the Damned",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play this from your banished zone.\nIf a hero has lost {h} this turn, you may play this as though it were an instant.\nCreate an Eloquence token.\nBlood Debt",
   "pitch": 1,
   "cost": 0,
@@ -2730,7 +2730,7 @@
  {
   "id": "DTD142",
   "name": "Oblivion",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary Vynnset Specialization\nPlay this only if you control exactly 6 Runechants.\nCreate a Nasreth, the Soul Harrower token.",
   "pitch": 3,
   "cost": 0,
@@ -2749,7 +2749,7 @@
  {
   "id": "DTD143",
   "name": "Deathly Delight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nWhen the combat chain closes, gain {h} equal to the number of heroes who have lost {h} this turn.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -2771,7 +2771,7 @@
  {
   "id": "DTD144",
   "name": "Deathly Delight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nWhen the combat chain closes, gain {h} equal to the number of heroes who have lost {h} this turn.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -2793,7 +2793,7 @@
  {
   "id": "DTD145",
   "name": "Deathly Delight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nWhen the combat chain closes, gain {h} equal to the number of heroes who have lost {h} this turn.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -2815,7 +2815,7 @@
  {
   "id": "DTD146",
   "name": "Deathly Wail",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nWhen the combat chain closes, create Runechant tokens equal to the number of heroes who have lost {h} this turn.\nBlood Debt",
   "pitch": 1,
   "cost": 3,
@@ -2837,7 +2837,7 @@
  {
   "id": "DTD147",
   "name": "Deathly Wail",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nWhen the combat chain closes, create Runechant tokens equal to the number of heroes who have lost {h} this turn.\nBlood Debt",
   "pitch": 2,
   "cost": 3,
@@ -2859,7 +2859,7 @@
  {
   "id": "DTD148",
   "name": "Deathly Wail",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nWhen the combat chain closes, create Runechant tokens equal to the number of heroes who have lost {h} this turn.\nBlood Debt",
   "pitch": 3,
   "cost": 3,
@@ -2881,7 +2881,7 @@
  {
   "id": "DTD149",
   "name": "Envelop in Darkness",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Runechant token.\nThe next attack action card you rune gate this turn gets +3{p}.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -2900,7 +2900,7 @@
  {
   "id": "DTD150",
   "name": "Envelop in Darkness",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Runechant token.\nThe next attack action card you rune gate this turn gets +2{p}.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -2919,7 +2919,7 @@
  {
   "id": "DTD151",
   "name": "Envelop in Darkness",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Runechant token.\nThe next attack action card you rune gate this turn gets +1{p}.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -2938,7 +2938,7 @@
  {
   "id": "DTD152",
   "name": "Rift Skitter",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nGo again\nBlood Debt",
   "pitch": 1,
   "cost": 3,
@@ -2961,7 +2961,7 @@
  {
   "id": "DTD153",
   "name": "Rift Skitter",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nGo again\nBlood Debt",
   "pitch": 2,
   "cost": 3,
@@ -2984,7 +2984,7 @@
  {
   "id": "DTD154",
   "name": "Rift Skitter",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nGo again\nBlood Debt",
   "pitch": 3,
   "cost": 3,
@@ -3007,7 +3007,7 @@
  {
   "id": "DTD155",
   "name": "Vantom Banshee",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nBlood Debt",
   "pitch": 1,
   "cost": 3,
@@ -3029,7 +3029,7 @@
  {
   "id": "DTD156",
   "name": "Vantom Banshee",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nBlood Debt",
   "pitch": 2,
   "cost": 3,
@@ -3051,7 +3051,7 @@
  {
   "id": "DTD157",
   "name": "Vantom Banshee",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nBlood Debt",
   "pitch": 3,
   "cost": 3,
@@ -3073,7 +3073,7 @@
  {
   "id": "DTD158",
   "name": "Vantom Wraith",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -3095,7 +3095,7 @@
  {
   "id": "DTD159",
   "name": "Vantom Wraith",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -3117,7 +3117,7 @@
  {
   "id": "DTD160",
   "name": "Vantom Wraith",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rune Gate\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -3139,7 +3139,7 @@
  {
   "id": "DTD161",
   "name": "Putrid Stirrings",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play this from your banished zone.\nThe next attack action card you rune gate this turn gets +5{p}.\nGo again\nBlood debt",
   "pitch": 1,
   "cost": 3,
@@ -3159,7 +3159,7 @@
  {
   "id": "DTD162",
   "name": "Putrid Stirrings",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play this from your banished zone.\nThe next attack action card you rune gate this turn gets +4{p}.\nGo again\nBlood debt",
   "pitch": 2,
   "cost": 3,
@@ -3179,7 +3179,7 @@
  {
   "id": "DTD163",
   "name": "Putrid Stirrings",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play this from your banished zone.\nThe next attack action card you rune gate this turn gets +3{p}.\nGo again\nBlood debt",
   "pitch": 3,
   "cost": 3,
@@ -3199,7 +3199,7 @@
  {
   "id": "DTD164",
   "name": "Levia, Redeemed",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Legendary Levia Specialization\nAction - Turn all cards in your banished zone face-down: Transform into Levia, Redeemed. Activate this ability only while this is in your inventory and you have 13 or more cards with blood debt in your banished zone.\nCards you own lose blood debt.",
   "subtypes": [
    "shadow"
@@ -3216,7 +3216,7 @@
  {
   "id": "DTD164B",
   "name": "Blasmophet, Levia Consumed",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Legendary Levia Specialization\nWhile this is in your inventory, when blood debt reduces your {h} to 13, you may transform into Blasmophet, Levia Consumed.\nOnce each turn, you may play a card with blood debt from your banished zone. Whenever a card is put into your banished zone, turn it face-down. If you would lose {h} from blood debt, instead banish the top card of the deck.",
   "subtypes": [
    "shadow",
@@ -3234,7 +3234,7 @@
  {
   "id": "DTD165",
   "name": "Shroud of Darkness",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If your hero would be dealt damage, you may banish this to prevent 2 of that damage.\nBlood Debt",
   "subtypes": [
    "shadow",
@@ -3248,7 +3248,7 @@
  {
   "id": "DTD166",
   "name": "Cloak of Darkness",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If your hero would be dealt damage, you may banish this to prevent 2 of that damage.\nBlood Debt",
   "subtypes": [
    "shadow",
@@ -3262,7 +3262,7 @@
  {
   "id": "DTD167",
   "name": "Grasp of Darkness",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If your hero would be dealt damage, you may banish this to prevent 2 of that damage.\nBlood Debt",
   "subtypes": [
    "shadow",
@@ -3276,7 +3276,7 @@
  {
   "id": "DTD168",
   "name": "Dance of Darkness",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If your hero would be dealt damage, you may banish this to prevent 2 of that damage.\nBlood Debt",
   "subtypes": [
    "shadow",
@@ -3290,7 +3290,7 @@
  {
   "id": "DTD169",
   "name": "Dabble in Darkness",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, banish the top card of your deck. This gets -X{p}, where X is the pitch value of the card banished this way.\nBlood Debt",
   "pitch": 1,
   "cost": 0,
@@ -3308,7 +3308,7 @@
  {
   "id": "DTD170",
   "name": "Chains of Mephetis",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play this from your banished zone. If you do, it enters the arena with a doom counter.\nAt the start of your turn, destroy this unless you remove a doom counter from it.\nIf a hero would draw a card during an action phase, instead they banish the top card of their deck and may play it this turn.\nBlood Debt",
   "pitch": 3,
   "cost": 0,
@@ -3325,7 +3325,7 @@
  {
   "id": "DTD171",
   "name": "Dimenxxional Vortex",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play this from your banished zone. If you do, it costs {r}{r} less to play.\nEach hero banishes a card from their arsenal.\nBlood Debt",
   "cost": 3,
   "subtypes": [
@@ -3339,7 +3339,7 @@
  {
   "id": "DTD172",
   "name": "Hungering Demigon",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an opposing hero has 1 or more cards in their soul, you may play this from your banished zone.\nWhen this hits a hero, banish a card from their soul.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -3357,7 +3357,7 @@
  {
   "id": "DTD173",
   "name": "Hungering Demigon",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an opposing hero has 1 or more cards in their soul, you may play this from your banished zone.\nWhen this hits a hero, banish a card from their soul.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -3375,7 +3375,7 @@
  {
   "id": "DTD174",
   "name": "Hungering Demigon",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If an opposing hero has 1 or more cards in their soul, you may play this from your banished zone.\nWhen this hits a hero, banish a card from their soul.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -3393,7 +3393,7 @@
  {
   "id": "DTD175",
   "name": "Grim Feast",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play this from your banished zone. If you do, it costs {r}{r} less to play.\nGain 3{h}\nBlood Debt",
   "pitch": 1,
   "cost": 3,
@@ -3409,7 +3409,7 @@
  {
   "id": "DTD176",
   "name": "Grim Feast",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play this from your banished zone. If you do, it costs {r}{r} less to play.\nGain 2{h}\nBlood Debt",
   "pitch": 2,
   "cost": 3,
@@ -3425,7 +3425,7 @@
  {
   "id": "DTD177",
   "name": "Grim Feast",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play this from your banished zone. If you do, it costs {r}{r} less to play.\nGain 1{h}\nBlood Debt",
   "pitch": 3,
   "cost": 3,
@@ -3441,7 +3441,7 @@
  {
   "id": "DTD178",
   "name": "Vile Inquisition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play this from your banished zone. If you do, it costs {r}{r} less to play.\nTarget hero banishes the top card of their deck. If it's red, they lose 1{h}.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -3457,7 +3457,7 @@
  {
   "id": "DTD179",
   "name": "Vile Inquisition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play this from your banished zone. If you do, it costs {r}{r} less to play.\nTarget hero banishes the top card of their deck. If it's yellow, they lose 1{h}.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -3473,7 +3473,7 @@
  {
   "id": "DTD180",
   "name": "Vile Inquisition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play this from your banished zone. If you do, it costs {r}{r} less to play.\nTarget hero banishes the top card of their deck. If it's blue, they lose 1{h}.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -3489,7 +3489,7 @@
  {
   "id": "DTD181",
   "name": "Soul Butcher",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If the defending hero has 1 or more cards in their soul, this gets +2{p}.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -3507,7 +3507,7 @@
  {
   "id": "DTD182",
   "name": "Soul Butcher",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If the defending hero has 1 or more cards in their soul, this gets +2{p}.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -3525,7 +3525,7 @@
  {
   "id": "DTD183",
   "name": "Soul Butcher",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If the defending hero has 1 or more cards in their soul, this gets +2{p}.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -3543,7 +3543,7 @@
  {
   "id": "DTD184",
   "name": "Soul Cleaver",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If the defending hero has 1 or more cards in their soul, this gets go again.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -3562,7 +3562,7 @@
  {
   "id": "DTD185",
   "name": "Soul Cleaver",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If the defending hero has 1 or more cards in their soul, this gets go again.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -3581,7 +3581,7 @@
  {
   "id": "DTD186",
   "name": "Soul Cleaver",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If the defending hero has 1 or more cards in their soul, this gets go again.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -3600,7 +3600,7 @@
  {
   "id": "DTD187",
   "name": "Beseech the Demigon",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose an attack action card in your banished zone. It gets +3{p} until end of turn.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -3616,7 +3616,7 @@
  {
   "id": "DTD188",
   "name": "Beseech the Demigon",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose an attack action card in your banished zone. It gets +2{p} until end of turn.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -3632,7 +3632,7 @@
  {
   "id": "DTD189",
   "name": "Beseech the Demigon",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose an attack action card in your banished zone. It gets +1{p} until end of turn.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -3648,7 +3648,7 @@
  {
   "id": "DTD190",
   "name": "Tear Through the Portal",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose a red action card in your banished zone. It gets go again until end of turn.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -3664,7 +3664,7 @@
  {
   "id": "DTD191",
   "name": "Tear Through the Portal",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose a yellow action card in your banished zone. It gets go again until end of turn.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -3680,7 +3680,7 @@
  {
   "id": "DTD192",
   "name": "Tear Through the Portal",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose a blue action card in your banished zone. It gets go again until end of turn.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -3696,7 +3696,7 @@
  {
   "id": "DTD193",
   "name": "Nasreth, the Soul Harrower",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Once per Turn Action - 0: Attack\nWhen Nasreth hits a hero, banish a card from their soul. If a Light card is banished this way, gain 1{h}.",
   "attack": 6,
   "subtypes": [
@@ -3710,7 +3710,7 @@
  {
   "id": "DTD194",
   "name": "Embodiment of Earth",
-  "cardType": "token",
+  "types": ["token"],
   "text": "'Non-attack' action cards you control have +1{d} while defending.\nAt the beginning of your action phase, destroy Embodiment of Earth.",
   "subtypes": [
    "elemental",
@@ -3721,7 +3721,7 @@
  {
   "id": "DTD195",
   "name": "Embodiment of Lightning",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card, destroy this, then the attack gets go again.",
   "subtypes": [
    "elemental",
@@ -3732,7 +3732,7 @@
  {
   "id": "DTD196",
   "name": "Anthem of Spring",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Briar Specialization\nThe next attack action card you play this turn gets +1{p}. Go again\nUnity - When this defends together with a card from hand, create an Embodiment of Earth token under any number of heroes' control.",
   "pitch": 3,
   "cost": 0,
@@ -3750,7 +3750,7 @@
  {
   "id": "DTD197",
   "name": "Northern Winds",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Oldhim Specialization\nFor each hero, freeze up to 1 equipment, item, and ally they control until the start of your next turn.\nUnity - When this defends together with a card from hand, create a Spellbane Aegis token under any number of heroes' control.",
   "pitch": 3,
   "cost": 0,
@@ -3768,7 +3768,7 @@
  {
   "id": "DTD198",
   "name": "Call Down the Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lexi Specialization\nYour attacks this turn get \"Whenever the defending hero adds 1 or more defending cards from hand to this chain link, this deals 1 damage to them.\" Go again\nUnity - When this defends together with a card from hand, create an Embodiment of Lightning token under any number of heroes' control.",
   "pitch": 2,
   "cost": 0,
@@ -3786,7 +3786,7 @@
  {
   "id": "DTD199",
   "name": "Rugged Roller",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nActivate Rugged Roller only if you've rolled a 6 on a die this turn.",
   "attack": 6,
   "classes": [
@@ -3801,7 +3801,7 @@
  {
   "id": "DTD200",
   "name": "Scowling Flesh Bag",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, intimidate.\nBlade Break",
   "defense": 2,
   "classes": [
@@ -3819,7 +3819,7 @@
  {
   "id": "DTD201",
   "name": "Numbskull",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While this is in any zone, its {r} cost to play, {p}, and {d} can't be modified.",
   "pitch": 1,
   "cost": 2,
@@ -3836,7 +3836,7 @@
  {
   "id": "DTD202",
   "name": "Dig Up Dinner",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose 3 random cards in your graveyard. Shuffle all attack action cards with 6 or more {p} chosen this way into your deck, then gain that much {h}. Banish this.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -3852,7 +3852,7 @@
  {
   "id": "DTD203",
   "name": "Star Struck",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Bravo Specialization\nCrush - When this deals 4 or more damage to a hero, the only attacks they may play or activate during their next turn are attacks with base {p} greater than the damage dealt this way.\nUnity - When this defends together with a card from hand, create a Seismic Surge token under any number of heroes' control.",
   "pitch": 2,
   "cost": 7,
@@ -3874,7 +3874,7 @@
  {
   "id": "DTD204",
   "name": "Seismic Surge",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the beginning of your action phase, destroy this, then the next Guardian attack action card you play this turn costs {r} less to play.",
   "classes": [
    "guardian"
@@ -3887,7 +3887,7 @@
  {
   "id": "DTD205",
   "name": "Decimator Great Axe",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}{r}:  Attack\nThe first time this is defended by a non-equipment card each turn, halve the base {d} of target defending card, rounded up, until end of turn.",
   "attack": 4,
   "classes": [
@@ -3902,7 +3902,7 @@
  {
   "id": "DTD206",
   "name": "Bastion of Unity",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Unity - When this defends together with a card from hand, this gets +1{d} until end of turn.\nTemper",
   "defense": 1,
   "classes": [
@@ -3920,7 +3920,7 @@
  {
   "id": "DTD207",
   "name": "Ironsong Versus",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Once per Turn Action - {r}: Your next sword attack this turn gets \"When this hits a hero, create a Courage token.\"  Go again\nTemper",
   "defense": 2,
   "classes": [
@@ -3937,7 +3937,7 @@
  {
   "id": "DTD208",
   "name": "Chorus of Ironsong",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Dorinthea Specialization\nUntil end of turn, target Dawnblade gets +1{p} and \"Damage this would deal can't be prevented.\"\nUnity - When this defends together with a card from hand, create a Courage token under any number of heroes' control.",
   "pitch": 2,
   "cost": 1,
@@ -3954,7 +3954,7 @@
  {
   "id": "DTD209",
   "name": "Morlock Hill",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next time you would be dealt lethal damage this turn, you may banish Minerva Themis from your hand or arsenal to prevent that damage.",
   "pitch": 3,
   "cost": 0,
@@ -3966,7 +3966,7 @@
  {
   "id": "DTD210",
   "name": "Scepter of Pain",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Deal 1 arcane damage to any opposing target.\nCreate a Runechant token for each damage dealt this way.",
   "classes": [
    "runeblade"
@@ -3980,7 +3980,7 @@
  {
   "id": "DTD211",
   "name": "Dyadic Carapace",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 2\nTemper",
   "defense": 2,
   "classes": [
@@ -3998,7 +3998,7 @@
  {
   "id": "DTD212",
   "name": "Bequest the Vast Beyond",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Viserai Specialization\nThe next Runeblade attack action card you play this turn costs {r} less to play for each Runechant you control.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -4015,7 +4015,7 @@
  {
   "id": "DTD213",
   "name": "Runic Reckoning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This costs {r} less to play for each Runechant you control.\nThe next Runeblade attack action card you play this turn gets +3{p}.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -4031,7 +4031,7 @@
  {
   "id": "DTD214",
   "name": "Runechant",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
   "classes": [
    "runeblade"
@@ -4044,7 +4044,7 @@
  {
   "id": "DTD215",
   "name": "Alluring Inducement",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Shiyana Specialization\nWhen this attacks, the defending hero reveals their hand. You may choose an attack action card revealed this way. If you do, this becomes the chosen card.\nUnity - When this defends together with a card from hand, create an Eloquence token under any number of heroes' control.",
   "pitch": 2,
   "cost": 2,
@@ -4065,7 +4065,7 @@
  {
   "id": "DTD216",
   "name": "Reality Refractor",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Illusionist auras you control are weapons with 5 base {p} and \"Once per Turn Action - {r]{r}: Attack\"",
   "classes": [
    "illusionist"
@@ -4079,7 +4079,7 @@
  {
   "id": "DTD217",
   "name": "Diadem of Dreamstate",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Once per turn, when this or a non-token permanent you control with ward is destroyed, you may pay {r}. If you do, create a Ponder token.\nWard 2",
   "classes": [
    "illusionist"
@@ -4095,7 +4095,7 @@
  {
   "id": "DTD218",
   "name": "Flicker Trick",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Mirage",
   "pitch": 1,
   "cost": 0,
@@ -4111,7 +4111,7 @@
  {
   "id": "DTD219",
   "name": "Lost in Thought",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Look at target hero's hand. Choose an attack action card and reveal it. If you do, they put it on the bottom of their deck and create a Ponder token.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -4127,7 +4127,7 @@
  {
   "id": "DTD220",
   "name": "Spectral Shield",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Ward 1",
   "classes": [
    "illusionist"
@@ -4143,7 +4143,7 @@
  {
   "id": "DTD221",
   "name": "Crown of Providence",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When you defend with Crown of Providence, you may put a card from your hand or arsenal on the bottom of your deck. If you do, draw a card.\nBlade Break",
   "defense": 2,
   "classes": [
@@ -4160,7 +4160,7 @@
  {
   "id": "DTD222",
   "name": "Frontline Helm",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "At the beginning of your end phase, put a -1{d} counter on this.\nBlade Break",
   "defense": 2,
   "classes": [
@@ -4177,7 +4177,7 @@
  {
   "id": "DTD223",
   "name": "Frontline Plating",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "At the beginning of your end phase, put a -1{d} counter on this.\nBlade Break",
   "defense": 2,
   "classes": [
@@ -4194,7 +4194,7 @@
  {
   "id": "DTD224",
   "name": "Frontline Gauntlets",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "At the beginning of your end phase, put a -1{d} counter on this.\nBlade Break",
   "defense": 2,
   "classes": [
@@ -4211,7 +4211,7 @@
  {
   "id": "DTD225",
   "name": "Frontline Legs",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "At the beginning of your end phase, put a -1{d} counter on this.\nBlade Break",
   "defense": 2,
   "classes": [
@@ -4228,7 +4228,7 @@
  {
   "id": "DTD226",
   "name": "Censor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, name a card. They can't play the named card until the end of their next turn.",
   "pitch": 1,
   "cost": 1,
@@ -4245,7 +4245,7 @@
  {
   "id": "DTD227",
   "name": "Mischievous Meeps",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, gain control of an item with cost 2 or less they control. Otherwise, draw a card.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -4265,7 +4265,7 @@
  {
   "id": "DTD228",
   "name": "Hold the Line",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "If the attacking hero has drawn 2 or more cards this turn, prevent the next 3 damage that would be dealt to your hero this turn.",
   "pitch": 3,
   "cost": 0,
@@ -4278,7 +4278,7 @@
  {
   "id": "DTD229",
   "name": "Hack to Reality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack this turn gets +2{p}.\nThe next time you hit a hero this turn, destroy a non-token aura they own with cost less than or equal to the damage dealt this way.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -4294,7 +4294,7 @@
  {
   "id": "DTD230",
   "name": "Warmonger's Diplomacy",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Starting with the hero to your left, each hero chooses war or peace.\nIf they choose war, the only actions they may play or activate during their next turn are weapon and attack actions.\nIf they choose peace, the only actions they may play or activate during their next turn are non-weapon non-attack actions.",
   "pitch": 3,
   "cost": 0,
@@ -4307,7 +4307,7 @@
  {
   "id": "DTD231",
   "name": "Poison the Well",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next time a hero would gain {h} this turn, instead they lose that much {h}.",
   "pitch": 3,
   "cost": 0,
@@ -4319,7 +4319,7 @@
  {
   "id": "DTD232",
   "name": "Courage",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gets +1{p}.",
   "classes": [
    "generic"
@@ -4332,7 +4332,7 @@
  {
   "id": "DTD233",
   "name": "Eloquence",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play a non-attack action card, destroy this and the card gets go again.",
   "classes": [
    "generic"
@@ -4345,7 +4345,7 @@
  {
   "id": "DTD234",
   "name": "Quicken",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gains go again.",
   "classes": [
    "generic"
@@ -4358,7 +4358,7 @@
  {
   "id": "DTD235",
   "name": "Spellbane Aegis",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Spellvoid 1",
   "classes": [
    "generic"

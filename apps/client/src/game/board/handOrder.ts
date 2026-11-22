@@ -52,6 +52,24 @@ export function moveVisibleHandCard(
   return order.map((id) => visible.has(id) ? reordered[index++]! : id);
 }
 
+/** Share of a slot step the dragged card travels before passing a neighbour.
+ * Past half, swapping back needs a return trip, so the boundary cannot flicker. */
+const HAND_SWAP_THRESHOLD = 0.6;
+
+/** The dragged card's new slot, from every card's slot centre in hand order. */
+export function handDragTargetIndex(
+  center: number,
+  slotCenters: readonly number[],
+  currentIndex: number,
+): number {
+  const step = slotCenters.length > 1
+    ? (slotCenters.at(-1)! - slotCenters[0]!) / (slotCenters.length - 1)
+    : 0;
+  const bias = (1 - HAND_SWAP_THRESHOLD) * step;
+  return slotCenters.filter((slot, index) => index !== currentIndex
+    && center > slot + (index < currentIndex ? bias : -bias)).length;
+}
+
 export function handDragStarted(startX: number, startY: number, x: number, y: number): boolean {
   return Math.max(Math.abs(x - startX), Math.abs(y - startY)) > 10;
 }

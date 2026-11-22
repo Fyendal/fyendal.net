@@ -2,7 +2,7 @@
  {
   "id": "SEN001",
   "name": "Enigma",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your first Spectral Shield attack each turn costs {r} less to activate.\nOnce per Turn Instant - {c}{c}{c}: Create a Spectral Shield token with a +1{p} counter.",
   "classes": [
    "mystic",
@@ -15,7 +15,7 @@
  {
   "id": "SEN002",
   "name": "Cosmo, Scroll of Ancestral Tapestry",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "During your turn, auras you control with ward are weapons with base {p} equal to their ward and Once per Turn Action - {r}: Attack\nYour aura attacks with one or more +1{p} counters get go again.",
   "classes": [
    "illusionist"
@@ -29,7 +29,7 @@
  {
   "id": "SEN003",
   "name": "Blade Beckoner Helm",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -46,7 +46,7 @@
  {
   "id": "SEN004",
   "name": "Nullrune Hood",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -63,7 +63,7 @@
  {
   "id": "SEN005",
   "name": "Blossom of Spring",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Gain {r}. Go again",
   "defense": 0,
   "classes": [
@@ -77,7 +77,7 @@
  {
   "id": "SEN006",
   "name": "Nullrune Robe",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -94,7 +94,7 @@
  {
   "id": "SEN007",
   "name": "Uphold Tradition",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Cloaked\nInstant - {r}, turn this face-up: Put a +1{p} counter on an aura you control with ward.\nWard 1",
   "classes": [
    "mystic",
@@ -112,7 +112,7 @@
  {
   "id": "SEN008",
   "name": "Blade Beckoner Boots",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -129,7 +129,7 @@
  {
   "id": "SEN009",
   "name": "Silent Stilettos",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever an attacking ally you control dies or an attack action card you control is destroyed by phantasm, you may pay {r}{r}{r}. If you do, destroy Silent Stilettos and gain 1 action point.\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -146,7 +146,7 @@
  {
   "id": "SEN010",
   "name": "Enigma Chimera",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm",
   "pitch": 1,
   "cost": 2,
@@ -166,7 +166,7 @@
  {
   "id": "SEN011",
   "name": "Look Tuff",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, it gets -1{p} unless you pay {r}.",
   "pitch": 1,
   "cost": 3,
@@ -183,7 +183,7 @@
  {
   "id": "SEN012",
   "name": "Unmovable",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "If this was played from arsenal, it gets +1{d}.",
   "pitch": 1,
   "cost": 3,
@@ -196,7 +196,7 @@
  {
   "id": "SEN013",
   "name": "Astral Etchings",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put three +1{p} counters on target aura with ward you control.\nIf you control a Spectral Shield, you may play this as though it were an instant.",
   "pitch": 1,
   "cost": 1,
@@ -209,7 +209,7 @@
  {
   "id": "SEN014",
   "name": "Spectral Manifestations",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Spectral Shield token, then if you control no other Illusionist auras, put three +1{p} counters on it.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -225,7 +225,7 @@
  {
   "id": "SEN015",
   "name": "Waning Vengeance",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "When this leaves the arena, if you've pitched a blue card this turn, create a Spectral Shield token.\nWard 3",
   "pitch": 1,
   "cost": 1,
@@ -241,7 +241,7 @@
  {
   "id": "SEN016",
   "name": "Waxing Specter",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "If you've pitched a blue card this turn, this enters the arena with a +1{p} counter.\nWard 3",
   "pitch": 1,
   "cost": 2,
@@ -257,7 +257,7 @@
  {
   "id": "SEN017",
   "name": "Oasis Respite",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Prevent the next 4 damage that would be dealt to target hero this turn by a source of your choice. If they have less life than each other hero, they may gain 1{h}.",
   "pitch": 1,
   "cost": 1,
@@ -269,7 +269,7 @@
  {
   "id": "SEN018",
   "name": "On the Horizon",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, look at the top card of your deck.",
   "pitch": 1,
   "defense": 4,
@@ -281,7 +281,7 @@
  {
   "id": "SEN019",
   "name": "Test of Strength",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, clash with the attacking hero. The winner creates a Gold token.",
   "pitch": 1,
   "defense": 4,
@@ -296,7 +296,7 @@
  {
   "id": "SEN020",
   "name": "Springboard Somersault",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "If Springboard Somersault is played from arsenal, it gains +2{d}.",
   "pitch": 2,
   "cost": 0,
@@ -309,7 +309,7 @@
  {
   "id": "SEN021",
   "name": "Enigma Chimera",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm",
   "pitch": 3,
   "cost": 2,
@@ -329,7 +329,7 @@
  {
   "id": "SEN022",
   "name": "Fluid Motion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've created a card this turn, this gets go again.",
   "pitch": 3,
   "cost": 0,
@@ -349,7 +349,7 @@
  {
   "id": "SEN023",
   "name": "Manifest Muscle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've created a card this turn, this gets +1{p}.",
   "pitch": 3,
   "cost": 3,
@@ -366,7 +366,7 @@
  {
   "id": "SEN024",
   "name": "Phantasmal Haze",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Phantasmal Haze is destroyed, create a Spectral Shield token.",
   "pitch": 3,
   "cost": 3,
@@ -386,7 +386,7 @@
  {
   "id": "SEN025",
   "name": "Second Tenet of Chi: Wind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've transcended this turn, this gets go again.",
   "pitch": 3,
   "cost": 3,
@@ -406,7 +406,7 @@
  {
   "id": "SEN026",
   "name": "Spears of Surreality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -427,7 +427,7 @@
  {
   "id": "SEN027",
   "name": "Spectral Rider",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you play Spectral Rider, if you control a Spectral Shield, this gains overpower.\nPhantasm",
   "pitch": 3,
   "cost": 3,
@@ -448,7 +448,7 @@
  {
   "id": "SEN028",
   "name": "Big Blue Sky",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "This gets +1{d} for each blue card you've pitched this turn.",
   "pitch": 3,
   "cost": 0,
@@ -461,7 +461,7 @@
  {
   "id": "SEN029",
   "name": "Put in Context",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "This can only defend an attack with 3 or less base {p}.",
   "pitch": 3,
   "cost": 0,
@@ -474,7 +474,7 @@
  {
   "id": "SEN030",
   "name": "Unmovable",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "If Unmovable is played from arsenal, it gains +1{d}.",
   "pitch": 3,
   "cost": 3,
@@ -487,7 +487,7 @@
  {
   "id": "SEN031",
   "name": "A Drop in the Ocean",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nTarget attack gets -1{p}.\nIf you've played another blue card this turn, transcend.",
   "pitch": 3,
   "cost": 0,
@@ -504,7 +504,7 @@
  {
   "id": "SEN032",
   "name": "Homage to Ancestors",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nGain 1{h}\nIf you've played another blue card this turn, transcend.",
   "pitch": 3,
   "cost": 0,
@@ -521,7 +521,7 @@
  {
   "id": "SEN033",
   "name": "Pass Over",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nBanish target card from an opposing hero's graveyard.\nIf you've played another blue card this turn, transcend.",
   "pitch": 3,
   "classes": [
@@ -538,7 +538,7 @@
  {
   "id": "SEN034",
   "name": "Preserve Tradition",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nPut target action card from your graveyard on the bottom of your deck.\nIf you've played another blue card this turn, transcend.",
   "pitch": 3,
   "classes": [
@@ -555,7 +555,7 @@
  {
   "id": "SEN035",
   "name": "Rising Sun, Setting Moon",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nDraw a card, then put a card from your hand on the bottom of your deck.\nIf you've played another blue card this turn, transcend.",
   "pitch": 3,
   "classes": [
@@ -572,7 +572,7 @@
  {
   "id": "SEN036",
   "name": "Gold",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Action - {r}{r}, destroy this: Draw a card. Go again",
   "classes": [
    "generic"
@@ -585,7 +585,7 @@
  {
   "id": "SEN037",
   "name": "Spectral Shield",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Ward 1",
   "classes": [
    "illusionist"

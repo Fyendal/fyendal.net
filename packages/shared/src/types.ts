@@ -14,13 +14,20 @@ export type CardPoolMode = "legal" | "future" | "open";
 export type QueuePoolCounts = Record<CardPoolMode, Record<CardPoolMode, number>>;
 
 /** Stable identities for the supported practice opponents. */
-export type BotOpponent = "bravo" | "briar" | "kayo" | "cindra" | "ira" | "hala" | "jarl" | "levia" | "starvo" | "boltyn" | "ira-sage";
+export type BotOpponent = "bravo" | "briar" | "kayo" | "cindra" | "ira" | "hala" | "jarl" | "levia" | "starvo" | "boltyn" | "ira-sage" | "aurora" | "dorinthea" | "fang";
 
 /** What a finished bot game needs to start again with the same deck and bot. */
 export interface BotRematch {
   format: Format;
   deckId: string;
   bot: BotOpponent;
+}
+
+/** What a finished self-play game needs to start again with the same decks. */
+export interface SoloRematch {
+  format: Format;
+  deckId: string;
+  opponentDeckId: string;
 }
 
 /** Numeric resources produced when pitched. Colored cards use their red/
@@ -51,7 +58,11 @@ export interface CardData {
   color?: CardColor;
   pitch?: Pitch;
   cost?: number;
-  cardType: CardType;
+  /** Every printed card type, in `CARD_TYPE_ORDER` (e.g. ["equipment",
+   *  "instant"] for an Equipment - Instant Evo). Read with `hasType`, or
+   *  `objectKind` for zone placement. Meld cards keep their printed side
+   *  types in their script. */
+  types: CardType[];
   /** e.g. ["attack"], ["sword","1h"], ["head"], ["club","2h"] */
   subtypes?: string[];
   /** e.g. ["warrior"], ["brute"], ["generic"] */
@@ -415,6 +426,8 @@ export interface PlayerView {
   heroInstanceId: number;
   /** Set when the hero is tapped ({t} costs, e.g. Lyath) */
   heroTapped?: boolean;
+  /** The hero currently has no hero card abilities (Humble and similar). */
+  heroAbilitiesLost?: true;
   /** Named counters on the hero itself (e.g. Blaze's energy counters) */
   heroCounters?: Record<string, number>;
   /** Public -1 defense counters on a hero that is also equipment. */
@@ -558,6 +571,8 @@ export interface PendingDecision {
   /** Semantic prompt used by localized clients. `prompt` remains during the
    * card-script migration and is the deterministic legacy fallback. */
   promptMessage?: GameMessage;
+  /** Caveat shown beside the prompt, projected only to the deciding player. */
+  warningMessage?: GameMessage;
   /** For choose-target / optional-effect: engine-defined option ids */
   options?: string[];
   /** Bounded multi-choice decisions submit a unique subset of `options` in
@@ -569,6 +584,8 @@ export interface PendingDecision {
   /** Option selected by the board's Space shortcut. Card scripts set this
    * explicitly when one choice is the expected/common path. */
   defaultOption?: string;
+  /** A triggered layer declaring its target (CR 6.6.6a); deciding player only. */
+  triggerTarget?: { sourceInstanceId: number; sourceCardId: string };
   /** Parallel display text for ordering/choice options whose ids are
    *  engine-owned and not suitable as player-facing labels. */
   optionLabels?: string[];
@@ -588,6 +605,9 @@ export interface PendingDecision {
    * transform token choices). Null entries are plain literal options. Live
    * cards secret to the viewer are projected hidden. */
   optionCards?: (CardView | null)[];
+  /** Parallel to `options`: the cards choosing that option lets the deciding
+   * player play. Projected only to them. */
+  optionEnabledCards?: CardView[][];
   /** Present a single-pick choose-target as rows of source card plus effect
    * label (replacement-effect choices) instead of the card grid. */
   optionLayout?: "effect-list";
@@ -620,9 +640,15 @@ export interface PendingDecision {
    *  it removes). Unlike `CardView.defense`, it includes delayed "next time
    *  they defend" effects applied at the defend event (Spider's Bite). */
   defenderDefense?: DefenderDefenseView[];
+  /** Defend and defense-reaction decisions, projected only to the defender:
+   *  the defense each defense reaction in hand, arsenal, or on the stack adds
+   *  as it resolves, including delayed effects on the next defending reaction
+   *  card (Nerve Scalpel). Each entry assumes it is the next one to defend. */
+  reactionDefense?: ReactionDefenseView[];
   /** A declared resource cost waiting for ordinary hand-card pitching. Only
-   *  projected to the paying player. Option ids remain engine-owned; clients
-   *  select cards and submit the matching option unchanged. */
+   *  projected to the paying player. Options are a capped sample of pitch
+   *  orders; clients may answer any option with their own order in
+   *  `choose.pitchInstanceIds`, which the engine validates. */
   resourcePayment?: {
     cost: number;
     options: { optionId: string; pitchInstanceIds: number[] }[];
@@ -648,8 +674,10 @@ export interface GameTurnStatsView {
   turn: number;
   activePlayer: number;
   attacks: [number, number];
+  /** Attack and effect damage aimed at the opposing hero or allies before prevention. */
   threatened: [number, number];
   blocked: [number, number];
+  /** Damage dealt to the opposing hero. */
   damageDealt: [number, number];
   /** Damage dealt by an opponent to this seat's allies. Absent in older games. */
   allyAbsorbed?: [number, number];
@@ -683,6 +711,9 @@ export interface PlayerTurnFactsView {
   /** Public: a turn-scoped effect (Kabuto) prohibits this player's weapon
    * attacks. Omitted when false. */
   weaponAttacksProhibited?: boolean;
+  /** Public: a delayed cap (Red in the Ledger) on actions this player may play
+   * or activate during `turn`, with how many remain. Omitted when none applies. */
+  actionLimit?: { turn: number; remaining: number };
   playedSubtypes: string[];
   /** Public permanent instance ids whose once-per-turn triggered effects have
    * already been consumed this turn. */
@@ -795,6 +826,14 @@ export interface DefenderDefenseView {
    *  defends, so defenders that change the attack's power are priced before
    *  the commit */
   attack: number;
+  /** Defending with this card would trigger the attack's current Phantasm,
+   *  after every effect on the attack and on this card's power. */
+  triggersPhantasm?: true;
+}
+
+export interface ReactionDefenseView {
+  instanceId: number;
+  defense: number;
 }
 
 export interface OngoingEffectView {
@@ -885,7 +924,8 @@ export type GameIntent =
   | { kind: "pass" }
   | { kind: "defend"; instanceIds: number[]; pitchInstanceIds?: number[] }
   | { kind: "stage-defenders"; instanceIds: number[] }
-  | { kind: "choose"; optionId: string }
+  /** `pitchInstanceIds` pays a `resourcePayment` option with the player's own pitch order. */
+  | { kind: "choose"; optionId: string; pitchInstanceIds?: number[] }
   | { kind: "choose-many"; optionIds: string[] }
   | { kind: "order-triggers"; optionIds: string[] }
   | { kind: "skip-runechant" }
@@ -896,6 +936,26 @@ export type GameIntent =
   | { kind: "accept-draw" }
   | { kind: "decline-draw" }
   | { kind: "withdraw-draw" };
+
+// ── Game clock ─────────────────────────────────────────────────────────────
+
+/** Count-up clock persisted beside a room. The seat the game awaits is charged
+ * from `since` (epoch ms) at the next commit; null while nothing is awaited. */
+export interface RoomClock {
+  awaiting: 0 | 1 | null;
+  since: number;
+  seatMs: [number, number];
+}
+
+/** Each seat's total thinking time (ms), kept with a finished replay. */
+export interface GameClockSummary {
+  seatMs: [number, number];
+}
+
+/** Clock in a state message, with the running interval included up to the send time. */
+export interface GameClockView extends GameClockSummary {
+  awaiting: 0 | 1 | null;
+}
 
 // ── Replays ────────────────────────────────────────────────────────────────
 
@@ -922,6 +982,8 @@ export interface ReplayFileV2 {
   version: 2;
   /** Board orientation seat, or null for a spectator recording. */
   seat: number | null;
+  /** Final game clock; absent on replays recorded before the clock existed. */
+  clock?: GameClockSummary;
   frames: ReplayFrameV2[];
 }
 
@@ -937,6 +999,7 @@ export interface ReplayFileV3 {
   version: 3;
   /** Board orientation seat, or null for a spectator recording. */
   seat: number | null;
+  clock?: GameClockSummary;
   frames: ReplayFrameV2[];
   notes: ReplayNote[];
 }
@@ -966,7 +1029,7 @@ export type PlayerReportReason =
 
 /** Cosmetic badge selected for public display. Entitlements are private
  * account data; this field exposes only the single active choice. */
-export type PlayerBadge = "early-tester";
+export type PlayerBadge = "early-tester" | "supporter";
 
 /** Public account presentation for one player in an active game. */
 export interface PlayerProfileView {
@@ -1004,6 +1067,12 @@ export interface PrepView {
   cardPoolMode?: Exclude<CardPoolMode, "legal">;
   /** This room has a synthetic AI opponent and is deleted when its human ends it. */
   botGame?: boolean;
+  /** One account controls both seats of this private room. */
+  soloGame?: boolean;
+  /** Private room that opted into sandbox; solo rooms imply it without the key. */
+  sandbox?: true;
+  /** Your seat came from matchmaking and is still waiting to be paired. */
+  searching?: true;
   seats: [PrepSeatView | null, PrepSeatView | null];
   yourSeat: number;
   /** your saved deck, cc/silver-age only (for loading the sideboarding pool after a reconnect) */
@@ -1120,9 +1189,9 @@ export interface FriendGameInvite {
 export type PriorityWindowMode = "auto-pass" | "always-pause";
 
 /** How far a seat's temporary pass shortcut reaches: through the current (or
- *  next) chain link, to the end of the current turn, or until the opponent
- *  plays or activates something. */
-export type PassUntilMode = "chain-link" | "turn" | "opponent";
+ *  next) chain link, or to the end of the current turn. Either pauses when the
+ *  opponent plays or activates something. */
+export type PassUntilMode = "chain-link" | "turn";
 
 /** `chooseHook` → option value; "ask" is absence. */
 export type SeatStandingOrder = Record<string, string>;
@@ -1141,14 +1210,18 @@ export type ClientMessage =
   | { type: "chat-history"; username: string; beforeId?: string }
   | { type: "chat-send"; username: string; text: string; clientMessageId: string }
   | { type: "chat-read"; username: string; throughId: string }
-  | { type: "create-friend-room"; username: string; format: Format; deckId: string; cardPoolMode?: CardPoolMode }
+  | { type: "create-friend-room"; username: string; format: Format; deckId: string; cardPoolMode?: CardPoolMode; sandbox?: boolean }
   | { type: "friend-game-invite-dismiss"; inviteId: string }
   /** Takes your seat in a league match's room, creating the room on first entry. */
   | { type: "enter-league-room"; matchId: string; deckId: string }
   /** deckId of a saved deck or format precon */
-  | { type: "create-room"; format: Format; deckId: string; private?: boolean; cardPoolMode?: CardPoolMode }
+  | { type: "create-room"; format: Format; deckId: string; private?: boolean; cardPoolMode?: CardPoolMode; /** Requires `private`. */ sandbox?: boolean }
   /** Create a dedicated constructed room with the selected AI opponent. */
   | { type: "create-bot-room"; format?: Format; deckId: string; bot?: BotOpponent; cardPoolMode?: CardPoolMode; searchForPlayer?: boolean; avoidRoomCodes?: string[] }
+  /** Create a private room where the creator plays both seats. */
+  | { type: "create-solo-room"; format: Format; deckId: string; opponentDeckId: string; cardPoolMode?: CardPoolMode }
+  /** Solo room: switch which seat this socket views and acts as. */
+  | { type: "solo-seat"; seat: 0 | 1 }
   /** deckId required to take a player seat; omit to spectate. spectate
    *  forces a spectator slot even when a player seat is free */
   | { type: "join-room"; code: string; token?: string; deckId?: string; spectate?: boolean }
@@ -1174,6 +1247,10 @@ export type ClientMessage =
   | { type: "present-deck"; deck: PresentedDeck }
   /** prep room: withdraw readiness to edit the presented deck again */
   | { type: "prep-unready" }
+  /** prep room: swap your saved deck while the other seat is empty */
+  | { type: "change-deck"; deckId: string }
+  /** prep room: invite an online friend to take the open seat */
+  | { type: "invite-friend-to-room"; username: string }
   /** prep room: authorized player picks who goes first (first=true → self) */
   | { type: "choose-first"; first: boolean }
   /** Leave a pre-game room, or explicitly delete a bot game. */
@@ -1193,16 +1270,43 @@ export type ClientMessage =
   /** Arm (or with null, cancel) the seat's temporary pass shortcut. The server
    *  passes its windows and declares no blocks until the mode expires, pausing
    *  for other choices and before an attack that could defeat the seat. */
-  | { type: "pass-until"; mode: PassUntilMode | null; commandId?: string; expectedVersion?: number }
+  | { type: "pass-until"; mode: PassUntilMode | null; /** Keep passing over the opponent's new plays too. */ ignorePlays?: true; commandId?: string; expectedVersion?: number }
+  /** Declare `optionId` for the seat's pending trigger target and repeat it
+   *  for that source's later declarations this turn. */
+  | { type: "remember-target"; optionId: string; commandId?: string; expectedVersion?: number }
   /** The same one-shot shortcut for a consecutive Seismic Surge resolution. */
   | { type: "seismic-surge-skip"; enabled: boolean; commandId?: string; expectedVersion?: number }
   | { type: "undo"; target?: UndoTarget; commandId?: string; expectedVersion?: number }
+  /** Sandbox rooms only: directly edit a seat the caller controls. */
+  | { type: "sandbox-edit"; seat: 0 | 1; edit: ManualEdit; commandId?: string; expectedVersion?: number }
   /** Broadcast a predefined, ephemeral message to the current room. */
   | { type: "emote"; message: EmoteMessage }
   /** Seated players may remove every live spectator session owned by this account. */
   | { type: "kick-spectator"; username: string }
   /** end the game as winner because the opponent has been idle (IDLE_VICTORY_MS) */
   | { type: "claim-victory"; commandId?: string; expectedVersion?: number };
+
+/** A silent direct state edit in a sandbox room; never a `GameIntent`. */
+export type ManualEdit =
+  | { kind: "set-life"; life: number }
+  | { kind: "set-resources"; resources: number }
+  /** A permutation of the seat's deck instance ids; index 0 becomes the top. */
+  | { kind: "reorder-deck"; instanceIds: number[] }
+  | { kind: "shuffle-deck" }
+  /** Move one of the seat's own hand, deck, graveyard, or face-up banished cards. */
+  | { kind: "move-card"; instanceId: number; to: ManualMoveDestination }
+  /** Changes nothing; converts a bot room so its deck order is shown before any edit. */
+  | { kind: "reveal-deck" };
+
+export const MANUAL_MOVE_DESTINATIONS = ["hand", "deck-top", "deck-bottom", "graveyard", "banish"] as const;
+export type ManualMoveDestination = typeof MANUAL_MOVE_DESTINATIONS[number];
+
+export type ManualEditKind = ManualEdit["kind"];
+
+export const MANUAL_LIFE_MIN = 1;
+export const MANUAL_LIFE_MAX = 999;
+export const MANUAL_RESOURCES_MIN = 0;
+export const MANUAL_RESOURCES_MAX = 99;
 
 export type ServerMessage =
   | { type: "bot-runtime"; code: string; runtimeId: string }
@@ -1222,8 +1326,10 @@ export type ServerMessage =
   | { type: "room-created"; code: string; seat: number; token: string; version: number }
   | { type: "joined"; code: string; seat: number | null; token: string; spectator?: boolean; resumed?: true; version: number }
   | { type: "room-info"; room: RoomInvite }
+  | { type: "deck-changed"; deckId: string }
+  | { type: "friend-invited"; username: string }
   | { type: "game-started"; version: number }
-  | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; botGame?: boolean; /** The recipient seat's armed pass shortcut; never sent to anyone else. */ passUntil?: PassUntilMode; /** Per-seat printing id -> image id, limited to cards this viewer can see. */ cardArt?: [Record<string, string>, Record<string, string>] }
+  | { type: "state"; version: number; view: GameView; transition?: GameTransitionView; playerProfiles: [PlayerProfileView, PlayerProfileView]; yourSeat: number | null; legal: GameIntent[]; /** Structurally available plays/activations, including unaffordable ones. */ actionCandidates?: GameIntent[]; spectators?: number; lastActionAt: [number, number]; /** Absent for rooms started before the clock existed. */ clock?: GameClockView; botGame?: boolean; soloGame?: boolean; /** Private room that opted into sandbox; solo rooms imply it without the key. */ sandbox?: true; /** Solo games: the owner's seat, which the board keeps at the bottom while `yourSeat` follows whoever must act. */ boardSeat?: 0 | 1; /** The recipient seat's armed pass shortcut; never sent to anyone else. */ passUntil?: PassUntilMode; /** Passing now would end the recipient seat's turn with a usable action point; never sent to anyone else. */ endTurnWarning?: true; /** Per-seat printing id -> image id, limited to cards this viewer can see. */ cardArt?: [Record<string, string>, Record<string, string>] }
   | { type: "spectators"; count: number; version: number }
   /** Additive companion to the legacy count message; null identifies a guest. */
   | { type: "spectator-list"; usernames: Array<string | null>; version: number }
@@ -1241,8 +1347,8 @@ export type ServerMessage =
   | { type: "match-timeout" }
   /** pre-game prep room update */
   | { type: "prep-state"; prep: PrepView; version: number }
-  /** your leave-room went through; an ended bot game names its deck and bot for Play again */
-  | { type: "left"; playAgain?: BotRematch }
+  /** your leave-room went through; an ended bot or solo game names what Play again recreates */
+  | { type: "left"; playAgain?: BotRematch; playAgainSolo?: SoloRematch }
   | { type: "error"; code: ErrorCode; message: string };
 
 /** Full application state after socket log reconstruction. */
@@ -1278,6 +1384,14 @@ export type ErrorCode =
   | "FRIEND_UNAVAILABLE"
   | "MESSAGE_BOUNDS"
   | "MESSAGE_RATE_LIMITED"
+  /** An opponent took the open seat before a deck switch committed. */
+  | "DECK_LOCKED"
+  /** Manual edits are only available in sandbox rooms. */
+  | "SANDBOX_REQUIRED"
+  /** The caller may not edit that seat. */
+  | "SANDBOX_SEAT_FORBIDDEN"
+  /** The edit is out of range or not allowed in the current game state. */
+  | "SANDBOX_EDIT_UNAVAILABLE"
   | "INTERNAL_ERROR";
 /** Operator-authored plain text shown to every visitor. */
 export interface GlobalNotice {

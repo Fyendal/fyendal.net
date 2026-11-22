@@ -1,5 +1,6 @@
 import type { CardData, CardView } from "@fyendal/shared";
 import type { BotPolicyInput } from "./policy.js";
+import { hasType } from "@fyendal/shared";
 
 export type CardRoleTag =
   | "attack"
@@ -46,19 +47,19 @@ export function defaultCardRoles(card: CardView, input: BotPolicyInput): CardRol
   const pitch = Number(data.pitch ?? 0);
   const defense = Number(card.defense ?? data.defense ?? 0);
   const attack = Number(card.attack ?? data.attack ?? 0);
-  const isAttack = data.cardType === "action" && data.subtypes?.includes("attack") === true;
+  const isAttack = hasType(data, "action") && data.subtypes?.includes("attack") === true;
   const tags: CardRoleTag[] = [];
   if (isAttack) tags.push("attack");
-  if (data.cardType === "attack-reaction") tags.push("attack-reaction");
-  if (data.cardType === "defense-reaction") tags.push("defense-reaction");
+  if (hasType(data, "attack-reaction")) tags.push("attack-reaction");
+  if (hasType(data, "defense-reaction")) tags.push("defense-reaction");
   if (includesText(data, /prevent(?:s|ed|ing)?\b/i)) tags.push("prevention");
-  if (pitch === 1 && (isAttack || data.cardType === "attack-reaction")) tags.push("red-offense");
+  if (pitch === 1 && (isAttack || hasType(data, "attack-reaction"))) tags.push("red-offense");
   if (pitch === 3 && defense >= 3) tags.push("blue-block-3");
 
   const colorPlayValue = Math.max(0, 3 - pitch) * 2;
-  const reactionValue = data.cardType === "defense-reaction"
+  const reactionValue = hasType(data, "defense-reaction")
     ? defense + 7
-    : data.cardType === "attack-reaction"
+    : hasType(data, "attack-reaction")
     ? attack + 6
     : 0;
   const preventionValue = tags.includes("prevention") ? 8 : 0;

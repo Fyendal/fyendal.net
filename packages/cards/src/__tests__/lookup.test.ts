@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { cardData, findPrinting, isImplemented, normalizeCardName } from "../index.js";
+import { hasType } from "@fyendal/shared";
 
 describe("normalizeCardName", () => {
   it("lowercases, trims and collapses whitespace", () => {
@@ -24,7 +25,7 @@ describe("findPrinting", () => {
     const card = findPrinting("jarl vetreidi");
     expect(card).toBeDefined();
     expect(card!.name).toBe("Jarl Vetreiði");
-    expect(card!.cardType).toBe("hero");
+    expect(card!.types).toContain("hero");
   });
 
   it("prefers an exact pitch match when given", () => {
@@ -55,7 +56,7 @@ describe("isImplemented", () => {
 
   it("is true for scripted cards", () => {
     // Rhinar's hero is scripted
-    const hero = Object.values(cardData).find((c) => c.cardType === "hero" && c.name.includes("Rhinar"));
+    const hero = Object.values(cardData).find((c) => hasType(c, "hero") && c.name.includes("Rhinar"));
     expect(hero).toBeDefined();
     expect(isImplemented(hero!)).toBe(true);
   });

@@ -1,5 +1,5 @@
 import { cardList } from "@fyendal/cards";
-import type { FabraryMatchup } from "@fyendal/protocol";
+import { cardArtImage, type FabraryMatchup } from "@fyendal/protocol";
 import type { CardData } from "@fyendal/shared";
 import { asRecord } from "./validation.js";
 
@@ -12,12 +12,22 @@ const MAX_CARD_QTY = 99;
 const MAX_MATCHUPS = 128;
 const REQUEST_TIMEOUT_MS = 10_000;
 
+/** A card the Fabrary deck pins to one printing, named as its decklist line names it. */
+export interface FabraryPin {
+  name: string;
+  pitch?: number;
+  /** Fabrary image object id of the pinned printing. */
+  image: string;
+}
+
 export interface FabraryDeck {
   canonicalUrl: string;
   name: string;
   /** Fabrary data translated to the same text format as Copy decklist. */
   text: string;
   matchups: FabraryMatchup[];
+  /** Fabrary sends pins only for supporters' decks. */
+  pins: FabraryPin[];
 }
 
 export type FabraryDeckResult =
@@ -110,7 +120,7 @@ function readableUnknownIdentifier(identifier: string): { name: string; pitch?: 
   };
 }
 
-function cardLine(identifier: string, qty: number): string {
+function cardName(identifier: string): { name: string; pitch?: number } {
   // Fabrary uses `--` between the faces of meld/double-faced cards, while our
   // normalized card-name index represents `//` as one separator. Collapse the
   // resulting underscores so `burn-up--shock-red` resolves to
@@ -125,6 +135,10 @@ function cardLine(identifier: string, qty: number): string {
   const card = cardsByIdentifier.get(normalizedIdentifier) ?? (unpitched?.pitch ? undefined : unpitched);
   const name = card?.name ?? fallback.name;
   const pitch = card ? card.pitch : fallback.pitch;
+  return { name, ...(pitch ? { pitch } : {}) };
+}
+
+function cardLine({ name, pitch }: { name: string; pitch?: number }, qty: number): string {
   return `${qty}x ${name}${pitch ? ` (${pitch})` : ""}`;
 }
 
@@ -182,6 +196,7 @@ export function decodeFabraryDeck(value: unknown, source: ParsedFabraryUrl): Fab
   if (matchups === null) return null;
   const main: string[] = [];
   const sideboard: string[] = [];
+  const pins: FabraryPin[] = [];
   for (const rawCard of data.cards) {
     const card = asRecord(rawCard);
     if (!card) return null;
@@ -195,8 +210,11 @@ export function decodeFabraryDeck(value: unknown, source: ParsedFabraryUrl): Fab
     const sideboardTotal = quantity(card.sideboardTotal, 0);
     if (!identifier || identifier.length > 256 || total === null || sideboardTotal === null) return null;
     if (total === 0 && sideboardTotal === 0) continue;
-    if (total > 0) main.push(cardLine(identifier, total));
-    if (sideboardTotal > 0) sideboard.push(cardLine(identifier, sideboardTotal));
+    const named = cardName(identifier);
+    if (total > 0) main.push(cardLine(named, total));
+    if (sideboardTotal > 0) sideboard.push(cardLine(named, sideboardTotal));
+    // A pin is cosmetic, so a malformed one is dropped rather than failing the import.
+    if (cardArtImage(card.imageOverride)) pins.push({ ...named, image: card.imageOverride });
   }
   if (main.length === 0 && sideboard.length === 0) return null;
 
@@ -204,6 +222,7 @@ export function decodeFabraryDeck(value: unknown, source: ParsedFabraryUrl): Fab
     canonicalUrl: source.canonicalUrl,
     name,
     matchups,
+    pins,
     text: [
       `Name: ${name}`,
       "Deck cards",

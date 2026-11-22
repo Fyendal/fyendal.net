@@ -14,17 +14,19 @@ import type {
   PendingDecision,
   PlayableZone,
   PlayerView,
+  ReactionDefenseView,
   StackLayerView,
   TurnFactsView,
   TurnTriggerChoiceView,
   TurnTriggerEvent,
 } from "@fyendal/shared";
+import { hasType } from "@fyendal/shared";
 import type { CardInstance, CombatValueModifier, Modifier, PendingDecisionState, PlayerState } from "./state.js";
 import { arsenalCapacity, arsenalZoneCount } from "./cardLifecycle.js";
 import { attackHasVeil, cardColorOf, cardTypesOf, dataOf, instanceDataOf, scriptOf } from "./cardProperties.js";
 import type { TriggerEvent } from "./eventTypes.js";
 import { pendingOnHitEffects } from "./hits.js";
-import { freezeExpiry, linkGoAgainBlocked } from "./ruleQueries.js";
+import { freezeExpiry, linkGoAgainBlocked, pendingActionLimit } from "./ruleQueries.js";
 import {
   combatDamageUnpreventable,
   conditionalModifierGrantsGoAgain,
@@ -41,7 +43,7 @@ import {
   defenseValueModifiers,
   effectiveDefense,
   grantsAuraAttackMarker,
-  linkWithStagedDefenders,
+  stagedDefenderPreview,
   stagedDefenseTotal,
 } from "./combatValues.js";
 import {
@@ -53,9 +55,10 @@ import {
 import { additionalTargetsAroundPrimary, currentLink, findCardAnywhere } from "./zoneQueries.js";
 import { queuedAttackObjects } from "./attackQueue.js";
 import { controlledPermanents } from "./sourceQueries.js";
-import { activatedAbilityUsage } from "./abilityRules.js";
+import { heroAbilitiesDisabled } from "./stateQueries.js";
+import { activatedAbilityUsage, grantedAuraAttackAvailable } from "./abilityRules.js";
 import { defenseReactionRestriction, weaponAttacksProhibited } from "./combatRestrictions.js";
-import { legalDefenderCards } from "./defense.js";
+import { cardTriggersPhantasm, legalDefenderCards } from "./defense.js";
 import { wardPieces } from "./damageResolution.js";
 import { playFromSourceCardId } from "./playRules.js";
 import { isInlineTurnLayer, windowPrompt, windowPromptMessage } from "./triggers.js";
@@ -66,8 +69,17 @@ function projectedLog(
   state: GameStateInternal,
   seat: number | null,
   revealAll: boolean,
+  allSeats = false,
 ): { log: string[]; logEntries?: GameLogViewEntry[] } {
   const entries = state.log.flatMap((entry) => {
+    if (allSeats) {
+      // The same text for every viewer: the first seat's override, then the other's.
+      const override = [0, 1].find((index) => entry.seatText?.[index] != null);
+      const text = override === undefined ? entry.publicText : entry.seatText![override]!;
+      if (text === null) return [];
+      const payload = override === undefined ? entry.publicPayload : entry.seatPayloads?.[override] ?? undefined;
+      return [{ text, payload, sequence: entry.sequence }];
+    }
     const publicAudience = seat === null || revealAll;
     const seatText = publicAudience ? undefined : entry.seatText?.[seat];
     const usesSeatOverride = seatText !== undefined && seatText !== null;
@@ -124,8 +136,7 @@ function projectedAbilityLabels(
  * script state is private implementation detail and never projected. */
 function isPublicStatusKey(key: string): boolean {
   return key === "marked" || key === "attacked" || key === "arcaneBonus" || key === "sharpenedTurn" ||
-    key === "fused" || key === "fusedEarth" || key === "fusedIce" ||
-    key.startsWith("fused:") || key.startsWith("frostZone:");
+    key === "fused" || key.startsWith("fused:") || key.startsWith("frostZone:");
 }
 
 /** A card's rules counters plus its public statuses, as `CardView.counters`. */
@@ -209,7 +220,7 @@ function cardView(state: GameStateInternal,
     ? abilityUsage.flatMap((usage, index) => usage?.remaining === 0 ? [index] : [])
     : [];
   // Aura attacks granted by another permanent (Reality Refractor, Cosmo)
-  // are synthetic once-per-turn abilities whose index follows the card's
+  // are synthetic attack-limited abilities whose index follows the card's
   // printed abilities. Project their per-instance usage too, so otherwise
   // identical board cards do not collapse after only one has attacked.
   const grantedAuraAttackIndex = controller &&
@@ -222,8 +233,8 @@ function cardView(state: GameStateInternal,
     ability.isAttack ? [index] : []);
   if (grantedAuraAttackIndex !== undefined) attackAbilityIndexes.push(grantedAuraAttackIndex);
   const tapAbilityIndexes = abilities.flatMap((ability, index) => ability.tap ? [index] : []);
-  const usedAbilityIndexes = grantedAuraAttackIndex !== undefined &&
-    controller?.flags[activatedFlagKey(c.instanceId, grantedAuraAttackIndex)] === true
+  const usedAbilityIndexes = controller && grantedAuraAttackIndex !== undefined &&
+    !grantedAuraAttackAvailable(controller, c.instanceId, grantedAuraAttackIndex)
       ? [...nativeUsedAbilityIndexes, grantedAuraAttackIndex]
       : nativeUsedAbilityIndexes;
   const playableFromSource = opts.playableFrom
@@ -351,6 +362,7 @@ function playerView(
   self: boolean,
   revealAll = false,
   viewerSeat: number | null = null,
+  revealDeck = revealAll,
 ): PlayerView {
   const gameOver = state.phase === "game-over";
   const equipment: Partial<Record<EquipmentSlot, CardView>> = {};
@@ -379,6 +391,7 @@ function playerView(
     heroCardId: p.heroCardId,
     heroInstanceId: p.hero.instanceId,
     ...(p.hero.tapped ? { heroTapped: true } : {}),
+    ...(heroAbilitiesDisabled(state, p.seat) ? { heroAbilitiesLost: true as const } : {}),
     ...(heroCounters ? { heroCounters } : {}),
     ...(p.hero.defCounters ? { heroDefCounters: p.hero.defCounters } : {}),
     ...(heroSubcards ? { heroSubcards } : {}),
@@ -394,7 +407,7 @@ function playerView(
     hand: self || gameOver || revealAll ? p.hand.map((c) => cardView(state, runtime, c, INACTIVE_ZONE)) : [],
     handCount: p.hand.length,
     deckCount: p.deck.length,
-    ...(gameOver || revealAll ? { deck: p.deck.map((c) => cardView(state, runtime, c, INACTIVE_ZONE)) } : {}),
+    ...(gameOver || revealDeck ? { deck: p.deck.map((c) => cardView(state, runtime, c, INACTIVE_ZONE)) } : {}),
     // face-up cards (e.g. a flipped mentor) are public; face-down stay secret
     arsenal: self || gameOver || revealAll
       ? p.arsenal.map((c) => cardView(state, runtime, c, INACTIVE_ZONE))
@@ -412,7 +425,7 @@ function playerView(
         : cardView(state, runtime, c, {
             includeCounters: false,
             includeLife: false,
-            ...(self && !revealAll ? { playableFrom: { zone: "graveyard", actingSeat: p.seat } } : {}),
+            ...(self ? { playableFrom: { zone: "graveyard", actingSeat: p.seat } } : {}),
           })
     ),
     // face-down banished cards are secret to everyone but their owner
@@ -422,7 +435,7 @@ function playerView(
         : cardView(state, runtime, c, {
             includeCounters: false,
             includeLife: false,
-            ...(viewerSeat !== null && !revealAll
+            ...(viewerSeat !== null
               ? { playableFrom: { zone: "banish", actingSeat: viewerSeat } }
               : {}),
           })
@@ -765,7 +778,7 @@ function projectedAllyPrevention(
   damage: number,
   spentShields: Set<Modifier>,
 ): { amount: number; modifiers: CombatValueModifier[] } | undefined {
-  if (damage <= 0 || link.flags.unpreventable === true) return undefined;
+  if (damage <= 0 || combatDamageUnpreventable(state, link, damage)) return undefined;
   const recipientTypes = cardTypesOf(state, ally);
   let total = 0;
   const modifiers: CombatValueModifier[] = [];
@@ -821,6 +834,12 @@ function projectedStackContext(state: GameStateInternal): string | undefined {
   return "ACTION PHASE · EFFECTS";
 }
 
+export interface ProjectionOptions {
+  /** Sandbox rooms: the viewer's own deck (both decks when revealed for one
+   * person playing both seats) is listed in order. */
+  revealOwnDeck?: boolean;
+}
+
 /** Per-player projection: full info for own zones, hidden info as counts.
  *  `seat` is the viewer's seat; `null` is a spectator (everything hidden). */
 export function projectStateFor(
@@ -828,8 +847,9 @@ export function projectStateFor(
   runtime: EngineRuntime,
   seat: number | null,
   publicGameId = "game",
+  options: ProjectionOptions = {},
 ): GameView {
-  return projectState(state, runtime, seat, publicGameId, false);
+  return projectState(state, runtime, seat, publicGameId, false, false, options.revealOwnDeck === true);
 }
 
 /** Full-information projection for a completed-game replay. It may be
@@ -844,6 +864,21 @@ export function projectStateForReplay(
   return projectState(state, runtime, null, publicGameId, true);
 }
 
+/** A seated projection with both players' hands, arsenals, and face-down cards
+ * revealed, for one person playing both seats. Decision details, legal-play
+ * provenance, and the seat's own deck knowledge are the seat's, as in
+ * `projectStateFor`; deck order stays hidden until game over. The log merges
+ * both seats' private entries, so it is the same for either seat. */
+export function projectStateRevealedFor(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  publicGameId = "game",
+  options: ProjectionOptions = {},
+): GameView {
+  return projectState(state, runtime, seat, publicGameId, true, true, options.revealOwnDeck === true);
+}
+
 /** Project the authoritative stack one-for-one. Counted server layers expose
  * their remaining occurrence count directly; the client does no grouping.
  * While new triggers are being ordered, the lower stack is parked on the
@@ -855,7 +890,11 @@ function projectedStackLayers(
   revealAll: boolean,
 ): StackLayerView[] {
   const parked = state.pendingDecision?.triggerOrder?.baseStack ?? [];
-  return [...state.stack, ...parked].filter((layer) => !isInlineTurnLayer(state, layer)).map((layer) => {
+  return [...state.stack, ...parked].filter((layer) => (
+    !isInlineTurnLayer(state, layer) &&
+    // A resolving card that moved itself (returned to hand) has left the stack.
+    !(layer.fromHand !== undefined && !layer.card)
+  )).map((layer) => {
     // Card layers carry their card; trigger layers point at a source in a zone.
     // A face-down source remains secret to an opposing viewer.
     const card = layer.card ??
@@ -863,11 +902,16 @@ function projectedStackLayers(
       layer.triggerSource ??
       null;
     const secret = !revealAll && !layer.card && !!card?.faceDown && card.owner !== seat;
-    const labelMessage = secret ? undefined : triggerLabelMessage(state, layer);
+    const declared = layer.card
+      ? scriptOf(state, layer.card.cardId, layer.card)?.stackLabel?.(layer.card)
+      : undefined;
+    const labelMessage = secret
+      ? undefined
+      : declared ? declared.labelMessage : triggerLabelMessage(state, layer);
     return {
       card: card && !secret ? cardView(state, runtime, card) : null,
       seat: layer.seat,
-      label: layer.label,
+      label: declared?.label ?? layer.label,
       ...(labelMessage ? { labelMessage } : {}),
       optional: layer.optional,
       ...(layer.triggerCount !== undefined && layer.triggerCount > 1
@@ -878,6 +922,16 @@ function projectedStackLayers(
 }
 
 /** Project only announcement continuations, never ordinary resolution choices. */
+function projectedTriggerTarget(
+  state: GameStateInternal,
+  pd: PendingDecisionState,
+): Pick<PendingDecision, "triggerTarget"> {
+  if (pd.chooseHook !== "trigger-target" || pd.sourceInstanceId === undefined) return {};
+  const sourceCardId = findCardAnywhere(state, pd.sourceInstanceId)?.card.cardId
+    ?? state.stack.find((layer) => layer.sourceInstanceId === pd.sourceInstanceId)?.triggerSource?.cardId;
+  return sourceCardId ? { triggerTarget: { sourceInstanceId: pd.sourceInstanceId, sourceCardId } } : {};
+}
+
 function projectedPreStackSource(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -904,6 +958,7 @@ function projectedPreStackSource(
   const resume = pd.resume;
   const play = pd.variablePlayCost ?? (resume?.kind === "continue-play-after-declaration"
     || resume?.kind === "continue-reaction-after-declaration"
+    || resume?.kind === "continue-window-instant-after-declaration"
     ? resume
     : resume?.kind === "finish-play" || resume?.kind === "finish-reaction" || resume?.kind === "finish-window-instant"
       ? { instanceId: resume.card.instanceId, from: resume.from }
@@ -1010,12 +1065,19 @@ function projectedDecisionPromptMessage(
   return undefined;
 }
 
+function actionLimitFact(state: GameStateInternal, player: PlayerState): { actionLimit?: { turn: number; remaining: number } } {
+  const actionLimit = pendingActionLimit(state, player);
+  return actionLimit ? { actionLimit } : {};
+}
+
 function projectState(
   state: GameStateInternal,
   runtime: EngineRuntime,
   seat: number | null,
   publicGameId: string,
   revealAll: boolean,
+  bothSeats = false,
+  revealOwnDeck = false,
 ): GameView {
   // Until the attack-layer resolves, the newest link is presented on the
   // stack. Attack-step triggers run after it has become attacking.
@@ -1042,7 +1104,9 @@ function projectState(
         ? link.finalDefense
         : computeDefense(state, runtime, link);
     const onHitEffects = projectedOnHitEffects(state, runtime, link, revealAll ? undefined : seat);
-    const damage = link.resolved
+    // Once dealt, shields it spent are consumed, so recomputing would drop them.
+    const damageDealt = link.resolved || link.flags.combatDamageDealt === true;
+    const damage = damageDealt
       ? link.damage
       : computeCombatDamage(state, runtime, link, attack, defense);
     // Targets are damaged in the attacker's order (or primary first until
@@ -1055,7 +1119,7 @@ function projectState(
     const targetSeat = link.attacker === 0 ? 1 : 0;
     const primaryAlly = (state.players[targetSeat] as PlayerState).board
       .find((card) => card.instanceId === link.targetAllyId);
-    const prevention = i !== lastLink || link.resolved
+    const prevention = i !== lastLink || damageDealt
       ? undefined
       : primaryAlly
         ? projectedAllyPrevention(state, link, primaryAlly, targetSeat, damage, spentShields)
@@ -1109,7 +1173,7 @@ function projectState(
             ),
           }
         : {}),
-      ...(!link.resolved && combatDamageUnpreventable(state, link, damage)
+      ...(!damageDealt && combatDamageUnpreventable(state, link, damage)
         ? { damageUnpreventable: true as const }
         : {}),
       damage,
@@ -1188,6 +1252,7 @@ function projectState(
         ? { soulBanishedThisChain: Number(player.flags.soulBanishedThisChain) }
         : {}),
       ...(weaponAttacksProhibited(player) ? { weaponAttacksProhibited: true } : {}),
+      ...actionLimitFact(state, player as PlayerState),
       playedSubtypes: Object.keys(player.flags)
         .filter((flag) => flag.startsWith("playedSubtype:") && player.flags[flag] === true)
         .map((flag) => flag.slice("playedSubtype:".length))
@@ -1205,7 +1270,9 @@ function projectState(
       arcaneDamageTaken: player.flags.arcaneDamageTakenThisTurn === true,
     })) as TurnFactsView["players"],
   };
-  const projectedGameLog = projectedLog(state, seat, revealAll);
+  const projectedGameLog = projectedLog(state, seat, revealAll, bothSeats);
+  const revealsDeck = (index: number) =>
+    (revealAll && !bothSeats) || (revealOwnDeck && seat !== null && (bothSeats || seat === index));
   return {
     // The RNG seed is private server state. Publishing it lets a client
     // reconstruct every future shuffle/random choice in a deterministic game.
@@ -1220,8 +1287,8 @@ function projectState(
       ? { endTurnPassPending: true as const }
       : {}),
     players: [
-      playerView(state, runtime, state.players[0] as PlayerState, seat === 0, revealAll, seat),
-      playerView(state, runtime, state.players[1] as PlayerState, seat === 1, revealAll, seat),
+      playerView(state, runtime, state.players[0] as PlayerState, seat === 0, revealAll, seat, revealsDeck(0)),
+      playerView(state, runtime, state.players[1] as PlayerState, seat === 1, revealAll, seat, revealsDeck(1)),
     ],
     chain,
     stack: projectedStackLayers(state, runtime, seat, revealAll),
@@ -1268,17 +1335,17 @@ function projectState(
             }
             const link = currentLink(state);
             const total = mine && link ? stagedDefenseTotal(state, runtime, link, stagedInstances) : 0;
-            const stagedLink = link ? linkWithStagedDefenders(state, link, visibleStaged) : undefined;
+            const preview = link ? stagedDefenderPreview(state, link, visibleStaged) : undefined;
             staged = {
               stagedCards: cards,
               stagedHandCount,
               stagedDefense: mine ? total : 0,
-              ...(stagedLink
+              ...(preview
                 ? {
-                    stagedAttack: computeAttack(state, runtime, stagedLink),
+                    stagedAttack: computeAttack(preview.state, runtime, preview.link),
                     stagedAttackModifiers: projectedCombatValueModifiers(
                       state,
-                      attackValueModifiers(state, runtime, stagedLink),
+                      attackValueModifiers(preview.state, runtime, preview.link),
                       seat,
                       revealAll,
                     ),
@@ -1288,6 +1355,10 @@ function projectState(
           }
           const defenderDefense = pd.kind === "defend" && (revealAll || pd.player === seat)
             ? projectedDefenderDefense(state, runtime, pd.player, stagedInstances)
+            : [];
+          const reactionDefense = (pd.kind === "defend" || pd.kind === "defense-reaction") &&
+              (revealAll || pd.player === seat)
+            ? projectedReactionDefense(state, runtime, pd.player)
             : [];
           const privateDecision = revealAll || pd.player === seat;
           const promptMessage = projectedDecisionPromptMessage(
@@ -1311,6 +1382,7 @@ function projectState(
             ...(privateDecision && promptMessage
               ? { promptMessage }
               : {}),
+            ...(privateDecision && pd.warningMessage ? { warningMessage: pd.warningMessage } : {}),
             ...((revealAll || pd.player === seat) && pd.options ? { options: pd.options } : {}),
             ...((revealAll || pd.player === seat) && pd.minimumSelections !== undefined
               ? {
@@ -1322,6 +1394,7 @@ function projectState(
             ...((revealAll || pd.player === seat) && pd.defaultOption
               ? { defaultOption: pd.defaultOption }
               : {}),
+            ...(privateDecision ? projectedTriggerTarget(state, pd) : {}),
             ...((revealAll || pd.player === seat) && pd.optionLabels ? { optionLabels: pd.optionLabels } : {}),
             ...(privateDecision && pd.optionMessages ? { optionMessages: pd.optionMessages } : {}),
             ...(privateDecision && pd.chosenOptions ? { chosenOptions: pd.chosenOptions } : {}),
@@ -1343,6 +1416,16 @@ function projectState(
                   ),
                 }
               : {}),
+            ...((revealAll || pd.player === seat) && pd.optionEnabledCardIds
+              ? {
+                  optionEnabledCards: pd.optionEnabledCardIds.map((ids) =>
+                    ids.flatMap((id) => {
+                      const card = optionCardView(state, runtime, id);
+                      return card ? [card] : [];
+                    }),
+                  ),
+                }
+              : {}),
             ...((revealAll || pd.player === seat) && pd.lookedCardIds
               ? {
                   // look-at floats are private, exactly like optionCards
@@ -1353,6 +1436,7 @@ function projectState(
                 }
               : {}),
             ...(defenderDefense.length > 0 ? { defenderDefense } : {}),
+            ...(reactionDefense.length > 0 ? { reactionDefense } : {}),
             ...(pd.revealedCardIds
               ? {
                   // These identities were explicitly made public by the
@@ -1389,10 +1473,31 @@ function projectState(
   };
 }
 
+/** Defense each of the defender's defense reactions adds as it resolves. */
+function projectedReactionDefense(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  defenderSeat: number,
+): ReactionDefenseView[] {
+  const link = currentLink(state);
+  if (!link || link.resolved) return [];
+  const player = state.players[defenderSeat] as PlayerState;
+  const onStack = state.stack.flatMap((layer) =>
+    layer.seat === defenderSeat && layer.card ? [layer.card] : []
+  );
+  return [...player.hand, ...player.arsenal, ...onStack]
+    .filter((card) => hasType(dataOf(state, card.cardId), "defense-reaction"))
+    .map((card) => ({
+      instanceId: card.instanceId,
+      defense: Math.max(0, stagedDefenseTotal(state, runtime, link, [card])),
+    }));
+}
+
 /** Marginal defense of each legal defender relative to the staged set (for a
  * staged card, the defense unstaging it removes), measured exactly as the
- * staged total so delayed one-shot defense effects are included, and the
- * attack value the link takes once that card defends beside the staged set. */
+ * staged total so delayed one-shot defense effects are included, the attack
+ * value the link takes once that card defends beside the staged set, and
+ * whether that defense would trigger the attack's Phantasm. */
 function projectedDefenderDefense(
   state: GameStateInternal,
   runtime: EngineRuntime,
@@ -1403,16 +1508,21 @@ function projectedDefenderDefense(
   if (!link) return [];
   const total = (cards: CardInstance[]) =>
     cards.length > 0 ? stagedDefenseTotal(state, runtime, link, cards) : 0;
-  const attack = (cards: readonly CardInstance[]) =>
-    computeAttack(state, runtime, linkWithStagedDefenders(state, link, cards));
   const base = total([...staged]);
   const stagedIds = new Set(staged.map((card) => card.instanceId));
   const { hand, arsenal, equipment } = legalDefenderCards(state, runtime, defenderSeat);
-  return [...hand, ...arsenal, ...equipment].map((card) => ({
-    instanceId: card.instanceId,
-    defense: Math.max(0, stagedIds.has(card.instanceId)
-      ? base - total(staged.filter((other) => other.instanceId !== card.instanceId))
-      : total([...staged, card]) - base),
-    attack: attack(stagedIds.has(card.instanceId) ? staged : [...staged, card]),
-  }));
+  return [...hand, ...arsenal, ...equipment].map((card) => {
+    const defenders = stagedIds.has(card.instanceId) ? staged : [...staged, card];
+    const preview = stagedDefenderPreview(state, link, defenders);
+    return {
+      instanceId: card.instanceId,
+      defense: Math.max(0, stagedIds.has(card.instanceId)
+        ? base - total(staged.filter((other) => other.instanceId !== card.instanceId))
+        : total([...staged, card]) - base),
+      attack: computeAttack(preview.state, runtime, preview.link),
+      ...(cardTriggersPhantasm(preview.state, runtime, preview.link, card)
+        ? { triggersPhantasm: true as const }
+        : {}),
+    };
+  });
 }

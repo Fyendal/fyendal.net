@@ -2,7 +2,7 @@
  {
   "id": "AUR001",
   "name": "Aurora",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {r}{r}: Create an Embodiment of Lightning token. Activate this only if you've played a Lightning card this turn.\nEssence of Lightning",
   "classes": [
    "runeblade"
@@ -20,7 +20,7 @@
  {
   "id": "AUR002",
   "name": "Star Fall",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nIf you've played a Lightning card this turn, this card's attacks get +1{p} and go again.",
   "attack": 1,
   "classes": [
@@ -39,7 +39,7 @@
  {
   "id": "AUR003",
   "name": "Ironrot Helm",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -56,7 +56,7 @@
  {
   "id": "AUR004",
   "name": "Blossom of Spring",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Gain {r}. Go again",
   "defense": 0,
   "classes": [
@@ -70,7 +70,7 @@
  {
   "id": "AUR005",
   "name": "Aether Crackers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When an attack you control hits a hero, you may destroy this. If you do, deal 1 arcane damage to them.",
   "defense": 0,
   "classes": [
@@ -84,7 +84,7 @@
  {
   "id": "AUR006",
   "name": "Ironrot Legs",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Blade Break",
   "defense": 1,
   "classes": [
@@ -101,7 +101,7 @@
  {
   "id": "AUR007",
   "name": "Crackling",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Flow - If you've played a Lightning card this turn, this gets +1{p}.",
   "pitch": 1,
   "cost": 0,
@@ -122,7 +122,7 @@
  {
   "id": "AUR008",
   "name": "Fry",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 1,
   "cost": 0,
@@ -140,7 +140,7 @@
  {
   "id": "AUR009",
   "name": "Heaven's Claws",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 1,
   "cost": 1,
@@ -155,7 +155,7 @@
  {
   "id": "AUR010",
   "name": "Lightning Surge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played from arsenal, it gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -173,7 +173,7 @@
  {
   "id": "AUR011",
   "name": "Photon Rush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Flow - If you've played a Lightning card this turn, this gets go again",
   "pitch": 1,
   "cost": 0,
@@ -195,7 +195,7 @@
  {
   "id": "AUR012",
   "name": "Static Shock",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Flow - When this hits a hero, if you've played a Lightning card this turn, deal 1 arcane damage to them.",
   "pitch": 1,
   "cost": 0,
@@ -216,7 +216,7 @@
  {
   "id": "AUR013",
   "name": "Harness Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Flow - If you've played a Lightning card this turn, deal 3 arcane damage to target hero.",
   "pitch": 1,
   "cost": 0,
@@ -235,7 +235,7 @@
  {
   "id": "AUR014",
   "name": "Sizzle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Lightning or Elemental attack this turn gets +3{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -251,7 +251,7 @@
  {
   "id": "AUR015",
   "name": "Crackling",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Flow - If you've played a Lightning card this turn, this gets +1{p}.",
   "pitch": 2,
   "cost": 0,
@@ -272,7 +272,7 @@
  {
   "id": "AUR016",
   "name": "Fry",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 2,
   "cost": 0,
@@ -290,7 +290,7 @@
  {
   "id": "AUR017",
   "name": "Heaven's Claws",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 2,
   "cost": 1,
@@ -305,7 +305,7 @@
  {
   "id": "AUR018",
   "name": "Lightning Surge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played from arsenal, it gets go again.",
   "pitch": 2,
   "cost": 0,
@@ -323,7 +323,7 @@
  {
   "id": "AUR019",
   "name": "Static Shock",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Flow - When this hits a hero, if you've played a Lightning card this turn, deal 1 arcane damage to them.",
   "pitch": 2,
   "cost": 0,
@@ -344,7 +344,7 @@
  {
   "id": "AUR020",
   "name": "Harness Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Flow - If you've played a Lightning card this turn, deal 2 arcane damage to target hero.",
   "pitch": 2,
   "cost": 0,
@@ -363,7 +363,7 @@
  {
   "id": "AUR021",
   "name": "Sizzle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Lightning or Elemental attack this turn gets +2{p}.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -379,7 +379,7 @@
  {
   "id": "AUR022",
   "name": "Spark Spray",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is defended by 1 or more cards, you may pay {r}. If you do, this gets +1{p}.",
   "pitch": 2,
   "cost": 0,
@@ -394,7 +394,7 @@
  {
   "id": "AUR023",
   "name": "Cloud Cover",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next time you would be dealt damage this turn, prevent 2 of that damage.",
   "pitch": 2,
   "cost": 0,
@@ -406,7 +406,7 @@
  {
   "id": "AUR024",
   "name": "Photon Rush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Flow - If you've played a Lightning card this turn, this gets go again",
   "pitch": 3,
   "cost": 0,
@@ -428,7 +428,7 @@
  {
   "id": "AUR025",
   "name": "Spark Spray",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is defended by 1 or more cards, you may pay {r}. If you do, this gets +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -443,7 +443,7 @@
  {
   "id": "AUR026",
   "name": "Lightning Press",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target attack action card with cost 1 or less gains +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -455,7 +455,7 @@
  {
   "id": "AUR027",
   "name": "Embodiment of Lightning",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card, destroy this, then the attack gets go again.",
   "subtypes": [
    "elemental",
@@ -466,7 +466,7 @@
  {
   "id": "AUR028",
   "name": "Spell Fray Tiara",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Spellvoid 1",
   "defense": 0,
   "classes": [
@@ -483,7 +483,7 @@
  {
   "id": "AUR029",
   "name": "Spell Fray Leggings",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Spellvoid 1",
   "defense": 0,
   "classes": [

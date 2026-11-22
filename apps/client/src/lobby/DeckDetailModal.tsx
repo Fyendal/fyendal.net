@@ -10,25 +10,15 @@ import { cardImageUrl } from "../game/Card.js";
 import { deckArtIsCustom, useCardArtCatalog } from "../game/cardArtCatalog.js";
 import { shownCardArt } from "../components/CardArtVariants.js";
 import { ModalSurface } from "../components/ModalSurface.js";
-import { UiIcon, type UiIconName } from "../components/UiIcon.js";
-import { BotOpponentModal } from "./BotOpponentModal.js";
+import { UiIcon } from "../components/UiIcon.js";
+import { SoloModeModal } from "./SoloModeModal.js";
+import { OpponentPicker, startMessageId } from "./OpponentPicker.js";
 import { CardPoolHelp } from "./CardPoolHelp.js";
+import { SandboxSwitch } from "./SandboxSwitch.js";
 import { CARD_POOL_MODES } from "./CardPoolModeControl.js";
-import { deckBlockedCards } from "./DeckGrid.js";
+import { deckBlockedCards, deckConstructionMessages, deckOverLimits } from "./DeckGrid.js";
 import { shortFormatLabel } from "./FormatBadge.js";
 import { heroImageUrl } from "./heroImage.js";
-
-const GAME_MODES = ["find-match", "invite-friend", "bot"] as const satisfies readonly HomeGameMode[];
-const GAME_MODE_MESSAGES: Record<HomeGameMode, string> = {
-  "find-match": "lobby.action.findMatch",
-  "invite-friend": "lobby.action.inviteFriend",
-  bot: "lobby.action.playBot",
-};
-const GAME_MODE_ICONS: Record<HomeGameMode, UiIconName> = {
-  "find-match": "search",
-  "invite-friend": "user-add",
-  bot: "bot",
-};
 
 /**
  * A saved deck's hub: start a game with it in its own format, or open,
@@ -49,6 +39,7 @@ export function DeckDetailModal(props: {
     cardPoolModes,
     createBotRoom,
     createRoom,
+    createSoloRoom,
     queuedFormat,
     queueJoin,
     queueLeave,
@@ -60,6 +51,7 @@ export function DeckDetailModal(props: {
     cardPoolModes: state.cardPoolModes,
     createBotRoom: state.createBotRoom,
     createRoom: state.createRoom,
+    createSoloRoom: state.createSoloRoom,
     queuedFormat: state.queuedFormat,
     queueJoin: state.queueJoin,
     queueLeave: state.queueLeave,
@@ -69,7 +61,8 @@ export function DeckDetailModal(props: {
   const [mode, setMode] = useState<HomeGameMode>(() =>
     typeof localStorage === "undefined" ? "find-match" : loadHomeGameMode(localStorage, authUser)
   );
-  const [choosingBot, setChoosingBot] = useState(false);
+  const [choosingSolo, setChoosingSolo] = useState(false);
+  const [sandbox, setSandbox] = useState(false);
   const [artOk, setArtOk] = useState(true);
   const [headshotOk, setHeadshotOk] = useState(true);
   const poolId = useId();
@@ -77,22 +70,33 @@ export function DeckDetailModal(props: {
   const deck = props.deck;
   const format = deck.format;
   const cardPoolMode = cardPoolModes[format];
-  const blocked = deckBlockedCards(deck, cardPoolMode);
+  const blockedCards = deckBlockedCards(deck, cardPoolMode);
+  const blocked = [
+    ...(blockedCards.length > 0
+      ? [intl.formatMessage({ id: "lobby.deck.illegalCards" }, { cards: blockedCards.join(", ") })]
+      : []),
+    ...(deckOverLimits(deck, cardPoolMode) ? deckConstructionMessages(intl, deck) : []),
+  ];
   const queued = queuedFormat !== null;
   const heroCard = findPrinting(deck.heroName);
   const showArt = heroCard !== undefined && artOk;
   const artCatalog = useCardArtCatalog(betaTester && deckArtIsCustom(deck.art));
   const heroArt = artCatalog && heroCard ? shownCardArt(artCatalog, heroCard.id, deck.art) : undefined;
 
-  if (choosingBot) {
+  if (choosingSolo) {
     return (
-      <BotOpponentModal
+      <SoloModeModal
         format={format}
-        onSelect={(bot, searchForPlayer) => {
+        deckId={deck.id}
+        onSelectBot={(bot, searchForPlayer) => {
           createBotRoom(format, deck.id, bot, searchForPlayer);
           props.onClose();
         }}
-        onClose={() => setChoosingBot(false)}
+        onStartSolo={(opponentDeckId) => {
+          createSoloRoom(format, deck.id, opponentDeckId);
+          props.onClose();
+        }}
+        onClose={() => setChoosingSolo(false)}
       />
     );
   }
@@ -104,8 +108,8 @@ export function DeckDetailModal(props: {
 
   const start = () => {
     if (queued || blocked.length > 0) return;
-    if (mode === "bot") {
-      setChoosingBot(true);
+    if (mode === "solo") {
+      setChoosingSolo(true);
       return;
     }
     if (mode === "find-match") {
@@ -114,7 +118,7 @@ export function DeckDetailModal(props: {
       if (typeof localStorage !== "undefined") saveHomeFormat(localStorage, authUser, format);
       setLobbyRail("home");
     } else {
-      createRoom(format, deck.id, "private");
+      createRoom(format, deck.id, "private", sandbox);
     }
     props.onClose();
   };
@@ -162,26 +166,14 @@ export function DeckDetailModal(props: {
       </div>
 
       <div className="deck-detail-body">
-        <div className="deck-detail-modes" role="group" aria-label={intl.formatMessage({ id: "lobby.home.gameMode" })}>
-          {GAME_MODES.map((gameMode) => (
-            <button
-              key={gameMode}
-              type="button"
-              aria-pressed={mode === gameMode}
-              disabled={queued}
-              onClick={() => selectMode(gameMode)}
-            >
-              <UiIcon name={GAME_MODE_ICONS[gameMode]} />
-              {intl.formatMessage({ id: GAME_MODE_MESSAGES[gameMode] })}
-            </button>
-          ))}
-        </div>
+        <OpponentPicker mode={mode} disabled={queued} onChange={selectMode} />
+        {mode === "invite-friend" ? <SandboxSwitch checked={sandbox} onChange={setSandbox} /> : null}
 
         {blocked.length > 0 ? (
           <p className="deck-detail-blocked" role="status">
             {intl.formatMessage(
               { id: "lobby.deck.blocked" },
-              { reason: intl.formatMessage({ id: "lobby.deck.illegalCards" }, { cards: blocked.join(", ") }) },
+              { reason: blocked.join("; ") },
             )}
           </p>
         ) : null}
@@ -217,7 +209,7 @@ export function DeckDetailModal(props: {
               data-modal-initial-focus={blocked.length > 0 ? undefined : ""}
               onClick={start}
             >
-              {intl.formatMessage({ id: "lobby.home.start" })}
+              {intl.formatMessage({ id: startMessageId(mode) })}
             </button>
           )}
         </div>

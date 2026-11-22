@@ -1,15 +1,19 @@
 import { useId, useMemo, useState, type ReactNode } from "react";
 import { useIntl } from "react-intl";
-import type { GameView } from "@fyendal/shared";
+import type { GameClockSummary, GameView } from "@fyendal/shared";
 import { heroImageUrl } from "../lobby/heroImage.js";
 import {
   averagePerRound,
   averageValue,
   computeCycleStats,
   cycleValue,
-  preventedDamage,
-  totalPrevented,
+  rowsFor,
+  totalValue,
 } from "../replay/stats.js";
+import { TooltipButton } from "../components/TooltipButton.js";
+import { TooltipLabel } from "../components/TooltipLabel.js";
+import { UiIcon } from "../components/UiIcon.js";
+import { formatDuration } from "./gameClock.js";
 
 /** Talishar-style end-game summary: one selected player's key match totals,
  * averages, and a compact round-by-round breakdown. All values come from
@@ -27,6 +31,9 @@ export function GameOver({
   onClose,
   replaying = false,
   friendAction = null,
+  clock = null,
+  botSeat = null,
+  solo = false,
 }: {
   view: GameView;
   seat: number;
@@ -39,9 +46,15 @@ export function GameOver({
   onClose: () => void;
   replaying?: boolean;
   friendAction?: ReactNode;
+  /** Final game clock; null for rooms and replays recorded before it existed. */
+  clock?: GameClockSummary | null;
+  botSeat?: 0 | 1 | null;
+  /** Both seats are the viewer's: no victory or defeat, only the named winner. */
+  solo?: boolean;
 }) {
   const intl = useIntl();
   const openingTooltipId = useId();
+  const retentionId = useId();
   const winner = view.winner;
   const initialSeat = (spectating ? winner ?? 0 : seat) === 1 ? 1 : 0;
   const [selectedSeat, setSelectedSeat] = useState<0 | 1>(initialSeat);
@@ -55,14 +68,26 @@ export function GameOver({
   const headline = winner === null
     ? intl.formatMessage({ id: "game.result.draw" })
     : intl.formatMessage({ id: "game.result.namedWinner" }, { winner: winnerName });
-  const resultLabel = winner === null || spectating || replaying
+  const resultLabel = winner === null || spectating || replaying || solo
     ? intl.formatMessage({ id: "game.over.matchComplete" })
     : intl.formatMessage({ id: winner === seat ? "game.result.victory" : "game.result.defeat" });
   const names: [string, string] = [
     view.players[0]?.heroName ?? intl.formatMessage({ id: "game.playerNumber" }, { number: 1 }),
     view.players[1]?.heroName ?? intl.formatMessage({ id: "game.playerNumber" }, { number: 2 }),
   ];
-  const totalValue = stats.rows.reduce((sum, row) => sum + cycleValue(row, selectedSeat), 0);
+  const gameTime = clock ? formatDuration(clock.seatMs[0] + clock.seatMs[1]) : "";
+  const retention = !spectating && !replaying ? intl.formatMessage({ id: "game.over.retention" }) : null;
+  const replayButton = (label: string, onClick: () => void, mark = "") => retention ? (
+    <TooltipButton
+      tooltip={retention}
+      tooltipSide="above"
+      aria-label={label}
+      aria-describedby={retentionId}
+      onClick={onClick}
+    >
+      {mark}{label}
+    </TooltipButton>
+  ) : <button onClick={onClick}>{mark}{label}</button>;
   const fmt = (n: number) => intl.formatNumber(n, { maximumFractionDigits: 1 });
 
   return (
@@ -74,16 +99,46 @@ export function GameOver({
             <div className="gameover-result-copy">
               <span className="gameover-eyebrow">{resultLabel}</span>
               <h2 className="gameover-headline">{headline}</h2>
+              {clock ? (
+                <div className="gameover-clock" role="group" aria-label={intl.formatMessage({ id: "game.time.title" })}>
+                  <TooltipLabel
+                    className="gameover-clock-stat"
+                    label={intl.formatMessage({ id: "game.time.gameLength" }, { time: gameTime })}
+                  >
+                    <UiIcon name="clock" />
+                    <strong aria-hidden="true">{gameTime}</strong>
+                  </TooltipLabel>
+                  <span className="gameover-clock-seats">
+                    {([0, 1] as const).map((playerSeat) => {
+                      const time = formatDuration(clock.seatMs[playerSeat]);
+                      return (
+                        <TooltipLabel
+                          key={playerSeat}
+                          className="gameover-clock-stat"
+                          label={intl.formatMessage(
+                            { id: "game.time.playerUsed" },
+                            { player: names[playerSeat], time },
+                          )}
+                        >
+                          <HeroPortrait name={names[playerSeat]} className="gameover-clock-portrait" />
+                          <strong aria-hidden="true">{time}</strong>
+                        </TooltipLabel>
+                      );
+                    })}
+                  </span>
+                </div>
+              ) : null}
             </div>
           </div>
           <div className="rail-actions gameover-actions">
             {friendAction}
-            {onDownloadReplay ? (
-              <button onClick={onDownloadReplay}>{intl.formatMessage({ id: "replay.controls.export" })}</button>
-            ) : null}
-            {onWatchReplay ? (
-              <button onClick={onWatchReplay}>▶ {intl.formatMessage({ id: "game.over.watchReplay" })}</button>
-            ) : null}
+            {onDownloadReplay
+              ? replayButton(intl.formatMessage({ id: "replay.controls.export" }), onDownloadReplay)
+              : null}
+            {onWatchReplay
+              ? replayButton(intl.formatMessage({ id: "game.over.watchReplay" }), onWatchReplay, "▶ ")
+              : null}
+            {retention ? <span id={retentionId} hidden>{retention}</span> : null}
             <button onClick={onClose}>{intl.formatMessage({ id: "game.over.backToBoard" })}</button>
             <button className={onPlayAgain ? undefined : "btn-primary"} onClick={onBackToLobby}>
               {intl.formatMessage({ id: replaying ? "replay.controls.exit" : "game.over.backToLobby" })}
@@ -95,12 +150,6 @@ export function GameOver({
             ) : null}
           </div>
         </header>
-
-        {!spectating && !replaying ? (
-          <p className="gameover-replay-retention">
-            {intl.formatMessage({ id: "game.over.retention" })}
-          </p>
-        ) : null}
 
         <div className="gameover-switcher">
           <span className="gameover-switcher-label">{intl.formatMessage({ id: "game.over.playerStats" })}</span>
@@ -119,7 +168,9 @@ export function GameOver({
                 onClick={() => setSelectedSeat(playerSeat)}
               >
                 <HeroPortrait name={names[playerSeat]} className="gameover-tab-portrait" />
-                <span className="gameover-player-name">{names[playerSeat]}</span>
+                <span className="gameover-player-name">{playerSeat === botSeat
+                  ? intl.formatMessage({ id: "game.over.botName" }, { name: names[playerSeat] })
+                  : names[playerSeat]}</span>
               </button>
             ))}
           </div>
@@ -186,7 +237,7 @@ export function GameOver({
                     </tr>
                   </thead>
                   <tbody>
-                    {stats.rows.map((row) => (
+                    {rowsFor(stats, selectedSeat).map((row) => (
                       <tr key={row.cycle}>
                         <td>{row.cycle === 0
                           ? intl.formatMessage({ id: "game.stats.openingTurn" })
@@ -195,7 +246,7 @@ export function GameOver({
                         <td>{row.damageDealt[selectedSeat]}</td>
                         <td>{row.blocked[selectedSeat]}</td>
                         <td>{row.allyAbsorbed[selectedSeat]}</td>
-                        <td>{preventedDamage(row, selectedSeat)}</td>
+                        <td>{row.prevented[selectedSeat]}</td>
                         <td>{row.lifeGained[selectedSeat]}</td>
                         <td>{row.lifeLost[selectedSeat]}</td>
                         <td>{cycleValue(row, selectedSeat)}</td>
@@ -209,10 +260,10 @@ export function GameOver({
                       <td>{stats.total.damageDealt[selectedSeat]}</td>
                       <td>{stats.total.blocked[selectedSeat]}</td>
                       <td>{stats.total.allyAbsorbed[selectedSeat]}</td>
-                      <td>{totalPrevented(stats, selectedSeat)}</td>
+                      <td>{stats.total.prevented[selectedSeat]}</td>
                       <td>{stats.total.lifeGained[selectedSeat]}</td>
                       <td>{stats.total.lifeLost[selectedSeat]}</td>
-                      <td>{totalValue}</td>
+                      <td>{totalValue(stats, selectedSeat)}</td>
                     </tr>
                   </tfoot>
                 </table>

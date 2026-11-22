@@ -1,13 +1,21 @@
+import { IDLE_VICTORY_MS } from "@fyendal/shared";
 import { useEffect, useState } from "react";
 
 export function useIdleVictoryPrompt() {
   const [now, setNow] = useState(() => Date.now());
-  const [dismissedFor, setDismissedFor] = useState<number | null>(null);
+  const [snoozedUntil, setSnoozedUntil] = useState<number | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 15_000);
     return () => clearInterval(timer);
   }, []);
 
-  return { now, dismissedFor, dismiss: setDismissedFor };
+  // A dismissal only snoozes: a still-idle opponent is offered again later.
+  const snooze = () => {
+    const at = Date.now();
+    setNow(at);
+    setSnoozedUntil(at + IDLE_VICTORY_MS);
+  };
+
+  return { now, snoozedUntil, snooze };
 }

@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { CardData, DeckPool, Format, PresentedDeck } from "@fyendal/shared";
+import type { CardData, CardType, DeckPool, Format, PresentedDeck } from "@fyendal/shared";
 import {
   arenaWeaponIssue,
   validateArenaAgainstCards,
   validatePresentationAgainstCards,
 } from "../presentation.js";
 
-const card = (id: string, cardType: CardData["cardType"], subtypes: string[] = []): CardData => ({
+const card = (id: string, type: CardType, subtypes: string[] = []): CardData => ({
   id,
   name: id,
-  cardType,
+  types: [type],
   subtypes,
   text: "",
 });
@@ -29,10 +29,11 @@ const cards: Record<string, CardData> = {
   CHEST: card("CHEST", "equipment", ["chest"]),
   BOTH: card("BOTH", "equipment", ["head", "chest"]),
   MODULAR: { ...card("MODULAR", "equipment"), keywords: ["Modular"] },
-  MAIN: card("MAIN", "action", ["attack"]),
+  // Unlimited keeps the one-card filler pool inside the copy limit.
+  MAIN: { ...card("MAIN", "action", ["attack"]), keywords: ["Unlimited"] },
   SIDE: card("SIDE", "action", ["attack"]),
   OUT: card("OUT", "action", ["attack"]),
-  FUTURE: { ...card("FUTURE", "action", ["attack"]), set: "AMO" },
+  FUTURE: { ...card("FUTURE", "action", ["attack"]), set: "OBK" },
   INCARNATE: { ...card("INCARNATE", "action", ["ally"]), keywords: ["Incarnate"] },
   INVENTORY: card("INVENTORY", "hero"),
 };
@@ -67,7 +68,7 @@ describe("shared presentation validation", () => {
     const deck = presentation().deck;
     deck[0] = "FUTURE";
     expect(validatePresentationAgainstCards(cards, pool, { ...presentation(), deck }, "cc"))
-      .toEqual({ ok: false, error: "FUTURE is from the unreleased AMO set" });
+      .toEqual({ ok: false, error: "FUTURE is from the unreleased OBK set" });
     expect(validatePresentationAgainstCards(
       cards,
       pool,
@@ -159,8 +160,18 @@ describe("shared presentation validation", () => {
     ["silver-age", 40, true],
     ["silver-age", 41, false],
   ] as [Format, number, boolean][])("enforces %s size %d", (format, size, ok) => {
-    const pool = basePool(Math.max(60, size));
+    const pool = basePool(format === "cc" ? Math.max(60, size) : 45);
     expect(validatePresentationAgainstCards(cards, pool, presentation(size), format).ok).toBe(ok);
+  });
+
+  it("waives the exact size and pool limits in the open card pool, but not the minimum", () => {
+    const pool = basePool(60);
+    const open = { cardPoolMode: "open" } as const;
+    expect(validatePresentationAgainstCards(cards, pool, presentation(60), "silver-age", open).ok).toBe(true);
+    expect(validatePresentationAgainstCards(cards, pool, presentation(39), "silver-age", open).ok).toBe(false);
+    expect(validatePresentationAgainstCards(cards, pool, presentation(40), "silver-age")).toMatchObject({
+      ok: false, error: "card pool too large (67 cards, silver-age allows at most 55)",
+    });
   });
 });
 

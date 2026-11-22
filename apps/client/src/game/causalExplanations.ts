@@ -1,5 +1,6 @@
 import type { CardView, GameIntent, GameView, PendingDecision } from "@fyendal/shared";
 import { cardData } from "@fyendal/cards/client";
+import { hasType } from "@fyendal/shared";
 
 export interface CausalStatus {
   kind: "priority" | "decision" | "waiting" | "action" | "complete";
@@ -163,7 +164,7 @@ export function cardLegalityExplanation(
     return UNEXPLAINED_ILLEGAL_CARD;
   }
   if (pd?.kind === "defend") {
-    if (data?.cardType === "defense-reaction") {
+    if (hasType(data, "defense-reaction")) {
       return { legal: false, text: "Not legal in the defend step: defense reactions are played in the later defense reaction window." };
     }
     if (data?.defense === undefined) {

@@ -1,17 +1,32 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } from "@fyendal/engine";
 import {
   anyDamageTarget,
+  arcaneSpell,
+  banishAttackOnHit,
   buffNextAttack,
   cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
+  createFrostbites,
   dealArcane,
   dealtByThis,
   dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
+  draconicLinks,
   entersArenaTrigger,
+  faceUpGraveyard,
+  hasArcaneDamageEffect,
+  hasCardSubtype,
+  heroChoiceSeat,
   heroDamage,
+  allyControllerSeat,
+  arenaAllies,
+  isAlly,
+  isenhowlFrostbitesKey,
+  isFused,
+  isItem,
+  hasLessLife,
   localizedCardLog,
   mergeSetScripts,
   ongoingLabel,
@@ -19,18 +34,19 @@ import {
   optN,
   optOnChoose,
   payForDefenseBoost,
+  playedAnotherRed,
+  requestHeroChoice,
   resourceAbility,
+  withFusion,
   wizardActionAsInstant,
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { uprHighRarity } from "./upr/high-rarity.js";
 import { dragonAttack } from "./upr/dragon-attack.js";
+import { AETHER_ASHWING, ASH, FROSTBITE } from "./tokens.js";
 
 // Uprising commons, rares, and young heroes. Invocation back faces use a
 // synthetic `B` registry id linked from the playable front by CardData.backId.
-const ASH = "UPR043";
-const AETHER_ASHWING = "UPR042";
-const FROSTBITE = "SIY035";
 
 /** Cromai's attack and leave-arena triggers share one per-turn limit, consumed
  * as a layer is created (CR 6.6.5e). */
@@ -47,14 +63,6 @@ function cromaiTrigger(event: "attack-declared" | "card-left-arena"): TriggerDef
   };
 }
 
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-
-function hasSubtype(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, subtype: string): boolean {
-  return ctx.cardTypes(card).includes(subtype.toLowerCase());
-}
-
 function ashCards(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
   return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Ash"));
 }
@@ -63,20 +71,12 @@ function phoenixFlames(ctx: ScriptCtx, zone: "hand" | "graveyard" = "graveyard")
   return ctx.player(ctx.seat)[zone].filter((card) => cardNamed(ctx, card, "Phoenix Flame"));
 }
 
-function draconicLinks(ctx: ScriptCtx): number {
-  return ctx.chainLinksControlled(ctx.seat, "draconic");
-}
-
-function playedAnotherRed(ctx: ScriptCtx): boolean {
-  return ctx.playedThisTurn("red") >= 2;
-}
-
 function livingTargets(ctx: ScriptCtx): number[] {
   return [
     ...ctx.state.players.map((player) => player.hero.instanceId),
     ...ctx.state.players.flatMap((player) =>
-      player.board
-        .filter((card) => hasSubtype(ctx, card, "ally") && card.life !== undefined)
+      arenaAllies(ctx, player)
+        .filter((card) => card.life !== undefined)
         .map((card) => card.instanceId),
     ),
   ];
@@ -99,40 +99,13 @@ function chooseDamageTarget(ctx: ScriptCtx, hook: string, prompt: string, amount
   );
 }
 
-function heroChoicePrompt(fallback = "Choose a hero") {
-  return decisionPrompt(fallback, "card.upr.hero.choose", {
-    optionMessages: {
-      opponent: decisionMessage("common.option.opponent"),
-      you: decisionMessage("card.upr.option.you"),
-    },
-  });
-}
-
-function arcaneHeroChoicePrompt(ctx: ScriptCtx, amount: number) {
-  return decisionPrompt(
-    `Choose a hero for ${ctx.previewArcaneDamage(amount)} arcane damage`,
-    "card.upr.arcane.hero.choose",
-    {
-      values: { amount: ctx.previewArcaneDamage(amount) },
-      optionMessages: {
-        opponent: decisionMessage("common.option.opponent"),
-        you: decisionMessage("card.upr.option.you"),
-      },
-    },
-  );
-}
-
 function dealToTarget(ctx: ScriptCtx, option: string, amount: number, arcane = false): number {
   const id = Number(option);
   const hero = ctx.state.players.find((player) => player.hero.instanceId === id);
   if (hero) return arcane ? dealArcane(ctx, hero.seat, amount) : ctx.dealDamage(hero.seat, amount);
-  const owner = ctx.state.players.find((player) => player.board.some((card) => card.instanceId === id));
-  if (!owner) return 0;
-  return arcane ? dealArcane(ctx, owner.seat, amount, id) : ctx.dealDamage(owner.seat, amount, { targetAllyId: id });
-}
-
-function createFrostbites(ctx: ScriptCtx, seat: number, count: number): void {
-  ctx.createTokens(FROSTBITE, count, seat);
+  const owner = allyControllerSeat(ctx, id);
+  if (owner === undefined) return 0;
+  return arcane ? dealArcane(ctx, owner, amount, id) : ctx.dealDamage(owner, amount, { targetAllyId: id });
 }
 
 function consumeOwnMarker(ctx: ScriptCtx): void {
@@ -223,81 +196,14 @@ function invocation(backId: string): CardScript {
   };
 }
 
-function fusionAdditionalCost(ctx: ScriptCtx): void {
-  const ice = ctx.player(ctx.seat).hand.filter((card) => hasSubtype(ctx, card, "ice"));
-  if (ice.length === 0) return;
-  ctx.requestCardChoice(
-    "ice-fusion",
-    decisionPrompt(`${ctx.data.name}: reveal an Ice card from your hand to fuse?`, "card.upr.ice.fusion.reveal.named", {
-      values: { card: { kind: "card", cardId: ctx.self.cardId } },
-      optionMessages: commonOptionMessages("no"),
-    }),
-    [...ice.map((card) => card.instanceId), "no"],
-  );
-}
-
-function consumeIsenhowl(ctx: ScriptCtx): void {
-  for (const target of [0, 1]) {
-    const key = `nextIceFusionFrostbites:${target}`;
-    const count = Number(ctx.getPlayerFlag(ctx.seat, key));
-    if (count > 0) createFrostbites(ctx, target, count);
-    ctx.setPlayerFlag(ctx.seat, key, 0);
-  }
-}
-
-function handleFusion(ctx: ScriptCtx, hook: string, option: string): boolean {
-  if (hook !== "ice-fusion") return false;
-  if (option === "no") return true;
-  const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
-  if (!card) return true;
-  ctx.setState("fused", 1);
-  ctx.setFlag("player", "fusedThisTurn", true);
-  ctx.setFlag("player", "iceFusedThisTurn", true);
-  consumeIsenhowl(ctx);
-  ctx.logPublic(
-    localizedCardLog(
-      ctx,
-      `${ctx.data.name} is fused (reveals ${ctx.cardData(card.cardId).name})`,
-      "card.log.common.fusion.revealed",
-      { revealed: { kind: "card", cardId: card.cardId } },
-      { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "hand" },
-    ),
-  );
-  return true;
-}
-
-function fused(ctx: ScriptCtx): boolean {
-  return ctx.getState("fused") > 0;
-}
-
-function arcaneSpell(amount: number): CardScript {
-  return {
-    arcaneDamageEffect: true,
-    arcaneDamageEffectAmounts: [amount],
-    playAsInstant: wizardActionAsInstant,
-    onPlay(ctx) {
-      chooseDamageTarget(
-        ctx,
-        "arcane",
-        `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to any target`,
-        amount,
-      );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "arcane") dealToTarget(ctx, option, amount, true);
-    },
-  };
-}
-
 function fusedArcane(
   amount: number,
   afterDamage?: (ctx: ScriptCtx, target: number, dealt: number) => void,
 ): CardScript {
-  return {
+  return withFusion("ice", {
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [amount],
     playAsInstant: wizardActionAsInstant,
-    additionalCost: fusionAdditionalCost,
     onPlay(ctx) {
       chooseDamageTarget(
         ctx,
@@ -310,7 +216,6 @@ function fusedArcane(
       if (arcane) afterDamage?.(ctx, target, dealt);
     },
     onChoose(ctx, hook, option) {
-      if (handleFusion(ctx, hook, option)) return;
       if (hook !== "fused-arcane") return;
       const id = Number(option);
       ctx.setState("target", id);
@@ -319,7 +224,7 @@ function fusedArcane(
       );
       dealToTarget(ctx, option, amount, true);
     },
-  };
+  });
 }
 
 function conditionalDraconicGoAgain(): CardScript {
@@ -355,45 +260,17 @@ function resolveFlameReturn(ctx: ScriptCtx, option: string): boolean {
   return flame ? ctx.moveToHand(flame.instanceId) : false;
 }
 
-function banishAttackOnHit(hook: string, reward: "power" | "discount" | "go-again"): CardScript {
-  return {
-    onHit(ctx) {
-      const count = draconicLinks(ctx);
-      const choices = ctx.player(ctx.seat).hand.filter((card) => {
-        const cardData = data(ctx, card);
-        return ctx.hasCardType(card, "action") && hasSubtype(ctx, card, "attack") && (cardData.cost ?? 0) < count;
-      });
-      if (choices.length > 0) {
-        ctx.requestCardChoice(
-          hook,
-          decisionPrompt(`${ctx.data.name}: banish an eligible attack?`, "card.upr.attack.banish", {
-            values: { card: { kind: "card", cardId: ctx.self.cardId } },
-            optionMessages: commonOptionMessages("pass"),
-          }),
-          ["pass", ...choices.map((card) => card.instanceId)],
-        );
-      }
-    },
-    onChoose(ctx, chosenHook, option) {
-      if (chosenHook !== hook || option === "pass") return;
-      const id = Number(option);
-      if (!ctx.banish(id)) return;
-      if (reward === "power") ctx.addCounter(id, "power", 1);
-      if (reward === "go-again") ctx.grantCardKeyword(id, "go again");
-      ctx.allowPlayFrom(id, "banish", reward === "discount" ? { costReduction: 1 } : undefined);
-    },
-  };
-}
-
 function defensePay(): CardScript {
   return { defendCost: 1, ...payForDefenseBoost(1, 2) };
 }
 
 function fightingSpirit(): CardScript {
   const gain = (ctx: ScriptCtx) => {
-    if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0) ctx.gainLife(ctx.seat, 1);
+    if (!hasLessLife(ctx)) return;
+    ctx.gainLife(ctx.seat, 1);
+    ctx.logPublic(localizedCardLog(ctx, `${ctx.data.name}: gained 1{h}`, "card.log.common.life.gained", { amount: 1 }));
   };
-  return { onAttackDeclared: gain, onDefend: gain };
+  return { onAttackDeclared: gain, canTriggerOnDefend: (ctx) => hasLessLife(ctx), onDefend: gain };
 }
 
 function quelling(): CardScript {
@@ -462,9 +339,9 @@ function strategicPlanning(maxCost: number): CardScript {
   return {
     onPlay(ctx) {
       const choices = ctx.state.players
-        .flatMap((player) => player.graveyard)
+        .flatMap((player) => faceUpGraveyard(ctx, player.seat))
         .filter((card) => {
-          const cardData = data(ctx, card);
+          const cardData = ctx.cardData(card.cardId);
           return ctx.hasCardType(card, "action") && (cardData.cost ?? 0) <= maxCost;
         });
       if (choices.length > 0) {
@@ -517,14 +394,18 @@ function singe(maxAllyTargets: number): CardScript {
   return {
     ...arcaneSpell(1),
     onPlay(ctx) {
-      ctx.requestChoice("singe-hero", arcaneHeroChoicePrompt(ctx, 1), ["opponent", "you"], undefined, undefined, "opponent");
+      const amount = ctx.previewArcaneDamage(1);
+      requestHeroChoice(ctx, "singe-hero", `Choose a hero for ${amount} arcane damage`, "card.upr.arcane.hero.choose", {
+        values: { amount },
+        defaultOption: "opposing hero",
+      });
     },
     onChoose(ctx, hook, option) {
       if (hook !== "singe-hero") return;
-      const target = option === "you" ? ctx.seat : opponentSeat(ctx);
+      const target = heroChoiceSeat(ctx, option)!;
       ctx.setState("singeTarget", target);
       dealArcane(ctx, target, 1);
-      const allies = ctx.player(target).board.filter((card) => hasSubtype(ctx, card, "ally"));
+      const allies = arenaAllies(ctx, ctx.player(target));
       if (!allies.length) return;
       const amount = ctx.previewArcaneDamage(1);
       ctx.requestCardChoices(
@@ -562,7 +443,7 @@ function transmogrify(power: number): CardScript {
     onFriendlyAttackDeclared(ctx) {
       if (ctx.getPlayerFlag(ctx.seat, "transmogrifyPending") !== true) return;
       if (ctx.link?.attackCardType !== "action") return;
-      if (!hasSubtype(ctx, ctx.link.attackingCard, "attack")) return;
+      if (!hasCardSubtype(ctx, ctx.link.attackingCard, "attack")) return;
       const target = Number(ctx.getPlayerFlag(ctx.seat, "transmogrifyPower"));
       ctx.addModifier({ scope: "chain-link", attack: target - ctx.basePower(ctx.link.attackingCard) });
       ctx.setPlayerFlag(ctx.seat, "transmogrifyPending", false);
@@ -592,14 +473,14 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     onFriendlyAttackDeclared(ctx) {
       if (
         ctx.link &&
-        hasSubtype(ctx, ctx.link.attackingCard, "dragon") &&
+        hasCardSubtype(ctx, ctx.link.attackingCard, "dragon") &&
         ctx.playedThisTurn("red") > 0
       )
         ctx.grantGoAgain();
     },
     onFriendlyPlay(ctx, played) {
       if (ctx.cardColor(played) !== 1 || !ctx.link) return;
-      if (hasSubtype(ctx, ctx.link.attackingCard, "dragon")) ctx.grantGoAgain();
+      if (hasCardSubtype(ctx, ctx.link.attackingCard, "dragon")) ctx.grantGoAgain();
     },
   },
 
@@ -641,7 +522,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     activated: dragonAttack(),
     canTriggerOnHit: (ctx) => !!ctx.link && ctx.link.targetAllyId === undefined,
     onHit(ctx) {
-      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasSubtype(ctx, card, "item"));
+      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => isItem(ctx, card));
       if (items.length === 0) {
         ctx.drawCards(ctx.seat, 1);
         return;
@@ -660,7 +541,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "miragai|0": {
     activated: dragonAttack(),
     onFriendlyAttackDeclared(ctx) {
-      if (!ctx.link || !hasSubtype(ctx, ctx.link.attackingCard, "dragon")) return;
+      if (!ctx.link || !hasCardSubtype(ctx, ctx.link.attackingCard, "dragon")) return;
       if (ctx.getPlayerFlag(ctx.seat, "dragonAttackedThisTurn") === true) return;
       ctx.setPlayerFlag(ctx.seat, "dragonAttackedThisTurn", true);
       ctx.suppressCardKeyword(ctx.link.attackingCard.instanceId, "phantasm");
@@ -946,7 +827,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "engulfing flamewave|1": {
     onHit(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
-      if (top && hasSubtype(ctx, top, "attack") && (data(ctx, top).cost ?? 0) < draconicLinks(ctx)) {
+      if (top && hasCardSubtype(ctx, top, "attack") && (ctx.cardData(top.cardId).cost ?? 0) < draconicLinks(ctx)) {
         ctx.banish(top.instanceId);
         ctx.allowPlayFrom(top.instanceId, "banish");
       }
@@ -955,7 +836,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "engulfing flamewave|2": {
     onHit(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
-      if (top && hasSubtype(ctx, top, "attack") && (data(ctx, top).cost ?? 0) < draconicLinks(ctx)) {
+      if (top && hasCardSubtype(ctx, top, "attack") && (ctx.cardData(top.cardId).cost ?? 0) < draconicLinks(ctx)) {
         ctx.banish(top.instanceId);
         ctx.allowPlayFrom(top.instanceId, "banish");
       }
@@ -964,7 +845,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "engulfing flamewave|3": {
     onHit(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
-      if (top && hasSubtype(ctx, top, "attack") && (data(ctx, top).cost ?? 0) < draconicLinks(ctx)) {
+      if (top && hasCardSubtype(ctx, top, "attack") && (ctx.cardData(top.cardId).cost ?? 0) < draconicLinks(ctx)) {
         ctx.banish(top.instanceId);
         ctx.allowPlayFrom(top.instanceId, "banish");
       }
@@ -1038,9 +919,9 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       ctx.logPublic(
         localizedCardLog(
           ctx,
-          `${ctx.data.name} reveals ${shown.map((card) => data(ctx, card).name).join(", ") || "no cards"}`,
+          `${ctx.data.name} reveals ${shown.map((card) => ctx.cardData(card.cardId).name).join(", ") || "no cards"}`,
           "card.log.upr.redhot.revealed",
-          { count: shown.length, revealed: shown.map((card) => data(ctx, card).name).join(", ") || "no cards" },
+          { count: shown.length, revealed: shown.map((card) => ctx.cardData(card.cardId).name).join(", ") || "no cards" },
           {
             kind: "cards-revealed",
             cards: shown.map((card) => ({ cardId: card.cardId, ownerSeat: ctx.seat })),
@@ -1102,39 +983,38 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   "arctic incarceration|1": {
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      ctx.requestChoice("arctic", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
+      requestHeroChoice(ctx, "arctic", "Choose a hero", "card.upr.hero.choose", { defaultOption: "opposing hero" });
     },
     onChoose(ctx, h, o) {
-      if (h === "arctic") createFrostbites(ctx, o === "you" ? ctx.seat : opponentSeat(ctx), 3);
+      if (h === "arctic") createFrostbites(ctx, heroChoiceSeat(ctx, o)!, 3);
     },
   },
   "arctic incarceration|2": {
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      ctx.requestChoice("arctic", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
+      requestHeroChoice(ctx, "arctic", "Choose a hero", "card.upr.hero.choose", { defaultOption: "opposing hero" });
     },
     onChoose(ctx, h, o) {
-      if (h === "arctic") createFrostbites(ctx, o === "you" ? ctx.seat : opponentSeat(ctx), 2);
+      if (h === "arctic") createFrostbites(ctx, heroChoiceSeat(ctx, o)!, 2);
     },
   },
   "arctic incarceration|3": {
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
-      ctx.requestChoice("arctic", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
+      requestHeroChoice(ctx, "arctic", "Choose a hero", "card.upr.hero.choose", { defaultOption: "opposing hero" });
     },
     onChoose(ctx, h, o) {
-      if (h === "arctic") createFrostbites(ctx, o === "you" ? ctx.seat : opponentSeat(ctx), 1);
+      if (h === "arctic") createFrostbites(ctx, heroChoiceSeat(ctx, o)!, 1);
     },
   },
-  "brain freeze|1": {
+  "brain freeze|1": withFusion("ice", {
     playAsInstant: wizardActionAsInstant,
-    additionalCost: fusionAdditionalCost,
     onPlay(ctx) {
       const hand = ctx.player(opponentSeat(ctx)).hand;
       const revealedIds = hand.map((card) => card.instanceId);
       if (!ctx.revealCards(revealedIds, opponentSeat(ctx))) return;
-      const choices = fused(ctx)
-        ? hand.filter((card) => ctx.hasCardType(card, "action") && (data(ctx, card).cost ?? 0) <= 2)
+      const choices = isFused(ctx)
+        ? hand.filter((card) => ctx.hasCardType(card, "action") && (ctx.cardData(card.cardId).cost ?? 0) <= 2)
         : [];
       ctx.requestCardChoice(
         "brain",
@@ -1149,19 +1029,17 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       );
     },
     onChoose(ctx, h, o) {
-      if (handleFusion(ctx, h, o)) return;
       if (h === "brain" && o !== "Close") ctx.putOnDeckTop(Number(o));
     },
-  },
-  "brain freeze|2": {
+  }),
+  "brain freeze|2": withFusion("ice", {
     playAsInstant: wizardActionAsInstant,
-    additionalCost: fusionAdditionalCost,
     onPlay(ctx) {
       const hand = ctx.player(opponentSeat(ctx)).hand;
       const revealedIds = hand.map((card) => card.instanceId);
       if (!ctx.revealCards(revealedIds, opponentSeat(ctx))) return;
-      const choices = fused(ctx)
-        ? hand.filter((card) => ctx.hasCardType(card, "action") && (data(ctx, card).cost ?? 0) <= 1)
+      const choices = isFused(ctx)
+        ? hand.filter((card) => ctx.hasCardType(card, "action") && (ctx.cardData(card.cardId).cost ?? 0) <= 1)
         : [];
       ctx.requestCardChoice(
         "brain",
@@ -1176,10 +1054,9 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       );
     },
     onChoose(ctx, h, o) {
-      if (handleFusion(ctx, h, o)) return;
       if (h === "brain" && o !== "Close") ctx.putOnDeckTop(Number(o));
     },
-  },
+  }),
   "dampen|1": {
     ...arcaneSpell(4),
     onDamageDealt(ctx, _target, amount, arcane) {
@@ -1199,31 +1076,31 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     },
   },
   "icebind|1": fusedArcane(3, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
+    if (isFused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
       const card = ctx.player(target).arsenal[0];
       if (card) freeze(ctx, card);
     }
   }),
   "icebind|2": fusedArcane(2, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
+    if (isFused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
       const card = ctx.player(target).arsenal[0];
       if (card) freeze(ctx, card);
     }
   }),
   "icebind|3": fusedArcane(1, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
+    if (isFused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) {
       const card = ctx.player(target).arsenal[0];
       if (card) freeze(ctx, card);
     }
   }),
   "polar cap|2": fusedArcane(3, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) ctx.createToken(FROSTBITE, target);
+    if (isFused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) ctx.createToken(FROSTBITE, target);
   }),
   "polar cap|3": fusedArcane(2, (ctx, target, dealt) => {
-    if (fused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) ctx.createToken(FROSTBITE, target);
+    if (isFused(ctx) && dealt > 0 && ctx.getState("targetedAlly") === 0) ctx.createToken(FROSTBITE, target);
   }),
   "succumb to winter|1": fusedArcane(5, (ctx, target) => {
-    if (!fused(ctx)) return;
+    if (!isFused(ctx)) return;
     if (ctx.getState("targetedAlly")) {
       const ally = ctx.state.players
         .flatMap((p) => p.board)
@@ -1235,7 +1112,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     }
   }),
   "succumb to winter|2": fusedArcane(4, (ctx, target) => {
-    if (!fused(ctx)) return;
+    if (!isFused(ctx)) return;
     if (ctx.getState("targetedAlly")) {
       const ally = ctx.state.players
         .flatMap((p) => p.board)
@@ -1247,7 +1124,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     }
   }),
   "succumb to winter|3": fusedArcane(3, (ctx, target) => {
-    if (!fused(ctx)) return;
+    if (!isFused(ctx)) return;
     if (ctx.getState("targetedAlly")) {
       const ally = ctx.state.players
         .flatMap((p) => p.board)
@@ -1260,36 +1137,36 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   }),
   "isenhowl weathervane|1": {
     onPlay(ctx) {
-      ctx.requestChoice("isenhowl", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
+      requestHeroChoice(ctx, "isenhowl", "Choose a hero", "card.upr.hero.choose", { defaultOption: "opposing hero" });
     },
     onChoose(ctx, h, o) {
       if (h === "isenhowl") {
-        const target = o === "you" ? ctx.seat : opponentSeat(ctx);
-        const key = `nextIceFusionFrostbites:${target}`;
+        const target = heroChoiceSeat(ctx, o)!;
+        const key = isenhowlFrostbitesKey(target);
         ctx.setPlayerFlag(ctx.seat, key, Number(ctx.getPlayerFlag(ctx.seat, key)) + 4);
       }
     },
   },
   "isenhowl weathervane|2": {
     onPlay(ctx) {
-      ctx.requestChoice("isenhowl", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
+      requestHeroChoice(ctx, "isenhowl", "Choose a hero", "card.upr.hero.choose", { defaultOption: "opposing hero" });
     },
     onChoose(ctx, h, o) {
       if (h === "isenhowl") {
-        const target = o === "you" ? ctx.seat : opponentSeat(ctx);
-        const key = `nextIceFusionFrostbites:${target}`;
+        const target = heroChoiceSeat(ctx, o)!;
+        const key = isenhowlFrostbitesKey(target);
         ctx.setPlayerFlag(ctx.seat, key, Number(ctx.getPlayerFlag(ctx.seat, key)) + 3);
       }
     },
   },
   "isenhowl weathervane|3": {
     onPlay(ctx) {
-      ctx.requestChoice("isenhowl", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
+      requestHeroChoice(ctx, "isenhowl", "Choose a hero", "card.upr.hero.choose", { defaultOption: "opposing hero" });
     },
     onChoose(ctx, h, o) {
       if (h === "isenhowl") {
-        const target = o === "you" ? ctx.seat : opponentSeat(ctx);
-        const key = `nextIceFusionFrostbites:${target}`;
+        const target = heroChoiceSeat(ctx, o)!;
+        const key = isenhowlFrostbitesKey(target);
         ctx.setPlayerFlag(ctx.seat, key, Number(ctx.getPlayerFlag(ctx.seat, key)) + 2);
       }
     },
@@ -1298,11 +1175,11 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
-      ctx.requestChoice("cold-target", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
+      requestHeroChoice(ctx, "cold-target", "Choose a hero", "card.upr.hero.choose", { defaultOption: "opposing hero" });
     },
     onChoose(ctx, h, o) {
       if (h === "cold-target") {
-        const target = o === "you" ? ctx.seat : opponentSeat(ctx);
+        const target = heroChoiceSeat(ctx, o)!;
         ctx.setState("coldTarget", target);
         if (
           !ctx.requestPayment(
@@ -1314,7 +1191,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         ) {
           const choices = [
             ...ctx.player(target).arsenal,
-            ...ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally")),
+            ...ctx.player(target).board.filter((c) => isAlly(ctx, c)),
           ];
           if (choices.length)
             ctx.requestCardChoice(
@@ -1327,7 +1204,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         const target = ctx.getState("coldTarget");
         const choices = [
           ...ctx.player(target).arsenal,
-          ...ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally")),
+          ...ctx.player(target).board.filter((c) => isAlly(ctx, c)),
         ];
         if (choices.length)
           ctx.requestCardChoice(
@@ -1348,11 +1225,11 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     playAsInstant: wizardActionAsInstant,
     onPlay(ctx) {
       if (ctx.fromArsenal) ctx.drawCards(ctx.seat, 1);
-      ctx.requestChoice("cold-target", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
+      requestHeroChoice(ctx, "cold-target", "Choose a hero", "card.upr.hero.choose", { defaultOption: "opposing hero" });
     },
     onChoose(ctx, h, o) {
       if (h === "cold-target") {
-        const target = o === "you" ? ctx.seat : opponentSeat(ctx);
+        const target = heroChoiceSeat(ctx, o)!;
         ctx.setState("coldTarget", target);
         if (
           !ctx.requestPayment(
@@ -1364,7 +1241,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         ) {
           const choices = [
             ...ctx.player(target).arsenal,
-            ...ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally")),
+            ...ctx.player(target).board.filter((c) => isAlly(ctx, c)),
           ];
           if (choices.length)
             ctx.requestCardChoice(
@@ -1377,7 +1254,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         const target = ctx.getState("coldTarget");
         const choices = [
           ...ctx.player(target).arsenal,
-          ...ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally")),
+          ...ctx.player(target).board.filter((c) => isAlly(ctx, c)),
         ];
         if (choices.length)
           ctx.requestCardChoice(
@@ -1394,45 +1271,33 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       }
     },
   },
-  "sigil of permafrost|1": {
-    additionalCost: fusionAdditionalCost,
+  "sigil of permafrost|1": withFusion("ice", {
     onPlay(ctx) {
-      if (fused(ctx)) {
+      if (isFused(ctx)) {
         ctx.setState("sigilFrost", 1);
         ctx.addModifier({ scope: "until-end-of-turn", ...SIGIL_OF_PERMAFROST_LABEL });
       }
     },
     triggers: [permafrostFrostbites],
-    onChoose(ctx, h, o) {
-      handleFusion(ctx, h, o);
-    },
-  },
-  "sigil of permafrost|2": {
-    additionalCost: fusionAdditionalCost,
+  }),
+  "sigil of permafrost|2": withFusion("ice", {
     onPlay(ctx) {
-      if (fused(ctx)) {
+      if (isFused(ctx)) {
         ctx.setState("sigilFrost", 1);
         ctx.addModifier({ scope: "until-end-of-turn", ...SIGIL_OF_PERMAFROST_LABEL });
       }
     },
     triggers: [permafrostFrostbites],
-    onChoose(ctx, h, o) {
-      handleFusion(ctx, h, o);
-    },
-  },
-  "sigil of permafrost|3": {
-    additionalCost: fusionAdditionalCost,
+  }),
+  "sigil of permafrost|3": withFusion("ice", {
     onPlay(ctx) {
-      if (fused(ctx)) {
+      if (isFused(ctx)) {
         ctx.setState("sigilFrost", 1);
         ctx.addModifier({ scope: "until-end-of-turn", ...SIGIL_OF_PERMAFROST_LABEL });
       }
     },
     triggers: [permafrostFrostbites],
-    onChoose(ctx, h, o) {
-      handleFusion(ctx, h, o);
-    },
-  },
+  }),
   "conduit of frostburn|0": {
     activated: {
       cost: 0,
@@ -1455,7 +1320,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
     },
     quell: { amount: 1, cost: 1 },
     onFriendlyPlay(ctx, played) {
-      if (!ctx.getState("conduitReady") || !ctx.cardData(played.cardId).text.toLowerCase().includes("arcane damage"))
+      if (!ctx.getState("conduitReady") || !hasArcaneDamageEffect(ctx, played.cardId))
         return;
       ctx.setState("conduitSource", played.instanceId);
       ctx.setState("conduitReady", 0);
@@ -1485,12 +1350,12 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
       destroySelfCost: true,
       label: "Destroy: freeze arsenal and ally",
       onActivate(ctx) {
-        ctx.requestChoice("horns-target", heroChoicePrompt(), ["opponent", "you"], undefined, undefined, "opponent");
+        requestHeroChoice(ctx, "horns-target", "Choose a hero", "card.upr.hero.choose", { defaultOption: "opposing hero" });
       },
     },
     onChoose(ctx, h, o) {
       if (h === "horns-target") {
-        const target = o === "you" ? ctx.seat : opponentSeat(ctx);
+        const target = heroChoiceSeat(ctx, o)!;
         ctx.setState("hornsTarget", target);
         if (ctx.player(target).arsenal[0])
           ctx.requestChoice("horns-arsenal", yesNoPrompt("Freeze their arsenal card?", "card.upr.freeze.arsenal"), [
@@ -1498,7 +1363,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
             "no",
           ]);
         else {
-          const allies = ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally"));
+          const allies = ctx.player(target).board.filter((c) => isAlly(ctx, c));
           if (allies.length)
             ctx.requestCardChoice(
               "horns-ally",
@@ -1512,7 +1377,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
         const target = ctx.getState("hornsTarget");
         const arsenalCard = ctx.player(target).arsenal[0];
         if (o === "yes" && arsenalCard) freeze(ctx, arsenalCard);
-        const allies = ctx.player(target).board.filter((c) => hasSubtype(ctx, c, "ally"));
+        const allies = ctx.player(target).board.filter((c) => isAlly(ctx, c));
         if (allies.length)
           ctx.requestCardChoice(
             "horns-ally",
@@ -1529,6 +1394,7 @@ export const upr: Record<string, CardScript> = mergeSetScripts("UPR", uprHighRar
   // Generic
   "brothers in arms|1": defensePay(),
   "brothers in arms|2": defensePay(),
+  "fyendal's fighting spirit|1": fightingSpirit(),
   "fyendal's fighting spirit|2": fightingSpirit(),
   "fyendal's fighting spirit|3": fightingSpirit(),
   "healing balm|1": {

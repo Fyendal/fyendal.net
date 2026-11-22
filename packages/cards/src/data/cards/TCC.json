@@ -2,7 +2,7 @@
  {
   "id": "TCC001",
   "name": "Professor Teklovossen",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Evos cost {r} less to play for each opposing hero.\nYou may play Evos from your banished zone.",
   "classes": [
    "mechanologist"
@@ -14,7 +14,7 @@
  {
   "id": "TCC002",
   "name": "Teklo Blaster",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}{r}: Attack",
   "attack": 2,
   "classes": [
@@ -29,7 +29,7 @@
  {
   "id": "TCC003",
   "name": "Proto Base Head",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "",
   "classes": [
    "mechanologist"
@@ -43,7 +43,7 @@
  {
   "id": "TCC004",
   "name": "Proto Base Chest",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "",
   "classes": [
    "mechanologist"
@@ -57,7 +57,7 @@
  {
   "id": "TCC005",
   "name": "Proto Base Arms",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "",
   "classes": [
    "mechanologist"
@@ -71,7 +71,7 @@
  {
   "id": "TCC006",
   "name": "Proto Base Legs",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "",
   "classes": [
    "mechanologist"
@@ -85,7 +85,7 @@
  {
   "id": "TCC007",
   "name": "Evo Tekloscope",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base head equipped, transform it into this, then equip this.\nYour Teklo Blaster attacks can target any opposing hero.\nBattleworn",
   "pitch": 3,
   "cost": 3,
@@ -106,7 +106,7 @@
  {
   "id": "TCC008",
   "name": "Evo Energy Matrix",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base chest equipped, transform it into this, then equip this.\nYour Teklo Blaster costs {r} less to activate for each opposing hero.\nBattleworn",
   "pitch": 3,
   "cost": 3,
@@ -127,7 +127,7 @@
  {
   "id": "TCC009",
   "name": "Evo Scatter Shot",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base arms equipped, transform it into this, then equip this.\nYour Teklo Blaster gets +1{p} for each opposing hero.\nBattleworn",
   "pitch": 3,
   "cost": 3,
@@ -148,7 +148,7 @@
  {
   "id": "TCC010",
   "name": "Evo Rapid Fire",
-  "cardType": "equipment",
+  "types": ["equipment", "action"],
   "text": "If you have a base legs equipped, transform it into this, then equip this.\nYour Teklo Blaster attacks get go again.\nBattleworn",
   "pitch": 3,
   "cost": 3,
@@ -169,7 +169,7 @@
  {
   "id": "TCC011",
   "name": "Apocalypse Automaton",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Play this only if you have 1 or more Evos equipped.\nEvo Upgrade - This attacks up to X target opposing heroes, where X is the number of Evos you have equipped.",
   "pitch": 1,
   "cost": 3,
@@ -189,7 +189,7 @@
  {
   "id": "TCC012",
   "name": "Liquid-Cooled Mayhem",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - This costs {r} less to play for each Evo you have equipped.",
   "pitch": 1,
   "cost": 4,
@@ -209,7 +209,7 @@
  {
   "id": "TCC013",
   "name": "Mechanical Strength",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - This gets +X{p}, where X is the number of Evos you have equipped.",
   "pitch": 1,
   "cost": 3,
@@ -229,7 +229,7 @@
  {
   "id": "TCC014",
   "name": "Over Loop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
   "pitch": 1,
   "cost": 2,
@@ -249,7 +249,7 @@
  {
   "id": "TCC015",
   "name": "Throttle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 1,
   "cost": 2,
@@ -269,7 +269,7 @@
  {
   "id": "TCC016",
   "name": "Under Loop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, put it on the bottom of its owner's deck.",
   "pitch": 1,
   "cost": 1,
@@ -289,7 +289,7 @@
  {
   "id": "TCC017",
   "name": "Zero to Sixty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 1,
   "cost": 0,
@@ -309,7 +309,7 @@
  {
   "id": "TCC018",
   "name": "Zipper Hit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 1,
   "cost": 1,
@@ -329,7 +329,7 @@
  {
   "id": "TCC019",
   "name": "Firewall",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, reveal the top card of your deck. If it's an Evo, put it on top of your deck. Otherwise, put it on the bottom.",
   "pitch": 1,
   "defense": 4,
@@ -341,7 +341,7 @@
  {
   "id": "TCC020",
   "name": "Throttle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 2,
   "cost": 2,
@@ -361,7 +361,7 @@
  {
   "id": "TCC021",
   "name": "Zipper Hit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 2,
   "cost": 1,
@@ -381,7 +381,7 @@
  {
   "id": "TCC022",
   "name": "Firewall",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, reveal the top card of your deck. If it's an Evo, put it on top of your deck. Otherwise, put it on the bottom.",
   "pitch": 2,
   "defense": 3,
@@ -393,7 +393,7 @@
  {
   "id": "TCC023",
   "name": "Liquid-Cooled Mayhem",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - This costs {r} less to play for each Evo you have equipped.",
   "pitch": 3,
   "cost": 4,
@@ -413,7 +413,7 @@
  {
   "id": "TCC024",
   "name": "Mechanical Strength",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Evo Upgrade - This gets +X{p}, where X is the number of Evos you have equipped.",
   "pitch": 3,
   "cost": 3,
@@ -433,7 +433,7 @@
  {
   "id": "TCC025",
   "name": "Throttle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 3,
   "cost": 2,
@@ -453,7 +453,7 @@
  {
   "id": "TCC026",
   "name": "Firewall",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, reveal the top card of your deck. If it's an Evo, put it on top of your deck. Otherwise, put it on the bottom.",
   "pitch": 3,
   "defense": 2,
@@ -465,7 +465,7 @@
  {
   "id": "TCC027",
   "name": "Brevant, Civic Protector",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may have any number of Chivalry in your deck.\nWhenever you protect another hero, create a Might token.",
   "classes": [
    "guardian"
@@ -477,7 +477,7 @@
  {
   "id": "TCC028",
   "name": "Hammer of Havenhold",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}{r}: Attack\nIf you have a Chivalry in your pitch zone, this gets +1{p}.",
   "attack": 3,
   "classes": [
@@ -492,7 +492,7 @@
  {
   "id": "TCC029",
   "name": "Bastion of Duty",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Protect\nTemper",
   "defense": 2,
   "classes": [
@@ -510,7 +510,7 @@
  {
   "id": "TCC030",
   "name": "Civic Peak",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever this defends, another target hero draws a card.\nTemper",
   "defense": 2,
   "classes": [
@@ -527,7 +527,7 @@
  {
   "id": "TCC031",
   "name": "Civic Duty",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever this defends, create a Vigor token under another hero's control.\nTemper",
   "defense": 2,
   "classes": [
@@ -544,7 +544,7 @@
  {
   "id": "TCC032",
   "name": "Civic Guide",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever this defends, create a Might token under another hero's control.\nTemper",
   "defense": 2,
   "classes": [
@@ -561,7 +561,7 @@
  {
   "id": "TCC033",
   "name": "Civic Steps",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever this defends, create a Quicken token under another hero's control.\nTemper",
   "defense": 2,
   "classes": [
@@ -578,7 +578,7 @@
  {
   "id": "TCC034",
   "name": "Colossal Bearing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Tower - If this has 13 or more {p}, it gets \"When this hits a hero, destroy an equipment they control with 1 or less {d}.\"",
   "pitch": 1,
   "cost": 4,
@@ -598,7 +598,7 @@
  {
   "id": "TCC035",
   "name": "Lay Down the Law",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Tower - If this has 13 or more {p}, non-equipment cards get -1{d} while defending this.",
   "pitch": 1,
   "cost": 3,
@@ -618,7 +618,7 @@
  {
   "id": "TCC036",
   "name": "Smack of Reality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Tower - If this has 13 or more {p}, it gets \"When this hits a hero, destroy all aura tokens they control.\"",
   "pitch": 1,
   "cost": 5,
@@ -638,7 +638,7 @@
  {
   "id": "TCC037",
   "name": "Crash Down",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the start of your turn, destroy this, then the next Guardian attack action card you play this turn gets +6{p}.",
   "pitch": 1,
   "cost": 3,
@@ -654,7 +654,7 @@
  {
   "id": "TCC038",
   "name": "Earthlore Empowerment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the start of your turn, destroy this, then the next Guardian attack action card you play this turn costs {r} less to play and gets +5{p}.",
   "pitch": 1,
   "cost": 3,
@@ -670,7 +670,7 @@
  {
   "id": "TCC039",
   "name": "Boulder Drop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, they put a card from their hand on top of their deck.",
   "pitch": 2,
   "cost": 3,
@@ -690,7 +690,7 @@
  {
   "id": "TCC040",
   "name": "Chokeslam",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, attack action cards they control can't gain {p} during their next action phase.",
   "pitch": 2,
   "cost": 4,
@@ -710,7 +710,7 @@
  {
   "id": "TCC041",
   "name": "Disable",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
   "pitch": 2,
   "cost": 5,
@@ -730,7 +730,7 @@
  {
   "id": "TCC042",
   "name": "Crash Down",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the start of your turn, destroy this, then the next Guardian attack action card you play this turn gets +5{p}.",
   "pitch": 2,
   "cost": 3,
@@ -746,7 +746,7 @@
  {
   "id": "TCC043",
   "name": "Earthlore Empowerment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the start of your turn, destroy this, then the next Guardian attack action card you play this turn costs {r} less to play and gets +4{p}.",
   "pitch": 2,
   "cost": 3,
@@ -762,7 +762,7 @@
  {
   "id": "TCC044",
   "name": "Boulder Drop",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, they put a card from their hand on top of their deck.",
   "pitch": 3,
   "cost": 3,
@@ -782,7 +782,7 @@
  {
   "id": "TCC045",
   "name": "Chokeslam",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, attack action cards they control can't gain {p} during their next action phase.",
   "pitch": 3,
   "cost": 4,
@@ -802,7 +802,7 @@
  {
   "id": "TCC046",
   "name": "Cranial Crush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, they can't draw cards during their next action phase",
   "pitch": 3,
   "cost": 6,
@@ -822,7 +822,7 @@
  {
   "id": "TCC047",
   "name": "Disable",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crush - When this deals 4 or more damage to a hero, put a card from their arsenal on the bottom of their deck.",
   "pitch": 3,
   "cost": 5,
@@ -842,7 +842,7 @@
  {
   "id": "TCC048",
   "name": "Chivalry",
-  "cardType": "block",
+  "types": ["block"],
   "text": "Protect",
   "pitch": 3,
   "defense": 3,
@@ -857,7 +857,7 @@
  {
   "id": "TCC049",
   "name": "Melody, Sing-along",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a song, create Copper tokens equal to the number of other heroes in the game.",
   "classes": [
    "bard"
@@ -869,7 +869,7 @@
  {
   "id": "TCC050",
   "name": "Jinglewood, Smash Hit",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}{r}: Target opposing hero chooses and creates a Might, Quicken, or Vigor token. You create a Copper token. Go again\nAction - 0: Attack. When this hits, destroy it.",
   "attack": 2,
   "classes": [
@@ -884,7 +884,7 @@
  {
   "id": "TCC051",
   "name": "Nom de Plume",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Each hero draws a card.  Go again",
   "defense": 0,
   "classes": [
@@ -898,7 +898,7 @@
  {
   "id": "TCC052",
   "name": "Heart-throb",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Each hero creates a Vigor token.  Go again",
   "defense": 0,
   "classes": [
@@ -912,7 +912,7 @@
  {
   "id": "TCC053",
   "name": "Fiddle-dee",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Each hero creates a Might token.  Go again",
   "defense": 0,
   "classes": [
@@ -926,7 +926,7 @@
  {
   "id": "TCC054",
   "name": "Quickstep",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Each hero creates a Quicken token.  Go again",
   "defense": 0,
   "classes": [
@@ -940,7 +940,7 @@
  {
   "id": "TCC055",
   "name": "Coax a Commotion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, choose any number:\n\nEach hero creates a Quicken token.\nEach hero draws a card.\nEach hero gains 1{h}.",
   "pitch": 1,
   "cost": 0,
@@ -957,7 +957,7 @@
  {
   "id": "TCC056",
   "name": "Life of the Party",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may discard or destroy a card you control named Crazy Brew rather than pay Life of the Party's {r} cost. If you do, choose all modes, otherwise choose 1 at random;\n\nThis gets \"When this hits, gain life 2{h}.\"\nThis gets +2{p}.\nThis gets go again.",
   "pitch": 1,
   "cost": 2,
@@ -977,7 +977,7 @@
  {
   "id": "TCC057",
   "name": "Final Act",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, it gets +X{p}, where X is twice the number of cards in all pitch zones.",
   "pitch": 1,
   "cost": 1,
@@ -994,7 +994,7 @@
  {
   "id": "TCC058",
   "name": "Interlude",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Choose a hero. The next time they would be dealt damage this turn, prevent 3 of that damage. If you prevent damage to another hero this way, create a Copper token.",
   "pitch": 1,
   "cost": 0,
@@ -1006,7 +1006,7 @@
  {
   "id": "TCC059",
   "name": "Sigil of Solace",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Gain 3{h}",
   "pitch": 1,
   "cost": 0,
@@ -1018,7 +1018,7 @@
  {
   "id": "TCC060",
   "name": "Crowd Control",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, you may pay {r}{r}{r}. If you do, it gets +1{d} for each opposing hero.",
   "pitch": 1,
   "defense": 4,
@@ -1030,7 +1030,7 @@
  {
   "id": "TCC061",
   "name": "Encore",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Return a Bard attack action card from your graveyard to your hand.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -1046,7 +1046,7 @@
  {
   "id": "TCC062",
   "name": "Interlude",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Choose a hero. The next time they would be dealt damage this turn, prevent 2 of that damage. If you prevent damage to another hero this way, create a Copper token.",
   "pitch": 2,
   "cost": 0,
@@ -1058,7 +1058,7 @@
  {
   "id": "TCC063",
   "name": "Crowd Control",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, you may pay {r}{r}{r}. If you do, it gets +1{d} for each opposing hero.",
   "pitch": 2,
   "defense": 3,
@@ -1070,7 +1070,7 @@
  {
   "id": "TCC064",
   "name": "Song of Jack-be-Quick",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Quicken token under each other hero's control.",
   "pitch": 3,
   "cost": 0,
@@ -1086,7 +1086,7 @@
  {
   "id": "TCC065",
   "name": "Song of Sweet Nectar",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Each other hero gains 1{h}.",
   "pitch": 3,
   "cost": 0,
@@ -1102,7 +1102,7 @@
  {
   "id": "TCC066",
   "name": "Song of the Rosen Matador",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Vigor token under each other hero's control.",
   "pitch": 3,
   "cost": 0,
@@ -1118,7 +1118,7 @@
  {
   "id": "TCC067",
   "name": "Song of the Shining Knight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Might token under each other hero's control.",
   "pitch": 3,
   "cost": 0,
@@ -1134,7 +1134,7 @@
  {
   "id": "TCC068",
   "name": "Song of the Wandering Mind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Each other hero draws a card.",
   "pitch": 3,
   "cost": 0,
@@ -1150,7 +1150,7 @@
  {
   "id": "TCC069",
   "name": "Song of Yesteryears",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Each other hero puts an attack action card from their graveyard on the bottom of their deck.",
   "pitch": 3,
   "cost": 0,
@@ -1166,7 +1166,7 @@
  {
   "id": "TCC070",
   "name": "Crazy Brew",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Action - Destroy this: Roll a 6 sided die. On;\n\n1 or 2 - Lose 2{h}. Go again\n3 or 4 - Gain 2{h}. Go again\n5 or 6 - Gain {r}{r}, gain 2 action points, and your next attack this turn gains +2{p}.",
   "pitch": 3,
   "cost": 0,
@@ -1181,7 +1181,7 @@
  {
   "id": "TCC071",
   "name": "Energy Potion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Destroy this: Gain {r}{r}",
   "pitch": 3,
   "cost": 0,
@@ -1196,7 +1196,7 @@
  {
   "id": "TCC072",
   "name": "Healing Potion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Action - Destroy this: Gain 2{h}. Go again",
   "pitch": 3,
   "cost": 0,
@@ -1211,7 +1211,7 @@
  {
   "id": "TCC073",
   "name": "Potion of Strength",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Action - Destroy this: Your next attack this turn gains +2{p}. Go again",
   "pitch": 3,
   "cost": 0,
@@ -1226,7 +1226,7 @@
  {
   "id": "TCC074",
   "name": "Timesnap Potion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Action - Destroy this: Gain 2 action points.",
   "pitch": 3,
   "cost": 0,
@@ -1241,7 +1241,7 @@
  {
   "id": "TCC075",
   "name": "Interlude",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Choose a hero. The next time they would be dealt damage this turn, prevent 1 of that damage. If you prevent damage to another hero this way, create a Copper token.",
   "pitch": 3,
   "cost": 0,
@@ -1253,7 +1253,7 @@
  {
   "id": "TCC076",
   "name": "Crowd Control",
-  "cardType": "block",
+  "types": ["block"],
   "text": "When this defends, you may pay {r}{r}{r}. If you do, it gets +1{d} for each opposing hero.",
   "pitch": 3,
   "defense": 2,
@@ -1265,7 +1265,7 @@
  {
   "id": "TCC077",
   "name": "Ira, Crimson Haze",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your second attack each turn gets +1{p}.",
   "classes": [
    "ninja"
@@ -1277,7 +1277,7 @@
  {
   "id": "TCC078",
   "name": "Edge of Autumn",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack. Go again",
   "attack": 1,
   "classes": [
@@ -1292,7 +1292,7 @@
  {
   "id": "TCC079",
   "name": "Mask of Three Tails",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Draw a card. Activate this ability only if you've hit 3 or more times this combat chain.",
   "defense": 0,
   "classes": [
@@ -1306,7 +1306,7 @@
  {
   "id": "TCC080",
   "name": "Blood Scent",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Gain {r}. Activate this only if you've attacked with a Crouching Tiger this turn.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -1323,7 +1323,7 @@
  {
   "id": "TCC081",
   "name": "Tearing Shuko",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: The next Crouching Tiger you play this turn gains +2{p}.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -1340,7 +1340,7 @@
  {
   "id": "TCC082",
   "name": "Pouncing Paws",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Create a Crouching Tiger in your banished zone. You may play it this turn.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -1357,7 +1357,7 @@
  {
   "id": "TCC083",
   "name": "Bittering Thorns",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, your next attack this turn gets +1{p}.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -1377,7 +1377,7 @@
  {
   "id": "TCC084",
   "name": "Flex Claws",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -1397,7 +1397,7 @@
  {
   "id": "TCC085",
   "name": "Flying Kick",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played as chain link 3 or higher, it gets +2{p}.",
   "pitch": 1,
   "cost": 2,
@@ -1414,7 +1414,7 @@
  {
   "id": "TCC086",
   "name": "Growl",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, the next Crouching Tiger you play this combat chain gets +1{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1434,7 +1434,7 @@
  {
   "id": "TCC087",
   "name": "Leg Tap",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 1,
   "cost": 1,
@@ -1454,7 +1454,7 @@
  {
   "id": "TCC088",
   "name": "Mauling Qi",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - When this hits, if Crouching Tiger was the last attack this combat chain, deal 1 damage to each opposing hero.",
   "pitch": 1,
   "cost": 1,
@@ -1474,7 +1474,7 @@
  {
   "id": "TCC089",
   "name": "Pouncing Qi",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +1{p} and go again.",
   "pitch": 1,
   "cost": 0,
@@ -1495,7 +1495,7 @@
  {
   "id": "TCC090",
   "name": "Qi Unleashed",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Combo - If Crouching Tiger was the last attack this combat chain, this gets +4{p}.",
   "pitch": 1,
   "cost": 2,
@@ -1515,7 +1515,7 @@
  {
   "id": "TCC091",
   "name": "Blessing of Qi",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the start of your turn, destroy this, then create a Crouching Tiger in your banished zone. It gains +3{p} and you may play it this turn.",
   "pitch": 1,
   "cost": 1,
@@ -1531,7 +1531,7 @@
  {
   "id": "TCC092",
   "name": "Bittering Thorns",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, your next attack this turn gets +1{p}.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -1551,7 +1551,7 @@
  {
   "id": "TCC093",
   "name": "Flex Claws",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -1571,7 +1571,7 @@
  {
   "id": "TCC094",
   "name": "Growl",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, the next Crouching Tiger you play this combat chain gets +1{p}.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1591,7 +1591,7 @@
  {
   "id": "TCC095",
   "name": "Leg Tap",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 2,
   "cost": 1,
@@ -1611,7 +1611,7 @@
  {
   "id": "TCC096",
   "name": "Salt the Wound",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This gets +1{p} for each attack that has hit this combat chain.",
   "pitch": 2,
   "cost": 0,
@@ -1628,7 +1628,7 @@
  {
   "id": "TCC097",
   "name": "Predatory Streak",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create 2 Crouching Tigers in your banished zone. You may play them this turn.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1644,7 +1644,7 @@
  {
   "id": "TCC098",
   "name": "Tiger Eye Reflex",
-  "cardType": "block",
+  "types": ["block"],
   "text": "Ambush\nWhen this defends, create a Crouching Tiger in your banished zone. You may play it during your next turn.",
   "pitch": 2,
   "defense": 3,
@@ -1659,7 +1659,7 @@
  {
   "id": "TCC099",
   "name": "Flying Kick",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played as chain link 3 or higher, it gets +2{p}.",
   "pitch": 3,
   "cost": 2,
@@ -1676,7 +1676,7 @@
  {
   "id": "TCC100",
   "name": "Blessing of Qi",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the start of your turn, destroy this, then create a Crouching Tiger in your banished zone. It gains +1{p} and you may play it this turn.",
   "pitch": 3,
   "cost": 1,
@@ -1692,7 +1692,7 @@
  {
   "id": "TCC101",
   "name": "Predatory Streak",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Crouching Tiger in your banished zone. You may play it this turn.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1708,7 +1708,7 @@
  {
   "id": "TCC102",
   "name": "Tiger Eye Reflex",
-  "cardType": "block",
+  "types": ["block"],
   "text": "Ambush\nWhen this defends, create a Crouching Tiger in your banished zone. You may play it during your next turn.",
   "pitch": 3,
   "defense": 2,
@@ -1723,7 +1723,7 @@
  {
   "id": "TCC103",
   "name": "Copper",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Action - {r}{r}{r}{r}, destroy this: Draw a card. Go again",
   "classes": [
    "generic"
@@ -1736,7 +1736,7 @@
  {
   "id": "TCC104",
   "name": "Crouching Tiger",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ephemeral\nGo again",
   "cost": 0,
   "attack": 0,
@@ -1755,7 +1755,7 @@
  {
   "id": "TCC105",
   "name": "Might",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then your next attack this turn gets +1{p}.",
   "classes": [
    "generic"
@@ -1768,7 +1768,7 @@
  {
   "id": "TCC106",
   "name": "Quicken",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and the attack gains go again.",
   "classes": [
    "generic"
@@ -1781,7 +1781,7 @@
  {
   "id": "TCC107",
   "name": "Vigor",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the start of your turn, destroy this, then gain {r}.",
   "classes": [
    "generic"
@@ -1794,7 +1794,7 @@
  {
   "id": "TCC108",
   "name": "Copper",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Action - {r}{r}{r}{r}, destroy this: Draw a card. Go again",
   "classes": [
    "generic"

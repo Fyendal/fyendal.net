@@ -1,11 +1,12 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
-import { cardNameKeysOf, dataOf, scriptOf } from "./cardProperties.js";
+import { cardNameKeysOf, dataOf, grantedBaseAbilityCardIds, scriptOf } from "./cardProperties.js";
 import { logTriggerAnnouncement, triggerAnnouncement } from "./triggerPresentation.js";
 import type { TriggerAnnouncement } from "./triggerPresentation.js";
 import { triggerOccurrenceCount } from "./scripts.js";
 import type { DamageEventContext, ScriptCtx, TriggerEvent, TriggerEventContext } from "./scripts.js";
 import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./state.js";
+import type { BanishBatch } from "./zoneMoves.js";
 import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 import { currentLink, opponent, removeFromArray } from "./zoneQueries.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
@@ -409,6 +410,22 @@ export function fireCardBanished(
   }
 }
 
+/** Raise "cards-banished" once per owner and origin zone for cards one event banished. */
+export function fireCardsBanished(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  moved: Readonly<BanishBatch>,
+): void {
+  const groups = new Map<string, BanishBatch[number]>();
+  for (const entry of moved) {
+    const key = `${entry.card.owner}\u0000${entry.from}`;
+    if (!groups.has(key)) groups.set(key, entry);
+  }
+  for (const { card, from } of groups.values()) {
+    runtime.events.queueTriggeredEvent(state, "cards-banished", card.owner, card, { from, to: "banish" });
+  }
+}
+
 /** Notify the owner's active sources after one of their cards leaves the graveyard. */
 export function fireCardLeavesGraveyard(
   state: GameStateInternal,
@@ -437,6 +454,7 @@ export function runHook<K extends
   | "onPlay"
   | "onResolved"
   | "onAttackDeclared"
+  | "onBecameAttackingCard"
   | "onAttackDeclaredTriggersResolved"
   | "onFriendlyAttackDeclared"
   | "onGainGoAgain"
@@ -466,11 +484,7 @@ export function runHook<K extends
   ) return;
   const ctx = runtime.makeCtx(state, seat, card, link, fromArsenal, playTargetInstanceId);
   if (fn) (fn as (c: ScriptCtx) => void)(ctx);
-  const inheritedIds = [
-    ...(card.grantedBaseAbilitiesCardId ? [card.grantedBaseAbilitiesCardId] : []),
-    ...(card.grantedBaseAbilitiesCardIds ?? []),
-  ];
-  for (const inheritedId of inheritedIds) {
+  for (const inheritedId of grantedBaseAbilityCardIds(card)) {
     const inherited = state.scriptsRef[inheritedId]?.[hook];
     if (inherited) (inherited as (c: ScriptCtx) => void)(ctx);
   }

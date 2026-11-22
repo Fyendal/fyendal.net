@@ -133,6 +133,44 @@ describe("CRU — Runeblade", () => {
 });
 
 describe("CRU — Wizard", () => {
+  it("Kano activated off a pitched Eye of Ophidia in the end-of-action window keeps the action phase open", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "kano, dracai of aether|0",
+          hand: ["eye of ophidia|3", "raging onslaught|3"],
+          deck: ["snapback|3", "raging onslaught|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    const passWindows = () => {
+      while (s.state.pendingDecision?.kind === "priority-window") s.passPriority();
+    };
+    s.passPriority().activate("kano, dracai of aether|0", { pitch: ["eye of ophidia|3"] });
+    passWindows();
+    s.chooseOption("pass");
+    passWindows();
+    s.chooseCard("snapback|3").expectInZone(0, "snapback|3", "banish");
+
+    expect(s.state.phase).toBe("action");
+    expect(s.state.turn).toBe(1);
+    expect(s.state.activePlayer).toBe(1);
+    s.passPriority();
+    const card = s.state.players[0]!.banish[0]!;
+    expect(
+      legalIntents(s.state, 0).some(
+        (intent) =>
+          intent.kind === "play-from-zone" &&
+          intent.zone === "banish" &&
+          intent.instanceId === card.instanceId,
+      ),
+    ).toBe(true);
+  });
+
   it("Kano banishes the top non-attack action and permits it as an instant", () => {
     const s = scenario({
       seats: [
@@ -171,7 +209,7 @@ describe("CRU — Wizard", () => {
     s.activate("aether conduit|0").chooseOption("opposing hero").expectLife(1, 18);
   });
 
-  it("Foreboding Bolt deals non-arcane damage and opts", () => {
+  it("Foreboding Bolt deals arcane damage and opts", () => {
     const s = scenario({
       seats: [
         { hero: "rhinar", hand: ["foreboding bolt|3", BLUE], deck: ["brutal assault|3"] },
@@ -184,6 +222,22 @@ describe("CRU — Wizard", () => {
       .expectLife(1, 19)
       .chooseOption("top")
       .expectDeckTop(0, "brutal assault|3");
+  });
+
+  it("Foreboding Bolt is amplified as an arcane-damage card", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["rousing aether|3", "foreboding bolt|3", BLUE] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("rousing aether|3", { pitch: [BLUE] })
+      .chooseOption("opposing hero");
+    s.state.players[0]!.actionPoints = 1;
+    s.play("foreboding bolt|3")
+      .chooseOption("opposing hero")
+      .expectLife(1, 16);
   });
 
   it("Rousing Aether amplifies the next arcane-damage card", () => {

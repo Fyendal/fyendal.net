@@ -4,6 +4,7 @@ import type { Decklist, GameIntent } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import { chooseBriarIntent, chooseBriarIntentWithTrace } from "./briar-policy.js";
 import { briarPresentationFor } from "./sideboard.js";
+import { hasType } from "@fyendal/shared";
 
 function briarDeck(opponent: Decklist): Decklist {
   const pool = precon("bot-briar-broccoli")!.pool;
@@ -43,6 +44,39 @@ function resolveToAction(state: ReturnType<typeof createGame>): ReturnType<typeo
 }
 
 describe("Briar policy", () => {
+  it("attacks on the opening turn into an instant-heavy deck while keeping an arsenal card", () => {
+    let state = createGame({
+      decklists: [briarDeck(decklists.dorinthea), decklists.dorinthea],
+      cards: cardData,
+      scripts,
+      seed: 701,
+      startPlayer: 0,
+    });
+    replaceHand(state, 0, ["SBA012", "SBA015", "SBA029", "SBA023"]);
+    const instantHeavy = {
+      opponent: [...Array.from({ length: 32 }, () => "ANQ031"), ...Array.from({ length: 8 }, () => "WTR163")],
+    };
+
+    let attacked = false;
+    for (let step = 0; step < 30 && state.activePlayer === 0 && state.turn === 1; step++) {
+      const playable = (candidate: 0 | 1) => legalIntents(state, candidate).filter((intent) =>
+        intent.kind !== "concede" && !intent.kind.endsWith("-draw")
+      );
+      const seat: 0 | 1 = playable(0).length > 0 ? 0 : 1;
+      const legal = playable(seat);
+      const intent = seat === 0
+        ? chooseBriarIntent({ seat, view: projectStateFor(state, seat), legal, cards: cardData, state, decklists: instantHeavy })
+        : legal.find((candidate) => candidate.kind === "pass") ?? legal[0]!;
+      const result = applyIntent(state, seat, intent);
+      expect(result.ok, result.ok ? "" : result.error).toBe(true);
+      if (!result.ok) return;
+      state = result.state;
+      attacked ||= state.chain.some((link) => link.attackingCard.owner === 0);
+    }
+    expect(attacked).toBe(true);
+    expect(state.players[0]!.arsenal).toHaveLength(1);
+  });
+
   it("passes on the opening turn, then arsenals for a five-card setup turn", () => {
     let state = createGame({
       decklists: [briarDeck(decklists.dorinthea), decklists.dorinthea],
@@ -695,7 +729,7 @@ describe("Briar policy", () => {
     });
     const view = projectStateFor(state, 0);
     const equipment = Object.values(view.players[0].equipment).find((card) =>
-      card && cardData[card.cardId]?.cardType === "equipment"
+      card && hasType(cardData[card.cardId], "equipment")
     )!;
     const handCard = view.players[0].hand[0]!;
     view.priorityPlayer = 0;
@@ -1027,7 +1061,7 @@ describe("Briar policy", () => {
       reactions: [],
     }];
 
-    expect(cardData.WTR115?.cardType).toBe("weapon");
+    expect(cardData.WTR115?.types).toEqual(["weapon"]);
     expect(chooseBriarIntent({
       seat: 0,
       view,
@@ -1334,6 +1368,10 @@ describe("Briar policy", () => {
     view.phase = "reaction";
     view.pendingDecision = { player: 0, kind: "attack-reaction", prompt: "Play an attack reaction or pass" };
     expect(chooseBriarIntent({ seat: 0, view, legal, cards: cardData })).toEqual(play);
+
+    view.chain[0] = { ...view.chain[0]!, defenseValue: 6, damage: 0 };
+    expect(chooseBriarIntent({ seat: 0, view, legal, cards: cardData }))
+      .toEqual({ kind: "pass" });
   });
 
   it("plays both halves of Burn Up // Shock before a large setup hand can expose Shock alone", () => {

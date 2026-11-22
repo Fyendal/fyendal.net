@@ -1,4 +1,5 @@
 import { cardData } from "@fyendal/cards/client";
+import { hasType } from "@fyendal/shared";
 
 export interface LogTextSegment {
   text: string;
@@ -10,7 +11,7 @@ const cardIdByName = new Map<string, string>();
 const tokenNames = new Set<string>();
 for (const card of Object.values(cardData)) {
   if (!cardIdByName.has(card.name)) cardIdByName.set(card.name, card.id);
-  if (card.cardType === "token") tokenNames.add(card.name);
+  if (hasType(card, "token")) tokenNames.add(card.name);
 }
 
 function escapeRegExp(value: string): string {

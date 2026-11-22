@@ -1,23 +1,26 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
+  attackTypes,
   buffNextAttack,
   decisionMessage,
   decisionPrompt,
+  isAttackAction,
   isWeaponAttack,
   localizedCardLog,
   opponentSeat,
   reprise,
 } from "./shared-helpers.js";
+import { AGILITY, VIGOR } from "./tokens.js";
 
 // ── SDO (Silver Age: Dorinthea precon, Chapter 2) ───────────────────────────
 //
 // Warrior cards — almost everything rides existing engine mechanics:
 // - Dawnblade's hit-count +1{p} counters ride the generic weapon power
 //   counters (computeAttack) and an end-of-turn trigger; the hit count itself
-//   is a per-turn flag (auto-wiped).
+//   is the engine's per-turn `attackHits:<instanceId>` flag (hero or ally).
 // - Wreck Havoc's "defense reactions can't be played to this chain link" is
-//   the noDefenseReactions link flag (SAZ). Its arsenal reveal destroys the
+//   the defenseReactionsProhibited script field. Its arsenal reveal destroys the
 //   revealed card if it is a defense reaction (arsenal cards are public in
 //   this engine except face-down mentors — "turn face up" clears faceDown).
 // - Granted piercing (Puncture) rides the generic static Piercing modifier.
@@ -27,11 +30,6 @@ import {
 //   Modifier.maxBasePower filter (printed base power).
 // - Agility/Vigor are aura tokens on the board; Vigor's start-of-turn trigger
 //   rides the trigger stack machinery.
-
-const AGILITY = "SDO035";
-const VIGOR = "SDO036";
-
-/** ctx.state is typed without the internal side tables; the runtime object has them. */
 
 /** Attack-reaction legality: my unresolved attack is on the chain and matches
  *  `target` — then pump it by `pump`. */
@@ -55,11 +53,6 @@ function targetMyAttack(
   };
 }
 
-function attackTypes(ctx: ScriptCtx): readonly string[] {
-  if (!ctx.link) return [];
-  return ctx.cardTypes(ctx.link.attackingCard);
-}
-
 export const sdo: Record<string, CardScript> = {
   // ── Weapon ────────────────────────────────────────────────────────────────
 
@@ -68,13 +61,8 @@ export const sdo: Record<string, CardScript> = {
     //  turn, put a +1{p} counter on it. At the beginning of your end phase,
     //  if this hasn't hit this turn, remove all +1{p} counters from it."
     activated: attackAbility(1),
-    onFriendlyCombatDamageDealt(ctx, source, target, amount) {
-      if (amount <= 0 || target === ctx.seat || source.instanceId !== ctx.self.instanceId) return;
-      const key = `hits:${ctx.self.instanceId}`;
-      ctx.setFlag("player", key, (Number(ctx.getFlag("player", key)) || 0) + 1);
-    },
     canTriggerOnHit(ctx) {
-      return !!ctx.link && Number(ctx.getFlag("player", `hits:${ctx.self.instanceId}`)) === 2;
+      return !!ctx.link && Number(ctx.getFlag("player", `attackHits:${ctx.self.instanceId}`)) === 2;
     },
     onHit(ctx) {
       ctx.addCounter(ctx.self.instanceId, "power", 1);
@@ -88,7 +76,7 @@ export const sdo: Record<string, CardScript> = {
       {
         event: "end-of-turn",
         condition: (ctx) =>
-          !ctx.getFlag("player", `hits:${ctx.self.instanceId}`) && (ctx.self.counters?.power ?? 0) > 0,
+          !ctx.getFlag("player", `attackHits:${ctx.self.instanceId}`) && (ctx.self.counters?.power ?? 0) > 0,
         label: "Dawnblade hasn't hit this turn — remove all +1{p} counters",
         effect(ctx) {
           const n = ctx.self.counters?.power ?? 0;
@@ -111,10 +99,7 @@ export const sdo: Record<string, CardScript> = {
   // ── Attacks ───────────────────────────────────────────────────────────────
 
   "wreck havoc|1": {
-    // "Defense reactions can't be played to this chain link."
-    onAttackDeclared(ctx) {
-      ctx.setFlag("link", "noDefenseReactions", true);
-    },
+    defenseReactionsProhibited: true,
     // "When this hits a hero, you may turn a card in their arsenal face up,
     //  then destroy a defense reaction in their arsenal."
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
@@ -153,7 +138,7 @@ export const sdo: Record<string, CardScript> = {
           { result: { kind: "card", cardId: card.cardId }, target: { kind: "player", seat: opponentSeat(ctx) } },
         ),
       );
-      if (ctx.cardData(card.cardId).cardType !== "defense-reaction") return;
+      if (!ctx.hasCardType(card, "defense-reaction")) return;
       ctx.moveToGraveyard(card.instanceId, "arsenal");
       ctx.logPublic(
         localizedCardLog(
@@ -176,7 +161,7 @@ export const sdo: Record<string, CardScript> = {
       // "If it's defended by an attack action card, create an Agility token."
       //  Defenders were committed in the defend step, before this resolves.
       const defended = ctx.link?.defendingCards.some((c) => {
-        return ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack");
+        return isAttackAction(ctx, c);
       });
       if (defended) ctx.createToken(AGILITY);
     },
@@ -278,7 +263,7 @@ export const sdo: Record<string, CardScript> = {
         label: "Destroy Vigor — gain {r}",
         effect(ctx) {
           ctx.destroySelf();
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
           ctx.logPublic(
             localizedCardLog(ctx, "Vigor is destroyed: gain {r}", "card.log.sdo.vigor.resources", { amount: 1 }),
           );

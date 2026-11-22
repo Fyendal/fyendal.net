@@ -1,59 +1,40 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  boostedThisTurn,
   buffNextAttack,
   cardNamed,
   commonOptionMessages,
+  controlsNamed,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  equipmentZoneCards,
+  equippedEvos,
+  evoEquipment,
+  faceUpGraveyard,
+  galvanize,
+  hasCardSubtype,
   hyperDriverCounterFromBoostBanish,
+  hyperDrivers,
+  isAttackAction,
+  isItem,
   localizedCardLog,
+  maintenanceItem,
   mergeSetScripts,
   opponentSeat,
   optN,
   optOnChoose,
+  pitches,
+  requestCrankSteam,
+  resolveCrankSteam,
   resourceAbility,
   upToOneTargetAttack,
 } from "./shared-helpers.js";
-import { evoHighRarity } from "./evo/high-rarity.js";
-
-const HYPER_DRIVER = "EVO234";
-const QUICKEN = "DVR028";
-
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-
-function hasTag(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, tag: string): boolean {
-  return ctx.cardTypes(card).includes(tag.toLowerCase());
-}
-
-function isMechAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasTag(ctx, card, "mechanologist") && hasTag(ctx, card, "attack");
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack");
-}
-
-function isItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasTag(ctx, card, "item");
-}
+import { evoHighRarity, isMechAttack } from "./evo/high-rarity.js";
+import { HYPER_DRIVER, QUICKEN } from "./tokens.js";
 
 function isEvo(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasTag(ctx, card, "evo");
-}
-
-function controlsNamed(ctx: ScriptCtx, name: string): boolean {
-  return ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, name));
-}
-
-function hyperDrivers(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
-  return ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Hyper Driver"));
-}
-
-function equippedEvos(ctx: ScriptCtx): number {
-  return ctx.countEquipped("evo");
+  return hasCardSubtype(ctx, card, "evo");
 }
 
 function boostedCount(ctx: ScriptCtx): number {
@@ -61,7 +42,7 @@ function boostedCount(ctx: ScriptCtx): number {
 }
 
 function initializeCogwerx(ctx: ScriptCtx): void {
-  for (const equipment of Object.values(ctx.player(ctx.seat).equipment)) {
+  for (const equipment of equipmentZoneCards(ctx.player(ctx.seat))) {
     if (equipment && ctx.cardNames(equipment).some((name) => name.startsWith("cogwerx base "))) {
       ctx.setCardCounter(equipment.instanceId, "steam", 1);
     }
@@ -69,51 +50,12 @@ function initializeCogwerx(ctx: ScriptCtx): void {
 }
 
 function scrapCards(ctx: ScriptCtx): DeepReadonly<CardInstance>[] {
-  return ctx.player(ctx.seat).graveyard.filter((card) => isItem(ctx, card) || data(ctx, card).cardType === "equipment");
-}
-
-function addSteamToChoice(ctx: ScriptCtx, hook: string): void {
-  const choices = ctx.player(ctx.seat).board.filter((card) => isItem(ctx, card) && ctx.hasCrank(card));
-  if (choices.length)
-    ctx.requestCardChoice(
-      hook,
-      decisionPrompt("Put a steam counter on an item with crank", "card.evo.crankitem.steam.add"),
-      choices.map((card) => card.instanceId),
-    );
-}
-
-function addSteam(ctx: ScriptCtx, option: string): void {
-  const id = Number(option);
-  const target = ctx.player(ctx.seat).board.find((card) => card.instanceId === id);
-  if (target) ctx.addCounter(id, "steam", 1);
+  return faceUpGraveyard(ctx).filter((card) => isItem(ctx, card) || ctx.hasCardType(card, "equipment"));
 }
 
 function addHyperSteam(ctx: ScriptCtx): void {
   const driver = hyperDrivers(ctx)[0];
   if (driver) ctx.addCounter(driver.instanceId, "steam", 1);
-}
-
-function pitches(name: string, factory: (pitch: 1 | 2 | 3) => CardScript): Record<string, CardScript> {
-  return {
-    [`${name}|1`]: factory(1),
-    [`${name}|2`]: factory(2),
-    [`${name}|3`]: factory(3),
-  };
-}
-
-function evoEquipment(extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    playableEquipment: true,
-    transformsEquipment: (ctx, equipped) => hasTag(ctx, equipped, "base"),
-    playAsInstant(ctx) {
-      return ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true || (extra.playAsInstant?.(ctx) ?? false);
-    },
-  };
-}
-
-function instantEvoEquipment(extra: CardScript = {}): CardScript {
-  return evoEquipment({ ...extra, additionalCardTypes: ["instant"], playAsInstant: () => true });
 }
 
 function destroyUnderAbility(effect: (ctx: ScriptCtx) => void): CardScript {
@@ -152,49 +94,8 @@ function cogwerxAbility(effect: (ctx: ScriptCtx) => void, label: string): CardSc
       timing: "instant",
       label,
       removeCounterCost: { key: "steam", amount: 1 },
-      canActivate: (ctx) => ctx.getPlayerFlag(ctx.seat, "boostedThisTurn") === true,
+      canActivate: (ctx) => boostedThisTurn(ctx),
       onActivate: effect,
-    },
-  };
-}
-
-function maintenanceItem(steam: number, extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    onEnterArena(ctx) {
-      ctx.setCounter("steam", steam);
-      extra.onEnterArena?.(ctx);
-    },
-    triggers: [
-      {
-        event: "start-of-turn",
-        whose: "subject",
-        label: "Remove a steam counter or destroy this",
-        labelMessage: decisionMessage("card.trigger.steam.maintain"),
-        effect(ctx) {
-          if (ctx.getCounter("steam") <= 0) ctx.destroySelf();
-          else
-            ctx.requestChoice(
-              "evo-maintenance",
-              decisionPrompt("Remove a steam counter or destroy this?", "card.evo.maintenance.choose", {
-                optionMessages: {
-                  remove: decisionMessage("common.option.remove"),
-                  destroy: decisionMessage("common.option.destroy"),
-                },
-              }),
-              ["remove", "destroy"],
-            );
-        },
-      },
-      ...(extra.triggers ?? []),
-    ],
-    onChoose(ctx, hook, option) {
-      if (hook === "evo-maintenance") {
-        if (option === "remove") ctx.setCounter("steam", Math.max(0, ctx.getCounter("steam") - 1));
-        else ctx.destroySelf();
-        return;
-      }
-      extra.onChoose?.(ctx, hook, option);
     },
   };
 }
@@ -208,9 +109,7 @@ function backupProtocol(pitch: number): CardScript {
       timing: "instant",
       destroySelfCost: true,
       onActivate(ctx) {
-        const cards = ctx
-          .player(ctx.seat)
-          .graveyard.filter((card) => isMechAttack(ctx, card) && ctx.cardColor(card) === pitch);
+        const cards = faceUpGraveyard(ctx).filter((card) => isMechAttack(ctx, card) && ctx.cardColor(card) === pitch);
         if (cards.length)
           ctx.requestCardChoice(
             "backup",
@@ -278,7 +177,7 @@ function scrapAttack(effect?: (ctx: ScriptCtx) => void): CardScript {
       if (choices.length)
         ctx.requestCardChoice(
           "scrap",
-          decisionPrompt("Scrap an item or equipment from your graveyard?", "card.evo.scrap.choose", {
+          decisionPrompt("Scrap an item or equipment from your graveyard?", "card.common.scrap.choose", {
             optionMessages: commonOptionMessages("none"),
           }),
           ["none", ...choices.map((card) => card.instanceId)],
@@ -295,43 +194,17 @@ function scrapAttack(effect?: (ctx: ScriptCtx) => void): CardScript {
   };
 }
 
-function galvanize(extra: CardScript = {}): CardScript {
-  return {
-    ...extra,
-    onDefend(ctx) {
-      const items = ctx.player(ctx.seat).board.filter((card) => isItem(ctx, card));
-      if (items.length)
-        ctx.requestCardChoice(
-          "galvanize",
-          decisionPrompt("Destroy an item for +2 defense?", "card.evo.galvanize.item", {
-            values: { amount: 2 },
-            optionMessages: commonOptionMessages("none"),
-          }),
-          ["none", ...items.map((card) => card.instanceId)],
-        );
-      extra.onDefend?.(ctx);
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "galvanize" && option !== "none" && ctx.destroyPermanent(Number(option))) {
-        ctx.addModifier({ scope: "chain-link", defense: 2 });
-        return;
-      }
-      extra.onChoose?.(ctx, hook, option);
-    },
-  };
-}
-
 function boostedItemOrEquipment(ctx: ScriptCtx): boolean {
   if (ctx.link?.flags.boosted !== true) return false;
   const id = Number(ctx.getPlayerFlag(ctx.seat, "lastBoostedCardInstanceId"));
   const card = ctx.player(ctx.seat).banish.find((candidate) => candidate.instanceId === id);
-  return !!card && (isItem(ctx, card) || data(ctx, card).cardType === "equipment");
+  return !!card && (isItem(ctx, card) || ctx.hasCardType(card, "equipment"));
 }
 
 function itemFromHandOnHit(): CardScript {
   return {
     onHit(ctx) {
-      const items = ctx.player(ctx.seat).hand.filter((card) => isItem(ctx, card) && (data(ctx, card).cost ?? 0) <= 1);
+      const items = ctx.player(ctx.seat).hand.filter((card) => isItem(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 1);
       if (items.length)
         ctx.requestCardChoice(
           "hit-item",
@@ -384,21 +257,22 @@ const dashDatabase: CardScript = {
   lookAtTopDeck: true,
   onGameStart: initializeCogwerx,
   allowsFriendlyCardPlayFrom(ctx, card, zone) {
-    const d = data(ctx, card);
+    const d = ctx.cardData(card.cardId);
     return (
       zone === "deck" &&
       isItem(ctx, card) &&
-      hasTag(ctx, card, "mechanologist") &&
+      hasCardSubtype(ctx, card, "mechanologist") &&
       (d.cost ?? 0) <= 1 &&
       ctx.player(ctx.seat).deck[0]?.instanceId === card.instanceId
     );
   },
   modifyFriendlyCardPlayCost(ctx, card, zone, baseCost) {
-    return zone === "deck" && isItem(ctx, card) && (data(ctx, card).cost ?? 0) <= 1 ? baseCost + 1 : baseCost;
+    return zone === "deck" && isItem(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 1 ? baseCost + 1 : baseCost;
   },
   allowsFriendlyCardPlayAsInstant(ctx, card, zone) {
     return (
-      zone === "deck" && isItem(ctx, card) && hasTag(ctx, card, "mechanologist") && (data(ctx, card).cost ?? 0) <= 1
+      zone === "deck" && isItem(ctx, card) && hasCardSubtype(ctx, card, "mechanologist") &&
+        (ctx.cardData(card.cardId).cost ?? 0) <= 1
     );
   },
 };
@@ -413,7 +287,7 @@ const maxxNitro: CardScript = {
     isAttack: false,
     goAgain: false,
     oncePerTurn: true,
-    canActivate: (ctx) => ctx.getPlayerFlag(ctx.seat, "boostedThisTurn") === true,
+    canActivate: (ctx) => boostedThisTurn(ctx),
     onActivate(ctx) {
       ctx.createToken(HYPER_DRIVER, undefined, { steam: 2 });
     },
@@ -460,7 +334,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
         cards.map((card) => card.instanceId),
       );
   }, "Remove steam: recover a boosted attack"),
-  "cogwerx base chest|0": cogwerxAbility((ctx) => ctx.changeResources(ctx.seat, 2), "Remove steam: gain 2 resources"),
+  "cogwerx base chest|0": cogwerxAbility((ctx) => ctx.gainResources(ctx.seat, 2), "Remove steam: gain 2 resources"),
   "cogwerx base arms|0": cogwerxAbility(
     (ctx) => buffNextAttack(ctx, { attack: 1, appliesToClass: "mechanologist" }),
     "Remove steam: next Mechanologist attack +1",
@@ -473,13 +347,13 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   "evo engine room|2": {
     ...destroyUnderAbility((ctx) => ctx.setPlayerFlag(ctx.seat, "nextWeaponCostReduction", true)),
     modifyAttackActivationCost(ctx, attacker, baseCost) {
-      return data(ctx, attacker).cardType === "weapon" &&
+      return ctx.hasCardType(attacker, "weapon") &&
         ctx.getPlayerFlag(ctx.seat, "nextWeaponCostReduction") === true
         ? Math.max(0, baseCost - 1)
         : baseCost;
     },
     onFriendlyActivate(ctx, activated) {
-      if (data(ctx, activated).cardType === "weapon") ctx.setPlayerFlag(ctx.seat, "nextWeaponCostReduction", false);
+      if (ctx.hasCardType(activated, "weapon")) ctx.setPlayerFlag(ctx.seat, "nextWeaponCostReduction", false);
     },
   },
   "evo smoothbore|2": destroyUnderAbility((ctx) => buffNextAttack(ctx, { attack: 1, appliesTo: "weapon" })),
@@ -515,13 +389,13 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
     if (hand.length)
       ctx.requestCardChoice(
         "data-mine",
-        decisionPrompt("Put a card from your hand on top of your deck", "card.evo.hand.card.top"),
+        decisionPrompt("Put a card from your hand on top of your deck", "card.common.hand.card.top"),
         hand.map((card) => card.instanceId),
       );
   }),
-  "evo battery pack|2": destroyUnderAbility((ctx) => addSteamToChoice(ctx, "battery-pack")),
+  "evo battery pack|2": destroyUnderAbility((ctx) => requestCrankSteam(ctx, "battery-pack")),
   "evo cogspitter|2": destroyUnderAbility((ctx) => {
-    const items = ctx.player(ctx.seat).hand.filter((card) => isItem(ctx, card) && (data(ctx, card).cost ?? 0) <= 1);
+    const items = ctx.player(ctx.seat).hand.filter((card) => isItem(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= 1);
     if (items.length)
       ctx.requestCardChoice(
         "cogspitter",
@@ -532,7 +406,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   "evo charging rods|2": destroyUnderAbility((ctx) => {
     ctx.createToken(QUICKEN);
   }),
-  "evo zoom call|2": instantEvoEquipment({
+  "evo zoom call|2": evoEquipment({
     triggers: [
       entersArenaTrigger(
         "You may banish a card from your hand to draw a card",
@@ -550,14 +424,14 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
       ),
     ],
   }),
-  "evo buzz hive|2": instantEvoEquipment({
+  "evo buzz hive|2": evoEquipment({
     triggers: [
       entersArenaTrigger("Gain 1 resource", decisionMessage("card.trigger.common.resource.gain", { amount: 1 }), (ctx) =>
-        ctx.changeResources(ctx.seat, 1),
+        ctx.gainResources(ctx.seat, 1),
       ),
     ],
   }),
-  "evo whizz bang|2": instantEvoEquipment({
+  "evo whizz bang|2": evoEquipment({
     triggers: [
       entersArenaTrigger(
         "Up to 1 target attack gets +1 power",
@@ -570,7 +444,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
       ),
     ],
   }),
-  "evo zip line|2": instantEvoEquipment({
+  "evo zip line|2": evoEquipment({
     triggers: [
       entersArenaTrigger(
         "Up to 1 target attack gets go again",
@@ -587,7 +461,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   ...pitches("heavy artillery", () => ({
     canBeDefendedBy(ctx, defending) {
       if (!isAttackAction(ctx, defending)) return true;
-      return (data(ctx, defending).cost ?? 0) >= equippedEvos(ctx);
+      return (ctx.cardData(defending.cardId).cost ?? 0) >= equippedEvos(ctx);
     },
   })),
   ...pitches("liquid-cooled mayhem", () => ({ modifyPlayCost: (ctx, base) => Math.max(0, base - equippedEvos(ctx)) })),
@@ -621,7 +495,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
       timing: "instant",
       putSelfOnDeckBottomCost: true,
       onActivate(ctx) {
-        addSteamToChoice(ctx, "steam-canister");
+        requestCrankSteam(ctx, "steam-canister");
       },
     },
   },
@@ -687,8 +561,8 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   ...pitches("infuse titanium", () => galvanize()),
   ...pitches("junkyard dogg", () => scrapAttack((ctx) => ctx.addModifier({ scope: "chain-link", attack: 1 }))),
   ...pitches("scrap compactor", () => scrapAttack((ctx) => ctx.setPlayerFlag(ctx.seat, "nextEvoAsInstant", true))),
-  ...pitches("scrap harvester", () => scrapAttack((ctx) => addSteamToChoice(ctx, "scrap-harvester"))),
-  ...pitches("scrap prospector", () => scrapAttack((ctx) => ctx.changeResources(ctx.seat, 1))),
+  ...pitches("scrap harvester", () => scrapAttack((ctx) => requestCrankSteam(ctx, "scrap-harvester"))),
+  ...pitches("scrap prospector", () => scrapAttack((ctx) => ctx.gainResources(ctx.seat, 1))),
 
   ...pitches("bull bar", () => ({
     onAttackDeclared(ctx) {
@@ -701,7 +575,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
       const opponent = ctx.player(opponentSeat(ctx));
       const targets = [
         ...opponent.weapons,
-        ...Object.values(opponent.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
+        ...equipmentZoneCards(opponent),
         ...opponent.board,
       ].filter((card) => Number(card.counters?.steam ?? 0) > 0);
       if (targets.length)
@@ -718,7 +592,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
   "big shot|1": { modifyAttack: (ctx) => (boostedCount(ctx) >= 2 ? 2 : 0) },
   "burn rubber|1": {
     modifyAttack: (ctx) => (boostedCount(ctx) >= 2 ? 2 : 0),
-    canBeDefendedBy: (ctx, card) => boostedCount(ctx) < 2 || data(ctx, card).cardType !== "equipment",
+    canBeDefendedBy: (ctx, card) => boostedCount(ctx) < 2 || !ctx.hasCardType(card, "equipment"),
   },
   "smash and grab|1": {
     modifyAttack: (ctx) => (boostedCount(ctx) >= 2 ? 2 : 0),
@@ -754,7 +628,7 @@ export const evo: Record<string, CardScript> = mergeSetScripts("EVO", evoHighRar
       ctx.logPublic(
         localizedCardLog(
           ctx,
-          `${ctx.data.name} reveals ${data(ctx, top).name}`,
+          `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`,
           "card.log.common.decktop.revealed",
           { revealed: { kind: "card", cardId: top.cardId } },
           { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
@@ -842,7 +716,8 @@ for (const key of [
   script.onChoose = (ctx, hook, option) => {
     if (hook === "thruster") ctx.grantAdditionalActivation(Number(option));
     else if (hook === "data-mine") ctx.putOnDeckTop(Number(option));
-    else if (hook === "battery-pack" || hook === "steam-canister" || hook === "scrap-harvester") addSteam(ctx, option);
+    else if (hook === "battery-pack" || hook === "steam-canister" || hook === "scrap-harvester")
+      resolveCrankSteam(ctx, option);
     else if (hook === "cogspitter") ctx.settleCard(Number(option));
     else if (hook === "zoom-call" && option !== "none" && ctx.banish(Number(option))) ctx.drawCards(ctx.seat, 1);
     else prior?.(ctx, hook, option);

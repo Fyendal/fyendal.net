@@ -100,8 +100,8 @@ function decodeCards(value, file) {
     if (typeof card.name !== "string" || !card.name) {
       throw new Error(`${file}[${index}]: name must be a non-empty string`);
     }
-    if (typeof card.cardType !== "string" || !card.cardType) {
-      throw new Error(`${file}[${index}]: cardType must be a non-empty string`);
+    if (!Array.isArray(card.types) || card.types.length === 0 || !card.types.every((type) => typeof type === "string" && type)) {
+      throw new Error(`${file}[${index}]: types must be a non-empty string array`);
     }
     if (card.pitch !== undefined && (!Number.isSafeInteger(card.pitch) || card.pitch < 0)) {
       throw new Error(`${file}[${index}]: pitch must be a non-negative safe integer`);

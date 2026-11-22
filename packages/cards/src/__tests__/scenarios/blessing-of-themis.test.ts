@@ -33,7 +33,7 @@ describe("Blessing of Themis", () => {
     expect(g.state.stack.some((layer) => layer.label.includes("Name a card"))).toBe(true);
     g.settle();
     expect(g.state.pendingDecision).toMatchObject({
-      kind: "choose-name", player: 0, promptMessage: { id: "card.pen.card.name" },
+      kind: "choose-name", player: 0, promptMessage: { id: "card.common.card.name" },
     });
     g.chooseName("Ghostly Visit").expectAP(0, 1);
 

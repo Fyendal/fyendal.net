@@ -1,12 +1,13 @@
 import { randomUUID } from "node:crypto";
 import type { StateFrame, StateMessage } from "@fyendal/shared";
+import { stateLogAudience } from "@fyendal/protocol";
 
 /** One instance per socket. Runs only on an already authorized projection. */
 export class StateLogTransport {
   private stream = randomUUID();
   private sequence = 0;
   private previous: {
-    gameId: string; seat: number | null; version: number; keys: string[]; structured: boolean;
+    gameId: string; audience: string; version: number; keys: string[]; structured: boolean;
   } | null = null;
 
   reset(): void {
@@ -18,11 +19,12 @@ export class StateLogTransport {
   encode(state: StateMessage): StateFrame {
     const keys = state.view.log.map((text, index) => JSON.stringify([text, state.view.logEntries?.[index]]));
     const structured = state.view.logEntries !== undefined;
+    const audience = stateLogAudience(state);
     const previous = this.previous;
     let drop: number | null = null;
     let retained = 0;
     if (previous && state.transition?.kind !== "replace"
-      && previous.gameId === state.view.gameId && previous.seat === state.yourSeat
+      && previous.gameId === state.view.gameId && previous.audience === audience
       && previous.structured === structured && previous.version <= state.version
       && keys.length >= previous.keys.length) {
       // Find the longest suffix/prefix overlap, including the 200-entry rollover.
@@ -44,7 +46,7 @@ export class StateLogTransport {
         ...(structured ? { logEntries: state.view.logEntries!.slice(retained) } : {}),
       } };
     }
-    this.previous = { gameId: state.view.gameId, seat: state.yourSeat, version: state.version, keys, structured };
+    this.previous = { gameId: state.view.gameId, audience, version: state.version, keys, structured };
     return frame;
   }
 }

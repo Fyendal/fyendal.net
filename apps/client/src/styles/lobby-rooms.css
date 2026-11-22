@@ -585,3 +585,173 @@
   background: rgba(0, 0, 0, 0.25); user-select: all;
 }
 .lobby-replay-error { text-align: center; margin: 9px 0 0; }
+
+/* Solo dialog: the bot roster and self-play share one surface, split by tabs. */
+@media (min-width: 701px) {
+  /* Pinned to the top so the tabs hold still while the panels differ in height. */
+  .solo-play-backdrop { align-items: start; padding-top: clamp(20px, 9vh, 88px); }
+  .solo-play-modal { max-height: calc(100dvh - clamp(20px, 9vh, 88px) - 20px); }
+  /* The deck list opens past the dialog's edge, like the create-room picker. */
+  .solo-play-modal-both { overflow: visible; }
+}
+.solo-play-modal { --solo-pad: 20px; }
+.solo-play-modal .modal-surface-header { margin-bottom: 0; border-bottom: 0; }
+.solo-play-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0 calc(-1 * var(--solo-pad)) 16px;
+  padding: 0 calc(var(--solo-pad) - 14px);
+  border-bottom: 1px solid #3d3128;
+}
+.solo-play-tabs button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: -1px;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  clip-path: none;
+  background: transparent;
+  color: var(--text-muted);
+  font: 600 14px var(--font-lobby-ui);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.solo-play-tabs button:hover { background: transparent; color: var(--text-primary); }
+.solo-play-tabs button.selected { border-bottom-color: var(--gold); color: var(--gold); }
+.solo-play-tabs button:focus-visible { outline: 2px solid var(--gold); outline-offset: -4px; }
+.solo-play-tabs .ui-icon { font-size: 17px; }
+/* Marks a tab the player has not opened yet. */
+.solo-tab-unseen {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: #e0503e;
+  box-shadow: 0 0 0 2px #211a15, 0 0 6px #e0503e99;
+  translate: 0 -7px;
+}
+
+.solo-both-form { display: grid; gap: 18px; }
+.solo-matchup {
+  --seat-h: 216px;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+.solo-matchup-seat {
+  position: relative;
+  display: flex;
+  height: var(--seat-h);
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  overflow: hidden;
+  padding: 14px 18px 16px;
+  border: 1px solid #59493a;
+  border-radius: 3px;
+  background: radial-gradient(120% 140% at 100% 50%, #3a2716 0%, #211a15 60%);
+}
+/* The opposing seat mirrors, so the two heroes meet at the centre. */
+.solo-matchup-seat.opposing {
+  align-items: flex-end;
+  background: radial-gradient(120% 140% at 0% 50%, #3a2716 0%, #211a15 60%);
+  text-align: right;
+}
+.solo-matchup-seat.opposing :is(.deck-card-art, .deck-card-img) {
+  right: auto;
+  left: 0;
+  -webkit-mask-image: linear-gradient(270deg, transparent 0%, #000 38%);
+  mask-image: linear-gradient(270deg, transparent 0%, #000 38%);
+}
+.solo-matchup-seat.opposing .deck-card-art img { left: 46%; }
+.solo-matchup-seat > :is(.solo-matchup-label, .solo-matchup-name, .solo-matchup-hero) {
+  position: relative;
+  z-index: 1;
+  max-width: 66%;
+  text-shadow: 0 1px 2px #000, 0 0 14px #000c;
+}
+.solo-matchup-label {
+  margin-bottom: auto;
+  color: #cdbb97;
+  font: 600 13px/1.3 var(--font-lobby-ui);
+}
+.solo-matchup-name {
+  color: #f6e8c6;
+  font: 700 20px/1.2 var(--font-lobby-title);
+  overflow-wrap: anywhere;
+}
+.solo-matchup-hero { color: #d9c9a8; font: 600 13px/1.35 var(--font-lobby-ui); }
+.solo-matchup-versus {
+  position: absolute;
+  top: calc(var(--seat-h) / 2);
+  left: 50%;
+  z-index: 2;
+  display: grid;
+  min-width: 46px;
+  height: 46px;
+  place-items: center;
+  isolation: isolate;
+  color: var(--gold);
+  font: italic 500 17px/1 var(--font-heading);
+  translate: -50% -50%;
+}
+.solo-matchup-versus::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border-strong);
+  background: #191510;
+  box-shadow: 0 0 0 4px #211a15;
+  content: "";
+  rotate: 45deg;
+  translate: -50% -50%;
+}
+.solo-both-lead {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.solo-both-pick { display: grid; min-width: 0; gap: 8px; }
+.solo-both-import {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 6px;
+  padding: 2px 0;
+  border: 0;
+  clip-path: none;
+  background: none;
+  color: var(--gold);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.solo-both-import:hover { text-decoration: underline; text-underline-offset: 3px; }
+.solo-both-import:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.solo-both-actions { display: flex; justify-content: flex-end; }
+.solo-both-actions > .btn-cta { min-width: 180px; min-height: 46px; }
+@media (max-width: 700px) {
+  .solo-play-modal { --solo-pad: 12px; min-height: min(560px, 100dvh - 40px); }
+  .solo-play-tabs { margin-bottom: 12px; padding: 0; }
+  .solo-play-tabs button { min-width: 0; flex: 1; padding: 0 8px; line-height: 1.2; }
+  .solo-matchup { --seat-h: 128px; grid-template-columns: minmax(0, 1fr); }
+  .solo-matchup-versus { top: calc(var(--seat-h) + 6px); }
+  .solo-matchup-name { font-size: 18px; }
+  .solo-both-lead { order: 1; }
+  .solo-both-actions > .btn-cta { width: 100%; }
+}

@@ -2,16 +2,23 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx, TriggerDef } fr
 import {
   anyDamageTarget,
   attackAbility,
-  bottomOrKeepPrompt,
+  boostsThisChain,
   buffNextArcaneDamageCard,
   buffNextAttack,
   cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   contractWithSilver,
+  controlledPermanents,
+  controlsNamed,
   dealArcane,
   dealToAnyTarget,
-  type DecisionPromptOptions,
+  equippedCards,
+  faceUpGraveyard,
+  hasArcaneDamageEffect,
+  heroChoiceSeat,
+  hyperDriver,
+  isAttackAction,
   decisionMessage,
   decisionPrompt,
   destroyedTrigger,
@@ -25,82 +32,28 @@ import {
   optN,
   optOnChoose,
   previousAttackHasName,
+  requestHeroChoice,
   targetHeroSeat,
   ongoingLabel,
+  hasCardSubtype,
+  isArrow,
+  isAura,
+  isNonAttackAction,
+  isItem,
 } from "./shared-helpers.js";
-import { dynHighRarity } from "./dyn/high-rarity.js";
-
-const CROUCHING_TIGER = "DYN065";
-const RUNECHANT = "DYN191";
-const SPECTRAL_SHIELD = "DYN233";
-
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function equipmentCards(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
-  const player = ctx.player(seat);
-  return [
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => card !== undefined),
-    ...player.weapons.filter((card) => data(ctx, card).cardType === "equipment"),
-  ];
-}
+import { bottomOrKeepPrompt, dynHighRarity } from "./dyn/high-rarity.js";
+import { CROUCHING_TIGER, PONDER, RUNECHANT, SPECTRAL_SHIELD } from "./tokens.js";
 
 function logDeckTopReveal(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): void {
   ctx.logPublic(
     localizedCardLog(
       ctx,
-      `${ctx.data.name} reveals ${data(ctx, card).name}`,
+      `${ctx.data.name} reveals ${ctx.cardData(card.cardId).name}`,
       "card.log.common.decktop.revealed",
       { revealed: { kind: "card", cardId: card.cardId } },
       { kind: "cards-revealed", cards: [{ cardId: card.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
     ),
   );
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
-}
-
-function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack");
-}
-
-function controlsNamed(ctx: ScriptCtx, name: string): boolean {
-  return ctx.player(ctx.seat).board.some((card) => cardNamed(ctx, card, name));
-}
-
-function createTokens(ctx: ScriptCtx, id: string, count: number): void {
-  ctx.createTokens(id, count);
-}
-
-function chooseHero(
-  ctx: ScriptCtx,
-  hook: string,
-  fallback: string,
-  id: string,
-  values?: DecisionPromptOptions["values"],
-  defaultOption?: "opposing hero" | "your hero",
-): void {
-  ctx.requestChoice(
-    hook,
-    decisionPrompt(fallback, id, {
-      values,
-      optionMessages: commonOptionMessages("opposing hero", "your hero"),
-    }),
-    ["opposing hero", "your hero"],
-    undefined,
-    undefined,
-    defaultOption,
-  );
-}
-
-function heroSeat(ctx: ScriptCtx, option: string): number {
-  return option === "your hero" ? ctx.seat : opponentSeat(ctx);
 }
 
 function blessing(effect: (ctx: ScriptCtx) => void, extra: Partial<TriggerDef> = {}): CardScript {
@@ -129,6 +82,7 @@ function blessingOfPatience(amount: number): CardScript {
     {
       target: {
         ...heroTarget(),
+        defaultTarget: (ctx) => ctx.player(ctx.seat).hero.instanceId,
         prompt: () =>
           decisionPrompt(`Choose a hero to gain ${amount} life`, "card.dyn.patience.hero.choose", { values: { amount } }),
       },
@@ -153,7 +107,7 @@ function blessingFocus(amount: number): CardScript {
     const top = ctx.player(ctx.seat).deck[0];
     if (!top) return;
     logDeckTopReveal(ctx, top);
-    if (hasType(ctx, top, "arrow")) {
+    if (isArrow(ctx, top)) {
       ctx.putIntoArsenal(top.instanceId, "deck", { faceUp: true });
       ctx.addCounter(top.instanceId, "aim", 1);
     }
@@ -168,7 +122,7 @@ function blessingFocus(amount: number): CardScript {
 
 function blessingIngenuity(count: number): CardScript {
   const offer = (ctx: ScriptCtx) => {
-    const candidates = [...ctx.player(ctx.seat).graveyard, ...ctx.player(ctx.seat).banish].filter(
+    const candidates = [...faceUpGraveyard(ctx), ...ctx.player(ctx.seat).banish].filter(
       (card) => cardNamed(ctx, card, "Hyper Driver"),
     );
     if (ctx.getState("ingenuityRemaining") <= 0 || candidates.length === 0) return;
@@ -251,36 +205,6 @@ function spectralRider(): CardScript {
   };
 }
 
-function hyperDriver(steam: number): CardScript {
-  return {
-    destroyAtZeroCounter: "steam",
-    onEnterArena(ctx) {
-      ctx.setCounter("steam", steam);
-    },
-    triggers: [
-      {
-        event: "card-boosted",
-        label: "Remove a steam counter and gain 1 resource",
-        labelMessage: decisionMessage("card.trigger.hyperdriver.boost"),
-        condition(ctx) {
-          return (
-            ctx.getFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`) !== true && ctx.getCounter("steam") > 0
-          );
-        },
-        onTrigger(ctx) {
-          ctx.setFlag("player", `hyperDriverBoost:${ctx.self.instanceId}`, true);
-        },
-        effect(ctx) {
-          const steam = ctx.getCounter("steam");
-          if (steam <= 0) return;
-          ctx.setCounter("steam", steam - 1);
-          ctx.changeResources(ctx.seat, 1);
-        },
-      },
-    ],
-  };
-}
-
 function aimCounter(ctx: ScriptCtx): boolean {
   return Number(ctx.self.counters?.aim ?? 0) > 0;
 }
@@ -294,11 +218,11 @@ function drillShot(): CardScript {
       return ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      const equipment = equipmentCards(ctx, opponentSeat(ctx));
+      const equipment = equippedCards(ctx, opponentSeat(ctx));
       if (equipment.length)
         ctx.requestCardChoice(
           "drill",
-          decisionPrompt("Put a -1 defense counter on equipment", "card.dyn.drill.equipment.counter"),
+          decisionPrompt("Put a -1 defense counter on equipment", "card.common.equipment.defensecounter"),
           equipment.map((card) => card.instanceId),
         );
     },
@@ -322,18 +246,18 @@ function contractAttack(test: ContractTest): CardScript {
 }
 
 const contractAttackAction: ContractTest = (ctx, card) => isAttackAction(ctx, card);
-const contractLowDefense: ContractTest = (ctx, card) => (data(ctx, card).defense ?? Infinity) <= 2;
+const contractLowDefense: ContractTest = (ctx, card) => (ctx.cardData(card.cardId).defense ?? Infinity) <= 2;
 const contractReaction: ContractTest = (ctx, card) =>
-  ["attack-reaction", "defense-reaction"].includes(data(ctx, card).cardType);
+  ctx.hasCardType(card, "attack-reaction") || ctx.hasCardType(card, "defense-reaction");
 const contractLowCost: ContractTest = (ctx, card) => {
-  const cardData = data(ctx, card);
+  const cardData = ctx.cardData(card.cardId);
   if (cardData.cost !== undefined) return cardData.cost <= 1;
   // An undeclared X is 0; cards with no cost property do not match.
   return ctx.hasVariablePlayCost(card);
 };
-const contractHighCost: ContractTest = (ctx, card) => (data(ctx, card).cost ?? -1) >= 2;
+const contractHighCost: ContractTest = (ctx, card) => (ctx.cardData(card.cardId).cost ?? -1) >= 2;
 const contractGoAgain: ContractTest = (ctx, card) =>
-  (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "go again");
+  ctx.hasKeyword(card, "go again");
 const contractNonAttack: ContractTest = (ctx, card) => isNonAttackAction(ctx, card);
 
 function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" | "hand" | null): CardScript {
@@ -342,13 +266,14 @@ function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" 
     arcaneDamageEffectAmounts: [amount],
     onPlay(ctx) {
       const preview = ctx.previewArcaneDamage(amount);
-      chooseHero(ctx, "arcane-target", `Deal ${preview} arcane damage to a hero`, "card.dyn.arcane.hero.choose", {
-        amount: preview,
-      }, "opposing hero");
+      requestHeroChoice(ctx, "arcane-target", `Deal ${preview} arcane damage to a hero`, "card.dyn.arcane.hero.choose", {
+        values: { amount: preview },
+        defaultOption: "opposing hero",
+      });
     },
     onDamageDealt(ctx, target, dealt, arcane) {
       if (!arcane || dealt <= amount || surge === null) return;
-      if (surge === "go-again") ctx.gainActionPoint();
+      if (surge === "go-again") ctx.grantGoAgain();
       else if (surge === "opt") optN(ctx, 1);
       else if (surge === "hand") {
         const hand = [...ctx.player(target).hand];
@@ -357,11 +282,7 @@ function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" 
         ctx.drawCards(target, Math.max(0, hand.length - 1));
       } else {
         const permanents = [
-          ...ctx.player(target).board,
-          ...ctx.player(target).weapons,
-          ...Object.values(ctx.player(target).equipment).filter(
-            (card): card is DeepReadonly<CardInstance> => card !== undefined,
-          ),
+          ...controlledPermanents(ctx, target),
           ctx.player(target).hero,
         ].filter((card) => Number(card.counters?.energy ?? 0) > 0);
         if (permanents.length)
@@ -375,7 +296,10 @@ function arcaneTargetSpell(amount: number, surge: "go-again" | "opt" | "energy" 
       }
     },
     onChoose(ctx, hook, option) {
-      if (hook === "arcane-target") dealArcane(ctx, heroSeat(ctx, option), amount);
+      if (hook === "arcane-target") {
+        const seat = heroChoiceSeat(ctx, option);
+        if (seat !== undefined) dealArcane(ctx, seat, amount);
+      }
       else if (hook === "sap-energy" && option !== "pass") ctx.addCounter(Number(option), "energy", -1);
       else optOnChoose(ctx, hook, option);
     },
@@ -396,7 +320,7 @@ function aetherSlash(): CardScript {
         condition: (ctx) => ctx.getState("nonAttackPitched") > 0,
         target: anyDamageTarget((ctx) => {
           const amount = ctx.previewArcaneDamage(1);
-          return decisionPrompt(`Deal ${amount} arcane damage to any target`, "card.dyn.aetherslash.target.choose", {
+          return decisionPrompt(`Deal ${amount} arcane damage to any target`, "card.common.arcane.anytarget.choose", {
             values: { amount },
           });
         }),
@@ -414,7 +338,7 @@ function deathlyDuet(): CardScript {
     },
     onAttackDeclared(ctx) {
       if (ctx.getState("attackPitched")) ctx.addModifier({ scope: "chain-link", attack: 2 });
-      if (ctx.getState("nonAttackPitched")) createTokens(ctx, RUNECHANT, 2);
+      if (ctx.getState("nonAttackPitched")) ctx.createTokens(RUNECHANT, 2);
     },
   };
 }
@@ -455,7 +379,7 @@ function tranquilPassing(maxCost: number): CardScript {
             options: (ctx) =>
               ctx
                 .player(opponentSeat(ctx))
-                .board.filter((card) => hasType(ctx, card, "aura") && (data(ctx, card).cost ?? 0) <= maxCost)
+                .board.filter((card) => isAura(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) <= maxCost)
                 .map((card) => card.instanceId),
             prompt: () =>
               decisionPrompt("Banish an opposing aura until this leaves", "card.dyn.tranquil.aura.banish", {
@@ -480,6 +404,26 @@ const tempestAuroraLabel = (cost: number) =>
     { cost },
   );
 
+function tempestAurora(maxCost: number): CardScript {
+  return {
+    onPlay(ctx) {
+      ctx.setState("auroraMax", maxCost);
+      ctx.addModifier({ scope: "until-end-of-turn", ...tempestAuroraLabel(maxCost) });
+    },
+    onFriendlyPlay(ctx, played) {
+      if (
+        ctx.getState("auroraMax") < 0 ||
+        (ctx.cardData(played.cardId).cost ?? 0) > ctx.getState("auroraMax") ||
+        !hasArcaneDamageEffect(ctx, played.cardId)
+      )
+        return;
+      ctx.addCardState(played.instanceId, "arcaneBonus", 1);
+      ctx.setState("auroraMax", -1);
+      consumeDelayedEffect(ctx);
+    },
+  };
+}
+
 export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRarity, {
   // Its Construct target is outside this C/R import; keeping Material here
   // avoids treating its +1 power grant as vanilla behavior.
@@ -495,7 +439,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
         optional: true,
         defaultOption: "yes",
         condition: (ctx, played) =>
-          !!played && (data(ctx, played).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract"),
+          !!played && ctx.hasKeyword(played, "contract"),
         effect(ctx) {
           const top = ctx.player(opponentSeat(ctx)).deck[0];
           if (!top) return;
@@ -607,7 +551,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "blessing of patience|3": blessingOfPatience(1),
   "shield bash|1": {
     onPlay(ctx) {
-      const offhand = ctx.link?.defendingEquipment.some((card) => hasType(ctx, card, "off-hand"));
+      const offhand = ctx.link?.defendingEquipment.some((card) => hasCardSubtype(ctx, card, "off-hand"));
       if (!offhand) return;
       const hand = ctx.player(opponentSeat(ctx)).hand;
       ctx.requestCardChoice(
@@ -627,7 +571,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "shield bash|2": {
     onPlay(ctx) {
-      const offhand = ctx.link?.defendingEquipment.some((card) => hasType(ctx, card, "off-hand"));
+      const offhand = ctx.link?.defendingEquipment.some((card) => hasCardSubtype(ctx, card, "off-hand"));
       if (!offhand) return;
       const hand = ctx.player(opponentSeat(ctx)).hand;
       ctx.requestCardChoice(
@@ -647,7 +591,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "shield bash|3": {
     onPlay(ctx) {
-      const offhand = ctx.link?.defendingEquipment.some((card) => hasType(ctx, card, "off-hand"));
+      const offhand = ctx.link?.defendingEquipment.some((card) => hasCardSubtype(ctx, card, "off-hand"));
       if (!offhand) return;
       const hand = ctx.player(opponentSeat(ctx)).hand;
       ctx.requestCardChoice(
@@ -667,29 +611,32 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "shield wall|1": {
     modifyDefense: (ctx) =>
-      equipmentCards(ctx, ctx.seat).some((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand"))
+      equippedCards(ctx, ctx.seat).some((card) =>
+        hasCardSubtype(ctx, card, "guardian") && hasCardSubtype(ctx, card, "off-hand"))
         ? 4
         : 0,
   },
   "shield wall|2": {
     modifyDefense: (ctx) =>
-      equipmentCards(ctx, ctx.seat).some((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand"))
+      equippedCards(ctx, ctx.seat).some((card) =>
+        hasCardSubtype(ctx, card, "guardian") && hasCardSubtype(ctx, card, "off-hand"))
         ? 4
         : 0,
   },
   "shield wall|3": {
     modifyDefense: (ctx) =>
-      equipmentCards(ctx, ctx.seat).some((card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand"))
+      equippedCards(ctx, ctx.seat).some((card) =>
+        hasCardSubtype(ctx, card, "guardian") && hasCardSubtype(ctx, card, "off-hand"))
         ? 4
         : 0,
   },
   "reinforce steel|1": {
     onPlay(ctx) {
-      const choices = equipmentCards(ctx, ctx.seat).filter(
+      const choices = equippedCards(ctx, ctx.seat).filter(
         (card) =>
-          hasType(ctx, card, "guardian") &&
-          hasType(ctx, card, "off-hand") &&
-          (data(ctx, card).defense ?? 0) <= 3 &&
+          hasCardSubtype(ctx, card, "guardian") &&
+          hasCardSubtype(ctx, card, "off-hand") &&
+          (ctx.cardData(card.cardId).defense ?? 0) <= 3 &&
           (card.defCounters ?? 0) > 0,
       );
       if (choices.length)
@@ -705,11 +652,11 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "reinforce steel|2": {
     onPlay(ctx) {
-      const choices = equipmentCards(ctx, ctx.seat).filter(
+      const choices = equippedCards(ctx, ctx.seat).filter(
         (card) =>
-          hasType(ctx, card, "guardian") &&
-          hasType(ctx, card, "off-hand") &&
-          (data(ctx, card).defense ?? 0) <= 2 &&
+          hasCardSubtype(ctx, card, "guardian") &&
+          hasCardSubtype(ctx, card, "off-hand") &&
+          (ctx.cardData(card.cardId).defense ?? 0) <= 2 &&
           (card.defCounters ?? 0) > 0,
       );
       if (choices.length)
@@ -725,11 +672,11 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "reinforce steel|3": {
     onPlay(ctx) {
-      const choices = equipmentCards(ctx, ctx.seat).filter(
+      const choices = equippedCards(ctx, ctx.seat).filter(
         (card) =>
-          hasType(ctx, card, "guardian") &&
-          hasType(ctx, card, "off-hand") &&
-          (data(ctx, card).defense ?? 0) <= 1 &&
+          hasCardSubtype(ctx, card, "guardian") &&
+          hasCardSubtype(ctx, card, "off-hand") &&
+          (ctx.cardData(card.cardId).defense ?? 0) <= 1 &&
           (card.defCounters ?? 0) > 0,
       );
       if (choices.length)
@@ -745,8 +692,8 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "withstand|1": {
     onPlay(ctx) {
-      const choices = equipmentCards(ctx, ctx.seat).filter(
-        (card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand"),
+      const choices = equippedCards(ctx, ctx.seat).filter(
+        (card) => hasCardSubtype(ctx, card, "guardian") && hasCardSubtype(ctx, card, "off-hand"),
       );
       if (choices.length)
         ctx.requestCardChoice(
@@ -761,8 +708,8 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "withstand|2": {
     onPlay(ctx) {
-      const choices = equipmentCards(ctx, ctx.seat).filter(
-        (card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand"),
+      const choices = equippedCards(ctx, ctx.seat).filter(
+        (card) => hasCardSubtype(ctx, card, "guardian") && hasCardSubtype(ctx, card, "off-hand"),
       );
       if (choices.length)
         ctx.requestCardChoice(
@@ -777,8 +724,8 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "withstand|3": {
     onPlay(ctx) {
-      const choices = equipmentCards(ctx, ctx.seat).filter(
-        (card) => hasType(ctx, card, "guardian") && hasType(ctx, card, "off-hand"),
+      const choices = equippedCards(ctx, ctx.seat).filter(
+        (card) => hasCardSubtype(ctx, card, "guardian") && hasCardSubtype(ctx, card, "off-hand"),
       );
       if (choices.length)
         ctx.requestCardChoice(
@@ -919,12 +866,13 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "blessing of ingenuity|3": blessingIngenuity(1),
   "urgent delivery|1": {
     onHit(ctx) {
-      const boosts = ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted).length;
+      const boosts = boostsThisChain(ctx);
       const items = ctx
         .player(ctx.seat)
         .hand.filter(
           (card) =>
-            hasType(ctx, card, "mechanologist") && hasType(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= boosts,
+            hasCardSubtype(ctx, card, "mechanologist") && isItem(ctx, card) &&
+              (ctx.cardData(card.cardId).cost ?? 0) <= boosts,
         );
       if (items.length)
         ctx.requestCardChoice(
@@ -941,12 +889,13 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "urgent delivery|2": {
     onHit(ctx) {
-      const boosts = ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted).length;
+      const boosts = boostsThisChain(ctx);
       const items = ctx
         .player(ctx.seat)
         .hand.filter(
           (card) =>
-            hasType(ctx, card, "mechanologist") && hasType(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= boosts,
+            hasCardSubtype(ctx, card, "mechanologist") && isItem(ctx, card) &&
+              (ctx.cardData(card.cardId).cost ?? 0) <= boosts,
         );
       if (items.length)
         ctx.requestCardChoice(
@@ -963,12 +912,13 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "urgent delivery|3": {
     onHit(ctx) {
-      const boosts = ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted).length;
+      const boosts = boostsThisChain(ctx);
       const items = ctx
         .player(ctx.seat)
         .hand.filter(
           (card) =>
-            hasType(ctx, card, "mechanologist") && hasType(ctx, card, "item") && (data(ctx, card).cost ?? 0) <= boosts,
+            hasCardSubtype(ctx, card, "mechanologist") && isItem(ctx, card) &&
+              (ctx.cardData(card.cardId).cost ?? 0) <= boosts,
         );
       if (items.length)
         ctx.requestCardChoice(
@@ -1009,8 +959,8 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "cut to the chase|1": {
     canPlay: (ctx) =>
       !!ctx.link &&
-      hasType(ctx, ctx.link.attackingCard, "assassin") &&
-      (data(ctx, ctx.link.attackingCard).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract"),
+      hasCardSubtype(ctx, ctx.link.attackingCard, "assassin") &&
+      ctx.hasKeyword(ctx.link.attackingCard, "contract"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 3 });
       const top = ctx.player(opponentSeat(ctx)).deck[0];
@@ -1027,8 +977,8 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "cut to the chase|2": {
     canPlay: (ctx) =>
       !!ctx.link &&
-      hasType(ctx, ctx.link.attackingCard, "assassin") &&
-      (data(ctx, ctx.link.attackingCard).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract"),
+      hasCardSubtype(ctx, ctx.link.attackingCard, "assassin") &&
+      ctx.hasKeyword(ctx.link.attackingCard, "contract"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 2 });
       const top = ctx.player(opponentSeat(ctx)).deck[0];
@@ -1045,8 +995,8 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "cut to the chase|3": {
     canPlay: (ctx) =>
       !!ctx.link &&
-      hasType(ctx, ctx.link.attackingCard, "assassin") &&
-      (data(ctx, ctx.link.attackingCard).keywords ?? []).some((keyword) => keyword.toLowerCase() === "contract"),
+      hasCardSubtype(ctx, ctx.link.attackingCard, "assassin") &&
+      ctx.hasKeyword(ctx.link.attackingCard, "contract"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
       const top = ctx.player(opponentSeat(ctx)).deck[0];
@@ -1063,13 +1013,13 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "shred|1": {
     canPlay: (ctx) =>
       !!ctx.link &&
-      hasType(ctx, ctx.link.attackingCard, "assassin") &&
+      hasCardSubtype(ctx, ctx.link.attackingCard, "assassin") &&
       [...ctx.link.defendingCards, ...ctx.link.defendingEquipment].length > 0,
     onPlay(ctx) {
       const defenders = [...(ctx.link?.defendingCards ?? []), ...(ctx.link?.defendingEquipment ?? [])];
       ctx.requestCardChoice(
         "shred",
-        decisionPrompt("Choose a defending card", "card.dyn.shred.defender.choose"),
+        decisionPrompt("Choose a defending card", "card.common.defending.card.choose"),
         defenders.map((card) => card.instanceId),
       );
     },
@@ -1080,13 +1030,13 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "shred|2": {
     canPlay: (ctx) =>
       !!ctx.link &&
-      hasType(ctx, ctx.link.attackingCard, "assassin") &&
+      hasCardSubtype(ctx, ctx.link.attackingCard, "assassin") &&
       [...ctx.link.defendingCards, ...ctx.link.defendingEquipment].length > 0,
     onPlay(ctx) {
       const defenders = [...(ctx.link?.defendingCards ?? []), ...(ctx.link?.defendingEquipment ?? [])];
       ctx.requestCardChoice(
         "shred",
-        decisionPrompt("Choose a defending card", "card.dyn.shred.defender.choose"),
+        decisionPrompt("Choose a defending card", "card.common.defending.card.choose"),
         defenders.map((card) => card.instanceId),
       );
     },
@@ -1159,7 +1109,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "long shot|3": { modifyAttack: (ctx) => (aimCounter(ctx) ? 2 : 0) },
   "point the tip|1": {
     onPlay(ctx) {
-      const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && hasType(ctx, card, "arrow"));
+      const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && isArrow(ctx, card));
       if (arrows.length)
         ctx.requestCardChoice(
           "point",
@@ -1176,7 +1126,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "point the tip|2": {
     onPlay(ctx) {
-      const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && hasType(ctx, card, "arrow"));
+      const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && isArrow(ctx, card));
       if (arrows.length)
         ctx.requestCardChoice(
           "point",
@@ -1193,7 +1143,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   },
   "point the tip|3": {
     onPlay(ctx) {
-      const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && hasType(ctx, card, "arrow"));
+      const arrows = ctx.player(ctx.seat).arsenal.filter((card) => !card.faceDown && isArrow(ctx, card));
       if (arrows.length)
         ctx.requestCardChoice(
           "point",
@@ -1213,7 +1163,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
       const top = ctx.player(ctx.seat).deck[0];
       if (!top) return;
       logDeckTopReveal(ctx, top);
-      if (hasType(ctx, top, "arrow")) {
+      if (isArrow(ctx, top)) {
         const targets = [ctx.player(opponentSeat(ctx)).hero.instanceId];
         if (ctx.link?.attackCardType === "ally") targets.push(ctx.link.attackingCard.instanceId);
         ctx.requestCardChoice(
@@ -1255,9 +1205,9 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "runic reaping|1": runicReaping(3),
   "runic reaping|2": runicReaping(2),
   "runic reaping|3": runicReaping(1),
-  "blessing of occult|1": blessing((ctx) => createTokens(ctx, RUNECHANT, 3)),
-  "blessing of occult|2": blessing((ctx) => createTokens(ctx, RUNECHANT, 2)),
-  "blessing of occult|3": blessing((ctx) => createTokens(ctx, RUNECHANT, 1)),
+  "blessing of occult|1": blessing((ctx) => ctx.createTokens(RUNECHANT, 3)),
+  "blessing of occult|2": blessing((ctx) => ctx.createTokens(RUNECHANT, 2)),
+  "blessing of occult|3": blessing((ctx) => ctx.createTokens(RUNECHANT, 1)),
   "sky fire lanterns|1": {
     onPlay(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
@@ -1299,57 +1249,9 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
   "blessing of aether|1": blessing((ctx) => buffNextArcaneDamageCard(ctx, 3)),
   "blessing of aether|2": blessing((ctx) => buffNextArcaneDamageCard(ctx, 2)),
   "blessing of aether|3": blessing((ctx) => buffNextArcaneDamageCard(ctx, 1)),
-  "tempest aurora|1": {
-    onPlay(ctx) {
-      ctx.setState("auroraMax", 2);
-      ctx.addModifier({ scope: "until-end-of-turn", ...tempestAuroraLabel(2) });
-    },
-    onFriendlyPlay(ctx, played) {
-      if (
-        ctx.getState("auroraMax") < 0 ||
-        (data(ctx, played).cost ?? 0) > ctx.getState("auroraMax") ||
-        !data(ctx, played).text.toLowerCase().includes("arcane damage")
-      )
-        return;
-      ctx.addCardState(played.instanceId, "arcaneBonus", 1);
-      ctx.setState("auroraMax", -1);
-      consumeDelayedEffect(ctx);
-    },
-  },
-  "tempest aurora|2": {
-    onPlay(ctx) {
-      ctx.setState("auroraMax", 1);
-      ctx.addModifier({ scope: "until-end-of-turn", ...tempestAuroraLabel(1) });
-    },
-    onFriendlyPlay(ctx, played) {
-      if (
-        ctx.getState("auroraMax") < 0 ||
-        (data(ctx, played).cost ?? 0) > ctx.getState("auroraMax") ||
-        !data(ctx, played).text.toLowerCase().includes("arcane damage")
-      )
-        return;
-      ctx.addCardState(played.instanceId, "arcaneBonus", 1);
-      ctx.setState("auroraMax", -1);
-      consumeDelayedEffect(ctx);
-    },
-  },
-  "tempest aurora|3": {
-    onPlay(ctx) {
-      ctx.setState("auroraMax", 0);
-      ctx.addModifier({ scope: "until-end-of-turn", ...tempestAuroraLabel(0) });
-    },
-    onFriendlyPlay(ctx, played) {
-      if (
-        ctx.getState("auroraMax") < 0 ||
-        (data(ctx, played).cost ?? 0) > ctx.getState("auroraMax") ||
-        !data(ctx, played).text.toLowerCase().includes("arcane damage")
-      )
-        return;
-      ctx.addCardState(played.instanceId, "arcaneBonus", 1);
-      ctx.setState("auroraMax", -1);
-      consumeDelayedEffect(ctx);
-    },
-  },
+  "tempest aurora|1": tempestAurora(2),
+  "tempest aurora|2": tempestAurora(1),
+  "tempest aurora|3": tempestAurora(0),
   "seerstone|0": {
     activated: {
       cost: 3,
@@ -1362,20 +1264,20 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
           ctx.lookAt(top.instanceId);
           ctx.setState("seerTop", top.instanceId);
           ctx.requestChoice("seerstone", bottomOrKeepPrompt(), ["bottom", "keep"]);
-        } else ctx.createToken("DYN244");
+        } else ctx.createToken(PONDER);
       },
     },
     onChoose(ctx, h, o) {
       if (h !== "seerstone") return;
       if (o === "bottom") ctx.putOnDeckBottom(ctx.getState("seerTop"));
-      ctx.createToken("DYN244");
+      ctx.createToken(PONDER);
     },
   },
 
   // Illusionist
-  "blessing of spirits|1": blessing((ctx) => createTokens(ctx, SPECTRAL_SHIELD, 3)),
-  "blessing of spirits|2": blessing((ctx) => createTokens(ctx, SPECTRAL_SHIELD, 2)),
-  "blessing of spirits|3": blessing((ctx) => createTokens(ctx, SPECTRAL_SHIELD, 1)),
+  "blessing of spirits|1": blessing((ctx) => ctx.createTokens(SPECTRAL_SHIELD, 3)),
+  "blessing of spirits|2": blessing((ctx) => ctx.createTokens(SPECTRAL_SHIELD, 2)),
+  "blessing of spirits|3": blessing((ctx) => ctx.createTokens(SPECTRAL_SHIELD, 1)),
   "spectral prowler|1": spectralProwler(),
   "spectral prowler|2": spectralProwler(),
   "spectral prowler|3": spectralProwler(),
@@ -1435,7 +1337,7 @@ export const dyn: Record<string, CardScript> = mergeSetScripts("DYN", dynHighRar
         if (hand.length)
           ctx.requestCardChoice(
             "tessen",
-            decisionPrompt("Put a hand card on the bottom", "card.dyn.tessen.hand.bottom"),
+            decisionPrompt("Put a hand card on the bottom", "card.common.hand.bottom"),
             hand.map((card) => card.instanceId),
           );
       },

@@ -22,22 +22,6 @@
 .prep-topbar-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; }
 .prep-heading { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; }
 .prep-code { display: inline-block; margin-left: 16px; font-size: 21px; letter-spacing: 5px; white-space: nowrap; }
-.prep-copy-link {
-  padding: 6px 10px;
-  border-color: #ffe6a2;
-  background: linear-gradient(180deg, #ffe08a, #c9912d);
-  box-shadow: inset 0 1px 0 #fff7d488, 0 2px 8px #d69b2d30;
-  color: #241506;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-shadow: 0 1px 0 #fff2bd66;
-}
-.prep-copy-link:hover {
-  border-color: #fff2c2;
-  background: linear-gradient(180deg, #ffeba9, #dda73f);
-  color: #180d03;
-}
 .prep-columns {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -49,6 +33,185 @@
   align-items: start;
 }
 .prep-opponent { text-align: center; }
+
+/* Self-play: one tab per seat above the prep content. */
+.solo-seat-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  max-width: var(--prep-content-width);
+  width: 100%;
+  margin: 16px auto 0;
+  padding: 0 var(--prep-content-gutter);
+}
+.solo-seat-tab {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  clip-path: none;
+  background: var(--surface-panel);
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+}
+.solo-seat-tab:hover { border-color: var(--border-strong); }
+.solo-seat-tab:focus-visible { outline: 2px solid var(--gold); outline-offset: -4px; }
+.solo-seat-tab.selected {
+  border-color: var(--bronze);
+  background: #33220f;
+  box-shadow: inset 0 -3px 0 var(--gold);
+}
+.solo-seat-tab > img,
+.solo-seat-tab-fallback {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.solo-seat-tab-fallback {
+  display: grid;
+  place-items: center;
+  background: var(--surface-control);
+  color: var(--gold);
+  font-family: var(--font-display);
+}
+.solo-seat-tab-copy { display: grid; min-width: 0; gap: 2px; }
+.solo-seat-tab-name {
+  overflow: hidden;
+  color: #f6e8c6;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.solo-seat-tab.selected .solo-seat-tab-name { color: var(--gold); }
+.solo-seat-tab-name > small {
+  margin-right: 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.solo-seat-tab-status {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.solo-seat-tab.ready .solo-seat-tab-status { color: #8fd48f; }
+
+/* Waiting bar before an opponent joins: deck, status, then ways to fill the seat. */
+.open-seat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding: 10px 14px;
+}
+.open-seat-deck-picker { flex: 1 1 260px; min-width: 0; max-width: 340px; }
+.open-seat-deck-picker[aria-busy="true"] { opacity: .6; pointer-events: none; }
+.open-seat-status {
+  display: flex;
+  flex: 1 1 200px;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  color: var(--text-secondary);
+  font: 14px/1.4 var(--font-lobby-ui);
+}
+.open-seat-invite { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+.open-seat-invite-trigger[aria-expanded="true"] { border-color: #a8833f; background: #21170e; color: var(--gold); }
+.open-seat-friends {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 320px;
+  max-width: calc(100vw - 28px);
+  padding: 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-raised);
+}
+.open-seat-friends ul { display: grid; max-height: 264px; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.open-seat-friends li {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 44px;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+.open-seat-friends li + li { border-top: 1px solid #4d3a2340; }
+.open-seat-friend-avatar {
+  position: relative;
+  display: grid;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface-control);
+  color: var(--gold);
+  font: 700 13px var(--font-lobby-ui);
+}
+/* Presence dot, matching the social panel's colors. */
+.open-seat-friend-avatar i {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--surface-raised);
+  border-radius: 50%;
+  background: #5a5144;
+}
+.open-seat-friends li.online .open-seat-friend-avatar i { background: #61b978; }
+.open-seat-friends li.offline .open-seat-friend-avatar { border-color: var(--border-subtle); color: var(--text-muted); }
+.open-seat-friend-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font: 600 14px var(--font-lobby-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.open-seat-friends li.offline .open-seat-friend-name { color: #a39784; font-weight: 500; }
+.open-seat-friend-status { flex: none; padding: 0 6px; color: var(--text-muted); font: 500 12px var(--font-lobby-ui); }
+.open-seat-friends li .lobby-create-action { flex: none; min-height: 34px; padding: 6px 14px; font-size: 13px; }
+.open-seat-friends li .lobby-create-action:disabled { opacity: .55; cursor: progress; }
+.open-seat-invited {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+  color: var(--success);
+  font: 600 13px var(--font-lobby-ui);
+}
+.open-seat-invited .ui-icon { width: 15px; height: 15px; }
+.open-seat .social-error {
+  display: flex;
+  flex-basis: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--danger);
+  font: 13px var(--font-lobby-ui);
+}
+.open-seat .social-error button { padding: 2px 8px; }
+
 .prep-selection-column { min-width: 0; display: grid; gap: 16px; }
 .prep-arena-stage .prep-cardrow { flex-wrap: wrap; }
 /* While you pick turn order the grid recedes, hover previews included, so
@@ -61,7 +224,7 @@
 }
 .prep-cloaked-card { display: grid; place-items: center; padding: 12px; text-align: center; }
 .prep-card-choice:disabled { cursor: default; }
-.prep-bot-nudge-backdrop {
+.prep-dialog-backdrop {
   position: fixed;
   inset: 0;
   z-index: 38;
@@ -71,25 +234,25 @@
   background: #090603b8;
   backdrop-filter: blur(4px);
 }
-.prep-bot-nudge {
+.prep-dialog {
   width: min(440px, 100%);
   padding: 30px;
   box-shadow: 0 20px 55px #000e, inset 0 1px 0 #ffd4791f;
   text-align: center;
 }
-.prep-bot-nudge .panel-title { margin-bottom: 8px; font-size: 28px; }
-.prep-bot-nudge p {
+.prep-dialog .panel-title { margin-bottom: 8px; font-size: 28px; }
+.prep-dialog p {
   margin: 0 0 20px;
   color: #b7a78b;
   font-size: 15px;
   line-height: 1.5;
 }
-.prep-bot-nudge-actions {
+.prep-dialog-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 9px;
 }
-.prep-bot-nudge-actions button {
+.prep-dialog-actions button {
   min-height: 44px;
   min-width: 0;
   padding: 8px 10px;
@@ -228,6 +391,8 @@
   margin-bottom: 16px;
 }
 .prep-pool-heading .panel-title { margin: 0; border-bottom: 0; padding-bottom: 0; }
+/* Display settings apply to both zones, so they sit above them in one bar. */
+.prep-pool-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-left: auto; }
 /* Sideboarding ledger: the main deck's head pins while its rows scroll, and
    Inventory is a sticky tray that scrolls inside its own frame beside them. */
 .prep-ledgers {
@@ -278,8 +443,7 @@
 .prep-zone-heading {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
   gap: 6px 14px;
 }
 .prep-zone-heading h4 {
@@ -300,37 +464,41 @@
 .prep-zone-count strong { color: var(--gold); font-size: 18px; font-weight: 600; }
 .prep-zone-count strong.invalid { color: #e0684a; }
 .prep-restore {
-  min-height: 26px;
-  padding: 0 8px;
-  border: 0;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--border-subtle);
   border-radius: 4px;
   background: transparent;
   clip-path: none;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font: 500 13px var(--font-lobby-ui);
   letter-spacing: normal;
   text-transform: none;
 }
-.prep-restore:hover { border: 0; background: #231709; color: var(--text-primary); }
+.prep-restore:hover { border-color: var(--border-strong); background: #231709; color: var(--text-primary); }
+/* Pitch split: the bar shows each color's share, the heading's figures the count. */
 .prep-pitch-bar {
   display: flex;
   gap: 2px;
-  height: 6px;
   margin-top: 10px;
-  border-radius: 3px;
+  height: 4px;
+  border-radius: 2px;
   overflow: hidden;
+  opacity: .85;
 }
-.prep-pitch-bar span { flex: 0 1 0; }
+.prep-pitch-bar span { flex: 0 1 0; min-width: 0; }
 .prep-pitch-legend {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px 16px;
-  margin-top: 6px;
+  flex: none;
+  margin-left: auto;
+  gap: 10px;
   color: var(--text-secondary);
-  font-size: 12px;
+  font: 600 12px/1 var(--font-lobby-ui);
   font-variant-numeric: tabular-nums;
 }
 .prep-pitch-legend > span { display: inline-flex; align-items: center; gap: 5px; }
+.prep-pitch-legend > span.empty { color: var(--text-muted); }
+.prep-pitch-legend > span.empty .prep-pitch { opacity: .45; }
 .prep-pitch {
   display: inline-block;
   width: 7px;
@@ -372,6 +540,11 @@
   padding: 0 4px;
   color: var(--text-muted);
   font-size: 12px;
+}
+.prep-group-count {
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 .prep-group-title::after { content: ""; flex: 1; height: 1px; background: #2f2315; }
 .prep-row {
@@ -420,7 +593,8 @@
 }
 .prep-row-name .prep-pitch { flex: none; width: 8px; height: 8px; transform: translateY(-1px); }
 .prep-row-title {
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
   overflow: hidden;
   color: var(--text-primary);
   font: 500 15px/1.2 var(--font-card-name);
@@ -429,7 +603,7 @@
 }
 /* The type label gives way before the name does. */
 .prep-row-type {
-  flex: 0 1 auto;
+  flex: 1 1 0;
   min-width: 0;
   overflow: hidden;
   color: var(--text-muted);
@@ -462,7 +636,6 @@
   font: 600 14px var(--font-lobby-ui);
   font-variant-numeric: tabular-nums;
 }
-.prep-row.changed .prep-copies { color: var(--gold); box-shadow: inset 0 0 0 1px #ffd47966; }
 .prep-step {
   display: grid;
   place-items: center;
@@ -488,6 +661,167 @@
   font-size: 15px;
 }
 .prep-empty-zone { margin: 14px 0 0; font-size: 13px; }
+/* Cards view: the whole card is the control; a badge counts the copies. */
+.prep-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 16px 8px;
+  margin: 0;
+  padding: 6px 0 2px;
+  list-style: none;
+}
+.prep-inventory-zone .prep-card-grid { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); }
+.prep-tile { min-width: 0; }
+.prep-ledger-group + .prep-ledger-group .prep-card-grid { padding-top: 2px; }
+.prep-tile-face {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  clip-path: none;
+  cursor: pointer;
+  /* Keeps the artwork's z-index under the pinned zone head. */
+  isolation: isolate;
+}
+.prep-tile-face:hover { border: 0; background: transparent; }
+.prep-tile-face:disabled { opacity: 1; cursor: default; }
+.prep-tile.fixed .prep-tile-art { opacity: .55; }
+.prep-tile-art {
+  width: 100%;
+  aspect-ratio: 450 / 628;
+  border-radius: 6px;
+  transition: transform 120ms ease-out, box-shadow 120ms ease-out;
+}
+/* Printed images carry a 28px black rim at 600px wide and full-bleed Marvels
+   none; draw it so every tile shows one card size. */
+:is(.prep-card, .prep-tile-art) .card-artwork-full-bleed {
+  box-sizing: border-box;
+  padding: 4.67%;
+  border-radius: 4.3% / 3.1%;
+  background: #000;
+}
+.prep-tile-face:hover:not(:disabled) .prep-tile-art { transform: translateY(-2px); }
+.prep-tile-face:active:not(:disabled) .prep-tile-art { transform: scale(.96); }
+/* Under the card: the count, then a pip per owned copy; lit pips are here,
+   hollow ones sit in the other zone. */
+.prep-tile-copies {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 14px;
+  margin-top: 7px;
+  color: var(--text-primary);
+  font: 600 13px/14px var(--font-lobby-ui);
+  font-variant-numeric: tabular-nums;
+}
+.prep-tile-pips { display: flex; gap: 3px; }
+.prep-tile-pips i {
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px #6b5433;
+  transition: opacity 120ms ease-out;
+}
+.prep-tile-pips i.on { background: var(--gold); box-shadow: none; }
+.prep-tile-owned { color: var(--text-muted); font-weight: 500; }
+@media (hover: hover) and (pointer: fine) {
+  /* Previews the copy a click sends to the other zone. */
+  .prep-tile-face:hover:not(:disabled) .prep-tile-pips i.last { opacity: .35; }
+}
+.prep-tile.fixed .prep-tile-copies { opacity: .55; }
+.prep-tile-lock {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0d0703e6;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.prep-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+/* Phone inventory tray: docked above the Ready bar so a set-aside card is
+   always one tap from coming back. */
+.prep-tray {
+  position: fixed;
+  right: 0;
+  bottom: var(--prep-float-height, 0px);
+  left: 0;
+  z-index: 29;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px 10px;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-panel);
+  box-shadow: 0 -6px 18px #0008;
+}
+.prep-tray.open {
+  max-height: min(72dvh, calc(100dvh - var(--prep-float-height, 0px) - 60px));
+  border-top-color: var(--border-strong);
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 -10px 28px #000c;
+}
+.prep-tray-scrim { position: fixed; inset: 0; z-index: 28; background: #0d0703b8; }
+.prep-tray-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+}
+.prep-tray-head h4 {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  color: var(--text-primary);
+  font: 500 17px/1.2 var(--font-heading);
+}
+.prep-tray-toggle {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  clip-path: none;
+  color: var(--text-muted);
+}
+.prep-tray-toggle:hover { border: 0; background: var(--surface-control); color: var(--text-primary); }
+/* The whole bar opens the sheet. */
+.prep-tray-toggle::after { position: absolute; inset: 0; content: ""; }
+.prep-tray-toggle .ui-icon { font-size: 18px; }
+.prep-tray-hint { min-width: 0; margin: 0 0 0 8px; color: var(--text-muted); font-size: 13px; line-height: 1.3; }
+.prep-tray-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 6px 0 4px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.prep-tray-body .prep-card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.prep-tray-body .prep-ledger-head { padding-top: 0; }
+.prep-page:has(.prep-tray) {
+  padding-bottom: calc(var(--prep-float-height, 0px) + var(--prep-tray-height, 0px) + 16px);
+}
 @media (max-width: 960px) {
   .prep-ledgers { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .prep-inventory-zone { position: static; max-height: none; }
@@ -650,6 +984,16 @@
 
 @media (max-width: 700px) {
   .prep-topbar { padding-inline: 14px; }
+  .solo-seat-tabs { margin-top: 12px; padding-inline: 10px; gap: 6px; }
+  .solo-seat-tab { gap: 8px; padding: 6px 8px; }
+  .solo-seat-tab > img,
+  .solo-seat-tab-fallback { width: 30px; height: 30px; }
+  .solo-seat-tab-name > small { display: block; margin-right: 0; }
+  .open-seat-deck-picker { flex-basis: 100%; max-width: none; }
+  .open-seat-status { flex-basis: 100%; }
+  .open-seat-invite { flex-basis: 100%; }
+  .open-seat-invite > .lobby-create-action { flex: 1 1 auto; }
+  .open-seat-friends { left: 0; width: auto; max-width: none; }
   .prep-code { margin-left: 8px; }
   .prep-columns {
     grid-template-columns: 1fr;
@@ -662,29 +1006,35 @@
     min-width: 0;
     padding-inline: 12px;
   }
+  .prep-pool-heading { gap: 10px; }
+  .prep-pool-heading .panel-title { flex: 1 1 auto; }
+  .prep-pool-controls { flex: 1 1 100%; margin-left: 0; }
+  .prep-pool-controls .prep-art-toggle { flex-basis: 100%; min-height: 0; margin-left: 0; padding-left: 0; border-left: 0; }
   .prep-zone-head { position: static; padding-top: 0; }
-  .prep-row { min-height: 44px; }
+  .prep-row { min-height: 52px; }
   .prep-row,
-  .prep-ledger-head { grid-template-columns: 40px minmax(0, 1fr) 128px; }
-  .prep-inventory-zone .prep-row,
-  .prep-inventory-zone .prep-ledger-head { grid-template-columns: 40px minmax(0, 1fr) 80px; }
-  .prep-step { width: 40px; height: 40px; }
+  .prep-ledger-head { grid-template-columns: 52px minmax(0, 1fr) 136px; }
+  .prep-tray .prep-row,
+  .prep-tray .prep-ledger-head { grid-template-columns: 52px minmax(0, 1fr) 82px; }
+  .prep-row-art { width: 52px; height: 32px; }
+  .prep-step { width: 44px; height: 44px; }
+  .prep-card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .prep-arena-stage .prep-cardrow { overflow: visible; }
   .prep-matchup-plan .listbox { flex-basis: 100%; }
   .prep-group,
   .prep-cardrow { max-width: 100%; min-width: 0; }
   :is(.match-accept-panel, .prep-match-accept-prompt) { padding: 24px 20px 20px; }
-  .prep-bot-nudge-backdrop {
+  .prep-dialog-backdrop {
     align-items: end;
     padding: 12px 12px max(12px, env(safe-area-inset-bottom));
   }
-  .prep-bot-nudge {
+  .prep-dialog {
     width: 100%;
     padding: 24px 20px 20px;
     border-radius: 8px;
   }
-  .prep-bot-nudge .panel-title { font-size: 24px; }
-  .prep-bot-nudge-actions { grid-template-columns: 1fr; }
+  .prep-dialog .panel-title { font-size: 24px; }
+  .prep-dialog-actions { grid-template-columns: 1fr; }
 }
 
 /* ── legal / site footer ── */
@@ -733,6 +1083,10 @@
   50% { filter: drop-shadow(0 0 7px #ffd479cc) drop-shadow(0 0 18px #e8bd4a80); }
 }
 @media (prefers-reduced-motion: reduce) {
+  .prep-tile-art,
+  .prep-tile-pips i { transition: none; }
+  .prep-tile-face:hover:not(:disabled) .prep-tile-art,
+  .prep-tile-face:active:not(:disabled) .prep-tile-art { transform: none; }
   .prep-nudge {
     animation: none;
     filter: drop-shadow(0 0 6px #ffd479b3) drop-shadow(0 0 14px #e8bd4a66);
@@ -1041,8 +1395,73 @@
   justify-content: center;
 }
 .prep-image-loading-actions > button { min-width: 108px; min-height: 40px; }
+/* The opponent's arrival beat a deck switch: say which deck stands. */
+.prep-deck-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 10px 8px 10px 14px;
+  border: 1px solid #806334;
+  border-radius: 4px;
+  background: #2a1d0e;
+  color: var(--text-primary);
+  font: 14px/1.4 var(--font-lobby-ui);
+}
+.prep-match-accept-prompt .prep-deck-notice { margin-bottom: 14px; text-align: left; }
+.prep-deck-notice button {
+  display: grid;
+  flex: none;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  clip-path: none;
+  background: transparent;
+  color: var(--text-muted);
+}
+.prep-deck-notice button:hover { background: #ffd47914; color: var(--gold); }
+.prep-deck-notice button:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+.prep-deck-notice .ui-icon { width: 16px; height: 16px; }
+
+/* A deck switch keeps the room on screen and waits inside the arena panel. */
+.prep-deck-switch {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  min-height: 190px;
+  padding: 8px 4px 4px;
+}
+.prep-deck-switch-hero.prep-image-loading-hero { flex: none; width: 112px; margin: 0; }
+.prep-deck-switch-hero.pending { background: var(--surface-well); }
+.prep-deck-switch-hero.pending::after { opacity: 0; }
+.prep-deck-switch-copy { display: grid; flex: 1 1 auto; max-width: 340px; min-width: 0; gap: 10px; }
+.prep-deck-switch-title {
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font: 600 15px/1.3 var(--font-lobby-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.prep-deck-switch-count { margin: 0; font: 13px var(--font-lobby-ui); font-variant-numeric: tabular-nums; }
+.prep-deck-switch-copy .lobby-create-action { justify-self: start; }
+/* No count yet: a short bar sweeps until the pool arrives. */
+.prep-image-loading-meter.indeterminate > span {
+  width: 30%;
+  animation: prep-meter-sweep 1.2s ease-in-out infinite;
+}
+@keyframes prep-meter-sweep {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(340%); }
+}
 @media (prefers-reduced-motion: reduce) {
   .prep-image-loading-fill,
   .prep-image-loading-hero::after,
   .prep-image-loading-meter > span { transition: none; }
+  .prep-image-loading-meter.indeterminate > span { width: 100%; opacity: .45; animation: none; }
 }

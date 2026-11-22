@@ -1,10 +1,11 @@
 import { engineRuntime } from "../engineRuntime.js";
 import { describe, expect, it } from "vitest";
 import type { CardData, Decklist, EquipmentSlot, GameIntent } from "@fyendal/shared";
+import { replaceAttackFromHand } from "../attacks.js";
 import { applyIntent, legalIntents, projectStateFor } from "../index.js";
 import type { CardScript } from "../scripts.js";
 import { createGame as createGameState, type GameStateInternal } from "../runtimeState.js";
-import type { CardInstance, PlayerState } from "../state.js";
+import type { CardInstance, Modifier, PlayerState } from "../state.js";
 import { drawUpTo, startTurn } from "../turn.js";
 
 // ── SAZ mechanics: arrows & bows, putIntoArsenal/onEnterArsenal, per-instance
@@ -12,23 +13,23 @@ import { drawUpTo, startTurn } from "../turn.js";
 // defense-reaction restrictions. Fixture style mirrors sen-mechanics.test.ts.
 
 const cards: Record<string, CardData> = {
-  HERO_A: { id: "HERO_A", name: "Hero A", cardType: "hero", classes: ["ranger"], intellect: 4, life: 20, text: "" },
-  HERO_B: { id: "HERO_B", name: "Hero B", cardType: "hero", classes: ["brute"], intellect: 4, life: 20, text: "" },
-  SWORD: { id: "SWORD", name: "Test Sword", cardType: "weapon", subtypes: ["sword", "1h"], attack: 3, text: "" },
-  BOW: { id: "BOW", name: "Test Bow", cardType: "weapon", subtypes: ["bow", "2h"], text: "" },
-  QUIVER: { id: "QUIVER", name: "Test Quiver", cardType: "equipment", subtypes: ["quiver"], defense: 0, text: "Whenever an arrow is put face up into your arsenal from your deck, put an aim counter on it" },
-  ARROW: { id: "ARROW", name: "Test Arrow", cardType: "action", subtypes: ["arrow", "attack"], classes: ["ranger"], pitch: 1, cost: 0, attack: 3, defense: 2, text: "" },
-  ARROW_ETB: { id: "ARROW_ETB", name: "Test Trigger Arrow", cardType: "action", subtypes: ["arrow", "attack"], classes: ["ranger"], pitch: 1, cost: 0, attack: 3, defense: 2, text: "When this is put face-up into your arsenal, it gets +2{p} this turn" },
-  ATK4: { id: "ATK4", name: "Attack Four", cardType: "action", subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 4, defense: 3, text: "" },
-  BLOCK3: { id: "BLOCK3", name: "Blocker", cardType: "action", subtypes: [], classes: ["generic"], pitch: 3, cost: 0, attack: 0, defense: 3, text: "" },
-  REACT: { id: "REACT", name: "Test Defense Reaction", cardType: "defense-reaction", classes: ["generic"], pitch: 3, cost: 0, defense: 3, text: "" },
-  WARD2: { id: "WARD2", name: "Ward Aura Two", cardType: "token", classes: ["illusionist"], keywords: ["Ward 2"], text: "Ward 2" },
-  MELODY: { id: "MELODY", name: "Test Melody", cardType: "action", subtypes: ["aura"], classes: ["generic"], pitch: 1, cost: 0, defense: 2, text: "Destroy this and prevent 4 damage" },
-  UNPREV: { id: "UNPREV", name: "Unpreventable Attack", cardType: "action", subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 5, defense: 3, text: "Damage that would be dealt by this can't be prevented" },
-  NOREACT: { id: "NOREACT", name: "No Reactions Attack", cardType: "action", subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 4, defense: 3, text: "Defense reactions can't be played to this chain link" },
-  LOADER: { id: "LOADER", name: "Test Loader", cardType: "weapon", subtypes: ["bow", "2h"], text: "Action: put the first arrow of your deck into your arsenal" },
-  ARS_PUMP: { id: "ARS_PUMP", name: "Test Arsenal Pump", cardType: "instant", classes: ["generic"], pitch: 3, cost: 0, text: "The next attack action card you play from arsenal this turn gains +3{p}" },
-  ARS_REACT_LOCK: { id: "ARS_REACT_LOCK", name: "Test Reaction Lock", cardType: "instant", classes: ["generic"], pitch: 3, cost: 0, text: "Your next attack this turn: defense reactions can't be played from arsenal this chain link" },
+  HERO_A: { id: "HERO_A", name: "Hero A", types: ["hero"], classes: ["ranger"], intellect: 4, life: 20, text: "" },
+  HERO_B: { id: "HERO_B", name: "Hero B", types: ["hero"], classes: ["brute"], intellect: 4, life: 20, text: "" },
+  SWORD: { id: "SWORD", name: "Test Sword", types: ["weapon"], subtypes: ["sword", "1h"], attack: 3, text: "" },
+  BOW: { id: "BOW", name: "Test Bow", types: ["weapon"], subtypes: ["bow", "2h"], text: "" },
+  QUIVER: { id: "QUIVER", name: "Test Quiver", types: ["equipment"], subtypes: ["quiver"], defense: 0, text: "Whenever an arrow is put face up into your arsenal from your deck, put an aim counter on it" },
+  ARROW: { id: "ARROW", name: "Test Arrow", types: ["action"], subtypes: ["arrow", "attack"], classes: ["ranger"], pitch: 1, cost: 0, attack: 3, defense: 2, text: "" },
+  ARROW_ETB: { id: "ARROW_ETB", name: "Test Trigger Arrow", types: ["action"], subtypes: ["arrow", "attack"], classes: ["ranger"], pitch: 1, cost: 0, attack: 3, defense: 2, text: "When this is put face-up into your arsenal, it gets +2{p} this turn" },
+  ATK4: { id: "ATK4", name: "Attack Four", types: ["action"], subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 4, defense: 3, text: "" },
+  BLOCK3: { id: "BLOCK3", name: "Blocker", types: ["action"], subtypes: [], classes: ["generic"], pitch: 3, cost: 0, attack: 0, defense: 3, text: "" },
+  REACT: { id: "REACT", name: "Test Defense Reaction", types: ["defense-reaction"], classes: ["generic"], pitch: 3, cost: 0, defense: 3, text: "" },
+  WARD2: { id: "WARD2", name: "Ward Aura Two", types: ["token"], classes: ["illusionist"], keywords: ["Ward 2"], text: "Ward 2" },
+  MELODY: { id: "MELODY", name: "Test Melody", types: ["action"], subtypes: ["aura"], classes: ["generic"], pitch: 1, cost: 0, defense: 2, text: "Destroy this and prevent 4 damage" },
+  UNPREV: { id: "UNPREV", name: "Unpreventable Attack", types: ["action"], subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 5, defense: 3, text: "Damage that would be dealt by this can't be prevented" },
+  NOREACT: { id: "NOREACT", name: "No Reactions Attack", types: ["action"], subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 4, defense: 3, text: "Defense reactions can't be played to this chain link" },
+  LOADER: { id: "LOADER", name: "Test Loader", types: ["weapon"], subtypes: ["bow", "2h"], text: "Action: put the first arrow of your deck into your arsenal" },
+  ARS_PUMP: { id: "ARS_PUMP", name: "Test Arsenal Pump", types: ["instant"], classes: ["generic"], pitch: 3, cost: 0, text: "The next attack action card you play from arsenal this turn gains +3{p}" },
+  ARS_REACT_LOCK: { id: "ARS_REACT_LOCK", name: "Test Reaction Lock", types: ["instant"], classes: ["generic"], pitch: 3, cost: 0, text: "Your next attack this turn: defense reactions can't be played from arsenal this chain link" },
 };
 
 const scripts: Record<string, CardScript> = {
@@ -354,6 +355,34 @@ describe("unpreventable", () => {
 });
 
 // ── defense-reaction restrictions ──────────────────────────────────────────
+
+describe("attacking card replacement", () => {
+  const grantDraconic = (s: GameStateInternal, extra: Partial<Modifier> = {}) => {
+    s.modifiers.push({
+      id: s.nextModifierId++,
+      scope: "combat-chain",
+      seat: 0,
+      sourceInstanceId: player(s, 0).hero.instanceId,
+      grantType: "draconic",
+      ...extra,
+    } as Modifier);
+  };
+
+  it("stamps a combat-chain type grant on the replacement", () => {
+    const s = declareAttackFromHand(makeGame(), 0, "ATK4");
+    grantDraconic(s);
+    expect(replaceAttackFromHand(s, engineRuntime, 0, giveCard(s, 0, "ATK4"), 2)).toBe(true);
+    expect(s.chain.at(-1)!.flags["grantedType:draconic"]).toBe(true);
+  });
+
+  it("checks that grant against the replacement, not the previous play origin", () => {
+    const s = makeGame();
+    const next = declareAttackFromArsenal(s, 0, giveArsenal(s, 0, "ATK4"));
+    grantDraconic(next, { appliesToFromArsenal: true });
+    expect(replaceAttackFromHand(next, engineRuntime, 0, giveCard(next, 0, "ATK4"), 2)).toBe(true);
+    expect(next.chain.at(-1)!.flags["grantedType:draconic"]).toBeUndefined();
+  });
+});
 
 describe("defense-reaction restrictions", () => {
   it("noDefenseReactions blocks all defense reactions on the link", () => {

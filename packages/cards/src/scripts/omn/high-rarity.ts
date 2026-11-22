@@ -3,51 +3,39 @@ import {
   ampNextArcane,
   attackAbility,
   buffNextAttack,
+  cardNamed,
   commonOptionMessages,
   consumeDelayedEffect,
   dealtByThis,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
+  hasCardSubtype,
   heroDamage,
   heroTarget,
+  isAlly,
+  isArrow,
+  isAura,
+  isItem,
+  isSword,
   ongoingLabel,
   opponentSeat,
   targetHeroSeat,
 } from "../shared-helpers.js";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "../aha/warrior-sharpen.js";
-
-const EMBODIMENT = "ROS026";
-const FLOW = "OMN203";
-const GOLD = "DYN243";
-const PONDER = "ROS237";
-const SPELLBANE = "DTD235";
+import { EMBODIMENT_OF_LIGHTNING, GOLD, LIGHTNING_FLOW, PONDER, SPELLBANE_AEGIS } from "../tokens.js";
 
 type Card = DeepReadonly<CardInstance>;
 
-function data(ctx: ScriptCtx, card: Card) {
-  return ctx.cardData(card.cardId);
-}
-function has(ctx: ScriptCtx, card: Card, type: string): boolean {
-  return ctx.cardTypes(card).some((candidate) => candidate.toLowerCase() === type.toLowerCase());
-}
-function named(ctx: ScriptCtx, card: Card, name: string): boolean {
-  return ctx.cardNames(card).some((candidate) => candidate.toLowerCase() === name.toLowerCase());
-}
-function isAura(ctx: ScriptCtx, card: Card): boolean {
-  return has(ctx, card, "aura");
-}
 function isFlickerBlinkTarget(ctx: ScriptCtx, card: Card): boolean {
   return card.instanceId !== ctx.self.instanceId &&
-    has(ctx, card, "lightning") &&
+    hasCardSubtype(ctx, card, "lightning") &&
     isAura(ctx, card) &&
     Number(card.counters?.holo ?? 0) === 0;
 }
-function isInstant(ctx: ScriptCtx, card: Card): boolean {
-  return ctx.hasCardType(card, "instant");
-}
 function swordAttack(ctx: ScriptCtx): boolean {
-  return ctx.link?.attackCardType === "weapon" && !!ctx.link && has(ctx, ctx.link.attackingCard, "sword");
+  return ctx.link?.attackCardType === "weapon" && !!ctx.link && isSword(ctx, ctx.link.attackingCard);
 }
 function shuriken(extra: CardScript = {}): CardScript {
   return {
@@ -72,7 +60,7 @@ export const omnHighRarity: Record<string, CardScript> = {
         label: "Create a Lightning Flow token",
         condition: (ctx, pitched) => pitched?.instanceId === ctx.self.instanceId,
         effect: (ctx) => {
-          ctx.createToken(FLOW);
+          ctx.createToken(LIGHTNING_FLOW);
         },
       },
     ],
@@ -82,9 +70,8 @@ export const omnHighRarity: Record<string, CardScript> = {
       ctx.drawCards(ctx.seat, 1);
     },
     onFragment(ctx) {
-      const cards = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => isInstant(ctx, card) && has(ctx, card, "lightning"));
+      const cards = faceUpGraveyard(ctx).filter((card) =>
+        ctx.hasCardType(card, "instant") && hasCardSubtype(ctx, card, "lightning"));
       if (cards.length)
         ctx.requestCardChoice(
           "unwinding-top",
@@ -164,7 +151,7 @@ export const omnHighRarity: Record<string, CardScript> = {
         },
       ],
       onActivate: (ctx) => {
-        ctx.createToken(EMBODIMENT);
+        ctx.createToken(EMBODIMENT_OF_LIGHTNING);
       },
     },
   },
@@ -190,7 +177,7 @@ export const omnHighRarity: Record<string, CardScript> = {
           if (hand.length)
             ctx.requestCardChoice(
               "tempest-discard",
-              decisionPrompt("Discard a card", "card.omn.card.discard"),
+              decisionPrompt("Discard a card", "card.common.card.discard"),
               hand.map((card) => card.instanceId),
               target,
             );
@@ -217,7 +204,7 @@ export const omnHighRarity: Record<string, CardScript> = {
         condition: (ctx, _eventCard, event) =>
           heroDamage(event)?.targetSeat === ctx.seat && event?.damage?.fromOpposingHeroOrdinal === 1,
         effect(ctx) {
-          const cards = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "lightning"));
+          const cards = ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, "lightning"));
           if (cards.length)
             ctx.requestCardChoice(
               "reproach-reveal",
@@ -264,8 +251,10 @@ export const omnHighRarity: Record<string, CardScript> = {
         ctx.link?.targetAllyId !== undefined
       )
         return;
-      const dealt = ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
-      if (dealt > 0) ctx.addModifier({ scope: "chain-link", attack: 1 });
+      ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
+    },
+    onDamageDealt(ctx, _target, dealt) {
+      if (dealt > 0 && ctx.link) ctx.addModifier({ scope: "chain-link", attack: 1 });
     },
   },
   "caress of the reaper|1": {
@@ -282,7 +271,7 @@ export const omnHighRarity: Record<string, CardScript> = {
             if (damaged === undefined) return [];
             return ctx.player(damaged).board.filter((card) => isAura(ctx, card)).map((card) => card.instanceId);
           },
-          prompt: () => decisionPrompt("Destroy an aura", "card.omn.aura.destroy"),
+          prompt: () => decisionPrompt("Destroy an aura", "card.common.aura.destroy"),
         },
         effect(ctx) {
           if (ctx.playTargetInstanceId !== undefined) ctx.destroyPermanent(ctx.playTargetInstanceId);
@@ -311,7 +300,7 @@ export const omnHighRarity: Record<string, CardScript> = {
         if (hand.length) {
           ctx.requestCardChoice(
             "oscilio-discard",
-            decisionPrompt("Discard a card", "card.omn.card.discard"),
+            decisionPrompt("Discard a card", "card.common.card.discard"),
             hand.map((card) => card.instanceId),
           );
           return;
@@ -323,7 +312,7 @@ export const omnHighRarity: Record<string, CardScript> = {
       if (hook !== "oscilio-discard") return;
       const discarded = ctx.discardCard(ctx.seat, Number(option));
       ctx.createToken(PONDER);
-      if (discarded && isInstant(ctx, discarded)) ctx.allowPlayFrom(discarded.instanceId, "graveyard");
+      if (discarded && ctx.hasCardType(discarded, "instant")) ctx.allowPlayFrom(discarded.instanceId, "graveyard");
     },
   },
   "volzar, meteor storm|0": {
@@ -341,7 +330,7 @@ export const omnHighRarity: Record<string, CardScript> = {
     arcaneDamageEffect: true,
     onPlay(ctx) {
       const top = ctx.player(ctx.seat).deck[0];
-      if (top && ctx.moveToGraveyard(top.instanceId, "deck") && isInstant(ctx, top))
+      if (top && ctx.moveToGraveyard(top.instanceId, "deck") && ctx.hasCardType(top, "instant"))
         ctx.allowPlayFrom(top.instanceId, "graveyard");
       if (ctx.getFlag("player", "graveCardType:instant") === true)
         ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true });
@@ -402,7 +391,7 @@ export const omnHighRarity: Record<string, CardScript> = {
             ctx.state.activePlayer !== ctx.seat &&
             event?.causedBySeat === ctx.seat &&
             played !== undefined &&
-            has(ctx, played, "lightning") &&
+            hasCardSubtype(ctx, played, "lightning") &&
             ctx.getFlag("player", "plutonicResource") !== true
           );
         },
@@ -410,7 +399,7 @@ export const omnHighRarity: Record<string, CardScript> = {
           ctx.setFlag("player", "plutonicResource", true);
         },
         effect(ctx) {
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
         },
       },
     ],
@@ -420,7 +409,7 @@ export const omnHighRarity: Record<string, CardScript> = {
       if (ctx.getFlag("player", "destroyedName:lightning flow") === true)
         ctx.requestChoice(
           "astral-mode",
-          decisionPrompt("Choose a mode", "card.omn.mode.choose", {
+          decisionPrompt("Choose a mode", "card.common.mode.choose", {
             optionMessages: {
               draw: decisionMessage("card.omn.option.draw"),
               "+2": decisionMessage("card.omn.option.plus2power"),
@@ -444,17 +433,17 @@ export const omnHighRarity: Record<string, CardScript> = {
         event: "card-played",
         label: "Create an Embodiment of Lightning or Lightning Flow",
         condition: (ctx, played) =>
-          ctx.link?.attackingCard.instanceId === ctx.self.instanceId && !!played && isInstant(ctx, played),
+          ctx.link?.attackingCard.instanceId === ctx.self.instanceId && !!played && ctx.hasCardType(played, "instant"),
         effect(ctx) {
           ctx.requestChoice(
             "flowstate-token",
             decisionPrompt("Create which token?", "card.omn.token.choose", {
               optionMessages: {
-                [EMBODIMENT]: decisionMessage("card.omn.option.embodimentoflightning"),
-                [FLOW]: decisionMessage("card.omn.option.lightningflow"),
+                [EMBODIMENT_OF_LIGHTNING]: decisionMessage("card.omn.option.embodimentoflightning"),
+                [LIGHTNING_FLOW]: decisionMessage("card.omn.option.lightningflow"),
               },
             }),
-            [EMBODIMENT, FLOW],
+            [EMBODIMENT_OF_LIGHTNING, LIGHTNING_FLOW],
           );
         },
       },
@@ -476,7 +465,7 @@ export const omnHighRarity: Record<string, CardScript> = {
         return;
     },
     onChoose(ctx, hook, option) {
-      if (hook === "static-flow" && option === "paid") ctx.createToken(FLOW);
+      if (hook === "static-flow" && option === "paid") ctx.createToken(LIGHTNING_FLOW);
     },
   },
   "boots of omnis ward|0": {
@@ -510,11 +499,11 @@ export const omnHighRarity: Record<string, CardScript> = {
   "tempt over|2": {
     onAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId !== undefined) return;
-      const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card) && data(ctx, card).cardType === "token");
+      const auras = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card) && ctx.hasCardType(card, "token"));
       if (auras.length)
         ctx.requestCardChoice(
           "tempt-steal",
-          decisionPrompt("Steal an aura token", "card.omn.aura.token.steal"),
+          decisionPrompt("Steal an aura token", "card.common.auratoken.steal"),
           auras.map((card) => card.instanceId),
         );
     },
@@ -525,7 +514,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   "unmake the underlings|3": {
     onAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId !== undefined) return;
-      const ally = ctx.player(opponentSeat(ctx)).graveyard.find((card) => has(ctx, card, "ally"));
+      const ally = faceUpGraveyard(ctx, opponentSeat(ctx)).find((card) => isAlly(ctx, card));
       if (ally) ctx.setCardFaceDown(ally.instanceId, true);
     },
     canTriggerOnHit: (ctx) => ctx.link?.targetAllyId !== undefined,
@@ -551,7 +540,8 @@ export const omnHighRarity: Record<string, CardScript> = {
   },
   "swift pickup|1": {
     onAttackDeclared(ctx) {
-      const item = ctx.player(ctx.seat).graveyard.find((card) => has(ctx, card, "shuriken") && has(ctx, card, "item"));
+      const item = faceUpGraveyard(ctx).find((card) =>
+        hasCardSubtype(ctx, card, "shuriken") && isItem(ctx, card));
       if (item && ctx.putOnDeckBottom(item.instanceId)) ctx.addModifier({ scope: "chain-link", attack: 1 });
     },
   },
@@ -560,7 +550,7 @@ export const omnHighRarity: Record<string, CardScript> = {
     canBeDefendedBy(ctx, defending) {
       return (
         ctx.link?.attackingCard.instanceId !== ctx.self.instanceId ||
-        (data(ctx, defending).cardType !== "attack-reaction" && data(ctx, defending).cardType !== "defense-reaction")
+        (!ctx.hasCardType(defending, "attack-reaction") && !ctx.hasCardType(defending, "defense-reaction"))
       );
     },
   }),
@@ -589,7 +579,7 @@ export const omnHighRarity: Record<string, CardScript> = {
   }),
   "gear turner|1": {
     onHit(ctx) {
-      const cogs = ctx.player(ctx.seat).deck.filter((card) => has(ctx, card, "cog"));
+      const cogs = ctx.player(ctx.seat).deck.filter((card) => hasCardSubtype(ctx, card, "cog"));
       ctx.requestCardChoice(
         "gear-turner-cog",
         decisionPrompt("Search your deck for a cog to put into the arena?", "card.omn.cog.search.arena", {
@@ -602,26 +592,25 @@ export const omnHighRarity: Record<string, CardScript> = {
       if (hook !== "gear-turner-cog" || option === "no") return;
       const cog = ctx
         .player(ctx.seat)
-        .deck.find((card) => card.instanceId === Number(option) && has(ctx, card, "cog"));
+        .deck.find((card) => card.instanceId === Number(option) && hasCardSubtype(ctx, card, "cog"));
       if (cog) ctx.settleCard(cog.instanceId);
       ctx.shuffleDeck();
     },
   },
   "arcbane grasp|3": {
     playableEquipment: true,
-    transformsEquipment: (ctx, equipped) => has(ctx, equipped, "base"),
-    playAsInstant: (ctx) => ctx.getPlayerFlag(ctx.seat, "nextEvoAsInstant") === true,
+    transformsEquipment: (ctx, equipped) => hasCardSubtype(ctx, equipped, "base"),
     triggers: [
       entersArenaTrigger(
         "Create a Spellbane Aegis token",
         decisionMessage("card.trigger.common.spellbaneaegis.create"),
-        (ctx) => ctx.createToken(SPELLBANE),
+        (ctx) => ctx.createToken(SPELLBANE_AEGIS),
       ),
     ],
   },
   "settle the bill|1": {
     onPlay(ctx) {
-      const arrows = ctx.player(ctx.seat).hand.filter((card) => has(ctx, card, "arrow"));
+      const arrows = ctx.player(ctx.seat).hand.filter((card) => isArrow(ctx, card));
       if (arrows.length && ctx.hasArsenalSpace())
         ctx.requestCardChoice(
           "settle-arrow",
@@ -683,13 +672,12 @@ export const omnHighRarity: Record<string, CardScript> = {
   },
   "crash site salvage|2": {
     declareAdditionalCost(ctx) {
-      const choices = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => has(ctx, card, "item") || data(ctx, card).cardType === "equipment");
+      const choices = faceUpGraveyard(ctx)
+        .filter((card) => isItem(ctx, card) || ctx.hasCardType(card, "equipment"));
       if (choices.length)
         ctx.requestCardChoice(
           "salvage-scrap",
-          decisionPrompt("Scrap an item or equipment from your graveyard?", "card.omn.permanent.scrap", {
+          decisionPrompt("Scrap an item or equipment from your graveyard?", "card.common.scrap.choose", {
             optionMessages: commonOptionMessages("no"),
           }),
           ["no", ...choices.map((card) => card.instanceId)],
@@ -697,16 +685,14 @@ export const omnHighRarity: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "salvage-scrap" || option === "no") return;
-      const card = ctx
-        .player(ctx.seat)
-        .graveyard.find(
+      const card = faceUpGraveyard(ctx).find(
           (candidate) =>
             candidate.instanceId === Number(option) &&
-            (has(ctx, candidate, "item") || data(ctx, candidate).cardType === "equipment"),
+            (isItem(ctx, candidate) || ctx.hasCardType(candidate, "equipment")),
         );
       if (card && ctx.banish(card.instanceId)) {
         ctx.setState("scrapped", 1);
-        if (has(ctx, card, "cog")) ctx.setState("scrappedCog", 1);
+        if (hasCardSubtype(ctx, card, "cog")) ctx.setState("scrappedCog", 1);
       }
     },
     onAttackDeclared(ctx) {
@@ -720,9 +706,8 @@ export const omnHighRarity: Record<string, CardScript> = {
       return ctx.link?.targetAllyId === undefined && ctx.getFlag("player", "activatedCannonThisTurn") === true;
     },
     onHit(ctx) {
-      const cards = ctx
-        .player(opponentSeat(ctx))
-        .graveyard.filter((card) => ctx.cardColor(card) === 1 && ctx.hasCardType(card, "action"));
+      const cards = faceUpGraveyard(ctx, opponentSeat(ctx))
+        .filter((card) => ctx.cardColor(card) === 1 && ctx.hasCardType(card, "action"));
       if (cards.length)
         ctx.requestCardChoice(
           "harpoon-banish",
@@ -785,7 +770,7 @@ export const omnHighRarity: Record<string, CardScript> = {
       if (hand.length)
         ctx.requestCardChoice(
           "axe-discard",
-          decisionPrompt("Discard a card", "card.omn.card.discard"),
+          decisionPrompt("Discard a card", "card.common.card.discard"),
           hand.map((card) => card.instanceId),
           opponentSeat(ctx),
         );
@@ -817,19 +802,17 @@ export const omnHighRarity: Record<string, CardScript> = {
         optional: true,
         label: "Banish 2 Draco Fire to gain 1 resource",
         condition(ctx) {
-          return ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).length >= 2;
+          return faceUpGraveyard(ctx).filter((card) => cardNamed(ctx, card, "Draco Fire")).length >= 2;
         },
         canAccept(ctx) {
-          return ctx.player(ctx.seat).graveyard.filter((card) => named(ctx, card, "Draco Fire")).length >= 2;
+          return faceUpGraveyard(ctx).filter((card) => cardNamed(ctx, card, "Draco Fire")).length >= 2;
         },
         onAccept(ctx) {
-          const cards = ctx
-            .player(ctx.seat)
-            .graveyard.filter((card) => named(ctx, card, "Draco Fire"))
+          const cards = faceUpGraveyard(ctx).filter((card) => cardNamed(ctx, card, "Draco Fire"))
             .slice(0, 2);
           if (cards.length < 2) return;
           for (const card of cards) ctx.banish(card.instanceId);
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
         },
       },
     ],
@@ -838,7 +821,7 @@ export const omnHighRarity: Record<string, CardScript> = {
     onDefend: (ctx) =>
       ctx.requestChoice(
         "panic-color",
-        decisionPrompt("Choose a color", "card.omn.color.choose", {
+        decisionPrompt("Choose a color", "card.common.color.choose", {
           optionMessages: {
             red: decisionMessage("card.omn.option.red"),
             yellow: decisionMessage("card.omn.option.yellow"),

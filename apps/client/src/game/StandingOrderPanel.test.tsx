@@ -12,7 +12,7 @@ const cog: StandingOrderCardModel = {
   rows: [{
     hook: "sea-cog-maintenance",
     timing: "start-of-turn",
-    label: { id: "card.trigger.steam.maintain" },
+    label: { id: "card.trigger.common.steam.maintain" },
     fallback: "Remove a steam counter or destroy this",
     options: [
       { value: "remove", message: { id: "common.option.remove" } },

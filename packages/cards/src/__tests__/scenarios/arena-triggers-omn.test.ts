@@ -137,7 +137,7 @@ describe("OMN-group arena triggers use the stack", () => {
   it("Arcbane Grasp creates Spellbane Aegis only when its equip trigger resolves", () => {
     const g = scenario({
       seats: [
-        { hero: "rhinar", hand: ["arcbane grasp|3"], equipment: NO_EQUIPMENT },
+        { hero: "rhinar", hand: ["arcbane grasp|3"], equipment: { ...NO_EQUIPMENT, arms: "proto base arms|0" } },
         { hero: "dorinthea", equipment: NO_EQUIPMENT },
       ],
     });

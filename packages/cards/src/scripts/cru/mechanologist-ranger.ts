@@ -1,25 +1,21 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
+  boostsThisChain,
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
+  isArrow,
+  isMechanologistItemAtMost,
   localizedCardLog,
   opponentSeat,
   optN,
   optOnChoose,
 } from "../shared-helpers.js";
 
-function isMechanologistItem(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, maxCost: number): boolean {
-  const data = ctx.cardData(card.cardId);
-  return (
-    ctx.cardTypes(card).includes("mechanologist") && ctx.cardTypes(card).includes("item") && (data.cost ?? 0) <= maxCost
-  );
-}
-
 function dashSetup(): CardScript {
   return {
     onGameStart(ctx) {
-      const candidates = ctx.state.players[ctx.seat]!.deck.filter((card) => isMechanologistItem(ctx, card, 2));
+      const candidates = ctx.state.players[ctx.seat]!.deck.filter((card) => isMechanologistItemAtMost(ctx, card, 2));
       if (candidates.length === 0) return;
       ctx.requestCardChoice(
         "dash-start-item",
@@ -38,7 +34,7 @@ function dashSetup(): CardScript {
       if (hook !== "dash-start-item" || option === "none") return;
       const instanceId = Number(option);
       const card = ctx.state.players[ctx.seat]!.deck.find((candidate) => candidate.instanceId === instanceId);
-      if (!card || !isMechanologistItem(ctx, card, 2)) return;
+      if (!card || !isMechanologistItemAtMost(ctx, card, 2)) return;
       if (ctx.settleCard(instanceId)) ctx.shuffleDeck(ctx.seat);
     },
   };
@@ -47,7 +43,7 @@ function dashSetup(): CardScript {
 function dataDoll(): CardScript {
   return {
     onCardBanished(ctx, card, from) {
-      if (from !== "deck" || !isMechanologistItem(ctx, card, 2)) return;
+      if (from !== "deck" || !isMechanologistItemAtMost(ctx, card, 2)) return;
       ctx.settleCard(card.instanceId);
     },
   };
@@ -102,10 +98,6 @@ function combustibleCourier(): CardScript {
   };
 }
 
-function boostedLinks(ctx: ScriptCtx): number {
-  return ctx.state.chain.filter((link) => link.attacker === ctx.seat && link.flags.boosted === true).length;
-}
-
 function finishWorkshop(ctx: ScriptCtx, maxCost: number): void {
   const top = ctx.state.players[ctx.seat]!.deck[0];
   if (!top) return;
@@ -119,7 +111,7 @@ function finishWorkshop(ctx: ScriptCtx, maxCost: number): void {
       { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
     ),
   );
-  if (isMechanologistItem(ctx, top, maxCost)) ctx.settleCard(top.instanceId);
+  if (isMechanologistItemAtMost(ctx, top, maxCost)) ctx.settleCard(top.instanceId);
 }
 
 function teklovossensWorkshop(maxCost: number): CardScript {
@@ -137,10 +129,6 @@ function teklovossensWorkshop(maxCost: number): CardScript {
       if (finalChoice) finishWorkshop(ctx, maxCost);
     },
   };
-}
-
-function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("arrow");
 }
 
 function requestArrow(ctx: ScriptCtx, hook: string, fallback: string, id: string): void {
@@ -368,8 +356,8 @@ export const cruMechanologistRanger: Record<string, CardScript> = {
   "combustible courier|1": combustibleCourier(),
   "combustible courier|2": combustibleCourier(),
   "combustible courier|3": combustibleCourier(),
-  "overblast|2": { modifyAttack: boostedLinks },
-  "overblast|3": { modifyAttack: boostedLinks },
+  "overblast|2": { modifyAttack: boostsThisChain },
+  "overblast|3": { modifyAttack: boostsThisChain },
   "teklovossen's workshop|1": teklovossensWorkshop(2),
   "teklovossen's workshop|2": teklovossensWorkshop(1),
   "teklovossen's workshop|3": teklovossensWorkshop(0),

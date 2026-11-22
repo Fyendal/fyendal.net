@@ -1,13 +1,16 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
   buffNextAttack,
   cardNamed,
   decisionMessage,
   decisionPrompt,
+  isSword,
   isSwordAttack,
   localizedCardLog,
   resourceAbility,
+  swords,
+  weaponReaction,
   yesNoPrompt,
 } from "./shared-helpers.js";
 import {
@@ -17,31 +20,20 @@ import {
   SHARPEN_TOP_ATTACK_REACTION_HOOK,
   sharpenSword,
 } from "./aha/warrior-sharpen.js";
+import { FLURRY } from "./tokens.js";
 
-const FLURRY = "SBL036";
-
-type Card = DeepReadonly<CardInstance>;
-
-function isSword(ctx: ScriptCtx, card: Card): boolean {
-  return ctx.cardTypes(card).some((type) => type.toLowerCase() === "sword");
-}
-
-function swords(ctx: ScriptCtx): readonly Card[] {
-  return ctx.player(ctx.seat).weapons.filter((card) => isSword(ctx, card));
-}
-
-function chooseSword(ctx: ScriptCtx, hook: string, prompt: string): void {
+function chooseSwordToSharpen(ctx: ScriptCtx, hook: string, prompt: string): void {
   const choices = swords(ctx);
   if (choices.length === 1) sharpenSword(ctx, choices[0]!.instanceId);
   else if (choices.length > 1)
     ctx.requestCardChoice(
       hook,
-      decisionPrompt(prompt, "card.aha.sword.sharpen"),
+      decisionPrompt(prompt, "card.common.sword.sharpen"),
       choices.map((card) => card.instanceId),
     );
 }
 
-function sharpenAction(threshold: number, payoff: "flurry" | "discount"): CardScript {
+function ahaSharpenAction(threshold: number, payoff: "flurry" | "discount"): CardScript {
   const finish = (ctx: ScriptCtx, id: number) => {
     sharpenSword(ctx, id, 1, {
       threshold,
@@ -68,18 +60,6 @@ function sharpenAction(threshold: number, payoff: "flurry" | "discount"): CardSc
   };
 }
 
-function weaponReaction(power: number, effect?: (ctx: ScriptCtx, weapon: Card) => void): CardScript {
-  return {
-    canPlay: (ctx) => ctx.link?.attacker === ctx.seat && ctx.link.attackCardType === "weapon",
-    onPlay(ctx) {
-      const weapon = ctx.link?.attackingCard;
-      if (!weapon) return;
-      ctx.addModifier({ scope: "chain-link", attack: power });
-      effect?.(ctx, weapon);
-    },
-  };
-}
-
 function swordPath(power: number): CardScript {
   return {
     onPlay(ctx) {
@@ -98,7 +78,7 @@ export const aha: Record<string, CardScript> = {
       tap: true,
       canActivate: (ctx) => swords(ctx).length > 0,
       onActivate(ctx) {
-        chooseSword(ctx, "hala-sharpen", "Hala: choose a sword to sharpen");
+        chooseSwordToSharpen(ctx, "hala-sharpen", "Hala: choose a sword to sharpen");
       },
     },
     onChoose(ctx, hook, option) {
@@ -226,7 +206,7 @@ export const aha: Record<string, CardScript> = {
       const sword = ctx.getState("polishedSword");
       const modes = ctx.getState("polishedModes");
       if (modes & 1) ctx.grantGoAgain();
-      if (modes & 2) ctx.setAttackActivationLimit(sword, 2);
+      if (modes & 2) ctx.grantAdditionalActivation(sword);
       if (modes & 4) buffNextAttack(ctx, { attackActivationCostReduction: 1, appliesToInstanceId: sword });
     },
     onChoose(ctx, hook, option) {
@@ -289,10 +269,10 @@ export const aha: Record<string, CardScript> = {
       if (hook === "brimming") sharpenSword(ctx, Number(option), 2);
     },
   },
-  "edict of steel|2": sharpenAction(2, "flurry"),
-  "edict of steel|3": sharpenAction(3, "flurry"),
-  "sharp incline|1": sharpenAction(1, "discount"),
-  "sharp incline|2": sharpenAction(2, "discount"),
+  "edict of steel|2": ahaSharpenAction(2, "flurry"),
+  "edict of steel|3": ahaSharpenAction(3, "flurry"),
+  "sharp incline|1": ahaSharpenAction(1, "discount"),
+  "sharp incline|2": ahaSharpenAction(2, "discount"),
   "swordmaster's path|1": swordPath(3),
   "swordmaster's path|3": swordPath(1),
   "flurry foot dance|2": {
@@ -321,7 +301,7 @@ export const aha: Record<string, CardScript> = {
       } else if (choices.length > 1) {
         ctx.requestCardChoice(
           "indefensible-sharpen",
-          decisionPrompt("Choose a sword to sharpen", "card.aha.sword.sharpen"),
+          decisionPrompt("Choose a sword to sharpen", "card.common.sword.sharpen"),
           choices.map((card) => card.instanceId),
         );
       }

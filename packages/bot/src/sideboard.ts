@@ -1,6 +1,8 @@
 import { cardData, precon } from "@fyendal/cards";
 import type { CardData, EquipmentSlot, PresentedDeck, RevealedArena } from "@fyendal/shared";
+import { auroraMatchupForHeroName, type AuroraMatchup } from "./aurora-strategy.js";
 import { briarMatchupForHeroName } from "./briar-strategy.js";
+import { fangMatchupForHeroName, type FangHead } from "./fang-strategy.js";
 
 /** Only information visible after arena reveal; never the opponent's deck. */
 export interface BotPrepOpponent extends RevealedArena {
@@ -17,6 +19,8 @@ const JARL_BOT_DECK_ID = "bot-jarl";
 const LEVIA_BOT_DECK_ID = "bot-levia-gates";
 const STARVO_BOT_DECK_ID = "bot-starvo-boss";
 const BOLTYN_BOT_DECK_ID = "bot-boltyn-raydn";
+const AURORA_BOT_DECK_ID = "bot-aurora-tempest";
+const FANG_BOT_DECK_ID = "bot-fang-dracai";
 
 const BRAVO_ARCANE_POLARITY = ["SBA030", "SBA030"];
 const BRAVO_RED_CHOKESLAM = ["SBR016", "SBR016"];
@@ -712,6 +716,87 @@ export function iraSagePresentationFor(
   };
 }
 
+// ── Dorinthea (Silver Age) ───────────────────────────────────────────────
+
+export type DorintheaSageMatchup =
+  | "wizard"
+  | "runeblade"
+  | "briar"
+  | "aggro"
+  | "value"
+  | "guardian"
+  | "fatigue"
+  | "default";
+
+const DORINTHEA_SAGE_BOT_DECK_ID = "bot-dorinthea-sage";
+const DORINTHEA_POLARITY = ["SBW023", "SBW023"]; // Arcane Polarity
+const DORINTHEA_OASIS = ["SLY019", "SLY019"]; // Oasis Respite
+const DORINTHEA_HORIZON = ["SIY017", "SIY017"]; // On the Horizon
+const DORINTHEA_TEST = ["SEN019", "SEN019"]; // Test of Strength
+const DORINTHEA_FATIGUE_ATTACKS = ["SEA198", "WTR190"]; // Crash Down the Gates, Raging Onslaught
+const DORINTHEA_FLEX = [
+  ...DORINTHEA_POLARITY, ...DORINTHEA_OASIS, ...DORINTHEA_HORIZON, ...DORINTHEA_TEST, ...DORINTHEA_FATIGUE_ATTACKS,
+];
+
+/** The four flex cards each matchup adds to the 36-card Axe core. */
+const DORINTHEA_SAGE_PACKAGE: Readonly<Record<DorintheaSageMatchup, readonly string[]>> = {
+  wizard: [...DORINTHEA_POLARITY, ...DORINTHEA_OASIS],
+  runeblade: [...DORINTHEA_POLARITY, ...DORINTHEA_OASIS],
+  briar: [...DORINTHEA_POLARITY, ...DORINTHEA_HORIZON],
+  aggro: [...DORINTHEA_HORIZON, ...DORINTHEA_TEST],
+  value: [...DORINTHEA_HORIZON, ...DORINTHEA_OASIS],
+  guardian: [...DORINTHEA_HORIZON, ...DORINTHEA_OASIS],
+  fatigue: [...DORINTHEA_OASIS, ...DORINTHEA_FATIGUE_ATTACKS],
+  default: [...DORINTHEA_HORIZON, ...DORINTHEA_TEST],
+};
+
+export function dorintheaSageMatchupForHeroName(
+  name: string,
+  classes: readonly string[] = [],
+): DorintheaSageMatchup {
+  if (classes.includes("wizard") || /kano|blaze|iyslander|oscilio|verdance/.test(name)) return "wizard";
+  if (name.includes("briar")) return "briar";
+  if (classes.includes("runeblade") || /viserai|aurora|florian|chane|vynnset/.test(name)) return "runeblade";
+  if (/dorinthea|riptide/.test(name)) return "fatigue";
+  if (classes.includes("guardian") || /oldhim|bravo|jarl|terra|victor|betsy|valda/.test(name)) return "guardian";
+  if (/\b(?:rhinar|katsu|fai|ira|cindra|dash|boltyn|fang|levia)\b/.test(name)) return "aggro";
+  if (classes.includes("warrior") || /azalea|kassai|hala|olympia/.test(name)) return "value";
+  return "default";
+}
+
+/** Present the matchup's forty: Nullrune against arcane damage, and Refraction
+ * Bolters against Guardians, fatigue, and aggro decks when on the draw. */
+export function dorintheaSagePresentationFor(
+  opponent: BotPrepOpponent,
+  botTurnOrder: "first" | "second" = "first",
+  cards: Readonly<Record<string, CardData>> = cardData,
+): PresentedDeck {
+  const registered = precon(DORINTHEA_SAGE_BOT_DECK_ID);
+  if (!registered || registered.format !== "silver-age" || registered.botOnly !== true) {
+    throw new Error("SAGE Dorinthea bot deck is not registered");
+  }
+  const classes = cards[opponent.heroId]?.classes?.map((value) => value.toLowerCase()) ?? [];
+  const matchup = dorintheaSageMatchupForHeroName(opponentHeroName(opponent, cards), classes);
+  const deck = [...registered.pool.deck];
+  for (const id of DORINTHEA_FLEX) removeCopies(deck, id, 1);
+  deck.push(...DORINTHEA_SAGE_PACKAGE[matchup]);
+  if (deck.length !== 40) throw new Error(`SAGE Dorinthea presentation has ${deck.length} cards, expected 40`);
+  const wizard = matchup === "wizard";
+  const barrier = wizard || matchup === "runeblade" || matchup === "briar";
+  const racing = (matchup === "briar" || matchup === "aggro") && botTurnOrder === "second";
+  const bolters = matchup === "fatigue" || matchup === "guardian" || racing;
+  return {
+    weaponIds: [...registered.pool.weaponIds],
+    equipment: {
+      head: barrier ? "SLY006" : "SBL004", // Nullrune Hood / Helm of Unity
+      chest: wizard ? "SLY008" : "PEN045", // Nullrune Robe / Plating of Unity
+      arms: wizard ? "SGB006" : "SBL007", // Nullrune Gloves / Gauntlets of Unity
+      legs: bolters ? "MPW020" : "PEN047", // Refraction Bolters / Pillar of Unity
+    },
+    deck,
+  };
+}
+
 // ── Ser Boltyn, Breaker of Dawn ──────────────────────────────────────────
 
 const BOLTYN_EDICT = "SBL020";
@@ -919,4 +1004,115 @@ export function boltynPresentationFor(
     throw new Error(`Boltyn matchup presentation has ${deck.length} cards`);
   }
   return { weaponIds: ["ASB002"], equipment, deck };
+}
+
+// ── Aurora, Legacy of Tempest ───────────────────────────────────────────
+
+const AURORA_BEATDOWN_PACKAGE = [
+  "AST010", "AST010", "AST010", // Flittering Charge
+  "LGS347", "LGS347", "LGS347", // Electrostatic Discharge
+  "FAB262", "FAB262", "FAB262", // Lightning Press
+];
+const AURORA_DEFENSIVE_PACKAGE = [
+  "ELE227", "ELE227", "ELE227", // Sigil of Suffering
+  "ANQ034", "ANQ034", "ANQ034", // Sink Below
+  "OMN068", "OMN068", // Rush of Power
+  "ANQ030", // Scar for a Scar
+];
+const AURORA_CORE_SIZE = 51;
+
+function auroraMatchupFor(
+  opponent: BotPrepOpponent,
+  cards: Readonly<Record<string, CardData>>,
+): AuroraMatchup {
+  const classes = cards[opponent.heroId]?.classes?.map((value) => value.toLowerCase()) ?? [];
+  return auroraMatchupForHeroName(opponentHeroName(opponent, cards), classes);
+}
+
+/** Present the Aurora list in the guide's beatdown or defensive stance. */
+export function auroraPresentationFor(
+  opponent: BotPrepOpponent,
+  cards: Readonly<Record<string, CardData>> = cardData,
+): PresentedDeck {
+  const registered = precon(AURORA_BOT_DECK_ID);
+  if (!registered || registered.format !== "cc" || registered.botOnly !== true) {
+    throw new Error("Aurora bot deck is not registered");
+  }
+  const deck = [...registered.pool.deck];
+  for (const cardId of AURORA_BEATDOWN_PACKAGE) removeCopies(deck, cardId, 1);
+  if (deck.length !== AURORA_CORE_SIZE) {
+    throw new Error(`Aurora core has ${deck.length} cards, expected ${AURORA_CORE_SIZE}`);
+  }
+  const matchup = auroraMatchupFor(opponent, cards);
+  deck.push(...(matchup.stance === "defensive" ? AURORA_DEFENSIVE_PACKAGE : AURORA_BEATDOWN_PACKAGE));
+  return {
+    weaponIds: [...registered.pool.weaponIds],
+    equipment: {
+      head: "PEN310", // Crown of Providence
+      chest: matchup.arcane ? "DTD211" : "MON230", // Dyadic Carapace / Aether Ironweave
+      arms: matchup.arcane ? "EVR103" : "ARC078", // Vexing Quillhand / Grasp of the Arknight
+      legs: "WTR154", // Snapdragon Scalers
+    },
+    deck,
+  };
+}
+
+// ── Fang, Dracai of Blades ──────────────────────────────────────────────
+
+const FANG_FLEX = {
+  sinkBelow: "ANQ034",
+  smokeOut: "HNT162",
+  fireAndBrimstone: "HNT105",
+  imperialIntent: "HNT109",
+  blazeHeadlong: "SFA011",
+  swornVengeance: "HNT140",
+  fateForeseen: "ARC200",
+  parchedTerrain: "SUP260",
+} as const;
+
+const FANG_HEAD: Readonly<Record<FangHead, string>> = {
+  crown: "PEN310", // Crown of Providence
+  kabuto: "HNT115", // Kabuto of Imperial Authority
+  balance: "PEN309", // Balance of Justice
+  skullcap: "EVR154", // Arcanite Skullcap
+};
+
+/** Present the Fang list by the guide's matchup configurations. */
+export function fangPresentationFor(
+  opponent: BotPrepOpponent,
+  cards: Readonly<Record<string, CardData>> = cardData,
+): PresentedDeck {
+  const registered = precon(FANG_BOT_DECK_ID);
+  if (!registered || registered.format !== "cc" || registered.botOnly !== true) {
+    throw new Error("Fang bot deck is not registered");
+  }
+  const classes = cards[opponent.heroId]?.classes?.map((value) => value.toLowerCase()) ?? [];
+  const matchup = fangMatchupForHeroName(opponentHeroName(opponent, cards), classes);
+  const deck = [...registered.pool.deck];
+  const swap = (out: readonly (readonly [string, number])[], into: readonly (readonly [string, number])[]) => {
+    for (const [cardId, count] of out) removeCopies(deck, cardId, count);
+    for (const [cardId, count] of into) deck.push(...Array<string>(count).fill(cardId));
+  };
+  if (matchup.stance === "aggro") {
+    swap([[FANG_FLEX.sinkBelow, 3], [FANG_FLEX.smokeOut, 3]], [[FANG_FLEX.blazeHeadlong, 3], [FANG_FLEX.swornVengeance, 3]]);
+  } else if (matchup.stance === "defensive") {
+    swap([[FANG_FLEX.fireAndBrimstone, 1], [FANG_FLEX.imperialIntent, 2]], [[FANG_FLEX.fateForeseen, 3]]);
+  }
+  if (matchup.parched) {
+    // Against arcane racers Parched replaces Imperial Intent; otherwise the deck grows to 62.
+    if (matchup.head === "skullcap" && deck.includes(FANG_FLEX.imperialIntent)) {
+      removeCopies(deck, FANG_FLEX.imperialIntent, 2);
+    }
+    deck.push(FANG_FLEX.parchedTerrain, FANG_FLEX.parchedTerrain);
+  }
+  return {
+    weaponIds: [...registered.pool.weaponIds],
+    equipment: {
+      head: FANG_HEAD[matchup.head],
+      chest: "MPW010", // Grains of Bloodspill
+      arms: "MPW011", // Braveforge Bracers
+      legs: "MPW012", // Valiant Dynamo
+    },
+    deck,
+  };
 }

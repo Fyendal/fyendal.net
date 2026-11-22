@@ -1,4 +1,4 @@
-import type { GameView } from "@fyendal/shared";
+import type { GameClockSummary, GameView } from "@fyendal/shared";
 import { useIntl } from "react-intl";
 import { DeckCardToast, type useDeckCardFeedback } from "../DeckCardToast.js";
 import { GameOver } from "../GameOver.js";
@@ -7,13 +7,14 @@ import { MobileCardInspect } from "../MobileCardInspect.js";
 import type { StandingOrderPanelModel } from "../StandingOrderPanel.js";
 import { PostGameFriendAction } from "../../social/PostGameFriendAction.js";
 import type { BoardOverlay } from "./BoardPrimitives.js";
-import { ZoneOverlay } from "./ZoneOverlay.js";
+import { ZoneOverlay, type ZoneOverlayMoves } from "./ZoneOverlay.js";
 
 export type { BoardPreview } from "../HoverCardPreview.js";
 
 export function BoardOverlays({
   preview,
   overlay,
+  overlayMoves,
   inspectedCardId,
   seat,
   yourSeat,
@@ -21,6 +22,7 @@ export function BoardOverlays({
   showIdleVictory,
   opponentHeroName,
   opponentIdleMs,
+  idleVictoryClaimPending,
   onClaimVictory,
   onDismissIdleVictory,
   gameView,
@@ -40,14 +42,19 @@ export function BoardOverlays({
   onCloseOverlay,
   onInspectCard,
   opponentUsername,
-  botGame,
+  practiceGame,
+  gameOverClock,
+  botSeat,
   drawOfferSeat,
   onAcceptDraw,
   onDeclineDraw,
   standingOrders = null,
+  soloGame = false,
 }: {
   preview: BoardPreview | null;
   overlay: BoardOverlay | null;
+  /** Sandbox move actions for the open pile, when the viewer may edit it. */
+  overlayMoves?: ZoneOverlayMoves;
   inspectedCardId: string | null;
   seat: number;
   yourSeat: number | null;
@@ -55,6 +62,7 @@ export function BoardOverlays({
   showIdleVictory: boolean;
   opponentHeroName: string;
   opponentIdleMs: number;
+  idleVictoryClaimPending: boolean;
   onClaimVictory: () => void;
   onDismissIdleVictory: () => void;
   gameView: GameView;
@@ -74,12 +82,17 @@ export function BoardOverlays({
   onCloseOverlay: () => void;
   onInspectCard: (cardId: string | null) => void;
   opponentUsername: string | null;
-  botGame: boolean;
+  /** Bot or self-play: no human opponent to befriend. */
+  practiceGame: boolean;
+  gameOverClock: GameClockSummary | null;
+  botSeat: 0 | 1 | null;
   drawOfferSeat: number | undefined;
   onAcceptDraw: (() => void) | null;
   onDeclineDraw: (() => void) | null;
   /** The inspected card's repeating questions. */
   standingOrders?: StandingOrderPanelModel | null;
+  /** One account plays both seats: every card is the viewer's and the result names the winner. */
+  soloGame?: boolean;
 }) {
   const intl = useIntl();
   return (
@@ -89,6 +102,8 @@ export function BoardOverlays({
         <ZoneOverlay
           overlay={overlay}
           yourSeat={yourSeat}
+          revealAllOwners={soloGame}
+          moves={overlayMoves}
           onClose={onCloseOverlay}
           onInspectCard={onInspectCard}
         />
@@ -114,7 +129,7 @@ export function BoardOverlays({
               { hero: opponentHeroName, minutes: Math.floor(opponentIdleMs / 60_000) },
             )}
           </span>
-          <button className="btn-primary" onClick={onClaimVictory}>
+          <button className="btn-primary" disabled={idleVictoryClaimPending} onClick={onClaimVictory}>
             {intl.formatMessage({ id: "game.idle.claim" })}
           </button>
           <button className="linklike" onClick={onDismissIdleVictory}>
@@ -144,8 +159,11 @@ export function BoardOverlays({
           onBackToLobby={replaying ? onCloseReplay : onLeave}
           onPlayAgain={replaying ? null : onPlayAgain}
           replaying={replaying}
+          clock={gameOverClock}
+          botSeat={botSeat}
+          solo={soloGame}
           onClose={onDismissGameOver}
-          friendAction={!replaying && !botGame && !spectating && opponentUsername
+          friendAction={!replaying && !practiceGame && !spectating && opponentUsername
             ? <PostGameFriendAction username={opponentUsername} />
             : null}
         />

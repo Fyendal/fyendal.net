@@ -2,7 +2,7 @@
  {
   "id": "MON000",
   "name": "Great Library of Solana",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Legendary\nAt the beginning of each end phase, if a hero has 2 or more cards with yellow color strips in their pitch zone, they gain +1{i} until end of turn.\nAction - Discard 2 cards with yellow color strips: Destroy Great Library of Solana. Any hero may activate this ability. Go again",
   "cost": 2,
   "subtypes": [
@@ -17,7 +17,7 @@
  {
   "id": "MON001",
   "name": "Prism, Sculptor of Arc Light",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {r}{r}, banish a card from Prism's soul: Create a Spectral Shield token.",
   "classes": [
    "illusionist"
@@ -32,7 +32,7 @@
  {
   "id": "MON002",
   "name": "Prism",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {r}{r}, banish a card from Prism's soul: Create a Spectral Shield token.",
   "classes": [
    "illusionist"
@@ -47,7 +47,7 @@
  {
   "id": "MON003",
   "name": "Luminaris",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "During your action phase, Illusionist auras you control are weapons with 1 base {p} and \"Once per Turn Action - 0: Attack\"\nIf there is a yellow card in your pitch zone, your Illusionist attacks get go again.",
   "classes": [
    "illusionist"
@@ -62,7 +62,7 @@
  {
   "id": "MON004",
   "name": "Herald of Erudition",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul and draw 2 cards.\nDominate\nPhantasm",
   "pitch": 2,
   "cost": 2,
@@ -84,7 +84,7 @@
  {
   "id": "MON005",
   "name": "Arc Light Sentinel",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Prism Specialization\nOpponents must choose this as the target of attacks if able.\nSpectra",
   "pitch": 2,
   "cost": 6,
@@ -104,7 +104,7 @@
  {
   "id": "MON006",
   "name": "Genesis",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "At the start of your turn, you may put a card from your hand into your soul. If it's an Illusionist card, create a Spectral Shield token. If it's a Light card, draw a card.\nSpectra",
   "pitch": 2,
   "cost": 4,
@@ -123,7 +123,7 @@
  {
   "id": "MON007",
   "name": "Herald of Judgment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Prism Specialization\nWhen this hits, put it into your hero's soul and the defending hero can't play cards from their banished zone during their next action phase.\nPhantasm",
   "pitch": 2,
   "cost": 2,
@@ -145,7 +145,7 @@
  {
   "id": "MON008",
   "name": "Herald of Triumph",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Attack action cards have -1{p} while defending this.\nWhen this hits, put it into your hero's soul.\nPhantasm",
   "pitch": 1,
   "cost": 2,
@@ -166,7 +166,7 @@
  {
   "id": "MON009",
   "name": "Herald of Triumph",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Attack action cards get -1{p} while defending this.\nWhen this hits, put it into your soul.\nPhantasm",
   "pitch": 2,
   "cost": 2,
@@ -187,7 +187,7 @@
  {
   "id": "MON010",
   "name": "Herald of Triumph",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Attack action cards get -1{p} while defending this.\nWhen this hits, put it into your soul.\nPhantasm",
   "pitch": 3,
   "cost": 2,
@@ -208,7 +208,7 @@
  {
   "id": "MON011",
   "name": "Parable of Humility",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Attack action cards your opponents control get -1{p} while attacking and defending.\nSpectra",
   "pitch": 2,
   "cost": 4,
@@ -227,7 +227,7 @@
  {
   "id": "MON012",
   "name": "Merciful Retribution",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Whenever an aura or attack action card you control is destroyed, deal 1 arcane damage to target hero. If it's a non-token Light card, put it into your soul.\nSpectra",
   "pitch": 2,
   "cost": 4,
@@ -246,7 +246,7 @@
  {
   "id": "MON013",
   "name": "Ode to Wrath",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Whenever a source you control deals damage to an opponent, they lose 1 {h}.\nIllusionist attack action cards you control get go again.\nSpectra",
   "pitch": 2,
   "cost": 4,
@@ -265,7 +265,7 @@
  {
   "id": "MON014",
   "name": "Herald of Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
   "pitch": 1,
   "cost": 2,
@@ -286,7 +286,7 @@
  {
   "id": "MON015",
   "name": "Herald of Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
   "pitch": 2,
   "cost": 2,
@@ -307,7 +307,7 @@
  {
   "id": "MON016",
   "name": "Herald of Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul and create a Spectral Shield token.\nPhantasm",
   "pitch": 3,
   "cost": 2,
@@ -328,7 +328,7 @@
  {
   "id": "MON017",
   "name": "Herald of Ravages",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and deal 1 arcane damage to target hero.\nPhantasm",
   "pitch": 1,
   "cost": 2,
@@ -349,7 +349,7 @@
  {
   "id": "MON018",
   "name": "Herald of Ravages",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and deal 1 arcane damage to target hero.\nPhantasm",
   "pitch": 2,
   "cost": 2,
@@ -370,7 +370,7 @@
  {
   "id": "MON019",
   "name": "Herald of Ravages",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and deal 1 arcane damage to target hero.\nPhantasm",
   "pitch": 3,
   "cost": 2,
@@ -391,7 +391,7 @@
  {
   "id": "MON020",
   "name": "Herald of Rebirth",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and put up to 1 card with phantasm from your graveyard on top of your deck.\nPhantasm",
   "pitch": 1,
   "cost": 2,
@@ -412,7 +412,7 @@
  {
   "id": "MON021",
   "name": "Herald of Rebirth",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and put up to 1 card with phantasm from your graveyard on top of your deck.\nPhantasm",
   "pitch": 2,
   "cost": 2,
@@ -433,7 +433,7 @@
  {
   "id": "MON022",
   "name": "Herald of Rebirth",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your hero's soul and put up to 1 card with phantasm from your graveyard on top of your deck.\nPhantasm",
   "pitch": 3,
   "cost": 2,
@@ -454,7 +454,7 @@
  {
   "id": "MON023",
   "name": "Herald of Tenacity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate\nWhen this hits, put it into your hero's soul.\nPhantasm",
   "pitch": 1,
   "cost": 2,
@@ -476,7 +476,7 @@
  {
   "id": "MON024",
   "name": "Herald of Tenacity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate\nWhen this hits, put it into your hero's soul.\nPhantasm",
   "pitch": 2,
   "cost": 2,
@@ -498,7 +498,7 @@
  {
   "id": "MON025",
   "name": "Herald of Tenacity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate\nWhen this hits, put it into your hero's soul.\nPhantasm",
   "pitch": 3,
   "cost": 2,
@@ -520,7 +520,7 @@
  {
   "id": "MON026",
   "name": "Wartune Herald",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul.\nPhantasm",
   "pitch": 1,
   "cost": 1,
@@ -541,7 +541,7 @@
  {
   "id": "MON027",
   "name": "Wartune Herald",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul.\nPhantasm",
   "pitch": 2,
   "cost": 1,
@@ -562,7 +562,7 @@
  {
   "id": "MON028",
   "name": "Wartune Herald",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, put it into your soul.\nPhantasm",
   "pitch": 3,
   "cost": 1,
@@ -583,7 +583,7 @@
  {
   "id": "MON029",
   "name": "Ser Boltyn, Breaker of Dawn",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If you've charged this turn, your attacks get +1{p} while defended by an attack action card.\nAttack Reaction - Banish a card from Boltyn's soul: Target attack with {p} greater than its base {p} gains go again.",
   "classes": [
    "warrior"
@@ -598,7 +598,7 @@
  {
   "id": "MON030",
   "name": "Boltyn",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If you've charged this turn, your attacks get +1{p} while defended by an attack action card.\nAttack Reaction - Banish a card from Boltyn's soul: Target attack with {p} greater than its base {p} gains go again.",
   "classes": [
    "warrior"
@@ -613,7 +613,7 @@
  {
   "id": "MON031",
   "name": "Raydn, Duskbane",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - 0: Attack\nIf you've charged this turn, Raydn gains +3{p}.",
   "attack": 0,
   "classes": [
@@ -629,7 +629,7 @@
  {
   "id": "MON032",
   "name": "Bolting Blade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Bolting Blade costs {r}{r} less to play for each time you've charged this turn.",
   "pitch": 2,
   "cost": 4,
@@ -647,7 +647,7 @@
  {
   "id": "MON033",
   "name": "Beacon of Victory",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "As an additional cost to play Beacon of Victory, banish X cards from your hero's soul. X can't be 0.\nTarget attack gains +X{p}.\nIf you've charged this turn, search your deck for an action card with cost X or less, reveal it, put it into your hand, then shuffle your deck.",
   "pitch": 2,
   "cost": 0,
@@ -663,7 +663,7 @@
  {
   "id": "MON034",
   "name": "Lumina Ascension",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boltyn Specialization\nUntil end of turn, weapons you control gain +1{p} and \"If this hits, reveal the top card of your deck. If it's a Light card, put it into your hero's soul and gain 1{h}, otherwise put it on the bottom of your deck.\"\nIf you've charged this turn, you may attack an additional time with each weapon you control.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -683,7 +683,7 @@
  {
   "id": "MON035",
   "name": "V of the Vanguard",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boltyn Specialization\nAs an additional cost to play V of the Vanguard, you may charge your hero's soul any number of times.\nAttacks on this combat chain gain +1{p} for each Light card charged this way.",
   "pitch": 2,
   "cost": 1,
@@ -705,7 +705,7 @@
  {
   "id": "MON036",
   "name": "Battlefield Blitz",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've charged this turn, Battlefield Blitz gains go again.",
   "pitch": 1,
   "cost": 1,
@@ -726,7 +726,7 @@
  {
   "id": "MON037",
   "name": "Battlefield Blitz",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've charged this turn, Battlefield Blitz gains go again.",
   "pitch": 2,
   "cost": 1,
@@ -747,7 +747,7 @@
  {
   "id": "MON038",
   "name": "Battlefield Blitz",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've charged this turn, Battlefield Blitz gains go again.",
   "pitch": 3,
   "cost": 1,
@@ -768,7 +768,7 @@
  {
   "id": "MON039",
   "name": "Valiant Thrust",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've charged this turn, Valiant Thrust gains +3{p}.",
   "pitch": 1,
   "cost": 1,
@@ -786,7 +786,7 @@
  {
   "id": "MON040",
   "name": "Valiant Thrust",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've charged this turn, Valiant Thrust gains +3{p}.",
   "pitch": 2,
   "cost": 1,
@@ -804,7 +804,7 @@
  {
   "id": "MON041",
   "name": "Valiant Thrust",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've charged this turn, Valiant Thrust gains +3{p}.",
   "pitch": 3,
   "cost": 1,
@@ -822,7 +822,7 @@
  {
   "id": "MON042",
   "name": "Bolt of Courage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Bolt of Courage, you may charge your hero's soul.\nIf you've charged this turn, Bolt of Courage gains \"If this hits, draw a card.\"",
   "pitch": 1,
   "cost": 0,
@@ -843,7 +843,7 @@
  {
   "id": "MON043",
   "name": "Bolt of Courage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Bolt of Courage, you may charge your hero's soul.\nIf you've charged this turn, Bolt of Courage gains \"If this hits, draw a card.\"",
   "pitch": 2,
   "cost": 0,
@@ -864,7 +864,7 @@
  {
   "id": "MON044",
   "name": "Bolt of Courage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Bolt of Courage, you may charge your hero's soul.\nIf you've charged this turn, Bolt of Courage gains \"If this hits, draw a card.\"",
   "pitch": 3,
   "cost": 0,
@@ -885,7 +885,7 @@
  {
   "id": "MON045",
   "name": "Cross the Line",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Cross the Line, you may charge your hero's soul.",
   "pitch": 1,
   "cost": 1,
@@ -906,7 +906,7 @@
  {
   "id": "MON046",
   "name": "Cross the Line",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Cross the Line, you may charge your hero's soul.",
   "pitch": 2,
   "cost": 1,
@@ -927,7 +927,7 @@
  {
   "id": "MON047",
   "name": "Cross the Line",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Cross the Line, you may charge your hero's soul.",
   "pitch": 3,
   "cost": 1,
@@ -948,7 +948,7 @@
  {
   "id": "MON048",
   "name": "Engulfing Light",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Engulfing Light, you may charge your hero's soul.\nIf you've charged this turn, Engulfing Light gains \"If this hits, put it into your hero's soul.\"",
   "pitch": 1,
   "cost": 0,
@@ -969,7 +969,7 @@
  {
   "id": "MON049",
   "name": "Engulfing Light",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Engulfing Light, you may charge your hero's soul.\nIf you've charged this turn, Engulfing Light gains \"If this hits, put it into your hero's soul.\"",
   "pitch": 2,
   "cost": 0,
@@ -990,7 +990,7 @@
  {
   "id": "MON050",
   "name": "Engulfing Light",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Engulfing Light, you may charge your hero's soul.\nIf you've charged this turn, Engulfing Light gains \"If this hits, put it into your hero's soul.\"",
   "pitch": 3,
   "cost": 0,
@@ -1011,7 +1011,7 @@
  {
   "id": "MON051",
   "name": "Express Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Express Lightning, you may charge your hero's soul.",
   "pitch": 1,
   "cost": 0,
@@ -1032,7 +1032,7 @@
  {
   "id": "MON052",
   "name": "Express Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Express Lightning, you may charge your hero's soul.",
   "pitch": 2,
   "cost": 0,
@@ -1053,7 +1053,7 @@
  {
   "id": "MON053",
   "name": "Express Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Express Lightning, you may charge your hero's soul.",
   "pitch": 3,
   "cost": 0,
@@ -1074,7 +1074,7 @@
  {
   "id": "MON054",
   "name": "Take Flight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Take Flight, you may charge your hero's soul.\nIf you've charged this turn, Take Flight gains go again.",
   "pitch": 1,
   "cost": 1,
@@ -1095,7 +1095,7 @@
  {
   "id": "MON055",
   "name": "Take Flight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Take Flight, you may charge your hero's soul.\nIf you've charged this turn, Take Flight gains go again.",
   "pitch": 2,
   "cost": 1,
@@ -1116,7 +1116,7 @@
  {
   "id": "MON056",
   "name": "Take Flight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Take Flight, you may charge your hero's soul.\nIf you've charged this turn, Take Flight gains go again.",
   "pitch": 3,
   "cost": 1,
@@ -1137,7 +1137,7 @@
  {
   "id": "MON057",
   "name": "Courageous Steelhand",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "If you've charged this turn, target attack gains +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -1153,7 +1153,7 @@
  {
   "id": "MON058",
   "name": "Courageous Steelhand",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "If you've charged this turn, target attack gains +2{p}.",
   "pitch": 2,
   "cost": 0,
@@ -1169,7 +1169,7 @@
  {
   "id": "MON059",
   "name": "Courageous Steelhand",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "If you've charged this turn, target attack gains +1{p}.",
   "pitch": 3,
   "cost": 0,
@@ -1185,7 +1185,7 @@
  {
   "id": "MON060",
   "name": "Vestige of Sol",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If a card has been put into your hero's soul this turn, whenever you pitch a Light card, instead gain that many {r} plus 1.\nBlade Break",
   "defense": 1,
   "subtypes": [
@@ -1200,7 +1200,7 @@
  {
   "id": "MON061",
   "name": "Halo of Illumination",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - {r}, destroy Halo of Illumination: Put a card from your hand into your hero's soul. If it's a Light card, draw a card.\nSpellvoid 2",
   "defense": 0,
   "subtypes": [
@@ -1215,7 +1215,7 @@
  {
   "id": "MON062",
   "name": "Celestial Cataclysm",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play this, banish 3 cards from your soul.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1233,7 +1233,7 @@
  {
   "id": "MON063",
   "name": "Soul Shield",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Put this into your soul when the combat chain closes.",
   "pitch": 2,
   "cost": 2,
@@ -1246,7 +1246,7 @@
  {
   "id": "MON064",
   "name": "Soul Food",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put Soul Food and all cards in your hand into your hero's soul.",
   "pitch": 2,
   "cost": 0,
@@ -1259,7 +1259,7 @@
  {
   "id": "MON065",
   "name": "Tome of Divinity",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Draw 2 cards.\nIf a card has been put into your hero's soul this turn, instead draw 3 cards.",
   "pitch": 2,
   "cost": 4,
@@ -1271,7 +1271,7 @@
  {
   "id": "MON066",
   "name": "Invigorating Light",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you play Invigorating Light, if there are no cards in your hero's soul, put it into your hero's soul when the combat chain closes.",
   "pitch": 1,
   "cost": 3,
@@ -1286,7 +1286,7 @@
  {
   "id": "MON067",
   "name": "Invigorating Light",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you play Invigorating Light, if there are no cards in your hero's soul, put it into your hero's soul when the combat chain closes.",
   "pitch": 2,
   "cost": 3,
@@ -1301,7 +1301,7 @@
  {
   "id": "MON068",
   "name": "Invigorating Light",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you play Invigorating Light, if there are no cards in your hero's soul, put it into your hero's soul when the combat chain closes.",
   "pitch": 3,
   "cost": 3,
@@ -1316,7 +1316,7 @@
  {
   "id": "MON069",
   "name": "Glisten",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Distribute up to four +1{p} counters among any number of weapons you control.\nAt the beginning of your end phase, remove all +1{p} counters from weapons you control.",
   "pitch": 1,
   "cost": 2,
@@ -1328,7 +1328,7 @@
  {
   "id": "MON070",
   "name": "Glisten",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Distribute up to three +1{p} counters among any number of weapons you control.\nAt the beginning of your end phase, remove all +1{p} counters from weapons you control.",
   "pitch": 2,
   "cost": 2,
@@ -1340,7 +1340,7 @@
  {
   "id": "MON071",
   "name": "Glisten",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Distribute up to two +1{p} counters among any number of weapons you control.\nAt the beginning of your end phase, remove all +1{p} counters from weapons you control.",
   "pitch": 3,
   "cost": 2,
@@ -1352,7 +1352,7 @@
  {
   "id": "MON072",
   "name": "Illuminate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Illuminate hits, put it into your hero's soul.",
   "pitch": 1,
   "cost": 0,
@@ -1367,7 +1367,7 @@
  {
   "id": "MON073",
   "name": "Illuminate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Illuminate hits, put it into your hero's soul.",
   "pitch": 2,
   "cost": 0,
@@ -1382,7 +1382,7 @@
  {
   "id": "MON074",
   "name": "Illuminate",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Illuminate hits, put it into your hero's soul.",
   "pitch": 3,
   "cost": 0,
@@ -1397,7 +1397,7 @@
  {
   "id": "MON075",
   "name": "Impenetrable Belief",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If 3 or more cards have been put into an opposing hero's banished zone this turn, Impenetrable Belief gains +2{d} while defending.",
   "pitch": 1,
   "cost": 2,
@@ -1412,7 +1412,7 @@
  {
   "id": "MON076",
   "name": "Impenetrable Belief",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If 3 or more cards have been put into an opposing hero's banished zone this turn, Impenetrable Belief gains +2{d} while defending.",
   "pitch": 2,
   "cost": 2,
@@ -1427,7 +1427,7 @@
  {
   "id": "MON077",
   "name": "Impenetrable Belief",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If 3 or more cards have been put into an opposing hero's banished zone this turn, Impenetrable Belief gains +2{d} while defending.",
   "pitch": 3,
   "cost": 2,
@@ -1442,7 +1442,7 @@
  {
   "id": "MON078",
   "name": "Rising Solartide",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Rising Solartide hits, put it into your hero's soul.",
   "pitch": 1,
   "cost": 1,
@@ -1457,7 +1457,7 @@
  {
   "id": "MON079",
   "name": "Rising Solartide",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Rising Solartide hits, put it into your hero's soul.",
   "pitch": 2,
   "cost": 1,
@@ -1472,7 +1472,7 @@
  {
   "id": "MON080",
   "name": "Rising Solartide",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Rising Solartide hits, put it into your hero's soul.",
   "pitch": 3,
   "cost": 1,
@@ -1487,7 +1487,7 @@
  {
   "id": "MON081",
   "name": "Seek Enlightenment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +3{p} and \"If this hits, put it into your hero's soul.\"\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -1503,7 +1503,7 @@
  {
   "id": "MON082",
   "name": "Seek Enlightenment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +2{p} and \"If this hits, put it into your hero's soul.\"\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -1519,7 +1519,7 @@
  {
   "id": "MON083",
   "name": "Seek Enlightenment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +1{p} and \"If this hits, put it into your hero's soul.\"\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -1535,7 +1535,7 @@
  {
   "id": "MON084",
   "name": "Blinding Beam",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Blinding Beam cost {r} less to play if it targets a Shadow Card.\nTarget attacking or defending attack action card gets -3{p}.",
   "pitch": 1,
   "cost": 1,
@@ -1547,7 +1547,7 @@
  {
   "id": "MON085",
   "name": "Blinding Beam",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Blinding Beam cost {r} less to play if it targets a Shadow Card.\nTarget attacking or defending attack action card gets -2{p}.",
   "pitch": 2,
   "cost": 1,
@@ -1559,7 +1559,7 @@
  {
   "id": "MON086",
   "name": "Blinding Beam",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Blinding Beam cost {r} less to play if it targets a Shadow Card.\nTarget attacking or defending attack action card gets -1{p}.",
   "pitch": 3,
   "cost": 1,
@@ -1571,7 +1571,7 @@
  {
   "id": "MON087",
   "name": "Ray of Hope",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Attacks you control have +1{p} while attacking a Shadow hero this turn.\nIf you have less {h} than an opposing Shadow hero, put Ray of Hope into your hero's soul.",
   "pitch": 2,
   "cost": 1,
@@ -1583,7 +1583,7 @@
  {
   "id": "MON088",
   "name": "Iris of Reality",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "During your action phase, Illusionist auras you control are weapons with 4{p} and Once per Turn Action - {r}{r}{r}: Attack. Go again",
   "classes": [
    "illusionist"
@@ -1597,7 +1597,7 @@
  {
   "id": "MON089",
   "name": "Phantasmal Footsteps",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Once per turn, when an Illusionist attack action card you control is destroyed, you may pay {r}. If you do, gain 1 action point.\nWhenever this defends, you may pay {r}. If you do, its {d} becomes 1 until end of turn.\nWhen Phantasmal Footsteps is defending a non-Illusionist attack with 6 or more {p}, destroy it when the combat chain closes.",
   "defense": 0,
   "classes": [
@@ -1611,7 +1611,7 @@
  {
   "id": "MON090",
   "name": "Dream Weavers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy Dream Weavers: The next Illusionist attack action card you play this turn loses and can't gain phantasm. Go again\nSpellvoid 1",
   "defense": 0,
   "classes": [
@@ -1628,7 +1628,7 @@
  {
   "id": "MON091",
   "name": "Phantasmaclasm",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Look at the defending hero's hand and choose a card. They put it on the bottom of their deck then draw a card.\nPhantasm",
   "pitch": 1,
   "cost": 3,
@@ -1648,7 +1648,7 @@
  {
   "id": "MON092",
   "name": "Prismatic Shield",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Create 3 Spectral Shield tokens.",
   "pitch": 1,
   "cost": 3,
@@ -1660,7 +1660,7 @@
  {
   "id": "MON093",
   "name": "Prismatic Shield",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Create 2 Spectral Shield tokens.",
   "pitch": 2,
   "cost": 3,
@@ -1672,7 +1672,7 @@
  {
   "id": "MON094",
   "name": "Prismatic Shield",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Create a Spectral Shield token.",
   "pitch": 3,
   "cost": 3,
@@ -1684,7 +1684,7 @@
  {
   "id": "MON095",
   "name": "Phantasmify",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn is Illusionist in addition to its other class types, and gains +5{p} and phantasm.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -1700,7 +1700,7 @@
  {
   "id": "MON096",
   "name": "Phantasmify",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn is Illusionist in addition to its other class types, and gains +4{p} and phantasm.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -1716,7 +1716,7 @@
  {
   "id": "MON097",
   "name": "Phantasmify",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn is Illusionist in addition to its other class types, and gains +3{p} and phantasm.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -1732,7 +1732,7 @@
  {
   "id": "MON098",
   "name": "Enigma Chimera",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm",
   "pitch": 1,
   "cost": 2,
@@ -1752,7 +1752,7 @@
  {
   "id": "MON099",
   "name": "Enigma Chimera",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm",
   "pitch": 2,
   "cost": 2,
@@ -1772,7 +1772,7 @@
  {
   "id": "MON100",
   "name": "Enigma Chimera",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm",
   "pitch": 3,
   "cost": 2,
@@ -1792,7 +1792,7 @@
  {
   "id": "MON101",
   "name": "Spears of Surreality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -1813,7 +1813,7 @@
  {
   "id": "MON102",
   "name": "Spears of Surreality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -1834,7 +1834,7 @@
  {
   "id": "MON103",
   "name": "Spears of Surreality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -1855,7 +1855,7 @@
  {
   "id": "MON104",
   "name": "Spectral Shield",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Ward 1",
   "classes": [
    "illusionist"
@@ -1871,7 +1871,7 @@
  {
   "id": "MON105B",
   "name": "Hatchet of Body",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nWhenever you attack with Hatchet of Body, if Hatchet of Mind was the last attack this turn, Hatchet of Body gains +1{p} until end of turn.",
   "attack": 2,
   "classes": [
@@ -1886,7 +1886,7 @@
  {
   "id": "MON106B",
   "name": "Hatchet of Mind",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nWhenever you attack with Hatchet of Mind, if Hatchet of Body was the last attack this turn, Hatchet of Mind gains +1{p} until end of turn.",
   "attack": 2,
   "classes": [
@@ -1901,7 +1901,7 @@
  {
   "id": "MON107",
   "name": "Valiant Dynamo",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "At the beginning of your end phase, if you've attacked 2 or more times with weapons this turn, you may remove a -1{d} counter from this.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -1918,7 +1918,7 @@
  {
   "id": "MON108",
   "name": "Gallantry Gold",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}, destroy Gallantry Gold: Your weapon attacks gain +1{p} this turn. Go again\nBattleworn",
   "defense": 1,
   "classes": [
@@ -1935,7 +1935,7 @@
  {
   "id": "MON109",
   "name": "Spill Blood",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Axes you control gain +2{p} and dominate until end of turn.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -1951,7 +1951,7 @@
  {
   "id": "MON110",
   "name": "Dusk Path Pilgrimage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gains +3{p} and \"If this hits, you may attack an additional time with this weapon this turn.\"\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -1967,7 +1967,7 @@
  {
   "id": "MON111",
   "name": "Dusk Path Pilgrimage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gains +2{p} and \"If this hits, you may attack an additional time with this weapon this turn.\"\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -1983,7 +1983,7 @@
  {
   "id": "MON112",
   "name": "Dusk Path Pilgrimage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gains +1{p} and \"If this hits, you may attack an additional time with this weapon this turn.\"\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -1999,7 +1999,7 @@
  {
   "id": "MON113",
   "name": "Plow Through",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gains +3{p} and \"If this weapon is defended by an attack action card, it gains +1{p} until end of turn.\"\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -2015,7 +2015,7 @@
  {
   "id": "MON114",
   "name": "Plow Through",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gains +2{p} and \"If this weapon is defended by an attack action card, it gains +1{p} until end of turn.\"\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -2031,7 +2031,7 @@
  {
   "id": "MON115",
   "name": "Plow Through",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next weapon attack this turn gains +1{p} and \"If this weapon is defended by an attack action card, it gains +1{p} until end of turn.\"\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -2047,7 +2047,7 @@
  {
   "id": "MON116",
   "name": "Second Swing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've attacked with a weapon this turn, your next attack this turn gets +4{p}.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -2063,7 +2063,7 @@
  {
   "id": "MON117",
   "name": "Second Swing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've attacked with a weapon this turn, your next attack this turn gets +3{p}.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -2079,7 +2079,7 @@
  {
   "id": "MON118",
   "name": "Second Swing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've attacked with a weapon this turn, your next attack this turn gets +2{p}.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -2095,8 +2095,8 @@
  {
   "id": "MON119",
   "name": "Levia, Shadowborn Abomination",
-  "cardType": "hero",
-  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, cards you own lose blood debt during the end phase.",
+  "types": ["hero"],
+  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, you don't lose {h} from blood debt during the end phase.",
   "classes": [
    "brute"
   ],
@@ -2110,8 +2110,8 @@
  {
   "id": "MON120",
   "name": "Levia",
-  "cardType": "hero",
-  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, cards you own lose blood debt during the end phase.",
+  "types": ["hero"],
+  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, you don't lose {h} from blood debt during the end phase.",
   "classes": [
    "brute"
   ],
@@ -2125,7 +2125,7 @@
  {
   "id": "MON121",
   "name": "Hexagore, the Death Hydra",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nWhenever you attack with Hexagore, it deals damage to you equal to 6 minus the number of cards with blood debt in your banished zone.",
   "attack": 6,
   "classes": [
@@ -2141,7 +2141,7 @@
  {
   "id": "MON122",
   "name": "Hooves of the Shadowbeast",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever a card with 6 or more {p} is put into your banished zone, you may destroy Hooves of the Shadowbeast. If you do, gain 1 action point.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -2159,7 +2159,7 @@
  {
   "id": "MON123",
   "name": "Deep Rooted Evil",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If a card with 6 or more {p} has been put into your banished zone this turn, you may play Deep Rooted Evil from your banished zone.\nBlood Debt",
   "pitch": 2,
   "cost": 3,
@@ -2179,7 +2179,7 @@
  {
   "id": "MON124",
   "name": "Mark of the Beast",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Mark of the Beast would be put into your graveyard from anywhere, instead banish it.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -2200,7 +2200,7 @@
  {
   "id": "MON125",
   "name": "Shadow of Blasmophet",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, search your deck for a card with blood debt, banish it, then shuffle your deck.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -2220,7 +2220,7 @@
  {
   "id": "MON126",
   "name": "Endless Maw",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Endless Maw, banish 3 random cards from your graveyard.\nIf a card with 6 or more {p} is banished this way, Endless maw gains +3{p}.\nBlood Debt",
   "pitch": 1,
   "cost": 3,
@@ -2241,7 +2241,7 @@
  {
   "id": "MON127",
   "name": "Endless Maw",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Endless Maw, banish 3 random cards from your graveyard.\nIf a card with 6 or more {p} is banished this way, Endless maw gains +3{p}.\nBlood Debt",
   "pitch": 2,
   "cost": 3,
@@ -2262,7 +2262,7 @@
  {
   "id": "MON128",
   "name": "Endless Maw",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Endless Maw, banish 3 random cards from your graveyard.\nIf a card with 6 or more {p} is banished this way, Endless maw gains +3{p}.\nBlood Debt",
   "pitch": 3,
   "cost": 3,
@@ -2283,7 +2283,7 @@
  {
   "id": "MON129",
   "name": "Writhing Beast Hulk",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Writhing Beast Hulk, banish 3 random cards from your graveyard.\nIf a card with 6 or more {p} is banished this way, Writhing Beast Hulk gains dominate.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -2305,7 +2305,7 @@
  {
   "id": "MON130",
   "name": "Writhing Beast Hulk",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Writhing Beast Hulk, banish 3 random cards from your graveyard.\nIf a card with 6 or more {p} is banished this way, Writhing Beast Hulk gains dominate.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -2327,7 +2327,7 @@
  {
   "id": "MON131",
   "name": "Writhing Beast Hulk",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Writhing Beast Hulk, banish 3 random cards from your graveyard.\nIf a card with 6 or more {p} is banished this way, Writhing Beast Hulk gains dominate.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -2349,7 +2349,7 @@
  {
   "id": "MON132",
   "name": "Convulsions from the Bellows of Hell",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Convulsions from the Bellows of Hell, banish 3 random cards from your graveyard.\nIf a card with 6 or more {p} is banished this way, the next attack action card you play this turn gains +3{p} and dominate.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -2368,7 +2368,7 @@
  {
   "id": "MON133",
   "name": "Convulsions from the Bellows of Hell",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Convulsions from the Bellows of Hell, banish 3 random cards from your graveyard.\nIf a card with 6 or more {p} is banished this way, the next attack action card you play this turn gains +2{p} and dominate.\nGo again",
   "pitch": 2,
   "cost": 2,
@@ -2387,7 +2387,7 @@
  {
   "id": "MON134",
   "name": "Convulsions from the Bellows of Hell",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Convulsions from the Bellows of Hell, banish 3 random cards from your graveyard.\nIf a card with 6 or more {p} is banished this way, the next attack action card you play this turn gains +1{p} and dominate.\nGo again",
   "pitch": 3,
   "cost": 2,
@@ -2406,7 +2406,7 @@
  {
   "id": "MON135",
   "name": "Boneyard Marauder",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Boneyard Marauder, banish 3 random cards from your graveyard.\nBlood Debt",
   "pitch": 1,
   "cost": 1,
@@ -2427,7 +2427,7 @@
  {
   "id": "MON136",
   "name": "Boneyard Marauder",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Boneyard Marauder, banish 3 random cards from your graveyard.\nBlood Debt",
   "pitch": 2,
   "cost": 1,
@@ -2448,7 +2448,7 @@
  {
   "id": "MON137",
   "name": "Boneyard Marauder",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Boneyard Marauder, banish 3 random cards from your graveyard.\nBlood Debt",
   "pitch": 3,
   "cost": 1,
@@ -2469,7 +2469,7 @@
  {
   "id": "MON138",
   "name": "Deadwood Rumbler",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, banish a card from a graveyard.\nBlood Debt",
   "pitch": 1,
   "cost": 3,
@@ -2489,7 +2489,7 @@
  {
   "id": "MON139",
   "name": "Deadwood Rumbler",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, banish a card from a graveyard.\nBlood Debt",
   "pitch": 2,
   "cost": 3,
@@ -2509,7 +2509,7 @@
  {
   "id": "MON140",
   "name": "Deadwood Rumbler",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, banish a card from a graveyard.\nBlood Debt",
   "pitch": 3,
   "cost": 3,
@@ -2529,7 +2529,7 @@
  {
   "id": "MON141",
   "name": "Dread Screamer",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Dread Screamer, banish 3 random cards from your graveyard\nIf a card with 6 or more {p} is banished this way, Dread Screamer gains go again.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -2551,7 +2551,7 @@
  {
   "id": "MON142",
   "name": "Dread Screamer",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Dread Screamer, banish 3 random cards from your graveyard\nIf a card with 6 or more {p} is banished this way, Dread Screamer gains go again.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -2573,7 +2573,7 @@
  {
   "id": "MON143",
   "name": "Dread Screamer",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Dread Screamer, banish 3 random cards from your graveyard\nIf a card with 6 or more {p} is banished this way, Dread Screamer gains go again.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -2595,7 +2595,7 @@
  {
   "id": "MON144",
   "name": "Graveling Growl",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Play Graveling Growl only if a card with 6 or more {p} has been put into your banished zone this turn.\nBlood Debt",
   "pitch": 1,
   "cost": 1,
@@ -2616,7 +2616,7 @@
  {
   "id": "MON145",
   "name": "Graveling Growl",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Play Graveling Growl only if a card with 6 or more {p} has been put into your banished zone this turn.\nBlood Debt",
   "pitch": 2,
   "cost": 1,
@@ -2637,7 +2637,7 @@
  {
   "id": "MON146",
   "name": "Graveling Growl",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Play Graveling Growl only if a card with 6 or more {p} has been put into your banished zone this turn.\nBlood Debt",
   "pitch": 3,
   "cost": 1,
@@ -2658,7 +2658,7 @@
  {
   "id": "MON147",
   "name": "Hungering Slaughterbeast",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Hungering Slaughterbeast, banish 3 random cards from your graveyard.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -2679,7 +2679,7 @@
  {
   "id": "MON148",
   "name": "Hungering Slaughterbeast",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Hungering Slaughterbeast, banish 3 random cards from your graveyard.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -2700,7 +2700,7 @@
  {
   "id": "MON149",
   "name": "Hungering Slaughterbeast",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Hungering Slaughterbeast, banish 3 random cards from your graveyard.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -2721,7 +2721,7 @@
  {
   "id": "MON150",
   "name": "Unworldly Bellow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Unworldly Bellow, banish 3 random cards from your graveyard.\nThe next Brute or Shadow attack action card you play this turn gains +4{p}.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -2740,7 +2740,7 @@
  {
   "id": "MON151",
   "name": "Unworldly Bellow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Unworldly Bellow, banish 3 random cards from your graveyard.\nThe next Brute or Shadow attack action card you play this turn gains +3{p}.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -2759,7 +2759,7 @@
  {
   "id": "MON152",
   "name": "Unworldly Bellow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Unworldly Bellow, banish 3 random cards from your graveyard.\nThe next Brute or Shadow attack action card you play this turn gains +2{p}.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -2778,7 +2778,7 @@
  {
   "id": "MON153",
   "name": "Chane, Bound by Shadow",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - Create a Soul Shackle token: Your next Runeblade or Shadow action this turn gains go again. Go again",
   "classes": [
    "runeblade"
@@ -2793,7 +2793,7 @@
  {
   "id": "MON154",
   "name": "Chane",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - Create a Soul Shackle token: Your next Runeblade or Shadow action this turn gains go again. Go again",
   "classes": [
    "runeblade"
@@ -2808,7 +2808,7 @@
  {
   "id": "MON155",
   "name": "Galaxxi Black",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nIf you have played a card from your banished zone this turn, Galaxxi Black gains +2{p} until end of turn.\nIf Galaxxi Black hits a hero, deal 1 arcane damage to that hero.",
   "attack": 1,
   "classes": [
@@ -2824,7 +2824,7 @@
  {
   "id": "MON156",
   "name": "Shadow of Ursur",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Shadow of Ursur from your banished zone.\nAs an additional cost to play Shadow of Ursur, you may banish a card with blood debt from your hand. If you do, Shadow of Ursur gains go again.\nBlood Debt",
   "pitch": 3,
   "cost": 0,
@@ -2846,7 +2846,7 @@
  {
   "id": "MON157",
   "name": "Dimenxxional Crossroads",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhenever you play an attack action card or a 'non-attack' action card from the banished zone, if you haven't played another card of that type this turn, deal 1 arcane damage to target hero.\nIf you lose {h} during your turn, destroy Dimenxxional Crossroads.",
   "pitch": 2,
   "cost": 2,
@@ -2866,7 +2866,7 @@
  {
   "id": "MON158",
   "name": "Invert Existence",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "You may play Invert Existence from your banished zone.\nBanish up to 2 cards in an opposing hero's graveyard. If an attack action card and a 'non-attack' action card are banished this way, deal 2 arcane damage to that hero.\nBlood Debt",
   "pitch": 3,
   "cost": 1,
@@ -2884,7 +2884,7 @@
  {
   "id": "MON159",
   "name": "Unhallowed Rites",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played a 'non-attack' action card this turn, you may play Unhallowed Rites from your banished zone.\nYou may put a 'non-attack' action card with blood debt from your graveyard on the bottom of your deck.\nBlood Debt",
   "pitch": 1,
   "cost": 1,
@@ -2905,7 +2905,7 @@
  {
   "id": "MON160",
   "name": "Unhallowed Rites",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played a 'non-attack' action card this turn, you may play Unhallowed Rites from your banished zone.\nYou may put a 'non-attack' action card with blood debt from your graveyard on the bottom of your deck.\nBlood Debt",
   "pitch": 2,
   "cost": 1,
@@ -2926,7 +2926,7 @@
  {
   "id": "MON161",
   "name": "Unhallowed Rites",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played a 'non-attack' action card this turn, you may play Unhallowed Rites from your banished zone.\nYou may put a 'non-attack' action card with blood debt from your graveyard on the bottom of your deck.\nBlood Debt",
   "pitch": 3,
   "cost": 1,
@@ -2947,7 +2947,7 @@
  {
   "id": "MON162",
   "name": "Dimenxxional Gateway",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Opt 3\nReveal the top card of your deck. If it's a Runeblade card, deal 1 arcane damage to each opposing hero. If it's a Shadow card, you may banish it.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -2967,7 +2967,7 @@
  {
   "id": "MON163",
   "name": "Dimenxxional Gateway",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Opt 2\nReveal the top card of your deck. If it's a Runeblade card, deal 1 arcane damage to each opposing hero. If it's a Shadow card, you may banish it.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -2987,7 +2987,7 @@
  {
   "id": "MON164",
   "name": "Dimenxxional Gateway",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Opt 1\nReveal the top card of your deck. If it's a Runeblade card, deal 1 arcane damage to each opposing hero. If it's a Shadow card, you may banish it.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -3007,7 +3007,7 @@
  {
   "id": "MON165",
   "name": "Seeping Shadows",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Seeping Shadows from your banished zone.\nThe next attack action card with cost 2 or less you play this turns gains +1{p} and go again.\nGo again\nBlood Debt",
   "pitch": 1,
   "cost": 3,
@@ -3027,7 +3027,7 @@
  {
   "id": "MON166",
   "name": "Seeping Shadows",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Seeping Shadows from your banished zone.\nThe next attack action card with cost 1 or less you play this turns gains +1{p} and go again.\nGo again\nBlood Debt",
   "pitch": 2,
   "cost": 3,
@@ -3047,7 +3047,7 @@
  {
   "id": "MON167",
   "name": "Seeping Shadows",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Seeping Shadows from your banished zone.\nThe next attack action card with cost 0 you play this turns gains +1{p} and go again.\nGo again\nBlood Debt",
   "pitch": 3,
   "cost": 3,
@@ -3067,7 +3067,7 @@
  {
   "id": "MON168",
   "name": "Bounding Demigon",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played a 'non-attack' action card this turn, you may play Bounding Demigon from your banished zone. If you do, it gains +1{p}.\nBlood Debt",
   "pitch": 1,
   "cost": 0,
@@ -3088,7 +3088,7 @@
  {
   "id": "MON169",
   "name": "Bounding Demigon",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played a 'non-attack' action card this turn, you may play Bounding Demigon from your banished zone. If you do, it gains +1{p}.\nBlood Debt",
   "pitch": 2,
   "cost": 0,
@@ -3109,7 +3109,7 @@
  {
   "id": "MON170",
   "name": "Bounding Demigon",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played a 'non-attack' action card this turn, you may play Bounding Demigon from your banished zone. If you do, it gains +1{p}.\nBlood Debt",
   "pitch": 3,
   "cost": 0,
@@ -3130,7 +3130,7 @@
  {
   "id": "MON171",
   "name": "Piercing Shadow Vise",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Piercing Shadow Vise from your banished zone.\nIf you have dealt arcane damage to an opposing hero this turn, Piercing Shadow Vise gains +2{p}.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -3151,7 +3151,7 @@
  {
   "id": "MON172",
   "name": "Piercing Shadow Vise",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Piercing Shadow Vise from your banished zone.\nIf you have dealt arcane damage to an opposing hero this turn, Piercing Shadow Vise gains +2{p}.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -3172,7 +3172,7 @@
  {
   "id": "MON173",
   "name": "Piercing Shadow Vise",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Piercing Shadow Vise from your banished zone.\nIf you have dealt arcane damage to an opposing hero this turn, Piercing Shadow Vise gains +2{p}.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -3193,7 +3193,7 @@
  {
   "id": "MON174",
   "name": "Rift Bind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Rift Bind from your banished zone. If you do, it gains +X{p}, where X is the number of 'non-attack' action cards you have played this turn.\nBlood Debt",
   "pitch": 1,
   "cost": 1,
@@ -3214,7 +3214,7 @@
  {
   "id": "MON175",
   "name": "Rift Bind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Rift Bind from your banished zone. If you do, it gains +X{p}, where X is the number of 'non-attack' action cards you have played this turn.\nBlood Debt",
   "pitch": 2,
   "cost": 1,
@@ -3235,7 +3235,7 @@
  {
   "id": "MON176",
   "name": "Rift Bind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Rift Bind from your banished zone. If you do, it gains +X{p}, where X is the number of 'non-attack' action cards you have played this turn.\nBlood Debt",
   "pitch": 3,
   "cost": 1,
@@ -3256,7 +3256,7 @@
  {
   "id": "MON177",
   "name": "Rifted Torment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Rifted Torment from your banished zone. If you do, deal 1 arcane damage to target hero.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -3277,7 +3277,7 @@
  {
   "id": "MON178",
   "name": "Rifted Torment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Rifted Torment from your banished zone. If you do, deal 1 arcane damage to target hero.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -3298,7 +3298,7 @@
  {
   "id": "MON179",
   "name": "Rifted Torment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Rifted Torment from your banished zone. If you do, deal 1 arcane damage to target hero.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -3319,7 +3319,7 @@
  {
   "id": "MON180",
   "name": "Rip Through Reality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Rip Through Reality from your banished zone.\nIf you have dealt arcane damage to an opposing hero this turn, Rip Through Reality gains go again.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -3341,7 +3341,7 @@
  {
   "id": "MON181",
   "name": "Rip Through Reality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Rip Through Reality from your banished zone.\nIf you have dealt arcane damage to an opposing hero this turn, Rip Through Reality gains go again.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -3363,7 +3363,7 @@
  {
   "id": "MON182",
   "name": "Rip Through Reality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Rip Through Reality from your banished zone.\nIf you have dealt arcane damage to an opposing hero this turn, Rip Through Reality gains go again.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -3385,7 +3385,7 @@
  {
   "id": "MON183",
   "name": "Seeds of Agony",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Seeds of Agony from your banished zone.\nThe next attack action card with cost 2 or less you play this turn gains \"When you attack with this, deal 1 arcane damage to target hero.\"\nGo again\nBlood Debt",
   "pitch": 1,
   "cost": 0,
@@ -3405,7 +3405,7 @@
  {
   "id": "MON184",
   "name": "Seeds of Agony",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Seeds of Agony from your banished zone.\nThe next attack action card with cost 1 or less you play this turn gains \"When you attack with this, deal 1 arcane damage to target hero.\"\nGo again\nBlood Debt",
   "pitch": 2,
   "cost": 0,
@@ -3425,7 +3425,7 @@
  {
   "id": "MON185",
   "name": "Seeds of Agony",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Seeds of Agony from your banished zone.\nThe next attack action card with cost 0 or less you play this turn gains \"When you attack with this, deal 1 arcane damage to target hero.\"\nGo again\nBlood Debt",
   "pitch": 3,
   "cost": 0,
@@ -3445,7 +3445,7 @@
  {
   "id": "MON186",
   "name": "Soul Shackle",
-  "cardType": "token",
+  "types": ["token"],
   "text": "At the beginning of your action phase, banish the top card of your deck.",
   "classes": [
    "runeblade"
@@ -3459,7 +3459,7 @@
  {
   "id": "MON187",
   "name": "Carrion Husk",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If you defend with Carrion Husk, banish it when the combat chain closes.\nAt the start of your turn, if you have 13 or less {h}, banish Carrion Husk.\nBlood Debt",
   "defense": 6,
   "subtypes": [
@@ -3474,7 +3474,7 @@
  {
   "id": "MON188",
   "name": "Ebon Fold",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - {r}, destroy Ebon Fold: Banish a card from your hand. If it's a Shadow card, draw a card.\nSpellvoid 2",
   "defense": 0,
   "subtypes": [
@@ -3489,7 +3489,7 @@
  {
   "id": "MON189",
   "name": "Doomsday",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary Levia Specialization\nPlay Doomsday only if there are 6 or more cards with blood debt in your banished zone.\nCreate a Blasmophet, the Soul Harvester token.",
   "pitch": 3,
   "cost": 0,
@@ -3505,7 +3505,7 @@
  {
   "id": "MON190",
   "name": "Eclipse",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary Chane Specialization\nPlay Eclipse only if you have played 6 or more cards with blood debt this turn. If you have, you may play Eclipse from your banished zone.\nCreate an Ursur, the Soul Reaper token.",
   "pitch": 3,
   "cost": 0,
@@ -3521,7 +3521,7 @@
  {
   "id": "MON191",
   "name": "Mutated Mass",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Mutated Mass from your banished zone.\nMutated Mass's {p} and {d} is equal to twice the number of cards in your pitch zone with different costs.\nBlood Debt",
   "pitch": 3,
   "cost": 1,
@@ -3537,7 +3537,7 @@
  {
   "id": "MON192",
   "name": "Guardian of the Shadowrealm",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Action - {r}{r}: Return Guardian of the Shadowrealm from your banished zone into your hand. Activate this ability only while Guardian of the Shadowrealm is in your banished zone.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -3553,7 +3553,7 @@
  {
   "id": "MON193",
   "name": "Shadow Puppetry",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +1 {p}, go again and \"If this attack hits, look at the top card of your deck. You may banish it.\"\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -3569,7 +3569,7 @@
  {
   "id": "MON194",
   "name": "Tome of Torment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Tome of Torment from your banished zone.\nDraw a card.\nBlood Debt",
   "pitch": 1,
   "cost": 0,
@@ -3584,7 +3584,7 @@
  {
   "id": "MON195",
   "name": "Consuming Aftermath",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Consuming Aftermath, you may banish a card from your hand. If a Shadow card is banished this way, Consuming Aftermath gains dominate.",
   "pitch": 1,
   "cost": 3,
@@ -3602,7 +3602,7 @@
  {
   "id": "MON196",
   "name": "Consuming Aftermath",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Consuming Aftermath, you may banish a card from your hand. If a Shadow card is banished this way, Consuming Aftermath gains dominate.",
   "pitch": 2,
   "cost": 3,
@@ -3620,7 +3620,7 @@
  {
   "id": "MON197",
   "name": "Consuming Aftermath",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Consuming Aftermath, you may banish a card from your hand. If a Shadow card is banished this way, Consuming Aftermath gains dominate.",
   "pitch": 3,
   "cost": 3,
@@ -3638,7 +3638,7 @@
  {
   "id": "MON198",
   "name": "Soul Harvest",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Legendary Levia Specialization\nAs an additional cost to play Soul Harvest, banish 6 cards from your graveyard. It gains +1{p} for each card with blood debt banished this way.\nIf Soul Harvest hits a hero, they banish all cards in their soul and lose {h} equal to the number of cards banished this way.",
   "pitch": 3,
   "cost": 6,
@@ -3657,7 +3657,7 @@
  {
   "id": "MON199",
   "name": "Soul Reaping",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Legendary Chane Specialization\nYou may banish 1 or more cards from your hand rather than pay Soul Reaping's {r} cost. If you do, gain {r} for each card with blood debt banished this way.\nWhile Soul Reaping is attacking a hero with 1 or more cards in their soul, it has go again.",
   "pitch": 1,
   "cost": 6,
@@ -3677,7 +3677,7 @@
  {
   "id": "MON200",
   "name": "Howl from Beyond",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Howl from Beyond from your banished zone.\nThe next attack action card you play this turn gains +3{p}.\nGo again\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -3694,7 +3694,7 @@
  {
   "id": "MON201",
   "name": "Howl from Beyond",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Howl from Beyond from your banished zone.\nThe next attack action card you play this turn gains +2{p}.\nGo again\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -3711,7 +3711,7 @@
  {
   "id": "MON202",
   "name": "Howl from Beyond",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Howl from Beyond from your banished zone.\nThe next attack action card you play this turn gains +1{p}.\nGo again\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -3728,7 +3728,7 @@
  {
   "id": "MON203",
   "name": "Ghostly Visit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Ghostly Visit from your banished zone.\nBlood Debt",
   "pitch": 1,
   "cost": 1,
@@ -3746,7 +3746,7 @@
  {
   "id": "MON204",
   "name": "Ghostly Visit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Ghostly Visit from your banished zone.\nBlood Debt",
   "pitch": 2,
   "cost": 1,
@@ -3764,7 +3764,7 @@
  {
   "id": "MON205",
   "name": "Ghostly Visit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Ghostly Visit from your banished zone.\nBlood Debt",
   "pitch": 3,
   "cost": 1,
@@ -3782,7 +3782,7 @@
  {
   "id": "MON206",
   "name": "Lunartide Plunderer",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Lunartide Plunderer hits a hero, banish it and a card from their soul.",
   "pitch": 1,
   "cost": 3,
@@ -3797,7 +3797,7 @@
  {
   "id": "MON207",
   "name": "Lunartide Plunderer",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Lunartide Plunderer hits a hero, banish it and a card from their soul.",
   "pitch": 2,
   "cost": 3,
@@ -3812,7 +3812,7 @@
  {
   "id": "MON208",
   "name": "Lunartide Plunderer",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Lunartide Plunderer hits a hero, banish it and a card from their soul.",
   "pitch": 3,
   "cost": 3,
@@ -3827,7 +3827,7 @@
  {
   "id": "MON209",
   "name": "Void Wraith",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Void Wraith from your banished zone.\nBlood Debt",
   "pitch": 1,
   "cost": 2,
@@ -3845,7 +3845,7 @@
  {
   "id": "MON210",
   "name": "Void Wraith",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Void Wraith from your banished zone.\nBlood Debt",
   "pitch": 2,
   "cost": 2,
@@ -3863,7 +3863,7 @@
  {
   "id": "MON211",
   "name": "Void Wraith",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may play Void Wraith from your banished zone.\nBlood Debt",
   "pitch": 3,
   "cost": 2,
@@ -3881,7 +3881,7 @@
  {
   "id": "MON212",
   "name": "Spew Shadow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose an attack action card with cost 2 or less in your banished zone. You may play it this turn. If it attacks a Light hero, it gains +2{p}.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -3897,7 +3897,7 @@
  {
   "id": "MON213",
   "name": "Spew Shadow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose an attack action card with cost 1 or less in your banished zone. You may play it this turn. If it attacks a Light hero, it gains +2{p}.\nGo again",
   "pitch": 2,
   "cost": 2,
@@ -3913,7 +3913,7 @@
  {
   "id": "MON214",
   "name": "Spew Shadow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose an attack action card with cost 0 or less in your banished zone. You may play it this turn. If it attacks a Light hero, it gains +2{p}.\nGo again",
   "pitch": 3,
   "cost": 2,
@@ -3929,7 +3929,7 @@
  {
   "id": "MON215",
   "name": "Blood Tribute",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Opt 3, then banish the top card of your deck.",
   "pitch": 1,
   "cost": 0,
@@ -3944,7 +3944,7 @@
  {
   "id": "MON216",
   "name": "Blood Tribute",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Opt 2, then banish the top card of your deck.",
   "pitch": 2,
   "cost": 0,
@@ -3959,7 +3959,7 @@
  {
   "id": "MON217",
   "name": "Blood Tribute",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Opt 1, then banish the top card of your deck.",
   "pitch": 3,
   "cost": 0,
@@ -3974,7 +3974,7 @@
  {
   "id": "MON218",
   "name": "Eclipse Existence",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Until end of turn, whenever an attack hits a Light hero, you may banish a card from their soul. If they do, they lose 1{h}.\nIf you have more {h} than an opposing Light hero, you may banish an action card from your graveyard.",
   "pitch": 3,
   "cost": 0,
@@ -3986,7 +3986,7 @@
  {
   "id": "MON219",
   "name": "Blasmophet, the Soul Harvester",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Once per Turn Action - 0: Attack\nWhenever Blasmophet attacks, you may banish a Shadow card from your hand. If you do, you may banish a card from the defending hero's soul.",
   "attack": 6,
   "subtypes": [
@@ -4000,7 +4000,7 @@
  {
   "id": "MON220B",
   "name": "Ursur, the Soul Reaper",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Once per Turn Action - 0: Attack\nWhile Ursur is attacking a hero with 1 or more cards in their soul, the attack has go again.",
   "attack": 6,
   "subtypes": [
@@ -4014,7 +4014,7 @@
  {
   "id": "MON221B",
   "name": "Ravenous Meataxe",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nWhenever you attack with Ravenous Meataxe, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, Ravenous Meataxe gains +2{p} until end of turn.",
   "attack": 3,
   "classes": [
@@ -4029,7 +4029,7 @@
  {
   "id": "MON222",
   "name": "Tear Limb from Limb",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, the next Brute attack action card you play this turn gains +X{p}, where X is its base {p}.\nGo again",
   "pitch": 3,
   "cost": 2,
@@ -4044,7 +4044,7 @@
  {
   "id": "MON223",
   "name": "Pulping",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets dominate.\nIf this is defended by fewer than 2 non-equipment cards, it gets go again.",
   "pitch": 1,
   "cost": 2,
@@ -4064,7 +4064,7 @@
  {
   "id": "MON224",
   "name": "Pulping",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets dominate.\nIf this is defended by fewer than 2 non-equipment cards, it gets go again.",
   "pitch": 2,
   "cost": 2,
@@ -4084,7 +4084,7 @@
  {
   "id": "MON225",
   "name": "Pulping",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, draw a card then discard a random card. If a card with 6 or more {p} is discarded this way, this gets dominate.\nIf this is defended by fewer than 2 non-equipment cards, it gets go again.",
   "pitch": 3,
   "cost": 2,
@@ -4104,7 +4104,7 @@
  {
   "id": "MON226",
   "name": "Smash with Big Tree",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 1,
   "cost": 2,
@@ -4120,7 +4120,7 @@
  {
   "id": "MON227",
   "name": "Smash with Big Tree",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 2,
   "cost": 2,
@@ -4136,7 +4136,7 @@
  {
   "id": "MON228",
   "name": "Smash with Big Tree",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 3,
   "cost": 2,
@@ -4152,7 +4152,7 @@
  {
   "id": "MON229",
   "name": "Dread Scythe",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}{r}: Attack\nWhenever you attack with Dread Scythe, deal 1 arcane damage to the defending hero.\nA hero dealt damage by Dread Scythe can't gain {h} during their next action phase.",
   "attack": 3,
   "classes": [
@@ -4167,7 +4167,7 @@
  {
   "id": "MON230",
   "name": "Aether Ironweave",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy Aether Ironweave: Gain {r}{r}. Activate this ability only if you have played an attack action card and a 'non-attack' action card this turn. Go again\nBattleworn",
   "defense": 1,
   "classes": [
@@ -4184,7 +4184,7 @@
  {
   "id": "MON231",
   "name": "Sonata Arcanix",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Reveal the top X+3 cards of your deck.\nFor each non-attack action card revealed this way, put an attack action card revealed this way into your hand. Then deal arcane damage to target hero equal to the number of cards put into your hand this way. Shuffle, then banish this.\nGo again",
   "pitch": 1,
   "defense": 2,
@@ -4199,7 +4199,7 @@
  {
   "id": "MON232",
   "name": "Vexing Malice",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero.",
   "pitch": 1,
   "cost": 1,
@@ -4216,7 +4216,7 @@
  {
   "id": "MON233",
   "name": "Vexing Malice",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero.",
   "pitch": 2,
   "cost": 1,
@@ -4233,7 +4233,7 @@
  {
   "id": "MON234",
   "name": "Vexing Malice",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero.",
   "pitch": 3,
   "cost": 1,
@@ -4250,7 +4250,7 @@
  {
   "id": "MON235",
   "name": "Arcanic Crackle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero.",
   "pitch": 1,
   "cost": 0,
@@ -4267,7 +4267,7 @@
  {
   "id": "MON236",
   "name": "Arcanic Crackle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero.",
   "pitch": 2,
   "cost": 0,
@@ -4284,7 +4284,7 @@
  {
   "id": "MON237",
   "name": "Arcanic Crackle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero.",
   "pitch": 3,
   "cost": 0,
@@ -4301,7 +4301,7 @@
  {
   "id": "MON238",
   "name": "Blood Drop Brocade",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Blood Drop Brocade: Gain {r}. Activate this ability only if you have dealt or been dealt {p} damage this turn.",
   "defense": 0,
   "classes": [
@@ -4315,7 +4315,7 @@
  {
   "id": "MON239",
   "name": "Stubby Hammerers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy Stubby Hammerers: Attack action cards with 3 or less base power gain +1{p} while attacking this turn. Go again",
   "defense": 0,
   "classes": [
@@ -4329,7 +4329,7 @@
  {
   "id": "MON240",
   "name": "Time Skippers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}{r}{r}, destroy this: Gain 2 action points.",
   "defense": 0,
   "classes": [
@@ -4343,7 +4343,7 @@
  {
   "id": "MON241",
   "name": "Ironhide Helm",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When you defend with Ironhide Helm, you may pay {r}. If you do, it gains +2{d} and \"When the combat chain closes, destroy Ironhide Helm.\"",
   "defense": 0,
   "classes": [
@@ -4357,7 +4357,7 @@
  {
   "id": "MON242",
   "name": "Ironhide Plate",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When you defend with Ironhide Plate, you may pay {r}. If you do, it gains +2{d} and destroy it when the combat chain closes.",
   "defense": 0,
   "classes": [
@@ -4371,7 +4371,7 @@
  {
   "id": "MON243",
   "name": "Ironhide Gauntlet",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When you defend with Ironhide Gauntlet, you may pay {r}. If you do, it gains +2{d} and \"When the combat chain closes, destroy Ironhide Gauntlet.\"",
   "defense": 0,
   "classes": [
@@ -4385,7 +4385,7 @@
  {
   "id": "MON244",
   "name": "Ironhide Legs",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When you defend with Ironhide Legs, you may pay {r}. If you do, it gains +2{d} and \"When the combat chain closes, destroy Ironhide Legs.\"",
   "defense": 0,
   "classes": [
@@ -4399,7 +4399,7 @@
  {
   "id": "MON245",
   "name": "Exude Confidence",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While Exude Confidence isn't defended by a card with equal or greater {p}, the defending hero can't play or activate instants or defense reactions this combat chain.\nInstant - {r}{r}{r}: Exude Confidence gains +2{p}. Activate this ability only while Exude Confidence is attacking.",
   "pitch": 1,
   "cost": 0,
@@ -4416,7 +4416,7 @@
  {
   "id": "MON246",
   "name": "Nourishing Emptiness",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While there are no attack action cards in your graveyard, Nourishing Emptiness has dominate and \"If this hits, your hero gains +1{i} until end of turn.\"",
   "pitch": 1,
   "cost": 2,
@@ -4436,7 +4436,7 @@
  {
   "id": "MON247",
   "name": "Rouse the Ancients",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Rouse the Ancients, you may reveal any number of attack action cards from your hand with 13 or more total {p}. If you do, Rouse the Ancients gains +7{p} and go again.",
   "pitch": 3,
   "cost": 3,
@@ -4456,7 +4456,7 @@
  {
   "id": "MON248",
   "name": "Out Muscle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While Out Muscle isn't defended by a card with equal or greater {p}, it has go again.",
   "pitch": 1,
   "cost": 3,
@@ -4476,7 +4476,7 @@
  {
   "id": "MON249",
   "name": "Out Muscle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While Out Muscle isn't defended by a card with equal or greater {p}, it has go again.",
   "pitch": 2,
   "cost": 3,
@@ -4496,7 +4496,7 @@
  {
   "id": "MON250",
   "name": "Out Muscle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While Out Muscle isn't defended by a card with equal or greater {p}, it has go again.",
   "pitch": 3,
   "cost": 3,
@@ -4516,7 +4516,7 @@
  {
   "id": "MON251",
   "name": "Seek Horizon",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Seek Horizon, you may put a card from your hand on top of your deck. If you do, Seek Horizon gains go again.",
   "pitch": 1,
   "cost": 0,
@@ -4536,7 +4536,7 @@
  {
   "id": "MON252",
   "name": "Seek Horizon",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Seek Horizon, you may put a card from your hand on top of your deck. If you do, Seek Horizon gains go again.",
   "pitch": 2,
   "cost": 0,
@@ -4556,7 +4556,7 @@
  {
   "id": "MON253",
   "name": "Seek Horizon",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Seek Horizon, you may put a card from your hand on top of your deck. If you do, Seek Horizon gains go again.",
   "pitch": 3,
   "cost": 0,
@@ -4576,7 +4576,7 @@
  {
   "id": "MON254",
   "name": "Tremor of i'Arathael",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If a card has been put into your banished zone this turn, Tremor of i'Arathael gains +2{p}.",
   "pitch": 1,
   "cost": 1,
@@ -4593,7 +4593,7 @@
  {
   "id": "MON255",
   "name": "Tremor of i'Arathael",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If a card has been put into your banished zone this turn, Tremor of i'Arathael gains +2{p}.",
   "pitch": 2,
   "cost": 1,
@@ -4610,7 +4610,7 @@
  {
   "id": "MON256",
   "name": "Tremor of i'Arathael",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If a card has been put into your banished zone this turn, Tremor of i'Arathael gains +2{p}.",
   "pitch": 3,
   "cost": 1,
@@ -4627,7 +4627,7 @@
  {
   "id": "MON257",
   "name": "Rise Above",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "You may put a card from your hand on top of your deck rather than pay Rise Above's {r} cost.",
   "pitch": 1,
   "cost": 2,
@@ -4640,7 +4640,7 @@
  {
   "id": "MON258",
   "name": "Rise Above",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "You may put a card from your hand on top of your deck rather than pay Rise Above's {r} cost.",
   "pitch": 2,
   "cost": 2,
@@ -4653,7 +4653,7 @@
  {
   "id": "MON259",
   "name": "Rise Above",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "You may put a card from your hand on top of your deck rather than pay Rise Above's {r} cost.",
   "pitch": 3,
   "cost": 2,
@@ -4666,7 +4666,7 @@
  {
   "id": "MON260",
   "name": "Captain's Call",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose 1;\nThe next attack action card with cost 2 or less you play this turn gains +2{p}.\nThe next attack action card with cost 2 or less you play this turn gains go again.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -4682,7 +4682,7 @@
  {
   "id": "MON261",
   "name": "Captain's Call",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose 1;\nThe next attack action card with cost 1 or less you play this turn gains +2{p}.\nThe next attack action card with cost 1 or less you play this turn gains go again.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -4698,7 +4698,7 @@
  {
   "id": "MON262",
   "name": "Captain's Call",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Choose 1;\nThe next attack action card with cost 0 you play this turn gains +2{p}.\nThe next attack action card with cost 0 you play this turn gains go again.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -4714,7 +4714,7 @@
  {
   "id": "MON263",
   "name": "Adrenaline Rush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you play this, if you have less {h} than an opposing hero, this gets +3{p}.",
   "pitch": 1,
   "cost": 2,
@@ -4731,7 +4731,7 @@
  {
   "id": "MON264",
   "name": "Adrenaline Rush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you play this, if you have less {h} than an opposing hero, this gets +3{p}.",
   "pitch": 2,
   "cost": 2,
@@ -4748,7 +4748,7 @@
  {
   "id": "MON265",
   "name": "Adrenaline Rush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you play this, if you have less {h} than an opposing hero, this gets +3{p}.",
   "pitch": 3,
   "cost": 2,
@@ -4765,7 +4765,7 @@
  {
   "id": "MON266",
   "name": "Belittle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Belittle, you may reveal an attack action card with 3 or less base {p} from your hand. If you do, search your deck for a card named Minnowism, reveal it, put it into your hand, then shuffle your deck.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -4785,7 +4785,7 @@
  {
   "id": "MON267",
   "name": "Belittle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Belittle, you may reveal an attack action card with 3 or less base {p} from your hand. If you do, search your deck for a card named Minnowism, reveal it, put it into your hand, then shuffle your deck.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -4805,7 +4805,7 @@
  {
   "id": "MON268",
   "name": "Belittle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Belittle, you may reveal an attack action card with 3 or less base {p} from your hand. If you do, search your deck for a card named Minnowism, reveal it, put it into your hand, then shuffle your deck.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -4825,7 +4825,7 @@
  {
   "id": "MON269",
   "name": "Brandish",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Brandish hits, your next weapon attack this turn gains +1{p}.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -4845,7 +4845,7 @@
  {
   "id": "MON270",
   "name": "Brandish",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Brandish hits, your next weapon attack this turn gains +1{p}.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -4865,7 +4865,7 @@
  {
   "id": "MON271",
   "name": "Brandish",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If Brandish hits, your next weapon attack this turn gains +1{p}.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -4885,7 +4885,7 @@
  {
   "id": "MON272",
   "name": "Frontline Scout",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may look at the defending hero's hand.\nIf Frontline Scout is played from arsenal, it gains go again.",
   "pitch": 1,
   "cost": 0,
@@ -4905,7 +4905,7 @@
  {
   "id": "MON273",
   "name": "Frontline Scout",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may look at the defending hero's hand.\nIf Frontline Scout is played from arsenal, it gains go again.",
   "pitch": 2,
   "cost": 0,
@@ -4925,7 +4925,7 @@
  {
   "id": "MON274",
   "name": "Frontline Scout",
-  "cardType": "action",
+  "types": ["action"],
   "text": "You may look at the defending hero's hand.\nIf Frontline Scout is played from arsenal, it gains go again.",
   "pitch": 3,
   "cost": 0,
@@ -4945,7 +4945,7 @@
  {
   "id": "MON275",
   "name": "Overload",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate\nIf Overload hits, it gains go again.",
   "pitch": 1,
   "cost": 0,
@@ -4966,7 +4966,7 @@
  {
   "id": "MON276",
   "name": "Overload",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate\nIf Overload hits, it gains go again.",
   "pitch": 2,
   "cost": 0,
@@ -4987,7 +4987,7 @@
  {
   "id": "MON277",
   "name": "Overload",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dominate\nIf Overload hits, it gains go again.",
   "pitch": 3,
   "cost": 0,
@@ -5008,7 +5008,7 @@
  {
   "id": "MON278",
   "name": "Pound for Pound",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you play Pound for Pound, if you have less {h} than an opposing hero, it gains dominate.",
   "pitch": 1,
   "cost": 3,
@@ -5028,7 +5028,7 @@
  {
   "id": "MON279",
   "name": "Pound for Pound",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you play Pound for Pound, if you have less {h} than an opposing hero, it gains dominate.",
   "pitch": 2,
   "cost": 3,
@@ -5048,7 +5048,7 @@
  {
   "id": "MON280",
   "name": "Pound for Pound",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you play Pound for Pound, if you have less {h} than an opposing hero, it gains dominate.",
   "pitch": 3,
   "cost": 3,
@@ -5068,7 +5068,7 @@
  {
   "id": "MON281",
   "name": "Rally the Rearguard",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this ability only while this is defending.",
   "pitch": 1,
   "cost": 2,
@@ -5085,7 +5085,7 @@
  {
   "id": "MON282",
   "name": "Rally the Rearguard",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this ability only while this is defending.",
   "pitch": 2,
   "cost": 2,
@@ -5102,7 +5102,7 @@
  {
   "id": "MON283",
   "name": "Rally the Rearguard",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per Turn Instant - Discard a card: This gets +3{d}. Activate this ability only while this is defending.",
   "pitch": 3,
   "cost": 2,
@@ -5119,7 +5119,7 @@
  {
   "id": "MON284",
   "name": "Stony Woottonhog",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While Stony Woottonhog is defended by less than 2 non-equipment cards, it has +1{p}.",
   "pitch": 1,
   "cost": 2,
@@ -5136,7 +5136,7 @@
  {
   "id": "MON285",
   "name": "Stony Woottonhog",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While Stony Woottonhog is defended by less than 2 non-equipment cards, it has +1{p}.",
   "pitch": 2,
   "cost": 2,
@@ -5153,7 +5153,7 @@
  {
   "id": "MON286",
   "name": "Stony Woottonhog",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While Stony Woottonhog is defended by less than 2 non-equipment cards, it has +1{p}.",
   "pitch": 3,
   "cost": 2,
@@ -5170,7 +5170,7 @@
  {
   "id": "MON287",
   "name": "Surging Militia",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Surging Militia has +1{p} for each non-equipment card defending it.",
   "pitch": 1,
   "cost": 2,
@@ -5187,7 +5187,7 @@
  {
   "id": "MON288",
   "name": "Surging Militia",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Surging Militia has +1{p} for each non-equipment card defending it.",
   "pitch": 2,
   "cost": 2,
@@ -5204,7 +5204,7 @@
  {
   "id": "MON289",
   "name": "Surging Militia",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Surging Militia has +1{p} for each non-equipment card defending it.",
   "pitch": 3,
   "cost": 2,
@@ -5221,7 +5221,7 @@
  {
   "id": "MON290",
   "name": "Yinti Yanti",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While Yinti Yanti is attacking and you control an aura, it has +1{p}.\nWhile Yinti Yanti is defending and you control an aura, it has +1{d}.",
   "pitch": 1,
   "cost": 0,
@@ -5238,7 +5238,7 @@
  {
   "id": "MON291",
   "name": "Yinti Yanti",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While Yinti Yanti is attacking and you control an aura, it has +1{p}.\nWhile Yinti Yanti is defending and you control an aura, it has +1{d}.",
   "pitch": 2,
   "cost": 0,
@@ -5255,7 +5255,7 @@
  {
   "id": "MON292",
   "name": "Yinti Yanti",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While Yinti Yanti is attacking and you control an aura, it has +1{p}.\nWhile Yinti Yanti is defending and you control an aura, it has +1{d}.",
   "pitch": 3,
   "cost": 0,
@@ -5272,7 +5272,7 @@
  {
   "id": "MON293",
   "name": "Zealous Belting",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While there is a card in your pitch zone with {p} greater than Zealous Belting's base {p}, Zealous Belting has go again.",
   "pitch": 1,
   "cost": 2,
@@ -5292,7 +5292,7 @@
  {
   "id": "MON294",
   "name": "Zealous Belting",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While there is a card in your pitch zone with {p} greater than Zealous Belting's base {p}, Zealous Belting has go again.",
   "pitch": 2,
   "cost": 2,
@@ -5312,7 +5312,7 @@
  {
   "id": "MON295",
   "name": "Zealous Belting",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While there is a card in your pitch zone with {p} greater than Zealous Belting's base {p}, Zealous Belting has go again.",
   "pitch": 3,
   "cost": 2,
@@ -5332,7 +5332,7 @@
  {
   "id": "MON296",
   "name": "Minnowism",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card with 3 or less base {p} you play this turn gains +3{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -5348,7 +5348,7 @@
  {
   "id": "MON297",
   "name": "Minnowism",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card with 3 or less base {p} you play this turn gains +2{p}.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -5364,7 +5364,7 @@
  {
   "id": "MON298",
   "name": "Minnowism",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card with 3 or less base {p} you play this turn gains +1{p}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -5380,7 +5380,7 @@
  {
   "id": "MON299",
   "name": "Warmonger's Recital",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +3{p} and \"When this hits, put it on the bottom of its owner's deck.\"\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -5396,7 +5396,7 @@
  {
   "id": "MON300",
   "name": "Warmonger's Recital",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +2{p} and \"When this hits, put it on the bottom of its owner's deck.\"\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -5412,7 +5412,7 @@
  {
   "id": "MON301",
   "name": "Warmonger's Recital",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn gains +1{p} and \"When this hits, put it on the bottom of its owner's deck.\"\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -5428,7 +5428,7 @@
  {
   "id": "MON302",
   "name": "Talisman of Dousing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nSpellvoid 1",
   "pitch": 2,
   "cost": 0,
@@ -5447,7 +5447,7 @@
  {
   "id": "MON303",
   "name": "Memorial Ground",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Put target attack action card with cost 2 or less from your graveyard on top of your deck.",
   "pitch": 1,
   "cost": 0,
@@ -5459,7 +5459,7 @@
  {
   "id": "MON304",
   "name": "Memorial Ground",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Put target attack action card with cost 1 or less from your graveyard on top of your deck.",
   "pitch": 2,
   "cost": 0,
@@ -5471,7 +5471,7 @@
  {
   "id": "MON305",
   "name": "Memorial Ground",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Put target attack action card with cost 0 from your graveyard on top of your deck.",
   "pitch": 3,
   "cost": 0,
@@ -5483,7 +5483,7 @@
  {
   "id": "MON306",
   "name": "Cracked Bauble",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
   "pitch": 2,
   "classes": [

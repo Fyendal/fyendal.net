@@ -22,6 +22,7 @@ export interface PersistedCardInstanceV1 {
   lastKnownCounters?: CardCounters;
   scriptState?: Record<string, number>;
   chosenName?: string;
+  creatorSeat?: number;
   playableFrom?: ("banish" | "graveyard" | "deck")[];
   playableFromSourceCardId?: string;
   playableFromSingleUseGroup?: string;
@@ -105,6 +106,7 @@ export interface PersistedStackLayerV1 {
     | { kind: "gain-action-points"; amount: number }
     | { kind: "lose-life"; amount: number }
     | { kind: "phantasm-destroy" }
+    | { kind: "mirage-destroy" }
     | { kind: "spectra-destroy" }
     | { kind: "watery-grave" }
     | { kind: "wager-result"; wagerIndex: number }
@@ -313,6 +315,7 @@ export interface PersistedModifierV1 {
   onDamageDealtCreateTokenPerPoint?: string;
   onPreventCreateToken?: string;
   defendedLessThanNonEquip?: number;
+  intimidatedAtLeastThisTurn?: number;
   appliesTo?: "any" | "attack" | "weapon" | "sword" | "attack-action";
   powerWhileDefending?: boolean;
   appliesToClass?: string;
@@ -328,6 +331,10 @@ export interface PersistedModifierV1 {
   appliesToInstanceId?: number;
   appliesToTargetType?: string;
   appliesToTargetNamePrefix?: string;
+  appliesToTargetControllingType?: string;
+  prohibitsTokenCreationOfType?: string;
+  prohibitsOpponentTokenCreation?: boolean;
+  creatorSeat?: number;
   appliesToMarkedHero?: boolean;
   excludesSubtype?: string;
   appliesToCardType?: string;
@@ -374,9 +381,11 @@ export interface PersistedPendingArcaneV1 {
   unpreventable?: boolean;
   payTotal?: number;
   arcaneBarrierResolved?: true;
+  spellvoidDeclined?: true;
   usedQuellSourceIds?: number[];
   wardSourceIds?: number[];
   usedDiscardDamagePreventionModifierIds?: number[];
+  usedOptionalDamagePreventionSourceIds?: number[];
   usedSoulDamagePreventionSourceIds?: number[];
   soulDamagePreventionSourceInstanceId?: number;
   lethalDamagePreventionModifierId?: number;
@@ -388,6 +397,7 @@ export type PersistedDecisionResumeV1 =
   | { kind: "stack-card"; seat: number; card: PersistedCardInstanceV1 }
   | { kind: "continue-play-after-declaration"; seat: number; instanceId: number; pitchInstanceIds: number[]; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck"; meldSide?: "left" | "right" | "both"; targetAllyId?: number; boost?: boolean; boostCount?: number; asInstant?: boolean; alternativeCostCardInstanceIds?: number[]; targetCardInstanceId?: number; declaredVariableX?: number }
   | { kind: "continue-reaction-after-declaration"; seat: number; instanceId: number; pitchInstanceIds: number[]; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck"; meldSide?: "left" | "right" | "both"; targetAllyId?: number; alternativeCostCardInstanceIds?: number[]; targetCardInstanceId?: number; declaredVariableX?: number }
+  | { kind: "continue-window-instant-after-declaration"; seat: number; instanceId: number; pitchInstanceIds: number[]; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck"; meldSide?: "left" | "right" | "both"; targetAllyId?: number; boost?: boolean; boostCount?: number; alternativeCostCardInstanceIds?: number[]; targetCardInstanceId?: number; declaredVariableX?: number }
   | { kind: "finish-play"; seat: number; card: PersistedCardInstanceV1; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck"; targetAllyId?: number; boost?: boolean; boostCount?: number; asInstant?: boolean }
   | { kind: "finish-reaction"; seat: number; card: PersistedCardInstanceV1; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck" }
   | { kind: "finish-window-instant"; seat: number; card: PersistedCardInstanceV1; from: "hand" | "arsenal" | "banish" | "graveyard" | "deck" }
@@ -401,11 +411,19 @@ export type PersistedDecisionResumeV1 =
   | { kind: "reopen-reaction"; seat: number }
   | { kind: "game-setup"; nextSeat: number };
 
+export interface PersistedTokenCreationCauseV1 {
+  kind: "effect" | "wager";
+  sourceCardId?: string;
+  creatorSeat?: number;
+  ownerSeat?: number;
+}
+
 export interface PersistedPendingDecisionV1 {
   player: number;
   kind: "defend" | "attack-reaction" | "defense-reaction" | "priority-window" | "arsenal" | "choose-target" | "choose-name" | "order-triggers" | "optional-effect";
   prompt: string;
   promptMessage?: GameMessage;
+  warningMessage?: GameMessage;
   options?: string[];
   minimumSelections?: number;
   maximumSelections?: number;
@@ -420,8 +438,9 @@ export interface PersistedPendingDecisionV1 {
   scriptSourceSnapshot?: { seat: number; card: PersistedCardInstanceV1 };
   chooseHook?: string;
   followUpDecisions?: PersistedPendingDecisionV1[];
-  tokenCreationCause?: { kind: "effect" | "wager"; sourceCardId?: string };
+  tokenCreationCause?: PersistedTokenCreationCauseV1;
   cardOptions?: (number | string | null)[];
+  optionEnabledCardIds?: number[][];
   revealedCardIds?: number[];
   lookedCardIds?: number[];
   payment?: { pitchOptions: Record<string, { cost: number; pitchIds: number[]; result: string }> };
@@ -459,7 +478,7 @@ export interface PersistedPendingDecisionV1 {
     seat: number;
     cardId: string;
     count: number;
-    cause: { kind: "effect" | "wager"; sourceCardId?: string };
+    cause: PersistedTokenCreationCauseV1;
     initialCounters?: CardCounters;
     initialState?: Record<string, number>;
     remainingReplacements: { instanceId: number; kind: "global" | "friendly" | "optional-friendly" }[];
@@ -469,7 +488,7 @@ export interface PersistedPendingDecisionV1 {
     seat: number;
     cardId: string;
     count: number;
-    cause: { kind: "effect" | "wager"; sourceCardId?: string };
+    cause: PersistedTokenCreationCauseV1;
     initialCounters?: CardCounters;
     initialState?: Record<string, number>;
     remainingReplacements: { instanceId: number; kind: "global" | "friendly" | "optional-friendly" }[];
@@ -505,6 +524,7 @@ export interface PersistedPendingDecisionV1 {
     remaining: PersistedStackLayerV1[];
     later: { seat: number; layers: PersistedStackLayerV1[] }[];
     baseStack?: PersistedStackLayerV1[];
+    prioritySeat?: number;
   };
   deckBottomOrder?: {
     ordered: number[];
@@ -569,7 +589,7 @@ export interface PersistedGameStateV1 {
     seat: number;
     cardId: string;
     count: number;
-    cause: { kind: "effect" | "wager"; sourceCardId?: string };
+    cause: PersistedTokenCreationCauseV1;
     initialCounters?: CardCounters;
     initialState?: Record<string, number>;
   }[];

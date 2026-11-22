@@ -7,11 +7,27 @@ const BLUE = "wrecker romp|3";
 const NON_ATTACK = "nimblism|3";
 const GRAPHENE = "graphene chelicera|0";
 
+// Swaps in the attacker's last hand card, then stops at the defender's reaction priority.
+function swapToLastHandCard(s: ReturnType<typeof scenario>): void {
+  s.activate("uzuri|0");
+  s.doRaw({ kind: "choose", optionId: String(s.state.players[0]!.hand.at(-1)!.instanceId) });
+  while (s.state.stack.length > 0 || s.state.priorityPlayer !== 1) s.passPriority();
+}
+
+function resolveStack(s: ReturnType<typeof scenario>): void {
+  while (s.state.stack.length > 0) s.passPriority();
+}
+
+function reactionPlayableAfterSwap(s: ReturnType<typeof scenario>, reaction: number): boolean {
+  swapToLastHandCard(s);
+  return legalIntents(s.state, 1).some((intent) => intent.kind === "play-card" && intent.instanceId === reaction);
+}
+
 describe("OUT — registration and core mechanics", () => {
   it("registers every printing and all heroes", () => {
     expect(Object.keys(cardData).filter((id) => id.startsWith("OUT"))).toHaveLength(239);
     for (const id of ["OUT002", "OUT003", "OUT046", "OUT047", "OUT090", "OUT092"]) {
-      expect(cardData[id]?.cardType).toBe("hero");
+      expect(cardData[id]?.types).toContain("hero");
       expect(scripts[id]).toBeDefined();
     }
   });
@@ -307,6 +323,51 @@ describe("OUT — registration and core mechanics", () => {
     expect(s.state.pendingDecision).toBeNull();
   });
 
+  describe("Codex choices start with the controller when seat 1 plays it", () => {
+    // Makes each choice in order and returns the seat that made it.
+    const chooseInOrder = (s: ReturnType<typeof scenario>, keys: string[]) => keys.map((key) => {
+      const seat = s.state.pendingDecision!.player;
+      s.chooseCard(key);
+      return seat;
+    });
+
+    it("Codex of Bloodrot", () => {
+      const s = scenario({ active: 1, seats: [
+        { hero: "rhinar", hand: [NON_ATTACK] },
+        { hero: "dorinthea", hand: ["codex of bloodrot|2", BLUE] },
+      ] });
+
+      s.play("codex of bloodrot|2");
+
+      expect(chooseInOrder(s, [BLUE, NON_ATTACK])).toEqual([1, 0]);
+      s.expectInZone(1, BLUE, "arsenal").expectInZone(0, NON_ATTACK, "arsenal");
+    });
+
+    it("Codex of Frailty", () => {
+      const s = scenario({ active: 1, seats: [
+        { hero: "rhinar", hand: [NON_ATTACK], graveyard: ["infect|1"] },
+        { hero: "dorinthea", hand: ["codex of frailty|2", BLUE], graveyard: ["the weakest link|1"] },
+      ] });
+
+      s.play("codex of frailty|2");
+
+      expect(chooseInOrder(s, ["the weakest link|1", "infect|1", BLUE, NON_ATTACK])).toEqual([1, 0, 1, 0]);
+      s.expectInZone(1, BLUE, "graveyard").expectInZone(0, NON_ATTACK, "graveyard");
+    });
+
+    it("Codex of Inertia", () => {
+      const s = scenario({ active: 1, seats: [
+        { hero: "rhinar", hand: [NON_ATTACK], deck: ["infect|1"] },
+        { hero: "dorinthea", hand: ["codex of inertia|2", BLUE], deck: ["the weakest link|1"] },
+      ] });
+
+      s.play("codex of inertia|2");
+
+      expect(chooseInOrder(s, [BLUE, NON_ATTACK])).toEqual([1, 0]);
+      s.expectInZone(1, BLUE, "graveyard").expectInZone(0, NON_ATTACK, "graveyard");
+    });
+  });
+
   it("Codex of Frailty fills New Horizon's empty additional arsenal zone", () => {
     const s = scenario({
       seats: [
@@ -459,6 +520,145 @@ describe("OUT — registration and core mechanics", () => {
       .expectFinalDefense(expectedDefense);
   });
 
+  it("Scale Peeler's -1{d} still applies when Temper checks at chain close", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "arakni, solitary confinement|0",
+          hand: ["infect|1", "infect|1"],
+          weapons: ["scale peeler|0"],
+          equipment: { arms: "flick knives|0" },
+        },
+        { hero: "dorinthea", hand: [BLUE], equipment: { arms: "steelbraid buckler|0" } },
+      ],
+    });
+
+    s.play("infect|1").blockWith(BLUE)
+      .activate("flick knives|0")
+      .chooseCard("scale peeler|0")
+      .play("infect|1")
+      .blockWith("steelbraid buckler|0")
+      .settle()
+      .expectFinalDefense(1)
+      .endTurn()
+      .expectNoEquipment(1, "arms");
+  });
+
+  it("Nerve Scalpel's -1{d} ends when Shimmering Mirage leaves the chain and is replayed", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["head jab|1", "head jab|1", "head jab|1"],
+          weapons: ["nerve scalpel|0"],
+          equipment: { arms: "flick knives|0" },
+        },
+        { hero: "dorinthea", hand: [BLUE, "shimmering mirage|3"] },
+      ],
+    });
+
+    s.play("head jab|1").blockWith(BLUE)
+      .activate("flick knives|0")
+      .chooseCard("nerve scalpel|0")
+      .play("head jab|1").blockWith()
+      .passPriority()
+      .react("shimmering mirage|3")
+      .settle()
+      .expectFinalDefense(1)
+      .expectLife(1, 17) // Flick Knives 1, then 3 - (2 - 1)
+      .expectInZone(1, "shimmering mirage|3", "banish")
+      .play("head jab|1").blockWith()
+      .passPriority()
+      .react("shimmering mirage|3")
+      .settle()
+      .expectFinalDefense(2)
+      .expectLife(1, 16); // 3 - 2: the replayed Mirage is a new object
+  });
+
+  it("Nerve Scalpel's -1{d} is projected onto the defender's defense reactions", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 6, weapons: ["nerve scalpel|0", "spider's bite|0"] },
+        { hero: "dorinthea", hand: ["sink below|1"] },
+      ],
+    });
+
+    s.attackWithWeapon("nerve scalpel|0").blockWith().settle()
+      .attackWithWeapon("spider's bite|0");
+    const sinkBelow = s.state.players[1]!.hand[0]!.instanceId;
+    expect(s.state.pendingDecision?.kind).toBe("defend");
+    expect(projectStateFor(s.state, 1).pendingDecision?.reactionDefense)
+      .toEqual([{ instanceId: sinkBelow, defense: 3 }]);
+    expect(projectStateFor(s.state, 0).pendingDecision?.reactionDefense).toBeUndefined();
+
+    s.blockWith().passPriority();
+    expect(s.state.pendingDecision?.kind).toBe("defense-reaction");
+    expect(projectStateFor(s.state, 1).pendingDecision?.reactionDefense)
+      .toEqual([{ instanceId: sinkBelow, defense: 3 }]);
+    s.react("sink below|1").doRaw({ kind: "choose", optionId: "pass" });
+    expect(projectStateFor(s.state, 1).chain[1]?.defenseValue).toBe(3);
+  });
+
+  it("Nerve Scalpel's -1{d} ends when Rout returns the defending card to hand", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 6,
+          hand: ["rout|1"],
+          weapons: ["nerve scalpel|0", "spider's bite|0"],
+        },
+        { hero: "dorinthea", hand: [BLUE, "shimmering mirage|3"] },
+      ],
+    });
+
+    s.attackWithWeapon("nerve scalpel|0").blockWith().settle()
+      .attackWithWeapon("spider's bite|0").blockWith(BLUE)
+      .passPriority()
+      .react("shimmering mirage|3", { settle: false })
+      .passPriority().passPriority()
+      .react("rout|1", { settle: false })
+      .passPriority().passPriority();
+    const mirage = s.state.chain[1]!.defendingCards.find(
+      (card) => card.cardId === printingId("shimmering mirage|3"),
+    )!;
+    s.doRaw({ kind: "choose", optionId: String(mirage.instanceId) })
+      .expectInZone(1, "shimmering mirage|3", "hand")
+      .passPriority()
+      .react("shimmering mirage|3")
+      .settle()
+      .expectFinalDefense(5); // Wrecker Romp 3 + a fresh Mirage 2
+  });
+
+  it("Scale Peeler's -1{d} follows Quickdodge Flexors when it moves to a new link", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["head jab|1", "head jab|1", "head jab|1"],
+          weapons: ["scale peeler|0"],
+          equipment: { arms: "flick knives|0" },
+        },
+        { hero: "dorinthea", resources: 2, hand: [BLUE], equipment: { legs: "quickdodge flexors|0" } },
+      ],
+    });
+
+    s.play("head jab|1").blockWith(BLUE)
+      .activate("flick knives|0")
+      .chooseCard("scale peeler|0")
+      .play("head jab|1").blockWith()
+      .passPriority()
+      .activate("quickdodge flexors|0")
+      .settle()
+      .expectFinalDefense(1)
+      .play("head jab|1").blockWith()
+      .passPriority()
+      .activate("quickdodge flexors|0")
+      .settle()
+      .expectFinalDefense(1);
+  });
+
   it("Flick Knives keeps a fully defended link in Mask of Momentum's hit streak", () => {
     const s = scenario({
       seats: [
@@ -535,6 +735,22 @@ describe("OUT — registration and core mechanics", () => {
 });
 
 describe("OUT — rules regression coverage", () => {
+  it("Infectious Host copies disease tokens that another card created", () => {
+    const noEquipment = { head: null, chest: null, arms: null, legs: null } as const;
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 2, hand: ["bloodrot courier|1", "infectious host|1"], weapons: [], equipment: noEquipment },
+        { hero: "dorinthea", hand: [], weapons: [], equipment: noEquipment },
+      ],
+    });
+    const boardNames = (seat: number) => s.state.players[seat]!.board.map((card) => cardData[card.cardId]!.name);
+
+    s.play("bloodrot courier|1").blockWith().settle();
+    expect(boardNames(1)).toEqual(["Bloodrot Pox"]);
+    s.play("infectious host|1");
+    expect(boardNames(1)).toEqual(["Bloodrot Pox", "Bloodrot Pox"]);
+  });
+
   it("Quiver of Abyssal Depths shuffles in up to 3 chosen arrows with different names", () => {
     const s = scenario({
       seats: [
@@ -602,6 +818,31 @@ describe("OUT — rules regression coverage", () => {
     g.play("infiltrate|1").blockWith().settle();
     g.endTurn().endTurn().endTurn().endTurn().expectTurn(5)
       .expectNoLegalPlay("cut through|1");
+  });
+
+  describe("an Infiltrated defense reaction defends for its controller", () => {
+    function infiltrated(reaction: string, attack: string) {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", hand: ["infiltrate|1"], deck: Array(6).fill(BLUE) },
+          { hero: "dorinthea", hand: [], deck: [reaction, attack] },
+        ],
+      });
+      g.play("infiltrate|1").blockWith().settle().endTurn();
+      g.play(attack).blockWith().passPriority();
+      return g.react(reaction);
+    }
+
+    it("Drag Down weakens the opposing attack", () => {
+      infiltrated("drag down|1", "snatch|1").settle().expectLife(0, 19);
+    });
+
+    it("That All You Got? draws for its controller when the chain closes", () => {
+      const g = infiltrated("that all you got?|2", "wounding blow|3");
+      const hands = g.state.players.map((player) => player.hand.length);
+      while (g.state.chain.length > 0) g.passPriority();
+      g.expectHandSize(0, hands[0]! + 1).expectHandSize(1, hands[1]!);
+    });
   });
 
   it("Redback Shroud reduces the next attack reaction's cost", () => {
@@ -896,6 +1137,472 @@ describe("OUT — rules regression coverage", () => {
       .chooseCard("remember the mists|3");
     expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Remember the Mists");
     expect(s.state.chain.at(-1)!.damage).toBe(6);
+  });
+
+  it("Uzuri's replacement attack applies its defense-reaction prohibition", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "command and conquer|1"] },
+        { hero: "dorinthea", hand: ["sink below|1"] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    const reaction = s.state.players[1]!.hand[0]!.instanceId;
+    expect(reactionPlayableAfterSwap(s, reaction)).toBe(false);
+    expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Command and Conquer");
+  });
+
+  it("Uzuri replacing Back Stab removes its defense-reaction prohibition", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["back stab|1", "infect|1"] },
+        { hero: "dorinthea", hand: ["sink below|1"] },
+      ],
+    });
+    s.play("back stab|1").blockWith();
+    const reaction = s.state.players[1]!.hand[0]!.instanceId;
+    expect(reactionPlayableAfterSwap(s, reaction)).toBe(true);
+    expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Infect");
+  });
+
+  it("Uzuri's replacement Malign's damage can't be prevented", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "malign|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    swapToLastHandCard(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.damageUnpreventable).toBe(true);
+  });
+
+  it("Uzuri replacing Malign makes damage preventable again", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["malign|1", "infect|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("malign|1").blockWith();
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.damageUnpreventable).toBe(true);
+    swapToLastHandCard(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.damageUnpreventable).toBeUndefined();
+  });
+
+  it("Uzuri replacing Scuttle the Canal removes its go again", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["reaper's call|1", "scuttle the canal|1", "infect|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.activate("reaper's call|1");
+    s.play("scuttle the canal|1").blockWith();
+    expect(s.state.chain.at(-1)!.goAgain).toBe(true);
+    swapToLastHandCard(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.goAgain).toBe(false);
+  });
+
+  it("Uzuri replacing Continued Coercion keeps its leave-trigger go again", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["continued coercion|2", "infect|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("continued coercion|2").blockWith();
+    swapToLastHandCard(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.goAgain).toBe(true);
+  });
+
+  it("Uzuri's replacement Vigor Rush checks its go again condition", () => {
+    const withAction = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: [NON_ATTACK, "infect|1", "vigor rush|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    withAction.play(NON_ATTACK).play("infect|1").blockWith();
+    swapToLastHandCard(withAction);
+    expect(projectStateFor(withAction.state, 1).chain.at(-1)!.goAgain).toBe(true);
+
+    const without = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "vigor rush|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    without.play("infect|1").blockWith();
+    swapToLastHandCard(without);
+    expect(projectStateFor(without.state, 1).chain.at(-1)!.goAgain).toBe(false);
+  });
+
+  it("Uzuri's replacement Zealous Belting checks the pitch zone for go again", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "uzuri|0",
+          hand: ["come to fight|1", "thunder quake|3", "infect|1", "zealous belting|1"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("come to fight|1", { pitch: ["thunder quake|3"] }).play("infect|1").blockWith();
+    swapToLastHandCard(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.goAgain).toBe(true);
+  });
+
+  it("Uzuri's own banish cost gives replacement Rumbling of i'Arathael overpower", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "rumbling of i'arathael|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    swapToLastHandCard(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.overpower).toBe(true);
+  });
+
+  it("Uzuri's replacement Nourishing Emptiness checks the graveyard for dominate", () => {
+    const blocked = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "nourishing emptiness|1"], graveyard: ["sneak attack|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    blocked.play("infect|1").blockWith();
+    swapToLastHandCard(blocked);
+    expect(projectStateFor(blocked.state, 1).chain.at(-1)!.dominate).toBe(false);
+
+    const open = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "nourishing emptiness|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    open.play("infect|1").blockWith();
+    swapToLastHandCard(open);
+    expect(projectStateFor(open.state, 1).chain.at(-1)!.dominate).toBe(true);
+  });
+
+  it("Uzuri's replacement Mutually Assured Destruction triggers on the first reaction", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "mutually assured destruction|1"] },
+        { hero: "dorinthea", hand: ["sink below|1"] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    swapToLastHandCard(s);
+    const reaction = s.state.players[1]!.hand[0]!.instanceId;
+    s.doRaw({ kind: "play-card", instanceId: reaction, pitchInstanceIds: [] }).settle();
+    expect(s.state.players[0]!.board.map((card) => cardData[card.cardId]!.name)).toContain("Bloodrot Pox");
+  });
+
+  it("Uzuri's replacement Demoralize the Dracai banishes on its hit and on later hits", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "uzuri|0",
+          hand: ["continued coercion|2", "infect|1", "demoralize the dracai|1"],
+        },
+        { hero: "dorinthea", hand: [], deck: [BLUE, BLUE, BLUE] },
+      ],
+    });
+    s.play("continued coercion|2").blockWith();
+    swapToLastHandCard(s);
+    s.settle();
+    expect(s.state.players[1]!.banish).toHaveLength(1);
+    s.play("infect|1").blockWith().settle();
+    expect(s.state.players[1]!.banish).toHaveLength(2);
+  });
+
+  it("Uzuri ends pumps on the replaced attack but keeps played-reaction conditions", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "razor's edge|1", "sneak attack|1"], resources: 1 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    s.play("razor's edge|1", { settle: false });
+    resolveStack(s);
+    while (s.state.priorityPlayer !== 0) s.passPriority();
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.attackValue).toBe(6);
+    swapToLastHandCard(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.attackValue).toBe(7);
+  });
+
+  it("Uzuri replacing Flip the Script keeps its link-wide +1 but not a pump on the old attack", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["flip the script|3", "razor's edge|1", "infect|1"], resources: 1 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("flip the script|3").blockWith();
+    s.play("razor's edge|1", { settle: false });
+    resolveStack(s);
+    while (s.state.priorityPlayer !== 0) s.passPriority();
+    swapToLastHandCard(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.attackValue).toBe(cardData[printingId("infect|1")]!.attack! + 1);
+  });
+
+  it("Uzuri replacing Spike Slasher keeps the link's attack reaction discount", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["spike slasher|1", "infect|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("spike slasher|1").blockWith();
+    expect(s.state.modifiers.some((modifier) => modifier.playCostReduction === 1)).toBe(true);
+    swapToLastHandCard(s);
+    expect(s.state.modifiers.some((modifier) => modifier.playCostReduction === 1)).toBe(true);
+  });
+
+  it("An attack reaction's targeted effect fails when Uzuri replaces its target in response", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "razor's edge|1", "sneak attack|1"], resources: 1 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    s.play("razor's edge|1", { settle: false });
+    swapToLastHandCard(s);
+    expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Sneak Attack");
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.attackValue).toBe(7);
+    s.expectLog("Razor's Edge's targeted effect fails");
+  });
+
+  it("An attack reaction ability's targeted effect fails when Uzuri replaces its target in response", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "uzuri|0",
+          hand: ["infect|1", "sneak attack|1"],
+          equipment: { legs: "stalker's steps|0" },
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    s.activate("stalker's steps|0", { settle: false });
+    swapToLastHandCard(s);
+    expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Sneak Attack");
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.goAgain).toBe(false);
+    s.expectLog("Stalker's Steps's targeted effect fails");
+  });
+
+  it("An instant with a declared target fails when Uzuri replaces it in response", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "lightning press|1", "sneak attack|1"], resources: 3 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    s.play("lightning press|1", { settle: false });
+    swapToLastHandCard(s);
+    expect(cardData[s.state.chain.at(-1)!.attackingCard.cardId]!.name).toBe("Sneak Attack");
+    s.expectLog("Lightning Press's targeted effect fails");
+  });
+
+  it("An instant's targeted effect fails when Uzuri replaces its target in response", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "uzuri|0",
+          hand: ["infect|1", "the grain that tips the scale|3", "sneak attack|1"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    s.play("the grain that tips the scale|3", { settle: false });
+    swapToLastHandCard(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.attackValue).toBe(7);
+    s.expectLog("The Grain that Tips the Scale's targeted effect fails");
+  });
+
+  it("An instant ability's targeted effect fails when Uzuri replaces its target in response", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "sneak attack|1"], board: ["concealed object|3"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    s.activate("concealed object|3", { settle: false });
+    swapToLastHandCard(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.attackValue).toBe(7);
+    s.expectLog("Concealed Object's targeted effect fails");
+  });
+
+  it("An instant still resolves when its target stays the attacking card", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "lightning press|1"], resources: 3 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    s.play("lightning press|1", { settle: false });
+    resolveStack(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.attackValue).toBe(6);
+  });
+
+  it("An attack reaction whose target left still generates its other effects", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "exposed|3", "sneak attack|1"], resources: 3 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    s.play("exposed|3", { settle: false });
+    swapToLastHandCard(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.attackValue).toBe(7);
+    expect(s.state.players[1]!.hero.scriptState?.marked).toBeGreaterThan(0);
+    s.expectLog("Exposed's targeted effect fails");
+  });
+
+  it("A modal attack reaction's later choice can't affect the replacement attack", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "two sides to the blade|1", "sneak attack|1"], resources: 3 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    s.play("two sides to the blade|1", { settle: false });
+    s.activate("uzuri|0");
+    s.doRaw({ kind: "choose", optionId: String(s.state.players[0]!.hand.at(-1)!.instanceId) });
+    for (let guard = 0; guard < 20; guard++) {
+      const options = s.state.pendingDecision?.options;
+      if (options) s.doRaw({ kind: "choose", optionId: options.at(-1)! });
+      else if (s.state.stack.length === 0 && s.state.priorityPlayer === 1) break;
+      else s.passPriority();
+    }
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.attackValue).toBe(7);
+    s.settle();
+    expect(s.state.players[1]!.hero.scriptState?.marked ?? 0).toBe(0);
+  });
+
+  it("A granted on-hit rider doesn't move to the replacement attack", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "spike with frailty|1", "sneak attack|1"], resources: 3 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    s.play("spike with frailty|1", { settle: false });
+    swapToLastHandCard(s);
+    s.settle();
+    expect(s.state.players[1]!.board.map((card) => cardData[card.cardId]!.name)).not.toContain("Frailty");
+  });
+
+  it("A departed attack doesn't take effects from other commands", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "nourishing emptiness|1"] },
+        { hero: "dorinthea", hand: [], equipment: { legs: "unflinching foothold|0" } },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    s.passPriority();
+    s.activate("unflinching foothold|0", { settle: false }).passPriority();
+    swapToLastHandCard(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.dominate).toBe(true);
+    expect(s.state.players[0]!.deck.at(-1)!.suppressedKeywords).toBeUndefined();
+    s.expectLog("Unflinching Foothold's targeted effect fails");
+  });
+
+  it("Uzuri's replacement Prowl buffs the next attack with stealth", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["continued coercion|2", "infect|1", "prowl|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("continued coercion|2").blockWith();
+    swapToLastHandCard(s);
+    s.settle();
+    s.play("infect|1");
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.attackValue).toBe(cardData[printingId("infect|1")]!.attack! + 1);
+  });
+
+  it("Uzuri replacing Prowl ends its buff on the next attack", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["prowl|1", "infect|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("prowl|1").blockWith();
+    expect(s.state.modifiers.some((modifier) => modifier.scope === "next-attack")).toBe(true);
+    swapToLastHandCard(s);
+    expect(s.state.modifiers.some((modifier) => modifier.scope === "next-attack")).toBe(false);
+  });
+
+  it("Uzuri replacing Creep keeps the go again its attack trigger already created", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["creep|1", "infect|1"] },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("creep|1").blockWith();
+    swapToLastHandCard(s);
+    expect(s.state.modifiers.some((modifier) => modifier.scope === "next-attack" && modifier.goAgain)).toBe(true);
+  });
+
+  it("A granted type on the replaced attack doesn't reach the replacement", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["brand with cinderclaw|1", "infect|1", "sneak attack|1"], resources: 3 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("brand with cinderclaw|1").blockWith().settle();
+    s.play("infect|1").blockWith();
+    expect(s.state.chain.at(-1)!.flags["grantedType:draconic"]).toBe(true);
+    swapToLastHandCard(s);
+    expect(s.state.chain.at(-1)!.flags["grantedType:draconic"]).toBeUndefined();
+  });
+
+  it("A resolved reaction doesn't keep its recorded attack target", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "razor's edge|1"], resources: 1 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    s.play("razor's edge|1", { settle: false });
+    resolveStack(s);
+    expect(s.state.players[0]!.graveyard.at(-1)!.playTargetInstanceId).toBeUndefined();
+  });
+
+  it("An attack reaction still resolves when its target stays the attacking card", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "uzuri|0", hand: ["infect|1", "razor's edge|1"], resources: 1 },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    s.play("infect|1").blockWith();
+    s.play("razor's edge|1", { settle: false });
+    resolveStack(s);
+    expect(projectStateFor(s.state, 1).chain.at(-1)!.attackValue).toBe(6);
   });
 
   it("Uzuri turns an ineligible cost card face up without replacing the attack", () => {

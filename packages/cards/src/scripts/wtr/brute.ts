@@ -1,9 +1,16 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
-import { attackIntimidateTrigger, isSixPlus, localizedLog, nextAttack, queueIntimidate } from "../shared-helpers.js";
+import {
+  attackIntimidateTrigger,
+  isAttackAction,
+  isSixPlus,
+  localizedLog,
+  nextAttack,
+  queueIntimidate,
+} from "../shared-helpers.js";
 
 /** Store whether the random discard paid for this card had 6+ {p}. */
 function rememberDiscardedSixPlus(ctx: ScriptCtx): void {
-  const attackAction = ctx.hasCardType(ctx.self, "action") && ctx.cardTypes(ctx.self).includes("attack");
+  const attackAction = isAttackAction(ctx, ctx.self);
   if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", true);
   const [discarded] = ctx.discardRandom(ctx.seat, 1);
   if (attackAction) ctx.setFlag("player", "discardingForBruteAttackCost", false);
@@ -149,7 +156,7 @@ export const brute: Record<string, CardScript> = {
     onDieRollResolved(ctx, hook, roll) {
       if (hook !== "barkbone") return;
       const gained = Math.floor(roll / 2);
-      ctx.changeResources(ctx.seat, gained);
+      ctx.gainResources(ctx.seat, gained);
       ctx.logPublic(
         localizedLog(
           `Barkbone Strapping: rolled ${roll}, gained {r}${gained}`,

@@ -45,6 +45,7 @@ import { lgs } from "./lgs.js";
 import { lss } from "./lss.js";
 import { mon } from "./mon.js";
 import { mpa } from "./mpa.js";
+import { mpb } from "./mpb.js";
 import { mpg } from "./mpg.js";
 import { mpw } from "./mpw.js";
 import { mst } from "./mst.js";
@@ -129,6 +130,7 @@ const setModules: Record<string, Record<string, CardScript>> = {
   LSS: lss,
   MON: mon,
   MPA: mpa,
+  MPB: mpb,
   MPG: mpg,
   MPW: mpw,
   MST: mst,

@@ -100,6 +100,45 @@ describe("transformed permanent stacks", () => {
     expect(g.state.chain.at(-1)?.attackingCard.instanceId).toBe(transformedHero.instanceId);
   });
 
+  it("logs only the cards Singularity transforms, not their sub-cards", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "teklovossen|0",
+          resources: 6,
+          hand: ["singularity|1"],
+          weapons: ["teklo leveler|0"],
+          equipment: {
+            head: "evo beta base head|3",
+            chest: "evo beta base chest|3",
+            arms: "evo beta base arms|3",
+            legs: "evo beta base legs|3",
+          },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    const player = g.state.players[0]!;
+    for (const evo of Object.values(player.equipment)) {
+      evo!.subcards = Array.from({ length: 4 }, () => ({
+        instanceId: g.state.nextInstanceId++,
+        cardId: printingId("wounding blow|1"),
+        owner: 0,
+      }));
+    }
+
+    g.play("singularity|1");
+
+    const entry = g.state.log.find((logEntry) =>
+      logEntry.publicPayload?.message.id === "engine.log.cards.transform.into");
+    const cards = entry?.publicPayload?.message.values?.cards;
+    expect(typeof cards).toBe("string");
+    expect((cards as string).split(" and ")).toHaveLength(6);
+    expect(cards).not.toContain("Wounding Blow");
+    expect(g.state.players[0]!.hero.subcards).toHaveLength(22);
+  });
+
   it("does not trigger Runechant when a non-weapon hero attack is activated", () => {
     const g = scenario({
       seats: [
@@ -218,6 +257,30 @@ describe("transformed permanent stacks", () => {
 
     expect(g.state.players[0]!.resources).toBe(0);
     expect(g.state.players[1]!.hand).toHaveLength(1);
+  });
+
+  it("counts the Mechropotent as 4 equipped Evos for Blast Rig", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "teklovossen|0",
+          resources: 6,
+          hand: ["singularity|1", "blast rig|1"],
+          weapons: ["teklo leveler|0"],
+          equipment: {
+            head: "evo beta base head|3",
+            chest: "evo beta base chest|3",
+            arms: "evo beta base arms|3",
+            legs: "evo beta base legs|3",
+          },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.state.players[0]!.actionPoints = 2;
+
+    g.play("singularity|1").play("blast rig|1").expectAttackValue(5);
   });
 
   it("allows the Mechropotent to defend once per combat chain and applies Battleworn", () => {

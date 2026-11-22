@@ -47,10 +47,26 @@ function render(
     acceptMatch: vi.fn(), declineMatch: vi.fn(), playBotFromPrep: vi.fn(),
     presentArena: vi.fn(), presentDeck: vi.fn(), prepUnready: vi.fn(),
     chooseFirst: vi.fn(), leave: vi.fn(), selectPrepMatchup: vi.fn(),
+    decks: [], deckPlayedAt: {}, refreshDecks: vi.fn(), changeRoomDeck: vi.fn(),
+    friends: [], roomFriendInvites: [], inviteFriendToRoom: vi.fn(),
+    socialError: null, clearSocialError: vi.fn(), setSocialOpen: vi.fn(),
+    deckSwitch: null, deckSwitchLocked: false, dismissDeckSwitchLocked: vi.fn(),
     ...overrides,
   });
   return renderToStaticMarkup(<TestI18nProvider><PrepRoom /></TestI18nProvider>);
 }
+
+describe("sandbox badge", () => {
+  it("shows the sandbox badge before anyone readies", () => {
+    const prep = { ...pairedPrep("select-arena"), botGame: false, sandbox: true as const };
+    const heading = render(prep, false, deck, { sandbox: true }).match(/<div class="prep-heading">([\s\S]*?)<\/div>/)?.[1];
+    expect(heading).toContain('<span class="sandbox-badge">Sandbox · not in stats</span>');
+  });
+
+  it("is absent from ordinary rooms", () => {
+    expect(render(pairedPrep("select-arena"), false)).not.toContain("sandbox-badge");
+  });
+});
 
 describe("preparation stage layout", () => {
   it.each([false, true])("shows full-screen control beside Leave (mobile: %s)", (mobile) => {
@@ -215,6 +231,83 @@ describe("preparation stage layout", () => {
     expect(html).not.toContain("prep-ready-float");
   });
 
+  it.each([false, true])("offers the room link, friends, and a deck switch while the seat is open (mobile: %s)", (mobile) => {
+    const html = render(null, mobile, deck, {
+      friends: [
+        { username: "zed", presence: "offline", friendsSince: 0, unreadCount: 0 },
+        { username: "bob", presence: "online", friendsSince: 0, unreadCount: 0 },
+        { username: "amy", presence: "online", friendsSince: 0, unreadCount: 0 },
+      ],
+      roomFriendInvites: ["amy"],
+    });
+    const text = html.replace(/<[^>]*>/g, " ");
+    expect(text).toContain("Copy invite link");
+    expect(text).toContain("Waiting for an opponent");
+    expect(text).toContain("Invite a friend");
+    expect(html).toContain('aria-expanded="false"');
+    expect(text).toContain("Your Presentation");
+    const moves = html.match(/<button[^>]*prep-(step|tile-face)[^>]*>/g) ?? [];
+    expect(moves.some((button) => !button.includes("disabled"))).toBe(true);
+    expect(html).not.toContain("open-seat-friends");
+    expect(html).not.toContain("Share");
+  });
+
+  it.each([false, true])("shows a matchmaking search with deck switching and invites (mobile: %s)", (mobile) => {
+    const html = render(null, mobile, deck, {
+      matchmakingActive: true,
+      friends: [{ username: "bob", presence: "online", friendsSince: 0, unreadCount: 0 }],
+    });
+    const text = html.replace(/<[^>]*>/g, " ");
+    expect(text).toContain("Searching for an opponent");
+    expect(text).not.toMatch(/searching yet|players searching/);
+    expect(html).not.toMatch(/<button[^>]*class="listbox-trigger[^"]*"[^>]*disabled/);
+    expect(text).toContain("Copy invite link");
+    expect(text).toContain("Invite a friend");
+    expect(text.indexOf("Searching for an opponent")).toBeLessThan(text.indexOf("Copy invite link"));
+  });
+
+  it.each([false, true])("loads a deck switch in place without the arena picker (mobile: %s)", (mobile) => {
+    const html = render(null, mobile, deck, { deckSwitch: { deckId: "precon-asr", deckName: "Next deck" } });
+    const text = html.replace(/<[^>]*>/g, " ");
+    expect(text).toContain("Loading Next deck");
+    expect(text).toContain("Getting your deck ready…");
+    expect(html).not.toContain("prep-card-choice");
+    expect(html).toContain('class="open-seat-deck-picker" aria-busy="true"');
+    expect(html).toContain("Copy invite link");
+    expect(html).not.toContain("Loading Card Art");
+  });
+
+  it("waits for the seat's new deck before offering arena cards", () => {
+    const prep = pairedPrep("select-arena");
+    prep.botGame = false;
+    prep.yourDeckId = "precon-asr";
+    const html = render(prep, false);
+    expect(html).toContain("prep-deck-switch");
+    expect(html).not.toContain("prep-card-choice");
+  });
+
+  it("says which deck stands when the opponent arrived before the switch", () => {
+    const prep = pairedPrep("select-arena");
+    prep.botGame = false;
+    const html = render(prep, false, deck, { deckSwitchLocked: true });
+    expect(html.replace(/<[^>]*>/g, "").replaceAll("&#x27;", "'"))
+      .toContain(`Player 1 joined before your deck switched, so you'll play ${deck.name}.`);
+    expect(render(null, false, deck, { deckSwitchLocked: true })).not.toContain("prep-deck-notice");
+  });
+
+  it("keeps a search looking like a search after a refresh", () => {
+    const waiting: PrepView = {
+      format: "cc", phase: "waiting", yourSeat: 0, die: null, startPlayer: null, searching: true,
+      seats: [{
+        username: "Player 0", heroId: deck.decklist.heroId, heroName: deck.heroName,
+        ready: false, connected: true, arenaLocked: false,
+      }, null],
+    };
+    const text = render(waiting, false, deck, { matchmakingActive: false }).replace(/<[^>]*>/g, " ");
+    expect(text).toContain("Searching for an opponent");
+    expect(render({ ...waiting, searching: undefined }, false).replace(/<[^>]*>/g, " ")).not.toContain("Searching");
+  });
+
   it("waits for uncached card art before opening the room", () => {
     vi.stubGlobal("Image", class {});
     const html = render(pairedPrep("select-arena"), false);
@@ -232,5 +325,46 @@ describe("preparation stage layout", () => {
     const html = render(prep, false, deck, { matchAcceptanceRole: "existing" });
     expect(html).not.toContain("Loading Card Art");
     expect(html).toContain("prep-match-accept-prompt");
+  });
+});
+
+describe("solo prep room", () => {
+  function soloPrep(phase: PrepView["phase"], yourSeat: 0 | 1 = 1): PrepView {
+    const prep = pairedPrep(phase);
+    const seats = prep.seats.map((seat, index) => seat && ({ ...seat, username: "alice", heroName: `Hero ${index + 1}` }));
+    const { botGame: _botGame, ...rest } = prep;
+    return { ...rest, soloGame: true, yourSeat, seats: [seats[0]!, seats[1]!] };
+  }
+
+  it.each([false, true])("shows a tab per seat with its hero and status (mobile: %s)", (mobile) => {
+    const html = render(soloPrep("select-arena"), mobile, deck, { switchSoloSeat: vi.fn() });
+    expect(html).toContain('role="tablist" aria-label="Players"');
+    expect(html).toMatch(/id="solo-seat-tab-1"[^>]*role="tab"[^>]*aria-selected="true"/);
+    expect(html).toMatch(/id="solo-seat-tab-0"[^>]*role="tab"[^>]*aria-selected="false"/);
+    expect(html).toContain("<small>You</small>Hero 1");
+    expect(html).toContain("<small>Opponent</small>Hero 2");
+    expect(html).toContain("Choosing arena cards");
+    expect(html).toContain('id="solo-seat-panel" role="tabpanel" aria-labelledby="solo-seat-tab-1"');
+  });
+
+  it("offers you or the opponent for the first-player pick without a die notice", () => {
+    const html = render(soloPrep("choose-first"), false, deck, { switchSoloSeat: vi.fn() });
+    expect(html).toContain("You play both sides: choose who goes first.");
+    expect(html).toContain(">You go first</button>");
+    expect(html).toContain(">Opponent goes first</button>");
+    expect(html).not.toContain("Go second");
+    expect(html).not.toContain("prep-die");
+  });
+
+  it("says who goes first once chosen, keeping you on your deck's seat", () => {
+    const html = render(soloPrep("select-deck"), false, deck, { switchSoloSeat: vi.fn() });
+    expect(html).toContain('<p class="prep-sheet-turn">You go <strong>first</strong></p>');
+    const opponentFirst = { ...soloPrep("select-deck"), startPlayer: 1 as const };
+    expect(render(opponentFirst, false, deck, { switchSoloSeat: vi.fn() }))
+      .toContain('<p class="prep-sheet-turn">Opponent goes <strong>first</strong></p>');
+  });
+
+  it("leaves seat tabs out of other rooms", () => {
+    expect(render(pairedPrep("select-arena"), false)).not.toContain("solo-seat-tab");
   });
 });

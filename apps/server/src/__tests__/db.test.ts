@@ -120,6 +120,63 @@ describe("initial schema", () => {
       .toEqual([{ bot: "ira-sage" }]);
   });
 
+  it("upgrades an existing database to accept Aurora for pending practice", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 63));
+    const user = await db.query(`INSERT INTO users (username, username_lc, pass_hash, created_at)
+      VALUES ('AuroraOwner', 'auroraowner', 'hash', 1) RETURNING id`);
+    const userId = user.rows[0]!.id;
+    await db.query(`INSERT INTO matchmaking_entries (user_id, format, deck_id, joined_at)
+      VALUES ($1, 'cc', 'precon-asr', 1)`, [userId]);
+    await expect(db.query(`INSERT INTO pending_bot_starts (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+      VALUES ($1, 'cc', 'precon-asr', 'aurora', 'legal', 1)`, [userId])).rejects.toThrow();
+
+    await applyMigrations(db, MIGRATIONS);
+    await applyMigrations(db, MIGRATIONS);
+    await db.query(`INSERT INTO pending_bot_starts (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+      VALUES ($1, 'cc', 'precon-asr', 'aurora', 'legal', 1)`, [userId]);
+    expect((await db.query("SELECT bot FROM pending_bot_starts WHERE user_id = $1", [userId])).rows)
+      .toEqual([{ bot: "aurora" }]);
+  });
+
+  it("upgrades an existing database to accept Dorinthea for pending practice", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 64));
+    const user = await db.query(`INSERT INTO users (username, username_lc, pass_hash, created_at)
+      VALUES ('DorintheaOwner', 'dorintheaowner', 'hash', 1) RETURNING id`);
+    const userId = user.rows[0]!.id;
+    await db.query(`INSERT INTO matchmaking_entries (user_id, format, deck_id, joined_at)
+      VALUES ($1, 'silver-age', 'precon-sba', 1)`, [userId]);
+    await expect(db.query(`INSERT INTO pending_bot_starts (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+      VALUES ($1, 'silver-age', 'precon-sba', 'dorinthea', 'legal', 1)`, [userId])).rejects.toThrow();
+
+    await applyMigrations(db, MIGRATIONS);
+    await applyMigrations(db, MIGRATIONS);
+    await db.query(`INSERT INTO pending_bot_starts (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+      VALUES ($1, 'silver-age', 'precon-sba', 'dorinthea', 'legal', 1)`, [userId]);
+    expect((await db.query("SELECT bot FROM pending_bot_starts WHERE user_id = $1", [userId])).rows)
+      .toEqual([{ bot: "dorinthea" }]);
+  });
+
+  it("upgrades an existing database to accept Fang for pending practice", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 71));
+    const user = await db.query(`INSERT INTO users (username, username_lc, pass_hash, created_at)
+      VALUES ('FangOwner', 'fangowner', 'hash', 1) RETURNING id`);
+    const userId = user.rows[0]!.id;
+    await db.query(`INSERT INTO matchmaking_entries (user_id, format, deck_id, joined_at)
+      VALUES ($1, 'cc', 'precon-asr', 1)`, [userId]);
+    await expect(db.query(`INSERT INTO pending_bot_starts (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+      VALUES ($1, 'cc', 'precon-asr', 'fang', 'legal', 1)`, [userId])).rejects.toThrow();
+
+    await applyMigrations(db, MIGRATIONS);
+    await applyMigrations(db, MIGRATIONS);
+    await db.query(`INSERT INTO pending_bot_starts (user_id, format, deck_id, bot, card_pool_mode, requested_at)
+      VALUES ($1, 'cc', 'precon-asr', 'fang', 'legal', 1)`, [userId]);
+    expect((await db.query("SELECT bot FROM pending_bot_starts WHERE user_id = $1", [userId])).rows)
+      .toEqual([{ bot: "fang" }]);
+  });
+
   it("uses an already checked-out client without reconnecting or releasing it", async () => {
     const statements: string[] = [];
     let released = false;
@@ -290,6 +347,26 @@ describe("initial schema", () => {
     ]);
     await expect(db.query("SELECT runechant_skip FROM room_seats")).rejects.toThrow();
     await expect(db.query("UPDATE room_seats SET token_skip = 'aura'")).rejects.toThrow();
+  });
+
+  it("widens room seat controllers to self-play without disturbing existing seats", async () => {
+    const db = rawDb();
+    await applyMigrations(db, MIGRATIONS.filter((migration) => migration.version <= 65));
+    await db.query(
+      `INSERT INTO rooms (code, format, spectators, ruleset_version, version, created_at, status)
+       VALUES ('SOLO01', 'cc', '[]', 'rules-a', 0, 1, 'open')`,
+    );
+    await db.query("INSERT INTO room_seats (room_code, seat, token_hash, controller) VALUES ('SOLO01', 0, 'hash', 'human')");
+    await db.query("INSERT INTO room_seats (room_code, seat, token_hash, controller) VALUES ('SOLO01', 1, 'hash', 'bot')");
+    await expect(db.query("UPDATE room_seats SET controller = 'self' WHERE seat = 1")).rejects.toThrow();
+
+    await applyMigrations(db, MIGRATIONS);
+
+    expect((await db.query("SELECT controller FROM room_seats ORDER BY seat")).rows)
+      .toEqual([{ controller: "human" }, { controller: "bot" }]);
+    await db.query("UPDATE room_seats SET controller = 'self' WHERE seat = 1");
+    await expect(db.query("UPDATE room_seats SET controller = 'robot' WHERE seat = 1")).rejects.toThrow();
+    await expect(db.query("UPDATE room_seats SET priority_mode = 'never' WHERE seat = 1")).rejects.toThrow();
   });
 
   it("adds optional recovery email and cascading recovery tokens to existing accounts", async () => {

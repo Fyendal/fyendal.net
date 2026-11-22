@@ -12,50 +12,52 @@ import { passDamageStep } from "./fixtures.js";
 // ── fixture cards ────────────────────────────────────────────────────────────
 
 const cards: Record<string, CardData> = {
-  SPLIT_ACTION: { id: "SPLIT_ACTION", name: "Test Action // Test Instant", cardType: "instant", classes: ["generic"], pitch: 1, cost: 0, defense: 3, keywords: ["Meld"], text: "Meld" },
-  INSTANT_DEF: { id: "INSTANT_DEF", name: "Defending Instant", cardType: "instant", classes: ["generic"], pitch: 1, cost: 0, defense: 2, text: "" },
-  HERO_A: { id: "HERO_A", name: "Hero A", cardType: "hero", classes: ["warrior"], intellect: 4, life: 20, text: "" },
-  HERO_B: { id: "HERO_B", name: "Hero B", cardType: "hero", classes: ["brute"], intellect: 4, life: 20, text: "" },
-  HERO_CHI: { id: "HERO_CHI", name: "Chi Hero", cardType: "hero", classes: ["mystic"], intellect: 4, life: 20, text: "Instant — {c}{c}{c}: Gain 1 life" },
-  HERO_DISCOUNT: { id: "HERO_DISCOUNT", name: "Discount Hero", cardType: "hero", classes: ["mystic"], intellect: 4, life: 20, text: "Your ward aura attacks cost {r} less" },
-  SWORD: { id: "SWORD", name: "Test Sword", cardType: "weapon", subtypes: ["sword", "1h"], attack: 3, text: "" },
-  SCROLL: { id: "SCROLL", name: "Test Scroll", cardType: "weapon", subtypes: ["scroll", "2h"], text: "Auras you control with ward are weapons" },
-  CHI3: { id: "CHI3", name: "Test Inner Chi", cardType: "resource", subtypes: ["chi"], classes: ["mystic"], pitch: 3, text: "" },
-  RED1: { id: "RED1", name: "Red One", cardType: "action", subtypes: [], classes: ["generic"], pitch: 1, cost: 0, attack: 0, defense: 3, text: "" },
-  BLUE3: { id: "BLUE3", name: "Blue Three", cardType: "action", subtypes: [], classes: ["generic"], pitch: 3, cost: 0, attack: 0, defense: 3, text: "" },
-  COST2: { id: "COST2", name: "Costly Trick", cardType: "action", subtypes: [], classes: ["generic"], pitch: 1, cost: 2, attack: 0, defense: 2, text: "" },
-  COST4: { id: "COST4", name: "Big Trick", cardType: "action", subtypes: [], classes: ["generic"], pitch: 1, cost: 4, attack: 0, defense: 2, text: "" },
-  ATK5: { id: "ATK5", name: "Attack Five", cardType: "action", subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 5, defense: 3, text: "" },
-  ATK2: { id: "ATK2", name: "Attack Two", cardType: "action", subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 2, defense: 3, text: "" },
-  BIG6: { id: "BIG6", name: "Big Six", cardType: "action", subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 6, defense: 2, text: "" },
-  ILL6: { id: "ILL6", name: "Illusion Six", cardType: "action", subtypes: ["attack"], classes: ["illusionist"], pitch: 1, cost: 0, attack: 6, defense: 2, text: "" },
-  PHANT: { id: "PHANT", name: "Phantasm Attack", cardType: "action", subtypes: ["attack"], classes: ["illusionist"], pitch: 3, cost: 0, attack: 5, defense: 3, keywords: ["Phantasm"], text: "Phantasm" },
-  OVER: { id: "OVER", name: "Overpower Attack", cardType: "action", subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 4, defense: 3, keywords: ["Overpower"], text: "Overpower" },
-  OVERFLAG: { id: "OVERFLAG", name: "Granted Overpower", cardType: "action", subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 4, defense: 3, text: "Gains overpower when played" },
-  BLOCK3: { id: "BLOCK3", name: "Blocker", cardType: "action", subtypes: [], classes: ["generic"], pitch: 3, cost: 0, attack: 0, defense: 3, text: "" },
-  BLOCKCARD: { id: "BLOCKCARD", name: "Block Card", cardType: "block", classes: ["generic"], pitch: 3, defense: 3, text: "" },
-  DREACT: { id: "DREACT", name: "Test Defense Reaction", cardType: "defense-reaction", classes: ["generic"], pitch: 3, cost: 0, defense: 3, text: "" },
-  GUARDMAX: { id: "GUARDMAX", name: "Small Guard", cardType: "defense-reaction", classes: ["generic"], pitch: 3, cost: 0, defense: 3, text: "This can only defend an attack with 3 or less base {p}" },
-  TRANSC: { id: "TRANSC", name: "Test Transcend", cardType: "instant", classes: ["mystic"], pitch: 3, cost: 0, keywords: ["Transcend"], backId: "CHI3", text: "Transcend" },
-  ZAP3: { id: "ZAP3", name: "Test Zap", cardType: "instant", classes: ["generic"], pitch: 3, cost: 0, text: "Deal 3 damage to the opposing hero" },
-  ARCZAP3: { id: "ARCZAP3", name: "Test Arcane Zap", cardType: "instant", classes: ["generic"], pitch: 3, cost: 0, text: "Deal 3 arcane damage to the opposing hero" },
-  MAKER: { id: "MAKER", name: "Test Maker", cardType: "instant", classes: ["generic"], pitch: 3, cost: 0, text: "Create a Test Token" },
-  TOKEN: { id: "TOKEN", name: "Test Token", cardType: "token", classes: ["generic"], text: "" },
-  WARD1: { id: "WARD1", name: "Ward Aura One", cardType: "token", classes: ["illusionist"], keywords: ["Ward 1"], text: "Ward 1" },
-  WARD2: { id: "WARD2", name: "Ward Aura Two", cardType: "token", classes: ["illusionist"], keywords: ["Ward 2"], text: "Ward 2" },
-  HELM: { id: "HELM", name: "Test Helm", cardType: "equipment", subtypes: ["head"], defense: 1, keywords: ["Blade Break"], text: "Blade Break" },
-  CHEST: { id: "CHEST", name: "Test Chest", cardType: "equipment", subtypes: ["chest"], defense: 0, text: "" },
-  ARMS: { id: "ARMS", name: "Test Arms", cardType: "equipment", subtypes: ["arms"], defense: 1, text: "" },
-  LEGS: { id: "LEGS", name: "Test Legs", cardType: "equipment", subtypes: ["legs"], defense: 1, text: "" },
-  BUCKLER: { id: "BUCKLER", name: "Test Buckler", cardType: "equipment", subtypes: ["off-hand"], defense: 2, text: "" },
-  CLOAK: { id: "CLOAK", name: "Cloaked Arms", cardType: "equipment", subtypes: ["arms"], defense: 2, keywords: ["Cloaked", "Ward 2"], text: "Cloaked. Instant — {r}, turn this face-up: gain 1 life. Ward 2" },
-  WATCHER: { id: "WATCHER", name: "Watcher Legs", cardType: "equipment", subtypes: ["legs"], defense: 0, text: "Reacts to lost attacks" },
-  BARRIER: { id: "BARRIER", name: "Barrier Helm", cardType: "equipment", subtypes: ["head"], defense: 1, keywords: ["Arcane Barrier 1"], text: "Arcane Barrier 1" },
-  ALLY: { id: "ALLY", name: "Test Ally", cardType: "action", subtypes: ["ally"], classes: ["generic"], cost: 0, attack: 2, defense: 3, life: 3, text: "Action — {t}: Attack" },
-  ZAPAL: { id: "ZAPAL", name: "Test Ally Zap", cardType: "instant", classes: ["generic"], pitch: 3, cost: 0, text: "Deal 2 damage to an opposing ally" },
-  ZAPALARC: { id: "ZAPALARC", name: "Test Ally Arcane Zap", cardType: "instant", classes: ["generic"], pitch: 3, cost: 0, text: "Deal 2 arcane damage to an opposing ally" },
-  DIM: { id: "DIM", name: "Diminish", cardType: "instant", classes: ["generic"], pitch: 3, cost: 0, text: "A defending attack action card gets -1 power" },
-  ALLYZAP: { id: "ALLYZAP", name: "Test Zapping Ally", cardType: "action", subtypes: ["ally"], classes: ["generic"], cost: 0, life: 3, text: "When this enters, deal 1 damage to an opposing ally" },
+  SPLIT_ACTION: { id: "SPLIT_ACTION", name: "Test Action // Test Instant", types: ["instant"], classes: ["generic"], pitch: 1, cost: 0, defense: 3, keywords: ["Meld"], text: "Meld" },
+  INSTANT_DEF: { id: "INSTANT_DEF", name: "Defending Instant", types: ["instant"], classes: ["generic"], pitch: 1, cost: 0, defense: 2, text: "" },
+  HERO_A: { id: "HERO_A", name: "Hero A", types: ["hero"], classes: ["warrior"], intellect: 4, life: 20, text: "" },
+  HERO_B: { id: "HERO_B", name: "Hero B", types: ["hero"], classes: ["brute"], intellect: 4, life: 20, text: "" },
+  HERO_CHI: { id: "HERO_CHI", name: "Chi Hero", types: ["hero"], classes: ["mystic"], intellect: 4, life: 20, text: "Instant — {c}{c}{c}: Gain 1 life" },
+  HERO_DISCOUNT: { id: "HERO_DISCOUNT", name: "Discount Hero", types: ["hero"], classes: ["mystic"], intellect: 4, life: 20, text: "Your ward aura attacks cost {r} less" },
+  SWORD: { id: "SWORD", name: "Test Sword", types: ["weapon"], subtypes: ["sword", "1h"], attack: 3, text: "" },
+  SCROLL: { id: "SCROLL", name: "Test Scroll", types: ["weapon"], subtypes: ["scroll", "2h"], text: "Auras you control with ward are weapons" },
+  CHI3: { id: "CHI3", name: "Test Inner Chi", types: ["resource"], subtypes: ["chi"], classes: ["mystic"], pitch: 3, text: "" },
+  RED1: { id: "RED1", name: "Red One", types: ["action"], subtypes: [], classes: ["generic"], pitch: 1, cost: 0, attack: 0, defense: 3, text: "" },
+  BLUE3: { id: "BLUE3", name: "Blue Three", types: ["action"], subtypes: [], classes: ["generic"], pitch: 3, cost: 0, attack: 0, defense: 3, text: "" },
+  COST2: { id: "COST2", name: "Costly Trick", types: ["action"], subtypes: [], classes: ["generic"], pitch: 1, cost: 2, attack: 0, defense: 2, text: "" },
+  COST4: { id: "COST4", name: "Big Trick", types: ["action"], subtypes: [], classes: ["generic"], pitch: 1, cost: 4, attack: 0, defense: 2, text: "" },
+  ATK5: { id: "ATK5", name: "Attack Five", types: ["action"], subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 5, defense: 3, text: "" },
+  ATK2: { id: "ATK2", name: "Attack Two", types: ["action"], subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 2, defense: 3, text: "" },
+  MIRG: { id: "MIRG", name: "Mirage Blocker", types: ["action"], subtypes: ["attack"], classes: ["illusionist"], pitch: 3, cost: 0, attack: 1, defense: 3, keywords: ["Mirage"], text: "Mirage" },
+  SHRINK: { id: "SHRINK", name: "Shrink", types: ["instant"], classes: ["generic"], pitch: 3, cost: 0, text: "The attack gets -1 power" },
+  BIG6: { id: "BIG6", name: "Big Six", types: ["action"], subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 6, defense: 2, text: "" },
+  ILL6: { id: "ILL6", name: "Illusion Six", types: ["action"], subtypes: ["attack"], classes: ["illusionist"], pitch: 1, cost: 0, attack: 6, defense: 2, text: "" },
+  PHANT: { id: "PHANT", name: "Phantasm Attack", types: ["action"], subtypes: ["attack"], classes: ["illusionist"], pitch: 3, cost: 0, attack: 5, defense: 3, keywords: ["Phantasm"], text: "Phantasm" },
+  OVER: { id: "OVER", name: "Overpower Attack", types: ["action"], subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 4, defense: 3, keywords: ["Overpower"], text: "Overpower" },
+  OVERFLAG: { id: "OVERFLAG", name: "Granted Overpower", types: ["action"], subtypes: ["attack"], classes: ["generic"], pitch: 1, cost: 0, attack: 4, defense: 3, text: "Gains overpower when played" },
+  BLOCK3: { id: "BLOCK3", name: "Blocker", types: ["action"], subtypes: [], classes: ["generic"], pitch: 3, cost: 0, attack: 0, defense: 3, text: "" },
+  BLOCKCARD: { id: "BLOCKCARD", name: "Block Card", types: ["block"], classes: ["generic"], pitch: 3, defense: 3, text: "" },
+  DREACT: { id: "DREACT", name: "Test Defense Reaction", types: ["defense-reaction"], classes: ["generic"], pitch: 3, cost: 0, defense: 3, text: "" },
+  GUARDMAX: { id: "GUARDMAX", name: "Small Guard", types: ["defense-reaction"], classes: ["generic"], pitch: 3, cost: 0, defense: 3, text: "This can only defend an attack with 3 or less base {p}" },
+  TRANSC: { id: "TRANSC", name: "Test Transcend", types: ["instant"], classes: ["mystic"], pitch: 3, cost: 0, keywords: ["Transcend"], backId: "CHI3", text: "Transcend" },
+  ZAP3: { id: "ZAP3", name: "Test Zap", types: ["instant"], classes: ["generic"], pitch: 3, cost: 0, text: "Deal 3 damage to the opposing hero" },
+  ARCZAP3: { id: "ARCZAP3", name: "Test Arcane Zap", types: ["instant"], classes: ["generic"], pitch: 3, cost: 0, text: "Deal 3 arcane damage to the opposing hero" },
+  MAKER: { id: "MAKER", name: "Test Maker", types: ["instant"], classes: ["generic"], pitch: 3, cost: 0, text: "Create a Test Token" },
+  TOKEN: { id: "TOKEN", name: "Test Token", types: ["token"], classes: ["generic"], text: "" },
+  WARD1: { id: "WARD1", name: "Ward Aura One", types: ["token"], classes: ["illusionist"], keywords: ["Ward 1"], text: "Ward 1" },
+  WARD2: { id: "WARD2", name: "Ward Aura Two", types: ["token"], classes: ["illusionist"], keywords: ["Ward 2"], text: "Ward 2" },
+  HELM: { id: "HELM", name: "Test Helm", types: ["equipment"], subtypes: ["head"], defense: 1, keywords: ["Blade Break"], text: "Blade Break" },
+  CHEST: { id: "CHEST", name: "Test Chest", types: ["equipment"], subtypes: ["chest"], defense: 0, text: "" },
+  ARMS: { id: "ARMS", name: "Test Arms", types: ["equipment"], subtypes: ["arms"], defense: 1, text: "" },
+  LEGS: { id: "LEGS", name: "Test Legs", types: ["equipment"], subtypes: ["legs"], defense: 1, text: "" },
+  BUCKLER: { id: "BUCKLER", name: "Test Buckler", types: ["equipment"], subtypes: ["off-hand"], defense: 2, text: "" },
+  CLOAK: { id: "CLOAK", name: "Cloaked Arms", types: ["equipment"], subtypes: ["arms"], defense: 2, keywords: ["Cloaked", "Ward 2"], text: "Cloaked. Instant — {r}, turn this face-up: gain 1 life. Ward 2" },
+  WATCHER: { id: "WATCHER", name: "Watcher Legs", types: ["equipment"], subtypes: ["legs"], defense: 0, text: "Reacts to lost attacks" },
+  BARRIER: { id: "BARRIER", name: "Barrier Helm", types: ["equipment"], subtypes: ["head"], defense: 1, keywords: ["Arcane Barrier 1"], text: "Arcane Barrier 1" },
+  ALLY: { id: "ALLY", name: "Test Ally", types: ["action"], subtypes: ["ally"], classes: ["generic"], cost: 0, attack: 2, defense: 3, life: 3, text: "Action — {t}: Attack" },
+  ZAPAL: { id: "ZAPAL", name: "Test Ally Zap", types: ["instant"], classes: ["generic"], pitch: 3, cost: 0, text: "Deal 2 damage to an opposing ally" },
+  ZAPALARC: { id: "ZAPALARC", name: "Test Ally Arcane Zap", types: ["instant"], classes: ["generic"], pitch: 3, cost: 0, text: "Deal 2 arcane damage to an opposing ally" },
+  DIM: { id: "DIM", name: "Diminish", types: ["instant"], classes: ["generic"], pitch: 3, cost: 0, text: "A defending attack action card gets -1 power" },
+  ALLYZAP: { id: "ALLYZAP", name: "Test Zapping Ally", types: ["action"], subtypes: ["ally"], classes: ["generic"], cost: 0, life: 3, text: "When this enters, deal 1 damage to an opposing ally" },
 };
 
 const scripts: Record<string, CardScript> = {
@@ -154,6 +156,11 @@ const scripts: Record<string, CardScript> = {
       const opp = ctx.state.players[ctx.seat === 0 ? 1 : 0]!;
       const ally = opp.board.find((c) => c.cardId === "ALLY");
       if (ally) ctx.dealDamage(opp.seat, 2, { targetAllyId: ally.instanceId, arcane: true });
+    },
+  },
+  SHRINK: {
+    onPlay(ctx) {
+      if (ctx.link) ctx.addCardTempPower(ctx.link.attackingCard.instanceId, -1);
     },
   },
   DIM: {
@@ -507,6 +514,27 @@ describe("ward", () => {
 });
 
 // ── phantasm ─────────────────────────────────────────────────────────────────
+
+describe("mirage", () => {
+  it("rechecks its condition when the layer resolves, so a response can save the defender", () => {
+    let s = makeGame();
+    s = declareAttack(s, 0, "BIG6");
+    const shrink = giveCard(s, 0, "SHRINK");
+    const mirage = giveCard(s, 1, "MIRG");
+    s = apply(s, 1, { kind: "defend", instanceIds: [mirage] });
+    expect(s.stack[0]?.engineEffect).toEqual({ kind: "mirage-destroy" });
+
+    s = apply(s, 0, { kind: "play-card", instanceId: shrink, pitchInstanceIds: [] });
+    s = apply(s, 0, { kind: "pass" });
+    s = apply(s, 1, { kind: "pass" });
+    expect(s.stack[0]?.engineEffect).toEqual({ kind: "mirage-destroy" });
+    s = apply(s, 0, { kind: "pass" });
+    s = apply(s, 1, { kind: "pass" });
+    expect(s.stack).toHaveLength(0);
+    expect(s.chain[0]?.defendingCards.map((card) => card.instanceId)).toEqual([mirage]);
+    expect(s.log.some((entry) => entry.publicPayload?.message.id === "engine.log.mirage.fizzles.condition.failed")).toBe(true);
+  });
+});
 
 describe("phantasm", () => {
   it("Phantasm destruction is a respondable triggered layer", () => {

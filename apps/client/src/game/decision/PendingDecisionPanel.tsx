@@ -14,6 +14,7 @@ import {
   bloodModeAllocation,
   handCardChoiceOptions,
   heroTargetSide,
+  numberChoice,
   optDecisionCards,
   boundedCardChoiceKey,
   boundedCardChoiceSelectable,
@@ -30,11 +31,13 @@ import {
   type ChoiceModalOption,
 } from "./ChoiceModal.js";
 import { RevealedChoiceCards } from "./CardChoices.js";
-import { CardRef, cardAffiliation, DecisionPrompt, PitchPaymentProgress } from "./DecisionShared.js";
+import { CardRef, cardAffiliation, cardDisplayName, DecisionPrompt, PitchPaymentProgress } from "./DecisionShared.js";
 import type { PendingDecisionModel } from "./DecisionModels.js";
 import { NameChoiceAutocomplete } from "./NameChoiceAutocomplete.js";
+import { NumberChoiceInput } from "./NumberChoiceInput.js";
 import { EffectChoiceDecision } from "./EffectChoiceDecision.js";
 import { TriggerOrderDecision } from "./TriggerOrderDecision.js";
+import { DecisionSheetMinimizeButton } from "./DecisionSheet.js";
 
 /** Legacy literal option values that render through shared catalog labels. */
 const LITERAL_OPTION_MESSAGES = {
@@ -320,6 +323,7 @@ export function PendingDecisionPanel({
     confirmSkipArsenal,
     onRequestPass,
     onDisableGuidance,
+    rememberTarget,
     onConfirmSkipArsenal,
     onCancelSkipArsenal,
     boundedChoiceSelectedOptionIds,
@@ -364,6 +368,8 @@ export function PendingDecisionPanel({
     });
   }
   const effectList = pd.optionLayout === "effect-list" && pd.kind === "choose-target";
+  const numericChoice = numberChoice(pd);
+  const numericOptionIds = new Set(numericChoice?.optionByValue.values());
   const showChoiceGrid =
     !effectList &&
     !optDecision &&
@@ -413,6 +419,7 @@ export function PendingDecisionPanel({
   ) {
     (pd.options ?? []).forEach((option, index) => {
       if (pd.optionCards?.[index]) return;
+      if (numericOptionIds.has(option)) return;
       if (pd.resourcePayment?.options.some((candidate) => candidate.optionId === option)) return;
       const onChoose = () => onSend({ kind: "choose", optionId: option });
       const spaceDefault = option === defaultSpaceOption;
@@ -420,6 +427,13 @@ export function PendingDecisionPanel({
       const side = heroTargetSide(option, viewerSeat) ?? undefined;
       // Hero-name labels need the side spelled out; relative values already say it.
       const sideTag = side !== undefined && option.startsWith("hero:");
+      const enabledCards = pd.optionEnabledCards?.[index];
+      const enabledText = enabledCards?.length
+        ? intl.formatMessage(
+            { id: "game.decision.enabledCards.named" },
+            { cards: intl.formatList(enabledCards.map(cardDisplayName), { type: "conjunction" }) },
+          )
+        : undefined;
       if (optionMessage) {
         const text = formatGameMessage(intl, optionMessage, optionResolvers);
         textOptions.push({
@@ -431,6 +445,7 @@ export function PendingDecisionPanel({
           spaceDefault,
           side,
           sideTag,
+          ...(enabledCards ? { enabledCards } : {}),
           onChoose,
         });
         return;
@@ -452,10 +467,13 @@ export function PendingDecisionPanel({
       textOptions.push({
         key: option,
         label: optionLabel,
-        text: spaceDefault ? shortcutLabel : undefined,
+        text: enabledText !== undefined
+          ? `${shortcutLabel}, ${enabledText}`
+          : spaceDefault ? shortcutLabel : undefined,
         spaceDefault,
         side,
         sideTag,
+        ...(enabledCards ? { enabledCards } : {}),
         onChoose,
       });
     });
@@ -484,7 +502,7 @@ export function PendingDecisionPanel({
   // Pure text choices use the shared choice modal; card-driven and payment
   // decisions keep their wider layouts and list any text options beneath.
   const choiceModal =
-    textOptions.length > 0 &&
+    (textOptions.length > 0 || numericChoice !== null) &&
     !priorityGuidanceDecision &&
     !optDecision &&
     !bloodAllocation &&
@@ -505,6 +523,10 @@ export function PendingDecisionPanel({
     onConfirmBoundedChoice !== undefined &&
     !onToggleBoundedChoice;
   const boundedFloat = boundedCardChoice && !boundedInHand ? boundedCardChoice : null;
+  // Prompts that carry their own options open as a sheet on phones; ones
+  // answered from the hand or board stay small floats.
+  const sheet = choiceModal || showChoiceGrid || optDecision || bloodAllocation !== null ||
+    revealedChoice || effectList || pd.kind === "order-triggers" || boundedFloat !== null;
 
   return (
     <div className={`decision decision-options${
@@ -513,11 +535,12 @@ export function PendingDecisionPanel({
       pd.kind === "order-triggers" || effectList ? " decision-trigger-order" : ""
     }${effectList ? " decision-effect-list" : ""}${
       boundedFloat ? " decision-bounded" : ""
-    }`}
+    }${sheet ? " decision-sheet" : ""}`}
     style={boundedFloat
       ? { "--bounded-choice-columns": boundedChoiceColumns(boundedFloat.choices.length) } as CSSProperties
       : undefined}
     >
+      {sheet ? <DecisionSheetMinimizeButton /> : null}
       <DecisionPrompt
         prompt={pd.kind === "arsenal"
           ? intl.formatMessage({ id: "game.decision.arsenal.choosePrompt" })
@@ -528,6 +551,11 @@ export function PendingDecisionPanel({
           <GuidanceSettingsInfo onDisableGuidance={onDisableGuidance} />
         ) : undefined}
       />
+      {pd.warningMessage ? (
+        <span className="decision-context decision-warning">
+          <GameMessageText message={pd.warningMessage} resolvers={{ card: (cardId) => <CardRef id={cardId} /> }} />
+        </span>
+      ) : null}
       {lookedCards.length > 0 && !showChoiceGrid ? (
         <div className="decision-cards">
           {lookedCards.map((card) => (
@@ -685,6 +713,13 @@ export function PendingDecisionPanel({
           })}
         </div>
       ) : null}
+      {numericChoice ? (
+        <NumberChoiceInput
+          key={`${pd.player}:${pd.prompt}`}
+          choice={numericChoice}
+          onChoose={(optionId) => onSend({ kind: "choose", optionId })}
+        />
+      ) : null}
       {pd.kind === "choose-name" ? (
         <NameChoiceAutocomplete
           key={`${pd.player}:${pd.prompt}`}
@@ -704,6 +739,32 @@ export function PendingDecisionPanel({
       ) : (
         <ChoiceList options={textOptions} chosen={chosenOptions} />
       )}
+      {pd.triggerTarget && rememberTarget ? (
+        <div className="decision-remember">
+          {/* A clicked switch drops focus, so Space still answers the prompt. */}
+          <label
+            className="toggle-switch"
+            onClick={(event) => {
+              const input = event.currentTarget.querySelector("input");
+              if (event.detail > 0) setTimeout(() => input?.blur());
+            }}
+          >
+            <input
+              type="checkbox"
+              role="switch"
+              checked={rememberTarget.on}
+              onChange={(event) => rememberTarget.onChange(event.target.checked)}
+            />
+            <span className="switch-track" aria-hidden="true" />
+            <span>
+              {intl.formatMessage(
+                { id: "game.decision.rememberTarget" },
+                { card: <CardRef key="card" id={pd.triggerTarget.sourceCardId} /> },
+              )}
+            </span>
+          </label>
+        </div>
+      ) : null}
     </div>
   );
 }

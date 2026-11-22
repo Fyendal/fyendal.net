@@ -260,7 +260,7 @@ describe("EVR — registration and combat designs", () => {
   it("puts Stalagmite's defend trigger on the stack before creating Frostbite", () => {
     const s = scenario({
       seats: [
-        { hero: "rhinar", hand: ["head jab|1", "sigil of solace|1"] },
+        { hero: "rhinar", hand: ["head jab|1", "parable of humility|2"] },
         {
           hero: "dorinthea",
           equipment: { head: "stalagmite, bastion of isenloft|0" },
@@ -415,6 +415,32 @@ describe("EVR — auras, items, and utility", () => {
       chooseHook: "engine-variable-play-payment",
       prompt: "Pay 6 resources",
     });
+  });
+
+  it("Imposing Visage accepts any non-overpitching pitch order for its declared X", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["imposing visage|3", BLUE, BLUE, RED_SIX] },
+        { hero: "dorinthea" },
+      ],
+    });
+    const pitchCards = s.state.players[0]!.hand.filter((card) => cardData[card.cardId]?.name === "Wrecker Romp");
+    const [blue, otherBlue] = pitchCards.filter((card) => cardData[card.cardId]?.pitch === 3);
+    const red = pitchCards.find((card) => cardData[card.cardId]?.pitch === 1)!;
+
+    s.play("imposing visage|3", { settle: false }).chooseOption("X = 2");
+    const optionId = s.state.pendingDecision!.resourcePayment!.options[0]!.optionId;
+    expect(() => s.doRaw({
+      kind: "choose",
+      optionId,
+      pitchInstanceIds: [blue!.instanceId, otherBlue!.instanceId, red.instanceId],
+    })).toThrow(/overpitch/);
+
+    s.doRaw({
+      kind: "choose",
+      optionId,
+      pitchInstanceIds: [red.instanceId, blue!.instanceId, otherBlue!.instanceId],
+    }).expectResources(0, 2).expectZoneSize(0, "pitch", 3);
   });
 
   it("Imposing Visage counts its declared X cost for What Happens Next?", () => {
@@ -659,6 +685,19 @@ describe("EVR — auras, items, and utility", () => {
 });
 
 describe("EVR — rules regression coverage", () => {
+  it("Pick a Card, Any Card names a transcended card by its active back face", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["pick a card, any card|3"], resources: 3 },
+        { hero: "dorinthea", hand: ["a drop in the ocean|3"] },
+      ],
+    });
+    g.state.players[1]!.hand[0]!.flipped = true;
+    g.play("pick a card, any card|3", { settle: false });
+    for (let guard = 0; guard < 6 && g.state.pendingDecision?.chooseHook !== "pick-name"; guard++) g.passPriority();
+    expect(g.state.pendingDecision?.options).toEqual(["Inner Chi"]);
+  });
+
   it("Talisman of Balance fills an empty additional arsenal zone when behind on arsenal cards", () => {
     const lexi = {
       hero: "rhinar",
@@ -870,5 +909,44 @@ describe("EVR — Crown of Reflection", () => {
 
     g.play("wounding blow|1").blockWith().passPriority();
     expect(() => g.activate(CROWN, { targetCard: SHIELD })).toThrow(/no legal intent/);
+  });
+});
+
+describe("EVR — Scour", () => {
+  it("destroys chosen aura tokens such as Gate to i'Arathael and skips auras with cost", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 5, hand: ["scour|3"] },
+        { hero: "dorinthea", board: ["gate to i'arathael|0", "runechant|0", "parable of humility|2"] },
+      ],
+    });
+    const [gate] = s.state.players[1]!.board;
+    const life = s.state.players[1]!.life;
+
+    s.play("scour|3").chooseOption("= 1");
+    const pd = s.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("scour-auras");
+    expect(pd.options).toHaveLength(2);
+    s.chooseMany([String(gate!.instanceId)]).settle();
+
+    s.expectNotInZone(1, "gate to i'arathael|0", "board")
+      .expectInZone(1, "runechant|0", "board")
+      .expectInZone(1, "parable of humility|2", "board");
+    expect(s.state.players[1]!.life).toBe(life - 1);
+  });
+
+  it("destroys every eligible aura without asking when X covers them", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", resources: 5, hand: ["scour|3"] },
+        { hero: "dorinthea", board: ["gate to i'arathael|0", "runechant|0"] },
+      ],
+    });
+    const life = s.state.players[1]!.life;
+
+    s.play("scour|3").chooseOption("= 3").settle();
+
+    s.expectZoneSize(1, "board", 0);
+    expect(s.state.players[1]!.life).toBe(life - 2);
   });
 });

@@ -72,7 +72,8 @@ function visualFor(
   destinationKind: MotionLocation["kind"],
 ): MotionVisual {
   if (!destinationCard) {
-    return sourceCard
+    // A face-down card (own arsenal) is already concealed; flipping it would imply it was public.
+    return sourceCard && sourceCard.faceDown !== true
       ? { kind: "face-conceal", card: sourceCard }
       : { kind: "back" };
   }
@@ -329,8 +330,19 @@ export function transitionMotionEvents(
     }
   }
 
+  // Count deltas net out across chained moves (arsenal -> deck bottom -> hand
+  // reads as arsenal -> hand), so a zone the transition touched is already explained.
+  const semanticZones = new Set(semantic.flatMap((event) => (
+    event.kind === "move" ? [motionLocationKey(event.source), motionLocationKey(event.destination)] : []
+  )));
+  const countOnlyInference = (event: GameMotionEvent): boolean => (
+    event.kind === "move" && event.instanceId === undefined && event.confidence === "inferred"
+    && (semanticZones.has(motionLocationKey(event.source))
+      || semanticZones.has(motionLocationKey(event.destination)))
+  );
   const inferred = detectGameMotionEvents(previous, current).filter((event) => (
     event.kind !== "reflow" &&
+    !countOnlyInference(event) &&
     !semantic.some((candidate) => sameMove(event, candidate))
   ));
 

@@ -1,53 +1,44 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  boostsThisChain,
   cardNamed,
   commonOptionMessages,
+  controlledPermanents,
+  crushTriggered,
   dealArcane,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  equipmentZoneCards,
+  faceUpGraveyard,
+  hasArcaneDamageEffect,
+  hasCardSubtype,
+  hasLiveTurnEffect,
+  isArrow,
+  isAttackAction,
+  isItem,
+  isNonAttackAction,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
   optN,
   optOnChoose,
   previousAttackHasName,
+  reload,
+  resolveReload,
+  runeCount,
   sharesName,
   wizardActionAsInstant,
   yesNoPrompt,
 } from "../shared-helpers.js";
-
-const COPPER = "CRU197";
-const QUICKEN = "CRU196";
-const RUNECHANT = "CRU157";
-const ZEN_STATE = "CRU075";
+import { COPPER, QUICKEN, RUNECHANT, ZEN_STATE } from "../tokens.js";
 
 function stampAuthorityPitched(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).pitch.filter((card) => (ctx.cardData(card.cardId).cost ?? 0) >= 3).length >= 2;
 }
 
-function types(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): readonly string[] {
-  return ctx.cardTypes(card);
-}
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return types(ctx, card).includes(type);
-}
-
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
-}
-
-function isNonAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && !hasType(ctx, card, "attack");
-}
-
 function previousNamed(ctx: ScriptCtx, name: string): boolean {
   return previousAttackHasName(ctx, name);
-}
-
-function runeCount(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).board.filter((card) => ctx.isRunechant(card)).length;
 }
 
 function ownedCards(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
@@ -61,9 +52,7 @@ function ownedCards(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
     ...player.graveyard,
     ...player.banish,
     ...player.soul,
-    ...player.board,
-    ...player.weapons,
-    ...Object.values(player.equipment).filter((card): card is DeepReadonly<CardInstance> => !!card),
+    ...controlledPermanents(ctx, player.seat),
   ].filter((card) => card.owner === ctx.seat);
 }
 
@@ -81,9 +70,7 @@ function orderOnTop(ctx: ScriptCtx, ids: number[]): void {
 }
 
 const righteousCleansing: CardScript = {
-  canTriggerOnHit(ctx) {
-    return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-  },
+  canTriggerOnHit: crushTriggered,
   onHit(ctx) {
     const top = ctx.player(opponentSeat(ctx)).deck.slice(0, 5);
     for (const card of top) ctx.lookAt(card.instanceId);
@@ -136,7 +123,7 @@ const floodOfForce: CardScript = {
         { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
       ),
     );
-    if ((ctx.cardData(top.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "combo")) {
+    if (ctx.hasKeyword(top, "combo")) {
       ctx.moveToHand(top.instanceId);
       ctx.addModifier({ scope: "chain-link", attack: 3 });
       ctx.grantGoAgain();
@@ -162,7 +149,7 @@ const heronsFlight: CardScript = {
   canBeDefendedBy(ctx, defending) {
     const mode = ctx.getState("heronMode");
     if (mode === 0) return true;
-    return mode === 1 ? isAttack(ctx, defending) : isNonAttack(ctx, defending);
+    return mode === 1 ? isAttackAction(ctx, defending) : isNonAttackAction(ctx, defending);
   },
   onChoose(ctx, hook, option) {
     if (hook === "heron-mode") ctx.setState("heronMode", option === "attack actions" ? 1 : 2);
@@ -177,7 +164,7 @@ const unifiedDecree: CardScript = {
     const top = ctx.player(ctx.seat).deck[0];
     if (!top) return;
     ctx.lookAt(top.instanceId);
-    if (ctx.cardData(top.cardId).cardType === "attack-reaction")
+    if (ctx.hasCardType(top, "attack-reaction"))
       ctx.requestCardChoice(
         "decree-banish",
         decisionPrompt("Unified Decree: banish the top card?", "card.cru.decree.banish", {
@@ -210,13 +197,7 @@ const viziertronic: CardScript = {
     },
   },
   onBoosted(ctx) {
-    const activated = ctx.state.modifiers.some(
-      (modifier) =>
-        modifier.sourceInstanceId === ctx.self.instanceId &&
-        modifier.scope === "until-end-of-turn" &&
-        !modifier.consumed,
-    );
-    if (!activated) return;
+    if (!hasLiveTurnEffect(ctx)) return;
     ctx.drawCards(ctx.seat, 1);
     const pendingTopKey = `viziertronicPendingTops:${ctx.self.instanceId}`;
     const pendingTops = Number(ctx.getPlayerFlag(ctx.seat, pendingTopKey));
@@ -271,11 +252,11 @@ const plasmaPurifier: CardScript = {
       canActivate: (ctx) =>
         ctx
           .player(ctx.seat)
-          .weapons.some((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "pistol")),
+          .weapons.some((card) => hasCardSubtype(ctx, card, "mechanologist") && hasCardSubtype(ctx, card, "pistol")),
       onActivate(ctx) {
         const pistols = ctx
           .player(ctx.seat)
-          .weapons.filter((card) => hasType(ctx, card, "mechanologist") && hasType(ctx, card, "pistol"));
+          .weapons.filter((card) => hasCardSubtype(ctx, card, "mechanologist") && hasCardSubtype(ctx, card, "pistol"));
         ctx.requestCardChoice(
           "purifier-pistol",
           decisionPrompt("Plasma Purifier: choose a pistol", "card.cru.purifier.pistol.choose"),
@@ -291,7 +272,9 @@ const plasmaPurifier: CardScript = {
 
 const remorseless: CardScript = {
   onEnterArsenal(ctx) {
-    if (!ctx.self.faceDown) ctx.setState("faceUpLoadedTurn", ctx.state.turn);
+    // The layer resolves later, so the card may have left the arsenal by then.
+    const inArsenal = ctx.player(ctx.self.owner).arsenal.some((card) => card.instanceId === ctx.self.instanceId);
+    if (inArsenal && !ctx.self.faceDown) ctx.setState("faceUpLoadedTurn", ctx.state.turn);
   },
   onAttackDeclared(ctx) {
     if (ctx.getState("faceUpLoadedTurn") === ctx.state.turn) ctx.addModifier({ scope: "chain-link", noDefenseReactionsFromArsenal: true });
@@ -316,7 +299,7 @@ const poisonTheTips: CardScript = {
     reload(ctx);
   },
   canTriggerOnHit(ctx) {
-    return !!ctx.link && hasType(ctx, ctx.link.attackingCard, "arrow") && ctx.link.targetAllyId === undefined;
+    return !!ctx.link && isArrow(ctx, ctx.link.attackingCard) && ctx.link.targetAllyId === undefined;
   },
   onHit(ctx) {
     const target = opponentSeat(ctx);
@@ -331,34 +314,15 @@ const poisonTheTips: CardScript = {
   },
   onChoose(ctx, hook, option) {
     if (hook === "poison-discard") ctx.discardCard(opponentSeat(ctx), Number(option));
-    else reloadChoice(ctx, hook, option);
+    else resolveReload(ctx, hook, option);
   },
 };
-
-function reload(ctx: ScriptCtx): void {
-  const player = ctx.player(ctx.seat);
-  if (player.arsenal.length === 0 && player.hand.length > 0)
-    ctx.requestCardChoice(
-      "cru-high-reload",
-      decisionPrompt("Reload: put a card into arsenal?", "card.cru.reload.card.choose", {
-        optionMessages: commonOptionMessages("pass"),
-      }),
-      ["pass", ...player.hand.map((card) => card.instanceId)],
-    );
-}
-
-function reloadChoice(ctx: ScriptCtx, hook: string, option: string): boolean {
-  if (hook !== "cru-high-reload") return false;
-  if (option !== "pass") ctx.putIntoArsenal(Number(option), "hand", { faceUp: false });
-  return true;
-}
 
 const rattleBones: CardScript = {
   playAsInstant: (ctx) => ctx.getFlag("player", "arcaneDamageDealtToOpposingHeroThisTurn") === true,
   onPlay(ctx) {
-    const cards = ctx
-      .player(ctx.seat)
-      .graveyard.filter((card) => isAttack(ctx, card) && hasType(ctx, card, "runeblade"));
+    const cards = faceUpGraveyard(ctx).filter((card) =>
+      isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "runeblade"));
     if (cards.length > 0)
       ctx.requestCardChoice(
         "rattle-banish",
@@ -377,7 +341,7 @@ const metacarpusNode: CardScript = {
       event: "card-played",
       label: "Pay 1 resource for +1 arcane damage?",
       condition: (ctx, played) =>
-        !!played && ctx.cardData(played.cardId).text?.toLowerCase().includes("arcane damage") === true,
+        !!played && hasArcaneDamageEffect(ctx, played.cardId),
       effect(ctx, played) {
         if (!played) return;
         ctx.setState("metacarpusTarget", played.instanceId);
@@ -434,7 +398,7 @@ const coaxACommotion: CardScript = {
     const draw = option === "all" || option.includes("draw");
     const life = option === "all" || option.includes("life");
     for (const player of ctx.state.players) {
-      if (quicken) ctx.createToken(QUICKEN, player.seat);
+      if (quicken) ctx.heroCreatesTokens(player.seat, QUICKEN);
       if (draw) ctx.drawCards(player.seat, 1);
       if (life) ctx.gainLife(player.seat, 1);
     }
@@ -474,7 +438,7 @@ export const cruHighRarity: Record<string, CardScript> = {
     onDieRollResolved(ctx, hook, roll) {
       if (hook !== "argh-smash") return;
       const count = Math.floor(roll / 2);
-      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasType(ctx, card, "item"));
+      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => isItem(ctx, card));
       if (count > 0 && items.length > 0)
         ctx.requestCardChoices(
           "smash-item",
@@ -527,7 +491,7 @@ export const cruHighRarity: Record<string, CardScript> = {
 
   "breeze rider boots|0": {
     canTriggerOnHit(ctx) {
-      return ctx.link?.attackCardType === "action" && hasType(ctx, ctx.link.attackingCard, "ninja");
+      return ctx.link?.attackCardType === "action" && hasCardSubtype(ctx, ctx.link.attackingCard, "ninja");
     },
     onHit(ctx) {
       ctx.requestChoice("breeze-destroy", yesNoPrompt("Destroy Breeze Rider Boots?", "card.cru.breeze.boots.destroy"), [
@@ -540,7 +504,7 @@ export const cruHighRarity: Record<string, CardScript> = {
       // destroying the equipment when this choice resolves.
       if (
         hook === "breeze-destroy" && option === "yes" &&
-        Object.values(ctx.player(ctx.seat).equipment).some((card) => card?.instanceId === ctx.self.instanceId)
+        equipmentZoneCards(ctx.player(ctx.seat)).some((card) => card.instanceId === ctx.self.instanceId)
       ) {
         ctx.destroySelf();
         ctx.addModifier({ scope: "until-end-of-turn", goAgain: true, appliesToKeyword: "combo" });
@@ -549,9 +513,7 @@ export const cruHighRarity: Record<string, CardScript> = {
         if (
           ctx.link?.attackCardType === "action" &&
           ctx.link.attacker === ctx.seat &&
-          (ctx.cardData(ctx.link.attackingCard.cardId).keywords ?? []).some(
-            (keyword) => keyword.toLowerCase() === "combo",
-          )
+          ctx.hasKeyword(ctx.link.attackingCard, "combo")
         ) ctx.grantGoAgain();
       }
     },
@@ -611,8 +573,7 @@ export const cruHighRarity: Record<string, CardScript> = {
         event: "begin-action-phase",
         label: "Copy a hero with Shiyana",
         target: {
-          options: (ctx) =>
-            ctx.state.players.filter((player) => player.seat !== ctx.seat).map((player) => player.hero.instanceId),
+          options: (ctx) => ctx.state.players.map((player) => player.hero.instanceId),
           prompt: () => decisionPrompt("Shiyana: choose a hero to copy", "card.cru.shiyana.hero.choose"),
         },
         effect(ctx) {
@@ -638,7 +599,7 @@ export const cruHighRarity: Record<string, CardScript> = {
   "viziertronic model i|0": viziertronic,
   "meganetic shockwave|3": {
     onAttackDeclared(ctx) {
-      ctx.setFlag("link", "mustDefendWithEquipmentCount", Number(ctx.getFlag("player", "boostCountThisTurn")) || 0);
+      ctx.setFlag("link", "mustDefendWithEquipmentCount", boostsThisChain(ctx));
     },
   },
   "absorption dome|2": {
@@ -778,7 +739,7 @@ export const cruHighRarity: Record<string, CardScript> = {
   "gorganian tome|0": {
     onPlay(ctx) {
       const copies = ctx.state.players
-        .flatMap((player) => player.graveyard)
+        .flatMap((player) => faceUpGraveyard(ctx, player.seat))
         .filter((card) => cardNamed(ctx, card, "Gorganian Tome")).length;
       ctx.drawCards(ctx.seat, 1 + copies);
     },

@@ -8,6 +8,7 @@ import {
   MAX_MATCHMAKING_AVOID_HEROES,
   MAX_MATCHMAKING_AVOID_ROOM_CODES,
   MAX_MATCHMAKING_AVOID_USERS,
+  isPlayerBadge,
   isPlayerReportReason,
   type HeroRecord,
   type MatchSummary,
@@ -15,6 +16,7 @@ import {
   playmatRef,
 } from "@fyendal/protocol";
 import { exportSocialData } from "./social.js";
+import { deleteOrphanedKofiPayments, exportKofiPayments, supporterActive } from "./kofi.js";
 import { accountEmail } from "./recovery.js";
 import { listUserAchievements } from "./achievements.js";
 import { detachLeaguesForUser, exportLeagueData } from "./league/leagueStore.js";
@@ -30,21 +32,25 @@ export interface AccountCosmetics {
 
 interface CosmeticRow {
   early_tester: boolean;
+  supporter_until: unknown;
   selected_badge: unknown;
   playmat: unknown;
 }
 
-function badgePreferences(earlyTester: boolean, selectedBadge: unknown): Pick<AccountCosmetics, "availableBadges" | "selectedBadge"> {
-  const availableBadges: PlayerBadge[] = earlyTester ? ["early-tester"] : [];
-  return {
-    availableBadges,
-    selectedBadge: selectedBadge === "early-tester" && earlyTester ? selectedBadge : null,
-  };
+function badgePreferences(
+  row: Pick<CosmeticRow, "early_tester" | "supporter_until" | "selected_badge">,
+): Pick<AccountCosmetics, "availableBadges" | "selectedBadge"> {
+  const availableBadges: PlayerBadge[] = [
+    ...(row.early_tester ? ["early-tester" as const] : []),
+    ...(supporterActive(row.supporter_until) ? ["supporter" as const] : []),
+  ];
+  const selected = availableBadges.find((badge) => badge === row.selected_badge);
+  return { availableBadges, selectedBadge: selected ?? null };
 }
 
 function cosmetics(row: CosmeticRow): AccountCosmetics {
   return {
-    ...badgePreferences(row.early_tester, row.selected_badge),
+    ...badgePreferences(row),
     playmat: playmatRef(row.playmat) ? row.playmat : null,
   };
 }
@@ -54,7 +60,7 @@ export async function getAccountCosmetics(
   userId: number,
 ): Promise<AccountCosmetics | null> {
   const { rows } = await db.query(
-    "SELECT early_tester, selected_badge, playmat FROM users WHERE id = $1",
+    "SELECT early_tester, supporter_until, selected_badge, playmat FROM users WHERE id = $1",
     [userId],
   );
   const user = rows[0] as CosmeticRow | undefined;
@@ -72,7 +78,7 @@ export async function updateAccountCosmetics(
 ): Promise<{ ok: true; cosmetics: AccountCosmetics } | { ok: false; error: AccountCosmeticsError }> {
   const { badge, playmat } = changes;
   if (badge === undefined && playmat === undefined) return { ok: false, error: "nothing to change" };
-  if (badge !== undefined && badge !== null && badge !== "early-tester") return { ok: false, error: "invalid badge" };
+  if (badge !== undefined && badge !== null && !isPlayerBadge(badge)) return { ok: false, error: "invalid badge" };
   if (playmat !== undefined && playmat !== null && !playmatRef(playmat)) return { ok: false, error: "invalid playmat" };
   const current = await getAccountCosmetics(db, userId);
   if (!current) return { ok: false, error: "account not found" };
@@ -101,6 +107,7 @@ export interface AccountExport {
     username: string;
     createdAt: number;
     earlyTester: boolean;
+    supporterUntil: number | null;
     selectedBadge: PlayerBadge | null;
     playmat: string | null;
     betaTester: boolean;
@@ -109,6 +116,7 @@ export interface AccountExport {
   };
   decks: Array<Record<string, unknown>>;
   deckPlays: DeckPlay[];
+  kofiPayments: Array<{ paidAt: number; tierName: string | null }>;
   rooms: Array<{
     code: string;
     format: string;
@@ -237,9 +245,10 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     { rows: playerReportRows },
     { rows: gameDayRows },
     social,
+    kofiPayments,
   ] = await Promise.all([
     db.query(
-      `SELECT u.username, u.created_at, u.early_tester, u.selected_badge, u.playmat,
+      `SELECT u.username, u.created_at, u.early_tester, u.supporter_until, u.selected_badge, u.playmat,
               b.user_id IS NOT NULL AS beta_tester
        FROM users u LEFT JOIN beta_testers b ON b.user_id = u.id
        WHERE u.id = $1`,
@@ -297,11 +306,13 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     ),
     db.query("SELECT day_utc FROM daily_game_players WHERE user_id = $1 ORDER BY day_utc", [userId]),
     exportSocialData(db, userId),
+    exportKofiPayments(db, userId),
   ]);
   const user = users[0] as {
     username: string;
     created_at: number;
     early_tester: boolean;
+    supporter_until: unknown;
     selected_badge: unknown;
     playmat: unknown;
     beta_tester: boolean;
@@ -387,7 +398,8 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
       username: user.username,
       createdAt: Number(user.created_at),
       earlyTester: user.early_tester,
-      selectedBadge: badgePreferences(user.early_tester, user.selected_badge).selectedBadge,
+      supporterUntil: supporterActive(user.supporter_until) ? Number(user.supporter_until) : null,
+      selectedBadge: badgePreferences(user).selectedBadge,
       playmat: playmatRef(user.playmat) ? user.playmat : null,
       betaTester: user.beta_tester,
       email: recoveryEmail?.email ?? null,
@@ -457,6 +469,7 @@ export async function exportAccount(db: Queryable, userId: number): Promise<Acco
     matchupRecords: matchRecords.matchups,
     ...social,
     leagues: await exportLeagueData(db, userId),
+    kofiPayments,
   };
 }
 
@@ -470,10 +483,10 @@ export async function deleteAccount(
 ): Promise<DeleteAccountResult> {
   return withTransaction(db, async (tx) => {
     const { rows: users } = await tx.query(
-      "SELECT pass_hash FROM users WHERE id = $1 FOR UPDATE",
+      "SELECT pass_hash, email_lc FROM users WHERE id = $1 FOR UPDATE",
       [userId],
     );
-    const user = users[0] as { pass_hash: string } | undefined;
+    const user = users[0] as { pass_hash: string; email_lc: string | null } | undefined;
     if (!user) return { status: "not-found" as const };
     if (!(await verifyPassword(password, user.pass_hash))) return { status: "invalid-password" as const };
     const { rows: roomRows } = await tx.query(
@@ -493,6 +506,7 @@ export async function deleteAccount(
     await detachLeaguesForUser(tx, userId);
     const result = await tx.query("DELETE FROM users WHERE id = $1", [userId]);
     if (result.rowCount) {
+      await deleteOrphanedKofiPayments(tx, user.email_lc);
       await tx.query(
         `DELETE FROM replay_games
          WHERE id NOT IN (SELECT replay_id FROM replay_participants)`,

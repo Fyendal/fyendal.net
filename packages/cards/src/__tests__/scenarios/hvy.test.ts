@@ -583,6 +583,21 @@ describe("HVY — Heavy Hitters mechanics", () => {
       .expectInZone(0, "ponder|0", "board");
   });
 
+  it.each(["pay 0", "pay 1"])("Aether Arc creates Ponder only if damage survives Arcane Barrier: %s", (payment) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["aether arc|3"] },
+        { hero: "dorinthea", hand: ["head jab|1"], resources: 1,
+          equipment: { head: "nullrune hood|0", chest: null, arms: null, legs: null } },
+      ],
+    });
+    g.play("aether arc|3");
+    expect(g.state.pendingDecision?.chooseHook).toBe("arcane-barrier");
+    g.chooseOption(payment).settle();
+    if (payment === "pay 0") g.expectLife(1, 19).expectInZone(0, "ponder|0", "board");
+    else expect(g.state.players[0]!.board).toHaveLength(0);
+  });
+
   it("Beat Chest pays with a 6-power card and Pound Town creates Might", () => {
     const g = scenario({
       seats: [
@@ -970,5 +985,86 @@ describe("HVY — Commanding Performance", () => {
       .expectNoLog("Commanding Performance triggers")
       .settle()
       .expectInZone(1, "sink below|1", "arsenal");
+  });
+});
+
+describe("HVY — Warrior reactions that target any attack", () => {
+  it("Take the Upper Hand pumps a wagered non-Warrior attack", () => {
+    const g = scenario({ seats: [
+      { hero: "dorinthea", heroKey: "olympia|0", resources: 10, hand: ["wage gold|1", "take the upper hand|1"] },
+      { hero: "rhinar" },
+    ] });
+    g.play("wage gold|1").chooseOption("yes").blockWith()
+      .react("take the upper hand|1", { settle: false })
+      .passPriority().passPriority()
+      .expectAttackValue(10);
+  });
+
+  it("Take the Upper Hand needs a wager this chain link", () => {
+    const g = scenario({ seats: [
+      { hero: "dorinthea", heroKey: "olympia|0", resources: 10, hand: ["wage gold|1", "take the upper hand|1"] },
+      { hero: "rhinar" },
+    ] });
+    g.play("wage gold|1").chooseOption("no").blockWith()
+      .expectNoLegalPlay("take the upper hand|1");
+  });
+
+  it("Fatal Engagement pumps a non-Warrior attack defended by an attack action", () => {
+    const g = scenario({ seats: [
+      { hero: "dorinthea", heroKey: "olympia|0", resources: 10, hand: ["wage gold|1", "fatal engagement|1"] },
+      { hero: "rhinar", hand: ["wrecker romp|3"] },
+    ] });
+    g.play("wage gold|1").chooseOption("no").blockWith("wrecker romp|3")
+      .react("fatal engagement|1", { settle: false })
+      .passPriority().passPriority()
+      .expectAttackValue(12);
+  });
+});
+
+describe("HVY — Slap-Happy", () => {
+  it("shows the damage it dealt, not the spent shield, during the Damage Step", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["romping club|0"], resources: 2 },
+        { hero: "dorinthea", hand: ["slap-happy|1"] },
+      ],
+    });
+    g.attackWithWeapon("romping club|0")
+      .blockWith()
+      .passPriority()
+      .react("slap-happy|1", { settle: false })
+      .passPriority().passPriority()
+      .expectDamageToPrevent(2, ["slap-happy|1"])
+      .passPriority().passPriority()
+      .expectLog("prevents 2 damage");
+    expect(g.state.chain[0]!.resolved).toBe(false);
+    const link = projectStateFor(g.state, 1).chain[0]!;
+    expect(link.damage).toBe(2);
+    expect(link.damageToPrevent).toBeUndefined();
+    g.expectLife(1, 18);
+  });
+
+  it("Gauntlets of Iron Will reduces a power gain after its defend trigger resolved", () => {
+    const none = { head: null, chest: null, arms: null, legs: null } as const;
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "ira, scarlet revenger|0",
+          weapons: ["edge of autumn|0"],
+          hand: ["head jab|1"],
+          equipment: { ...none, arms: "okana scar wraps|0" },
+        },
+        { hero: "dorinthea", hand: [], equipment: { ...none, arms: "gauntlets of iron will|0" } },
+      ],
+    });
+
+    g.play("head jab|1")
+      .blockWith("gauntlets of iron will|0")
+      .passPriority()
+      .passPriority()
+      .activate("okana scar wraps|0")
+      .chooseCard("edge of autumn|0")
+      .expectLog("Head Jab hits for 1");
   });
 });

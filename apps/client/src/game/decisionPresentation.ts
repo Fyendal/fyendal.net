@@ -5,15 +5,18 @@ export interface CardChoiceLocationLabelText {
   opponentHero: string;
   leftWeapon: string;
   rightWeapon: string;
+  yourArsenal: string;
 }
 
 /** Viewer-relative labels for public permanents whose artwork alone can make
  * a scripted card choice ambiguous. Hero labels are always included so an
- * effect such as Oasis Respite cannot silently be assigned to the wrong hero. */
+ * effect such as Oasis Respite cannot silently be assigned to the wrong hero.
+ * Arsenal cards are labeled so a copy in arsenal is distinct from one in hand. */
 export function cardChoiceLocationLabels(
   yourHeroInstanceId: number,
   opponentHeroInstanceId: number,
   yourWeaponInstanceIds: readonly number[],
+  yourArsenalInstanceIds: readonly number[],
   text: CardChoiceLocationLabelText,
 ): ReadonlyMap<number, string> {
   const labels = new Map<number, string>([
@@ -24,6 +27,7 @@ export function cardChoiceLocationLabels(
     labels.set(yourWeaponInstanceIds[0]!, text.leftWeapon);
     labels.set(yourWeaponInstanceIds[1]!, text.rightWeapon);
   }
+  for (const instanceId of yourArsenalInstanceIds) labels.set(instanceId, text.yourArsenal);
   return labels;
 }
 
@@ -261,4 +265,48 @@ export function heroTargetSide(option: string, viewerSeat: number): HeroTargetSi
   const seat = /^hero:(\d+)$/.exec(option)?.[1];
   if (seat === undefined) return null;
   return Number(seat) === viewerSeat ? "self" : "opponent";
+}
+
+/** Bare number choices list as buttons until there are this many. */
+const NUMBER_INPUT_MIN_OPTIONS = 10;
+/** Declared-X choices list as buttons while X can be at most this. */
+const X_BUTTONS_MAX = 4;
+
+export type NumberChoice = {
+  minimum: number;
+  maximum: number;
+  optionByValue: ReadonlyMap<number, string>;
+  defaultValue?: number;
+};
+
+/** Number options ("choose a number", "X = n") rendered as one number input;
+ * any other options in the decision stay buttons. */
+export function numberChoice(decision: PendingDecision | null): NumberChoice | null {
+  if (
+    decision?.kind !== "choose-target" ||
+    !decision.options ||
+    decision.optionCards?.some(Boolean) ||
+    decision.optionMessages?.some(Boolean) ||
+    decision.optionEnabledCards
+  ) return null;
+  const parse = (pattern: RegExp) => new Map(decision.options!.flatMap((option) => {
+    const digits = pattern.exec(option)?.[1];
+    return digits === undefined ? [] : [[Number(digits), option] as const];
+  }));
+  const declaredX = parse(/^X = (\d+)$/);
+  const bare = parse(/^(\d+)$/);
+  const optionByValue = declaredX.size > 1 && Math.max(...declaredX.keys()) > X_BUTTONS_MAX
+    ? declaredX
+    : bare.size >= NUMBER_INPUT_MIN_OPTIONS && bare.size === decision.options.length
+      ? bare
+      : null;
+  if (!optionByValue) return null;
+  const values = [...optionByValue.keys()];
+  const defaultValue = values.find((value) => optionByValue.get(value) === decision.defaultOption);
+  return {
+    minimum: Math.min(...values),
+    maximum: Math.max(...values),
+    optionByValue,
+    ...(defaultValue === undefined ? {} : { defaultValue }),
+  };
 }

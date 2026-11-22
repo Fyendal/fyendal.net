@@ -1,5 +1,6 @@
-import { legalIntents, projectStateFor, type GameState } from "@fyendal/engine";
+import { actionCandidates, legalIntents, projectStateFor, type GameState } from "@fyendal/engine";
 import type { GameIntent, PassUntilMode, PendingDecision } from "@fyendal/shared";
+import { forfeitsActionPoint } from "./endTurnWarning.js";
 
 /** A chain link by its place on the open chain and its attacking object. */
 export interface PassUntilLink {
@@ -8,12 +9,19 @@ export interface PassUntilLink {
 }
 
 /** A seat's armed pass shortcut. A chain-link latch armed with no open link
- *  binds to the next link to open. An opponent latch remembers the opposing
- *  plays already on the stack or chain, so only a new one ends it. */
+ *  binds to the next link to open. `seen` holds the opposing plays on the
+ *  stack the seat has already had a window for; a new one pauses the latch
+ *  while the seat can respond, unless `ignorePlays`. */
 export type SeatPassUntil =
-  | { mode: "turn"; turn: number }
-  | { mode: "chain-link"; turn: number; link?: PassUntilLink }
-  | { mode: "opponent"; turn: number; seen: string[] };
+  | { mode: "turn"; turn: number; seen: string[]; ignorePlays?: true }
+  | { mode: "chain-link"; turn: number; link?: PassUntilLink; seen: string[]; ignorePlays?: true };
+
+const RESPONSE_KINDS: ReadonlySet<GameIntent["kind"]> = new Set([
+  "play-card",
+  "play-from-arsenal",
+  "play-from-zone",
+  "activate-ability",
+]);
 
 const PASS_WINDOW_KINDS: ReadonlySet<PendingDecision["kind"]> = new Set([
   "priority-window",
@@ -29,54 +37,63 @@ function hasExactKeys(value: Record<string, unknown>, keys: readonly string[], r
   return Object.keys(value).every((key) => keys.includes(key)) && required.every((key) => Object.hasOwn(value, key));
 }
 
-/** Persisted JSON, decoded exhaustively; anything else is `null`. */
+function decodeSeen(value: unknown): string[] | null {
+  if (value === undefined) return [];
+  return Array.isArray(value) && value.length <= 256
+    && value.every((key) => typeof key === "string" && key.length <= 64)
+    ? [...value] as string[]
+    : null;
+}
+
+/** Persisted JSON, decoded exhaustively; anything else is `null`. Latches
+ *  stored before `seen` existed decode with none, and a retired opponent
+ *  latch as a turn latch. */
 export function decodeStoredPassUntil(value: unknown): SeatPassUntil | null {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
   const candidate = value as Record<string, unknown>;
   if (!nonNegativeInteger(candidate.turn)) return null;
-  if (candidate.mode === "opponent") {
-    return hasExactKeys(candidate, ["mode", "turn", "seen"], ["mode", "turn", "seen"])
-      && Array.isArray(candidate.seen) && candidate.seen.length <= 256
-      && candidate.seen.every((key) => typeof key === "string" && key.length <= 64)
-      ? { mode: "opponent", turn: candidate.turn, seen: [...candidate.seen] as string[] }
+  const seen = decodeSeen(candidate.seen);
+  if (seen === null) return null;
+  if (candidate.ignorePlays !== undefined && candidate.ignorePlays !== true) return null;
+  const ignore = candidate.ignorePlays ? { ignorePlays: true as const } : {};
+  if (candidate.mode === "turn" || candidate.mode === "opponent") {
+    return hasExactKeys(candidate, ["mode", "turn", "seen", "ignorePlays"], ["mode", "turn"])
+      ? { mode: "turn", turn: candidate.turn, seen, ...ignore }
       : null;
   }
-  if (candidate.mode === "turn") {
-    return hasExactKeys(candidate, ["mode", "turn"], ["mode", "turn"])
-      ? { mode: "turn", turn: candidate.turn }
-      : null;
-  }
-  if (candidate.mode !== "chain-link" || !hasExactKeys(candidate, ["mode", "turn", "link"], ["mode", "turn"])) {
+  if (candidate.mode !== "chain-link"
+    || !hasExactKeys(candidate, ["mode", "turn", "link", "seen", "ignorePlays"], ["mode", "turn"])) {
     return null;
   }
-  if (candidate.link === undefined) return { mode: "chain-link", turn: candidate.turn };
+  if (candidate.link === undefined) return { mode: "chain-link", turn: candidate.turn, seen, ...ignore };
   if (typeof candidate.link !== "object" || candidate.link === null || Array.isArray(candidate.link)) return null;
   const link = candidate.link as Record<string, unknown>;
   return hasExactKeys(link, ["index", "instanceId"], ["index", "instanceId"])
     && nonNegativeInteger(link.index) && nonNegativeInteger(link.instanceId)
-    ? { mode: "chain-link", turn: candidate.turn, link: { index: link.index, instanceId: link.instanceId } }
+    ? { mode: "chain-link", turn: candidate.turn, link: { index: link.index, instanceId: link.instanceId }, seen, ...ignore }
     : null;
 }
 
-export function armPassUntil(state: GameState, seat: number, mode: PassUntilMode): SeatPassUntil {
-  const armed: SeatPassUntil = mode === "opponent"
-    ? { mode, turn: state.turn, seen: opponentPlays(state, seat) }
-    : { mode, turn: state.turn };
+export function armPassUntil(state: GameState, seat: number, mode: PassUntilMode, ignorePlays = false): SeatPassUntil {
+  const armed: SeatPassUntil = { mode, turn: state.turn, seen: opponentPlays(state, seat) };
+  if (ignorePlays) armed.ignorePlays = true;
   return refreshPassUntil(state, seat, armed) ?? armed;
 }
 
-/** The opposing seat's played cards and activated abilities on the stack, and
- *  its unresolved chain links, by identity. Triggers are not plays. */
+/** The opposing seat's played cards and activated abilities on the stack, by
+ *  identity. Triggers are not plays. */
 function opponentPlays(state: GameState, seat: number): string[] {
-  const plays = state.stack
+  return state.stack
     .filter((layer) => layer.seat !== seat && (layer.card || layer.ability))
     .map((layer) => [
-      "layer", layer.sourceInstanceId, layer.card?.instanceId ?? "ability", layer.abilityIndex ?? 0,
+      layer.sourceInstanceId, layer.card?.instanceId ?? "ability", layer.abilityIndex ?? 0,
     ].join(":"));
-  state.chain.forEach((link, index) => {
-    if (link.attacker !== seat && !link.resolved) plays.push(`link:${index}:${link.attackingCard.instanceId}`);
-  });
-  return plays;
+}
+
+/** The seat acted itself, so every opposing play now on the stack has had
+ *  its window. */
+export function acknowledgePassUntil(state: GameState, seat: number, armed: SeatPassUntil): SeatPassUntil {
+  return { ...armed, seen: opponentPlays(state, seat) };
 }
 
 function openLink(state: GameState): PassUntilLink | null {
@@ -86,21 +103,23 @@ function openLink(state: GameState): PassUntilLink | null {
 }
 
 /** The latch after observing `state`, or `null` once it has expired: the turn
- *  ended, the chain link it covers is no longer the open one, or the opponent
- *  made a new play. An opponent latch also ends when the seat's own turn
- *  begins, so a quiet opponent never passes that turn away. */
+ *  ended or the chain link it covers is no longer the open one. Plays that
+ *  left the stack drop out of `seen`. */
 export function refreshPassUntil(state: GameState, seat: number, armed: SeatPassUntil): SeatPassUntil | null {
-  if (state.phase === "game-over") return null;
-  if (armed.mode === "opponent") {
-    if (state.turn !== armed.turn && state.activePlayer === seat) return null;
-    const plays = opponentPlays(state, seat);
-    return plays.every((play) => armed.seen.includes(play)) ? { ...armed, seen: plays } : null;
-  }
-  if (state.turn !== armed.turn) return null;
-  if (armed.mode === "turn") return armed;
+  if (state.phase === "game-over" || state.turn !== armed.turn) return null;
+  const plays = opponentPlays(state, seat);
+  const seen = armed.seen.filter((play) => plays.includes(play));
+  if (armed.mode === "turn") return { ...armed, seen };
   const link = openLink(state);
-  if (!armed.link) return link ? { ...armed, link } : armed;
-  return link && link.index === armed.link.index && link.instanceId === armed.link.instanceId ? armed : null;
+  if (!armed.link) return link ? { ...armed, link, seen } : { ...armed, seen };
+  return link && link.index === armed.link.index && link.instanceId === armed.link.instanceId
+    ? { ...armed, seen }
+    : null;
+}
+
+/** The seat could play or activate something now, not just pass. */
+function canRespond(legal: readonly GameIntent[]): boolean {
+  return legal.some((intent) => RESPONSE_KINDS.has(intent.kind));
 }
 
 /** An attack the seat is defending whose power, net of established
@@ -113,23 +132,41 @@ function threatensLethal(state: GameState, seat: number): boolean {
   return link.attackValue - (link.damageToPrevent ?? 0) >= life;
 }
 
+/** The seat's final pass of the reaction step would let the attack defeat it
+ *  while it can still respond. */
+function finalPassLethal(state: GameState, seat: number, legal: readonly GameIntent[]): boolean {
+  if (state.pendingDecision?.kind !== "defense-reaction" || state.stack.length > 0) return false;
+  if (!legal.some((intent) => intent.kind !== "pass")) return false;
+  const view = projectStateFor(state, seat);
+  const link = view.chain.at(-1);
+  const life = view.players[seat]?.life;
+  if (!link || link.resolved || life === undefined || link.targetAllyName !== undefined) return false;
+  const damage = link.damage - (link.damageUnpreventable ? 0 : link.damageToPrevent ?? 0);
+  return damage > 0 && damage >= life;
+}
+
 /** What the latch answers for `seat` in `state`: pass its priority and
  *  reaction windows and declare no blocks. Any other choice, a chain-link
- *  latch before its link opens, and a lethal attack pause it without
- *  disarming. An opponent latch never blocks: its attack ends the latch. */
+ *  latch before its link opens, a new opposing play the seat can respond to
+ *  (unless it ignores plays), a lethal attack or final pass, and ending the
+ *  seat's turn with a usable action point pause it without disarming. */
 export function passUntilIntent(state: GameState, seat: number, armed: SeatPassUntil): GameIntent | null {
   if (armed.mode === "chain-link" && !armed.link) return null;
   const decision = state.pendingDecision;
   if (decision && decision.player !== seat) return null;
   const legal = legalIntents(state, seat);
+  const newPlay = opponentPlays(state, seat).some((play) => !armed.seen.includes(play));
+  if (newPlay && !armed.ignorePlays && canRespond(legal)) return null;
   if (decision?.kind === "defend") {
-    if (armed.mode === "opponent" || threatensLethal(state, seat)) return null;
+    if (threatensLethal(state, seat)) return null;
     return legal.find((intent) =>
       intent.kind === "defend" && intent.instanceIds.length === 0 && (intent.pitchInstanceIds?.length ?? 0) === 0
     ) ?? null;
   }
+  if (finalPassLethal(state, seat, legal)) return null;
   const passWindow = decision
     ? PASS_WINDOW_KINDS.has(decision.kind)
-    : state.phase === "action" && state.priorityPlayer === seat;
+    : state.phase === "action" && state.priorityPlayer === seat
+      && !forfeitsActionPoint(projectStateFor(state, seat), seat, actionCandidates(state, seat));
   return passWindow ? legal.find((intent) => intent.kind === "pass") ?? null : null;
 }

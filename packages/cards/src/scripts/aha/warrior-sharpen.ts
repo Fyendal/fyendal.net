@@ -1,11 +1,17 @@
 import type { CardInstance, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { buffNextAttack, cardNamed, commonOptionMessages, decisionPrompt, localizedLog } from "../shared-helpers.js";
+import {
+  buffNextAttack,
+  cardNamed,
+  commonOptionMessages,
+  decisionPrompt,
+  equipmentZoneCards,
+  faceUpGraveyard,
+  isSword,
+  localizedLog,
+} from "../shared-helpers.js";
+import { BLADE_DANCE, FLURRY } from "../tokens.js";
 
 type Card = DeepReadonly<CardInstance>;
-
-const BLADE_DANCE = "MPW134";
-const MPW_FLURRY = "MPW135";
-const SBL_FLURRY = "SBL036";
 
 export const SHARPEN_FOLLOWUP = {
   SBL_FLURRY: 1,
@@ -29,10 +35,6 @@ export interface SharpenFollowup {
   kind: SharpenFollowupKind;
 }
 
-function isSword(ctx: ScriptCtx, card: Card): boolean {
-  return ctx.cardTypes(card).some((type) => type.toLowerCase() === "sword");
-}
-
 function controlledSword(ctx: ScriptCtx, instanceId: number): Card | undefined {
   return ctx.player(ctx.seat).weapons.find((card) => card.instanceId === instanceId && isSword(ctx, card));
 }
@@ -49,7 +51,7 @@ export function resolveSharpenFollowup(
 
   switch (kind) {
     case SHARPEN_FOLLOWUP.SBL_FLURRY:
-      ctx.createToken(SBL_FLURRY);
+      ctx.createToken(FLURRY);
       break;
     case SHARPEN_FOLLOWUP.DISCOUNT:
       buffNextAttack(ctx, { attackActivationCostReduction: 1, appliesToInstanceId: instanceId }, source);
@@ -58,7 +60,7 @@ export function resolveSharpenFollowup(
       ctx.createToken(BLADE_DANCE);
       break;
     case SHARPEN_FOLLOWUP.MPW_FLURRY:
-      ctx.createToken(MPW_FLURRY);
+      ctx.createToken(FLURRY);
       break;
     case SHARPEN_FOLLOWUP.DRAW_ON_HIT:
       ctx.addModifier(
@@ -72,9 +74,7 @@ export function resolveSharpenFollowup(
       );
       break;
     case SHARPEN_FOLLOWUP.TOP_ATTACK_REACTION: {
-      const reactions = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => ctx.cardData(card.cardId).cardType === "attack-reaction");
+      const reactions = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "attack-reaction"));
       if (reactions.length) {
         ctx.requestCardChoice(
           SHARPEN_TOP_ATTACK_REACTION_HOOK,
@@ -143,8 +143,8 @@ export function sharpenSword(ctx: ScriptCtx, instanceId: number, count = 1, foll
   }
 
   const rerebrace = isZenithBlade
-    ? Object.values(ctx.player(ctx.seat).equipment).find(
-        (card) => card && cardNamed(ctx, card, "Reverent Rerebrace"),
+    ? equipmentZoneCards(ctx.player(ctx.seat)).find(
+        (card) => cardNamed(ctx, card, "Reverent Rerebrace"),
       )
     : undefined;
   if (rerebrace) {

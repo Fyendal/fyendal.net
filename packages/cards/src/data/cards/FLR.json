@@ -2,7 +2,7 @@
  {
   "id": "FLR001",
   "name": "Florian",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If there are 4 or more Earth cards in your banished zone, Florian gets \"If you would create 1 or more aura tokens, instead create that many plus 1 of each of those tokens.\"\nEssence of Earth",
   "classes": [
    "runeblade"
@@ -20,7 +20,7 @@
  {
   "id": "FLR002",
   "name": "Rotwood Reaper",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nIf you've played or created an aura this turn, this gets +2{p}.",
   "attack": 2,
   "classes": [
@@ -36,7 +36,7 @@
  {
   "id": "FLR003",
   "name": "Helm of Lignum Vitae",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "If there are 4 or more Earth cards in your banished zone, this gets +1{d}.\nBlade Break",
   "defense": 1,
   "subtypes": [
@@ -51,7 +51,7 @@
  {
   "id": "FLR004",
   "name": "Bloodtorn Bodice",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this and an aura you control: Gain {r}. Go again",
   "defense": 0,
   "classes": [
@@ -65,7 +65,7 @@
  {
   "id": "FLR005",
   "name": "Runehold Release",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Create a Runechant token. Go again",
   "defense": 0,
   "classes": [
@@ -79,7 +79,7 @@
  {
   "id": "FLR006",
   "name": "Well Grounded",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Prevent the next 2 damage that would be dealt to you this turn. Activate this only if there are 4 or more Earth cards in your banished zone.",
   "defense": 0,
   "subtypes": [
@@ -91,7 +91,7 @@
  {
   "id": "FLR007",
   "name": "Cadaverous Tilling",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, this gets +2{p}.",
   "pitch": 1,
   "cost": 3,
@@ -109,7 +109,7 @@
  {
   "id": "FLR008",
   "name": "Fruits of the Forest",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Gain 2{h}",
   "pitch": 1,
   "cost": 3,
@@ -124,7 +124,7 @@
  {
   "id": "FLR009",
   "name": "Runerager Swarm",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played or created an aura this turn, this gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -144,7 +144,7 @@
  {
   "id": "FLR010",
   "name": "Vantage Point",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played or created an aura this turn, this gets overpower.",
   "pitch": 1,
   "cost": 3,
@@ -164,7 +164,7 @@
  {
   "id": "FLR011",
   "name": "Rootbound Carapace",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Decompose - You may banish 2 Earth cards and an action card from your graveyard. If you do, this gets +1{d}.",
   "pitch": 1,
   "cost": 0,
@@ -180,7 +180,7 @@
  {
   "id": "FLR012",
   "name": "Arcane Cussing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen you deal or are dealt damage, destroy this.\nWhen this leaves the arena during your turn, create 3 Runechant tokens.",
   "pitch": 1,
   "cost": 1,
@@ -199,7 +199,7 @@
  {
   "id": "FLR013",
   "name": "Arcane Seeds // Life",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Meld\nCreate a Runechant token. Create a Runechant token.\nGo again\n//\nGain 1{h}",
   "pitch": 1,
   "cost": 0,
@@ -219,7 +219,7 @@
  {
   "id": "FLR014",
   "name": "Deadwood Dirge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Destroy an aura you control. If you do, create 3 Runechant tokens.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -235,7 +235,7 @@
  {
   "id": "FLR015",
   "name": "Malefic Incantation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nThis enters the arena with 3 verse counters. When it has none, destroy it.\nOnce per turn, when you play an attack action card, remove a verse counter from this. If you do, create a Runechant token.",
   "pitch": 1,
   "cost": 0,
@@ -254,7 +254,7 @@
  {
   "id": "FLR016",
   "name": "Oath of the Arknight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Runeblade attack this turn gains +3{p}.\nCreate a Runechant token.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -270,7 +270,7 @@
  {
   "id": "FLR017",
   "name": "Strong Yield",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nAt the beginning of your action phase, destroy this, then your next attack this turn gets +3{p}.",
   "pitch": 1,
   "cost": 1,
@@ -287,7 +287,7 @@
  {
   "id": "FLR018",
   "name": "Arcane Cussing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen you deal or are dealt damage, destroy this.\nWhen this leaves the arena during your turn, create 2 Runechant tokens.",
   "pitch": 2,
   "cost": 1,
@@ -306,7 +306,7 @@
  {
   "id": "FLR019",
   "name": "Autumn's Touch",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 3,
   "cost": 3,
@@ -321,7 +321,7 @@
  {
   "id": "FLR020",
   "name": "Cadaverous Tilling",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Decompose - When this attacks, you may banish 2 Earth cards and an action card from your graveyard. If you do, this gets +2{p}.",
   "pitch": 3,
   "cost": 3,
@@ -339,7 +339,7 @@
  {
   "id": "FLR021",
   "name": "Earth Form",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, create an Embodiment of Earth token.",
   "pitch": 3,
   "cost": 3,
@@ -354,7 +354,7 @@
  {
   "id": "FLR022",
   "name": "Fruits of the Forest",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Discard this: Gain 2{h}",
   "pitch": 3,
   "cost": 3,
@@ -369,7 +369,7 @@
  {
   "id": "FLR023",
   "name": "Splintering Deadwood",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or hits, you may destroy an aura you control. If you do, create a Runechant token.",
   "pitch": 3,
   "cost": 3,
@@ -386,7 +386,7 @@
  {
   "id": "FLR024",
   "name": "Arcane Cussing",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen you deal or are dealt damage, destroy this.\nWhen this leaves the arena during your turn, create a Runechant token.",
   "pitch": 3,
   "cost": 1,
@@ -405,7 +405,7 @@
  {
   "id": "FLR025",
   "name": "Condemn to Slaughter",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Runeblade attack this turn gets +1{p}.\nYou may destroy an aura you control. If you do, each opponent destroys an aura permanent they control.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -421,7 +421,7 @@
  {
   "id": "FLR026",
   "name": "Sigil of Sanctuary",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Arcane Shelter 1\nWhen this leaves the arena, create an Embodiment of Earth token.",
   "pitch": 3,
   "cost": 0,
@@ -437,7 +437,7 @@
  {
   "id": "FLR027",
   "name": "Embodiment of Earth",
-  "cardType": "token",
+  "types": ["token"],
   "text": "'Non-attack' action cards you control have +1{d} while defending.\nAt the beginning of your action phase, destroy Embodiment of Earth.",
   "subtypes": [
    "elemental",
@@ -448,7 +448,7 @@
  {
   "id": "FLR028",
   "name": "Runechant",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
   "classes": [
    "runeblade"
@@ -461,7 +461,7 @@
  {
   "id": "FLR029",
   "name": "Sanctuary of Aria",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Instant - {r}{r}: Prevent the next 1 damage that would be dealt to you this turn by a source of your choice. Destroy this at the beginning of the end phase.",
   "subtypes": [
    "rosetta",

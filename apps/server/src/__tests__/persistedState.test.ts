@@ -23,6 +23,24 @@ function jsonCopy<T>(value: T): T {
 }
 
 describe("PersistedStateV1", () => {
+  it("round-trips the sub-card stacks a large transform leaves", () => {
+    const source = game();
+    const subcards = () => Array.from({ length: 30 }, () => ({
+      instanceId: source.nextInstanceId++,
+      cardId: "UPR043",
+      owner: 0,
+    }));
+    source.players[0]!.hero.subcards = subcards();
+    source.players[0]!.equipment.arms!.subcards = subcards();
+
+    const decoded = decodePersistedState(
+      jsonCopy(encodePersistedState(source)), "ABCDEF", cardData, scripts,
+    );
+
+    expect(decoded.players[0]!.hero.subcards).toHaveLength(30);
+    expect(decodeGameView(jsonCopy(projectStateFor(decoded, 0)))).not.toBeNull();
+  });
+
   it.each(["own", "opponent", "both"] as const)(
     "round trips %s-zone play permissions with a base-cost override",
     (ownerScope) => {
@@ -453,7 +471,7 @@ describe("PersistedStateV1", () => {
       seat: 0,
       cardId: "HVY241",
       count: 1,
-      cause: { kind: "effect", sourceCardId: "HVY176" },
+      cause: { kind: "effect", sourceCardId: "HVY176", creatorSeat: 1, ownerSeat: 1 },
     }];
 
     const encoded = encodePersistedState(source);
@@ -507,6 +525,32 @@ describe("PersistedStateV1", () => {
         pitchInstanceIds: [pitch!.instanceId],
         from: "arsenal",
         targetCardInstanceId: 100,
+      },
+    };
+
+    const encoded = encodePersistedState(source);
+    expect(decodePersistedState(jsonCopy(encoded), "ABC123", cardData, scripts)
+      .pendingDecision).toEqual(source.pendingDecision);
+  });
+
+  it("round trips a priority-window instant paused for a pre-payment mode declaration", () => {
+    const source = game();
+    const [card] = source.players[0]!.hand;
+    source.pendingDecision = {
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose any number of modes",
+      options: ["boo", "done"],
+      sourceInstanceId: card!.instanceId,
+      chooseHook: "mode",
+      resume: {
+        kind: "continue-window-instant-after-declaration",
+        seat: 0,
+        instanceId: card!.instanceId,
+        pitchInstanceIds: [],
+        from: "hand",
+        boost: true,
+        boostCount: 2,
       },
     };
 
@@ -1066,6 +1110,8 @@ describe("PersistedStateV1", () => {
       onBoostDominate: true,
       onActionPlayedGainActionPoints: 1,
       onFriendlyActivateCreateToken: "FYD-QUICKEN",
+      prohibitsOpponentTokenCreation: true,
+      creatorSeat: 1,
       extraDiceIgnoreLowest: 1,
       onHitClearHandAndArsenalAtEndPhase: true,
       onHitDealDamage: 2,
@@ -1104,6 +1150,7 @@ describe("PersistedStateV1", () => {
         arcane: false,
         sourceIsRunechant: true,
         arcaneBarrierResolved: true,
+        spellvoidDeclined: true,
         destroySourceAfterDamage: true,
         targetWasMarked: true,
         combat: true,

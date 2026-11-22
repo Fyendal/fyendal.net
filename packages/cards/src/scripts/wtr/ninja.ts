@@ -1,25 +1,13 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { commonOptionMessages, decisionPrompt, localizedLog, previousAttackHasName } from "../shared-helpers.js";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
+import {
+  commonOptionMessages,
+  decisionPrompt,
+  isAttackAction,
+  localizedLog,
+  previousAttackHasName,
+} from "../shared-helpers.js";
 
 // ── WTR Ninja helpers ───────────────────────────────────────────────────────
-
-/** Normalised card name (no pitch). */
-function nameKey(name: string): string {
-  return name.trim().toLowerCase().replace(/\s+/g, " ");
-}
-
-/** True if the previous resolved attack matches the named card (any pitch). */
-function comboWith(ctx: ScriptCtx, name: string): boolean {
-  return previousAttackHasName(ctx, nameKey(name));
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
-}
-
-function hasCombo(ctx: ScriptCtx, cardId: string): boolean {
-  return (ctx.cardData(cardId).keywords ?? []).some((k) => k.toLowerCase() === "combo");
-}
 
 function hitsThisChain(ctx: ScriptCtx): number {
   return ctx.state.chain.filter((l) => l.resolved && l.hit).length;
@@ -29,22 +17,22 @@ function hitsThisChain(ctx: ScriptCtx): number {
 
 const blackoutKick = ((): CardScript => ({
   modifyAttack(ctx) {
-    return comboWith(ctx, "rising knee thrust") ? 3 : 0;
+    return previousAttackHasName(ctx, "rising knee thrust") ? 3 : 0;
   },
 }))();
 
 const flusterFist = ((): CardScript => ({
   modifyAttack(ctx) {
-    return comboWith(ctx, "open the center") ? hitsThisChain(ctx) : 0;
+    return previousAttackHasName(ctx, "open the center") ? hitsThisChain(ctx) : 0;
   },
 }))();
 
 const openTheCenter = ((): CardScript => ({
   modifyAttack(ctx) {
-    return comboWith(ctx, "head jab") ? 1 : 0;
+    return previousAttackHasName(ctx, "head jab") ? 1 : 0;
   },
   onAttackDeclared(ctx) {
-    if (!comboWith(ctx, "head jab")) return;
+    if (!previousAttackHasName(ctx, "head jab")) return;
     ctx.grantGoAgain();
     ctx.addModifier({ scope: "chain-link", dominate: true });
     ctx.logPublic(
@@ -57,10 +45,10 @@ const openTheCenter = ((): CardScript => ({
 
 const risingKneeThrust = ((): CardScript => ({
   modifyAttack(ctx) {
-    return comboWith(ctx, "leg tap") ? 2 : 0;
+    return previousAttackHasName(ctx, "leg tap") ? 2 : 0;
   },
   onAttackDeclared(ctx) {
-    if (!comboWith(ctx, "leg tap")) return;
+    if (!previousAttackHasName(ctx, "leg tap")) return;
     ctx.grantGoAgain();
     ctx.logPublic(
       localizedLog("Rising Knee Thrust: +2 power and go again", "card.log.wtr.risingkneethrust.combo", {
@@ -72,10 +60,10 @@ const risingKneeThrust = ((): CardScript => ({
 
 const whelmingGustwave = ((): CardScript => ({
   modifyAttack(ctx) {
-    return comboWith(ctx, "surging strike") ? 1 : 0;
+    return previousAttackHasName(ctx, "surging strike") ? 1 : 0;
   },
   onAttackDeclared(ctx) {
-    if (!comboWith(ctx, "surging strike")) return;
+    if (!previousAttackHasName(ctx, "surging strike")) return;
     ctx.grantGoAgain();
     ctx.addModifier({ scope: "chain-link", onHitDraw: 1 });
     ctx.logPublic(
@@ -99,7 +87,7 @@ const breakingScales: CardScript = {
     canActivate(ctx) {
       const link = ctx.state.chain[ctx.state.chain.length - 1];
       if (!link || link.resolved) return false;
-      return isAttackAction(ctx, link.attackingCard) && hasCombo(ctx, link.attackingCard.cardId);
+      return isAttackAction(ctx, link.attackingCard) && ctx.hasKeyword(link.attackingCard, "combo");
     },
     onActivate(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
@@ -160,7 +148,7 @@ const katsu: CardScript = {
       if (option === "pass") return;
       const discarded = ctx.discardCard(ctx.seat, Number(option));
       if (!discarded) return;
-      const comboCards = p.deck.filter((c) => hasCombo(ctx, c.cardId));
+      const comboCards = p.deck.filter((c) => ctx.hasKeyword(c, "combo"));
       if (comboCards.length === 0) {
         ctx.shuffleDeck();
         ctx.logPublic(
@@ -175,7 +163,7 @@ const katsu: CardScript = {
       }
       ctx.requestCardChoice(
         "katsu-search",
-        decisionPrompt("Katsu: choose a combo card to banish face up", "card.wtr.katsu.combo.choose"),
+        decisionPrompt("Katsu: choose a combo card to banish face up", "card.common.katsu.combo.choose"),
         comboCards.map((c) => c.instanceId),
       );
       return;

@@ -1,44 +1,45 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
-  hasBloodDebt,
   attackedWithWeapon,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
-  chargeDeclineMessages,
+  chargeAttack,
+  chargedThisTurn,
   commonOptionMessages,
   consumeDelayedEffect,
   dealArcane,
   dealArcaneToTargetHero,
   decisionMessage,
   decisionPrompt,
+  faceUpGraveyard,
+  hasBloodDebt,
+  hasCardSubtype,
   heroTarget,
   ironhideScript,
+  isAttackAction,
+  isAura,
   isCard,
-  isChargeDecline,
+  isLight,
   isSixPlus,
   leviaRedeemedAbility,
   localizedCardLog,
   mergeSetScripts,
+  ongoingLabel,
+  opponentSeat,
+  opposingHeroDamage,
   optN,
   optOnChoose,
-  opponentSeat,
   pendingDelayedEffect,
-  yesNoPrompt,
-  opposingHeroDamage,
-  ongoingLabel,
-  optionalChargeOptions,
   resourceAbility,
+  warnIfNoActionPoint,
+  yesNoPrompt,
+  hasLessLife,
+  hasMoreLife,
 } from "./shared-helpers.js";
 import { monHighRarity } from "./mon/high-rarity.js";
+import { SOUL_SHACKLE, SPECTRAL_SHIELD } from "./tokens.js";
 
 // ── Monarch (commons, rares, young heroes, and required tokens) ────────────
-
-const SPECTRAL_SHIELD = "SEN037";
-const SOUL_SHACKLE = "MON186";
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
-}
 
 function lessLifePlayTrigger(effect: { attack?: number; keyword?: string }): CardScript {
   return {
@@ -47,7 +48,7 @@ function lessLifePlayTrigger(effect: { attack?: number; keyword?: string }): Car
         event: "card-played",
         sourceZone: "self",
         label: effect.attack ? `Gain +${effect.attack} power` : `Gain ${effect.keyword}`,
-        condition: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0,
+        condition: (ctx) => hasLessLife(ctx),
         effect(ctx, played) {
           if (!played) return;
           if (effect.attack) ctx.addCardTempPower(played.instanceId, effect.attack);
@@ -74,14 +75,6 @@ function invigoratingLight(): CardScript {
   };
 }
 
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type.toLowerCase());
-}
-
-function hasKeyword(ctx: ScriptCtx, cardId: string, keyword: string): boolean {
-  return (ctx.cardData(cardId).keywords ?? []).some((candidate) => candidate.toLowerCase() === keyword.toLowerCase());
-}
-
 function blindingBeamTargets(ctx: ScriptCtx) {
   return [ctx.link?.attackingCard, ...(ctx.link?.defendingCards ?? [])].filter(
     (card): card is NonNullable<typeof card> => !!card && isAttackAction(ctx, card),
@@ -95,50 +88,12 @@ function blindingBeam(powerReduction: number): CardScript {
     },
     modifyPlayCost(ctx, baseCost) {
       const target = blindingBeamTargets(ctx).find((card) => card.instanceId === ctx.playTargetInstanceId);
-      const shadow =
-        target &&
-        (hasType(ctx, target, "shadow") || (target.grantedTypes ?? []).some((type) => type.toLowerCase() === "shadow"));
+      const shadow = target && hasCardSubtype(ctx, target, "shadow");
       return shadow ? baseCost - 1 : baseCost;
     },
     onPlay(ctx) {
       const target = blindingBeamTargets(ctx).find((card) => card.instanceId === ctx.playTargetInstanceId);
       if (target) ctx.addCardTempPower(target.instanceId, -powerReduction);
-    },
-  };
-}
-
-function chargedThisTurn(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "chargedThisTurn") === true;
-}
-
-function chargeAttack(extra: CardScript = {}): CardScript {
-  return {
-    additionalCost(ctx) {
-      const hand = ctx.player(ctx.seat).hand;
-      if (hand.length === 0) return;
-      ctx.requestCardChoice(
-        "mon-charge",
-        decisionPrompt(
-          `${ctx.data.name}: choose a card from your hand to charge, or decline`,
-          "card.mon.charge.choose",
-          {
-            values: { card: { kind: "card", cardId: ctx.self.cardId } },
-            optionMessages: chargeDeclineMessages,
-          },
-        ),
-        optionalChargeOptions(ctx),
-      );
-    },
-    ...extra,
-    onChoose(ctx, hook, option) {
-      if (hook === "mon-charge") {
-        if (!isChargeDecline(option)) {
-          const charged = ctx.charge(Number(option));
-          if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
-        }
-        return;
-      }
-      extra.onChoose?.(ctx, hook, option);
     },
   };
 }
@@ -276,7 +231,7 @@ function secondSwing(attack: number): CardScript {
 }
 
 function banishRandomFromGraveyard(ctx: ScriptCtx, count: number) {
-  const graveyard = [...ctx.player(ctx.seat).graveyard];
+  const graveyard = faceUpGraveyard(ctx);
   const banished = [];
   for (let i = 0; i < count && graveyard.length > 0; i++) {
     const index = ctx.randomInt(graveyard.length);
@@ -288,7 +243,7 @@ function banishRandomFromGraveyard(ctx: ScriptCtx, count: number) {
 
 function banishThreeCost(extra: CardScript = {}): CardScript {
   return {
-    canPlay: (ctx) => ctx.player(ctx.seat).graveyard.length >= 3,
+    canPlay: (ctx) => faceUpGraveyard(ctx).length >= 3,
     additionalCost(ctx) {
       const banished = banishRandomFromGraveyard(ctx, 3);
       if (banished.some((card) => isSixPlus(ctx, card))) ctx.setState("banishedSix", 1);
@@ -361,8 +316,8 @@ function dimenxxionalGateway(opt: number): CardScript {
         { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
       ),
     );
-    const runeblade = hasType(ctx, top, "runeblade");
-    const shadow = hasType(ctx, top, "shadow");
+    const runeblade = hasCardSubtype(ctx, top, "runeblade");
+    const shadow = hasCardSubtype(ctx, top, "shadow");
     if (runeblade && shadow) ctx.setState("gatewayShadowCard", top.instanceId);
     if (runeblade) {
       dealArcane(ctx, opponentSeat(ctx), 1);
@@ -637,7 +592,7 @@ function warmongersRecital(attack: number): CardScript {
 
 function memorialGround(maxCost: number): CardScript {
   const targets = (ctx: ScriptCtx) =>
-    ctx.player(ctx.seat).graveyard.filter((card) => {
+    faceUpGraveyard(ctx).filter((card) => {
       const data = ctx.cardData(card.cardId);
       return isAttackAction(ctx, card) && (data.cost ?? 0) <= maxCost;
     });
@@ -795,11 +750,12 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         condition: (ctx, destroyed) =>
           !!destroyed &&
           destroyed.instanceId !== ctx.self.instanceId &&
-          (hasType(ctx, destroyed, "aura") || isAttackAction(ctx, destroyed)),
+          (isAura(ctx, destroyed) || isAttackAction(ctx, destroyed)),
         target: heroTarget(),
         effect(ctx, destroyed) {
           dealArcaneToTargetHero(ctx);
-          if (destroyed && ctx.cardData(destroyed.cardId).cardType !== "token" && hasType(ctx, destroyed, "light")) {
+          if (destroyed && !ctx.hasCardType(destroyed, "token") &&
+            isLight(ctx, destroyed)) {
             ctx.putIntoSoul(destroyed.instanceId);
           }
         },
@@ -808,7 +764,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   },
   "ode to wrath|2": {
     onFriendlyPlay(ctx, played) {
-      if (isAttackAction(ctx, played) && hasType(ctx, played, "illusionist")) {
+      if (isAttackAction(ctx, played) && hasCardSubtype(ctx, played, "illusionist")) {
         ctx.grantCardKeyword(played.instanceId, "go again");
       }
     },
@@ -854,7 +810,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   }),
   "herald of rebirth|1": putAttackIntoSoulOnHit({
     onHit(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
+      const cards = faceUpGraveyard(ctx).filter((card) => ctx.hasKeyword(card, "phantasm"));
       if (cards.length > 0)
         ctx.requestCardChoice(
           "herald-rebirth",
@@ -871,7 +827,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   }),
   "herald of rebirth|2": putAttackIntoSoulOnHit({
     onHit(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
+      const cards = faceUpGraveyard(ctx).filter((card) => ctx.hasKeyword(card, "phantasm"));
       if (cards.length > 0)
         ctx.requestCardChoice(
           "herald-rebirth",
@@ -888,7 +844,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   }),
   "herald of rebirth|3": putAttackIntoSoulOnHit({
     onHit(ctx) {
-      const cards = ctx.player(ctx.seat).graveyard.filter((card) => hasKeyword(ctx, card.cardId, "phantasm"));
+      const cards = faceUpGraveyard(ctx).filter((card) => ctx.hasKeyword(card, "phantasm"));
       if (cards.length > 0)
         ctx.requestCardChoice(
           "herald-rebirth",
@@ -980,8 +936,8 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     onPlay(ctx) {
       ctx.addModifier({ scope: "until-end-of-turn", attack: 1, appliesToTargetType: "shadow" });
       if (
-        ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0 &&
-        hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "shadow")
+        hasLessLife(ctx) &&
+        hasCardSubtype(ctx, ctx.player(opponentSeat(ctx)).hero, "shadow")
       ) {
         ctx.putIntoSoul(ctx.self.instanceId);
       }
@@ -1024,7 +980,10 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       if (pending === 1) {
         ctx.requestChoice(
           "hooves-shadowbeast",
-          yesNoPrompt("Destroy Hooves of the Shadowbeast to gain 1 action point?", "card.mon.hooves.destroy"),
+          warnIfNoActionPoint(
+            ctx,
+            yesNoPrompt("Destroy Hooves of the Shadowbeast to gain 1 action point?", "card.mon.hooves.destroy"),
+          ),
           ["yes", "no"],
         );
       }
@@ -1039,7 +998,10 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       } else if (remaining > 0) {
         ctx.requestChoice(
           "hooves-shadowbeast",
-          yesNoPrompt("Destroy Hooves of the Shadowbeast to gain 1 action point?", "card.mon.hooves.destroy"),
+          warnIfNoActionPoint(
+            ctx,
+            yesNoPrompt("Destroy Hooves of the Shadowbeast to gain 1 action point?", "card.mon.hooves.destroy"),
+          ),
           ["yes", "no"],
         );
       }
@@ -1062,7 +1024,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       ctx.drawCards(ctx.seat, 1);
       const discarded = ctx.discardRandom(ctx.seat, 1)[0];
       if (!isSixPlus(ctx, discarded)) return;
-      const graves = ctx.state.players.flatMap((player) => player.graveyard);
+      const graves = ctx.state.players.flatMap((player) => faceUpGraveyard(ctx, player.seat));
       if (graves.length > 0)
         ctx.requestCardChoice(
           "deadwood-banish",
@@ -1081,7 +1043,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       ctx.drawCards(ctx.seat, 1);
       const discarded = ctx.discardRandom(ctx.seat, 1)[0];
       if (!isSixPlus(ctx, discarded)) return;
-      const graves = ctx.state.players.flatMap((player) => player.graveyard);
+      const graves = ctx.state.players.flatMap((player) => faceUpGraveyard(ctx, player.seat));
       if (graves.length > 0)
         ctx.requestCardChoice(
           "deadwood-banish",
@@ -1100,7 +1062,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       ctx.drawCards(ctx.seat, 1);
       const discarded = ctx.discardRandom(ctx.seat, 1)[0];
       if (!isSixPlus(ctx, discarded)) return;
-      const graves = ctx.state.players.flatMap((player) => player.graveyard);
+      const graves = ctx.state.players.flatMap((player) => faceUpGraveyard(ctx, player.seat));
       if (graves.length > 0)
         ctx.requestCardChoice(
           "deadwood-banish",
@@ -1143,14 +1105,14 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     onFriendlyPlay(ctx, played) {
       if (ctx.getFlag("player", "chaneNextActionGoAgain") !== true) return;
       if (!ctx.hasCardType(played, "action")) return;
-      if (!hasType(ctx, played, "runeblade") && !hasType(ctx, played, "shadow")) return;
+      if (!hasCardSubtype(ctx, played, "runeblade") && !hasCardSubtype(ctx, played, "shadow")) return;
       ctx.setFlag("player", "chaneNextActionGoAgain", false);
       ctx.grantCardKeyword(played.instanceId, "go again");
     },
     onFriendlyActivate(ctx, activated, timing) {
       if (ctx.getFlag("player", "chaneNextActionGoAgain") !== true) return;
       if (timing !== "action") return;
-      if (!hasType(ctx, activated, "runeblade") && !hasType(ctx, activated, "shadow")) return;
+      if (!hasCardSubtype(ctx, activated, "runeblade") && !hasCardSubtype(ctx, activated, "shadow")) return;
       ctx.setFlag("player", "chaneNextActionGoAgain", false);
       ctx.setFlag("player", "nextActionGoAgain", true);
     },
@@ -1174,10 +1136,10 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         return !inBanish || ctx.getFlag("player", "playedNonAttackAction") === true;
       },
       onPlay(ctx) {
-        const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
+        const cards = faceUpGraveyard(ctx).filter((card) => {
           return (
             ctx.hasCardType(card, "action") &&
-            !hasType(ctx, card, "attack") &&
+            !hasCardSubtype(ctx, card, "attack") &&
             hasBloodDebt(ctx, card)
           );
         });
@@ -1208,10 +1170,10 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         return !inBanish || ctx.getFlag("player", "playedNonAttackAction") === true;
       },
       onPlay(ctx) {
-        const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
+        const cards = faceUpGraveyard(ctx).filter((card) => {
           return (
             ctx.hasCardType(card, "action") &&
-            !hasType(ctx, card, "attack") &&
+            !hasCardSubtype(ctx, card, "attack") &&
             hasBloodDebt(ctx, card)
           );
         });
@@ -1242,10 +1204,10 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         return !inBanish || ctx.getFlag("player", "playedNonAttackAction") === true;
       },
       onPlay(ctx) {
-        const cards = ctx.player(ctx.seat).graveyard.filter((card) => {
+        const cards = faceUpGraveyard(ctx).filter((card) => {
           return (
             ctx.hasCardType(card, "action") &&
-            !hasType(ctx, card, "attack") &&
+            !hasCardSubtype(ctx, card, "attack") &&
             hasBloodDebt(ctx, card)
           );
         });
@@ -1318,7 +1280,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       if (hook !== "ebon-fold-banish") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      const shadow = hasType(ctx, card, "shadow");
+      const shadow = hasCardSubtype(ctx, card, "shadow");
       if (ctx.banish(card.instanceId) && shadow) ctx.drawCards(ctx.seat, 1);
     },
   },
@@ -1338,7 +1300,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     onChoose(ctx, hook, option) {
       if (hook !== "aftermath-banish" || option === "no") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
-      if (card && hasType(ctx, card, "shadow") && ctx.banish(card.instanceId))
+      if (card && hasCardSubtype(ctx, card, "shadow") && ctx.banish(card.instanceId))
         ctx.grantCardKeyword(ctx.self.instanceId, "dominate");
       else if (card) ctx.banish(card.instanceId);
     },
@@ -1360,7 +1322,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       if (hook !== "aftermath-banish" || option === "no") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      const shadow = hasType(ctx, card, "shadow");
+      const shadow = hasCardSubtype(ctx, card, "shadow");
       if (ctx.banish(card.instanceId) && shadow) ctx.grantCardKeyword(ctx.self.instanceId, "dominate");
     },
   },
@@ -1381,19 +1343,19 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       if (hook !== "aftermath-banish" || option === "no") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card) return;
-      const shadow = hasType(ctx, card, "shadow");
+      const shadow = hasCardSubtype(ctx, card, "shadow");
       if (ctx.banish(card.instanceId) && shadow) ctx.grantCardKeyword(ctx.self.instanceId, "dominate");
     },
   },
   "soul harvest|3": {
-    canPlay: (ctx) => ctx.player(ctx.seat).graveyard.length >= 6,
+    canPlay: (ctx) => faceUpGraveyard(ctx).length >= 6,
     additionalCost(ctx) {
       ctx.requestCardChoices(
         "soul-harvest-banish",
         decisionPrompt(`${ctx.data.name}: choose 6 graveyard cards to banish`, "card.mon.graveyard.cards.banish", {
           values: { card: { kind: "card", cardId: ctx.self.cardId }, count: 6 },
         }),
-        ctx.player(ctx.seat).graveyard.map((card) => card.instanceId),
+        faceUpGraveyard(ctx).map((card) => card.instanceId),
         6,
         6,
       );
@@ -1408,7 +1370,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     onChooseMany(ctx, hook, options) {
       if (hook !== "soul-harvest-banish") return;
       for (const option of options) {
-        const card = ctx.player(ctx.seat).graveyard.find((candidate) => candidate.instanceId === Number(option));
+        const card = faceUpGraveyard(ctx).find((candidate) => candidate.instanceId === Number(option));
         if (!card) continue;
         if (hasBloodDebt(ctx, card))
           ctx.setState("harvestBloodDebt", ctx.getState("harvestBloodDebt") + 1);
@@ -1420,7 +1382,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
     alternativePlayCost: { kind: "banish-hand", min: 1 },
     onAlternativeCostPaid(ctx, paidCards) {
       const bloodDebt = paidCards.filter((card) => hasBloodDebt(ctx, card)).length;
-      if (bloodDebt > 0) ctx.changeResources(ctx.seat, bloodDebt);
+      if (bloodDebt > 0) ctx.gainResources(ctx.seat, bloodDebt);
     },
     onAttackDeclared(ctx) {
       if (ctx.link?.targetAllyId === undefined && ctx.player(opponentSeat(ctx)).soul.length > 0) ctx.grantGoAgain();
@@ -1573,8 +1535,8 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
           "card.effect.mon.eclipseexistence",
         ),
       });
-      if (ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0) {
-        const actions = ctx.player(ctx.seat).graveyard.filter((card) => ctx.hasCardType(card, "action"));
+      if (hasMoreLife(ctx)) {
+        const actions = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "action"));
         if (actions.length > 0)
           ctx.requestCardChoice(
             "eclipse-grave",
@@ -1587,7 +1549,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       }
     },
     canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && hasType(ctx, ctx.player(opponentSeat(ctx)).hero, "light");
+      return ctx.link?.targetAllyId === undefined && isLight(ctx, ctx.player(opponentSeat(ctx)).hero);
     },
     onHit(ctx) {
       const soul = ctx.player(opponentSeat(ctx)).soul;
@@ -1634,7 +1596,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
         ctx.getFlag("player", "playedNonAttackAction") === true,
       label: "Destroy after playing attack and non-attack actions: gain 2 resources",
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 2);
+        ctx.gainResources(ctx.seat, 2);
       },
     },
   },
@@ -1676,7 +1638,7 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
       goAgain: false,
       label: "Destroy: gain 2 action points",
       onActivate(ctx) {
-        ctx.changeActionPoints(ctx.seat, 2);
+        ctx.gainActionPoints(ctx.seat, 2);
       },
     },
   },
@@ -1808,27 +1770,27 @@ export const mon: Record<string, CardScript> = mergeSetScripts("MON", monHighRar
   "surging militia|2": { modifyAttack: (ctx) => ctx.link?.defendingCards.length ?? 0 },
   "surging militia|3": { modifyAttack: (ctx) => ctx.link?.defendingCards.length ?? 0 },
   "yinti yanti|1": {
-    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
-    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
+    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => isAura(ctx, card)) ? 1 : 0),
+    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => isAura(ctx, card)) ? 1 : 0),
   },
   "yinti yanti|2": {
-    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
-    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
+    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => isAura(ctx, card)) ? 1 : 0),
+    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => isAura(ctx, card)) ? 1 : 0),
   },
   "yinti yanti|3": {
-    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
-    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => hasType(ctx, card, "aura")) ? 1 : 0),
+    modifyAttack: (ctx) => (ctx.player(ctx.seat).board.some((card) => isAura(ctx, card)) ? 1 : 0),
+    modifyDefense: (ctx) => (ctx.player(ctx.seat).board.some((card) => isAura(ctx, card)) ? 1 : 0),
   },
   "zealous belting|2": {
-    onAttackDeclared(ctx) {
+    hasConditionalGoAgain: (ctx) => {
       const base = ctx.data.attack ?? 0;
-      if (ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > base)) ctx.grantGoAgain();
+      return ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > base);
     },
   },
   "zealous belting|3": {
-    onAttackDeclared(ctx) {
+    hasConditionalGoAgain: (ctx) => {
       const base = ctx.data.attack ?? 0;
-      if (ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > base)) ctx.grantGoAgain();
+      return ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > base);
     },
   },
   "minnowism|1": minnowism(3),

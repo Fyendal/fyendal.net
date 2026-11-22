@@ -83,7 +83,7 @@ const dynamoTrigger: TurnTriggerView = {
 const cogTrigger: TurnTriggerView = {
   event: "start-of-turn",
   label: "Remove a steam counter or destroy this",
-  labelMessage: { id: "card.trigger.steam.maintain" },
+  labelMessage: { id: "card.trigger.common.steam.maintain" },
   choices: [{
     hook: "sea-cog-maintenance",
     options: [

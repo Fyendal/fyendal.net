@@ -9,6 +9,7 @@ import { withTransaction, type Queryable, type UserRow } from "./db.js";
 import { appendClusterEvent } from "./clusterEvents.js";
 import type { NormalizedEmail } from "./emailVerification.js";
 import { hashToken, newToken } from "./tokenHash.js";
+import { refreshSupporterStatus } from "./kofi.js";
 
 // scrypt parameters: N=131072, r=8, p=1 with a random 16-byte salt,
 // stored as scrypt:N:r:p:salt:hash (base64).
@@ -179,11 +180,12 @@ export async function register(
     const passHash = await hashPassword(password);
     const createdAt = Date.now();
     await withTransaction(db, async (tx) => {
-      await tx.query(
+      const { rows } = await tx.query(
         `INSERT INTO users (username, username_lc, pass_hash, created_at, email, email_lc)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
+         VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
         [username, username.toLowerCase(), passHash, createdAt, email?.email ?? null, email?.emailLc ?? null],
       );
+      if (email) await refreshSupporterStatus(tx, Number(rows[0].id), createdAt);
       await recordUserRegistration(tx, createdAt);
     });
     return { ok: true };

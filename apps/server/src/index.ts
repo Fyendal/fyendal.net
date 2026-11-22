@@ -17,7 +17,7 @@ import {
 } from "@fyendal/protocol";
 import { isBetaTester } from "./betaTesters.js";
 import { StateLogTransport } from "./stateLogTransport.js";
-import { encodeWireMessage, type WireServerMessage } from "./errors.js";
+import { DECKS_LOCKED, encodeWireMessage, type WireServerMessage } from "./errors.js";
 import { RoomBroadcaster } from "./roomBroadcaster.js";
 import { ConnectionRegistry, type ClientCtx } from "./gateway/connectionSession.js";
 import { composeProductionGateway } from "./gateway/composition.js";
@@ -60,6 +60,7 @@ import {
 import {
   PgRoomStore,
   hashReconnectToken,
+  isSoloRoom,
   PLAY_REQUIRES_LOGIN,
   PRESENCE_HEARTBEAT_MS,
   prepViewFor,
@@ -83,6 +84,7 @@ const WS_PING_INTERVAL_MS = 30_000;
 const EMOTE_COOLDOWN_MS = 1_000;
 const SESSION_SWEEP_INTERVAL_MS = 15 * 60 * 1000;
 const ALREADY_IN_ROOM = "this connection is already in a room";
+const SANDBOX_REQUIRES_PRIVATE = "sandbox rooms must be private";
 
 interface ServerDeps {
   db: Queryable;
@@ -582,7 +584,8 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
       connections.detach(ctx);
       return undefined;
     }
-    return ctx.seat;
+    // Started solo games project for the acting seat in `stateMessage`.
+    return isSoloRoom(room) && !room.state ? ctx.viewSeat ?? ctx.seat : ctx.seat;
   }
 
   function seatCredentials(ctx: ClientCtx): SeatCredentials | null {
@@ -611,6 +614,31 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
     return {
       choice: { deckId: deck.id, deckName: deck.name },
     };
+  }
+
+  /** The previous socket's close dropped this seat's foreground search. */
+  async function resumeRetainedSearch(ctx: ClientCtx, code: string): Promise<void> {
+    const user = ctx.user;
+    if (!user) return;
+    // Let that close's queue cleanup land first so it cannot delete the resumed entry.
+    await Promise.allSettled([...disconnectTasks]);
+    const search = await rooms.searchToResume(user.id, code);
+    if (!search || ctx.closed) return;
+    queuedUsers.set(user.id, ctx);
+    const result = await rooms.queueForMatch(search.format, {
+      userId: user.id,
+      username: user.username,
+      deckId: search.deckId,
+      deckName: search.deckName,
+      cardPoolMode: search.cardPoolMode,
+      retainedRoomCode: code,
+    });
+    if (!result.ok) {
+      if (queuedUsers.get(user.id) === ctx) queuedUsers.delete(user.id);
+      ctx.send({ type: "error", message: result.error });
+      return;
+    }
+    clusterConsumer?.nudge();
   }
 
   /** Takes a seat, reconnects, or spectates in an existing room. */
@@ -683,6 +711,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
       // Reload locally to restore prep/state and negotiate browser bot work.
       await broadcaster.afterCommit({ code, kind: "sync", version });
       await publishRoomEvent({ code, kind: "presence", seat: r.seat, connected: true, version });
+      await resumeRetainedSearch(ctx, code);
       return;
     }
     if (r.started) {
@@ -813,7 +842,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           ...choice.choice,
           username: ctx.user.username,
           userId: ctx.user.id,
-        }, "private", cardPoolMode);
+        }, "private", cardPoolMode, msg.sandbox === true);
         await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
         connections.attach(ctx, code, seat, token);
         const version = await markAttachedPresent(ctx);
@@ -867,6 +896,10 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
           return;
         }
+        if (msg.sandbox && !msg.private) {
+          send(ws, { type: "error", message: SANDBOX_REQUIRES_PRIVATE });
+          return;
+        }
         const cardPoolMode = msg.cardPoolMode ?? "legal";
         const choice = await resolveChoice(ctx.user, msg.format, msg.deckId, cardPoolMode);
         if ("error" in choice) {
@@ -877,7 +910,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           ...choice.choice,
           username: ctx.user.username,
           userId: ctx.user.id,
-        }, msg.private ? "private" : "public", cardPoolMode);
+        }, msg.private ? "private" : "public", cardPoolMode, msg.sandbox === true);
         await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
         connections.attach(ctx, code, seat, token);
         const version = await markAttachedPresent(ctx);
@@ -995,6 +1028,59 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           return;
         }
         send(ws, { type: "room-info", room });
+        return;
+      }
+      case "create-solo-room": {
+        if (!ctx.user) {
+          send(ws, { type: "error", message: PLAY_REQUIRES_LOGIN });
+          return;
+        }
+        if (ctx.code !== null) {
+          send(ws, { type: "error", message: ALREADY_IN_ROOM });
+          return;
+        }
+        const cardPoolMode = msg.cardPoolMode ?? "legal";
+        const choice = await resolveChoice(ctx.user, msg.format, msg.deckId, cardPoolMode);
+        if ("error" in choice) {
+          send(ws, { type: "error", message: choice.error });
+          return;
+        }
+        const opponent = await resolveChoice(ctx.user, msg.format, msg.opponentDeckId, cardPoolMode);
+        if ("error" in opponent) {
+          send(ws, { type: "error", message: opponent.error });
+          return;
+        }
+        const { code, seat, token } = await rooms.createSoloRoom(msg.format, {
+          ...choice.choice,
+          username: ctx.user.username,
+          userId: ctx.user.id,
+        }, opponent.choice, cardPoolMode);
+        await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
+        connections.attach(ctx, code, seat, token);
+        const version = await markAttachedPresent(ctx);
+        send(ws, { type: "room-created", code, seat, token, version });
+        await publishRoomEvent({ code, kind: "created", version });
+        await publishRoomEvent({ code, kind: "prep", version });
+        return;
+      }
+      case "solo-seat": {
+        if (!ctx.code || ctx.seat === null || !ctx.token) {
+          send(ws, { type: "error", message: "not in a solo room" });
+          return;
+        }
+        const room = await rooms.getRoom(ctx.code);
+        if (!room || !isSoloRoom(room)) {
+          send(ws, { type: "error", message: "not in a solo room" });
+          return;
+        }
+        if (room.state) {
+          send(ws, { type: "error", message: "control follows the acting seat once the game starts" });
+          return;
+        }
+        if (authorizedProjectionSeat(room, ctx) === undefined) return;
+        // Socket-local: switching prep views is not a room mutation.
+        ctx.viewSeat = msg.seat;
+        send(ws, { type: "prep-state", prep: prepViewFor(room, msg.seat), version: room.version });
         return;
       }
       case "list-rooms": {
@@ -1188,15 +1274,18 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         const player = requirePlayer(ws, ctx);
         if (!player) return;
         const room = await rooms.getRoom(player.code);
-        const seat = ctx.seat === null ? null : room?.seats[ctx.seat];
+        const actingSeat = ctx.viewSeat ?? ctx.seat;
+        const seat = actingSeat === null ? null : room?.seats[actingSeat];
+        let fabraryArt: Record<string, string> = {};
         if (seat?.deckId && ctx.user) {
           const refreshed = await resolveFreshDeck(deps.db, ctx.user.id, seat.deckId, fabraryClient);
           if (!refreshed.ok) {
             send(ws, { type: "error", message: refreshed.error });
             return;
           }
+          fabraryArt = refreshed.fabraryArt;
         }
-        const r = await rooms.presentDeck(player.code, player.credentials, msg.deck);
+        const r = await rooms.presentDeck(player.code, player.credentials, msg.deck, fabraryArt);
         if (!r.ok) {
           send(ws, { type: "error", message: r.error });
           return;
@@ -1214,6 +1303,57 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         }
         for (const replayId of r.replayFinalizationIds ?? []) replayFinalizer.enqueue(replayId);
         await publishRoomEvent({ code: player.code, kind: "prep", version: r.version });
+        return;
+      }
+      case "change-deck": {
+        const player = requirePlayer(ws, ctx);
+        if (!player || !ctx.user) return;
+        const room = await rooms.getRoom(player.code);
+        if (!room) {
+          send(ws, { type: "error", message: "room not found" });
+          return;
+        }
+        // Skip the deck refresh when the seat is already taken; the store re-checks.
+        if (room.seats.every(Boolean)) {
+          send(ws, { type: "error", message: DECKS_LOCKED });
+          return;
+        }
+        const choice = await resolveChoice(ctx.user, room.format, msg.deckId, room.cardPoolMode);
+        if ("error" in choice) {
+          send(ws, { type: "error", message: choice.error });
+          return;
+        }
+        const r = await rooms.changeDeck(player.code, player.credentials, choice.choice);
+        if (!r.ok) {
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        await rememberAcceptedDeck(ctx.user.id, choice.choice.deckId);
+        send(ws, { type: "deck-changed", deckId: choice.choice.deckId });
+        await publishRoomEvent({ code: player.code, kind: "prep", version: r.version });
+        return;
+      }
+      case "invite-friend-to-room": {
+        const player = requirePlayer(ws, ctx);
+        if (!player) return;
+        if (!ctx.user) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        if (!(await friendInviteLimiter.allow(String(ctx.user.id), "send"))) {
+          return sendSocialError(ctx, "MESSAGE_RATE_LIMITED");
+        }
+        const friend = await friendByUsername(deps.db, ctx.user.id, msg.username);
+        if (!friend) return sendSocialError(ctx, "FRIEND_REQUIRED");
+        if (!(await isUserOnline(deps.db, friend.id))) return sendSocialError(ctx, "FRIEND_UNAVAILABLE");
+        const r = await rooms.friendInviteRoom(player.code, player.credentials);
+        if (!r.ok) {
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        await publishClusterEvent({
+          type: "friend-game-invite",
+          userId: friend.id,
+          invite: { inviteId: randomUUID(), fromUsername: ctx.user.username, room: r.room, sentAt: Date.now() },
+        });
+        send(ws, { type: "friend-invited", username: friend.username });
         return;
       }
       case "prep-unready": {
@@ -1254,14 +1394,18 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
               queuedUsers.delete(ctx.user.id);
             }
           }
-          const ended = await rooms.deleteBotRoom(code, credentials);
+          const ended = await rooms.deletePracticeRoom(code, credentials);
           if (!ended.ok) {
             send(ws, { type: "error", message: ended.error });
             return;
           }
           if (ended.replayFinalizationId) replayFinalizer.enqueue(ended.replayFinalizationId);
           connections.detach(ctx);
-          send(ws, { type: "left", ...(ended.playAgain ? { playAgain: ended.playAgain } : {}) });
+          send(ws, {
+            type: "left",
+            ...(ended.playAgain ? { playAgain: ended.playAgain } : {}),
+            ...(ended.playAgainSolo ? { playAgainSolo: ended.playAgainSolo } : {}),
+          });
           await publishRoomEvent({ code, kind: "deleted", version: ended.version });
           return;
         }
@@ -1402,6 +1546,7 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           player.code,
           player.credentials,
           msg.mode,
+          msg.ignorePlays === true,
           msg.commandId !== undefined && msg.expectedVersion !== undefined
             ? { id: msg.commandId, expectedVersion: msg.expectedVersion }
             : undefined,
@@ -1414,6 +1559,24 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
         if (r.advanced) {
           await afterStateCommit(player.code, r.version, r.replayFinalizationId);
         }
+        return;
+      }
+      case "remember-target": {
+        const player = requirePlayer(ws, ctx);
+        if (!player) return;
+        const r = await rooms.setRememberedTarget(
+          player.code,
+          player.credentials,
+          msg.optionId,
+          msg.commandId !== undefined && msg.expectedVersion !== undefined
+            ? { id: msg.commandId, expectedVersion: msg.expectedVersion }
+            : undefined,
+        );
+        if (!r.ok) {
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        await afterStateCommit(player.code, r.version, r.replayFinalizationId);
         return;
       }
       case "standing-orders": {
@@ -1501,6 +1664,25 @@ export function createGameServer(port: number, deps: ServerDeps): http.Server {
           return;
         }
         await publishRoomEvent({ code: player.code, kind: "spectators", version: kicked.version });
+        return;
+      }
+      case "sandbox-edit": {
+        const player = requirePlayer(ws, ctx);
+        if (!player) return;
+        const r = await rooms.sandboxEdit(
+          player.code,
+          player.credentials,
+          msg.seat,
+          msg.edit,
+          msg.commandId !== undefined && msg.expectedVersion !== undefined
+            ? { id: msg.commandId, expectedVersion: msg.expectedVersion }
+            : undefined,
+        );
+        if (!r.ok) {
+          send(ws, { type: "error", message: r.error });
+          return;
+        }
+        await afterStateCommit(player.code, r.version);
         return;
       }
       case "claim-victory": {
@@ -1851,7 +2033,8 @@ export async function broadcastCommittedRoom(
   await clusterPublisherByServer.get(server)?.(event);
 }
 
-/** Resolve the stable room code and credentials needed for a player action. */
+/** Resolve the stable room code and credentials needed for a player action.
+ * In solo prep they act as the viewed seat; the store ignores that elsewhere. */
 function requirePlayer(
   ws: WebSocket,
   ctx: ClientCtx,
@@ -1867,7 +2050,11 @@ function requirePlayer(
   if (!ctx.token) return null;
   return {
     code: ctx.code,
-    credentials: { token: ctx.token, userId: ctx.user?.id },
+    credentials: {
+      token: ctx.token,
+      userId: ctx.user?.id,
+      ...(ctx.viewSeat === undefined ? {} : { actAs: ctx.viewSeat }),
+    },
   };
 }
 

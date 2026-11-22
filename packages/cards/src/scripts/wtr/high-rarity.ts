@@ -2,33 +2,25 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   cardNamed,
   commonOptionMessages,
+  crushTriggered,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  faceUpGraveyard,
+  hasCardSubtype,
+  isAttackAction,
   isSixPlus,
   localizedCardLog,
   opponentSeat,
   previousAttackHasName,
   reprise,
   resourceAbility,
+  hasLessLife,
 } from "../shared-helpers.js";
-
-const SEISMIC_SURGE = "WTR075B";
+import { SEISMIC_SURGE } from "../tokens.js";
 
 function namedAny(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, names: readonly string[]): boolean {
   return names.some((name) => cardNamed(ctx, card, name));
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasType(ctx, card, "attack");
-}
-
-function hasType(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, type: string): boolean {
-  return ctx.cardTypes(card).includes(type);
-}
-
-function previousAttackNamed(ctx: ScriptCtx, name: string): boolean {
-  return previousAttackHasName(ctx, name);
 }
 
 function rememberRandomDiscard(ctx: ScriptCtx): void {
@@ -61,12 +53,12 @@ function finishSearchToHand(ctx: ScriptCtx, option: string): boolean {
 
 function comboAttack(previous: string, bonus: number, onHit?: (ctx: ScriptCtx) => void): CardScript {
   return {
-    modifyAttack: (ctx) => (previousAttackNamed(ctx, previous) ? bonus : 0),
+    modifyAttack: (ctx) => (previousAttackHasName(ctx, previous) ? bonus : 0),
     onAttackDeclared(ctx) {
-      if (previousAttackNamed(ctx, previous)) ctx.grantGoAgain();
+      if (previousAttackHasName(ctx, previous)) ctx.grantGoAgain();
     },
     canTriggerOnHit(ctx) {
-      return previousAttackNamed(ctx, previous);
+      return previousAttackHasName(ctx, previous);
     },
     onHit(ctx) {
       onHit?.(ctx);
@@ -82,7 +74,7 @@ const heartOfFyendal: CardScript = {
       label: "Gain 1 life if behind",
       condition: (ctx, pitched) => pitched?.instanceId === ctx.self.instanceId,
       effect(ctx) {
-        if (ctx.player(ctx.seat).life < ctx.player(opponentSeat(ctx)).life) ctx.gainLife(ctx.seat, 1);
+        if (hasLessLife(ctx)) ctx.gainLife(ctx.seat, 1);
       },
     },
   ],
@@ -107,7 +99,7 @@ const sandSketchedPlan: CardScript = {
   onChoose(ctx, hook, option) {
     if (hook !== "sand-search" || !finishSearchToHand(ctx, option)) return;
     const discarded = ctx.discardRandom(ctx.seat, 1)[0];
-    if (isSixPlus(ctx, discarded)) ctx.changeActionPoints(ctx.seat, 2);
+    if (isSixPlus(ctx, discarded)) ctx.gainActionPoints(ctx.seat, 2);
   },
 };
 
@@ -125,7 +117,7 @@ const showTime: CardScript = {
           "show-time-search",
           "Show Time!: choose a Guardian attack action",
           "card.wtr.showtime.attack.choose",
-          (card) => isAttackAction(ctx, card) && hasType(ctx, card, "guardian"),
+          (card) => isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "guardian"),
         ),
     ),
     {
@@ -161,7 +153,7 @@ const maskOfMomentum: CardScript = {
 
 const lordOfWind: CardScript = {
   additionalCost(ctx) {
-    if (previousAttackNamed(ctx, "mugenshi: release")) {
+    if (previousAttackHasName(ctx, "mugenshi: release")) {
       ctx.requestXPayment("lord-wind-x", decisionPrompt("Lord of Wind: choose X", "card.wtr.lordwind.x"), ctx.seat);
     }
   },
@@ -170,9 +162,7 @@ const lordOfWind: CardScript = {
     if (hook === "lord-wind-x" && option.startsWith("x:")) {
       const amount = Number(option.slice(2));
       ctx.setState("lordWindX", amount);
-      const eligible = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) =>
+      const eligible = faceUpGraveyard(ctx).filter((card) =>
           namedAny(ctx, card, ["surging strike", "whelming gustwave", "mugenshi: release"]),
         );
       if (amount > 0 && eligible.length > 0) {
@@ -220,7 +210,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
       },
     },
     onDieRollResolved(ctx, hook, roll) {
-      if (hook === "scabskin") ctx.changeActionPoints(ctx.seat, Math.floor(roll / 2));
+      if (hook === "scabskin") ctx.gainActionPoints(ctx.seat, Math.floor(roll / 2));
     },
   },
   "bloodrush bellow|2": bloodrushBellow,
@@ -253,17 +243,13 @@ export const wtrHighRarity: Record<string, CardScript> = {
     },
   },
   "crippling crush|1": {
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-    },
+    canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       ctx.discardRandom(opponentSeat(ctx), 2);
     },
   },
   "cranial crush|3": {
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-    },
+    canTriggerOnHit: crushTriggered,
     onHit(ctx) {
       const target = ctx.player(opponentSeat(ctx));
       ctx.setPlayerFlag(target.seat, "cannotDrawNextActionPhase", true);
@@ -285,7 +271,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
   "mask of momentum|0": maskOfMomentum,
   "lord of wind|3": lordOfWind,
   "ancestral empowerment|1": {
-    canPlay: (ctx) => ctx.link?.attackCardType === "action" && hasType(ctx, ctx.link.attackingCard, "ninja"),
+    canPlay: (ctx) => ctx.link?.attackCardType === "action" && hasCardSubtype(ctx, ctx.link.attackingCard, "ninja"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
       ctx.drawCards(ctx.seat, 1);
@@ -294,21 +280,16 @@ export const wtrHighRarity: Record<string, CardScript> = {
   "mugenshi: release|2": mugenshiRelease,
   "hurricane technique|2": hurricaneTechnique,
   "pounding gale|1": {
-    modifyCombatDamage: (ctx, amount) => (previousAttackNamed(ctx, "open the center") ? amount * 2 : amount),
+    modifyCombatDamage: (ctx, amount) => (previousAttackHasName(ctx, "open the center") ? amount * 2 : amount),
   },
 
   "braveforge bracers|0": {
-    onFriendlyCombatDamageDealt(ctx, source, target, amount) {
-      if (amount > 0 && target !== ctx.seat && ctx.cardData(source.cardId).cardType === "weapon") {
-        ctx.setFlag("player", "weaponHitThisTurn", true);
-      }
-    },
     activated: {
       cost: 1,
       isAttack: false,
       goAgain: true,
       oncePerTurn: true,
-      canActivate: (ctx) => ctx.getFlag("player", "weaponHitThisTurn") === true,
+      canActivate: (ctx) => ctx.getPlayerFlag(ctx.seat, "hitType:weapon") === true,
       onActivate(ctx) {
         ctx.addModifier({ scope: "next-attack", attack: 1, appliesTo: "weapon" });
       },
@@ -370,7 +351,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
           "singing-search",
           "Singing Steelblade: choose an attack reaction",
           "card.wtr.singing.reaction.choose",
-          (card) => ctx.cardData(card.cardId).cardType === "attack-reaction",
+          (card) => ctx.hasCardType(card, "attack-reaction"),
         );
     },
     onChoose(ctx, hook, option) {
@@ -442,7 +423,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
         if (ctx.putOnDeckBottom(Number(option)))
           ctx.requestChoice(
             "estrike-mode",
-            decisionPrompt("Choose a mode", "card.wtr.estrike.mode.choose", {
+            decisionPrompt("Choose a mode", "card.common.mode.choose", {
               optionMessages: {
                 draw: decisionMessage("card.wtr.estrike.option.draw"),
                 "+2": decisionMessage("card.wtr.estrike.option.power"),
@@ -502,7 +483,7 @@ export const wtrHighRarity: Record<string, CardScript> = {
   },
   "remembrance|2": {
     onPlay(ctx) {
-      const actions = ctx.player(ctx.seat).graveyard.filter((card) => ctx.hasCardType(card, "action"));
+      const actions = faceUpGraveyard(ctx).filter((card) => ctx.hasCardType(card, "action"));
       if (!actions.length) {
         ctx.shuffleDeck();
         return;

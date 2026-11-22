@@ -6,17 +6,23 @@ import {
   cardDefendsThisTrigger,
   commonOptionMessages,
   contractWithSilver,
+  controlsNamed,
+  countAuras,
   crowdTrigger,
+  crushTriggered,
   decisionMessage,
   decisionPrompt,
+  defendsTogetherWithCardFromHand,
   entersArenaTrigger,
+  faceUpGraveyard,
+  hasSixPlusInPitch,
   heroTarget,
   isSixPlus,
   leavesArenaTrigger,
   opponentSeat,
   payForDefenseBoost,
+  pitches,
   previousAttackHasName,
-  queueIntimidate,
   requestDiscardChoice,
   resolveDiscardChoice,
   suspenseAura as suspenseLifecycle,
@@ -25,45 +31,24 @@ import {
   targetHeroSeat,
   yesNoPrompt,
   ongoingLabel,
+  cardNamed,
+  hasCardSubtype,
+  isAttackAction,
+  isAura,
+  isSuspenseAura,
+  isSword,
+  isTokenAura,
+  hasLessLife,
+  hasMoreLife,
 } from "./shared-helpers.js";
+import { AGILITY, BAIT, CINTARI_SELLSWORD, CONFIDENCE, COURAGE, MIGHT, TOUGHNESS, VIGOR } from "./tokens.js";
 
-const CONFIDENCE = "SLY034";
-const MIGHT = "SLY035";
-const TOUGHNESS = "SUP241";
-const VIGOR = "SKA036";
 const CHEER = crowdTrigger("cheer");
 
 type Card = DeepReadonly<CardInstance>;
 
-function pitches(name: string, make: (pitch: 1 | 2 | 3) => CardScript): Record<string, CardScript> {
-  return Object.fromEntries(([1, 2, 3] as const).map((pitch) => [`${name}|${pitch}`, make(pitch)]));
-}
-
-function data(ctx: ScriptCtx, card: Card) {
-  return ctx.cardData(card.cardId);
-}
-function hasTag(ctx: ScriptCtx, card: Card, tag: string): boolean {
-  return ctx.cardTypes(card).includes(tag.toLowerCase());
-}
-function named(ctx: ScriptCtx, card: Card, name: string): boolean {
-  return ctx.cardNames(card).includes(name.toLowerCase());
-}
-function controls(ctx: ScriptCtx, name: string): boolean {
-  const player = ctx.player(ctx.seat);
-  return [
-    ...player.board,
-    ...player.weapons,
-    ...Object.values(player.equipment).filter((card): card is Card => card !== undefined),
-  ].some((card) => named(ctx, card, name));
-}
 function controlsAny(ctx: ScriptCtx, names: string[]): boolean {
-  return names.some((name) => controls(ctx, name));
-}
-function aura(ctx: ScriptCtx, card: Card): boolean {
-  return hasTag(ctx, card, "aura");
-}
-function tokenAura(ctx: ScriptCtx, card: Card): boolean {
-  return data(ctx, card).cardType === "token" && aura(ctx, card);
+  return names.some((name) => controlsNamed(ctx, name));
 }
 
 type CharmMode = { readonly option: string; readonly bit: number; readonly message: string };
@@ -149,6 +134,56 @@ function finishLiarsCharmModes(ctx: ScriptCtx): void {
   if ((modes & 4) !== 0) requestLiarsCharmDiscard(ctx, ctx.getState("liar-target"));
 }
 
+const CHEATERS_CHARM_MODES = [
+  { option: "steal", bit: 1, message: "card.sup.option.steal" },
+  { option: "boo", bit: 2, message: "card.sup.option.boo" },
+  { option: "damage", bit: 4, message: "card.sup.option.cheater.damage" },
+] as const;
+
+function requestCheatersCharmTarget(ctx: ScriptCtx): void {
+  if ((ctx.getState("cheater-modes") & 4) === 0) return;
+  ctx.requestCardChoice(
+    "cheater-target",
+    decisionPrompt(`${ctx.data.name}: choose target hero`, "card.common.target.hero.choose", {
+      values: { card: { kind: "card", cardId: ctx.self.cardId } },
+    }),
+    ctx.state.players.map((player) => player.hero.instanceId),
+    undefined,
+    undefined,
+    undefined,
+    ctx.player(opponentSeat(ctx)).hero.instanceId,
+  );
+}
+function controlsSixPowerAttack(ctx: ScriptCtx): boolean {
+  return ctx.link?.attacker === ctx.seat && ctx.currentAttackPower() >= 6;
+}
+function requestCheatersCharmMode(ctx: ScriptCtx): void {
+  const prompt = "Choose any number of modes";
+  const modes = controlsSixPowerAttack(ctx)
+    ? CHEATERS_CHARM_MODES
+    : CHEATERS_CHARM_MODES.filter((mode) => mode.option !== "damage");
+  if (!requestCharmMode(ctx, "cheater-mode", "cheater-modes", modes, prompt, "card.sup.modes.choose"))
+    requestCheatersCharmTarget(ctx);
+}
+function finishCheatersCharmModes(ctx: ScriptCtx): void {
+  const modes = ctx.getState("cheater-modes");
+  if ((modes & 2) !== 0) ctx.crowdBoo(ctx.seat);
+  if ((modes & 4) === 0 || !controlsSixPowerAttack(ctx)) return;
+  const target = ctx.getState("cheater-target");
+  const hand = ctx.player(target).hand;
+  if (hand.length)
+    ctx.requestCardChoice(
+      "cheater-discard",
+      decisionPrompt("Discard a card or take 2 damage", "card.sup.discard.or.damage", {
+        values: { amount: 2 },
+        optionMessages: { damage: decisionMessage("card.sup.option.take.damage", { amount: 2 }) },
+      }),
+      ["damage", ...hand.map((card) => card.instanceId)],
+      target,
+    );
+  else ctx.dealDamage(target, 2);
+}
+
 const NUMBSKULL_CHARM_MODES = [
   { option: "destroy", bit: 1, message: "card.sup.option.numbskull.destroy" },
   { option: "cheer", bit: 2, message: "card.sup.option.numbskull.cheer" },
@@ -180,20 +215,11 @@ function resolveNumbskullCharm(ctx: ScriptCtx): void {
   if (six) ctx.createToken(VIGOR);
 }
 
-function suspenseAura(ctx: ScriptCtx, card: Card): boolean {
-  return aura(ctx, card) && (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "suspense");
-}
 function controlsSuspense(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).board.some((card) => suspenseAura(ctx, card));
-}
-function countAuras(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).board.filter((card) => aura(ctx, card)).length;
+  return ctx.player(ctx.seat).board.some((card) => isSuspenseAura(ctx, card));
 }
 function heroHas(ctx: ScriptCtx, seat: number, tag: string): boolean {
-  return hasTag(ctx, ctx.player(seat).hero, tag);
-}
-function hasSixPlusInPitch(ctx: ScriptCtx): boolean {
-  return ctx.player(ctx.seat).pitch.some((card) => isSixPlus(ctx, card));
+  return hasCardSubtype(ctx, ctx.player(seat).hero, tag);
 }
 function createMany(ctx: ScriptCtx, id: string, count: number): void {
   ctx.createTokens(id, count);
@@ -218,10 +244,11 @@ function requestHunterSearch(ctx: ScriptCtx): void {
   const target = opponentSeat(ctx);
   const searchedCards = hunterSearchedCards(ctx);
   const candidates = hunterSearchCandidates(ctx, searchedCards);
-  if (candidates.length === 0) {
+  if (searchedCards.length === 0) {
     ctx.shuffleDeck(target);
     return;
   }
+  // Searching shows the zones even when nothing matches.
   ctx.requestCardChoices(
     "hunter-search",
     decisionPrompt("Choose up to 3 more cards with the named card's name", "card.sup.named.cards.choose"),
@@ -292,7 +319,7 @@ function requestSongOfSinewOrder(ctx: ScriptCtx, ids: number[]): void {
 }
 
 function tokenEquipment(a: string, b: string): CardScript {
-  return { modifyDefense: (ctx) => (controls(ctx, a) && controls(ctx, b) ? 2 : 0) };
+  return { modifyDefense: (ctx) => (controlsNamed(ctx, a) && controlsNamed(ctx, b) ? 2 : 0) };
 }
 
 function tokenAttack(a: string, b: string): CardScript {
@@ -349,7 +376,8 @@ function subtypeOpponentAttack(tag: "revered" | "reviled", bonus: number, kind: 
 
 function defendedByTag(ctx: ScriptCtx, tag: string): boolean {
   return (
-    !!ctx.link && [...ctx.link.defendingCards, ...ctx.link.defendingEquipment].some((card) => hasTag(ctx, card, tag))
+    !!ctx.link && [...ctx.link.defendingCards, ...ctx.link.defendingEquipment].some((card) =>
+      hasCardSubtype(ctx, card, tag))
   );
 }
 
@@ -404,7 +432,7 @@ function clashToken(tokenId: string): CardScript {
     },
     onClashResult(ctx, hook, winner) {
       if (hook !== "sup-clash") return;
-      if (winner >= 0) ctx.createToken(tokenId, winner);
+      if (winner >= 0) ctx.heroCreatesTokens(winner, tokenId);
       const top = ctx.player(ctx.seat).deck[0];
       if (top) {
         ctx.setState("clashTop", top.instanceId);
@@ -427,12 +455,12 @@ function missCreates(tokenId: string): CardScript {
       ctx.setState("missed", 1);
     },
     onCombatChainClosed(ctx) {
-      if (ctx.getState("missed")) ctx.createToken(tokenId, opponentSeat(ctx));
+      if (ctx.getState("missed")) ctx.heroCreatesTokens(opponentSeat(ctx), tokenId);
     },
   };
 }
 
-function nextAttack(amount: number, kind?: "cheer" | "boo"): CardScript {
+function crowdNextAttackPump(amount: number, kind?: "cheer" | "boo"): CardScript {
   return {
     onPlay(ctx) {
       buffNextAttack(ctx, { attack: amount });
@@ -446,17 +474,10 @@ function destroyOpposingToken(createId: string, targetName: string, heroTag: str
   return {
     canTriggerOnDefend: (ctx) => heroHas(ctx, opponentSeat(ctx), heroTag),
     onDefend(ctx) {
-      const token = ctx.player(opponentSeat(ctx)).board.find((card) => named(ctx, card, targetName));
+      const token = ctx.player(opponentSeat(ctx)).board.find((card) => cardNamed(ctx, card, targetName));
       if (token && ctx.destroyPermanent(token.instanceId)) ctx.createToken(createId);
     },
   };
-}
-
-function defendsTogetherWithCardFromHand(ctx: ScriptCtx): boolean {
-  if (!ctx.link) return false;
-  const count = Number(ctx.link.flags.defendedFromHandCount ?? 0);
-  const selfWasFromHand = ctx.link.flags[`defendedFromHand:${ctx.self.instanceId}`] === true ? 1 : 0;
-  return count > selfWasFromHand;
 }
 
 function suspense(
@@ -512,7 +533,8 @@ const INTIMIDATE_TARGET_HERO: SuspenseTrigger = {
 const ANOTHER_AURA_TARGET: NonNullable<TriggerDef["target"]> = {
   options: (ctx) =>
     ctx.state.players.flatMap((p) =>
-      p.board.filter((card) => aura(ctx, card) && card.instanceId !== ctx.self.instanceId).map((card) => card.instanceId),
+      p.board.filter((card) => isAura(ctx, card) && card.instanceId !== ctx.self.instanceId).map((card) =>
+        card.instanceId),
     ),
   prompt: () => decisionPrompt("Put another target aura on the bottom of its owner's deck", "card.sup.aura.bottom.choose"),
 };
@@ -525,7 +547,7 @@ function storyBeats(): CardScript {
   const request = (ctx: ScriptCtx) => {
     const board = ctx.player(ctx.seat).board;
     const options = board.flatMap((card) =>
-      suspenseAura(ctx, card)
+      isSuspenseAura(ctx, card)
         ? [`add:${card.instanceId}`, ...(card.counters?.suspense ? [`remove:${card.instanceId}`] : [])]
         : [],
     );
@@ -571,11 +593,11 @@ function bashHero(className: string): CardScript {
       return ctx.link?.targetAllyId === undefined && heroHas(ctx, opponentSeat(ctx), className);
     },
     onHit(ctx) {
-      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => tokenAura(ctx, card));
+      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => isTokenAura(ctx, card));
       if (targets.length)
         ctx.requestCardChoice(
           "bash-aura",
-          decisionPrompt(`${ctx.data.name}: destroy an aura token`, "card.sup.aura.token.destroy", {
+          decisionPrompt(`${ctx.data.name}: destroy an aura token`, "card.common.auratoken.destroy.named", {
             values: { card: { kind: "card", cardId: ctx.self.cardId } },
           }),
           targets.map((card) => card.instanceId),
@@ -595,7 +617,7 @@ function defendedByClassToken(className: string, tokenId: string): CardScript {
         return (
           ctx.link?.attackingCard.instanceId === ctx.self.instanceId &&
           ctx.getState("madeToken") === 0 &&
-          defenders.some((card) => hasTag(ctx, card, className))
+          defenders.some((card) => hasCardSubtype(ctx, card, className))
         );
       },
     },
@@ -714,11 +736,11 @@ export const sup: Record<string, CardScript> = {
         },
       ],
       onActivate(ctx) {
-        const targets = ctx.player(ctx.seat).board.filter((card) => suspenseAura(ctx, card));
+        const targets = ctx.player(ctx.seat).board.filter((card) => isSuspenseAura(ctx, card));
         if (targets.length)
           ctx.requestChoice(
             "pleiades-add",
-            decisionPrompt("Put a suspense counter on an aura of suspense?", "card.sup.suspense.counter.add", {
+            decisionPrompt("Put a suspense counter on an aura of suspense?", "card.common.suspense.counter.add", {
               optionMessages: commonOptionMessages("pass"),
             }),
             ["pass", ...targets.map((card) => String(card.instanceId))],
@@ -749,7 +771,7 @@ export const sup: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       destroySelfCost: true,
-      canActivate: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0,
+      canActivate: (ctx) => hasLessLife(ctx),
       onActivate(ctx) {
         createMany(ctx, TOUGHNESS, 3);
       },
@@ -768,7 +790,7 @@ export const sup: Record<string, CardScript> = {
       if (hand.length)
         ctx.requestCardChoice(
           "disarm-bottom",
-          decisionPrompt("Put a hand card on the bottom", "card.sup.hand.bottom"),
+          decisionPrompt("Put a hand card on the bottom", "card.common.hand.bottom"),
           hand.map((card) => card.instanceId),
           opponentSeat(ctx),
         );
@@ -784,7 +806,7 @@ export const sup: Record<string, CardScript> = {
     canTriggerOnDefend: (ctx) => ctx.currentDefense(ctx.self) >= 6,
     onDefend(ctx) {
       if (ctx.currentDefense(ctx.self) < 6) return;
-      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => aura(ctx, card));
+      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card));
       if (targets.length)
         ctx.requestCardChoice(
           "disembody-bottom",
@@ -861,11 +883,11 @@ export const sup: Record<string, CardScript> = {
     onPlay(ctx) {
       ctx.createToken(TOUGHNESS);
       buffNextAttack(ctx, {
-        attack: ctx.player(ctx.seat).board.filter((card) => named(ctx, card, "Toughness")).length,
+        attack: ctx.player(ctx.seat).board.filter((card) => cardNamed(ctx, card, "Toughness")).length,
       });
     },
   },
-  ...pitches("heroic pose", (pitch) => nextAttack(4 - pitch, "cheer")),
+  ...pitches("heroic pose", (pitch) => crowdNextAttackPump(4 - pitch, "cheer")),
   "humble entrance|3": {
     onPlay(ctx) {
       createMany(ctx, TOUGHNESS, 3);
@@ -905,7 +927,7 @@ export const sup: Record<string, CardScript> = {
       isAttack: false,
       goAgain: true,
       destroySelfCost: true,
-      canActivate: (ctx) => ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0,
+      canActivate: (ctx) => hasMoreLife(ctx),
       onActivate(ctx) {
         createMany(ctx, MIGHT, 3);
       },
@@ -973,8 +995,8 @@ export const sup: Record<string, CardScript> = {
       ctx.createToken(MIGHT);
     },
   },
-  "villainous pose|2": nextAttack(3, "boo"),
-  "villainous pose|3": nextAttack(2, "boo"),
+  "villainous pose|2": crowdNextAttackPump(3, "boo"),
+  "villainous pose|3": crowdNextAttackPump(2, "boo"),
   "disdainful delight|2": { modifyDefense: (ctx) => (ctx.getFlag("player", "booedThisTurn") ? 1 : 0) },
   "not so tuff|3": destroyOpposingToken(MIGHT, "Toughness", "revered"),
 
@@ -998,7 +1020,7 @@ export const sup: Record<string, CardScript> = {
   },
   "visit the boneyard|3": {
     onPlay(ctx) {
-      const targets = ctx.player(ctx.seat).graveyard.filter((card) => isSixPlus(ctx, card));
+      const targets = faceUpGraveyard(ctx).filter((card) => isSixPlus(ctx, card));
       if (targets.length)
         ctx.requestCardChoice(
           "boneyard",
@@ -1062,15 +1084,13 @@ export const sup: Record<string, CardScript> = {
     modifyAttack(ctx) {
       return ctx.attackBonusAboveBase(ctx.self.instanceId) > 0 ? 1 : 0;
     },
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && (ctx.link?.damage ?? 0) >= 4;
-    },
+    canTriggerOnHit: crushTriggered,
     onHit(ctx) {
-      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => aura(ctx, card));
+      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => isAura(ctx, card));
       if (targets.length)
         ctx.requestCardChoice(
           "small-aura",
-          decisionPrompt("Destroy an aura", "card.sup.aura.destroy"),
+          decisionPrompt("Destroy an aura", "card.common.aura.destroy"),
           targets.map((card) => card.instanceId),
         );
     },
@@ -1112,9 +1132,8 @@ export const sup: Record<string, CardScript> = {
       timing: "instant",
       destroySelfCost: true,
       onActivate(ctx) {
-        const cards = ctx
-          .player(ctx.seat)
-          .graveyard.filter((card) => ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack"));
+        const cards = faceUpGraveyard(ctx)
+          .filter((card) => isAttackAction(ctx, card));
         if (cards.length)
           ctx.requestCardChoice(
             "hindsight",
@@ -1186,12 +1205,8 @@ export const sup: Record<string, CardScript> = {
   },
 };
 
-const AGILITY = "AKO027";
-const COURAGE = "ASB027";
-const SELLSWORD = "HVY134";
-
 function tokenNamed(ctx: ScriptCtx, seat: number, name: string): Card | undefined {
-  return ctx.player(seat).board.find((card) => named(ctx, card, name) && tokenAura(ctx, card));
+  return ctx.player(seat).board.find((card) => cardNamed(ctx, card, name) && isTokenAura(ctx, card));
 }
 
 function convertTokens(from: string, to: string, max = 3): CardScript {
@@ -1199,7 +1214,7 @@ function convertTokens(from: string, to: string, max = 3): CardScript {
     onPlay(ctx) {
       const tokens = ctx.state.players
         .flatMap((player) => player.board)
-        .filter((card) => named(ctx, card, from) && tokenAura(ctx, card))
+        .filter((card) => cardNamed(ctx, card, from) && isTokenAura(ctx, card))
         .slice(0, max);
       for (const token of tokens) if (ctx.destroyPermanent(token.instanceId)) ctx.createToken(to);
     },
@@ -1221,11 +1236,11 @@ function tower(payoff: (ctx: ScriptCtx) => void): CardScript {
 }
 
 function destroyAuraAtTarget(ctx: ScriptCtx, seat: number, hook: string): void {
-  const targets = ctx.player(seat).board.filter((card) => aura(ctx, card));
+  const targets = ctx.player(seat).board.filter((card) => isAura(ctx, card));
   if (targets.length)
     ctx.requestCardChoice(
       hook,
-      decisionPrompt(`${ctx.data.name}: destroy an aura`, "card.sup.aura.destroy.named", {
+      decisionPrompt(`${ctx.data.name}: destroy an aura`, "card.common.aura.destroy.named", {
         values: { card: { kind: "card", cardId: ctx.self.cardId } },
       }),
       targets.map((card) => card.instanceId),
@@ -1265,7 +1280,7 @@ Object.assign(sup, {
   },
   "jaws of victory|1": {
     onAttackDeclared(ctx: ScriptCtx) {
-      if (ctx.link?.targetAllyId === undefined && ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0)
+      if (ctx.link?.targetAllyId === undefined && hasLessLife(ctx))
         ctx.crowdCheer(ctx.seat);
     },
     hasConditionalGoAgain: (ctx: ScriptCtx) => ctx.getFlag("player", "cheeredThisTurn") === true,
@@ -1303,7 +1318,8 @@ Object.assign(sup, {
       const modes = ctx.getState("numbskull-modes");
       if ((modes & 1) !== 0) {
         const tokens = ctx.state.players.flatMap((player) =>
-          player.board.filter((card) => tokenAura(ctx, card) && (named(ctx, card, "Confidence") || named(ctx, card, "Might"))),
+          player.board.filter((card) =>
+            isTokenAura(ctx, card) && (cardNamed(ctx, card, "Confidence") || cardNamed(ctx, card, "Might"))),
         );
         if (tokens.length > 1) {
           ctx.requestCardChoice(
@@ -1320,7 +1336,7 @@ Object.assign(sup, {
   },
   "cries of encore|1": {
     onAttackDeclared(ctx: ScriptCtx) {
-      if (ctx.link?.targetAllyId === undefined && ctx.compareLife(ctx.seat, opponentSeat(ctx)) < 0)
+      if (ctx.link?.targetAllyId === undefined && hasLessLife(ctx))
         ctx.crowdCheer(ctx.seat);
     },
     canTriggerOnHit(ctx: ScriptCtx) {
@@ -1375,7 +1391,7 @@ Object.assign(sup, {
   "a good clean fight|1": { suppressesAttackActionHitEffects: true },
   "escalate order|1": {
     onAttackDeclared(ctx: ScriptCtx) {
-      if (controls(ctx, "Toughness")) createMany(ctx, TOUGHNESS, 3);
+      if (controlsNamed(ctx, "Toughness")) createMany(ctx, TOUGHNESS, 3);
     },
   },
   "old favorite|2": {
@@ -1411,7 +1427,7 @@ Object.assign(sup, {
       fromHand: true,
       onActivate(ctx: ScriptCtx) {
         const attacks = (ctx.player(ctx.seat).inventory ?? []).filter(
-          (card) => ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack") && hasTag(ctx, card, "reviled"),
+          (card) => isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "reviled"),
         );
         if (attacks.length) {
           ctx.requestCardChoice(
@@ -1434,7 +1450,7 @@ Object.assign(sup, {
   },
   "big bully|1": {
     onAttackDeclared(ctx: ScriptCtx) {
-      if (ctx.link?.targetAllyId === undefined && ctx.compareLife(ctx.seat, opponentSeat(ctx)) > 0) {
+      if (ctx.link?.targetAllyId === undefined && hasMoreLife(ctx)) {
         ctx.crowdBoo(ctx.seat);
       }
     },
@@ -1443,41 +1459,56 @@ Object.assign(sup, {
     },
   },
   "cheater's charm|2": {
+    declareAdditionalCost(ctx: ScriptCtx) {
+      ctx.setState("cheater-modes", 0);
+      requestCheatersCharmMode(ctx);
+    },
     onPlay(ctx: ScriptCtx) {
-      for (const name of ["Confidence", "Toughness"]) {
-        const token = tokenNamed(ctx, opponentSeat(ctx), name);
-        if (token) ctx.steal(token.instanceId, { duration: "indefinite" });
-      }
-      ctx.crowdBoo(ctx.seat);
-      if (ctx.link && ctx.currentAttackPower() >= 6) {
-        const hand = ctx.player(opponentSeat(ctx)).hand;
-        if (hand.length)
+      if ((ctx.getState("cheater-modes") & 1) !== 0) {
+        const tokens = ["Confidence", "Toughness"].flatMap((name) => {
+          const token = tokenNamed(ctx, opponentSeat(ctx), name);
+          return token ? [token] : [];
+        });
+        if (tokens.length) {
           ctx.requestCardChoice(
-            "cheater-discard",
-            decisionPrompt("Discard a card or take 2 damage", "card.sup.discard.or.damage", {
-              values: { amount: 2 },
-              optionMessages: { damage: decisionMessage("card.sup.option.take.damage", { amount: 2 }) },
-            }),
-            ["damage", ...hand.map((card) => card.instanceId)],
-            opponentSeat(ctx),
+            "cheater-steal",
+            decisionPrompt("Choose a Confidence or Toughness token to steal", "card.sup.token.steal.confidence.choose"),
+            tokens.map((card) => card.instanceId),
           );
-        else ctx.dealDamage(opponentSeat(ctx), 2);
+          return;
+        }
       }
+      finishCheatersCharmModes(ctx);
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook === "cheater-discard") {
-        if (option === "damage") ctx.dealDamage(opponentSeat(ctx), 2);
-        else ctx.discardCard(opponentSeat(ctx), Number(option));
+      if (hook === "cheater-mode") {
+        const mode = CHEATERS_CHARM_MODES.find((candidate) => candidate.option === option);
+        if (!mode) {
+          requestCheatersCharmTarget(ctx);
+          return;
+        }
+        ctx.setState("cheater-modes", ctx.getState("cheater-modes") | mode.bit);
+        requestCheatersCharmMode(ctx);
+      } else if (hook === "cheater-target") {
+        const target = ctx.state.players.find((player) => player.hero.instanceId === Number(option))?.seat;
+        if (target !== undefined) ctx.setState("cheater-target", target);
+      } else if (hook === "cheater-steal") {
+        ctx.steal(Number(option), { duration: "indefinite" });
+        finishCheatersCharmModes(ctx);
+      } else if (hook === "cheater-discard") {
+        const target = ctx.getState("cheater-target");
+        if (option === "damage") ctx.dealDamage(target, 2);
+        else resolveDiscardChoice(ctx, option, target);
       }
     },
   },
   "steal victory|3": {
     onDefend(ctx: ScriptCtx) {
-      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => tokenAura(ctx, card));
+      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => isTokenAura(ctx, card));
       if (targets.length)
         ctx.requestCardChoice(
           "steal-victory",
-          decisionPrompt("Steal an aura token", "card.sup.aura.token.steal"),
+          decisionPrompt("Steal an aura token", "card.common.auratoken.steal"),
           targets.map((card) => card.instanceId),
         );
     },
@@ -1568,7 +1599,7 @@ Object.assign(sup, {
         ctx.lookAt(top.instanceId);
         ctx.requestChoice(
           "truth-color",
-          decisionPrompt("Choose a color", "card.sup.color.choose", {
+          decisionPrompt("Choose a color", "card.common.color.choose", {
             optionMessages: {
               ...commonOptionMessages("pass"),
               red: decisionMessage("card.common.option.red"),
@@ -1606,17 +1637,25 @@ Object.assign(sup, {
     },
   },
   "bully tactics|1": {
-    onAttackDeclared(ctx: ScriptCtx) {
-      if (ctx.link?.targetAllyId !== undefined) return;
-      ctx.requestXPayment(
-        "bully-x",
-        decisionPrompt("Pay up to 3 to intimidate", "card.sup.intimidate.pay", { values: { amount: 3 } }),
-        undefined,
-        3,
-      );
-    },
+    triggers: [
+      {
+        event: "attack-declared",
+        sourceZone: "self",
+        label: "Intimidate",
+        labelMessage: decisionMessage("card.trigger.common.intimidate"),
+        condition: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined,
+        effect(ctx: ScriptCtx) {
+          ctx.requestXPayment(
+            "bully-x",
+            decisionPrompt("Pay up to 3 to intimidate", "card.sup.intimidate.pay", { values: { amount: 3 } }),
+            undefined,
+            3,
+          );
+        },
+      },
+    ],
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook === "bully-x") for (let i = 0; i < Number(option.slice(2)); i++) queueIntimidate(ctx);
+      if (hook === "bully-x") ctx.intimidate(undefined, Number(option.slice(2)));
     },
   },
   "fix the match|2": {
@@ -1625,7 +1664,7 @@ Object.assign(sup, {
       if (deck.length)
         ctx.requestCardChoice(
           "fix-top",
-          decisionPrompt("Choose a card to put on top", "card.sup.card.top.choose"),
+          decisionPrompt("Choose a card to put on top", "card.common.card.top.choose"),
           deck.map((card) => card.instanceId),
         );
     },
@@ -1634,7 +1673,7 @@ Object.assign(sup, {
       ctx.requestClash(opponentSeat(ctx), "fix-clash");
     },
     onClashResult(ctx: ScriptCtx, hook: string, winner: number) {
-      if (hook === "fix-clash" && winner >= 0) ctx.createToken(MIGHT, winner);
+      if (hook === "fix-clash" && winner >= 0) ctx.heroCreatesTokens(winner, MIGHT);
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook !== "fix-top") return;
@@ -1661,17 +1700,17 @@ Object.assign(sup, {
   },
   "escalate violence|3": {
     onAttackDeclared(ctx: ScriptCtx) {
-      if (controls(ctx, "Might")) createMany(ctx, MIGHT, 3);
+      if (controlsNamed(ctx, "Might")) createMany(ctx, MIGHT, 3);
     },
   },
   "gang robbery|2": {
     modifyAttack: (ctx: ScriptCtx) => (countAuras(ctx) >= 3 ? 3 : 0),
     onAttackDeclared(ctx: ScriptCtx) {
-      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => tokenAura(ctx, card));
+      const targets = ctx.player(opponentSeat(ctx)).board.filter((card) => isTokenAura(ctx, card));
       if (targets.length)
         ctx.requestCardChoice(
           "gang-steal",
-          decisionPrompt("Steal an aura token", "card.sup.aura.token.steal"),
+          decisionPrompt("Steal an aura token", "card.common.auratoken.steal"),
           targets.map((card) => card.instanceId),
         );
     },
@@ -1803,7 +1842,7 @@ Object.assign(sup, {
   },
   "disturb the peace|1": {
     canBeDefendedBy(ctx: ScriptCtx, card: Card) {
-      return !(hasTag(ctx, card, "guardian") && aura(ctx, card));
+      return !(hasCardSubtype(ctx, card, "guardian") && isAura(ctx, card));
     },
     canTriggerOnHit(ctx: ScriptCtx) {
       return ctx.link?.targetAllyId === undefined && heroHas(ctx, opponentSeat(ctx), "guardian");
@@ -1860,7 +1899,7 @@ Object.assign(sup, {
         .player(ctx.seat)
         .arsenal.filter(
           (card) =>
-            card.faceDown && (data(ctx, card).keywords ?? []).some((keyword) => keyword.toLowerCase() === "crush"),
+            card.faceDown && ctx.hasKeyword(card, "crush"),
         );
       if (cards.length)
         ctx.requestCardChoice(
@@ -1883,7 +1922,7 @@ Object.assign(sup, {
     for (const card of ctx.player(opponentSeat(ctx)).deck.slice(0, 3)) ctx.moveToGraveyard(card.instanceId, "deck");
   }),
   "cut the small talk|2": tower((ctx) => {
-    for (const card of [...ctx.player(opponentSeat(ctx)).board].filter((candidate) => aura(ctx, candidate)))
+    for (const card of [...ctx.player(opponentSeat(ctx)).board].filter((candidate) => isAura(ctx, candidate)))
       ctx.destroyPermanent(card.instanceId);
   }),
   "hungry for more|1": suspense(undefined, {
@@ -1905,7 +1944,7 @@ Object.assign(sup, {
     effect(ctx) {
       const targets = ctx.state.players
         .filter((p) => heroHas(ctx, p.seat, "guardian"))
-        .flatMap((p) => p.board.filter((card) => aura(ctx, card)));
+        .flatMap((p) => p.board.filter((card) => isAura(ctx, card)));
       if (targets.length)
         ctx.requestCardChoice(
           "blinks-aura",
@@ -1935,7 +1974,7 @@ Object.assign(sup, {
         const n = Number(option.slice(2));
         const tokens = ctx
           .player(opponentSeat(ctx))
-          .board.filter((card) => tokenAura(ctx, card))
+          .board.filter((card) => isTokenAura(ctx, card))
           .slice(0, n);
         for (const token of tokens)
           if (ctx.destroyPermanent(token.instanceId)) ctx.addModifier({ scope: "chain-link", attack: 1 });
@@ -1946,14 +1985,14 @@ Object.assign(sup, {
     modifyAttack(ctx: ScriptCtx) {
       return new Set(
         ctx.state.players.flatMap((p) =>
-          p.board.filter((card) => tokenAura(ctx, card)).map((card) => data(ctx, card).name),
+          p.board.filter((card) => isTokenAura(ctx, card)).map((card) => ctx.cardData(card.cardId).name),
         ),
       ).size;
     },
     modifyDefense(ctx: ScriptCtx) {
       return new Set(
         ctx.state.players.flatMap((p) =>
-          p.board.filter((card) => tokenAura(ctx, card)).map((card) => data(ctx, card).name),
+          p.board.filter((card) => isTokenAura(ctx, card)).map((card) => ctx.cardData(card.cardId).name),
         ),
       ).size;
     },
@@ -2044,7 +2083,7 @@ Object.assign(sup, {
       !!ctx.link &&
       !ctx.link.resolved &&
       ctx.link.attacker === ctx.seat &&
-      named(ctx, ctx.link.attackingCard, "dawnblade"),
+      cardNamed(ctx, ctx.link.attackingCard, "dawnblade"),
     declareAdditionalCost(ctx: ScriptCtx) {
       const counters = Math.max(0, Number(ctx.link?.attackingCard.counters?.power ?? 0));
       const count = Math.min(BEAT_OF_THE_IRONSONG_MODES.length, counters + 1);
@@ -2097,7 +2136,7 @@ Object.assign(sup, {
       }
     },
     onPlay(ctx: ScriptCtx) {
-      if (!ctx.link || !named(ctx, ctx.link.attackingCard, "dawnblade")) return;
+      if (!ctx.link || !cardNamed(ctx, ctx.link.attackingCard, "dawnblade")) return;
       const modes = ctx.getState("beat-modes");
       if ((modes & 1) !== 0) ctx.addModifier({ scope: "chain-link", attack: 1 });
       if ((modes & 2) !== 0) ctx.grantGoAgain();
@@ -2107,14 +2146,13 @@ Object.assign(sup, {
   },
   "blood follows blade|2": {
     onPlay(ctx: ScriptCtx) {
-      if (ctx.link && hasTag(ctx, ctx.link.attackingCard, "sword")) {
+      if (ctx.link && isSword(ctx, ctx.link.attackingCard)) {
         ctx.grantGoAgain();
-        ctx.addModifier({ scope: "chain-link", onHitCreateToken: { cardId: SELLSWORD, count: 1 } });
+        ctx.addModifier({ scope: "chain-link", onHitCreateToken: { cardId: CINTARI_SELLSWORD, count: 1 } });
       }
     },
   },
   "adaptive alpha mold|0": {
-    playableEquipment: true,
     activated: {
       cost: 0,
       isAttack: false,
@@ -2161,9 +2199,10 @@ Object.assign(sup, {
   },
   "hit the gas|3": {
     onPlay(ctx: ScriptCtx) {
-      const drivers = ctx.player(ctx.seat).banish.filter((card) => named(ctx, card, "Hyper Driver") && !card.faceDown);
+      const drivers = ctx.player(ctx.seat).banish.filter((card) =>
+        cardNamed(ctx, card, "Hyper Driver") && !card.faceDown);
       for (const card of drivers) ctx.setCardFaceDown(card.instanceId, true);
-      ctx.changeActionPoints(ctx.seat, drivers.length);
+      ctx.gainActionPoints(ctx.seat, drivers.length);
       if (drivers.length >= 3) ctx.drawCards(ctx.seat, 1);
     },
   },
@@ -2199,11 +2238,10 @@ Object.assign(sup, {
       if (deck.length)
         ctx.requestCardChoice(
           "bait-top",
-          decisionPrompt("Choose a card to put on top", "card.sup.card.top.choose"),
+          decisionPrompt("Choose a card to put on top", "card.common.card.top.choose"),
           deck.map((card) => card.instanceId),
         );
-      const bait = ctx.createToken("SUP259");
-      if (bait) ctx.giveControl(bait.instanceId, opponentSeat(ctx));
+      ctx.createOwnedTokenUnder(opponentSeat(ctx), BAIT);
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
       if (hook !== "bait-top") return;
@@ -2241,7 +2279,7 @@ Object.assign(sup, {
         label: "Add a sand counter",
         effect(ctx: ScriptCtx) {
           ctx.setCounter("sand", ctx.getCounter("sand") + 1);
-          const reds = ctx.player(ctx.seat).graveyard.filter((card) => ctx.cardColor(card) === 1);
+          const reds = faceUpGraveyard(ctx).filter((card) => ctx.cardColor(card) === 1);
           if (reds.length < ctx.getCounter("sand")) ctx.destroySelf();
           else for (const card of reds.slice(0, ctx.getCounter("sand"))) ctx.banish(card.instanceId);
         },
@@ -2285,7 +2323,7 @@ Object.assign(sup, {
   },
   "angelic attendant|2": {
     onPlay(ctx: ScriptCtx) {
-      const figments = ctx.player(ctx.seat).board.filter((card) => hasTag(ctx, card, "figment"));
+      const figments = ctx.player(ctx.seat).board.filter((card) => hasCardSubtype(ctx, card, "figment"));
       if (figments.length)
         ctx.requestCardChoice(
           "awaken-figment",
@@ -2373,7 +2411,7 @@ Object.assign(sup, {
     onPlay(ctx: ScriptCtx) {
       const attacks = ctx
         .player(ctx.seat)
-        .hand.filter((card) => ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack"));
+        .hand.filter((card) => isAttackAction(ctx, card));
       if (attacks.length) {
         ctx.requestCardChoice(
           "painful-card",

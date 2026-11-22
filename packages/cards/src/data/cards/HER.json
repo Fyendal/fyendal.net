@@ -2,7 +2,7 @@
  {
   "id": "HER000",
   "name": "Ira, Crimson Haze",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your second attack each turn gets +1{p}.",
   "classes": [
    "ninja"
@@ -14,7 +14,7 @@
  {
   "id": "HER001",
   "name": "Rhinar, Reckless Rampage",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
   "classes": [
    "brute"
@@ -29,7 +29,7 @@
  {
   "id": "HER002",
   "name": "Bravo, Showstopper",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Action - {r}{r}: Until end of turn, your attack action cards with cost 3 or greater gains dominate. Go again",
   "classes": [
    "guardian"
@@ -41,7 +41,7 @@
  {
   "id": "HER003",
   "name": "Katsu, the Wanderer",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first time an attack action card you control hits each turn, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it face up, then shuffle your deck. You may play it this turn.",
   "classes": [
    "ninja"
@@ -53,7 +53,7 @@
  {
   "id": "HER004",
   "name": "Dorinthea Ironsong",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per turn Effect - When a weapon you control hits, you may attack an additional time with that weapon this turn.",
   "classes": [
    "warrior"
@@ -65,7 +65,7 @@
  {
   "id": "HER005",
   "name": "Rhinar",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
   "classes": [
    "brute"
@@ -80,7 +80,7 @@
  {
   "id": "HER006",
   "name": "Bravo",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Action - {r}{r}: Until end of turn, your attack action cards with cost 3 or more get dominate. Go again",
   "classes": [
    "guardian"
@@ -92,7 +92,7 @@
  {
   "id": "HER007",
   "name": "Katsu",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first time an attack action card you control hits each turn, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it face up, then shuffle your deck. You may play it this turn.",
   "classes": [
    "ninja"
@@ -104,7 +104,7 @@
  {
   "id": "HER008",
   "name": "Dorinthea",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per turn Effect - When a weapon you control hits, you may attack an additional time with that weapon this turn.",
   "classes": [
    "warrior"
@@ -116,7 +116,7 @@
  {
   "id": "HER009",
   "name": "Dash, Inventor Extraordinaire",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may start the game with a Mechanologist item with cost 2 or less in the arena.",
   "classes": [
    "mechanologist"
@@ -128,7 +128,7 @@
  {
   "id": "HER010",
   "name": "Azalea, Ace in the Hole",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - 0: Put a card from your arsenal on the bottom of your deck. If you do, put the top card of your deck face up into your arsenal. If it's an arrow card, it gains dominate until end of turn. Go again",
   "classes": [
    "ranger"
@@ -140,7 +140,7 @@
  {
   "id": "HER011",
   "name": "Viserai, Rune Blood",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a Runeblade card, if you've played another non-attack action card this turn, create a Runechant token.",
   "classes": [
    "runeblade"
@@ -152,7 +152,7 @@
  {
   "id": "HER012",
   "name": "Kano, Dracai of Aether",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Instant - {r}{r}{r}: Look at the top card of your deck. If it's a 'non-attack' action card, you may banish it. If you do, you may play it this turn as though it were an instant.",
   "classes": [
    "wizard"
@@ -164,7 +164,7 @@
  {
   "id": "HER013",
   "name": "Dash",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may start the game with a Mechanologist item with cost 2 or less in the arena.",
   "classes": [
    "mechanologist"
@@ -176,7 +176,7 @@
  {
   "id": "HER014",
   "name": "Azalea",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - 0: Put a card from your arsenal on the bottom of your deck. If you do, put the top card of your deck face up into your arsenal. If it's an arrow card, it gains dominate until end of turn. Go again",
   "classes": [
    "ranger"
@@ -188,7 +188,7 @@
  {
   "id": "HER015",
   "name": "Viserai",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a Runeblade card, if you have played another 'non-attack' action card this turn, create a Runechant token.",
   "classes": [
    "runeblade"
@@ -200,7 +200,7 @@
  {
   "id": "HER016",
   "name": "Kano",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Instant - {r}{r}{r}: Look at the top card of your deck. If it's a 'non-attack' action card, you may banish it. If you do, you may play it this turn as though it were an instant.",
   "classes": [
    "wizard"
@@ -212,7 +212,7 @@
  {
   "id": "HER017",
   "name": "Dash, Inventor Extraordinaire",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may start the game with a Mechanologist item with cost 2 or less in the arena.",
   "classes": [
    "mechanologist"
@@ -224,7 +224,7 @@
  {
   "id": "HER018",
   "name": "Azalea, Ace in the Hole",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - 0: Put a card from your arsenal on the bottom of your deck. If you do, put the top card of your deck face up into your arsenal. If it's an arrow card, it gains dominate until end of turn. Go again",
   "classes": [
    "ranger"
@@ -236,7 +236,7 @@
  {
   "id": "HER019",
   "name": "Viserai, Rune Blood",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a Runeblade card, if you've played another non-attack action card this turn, create a Runechant token.",
   "classes": [
    "runeblade"
@@ -248,7 +248,7 @@
  {
   "id": "HER020",
   "name": "Kano, Dracai of Aether",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Instant - {r}{r}{r}: Look at the top card of your deck. If it's a 'non-attack' action card, you may banish it. If you do, you may play it this turn as though it were an instant.",
   "classes": [
    "wizard"
@@ -260,7 +260,7 @@
  {
   "id": "HER021",
   "name": "Rhinar, Reckless Rampage",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
   "classes": [
    "brute"
@@ -275,7 +275,7 @@
  {
   "id": "HER022",
   "name": "Bravo, Showstopper",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Action - {r}{r}: Until end of turn, your attack action cards with cost 3 or greater gains dominate. Go again",
   "classes": [
    "guardian"
@@ -287,7 +287,7 @@
  {
   "id": "HER023",
   "name": "Katsu, the Wanderer",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first time an attack action card you control hits each turn, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it face up, then shuffle your deck. You may play it this turn.",
   "classes": [
    "ninja"
@@ -299,7 +299,7 @@
  {
   "id": "HER024",
   "name": "Dorinthea Ironsong",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per turn Effect - When a weapon you control hits, you may attack an additional time with that weapon this turn.",
   "classes": [
    "warrior"
@@ -311,7 +311,7 @@
  {
   "id": "HER025",
   "name": "Kayo, Berserker Runt",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play an attack action card with base power 6 or more {p}, roll a 6 sided die. On;\n\n\n1 to 4 - Halve the attack's base {p}, rounded down.\n\n\n5 to 6 - Double the attack's base {p}.",
   "classes": [
    "brute"
@@ -323,7 +323,7 @@
  {
   "id": "HER026",
   "name": "Benji, the Piercing Wind",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your attack action cards with 2 or less {p} can't be defended by cards from hand.\nThe first time an attack action card you control hits each turn, your next attack gains +1{p}.",
   "classes": [
    "ninja"
@@ -335,7 +335,7 @@
  {
   "id": "HER027",
   "name": "Data Doll MKII",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever a Mechanologist item with cost 2 or less is put into your banished zone from your deck, put it into the arena.",
   "classes": [
    "mechanologist"
@@ -347,7 +347,7 @@
  {
   "id": "HER028",
   "name": "Kavdaen, Trader of Skins",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - {r}{r}{r}: If a hero has more {h} than all other hero's, they lose 1{h} and create a Copper token. Then if a hero has less {h} than all other hero's, they gain 1{h}. Go again",
   "classes": [
    "merchant"
@@ -359,7 +359,7 @@
  {
   "id": "HER029",
   "name": "Kassai, Cintari Sellsword",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your second sword attack each turn costs {r} less.\nAt the beginning of your end phase, if you have attacked 2 or more times with weapons this turn, create a Copper token for each weapon attack that hit.",
   "classes": [
    "warrior"
@@ -371,7 +371,7 @@
  {
   "id": "HER030",
   "name": "Prism, Sculptor of Arc Light",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {r}{r}, banish a card from Prism's soul: Create a Spectral Shield token.",
   "classes": [
    "illusionist"
@@ -386,7 +386,7 @@
  {
   "id": "HER031",
   "name": "Ser Boltyn, Breaker of Dawn",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If you've charged this turn, your attacks get +1{p} while defended by an attack action card.\nAttack Reaction - Banish a card from Boltyn's soul: Target attack with {p} greater than its base {p} gains go again.",
   "classes": [
    "warrior"
@@ -401,8 +401,8 @@
  {
   "id": "HER032",
   "name": "Levia, Shadowborn Abomination",
-  "cardType": "hero",
-  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, cards you own lose blood debt during the end phase.",
+  "types": ["hero"],
+  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, you don't lose {h} from blood debt during the end phase.",
   "classes": [
    "brute"
   ],
@@ -416,7 +416,7 @@
  {
   "id": "HER033",
   "name": "Chane, Bound by Shadow",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - Create a Soul Shackle token: Your next Runeblade or Shadow action this turn gains go again. Go again",
   "classes": [
    "runeblade"
@@ -431,7 +431,7 @@
  {
   "id": "HER034",
   "name": "Prism",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {r}{r}, banish a card from Prism's soul: Create a Spectral Shield token.",
   "classes": [
    "illusionist"
@@ -446,7 +446,7 @@
  {
   "id": "HER035",
   "name": "Boltyn",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If you've charged this turn, your attacks get +1{p} while defended by an attack action card.\nAttack Reaction - Banish a card from Boltyn's soul: Target attack with {p} greater than its base {p} gains go again.",
   "classes": [
    "warrior"
@@ -461,8 +461,8 @@
  {
   "id": "HER036",
   "name": "Levia",
-  "cardType": "hero",
-  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, cards you own lose blood debt during the end phase.",
+  "types": ["hero"],
+  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, you don't lose {h} from blood debt during the end phase.",
   "classes": [
    "brute"
   ],
@@ -476,7 +476,7 @@
  {
   "id": "HER037",
   "name": "Chane",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - Create a Soul Shackle token: Your next Runeblade or Shadow action this turn gains go again. Go again",
   "classes": [
    "runeblade"
@@ -491,7 +491,7 @@
  {
   "id": "HER038",
   "name": "Prism, Sculptor of Arc Light",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {r}{r}, banish a card from Prism's soul: Create a Spectral Shield token.",
   "classes": [
    "illusionist"
@@ -506,7 +506,7 @@
  {
   "id": "HER039",
   "name": "Ser Boltyn, Breaker of Dawn",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If you've charged this turn, your attacks get +1{p} while defended by an attack action card.\nAttack Reaction - Banish a card from Boltyn's soul: Target attack with {p} greater than its base {p} gains go again.",
   "classes": [
    "warrior"
@@ -521,8 +521,8 @@
  {
   "id": "HER040",
   "name": "Levia, Shadowborn Abomination",
-  "cardType": "hero",
-  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, cards you own lose blood debt during the end phase.",
+  "types": ["hero"],
+  "text": "If a card with 6 or more {p} has been put into your banished zone this turn, you don't lose {h} from blood debt during the end phase.",
   "classes": [
    "brute"
   ],
@@ -536,7 +536,7 @@
  {
   "id": "HER041",
   "name": "Chane, Bound by Shadow",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - Create a Soul Shackle token: Your next Runeblade or Shadow action this turn gains go again. Go again",
   "classes": [
    "runeblade"
@@ -551,7 +551,7 @@
  {
   "id": "HER042",
   "name": "Oldhim, Grandfather of Eternity",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Earth and Ice\nOnce per Turn Defense Reaction - {r}{r}{r}: If an Earth card is pitched this way, prevent the next 2 damage that would be dealt to Oldhim this turn. If an Ice card is pitched this way, the attacking hero puts a card from their hand on top of their deck.",
   "classes": [
    "guardian"
@@ -569,7 +569,7 @@
  {
   "id": "HER043",
   "name": "Lexi, Livewire",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Ice and Lightning\nOnce per Turn Action - Turn a face down card in your arsenal face up: If it's a Lightning card, your next attack this turn gains go again. If it's an Ice card, create a Frostbite token under target hero's control. Go again",
   "classes": [
    "ranger"
@@ -587,7 +587,7 @@
  {
   "id": "HER044",
   "name": "Briar, Warden of Thorns",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Earth and Lightning\nThe first time an attack action card you control deals damage to an opposing hero, create an Embodiment of Earth token.\nWhenever you play your second 'non-attack' action card each turn, create an Embodiment of Lightning token.",
   "classes": [
    "runeblade"
@@ -605,7 +605,7 @@
  {
   "id": "HER045",
   "name": "Oldhim",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Earth and Ice\nOnce per Turn Defense Reaction - {r}{r}{r}: If an Earth card is pitched this way, prevent the next 2 damage that would be dealt to Oldhim this turn. If an Ice card is pitched this way, the attacking hero puts a card from their hand on top of their deck.",
   "classes": [
    "guardian"
@@ -623,7 +623,7 @@
  {
   "id": "HER046",
   "name": "Lexi",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Ice and Lightning\nOnce per Turn Action - Turn a face down card in your arsenal face up: If it's a Lightning card, your next attack this turn gains go again. If it's an Ice card, create a Frostbite token under target hero's control. Go again",
   "classes": [
    "ranger"
@@ -641,7 +641,7 @@
  {
   "id": "HER047",
   "name": "Briar",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Earth and Lightning\nThe first time an attack action card you control deals damage to an opposing hero, create an Embodiment of Earth token.\nWhenever you play your second 'non-attack' action card each turn, create an Embodiment of Lightning token.",
   "classes": [
    "runeblade"
@@ -659,7 +659,7 @@
  {
   "id": "HER048",
   "name": "Oldhim, Grandfather of Eternity",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Earth and Ice\nOnce per Turn Defense Reaction - {r}{r}{r}: If an Earth card is pitched this way, prevent the next 2 damage that would be dealt to Oldhim this turn. If an Ice card is pitched this way, the attacking hero puts a card from their hand on top of their deck.",
   "classes": [
    "guardian"
@@ -677,7 +677,7 @@
  {
   "id": "HER049",
   "name": "Lexi, Livewire",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Ice and Lightning\nOnce per Turn Action - Turn a face down card in your arsenal face up: If it's a Lightning card, your next attack this turn gains go again. If it's an Ice card, create a Frostbite token under target hero's control. Go again",
   "classes": [
    "ranger"
@@ -695,7 +695,7 @@
  {
   "id": "HER050",
   "name": "Briar, Warden of Thorns",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Earth and Lightning\nThe first time an attack action card you control deals damage to an opposing hero, create an Embodiment of Earth token.\nWhenever you play your second 'non-attack' action card each turn, create an Embodiment of Lightning token.",
   "classes": [
    "runeblade"
@@ -713,7 +713,7 @@
  {
   "id": "HER051",
   "name": "Valda Brightaxe",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever an opponent draws a card during an action phase, create a Seismic Surge token for each card drawn this way.\nAt the start of your turn, if you control 3 or more Seismic Surge tokens, cards you own with crush gain dominate this turn.",
   "classes": [
    "guardian"
@@ -725,7 +725,7 @@
  {
   "id": "HER052",
   "name": "Iyslander",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Ice\nIf it's not your turn, you may play blue 'non-attack' action cards from your arsenal as though they were an instant.\nWhenever you play an Ice card during an opponents turn, create a Frostbite token under their control.",
   "classes": [
    "wizard"
@@ -743,7 +743,7 @@
  {
   "id": "HER053",
   "name": "Genis Wotchuneed",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - {r}{r}: Each other hero may put a card from their hand on the bottom of their deck. If they do, they draw a card and you create a Silver token. If you gain no Silver this way, draw a card. Go again",
   "classes": [
    "merchant"
@@ -755,7 +755,7 @@
  {
   "id": "HER054",
   "name": "Rhinar",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
   "classes": [
    "brute"
@@ -770,7 +770,7 @@
  {
   "id": "HER055",
   "name": "Bravo",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Action - {r}{r}: Until end of turn, your attack action cards with cost 3 or more get dominate. Go again",
   "classes": [
    "guardian"
@@ -782,7 +782,7 @@
  {
   "id": "HER056",
   "name": "Katsu",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first time an attack action card you control hits each turn, you may discard a card with cost 0. If you do, search your deck for a card with combo, banish it face up, then shuffle your deck. You may play it this turn.",
   "classes": [
    "ninja"
@@ -794,7 +794,7 @@
  {
   "id": "HER057",
   "name": "Dorinthea",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per turn Effect - When a weapon you control hits, you may attack an additional time with that weapon this turn.",
   "classes": [
    "warrior"
@@ -806,7 +806,7 @@
  {
   "id": "HER058",
   "name": "Fai, Rising Rebellion",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may start the game with a Phoenix Flame in your graveyard.\nOnce per Turn Instant - {r}{r}{r}: Return a Phoenix Flame from your graveyard to your hand. This ability costs {r} less for each Draconic chain link you control.",
   "classes": [
    "ninja"
@@ -821,7 +821,7 @@
  {
   "id": "HER059",
   "name": "Dromai, Ash Artist",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you pitch a red card, create an Ash Token.\nIf you've played a red card this turn, dragons you control have go again while attacking.",
   "classes": [
    "illusionist"
@@ -836,7 +836,7 @@
  {
   "id": "HER060",
   "name": "Iyslander, Stormbind",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Ice\nIf it's not your turn, you may play blue 'non-attack' action cards from your arsenal as though they were an instant.\nWhenever you play an Ice card during an opponents turn, create a Frostbite token under their control.",
   "classes": [
    "wizard"
@@ -854,7 +854,7 @@
  {
   "id": "HER061",
   "name": "Fai",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may start the game with a Phoenix Flame in your graveyard.\nOnce per Turn Instant - {r}{r}{r}: Return a Phoenix Flame from your graveyard to your hand. This ability costs {r} less for each Draconic chain link you control.",
   "classes": [
    "ninja"
@@ -869,7 +869,7 @@
  {
   "id": "HER062",
   "name": "Dromai",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you pitch a red card, create an Ash Token.\nIf you've played a red card this turn, dragons you control have go again while attacking.",
   "classes": [
    "illusionist"
@@ -884,7 +884,7 @@
  {
   "id": "HER063",
   "name": "Briar, Warden of Thorns",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Earth and Lightning\nThe first time an attack action card you control deals damage to an opposing hero, create an Embodiment of Earth token.\nWhenever you play your second 'non-attack' action card each turn, create an Embodiment of Lightning token.",
   "classes": [
    "runeblade"
@@ -902,7 +902,7 @@
  {
   "id": "HER064",
   "name": "Briar",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Earth and Lightning\nThe first time an attack action card you control deals damage to an opposing hero, create an Embodiment of Earth token.\nWhenever you play your second 'non-attack' action card each turn, create an Embodiment of Lightning token.",
   "classes": [
    "runeblade"
@@ -920,7 +920,7 @@
  {
   "id": "HER065",
   "name": "Fai, Rising Rebellion",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may start the game with a Phoenix Flame in your graveyard.\nOnce per Turn Instant - {r}{r}{r}: Return a Phoenix Flame from your graveyard to your hand. This ability costs {r} less for each Draconic chain link you control.",
   "classes": [
    "ninja"
@@ -935,7 +935,7 @@
  {
   "id": "HER066",
   "name": "Dromai, Ash Artist",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you pitch a red card, create an Ash Token.\nIf you've played a red card this turn, dragons you control have go again while attacking.",
   "classes": [
    "illusionist"
@@ -950,7 +950,7 @@
  {
   "id": "HER067",
   "name": "Iyslander, Stormbind",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Ice\nIf it's not your turn, you may play blue 'non-attack' action cards from your arsenal as though they were an instant.\nWhenever you play an Ice card during an opponents turn, create a Frostbite token under their control.",
   "classes": [
    "wizard"
@@ -968,7 +968,7 @@
  {
   "id": "HER069",
   "name": "Prism, Sculptor of Arc Light",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {r}{r}, banish a card from Prism's soul: Create a Spectral Shield token.",
   "classes": [
    "illusionist"
@@ -983,7 +983,7 @@
  {
   "id": "HER070",
   "name": "Dash",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may start the game with a Mechanologist item with cost 2 or less in the arena.",
   "classes": [
    "mechanologist"
@@ -995,7 +995,7 @@
  {
   "id": "HER071",
   "name": "Azalea",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - 0: Put a card from your arsenal on the bottom of your deck. If you do, put the top card of your deck face up into your arsenal. If it's an arrow card, it gains dominate until end of turn. Go again",
   "classes": [
    "ranger"
@@ -1007,7 +1007,7 @@
  {
   "id": "HER072",
   "name": "Kano",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Instant - {r}{r}{r}: Look at the top card of your deck. If it's a 'non-attack' action card, you may banish it. If you do, you may play it this turn as though it were an instant.",
   "classes": [
    "wizard"
@@ -1019,7 +1019,7 @@
  {
   "id": "HER073",
   "name": "Arakni",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a card with contract, you may look at the top card of target opponent's deck. You may put it on the bottom.",
   "classes": [
    "assassin"
@@ -1031,7 +1031,7 @@
  {
   "id": "HER074",
   "name": "Arakni, Huntsman",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a card with contract, you may look at the top card of target opponent's deck. You may put it on the bottom.",
   "classes": [
    "assassin"
@@ -1043,7 +1043,7 @@
  {
   "id": "HER075",
   "name": "Yoji, Royal Protector",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {r}{r}{r}: The next time another target hero would be dealt damage this turn, instead that damage is dealt to Yoji and prevent 1 of that damage.",
   "classes": [
    "guardian"
@@ -1055,7 +1055,7 @@
  {
   "id": "HER076",
   "name": "Uzuri",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Attack Reaction - Banish a card from your hand face down: Turn the card banished this way face up. If it's an attack action card with cost 2 or less, put target attacking card with stealth from the active chain link on the bottom of its owner's deck, then put the banished card onto the active chain link as the attacking card.",
   "classes": [
    "assassin"
@@ -1067,7 +1067,7 @@
  {
   "id": "HER077",
   "name": "Uzuri, Switchblade",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Attack Reaction - Banish a card from your hand face down: Turn the card banished this way face up. If it's an attack action card with cost 2 or less, put target attacking card with stealth from the active chain link on the bottom of its owner's deck, then put the banished card onto the active chain link as the attacking card.",
   "classes": [
    "assassin"
@@ -1079,7 +1079,7 @@
  {
   "id": "HER078",
   "name": "Riptide, Lurker of the Deep",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a card from hand, you may put a card from hand face down into your arsenal.\nWhenever a trap you control triggers, deal 1 damage to the attacking hero.",
   "classes": [
    "ranger"
@@ -1091,7 +1091,7 @@
  {
   "id": "HER079",
   "name": "Arakni, Solitary Confinement",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your first attack with stealth each turn has go again.",
   "classes": [
    "assassin"
@@ -1103,7 +1103,7 @@
  {
   "id": "HER080",
   "name": "Riptide",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a card from hand, you may put a card from hand face down into your arsenal.\nWhenever a trap you control triggers, deal 1 damage to the attacking hero.",
   "classes": [
    "ranger"
@@ -1115,7 +1115,7 @@
  {
   "id": "HER081",
   "name": "Riptide",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a card from hand, you may put a card from hand face down into your arsenal.\nWhenever a trap you control triggers, deal 1 damage to the attacking hero.",
   "classes": [
    "ranger"
@@ -1127,7 +1127,7 @@
  {
   "id": "HER082",
   "name": "Arakni, Solitary Confinement",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your first attack with stealth each turn has go again.",
   "classes": [
    "assassin"
@@ -1139,7 +1139,7 @@
  {
   "id": "HER083",
   "name": "Uzuri",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Attack Reaction - Banish a card from your hand face down: Turn the card banished this way face up. If it's an attack action card with cost 2 or less, put target attacking card with stealth from the active chain link on the bottom of its owner's deck, then put the banished card onto the active chain link as the attacking card.",
   "classes": [
    "assassin"
@@ -1151,7 +1151,7 @@
  {
   "id": "HER084",
   "name": "Prism, Advent of Thrones",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever a card with Herald in its name is put into Prism's soul during an action phase, you may search your deck for a figment, put it into the arena, then shuffle.\nOnce per Turn Instant - {r}{r}, banish a card from Prism's soul: Awaken target figment you control.",
   "classes": [
    "illusionist"
@@ -1166,7 +1166,7 @@
  {
   "id": "HER085",
   "name": "Vynnset",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "At the start of your turn, banish a card from your hand. If you do, create a Runechant token.\nWhenever you play a Shadow non-attack action card, you may pay {h}. If you do, the next Runechant effect that would deal damage this turn can't be prevented.",
   "classes": [
    "runeblade"
@@ -1181,7 +1181,7 @@
  {
   "id": "HER086",
   "name": "Prism, Awakener of Sol",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever a card with Herald in its name is put into Prism's soul during an action phase, you may search your deck for a figment, put it into the arena, then shuffle.\nOnce per Turn Instant - {r}{r}, banish a card from Prism's soul: Awaken target figment you control.",
   "classes": [
    "illusionist"
@@ -1196,7 +1196,7 @@
  {
   "id": "HER087",
   "name": "Vynnset, Iron Maiden",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "At the start of your turn, banish a card from your hand. If you do, create a Runechant token.\nWhenever you play a Shadow non-attack action card, you may pay {h}. If you do, the next Runechant effect that would deal damage this turn can't be prevented.",
   "classes": [
    "runeblade"
@@ -1211,7 +1211,7 @@
  {
   "id": "HER088",
   "name": "Teklovossen, Esteemed Magnate",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may play Evos from your banished zone.\nOnce per Turn Instant - {r}{r}{r}: You may play your next Evo this turn as though it were an instant. When you do, draw a card.",
   "classes": [
    "mechanologist"
@@ -1223,7 +1223,7 @@
  {
   "id": "HER089",
   "name": "Dash I/O",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may look at the top card of your deck at any time.\nOnce per turn, you may play a Mechanologist item with cost 0 or 1 from the top of your deck as though it were an instant. It costs an additional {r} to play.",
   "classes": [
    "mechanologist"
@@ -1235,7 +1235,7 @@
  {
   "id": "HER090",
   "name": "Maxx 'The Hype' Nitro",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - {r}{r}: Create a Hyper Driver token with 2 steam counters.  Activate this ability only if you've boosted this turn.\nHyper Drivers you control get crank.",
   "classes": [
    "mechanologist"
@@ -1247,7 +1247,7 @@
  {
   "id": "HER091",
   "name": "Dash, Database",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may look at the top card of your deck at any time.\nOnce per turn, you may play a Mechanologist item with cost 0 or 1 from the top of your deck as though it were an instant. It costs an additional {r} to play.",
   "classes": [
    "mechanologist"
@@ -1259,7 +1259,7 @@
  {
   "id": "HER092",
   "name": "Maxx Nitro",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - {r}{r}: Create a Hyper Driver token with 2 steam counters.  Activate this ability only if you've boosted this turn.\nHyper Drivers you control get crank.",
   "classes": [
    "mechanologist"
@@ -1271,7 +1271,7 @@
  {
   "id": "HER093",
   "name": "Teklovossen",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may play Evos from your banished zone.\nOnce per Turn Instant - {r}{r}{r}: You may play your next Evo this turn as though it were an instant. When you do, draw a card.",
   "classes": [
    "mechanologist"
@@ -1283,7 +1283,7 @@
  {
   "id": "HER094",
   "name": "Dash I/O",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may look at the top card of your deck at any time.\nOnce per turn, you may play a Mechanologist item with cost 0 or 1 from the top of your deck as though it were an instant. It costs an additional {r} to play.",
   "classes": [
    "mechanologist"
@@ -1295,7 +1295,7 @@
  {
   "id": "HER095",
   "name": "Maxx 'The Hype' Nitro",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - {r}{r}: Create a Hyper Driver token with 2 steam counters.  Activate this ability only if you've boosted this turn.\nHyper Drivers you control get crank.",
   "classes": [
    "mechanologist"
@@ -1307,7 +1307,7 @@
  {
   "id": "HER096",
   "name": "Teklovossen, Esteemed Magnate",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may play Evos from your banished zone.\nOnce per Turn Instant - {r}{r}{r}: You may play your next Evo this turn as though it were an instant. When you do, draw a card.",
   "classes": [
    "mechanologist"
@@ -1319,7 +1319,7 @@
  {
   "id": "HER097",
   "name": "Dash, Database",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may look at the top card of your deck at any time.\nOnce per turn, you may play a Mechanologist item with cost 0 or 1 from the top of your deck as though it were an instant. It costs an additional {r} to play.",
   "classes": [
    "mechanologist"
@@ -1331,7 +1331,7 @@
  {
   "id": "HER098",
   "name": "Maxx Nitro",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Action - {r}{r}: Create a Hyper Driver token with 2 steam counters.  Activate this ability only if you've boosted this turn.\nHyper Drivers you control get crank.",
   "classes": [
    "mechanologist"
@@ -1343,7 +1343,7 @@
  {
   "id": "HER099",
   "name": "Teklovossen",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may play Evos from your banished zone.\nOnce per Turn Instant - {r}{r}{r}: You may play your next Evo this turn as though it were an instant. When you do, draw a card.",
   "classes": [
    "mechanologist"
@@ -1355,7 +1355,7 @@
  {
   "id": "HER102",
   "name": "Brevant, Civic Protector",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may have any number of Chivalry in your deck.\nWhenever you protect another hero, create a Might token.",
   "classes": [
    "guardian"
@@ -1367,7 +1367,7 @@
  {
   "id": "HER103",
   "name": "Melody, Sing-along",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a song, create Copper tokens equal to the number of other heroes in the game.",
   "classes": [
    "bard"
@@ -1379,7 +1379,7 @@
  {
   "id": "HER104",
   "name": "Professor Teklovossen",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Evos cost {r} less to play for each opposing hero.\nYou may play Evos from your banished zone.",
   "classes": [
    "mechanologist"
@@ -1391,7 +1391,7 @@
  {
   "id": "HER105",
   "name": "Rhinar, Reckless Rampage",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
   "classes": [
    "brute"
@@ -1406,7 +1406,7 @@
  {
   "id": "HER106",
   "name": "Victor Goldmane, High and Mighty",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first time each turn you create a Gold token from an effect you control, draw a card.\nThe first time each turn you would fail to win a clash, instead you may destroy a Gold you control. If you do, put 1 of the revealed cards on the bottom of its owner's deck, then clash again.",
   "classes": [
    "guardian"
@@ -1421,7 +1421,7 @@
  {
   "id": "HER107",
   "name": "Olympia, Prized Fighter",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first time each of your attacks wins a wager, create a Gold token.",
   "classes": [
    "warrior"
@@ -1433,7 +1433,7 @@
  {
   "id": "HER108",
   "name": "Kayo, Armed and Dangerous",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You have 1 weapon zone.\nAttack action cards you own get +1{p} while they are in any zone other than the combat chain.\nThe first time you discard a card with 6 or more {p} during each of your action phases, create a Might token.",
   "classes": [
    "brute"
@@ -1445,7 +1445,7 @@
  {
   "id": "HER109",
   "name": "Betsy, Skin in the Game",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever an attack you control wagers, you may pay {r}{r}. If you do, the attack gets +1{p} and overpower.",
   "classes": [
    "guardian"
@@ -1457,7 +1457,7 @@
  {
   "id": "HER110",
   "name": "Kassai of the Golden Sand",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If you've drawn a card this turn, your sword attacks cost {r} less to activate.\nOnce per Turn Action - Banish 2 red and 2 yellow cards from your graveyard: The next time a weapon you control hits a hero this turn, create a Gold token. Go again",
   "classes": [
    "warrior"
@@ -1469,7 +1469,7 @@
  {
   "id": "HER111",
   "name": "Prism, Awakener of Sol",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever a card with Herald in its name is put into Prism's soul during an action phase, you may search your deck for a figment, put it into the arena, then shuffle.\nOnce per Turn Instant - {r}{r}, banish a card from Prism's soul: Awaken target figment you control.",
   "classes": [
    "illusionist"
@@ -1484,7 +1484,7 @@
  {
   "id": "HER112",
   "name": "Vynnset, Iron Maiden",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "At the start of your turn, banish a card from your hand. If you do, create a Runechant token.\nWhenever you play a Shadow non-attack action card, you may pay {h}. If you do, the next Runechant effect that would deal damage this turn can't be prevented.",
   "classes": [
    "runeblade"
@@ -1499,7 +1499,7 @@
  {
   "id": "HER113",
   "name": "Nuu, Alluring Desire",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your attacks with stealth get \"When this chain link resolves, banish all action cards defending this.\"\nInstant - {c}{c}{c}: Look at the top card of an opposing hero's deck. If it's blue, you may banish it. Until end of turn, you may play blue cards from that hero's banished zone without paying their {r} cost.",
   "classes": [
    "mystic",
@@ -1512,7 +1512,7 @@
  {
   "id": "HER114",
   "name": "Enigma, Ledger of Ancestry",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your first Spectral Shield attack each turn costs {r} less to activate.\nOnce per Turn Instant - {c}{c}{c}: Create a Spectral Shield token with a +1{p} counter.",
   "classes": [
    "mystic",
@@ -1525,7 +1525,7 @@
  {
   "id": "HER115",
   "name": "Zen, Tamer of Purpose",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {c}{c}{c}: Create a Crouching Tiger in your hand. Search your deck for a card with combo, banish it, then shuffle. You may play it this turn.",
   "classes": [
    "mystic",
@@ -1538,7 +1538,7 @@
  {
   "id": "HER116",
   "name": "Enigma, Ledger of Ancestry",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your first Spectral Shield attack each turn costs {r} less to activate.\nOnce per Turn Instant - {c}{c}{c}: Create a Spectral Shield token with a +1{p} counter.",
   "classes": [
    "mystic",
@@ -1551,7 +1551,7 @@
  {
   "id": "HER117",
   "name": "Blaze, Firemind",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you opt, put energy counters on Blaze equal to the number of cards looked at this way.\nOnce per Turn Instant - Remove X energy counters from Blaze: Banish a Wizard non-attack action card from your hand with an effect that deals arcane damage equal to X. You may play it this turn as though it were an instant.",
   "classes": [
    "wizard"
@@ -1563,7 +1563,7 @@
  {
   "id": "HER119",
   "name": "Florian, Rotwood Harbinger",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If there are 8 or more Earth cards in your banished zone, Florian gets \"If you would create 1 or more aura tokens, instead create that many plus 1 of each of those tokens.\"\nEssence of Earth",
   "classes": [
    "runeblade"
@@ -1581,7 +1581,7 @@
  {
   "id": "HER120",
   "name": "Aurora, Shooting Star",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {r}{r}: Create an Embodiment of Lightning token. Activate this only if you've played a Lightning card this turn.\nEssence of Lightning",
   "classes": [
    "runeblade"
@@ -1599,7 +1599,7 @@
  {
   "id": "HER121",
   "name": "Verdance, Thorn of the Rose",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If there are 8 or more Earth cards in your banished zone, Verdance gets \"Whenever you gain {h} during your turn, you may deal 1 arcane damage to any opposing target.\"\nEssence of Earth",
   "classes": [
    "wizard"
@@ -1617,7 +1617,7 @@
  {
   "id": "HER122",
   "name": "Oscilio, Constella Intelligence",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - Discard an instant: Draw a card.\nEssence of Lightning",
   "classes": [
    "wizard"
@@ -1635,7 +1635,7 @@
  {
   "id": "HER123",
   "name": "Ira, Scarlet Revenger",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your second attack each turn gets +1{p}.",
   "classes": [
    "ninja"
@@ -1647,7 +1647,7 @@
  {
   "id": "HER124",
   "name": "Ira, Scarlet Revenger",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your second attack each turn gets +1{p}.",
   "classes": [
    "ninja"
@@ -1659,7 +1659,7 @@
  {
   "id": "HER125",
   "name": "Ira, Scarlet Revenger",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your second attack each turn gets +1{p}.",
   "classes": [
    "ninja"
@@ -1671,7 +1671,7 @@
  {
   "id": "HER126",
   "name": "Dorinthea Ironsong",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per turn Effect - When a weapon you control hits, you may attack an additional time with that weapon this turn.",
   "classes": [
    "warrior"
@@ -1683,7 +1683,7 @@
  {
   "id": "HER127",
   "name": "Viserai, Rune Blood",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a Runeblade card, if you've played another non-attack action card this turn, create a Runechant token.",
   "classes": [
    "runeblade"
@@ -1695,7 +1695,7 @@
  {
   "id": "HER128",
   "name": "Nuu, Alluring Desire",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your attacks with stealth get \"When this chain link resolves, banish all action cards defending this.\"\nInstant - {c}{c}{c}: Look at the top card of an opposing hero's deck. If it's blue, you may banish it. Until end of turn, you may play blue cards from that hero's banished zone without paying their {r} cost.",
   "classes": [
    "mystic",
@@ -1708,7 +1708,7 @@
  {
   "id": "HER129",
   "name": "Terra",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "At the beginning of each end phase, if there is an Earth card in your pitch zone, you may pay {r}. If you do, create a Might token.\nEssence of Earth",
   "classes": [
    "guardian"
@@ -1726,7 +1726,7 @@
  {
   "id": "HER130",
   "name": "Arakni, 5L!p3d 7hRu 7h3 cR4X",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first attack with stealth each turn gets go again.",
   "classes": [
    "chaos",
@@ -1739,7 +1739,7 @@
  {
   "id": "HER131",
   "name": "Arakni, 5L!p3d 7hRu 7h3 cR4X",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first attack with stealth each turn gets go again.",
   "classes": [
    "chaos",
@@ -1752,7 +1752,7 @@
  {
   "id": "HER132",
   "name": "Arakni, Marionette",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your attacks with stealth that are attacking a marked hero get +1{p} and \"When this hits, this gets go again.\"\nAt the beginning of your end phase, if an opponent is marked, you become a random Agent of Chaos.",
   "classes": [
    "chaos",
@@ -1765,7 +1765,7 @@
  {
   "id": "HER133",
   "name": "Cindra, Dracai of Retribution",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you hit a marked hero, create a Fealty token.\nOnce per Turn Instant - {r}{r}{r}: Equip up to 2 Draconic daggers from your graveyard. This costs {r} less to activate for each Draconic chain link you control.",
   "classes": [
    "royal",
@@ -1781,7 +1781,7 @@
  {
   "id": "HER134",
   "name": "Fang, Dracai of Blades",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you hit a marked hero, create a Fealty token.\nIf you control 3 or more Fealty tokens, dagger attacks cost you {r} less to activate.",
   "classes": [
    "royal",
@@ -1797,7 +1797,7 @@
  {
   "id": "HER135",
   "name": "Valda, Seismic Impact",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever an opponent draws 1 or more cards during an action phase, create that many Seismic Surge tokens.\nAt the start of your turn, if you control 3 or more Siesmic Surge tokens, cards you own with crush get dominate this turn.",
   "classes": [
    "guardian"
@@ -1809,7 +1809,7 @@
  {
   "id": "HER144",
   "name": "Cindra, Dracai of Retribution",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you hit a marked hero, create a Fealty token.\nOnce per Turn Instant - {r}{r}{r}: Equip up to 2 Draconic daggers from your graveyard. This costs {r} less to activate for each Draconic chain link you control.",
   "classes": [
    "royal",
@@ -1825,7 +1825,7 @@
  {
   "id": "HER145",
   "name": "Victor Goldmane, High and Mighty",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first time each turn you create a Gold token from an effect you control, draw a card.\nThe first time each turn you would fail to win a clash, instead you may destroy a Gold you control. If you do, put 1 of the revealed cards on the bottom of its owner's deck, then clash again.",
   "classes": [
    "guardian"
@@ -1840,7 +1840,7 @@
  {
   "id": "HER146",
   "name": "Kassai of the Golden Sand",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If you've drawn a card this turn, your sword attacks cost {r} less to activate.\nOnce per Turn Action - Banish 2 red and 2 yellow cards from your graveyard: The next time a weapon you control hits a hero this turn, create a Gold token. Go again",
   "classes": [
    "warrior"
@@ -1852,7 +1852,7 @@
  {
   "id": "HER147",
   "name": "Pleiades, Superstar",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Instant - {t}, remove a suspense counter from an aura you control: You may put a suspense counter on an aura of suspense you control.\nWhenever the crowd cheers you, create a Confidence token.",
   "classes": [
    "guardian"
@@ -1867,7 +1867,7 @@
  {
   "id": "HER148",
   "name": "Kayo, Underhanded Cheat",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You start the game with 1 weapon zone.\nInstant - {r}{r}{r}{r}, {t}: Target attack action card you control has 6 base {p}.\nWhenever the crowd boos you, create a Vigor token.",
   "classes": [
    "brute"
@@ -1882,7 +1882,7 @@
  {
   "id": "HER149",
   "name": "Lyath Goldmane, Vile Savant",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The base {p} and {d} of cards you control are halved, rounded up.\nInstant - {r}{r}, {t}: The crowd boos you. Defending action cards you control get +1{d} this turn.\nWhenever the crowd boos you, create a Might token.",
   "classes": [
    "guardian"
@@ -1897,7 +1897,7 @@
  {
   "id": "HER154",
   "name": "Bravo, Flattering Showman",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Action - {r}{r}, {t}: Turn a face-down card in your arsenal face-up. If it has crush, it gets +2{p} and dominate this turn. Go again",
   "classes": [
    "guardian"
@@ -1912,7 +1912,7 @@
  {
   "id": "HER156",
   "name": "Dash I/O",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may look at the top card of your deck at any time.\nOnce per turn, you may play a Mechanologist item with cost 0 or 1 from the top of your deck as though it were an instant. It costs an additional {r} to play.",
   "classes": [
    "mechanologist"
@@ -1924,7 +1924,7 @@
  {
   "id": "HER157",
   "name": "Prism, Sculptor of Arc Light",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Once per Turn Instant - {r}{r}, banish a card from Prism's soul: Create a Spectral Shield token.",
   "classes": [
    "illusionist"
@@ -1939,7 +1939,7 @@
  {
   "id": "HER158",
   "name": "Florian, Rotwood Harbinger",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If there are 8 or more Earth cards in your banished zone, Florian gets \"If you would create 1 or more aura tokens, instead create that many plus 1 of each of those tokens.\"\nEssence of Earth",
   "classes": [
    "runeblade"
@@ -1957,7 +1957,7 @@
  {
   "id": "HER159",
   "name": "Rhinar, Reckless Rampage",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you discard a card with 6 or more {p} during your action phase, intimidate.",
   "classes": [
    "brute"
@@ -1972,7 +1972,7 @@
  {
   "id": "HER160",
   "name": "Boltyn",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "If you've charged this turn, your attacks get +1{p} while defended by an attack action card.\nAttack Reaction - Banish a card from Boltyn's soul: Target attack with {p} greater than its base {p} gains go again.",
   "classes": [
    "warrior"
@@ -1987,7 +1987,7 @@
  {
   "id": "HER167",
   "name": "Dorinthea, Quicksilver Prodigy",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first time your Dawnblade, Resplendent's attack gets go again each turn, you may attack an additional time with it this turn.",
   "classes": [
    "warrior"
@@ -1999,7 +1999,7 @@
  {
   "id": "HER170",
   "name": "Olympia, Prized Fighter",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "The first time each of your attacks wins a wager, create a Gold token.",
   "classes": [
    "warrior"

@@ -1,37 +1,20 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
   buffNextAttack,
   commonOptionMessages,
   decisionPrompt,
-  localizedCardLog,
+  faceUpGraveyard,
+  isItem,
+  isMarked,
+  markHero,
   ongoingLabel,
   opponentSeat,
 } from "./shared-helpers.js";
 
-type Card = DeepReadonly<CardInstance>;
-
-function hasTag(ctx: ScriptCtx, card: Card, tag: string): boolean {
-  return ctx.cardTypes(card).some((value) => value.toLowerCase() === tag.toLowerCase());
-}
-function hasStealth(ctx: ScriptCtx, card: Card): boolean {
-  return (ctx.cardData(card.cardId).keywords ?? []).some((keyword) => keyword.toLowerCase() === "stealth");
-}
-function isMarked(ctx: ScriptCtx, seat: number): boolean {
-  return (ctx.player(seat).hero.scriptState?.marked ?? 0) > 0;
-}
-function markHero(ctx: ScriptCtx, seat: number): void {
-  const hero = ctx.player(seat).hero;
-  if ((hero.scriptState?.marked ?? 0) > 0) return;
-  ctx.addCardState(hero.instanceId, "marked", 1);
-  ctx.logPublic(
-    localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
-      target: { kind: "card", cardId: hero.cardId },
-    }),
-  );
-}
 function myStealthAttack(ctx: ScriptCtx): boolean {
-  return !!ctx.link && !ctx.link.resolved && ctx.link.attacker === ctx.seat && hasStealth(ctx, ctx.link.attackingCard);
+  return !!ctx.link && !ctx.link.resolved && ctx.link.attacker === ctx.seat &&
+    ctx.hasKeyword(ctx.link.attackingCard, "stealth");
 }
 function lingeringFromSelf(ctx: ScriptCtx): boolean {
   return ctx.state.modifiers.some(
@@ -45,7 +28,7 @@ export const aac: Record<string, CardScript> = {
     onFriendlyAttackDeclared(ctx) {
       if (
         !ctx.link ||
-        !hasStealth(ctx, ctx.link.attackingCard) ||
+        !ctx.hasKeyword(ctx.link.attackingCard, "stealth") ||
         ctx.getFlag("player", "aacFirstStealthUsed") === true
       )
         return;
@@ -71,7 +54,7 @@ export const aac: Record<string, CardScript> = {
             link.attacker === ctx.seat &&
             link.attackingCard.instanceId !== ctx.self.instanceId &&
             link.attackCardType === "action" &&
-            hasStealth(ctx, link.attackingCard),
+            ctx.hasKeyword(link.attackingCard, "stealth"),
         );
       if (previous) {
         ctx.grantBaseAbilities(ctx.self.instanceId, previous.attackingCard.cardId);
@@ -122,8 +105,8 @@ export const aac: Record<string, CardScript> = {
       {
         event: "card-played",
         label: "Gain 1 resource",
-        condition: (ctx, played) => lingeringFromSelf(ctx) && !!played && hasStealth(ctx, played),
-        effect: (ctx) => ctx.changeResources(ctx.seat, 1),
+        condition: (ctx, played) => lingeringFromSelf(ctx) && !!played && ctx.hasKeyword(played, "stealth"),
+        effect: (ctx) => ctx.gainResources(ctx.seat, 1),
       },
     ],
   },
@@ -182,9 +165,8 @@ export const aac: Record<string, CardScript> = {
       const marked = isMarked(ctx, opponentSeat(ctx));
       ctx.addModifier({ scope: "chain-link", attack: marked ? 3 : 2 });
       if (!marked) return;
-      const options = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => ctx.hasCardType(card, "action") && hasStealth(ctx, card));
+      const options = faceUpGraveyard(ctx).filter((card) =>
+        ctx.hasCardType(card, "action") && ctx.hasKeyword(card, "stealth"));
       if (options.length)
         ctx.requestCardChoice(
           "aac-mantle",
@@ -196,7 +178,7 @@ export const aac: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "aac-mantle" || option === "pass") return;
-      const chosen = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
+      const chosen = faceUpGraveyard(ctx).find((card) => card.instanceId === Number(option));
       if (!chosen || !ctx.link || !ctx.banish(chosen.instanceId)) return;
       ctx.becomeCardCopy(ctx.link.attackingCard.instanceId, chosen.cardId);
     },
@@ -206,11 +188,11 @@ export const aac: Record<string, CardScript> = {
       return ctx.link?.targetAllyId === undefined;
     },
     onHit(ctx) {
-      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => hasTag(ctx, card, "item"));
+      const items = ctx.player(opponentSeat(ctx)).board.filter((card) => isItem(ctx, card));
       if (items.length)
         ctx.requestCardChoice(
           "aac-steal-item",
-          decisionPrompt("Steal an item", "card.aac.item.steal"),
+          decisionPrompt("Steal an item", "card.common.item.steal"),
           items.map((card) => card.instanceId),
         );
     },

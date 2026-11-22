@@ -1,19 +1,28 @@
-import type { ActivatedAbility, CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { ActivatedAbility, CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   armGrantedHitRider,
+  armedBySelf,
   attackAbility,
+  attackTypes,
   buffNextAttack,
   cardNamed,
+  chainHitRider,
   commonOptionMessages,
   decisionMessage,
   decisionPrompt,
-  grantedHitRiderOn,
+  hitMarkedHero,
+  isDagger,
+  isMarked,
+  isOwnAttack,
   localizedCardLog,
+  markHero,
   markedStealthHeroScript,
   ongoingLabel,
   opponentSeat,
   yesNoPrompt,
+  hasCardSubtype,
 } from "./shared-helpers.js";
+import { BLOODROT_POX, FRAILTY, GRAPHENE_CHELICERA, INERTIA } from "./tokens.js";
 
 // ── SAR (Silver Age: Arakni, Web of Deceit precon, Chapter 2) ───────────────
 //
@@ -41,7 +50,6 @@ import {
 // - Stealth (CR 8.3.24) means nothing — a keyword tag the scripts read.
 
 const WEB_OF_DECEIT = "SAR001";
-const GRAPHENE = "SAR033";
 const BLACK_WIDOW = "SAR034";
 const FUNNEL_WEB = "SAR035";
 const ORB_WEAVER = "SAR036";
@@ -51,62 +59,12 @@ const TRAP_DOOR = "SAR039";
 /** The brood — the Agents of Chaos Web of Deceit randomly becomes. */
 const AGENTS = [BLACK_WIDOW, FUNNEL_WEB, ORB_WEAVER, REDBACK, TARANTULA, TRAP_DOOR];
 
-const BLOODROT_POX = "SAZ034";
-const FRAILTY = "SAZ035";
-const INERTIA = "SAZ036";
-
-/** ctx.state is typed without the internal side tables; the runtime object has them. */
-
-function isMarked(ctx: ScriptCtx, seat: number): boolean {
-  return (ctx.state.players[seat]!.hero.scriptState?.marked ?? 0) > 0;
-}
-
-/** Mark is removed as part of the hit event. Hit-triggered effects that care
- *  about the target's prior condition use the event snapshot on the link. */
-function hitMarkedHero(ctx: ScriptCtx): boolean {
-  return ctx.link?.flags.targetWasMarkedOnHit === true;
-}
-
-function markHero(ctx: ScriptCtx, seat: number): void {
-  const hero = ctx.state.players[seat]!.hero;
-  if ((hero.scriptState?.marked ?? 0) > 0) return;
-  ctx.addCardState(hero.instanceId, "marked", 1);
-  ctx.logPublic(
-    localizedCardLog(ctx, `${ctx.cardData(hero.cardId).name} is marked`, "card.log.common.hero.marked", {
-      target: { kind: "card", cardId: hero.cardId },
-    }),
-  );
-}
-
 function requestHuntsmanMark(ctx: ScriptCtx): void {
   ctx.requestChoice(
     "huntsman-mark",
     yesNoPrompt("Mark of the Huntsman: destroy this and mark them?", "card.sar.huntsman.destroy"),
     ["yes", "no"],
   );
-}
-
-function hasStealth(ctx: ScriptCtx, cardId: string): boolean {
-  return (ctx.cardData(cardId).keywords ?? []).some((k) => k.toLowerCase() === "stealth");
-}
-
-function isDagger(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("dagger");
-}
-
-function attackTypes(ctx: ScriptCtx): readonly string[] {
-  if (!ctx.link) return [];
-  return ctx.cardTypes(ctx.link.attackingCard);
-}
-
-/** The attacking card's class check for "target Assassin attack". */
-function myAttack(ctx: ScriptCtx): boolean {
-  return !!ctx.link && !ctx.link.resolved && ctx.link.attacker === ctx.seat;
-}
-
-/** A rider granted by a chain-link modifier sourced from this card/hero. */
-function armedBySelf(ctx: ScriptCtx): boolean {
-  return ctx.state.modifiers.some((m) => m.scope === "chain-link" && m.sourceInstanceId === ctx.self.instanceId);
 }
 
 /** "At the beginning of your end phase, return to the brood" (CR 8.5.52). */
@@ -131,7 +89,7 @@ function broodReaction(target: (ctx: ScriptCtx) => boolean, label: string): Acti
     timing: "attack-reaction",
     discardCost: { count: 1, classes: ["assassin"] },
     label,
-    canActivate: (ctx) => myAttack(ctx) && target(ctx),
+    canActivate: (ctx) => isOwnAttack(ctx) && target(ctx),
     onActivate(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 3 });
     },
@@ -166,24 +124,15 @@ function pumpWithRider(
   target: (ctx: ScriptCtx) => boolean,
   pump: number,
   label: ReturnType<typeof ongoingLabel>,
-  rider: (ctx: ScriptCtx) => void,
+  rider: (ctx: ScriptCtx, hitSeat: number) => void,
 ): CardScript {
   return {
-    canPlay: (ctx) => myAttack(ctx) && target(ctx),
+    canPlay: (ctx) => isOwnAttack(ctx) && target(ctx),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: pump });
       armGrantedHitRider(ctx, label);
     },
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && grantedHitRiderOn(ctx, ctx.link?.attackingCard);
-    },
-    onHit(ctx) {
-      rider(ctx);
-    },
-    onFriendlyEffectHitCondition: grantedHitRiderOn,
-    onFriendlyEffectHit(ctx) {
-      rider(ctx);
-    },
+    ...chainHitRider(rider),
   };
 }
 
@@ -251,7 +200,6 @@ export const sar: Record<string, CardScript> = {
     // Once per Turn Action — {r}: Attack. "When this attacks a marked hero,
     //  the attack gets go again." (Go again is conditional —
     //  KEYWORD_OVERRIDES strips the printed keyword; Stealth is a tag.)
-    additionalCardTypes: ["token"],
     activated: attackAbility(1),
     onAttackDeclared(ctx) {
       if (ctx.link?.attackingCard.instanceId !== ctx.self.instanceId) return;
@@ -315,7 +263,7 @@ export const sar: Record<string, CardScript> = {
       label: "Destroy: another dagger deals 1 damage, then is destroyed",
       canActivate(ctx) {
         const link = ctx.link;
-        if (!myAttack(ctx)) return false;
+        if (!isOwnAttack(ctx)) return false;
         return ctx
           .player(ctx.seat)
           .weapons.some((w) => isDagger(ctx, w) && w.instanceId !== link?.attackingCard.instanceId);
@@ -357,7 +305,7 @@ export const sar: Record<string, CardScript> = {
       timing: "attack-reaction",
       destroySelfCost: true,
       label: "Destroy: an attack with stealth gets go again",
-      canActivate: (ctx) => myAttack(ctx) && hasStealth(ctx, ctx.link!.attackingCard.cardId),
+      canActivate: (ctx) => isOwnAttack(ctx) && ctx.hasKeyword(ctx.link!.attackingCard, "stealth"),
       onActivate(ctx) {
         ctx.grantGoAgain();
       },
@@ -468,7 +416,7 @@ export const sar: Record<string, CardScript> = {
     // "Equip a Graphene Chelicera token. Your next attack with stealth this
     //  turn gets +3{p}." Go again is printed (native).
     onPlay(ctx) {
-      ctx.equipToken(GRAPHENE);
+      ctx.equipToken(GRAPHENE_CHELICERA);
       buffNextAttack(ctx, { attack: 3, appliesToKeyword: "stealth" });
     },
   },
@@ -479,24 +427,24 @@ export const sar: Record<string, CardScript> = {
     (ctx) => isDagger(ctx, ctx.link!.attackingCard),
     3,
     markOnHitLabel,
-    (ctx) => markHero(ctx, opponentSeat(ctx)),
+    markHero,
   ),
 
   "spike with bloodrot|1": pumpWithRider(
-    (ctx) => ctx.link!.attackCardType === "action" && hasStealth(ctx, ctx.link!.attackingCard.cardId),
+    (ctx) => ctx.link!.attackCardType === "action" && ctx.hasKeyword(ctx.link!.attackingCard, "stealth"),
     3,
     ongoingLabel(
       "when the attack hits a hero, create a Bloodrot Pox token under their control",
       "card.effect.sar.spikewithbloodrot",
     ),
-    (ctx) => ctx.createToken(BLOODROT_POX, opponentSeat(ctx)),
+    (ctx, seat) => ctx.createToken(BLOODROT_POX, seat),
   ),
 
   "stains of the redback|1": {
     // "If the defending hero is marked, this costs {r} less to play."
     modifyPlayCost: (ctx, base) => (ctx.link && isMarked(ctx, ctx.link.attacker === 0 ? 1 : 0) ? base - 1 : base),
     // "Target attack with stealth gets +3{p} and go again."
-    canPlay: (ctx) => myAttack(ctx) && hasStealth(ctx, ctx.link!.attackingCard.cardId),
+    canPlay: (ctx) => isOwnAttack(ctx) && ctx.hasKeyword(ctx.link!.attackingCard, "stealth"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 3 });
       ctx.grantGoAgain();
@@ -505,16 +453,16 @@ export const sar: Record<string, CardScript> = {
 
   "two sides to the blade|1": {
     canPlay(ctx) {
-      if (!myAttack(ctx)) return false;
+      if (!isOwnAttack(ctx)) return false;
       return (
         isDagger(ctx, ctx.link!.attackingCard) ||
-        (ctx.link!.attackCardType === "action" && hasStealth(ctx, ctx.link!.attackingCard.cardId))
+        (ctx.link!.attackCardType === "action" && ctx.hasKeyword(ctx.link!.attackingCard, "stealth"))
       );
     },
     additionalCost(ctx) {
       const link = ctx.link!;
       const dagger = isDagger(ctx, link.attackingCard);
-      const stealthAction = link.attackCardType === "action" && hasStealth(ctx, link.attackingCard.cardId);
+      const stealthAction = link.attackCardType === "action" && ctx.hasKeyword(link.attackingCard, "stealth");
       if (dagger && stealthAction) {
         ctx.requestChoice(
           "two-sides",
@@ -531,23 +479,14 @@ export const sar: Record<string, CardScript> = {
     onPlay(ctx) {
       const link = ctx.link!;
       const dagger = isDagger(ctx, link.attackingCard);
-      const stealthAction = link.attackCardType === "action" && hasStealth(ctx, link.attackingCard.cardId);
+      const stealthAction = link.attackCardType === "action" && ctx.hasKeyword(link.attackingCard, "stealth");
       const selectedStealth = ctx.getState("twoSidesMode") === 2;
       ctx.addModifier({ scope: "chain-link", attack: 3 });
       if (stealthAction && (!dagger || selectedStealth)) {
         armGrantedHitRider(ctx, markOnHitLabel);
       }
     },
-    canTriggerOnHit(ctx) {
-      return ctx.link?.targetAllyId === undefined && grantedHitRiderOn(ctx, ctx.link?.attackingCard);
-    },
-    onHit(ctx) {
-      markHero(ctx, opponentSeat(ctx));
-    },
-    onFriendlyEffectHitCondition: grantedHitRiderOn,
-    onFriendlyEffectHit(ctx) {
-      markHero(ctx, opponentSeat(ctx));
-    },
+    ...chainHitRider(markHero),
     onChoose(ctx, hook, option) {
       if (hook !== "two-sides") return;
       ctx.setState("twoSidesMode", option.startsWith("Stealth") ? 2 : 1);
@@ -564,7 +503,7 @@ export const sar: Record<string, CardScript> = {
   "shred|3": {
     // "Target card defending an Assassin attack gets -2{d} this combat chain."
     canPlay(ctx) {
-      if (!myAttack(ctx) || !attackTypes(ctx).includes("assassin")) return false;
+      if (!isOwnAttack(ctx) || !attackTypes(ctx).includes("assassin")) return false;
       const link = ctx.link!;
       return link.defendingCards.length + link.defendingEquipment.length > 0;
     },
@@ -669,7 +608,7 @@ export const sar: Record<string, CardScript> = {
     canTriggerOnHit(ctx) {
       const link = ctx.link;
       return (
-        !!link && link.targetAllyId === undefined && armedBySelf(ctx) && hasStealth(ctx, link.attackingCard.cardId)
+        !!link && link.targetAllyId === undefined && armedBySelf(ctx) && ctx.hasKeyword(link.attackingCard, "stealth")
       );
     },
     onHit(ctx) {
@@ -699,7 +638,7 @@ export const sar: Record<string, CardScript> = {
     canTriggerOnHit(ctx) {
       const link = ctx.link;
       return (
-        !!link && link.targetAllyId === undefined && armedBySelf(ctx) && hasStealth(ctx, link.attackingCard.cardId)
+        !!link && link.targetAllyId === undefined && armedBySelf(ctx) && ctx.hasKeyword(link.attackingCard, "stealth")
       );
     },
     onHit(ctx) {
@@ -707,7 +646,7 @@ export const sar: Record<string, CardScript> = {
       const card = opp.arsenal[0];
       if (!card) return;
       ctx.setCardFaceDown(card.instanceId, false);
-      ctx.banish(card.instanceId);
+      ctx.banish(card.instanceId, { asAttackingCard: true });
     },
     triggers: [returnToBrood()],
   },
@@ -729,7 +668,7 @@ export const sar: Record<string, CardScript> = {
       discardCost: { count: 1, classes: ["assassin"] },
       label: "Discard an Assassin card: equip a Graphene Chelicera; next stealth attack +3{p}",
       onActivate(ctx) {
-        ctx.equipToken(GRAPHENE);
+        ctx.equipToken(GRAPHENE_CHELICERA);
         buffNextAttack(ctx, { attack: 3, appliesToKeyword: "stealth" });
       },
     },
@@ -745,7 +684,7 @@ export const sar: Record<string, CardScript> = {
       // "If it has stealth, it gets go again."
       onActivate(ctx) {
         ctx.addModifier({ scope: "chain-link", attack: 3 });
-        if (hasStealth(ctx, ctx.link!.attackingCard.cardId)) ctx.grantGoAgain();
+        if (ctx.hasKeyword(ctx.link!.attackingCard, "stealth")) ctx.grantGoAgain();
       },
     },
     triggers: [returnToBrood()],
@@ -829,7 +768,7 @@ export const sar: Record<string, CardScript> = {
         ),
       );
       ctx.shuffleDeck();
-      if (ctx.cardTypes(card).includes("trap")) {
+      if (hasCardSubtype(ctx, card, "trap")) {
         ctx.allowPlayFrom(card.instanceId, "banish", { untilNextTurn: true });
         ctx.logPublic(
           localizedCardLog(

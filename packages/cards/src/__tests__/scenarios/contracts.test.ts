@@ -31,7 +31,9 @@ describe("Contract", () => {
       const script = scripts[card.id];
       const observer = /contracted to create/i.test(card.text)
         ? script?.onFriendlyCreatesOpponentToken
-        : script?.onFriendlyBanishesOpponentCard;
+        : /contracted to hit/i.test(card.text)
+          ? script?.onHit
+          : script?.onFriendlyBanishesOpponentCard;
       expect(observer, card.id).toBeTypeOf("function");
     }
   });

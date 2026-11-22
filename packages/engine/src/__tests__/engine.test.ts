@@ -1,7 +1,7 @@
 import { engineRuntime } from "../engineRuntime.js";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { GameIntent } from "@fyendal/shared";
-import { actionCandidates, applyIntent, legalIntents, projectStateFor, projectStateForReplay, projectTransitionEvents, rngNext } from "../index.js";
+import { actionCandidates, applyIntent, legalIntents, projectStateFor, projectStateForReplay, projectStateRevealedFor, projectTransitionEvents, rngNext } from "../index.js";
 import { declareAttack, queueAttackCard } from "../attacks.js";
 import { closeChain } from "../combatChain.js";
 import { computeAttack } from "../combatValues.js";
@@ -9,7 +9,8 @@ import { pendingOnHitEffects } from "../hits.js";
 import type { CardInstance, ChainLinkState } from "../state.js";
 import { resolveWagerLayer, resumeWagerResult } from "../wagers.js";
 import { destroyPermanent } from "../zoneMoves.js";
-import { answerTokenCreationReplacement, answerTokenReplacementOrder } from "../tokens.js";
+import { answerTokenCreationReplacement, answerTokenReplacementOrder, resumePendingTokenCreations } from "../tokens.js";
+import { tokenCreationCauseForModifier } from "../tokenQueries.js";
 import { cardColorOf, cardHasType, cardTypesOf, TALENT_SUPERTYPES } from "../cardProperties.js";
 import { logPrivate, logPublic } from "../gameLog.js";
 import { makeCtx } from "../scriptContext.js";
@@ -841,6 +842,83 @@ describe("game setup & turn structure", () => {
     expect(drawn).not.toHaveProperty("arsenalSlot");
   });
 
+  it("prohibits opponents' tokens before replacements, flags, and hooks", () => {
+    const s = makeGame(102);
+    const p = player(s, 0);
+    const created = vi.fn();
+    const replace = vi.fn(() => 2);
+    s.scriptsRef = {
+      ...s.scriptsRef,
+      HERO_A: { onFriendlyTokenCreated: created },
+      HERO_B: {
+        globalTokenCreationReplacement: { label: "Replace", replace },
+        onFriendlyCreatesOpponentToken: created,
+      },
+    };
+    s.modifiers.push({
+      id: s.nextModifierId++,
+      sourceInstanceId: p.hero.instanceId,
+      seat: 0,
+      scope: "until-end-of-turn",
+      prohibitsOpponentTokenCreation: true,
+    });
+
+    const opponentCtx = makeCtx(s, engineRuntime, 1, player(s, 1).hero);
+    expect(opponentCtx.createTokens("TOKEN", 2, 0)).toEqual([]);
+    expect(opponentCtx.createToken("TOKEN", 0)).toBeUndefined();
+    expect(replace).not.toHaveBeenCalled();
+    expect(created).not.toHaveBeenCalled();
+    expect(s.pendingDecision).toBeNull();
+    expect(s.pendingTokenCreations).toEqual([]);
+    expect(p.board).toEqual([]);
+    expect(p.flags.createdThisTurn).toBeUndefined();
+
+    expect(opponentCtx.heroCreatesTokens(0, "TOKEN")).toHaveLength(2);
+    expect(makeCtx(s, engineRuntime, 0, p.hero).createToken("TOKEN")).toBeDefined();
+  });
+
+  it("checks the prohibition again for an event queued behind a decision", () => {
+    const s = makeGame(102);
+    const p = player(s, 0);
+    s.pendingTokenCreations.push({ seat: 0, cardId: "TOKEN", count: 1, cause: { kind: "effect", creatorSeat: 1 } });
+    s.modifiers.push({
+      id: s.nextModifierId++,
+      sourceInstanceId: p.hero.instanceId,
+      seat: 0,
+      scope: "until-end-of-turn",
+      prohibitsOpponentTokenCreation: true,
+    });
+
+    resumePendingTokenCreations(s, engineRuntime);
+
+    expect(s.pendingTokenCreations).toEqual([]);
+    expect(p.board).toEqual([]);
+  });
+
+  it("attributes a modifier's token to the seat that generated it", () => {
+    const s = makeGame(102);
+    const p = player(s, 0);
+    const victim = player(s, 1);
+    s.modifiers.push({
+      id: s.nextModifierId++,
+      sourceInstanceId: victim.hero.instanceId,
+      seat: 1,
+      scope: "until-end-of-turn",
+      prohibitsOpponentTokenCreation: true,
+    });
+    makeCtx(s, engineRuntime, 0, p.hero).addModifier({
+      scope: "until-end-of-turn",
+      seat: 1,
+      onFriendlyActivateCreateToken: "TOKEN",
+    });
+    const armed = s.modifiers.at(-1)!;
+
+    expect(armed.creatorSeat).toBe(0);
+    expect(tokenCreationCauseForModifier(s, armed).creatorSeat).toBe(0);
+    makeCtx(s, engineRuntime, 1, victim.hero).addModifier({ scope: "until-end-of-turn", attack: 1 });
+    expect(s.modifiers.at(-1)!.creatorSeat).toBeUndefined();
+  });
+
   it("logs publicly when a replacement cancels token creation", () => {
     const s = makeGame(102);
     const p = player(s, 0);
@@ -1364,7 +1442,7 @@ describe("game setup & turn structure", () => {
       RUNE_AURA: {
         id: "RUNE_AURA",
         name: "Runechant of Testing",
-        cardType: "instant",
+        types: ["instant"],
         subtypes: ["aura"],
         classes: ["runeblade"],
         cost: 0,
@@ -1500,12 +1578,15 @@ describe("game setup & turn structure", () => {
         suppressesOwnedClassTalentTypes: true,
       });
 
+      const ctx = makeCtx(s, engineRuntime, 0, player(s, 0).hero);
       expect(cardTypesOf(s, owned)).not.toContain("guardian");
       expect(cardTypesOf(s, owned)).not.toContain(talent);
       expect(cardTypesOf(s, owned)).toContain("attack");
+      expect(ctx.hasClassOrTalent(owned)).toBe(false);
 
       owned.grantedTypes = [talent];
       expect(cardTypesOf(s, owned)).toContain(talent);
+      expect(ctx.hasClassOrTalent(owned)).toBe(true);
     },
   );
 
@@ -3631,6 +3712,37 @@ describe("combat", () => {
     expect(optionCard?.defCounters).toBeUndefined();
   });
 
+  it.each(["hand", "arsenal"] as const)(
+    "records the seat that plays a defense reaction from %s on the chain link",
+    (zone) => {
+      let s = makeGame(34);
+      const atk = giveCard(s, 0, "ATK6");
+      const dr = 998;
+      if (zone === "hand") player(s, 1).hand.push({ instanceId: dr, cardId: "DREACT", owner: 1 });
+      else player(s, 1).arsenal.push({ instanceId: dr, cardId: "DREACT", owner: 1 });
+      const step = (seat: number, intent: Parameters<typeof applyIntent>[2]) => {
+        const r = applyIntent(s, seat, intent);
+        if (!r.ok) throw new Error(r.error);
+        s = r.state;
+      };
+
+      step(0, { kind: "play-card", instanceId: atk, pitchInstanceIds: [] });
+      step(1, { kind: "defend", instanceIds: [] });
+      step(0, { kind: "pass" });
+      expect(s.chain[0]!.flags["defenseReactionBySeat:1"]).toBeUndefined();
+      step(1, zone === "hand"
+        ? { kind: "play-card", instanceId: dr, pitchInstanceIds: [] }
+        : { kind: "play-from-arsenal", instanceId: dr, pitchInstanceIds: [] });
+
+      expect(s.chain[0]!.flags["defenseReactionBySeat:1"]).toBe(true);
+      expect(s.chain[0]!.flags["defenseReactionBySeat:0"]).toBeUndefined();
+      // Defense reactions stay out of the attack-reaction bookkeeping.
+      expect(s.chain[0]!.flags["reactionBySeat:1"]).toBeUndefined();
+      expect(s.chain[0]!.flags.reactionPlayedOrActivated).toBeUndefined();
+      expect(s.chain[0]!.flags.reactionCount).toBeUndefined();
+    },
+  );
+
   it("a defense reaction resolves as a defending card with its printed defense (8.1.3b)", () => {
     let s = makeGame(34);
     const atk = giveCard(s, 0, "ATK6"); // go again keeps the turn going after
@@ -3928,7 +4040,7 @@ describe("projection", () => {
       FIXED_PREVENTION: {
         id: "FIXED_PREVENTION",
         name: "Fixed Prevention",
-        cardType: "token",
+        types: ["token"],
         classes: ["generic"],
         subtypes: ["aura"],
         text: "Prevent 2 damage.",
@@ -3936,7 +4048,7 @@ describe("projection", () => {
       WARD_THREE: {
         id: "WARD_THREE",
         name: "Ward Three",
-        cardType: "token",
+        types: ["token"],
         classes: ["generic"],
         subtypes: ["aura"],
         keywords: ["Ward 3"],
@@ -4053,6 +4165,36 @@ describe("projection", () => {
     expect(replay.players[1]!.arsenal[0]!.instanceId).toBe(arsenalCard.instanceId);
     expect(replay.players[0]!.deck?.length).toBeGreaterThan(0);
     expect(replay.players[1]!.deck?.length).toBeGreaterThan(0);
+  });
+
+  it("reveals both seats for one player without changing the seat's own view", () => {
+    const s = makeGame(122, undefined, "MENTOR");
+    const arsenalCard = s.players[1]!.hand.shift()!;
+    arsenalCard.faceDown = true;
+    s.players[1]!.arsenal.push(arsenalCard);
+    const banished = s.players[1]!.hand.shift()!;
+    banished.faceDown = true;
+    s.players[1]!.banish.push(banished);
+    logPrivate(s, 0, "seat zero secret");
+    logPrivate(s, 1, "seat one secret", "seat one public");
+
+    for (const seat of [0, 1] as const) {
+      const live = projectStateFor(s, seat);
+      const revealed = projectStateRevealedFor(s, seat);
+      expect(revealed.players[seat]).toEqual(live.players[seat]);
+      expect(revealed.players[1 - seat]!.hand.map((card) => card.instanceId))
+        .toEqual(s.players[1 - seat]!.hand.map((card) => card.instanceId));
+      expect(revealed.players[0]!.deck).toBeUndefined();
+      expect(revealed.players[1]!.deck).toBeUndefined();
+      expect(revealed.players[1]!.arsenal.map((card) => card.instanceId)).toContain(arsenalCard.instanceId);
+      expect(revealed.players[1]!.banish.at(-1)!.cardId).toBe(banished.cardId);
+    }
+    expect(projectStateFor(s, 0).players[1]!.banish.at(-1)!.cardId).not.toBe(banished.cardId);
+    // The pending mentor decision keeps its details for the deciding seat.
+    expect(projectStateRevealedFor(s, 0).pendingDecision).toEqual(projectStateFor(s, 0).pendingDecision);
+    const logs = [0, 1].map((seat) => projectStateRevealedFor(s, seat).log);
+    expect(logs[0]).toEqual(logs[1]);
+    expect(logs[0]!.slice(-2)).toEqual(["seat zero secret", "seat one secret"]);
   });
 });
 

@@ -8,6 +8,7 @@ import { Auth } from "../auth/AuthCard.js";
 import type { Format } from "@fyendal/shared";
 import { SiteFooter } from "../legal/SiteFooter.js";
 import { LobbyHeader } from "./LobbyHeader.js";
+import { KofiLink } from "./KofiLink.js";
 import { ModalSurface } from "../components/ModalSurface.js";
 import { LanguagePicker } from "../i18n/LanguagePicker.js";
 import { SocialMenuButton, UnreadMessageBadge } from "../social/MobileSocialControls.js";
@@ -15,6 +16,7 @@ import { mobileLobbyDestinationSelected, type MobileLobbyDestination } from "./m
 import { UiIcon, type UiIconName } from "../components/UiIcon.js";
 import { FullscreenButton } from "../components/FullscreenButton.js";
 import { GlobalNoticeBanner } from "../notices/GlobalNoticeBanner.js";
+import { isReleaseNotesPath } from "../notices/route.js";
 import { leagueActionCount } from "../league/pendingActions.js";
 import {
   GuestLandingDetails,
@@ -194,7 +196,7 @@ export function Lobby() {
     <div className="lobby-page lobby-page-authenticated">
       {rail === "home" ? <GlobalNoticeBanner /> : null}
       <LobbyHeader />
-      {rail === "home" && !inviteRoom
+      {rail === "home" && !inviteRoom && !isReleaseNotesPath(location.pathname)
         ? <Suspense fallback={null}><VersionUpdateModal key={authUser} username={authUser} /></Suspense>
         : null}
 
@@ -297,6 +299,7 @@ export function Lobby() {
               <a href="https://discord.gg/DpTjVbfPVv" target="_blank" rel="noopener noreferrer">
                 {intl.formatMessage({ id: "lobby.discordCommunity" })}
               </a>
+              <KofiLink placement="menu" />
               <FullscreenButton placement="menu" onToggle={() => setShowMobileMore(false)} />
             </div>
             <div className="mobile-more-group">

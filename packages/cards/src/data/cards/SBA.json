@@ -2,7 +2,7 @@
  {
   "id": "SBA001",
   "name": "Briar",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Earth and Lightning\nThe first time an attack action card you control deals damage to an opposing hero, create an Embodiment of Earth token.\nWhenever you play your second 'non-attack' action card each turn, create an Embodiment of Lightning token.",
   "classes": [
    "runeblade"
@@ -20,7 +20,7 @@
  {
   "id": "SBA002",
   "name": "Scorpio, Comet Tail",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Action - {t}: Attack. Activate this only if you control a Lightning attack.\nWhen this hits a hero, deal 1 arcane damage to them.",
   "attack": 1,
   "classes": [
@@ -36,7 +36,7 @@
  {
   "id": "SBA003",
   "name": "Star Fall",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nIf you've played a Lightning card this turn, this card's attacks get +1{p} and go again.",
   "attack": 1,
   "classes": [
@@ -55,7 +55,7 @@
  {
   "id": "SBA004",
   "name": "Blade Beckoner Helm",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -72,7 +72,7 @@
  {
   "id": "SBA005",
   "name": "Crown of Dichotomy",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}, destroy Crown of Dichotomy: Put target Runeblade attack action card and target Runeblade 'non-attack' action card from your graveyard on top of your deck in any order.\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -89,7 +89,7 @@
  {
   "id": "SBA006",
   "name": "Blossom of Spring",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Gain {r}. Go again",
   "defense": 0,
   "classes": [
@@ -103,7 +103,7 @@
  {
   "id": "SBA007",
   "name": "Blade Beckoner Gauntlets",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -120,7 +120,7 @@
  {
   "id": "SBA008",
   "name": "Swiftstrike Bracers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Your next attack this turn gets +2{p}. Activate this only if you've played a Nimblism this turn. Go again",
   "defense": 0,
   "classes": [
@@ -134,7 +134,7 @@
  {
   "id": "SBA009",
   "name": "Blade Beckoner Boots",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -151,7 +151,7 @@
  {
   "id": "SBA010",
   "name": "Quick Clicks",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Your next attack this turn gets go again. Activate this only if you've played a Nimblism this turn. Go again",
   "defense": 0,
   "classes": [
@@ -165,7 +165,7 @@
  {
   "id": "SBA011",
   "name": "Arcanic Shockwave",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Fusion\nWhen you attack with Arcanic Shockwave, if it was fused, deal 1 arcane damage to target hero.",
   "pitch": 1,
   "cost": 0,
@@ -186,7 +186,7 @@
  {
   "id": "SBA012",
   "name": "Entwine Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Fusion\nIf Entwine Lightning was fused, it gains go again.",
   "pitch": 1,
   "cost": 0,
@@ -205,7 +205,7 @@
  {
   "id": "SBA013",
   "name": "Fry",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 1,
   "cost": 0,
@@ -223,7 +223,7 @@
  {
   "id": "SBA014",
   "name": "Jack Be Quick",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, you may banish a Nimblism from your graveyard. If you do, this gets +1{p} and go again.\nWhen this hits a hero, {u} an ally they control, then steal it until the end of this action phase.",
   "pitch": 1,
   "cost": 0,
@@ -244,7 +244,7 @@
  {
   "id": "SBA015",
   "name": "Lightning Surge",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If this was played from arsenal, it gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -262,7 +262,7 @@
  {
   "id": "SBA016",
   "name": "Path of Same Ends",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a hero, deal 1 arcane damage to them. If damage is dealt this way, this gets go again.\nInstant - {r}: This gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -283,7 +283,7 @@
  {
   "id": "SBA017",
   "name": "Ravenous Rabble",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -303,7 +303,7 @@
  {
   "id": "SBA018",
   "name": "Rush of Power",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Quickstrike - If this has go again, it gets +1{p}.\nWhen this hits a hero, deal 1 arcane damage to them.",
   "pitch": 1,
   "cost": 0,
@@ -324,7 +324,7 @@
  {
   "id": "SBA019",
   "name": "Scar for a Scar",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -344,7 +344,7 @@
  {
   "id": "SBA020",
   "name": "Second Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, if you've dealt damage this turn, this gets +1{p} and go again.",
   "pitch": 1,
   "cost": 0,
@@ -362,7 +362,7 @@
  {
   "id": "SBA021",
   "name": "Snatch",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits, draw a card.",
   "pitch": 1,
   "cost": 0,
@@ -379,7 +379,7 @@
  {
   "id": "SBA022",
   "name": "Static Shock",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Lightning Flow - When this hits a hero, if you've played a Lightning card this turn, deal 1 arcane damage to them.",
   "pitch": 1,
   "cost": 0,
@@ -400,7 +400,7 @@
  {
   "id": "SBA023",
   "name": "Sigil of Suffering",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Deal 1 arcane damage to the attacking hero.\nIf you have dealt arcane damage this turn, Sigil of Suffering gains +1{d}.",
   "pitch": 1,
   "cost": 0,
@@ -413,7 +413,7 @@
  {
   "id": "SBA024",
   "name": "Arcane Seeds // Life",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Meld\nCreate a Runechant token. Create a Runechant token.\nGo again\n//\nGain 1{h}",
   "pitch": 1,
   "cost": 0,
@@ -433,7 +433,7 @@
  {
   "id": "SBA025",
   "name": "Burn Up // Shock",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Meld\nThe next time an attack you control hits a hero this turn, deal 4 arcane damage to them.\nGo again\n//\nDeal 1 arcane damage to any target.",
   "pitch": 1,
   "cost": 0,
@@ -453,7 +453,7 @@
  {
   "id": "SBA026",
   "name": "Nimblism",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card with cost 1 or less you play this turn gains +3{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -469,7 +469,7 @@
  {
   "id": "SBA027",
   "name": "Sizzle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Lightning or Elemental attack this turn gets +3{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -485,7 +485,7 @@
  {
   "id": "SBA028",
   "name": "Sprout Strength",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack this turn gets +1{p}.\nYour next attack this turn gets +1{p}.\nYour next attack this turn gets +1{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -501,7 +501,7 @@
  {
   "id": "SBA029",
   "name": "Weave Lightning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Lightning or Elemental attack action card you play this turn gains +3{p}. If it's fused, it gains go again.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -517,7 +517,7 @@
  {
   "id": "SBA030",
   "name": "Arcane Polarity",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Gain 1{h}\nIf you've been dealt arcane damage this turn, instead gain 4{h}.",
   "pitch": 1,
   "cost": 0,
@@ -529,7 +529,7 @@
  {
   "id": "SBA031",
   "name": "Cloud Cover",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "The next time you would be dealt damage this turn, prevent 3 of that damage.",
   "pitch": 1,
   "cost": 0,
@@ -541,7 +541,7 @@
  {
   "id": "SBA032",
   "name": "Lightning Press",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target attack action card with cost 1 or less gains +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -553,7 +553,7 @@
  {
   "id": "SBA033",
   "name": "Nimblism",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card with cost 1 or less you play this turn gains +2{p}.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -569,7 +569,7 @@
  {
   "id": "SBA034",
   "name": "Embodiment of Earth",
-  "cardType": "token",
+  "types": ["token"],
   "text": "'Non-attack' action cards you control have +1{d} while defending.\nAt the beginning of your action phase, destroy Embodiment of Earth.",
   "subtypes": [
    "elemental"
@@ -579,7 +579,7 @@
  {
   "id": "SBA035",
   "name": "Embodiment of Lightning",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card, destroy this, then the attack gets go again.",
   "subtypes": [
    "elemental"
@@ -589,7 +589,7 @@
  {
   "id": "SBA036",
   "name": "Runechant",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
   "classes": [
    "runeblade"

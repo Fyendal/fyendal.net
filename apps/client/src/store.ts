@@ -5,6 +5,7 @@ import { create } from "zustand";
 import type {
   BotOpponent,
   CardPoolMode,
+  ErrorCode,
   ClientMessage,
   EmoteMessage,
   PassUntilMode,
@@ -41,6 +42,8 @@ import {
   pruneRejectedMatchRooms,
   rememberRejectedMatchRoom,
   saveLobbySettings,
+  loadPassUntilIgnorePlays,
+  savePassUntilIgnorePlays,
 } from "./storage.js";
 import {
   loadRoomSession,
@@ -54,6 +57,7 @@ import {
 import type {
   OptimisticInteractionIntent,
   PreReplaySnapshot,
+  SandboxEditRefusal,
   StoreState,
   ViewTransition,
   ViewUpdate,
@@ -83,16 +87,23 @@ import { replayViewerProjection, snapshotBeforeReplay } from "./store/replayView
 import { createErrorController } from "./store/errorController.js";
 import { withReplayNotes } from "./replay/replayFileNotes.js";
 import { trackLobbyTab } from "./analytics.js";
+import { soloAutoAdvanceSeat } from "./prep/soloSeats.js";
 
 let disposeBrowserBot: (() => void) | null = null;
 let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let reconnectNoticeTimer: ReturnType<typeof setTimeout> | null = null;
 const RECONNECT_NOTICE_GRACE_MS = 5_000;
+/** A handshake lost on a mobile network change can leave a socket CONNECTING
+ * indefinitely; abandon it so the close handler reconnects. */
+const CONNECT_TIMEOUT_MS = 10_000;
 let reconnectAttempts = 0;
 let emoteSequence = 0;
 let viewUpdateSequence = 0;
 const friendInviteTimers = new Map<string, ReturnType<typeof setTimeout>>();
+let deckSwitchSequence = 0;
+/** Longest a deck switch may wait for its reply before the room stops waiting. */
+const DECK_SWITCH_TIMEOUT_MS = 15_000;
 const SOCIAL_ERROR_CODES = new Set([
   "USER_NOT_FOUND",
   "INVALID_FRIEND_REQUEST",
@@ -102,6 +113,9 @@ const SOCIAL_ERROR_CODES = new Set([
   "MESSAGE_BOUNDS",
   "MESSAGE_RATE_LIMITED",
 ]);
+function isSandboxEditRefusal(code: ErrorCode): code is SandboxEditRefusal {
+  return code.startsWith("SANDBOX_");
+}
 const roomVersions = new RoomVersionGate();
 const replayRuntime = createReplayRuntime(localStorage);
 
@@ -136,6 +150,8 @@ let prepDeckId: string | null = null;
 let prepDeckLoad = 0;
 /** The pool was fetched before the server's Fabrary refresh; reload it once. */
 let prepDeckProvisional = false;
+/** Solo prep: each seat's loaded pool, so switching seats keeps its matchup and skips a refetch. */
+let soloSeatDecks: [StoreState["prepDeck"], StoreState["prepDeck"]] = [null, null];
 
 /** store snapshot taken when a replay opens from the game screen; restored on close */
 let preReplay: PreReplaySnapshot | null = null;
@@ -181,7 +197,7 @@ export const useStore = create<StoreState>((set, get) => {
   /** A bot-room request waiting for the retained matchmaking room to release
    *  this socket. WebSocket commands stay ordered by waiting for `left`. */
   let pendingBotRoom: { format: Format; deckId: string; bot?: BotOpponent; searchForPlayer?: boolean } | null = null;
-  /** Play again ended the bot room and waits for "left" to name the rematch. */
+  /** Play again ended the bot or solo room and waits for "left" to name the rematch. */
   let pendingPlayAgain = false;
   /** A declined matchmade room; the next pairing or opener replaces it. */
   let pendingMatchDecline: string | null = null;
@@ -463,7 +479,11 @@ export const useStore = create<StoreState>((set, get) => {
     let streamFailed = false;
     ws = socket;
     const epoch = ++connectionEpoch;
+    const connectTimer = setTimeout(() => {
+      if (socket.readyState === WebSocket.CONNECTING) socket.close();
+    }, CONNECT_TIMEOUT_MS);
     socket.onopen = () => {
+      clearTimeout(connectTimer);
       if (ws !== socket || connectionEpoch !== epoch) return; // superseded by a newer socket
       cancelReconnect();
       set({ connected: true, connectionIssueVisible: false });
@@ -474,6 +494,7 @@ export const useStore = create<StoreState>((set, get) => {
       for (const cb of cbs) cb();
     };
     socket.onclose = (event) => {
+      clearTimeout(connectTimer);
       if (ws !== socket || connectionEpoch !== epoch) return;
       browserBot.reset();
       decoder.reset();
@@ -491,7 +512,7 @@ export const useStore = create<StoreState>((set, get) => {
       const pendingPlay = get().pendingFabraryPlay;
       if (pendingPlay?.status === "starting") {
         set({ pendingFabraryPlay: { ...pendingPlay, status: "ready" },
-          matchmakingActive: false, botGame: false, pendingBotStart: false });
+          matchmakingActive: false, botGame: false, soloGame: false, sandbox: false, pendingBotStart: false });
       }
       if (roomEntryPending && !roomEntryRetryable) {
         failPendingRoomEntry("connection to room failed");
@@ -730,15 +751,20 @@ export const useStore = create<StoreState>((set, get) => {
       return { acknowledged: true, defenderStageIds: null };
     }
     const decision = message.view.pendingDecision;
-    const stageable = new Set(message.legal.flatMap((intent) =>
-      intent.kind === "stage-defenders" ? intent.instanceIds : []
-    ));
-    if (
-      decision?.kind !== "defend"
-      || decision.player !== message.yourSeat
-      || !desiredIds.every((id) => stageable.has(id))
-    ) return { acknowledged: true, defenderStageIds: null };
+    if (decision?.kind !== "defend" || decision.player !== message.yourSeat) {
+      return { acknowledged: true, defenderStageIds: null };
+    }
     const authoritativeIds = (decision.stagedCards ?? []).map((card) => card.instanceId);
+    // Legal staging advertises only unstaged candidates; already staged cards stay valid.
+    const stageable = new Set([
+      ...authoritativeIds,
+      ...message.legal.flatMap((intent) =>
+        intent.kind === "stage-defenders" ? intent.instanceIds : []
+      ),
+    ]);
+    if (!desiredIds.every((id) => stageable.has(id))) {
+      return { acknowledged: true, defenderStageIds: null };
+    }
     return {
       acknowledged: true,
       defenderStageIds: sameInstanceIds(desiredIds, authoritativeIds) ? null : desiredIds,
@@ -757,18 +783,27 @@ export const useStore = create<StoreState>((set, get) => {
     if (id.startsWith("precon-")) {
       const { preconPrepDeck } = await import("./prep/prepDeck.js");
       const deck = preconPrepDeck(id);
-      if (deck && prepDeckId === id && isCurrentAuth(request)) set({ prepDeck: deck });
+      if (deck && prepDeckId === id && isCurrentAuth(request)) adoptPrepDeck(deck);
       return;
     }
     const r = await apiDeck(token, id, request.signal);
     if (!isCurrentAuth(request) || load !== prepDeckLoad) return;
     if (r.ok && prepDeckId === id) {
-      set({ prepDeck: r.deck });
+      adoptPrepDeck(r.deck);
     } else if (!r.ok) {
       // surface the failure — otherwise the prep room shows "Loading your deck…"
       // forever; the user can get back with the Cancel button there
       errors.show(r.error);
+      if (get().deckSwitch?.deckId === id) set({ deckSwitch: null });
     }
+  }
+
+  /** The room's pool is loaded; a deck switch ends once its deck arrives. */
+  function adoptPrepDeck(deck: NonNullable<StoreState["prepDeck"]>): void {
+    set({
+      prepDeck: deck,
+      ...(get().deckSwitch?.deckId === deck.id ? { deckSwitch: null } : {}),
+    });
   }
 
   /** Consume a pending decline once another room replaces it. */
@@ -789,6 +824,15 @@ export const useStore = create<StoreState>((set, get) => {
       set({ screen });
       void loadPrepDeck(prepDeckId);
     }
+  }
+
+  /** End a finished practice room; the server names the rematch in its "left" reply. */
+  function playPracticeAgain(practiceRoom: boolean): void {
+    if (!practiceRoom || get().spectating || !get().roomCode || !get().connected
+      || get().view?.phase !== "game-over") return;
+    get().leave();
+    pendingPlayAgain = true;
+    set({ roomStartPending: true });
   }
 
   function launchPendingBotRoom(): void {
@@ -842,7 +886,10 @@ export const useStore = create<StoreState>((set, get) => {
     }
     if (msg.type === "error" && msg.code === "INVALID_MESSAGE" && msg.message.startsWith("Refresh this page to")) return;
 
-    if (msg.type === "room-created" || msg.type === "joined") resetRoomVersionState();
+    if (msg.type === "room-created" || msg.type === "joined") {
+      resetRoomVersionState();
+      soloSeatDecks = [null, null];
+    }
     if ("version" in msg && !roomVersions.accept(msg.type, msg.version)) return;
     switch (msg.type) {
       case "authed":
@@ -971,6 +1018,9 @@ export const useStore = create<StoreState>((set, get) => {
           spectatorKicked: false,
           inviteRoom: null,
           friendInviteTarget: null,
+          roomFriendInvites: [],
+          deckSwitch: null,
+          deckSwitchLocked: false,
           error: null,
           queuedFormat: null,
           matchmakingActive: fromMatchmaking,
@@ -1042,6 +1092,15 @@ export const useStore = create<StoreState>((set, get) => {
         }
         break;
       }
+      case "deck-changed":
+        prepDeckId = msg.deckId;
+        void loadPrepDeck(msg.deckId);
+        break;
+      case "friend-invited":
+        if (!get().roomFriendInvites.includes(msg.username)) {
+          set({ roomFriendInvites: [...get().roomFriendInvites, msg.username] });
+        }
+        break;
       case "room-info":
         roomEntryPending = false;
         roomEntryRetryable = false;
@@ -1068,6 +1127,7 @@ export const useStore = create<StoreState>((set, get) => {
         });
         break;
       case "state": {
+        if (msg.soloGame === true) liveBotParticipant = false;
         const liveCode = get().roomCode;
         if (liveCode) browserBot.observe(liveCode, msg.version, msg.transition?.kind === "replace", msg.view.phase === "game-over");
         roomEntryPending = false;
@@ -1076,10 +1136,12 @@ export const useStore = create<StoreState>((set, get) => {
         // keep recording frames even while watching a replay of this room
         const code = get().roomCode;
         const frames = code
-          ? replayRuntime.recordFrame(code, msg.version, msg.view, msg.yourSeat, msg.transition)
+          ? replayRuntime.recordFrame(code, msg.version, msg.view, msg.boardSeat ?? msg.yourSeat, msg.transition)
           : get().replayFrames;
         const commandState = acceptRoomCommandState(msg.version, msg);
+        const clock = { clock: msg.clock ?? null, clockReceivedAt: performance.now() };
         if (get().screen === "replay") {
+          set(clock);
           if (commandState.acknowledged) {
             set({
               roomCommandPending: false,
@@ -1142,11 +1204,16 @@ export const useStore = create<StoreState>((set, get) => {
           yourSeat: msg.yourSeat,
           spectatorCount: msg.spectators ?? 0,
           botGame: msg.botGame === true,
+          soloGame: msg.soloGame === true,
+          sandbox: msg.sandbox === true || msg.soloGame === true,
+          boardSeat: msg.boardSeat ?? null,
           botMatchTransition: null,
           lastActionAt: msg.lastActionAt,
+          ...clock,
           passUntil: passUntilRequest?.code === code && msg.version <= passUntilRequest.afterVersion
             ? passUntilRequest.mode
             : msg.passUntil ?? null,
+          endTurnWarning: msg.endTurnWarning === true,
           screen: "game",
           replayFrames: frames,
           replayNotes,
@@ -1252,9 +1319,23 @@ export const useStore = create<StoreState>((set, get) => {
             || (accepting && (matchAcceptanceRole === "joining" || current.pendingBotStart))
             ? "waiting" as const
             : "prep" as const;
+        if (msg.prep.soloGame === true) liveBotParticipant = false;
+        let soloSeatDeck: StoreState["prepDeck"] = null;
+        if (msg.prep.soloGame === true && current.prep?.soloGame === true
+          && current.prep.yourSeat !== msg.prep.yourSeat) {
+          if (current.prepDeck && !prepDeckProvisional) soloSeatDecks[current.prep.yourSeat as 0 | 1] = current.prepDeck;
+          const cached = soloSeatDecks[msg.prep.yourSeat as 0 | 1];
+          if (cached && cached.id === msg.prep.yourDeckId) {
+            prepDeckId = cached.id;
+            soloSeatDeck = cached;
+          }
+        }
         set({
+          ...(soloSeatDeck ? { prepDeck: soloSeatDeck } : {}),
           prep: msg.prep,
           botGame: msg.prep.botGame === true,
+          soloGame: msg.prep.soloGame === true,
+          sandbox: msg.prep.sandbox === true || msg.prep.soloGame === true,
           queuedFormat: null,
           roomStartPending: false,
           matchAcceptanceRole,
@@ -1266,6 +1347,8 @@ export const useStore = create<StoreState>((set, get) => {
           void loadPrepDeck(msg.prep.yourDeckId);
         }
         if (get().screen !== "game" && get().screen !== "replay") set({ screen });
+        const advanceSeat = soloAutoAdvanceSeat(current.prep, msg.prep);
+        if (advanceSeat !== null) get().switchSoloSeat(advanceSeat);
         break;
       }
       case "left":
@@ -1274,7 +1357,9 @@ export const useStore = create<StoreState>((set, get) => {
         if (pendingPlayAgain) {
           pendingPlayAgain = false;
           if (msg.playAgain) get().createBotRoom(msg.playAgain.format, msg.playAgain.deckId, msg.playAgain.bot);
-          else set({ roomStartPending: false });
+          else if (msg.playAgainSolo) {
+            get().createSoloRoom(msg.playAgainSolo.format, msg.playAgainSolo.deckId, msg.playAgainSolo.opponentDeckId);
+          } else set({ roomStartPending: false });
           break;
         }
         launchPendingBotRoom();
@@ -1306,6 +1391,17 @@ export const useStore = create<StoreState>((set, get) => {
           set({ socialError: msg.code });
           break;
         }
+        // Switch failures arrive as plain errors; none of them leave it in flight.
+        if (get().deckSwitch) set({ deckSwitch: null });
+        if (msg.code === "DECK_LOCKED") {
+          set({ deckSwitchLocked: true });
+          break;
+        }
+        if (isSandboxEditRefusal(msg.code)) {
+          resetRoomCommandPipeline();
+          set({ sandboxEditRefusal: msg.code });
+          break;
+        }
         set({ roomStartPending: false });
         if ((get().pendingBotStart || pendingMatchDecline !== null) && get().screen === "room-loading"
           && get().prep?.deadlinePhase === "accept") {
@@ -1327,7 +1423,7 @@ export const useStore = create<StoreState>((set, get) => {
         const pendingPlay = get().pendingFabraryPlay;
         if (pendingPlay?.status === "starting") {
           set({ pendingFabraryPlay: { ...pendingPlay, status: "ready" },
-            matchmakingActive: false, botGame: false, pendingBotStart: false });
+            matchmakingActive: false, botGame: false, soloGame: false, sandbox: false, pendingBotStart: false });
         }
         if (failPendingRoomEntry(msg.message)) break;
         resetRoomCommandPipeline();
@@ -1392,6 +1488,7 @@ export const useStore = create<StoreState>((set, get) => {
 
   return {
     ...initialStoreProjection(stored, lobbySettings),
+    passUntilIgnorePlays: loadPassUntilIgnorePlays(localStorage),
     pendingFabraryPlay: initialPlayRoute ? { route: initialPlayRoute, status: "idle", result: null } : null,
     ...accountActions,
     ...replayActions,
@@ -1408,7 +1505,7 @@ export const useStore = create<StoreState>((set, get) => {
       const { deck } = pending.result;
       const { format } = pending.route.request;
       const mode = get().cardPoolModes[format];
-      if (deck.format !== format || (mode !== "open" && deck.bannedCards?.length)
+      if (deck.format !== format || (mode !== "open" && (deck.bannedCards?.length || deck.constructionIssues?.length))
         || (mode === "legal" && deck.futureCards?.length)) return;
       errors.clear();
       set({ pendingFabraryPlay: { ...pending, status: "starting" } });
@@ -1476,7 +1573,7 @@ export const useStore = create<StoreState>((set, get) => {
       set({ friendInviteTarget: username, socialOpen: false });
     },
     cancelFriendInvite: () => set({ friendInviteTarget: null }),
-    createFriendRoom: (username, format, deckId) => {
+    createFriendRoom: (username, format, deckId, sandbox = false) => {
       if (get().roomCode || get().screen !== "lobby") {
         set({ friendInviteTarget: null });
         return;
@@ -1487,6 +1584,8 @@ export const useStore = create<StoreState>((set, get) => {
         prep: null,
         prepDeck: null,
         botGame: false,
+        soloGame: false,
+        sandbox: false,
         socialError: null,
       });
       connect(() => send({
@@ -1494,6 +1593,7 @@ export const useStore = create<StoreState>((set, get) => {
         username,
         format,
         deckId,
+        ...(sandbox ? { sandbox: true } : {}),
         ...(get().cardPoolModes[format] === "legal" ? {} : { cardPoolMode: get().cardPoolModes[format] }),
       }));
     },
@@ -1501,7 +1601,7 @@ export const useStore = create<StoreState>((set, get) => {
       if (get().roomCode || get().screen !== "lobby") return;
       prepDeckId = deckId;
       roomEntryPending = false;
-      set({ prep: null, prepDeck: null, botGame: false });
+      set({ prep: null, prepDeck: null, botGame: false, soloGame: false, sandbox: false });
       connect(() => send({ type: "enter-league-room", matchId, deckId }));
     },
     dismissFriendGameInvite: (inviteId) => {
@@ -1583,12 +1683,12 @@ export const useStore = create<StoreState>((set, get) => {
       clearAuthenticatedState();
       if (token) await apiLogout(token);
     },
-    createRoom: (format, deckId, visibility = "private") => {
+    createRoom: (format, deckId, visibility = "private", sandbox = false) => {
       roomEntryPending = false;
       pendingBotRoom = null;
       // hosts land on the prep room once the room exists
       prepDeckId = deckId;
-      set({ prep: null, prepDeck: null, botGame: false, matchmakingActive: false, roomStartPending: true });
+      set({ prep: null, prepDeck: null, botGame: false, soloGame: false, sandbox: false, matchmakingActive: false, roomStartPending: true });
       // Warm the deck art while the server refreshes the Fabrary deck.
       void loadPrepDeck(deckId, true);
       connect(() => {
@@ -1597,6 +1697,7 @@ export const useStore = create<StoreState>((set, get) => {
           format,
           deckId,
           private: visibility === "private",
+          ...(sandbox && visibility === "private" ? { sandbox: true } : {}),
           ...(get().cardPoolModes[format] !== "legal"
             ? { cardPoolMode: get().cardPoolModes[format] }
             : {}),
@@ -1617,6 +1718,8 @@ export const useStore = create<StoreState>((set, get) => {
         prep: null,
         prepDeck: null,
         botGame: true,
+        soloGame: false,
+        sandbox: false,
         matchmakingActive: searchForPlayer,
         backgroundMatchmaking: { state: "inactive" },
         declinedBackgroundHero: null,
@@ -1648,14 +1751,40 @@ export const useStore = create<StoreState>((set, get) => {
         send({ type: "leave-room" });
       }
     },
-    playBotAgain: () => {
-      if (!get().botGame || get().spectating || !get().roomCode || !get().connected
-        || get().view?.phase !== "game-over") return;
-      get().leave();
-      // The server names the deck and bot in its "left" reply.
-      pendingPlayAgain = true;
-      set({ roomStartPending: true });
+    playBotAgain: () => playPracticeAgain(get().botGame),
+    createSoloRoom: (format, deckId, opponentDeckId) => {
+      roomEntryPending = false;
+      pendingBotRoom = null;
+      prepDeckId = deckId;
+      set({
+        prep: null,
+        prepDeck: null,
+        botGame: false,
+        soloGame: true,
+        sandbox: true,
+        matchmakingActive: false,
+        roomStartPending: true,
+      });
+      void loadPrepDeck(deckId, true);
+      connect(() => {
+        send({
+          type: "create-solo-room",
+          format,
+          deckId,
+          opponentDeckId,
+          ...(get().cardPoolModes[format] !== "legal"
+            ? { cardPoolMode: get().cardPoolModes[format] }
+            : {}),
+        });
+      });
     },
+    switchSoloSeat: (seat) => {
+      const prep = get().prep;
+      if (!prep?.soloGame || prep.yourSeat === seat || get().screen !== "prep") return;
+      get().clearError();
+      if (send({ type: "solo-seat", seat })) roomVersions.allowRepeat("prep-state");
+    },
+    playSoloAgain: () => playPracticeAgain(get().soloGame),
     joinRoom: (code, deckId, spectate) => {
       pendingBotRoom = null;
       const upperCode = code.toUpperCase();
@@ -1689,7 +1818,7 @@ export const useStore = create<StoreState>((set, get) => {
           set({ roomCode: upperCode, screen: "room-loading", inviteRoom: null });
         }
       }
-      set({ botGame: false });
+      set({ botGame: false, soloGame: false, sandbox: false });
       // a deck id means a player seat → prep room;
       // without one (spectate or token reconnect) keep the current session
       if (deckId) {
@@ -1829,6 +1958,22 @@ export const useStore = create<StoreState>((set, get) => {
       }
     },
     prepUnready: () => send({ type: "prep-unready" }),
+    changeRoomDeck: (deckId, deckName) => {
+      if (get().deckSwitch || get().prepDeck?.id === deckId) return;
+      if (!send({ type: "change-deck", deckId })) return;
+      set({ deckSwitch: { deckId, deckName }, deckSwitchLocked: false });
+      // A lost reply must not pin the room in its switching state; the next
+      // prep-state re-syncs the pool from the seat either way.
+      const sequence = ++deckSwitchSequence;
+      setTimeout(() => {
+        if (sequence === deckSwitchSequence && get().deckSwitch) set({ deckSwitch: null });
+      }, DECK_SWITCH_TIMEOUT_MS);
+    },
+    dismissDeckSwitchLocked: () => set({ deckSwitchLocked: false }),
+    inviteFriendToRoom: (username) => {
+      set({ socialError: null });
+      send({ type: "invite-friend-to-room", username });
+    },
     chooseFirst: (first) => send({ type: "choose-first", first }),
     browserBotStatus: null,
     retryBrowserBot: () => browserBot.retry(),
@@ -1867,19 +2012,33 @@ export const useStore = create<StoreState>((set, get) => {
     sendPassUntil: (mode) => {
       const code = get().roomCode;
       const command = roomCommand();
-      if (!code || !send({ type: "pass-until", mode, ...command })) return;
+      const ignorePlays = mode !== null && get().passUntilIgnorePlays ? { ignorePlays: true as const } : {};
+      if (!code || !send({ type: "pass-until", mode, ...ignorePlays, ...command })) return;
       passUntilRequest = { code, mode, afterVersion: command.expectedVersion };
       set({ passUntil: mode });
+    },
+    setPassUntilIgnorePlays: (ignore) => {
+      savePassUntilIgnorePlays(localStorage, ignore);
+      set({ passUntilIgnorePlays: ignore });
+      const armed = get().passUntil;
+      if (armed) get().sendPassUntil(armed);
     },
     sendTokenSkip: (kind, enabled) => {
       send({ type: kind === "runechant" ? "runechant-skip" : "seismic-surge-skip", enabled, ...roomCommand() });
     },
+    sendRememberedTarget: (optionId) => send({ type: "remember-target", optionId, ...roomCommand() }),
     sendEmote: (message: EmoteMessage) => send({ type: "emote", message }),
     kickSpectator: (username) => send({ type: "kick-spectator", username }),
     undo: (target = "last-action") => {
       get().clearError();
       sendVersionedRoomCommand((command) => ({ type: "undo", target, ...command }));
     },
+    sendSandboxEdit: (seat, edit) => {
+      get().clearError();
+      set({ sandboxEditRefusal: null });
+      return sendVersionedRoomCommand((command) => ({ type: "sandbox-edit", seat, edit, ...command }));
+    },
+    clearSandboxEditRefusal: () => set({ sandboxEditRefusal: null }),
     claimVictory: () => {
       get().clearError();
       sendVersionedRoomCommand((command) => ({ type: "claim-victory", ...command }));
@@ -1898,10 +2057,10 @@ export const useStore = create<StoreState>((set, get) => {
       // pre-game rooms get an explicit leave so the server frees the seat and
       // re-queues the opponent; mid-game leaving stays a plain disconnect
       const preGame = get().screen === "prep" || get().screen === "waiting";
-      const endBotGame = get().botGame && !get().spectating;
-      const serverLeave = !!get().roomCode && (preGame || endBotGame);
+      const endPracticeGame = (get().botGame || get().soloGame) && !get().spectating;
+      const serverLeave = !!get().roomCode && (preGame || endPracticeGame);
       if (serverLeave) {
-        send({ type: "leave-room", ...(endBotGame ? { endGame: true } : {}) });
+        send({ type: "leave-room", ...(endPracticeGame ? { endGame: true } : {}) });
       } else if (!get().roomCode && get().queuedFormat) {
         send({ type: "queue-leave" });
       }
@@ -1914,7 +2073,7 @@ export const useStore = create<StoreState>((set, get) => {
       } else {
         closeCurrentSocket();
       }
-      if (preGame || endBotGame) replayRuntime.discard(get().roomCode);
+      if (preGame || endPracticeGame) replayRuntime.discard(get().roomCode);
       else replayRuntime.detach();
       preReplay = null;
       set(clearedRoomProjection());
@@ -1949,13 +2108,14 @@ export const useStore = create<StoreState>((set, get) => {
       const views = get().replayViews;
       const transitions = get().replayTransitions;
       const notes = get().replayNotes;
+      const replayClock = get().replayClock;
       const frames = views?.map((view, index) => ({
         view,
         transition: transitions?.[index] ?? null,
       }));
       const baseFile: ReplayFile | null =
         get().screen === "replay" && frames
-          ? { version: 2, seat: get().yourSeat, frames }
+          ? { version: 2, seat: get().yourSeat, ...(replayClock ? { clock: replayClock } : {}), frames }
           : replayRuntime.getFile();
       const file = baseFile ? withReplayNotes(baseFile, notes) : null;
       if (!file) return;
@@ -2072,6 +2232,7 @@ export const useStore = create<StoreState>((set, get) => {
         replayViews: null,
         replayTransitions: null,
         replayStep: 0,
+        replayClock: null,
         replayNotes: [],
         activeSavedReplayId: null,
         activeSharedReplay: null,
@@ -2100,6 +2261,7 @@ export const useStore = create<StoreState>((set, get) => {
           viewUpdate: nextViewUpdate({ source: "restore", transition: "replace" }),
           legal: [],
           actionCandidates: [],
+          endTurnWarning: false,
           yourSeat: null,
           spectating: false,
         });

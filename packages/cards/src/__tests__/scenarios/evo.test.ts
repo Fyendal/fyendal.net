@@ -1,22 +1,24 @@
 import { describe, expect, it } from "vitest";
 import { actionCandidates, legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, scripts } from "../../index.js";
-import { printingId, scenario } from "../harness.js";
+import { printingId, scenario, type SeatSpec } from "../harness.js";
+import { hasType, objectKind } from "@fyendal/shared";
 
 const BLUE = "wrecker romp|3";
+const NO_EQUIPMENT = { head: null, chest: null, arms: null, legs: null } as const;
 
 describe("EVO — registration and core mechanics", () => {
   it("registers the complete set", () => {
     expect(Object.keys(cardData).filter((id) => id.startsWith("EVO"))).toHaveLength(252);
     for (const id of ["EVO001", "EVO002", "EVO004", "EVO005", "EVO007", "EVO008", "EVO010B"]) {
-      expect(cardData[id]?.cardType).toBe("hero");
+      expect(cardData[id]?.types).toContain("hero");
       expect(scripts[id]).toBeDefined();
     }
   });
 
-  it("all playable Evo equipment supports next-Evo instant permissions", () => {
+  it("all playable Action Evos support next-Evo instant permissions", () => {
     const playableEvos = Object.values(cardData).filter((card) =>
-      card.cardType === "equipment" &&
+      hasType(card, "action") &&
       (card.subtypes ?? []).includes("evo") &&
       scripts[card.id]?.playableEquipment === true
     );
@@ -25,6 +27,131 @@ describe("EVO — registration and core mechanics", () => {
     for (const card of playableEvos) {
       expect(scripts[card.id]?.playAsInstant, card.name).toBeTypeOf("function");
     }
+  });
+
+  it.each([
+    ["evo circuit breaker|1", "head", "proto base head|0"],
+    ["evo atom breaker|1", "chest", "proto base chest|0"],
+    ["evo face breaker|1", "arms", "proto base arms|0"],
+    ["evo mach breaker|1", "legs", "proto base legs|0"],
+    ["arcbane grasp|3", "arms", "proto base arms|0"],
+  ] as const)("%s is an instant that spends no action point", (key, slot, base) => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: [key], equipment: { ...NO_EQUIPMENT, [slot]: base } },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    const plays = legalIntents(s.state, 0).filter(
+      (intent) => intent.kind === "play-card" && s.state.players[0]!.hand[0]?.instanceId === intent.instanceId,
+    );
+    expect(plays.length).toBeGreaterThan(0);
+
+    s.play(key).expectAP(0, 1).expectEquipped(0, slot, key);
+  });
+
+  it("an Instant Evo can be played on the opponent's turn", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", hand: ["evo circuit breaker|1"], equipment: { ...NO_EQUIPMENT, head: "proto base head|0" } },
+        { hero: "dorinthea", hand: ["sigil of solace|1"], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    s.play("sigil of solace|1", { settle: false })
+      .passPriority()
+      .react("evo circuit breaker|1")
+      .expectEquipped(0, "head", "evo circuit breaker|1");
+  });
+
+  it("an Action Evo costs an action point and cannot be played on the opponent's turn", () => {
+    const evo = "evo sentry base head|1";
+    expect(cardData[printingId(evo)]?.types).toEqual(["equipment", "action"]);
+    const opponentTurn = scenario({
+      active: 1,
+      seats: [
+        { hero: "rhinar", heroKey: "teklovossen|0", hand: [evo, BLUE], equipment: { head: "teklo base head|0" } },
+        { hero: "dorinthea", hand: ["sigil of solace|1"] },
+      ],
+    });
+    opponentTurn.play("sigil of solace|1", { settle: false }).passPriority();
+    expect(() => opponentTurn.react(evo)).toThrow("no legal intent");
+
+    scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "teklovossen|0", hand: [evo, BLUE], equipment: { head: "teklo base head|0" } },
+        { hero: "dorinthea" },
+      ],
+    }).play(evo, { pitch: [BLUE] })
+      .expectAP(0, 0)
+      .expectEquipped(0, "head", evo);
+  });
+
+  it("an Action Evo counts toward a non-attack action limit", () => {
+    const evo = "evo sentry base head|1";
+    const seat = (board: string[]) => scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "teklovossen|0", board, hand: ["nimblism|1", evo, BLUE], equipment: { head: "teklo base head|0" } },
+        { hero: "dorinthea" },
+      ],
+    });
+    const evoPlays = (g: ReturnType<typeof seat>) => legalIntents(g.state, 0).filter((intent) =>
+      intent.kind === "play-card" &&
+      g.state.players[0]!.hand.some((card) => card.instanceId === intent.instanceId && card.cardId === printingId(evo)));
+
+    const capped = seat(["signal jammer|3"]).play("nimblism|1");
+    expect(evoPlays(capped)).toEqual([]);
+    expect(evoPlays(seat([]).play("nimblism|1")).length).toBeGreaterThan(0);
+
+    const counted = seat([]).play(evo, { pitch: [BLUE] });
+    expect(counted.state.players[0]!.flags.nonAttackActionsPlayedThisTurn).toBe(1);
+  });
+
+  it("an Instant Evo is played in the reaction step unless the attack prohibits opposing instants", () => {
+    const evo = "evo circuit breaker|1";
+    const seats = (attack: string): [SeatSpec, SeatSpec] => [
+      { hero: "rhinar", hand: [evo], equipment: { ...NO_EQUIPMENT, head: "proto base head|0" } },
+      { hero: "dorinthea", hand: [attack], resources: 3, equipment: NO_EQUIPMENT },
+    ];
+
+    scenario({ active: 1, seats: seats("head jab|1") })
+      .play("head jab|1")
+      .blockWith()
+      .passPriority()
+      .react(evo)
+      .expectEquipped(0, "head", evo);
+
+    const prohibited = scenario({ active: 1, seats: seats("step between|1") })
+      .play("step between|1")
+      .blockWith()
+      .passPriority();
+    expect(() => prohibited.react(evo)).toThrow("no legal intent");
+  });
+
+  it("Parry Blade and Nitro Mechanoid are weapons and equipment", () => {
+    for (const key of ["parry blade|0", "nitro mechanoid|0"]) {
+      const card = cardData[printingId(key)]!;
+      expect(objectKind(card), key).toBe("weapon");
+      expect(hasType(card, "equipment"), key).toBe(true);
+    }
+
+    const s = scenario({
+      seats: [
+        { hero: "dorinthea", weapons: ["parry blade|0"], resources: 1 },
+        { hero: "rhinar" },
+      ],
+    });
+    s.attackWithWeapon("parry blade|0").blockWith().settle().expectLife(1, 18);
+
+    const scrap = scenario({
+      seats: [
+        { hero: "rhinar", resources: 3, hand: ["junkyard dogg|1"], graveyard: ["parry blade|0"] },
+        { hero: "dorinthea" },
+      ],
+    });
+    scrap.play("junkyard dogg|1").chooseCard("parry blade|0")
+      .expectInZone(0, "parry blade|0", "banish");
   });
 
   it("Dash, Database sees and plays an eligible top-deck item as an instant with the tax", () => {
@@ -81,6 +208,54 @@ describe("EVO — registration and core mechanics", () => {
     const evo = s.state.players[0]!.equipment.head!;
     expect(evo.subcards).toHaveLength(1);
     expect(evo.subcards![0]!.cardId).toBe(printingId("teklo base head|0"));
+  });
+
+  it("an Evo played into a Frostbite's zone has no base once playing it destroys the Frostbite", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "teklovossen|0",
+          hand: ["evo smoothbore|2", BLUE, BLUE],
+          weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+        {
+          hero: "dorinthea",
+          heroKey: "jarl vetreiði|0",
+          hand: ["colors of aria|1"],
+          resources: 3,
+          weapons: [],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+    s.play("colors of aria|1").chooseOption("arms").blockWith().settle();
+    s.endTurn();
+
+    s.play("evo smoothbore|2", { pitch: [BLUE, BLUE] }).expectInZone(0, "evo smoothbore|2", "graveyard");
+    expect(s.state.players[0]!.board).toEqual([]);
+    expect(s.state.players[0]!.equipment.arms).toBeFalsy();
+  });
+
+  it("an Evo goes to the graveyard when a Frostbite enters its zone in response", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "teklovossen|0", hand: ["evo smoothbore|2", BLUE], weapons: [], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: ["frost spike|3"] },
+      ],
+    });
+    s.play("evo smoothbore|2", { pitch: [BLUE], settle: false });
+    s.passPriority();
+    s.react("frost spike|3", { settle: false });
+    s.passPriority().passPriority();
+    s.chooseOption("0:arms");
+    s.settle();
+
+    expect(s.state.players[0]!.equipment.arms).toBeUndefined();
+    s.expectInZone(0, "evo smoothbore|2", "graveyard");
+    s.expectInZone(0, "frostbite|0", "board");
   });
 
   it("an Evo over a transformed base keeps every card under it destroyable", () => {
@@ -282,6 +457,77 @@ describe("EVO — registration and core mechanics", () => {
     ]));
   });
 
+  it("Fabricate lets its controller choose which Evo to banish from hand", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["fabricate|1", "evo beta base legs|3", "evo beta base arms|3"],
+          deck: ["head jab|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("fabricate|1").chooseOption("defense").chooseOption("hand").chooseCard("evo beta base arms|3");
+
+    const me = s.state.players[0]!;
+    expect(me.banish.map((card) => card.cardId)).toEqual([printingId("evo beta base arms|3")]);
+    expect(me.hand.map((card) => card.cardId)).toEqual([
+      printingId("evo beta base legs|3"),
+      printingId("head jab|1"),
+    ]);
+  });
+
+  it("Fabricate may decline to banish an Evo from hand", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["fabricate|1", "evo beta base legs|3"],
+          deck: ["head jab|1"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("fabricate|1").chooseOption("defense").chooseOption("hand").chooseOption("no");
+
+    const me = s.state.players[0]!;
+    expect(me.banish).toEqual([]);
+    expect(me.hand.map((card) => card.cardId)).toEqual([printingId("evo beta base legs|3")]);
+  });
+
+  it("Fabricate goes under an Evo before choosing the Evo to banish", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["fabricate|1", "evo beta base legs|3", "evo beta base arms|3"],
+          deck: ["head jab|1"],
+          equipment: { head: "evo sentry base head|1" },
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("fabricate|1")
+      .chooseOption("hand")
+      .chooseOption("under")
+      .chooseCard("evo sentry base head|1")
+      .chooseCard("evo beta base arms|3");
+
+    const me = s.state.players[0]!;
+    expect(me.equipment.head?.subcards).toEqual([
+      expect.objectContaining({ cardId: printingId("fabricate|1") }),
+    ]);
+    expect(me.banish.map((card) => card.cardId)).toEqual([printingId("evo beta base arms|3")]);
+    expect(me.hand.map((card) => card.cardId)).toEqual([
+      printingId("evo beta base legs|3"),
+      printingId("head jab|1"),
+    ]);
+  });
+
   it("Fabricate adds defense to Evo equipment, including Evo bases, but not ordinary bases", () => {
     const s = scenario({
       active: 1,
@@ -411,7 +657,7 @@ describe("EVO — registration and core mechanics", () => {
       .expectInZone(0, "evo steel soul tower|3", "graveyard");
   });
 
-  it("an Evo played with no base equips to its empty zone without transforming", () => {
+  it("an Evo played with no base fails to equip and goes to the graveyard", () => {
     const s = scenario({
       seats: [
         {
@@ -424,8 +670,8 @@ describe("EVO — registration and core mechanics", () => {
       ],
     });
     s.play("evo sentry base head|1", { pitch: [BLUE] })
-      .expectEquipped(0, "head", "evo sentry base head|1");
-    expect(s.state.players[0]!.equipment.head!.subcards ?? []).toHaveLength(0);
+      .expectInZone(0, "evo sentry base head|1", "graveyard");
+    expect(s.state.players[0]!.equipment.head).toBeFalsy();
   });
 
   it("offers a banished Evo Beta Base Legs after Teklovossen resolves before defense", () => {
@@ -476,6 +722,7 @@ describe("EVO — registration and core mechanics", () => {
       instanceId: evo.instanceId,
       pitchInstanceIds: [],
       pitchRequired: 0,
+      asInstant: true,
     });
 
     s.react("evo beta base legs|3", { settle: false });
@@ -568,7 +815,7 @@ describe("EVO — registration and core mechanics", () => {
       .expectAP(0, 1);
 
     s.activate("teklovossen, esteemed magnate|0")
-      .play("evo face breaker|1", { asInstant: true })
+      .play("evo face breaker|1")
       .expectAP(0, 1)
       .expectEquipped(0, "arms", "evo face breaker|1");
   });
@@ -824,6 +1071,31 @@ describe("EVO — registration and core mechanics", () => {
       arms: "evo beta base arms|3",
       legs: "evo beta base legs|3",
     })).toBe(true);
+  });
+
+  it("Terminator Tank's discard needs a hero hit, not an ally hit", () => {
+    const attack = (targetAlly?: string) => {
+      const s = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            resources: 6,
+            hand: ["terminator tank|1"],
+            equipment: {
+              head: "evo beta base head|3",
+              chest: "cogwerx base chest|0",
+              arms: "cogwerx base arms|0",
+              legs: "cogwerx base legs|0",
+            },
+          },
+          { hero: "dorinthea", hand: [BLUE], board: ["barnacle|2"] },
+        ],
+      });
+      return s.play("terminator tank|1", targetAlly === undefined ? {} : { targetAlly });
+    };
+
+    attack("barnacle|2").expectHandSize(1, 1).expectNoLog("triggers: On hit");
+    attack().blockWith().settle().chooseCard(BLUE).expectHandSize(1, 0);
   });
 
   it("Scrap banishes a graveyard item or equipment and leaves arena items alone", () => {
@@ -1089,6 +1361,27 @@ describe("EVO — registration and core mechanics", () => {
     expect(s.state.players[0]!.board[0]!.counters?.steam).toBe(1);
   });
 
+  it("Master Cog recognizes Crank granted to Hyper Driver by Maxx", () => {
+    const setup = (heroKey?: string) => scenario({
+      seats: [
+        { hero: "rhinar", heroKey, resources: 1, hand: ["big bertha|2", "master cog|2"], board: ["hyper driver|0"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    const granted = setup("maxx nitro|0");
+    granted.play("big bertha|2", { pitch: ["master cog|2"], settle: false });
+    granted.passPriority().passPriority();
+    expect(granted.state.pendingDecision?.chooseHook).toBe("master-cog");
+    granted.chooseCard("hyper driver|0");
+    expect(granted.state.players[0]!.board[0]!.counters?.steam).toBe(1);
+
+    const ungranted = setup();
+    ungranted.play("big bertha|2", { pitch: ["master cog|2"], settle: false });
+    ungranted.passPriority().passPriority();
+    expect(ungranted.state.pendingDecision?.chooseHook).not.toBe("master-cog");
+  });
+
   it("Twin Drive offers zero, one, or two Boost payments and applies the chosen count", () => {
     const setup = () => scenario({
       seats: [
@@ -1198,6 +1491,26 @@ describe("EVO — registration and core mechanics", () => {
 });
 
 describe("EVO — rules regression coverage", () => {
+  it("Hadron Collider adds its steam counters to an attack boosted from arsenal", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          arsenal: ["zero to sixty|1"],
+          deck: ["zipper hit|3", "zipper hit|3"],
+          board: ["hadron collider|1", "hadron collider|1"],
+        },
+        { hero: "dorinthea", hand: [] },
+      ],
+    });
+    for (const collider of s.state.players[0]!.board) collider.counters = { steam: 3 };
+
+    s.play("zero to sixty|1", { boost: true, fromArsenal: true, settle: false });
+
+    expect(s.state.players[0]!.board).toHaveLength(0);
+    s.expectAttackValue(10);
+  });
+
   it("Maxx grants Crank to a Hyper Driver as it enters", () => {
     const s = scenario({
       seats: [

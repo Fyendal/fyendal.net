@@ -1,5 +1,8 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
+  attackingWeapon,
+  chargedThisTurn,
+  faceUpGraveyard,
   hasBloodDebt,
   bloodDebtScript as bloodDebt,
   buffNextAttack,
@@ -13,27 +16,16 @@ import {
   opponentSeat,
   targetHeroSeat,
   weaponAttackCount,
+  warnIfNoActionPoint,
+  isAttackAction,
+  isNonAttackAction,
+  hasCardSubtype,
+  isLight,
 } from "../shared-helpers.js";
-
-const SPECTRAL_SHIELD = "MON104";
-const SOUL_SHACKLE = "MON186";
-const BLASMOPHET = "MON219";
-const URSUR = "MON220";
-
-function isAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack");
-}
-
-function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && !ctx.cardTypes(card).includes("attack");
-}
-
-function weapon(cost: number, extra: CardScript = {}): CardScript {
-  return { ...extra, activated: { cost, isAttack: true, goAgain: false, oncePerTurn: true } };
-}
+import { BLASMOPHET_SOUL_HARVESTER, SOUL_SHACKLE, SPECTRAL_SHIELD, URSUR } from "../tokens.js";
 
 function hatchet(otherCode: 1 | 2): CardScript {
-  return weapon(1, {
+  return attackingWeapon(1, {
     onAttackDeclared(ctx) {
       if (ctx.getPlayerFlag(ctx.seat, "lastHatchetObservedAttack") !== otherCode) return;
       const key = `hatchetPower:${ctx.self.instanceId}`;
@@ -86,7 +78,7 @@ const beaconOfVictory: CardScript = {
   onPlay(ctx) {
     const x = ctx.getState("beaconX");
     if (x > 0) ctx.addModifier({ scope: "chain-link", attack: x });
-    if (ctx.getFlag("player", "chargedThisTurn") !== true) return;
+    if (!chargedThisTurn(ctx)) return;
     const cards = ctx.player(ctx.seat).deck.filter((card) => {
       const data = ctx.cardData(card.cardId);
       return ctx.hasCardType(card, "action") && (data.cost ?? 0) <= x;
@@ -140,7 +132,7 @@ function finishSonata(ctx: ScriptCtx): void {
 function requestSonataAttack(ctx: ScriptCtx): void {
   const attacks = ctx
     .player(ctx.seat)
-    .deck.filter((card) => ctx.getState(`sonata:${card.instanceId}`) > 0 && isAttack(ctx, card));
+    .deck.filter((card) => ctx.getState(`sonata:${card.instanceId}`) > 0 && isAttackAction(ctx, card));
   if (ctx.getState("sonataRemaining") <= 0 || attacks.length === 0) {
     finishSonata(ctx);
     return;
@@ -165,7 +157,7 @@ const sonataArcanix: CardScript = {
     const revealed = ctx.player(ctx.seat).deck.slice(0, ctx.getState("sonataX") + 3);
     ctx.revealCards(revealed.map((card) => card.instanceId));
     for (const card of revealed) ctx.setState(`sonata:${card.instanceId}`, 1);
-    ctx.setState("sonataRemaining", revealed.filter((card) => !isAttack(ctx, card)).length);
+    ctx.setState("sonataRemaining", revealed.filter((card) => !isAttackAction(ctx, card)).length);
     ctx.setState("sonataChosen", 0);
     requestSonataAttack(ctx);
   },
@@ -187,7 +179,7 @@ const sonataArcanix: CardScript = {
 };
 
 function rouseRevealOptions(ctx: ScriptCtx): string[] {
-  const attacks = ctx.player(ctx.seat).hand.filter((card) => isAttack(ctx, card));
+  const attacks = ctx.player(ctx.seat).hand.filter((card) => isAttackAction(ctx, card));
   const options: string[] = [];
   const visit = (index: number, selected: DeepReadonly<CardInstance>[], power: number): void => {
     if (power >= 13) {
@@ -335,8 +327,8 @@ export const monHighRarity: Record<string, CardScript> = {
       if (hook !== "genesis-soul") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
       if (!card || !ctx.putIntoSoul(card.instanceId)) return;
-      if (ctx.cardTypes(card).includes("illusionist")) ctx.createToken(SPECTRAL_SHIELD);
-      if (ctx.cardTypes(card).includes("light")) ctx.drawCards(ctx.seat, 1);
+      if (hasCardSubtype(ctx, card, "illusionist")) ctx.createToken(SPECTRAL_SHIELD);
+      if (isLight(ctx, card)) ctx.drawCards(ctx.seat, 1);
     },
   },
   "bolting blade|2": {
@@ -347,7 +339,7 @@ export const monHighRarity: Record<string, CardScript> = {
   "beacon of victory|2": beaconOfVictory,
   "vestige of sol|0": {
     replacePitchResources(ctx, pitched, amount) {
-      return ctx.cardTypes(pitched).includes("light") && ctx.player(ctx.seat).soul.length > 0 ? amount + 1 : amount;
+      return isLight(ctx, pitched) && ctx.player(ctx.seat).soul.length > 0 ? amount + 1 : amount;
     },
   },
   "celestial cataclysm|2": celestialCataclysm,
@@ -360,7 +352,7 @@ export const monHighRarity: Record<string, CardScript> = {
   },
   "tome of divinity|2": {
     onPlay(ctx) {
-      ctx.drawCards(ctx.seat, Number(ctx.getFlag("player", "chargedThisTurn")) ? 3 : 2);
+      ctx.drawCards(ctx.seat, chargedThisTurn(ctx) ? 3 : 2);
     },
   },
   "iris of reality|0": {
@@ -382,28 +374,37 @@ export const monHighRarity: Record<string, CardScript> = {
       );
       if (!ctx.link) return;
       if (
-        !ctx.cardTypes(ctx.link.attackingCard).includes("illusionist") &&
+        !hasCardSubtype(ctx, ctx.link.attackingCard, "illusionist") &&
         ctx.basePower(ctx.link.attackingCard) >= 6
       ) {
         ctx.setFlag("link", `destroyOnClose:${ctx.self.instanceId}`, true);
       }
     },
-    onFriendlyAttackLost(ctx, card, cause) {
-      if (cause !== "phantasm" || !ctx.cardTypes(card).includes("illusionist")) return;
-      if (ctx.getState("actionPointTurn") === ctx.state.turn) return;
-      ctx.requestPayment(
-        "footsteps-action",
-        decisionPrompt("Pay 1 to gain an action point?", "card.mon.actionpoint.pay"),
-        1,
-      );
-    },
+    triggers: [
+      {
+        event: "card-destroyed",
+        label: "Gain 1 action point",
+        labelMessage: decisionMessage("card.trigger.common.actionpoint.gain", { amount: 1 }),
+        condition(ctx, card) {
+          if (!card || ctx.getState("actionPointTurn") === ctx.state.turn) return false;
+          return isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "illusionist");
+        },
+        onTrigger: (ctx) => ctx.setState("actionPointTurn", ctx.state.turn),
+        effect: (ctx) =>
+          ctx.requestPayment(
+            "footsteps-action",
+            warnIfNoActionPoint(
+              ctx,
+              decisionPrompt("Pay 1 to gain an action point?", "card.mon.actionpoint.pay"),
+            ),
+            1,
+          ),
+      },
+    ],
     onChoose(ctx, hook, option) {
       if (option !== "paid") return;
       if (hook === "footsteps-defense") ctx.addCardTempDefense(ctx.self.instanceId, 1);
-      if (hook === "footsteps-action") {
-        ctx.setState("actionPointTurn", ctx.state.turn);
-        ctx.gainActionPoint();
-      }
+      if (hook === "footsteps-action") ctx.gainActionPoint();
     },
   },
   "phantasmaclasm|1": {
@@ -443,7 +444,7 @@ export const monHighRarity: Record<string, CardScript> = {
       ctx.addModifier({ scope: "until-end-of-turn", dominate: true, appliesTo: "weapon" });
     },
   },
-  "hexagore, the death hydra|0": weapon(2, {
+  "hexagore, the death hydra|0": attackingWeapon(2, {
     onAttackDeclared(ctx) {
       const blood = ctx
         .player(ctx.seat)
@@ -492,7 +493,7 @@ export const monHighRarity: Record<string, CardScript> = {
       },
     },
   },
-  "galaxxi black|0": weapon(1, {
+  "galaxxi black|0": attackingWeapon(1, {
     modifyAttack(ctx) {
       return ctx.getFlag("player", "playedFromBanishThisTurn") === true ? 2 : 0;
     },
@@ -532,12 +533,12 @@ export const monHighRarity: Record<string, CardScript> = {
         target: heroTarget(),
         condition(ctx, played, event) {
           if (!played || event?.from !== "banish" || !ctx.hasCardType(played, "action")) return false;
-          const kind = ctx.cardTypes(played).includes("attack") ? "attack" : "nonattack";
+          const kind = hasCardSubtype(ctx, played, "attack") ? "attack" : "nonattack";
           return !ctx.getState(`crossroads:${kind}`);
         },
         onTrigger(ctx, played) {
           if (!played) return;
-          const kind = ctx.cardTypes(played).includes("attack") ? "attack" : "nonattack";
+          const kind = hasCardSubtype(ctx, played, "attack") ? "attack" : "nonattack";
           ctx.setState(`crossroads:${kind}`, 1);
         },
         effect(ctx) {
@@ -553,7 +554,7 @@ export const monHighRarity: Record<string, CardScript> = {
       arcaneDamageEffect: true,
       arcaneDamageEffectAmounts: [2],
       onPlay(ctx) {
-        const cards = ctx.player(opponentSeat(ctx)).graveyard;
+        const cards = faceUpGraveyard(ctx, opponentSeat(ctx));
         if (!cards.length) return;
         ctx.requestCardChoices(
           "invert-existence-banish",
@@ -572,11 +573,10 @@ export const monHighRarity: Record<string, CardScript> = {
         let attack = false;
         let nonAttack = false;
         for (const option of options) {
-          const card = ctx
-            .player(opponentSeat(ctx))
-            .graveyard.find((candidate) => candidate.instanceId === Number(option));
+          const card = faceUpGraveyard(ctx, opponentSeat(ctx))
+            .find((candidate) => candidate.instanceId === Number(option));
           if (!card) continue;
-          const isAttackCard = isAttack(ctx, card);
+          const isAttackCard = isAttackAction(ctx, card);
           const isNonAttackCard = isNonAttackAction(ctx, card);
           if (!ctx.banish(card.instanceId)) continue;
           attack ||= isAttackCard;
@@ -612,7 +612,7 @@ export const monHighRarity: Record<string, CardScript> = {
             hasBloodDebt(ctx, card),
         ).length >= 6,
     onPlay(ctx) {
-      ctx.createToken(BLASMOPHET);
+      ctx.createToken(BLASMOPHET_SOUL_HARVESTER);
     },
   },
   "eclipse|3": {
@@ -725,7 +725,7 @@ export const monHighRarity: Record<string, CardScript> = {
       if (ctx.link?.targetAllyId === undefined && ctx.player(opponentSeat(ctx)).soul.length) ctx.grantGoAgain();
     },
   },
-  "ravenous meataxe|0": weapon(2, {
+  "ravenous meataxe|0": attackingWeapon(2, {
     onAttackDeclared(ctx) {
       ctx.drawCards(ctx.seat, 1);
       if (randomDiscardSix(ctx)) ctx.addModifier({ scope: "chain-link", attack: 2 });
@@ -737,7 +737,7 @@ export const monHighRarity: Record<string, CardScript> = {
       if (randomDiscardSix(ctx)) buffNextAttack(ctx, { attackFromBasePower: true, appliesTo: "attack-action", appliesToType: ["brute"] });
     },
   },
-  "dread scythe|0": weapon(3, {
+  "dread scythe|0": attackingWeapon(3, {
     onAttackDeclared(ctx) {
       ctx.dealDamage(opponentSeat(ctx), 1, { arcane: true, sourceInstanceId: ctx.self.instanceId });
     },
@@ -757,13 +757,9 @@ export const monHighRarity: Record<string, CardScript> = {
     },
   },
   "nourishing emptiness|1": {
-    onAttackDeclared(ctx) {
-      if (ctx.player(ctx.seat).graveyard.some((card) => isAttack(ctx, card))) {
-        ctx.suppressCardKeyword(ctx.self.instanceId, "dominate");
-      }
-    },
+    hasConditionalDominate: (ctx) => !faceUpGraveyard(ctx).some((card) => isAttackAction(ctx, card)),
     onHit(ctx) {
-      if (!ctx.player(ctx.seat).graveyard.some((card) => isAttack(ctx, card))) {
+      if (!faceUpGraveyard(ctx).some((card) => isAttackAction(ctx, card))) {
         ctx.setPlayerFlag(ctx.seat, "bonusIntellect", Number(ctx.getPlayerFlag(ctx.seat, "bonusIntellect")) + 1);
       }
     },

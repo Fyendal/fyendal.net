@@ -2,7 +2,7 @@
  {
   "id": "NUU001",
   "name": "Nuu",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Your attacks with stealth get \"When this chain link resolves, banish all action cards defending this.\"\nInstant - {c}{c}{c}: Look at the top card of an opposing hero's deck. If it's blue, you may banish it. Until end of turn, you may play blue cards from that hero's banished zone without paying their {r} cost.",
   "classes": [
    "mystic",
@@ -15,7 +15,7 @@
  {
   "id": "NUU002",
   "name": "Beckoning Mistblade",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack. Go again\nWhen this hits, your next blue attack this turn gets +1{p} and go again.",
   "attack": 1,
   "classes": [
@@ -31,7 +31,7 @@
  {
   "id": "NUU003",
   "name": "Aqua Seeing Shell",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Cloaked\nInstant - {r}{r}{r}, turn this face-up: Draw a card.\nAt the start of your turn, destroy this.",
   "defense": 1,
   "classes": [
@@ -48,7 +48,7 @@
  {
   "id": "NUU004",
   "name": "Koi Blessed Kimono",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Cloaked\nWhile this is equipped face-down, at the start of your turn, if you have exactly 1{h}, you may turn this face-up.\nWhen this is turned face-up, destroy it. Search your deck for an Inner Chi, reveal it, put it into your hand, then shuffle.",
   "classes": [
    "mystic"
@@ -64,7 +64,7 @@
  {
   "id": "NUU005",
   "name": "Arousing Wave",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Attack Reaction - {r}, destroy this: Create a Fang Strike in your hand.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -82,7 +82,7 @@
  {
   "id": "NUU006",
   "name": "Undertow Stilettos",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Attack Reaction - {r}, destroy this: Create a Slither in your hand.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -100,7 +100,7 @@
  {
   "id": "NUU007",
   "name": "Art of Desire: Body",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a red card, draw a card and gain 1{h}.",
   "pitch": 1,
   "cost": 0,
@@ -120,7 +120,7 @@
  {
   "id": "NUU008",
   "name": "Bonds of Memory",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, banish the top card of their deck, then banish a card from their graveyard.\nWhenever this banishes a card and this has banished another card with the same name, gain 1{h}.",
   "pitch": 1,
   "cost": 0,
@@ -140,7 +140,7 @@
  {
   "id": "NUU009",
   "name": "Desires of Flesh",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes an attack action card, gain 1{h}.",
   "pitch": 1,
   "cost": 0,
@@ -160,7 +160,7 @@
  {
   "id": "NUU010",
   "name": "Double Trouble",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nIf you've played or activated 2 or more attack reactions this chain link, this gets +2{p} and \"When this hits a hero, banish the top 2 cards of their deck.\"",
   "pitch": 1,
   "cost": 0,
@@ -180,7 +180,7 @@
  {
   "id": "NUU011",
   "name": "Impulsive Desire",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a reaction or instant card, gain 1{h}.",
   "pitch": 1,
   "cost": 0,
@@ -200,7 +200,7 @@
  {
   "id": "NUU012",
   "name": "Mind's Desire",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a non-attack action card, gain 1{h}.",
   "pitch": 1,
   "cost": 0,
@@ -220,7 +220,7 @@
  {
   "id": "NUU013",
   "name": "Hiss",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target Assassin or Mystic attack action card gets +3{p}.\nIf you've pitched a blue card this turn, create a Slither in your hand.",
   "pitch": 1,
   "cost": 1,
@@ -234,7 +234,7 @@
  {
   "id": "NUU014",
   "name": "Venomous Bite",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target Assassin or Mystic attack action card gets +3{p}.\nIf you've pitched a blue card this turn, create a Fang Strike in your hand.",
   "pitch": 1,
   "cost": 1,
@@ -248,7 +248,7 @@
  {
   "id": "NUU015",
   "name": "Hiss",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target Assassin or Mystic attack action card gets +2{p}.\nIf you've pitched a blue card this turn, create a Slither in your hand.",
   "pitch": 2,
   "cost": 1,
@@ -262,7 +262,7 @@
  {
   "id": "NUU016",
   "name": "Bonds of Attraction",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, banish the top card of their deck, then banish a card from their graveyard.\nWhenever this banishes a card and this has banished another card with the same color, gain 1{h}.",
   "pitch": 3,
   "cost": 0,
@@ -282,7 +282,7 @@
  {
   "id": "NUU017",
   "name": "Bonds of Memory",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, banish the top card of their deck, then banish a card from their graveyard.\nWhenever this banishes a card and this has banished another card with the same name, gain 1{h}.",
   "pitch": 3,
   "cost": 0,
@@ -302,7 +302,7 @@
  {
   "id": "NUU018",
   "name": "Deep Blue Sea",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This gets +1{p} for each blue card you've pitched this turn.",
   "pitch": 3,
   "cost": 4,
@@ -319,7 +319,7 @@
  {
   "id": "NUU019",
   "name": "Desires of Flesh",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes an attack action card, gain 1{h}.",
   "pitch": 3,
   "cost": 0,
@@ -339,7 +339,7 @@
  {
   "id": "NUU020",
   "name": "Gravekeeping",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks a hero, you may banish a card from their graveyard.",
   "pitch": 3,
   "cost": 1,
@@ -356,7 +356,7 @@
  {
   "id": "NUU021",
   "name": "Impulsive Desire",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a reaction or instant card, gain 1{h}.",
   "pitch": 3,
   "cost": 0,
@@ -376,7 +376,7 @@
  {
   "id": "NUU022",
   "name": "Mind's Desire",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Stealth\nWhen this hits a hero, banish the top card of their deck.\nWhenever this banishes a non-attack action card, gain 1{h}.",
   "pitch": 3,
   "cost": 0,
@@ -396,7 +396,7 @@
  {
   "id": "NUU023",
   "name": "Rising Tide",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played another blue card this turn, this gets +2{p}.",
   "pitch": 3,
   "cost": 1,
@@ -413,7 +413,7 @@
  {
   "id": "NUU024",
   "name": "Hiss",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target Assassin or Mystic attack action card gets +1{p}.\nIf you've pitched a blue card this turn, create a Slither in your hand.",
   "pitch": 3,
   "cost": 1,
@@ -427,7 +427,7 @@
  {
   "id": "NUU025",
   "name": "Tide Chakra",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target Assassin or Mystic attack action card gets +1{p}. If you've transcended this turn, instead it gets +3{p}.",
   "pitch": 3,
   "cost": 1,
@@ -441,7 +441,7 @@
  {
   "id": "NUU026",
   "name": "Pass Over",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nBanish target card from an opposing hero's graveyard.\nIf you've played another blue card this turn, transcend.",
   "pitch": 3,
   "cost": 0,
@@ -458,7 +458,7 @@
  {
   "id": "NUU026B",
   "name": "Inner Chi",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "",
   "pitch": 3,
   "classes": [
@@ -472,7 +472,7 @@
  {
   "id": "NUU027",
   "name": "Path Well Traveled",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Legendary\nTarget attack gets go again.\nIf you've played another blue card this turn, transcend.",
   "pitch": 3,
   "cost": 0,
@@ -489,7 +489,7 @@
  {
   "id": "NUU027B",
   "name": "Inner Chi",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "",
   "pitch": 3,
   "classes": [
@@ -503,7 +503,7 @@
  {
   "id": "NUU028",
   "name": "Fang Strike",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Ephemeral\nTarget attack action card gets +1{p}.",
   "cost": 0,
   "classes": [
@@ -518,7 +518,7 @@
  {
   "id": "NUU029",
   "name": "Slither",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Ephemeral\nTarget attack action card gets go again.",
   "cost": 0,
   "classes": [

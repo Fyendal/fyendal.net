@@ -96,7 +96,7 @@ describe("Mechanologist, Evo and Illusionist arena triggers use the stack", () =
       ],
     });
 
-    g.play("evo heartdrive|3", { asInstant: true, settle: false });
+    g.play("evo heartdrive|3", { settle: false });
     g.passUntilLayer("The next attack action card you play this turn costs 1 less to play");
     expect(g.state.modifiers).toEqual([]);
 

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { createTestIntl, TestI18nProvider } from "../i18n/TestI18nProvider.js";
 import { SquareCardPresentation } from "./Card.js";
 import { decisionFloatDragKey } from "./DecisionFloat.js";
+import { DecisionSheetMinimize } from "./decision/DecisionSheet.js";
 import { BloodModeDecision } from "./decision/BloodModeDecision.js";
 import { ActionTargetCards, RevealedChoiceCards, targetPlayPermissionNote } from "./decision/CardChoices.js";
 import type { PendingDecisionModel } from "./decision/DecisionModels.js";
@@ -32,9 +33,12 @@ import {
 } from "./decision/DecisionShared.js";
 import {
   cardNameEnterAction,
+  cardNameSuggestionParts,
   cardNameSuggestions,
   NameChoiceAutocomplete,
+  registeredCardName,
 } from "./decision/NameChoiceAutocomplete.js";
+import { steppedNumberChoice } from "./decision/NumberChoiceInput.js";
 import {
   confirmTriggerOrderOnSpace,
   moveTriggerOrder,
@@ -47,6 +51,7 @@ import {
   cardChoiceLocationLabels,
   handCardChoiceOptions,
   heroTargetSide,
+  numberChoice,
   optDecisionCards,
   boundedCardChoiceSelectable,
   toggleBoundedCardChoice,
@@ -238,12 +243,88 @@ describe("card-name autocomplete", () => {
     );
   });
 
+  it("renders long consecutive number choices as a number input", () => {
+    const options = Array.from({ length: 99 }, (_, index) => String(index + 1));
+    const decision = { player: 0, kind: "choose-target", prompt: "Choose a number", options } as const;
+    expect(numberChoice(decision)).toMatchObject({ minimum: 1, maximum: 99 });
+    expect(numberChoice({ ...decision, options: options.slice(0, 6) })).toBeNull();
+
+    const html = renderLocalized(
+      <PendingDecisionPanel
+        model={{
+          decision,
+          isMine: true,
+          canPass: false,
+          defendPitchIds: new Set(),
+          hand: [],
+          defendSel: [],
+          selectedPitchIds: [],
+          onTogglePitch: () => undefined,
+          resourcePaymentSelected: 0,
+          resourcePaymentRequired: 0,
+          confirmSkipArsenal: false,
+          onRequestPass: () => undefined,
+          onDisableGuidance: () => undefined,
+          onConfirmSkipArsenal: () => undefined,
+          onCancelSkipArsenal: () => undefined,
+          onSend: () => undefined,
+        }}
+        viewerSeat={0}
+      />,
+    );
+    expect(html).toContain('class="number-dial"');
+    expect(html).toContain('value="1"');
+    expect(html).toContain("1–99");
+    expect(html).toContain("Choose 1");
+    expect(html).not.toContain(">42<");
+  });
+
+  it("routes declared-X options through the number input and keeps other options", () => {
+    const choice = numberChoice({
+      player: 0,
+      kind: "choose-target",
+      prompt: "Choose X",
+      options: ["X = 0", "X = 2", "X = 5", "no"],
+      defaultOption: "X = 2",
+    });
+
+    expect(choice).toMatchObject({ minimum: 0, maximum: 5, defaultValue: 2 });
+    expect(choice?.optionByValue.get(5)).toBe("X = 5");
+    expect(choice?.optionByValue.has(1)).toBe(false);
+    expect(numberChoice({ player: 0, kind: "choose-target", prompt: "Choose X", options: ["X = 0", "X = 1", "X = 2", "X = 3", "X = 4"] })).toBeNull();
+    expect(numberChoice({ player: 0, kind: "choose-target", prompt: "Choose X", options: ["X = 0"] })).toBeNull();
+  });
+
+  it("steps the number dial across gaps and stops at the ends", () => {
+    const values = [0, 2, 3, 7];
+    expect(steppedNumberChoice(values, 0, 1)).toBe(2);
+    expect(steppedNumberChoice(values, 3, -1)).toBe(2);
+    expect(steppedNumberChoice(values, 3, 10)).toBe(7);
+    expect(steppedNumberChoice(values, 2, -10)).toBe(0);
+  });
+
   it("accepts the highlighted suggestion on Enter without submitting it", () => {
     expect(cardNameEnterAction(true, ["Head Jab", "Hundred Winds"], 1)).toEqual({
       kind: "accept-suggestion",
       name: "Hundred Winds",
     });
     expect(cardNameEnterAction(false, ["Hundred Winds"], 0)).toEqual({ kind: "submit" });
+  });
+
+  it("does not pick a suggestion on Enter until one is highlighted", () => {
+    expect(cardNameSuggestions("shadowrealm h")[0]).toBe("Shadowrealm Harrower");
+    expect(cardNameEnterAction(true, cardNameSuggestions("shadowrealm h"), -1)).toEqual({ kind: "submit" });
+  });
+
+  it("only treats a complete registered name as submittable", () => {
+    expect(registeredCardName("shadowrealm h")).toBeUndefined();
+    expect(registeredCardName("  shadowrealm horror ")).toBe("Shadowrealm Horror");
+  });
+
+  it("splits a suggestion around the typed text", () => {
+    expect(cardNameSuggestionParts("Shadowrealm Horror", " shadowrealm ")).toEqual(["", "Shadowrealm", " Horror"]);
+    expect(cardNameSuggestionParts("Shadowrealm Horror", "horr")).toEqual(["Shadowrealm ", "Horr", "or"]);
+    expect(cardNameSuggestionParts("Shadowrealm Horror", "")).toEqual(["", "", "Shadowrealm Horror"]);
   });
 });
 
@@ -360,6 +441,25 @@ describe("priority guidance help", () => {
     expect(html).not.toContain("decision-guidance-info");
   });
 
+  it("shows a trigger's warning beside its yes/no prompt", () => {
+    const model = pendingModel("optional-effect");
+    model.decision = {
+      player: 0,
+      kind: "optional-effect",
+      prompt: "Cadaver Handlers: Destroy 2 Silver to equip this",
+      warningMessage: {
+        id: "card.trigger.common.silver.equip.blocked",
+        values: { card: { kind: "card", cardId: "MPA007" } },
+      },
+      options: ["yes", "no"],
+      optionMessages: [{ id: "common.option.yes" }, { id: "common.option.no" }],
+    };
+    const html = renderLocalized(<PendingDecisionPanel model={model} viewerSeat={0} />);
+
+    expect(html).toContain("can&#x27;t be equipped");
+    expect(html).toContain('data-cardid="MPA007"');
+  });
+
   it("renders semantic prompts and unchanged yes/no option ids in Chinese", () => {
     const model = pendingModel("optional-effect");
     model.decision = {
@@ -381,7 +481,7 @@ describe("priority guidance help", () => {
     );
 
     expect(html).toContain('data-cardid="AHA005"');
-    expect(html).toContain("Crank——移除一个蒸汽指示物");
+    expect(html).toContain("Crank——移除一个 steam 指示物");
     expect(html).toContain(">是");
     expect(html).toContain(">否<");
     expect(html).toContain('title="是（空格键）"');
@@ -398,7 +498,7 @@ describe("priority guidance help", () => {
     };
     const html = renderLocalized(createElement(PendingDecisionPanel, { model, viewerSeat: 0 }));
 
-    expect(html).toContain('class="decision decision-options decision-choice"');
+    expect(html).toContain('class="decision decision-options decision-choice decision-sheet"');
     expect(html.match(/class="decision-choice-option"/g)).toHaveLength(3);
     expect(html).toContain(">Pass</span>");
     expect(html).not.toContain('class="decision-buttons"');
@@ -562,7 +662,7 @@ describe("priority guidance help", () => {
       optionLabels: ["Add an energy counter", "Remove a steam counter or destroy this"],
       optionMessages: [
         { id: "card.trigger.energycounter.add" },
-        { id: "card.trigger.steam.maintain" },
+        { id: "card.trigger.common.steam.maintain" },
       ],
       optionCounts: [null, null],
       optionCards: [null, null],
@@ -616,7 +716,7 @@ describe("priority guidance help", () => {
       kind: "choose-target",
       prompt: "Choose a target for 7 arcane damage",
       promptMessage: {
-        id: "card.sea.damage.arcane.target",
+        id: "card.common.arcane.damage.target",
         values: { amount: 7 },
       },
       options: ["hero:1"],
@@ -714,16 +814,23 @@ describe("scripted card-choice presentation", () => {
     expect(duplicateCardsHtml).toContain('aria-hidden="true">Discard Duty Bound Blitz</span>');
   });
 
+  const LOCATION_TEXT = {
+    yourHero: "Your Hero",
+    opponentHero: "Opponent's Hero",
+    leftWeapon: "Left weapon",
+    rightWeapon: "Right weapon",
+    yourArsenal: "Your Arsenal",
+  };
+
   it("labels hero choices relative to the deciding player", () => {
-    expect(cardChoiceLocationLabels(11, 22, [], {
-      yourHero: "Your Hero",
-      opponentHero: "Opponent's Hero",
-      leftWeapon: "Left weapon",
-      rightWeapon: "Right weapon",
-    })).toEqual(new Map([
+    expect(cardChoiceLocationLabels(11, 22, [], [], LOCATION_TEXT)).toEqual(new Map([
       [11, "Your Hero"],
       [22, "Opponent's Hero"],
     ]));
+  });
+
+  it("labels arsenal choices so a duplicate in hand stays distinguishable", () => {
+    expect(cardChoiceLocationLabels(11, 22, [], [33], LOCATION_TEXT).get(33)).toBe("Your Arsenal");
   });
 
   it("labels matching weapon choices by their table position", () => {
@@ -766,6 +873,96 @@ describe("scripted card-choice presentation", () => {
     expect(html).toContain('aria-label="TST-DAGGER — Right weapon"');
     expect(html).toContain('aria-hidden="true">Left weapon</span>');
     expect(html).toContain('aria-hidden="true">Right weapon</span>');
+  });
+
+  it("opens card choices as a sheet that the float can hide", () => {
+    const card = { instanceId: 41, cardId: "TST-DAGGER", owner: 0 };
+    const model: PendingDecisionModel = {
+      decision: {
+        player: 0,
+        kind: "choose-target",
+        prompt: "Choose a dagger",
+        options: ["no", "41"],
+        optionCards: [null, card],
+      },
+      isMine: true,
+      canPass: false,
+      defendPitchIds: new Set(),
+      hand: [],
+      defendSel: [],
+      selectedPitchIds: [],
+      onTogglePitch: () => undefined,
+      resourcePaymentSelected: 0,
+      resourcePaymentRequired: 0,
+      confirmSkipArsenal: false,
+      onRequestPass: () => undefined,
+      onDisableGuidance: () => undefined,
+      onConfirmSkipArsenal: () => undefined,
+      onCancelSkipArsenal: () => undefined,
+      onSend: () => undefined,
+    };
+
+    const html = renderLocalized(
+      <DecisionSheetMinimize.Provider value={() => undefined}>
+        <PendingDecisionPanel model={model} viewerSeat={0} />
+      </DecisionSheetMinimize.Provider>,
+    );
+    expect(html).toContain("decision-sheet");
+    expect(html).toContain('aria-label="Hide choice"');
+
+    const handPick = renderLocalized(
+      <DecisionSheetMinimize.Provider value={() => undefined}>
+        <PendingDecisionPanel
+          model={{ ...model, decision: { ...model.decision!, options: ["pass", "41"] }, hand: [card] }}
+          viewerSeat={0}
+        />
+      </DecisionSheetMinimize.Provider>,
+    );
+    expect(handPick).not.toContain("decision-sheet");
+  });
+
+  it("offers don't-ask-again for a trigger target, naming its source", () => {
+    const mine = { instanceId: 11, cardId: "TST-HERO-A", owner: 0 };
+    const theirs = { instanceId: 22, cardId: "TST-HERO-B", owner: 1 };
+    const render = (triggerTarget: boolean, on = false) => renderLocalized(
+      <PendingDecisionPanel
+        viewerSeat={0}
+        model={{
+          decision: {
+            player: 0,
+            kind: "choose-target",
+            prompt: "Deal 1 arcane damage to any target",
+            options: ["11", "22"],
+            optionCards: [mine, theirs],
+            defaultOption: "22",
+            ...(triggerTarget ? { triggerTarget: { sourceInstanceId: 5, sourceCardId: "TST-ARC" } } : {}),
+          },
+          isMine: true,
+          canPass: false,
+          defendPitchIds: new Set(),
+          hand: [],
+          defendSel: [],
+          selectedPitchIds: [],
+          onTogglePitch: () => undefined,
+          resourcePaymentSelected: 0,
+          resourcePaymentRequired: 0,
+          confirmSkipArsenal: false,
+          onRequestPass: () => undefined,
+          onDisableGuidance: () => undefined,
+          rememberTarget: { on, onChange: () => undefined },
+          onConfirmSkipArsenal: () => undefined,
+          onCancelSkipArsenal: () => undefined,
+          onSend: () => undefined,
+        }}
+      />,
+    );
+    const html = render(true);
+    expect(html).toContain("ask again for");
+    expect(html).toContain('data-cardid="TST-ARC"');
+    expect(html).toContain('role="switch"');
+    expect(html).not.toContain("checked");
+    expect(render(true, true)).toContain("checked");
+    expect(render(false)).not.toContain("ask again for");
   });
 
   it("marks the scripted Space default among card choices", () => {
@@ -1140,6 +1337,34 @@ describe("action confirmation", () => {
     expect(html).toContain("Play (Space)");
     expect(html).toContain('aria-keyshortcuts="Space"');
     expect(html).toContain("Cancel");
+    expect(html).not.toContain("graveyard");
+  });
+
+  it("warns when the played equipment will go to the graveyard", () => {
+    const html = renderLocalized(createElement(ActionConfirmation, {
+      cardId: "TEST-CARD",
+      activation: false,
+      equipBlockedBy: "MST228",
+      onConfirm: () => undefined,
+      onCancel: () => undefined,
+    }));
+
+    expect(html).toContain("can&#x27;t be equipped");
+    expect(html).toContain("graveyard");
+    expect(html).toContain("Evo Recall");
+  });
+
+  it("warns when an Evo has no base to transform", () => {
+    const html = renderLocalized(createElement(ActionConfirmation, {
+      cardId: "TEST-CARD",
+      activation: false,
+      equipBlockedBy: null,
+      onConfirm: () => undefined,
+      onCancel: () => undefined,
+    }));
+
+    expect(html).toContain("no base equipment");
+    expect(html).toContain("graveyard");
   });
 });
 

@@ -2,11 +2,14 @@ import { cardData, precon, validatePresentation } from "@fyendal/cards";
 import type { Decklist } from "@fyendal/shared";
 import { describe, expect, it } from "vitest";
 import {
+  auroraPresentationFor,
   boltynPreferredTurnOrderFor,
   boltynPresentationFor,
   bravoPresentationFor,
   briarPresentationFor,
   cindraPresentationFor,
+  dorintheaSageMatchupForHeroName,
+  dorintheaSagePresentationFor,
   halaPresentationFor,
   iraPresentation,
   iraSageMatchupForHeroName,
@@ -191,6 +194,84 @@ describe("SAGE Ira matchup presentation", () => {
   });
 });
 
+describe("SAGE Dorinthea matchup presentation", () => {
+  const pool = precon("bot-dorinthea-sage")!.pool;
+  const present = (heroName: string, classes: string[] = ["mechanologist"], order: "first" | "second" = "first") => {
+    const cards = { ...cardData, OPPONENT: { ...cardData["MON119"]!, name: heroName, classes } };
+    return dorintheaSagePresentationFor({ heroId: "OPPONENT", weaponIds: [], equipment: {} }, order, cards);
+  };
+  const flex = (heroName: string, classes?: string[]) => {
+    const names = ["Arcane Polarity", "Oasis Respite", "On the Horizon", "Test of Strength",
+      "Crash Down the Gates", "Raging Onslaught"];
+    const deck = present(heroName, classes).deck.map((id) => cardData[id]!.name);
+    return names.filter((name) => deck.includes(name));
+  };
+  const equipment = (heroName: string, classes?: string[], order?: "first" | "second") =>
+    Object.values(present(heroName, classes, order).equipment).map((id) => cardData[id!]?.name);
+  const unity = ["Helm of Unity", "Plating of Unity", "Gauntlets of Unity", "Pillar of Unity"];
+
+  it("groups heroes by matchup", () => {
+    expect(dorintheaSageMatchupForHeroName("kano", ["wizard"])).toBe("wizard");
+    expect(dorintheaSageMatchupForHeroName("briar", ["runeblade"])).toBe("briar");
+    expect(dorintheaSageMatchupForHeroName("florian", ["runeblade"])).toBe("runeblade");
+    expect(dorintheaSageMatchupForHeroName("dorinthea", ["warrior"])).toBe("fatigue");
+    expect(dorintheaSageMatchupForHeroName("bravo, flattering showman", ["guardian"])).toBe("guardian");
+    expect(dorintheaSageMatchupForHeroName("kayo", ["brute"])).toBe("default");
+    expect(dorintheaSageMatchupForHeroName("fai", ["ninja"])).toBe("aggro");
+    expect(dorintheaSageMatchupForHeroName("azalea", ["ranger"])).toBe("value");
+    expect(dorintheaSageMatchupForHeroName("kassai", ["warrior"])).toBe("value");
+    expect(dorintheaSageMatchupForHeroName("dromai", ["illusionist"])).toBe("default");
+  });
+
+  it("presents a legal forty in every matchup and turn order", () => {
+    const heroes = [
+      ["Kano", "wizard"], ["Briar", "runeblade"], ["Florian", "runeblade"], ["Dorinthea", "warrior"],
+      ["Oldhim", "guardian"], ["Kayo", "brute"], ["Fai", "ninja"], ["Azalea", "ranger"], ["Dromai", "illusionist"],
+      ["Puffin", "mechanologist"],
+    ] as const;
+    for (const [name, heroClass] of heroes) {
+      for (const order of ["first", "second"] as const) {
+        const presented = present(name, [heroClass], order);
+        expect(presented.deck, name).toHaveLength(40);
+        expect(validatePresentation(pool, presented, "silver-age", { cardPoolMode: "open" }), name)
+          .toMatchObject({ ok: true });
+      }
+    }
+  });
+
+  it("adds each matchup's four flex cards to the core", () => {
+    expect(flex("Puffin", ["mechanologist"])).toEqual(["On the Horizon", "Test of Strength"]);
+    expect(flex("Dromai", ["illusionist"])).toEqual(["On the Horizon", "Test of Strength"]);
+    expect(flex("Enigma", ["illusionist"])).toEqual(["On the Horizon", "Test of Strength"]);
+    expect(flex("Fai", ["ninja"])).toEqual(["On the Horizon", "Test of Strength"]);
+    expect(flex("Kayo", ["brute"])).toEqual(["On the Horizon", "Test of Strength"]);
+    expect(flex("Azalea", ["ranger"])).toEqual(["Oasis Respite", "On the Horizon"]);
+    expect(flex("Oldhim", ["guardian"])).toEqual(["Oasis Respite", "On the Horizon"]);
+    expect(flex("Kano", ["wizard"])).toEqual(["Arcane Polarity", "Oasis Respite"]);
+    expect(flex("Florian", ["runeblade"])).toEqual(["Arcane Polarity", "Oasis Respite"]);
+    expect(flex("Briar", ["runeblade"])).toEqual(["Arcane Polarity", "On the Horizon"]);
+    expect(flex("Dorinthea", ["warrior"])).toEqual(["Oasis Respite", "Crash Down the Gates", "Raging Onslaught"]);
+  });
+
+  it("wears full Nullrune into Wizards and one piece into Runeblades", () => {
+    expect(equipment("Kayo", ["brute"])).toEqual(unity);
+    expect(equipment("Kano", ["wizard"]))
+      .toEqual(["Nullrune Hood", "Nullrune Robe", "Nullrune Gloves", "Pillar of Unity"]);
+    expect(equipment("Florian", ["runeblade"])).toEqual(["Nullrune Hood", ...unity.slice(1)]);
+  });
+
+  it("wears Refraction Bolters into Guardians, fatigue and when racing aggro on the draw", () => {
+    const bolters = [...unity.slice(0, 3), "Refraction Bolters"];
+    expect(equipment("Oldhim", ["guardian"])).toEqual(bolters);
+    expect(equipment("Dorinthea", ["warrior"])).toEqual(bolters);
+    expect(equipment("Fai", ["ninja"], "first")).toEqual(unity);
+    expect(equipment("Fai", ["ninja"], "second")).toEqual(bolters);
+    expect(equipment("Briar", ["runeblade"], "second"))
+      .toEqual(["Nullrune Hood", "Plating of Unity", "Gauntlets of Unity", "Refraction Bolters"]);
+    expect(equipment("Kayo", ["brute"], "second")).toEqual(unity);
+  });
+});
+
 describe("Bravo Fabrary matchup presentation", () => {
   it.each(["SBZ001", "ARC113"])(
     "uses the fatigue package and AB3 equipment against %s",
@@ -340,7 +421,7 @@ describe("Cindra Fabrary matchup presentation", () => {
       opponent({ heroId: "AIO001" }),
       opponent({ heroId: "ASB001" }),
     ]) {
-      expect(validatePresentation(pool, cindraPresentationFor(matchup), "cc"))
+      expect(validatePresentation(pool, cindraPresentationFor(matchup), "cc", { cardPoolMode: "open" }))
         .toMatchObject({ ok: true });
     }
   });
@@ -627,5 +708,47 @@ describe("Boltyn Raydn matchup guide", () => {
     expect(count(guide("Marlynn, Treasure Hunter").presented.deck, "ASB016")).toBe(3);
     expect(guide("Aurora, Tempest in a Teacup").presented.equipment.arms).toBe("PEN179");
     expect(guide("Olympia, Prized Fighter").presented.deck).toHaveLength(63);
+  });
+});
+
+describe("Aurora stance guide", () => {
+  const pool = precon("bot-aurora-tempest")!.pool;
+  const guide = (heroName: string, classes: string[] = []) => {
+    const cards = { ...cardData, GUIDE_HERO: { ...cardData["WTR001"]!, name: heroName, classes } };
+    const presented = auroraPresentationFor({ heroId: "GUIDE_HERO", weaponIds: [], equipment: {} }, cards);
+    return { presented, validation: validatePresentation(pool, presented, "cc", { cardPoolMode: "open" }) };
+  };
+  const count = (deck: readonly string[], id: string) => deck.filter((card) => card === id).length;
+
+  it("is the beatdown with Flittering Charge and the +3 instants against slower heroes", () => {
+    const { presented, validation } = guide("Oldhim, Grandfather of Eternity", ["guardian"]);
+    expect(validation).toMatchObject({ ok: true });
+    expect(presented.weaponIds).toEqual(["SBA002"]);
+    expect(presented.equipment).toEqual({ head: "PEN310", chest: "MON230", arms: "ARC078", legs: "WTR154" });
+    expect(presented.deck).toHaveLength(60);
+    expect(count(presented.deck, "AST010")).toBe(3);
+    expect(count(presented.deck, "LGS347")).toBe(3);
+    expect(count(presented.deck, "FAB262")).toBe(3);
+    expect(presented.deck).not.toContain("ELE227");
+    expect(presented.deck).not.toContain("ANQ034");
+  });
+
+  it("brings defense reactions, Rush of Power and the third Scar against racing heroes", () => {
+    const { presented, validation } = guide("Cindra, Dracai of Retribution", ["ninja"]);
+    expect(validation).toMatchObject({ ok: true });
+    expect(presented.deck).toHaveLength(60);
+    expect(count(presented.deck, "ELE227")).toBe(3);
+    expect(count(presented.deck, "ANQ034")).toBe(3);
+    expect(count(presented.deck, "OMN068")).toBe(2);
+    expect(count(presented.deck, "ANQ030")).toBe(3);
+    expect(presented.deck).not.toContain("AST010");
+    expect(presented.equipment.arms).toBe("ARC078");
+  });
+
+  it("wears Vexing Quillhand into arcane damage", () => {
+    expect(guide("Oscilio, Constella Intelligence", ["wizard"]).presented.equipment.arms).toBe("EVR103");
+    expect(guide("Briar, Warden of Thorns", ["runeblade"]).presented).toMatchObject({
+      equipment: { arms: "EVR103" },
+    });
   });
 });

@@ -2,7 +2,7 @@
  {
   "id": "AIO001",
   "name": "Dash I/O",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may look at the top card of your deck at any time.\nOnce per turn, you may play a Mechanologist item with cost 0 or 1 from the top of your deck as though it were an instant. It costs an additional {r} to play.",
   "classes": [
    "mechanologist"
@@ -14,7 +14,7 @@
  {
   "id": "AIO002",
   "name": "Symbiosis Shot",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Dash Specialization\nAction - Remove a steam counter from this: Attack\nWhenever a Mechanologist item enters the arena under your control, if this has fewer than 6 steam counters, you may put a steam counter on this.",
   "attack": 2,
   "classes": [
@@ -32,7 +32,7 @@
  {
   "id": "AIO003",
   "name": "Heavy Industry Surveillance",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, you may banish the top card of your deck. If it's a Mechanologist card, this gets +1{d} until end of turn.\nTemper",
   "defense": 1,
   "classes": [
@@ -49,7 +49,7 @@
  {
   "id": "AIO004",
   "name": "Heavy Industry Power Plant",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}, destroy this: Whenever you boost this turn, gain {r}. Go again\nTemper",
   "defense": 2,
   "classes": [
@@ -66,7 +66,7 @@
  {
   "id": "AIO005",
   "name": "Heavy Industry Ram Stop",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When this defends, you may pay {r}. If you do, it gets +1{d} until end of turn.\nTemper",
   "defense": 1,
   "classes": [
@@ -83,7 +83,7 @@
  {
   "id": "AIO006",
   "name": "Heavy Industry Gear Shift",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Banish the top 2 cards of your deck. Gain 1 action point for each Mechanologist card banished this way.\nBattleworn",
   "defense": 1,
   "classes": [
@@ -100,7 +100,7 @@
  {
   "id": "AIO007",
   "name": "Data Link",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, opt 1.",
   "pitch": 1,
   "cost": 0,
@@ -121,7 +121,7 @@
  {
   "id": "AIO008",
   "name": "Dive Through Data",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, opt 1.",
   "pitch": 1,
   "cost": 1,
@@ -142,7 +142,7 @@
  {
   "id": "AIO009",
   "name": "Fast and Furious",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nIf you've cranked this turn, this gets +1{p}.\nWhen this is banished from boosting, put a steam counter on an item you control with crank.",
   "pitch": 1,
   "cost": 0,
@@ -162,7 +162,7 @@
  {
   "id": "AIO010",
   "name": "Maximum Velocity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Play this only if you've boosted 3 or more times this turn.",
   "pitch": 1,
   "cost": 2,
@@ -179,7 +179,7 @@
  {
   "id": "AIO011",
   "name": "Throttle",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 1,
   "cost": 2,
@@ -199,7 +199,7 @@
  {
   "id": "AIO012",
   "name": "Zero to Sixty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 1,
   "cost": 0,
@@ -219,7 +219,7 @@
  {
   "id": "AIO013",
   "name": "Zipper Hit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 1,
   "cost": 1,
@@ -239,7 +239,7 @@
  {
   "id": "AIO014",
   "name": "Backup Protocol: RED",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nInstant - {r}{r}, destroy this: Return a red Mechanologist attack action card from your graveyard to your hand.",
   "pitch": 1,
   "cost": 0,
@@ -257,7 +257,7 @@
  {
   "id": "AIO015",
   "name": "Boom Grenade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nWhen a Mechanologist attack action card you control hits a hero, destroy this and deal 4 damage to them.",
   "pitch": 1,
   "cost": 0,
@@ -275,7 +275,7 @@
  {
   "id": "AIO016",
   "name": "Convection Amplifier",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Convection Amplifier enters the arena with 2 steam counters on it. When Convection Amplifier has no steam counters on it, destroy it.\nAction - Remove a steam counter from Convection Amplifier: The next attack action card you play this turn gains dominate. Go again",
   "pitch": 1,
   "cost": 0,
@@ -290,7 +290,7 @@
  {
   "id": "AIO017",
   "name": "Dissolving Shield",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with 3 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.\nInstant - Remove a steam counter from this: Prevent the next 1 damage that would be dealt to you this turn. If this has no steam counters, destroy it.",
   "pitch": 1,
   "cost": 0,
@@ -308,7 +308,7 @@
  {
   "id": "AIO018",
   "name": "Zero to Sixty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 2,
   "cost": 0,
@@ -328,7 +328,7 @@
  {
   "id": "AIO019",
   "name": "Zipper Hit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 2,
   "cost": 1,
@@ -348,7 +348,7 @@
  {
   "id": "AIO020",
   "name": "Boom Grenade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nWhen a Mechanologist attack action card you control hits a hero, destroy this and deal 3 damage to them.",
   "pitch": 2,
   "cost": 0,
@@ -366,7 +366,7 @@
  {
   "id": "AIO021",
   "name": "Data Link",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, opt 1.",
   "pitch": 3,
   "cost": 0,
@@ -387,7 +387,7 @@
  {
   "id": "AIO022",
   "name": "Expedite",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost\nWhen this hits, you may put an item with cost 0 or 1 from your hand into the arena.",
   "pitch": 3,
   "cost": 0,
@@ -407,7 +407,7 @@
  {
   "id": "AIO023",
   "name": "Zero to Sixty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 3,
   "cost": 0,
@@ -427,7 +427,7 @@
  {
   "id": "AIO024",
   "name": "Zipper Hit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Boost",
   "pitch": 3,
   "cost": 1,
@@ -447,7 +447,7 @@
  {
   "id": "AIO025",
   "name": "Backup Protocol: BLU",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with a steam counter. At the start of your turn, destroy this unless you remove a steam counter from it.\nInstant - {r}{r}, destroy this: Return a blue Mechanologist attack action card from your graveyard to your hand.",
   "pitch": 3,
   "cost": 0,
@@ -465,7 +465,7 @@
  {
   "id": "AIO026",
   "name": "Cerebellum Processor",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Crank\nThis enters the arena with 2 steam counters. At the start of your turn, destroy this unless you remove a steam counter from it.\nOnce per Turn Action - 0: Draw a card.",
   "pitch": 3,
   "cost": 0,
@@ -483,7 +483,7 @@
  {
   "id": "AIO027",
   "name": "Steam Canister",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Instant - Put this on the bottom of its owner's deck: Put a steam counter on an item you control with crank.",
   "pitch": 3,
   "cost": 0,

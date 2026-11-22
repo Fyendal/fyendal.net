@@ -1,9 +1,11 @@
 import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import {
   buffNextAttack,
+  crushTriggered,
   decisionMessage,
   decisionPrompt,
   entersArenaTrigger,
+  equippedCards,
   localizedLog,
   opponentSeat,
   payForDefenseBoost,
@@ -14,10 +16,6 @@ import {
 // Crush keyword: these attacks have an additional "on hit" effect if they deal
 // 4 or more damage to a hero.
 
-function crushTriggered(ctx: ScriptCtx): boolean {
-  return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.damage >= 4 && ctx.link.hit;
-}
-
 function opponentEquipmentOptions(ctx: ScriptCtx): string[] {
   const opp = ctx.player(opponentSeat(ctx));
   const options: string[] = [];
@@ -25,7 +23,7 @@ function opponentEquipmentOptions(ctx: ScriptCtx): string[] {
     if (eq) options.push(`${slot}:${eq.instanceId}`);
   }
   for (const eq of opp.weapons) {
-    if (ctx.cardData(eq.cardId).cardType === "equipment") options.push(`off-hand:${eq.instanceId}`);
+    if (ctx.hasCardType(eq, "equipment")) options.push(`off-hand:${eq.instanceId}`);
   }
   return options;
 }
@@ -36,10 +34,7 @@ function findOpponentEquipment(
 ): { readonly instanceId: number; readonly cardId: string; readonly defCounters?: number } | undefined {
   const opp = ctx.player(opponentSeat(ctx));
   const instanceId = Number(optionId.split(":")[1]);
-  return [
-    ...Object.values(opp.equipment),
-    ...opp.weapons.filter((eq) => ctx.cardData(eq.cardId).cardType === "equipment"),
-  ].find((eq) => eq?.instanceId === instanceId);
+  return equippedCards(ctx, opp.seat).find((eq) => eq.instanceId === instanceId);
 }
 
 // ── Auras: Blessing of Deliverance, Emerging Power, Stonewall Confidence ─────

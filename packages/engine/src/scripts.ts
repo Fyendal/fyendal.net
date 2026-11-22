@@ -44,6 +44,8 @@ export interface ScriptDecisionPrompt {
    * the player beside the remaining options. Labels come from
    * `optionMessagesByValue`. */
   chosenOptions?: readonly string[];
+  /** Caveat shown beside the prompt. Honored by `requestChoice` and `requestPayment`. */
+  warningMessage?: GameMessage;
 }
 
 export type ScriptPrompt = string | ScriptDecisionPrompt;
@@ -77,13 +79,16 @@ export interface ScriptCtx {
   ): void;
   /** Read one player's state. The result is deeply readonly. */
   player(targetSeat: number): DeepReadonly<PlayerState>;
+  /** CR 3.0.1a: whether this equipment zone holds neither equipment nor a token placed in it. */
+  equipmentZoneEmpty(targetSeat: number, slot: EquipmentSlot): boolean;
   /** Attacks waiting in a player's attack queue, first attack first. CR
    * 3.15.7f treats them as on the stack when choosing targets. */
   queuedAttacks(targetSeat: number): readonly DeepReadonly<CardInstance>[];
-  /** Add or spend floating resources/chi or action points through bounded commands. */
-  changeResources(targetSeat: number, delta: number): void;
-  changeChi(targetSeat: number, delta: number): void;
-  changeActionPoints(targetSeat: number, delta: number): void;
+  /** Gain floating resources, chi or action points through bounded commands.
+   * Gaining action points fails outside that seat's action phase. */
+  gainResources(targetSeat: number, amount: number): void;
+  gainChi(targetSeat: number, amount: number): void;
+  gainActionPoints(targetSeat: number, amount: number): void;
   /** Permit a permanent's once-per-turn ability to be activated `count`
    * additional times this turn. */
   grantAdditionalActivation(instanceId: number, count?: number): void;
@@ -207,7 +212,8 @@ export interface ScriptCtx {
    * counters and continuous modifiers; 0 when it is not defending. */
   currentDefense(card: number | DeepReadonly<CardInstance>): number;
   /** Full current power of the active attack, including base changes,
-   * counters, continuous modifiers, and opposing effects. */
+   * counters, continuous modifiers, and opposing effects; a resolved link
+   * reports its power at resolution. */
   currentAttackPower(): number;
   /** Whether the active attack currently has dominate from any rules source. */
   currentAttackHasDominate(): boolean;
@@ -258,9 +264,11 @@ export interface ScriptCtx {
   gainLife(targetSeat: number, n: number): void;
   /** Lose life without creating a damage event. */
   loseLife(targetSeat: number, n: number): void;
-  /** Grant the controller 1 action point (go again on a resolving layer).
-   *  Fails for the non-turn player (CR 8.5.7b). */
+  /** Grant the controller 1 action point, for text that says so; "go again"
+   *  uses `grantGoAgain`. Fails outside their action phase (CR 1.13.2b). */
   gainActionPoint(): void;
+  /** Whether `gainActionPoint` would currently grant the controller a point. */
+  canGainActionPoint(): boolean;
   drawCards(targetSeat: number, n: number): void;
   /** Seeded random discard from hand; returns the discarded cards */
   discardRandom(targetSeat: number, n: number): DeepReadonly<CardInstance>[];
@@ -282,6 +290,8 @@ export interface ScriptCtx {
    * already-resolved link does not resolve that link again or retroactively
    * grant an action point. */
   grantGoAgain(targetAttackInstanceId?: number): void;
+  /** Give this source's resolving activated ability go again. */
+  grantAbilityGoAgain(): void;
   /** Give the attack on an exact combat-chain link go again. Use this for
    * targeted effects because a weapon or ally may attack on multiple links
    * with the same permanent instance id. */
@@ -298,7 +308,7 @@ export interface ScriptCtx {
   requestClash(withSeat: number, resultHook: string): void;
   /** Wager with another hero on the current attack (CR 8.5.46). This marks
    *  the attack as having wagered immediately; its hit/miss result determines
-   *  the winner and awards the listed reward tokens when the link resolves.
+   *  the winner and awards the listed reward tokens in the Damage Step.
    *  Non-token rewards supply their public tooltip description explicitly. */
   wager(withSeat: number, rewardCardIds: readonly string[], rewardLabel?: string): void;
   /** Compare two heroes' life: 1 = a has more, -1 = a has less, 0 = tied.
@@ -371,6 +381,8 @@ export interface ScriptCtx {
   transcend(): void;
   /** Destroy self (permanent or face-up attack); moves to graveyard and fires onDestroyed. */
   destroySelf(): void;
+  /** Record that this seat completed a contract and raise "contract-completed". */
+  completeContract(): void;
   /** Charge the controller's hero's soul: move the chosen card from their hand
    *  toward the soul zone, set the per-turn charge flags (`chargedThisTurn`,
    *  `chargedCountThisTurn`, `chargedPitch:<n>`), and raise the
@@ -378,7 +390,7 @@ export interface ScriptCtx {
    *  the move's destination.
    *  Returns the charged card, or undefined when it is not in hand. */
   charge(instanceId: number): DeepReadonly<CardInstance> | undefined;
-  /** Move a card from any of its owner's zones into its owner's soul (face up).
+  /** Move a card from any zone into this controller's hero's soul (face up).
    *  Sets the per-turn "put into soul" flags (`soulThisTurn`, `soulPitch:<n>`)
    *  but does NOT raise "card-charged" — only charging does. */
   putIntoSoul(instanceId: number): boolean;
@@ -400,6 +412,9 @@ export interface ScriptCtx {
    *  to keep the state the card already had. `asAttackingCard` attributes the
    *  banish to the active attack when resolving an ability granted to it. */
   banish(instanceId: number, opts?: { faceDown?: boolean; asAttackingCard?: boolean }): boolean;
+  /** Banish several cards as one event ("banish the top 2 cards"), so
+   *  "cards-banished" triggers once per owner and zone. Returns the count moved. */
+  banishCards(instanceIds: readonly number[], opts?: { faceDown?: boolean; asAttackingCard?: boolean }): number;
   /** Mark every card currently defending on the open combat chain to be
    *  banished by the ordinary chain-close settlement flow. */
   banishAllDefendingCardsOnChainClose(): void;
@@ -439,8 +454,8 @@ export interface ScriptCtx {
   preventAuraTokenCreationNextTurn(targetSeat: number): void;
   /** Create a token/aura; returns the created instance, or undefined when a
    *  replacement effect prevents its creation. Defaults to the
-   *  controller's board — pass `seat` to create it for another player
-   *  (e.g. Test of Strength's clash winner). `initialCounters` and
+   *  controller's board — pass `seat` for "create under that hero's control"
+   *  (`heroCreatesTokens` when the hero is the creator). `initialCounters` and
    *  `initialState` are present as the token enters, before Crank and
    *  enter-arena observers. */
   createToken(
@@ -464,6 +479,11 @@ export interface ScriptCtx {
     initialCounters?: Readonly<CardCounters>,
     initialState?: Readonly<Record<string, number>>,
   ): DeepReadonly<CardInstance>[];
+  /** "<Hero> creates": that hero is the creator (CR 8.5.2c), unlike the
+   * effect's controller creating under their control with `createTokens`. */
+  heroCreatesTokens(seat: number, cardId: string, count?: number): DeepReadonly<CardInstance>[];
+  /** Create under `seat`'s control while this effect's controller owns the token. */
+  createOwnedTokenUnder(seat: number, cardId: string): DeepReadonly<CardInstance> | undefined;
   /** Create a new card object directly in a player's hand. The created card's
    * identity is public because the generating effect names it. */
   createCardInHand(cardId: string, seat?: number): DeepReadonly<CardInstance>;
@@ -501,11 +521,16 @@ export interface ScriptCtx {
   hasCardType(card: DeepReadonly<CardInstance>, cardType: CardType): boolean;
   /** Effective classes and subtypes, including all-zone and granted types. */
   cardTypes(card: DeepReadonly<CardInstance>): readonly string[];
+  /** Whether this object currently has any class or talent supertype. */
+  hasClassOrTalent(card: DeepReadonly<CardInstance>): boolean;
   /** Whether this permanent currently counts as a Runechant. */
   isRunechant(card: DeepReadonly<CardInstance>): boolean;
   /** Whether an item currently has Crank, including continuous grants from
    * active sources and suppression of its printed abilities. */
   hasCrank(card: DeepReadonly<CardInstance>): boolean;
+  /** Whether an object currently has a keyword, honoring grants, suppression
+   * and ability loss. Use `cardData(...).keywords` only for printed text. */
+  hasKeyword(card: DeepReadonly<CardInstance>, keyword: string): boolean;
   /** Whether an object currently has Ward (Ward N or Ward X), printed or granted. */
   hasWard(card: DeepReadonly<CardInstance>): boolean;
   /** Count equipped cards with this effective class/subtype, including active
@@ -673,8 +698,9 @@ export interface ScriptCtx {
    *  additional zones granted by active continuous effects. */
   hasArsenalSpace(targetSeat?: number): boolean;
   /** Put one of the controller's cards (from hand, deck, graveyard, or banish, by instance id)
-   *  into their arsenal face up, triggering onEnterArsenal hooks (the entering
-   *  card's own and the controller's permanents') after the current effect
+   *  into their arsenal, face up by default or face down with `faceUp: false`.
+   *  Only a face-up entry triggers onEnterArsenal hooks (the entering card's
+   *  own and the controller's permanents'), after the current effect
    *  finishes. `from` names the source
    *  zone for triggers that care ("from your deck").
    *  Returns false when the card isn't in the named zone or its owner's
@@ -773,11 +799,14 @@ export interface ActivatedEffectCardCost {
   /** `under` selects from the source permanent's public sub-cards;
    * `hand-or-arsenal` lets each selected card come from either zone. */
   zone: "hand" | "graveyard" | "arsenal" | "hand-or-arsenal" | "arena" | "under";
+  /** With zone `arena`, select from opponents' boards instead of your own permanents. */
+  opponentControlled?: boolean;
   move: "banish" | "discard" | "destroy" | "put-on-deck-bottom" | "tap" | "untap" | "remove-counter" | "turn-face-up";
   count: number;
   /** Banish the selected card face down, keeping its identity private. */
   faceDown?: boolean;
   pitch?: number;
+  tokenOnly?: boolean;
   class?: string;
   subtype?: string;
   keyword?: string;
@@ -813,6 +842,9 @@ export interface ActivatedAbility {
     maximum?: number | ((ctx: ScriptCtx) => number);
     /** Restrict declarations to values that can produce the printed effect. */
     canDeclareX?(ctx: ScriptCtx, x: number): boolean;
+    /** Instance ids of the cards declaring this X lets the player play,
+     *  shown beside that option. Presentation only. */
+    cardsForX?(ctx: ScriptCtx, x: number): number[];
     prompt?: ScriptPrompt;
   };
   /** Chi point cost ({c}) in addition to `cost` (CR 1.14.2c/d): only chi
@@ -837,6 +869,7 @@ export interface ActivatedAbility {
   destroySelfCost?: boolean;
   banishSelfCost?: boolean;
   putSelfOnDeckBottomCost?: boolean;
+  shuffleSelfIntoDeckCost?: boolean;
   /** Return this source from its owner's banished zone to their hand as an
    * activation cost. */
   returnSelfToHandCost?: boolean;
@@ -847,6 +880,7 @@ export interface ActivatedAbility {
    *  own: auto-pass skips a window that offers nothing else unless this many
    *  resources would make another play affordable. An upper bound is safe for
    *  a variable gain, since it can only make auto-pass stop more often.
+   *  Reaction-timed sources always stop, since their window doesn't recur.
    *  `onActivate` still performs the gain. */
   resourceSource?: number;
   /** Remove named counters from this source as part of the activation cost. */
@@ -915,6 +949,10 @@ export interface ActivatedAbility {
   fromArsenal?: boolean;
   /** Extra legality beyond cost/AP (e.g. "only if you attacked with a weapon this turn") */
   canActivate?(ctx: ScriptCtx): boolean;
+  /** "Target attack with …" qualifier of an `abilityTargetsAttackingCard`
+   * ability, rechecked at resolution (CR 1.8.9). `canActivate` must apply it
+   * too. Must be pure. */
+  attackTargetLegal?(ctx: ScriptCtx): boolean;
   /** Dynamic resource cost of the ability ("this ability costs {r} less for
    *  each …"): consulted in enumeration AND validation — must be pure. */
   modifyCost?(ctx: ScriptCtx, baseCost: number): number;
@@ -989,7 +1027,7 @@ export interface TriggerDef {
     eventCard?: DeepReadonly<CardInstance>,
     eventContext?: TriggerEventContext,
   ): boolean;
-  /** If true, the controller chooses yes/no before the ability goes on the stack */
+  /** If true, the controller chooses yes/no as the layer resolves */
   optional?: boolean;
   /** A card target declared as the layer is added to the stack (CR 6.6.6a).
    * Without a legal target the layer ceases to exist; an optional targeted
@@ -1005,6 +1043,8 @@ export interface TriggerDef {
     ): readonly number[];
     prompt(ctx: ScriptCtx): ScriptPrompt;
     optional?: boolean;
+    /** Space-bar default; ignored unless it is one of `options`. */
+    defaultTarget?(ctx: ScriptCtx): number | undefined;
   };
   /** Space-bar default for an optional trigger choice. */
   defaultOption?: "yes" | "no";
@@ -1019,6 +1059,11 @@ export interface TriggerDef {
   /** Locale-independent counterpart to `label`. It is derived from the script
    * during decision/view projection and never persisted in room state. */
   labelMessage?: GameMessage;
+  /** Replaces `labelMessage` on a layer to name its public event card, telling
+   * same-source layers apart. Must read only `eventCard`; it runs at projection. */
+  eventLabelMessage?(eventCard: DeepReadonly<CardInstance>): GameMessage;
+  /** Optional triggers: caveat shown beside the yes/no when accepting won't do what the label says. */
+  warningMessage?(ctx: ScriptCtx): GameMessage | undefined;
   /** Exact public trigger announcement. Defaults to "<source> triggers: <label>". */
   publicLog?: string;
   /** Locale-independent counterpart to `publicLog`. The engine adds
@@ -1092,8 +1137,8 @@ type AlternativePlayCost = (
  * Hooks receive the engine's mutable working copy and are called synchronously.
  */
 export interface CardScript {
-  /** Additional primary card types this object has in every zone. Used for
-   * double-faced objects whose characteristics include more than one type. */
+  /** Card types an effect grants this object in every zone, beyond its
+   * printed `CardData.types`. */
   additionalCardTypes?: CardType[];
   /** Additional names this face-up object has in every zone. */
   allZoneNames?: string[];
@@ -1125,12 +1170,16 @@ export interface CardScript {
   activeWhileFaceUpInArsenal?: boolean;
   /** Hero: 2H weapons with this subtype are equipped as though they were 1H. */
   equipsTwoHandedAsOneHanded?: string;
-  /** This equipment is a deck-playable action object (Evo, CR 8.3.26). On
-   * resolution it equips to its empty zone or transforms the occupant. */
+  /** This deck-played equipment (Evo, CR 8.3.26) enters an equipment zone on
+   * resolution: it transforms the occupant if `transformsEquipment` is set,
+   * otherwise it equips to its empty zone. */
   playableEquipment?: boolean;
   /** Whether resolving playable equipment transforms `equipped` and retains it
-   * underneath; otherwise equipping into the occupied zone fails. */
+   * underneath; otherwise, or with no occupant, equipping fails. */
   transformsEquipment?(ctx: ScriptCtx, equipped: DeepReadonly<CardInstance>): boolean;
+  /** Public stack label for this card's layer, showing parameters declared
+   * as it was played (modes). Must read only `card`; it runs at projection. */
+  stackLabel?(card: DeepReadonly<CardInstance>): { label: string; labelMessage?: GameMessage } | undefined;
   /** A live source may grant matching friendly cards permission to be played
    * from an otherwise inaccessible zone. */
   allowsFriendlyCardPlayFrom?(
@@ -1220,6 +1269,13 @@ export interface CardScript {
   onGameStart?(ctx: ScriptCtx): void;
   /** Extra legality for playing this card from any zone (beyond type/cost/AP). */
   canPlay?(ctx: ScriptCtx): boolean;
+  /** Set by the card registry from card text, for an attack reaction or instant
+   * that targets an attack without declaring it through `playTargetOptions`: it
+   * records the active attack on the stack, and only that effect fails if the
+   * attack stops attacking. */
+  targetsAttackingCard?: boolean;
+  /** `targetsAttackingCard` for activated abilities without `targetCardOptions`. */
+  abilityTargetsAttackingCard?: boolean;
   /** Card instances this play may target. A script with this hook requires one
    * of the returned targets to be announced in the play intent. Must be pure. */
   playTargetOptions?(ctx: ScriptCtx): readonly number[];
@@ -1253,6 +1309,11 @@ export interface CardScript {
   onResolved?(ctx: ScriptCtx): void;
   /** This object was declared as the current attack. */
   onAttackDeclared?(ctx: ScriptCtx): void;
+  /** This object replaced the attacking card without being declared. */
+  onBecameAttackingCard?(ctx: ScriptCtx): void;
+  /** The next-attack effects this attack creates are static (CR 5.4.1): they end
+   * if it stops being the attacking card (CR 6.2.3a). */
+  nextAttackEffectIsStatic?: boolean;
   /** Deferred attack-source work after attack-declared triggered layers have
    * resolved, immediately before the defend step begins. */
   onAttackDeclaredTriggersResolved?(ctx: ScriptCtx): void;
@@ -1270,8 +1331,8 @@ export interface CardScript {
    * observer effects belong on explicit friendly-attack/modifier hooks. */
   modifyAttack?(ctx: ScriptCtx): number;
   /** Whether this attack currently has go again from its own conditional
-   * static ability. Re-evaluated when the attack is declared, projected, and
-   * at the beginning of the Resolution Step. */
+   * static ability. Read live until the beginning of the Resolution Step, where
+   * it is locked in, so losing the condition first loses the go again. */
   hasConditionalGoAgain?(ctx: ScriptCtx): boolean;
   /** Whether this attack currently has dominate from its own conditional
    * static ability. Evaluated live wherever dominate is checked, so a power
@@ -1330,7 +1391,7 @@ export interface CardScript {
   /** This permanent left the arena for another zone. */
   onLeaveArena?(
     ctx: ScriptCtx,
-    to: "graveyard" | "banish" | "soul" | "deck" | "hand" | "subcard" | "cease-to-exist",
+    to: "graveyard" | "banish" | "soul" | "deck" | "hand" | "subcard" | "cease-to-exist" | "removed-from-game",
   ): void;
   /** Effect damage this card dealt has been applied (after any prevention,
    *  including a deferred Arcane Barrier decision). `amount` is what was
@@ -1522,6 +1583,9 @@ export interface CardScript {
   /** While this card attacks, the defending hero cannot play/activate
    * instants or defense reactions unless a defender has at least its power. */
   defendingHeroCannotRespondBelowPower?: boolean;
+  /** While this card is the attacking card, defense reactions can't be played
+   * to its chain link, even if it became the attacking card without attacking. */
+  defenseReactionsProhibited?: boolean;
   /** While its controller has a face-up arsenal card, this active permanent
    * provides one additional arsenal zone. */
   additionalArsenalZoneWhileFaceUp?: boolean;
@@ -1586,11 +1650,15 @@ export interface CardScript {
     condition?(ctx: ScriptCtx): boolean;
   };
   /** Optional prevention replacement offered whenever this source's
-   * controller would be dealt preventable damage. Applying it moves this
-   * source out of the arena as part of the replacement. */
+   * controller would be dealt preventable damage. Applying it either moves
+   * this source out of the arena or removes one counter from a matching
+   * permanent its controller controls (at most once per damage event). */
   optionalDamagePrevention?: {
     amount: number;
-    moveSource: "destroy" | "banish";
+    moveSource?: "destroy" | "banish";
+    /** Pay by removing one `key` counter from a controlled permanent
+     * matching `from` instead of moving this source. Must be pure. */
+    removeCounter?: { key: CounterKind; from(ctx: ScriptCtx, permanent: DeepReadonly<CardInstance>): boolean };
     /** Offer this replacement only for arcane damage (Arcane Shelter). */
     arcaneOnly?: boolean;
     /** Offer only when the damage is controlled by a hero with this class or
@@ -1605,7 +1673,8 @@ export interface CardScript {
   onBoosted?(ctx: ScriptCtx, boosted: DeepReadonly<CardInstance>, banished: DeepReadonly<CardInstance>): void;
   /** Power this attack card gains when one of its own Boost costs banishes
    * `banished` ("+N for each … card banished from boosting this"). Replaced
-   * Boost movements banish nothing and are not consulted. Must be pure. */
+   * Boost movements banish nothing and are not consulted. Re-evaluated
+   * continuously while `banished` stays in banish. Must be pure. */
   boostBanishPowerBonus?(ctx: ScriptCtx, banished: DeepReadonly<CardInstance>): number;
   /** Number of separate Boost abilities printed on this card. Defaults to 1
    * when the card has the Boost keyword. */
@@ -1759,7 +1828,8 @@ export interface CardScript {
    *  permanents ("whenever an arrow is put face up into your arsenal from your
    *  deck"). Each hook is a triggered layer that resolves after the effect
    *  that moved the card finishes. `from` names the zone it came from (for
-   *  example, "hand", "deck", or "banish"). Turning a face-down arsenal card
+   *  example, "hand", "deck", or "banish"). A card put in face down
+   *  (`faceUp: false`) does not fire it. Turning a face-down arsenal card
    *  face up does not put it into the arsenal; it fires this hook (with
    *  `from` "arsenal") only for scripts that set `onEnterArsenalWhenTurnedFaceUp`. */
   onEnterArsenal?(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, from: string): void;
@@ -1886,8 +1956,9 @@ export interface CardScript {
    *  other hero can't gain life (Reaping Blade-style static effect). */
   preventsLifeGainWhileAhead?: boolean;
   /** Dynamic Spellvoid value for equipment whose prevention amount is not a
-   *  fixed number ("Spellvoid X, where X is …"): consulted whenever the
-   *  equipment's Spellvoid is enumerated or applied — must be pure. */
+   *  fixed number ("Spellvoid X, where X is …") or conditional: consulted
+   *  instead of any printed Spellvoid keyword whenever the equipment's
+   *  Spellvoid is enumerated or applied — must be pure. */
   spellvoidValue?(ctx: ScriptCtx): number;
   /** Arcane Barrier X permits any positive payment up to the incoming damage. */
   arcaneBarrierX?: boolean;

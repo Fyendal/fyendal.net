@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ActivatedAbility, CardScript } from "@fyendal/engine";
 import { cardList, isImplemented, scripts } from "../index.js";
+import { hasType } from "@fyendal/shared";
 
 function abilitiesOf(script: CardScript | undefined): ActivatedAbility[] {
   if (!script?.activated) return [];
@@ -27,7 +28,7 @@ describe("activated ability cost audit", () => {
   it("declares printed equipment and weapon self-destruction as an activation cost", () => {
     const mismatches = cardList
       .filter((card) =>
-        (card.cardType === "equipment" || card.cardType === "weapon") &&
+        (hasType(card, "equipment") || hasType(card, "weapon")) &&
         isImplemented(card) &&
         hasPrintedDestroySelfCost(card.name, card.text)
       )

@@ -251,6 +251,32 @@ describe("SUP — heroes and the crowd", () => {
     ]);
   });
 
+  it("Battle Clearing Bellow reads Big Bully's doubled base power when already booed", () => {
+    const g = scenario({
+      seats: [
+        foe({ hero: "rhinar", hand: ["battle clearing bellow|3", "big bully|1"], resources: 5 }),
+        foe(),
+      ],
+    });
+    g.state.players[0]!.flags.booedThisTurn = true;
+
+    g.play("battle clearing bellow|3").play("big bully|1").expectAttackValue(14);
+  });
+
+  it("Battle Clearing Bellow skips Big Bully when the boo comes from its own attack", () => {
+    const g = scenario({
+      seats: [
+        foe({ hero: "rhinar", hand: ["battle clearing bellow|3", "big bully|1"], resources: 5 }),
+        foe(),
+      ],
+    });
+    g.state.players[1]!.life = 10;
+
+    g.play("battle clearing bellow|3").play("big bully|1").expectAttackValue(8);
+    expect(g.state.modifiers.some((modifier) => modifier.scope === "next-attack" && modifier.minBasePower === 6))
+      .toBe(true);
+  });
+
   it("Numbskull Charm resolves only the modes its controller chooses", () => {
     const g = scenario({
       seats: [
@@ -336,6 +362,83 @@ describe("SUP — heroes and the crowd", () => {
     expect(suppressed(0)).toBe(true);
     expect(suppressed(1)).toBe(false);
     g.expectHandSize(1, 1);
+  });
+
+  it("Cheater's Charm resolves only its chosen modes and hides the damage mode without a 6-power attack", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["cheater's charm|2"] },
+        foe({ board: ["confidence|0", "toughness|0"] }),
+      ],
+    });
+
+    g.play("cheater's charm|2", { settle: false });
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "cheater-mode",
+      options: ["steal", "boo", "done"],
+    });
+    g.chooseOption("boo").chooseOption("done").settle();
+
+    expect(g.state.players[0]!.flags.booedThisTurn).toBe(true);
+    expect(g.state.players[1]!.board).toHaveLength(2);
+  });
+
+  it("Cheater's Charm steals one chosen Confidence or Toughness token", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["cheater's charm|2"] },
+        foe({ board: ["confidence|0", "toughness|0"] }),
+      ],
+    });
+
+    g.play("cheater's charm|2", { settle: false }).chooseOption("steal").chooseOption("done").settle();
+    expect(g.state.pendingDecision).toMatchObject({ chooseHook: "cheater-steal" });
+    g.chooseCard("toughness|0").settle();
+
+    expect(g.state.players[0]!.flags.booedThisTurn).not.toBe(true);
+    expect(g.state.players[0]!.board.map((card) => card.cardId)).toEqual([printingId("toughness|0")]);
+    expect(g.state.players[1]!.board.map((card) => card.cardId)).toEqual([printingId("confidence|0")]);
+  });
+
+  it("Cheater's Charm makes the target hero discard or take 2 while you attack with 6 or more power", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["big bully|1", "cheater's charm|2"], resources: 2 },
+        foe({ hand: ["sigil of solace|3"] }),
+      ],
+    });
+    g.state.players[0]!.flags.booedThisTurn = true;
+    const life = g.state.players[1]!.life;
+
+    g.play("big bully|1").expectAttackValue(8).blockWith();
+    g.play("cheater's charm|2", { settle: false });
+    expect(g.state.pendingDecision?.options).toEqual(["steal", "boo", "damage", "done"]);
+    g.chooseOption("damage").chooseOption("done");
+    expect(g.state.pendingDecision).toMatchObject({ chooseHook: "cheater-target" });
+    g.doRaw({ kind: "choose", optionId: String(g.state.players[1]!.hero.instanceId) }).settle();
+    expect(g.state.pendingDecision).toMatchObject({ chooseHook: "cheater-discard", player: 1 });
+    // 2 from the Charm, then Big Bully's 8 combat damage once the harness settles.
+    g.chooseOption("damage").expectLife(1, life - 10).expectHandSize(1, 1);
+  });
+
+  it("Liar's Charm declares its modes when played in response to a layer on the stack", () => {
+    const g = scenario({
+      seats: [{ hero: "rhinar", weapons: [], hand: ["sigil of solace|3", "liar's charm|2"] }, foe()],
+    });
+
+    g.play("sigil of solace|3", { settle: false });
+    expect(g.state.phase).toBe("layer");
+    g.play("liar's charm|2", { settle: false });
+    expect(g.state.pendingDecision).toMatchObject({ chooseHook: "liar-mode" });
+    g.expectInZone(0, "liar's charm|2", "hand");
+    g.chooseOption("boo").doRaw({ kind: "choose", optionId: "done" });
+    expect(g.state.stack.map((layer) => layer.card?.cardId)).toEqual([
+      printingId("liar's charm|2"),
+      printingId("sigil of solace|3"),
+    ]);
+    g.settle();
+
+    expect(g.state.players[0]!.flags.booedThisTurn).toBe(true);
   });
 
   it("Liar's Charm suppresses the opposing hero only for this action phase", () => {
@@ -668,6 +771,71 @@ describe("SUP — heroes and the crowd", () => {
     expect(g.state.stack).toHaveLength(0);
   });
 
+  it("Hunter or Hunted? shows the searched hand, deck, and arsenal when no other copy remains", () => {
+    const g = scenario({
+      seats: [
+        foe({
+          heroKey: "hala, bladesaint of the vow|0",
+          weapons: ["zenith blade|0"],
+          hand: ["head jab|1"],
+          deck: ["blunten|2", "head jab|1", "head jab|1"],
+          arsenalFaceDown: ["raging onslaught|3"],
+          resources: 1,
+        }),
+        hero("arakni, huntsman|0", {
+          arsenalFaceDown: ["hunter or hunted?|3"],
+          resources: 3,
+        }),
+      ],
+    });
+
+    g.attackWithWeapon("zenith blade|0")
+      .blockWith()
+      .passPriority()
+      .react("hunter or hunted?|3", { settle: false })
+      .passPriority()
+      .passPriority()
+      .chooseOption("yes")
+      .chooseOption("keep")
+      .doRaw({ kind: "choose", optionId: "Blunten" });
+
+    expect(g.state.pendingDecision).toMatchObject({
+      chooseHook: "hunter-search",
+      options: [],
+      minimumSelections: 0,
+      maximumSelections: 0,
+    });
+    expect(projectStateFor(g.state, 1).pendingDecision?.lookedCards?.map((card) => cardData[card.cardId]?.name))
+      .toEqual(["Head Jab", "Head Jab", "Head Jab", "Raging Onslaught"]);
+    expect(projectStateFor(g.state, 0).pendingDecision?.lookedCards).toBeUndefined();
+    expect(legalIntents(g.state, 1)).toContainEqual({ kind: "choose-many", optionIds: [] });
+
+    g.chooseMany([]);
+
+    expect(g.state.players[1]!.board.filter(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "silver|0",
+    )).toHaveLength(1);
+    expect(g.state.pendingDecision).toMatchObject({ kind: "attack-reaction", player: 0 });
+  });
+
+  it("Self-determination stops Take the Bait's token", () => {
+    const g = scenario({
+      seats: [
+        hero("tuffnut|0", { hand: ["take the bait|1"], deck: ["head jab|2"] }),
+        foe({ hand: ["self-determination|3"] }),
+      ],
+    });
+
+    g.play("take the bait|1", { settle: false })
+      .passPriority()
+      .activate("self-determination|3")
+      .settle()
+      .chooseCard("head jab|2");
+
+    expect(g.state.players[0]!.board).toEqual([]);
+    expect(g.state.players[1]!.board).toEqual([]);
+  });
+
   it("Bait stops its controller playing cards they own but leaves its own abilities usable", () => {
     const g = scenario({
       seats: [
@@ -866,7 +1034,7 @@ describe("SUP — heroes and the crowd", () => {
       .chooseOption("no")
       .expectLog("The crowd boos Kayo, Strong-arm")
       .expectZoneSize(0, "board", 2);
-    expect(g.state.players[0]!.board.every((card) => card.cardId.endsWith("036"))).toBe(true);
+    expect(g.state.players[0]!.board.every((card) => cardData[card.cardId]!.name === "Vigor")).toBe(true);
   });
 
   it("Vigorous Smashup leaves its revealed card on top when its bottom choice is declined", () => {
@@ -1187,6 +1355,33 @@ describe("SUP — intimidating attacks", () => {
 
     g.play("bully tactics|1").chooseOption("X = 0").expectPendingReturn(1, 0);
   });
+
+  it("Bully Tactics intimidates once per resource paid", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", weapons: [], hand: ["bully tactics|1"], resources: 3 },
+        foe({ hand: ["head jab|1", "head jab|1", "head jab|1"] }),
+      ],
+    });
+
+    g.play("bully tactics|1").chooseOption("X = 3").expectPendingReturn(1, 3);
+  });
+
+  it("Bully Tactics banishes before the attack's layer-step priority window", () => {
+    const g = scenario({
+      seats: [
+        hero("lyath goldmane, vile savant|0", { hand: ["bully tactics|1", "titanium bauble|3", "titanium bauble|3"] }),
+        foe({ hand: ["head jab|1", "head jab|1", "head jab|1"] }),
+      ],
+    });
+
+    g.play("bully tactics|1").chooseOption("X = 3");
+    g.doRaw({ kind: "choose", optionId: g.state.pendingDecision!.options![0]! });
+    expect(g.state.phase).toBe("layer");
+    expect(g.state.pendingDecision?.kind).toBe("priority-window");
+    expect(g.state.players[1]!.hand).toHaveLength(0);
+  });
+
 
   it("Battered, Beaten, and Broken destroys an intimidated card on hit with 3 auras", () => {
     const g = scenario({

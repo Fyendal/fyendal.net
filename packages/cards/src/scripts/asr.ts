@@ -4,16 +4,15 @@ import {
   cardNamed,
   commonOptionMessages,
   decisionPrompt,
+  faceUpGraveyard,
+  hasCardSubtype,
+  isAttackAction,
   opponentSeat,
   previousAttackHasName,
   previousAttackNameContains,
   yesNoPrompt,
 } from "./shared-helpers.js";
 import { bitteringThorns, cruNinjaWarrior } from "./cru/ninja-warrior.js";
-
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
 
 function previousWasEdge(ctx: ScriptCtx): boolean {
   return previousAttackHasName(ctx, "edge of autumn");
@@ -25,15 +24,13 @@ function previousWasEdgeOrVengeance(ctx: ScriptCtx): boolean {
 
 function ninjaAttack(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
   return (
-    ctx.hasCardType(card, "action") && ctx.cardTypes(card).includes("attack") && ctx.cardTypes(card).includes("ninja")
+    isAttackAction(ctx, card) && hasCardSubtype(ctx, card, "ninja")
   );
 }
 
 function offerGiveAndTake(ctx: ScriptCtx): void {
-  const choices = ctx
-    .player(ctx.seat)
-    .graveyard.filter(
-      (card) => ctx.hasCardType(card, "action") && (data(ctx, card).cost ?? 0) < ctx.currentAttackPower(),
+  const choices = faceUpGraveyard(ctx).filter(
+      (card) => ctx.hasCardType(card, "action") && (ctx.cardData(card.cardId).cost ?? 0) < ctx.currentAttackPower(),
     );
   if (choices.length)
     ctx.requestCardChoice(
@@ -100,7 +97,7 @@ export const asr: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "robe-autumn" || option !== "yes") return;
       ctx.destroySelf();
-      ctx.changeResources(ctx.seat, 1);
+      ctx.gainResources(ctx.seat, 1);
     },
   },
 
@@ -207,7 +204,7 @@ export const asr: Record<string, CardScript> = {
 
   "legacy of ikaru|3": {
     canPlay: (ctx) =>
-      !!ctx.link && ctx.link.attacker === ctx.seat && ctx.cardTypes(ctx.link.attackingCard).includes("ninja"),
+      !!ctx.link && ctx.link.attacker === ctx.seat && hasCardSubtype(ctx, ctx.link.attackingCard, "ninja"),
     onPlay(ctx) {
       ctx.addModifier({ scope: "chain-link", attack: 1 });
     },

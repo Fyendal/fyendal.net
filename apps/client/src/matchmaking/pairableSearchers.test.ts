@@ -33,5 +33,6 @@ describe("deckCardPool", () => {
     expect(deckCardPool({})).toBe("legal");
     expect(deckCardPool({ futureCards: ["X"] })).toBe("future");
     expect(deckCardPool({ futureCards: ["X"], bannedCards: ["Y"] })).toBe("open");
+    expect(deckCardPool({ constructionIssues: [{ kind: "pool-too-large", count: 60, limit: 55 }] })).toBe("open");
   });
 });

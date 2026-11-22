@@ -45,6 +45,12 @@ describe("VersionUpdateModal", () => {
     expect(html).toContain('<span class="version-update-figure-caption">Decks now show as a grid</span>');
     expect(html).not.toContain("title=");
   });
+  it("applies a #w= display width and links to the image without the fragment", () => {
+    const html = renderBody("![Sandbox panel](/updates/1-6/sandbox.840x1012.webp#w=360)");
+    expect(html).toContain('href="/updates/1-6/sandbox.840x1012.webp"');
+    expect(html).toContain('width="840" height="1012" style="width:360px"');
+    expect(html).not.toContain("#w=");
+  });
   it("renders Fabrary card art without a full-size link", () => {
     const html = renderBody('![Snatch](https://content.fabrary.net/cards/WTR167.webp)');
     expect(html).toContain('<span class="version-update-figure version-update-figure-card"><img class="version-update-image" src="https://content.fabrary.net/cards/WTR167.webp" alt="Snatch" width="450" height="628"');

@@ -6,6 +6,8 @@ import { chooseBoltynIntent } from "./boltyn-policy.js";
 import { chooseHalaIntent } from "./hala-policy.js";
 import { decklistsFromState } from "./deck-knowledge.js";
 import { boltynPresentationFor, halaPresentationFor } from "./sideboard.js";
+import { boltynSolverRules } from "./boltyn-rules.js";
+import { handResponse, solveHand } from "./hand-value.js";
 import { plannedDefenseReactionPlan, type BotPolicyInput } from "./policy.js";
 
 const BOLTYN_POOL = precon("bot-boltyn-raydn")!.pool;
@@ -120,6 +122,25 @@ function passOrNoBlock(state: GameState): GameIntent {
     ?? legal.find((intent) => intent.kind !== "concede")!;
 }
 
+/** Resolve the open chain link, with Boltyn's policy choosing unless `noBlock` declines the block. */
+function resolveIncoming(state: GameState, noBlock = false): { state: GameState; played: string[] } {
+  const played: string[] = [];
+  let current = state;
+  for (let step = 0; step < 24 && current.chain.some((link) => !link.resolved); step++) {
+    const actor = (current.pendingDecision?.player ?? current.priorityPlayer) as 0 | 1;
+    const intent: GameIntent = actor === 1
+      ? passOrNoBlock(current)
+      : noBlock && current.pendingDecision?.kind === "defend"
+      ? { kind: "defend", instanceIds: [] }
+      : chooseBoltynIntent(input(current));
+    if (actor === 0) played.push(name(current, intent));
+    const result = applyIntent(current, actor, intent);
+    if (!result.ok) throw new Error(result.error);
+    current = result.state;
+  }
+  return { state: current, played };
+}
+
 function turnOver(state: GameState): boolean {
   return state.activePlayer !== 0 || state.turn !== 3;
 }
@@ -174,6 +195,13 @@ function defenders(state: GameState): readonly number[] {
   const intent = chooseBoltynIntent(input(state));
   if (intent.kind !== "stage-defenders" && intent.kind !== "defend") throw new Error(`not a defense: ${intent.kind}`);
   return intent.instanceIds;
+}
+
+/** Pitch left in Boltyn's hand once the defenders leave it. */
+function pitchKept(state: GameState, defenderIds: readonly number[]): number {
+  return state.players[0]!.hand
+    .filter((card) => !defenderIds.includes(card.instanceId))
+    .reduce((total, card) => total + Number(cardData[card.cardId]?.pitch ?? 0), 0);
 }
 
 function currentLinkPower(state: GameState): number | undefined {
@@ -232,6 +260,8 @@ function veinSwing(state: GameState, swing: 0 | 1): GameState {
 }
 
 const HERO = "Ser Boltyn, Breaker of Dawn";
+/** A hand whose attacks chain only through charged pumps and soul go again. */
+const CHARGE_LINE = ["ASB021", "PEN183", "ASB007"];
 const RAYDN = "Raydn, Duskbane";
 /** Wounding Blow: a plain four-power attack. */
 const PLAIN_ATTACK = "WTR203";
@@ -276,6 +306,21 @@ describe("Boltyn policy", () => {
     const actions = intents.filter((name) => !name.startsWith("choose:") && name !== "order-triggers");
     for (let index = 1; index < actions.length; index++) {
       expect([actions[index - 1], actions[index]], "hero ability repeated on one attack").not.toEqual([HERO, HERO]);
+    }
+  });
+
+  it("does not activate Snapdragon Scalers on a link the hero ability already gives go again", () => {
+    const state = game();
+    state.players[0]!.equipment.legs = cards(state, ["BOL008"])[0];
+    hand(state, ["ASB021", "PEN183", "ASB007"]);
+    soul(state, 0);
+    const { intents } = play(settled(state), turnOver);
+    expect(intents).toContain(HERO);
+    const actions = intents.filter((name) => !name.startsWith("choose:") && name !== "order-triggers");
+    for (let index = 1; index < actions.length; index++) {
+      const pair = [actions[index - 1], actions[index]];
+      expect(pair, "two go-again sources on one attack").not.toEqual([HERO, "Snapdragon Scalers"]);
+      expect(pair, "two go-again sources on one attack").not.toEqual(["Snapdragon Scalers", HERO]);
     }
   });
 
@@ -378,6 +423,18 @@ describe("Boltyn policy", () => {
     expect(intents).not.toContain("Energy Potion");
     expect(intents).not.toContain("Edict of Steel");
     expect(after.players[0]!.hand.map((card) => card.instanceId)).toContain(edict);
+    expect(after.players[0]!.equipment.chest!.counters?.energy).toBe(3);
+    expect(after.players[0]!.board.map((card) => cardData[card.cardId]?.name)).toContain("Energy Potion");
+  });
+
+  it("keeps Tunic counters and Energy Potion when the hand's pitch already pays its costs", () => {
+    const state = settled(game());
+    hand(state, ["ASB023", "ASB021"]);
+    state.players[0]!.board = cards(state, ["MPW146"]);
+    state.players[0]!.equipment.chest!.counters = { energy: 3 };
+    const { state: after, intents } = play(state, turnOver);
+    expect(intents).not.toContain("Fyendal's Spring Tunic");
+    expect(intents).not.toContain("Energy Potion");
     expect(after.players[0]!.equipment.chest!.counters?.energy).toBe(3);
     expect(after.players[0]!.board.map((card) => cardData[card.cardId]?.name)).toContain("Energy Potion");
   });
@@ -588,6 +645,38 @@ describe("Boltyn policy", () => {
     expect(intent.kind === "activate-ability" && intent.sourceInstanceId === raydn).toBe(false);
   });
 
+  it("does not swing a 0-power Raydn for a Roaring Beam that cannot charge through a full soul", () => {
+    const state = settled(game());
+    // As reported: at 1 life, Raydn swung for 0 and spent Roaring Beam's block on a Courage.
+    state.players[0]!.life = 1;
+    hand(state, ["ASB014", "PEN178"]);
+    soul(state, 6);
+    const raydn = state.players[0]!.weapons[0]!.instanceId;
+    const intent = chooseBoltynIntent(input(state));
+    expect(intent.kind === "activate-ability" && intent.sourceInstanceId === raydn).toBe(false);
+  });
+
+  it("does not swing a 0-power Raydn for reactions the lethal upkeep reserve withholds", () => {
+    const state = settled(game());
+    // As reported: at 2 life under Bloodrot Pox, both yellows must pitch for the upkeep.
+    state.players[0]!.life = 2;
+    hand(state, ["MON033", "PEN178"]);
+    state.players[0]!.board = cards(state, ["AAC030"]);
+    const raydn = state.players[0]!.weapons[0]!.instanceId;
+    const intent = chooseBoltynIntent(input(state));
+    expect(intent.kind === "activate-ability" && intent.sourceInstanceId === raydn).toBe(false);
+  });
+
+  it("does not swing Raydn when Frailty cancels Courage's +1", () => {
+    const state = settled(game());
+    hand(state, []);
+    state.players[0]!.board = cards(state, ["ASB027", "AAZ031"]);
+    const raydn = state.players[0]!.weapons[0]!.instanceId;
+    // Without a simulation only the swing-power estimate can see this.
+    const intent = chooseBoltynIntent({ ...input(state), state: undefined });
+    expect(intent.kind === "activate-ability" && intent.sourceInstanceId === raydn).toBe(false);
+  });
+
   it("charges Lumina Ascension into Warband of Bellona to unlock Duty Bound Blitz behind a charged Raydn", () => {
     const state = settled(game());
     hand(state, ["ASB026", "PEN183"]);
@@ -651,6 +740,20 @@ describe("Boltyn policy", () => {
     expect(intents).not.toContain(RAYDN);
     expect(after.players[0]!.board.map((card) => cardData[card.cardId]?.name)).toContain("Blessing of Bellona");
     expect(after.players[0]!.arsenal).toHaveLength(1);
+  });
+
+  it("keeps its soul when the opening turn's last card is reserved for arsenal", () => {
+    const state = createGame({
+      decklists: [boltynDeck("AMO001"), decklists.dorinthea], cards: cardData, scripts, seed: 303, startPlayer: 0,
+    });
+    hand(state, ["PEN181", "IAR254", "PEN184", "PEN184"]);
+    state.players[1]!.hand = [];
+    const openingOver = (current: GameState) => current.activePlayer !== 0 || current.turn !== 1;
+    const { state: after, intents } = play(settled(state), openingOver);
+    expect(intents).toContain(RAYDN);
+    expect(intents).not.toContain("Ser Boltyn, Breaker of Dawn");
+    expect(after.players[0]!.arsenal.map((card) => cardData[card.cardId]?.name)).toEqual(["Duty Bound Blitz"]);
+    expect(after.players[0]!.soul).toHaveLength(1);
   });
 
   it("keeps Lumina Ascension for its own turn even when Spirit of Eirina makes it an instant", () => {
@@ -720,6 +823,35 @@ describe("Boltyn policy", () => {
     const defending = underAttack(state, "ELE128");
     const spirit = defending.players[0]!.hand.find((card) => card.cardId === "DTD052")!;
     expect(defenders(defending)).not.toContain(spirit.instanceId);
+  });
+
+  it("does not throw its whole hand at an attack when Flick Knives alone is lethal", () => {
+    const state = settled(game());
+    // As reported: 1 life under Bloodrot Pox, and a dagger can deal the last point past any block.
+    hand(state, ["IAR254", "MON033", "PEN178", "IAR253"]);
+    state.players[0]!.life = 1;
+    state.players[0]!.board = cards(state, ["SAZ034"]);
+    state.players[1]!.weapons = cards(state, ["DYN115"], 1);
+    state.players[1]!.equipment.arms = cards(state, ["FAB124"], 1)[0];
+    state.players[1]!.resources = 3;
+    const defending = underAttack(state, "MST114");
+    const chosen = defenders(defending);
+    expect(chosen.length).toBe(1);
+    expect(pitchKept(defending, chosen)).toBeGreaterThanOrEqual(3);
+  });
+
+  it("keeps the pitch for a lethal Bloodrot Pox when it blocks", () => {
+    const state = settled(game());
+    hand(state, ["IAR254", "DTD052", "MON033", "PEN178"]);
+    state.players[0]!.life = 3;
+    state.players[0]!.board = cards(state, ["SAZ034"]);
+    state.players[0]!.equipment = {};
+    state.players[1]!.resources = 3;
+    // Two blocks leave 2 life, where the Pox kills unless 3 pitch stays in hand.
+    const defending = underAttack(state, "ELE128");
+    const chosen = defenders(defending);
+    expect(chosen.length).toBe(2);
+    expect(pitchKept(defending, chosen)).toBeGreaterThanOrEqual(3);
   });
 
   it("keeps Beaming Bravado and its yellow charge when they unlock Duty Bound Blitz", () => {
@@ -815,6 +947,70 @@ describe("Boltyn policy", () => {
       .toEqual({ kind: "choose", optionId: String(grace!.instanceId) });
   });
 
+  it("takes a 1-power attack rather than spending Saving Grace on it", () => {
+    const state = settled(game());
+    hand(state, ["ASB025", "PEN183", "ASB007", "ASB021"]);
+    state.players[0]!.board = cards(state, ["PEN181"]);
+    const { state: current, played } = resolveIncoming(underAttack(state, "BEN024"));
+    expect(played).not.toContain("Saving Grace");
+    expect(current.players[0]!.hand.map((card) => card.cardId)).toContain("ASB025");
+  });
+
+  it("still spends Saving Grace on an unblocked 4-power attack", () => {
+    const state = settled(game());
+    hand(state, ["ASB025", "ASB021", "ASB021", "ASB009"]);
+    const { played } = resolveIncoming(underAttack(state, PLAIN_ATTACK), true);
+    expect(played).toContain("Saving Grace");
+  });
+
+  it("plays Saving Grace without charging when the -2 has nothing left to stop", () => {
+    const state = settled(game());
+    hand(state, ["ASB025", "IAR254", "ASB021", "ASB007"]);
+    const { state: current, played } = resolveIncoming(underAttack(state, "BEN017"), true);
+    expect(played).toContain("Saving Grace");
+    expect(current.players[0]!.soul).toHaveLength(0);
+    expect(current.players[0]!.life).toBe(40);
+    expect(current.players[0]!.hand).toHaveLength(3);
+  });
+
+  it("keeps the Saving Grace it needs to survive out of Warpath's charge", () => {
+    const state = settled(game());
+    hand(state, ["ASB025", "ASB021"]);
+    const [grace] = state.players[0]!.hand;
+    const { equipment } = state.players[0]!;
+    for (const slot of Object.keys(equipment)) delete (equipment as Record<string, unknown>)[slot];
+    equipment.legs = cards(state, ["ASB006"])[0]!;
+    state.players[0]!.life = 2;
+    state.players[1]!.resources = 2;
+    const { state: after, played } = resolveIncoming(underAttack(state, "DRO024"));
+    expect(played).toContain("Saving Grace");
+    expect(after.players[0]!.life).toBeGreaterThan(0);
+    expect(after.players[0]!.soul.map((card) => card.instanceId)).not.toContain(grace!.instanceId);
+  });
+
+  it("fully blocks Surgical Extraction rather than leave a card for its hit to banish", () => {
+    // As reported: Edict of Steel alone let the hit through to banish Beacon of Victory.
+    const state = settled(createGame({
+      decklists: [boltynDeck("AMO001"), decklists.dorinthea], cards: cardData, scripts, seed: 4040, startPlayer: 0,
+    }));
+    state.turn = 2;
+    hand(state, ["SBL020", "MON033"]);
+    state.players[0]!.arsenal = cards(state, ["PEN184"]);
+    state.players[0]!.soul = cards(state, ["PEN183"]);
+    state.players[0]!.board = cards(state, ["PEN181", "ASB027"]);
+    state.players[0]!.flags.chargedThisTurn = true;
+    state.players[1]!.hero.cardId = "AMO001";
+    state.players[1]!.resources = 3;
+    const blocked = underAttack(state, "DYN122");
+    blocked.players[1]!.hand = cards(blocked, ["WTR203"], 1);
+    const ids = defenders(blocked);
+    const player = blocked.players[0]!;
+    const all = [...player.hand, ...Object.values(player.equipment).flatMap((card) => card ? [card] : [])];
+    const defense = ids.reduce((total, id) =>
+      total + (cardData[all.find((card) => card.instanceId === id)?.cardId ?? ""]?.defense ?? 0), 0);
+    expect(defense).toBeGreaterThanOrEqual(4);
+  });
+
   it("blocks when the Soulbond stance faces lethal pressure and plays its defense reactions", () => {
     const cindraPool = precon("bot-cindra-head-jabs")!.pool;
     const state = createGame({
@@ -843,5 +1039,91 @@ describe("Boltyn policy", () => {
     expect(played.some((entry) =>
       entry.startsWith("defend(") || entry === "Saving Grace" || entry === "Sink Below"
     )).toBe(true);
+  });
+
+  it("does not chip Command and Conquer with armor alone when its on-hit still lands", () => {
+    const state = settled(game());
+    const me = state.players[0]!;
+    me.life = 20;
+    hand(state, ["ASB020", "ASB023", "ASB007", "MON032"]);
+    me.arsenal = cards(state, ["DTD052"]);
+    soul(state, 2);
+    me.equipment.head = { instanceId: state.nextInstanceId++, cardId: "EVO247", owner: 0 };
+    delete me.equipment.legs;
+    me.equipment.arms!.defCounters = 1;
+    state.players[1]!.resources = 2;
+    const defending = underAttack(state, "ARC159");
+    const chosen = defenders(defending);
+    const { hand: held, equipment } = defending.players[0]!;
+    const worn = Object.values(equipment).filter((card) => card && chosen.includes(card.instanceId));
+    // Every hand card here defends for 3.
+    const defense = 3 * held.filter((card) => chosen.includes(card.instanceId)).length + worn.reduce(
+      (total, card) => total + (cardData[card!.cardId]?.defense ?? 0) - (card!.defCounters ?? 0), 0);
+    expect(worn.length === 0 || defense >= 6).toBe(true);
+  });
+
+  it("charges a stranded V of the Vanguard to open a charged Raydn swing next turn", () => {
+    const state = game();
+    state.activePlayer = 1;
+    state.priorityPlayer = 1;
+    // With no other Light card for V to charge, Beaming Bravado charging it beats holding V.
+    hand(state, ["ASB020", "ASB023"]);
+    soul(state, 2);
+    const raydn = state.players[0]!.weapons[0]!;
+    const result = solveHand(
+      [...state.players[0]!.hand],
+      { seat: 0, view: projectStateFor(state, 0), legal: [], cards: cardData, state },
+      boltynSolverRules,
+    );
+    expect(result.damage).toBeGreaterThanOrEqual(6);
+    expect(result.line.map((step) => step.instanceId)).toContain(raydn.instanceId);
+  });
+
+  describe("hero ability locks", () => {
+    function lost(state: GameState): GameState {
+      state.modifiers.push({
+        scope: "until-end-of-turn", seat: 0, suppressesHeroAbilities: true, expiresAtEndOfSeatTurn: 0,
+        sourceInstanceId: state.players[1]!.hero.instanceId, createdTurn: state.turn - 1,
+      } as GameState["modifiers"][number]);
+      return state;
+    }
+
+    it("prices next turn without the hero ability as a smaller turn", () => {
+      const state = game();
+      state.activePlayer = 1;
+      state.priorityPlayer = 1;
+      hand(state, CHARGE_LINE);
+      soul(state, 2);
+      const respond = () => handResponse(
+        [...state.players[0]!.hand],
+        { seat: 0, view: projectStateFor(state, 0), legal: [], cards: cardData, state },
+        boltynSolverRules,
+      ).damageThreatened;
+      const free = respond();
+      lost(state);
+      expect(respond()).toBeLessThan(free);
+    });
+
+    it("does not plan go again through the soul while humbled", () => {
+      const free = game();
+      hand(free, CHARGE_LINE);
+      soul(free, 2);
+      const humbled = lost(game());
+      hand(humbled, CHARGE_LINE);
+      soul(humbled, 2);
+      expect(play(settled(free), turnOver).intents).toContain(HERO);
+      expect(play(settled(humbled), turnOver).intents).not.toContain(HERO);
+    }, 30_000);
+
+    it("stops Humble with hand cards when next turn runs through the hero ability", () => {
+      const state = settled(game());
+      state.players[0]!.equipment = {};
+      state.players[0]!.life = 10;
+      state.players[0]!.arsenal = [];
+      hand(state, ["ASB021", "ASB023", "ASB023", "ASB007"]);
+      soul(state, 3);
+      state.players[1]!.resources = 2;
+      expect(defenders(underAttack(state, "OUT189")).length).toBeGreaterThanOrEqual(2);
+    });
   });
 });

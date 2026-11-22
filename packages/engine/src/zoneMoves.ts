@@ -26,6 +26,7 @@ import type { CardInstance, PlayerState } from "./state.js";
 import type { TriggerEventContext } from "./eventTypes.js";
 import {
   currentLink,
+  defendingSeatOf,
   findPermanent,
   removeFromArray,
   severDefendingEquipment,
@@ -44,6 +45,7 @@ import {
   transitionZoneFromEngineZone,
   transitionZoneIsPrivate,
 } from "./transitions.js";
+import { hasType } from "@fyendal/shared";
 
 /**
  * Put a card into its owner's graveyard: record per-turn facts in the owner's
@@ -64,7 +66,7 @@ function enterGraveyard(
   defending = false,
 ): void {
   const owner = state.players[card.owner] as PlayerState;
-  if (dataOf(state, card.cardId).cardType === "token") return;
+  if (hasType(dataOf(state, card.cardId), "token")) return;
   // Ephemeral (CR 8.3.21): "If this would be put into a graveyard from
   //  anywhere, instead it ceases to exist" — no graveyard, no graveyard flags
   //  or triggers
@@ -128,7 +130,7 @@ function enterGraveyard(
         ...(card.meldSide !== "right" ? [meld.leftCardType] : []),
         ...(card.meldSide !== "left" ? [meld.rightCardType] : []),
       ]
-    : [d.cardType];
+    : d.types;
   for (const type of movedTypes) owner.flags[`graveCardType:${type.toLowerCase()}`] = true;
   for (const s of d.subtypes ?? []) {
     owner.flags[`graveSubtype:${s.toLowerCase()}`] = true;
@@ -213,7 +215,7 @@ export function moveToGraveyard(state: GameStateInternal,
     logPublic(state, cardCeasesToExistLogMessage(state, card.cardId));
     return;
   }
-  const ceases = dataOf(state, card.cardId).cardType === "token"
+  const ceases = hasType(dataOf(state, card.cardId), "token")
     || (!cardAbilitiesSuppressed(state, card)
       && (dataOf(state, card.cardId).keywords ?? []).some(
         (keyword) => keyword.trim().toLowerCase() === "ephemeral",
@@ -233,7 +235,7 @@ export function fireLeaveArena(
   runtime: EngineRuntime,
   seat: number,
   card: CardInstance,
-  to: "graveyard" | "banish" | "soul" | "deck" | "hand" | "subcard" | "cease-to-exist",
+  to: "graveyard" | "banish" | "soul" | "deck" | "hand" | "subcard" | "cease-to-exist" | "removed-from-game",
   asActivationCost = false,
   destroyed = false,
   combatRole?: TriggerEventContext["combatRole"],
@@ -304,6 +306,16 @@ export function fireLeaveCombatChain(
   ] as const;
   const to = zones.find(([, cards]) => cards.some((candidate) => candidate.instanceId === card.instanceId))?.[0]
     ?? "cease-to-exist";
+  // "While defending" penalties end with the object; a replayed card is new.
+  if (combatRole === "defending") {
+    state.modifiers = state.modifiers.filter((modifier) =>
+      !(
+        modifier.scope === "combat-chain" &&
+        modifier.defense &&
+        modifier.appliesToInstanceId === card.instanceId
+      )
+    );
+  }
   fireLeaveArena(state, runtime, seat, card, to, false, destroyed, combatRole);
 }
 
@@ -403,7 +415,8 @@ export function destroyPermanent(state: GameStateInternal,
       transitionZone(sourceKind, controllerSeat),
       null,
     );
-    fireLeaveArena(state, runtime, controllerSeat, card, "cease-to-exist", false, true);
+    // CR 8.3.46b: removed from the game, so it is not considered to have died.
+    fireLeaveArena(state, runtime, controllerSeat, card, "removed-from-game", false, true);
     logPublic(state, gameLogMessage(
       `${nameOf(state, card.cardId)} ceases to exist (Incarnate)`,
       "engine.log.card.ceases.to.exist.incarnate",
@@ -475,9 +488,9 @@ export function destroyControlledCard(
       return true;
     }
 
-    const defending = link.defendingCards.find(
-      (candidate) => candidate.owner === seat && candidate.instanceId === card.instanceId,
-    );
+    const defending = defendingSeatOf(link) === seat
+      ? link.defendingCards.find((candidate) => candidate.instanceId === card.instanceId)
+      : undefined;
     if (defending) {
       removeFromArray(link.defendingCards, defending.instanceId);
       moveToGraveyard(state, runtime, defending, "chain", seat, undefined, true);
@@ -529,8 +542,10 @@ export function enterSoul(
   card: CardInstance,
   charged: boolean,
   lastKnownObserver?: CardInstance,
+  heroSeat = card.owner,
 ): void {
-  const owner = state.players[card.owner] as PlayerState;
+  // The soul sits under a hero (CR 3.11.5), so a controlled non-owned card joins its controller's soul.
+  const owner = state.players[heroSeat] as PlayerState;
   if (scriptOf(state, card.cardId, card)?.replacesSoulMoveWithArena === true) {
     owner.board.push(card);
     stampControlledName(state, owner, card);
@@ -582,17 +597,17 @@ function findAndRemoveCard(
   state: GameStateInternal,
   instanceId: number,
   opts?: { includeEquipment?: boolean; includeBanish?: boolean },
-): { owner: PlayerState; card: CardInstance; fromArena: boolean; fromZone: string } | undefined {
+): { owner: PlayerState; card: CardInstance; fromArena: boolean; fromZone: string; arenaZone?: "equipment" | "weapon" } | undefined {
   for (const p of state.players as PlayerState[]) {
     if (opts?.includeEquipment) {
       const eqSlot = Object.entries(p.equipment).find(([, c]) => c?.instanceId === instanceId);
       if (eqSlot) {
         const card = p.equipment[eqSlot[0] as keyof typeof p.equipment] as CardInstance;
         delete p.equipment[eqSlot[0] as keyof typeof p.equipment];
-        return { owner: p, card, fromArena: true, fromZone: "arena" };
+        return { owner: p, card, fromArena: true, fromZone: "arena", arenaZone: "equipment" };
       }
       const weapon = removeFromArray(p.weapons, instanceId);
-      if (weapon) return { owner: p, card: weapon, fromArena: true, fromZone: "arena" };
+      if (weapon) return { owner: p, card: weapon, fromArena: true, fromZone: "arena", arenaZone: "weapon" };
     }
     const zones: { arr: CardInstance[]; name: string; arena?: boolean }[] = [
       { arr: p.hand, name: "hand" }, { arr: p.deck, name: "deck" },
@@ -628,6 +643,9 @@ function powerAtOrigin(
   return basePowerOf(state, runtime, card.owner, card, dataOf(state, card.cardId).attack ?? 0);
 }
 
+/** Cards banished by one event; the caller raises "cards-banished" once for them. */
+export type BanishBatch = { card: CardInstance; from: string }[];
+
 /** Put an already removed card into its owner's banished zone and record all
  * public, per-turn, and observer consequences of the move. */
 export function enterBanish(
@@ -636,6 +654,7 @@ export function enterBanish(
   card: CardInstance,
   from: string,
   causedBySeat = card.owner,
+  batch?: BanishBatch,
 ): void {
   const owner = state.players[card.owner] as PlayerState;
   const causedBy = state.players[causedBySeat] as PlayerState | undefined;
@@ -659,7 +678,7 @@ export function enterBanish(
         Number(resolving.scriptState?.payingAdditionalCost ?? 0) !== 1
       ) return false;
       const resolvingData = dataOf(state, resolving.cardId);
-      return resolvingData.cardType === "action" &&
+      return hasType(resolvingData, "action") &&
         (resolvingData.subtypes ?? []).includes("attack");
     },
   );
@@ -681,7 +700,7 @@ export function enterBanish(
   }
   // Observers historically see ordinary cards already present in banish.
   // Tokens still fire the move event, but cease instead of remaining there.
-  if (dataOf(state, card.cardId).cardType !== "token") owner.banish.push(card);
+  if (!hasType(dataOf(state, card.cardId), "token")) owner.banish.push(card);
   const origin = from === "deck"
     ? " from deck"
     : from === "graveyard"
@@ -716,6 +735,8 @@ export function enterBanish(
     );
   }
   runtime.events.fireCardBanished(state, owner.seat, card, from);
+  if (batch) batch.push({ card, from });
+  else runtime.events.fireCardsBanished(state, [{ card, from }]);
 }
 
 /** Banish a card from any of its owner's zones (hand/soul/equipment/board/…). */
@@ -726,6 +747,7 @@ export function banishCard(
   causedBySeat?: number,
   faceDown?: boolean,
   effectSource?: TriggerEventContext["effectSource"],
+  batch?: BanishBatch,
 ): boolean {
   const applyBanishVisibility = (card: CardInstance): void => {
     if (faceDown === true) card.faceDown = true;
@@ -757,7 +779,7 @@ export function banishCard(
     active.flags.attackGone = true;
     if (!fromAttackingOwnerZone) {
       applyBanishVisibility(card);
-      enterBanish(state, runtime, card, "chain", causedBySeat);
+      enterBanish(state, runtime, card, "chain", causedBySeat, batch);
       fireLeaveCombatChain(state, runtime, active.attacker, card, "attacking");
       return true;
     }
@@ -765,8 +787,10 @@ export function banishCard(
   // A resolving instant/reaction is represented on both its stack layer and
   // the combat-chain link. Explicitly moving it must clear both copies.
   let defendingCard: CardInstance | undefined;
+  let defenderSeat: number | undefined;
   for (const link of state.chain) {
     const defending = removeFromArray(link.defendingCards, instanceId);
+    if (defending && !defendingCard) defenderSeat = defendingSeatOf(link);
     defendingCard ??= defending;
     const card = defending
       ?? removeFromArray(link.defendingEquipment, instanceId)
@@ -794,9 +818,9 @@ export function banishCard(
   const { owner, card, fromArena, fromZone } = found;
   if (fromArena) fireLeaveArena(state, runtime, owner.seat, card, "banish");
   applyBanishVisibility(card);
-  enterBanish(state, runtime, card, fromZone, causedBySeat);
+  enterBanish(state, runtime, card, fromZone, causedBySeat, batch);
   if (fromZone === "chain" && card === defendingCard) {
-    fireLeaveCombatChain(state, runtime, card.owner, card, "defending");
+    fireLeaveCombatChain(state, runtime, defenderSeat ?? card.owner, card, "defending");
   }
   if (fromZone === "deck" && !card.faceDown) {
     runtime.events.queueTriggeredEvent(
@@ -874,20 +898,22 @@ export function removeFromStackResolution(
 /** Remove a card from its resolving stack object or any of its owner's zones;
  * returns the card's owner. Effects may explicitly move their own source while
  * it is resolving, before the engine performs the default leave-stack move. */
-export function removeFromOwnerZones(state: GameStateInternal, instanceId: number): { owner: PlayerState; card: CardInstance; fromArena: boolean; fromZone: string } | undefined {
+export function removeFromOwnerZones(state: GameStateInternal, instanceId: number): { owner: PlayerState; card: CardInstance; fromArena: boolean; fromZone: string; arenaZone?: "equipment" | "weapon" } | undefined {
   return removeFromStackResolution(state, instanceId)
     ?? findAndRemoveCard(state, instanceId, { includeEquipment: true, includeBanish: true });
 }
 
-/** Move a card into its owner's soul, including an attack action that is
- * currently represented only on the combat chain. The chain retains a
- * last-known snapshot while settlement skips the card that already left. */
+/** Move a card into `heroSeat`'s soul (default: its owner's), including an
+ * attack action that is currently represented only on the combat chain. The
+ * chain retains a last-known snapshot while settlement skips the card that
+ * already left. */
 export function putCardIntoSoul(
   state: GameStateInternal,
   runtime: EngineRuntime,
   instanceId: number,
   causedBySeat?: number,
   effectSource?: TriggerEventContext["effectSource"],
+  heroSeat?: number,
 ): boolean {
   const fromResolving = removeFromStackResolution(state, instanceId);
   const link = currentLink(state);
@@ -916,12 +942,13 @@ export function putCardIntoSoul(
     ?? fromChain
     ?? findAndRemoveCard(state, instanceId, { includeEquipment: true, includeBanish: true });
   if (!found) return false;
-  const lastKnownObserver = found.fromArena && found.owner.seat === found.card.owner
+  const destinationSeat = heroSeat ?? found.card.owner;
+  const lastKnownObserver = found.fromArena && found.owner.seat === destinationSeat
     ? snapshotSerializable(found.card)
     : undefined;
   delete found.card.faceDown;
   if (found.fromArena) fireLeaveArena(state, runtime, found.owner.seat, found.card, "soul");
-  enterSoul(state, runtime, found.card, false, lastKnownObserver);
+  enterSoul(state, runtime, found.card, false, lastKnownObserver, destinationSeat);
   if (found.fromZone === "chain" && link) {
     fireLeaveCombatChain(state, runtime, link.attacker, found.card, "attacking");
   }
@@ -945,6 +972,7 @@ interface DeckEntry {
   card: CardInstance;
   /** The card left a zone its owner's opponent cannot see. */
   privateSource: boolean;
+  fromDeck: boolean;
 }
 
 /** Move one card into its owner's deck (appended at the bottom) without
@@ -983,11 +1011,9 @@ function moveCardIntoOwnerDeck(
     || (found.fromZone === "arsenal" && found.card.faceDown === true)
     || (found.fromZone === "banish" && found.card.faceDown === true);
   const sourceWasFaceDown = found.card.faceDown === true;
-  const source = found.fromArena && dataOf(state, found.card.cardId).cardType === "weapon"
-    ? transitionZone("weapon", found.owner.seat)
-    : found.fromArena && dataOf(state, found.card.cardId).cardType === "equipment"
-      ? transitionZone("equipment", found.owner.seat)
-      : transitionZoneFromEngineZone(found.fromZone, found.owner.seat);
+  const source = found.arenaZone
+    ? transitionZone(found.arenaZone, found.owner.seat)
+    : transitionZoneFromEngineZone(found.fromZone, found.owner.seat);
   if (found.fromArena && cardHasType(state, found.card, "token")) {
     runtime.transitions.move(found.card, source, null, { from: false });
     fireLeaveArena(state, runtime, found.owner.seat, found.card, "cease-to-exist", asActivationCost);
@@ -1011,7 +1037,7 @@ function moveCardIntoOwnerDeck(
   }
   if (found.fromArena) fireLeaveArena(state, runtime, found.owner.seat, found.card, "deck", asActivationCost);
   if (attackerSeat !== undefined) fireLeaveCombatChain(state, runtime, attackerSeat, found.card, "attacking");
-  return { owner: found.owner, card: found.card, privateSource };
+  return { owner: found.owner, card: found.card, privateSource, fromDeck: found.fromZone === "deck" };
 }
 
 /** Move one card to its owner's deck bottom with hidden-zone-safe logging. */
@@ -1020,15 +1046,17 @@ export function putCardOnDeckBottom(
   runtime: EngineRuntime,
   instanceId: number,
   asActivationCost = false,
+  actingSeat?: number,
 ): boolean {
   const entry = moveCardIntoOwnerDeck(state, runtime, instanceId, asActivationCost, "bottom");
   if (!entry) return false;
   if (entry === "ceased") return true;
   const detail = cardPutOnDeckBottomLogMessage(state, entry.card.cardId);
   if (entry.privateSource) {
+    // A deck card is known to the player moving it, not necessarily its owner.
     logPrivate(
       state,
-      entry.owner.seat,
+      entry.fromDeck && actingSeat !== undefined ? actingSeat : entry.owner.seat,
       detail,
       gameLogMessage(
         "a card is put on the bottom of the deck",

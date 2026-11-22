@@ -26,6 +26,27 @@ describe("PEN / WTR / EVR enter and leave arena triggers use the stack", () => {
     expect(boardKeys(g, 0)).toContain("seismic surge|0");
   });
 
+  it("Rites of Earthlore's start-of-turn buff skips Guardian weapon attacks", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          board: ["rites of earthlore|2"],
+          hand: ["sigil of solace|3"],
+          weapons: ["titan's fist|0"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", hand: [], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.endTurn();
+    expect(boardKeys(g, 0)).not.toContain("rites of earthlore|2");
+    g.attackWithWeapon("titan's fist|0").expectAttackValue(3);
+    expect(g.state.modifiers).toContainEqual(expect.objectContaining({ scope: "next-attack", attack: 2 }));
+  });
+
   it("Distant Rumbling draws and asks for the fifth-from-top card only on resolution", () => {
     const g = scenario({
       seats: [

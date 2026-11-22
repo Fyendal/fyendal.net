@@ -19,9 +19,9 @@ describe("compact arena layout", () => {
   });
 
   it("counts both pile columns as full arena squares on narrow desktop windows", () => {
-    // 1100 × 840 needs 813px beside the open sidebar's 788px.
-    expect(shouldUseCompactBoard(1100 - 276 - 36, 1100, 840)).toBe(true);
-    expect(shouldUseCompactBoard(1160 - 276 - 36, 1160, 840)).toBe(false);
+    // 1080 × 840 needs 776px beside the open sidebar's 768px.
+    expect(shouldUseCompactBoard(1080 - 276 - 36, 1080, 840)).toBe(true);
+    expect(shouldUseCompactBoard(1100 - 276 - 36, 1100, 840)).toBe(false);
   });
 
   it("leaves mobile layout selection to the mobile viewport", () => {

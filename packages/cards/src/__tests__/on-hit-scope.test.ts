@@ -28,8 +28,12 @@ describe("on-hit source scopes", () => {
       "blizzard bolt",
       "buzz bolt",
       "chilling icevein",
+      "defang the dragon",
       "demoralize the dracai",
+      "extinguish the flames",
       "poisoned blade",
+      "professional rivalry",
+      "viral sampling",
     ]);
   });
 });

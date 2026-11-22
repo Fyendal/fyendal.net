@@ -1,43 +1,32 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
 import {
   attackAbility,
+  bothHeroSeats,
   buffNextAttack,
   commonOptionMessages,
+  controlledDiseases,
   decisionMessage,
   decisionPrompt,
+  defenderInfected,
   effectPutSelfFaceUpFromDeck,
   entersArenaTrigger,
+  flipHero,
   heroChoiceSeat,
+  isDisease,
+  isDiseaseToken,
+  isInfected,
   localizedCardLog,
   opponentSeat,
   requestHeroChoice,
+  targetsHero,
+  isArrow,
+  hasCardSubtype,
 } from "./shared-helpers.js";
+import { BLOODROT_POX, EXERTION, INERTIA, PONDER } from "./tokens.js";
 
 // Disease token names offered when an effect names a disease token.
 const DISEASE_TOKEN_NAMES: readonly string[] = ["Bloodrot Pox", "Exertion", "Frailty", "Inertia"];
-const EXERTION = "SLV035";
-const BLOODROT_POX = "SAZ034";
-const INERTIA = "SAZ036";
 const EXTINCTION_WIN_THRESHOLD = 33;
-
-function hasKeyword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, keyword: string): boolean {
-  const key = keyword.toLowerCase();
-  if ((card.suppressedKeywords ?? []).includes(key)) return false;
-  return [...(ctx.cardData(card.cardId).keywords ?? []), ...(card.grantedKeywords ?? [])]
-    .some((candidate) => candidate.toLowerCase() === key);
-}
-
-function isArrow(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("arrow");
-}
-
-function isDisease(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("disease");
-}
-
-function isDiseaseToken(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "token") && isDisease(ctx, card);
-}
 
 /** Each hero, in turn order, puts their deck top face-up into their arsenal;
  * returns the cards actually moved. */
@@ -64,18 +53,48 @@ function minFace(ownedCardTypes: CardScript["ownedCardTypes"], flip: (ctx: Scrip
   };
 }
 
-function flipToBack(ctx: ScriptCtx): void {
-  const backId = ctx.cardData(ctx.self.cardId).backId;
-  if (backId) ctx.becomeHero(backId);
+const minGenius = minFace({ gain: ["mechanologist"] }, flipHero);
+const minMad = minFace({ loseClassTalent: true }, flipHero);
+
+// Min's front faces are △, the backs ▽.
+const changeOfMind: CardScript = {
+  onPlay(ctx) {
+    const face = flipHero(ctx);
+    if (face === "front") ctx.gainResources(ctx.seat, 2);
+    else if (face === "back") buffNextAttack(ctx, { attack: 2 });
+  },
+};
+
+const CASCADE_TOKENS: readonly string[] = [EXERTION, INERTIA, BLOODROT_POX];
+
+function cascadeInfected(ctx: ScriptCtx): boolean {
+  return isInfected(ctx, ctx.seat) && defenderInfected(ctx);
 }
 
-function flipToFront(ctx: ScriptCtx): void {
-  const frontId = ctx.self.originalHeroCardId;
-  if (frontId) ctx.becomeHero(frontId);
-}
+const virulentCascade: CardScript = {
+  onAttackDeclared(ctx) {
+    const token = CASCADE_TOKENS[ctx.randomInt(CASCADE_TOKENS.length)]!;
+    ctx.logPublic(
+      localizedCardLog(
+        ctx,
+        `${ctx.data.name} chooses ${ctx.cardData(token).name} at random`,
+        "card.log.obk.virulentcascade.token",
+        { token: { kind: "card", cardId: token } },
+      ),
+    );
+    ctx.createToken(token, ctx.seat);
+  },
+  modifyAttack: (ctx) => (cascadeInfected(ctx) ? 1 : 0),
+  hasConditionalGoAgain: cascadeInfected,
+};
 
-const minGenius = minFace({ gain: ["mechanologist"] }, flipToBack);
-const minMad = minFace({ loseClassTalent: true }, flipToFront);
+const eideticEndpoint: CardScript = {
+  onEnterArsenal(ctx) {
+    for (const player of ctx.state.players) {
+      for (const card of player.arsenal) if (card.faceDown) ctx.turnArsenalFaceUp(card.instanceId);
+    }
+  },
+};
 
 const vyle: CardScript = {
   activated: {
@@ -102,8 +121,11 @@ const huxley: CardScript = {
       optional: true,
       label: "Tap this hero to play the banished card as though it were an instant this turn",
       labelMessage: decisionMessage("card.trigger.obk.huxley.instant"),
+      eventLabelMessage: (banished) =>
+        decisionMessage("card.trigger.obk.huxley.instant.card", { target: { kind: "card", cardId: banished.cardId } }),
+      // Triggers while tapped: the tap is paid on resolution, after a window to untap.
       condition: (ctx, banished) =>
-        !!banished && !ctx.self.tapped && ctx.hasCardType(banished, "action") && hasKeyword(ctx, banished, "stealth"),
+        !!banished && ctx.hasCardType(banished, "action") && ctx.hasKeyword(banished, "stealth"),
       canAccept: (ctx) => !ctx.self.tapped,
       effect(ctx, banished) {
         if (!banished || !ctx.tap(ctx.self.instanceId)) return;
@@ -154,7 +176,7 @@ const azalea: CardScript = {
       if (!top || !ctx.putIntoArsenal(top.instanceId, "deck")) return;
       const target = { kind: "card", cardId: top.cardId } as const;
       const name = ctx.cardData(top.cardId).name;
-      if (hasKeyword(ctx, top, "stealth")) {
+      if (ctx.hasKeyword(top, "stealth")) {
         ctx.addCardTempPower(top.instanceId, 1);
         ctx.grantCardKeyword(top.instanceId, "go again");
         ctx.logPublic(
@@ -401,7 +423,7 @@ const exertion: CardScript = {
 const PATIENT_ZERO_HOOK = "obk-patient-zero-give";
 
 const patientZero: CardScript = {
-  canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+  canTriggerOnHit: targetsHero,
   onHit(ctx) {
     const diseases = ctx.player(ctx.seat).board.filter((card) => isDiseaseToken(ctx, card));
     if (diseases.length === 1) {
@@ -432,14 +454,6 @@ type CeremonyMode = (typeof CEREMONY_MODES)[number];
 
 const ceremonyModeKey = (mode: CeremonyMode) => `ceremonyMode:${mode}`;
 
-function ceremonyHeroes(ctx: ScriptCtx): number[] {
-  return [ctx.seat, opponentSeat(ctx)];
-}
-
-function controlledDiseases(ctx: ScriptCtx, seat: number): DeepReadonly<CardInstance>[] {
-  return ctx.player(seat).board.filter((card) => isDisease(ctx, card));
-}
-
 function cureForCeremony(ctx: ScriptCtx, seat: number, instanceId: number): void {
   if (ctx.destroyPermanent(instanceId, seat)) ctx.setState(CEREMONY_CURED, ctx.getState(CEREMONY_CURED) + 1);
 }
@@ -447,7 +461,7 @@ function cureForCeremony(ctx: ScriptCtx, seat: number, instanceId: number): void
 /** Each hero, in turn order, cures a disease they control if able, choosing
  * among several; then the controller picks one mode per cured disease. */
 function continueCeremony(ctx: ScriptCtx): void {
-  const heroes = ceremonyHeroes(ctx);
+  const heroes = bothHeroSeats(ctx);
   for (let index = ctx.getState(CEREMONY_HERO); index < heroes.length; index++) {
     const seat = heroes[index]!;
     const diseases = controlledDiseases(ctx, seat);
@@ -493,7 +507,7 @@ const curativeCeremony: CardScript = {
   onChoose(ctx, hook, option) {
     if (hook === CEREMONY_CURE_HOOK) {
       const index = ctx.getState(CEREMONY_HERO);
-      const seat = ceremonyHeroes(ctx)[index];
+      const seat = bothHeroSeats(ctx)[index];
       if (seat === undefined) return;
       const disease = controlledDiseases(ctx, seat).find((card) => card.instanceId === Number(option));
       if (disease) cureForCeremony(ctx, seat, disease.instanceId);
@@ -536,7 +550,7 @@ const cogwerxDuelingPistol: CardScript = {
 };
 
 const bootleggerBustUp: CardScript = {
-  boostBanishPowerBonus: (ctx, banished) => (ctx.cardTypes(banished).includes("mechanologist") ? 0 : 2),
+  boostBanishPowerBonus: (ctx, banished) => (hasCardSubtype(ctx, banished, "mechanologist") ? 0 : 2),
 };
 
 const PINPOINTER_BOTTOM_HOOK = "obk-pinpointer-bottom";
@@ -544,7 +558,7 @@ const PINPOINTER_ARROW_HOOK = "obk-pinpointer-arrow";
 
 function controlsOtherTappedBow(ctx: ScriptCtx): boolean {
   return ctx.player(ctx.seat).weapons.some((weapon) =>
-    weapon.instanceId !== ctx.self.instanceId && weapon.tapped === true && ctx.cardTypes(weapon).includes("bow")
+    weapon.instanceId !== ctx.self.instanceId && weapon.tapped === true && hasCardSubtype(ctx, weapon, "bow")
   );
 }
 
@@ -614,7 +628,7 @@ const CURE_ALL_HOOK = "obk-cure-all";
 const cureAllElixir: CardScript = {
   onPlay(ctx) {
     buffNextAttack(ctx, { attack: 3 });
-    const diseases = ctx.player(ctx.seat).board.filter((card) => isDisease(ctx, card));
+    const diseases = controlledDiseases(ctx, ctx.seat);
     if (diseases.length) {
       ctx.requestCardChoice(
         CURE_ALL_HOOK,
@@ -630,9 +644,98 @@ const cureAllElixir: CardScript = {
   },
 };
 
+const CODEX_ARSENAL_HOOK = "obk-codex-arsenal";
+const CODEX_HERO = "codexHero";
+const codexMovedKey = (seat: number) => `codexMoved:${seat}`;
+
+function codexMoveToHand(ctx: ScriptCtx, seat: number, instanceId: number): void {
+  if (ctx.moveToHand(instanceId)) ctx.setState(codexMovedKey(seat), 1);
+}
+
+/** Each hero, in turn order, returns an arsenal card to hand (choosing among
+ * several); then every hero that did draws, and the tokens are created. */
+function continueCodex(ctx: ScriptCtx): void {
+  const heroes = bothHeroSeats(ctx);
+  for (let index = ctx.getState(CODEX_HERO); index < heroes.length; index++) {
+    const seat = heroes[index]!;
+    const arsenal = ctx.player(seat).arsenal;
+    if (arsenal.length > 1) {
+      ctx.setState(CODEX_HERO, index);
+      ctx.requestCardChoice(
+        CODEX_ARSENAL_HOOK,
+        decisionPrompt("Put a card from your arsenal into your hand", "card.obk.codex.arsenal.hand"),
+        arsenal.map((card) => card.instanceId),
+        seat,
+      );
+      return;
+    }
+    if (arsenal.length === 1) codexMoveToHand(ctx, seat, arsenal[0]!.instanceId);
+  }
+  for (const seat of heroes) if (ctx.getState(codexMovedKey(seat)) > 0) ctx.drawCards(seat, 1);
+  ctx.createToken(PONDER);
+  ctx.createToken(EXERTION, opponentSeat(ctx));
+}
+
+const codexOfExertion: CardScript = {
+  onPlay(ctx) {
+    ctx.setState(CODEX_HERO, 0);
+    for (const seat of bothHeroSeats(ctx)) ctx.setState(codexMovedKey(seat), 0);
+    continueCodex(ctx);
+  },
+  onChoose(ctx, hook, option) {
+    if (hook !== CODEX_ARSENAL_HOOK) return;
+    const index = ctx.getState(CODEX_HERO);
+    const seat = bothHeroSeats(ctx)[index];
+    if (seat === undefined) return;
+    if (ctx.player(seat).arsenal.some((card) => card.instanceId === Number(option))) {
+      codexMoveToHand(ctx, seat, Number(option));
+    }
+    ctx.setState(CODEX_HERO, index + 1);
+    continueCodex(ctx);
+  },
+};
+
+// Stores turn + 1 so the default 0 never matches a real turn.
+const GYROSTRIDERS_ACTIVATED = "activatedTurn";
+
+function gyrostridersActivatedThisTurn(ctx: ScriptCtx): boolean {
+  return ctx.getState(GYROSTRIDERS_ACTIVATED) === ctx.state.turn + 1;
+}
+
+const cogwerxGyrostriders: CardScript = {
+  preventsUntapOf: (ctx, target) =>
+    target.instanceId === ctx.self.instanceId && ctx.state.phase === "end" && ctx.state.activePlayer === ctx.seat,
+  activated: [
+    {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      tap: true,
+      label: "Untap your hero",
+      onCostPaid: (ctx) => ctx.setState(GYROSTRIDERS_ACTIVATED, ctx.state.turn + 1),
+      onActivate(ctx) {
+        ctx.untap(ctx.player(ctx.seat).hero.instanceId);
+      },
+    },
+    {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      destroySelfCost: true,
+      label: "Next attack action from arsenal gets go again",
+      canActivate: (ctx) => !gyrostridersActivatedThisTurn(ctx),
+      onActivate(ctx) {
+        buffNextAttack(ctx, { goAgain: true, appliesTo: "attack-action", appliesToFromArsenal: true });
+      },
+    },
+  ],
+};
+
 function courier(tokenId: string): CardScript {
   return {
-    canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined,
+    canTriggerOnHit: targetsHero,
     onHit(ctx) {
       for (const seat of [ctx.seat, opponentSeat(ctx)]) ctx.createToken(tokenId, seat);
     },
@@ -680,11 +783,11 @@ const incubatorImplanter: CardScript = {
   // "When this attacks a hero, if …" grants the hit ability only when the
   // defending hero is infected as the attack is declared.
   onAttackDeclared(ctx) {
-    if (ctx.link?.targetAllyId === undefined && infectedWithBloodrotPox(ctx, opponentSeat(ctx))) {
+    if (targetsHero(ctx) && infectedWithBloodrotPox(ctx, opponentSeat(ctx))) {
       ctx.setFlag("link", INCUBATOR_INFECTED, true);
     }
   },
-  canTriggerOnHit: (ctx) => ctx.link?.targetAllyId === undefined && ctx.getFlag("link", INCUBATOR_INFECTED) === true,
+  canTriggerOnHit: (ctx) => targetsHero(ctx) && ctx.getFlag("link", INCUBATOR_INFECTED) === true,
   onHit(ctx) {
     const seat = opponentSeat(ctx);
     ctx.scheduleRecurringEndOfTurnTrigger(
@@ -710,7 +813,8 @@ const incubatorImplanter: CardScript = {
   },
 };
 
-// Weapon and ally attacks are attack-proxies, not cards on the chain link.
+// A weapon or ally attack-source is a non-equipment card on the chain link;
+// its attack-proxy is not, and neither is defending equipment.
 function streets(delta: number): CardScript {
   const sign = delta < 0 ? "-" : "+";
   const amount = Math.abs(delta);
@@ -719,7 +823,7 @@ function streets(delta: number): CardScript {
       const link = ctx.link;
       if (!link) return;
       const cards = [
-        ...(link.attackCardType === "action" && link.flags.attackGone !== true ? [link.attackingCard] : []),
+        ...(link.attackCardType !== "action" || link.flags.attackGone !== true ? [link.attackingCard] : []),
         ...link.defendingCards,
       ].filter((card) => !ctx.hasCardType(card, "equipment"));
       if (!cards.length) return;
@@ -767,6 +871,8 @@ export const obk: Record<string, CardScript> = {
   "mortimer, living virus|0": mortimer,
   "extinction level event|1": extinctionLevelEvent,
   "swap spit|1": swapSpit,
+  "swap spit|2": swapSpit,
+  "swap spit|3": swapSpit,
   "incite aggression|1": inciteAggression,
   "incite resolve|3": inciteResolve,
   "exertion bloom|2": exertionBloom,
@@ -781,6 +887,8 @@ export const obk: Record<string, CardScript> = {
   "incubator implanter|1": incubatorImplanter,
   "exertion|0": exertion,
   "patient zero|1": patientZero,
+  "patient zero|2": patientZero,
+  "patient zero|3": patientZero,
   "curative ceremony|1": curativeCeremony,
   "pauper's knife|0": { activated: attackAbility(2, { goAgain: true, oncePerTurn: false, tap: true }) },
   "cogwerx dueling pistol|0": cogwerxDuelingPistol,
@@ -790,4 +898,13 @@ export const obk: Record<string, CardScript> = {
   "one-click pinpointer|0": oneClickPinpointer,
   "max-tension shot|1": maxTensionShot,
   "cure-all elixir|0": cureAllElixir,
+  "codex of exertion|2": codexOfExertion,
+  "cogwerx gyrostriders|0": cogwerxGyrostriders,
+  "virulent cascade|1": virulentCascade,
+  "virulent cascade|2": virulentCascade,
+  "virulent cascade|3": virulentCascade,
+  "change of mind|3": changeOfMind,
+  "eidetic endpoint|1": eideticEndpoint,
+  "eidetic endpoint|2": eideticEndpoint,
+  "eidetic endpoint|3": eideticEndpoint,
 };

@@ -18,6 +18,7 @@ export type ScriptCommandName =
   | "basePowerOf"
   | "bindPermanent"
   | "boundArcaneCardBonus"
+  | "canPayFromHand"
   | "chainLinkNumber"
   | "chainLinksControlled"
   | "compareLife"
@@ -75,6 +76,7 @@ export type ScriptCommandName =
 export type ScriptEventName =
   | "collectCardEventTriggerLayers"
   | "fireCardBanished"
+  | "fireCardsBanished"
   | "fireCardLeavesGraveyard"
   | "fireFriendlyAttackLost"
   | "fireFriendlyDestroyed"

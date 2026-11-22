@@ -67,7 +67,7 @@ describe("AJV — Jarl", () => {
     g.state.players[1]!.weapons[0]!.defCounters = 1;
 
     g.play("AJV020", { pitch: ["SIY033"] })
-      .chooseOption("ice:")
+      .chooseCard("AJV018")
       .chooseCard("SGB002");
 
     expect(g.state.players[1]!.weapons).toHaveLength(0);
@@ -94,7 +94,7 @@ describe("AJV — Jarl", () => {
     g.state.players[1]!.equipment.chest!.defCounters = 1;
 
     g.play("AJV020", { pitch: ["SIY033"] })
-      .chooseOption("ice:")
+      .chooseCard("AJV018")
       .chooseCard("HVY097")
       .chooseOption("chest")
       .chooseOption("no");

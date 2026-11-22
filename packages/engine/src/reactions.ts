@@ -24,6 +24,7 @@ import {
   payCost,
   resolveVariableAbilityCost,
   resolveVariablePlayCost,
+  variableChoiceEnabledCardIds,
   variableResourceChoices,
   variableResourceCost,
 } from "./costs.js";
@@ -45,25 +46,28 @@ import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
 
 import {
   currentLink,
+  defendingSeatOf,
   findCard,
   heroSoulCards,
   isPermanentSource,
   removeFromArray,
 } from "./zoneQueries.js";
 import { abilitiesAsInstantForCard, abilityResourceCost, actionAbilityRestrictedByModifier, payActivatedAbilityCost, prepareActivatedAbilityTarget, prepareActivatedDiscardCost, prepareActivatedEffectCardCosts, prepareDestroySubcardCost } from "./abilityRules.js";
-import { consumeNextActionGoAgain, noteActionPlayedOrActivated } from "./cardLifecycle.js";
+import { consumeNextActionGoAgain, noteActionPlayedOrActivated, startPlayScriptState } from "./cardLifecycle.js";
 import { canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, mayPlayFromArsenal, mayPlayFromZone, notePlayPermissionSource, payAlternativePlayCost, preparePlayTarget } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
 import { actionLimitReached, isFrozen, opposingInstantsProhibited } from "./ruleQueries.js";
 import { defendingHeroCannotRespondBelowPower, defenseReactionRestriction } from "./combatRestrictions.js";
-import { pushAbilityLayer, pushAttackCardLayer, recordAnnouncedAttackTarget } from "./stackCore.js";
+import { boostDeclarationError, declareInstantBoosts, payDeclaredInstantBoosts } from "./boost.js";
+import { pushAbilityLayer, pushAttackCardLayer, recordAnnouncedAttackTarget, recordAttackTarget } from "./stackCore.js";
 
 import {
   holdPriorityWindow,
   passPriorityWindow,
   type PriorityWindow,
 } from "./priority.js";
+import { hasType } from "@fyendal/shared";
 
 /** Enter the reaction step: attacker holds priority first. */
 export function beginReactionStep(state: GameStateInternal): void {
@@ -244,17 +248,15 @@ export function activateWindowAbility(
     });
     if (result.status === "error") return result.error;
     if (result.status === "pending") return undefined;
+    if (!inReaction) runtime.dispatchFlow("cancelEndActionPass", state);
     if (state.pendingDecision?.chooseHook) {
       if (inReaction) state.pendingDecision.resume = { kind: "reopen-reaction", seat };
       else state.pendingDecision.resume = { kind: "continue-stack", seat };
       return undefined;
     }
-    if (runtime.dispatchFlow("flushPendingTriggersAboveStack", state)) return undefined;
+    if (runtime.dispatchFlow("flushPendingTriggersAboveStack", state, seat)) return undefined;
     if (inReaction) holdPriorityWindow(state, seat, reactionWindow(runtime));
-    else {
-      runtime.dispatchFlow("cancelEndActionPass", state);
-      runtime.dispatchFlow("holdLayerWindow", state, seat);
-    }
+    else runtime.dispatchFlow("holdLayerWindow", state, seat);
     return undefined;
   }
   if (card.instanceId === player.hero.instanceId && heroAbilitiesDisabled(state, seat)) {
@@ -362,6 +364,7 @@ export function activateWindowAbility(
       ...(presentation.promptMessage ? { promptMessage: presentation.promptMessage } : {}),
       ...(presentation.optionMessages ? { optionMessages: presentation.optionMessages } : {}),
       options,
+      ...variableChoiceEnabledCardIds(choices, resolvedVariableCost),
       sourceInstanceId: card.instanceId,
       chooseHook: "engine-variable-activation-x",
       variableActivationCost: {
@@ -503,24 +506,20 @@ export function activateWindowAbility(
     targetCardInstanceId: declaredCardTarget,
   });
   if (timing === "attack-reaction") runtime.dispatchFlow("queueReactionEventTriggers", state, seat);
+  // Before the early returns: a trigger from paying the cost must not leave the end-of-action pass standing.
+  if (!inReaction) runtime.dispatchFlow("cancelEndActionPass", state);
   // A leave-arena trigger opened while paying this activation cost must be
   // answered before priority resumes; do not overwrite it with the window.
   if (state.pendingDecision?.chooseHook) {
     if (inReaction) state.pendingDecision.resume = { kind: "reopen-reaction", seat };
-    else {
-      runtime.dispatchFlow("cancelEndActionPass", state);
-      state.pendingDecision.resume = { kind: "continue-stack", seat };
-    }
+    else state.pendingDecision.resume = { kind: "continue-stack", seat };
     return undefined;
   }
-  if (runtime.dispatchFlow("flushPendingTriggersAboveStack", state)) return undefined;
+  if (runtime.dispatchFlow("flushPendingTriggersAboveStack", state, seat)) return undefined;
   // the priority holder keeps priority and may play more; priority only
   // passes when they pass
   if (inReaction) holdPriorityWindow(state, seat, reactionWindow(runtime));
-  else {
-    runtime.dispatchFlow("cancelEndActionPass", state);
-    runtime.dispatchFlow("holdLayerWindow", state, seat);
-  }
+  else runtime.dispatchFlow("holdLayerWindow", state, seat);
   return undefined;
 }
 
@@ -538,28 +537,30 @@ export function playReaction(
   declaredVariableX?: number,
   targetAllyId?: number,
   additionalCostDeclared = false,
+  boost = false,
+  boostCount?: number,
 ): string | undefined {
   const link = currentLink(state);
   if (state.phase !== "reaction" || !link) return "no active reaction window";
   if (state.priorityPlayer !== seat) return "not your priority";
   const data = instanceDataOf(state, card);
-  const playedAsInstant = data.cardType === "instant" ||
-    (data.cardType !== "attack-reaction" && data.cardType !== "defense-reaction" &&
+  const playedAsInstant = hasType(data, "instant") ||
+    (!hasType(data, "attack-reaction") && !hasType(data, "defense-reaction") &&
       canPlayAsInstant(state, runtime, seat, card, link, fromZone ?? (fromArsenal ? "arsenal" : "hand")));
   if (playedAsInstant && opposingInstantsProhibited(state, seat)) {
     return "opposing effect prohibits instants";
   }
   const isAttacker = seat === link.attacker;
-  if (data.cardType === "attack-reaction" && !isAttacker)
+  if (hasType(data, "attack-reaction") && !isAttacker)
     return "only the attacker can play attack reactions";
-  if (data.cardType === "defense-reaction" && isAttacker)
+  if (hasType(data, "defense-reaction") && isAttacker)
     return "only the defender can play defense reactions";
   const player = state.players[seat] as PlayerState;
   const script = scriptOf(state, card.cardId, card);
   if (
-    data.cardType !== "attack-reaction" &&
-    data.cardType !== "defense-reaction" &&
-    data.cardType !== "instant"
+    !hasType(data, "attack-reaction") &&
+    !hasType(data, "defense-reaction") &&
+    !hasType(data, "instant")
   ) {
     // an action playable "as though it were an instant" counts as an instant here
     const asInstant = canPlayAsInstant(state, runtime, seat, card, link, fromZone ?? (fromArsenal ? "arsenal" : "hand"));
@@ -596,7 +597,7 @@ export function playReaction(
   if (cardPlayRestrictedByModifier(state, seat, card)) {
     return `${nameOf(state, card.cardId)} cannot be played due to a card-type restriction`;
   }
-  const isDefReact = data.cardType === "defense-reaction";
+  const isDefReact = hasType(data, "defense-reaction");
   const fromHand = !fromZone && source === player.hand;
   const maxNonBlock = attackMaxNonBlockDefenders(state, link);
   if (
@@ -641,6 +642,10 @@ export function playReaction(
       return `${nameOf(state, card.cardId)} cannot defend this attack`;
     }
   }
+  const boostErr = boostDeclarationError(state, seat, card, boost, boostCount);
+  if (boostErr) return boostErr;
+  if (!additionalCostDeclared) startPlayScriptState(player, card);
+  declareInstantBoosts(card, boost, boostCount);
   if (script?.canPlay && !script.canPlay(runtime.makeCtx(state, seat, card, link, fromArsenal))) {
     return `${nameOf(state, card.cardId)} cannot be played now`;
   }
@@ -849,19 +854,24 @@ export function finishReactionPlay(
   origin: "hand" | "arsenal" | PlayableZone,
 ): void {
   const link = currentLink(state);
-  if (link && dataOf(state, removed.cardId).cardType === "attack-reaction") {
+  if (link && hasType(dataOf(state, removed.cardId), "attack-reaction")) {
     link.flags.reactionPlayedOrActivated = true;
     link.flags[`reactionBySeat:${seat}`] = true;
     link.flags.reactionCount = Number(link.flags.reactionCount ?? 0) + 1;
+  }
+  if (link && hasType(dataOf(state, removed.cardId), "defense-reaction")) {
+    link.flags[`defenseReactionBySeat:${seat}`] = true;
   }
   const { goAgain, layers: playedTriggers } = runtime.dispatchFlow("announceCardPlayed", state, seat, removed, origin);
   // reactions/instants become the top stack layer: their effects resolve only
   // once both players pass in succession (CR 5.3.2); a defense reaction becomes
   // a defending card when it resolves (7.4.2d)
   if (isAttackActionData(instanceDataOf(state, removed))) {
+    payDeclaredInstantBoosts(state, runtime, seat, removed);
     pushAttackCardLayer(state, seat, removed, origin);
     runtime.dispatchFlow("triggerPlayedAttackSpectra", state, seat, removed);
   } else {
+    recordAttackTarget(state, removed);
     state.stack.unshift({
       sourceInstanceId: removed.instanceId,
       seat,
@@ -874,9 +884,11 @@ export function finishReactionPlay(
     });
   }
   state.stack.unshift(...playedTriggers);
-  if (dataOf(state, removed.cardId).cardType === "attack-reaction") {
+  if (hasType(dataOf(state, removed.cardId), "attack-reaction")) {
     runtime.dispatchFlow("queueReactionEventTriggers", state, seat);
   }
+  // Triggers from paying its cost (e.g. a pitch trigger) go above the reaction (CR 6.6.6).
+  if (runtime.dispatchFlow("flushPendingTriggersAboveStack", state, seat)) return;
   if (runtime.dispatchFlow("declarePlayedTriggerTargets", state, seat)) return;
   // the priority holder keeps priority and may play more reactions/instants;
   // priority only passes when they pass
@@ -911,7 +923,7 @@ export function activateDefenseAbility(
     candidate.defendingCards.some((card) => card.instanceId === sourceInstanceId)
   );
   const card = link?.defendingCards.find((candidate) => candidate.instanceId === sourceInstanceId);
-  if (!link || !card || card.owner !== seat) return "source is not defending for you";
+  if (!link || !card || defendingSeatOf(link) !== seat) return "source is not defending for you";
   if (activatedAbilitiesSuppressed(state, card)) return "activated abilities are suppressed";
   const script = scriptOf(state, card.cardId, card);
   const ability = script?.defenseAbility;
@@ -945,6 +957,6 @@ export function activateDefenseAbility(
   }
   player.flags[`defAbility:${card.instanceId}`] = true;
   script?.onDefendAbility?.(runtime.makeCtx(state, seat, card, link));
-  runtime.dispatchFlow("flushPendingTriggersAboveStack", state);
+  runtime.dispatchFlow("flushPendingTriggersAboveStack", state, seat);
   return undefined;
 }

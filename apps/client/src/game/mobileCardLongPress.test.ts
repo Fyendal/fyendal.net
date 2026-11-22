@@ -37,14 +37,36 @@ describe("mobile card long press", () => {
     expect(mobileCardLongPressCardId(target)).toBeNull();
   });
 
-  it("leaves hand cards to the hold-to-drag gesture", () => {
+  it("leaves draggable hand cards to the hold-to-drag gesture", () => {
+    const target = {
+      closest: (selector: string) => selector === "[data-hand-instance-id]"
+        ? { dataset: { handInstanceId: "7" } }
+        : selector === "[data-cardid]" ? { dataset: { cardid: "SEA225" } } : null,
+    } as unknown as HTMLElement;
+
+    expect(mobileCardLongPressCardId(target)).toBeNull();
+  });
+
+  it("inspects a hand card that cannot be dragged, such as while paying", () => {
     const target = {
       closest: (selector: string) => selector === "#player-hand"
         ? { id: "player-hand" }
         : selector === "[data-cardid]" ? { dataset: { cardid: "SEA225" } } : null,
     } as unknown as HTMLElement;
 
-    expect(mobileCardLongPressCardId(target)).toBeNull();
+    expect(mobileCardLongPressCardId(target)).toBe("SEA225");
+  });
+
+  it("inspects from a draggable hand card's overlay, which starts no drag", () => {
+    const target = {
+      closest: (selector: string) => selector === "[data-hand-instance-id]"
+        ? { dataset: { handInstanceId: "7" } }
+        : selector === ".c-ovl"
+          ? { className: "c-ovl" }
+          : selector === "[data-cardid]" ? { dataset: { cardid: "SEA225" } } : null,
+    } as unknown as HTMLElement;
+
+    expect(mobileCardLongPressCardId(target)).toBe("SEA225");
   });
 
   it("does not start another inspection from the enlarged card modal", () => {

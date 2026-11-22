@@ -82,6 +82,29 @@ describe("SEA — High Seas heroes and cogs", () => {
       .expectInZone(0, "enigma chimera|3", "graveyard");
   });
 
+  it("Burn Bare cannot destroy an attack that lost phantasm to Semblance", () => {
+    const burnBareId = printingId("burn bare|0");
+    const canBurnAfter = (semblance: boolean) => {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", weapons: [], resources: 6, hand: ["enigma chimera|3", "semblance|3"] },
+          { hero: "dorinthea", hand: ["burn bare|0"] },
+        ],
+      });
+      g.play("enigma chimera|3").blockWith();
+      if (semblance) g.react("semblance|3", { settle: false }).passPriority().passPriority();
+      g.passPriority();
+      return legalIntents(g.state, 1).some(
+        (intent) =>
+          intent.kind === "activate-ability" &&
+          g.state.players[1]!.hand.find((card) => card.instanceId === intent.sourceInstanceId)?.cardId === burnBareId,
+      );
+    };
+
+    expect(canBurnAfter(false)).toBe(true);
+    expect(canBurnAfter(true)).toBe(false);
+  });
+
   it("Burn Bare previews and deals a bound next-card arcane bonus", () => {
     const g = scenario({
       seats: [
@@ -99,7 +122,7 @@ describe("SEA — High Seas heroes and cogs", () => {
       .play("burn bare|0");
     expect(g.state.pendingDecision?.prompt).toBe("Choose a target for 7 arcane damage");
     expect(g.state.pendingDecision?.promptMessage).toEqual({
-      id: "card.sea.damage.arcane.target",
+      id: "card.common.arcane.damage.target",
       values: { amount: 7 },
     });
     expect(g.state.pendingDecision?.optionMessages).toHaveLength(
@@ -202,7 +225,7 @@ describe("SEA — High Seas heroes and cogs", () => {
       player: 0,
       chooseHook: "sea-cog-maintenance",
       options: ["remove", "destroy"],
-      promptMessage: { id: "card.sea.cog.maintenance.choose" },
+      promptMessage: { id: "card.common.maintenance.choose" },
       optionMessages: [
         { id: "common.option.remove" },
         { id: "common.option.destroy" },
@@ -261,6 +284,36 @@ describe("SEA — High Seas heroes and cogs", () => {
     expect(legalIntents(g.state, 1).some(
       (intent) => intent.kind === "activate-ability" && intent.targetAllyId === sticky.instanceId,
     )).toBe(true);
+  });
+
+  it("an equipped Polly Cranka can be targeted by any-target arcane damage", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["arc lightning|2"], resources: 2 },
+        { hero: "rhinar", heroKey: "puffin|0", weapons: ["polly cranka|0"] },
+      ],
+    });
+    const polly = g.state.players[1]!.weapons[0]!;
+    expect(polly.life).toBe(1);
+    g.play("arc lightning|2");
+    expect(g.state.pendingDecision?.options).toContain(String(polly.instanceId));
+    g.declareTarget(String(polly.instanceId))
+      .expectInZone(1, "polly cranka|0", "graveyard")
+      .expectLife(1, 20);
+  });
+
+  it("an equipped Polly Cranka without a stamped life total still takes damage", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["arc lightning|2"], resources: 2 },
+        { hero: "rhinar", heroKey: "puffin|0", weapons: ["polly cranka|0"] },
+      ],
+    });
+    const polly = g.state.players[1]!.weapons[0]!;
+    delete polly.life;
+    g.play("arc lightning|2")
+      .declareTarget(String(polly.instanceId))
+      .expectInZone(1, "polly cranka|0", "graveyard");
   });
 
   it("Polly Cranka's crank does not refund a second action point", () => {
@@ -1392,6 +1445,21 @@ describe("SEA — pirate and generic attacks", () => {
 });
 
 describe("SEA — rules regression coverage", () => {
+  it("Midas Touch gives Gold to the ally's controller, not its owner", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["midas touch|2"], resources: 1 },
+        { hero: "dorinthea", board: ["barnacle|2"] },
+      ],
+    });
+    g.state.players[1]!.board[0]!.owner = 0;
+
+    g.play("midas touch|2", { targetPermanent: "barnacle|2" });
+
+    expect(countOnBoard(g, 0, "gold|0")).toBe(0);
+    expect(countOnBoard(g, 1, "gold|0")).toBe(2);
+  });
+
   const barbedBarrage = (opts: { resources?: number; hand?: string[]; board?: string[] } = {}) =>
     scenario({
       seats: [
@@ -1778,5 +1846,41 @@ describe("SEA — rules regression coverage", () => {
       .expectInZone(0, "buckle|3", "hand")
       .expectHandSize(0, handSize)
       .expectZoneSize(0, "deck", deckSize);
+  });
+
+  it("Give No Quarter discounts only the next 2 watery grave allies by 3 each", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          resources: 12,
+          hand: ["give no quarter|3", "wailer humperdinck|2", "wailer humperdinck|2", "wailer humperdinck|2"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("give no quarter|3").play("wailer humperdinck|2").expectResources(0, 9);
+    g.state.players[0]!.actionPoints = 1;
+    g.play("wailer humperdinck|2").expectResources(0, 6);
+    g.state.players[0]!.actionPoints = 1;
+    g.play("wailer humperdinck|2").expectResources(0, 0);
+  });
+
+  it("Riddle with Regret counts auras when it triggers, not when it resolves", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", life: 20, board: ["riddle with regret|1", "ponder|0", "ponder|0"], hand: [] },
+        { hero: "rhinar", hand: [] },
+      ],
+    });
+    g.passActionPhase();
+    const riddle = g.state.players[0]!.board.find((card) => card.cardId === printingId("riddle with regret|1"))!;
+    const pd = g.state.pendingDecision!;
+    expect(pd.chooseHook).toBe("trigger-order");
+    g.doRaw({ kind: "choose", optionId: pd.options!.find((id) => !id.startsWith(`${riddle.instanceId}:`))! });
+    g.settle();
+    g.expectLife(0, 17).expectNotInZone(0, "riddle with regret|1", "board");
+    expect(countOnBoard(g, 0, "ponder|0")).toBe(0);
   });
 });

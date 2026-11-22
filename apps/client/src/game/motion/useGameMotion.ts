@@ -15,6 +15,7 @@ import { detectGameMotionEvents } from "./detectMotionEvents.js";
 import { transitionMotionEvents } from "./transitionMotionEvents.js";
 import { extractGamePresentations } from "./extractPresentations.js";
 import { focusHandReflows } from "./handReflow.js";
+import { stagedDefenderHandoffs, type StagedDefenderHandoff } from "./stagedDefenderHandoff.js";
 import { motionPresentationKey } from "./motionTypes.js";
 import {
   completeMotionBatch,
@@ -42,6 +43,7 @@ import { rememberHandFocusOrigins, rememberStackFocusOrigins } from "../pitchFoc
 import {
   activateMotionDestinationMasks,
   arriveMotionDestination,
+  concealMotionDestination,
   motionDestinationsRequiringEarlyMask,
   motionDestinationIsMasked,
   refreshMotionDestinationMasks,
@@ -213,7 +215,7 @@ export function useGameMotion({
     if (batchQueueRef.current.active?.id !== batchId) return;
     // Only float-bound flights affect React presentation. Other departures
     // reveal their source pile directly without rerendering the board.
-    if (flight.destinationLayer) {
+    if (flight.destinationLayer || flight.sourceMaskPresentationKey) {
       setStartedFlightIds((current) => (
         current.has(flight.id) ? current : new Set([...current, flight.id])
       ));
@@ -288,8 +290,9 @@ export function useGameMotion({
       : viewUpdate;
     const classification = classifyViewUpdate(previousView, view, motionUpdate);
     let nextBatches: GameMotionBatch[] = [];
+    let handoffs: StagedDefenderHandoff[] = [];
     if (previousView && classification.kind === "animate") {
-      const events = motionUpdate.gameTransition
+      const detected = motionUpdate.gameTransition
         ? transitionMotionEvents(
             previousView,
             view,
@@ -301,6 +304,9 @@ export function useGameMotion({
             },
           )
         : detectGameMotionEvents(previousView, view);
+      const handedOff = stagedDefenderHandoffs(detected, batchQueueRef.current, maskedElementsRef.current);
+      const events = handedOff.events;
+      handoffs = handedOff.handoffs;
       const eventKeys = new Set(events.filter((event) => event.kind === "reflow")
         .map((event) => event.destinationPresentationKey));
       events.push(...focusReflows.filter((event) => !eventKeys.has(event.destinationPresentationKey)));
@@ -345,6 +351,14 @@ export function useGameMotion({
         measured.cardElements,
         maskedElementsRef.current,
       );
+    }
+    for (const handoff of handoffs) {
+      const element = measured.cardElements.get(handoff.destinationKey);
+      if (!element) continue;
+      concealMotionDestination(element);
+      const batchMasks = maskedElementsRef.current.get(handoff.batchId) ?? new Map<string, HTMLElement>();
+      batchMasks.set(handoff.stagingKey, element);
+      maskedElementsRef.current.set(handoff.batchId, batchMasks);
     }
     if (nextBatches.length > 0) {
       let nextQueue = batchQueueRef.current;

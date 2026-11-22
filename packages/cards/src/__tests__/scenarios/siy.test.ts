@@ -76,6 +76,26 @@ describe("SIY — Iyslander and Frostbite", () => {
     s.expectLife(1, 19).blockWith().settle();
   });
 
+  it("cannot play a blue action from arsenal on the opponent's turn while her abilities are disabled", () => {
+    const s = scenario({
+      active: 1,
+      seats: [
+        iyslander({ arsenal: ["frosting|3"] }),
+        { hero: "dorinthea", hand: ["wounded bull|1", BLUE] },
+      ],
+    });
+    s.state.players[0]!.flags.disableHeroAbilities = true;
+    s.play("wounded bull|1", { pitch: [BLUE], settle: false });
+    // With no instant to offer, the engine skips Iyslander's priority in the layer window.
+    if (s.state.priorityPlayer === 1) s.passPriority();
+    const frosting = s.state.players[0]!.arsenal[0]!.instanceId;
+    expect(
+      legalIntents(s.state, 0).some(
+        (intent) => intent.kind === "play-from-arsenal" && intent.instanceId === frosting,
+      ),
+    ).toBe(false);
+  });
+
   it("each Frostbite increases a card's cost, then destroys itself on that play", () => {
     const s = scenario({
       seats: [

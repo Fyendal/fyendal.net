@@ -2,6 +2,7 @@ import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal
 import {
   ampNextArcane,
   anyDamageTarget,
+  arcaneHero,
   attackAbility,
   buffNextAttack,
   cardNameContains,
@@ -9,39 +10,42 @@ import {
   channelLightning,
   commonOptionMessages,
   consumeDelayedEffect,
+  createRunechants,
   dealArcane,
+  dealArcaneToAnyTargetChoice,
   dealToAnyTarget,
   decisionMessage,
   decisionPrompt,
+  decompose,
   entersArenaTrigger,
+  equippedCards,
+  faceUpGraveyard,
+  hasCardSubtype,
+  hasLiveTurnEffect,
+  heroChoiceSeat,
   heroDamage,
   hitHookLabel,
+  isAttackAction,
+  isAura,
+  isNonAttackAction,
   leavesArenaTrigger,
   localizedCardLog,
+  maleficIncantation,
   ongoingLabel,
   opponentSeat,
   pendingDelayedEffect,
+  playedLightning,
+  playedOrCreatedAura,
   previousAttackHasName,
+  requestAnyTargetChoice,
   requestDiscardChoice,
   resolveDiscardChoice,
   resourceAbility,
+  splitScript,
 } from "./shared-helpers.js";
+import { EMBODIMENT_OF_EARTH, EMBODIMENT_OF_LIGHTNING, PONDER, RUNECHANT, SPECTRAL_SHIELD } from "./tokens.js";
 
 // Rosetta (ROS) — commons, rares, young heroes, and their required tokens.
-
-const EARTH = "ROS025";
-const LIGHTNING = "ROS026";
-const RUNECHANT = "ROS162";
-const PONDER = "ROS237";
-const SPECTRAL_SHIELD = "MST158";
-
-function data(ctx: ScriptCtx, card: DeepReadonly<CardInstance>) {
-  return ctx.cardData(card.cardId);
-}
-
-function hasTag(ctx: ScriptCtx, card: DeepReadonly<CardInstance>, tag: string): boolean {
-  return ctx.cardTypes(card).includes(tag.toLowerCase());
-}
 
 function requestPlanForWorstHandShuffle(ctx: ScriptCtx): void {
   const hand = ctx.player(ctx.seat).hand;
@@ -61,20 +65,8 @@ function requestPlanForWorstHandShuffle(ctx: ScriptCtx): void {
   );
 }
 
-function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return hasTag(ctx, card, "aura");
-}
-
-function isAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack");
-}
-
-function isNonAttackAction(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.hasCardType(card, "action") && !hasTag(ctx, card, "attack");
-}
-
 function earthBanished(ctx: ScriptCtx): number {
-  return ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && hasTag(ctx, card, "earth")).length;
+  return ctx.player(ctx.seat).banish.filter((card) => !card.faceDown && hasCardSubtype(ctx, card, "earth")).length;
 }
 
 function fourEarthBanished(ctx: ScriptCtx): boolean {
@@ -93,7 +85,7 @@ function verdance(earthCards: number): CardScript {
           (ctx) =>
             decisionPrompt(
               `Verdance: deal ${ctx.previewArcaneDamage(1)} arcane damage to an opposing target?`,
-              "card.ros.arcane.target.choose",
+              "card.common.arcane.target.choose",
               {
                 values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(1) },
                 optionMessages: commonOptionMessages("pass"),
@@ -107,198 +99,19 @@ function verdance(earthCards: number): CardScript {
   };
 }
 
-function playedOrCreatedAura(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "playedSubtype:aura") === true || ctx.getFlag("player", "createdSubtype:aura") === true;
-}
-
 function sigils(ctx: ScriptCtx, seat = ctx.seat): DeepReadonly<CardInstance>[] {
   return ctx
     .player(seat)
     .board.filter((card) => isAura(ctx, card) && cardNameContains(ctx, card, "sigil"));
 }
 
-function createRunechants(ctx: ScriptCtx, count: number): void {
-  ctx.createTokens(RUNECHANT, count);
-}
-
-function requestAnyTarget(
-  ctx: ScriptCtx,
-  hook: string,
-  prompt: string,
-  amount: number,
-  opposingOnly = false,
-  optional = false,
-): void {
-  const options = opposingOnly ? ["opposing hero"] : ["opposing hero", "your hero"];
-  if (optional) options.unshift("no");
-  const cardOptions: (number | null)[] = options.map(() => null);
-  for (const player of ctx.state.players) {
-    if (opposingOnly && player.seat === ctx.seat) continue;
-    for (const card of player.board) {
-      if (!hasTag(ctx, card, "ally")) continue;
-      options.push(`ally:${player.seat}:${card.instanceId}`);
-      cardOptions.push(card.instanceId);
-    }
-  }
-  ctx.requestChoice(
-    hook,
-    decisionPrompt(prompt, "card.ros.arcane.target.choose", {
-      values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(amount) },
-      optionMessages: {
-        "opposing hero": decisionMessage("common.option.opponent"),
-        "your hero": decisionMessage("card.ros.option.yourhero"),
-        ...(optional ? commonOptionMessages("no") : {}),
-      },
-    }),
-    options,
-    ctx.seat,
-    cardOptions,
-    "opposing hero",
-  );
-}
-
-function dealToChoice(ctx: ScriptCtx, option: string, amount: number): void {
-  if (option === "no") return;
-  const ally = /^ally:(\d+):(\d+)$/.exec(option);
-  ctx.setState("lastTargetWasAlly", ally ? 1 : 0);
-  if (ally) {
-    dealArcane(ctx, Number(ally[1]), amount, Number(ally[2]));
-  } else {
-    dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), amount);
-  }
-}
-
-interface SplitSides {
-  leftName: string;
-  rightName: string;
-  left(ctx: ScriptCtx): void;
-  right(ctx: ScriptCtx): void;
-}
-
-function splitScript(sides: SplitSides): CardScript {
-  return {
-    meld: {
-      leftName: sides.leftName,
-      rightName: sides.rightName,
-      leftCardType: "action",
-      rightCardType: "instant",
-    },
-    onPlay(ctx) {
-      if (ctx.self.meldSide === "left") sides.left(ctx);
-      else if (ctx.self.meldSide === "right") sides.right(ctx);
-      else if (ctx.self.meldSide === "both") {
-        sides.right(ctx);
-        sides.left(ctx);
-      }
-    },
-  };
-}
-
-type DecomposePayoff = (ctx: ScriptCtx) => void;
-
-function decompose(trigger: "attack" | "play", payoff: DecomposePayoff): CardScript {
-  const offer = (ctx: ScriptCtx) => {
-    const grave = ctx.player(ctx.seat).graveyard;
-    const firstEarth = grave.filter(
-      (first) =>
-        hasTag(ctx, first, "earth") &&
-        grave.some(
-          (second) =>
-            second.instanceId !== first.instanceId &&
-            hasTag(ctx, second, "earth") &&
-            grave.some(
-              (action) =>
-                action.instanceId !== first.instanceId &&
-                action.instanceId !== second.instanceId &&
-                ctx.hasCardType(action, "action"),
-            ),
-        ),
-    );
-    if (firstEarth.length === 0) return;
-    ctx.requestCardChoice(
-      "decompose-earth-1",
-      decisionPrompt(
-        `${ctx.data.name}: decompose? Choose the first Earth card to banish`,
-        "card.ros.decompose.earth.first",
-        { values: { card: { kind: "card", cardId: ctx.self.cardId } }, optionMessages: commonOptionMessages("no") },
-      ),
-      ["no", ...firstEarth.map((card) => card.instanceId)],
-    );
-  };
-  return {
-    ...(trigger === "attack" ? { onAttackDeclared: offer } : { onPlay: offer }),
-    onChoose(ctx, hook, option) {
-      if (hook === "decompose-earth-1") {
-        if (option === "no") return;
-        const first = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
-        if (!first || !hasTag(ctx, first, "earth")) return;
-        ctx.setState("decomposeEarth1", first.instanceId);
-        const secondEarth = ctx
-          .player(ctx.seat)
-          .graveyard.filter(
-            (second) =>
-              second.instanceId !== first.instanceId &&
-              hasTag(ctx, second, "earth") &&
-              ctx
-                .player(ctx.seat)
-                .graveyard.some(
-                  (action) =>
-                    action.instanceId !== first.instanceId &&
-                    action.instanceId !== second.instanceId &&
-                    ctx.hasCardType(action, "action"),
-                ),
-          );
-        ctx.requestCardChoice(
-          "decompose-earth-2",
-          decisionPrompt(
-            `${ctx.data.name}: choose the second Earth card to banish`,
-            "card.ros.decompose.earth.second",
-            { values: { card: { kind: "card", cardId: ctx.self.cardId } } },
-          ),
-          secondEarth.map((card) => card.instanceId),
-        );
-        return;
-      }
-      if (hook === "decompose-earth-2") {
-        const firstId = ctx.getState("decomposeEarth1");
-        const second = ctx.player(ctx.seat).graveyard.find((card) => card.instanceId === Number(option));
-        if (!second || second.instanceId === firstId || !hasTag(ctx, second, "earth")) return;
-        ctx.setState("decomposeEarth2", second.instanceId);
-        const actions = ctx
-          .player(ctx.seat)
-          .graveyard.filter(
-            (card) =>
-              card.instanceId !== firstId && card.instanceId !== second.instanceId && ctx.hasCardType(card, "action"),
-          );
-        ctx.requestCardChoice(
-          "decompose-action",
-          decisionPrompt(`${ctx.data.name}: choose the action card to banish`, "card.ros.decompose.action", {
-            values: { card: { kind: "card", cardId: ctx.self.cardId } },
-          }),
-          actions.map((card) => card.instanceId),
-        );
-        return;
-      }
-      if (hook !== "decompose-action") return;
-      const ids = [ctx.getState("decomposeEarth1"), ctx.getState("decomposeEarth2"), Number(option)];
-      if (new Set(ids).size !== 3) return;
-      const grave = ctx.player(ctx.seat).graveyard;
-      const chosen = ids.map((id) => grave.find((card) => card.instanceId === id));
-      if (
-        !chosen.every(Boolean) ||
-        !hasTag(ctx, chosen[0]!, "earth") ||
-        !hasTag(ctx, chosen[1]!, "earth") ||
-        !ctx.hasCardType(chosen[2]!, "action")
-      )
-        return;
-      for (const id of ids) ctx.banish(id);
-      payoff(ctx);
-    },
-  };
+function dealArcaneRecordingAllyTarget(ctx: ScriptCtx, option: string, amount: number): void {
+  const target = dealArcaneToAnyTargetChoice(ctx, option, amount);
+  if (target) ctx.setState("lastTargetWasAlly", target.allyId === undefined ? 0 : 1);
 }
 
 function earthForm(): CardScript {
-  return { onHit: (ctx) => ctx.createToken(EARTH) };
+  return { onHit: (ctx) => ctx.createToken(EMBODIMENT_OF_EARTH) };
 }
 
 function fellingOfTheCrown(): CardScript {
@@ -310,7 +123,7 @@ function fellingOfTheCrown(): CardScript {
       if (hand.length === 0) continue;
       ctx.requestCardChoice(
         `felling-hand:${index}:${choiceSeat}`,
-        decisionPrompt("Put a card from your hand on the bottom of your deck", "card.ros.hand.card.bottom"),
+        decisionPrompt("Put a card from your hand on the bottom of your deck", "card.common.cost.hand.deckbottom"),
         hand.map((card) => card.instanceId),
         choiceSeat,
       );
@@ -377,7 +190,7 @@ function fruitsOfForest(): CardScript {
   };
 }
 
-function beginningAura(effect?: (ctx: ScriptCtx) => void, leave?: (ctx: ScriptCtx) => void): CardScript {
+function beginningAuraWithLeave(effect?: (ctx: ScriptCtx) => void, leave?: (ctx: ScriptCtx) => void): CardScript {
   const triggers: NonNullable<CardScript["triggers"]> = [
     {
       event: "begin-action-phase",
@@ -402,7 +215,7 @@ function beginningAura(effect?: (ctx: ScriptCtx) => void, leave?: (ctx: ScriptCt
   };
 }
 
-function preventEquipment(amount: number, condition: (ctx: ScriptCtx) => boolean): CardScript {
+function conditionalPreventEquipment(amount: number, condition: (ctx: ScriptCtx) => boolean): CardScript {
   return {
     activated: {
       cost: 0,
@@ -417,7 +230,7 @@ function preventEquipment(amount: number, condition: (ctx: ScriptCtx) => boolean
 }
 
 function lightningForm(): CardScript {
-  return { onHit: (ctx) => ctx.createToken(LIGHTNING) };
+  return { onHit: (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING) };
 }
 
 const valleyChannel = channelLightning("valleyChannelRemaining", "ros-valley-channel");
@@ -467,35 +280,6 @@ function splinteringDeadwood(): CardScript {
     onChoose(ctx, hook, option) {
       if (hook === "splinter-aura" && option !== "no" && ctx.destroyPermanent(Number(option))) createRunechants(ctx, 1);
     },
-  };
-}
-
-function maleficIncantation(verses: number): CardScript {
-  return {
-    destroyAtZeroCounter: "verse",
-    onEnterArena: (ctx) => ctx.setCounter("verse", verses),
-    triggers: [
-      {
-        event: "card-played",
-        label: "Remove a verse counter and create a Runechant",
-        condition(ctx, played) {
-          const onceKey = `maleficUsed:${ctx.self.instanceId}`;
-          return (
-            !!played &&
-            isAttackAction(ctx, played) &&
-            ctx.getFlag("player", onceKey) !== true &&
-            ctx.getCounter("verse") > 0
-          );
-        },
-        onTrigger(ctx) {
-          ctx.setFlag("player", `maleficUsed:${ctx.self.instanceId}`, true);
-        },
-        effect(ctx) {
-          ctx.setCounter("verse", ctx.getCounter("verse") - 1);
-          createRunechants(ctx, 1);
-        },
-      },
-    ],
   };
 }
 
@@ -562,49 +346,11 @@ function arcaneAnyTarget(
     arcaneDamageEffect: true,
     arcaneDamageEffectAmounts: [amount],
     onPlay: (ctx) =>
-      requestAnyTarget(
-        ctx,
-        "arcane-target",
-        `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a target`,
-        amount,
-      ),
+      requestAnyTargetChoice(ctx, "arcane-target", amount),
     onChoose(ctx, hook, option) {
-      if (hook === "arcane-target") dealToChoice(ctx, option, amount);
+      if (hook === "arcane-target") dealArcaneRecordingAllyTarget(ctx, option, amount);
     },
     ...extra,
-  };
-}
-
-function arcaneHero(amount: number, surge?: (ctx: ScriptCtx, target: number, dealt: number) => void): CardScript {
-  return {
-    arcaneDamageEffect: true,
-    arcaneDamageEffectAmounts: [amount],
-    onPlay(ctx) {
-      ctx.requestChoice(
-        "arcane-hero",
-        decisionPrompt(
-          `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a hero`,
-          "card.ros.arcane.hero.choose",
-          {
-            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(amount) },
-            optionMessages: {
-              "opposing hero": decisionMessage("common.option.opponent"),
-              "your hero": decisionMessage("card.ros.option.yourhero"),
-            },
-          },
-        ),
-        ["opposing hero", "your hero"],
-        undefined,
-        undefined,
-        "opposing hero",
-      );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "arcane-hero") dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), amount);
-    },
-    onDamageDealt(ctx, target, dealt, arcane) {
-      if (arcane && dealt > amount) surge?.(ctx, target, dealt);
-    },
   };
 }
 
@@ -631,29 +377,11 @@ function glyphOverlay(base: number): CardScript {
     arcaneDamageEffectAmounts: [base],
     onPlay(ctx) {
       const amount = base + sigils(ctx).length;
-      ctx.requestChoice(
-        "glyph-hero",
-        decisionPrompt(
-          `${ctx.data.name}: deal ${ctx.previewArcaneDamage(amount)} arcane damage to a hero`,
-          "card.ros.arcane.hero.choose",
-          {
-            values: { card: { kind: "card", cardId: ctx.self.cardId }, amount: ctx.previewArcaneDamage(amount) },
-            optionMessages: {
-              "opposing hero": decisionMessage("common.option.opponent"),
-              "your hero": decisionMessage("card.ros.option.yourhero"),
-            },
-          },
-        ),
-        ["opposing hero", "your hero"],
-        undefined,
-        undefined,
-        "opposing hero",
-      );
+      requestAnyTargetChoice(ctx, "glyph-hero", amount, { heroesOnly: true });
     },
     onChoose(ctx, hook, option) {
-      if (hook === "glyph-hero") {
-        dealArcane(ctx, option === "your hero" ? ctx.seat : opponentSeat(ctx), base + sigils(ctx).length);
-      }
+      const seat = hook === "glyph-hero" ? heroChoiceSeat(ctx, option) : undefined;
+      if (seat !== undefined) dealArcane(ctx, seat, base + sigils(ctx).length);
     },
     onDamageDealt(ctx, _target, dealt, arcane) {
       if (!arcane || dealt <= base) return;
@@ -673,7 +401,7 @@ function popBubble(amount: number): CardScript {
       if (auras.length)
         ctx.requestCardChoice(
           "pop-aura",
-          decisionPrompt("Destroy an aura permanent", "card.ros.aura.destroy"),
+          decisionPrompt("Destroy an aura permanent", "card.common.aura.destroy"),
           auras.map((card) => card.instanceId),
         );
     },
@@ -693,7 +421,7 @@ function saveThought(max: number): CardScript {
     ctx.createToken(PONDER);
   };
   const offer = (ctx: ScriptCtx, remaining: number) => {
-    const cards = ctx.player(ctx.seat).graveyard.filter((card) => isNonAttackAction(ctx, card));
+    const cards = faceUpGraveyard(ctx).filter((card) => isNonAttackAction(ctx, card));
     if (remaining <= 0 || cards.length === 0) {
       finish(ctx);
       return;
@@ -725,9 +453,7 @@ function saveThought(max: number): CardScript {
 
 function etchings(amount: number): CardScript {
   const base = arcaneHero(amount, (ctx) => {
-    const choices = ctx
-      .player(ctx.seat)
-      .graveyard.filter((card) => isAura(ctx, card) && cardNameContains(ctx, card, "sigil"));
+    const choices = faceUpGraveyard(ctx).filter((card) => isAura(ctx, card) && cardNameContains(ctx, card, "sigil"));
     if (choices.length)
       ctx.requestCardChoice(
         "etching-sigil",
@@ -757,8 +483,8 @@ function arsenalHit(required: "attack" | "non-attack" | "instant"): CardScript {
       if (facedown) ctx.turnArsenalFaceUp(facedown.instanceId);
       const matches = ctx.player(target).arsenal.filter((card) => {
         if (required === "instant") return ctx.hasCardType(card, "instant");
-        if (required === "attack") return ctx.hasCardType(card, "action") && hasTag(ctx, card, "attack");
-        return ctx.hasCardType(card, "action") && !hasTag(ctx, card, "attack");
+        if (required === "attack") return isAttackAction(ctx, card);
+        return isNonAttackAction(ctx, card);
       });
       if (matches.length)
         ctx.requestCardChoice(
@@ -776,7 +502,7 @@ function arsenalHit(required: "attack" | "non-attack" | "instant"): CardScript {
 export const ros: Record<string, CardScript> = {
   "florian|0": {
     replaceFriendlyTokenCreation(ctx, cardId, count) {
-      return fourEarthBanished(ctx) && hasTag(ctx, { cardId, owner: ctx.seat, instanceId: -1 }, "aura")
+      return fourEarthBanished(ctx) && isAura(ctx, { cardId, owner: ctx.seat, instanceId: -1 })
         ? count + 1
         : count;
     },
@@ -789,8 +515,8 @@ export const ros: Record<string, CardScript> = {
       goAgain: false,
       timing: "instant",
       oncePerTurn: true,
-      canActivate: (ctx) => ctx.getFlag("player", "playedSubtype:lightning") === true,
-      onActivate: (ctx) => ctx.createToken(LIGHTNING),
+      canActivate: (ctx) => playedLightning(ctx),
+      onActivate: (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING),
     },
   },
   "verdance|0": verdance(4),
@@ -801,7 +527,7 @@ export const ros: Record<string, CardScript> = {
       goAgain: true,
       oncePerTurn: true,
       onCostPaid(ctx, paid) {
-        if (paid.some((card) => hasTag(ctx, card, "earth"))) ctx.setState("earthPitchedTurn", ctx.state.turn);
+        if (paid.some((card) => hasCardSubtype(ctx, card, "earth"))) ctx.setState("earthPitchedTurn", ctx.state.turn);
       },
       onActivate(ctx) {
         ampNextArcane(ctx, 1);
@@ -819,7 +545,7 @@ export const ros: Record<string, CardScript> = {
           event.damage.byController &&
           ctx.getState("earthPitchedTurn") === ctx.state.turn,
         onTrigger: (ctx) => ctx.setState("earthPitchedTurn", 0),
-        effect: (ctx) => ctx.createToken(EARTH),
+        effect: (ctx) => ctx.createToken(EMBODIMENT_OF_EARTH),
       },
     ],
   },
@@ -827,7 +553,7 @@ export const ros: Record<string, CardScript> = {
     leftName: "Pulsing Aether",
     rightName: "Life",
     left: (ctx) =>
-      requestAnyTarget(ctx, "pulsing-target", `Choose a target for ${ctx.previewArcaneDamage(4)} arcane damage`, 4),
+      requestAnyTargetChoice(ctx, "pulsing-target", 4),
     right: (ctx) => ctx.gainLife(ctx.seat, 1),
   }),
   "oscilio|0": {
@@ -856,26 +582,26 @@ export const ros: Record<string, CardScript> = {
     leftName: "Comet Storm",
     rightName: "Shock",
     left: (ctx) =>
-      requestAnyTarget(ctx, "comet-target", `Choose a target for ${ctx.previewArcaneDamage(5)} arcane damage`, 5),
+      requestAnyTargetChoice(ctx, "comet-target", 5),
     right: (ctx) =>
-      requestAnyTarget(ctx, "shock-target", `Choose a target for ${ctx.previewArcaneDamage(1)} arcane damage`, 1),
+      requestAnyTargetChoice(ctx, "shock-target", 1),
   }),
 
   "helm of lignum vitae|0": { modifyDefense: (ctx) => (fourEarthBanished(ctx) ? 1 : 0) },
-  "well grounded|0": preventEquipment(2, fourEarthBanished),
+  "well grounded|0": conditionalPreventEquipment(2, fourEarthBanished),
   "sigil of sanctuary|3": {
     optionalDamagePrevention: { amount: 1, moveSource: "destroy", arcaneOnly: true },
     triggers: [
       leavesArenaTrigger(
         "Create Embodiment of Earth",
         decisionMessage("card.trigger.common.embodimentearth.create"),
-        (ctx) => ctx.createToken(EARTH),
+        (ctx) => ctx.createToken(EMBODIMENT_OF_EARTH),
       ),
     ],
   },
   "flash of brilliance|0": {
     onDefend(ctx) {
-      const lightning = ctx.player(ctx.seat).hand.filter((card) => hasTag(ctx, card, "lightning"));
+      const lightning = ctx.player(ctx.seat).hand.filter((card) => hasCardSubtype(ctx, card, "lightning"));
       if (lightning.length)
         ctx.requestCardChoice(
           "brilliance-discard",
@@ -891,14 +617,14 @@ export const ros: Record<string, CardScript> = {
       else if (hook === "brilliance-aura") ctx.moveToHand(Number(option));
     },
   },
-  "twinkle toes|0": preventEquipment(2, (ctx) => ctx.getFlag("player", "playedCardType:instant") === true),
+  "twinkle toes|0": conditionalPreventEquipment(2, (ctx) => ctx.getFlag("player", "playedCardType:instant") === true),
   "sigil of conductivity|3": {
     optionalDamagePrevention: { amount: 1, moveSource: "destroy", arcaneOnly: true },
     triggers: [
       leavesArenaTrigger(
         "Create Embodiment of Lightning",
         decisionMessage("card.trigger.common.embodimentlightning.create"),
-        (ctx) => ctx.createToken(LIGHTNING),
+        (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING),
       ),
     ],
   },
@@ -923,7 +649,7 @@ export const ros: Record<string, CardScript> = {
       ],
       effectCardCostChoiceHook: "bloodtorn-cost",
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
+        ctx.gainResources(ctx.seat, 1);
       },
     },
   },
@@ -956,13 +682,13 @@ export const ros: Record<string, CardScript> = {
     },
   },
 
-  "sigil of the arknight|3": beginningAura(undefined, (ctx) => {
+  "sigil of the arknight|3": beginningAuraWithLeave(undefined, (ctx) => {
     const top = ctx.player(ctx.seat).deck[0];
     if (!top) return;
     ctx.logPublic(
       localizedCardLog(
         ctx,
-        `${ctx.data.name} reveals ${data(ctx, top).name}`,
+        `${ctx.data.name} reveals ${ctx.cardData(top.cardId).name}`,
         "card.log.common.decktop.revealed",
         { revealed: { kind: "card", cardId: top.cardId } },
         { kind: "cards-revealed", cards: [{ cardId: top.cardId, ownerSeat: ctx.seat }], sourceZone: "deck" },
@@ -970,29 +696,29 @@ export const ros: Record<string, CardScript> = {
     );
     if (isAttackAction(ctx, top)) ctx.moveToHand(top.instanceId);
   }),
-  "sigil of deadwood|3": beginningAura(undefined, (ctx) => ctx.createToken(RUNECHANT)),
-  "sigil of temporal manipulation|3": beginningAura(undefined, (ctx) => {
+  "sigil of deadwood|3": beginningAuraWithLeave(undefined, (ctx) => ctx.createToken(RUNECHANT)),
+  "sigil of temporal manipulation|3": beginningAuraWithLeave(undefined, (ctx) => {
     const top = ctx.player(ctx.seat).deck[0];
     if (!top || !ctx.banish(top.instanceId) || !isNonAttackAction(ctx, top)) return;
     ctx.allowPlayFrom(top.instanceId, "banish");
     ctx.setFlag("player", `asInstant:${top.instanceId}`, true);
   }),
-  "sigil of forethought|3": beginningAura(undefined, (ctx) => ctx.createToken(PONDER)),
-  "sigil of cycles|3": beginningAura(undefined, (ctx) => {
+  "sigil of forethought|3": beginningAuraWithLeave(undefined, (ctx) => ctx.createToken(PONDER)),
+  "sigil of cycles|3": beginningAuraWithLeave(undefined, (ctx) => {
     const hand = ctx.player(ctx.seat).hand;
     if (hand.length) {
       ctx.requestCardChoice(
         "cycles-discard",
-        decisionPrompt("Discard a card", "card.ros.card.discard"),
+        decisionPrompt("Discard a card", "card.common.card.discard.choose"),
         hand.map((card) => card.instanceId),
       );
     } else {
       ctx.drawCards(ctx.seat, 1);
     }
   }),
-  "sigil of fyendal|3": beginningAura(undefined, (ctx) => ctx.gainLife(ctx.seat, 1)),
-  "sigil of earth|3": beginningAura(undefined, (ctx) => ctx.createToken(EARTH)),
-  "sigil of lightning|3": beginningAura(undefined, (ctx) => ctx.createToken(LIGHTNING)),
+  "sigil of fyendal|3": beginningAuraWithLeave(undefined, (ctx) => ctx.gainLife(ctx.seat, 1)),
+  "sigil of earth|3": beginningAuraWithLeave(undefined, (ctx) => ctx.createToken(EMBODIMENT_OF_EARTH)),
+  "sigil of lightning|3": beginningAuraWithLeave(undefined, (ctx) => ctx.createToken(EMBODIMENT_OF_LIGHTNING)),
 };
 
 for (const pitch of [1, 2, 3]) {
@@ -1041,13 +767,11 @@ for (const pitch of [1, 2, 3]) {
     ...bloom,
     graveyardReplacement: (ctx) => (ctx.getState("surged") ? "bottom-of-deck" : undefined),
   };
-  ros[`overflow the aetherwell|${pitch}`] = arcaneHero(4 - pitch, (ctx) => ctx.changeResources(ctx.seat, 2));
-  ros[`trailblazing aether|${pitch}`] = arcaneHero(4 - pitch, (ctx) => ctx.gainActionPoint());
+  ros[`overflow the aetherwell|${pitch}`] = arcaneHero(4 - pitch, (ctx) => ctx.gainResources(ctx.seat, 2));
+  ros[`trailblazing aether|${pitch}`] = arcaneHero(4 - pitch, (ctx) => ctx.grantGoAgain());
   ros[`count your blessings|${pitch}`] = {
     onPlay(ctx) {
-      const copies = ctx
-        .player(ctx.seat)
-        .graveyard.filter((card) => cardNamed(ctx, card, "Count Your Blessings")).length;
+      const copies = faceUpGraveyard(ctx).filter((card) => cardNamed(ctx, card, "Count Your Blessings")).length;
       ctx.gainLife(ctx.seat, 4 - pitch + copies);
     },
   };
@@ -1063,8 +787,8 @@ for (const [pitch, amount] of [
   [2, 2],
   [3, 1],
 ] as const) {
-  ros[`harvest season|${pitch}`] = beginningAura((ctx) => ctx.gainLife(ctx.seat, amount));
-  ros[`strong yield|${pitch}`] = beginningAura((ctx) => buffNextAttack(ctx, { attack: amount }));
+  ros[`harvest season|${pitch}`] = beginningAuraWithLeave((ctx) => ctx.gainLife(ctx.seat, amount));
+  ros[`strong yield|${pitch}`] = beginningAuraWithLeave((ctx) => buffNextAttack(ctx, { attack: amount }));
   ros[`fertile ground|${pitch}`] = { onPlay: (ctx) => ctx.gainLife(ctx.seat, fourEarthBanished(ctx) ? amount + 2 : 2) };
   ros[`electrostatic discharge|${pitch}`] = conditionalNextAttack(amount);
   ros[`chorus of the amphitheater|${pitch}`] = chorus(amount + 1);
@@ -1130,7 +854,7 @@ for (const pitch of [1, 2, 3]) {
               .flatMap((player) => player.board)
               .filter(
                 (card) =>
-                  isAura(ctx, card) && ((data(ctx, card).cost ?? 0) <= 1 || data(ctx, card).cardType === "token"),
+                  isAura(ctx, card) && ((ctx.cardData(card.cardId).cost ?? 0) <= 1 || ctx.hasCardType(card, "token")),
               )
               .map((card) => card.instanceId),
           prompt: () =>
@@ -1157,7 +881,7 @@ for (const [pitch, minimum] of [
       const link = ctx.link;
       if (!link) return;
       const cards = [link.attackingCard, ...link.defendingCards].filter(
-        (card) => isAttackAction(ctx, card) && (data(ctx, card).cost ?? 0) >= minimum,
+        (card) => isAttackAction(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) >= minimum,
       );
       if (cards.length)
         ctx.requestCardChoices(
@@ -1208,7 +932,7 @@ Object.assign(ros, {
       ctx.setState("germinateRemaining", count);
       ctx.requestChoice(
         "germinate-token",
-        decisionPrompt("Create which token?", "card.ros.token.create", {
+        decisionPrompt("Create which token?", "card.common.token.create.choose", {
           optionMessages: {
             Runechant: decisionMessage("card.ros.option.runechant"),
             "Embodiment of Earth": decisionMessage("card.ros.option.earth"),
@@ -1241,13 +965,13 @@ Object.assign(ros, {
     arcaneDamageEffect: true,
     onPlay(ctx: ScriptCtx) {
       if (ctx.self.meldSide !== "left")
-        requestAnyTarget(ctx, "vaporize-shock", `Choose a target for ${ctx.previewArcaneDamage(1)} arcane damage`, 1);
+        requestAnyTargetChoice(ctx, "vaporize-shock", 1);
       if (ctx.self.meldSide === "left" || ctx.self.meldSide === "both") {
         const x = Number(ctx.getPlayerFlag(ctx.seat, `arcaneDamageAmountToSeat:${opponentSeat(ctx)}`));
         const auras = ctx.state.players
           .flatMap((player) => player.board)
           .filter(
-            (card) => isAura(ctx, card) && ((data(ctx, card).cost ?? 0) <= x || data(ctx, card).cardType === "token"),
+            (card) => isAura(ctx, card) && ((ctx.cardData(card.cardId).cost ?? 0) <= x || ctx.hasCardType(card, "token")),
           );
         if (auras.length)
           ctx.requestCardChoice(
@@ -1260,7 +984,7 @@ Object.assign(ros, {
       }
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook === "vaporize-shock") dealToChoice(ctx, option, 1);
+      if (hook === "vaporize-shock") dealArcaneRecordingAllyTarget(ctx, option, 1);
       else if (hook === "vaporize-aura" && option !== "done") ctx.destroyPermanent(Number(option));
     },
   },
@@ -1283,7 +1007,7 @@ Object.assign(ros, {
       if (ctx.self.meldSide !== "right") ampNextArcane(ctx, Number(ctx.getPlayerFlag(ctx.seat, "lifeGainedThisTurn")));
     },
   },
-  "sigil of brilliance|2": beginningAura(undefined, (ctx) => ctx.drawCards(ctx.seat, 1)),
+  "sigil of brilliance|2": beginningAuraWithLeave(undefined, (ctx) => ctx.drawCards(ctx.seat, 1)),
   "null // shock|2": {
     meld: {
       leftName: "Null",
@@ -1294,10 +1018,10 @@ Object.assign(ros, {
     arcaneDamageEffect: true,
     onPlay(ctx: ScriptCtx) {
       if (ctx.self.meldSide !== "left")
-        requestAnyTarget(ctx, "null-shock", `Choose a target for ${ctx.previewArcaneDamage(1)} arcane damage`, 1);
+        requestAnyTargetChoice(ctx, "null-shock", 1);
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook === "null-shock") dealToChoice(ctx, option, 1);
+      if (hook === "null-shock") dealArcaneRecordingAllyTarget(ctx, option, 1);
     },
   },
   "sanctuary of aria|0": {
@@ -1315,7 +1039,7 @@ Object.assign(ros, {
   "barkskin of the millennium tree|0": {
     canTriggerOnDefend: fourEarthBanished,
     onDefend(ctx: ScriptCtx) {
-      if (fourEarthBanished(ctx)) ctx.createToken(EARTH);
+      if (fourEarthBanished(ctx)) ctx.createToken(EMBODIMENT_OF_EARTH);
     },
   },
   "felling of the crown|1": fellingOfTheCrown(),
@@ -1344,7 +1068,7 @@ Object.assign(ros, {
         event: "end-of-turn",
         label: "Create Embodiment of Earth",
         effect(ctx: ScriptCtx) {
-          ctx.createToken(EARTH);
+          ctx.createToken(EMBODIMENT_OF_EARTH);
           if (ctx.getFlag("player", "banishedSubtype:earth") !== true) ctx.destroySelf();
         },
       },
@@ -1457,7 +1181,7 @@ Object.assign(ros, {
         !requestDiscardChoice(
           ctx,
           "face-purgatory-discard",
-          decisionPrompt("Choose a card to discard", "card.ros.card.discard"),
+          decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
           opponentSeat(ctx),
         )
       )
@@ -1480,7 +1204,7 @@ Object.assign(ros, {
         requestDiscardChoice(
           ctx,
           "snuff-discard",
-          decisionPrompt("Choose a card to discard", "card.ros.card.discard"),
+          decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
           opponentSeat(ctx),
         );
       else if (hook === "snuff-discard") resolveDiscardChoice(ctx, option, opponentSeat(ctx));
@@ -1563,12 +1287,7 @@ Object.assign(ros, {
         event: "card-left-arena",
         label: "Amp 1",
         condition: (ctx, left) =>
-          ctx.state.modifiers.some(
-            (modifier) =>
-              modifier.sourceInstanceId === ctx.self.instanceId &&
-              modifier.scope === "until-end-of-turn" &&
-              !modifier.consumed,
-          ) &&
+          hasLiveTurnEffect(ctx) &&
           !!left &&
           isAura(ctx, left) &&
           cardNameContains(ctx, left, "sigil"),
@@ -1601,12 +1320,11 @@ Object.assign(ros, {
     },
   },
   "sigil of aether|3": {
-    ...beginningAura(undefined, (ctx) => {
-      const amount = ctx.previewArcaneDamage(1);
-      requestAnyTarget(ctx, "sigil-aether-target", `Deal ${amount} arcane damage to a target`, 1);
+    ...beginningAuraWithLeave(undefined, (ctx) => {
+      requestAnyTargetChoice(ctx, "sigil-aether-target", 1);
     }),
     onChoose(ctx, hook, option) {
-      if (hook === "sigil-aether-target") dealToChoice(ctx, option, 1);
+      if (hook === "sigil-aether-target") dealArcaneRecordingAllyTarget(ctx, option, 1);
     },
     onDamageDealt(ctx, _target, dealt, arcane) {
       if (arcane && dealt > 0) ampNextArcane(ctx, 1);
@@ -1627,11 +1345,9 @@ Object.assign(ros, {
   },
   "arcanite fortress|0": {
     modifyDefense: (ctx: ScriptCtx) =>
-      Object.values(ctx.player(ctx.seat).equipment).filter((card) => card && cardNameContains(ctx, card, "Arcanite"))
-        .length,
+      equippedCards(ctx, ctx.seat).filter((card) => cardNameContains(ctx, card, "Arcanite")).length,
     spellvoidValue: (ctx: ScriptCtx) =>
-      Object.values(ctx.player(ctx.seat).equipment).filter((card) => card && cardNameContains(ctx, card, "Arcanite"))
-        .length,
+      equippedCards(ctx, ctx.seat).filter((card) => cardNameContains(ctx, card, "Arcanite")).length,
   },
   "cut through the facade|1": {
     canTriggerOnHit: (ctx: ScriptCtx) => ctx.link?.targetAllyId === undefined,
@@ -1640,7 +1356,7 @@ Object.assign(ros, {
       if (auras.length)
         ctx.requestCardChoice(
           "facade-aura",
-          decisionPrompt("Destroy an aura", "card.ros.aura.destroy", { optionMessages: commonOptionMessages("no") }),
+          decisionPrompt("Destroy an aura", "card.common.aura.destroy", { optionMessages: commonOptionMessages("no") }),
           ["no", ...auras.map((card) => card.instanceId)],
         );
     },
@@ -1729,7 +1445,7 @@ Object.assign(ros, {
       requestDiscardChoice(
         ctx,
         "drink-discard",
-        decisionPrompt("Choose a card to discard", "card.ros.card.discard"),
+        decisionPrompt("Choose a card to discard", "card.common.card.discard.choose"),
         loser,
       );
     },
@@ -1752,7 +1468,7 @@ Object.assign(ros, {
       // end-phase wipe consumed in endTurn()
       ctx.setCardState(target.hero.instanceId, "clearHandAndArsenalAtEndPhaseTurn", ctx.state.turn + 1);
       const deck = ctx.player(ctx.seat).deck;
-      const traps = ctx.canSearchDeck() ? deck.filter((card) => hasTag(ctx, card, "trap")) : [];
+      const traps = ctx.canSearchDeck() ? deck.filter((card) => hasCardSubtype(ctx, card, "trap")) : [];
       if (traps.length) {
         ctx.requestCardChoices(
           "plan-for-worst-traps",
@@ -1771,7 +1487,7 @@ Object.assign(ros, {
     onChooseMany(ctx: ScriptCtx, hook: string, options: readonly string[]) {
       if (hook === "plan-for-worst-traps") {
         const chosen = options.map(Number).filter((instanceId) =>
-          ctx.player(ctx.seat).deck.some((card) => card.instanceId === instanceId && hasTag(ctx, card, "trap")),
+          ctx.player(ctx.seat).deck.some((card) => card.instanceId === instanceId && hasCardSubtype(ctx, card, "trap")),
         );
         if (chosen.length) ctx.revealCards(chosen);
         for (const instanceId of chosen) ctx.moveToHand(instanceId);
@@ -1849,12 +1565,11 @@ Object.assign(ros, {
     arcaneDamageEffect: true,
     onPlay(ctx: ScriptCtx) {
       if (ctx.self.meldSide !== "left")
-        requestAnyTarget(ctx, "regrowth-shock", `Choose a target for ${ctx.previewArcaneDamage(1)} arcane damage`, 1);
+        requestAnyTargetChoice(ctx, "regrowth-shock", 1);
       if (ctx.self.meldSide !== "right") {
         const x = Number(ctx.getPlayerFlag(ctx.seat, `arcaneDamageAmountToSeat:${opponentSeat(ctx)}`));
-        const cards = ctx
-          .player(ctx.seat)
-          .graveyard.filter((card) => isAttackAction(ctx, card) && (data(ctx, card).cost ?? 0) < x);
+        const cards = faceUpGraveyard(ctx)
+          .filter((card) => isAttackAction(ctx, card) && (ctx.cardData(card.cardId).cost ?? 0) < x);
         if (cards.length)
           ctx.requestCardChoice(
             "regrowth-card",
@@ -1864,7 +1579,7 @@ Object.assign(ros, {
       }
     },
     onChoose(ctx: ScriptCtx, hook: string, option: string) {
-      if (hook === "regrowth-shock") dealToChoice(ctx, option, 1);
+      if (hook === "regrowth-shock") dealArcaneRecordingAllyTarget(ctx, option, 1);
       else if (hook === "regrowth-card") ctx.moveToHand(Number(option));
     },
   },
@@ -1872,13 +1587,13 @@ Object.assign(ros, {
 
 ros["germinate|3"]!.onChoose = (ctx, hook, option) => {
   if (hook === "germinate-token") {
-    ctx.createToken(option === "Runechant" ? RUNECHANT : EARTH);
+    ctx.createToken(option === "Runechant" ? RUNECHANT : EMBODIMENT_OF_EARTH);
     const remaining = ctx.getState("germinateRemaining") - 1;
     ctx.setState("germinateRemaining", remaining);
     if (remaining > 0)
       ctx.requestChoice(
         "germinate-token",
-        decisionPrompt("Create which token?", "card.ros.token.create", {
+        decisionPrompt("Create which token?", "card.common.token.create.choose", {
           optionMessages: {
             Runechant: decisionMessage("card.ros.option.runechant"),
             "Embodiment of Earth": decisionMessage("card.ros.option.earth"),
@@ -1892,7 +1607,7 @@ ros["germinate|3"]!.onChoose = (ctx, hook, option) => {
 };
 
 for (const name of ["hood of second thoughts", "bruised leather", "four finger gloves"]) {
-  ros[`${name}|0`] = preventEquipment(1, (ctx) => ctx.getFlag("player", "damageTakenThisTurn") === true);
+  ros[`${name}|0`] = conditionalPreventEquipment(1, (ctx) => ctx.getFlag("player", "damageTakenThisTurn") === true);
 }
 ros["hand behind the pen|1"] = arsenalHit("non-attack");
 ros["smash up|1"] = arsenalHit("attack");
@@ -1906,11 +1621,11 @@ cycles.onChoose = (ctx, hook, option) => {
 const pulsing = ros["pulsing aether // life|1"]!;
 pulsing.arcaneDamageEffect = true;
 pulsing.onChoose = (ctx, hook, option) => {
-  if (hook === "pulsing-target") dealToChoice(ctx, option, 4);
+  if (hook === "pulsing-target") dealArcaneRecordingAllyTarget(ctx, option, 4);
 };
 const comet = ros["comet storm // shock|1"]!;
 comet.arcaneDamageEffect = true;
 comet.onChoose = (ctx, hook, option) => {
-  if (hook === "comet-target") dealToChoice(ctx, option, 5);
-  else if (hook === "shock-target") dealToChoice(ctx, option, 1);
+  if (hook === "comet-target") dealArcaneRecordingAllyTarget(ctx, option, 5);
+  else if (hook === "shock-target") dealArcaneRecordingAllyTarget(ctx, option, 1);
 };

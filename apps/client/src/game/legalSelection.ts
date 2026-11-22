@@ -76,23 +76,31 @@ export function intentBoostCount(intent: PaidIntent): number {
     : 0;
 }
 
-/** Exact server-owned payment option matching the hand cards selected so far. */
-export function selectedResourcePaymentOption(
-  payment: ResourcePayment,
-  selected: readonly number[],
-): ResourcePayment["options"][number] | null {
-  return payment.options.find((option) => sameOrderedIds(option.pitchInstanceIds, selected)) ?? null;
-}
-
-/** A hand card is pitchable while at least one authoritative payment option
- * contains the resulting selection. */
+/** A pitchable hand card may join a resource payment while the selection is
+ * short: stopping once covered never overpitches, whatever the order. */
 export function canAddResourcePaymentPitch(
   payment: ResourcePayment,
+  floating: number,
   selected: readonly number[],
   instanceId: number,
+  pitchValue: (instanceId: number) => number,
 ): boolean {
-  const next = [...selected, instanceId];
-  return payment.options.some((option) => startsWithIds(option.pitchInstanceIds, next));
+  return !selected.includes(instanceId) &&
+    pitchValue(instanceId) > 0 &&
+    floating + pitchTotal(selected, pitchValue) < payment.cost;
+}
+
+/** Answer the payment with the selected order once it covers the cost; the
+ * engine validates the order against the overpitch rule. */
+export function resourcePaymentIntent(
+  payment: ResourcePayment,
+  floating: number,
+  selected: readonly number[],
+  pitchValue: (instanceId: number) => number,
+): Extract<GameIntent, { kind: "choose" }> | null {
+  const option = payment.options[0];
+  if (!option || floating + pitchTotal(selected, pitchValue) < payment.cost) return null;
+  return { kind: "choose", optionId: option.optionId, pitchInstanceIds: [...selected] };
 }
 
 function sameOptionalIds(
@@ -104,7 +112,7 @@ function sameOptionalIds(
 }
 
 /** Server-offered variants for the selected source, play mode, and Meld side.
- * Target and Boost stay unresolved so the client can stage payment first. */
+ * Target and Boost stay unresolved so the client can declare them first. */
 export function actionSelectionVariants(
   legal: readonly GameIntent[],
   sel: Sel,

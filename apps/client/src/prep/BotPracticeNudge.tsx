@@ -3,7 +3,7 @@ import { useIntl } from "react-intl";
 import type { BotOpponent, Format } from "@fyendal/shared";
 import { BotOpponentModal } from "../lobby/BotOpponentModal.js";
 
-export const BOT_PRACTICE_NUDGE_DELAY_MS = 10_000;
+export const BOT_PRACTICE_NUDGE_DELAY_MS = 30_000;
 
 export function shouldOfferBotPractice(input: {
   format: Format | undefined;
@@ -26,13 +26,13 @@ export function BotPracticeNudge(props: {
 
   return (
     <div
-      className="prep-bot-nudge-backdrop"
+      className="prep-dialog-backdrop"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !props.busy) props.onDismiss();
       }}
     >
       <section
-        className="panel prep-bot-nudge"
+        className="panel prep-dialog"
         role="dialog"
         aria-modal="true"
         aria-labelledby="prep-bot-nudge-title"
@@ -50,7 +50,7 @@ export function BotPracticeNudge(props: {
         <p id="prep-bot-nudge-description">
           {intl.formatMessage({ id: "prep.botNudge.description" })}
         </p>
-        <div className="prep-bot-nudge-actions">
+        <div className="prep-dialog-actions">
           <button
             autoFocus
             className="btn-bot"

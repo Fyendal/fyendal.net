@@ -37,6 +37,7 @@ import type { CardInstance, PlayerState, StackLayer, StackResume } from "./state
 import { currentLink, findCardAnywhere, findPermanent, opponent, removeFromArray } from "./zoneQueries.js";
 import { destroyPermanent, moveToGraveyard } from "./zoneMoves.js";
 import { createTokensFor } from "./tokens.js";
+import { tokenCreationCauseForModifier } from "./tokenQueries.js";
 
 import {
   applyOneShotDefenseModifiers,
@@ -47,22 +48,24 @@ import {
 } from "./combatValues.js";
 
 import { abilityResourceCost, activatedAbilityAvailable, canPayAbilityLifeCost, canPayActivatedEffectCardCosts, discardCostOptions, effectiveAbilityList } from "./abilityRules.js";
-import { clearPlayFromZoneGrant, settlesInArena, settlePlayedCard } from "./cardLifecycle.js";
+import { clearPlayFromZoneGrant, settlesInArena, settlePlayedCard, startPlayScriptState } from "./cardLifecycle.js";
 import { alternativePlayCostOptions, canPlayAsInstant, cardPlayCost, cardPlayReductionForSeat, cardPlayRestrictedByModifier, playOriginRestricted, cardsPlayableFromArsenal, cardsPlayableFromZone, cardLayerGoAgain, consumeSingleUsePlayFromGroup, mayPlayFromArsenal, mayPlayFromZone, modifierMatchesPlayedCard, noteCardPlayed, notePlayPermissionSource, payAlternativePlayCost, playFromZoneOwnerMatches, playTargetOptions, preparePlayTarget, spendFriendlyPlayPermission } from "./playRules.js";
 import { canPayRequiredHandCardsForAdditionalCost, pitchValueOfInstance } from "./resources.js";
 import { heroAbilitiesDisabled } from "./stateQueries.js";
-import { consumeFirstActionExtraCost, firstActionExtraCost, goAgainSuppressed, isFrozen, opposingInstantsProhibited, snapshotSerializable } from "./ruleQueries.js";
+import { consumeFirstActionExtraCost, firstActionExtraCost, goAgainSuppressed, inActionPhase, isFrozen, opposingInstantsProhibited, snapshotSerializable } from "./ruleQueries.js";
 import { opposingActionsProhibited } from "./restrictions.js";
 import { defendingHeroCannotRespondBelowPower } from "./combatRestrictions.js";
+import { boostDeclarationError, declareInstantBoosts, payDeclaredInstantBoosts } from "./boost.js";
 import { pushAttackCardLayer, pushCardLayer, recordAnnouncedAttackTarget, takeAttackLayerOrigin } from "./stackCore.js";
 import { DESTROY_AT_END_PHASE_HOOK, logTriggerAnnouncement, triggerAnnouncement, triggerLabelMessage } from "./triggerPresentation.js";
-import { declaredLayerTargetLegal, layerTargetOptions, layerTargetSpec, triggerLayerEventContext } from "./layerTargets.js";
+import { declaredLayerTargetLegal, departedAttackTarget, layerTargetOptions, logPlayTargetIllegal, layerTargetSpec, triggerLayerEventContext } from "./layerTargets.js";
 
 import {
   holdPriorityWindow,
   passPriorityWindow,
   type PriorityWindow,
 } from "./priority.js";
+import { hasType } from "@fyendal/shared";
 
 /**
  * The layer/priority machine. Triggered abilities are queued as stack layers;
@@ -457,6 +460,7 @@ export function finishDamageStep(state: GameStateInternal, runtime: EngineRuntim
     continueStack(state, runtime);
     return;
   }
+  if (runtime.dispatchFlow("queueWagerResults", state, link)) return;
   if (link.flags.damageStepPriorityOpened !== true) {
     link.flags.damageStepPriorityOpened = true;
     state.stackResume = "finish-link-resolution";
@@ -534,9 +538,14 @@ export function playWindowInstant(
   declaredVariableX?: number,
   alternativeCostCardInstanceIds?: number[],
   targetAllyId?: number,
+  boost = false,
+  boostCount?: number,
+  additionalCostDeclared = false,
 ): string | undefined {
   if (state.phase !== "layer" || (
-    declaredVariableX === undefined && state.pendingDecision?.kind !== "priority-window"
+    declaredVariableX === undefined &&
+    !additionalCostDeclared &&
+    state.pendingDecision?.kind !== "priority-window"
   )) {
     return "no priority window";
   }
@@ -561,6 +570,7 @@ export function playWindowInstant(
         : player.hand;
   const card = source.find((c) => c.instanceId === instanceId);
   if (!card) return "card not found in that zone";
+  const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
   if (fromArsenal && !mayPlayFromArsenal(state, card, seat)) {
     return `${nameOf(state, card.cardId)} may not be played from arsenal`;
   }
@@ -585,7 +595,7 @@ export function playWindowInstant(
     return "only instants can be played in a priority window";
   }
   if (meldSide) card.meldSide = meldSide;
-  if (data.cardType !== "instant") {
+  if (!hasType(data, "instant")) {
     // an action whose script allows it may be played as though it were an instant
     const asInstant = canPlayAsInstant(
       state,
@@ -608,6 +618,10 @@ export function playWindowInstant(
   if (cardPlayRestrictedByModifier(state, seat, card)) {
     return `${nameOf(state, card.cardId)} cannot be played due to a card-type restriction`;
   }
+  const boostErr = boostDeclarationError(state, seat, card, boost, boostCount);
+  if (boostErr) return boostErr;
+  if (!additionalCostDeclared) startPlayScriptState(player, card);
+  declareInstantBoosts(card, boost, boostCount);
   if (script?.canPlay && !script.canPlay(runtime.makeCtx(state, seat, card, link, fromArsenal))) {
     return `${nameOf(state, card.cardId)} cannot be played now`;
   }
@@ -663,9 +677,6 @@ export function playWindowInstant(
         resolvedVariableCost.prompt ?? DEFAULT_CHOOSE_X_PROMPT,
         options,
       );
-      const origin = fromZone ?? (fromArsenal
-        ? "arsenal"
-        : source === player.banish ? "banish" : "hand");
       state.pendingDecision = {
         player: seat,
         kind: "choose-target",
@@ -692,7 +703,7 @@ export function playWindowInstant(
       variableCost,
       runtime.makeCtx(state, seat, card, link, fromArsenal),
     );
-    if (!isValidVariableX(declaredVariableX, resolvedVariableCost)) {
+    if (!additionalCostDeclared && !isValidVariableX(declaredVariableX, resolvedVariableCost)) {
       return "invalid X declaration";
     }
     variableBaseCost = variableResourceCost(resolvedVariableCost, declaredVariableX);
@@ -704,6 +715,32 @@ export function playWindowInstant(
     card,
     [...pitchInstanceIds, ...(alternativeCostCardInstanceIds ?? [])],
   )) return "cannot pay the card's additional hand-card cost";
+  if (!additionalCostDeclared && script?.declareAdditionalCost) {
+    // Marks the card as being played while it is still in its origin zone.
+    (card.scriptState ??= {}).declaringAdditionalCost = 1;
+    script.declareAdditionalCost(runtime.makeCtx(state, seat, card, link, fromArsenal));
+    const declarationDecision = state.pendingDecision;
+    if (declarationDecision?.chooseHook) {
+      declarationDecision.resume = {
+        kind: "continue-window-instant-after-declaration",
+        seat,
+        instanceId: card.instanceId,
+        pitchInstanceIds: [...pitchInstanceIds],
+        from: origin,
+        ...(meldSide ? { meldSide } : {}),
+        ...(targetAllyId === undefined ? {} : { targetAllyId }),
+        ...(boost ? { boost } : {}),
+        ...(boostCount === undefined ? {} : { boostCount }),
+        ...(alternativeCostCardInstanceIds === undefined
+          ? {}
+          : { alternativeCostCardInstanceIds: [...alternativeCostCardInstanceIds] }),
+        ...(targetCardInstanceId === undefined ? {} : { targetCardInstanceId }),
+        ...(declaredVariableX === undefined ? {} : { declaredVariableX }),
+      };
+      return undefined;
+    }
+  }
+  delete card.scriptState?.declaringAdditionalCost;
   const costErr = payCost(state, runtime, player, cost, pitchInstanceIds, card.instanceId, {
     beforePitch: () =>
       logPublic(state, gameLogMessage(
@@ -739,7 +776,6 @@ export function playWindowInstant(
       paidCards,
     );
   }
-  const origin = fromZone ?? (fromArsenal ? "arsenal" : source === player.banish ? "banish" : "hand");
   notePlayPermissionSource(state, runtime, card, origin, seat);
   removeFromArray(source, card.instanceId);
   delete card.faceDown;
@@ -773,6 +809,7 @@ export function finishWindowInstantPlay(
   // the instant becomes the top stack layer: its effect resolves only once
   // both players pass in succession (CR 5.3.2)
   if (isAttackActionData(instanceDataOf(state, card))) {
+    payDeclaredInstantBoosts(state, runtime, seat, card);
     pushAttackCardLayer(state, seat, card, origin);
     runtime.dispatchFlow("triggerPlayedAttackSpectra", state, seat, card);
   } else {
@@ -783,6 +820,7 @@ export function finishWindowInstantPlay(
     state.pendingDecision.resume = { kind: "continue-stack", seat };
     return;
   }
+  if (flushPendingTriggersAboveStack(state, runtime, seat)) return;
   if (declarePlayedTriggerTargets(state, runtime, seat)) return;
   // the priority holder keeps priority and may play more instants;
   // priority only passes when they pass
@@ -851,7 +889,13 @@ export function announceCardPlayed(
         const token = modifier.onAttackActionPlayedFromBanishCreateToken;
         if (!token || modifier.consumed || modifier.seat !== seat) continue;
         modifier.consumed = true;
-        createTokensFor(state, runtime, player, token.cardId, token.count);
+        createTokensFor(
+          state, runtime,
+          player,
+          token.cardId,
+          token.count,
+          tokenCreationCauseForModifier(state, modifier),
+        );
       }
     }
     if (
@@ -955,6 +999,7 @@ function declareTriggerTargets(state: GameStateInternal, runtime: EngineRuntime)
     const optional = target.optional === true;
     const options = [...(optional ? ["pass"] : []), ...targets.map(String)];
     const presentation = scriptPromptParts(target.prompt(ctx), options);
+    const defaultTarget = target.defaultTarget?.(ctx);
     state.pendingDecision = {
       player: layer.seat,
       kind: "choose-target",
@@ -965,6 +1010,9 @@ function declareTriggerTargets(state: GameStateInternal, runtime: EngineRuntime)
       cardOptions: [...(optional ? [null] : []), ...targets],
       sourceInstanceId: layer.sourceInstanceId,
       chooseHook: "trigger-target",
+      ...(defaultTarget !== undefined && targets.includes(defaultTarget)
+        ? { defaultOption: String(defaultTarget) }
+        : {}),
     };
     return true;
   }
@@ -1032,7 +1080,7 @@ function offerHiddenTrigger(state: GameStateInternal, runtime: EngineRuntime, la
     continueStack(state, runtime, layer.seat);
     return;
   }
-  askTriggerChoice(state, layer, "hidden-trigger");
+  askTriggerChoice(state, runtime, layer, "hidden-trigger");
 }
 
 /** Answer a "hidden-trigger" offer. Accepting makes the source public until
@@ -1114,9 +1162,13 @@ export function resolveAbilityLayer(state: GameStateInternal,
   } else {
     delete found.card.playTargetInstanceId;
   }
-  ability?.onActivate?.(
-    runtime.makeCtx(state, layer.seat, found.card, link, undefined, layer.targetCardInstanceId),
-  );
+  const ctx = runtime.makeCtx(state, layer.seat, found.card, link, undefined, layer.targetCardInstanceId);
+  const targetDeparted = departedAttackTarget(state, found.card, link) !== undefined;
+  // A departed attack still answers the effect through last-known information.
+  const targetDisqualified = !targetDeparted && layer.targetCardInstanceId !== undefined &&
+    ability?.attackTargetLegal?.(ctx) === false;
+  if (targetDeparted || targetDisqualified) logPlayTargetIllegal(state, found.card);
+  if (!targetDisqualified) ability?.onActivate?.(ctx);
   if (
     link &&
     (ability?.timing === "attack-reaction" || ability?.timing === "defense-reaction")
@@ -1137,12 +1189,18 @@ export function resolveAbilityLayer(state: GameStateInternal,
 /** Ask the controller whether an optional or hidden trigger fires (trigger resolution). */
 function askTriggerChoice(
   state: GameStateInternal,
+  runtime: EngineRuntime,
   layer: StackLayer,
   chooseHook: "trigger-choice" | "hidden-trigger" = "trigger-choice",
 ): void {
   const found = findCardAnywhere(state, layer.sourceInstanceId);
   const name = found ? nameOf(state, found.card.cardId) : "Triggered ability";
   const labelMessage = triggerLabelMessage(state, layer);
+  const definitionSource = layer.triggerSource ?? found?.card;
+  const warningMessage = found && definitionSource
+    ? scriptOf(state, definitionSource.cardId, definitionSource)?.triggers?.[layer.triggerIndex]
+      ?.warningMessage?.(runtime.makeCtx(state, layer.seat, found.card, currentLink(state)))
+    : undefined;
   state.pendingDecision = {
     player: layer.seat,
     kind: "optional-effect",
@@ -1162,6 +1220,7 @@ function askTriggerChoice(
             values: { card: logCardValue(found.card.cardId) },
           }
         : { id: "engine.decision.trigger.optional" }),
+    ...(warningMessage ? { warningMessage } : {}),
     options: ["yes", "no"],
     optionMessages: [
       { id: "common.option.yes" },
@@ -1192,7 +1251,7 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
     return;
   }
   if (layer.engineEffect?.kind === "gain-action-points") {
-    if (layer.seat === state.activePlayer) {
+    if (inActionPhase(state, layer.seat)) {
       (state.players[layer.seat] as PlayerState).actionPoints += layer.engineEffect.amount;
       const player = state.players[layer.seat] as PlayerState;
       logPublic(state, gameLogMessage(
@@ -1278,6 +1337,17 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
       return;
     }
     continueStack(state, runtime, layer.seat);
+    return;
+  }
+  if (layer.engineEffect?.kind === "mirage-destroy") {
+    state.stack.shift();
+    runtime.dispatchFlow("resolveMirageLayer", state, layer.sourceInstanceId);
+    // The defender controls this layer, but the turn player regains priority (CR 1.11.3).
+    if (state.pendingDecision?.chooseHook) {
+      state.pendingDecision.resume ??= { kind: "continue-stack", seat: state.activePlayer };
+      return;
+    }
+    continueStack(state, runtime, state.activePlayer);
     return;
   }
   if (layer.engineEffect?.kind === "spectra-destroy") {
@@ -1406,7 +1476,7 @@ function advanceStack(state: GameStateInternal, runtime: EngineRuntime): void {
       continueStack(state, runtime, layer.seat);
       return;
     }
-    askTriggerChoice(state, layer);
+    askTriggerChoice(state, runtime, layer);
     return;
   }
   runTriggerEffect(state, runtime, layer);
@@ -1454,7 +1524,7 @@ export function resolveTopStackCard(state: GameStateInternal, runtime: EngineRun
     continueStack(state, runtime, state.activePlayer);
     return;
   }
-  const isDefReact = dataOf(state, card.cardId).cardType === "defense-reaction";
+  const isDefReact = hasType(dataOf(state, card.cardId), "defense-reaction");
   if (layer.meldStage !== 1 && isDefReact && !link) {
     logPublic(state, gameLogMessage(
       `${nameOf(state, card.cardId)} fails to resolve (it cannot defend this attack)`,
@@ -1515,6 +1585,7 @@ export function resolveTopStackCard(state: GameStateInternal, runtime: EngineRun
     !script?.playTargetOptions ||
     playTargetOptions(state, runtime, seat, card, link, !layer.fromHand)
       .includes(card.playTargetInstanceId);
+  if (!targetStillLegal || departedAttackTarget(state, card, link) !== undefined) logPlayTargetIllegal(state, card);
   if (targetStillLegal) {
     runtime.events.runHook(state, seat, card, "onPlay", link, !layer.fromHand);
   }
@@ -1529,7 +1600,8 @@ export function resolveTopStackCard(state: GameStateInternal, runtime: EngineRun
     // Resolution paused on a choice. The source may be a permanent created by
     // this card rather than the resolving card itself.
     pd.resume = { kind: "stack-card", seat, card };
-    state.resolving.push(card);
+    // A card that already moved itself (returned to hand) is no longer resolving.
+    if (layer.card === card) state.resolving.push(card);
     return;
   }
   finishStackCardResolution(state, runtime, seat);
@@ -1557,11 +1629,17 @@ export function finishStackCardResolution(
     continueStack(state, runtime, state.activePlayer);
     return;
   }
+  // A recorded attack target only matters while its layer resolves.
+  const resolvedSource = layer?.card ?? (layer?.ability ? findCardAnywhere(state, layer.sourceInstanceId)?.card : undefined);
+  const resolvedScript = resolvedSource && scriptOf(state, resolvedSource.cardId, resolvedSource);
+  if (layer?.ability ? resolvedScript?.abilityTargetsAttackingCard : resolvedScript?.targetsAttackingCard) {
+    delete resolvedSource!.playTargetInstanceId;
+  }
   // Stage 2 narrowed the side for onPlay; the object itself had both sides.
   if (layer?.meldStage === 2 && layer.card) layer.card.meldSide = "both";
   // A non-attack action card or ability with go again refunds its action point
   // only now that its layer resolves.
-  const gainedGoAgain = layer?.goAgain === true && layer.seat === state.activePlayer &&
+  const gainedGoAgain = layer?.goAgain === true && inActionPhase(state, layer.seat) &&
     !goAgainSuppressed(state, layer.seat);
   if (gainedGoAgain) {
     (state.players[layer.seat] as PlayerState).actionPoints += 1;
@@ -1585,9 +1663,9 @@ export function finishStackCardResolution(
   const resolvedCard = layer?.card;
   if (resolvedCard) {
     const link = currentLink(state);
-    const cardType = dataOf(state, resolvedCard.cardId).cardType;
+    const resolvedData = dataOf(state, resolvedCard.cardId);
     if (
-      resolvedSuccessfully && link && cardType === "defense-reaction" &&
+      resolvedSuccessfully && link && hasType(resolvedData, "defense-reaction") &&
       // CR 7.0.5b: a card that cannot become a defending card stays off the link.
       !veilBlocksDefender(state, link, resolvedCard)
     ) {
@@ -1608,7 +1686,7 @@ export function finishStackCardResolution(
         [{ card: resolvedCard, fragmentTriggered }],
         layer.fromHand === true,
       );
-    } else if (resolvedSuccessfully && link && cardType === "attack-reaction") {
+    } else if (resolvedSuccessfully && link && hasType(resolvedData, "attack-reaction")) {
       // The card clears to graveyard (CR 8.1.2b), but retain last-known
       // presentation data so the resolved reaction remains visible beside the
       // chain link without being treated as an object on the combat chain.
@@ -1768,7 +1846,7 @@ export function continueStack(state: GameStateInternal,
   const pendingTriggerGroups = takePendingTriggerGroups(state);
   if (pendingTriggerGroups.length > 0) {
     const baseStack = state.stack.splice(0);
-    placeTriggers(state, runtime, pendingTriggerGroups, baseStack);
+    placeTriggers(state, runtime, pendingTriggerGroups, baseStack, prioritySeat);
     return;
   }
   // Layers added outside trigger placement (card-played and reaction
@@ -2000,10 +2078,10 @@ function coalesceInterchangeableLayers(
  * but resolve as if all players continuously pass priority (CR 4.2.1–4.2.2
  * and 4.4.1–4.4.3). Ordering simultaneous layers or declaring their targets
  * does not make an automatic phase interactive. */
-function openPlacedTriggers(state: GameStateInternal, runtime: EngineRuntime): void {
+function openPlacedTriggers(state: GameStateInternal, runtime: EngineRuntime, prioritySeat?: number): void {
   const top = state.stack[0];
-  if (top && phaseAllowsPriority(state) && !isInlineTurnLayer(state, top)) openWindow(state);
-  else continueStack(state, runtime);
+  if (top && phaseAllowsPriority(state) && !isInlineTurnLayer(state, top)) openWindow(state, prioritySeat);
+  else continueStack(state, runtime, prioritySeat);
 }
 
 /**
@@ -2017,18 +2095,20 @@ function placeTriggers(
   runtime: EngineRuntime,
   groups: { seat: number; layers: StackLayer[] }[],
   baseStack: StackLayer[] = [],
+  prioritySeat?: number,
 ): void {
   const [head, ...rest] = groups;
   if (!head) {
     state.stack.push(...baseStack);
-    if (!declareTriggerTargets(state, runtime)) openPlacedTriggers(state, runtime);
+    if (!declareTriggerTargets(state, runtime)) openPlacedTriggers(state, runtime, prioritySeat);
+    else if (prioritySeat !== undefined) state.pendingDecision!.resume = { kind: "continue-stack", seat: prioritySeat };
     return;
   }
   const layers = coalesceInterchangeableLayers(state, head.layers);
   const distinct = new Set(layers.map((layer) => layerKey(state, layer)));
   if (layers.length <= 1 || distinct.size <= 1) {
     state.stack.push(...layers);
-    placeTriggers(state, runtime, rest, baseStack);
+    placeTriggers(state, runtime, rest, baseStack, prioritySeat);
     return;
   }
   const optionCounts = layers.map((layer) => layer.triggerCount ?? null);
@@ -2048,6 +2128,7 @@ function placeTriggers(
       remaining: layers,
       later: rest,
       ...(baseStack.length > 0 ? { baseStack } : {}),
+      ...(prioritySeat === undefined ? {} : { prioritySeat }),
     },
   };
 }
@@ -2067,12 +2148,17 @@ function takePendingTriggerGroups(
 }
 
 /** Place triggers generated while announcing a card or ability above its new
- * stack layer before the announcement's first priority point. */
-export function flushPendingTriggersAboveStack(state: GameStateInternal, runtime: EngineRuntime): boolean {
+ * stack layer before the announcement's first priority point. The announcing
+ * player regains priority afterwards (CR 1.11.5). */
+export function flushPendingTriggersAboveStack(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  prioritySeat?: number,
+): boolean {
   const groups = takePendingTriggerGroups(state);
   if (groups.length === 0) return false;
   const baseStack = state.stack.splice(0);
-  placeTriggers(state, runtime, groups, baseStack);
+  placeTriggers(state, runtime, groups, baseStack, prioritySeat);
   return true;
 }
 
@@ -2113,13 +2199,13 @@ export function answerTriggerOrder(
   if (!pd || pd.chooseHook !== "trigger-order" || pd.player !== seat || !pd.triggerOrder) {
     return "not your decision";
   }
-  const { remaining, later, baseStack = [] } = pd.triggerOrder;
+  const { remaining, later, baseStack = [], prioritySeat } = pd.triggerOrder;
   const idx = remaining.findIndex((l) => `${l.sourceInstanceId}:${l.triggerIndex}` === optionId);
   if (idx < 0) return "invalid option";
   const [chosen] = remaining.splice(idx, 1);
   state.stack.push(chosen!);
   state.pendingDecision = null;
-  placeTriggers(state, runtime, [{ seat, layers: remaining }, ...later], baseStack);
+  placeTriggers(state, runtime, [{ seat, layers: remaining }, ...later], baseStack, prioritySeat);
   return undefined;
 }
 
@@ -2134,7 +2220,7 @@ export function answerTriggerOrderList(
   if (!pd || pd.chooseHook !== "trigger-order" || pd.player !== seat || !pd.triggerOrder) {
     return "not your decision";
   }
-  const { remaining, later, baseStack = [] } = pd.triggerOrder;
+  const { remaining, later, baseStack = [], prioritySeat } = pd.triggerOrder;
   if (optionIds.length !== remaining.length) return "invalid trigger order";
   const pool = [...remaining];
   const ordered: StackLayer[] = [];
@@ -2146,7 +2232,7 @@ export function answerTriggerOrderList(
   }
   state.stack.push(...ordered);
   state.pendingDecision = null;
-  placeTriggers(state, runtime, later, baseStack);
+  placeTriggers(state, runtime, later, baseStack, prioritySeat);
   return undefined;
 }
 

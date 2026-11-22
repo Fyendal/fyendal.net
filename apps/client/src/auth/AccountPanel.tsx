@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useIntl } from "react-intl";
 import type { PlayerBadge } from "@fyendal/shared";
 import type { AccountCosmeticsResponse } from "@fyendal/protocol";
@@ -6,10 +6,15 @@ import { ModalSurface } from "../components/ModalSurface.js";
 import { PlayerBadgeMark } from "../game/PlayerBadge.js";
 import { useStore } from "../store.js";
 import { BadgeArt, badgeMessageIds, BadgePicker } from "./BadgePicker.js";
+import { KOFI_URL } from "../lobby/KofiLink.js";
 import { RecoveryEmailSetting } from "./RecoveryEmailSetting.js";
 import "../styles/account.css";
 
 type AccountAction = "badges" | "export" | "delete";
+
+const kofiLink = (chunks: ReactNode[]) => (
+  <a href={KOFI_URL} target="_blank" rel="noopener noreferrer">{chunks}</a>
+);
 
 export function AccountPanel() {
   const intl = useIntl();
@@ -105,6 +110,7 @@ export function AccountPanel() {
     : null;
   const selectedBadge = cosmetics?.selectedBadge ?? null;
   const currentBadgeIds = badgeMessageIds(selectedBadge);
+  const hasSupporterBadge = cosmetics?.availableBadges.includes("supporter") ?? false;
 
   return (
     <div className="panel account-panel">
@@ -136,6 +142,11 @@ export function AccountPanel() {
             </div>
           ) : error?.action !== "badges" ? (
             <p className="muted" role="status">{intl.formatMessage({ id: "account.badge.loading" })}</p>
+          ) : null}
+          {cosmetics && !hasSupporterBadge ? (
+            <p className="account-badge-hint">
+              {intl.formatMessage({ id: "account.badge.supporter.hint" }, { link: kofiLink })}
+            </p>
           ) : null}
           {note && <p className="account-feedback success" role="status">{note}</p>}
           {draftBadge === undefined ? errorFor("badges") : null}
@@ -203,6 +214,10 @@ export function AccountPanel() {
             selectedBadge={draftBadge}
             disabled={busy !== null}
             onSelect={setDraftBadge}
+            lockedBadges={hasSupporterBadge ? [] : [{
+              badge: "supporter",
+              requirement: intl.formatMessage({ id: "account.badge.supporter.locked" }, { link: kofiLink }),
+            }]}
           />
           {errorFor("badges")}
           <div className="account-badge-actions">

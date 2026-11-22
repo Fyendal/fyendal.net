@@ -76,6 +76,24 @@ describe("bug reports", () => {
     expect((await db.query("SELECT id FROM bug_reports")).rows).toHaveLength(1);
   });
 
+  it("still captures a report when the room and its history fail to decode", async () => {
+    const { rows } = await db.query("SELECT state FROM rooms WHERE code = 'ABC123'");
+    const corrupt = rows[0]!.state as { state: { players: { hero: { subcards?: unknown } }[] } };
+    corrupt.state.players[0]!.hero.subcards = "not an array";
+    await db.query("UPDATE rooms SET state = $1 WHERE code = 'ABC123'", [JSON.stringify(corrupt)]);
+    await db.query("UPDATE room_history SET state = $1 WHERE room_code = 'ABC123'", [JSON.stringify(corrupt)]);
+
+    await expect(createBugReport(db, userId, "ABC123", "The game froze after a transform."))
+      .resolves.toMatchObject({ ok: true });
+
+    const stateError = "corrupt room ABC123 at state.players[0].hero.subcards: expected a bounded array";
+    const { rows: reports } = await db.query("SELECT trace FROM bug_reports");
+    expect(reports[0]!.trace).toMatchObject({
+      room: { state: corrupt, stateError },
+      history: [{ version: 1, state: corrupt, stateError }],
+    });
+  });
+
   it("rejects non-members and out-of-bounds descriptions", async () => {
     await expect(createBugReport(db, userId + 1, "ABC123", "A valid description."))
       .resolves.toEqual({ ok: false, error: "room not found" });

@@ -2,7 +2,7 @@
  {
   "id": "UPR000",
   "name": "Blood of the Dracai",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "Legendary\nWhen you pitch Blood of the Dracai, the next 3 Draconic cards you play this turn cost {r} less.",
   "pitch": 1,
   "subtypes": [
@@ -17,7 +17,7 @@
  {
   "id": "UPR001",
   "name": "Dromai, Ash Artist",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you pitch a red card, create an Ash Token.\nIf you've played a red card this turn, dragons you control have go again while attacking.",
   "classes": [
    "illusionist"
@@ -32,7 +32,7 @@
  {
   "id": "UPR002",
   "name": "Dromai",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you pitch a red card, create an Ash Token.\nIf you've played a red card this turn, dragons you control have go again while attacking.",
   "classes": [
    "illusionist"
@@ -47,7 +47,7 @@
  {
   "id": "UPR003",
   "name": "Storm of Sandikai",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Dragon allies you control have \"Once per Turn Action - 0: Attack\".",
   "classes": [
    "illusionist"
@@ -62,7 +62,7 @@
  {
   "id": "UPR004",
   "name": "Silken Form",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Silken Form: Transform target ash you control into an Aether Ashwing.\nQuell 1",
   "defense": 0,
   "classes": [
@@ -80,7 +80,7 @@
  {
   "id": "UPR005",
   "name": "Burn Them All",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nOnce per turn, when a dragon you control attacks, it deals 1 arcane damage to each opposing hero.\nAt the beginning of your end phase, put a raze counter on Burn Them All then destroy it unless you banish red card from your graveyard for each raze counter on it.",
   "pitch": 1,
   "cost": 0,
@@ -100,7 +100,7 @@
  {
   "id": "UPR006",
   "name": "Invoke Dracona Optimai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Legendary\nTransform target ash you control into Dracona Optimai. Go again",
   "pitch": 1,
   "cost": 6,
@@ -123,7 +123,7 @@
  {
   "id": "UPR006B",
   "name": "Dracona Optimai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Whenever Dracona Optimai attacks a hero, reveal the top 3 cards of your deck. He deals arcane damage equal to twice the number of red cards revealed this way to them or an ally they control.",
   "attack": 6,
   "classes": [
@@ -140,7 +140,7 @@
  {
   "id": "UPR007",
   "name": "Invoke Tomeltai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Legendary\nTransform target ash you control into Tomeltai. Go again",
   "pitch": 1,
   "cost": 5,
@@ -163,7 +163,7 @@
  {
   "id": "UPR007B",
   "name": "Tomeltai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Whenever Tomeltai attacks a hero, reveal the top 2 cards of your deck. If 1 or more red cards are revealed this way, put that many -1{d} counters on an equipment they control, then if it has 0{d}, destroy it.",
   "attack": 5,
   "classes": [
@@ -180,7 +180,7 @@
  {
   "id": "UPR008",
   "name": "Invoke Dominia",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Legendary\nTransform target ash you control into Dominia. Go again",
   "pitch": 1,
   "cost": 4,
@@ -203,7 +203,7 @@
  {
   "id": "UPR008B",
   "name": "Dominia",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Whenever Dominia attacks a hero, reveal the top card of your deck. If it's a red card, look at their hand and banish a card from it.",
   "attack": 4,
   "classes": [
@@ -220,7 +220,7 @@
  {
   "id": "UPR009",
   "name": "Invoke Azvolai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Transform target ash you control into Azvolai. Go again",
   "pitch": 1,
   "cost": 0,
@@ -242,7 +242,7 @@
  {
   "id": "UPR009B",
   "name": "Azvolai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Whenever Azvolai attacks, you may have him deal 1 arcane damage to up to any 2 targets.",
   "attack": 2,
   "classes": [
@@ -259,7 +259,7 @@
  {
   "id": "UPR010",
   "name": "Invoke Cromai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Transform target ash you control into Cromai. Go again",
   "pitch": 1,
   "cost": 0,
@@ -281,7 +281,7 @@
  {
   "id": "UPR010B",
   "name": "Cromai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Once per turn, when Cromai attacks or leaves the arena, gain 1 action point.",
   "attack": 3,
   "classes": [
@@ -298,7 +298,7 @@
  {
   "id": "UPR011",
   "name": "Invoke Kyloria",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Transform target ash you control into Kyloria. Go again",
   "pitch": 1,
   "cost": 1,
@@ -320,7 +320,7 @@
  {
   "id": "UPR011B",
   "name": "Kyloria",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Whenever Kyloria hits a hero, gain control of an item they control. If you don't gain control of an item this way, draw a card.",
   "attack": 4,
   "classes": [
@@ -337,7 +337,7 @@
  {
   "id": "UPR012",
   "name": "Invoke Miragai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Transform target ash you control into Miragai. Go again",
   "pitch": 1,
   "cost": 1,
@@ -359,7 +359,7 @@
  {
   "id": "UPR012B",
   "name": "Miragai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your first dragon attack each turn loses and can't gain phantasm.",
   "attack": 2,
   "classes": [
@@ -376,7 +376,7 @@
  {
   "id": "UPR013",
   "name": "Invoke Nekria",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Transform target ash you control into Nekria. Go again",
   "pitch": 1,
   "cost": 3,
@@ -398,7 +398,7 @@
  {
   "id": "UPR013B",
   "name": "Nekria",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Whenever Nekria deals or is dealt damage, put a -1{h} counter on her and create an Ash token.",
   "attack": 4,
   "classes": [
@@ -415,7 +415,7 @@
  {
   "id": "UPR014",
   "name": "Invoke Ouvia",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Transform target ash you control into Ouvia. Go again",
   "pitch": 1,
   "cost": 2,
@@ -437,7 +437,7 @@
  {
   "id": "UPR014B",
   "name": "Ouvia",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the start of your turn or when Ouvia enters the arena, transform up to 1 ash you control into an Aether Ashwing.",
   "attack": 1,
   "classes": [
@@ -457,7 +457,7 @@
  {
   "id": "UPR015",
   "name": "Invoke Themai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Transform target ash you control into Themai. Go again",
   "pitch": 1,
   "cost": 2,
@@ -479,7 +479,7 @@
  {
   "id": "UPR015B",
   "name": "Themai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Opponents can't play cards or activate abilities during your turn.",
   "attack": 3,
   "classes": [
@@ -496,7 +496,7 @@
  {
   "id": "UPR016",
   "name": "Invoke Vynserakai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Transform target ash you control into Vynserakai. Go again",
   "pitch": 1,
   "cost": 3,
@@ -518,7 +518,7 @@
  {
   "id": "UPR016B",
   "name": "Vynserakai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Whenever Vynserakai hits a hero, he deals 3 arcane damage to them.",
   "attack": 6,
   "classes": [
@@ -535,7 +535,7 @@
  {
   "id": "UPR017",
   "name": "Invoke Yendurai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Transform target ash you control into Yendurai. Go again",
   "pitch": 1,
   "cost": 1,
@@ -557,7 +557,7 @@
  {
   "id": "UPR017B",
   "name": "Yendurai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Yendurai enters the arena with an endurance counter on him.\nIf Yendurai would be dealt damage, remove an endurance counter from him to prevent 3 of that damage.",
   "attack": 3,
   "classes": [
@@ -574,7 +574,7 @@
  {
   "id": "UPR018",
   "name": "Billowing Mirage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Billowing Mirage, transform up to 1 ash you control into an Aether Ashwing.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -596,7 +596,7 @@
  {
   "id": "UPR019",
   "name": "Billowing Mirage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Billowing Mirage, transform up to 1 ash you control into an Aether Ashwing.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -618,7 +618,7 @@
  {
   "id": "UPR020",
   "name": "Billowing Mirage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Billowing Mirage, transform up to 1 ash you control into an Aether Ashwing.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -640,7 +640,7 @@
  {
   "id": "UPR021",
   "name": "Dunebreaker Cenipai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Dunebreaker Cenipai is destroyed, create an Ash token.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -662,7 +662,7 @@
  {
   "id": "UPR022",
   "name": "Dunebreaker Cenipai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Dunebreaker Cenipai is destroyed, create an Ash token.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -684,7 +684,7 @@
  {
   "id": "UPR023",
   "name": "Dunebreaker Cenipai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Dunebreaker Cenipai is destroyed, create an Ash token.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -706,7 +706,7 @@
  {
   "id": "UPR024",
   "name": "Dustup",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Dustup hits, create an Ash token, then transform up to 1 ash you control into an Aether Ashwing.",
   "pitch": 1,
   "cost": 0,
@@ -727,7 +727,7 @@
  {
   "id": "UPR025",
   "name": "Dustup",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Dustup hits, create an Ash token, then transform up to 1 ash you control into an Aether Ashwing.",
   "pitch": 2,
   "cost": 0,
@@ -748,7 +748,7 @@
  {
   "id": "UPR026",
   "name": "Dustup",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Dustup hits, create an Ash token, then transform up to 1 ash you control into an Aether Ashwing.",
   "pitch": 3,
   "cost": 0,
@@ -769,7 +769,7 @@
  {
   "id": "UPR027",
   "name": "Embermaw Cenipai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Embermaw Cenipai is destroyed, create an Ash token.",
   "pitch": 1,
   "cost": 2,
@@ -790,7 +790,7 @@
  {
   "id": "UPR028",
   "name": "Embermaw Cenipai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Embermaw Cenipai is destroyed, create an Ash token.",
   "pitch": 2,
   "cost": 2,
@@ -811,7 +811,7 @@
  {
   "id": "UPR029",
   "name": "Embermaw Cenipai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Embermaw Cenipai is destroyed, create an Ash token.",
   "pitch": 3,
   "cost": 2,
@@ -832,7 +832,7 @@
  {
   "id": "UPR030",
   "name": "Sweeping Blow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Sweeping Blow, create an Ash token.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -853,7 +853,7 @@
  {
   "id": "UPR031",
   "name": "Sweeping Blow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Sweeping Blow, create an Ash token.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -874,7 +874,7 @@
  {
   "id": "UPR032",
   "name": "Sweeping Blow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Sweeping Blow, create an Ash token.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -895,7 +895,7 @@
  {
   "id": "UPR033",
   "name": "Rake the Embers",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create an Ash token, then transform up to 3 ash you control into Aether Ashwings.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -915,7 +915,7 @@
  {
   "id": "UPR034",
   "name": "Rake the Embers",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create an Ash token, then transform up to 2 ash you control into Aether Ashwings.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -935,7 +935,7 @@
  {
   "id": "UPR035",
   "name": "Rake the Embers",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create an Ash token, then transform up to 1 ash you control into an Aether Ashwing.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -955,7 +955,7 @@
  {
   "id": "UPR036",
   "name": "Skittering Sands",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Transform target ash you control into an Aether Ashwing. It gains +3{p} until end of turn.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -975,7 +975,7 @@
  {
   "id": "UPR037",
   "name": "Skittering Sands",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Transform target ash you control into an Aether Ashwing. It gains +2{p} until end of turn.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -995,7 +995,7 @@
  {
   "id": "UPR038",
   "name": "Skittering Sands",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Transform target ash you control into an Aether Ashwing. It gains +1{p} until end of turn.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1015,7 +1015,7 @@
  {
   "id": "UPR039",
   "name": "Sand Cover",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target ash you control gains ward 4 until end of turn.",
   "pitch": 1,
   "cost": 0,
@@ -1030,7 +1030,7 @@
  {
   "id": "UPR040",
   "name": "Sand Cover",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target ash you control gains ward 3 until end of turn.",
   "pitch": 2,
   "cost": 0,
@@ -1045,7 +1045,7 @@
  {
   "id": "UPR041",
   "name": "Sand Cover",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Target ash you control gains ward 2 until end of turn.",
   "pitch": 3,
   "cost": 0,
@@ -1060,7 +1060,7 @@
  {
   "id": "UPR042",
   "name": "Aether Ashwing",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Arcane Barrier 1",
   "attack": 1,
   "classes": [
@@ -1080,7 +1080,7 @@
  {
   "id": "UPR043",
   "name": "Ash",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Material - While Ash is under an object, that object has phantasm.",
   "classes": [
    "illusionist"
@@ -1097,7 +1097,7 @@
  {
   "id": "UPR044",
   "name": "Fai, Rising Rebellion",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may start the game with a Phoenix Flame in your graveyard.\nOnce per Turn Instant - {r}{r}{r}: Return a Phoenix Flame from your graveyard to your hand. This ability costs {r} less for each Draconic chain link you control.",
   "classes": [
    "ninja"
@@ -1112,7 +1112,7 @@
  {
   "id": "UPR045",
   "name": "Fai",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may start the game with a Phoenix Flame in your graveyard.\nOnce per Turn Instant - {r}{r}{r}: Return a Phoenix Flame from your graveyard to your hand. This ability costs {r} less for each Draconic chain link you control.",
   "classes": [
    "ninja"
@@ -1127,7 +1127,7 @@
  {
   "id": "UPR046",
   "name": "Searing Emberblade",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nIf you control 2 or more Draconic chain links, this card's attacks get go again.",
   "attack": 3,
   "classes": [
@@ -1143,7 +1143,7 @@
  {
   "id": "UPR047",
   "name": "Heat Wave",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Heat Wave: Phoenix Flames you control gain +1{p} until end of turn.\nQuell 1",
   "defense": 0,
   "classes": [
@@ -1161,7 +1161,7 @@
  {
   "id": "UPR048",
   "name": "Phoenix Form",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 1 or more Phoenix Flames, Phoenix Form has go again. If you control 2 or more, it has +2{p}. If you control 3 or more, it has \"When this hits a hero, draw 3 cards.\"",
   "pitch": 1,
   "cost": 0,
@@ -1182,7 +1182,7 @@
  {
   "id": "UPR049",
   "name": "Spreading Flames",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Draconic attacks you control have +1{p} while their base {p} is less than the number of Draconic chain links you control.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -1203,7 +1203,7 @@
  {
   "id": "UPR050",
   "name": "Combustion Point",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target Draconic or Ninja attack action card gains +1{p}.\nYou may banish a non-equipment defending card with {d} less than the number of Draconic chain links you control.",
   "pitch": 1,
   "cost": 1,
@@ -1219,7 +1219,7 @@
  {
   "id": "UPR051",
   "name": "Engulfing Flamewave",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Engulfing Flamewave hits, reveal the top card of your deck. If it's an attack action card with cost less than number of Draconic chain links you control, banish it. You may play it this turn.\nGo again",
   "pitch": 1,
   "cost": 2,
@@ -1240,7 +1240,7 @@
  {
   "id": "UPR052",
   "name": "Engulfing Flamewave",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Engulfing Flamewave hits, reveal the top card of your deck. If it's an attack action card with cost less than number of Draconic chain links you control, banish it. You may play it this turn.\nGo again",
   "pitch": 2,
   "cost": 2,
@@ -1261,7 +1261,7 @@
  {
   "id": "UPR053",
   "name": "Engulfing Flamewave",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Engulfing Flamewave hits, reveal the top card of your deck. If it's an attack action card with cost less than number of Draconic chain links you control, banish it. You may play it this turn.\nGo again",
   "pitch": 3,
   "cost": 2,
@@ -1282,7 +1282,7 @@
  {
   "id": "UPR054",
   "name": "Mounting Anger",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Mounting Anger hits, you may banish an attack action card from your hand with cost less than the number of Draconic chain links you control. If you do, it gains +1{p} and you may play it this turn.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -1303,7 +1303,7 @@
  {
   "id": "UPR055",
   "name": "Mounting Anger",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Mounting Anger hits, you may banish an attack action card from your hand with cost less than the number of Draconic chain links you control. If you do, it gains +1{p} and you may play it this turn.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -1324,7 +1324,7 @@
  {
   "id": "UPR056",
   "name": "Mounting Anger",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Mounting Anger hits, you may banish an attack action card from your hand with cost less than the number of Draconic chain links you control. If you do, it gains +1{p} and you may play it this turn.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -1345,7 +1345,7 @@
  {
   "id": "UPR057",
   "name": "Rise from the Ashes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Draconic or Ninja attack action card you play this turn gains +3{p}.\nYou may return a Phoenix Flame from your graveyard to your hand.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1364,7 +1364,7 @@
  {
   "id": "UPR058",
   "name": "Rise from the Ashes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Draconic or Ninja attack action card you play this turn gains +2{p}.\nYou may return a Phoenix Flame from your graveyard to your hand.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1383,7 +1383,7 @@
  {
   "id": "UPR059",
   "name": "Rise from the Ashes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Draconic or Ninja attack action card you play this turn gains +1{p}.\nYou may return a Phoenix Flame from your graveyard to your hand.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1402,7 +1402,7 @@
  {
   "id": "UPR060",
   "name": "Brand with Cinderclaw",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack this combat chain is Draconic in addition to its other card types.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1423,7 +1423,7 @@
  {
   "id": "UPR061",
   "name": "Brand with Cinderclaw",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack this combat chain is Draconic in addition to its other card types.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1444,7 +1444,7 @@
  {
   "id": "UPR062",
   "name": "Brand with Cinderclaw",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack this combat chain is Draconic in addition to its other card types.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1465,7 +1465,7 @@
  {
   "id": "UPR063",
   "name": "Cinderskin Devotion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 2 or more Draconic chain links, this gets go again.",
   "pitch": 1,
   "cost": 1,
@@ -1486,7 +1486,7 @@
  {
   "id": "UPR064",
   "name": "Cinderskin Devotion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 2 or more Draconic chain links, this gets go again.",
   "pitch": 2,
   "cost": 1,
@@ -1507,7 +1507,7 @@
  {
   "id": "UPR065",
   "name": "Cinderskin Devotion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 2 or more Draconic chain links, this gets go again.",
   "pitch": 3,
   "cost": 1,
@@ -1528,7 +1528,7 @@
  {
   "id": "UPR066",
   "name": "Dust Runner Outlaw",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 1,
   "cost": 1,
@@ -1549,7 +1549,7 @@
  {
   "id": "UPR067",
   "name": "Dust Runner Outlaw",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 2,
   "cost": 1,
@@ -1570,7 +1570,7 @@
  {
   "id": "UPR068",
   "name": "Dust Runner Outlaw",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 3,
   "cost": 1,
@@ -1591,7 +1591,7 @@
  {
   "id": "UPR069",
   "name": "Lava Vein Loyalty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 2 or more Draconic chain links, this gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -1612,7 +1612,7 @@
  {
   "id": "UPR070",
   "name": "Lava Vein Loyalty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 2 or more Draconic chain links, this gets go again.",
   "pitch": 2,
   "cost": 0,
@@ -1633,7 +1633,7 @@
  {
   "id": "UPR071",
   "name": "Lava Vein Loyalty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 2 or more Draconic chain links, this gets go again.",
   "pitch": 3,
   "cost": 0,
@@ -1654,7 +1654,7 @@
  {
   "id": "UPR072",
   "name": "Rebellious Rush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 1,
   "cost": 2,
@@ -1675,7 +1675,7 @@
  {
   "id": "UPR073",
   "name": "Rebellious Rush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 2,
   "cost": 2,
@@ -1696,7 +1696,7 @@
  {
   "id": "UPR074",
   "name": "Rebellious Rush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 3,
   "cost": 2,
@@ -1717,7 +1717,7 @@
  {
   "id": "UPR075",
   "name": "Rising Resentment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Rising Resentment hits, you may banish an attack action card from your hand with cost less than the number of Draconic chain links you control. If you do, it costs {r} less to play and you may play it this turn.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1738,7 +1738,7 @@
  {
   "id": "UPR076",
   "name": "Rising Resentment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Rising Resentment hits, you may banish an attack action card from your hand with cost less than the number of Draconic chain links you control. If you do, it costs {r} less to play and you may play it this turn.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -1759,7 +1759,7 @@
  {
   "id": "UPR077",
   "name": "Rising Resentment",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Rising Resentment hits, you may banish an attack action card from your hand with cost less than the number of Draconic chain links you control. If you do, it costs {r} less to play and you may play it this turn.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -1780,7 +1780,7 @@
  {
   "id": "UPR078",
   "name": "Ronin Renegade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 1,
   "cost": 0,
@@ -1801,7 +1801,7 @@
  {
   "id": "UPR079",
   "name": "Ronin Renegade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 2,
   "cost": 0,
@@ -1822,7 +1822,7 @@
  {
   "id": "UPR080",
   "name": "Ronin Renegade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 3,
   "cost": 0,
@@ -1843,7 +1843,7 @@
  {
   "id": "UPR081",
   "name": "Soaring Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Soaring Strike hits, you may banish an attack action card from your hand with cost less than the number of Draconic chain links you control. If you do, it gains go again and you may play it this turn.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -1864,7 +1864,7 @@
  {
   "id": "UPR082",
   "name": "Soaring Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Soaring Strike hits, you may banish an attack action card from your hand with cost less than the number of Draconic chain links you control. If you do, it gains go again and you may play it this turn.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -1885,7 +1885,7 @@
  {
   "id": "UPR083",
   "name": "Soaring Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Soaring Strike hits, you may banish an attack action card from your hand with cost less than the number of Draconic chain links you control. If you do, it gains go again and you may play it this turn.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -1906,7 +1906,7 @@
  {
   "id": "UPR084",
   "name": "Flamescale Furnace",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Once per Turn Instant - {r}: Gain {r} for each red card in your pitch zone. Activate this ability only if you've played a red card this turn.\nTemper",
   "defense": 2,
   "subtypes": [
@@ -1921,7 +1921,7 @@
  {
   "id": "UPR085",
   "name": "Sash of Sandikai",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Sash of Sandikai: Gain {r}. Activate this ability only if you've played a red card this turn.",
   "defense": 0,
   "subtypes": [
@@ -1933,7 +1933,7 @@
  {
   "id": "UPR086",
   "name": "Thaw",
-  "cardType": "action",
+  "types": ["action"],
   "text": "While this is in your graveyard, at the start of your turn, you may banish it and choose 1:\n\nDestroy target Frostbite.\nDestroy target Ice affliction.\nUnfreeze target frozen card in the arena or an arsenal.",
   "pitch": 1,
   "cost": 2,
@@ -1948,7 +1948,7 @@
  {
   "id": "UPR087",
   "name": "Liquefy",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Rupture - If Liquefy is played at chain link 4 or higher, target attack action card gains \"When this hits a hero, put a -1{d} counter on an equipment they control. Then if it has 0{d}, destroy it.\"",
   "pitch": 1,
   "cost": 1,
@@ -1964,7 +1964,7 @@
  {
   "id": "UPR088",
   "name": "Uprising",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next 4 Draconic attacks this turn gain +1{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -1980,7 +1980,7 @@
  {
   "id": "UPR089",
   "name": "Tome of Firebrand",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Play Tome of Firebrand only if you control 4 or more Draconic chain links.\nDraw 2 cards.",
   "pitch": 1,
   "cost": 1,
@@ -1992,7 +1992,7 @@
  {
   "id": "UPR090",
   "name": "Red Hot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dromai or Fai Specialization\nRupture - If Red Hot is played as chain link 4 or higher, it has \"When you attack with this, reveal the top X cards of your deck, where X is the number of Draconic chain links you control. Deal damage equal to the number of red cards revealed this way to any target, then shuffle.\"",
   "pitch": 1,
   "cost": 2,
@@ -2011,7 +2011,7 @@
  {
   "id": "UPR091",
   "name": "Rise Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dromai or Fai Specialization\nRupture - If Rise Up is played as chain link 4 or higher, it has dominate and +X{p}, where X is twice the number of Phoenix Flames you control.",
   "pitch": 1,
   "cost": 1,
@@ -2031,7 +2031,7 @@
  {
   "id": "UPR092",
   "name": "Blaze Headlong",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played another red card this turn, this gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -2049,7 +2049,7 @@
  {
   "id": "UPR093",
   "name": "Breaking Point",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rupture - If Breaking Point is played as chain link 4 or higher, it has \"When this hits a hero, destroy all cards in their arsenal.\"",
   "pitch": 1,
   "cost": 1,
@@ -2067,7 +2067,7 @@
  {
   "id": "UPR094",
   "name": "Burn Away",
-  "cardType": "action",
+  "types": ["action"],
   "text": "As an additional cost to play Burn Away, you may banish a Phoenix Flame from your graveyard. When you do, Burn Away gains +2{p} and go again.",
   "pitch": 1,
   "cost": 0,
@@ -2085,7 +2085,7 @@
  {
   "id": "UPR095",
   "name": "Flameborn Retribution",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you defend with Flameborn Retribution, if you've been dealt damage this turn, you may return a Phoenix Flame from your graveyard to your hand.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -2103,7 +2103,7 @@
  {
   "id": "UPR096",
   "name": "Flamecall Awakening",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Flamecall Awakening, if you've played another red card this turn, you may search your deck for a Phoenix Flame, reveal it, put it into your hand, then shuffle.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -2121,7 +2121,7 @@
  {
   "id": "UPR097",
   "name": "Inflame",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Inflame, if you've played another red card this turn, you may return a Phoenix Flame from your graveyard to your hand.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -2139,7 +2139,7 @@
  {
   "id": "UPR098",
   "name": "Lava Burst",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rupture - If Lava Burst is played as chain link 4 or higher, it has +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -2157,7 +2157,7 @@
  {
   "id": "UPR099",
   "name": "Searing Touch",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rupture - If Searing Touch is played as chain link 4 or higher, it has \"When you attack with this, deal 2 damage to any target.\"",
   "pitch": 1,
   "cost": 1,
@@ -2175,7 +2175,7 @@
  {
   "id": "UPR100",
   "name": "Stoke the Flames",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Stoke the Flames hits, you may return a Phoenix Flame from your graveyard to your hand. If you do, Stoke the Flames gains go again.",
   "pitch": 1,
   "cost": 1,
@@ -2193,7 +2193,7 @@
  {
   "id": "UPR101",
   "name": "Phoenix Flame",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 2 or more Draconic chain links, this gets +1{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -2210,7 +2210,7 @@
  {
   "id": "UPR102",
   "name": "Iyslander, Stormbind",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Ice\nIf it's not your turn, you may play blue 'non-attack' action cards from your arsenal as though they were an instant.\nWhenever you play an Ice card during an opponents turn, create a Frostbite token under their control.",
   "classes": [
    "wizard"
@@ -2228,7 +2228,7 @@
  {
   "id": "UPR103",
   "name": "Iyslander",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Essence of Ice\nIf it's not your turn, you may play blue 'non-attack' action cards from your arsenal as though they were an instant.\nWhenever you play an Ice card during an opponents turn, create a Frostbite token under their control.",
   "classes": [
    "wizard"
@@ -2246,7 +2246,7 @@
  {
   "id": "UPR104",
   "name": "Encase",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 3 arcane damage to any target. If Encase was fused and deals damage to a hero, freeze that hero and all equipment they control until the start of your next turn.",
   "pitch": 1,
   "cost": 0,
@@ -2265,7 +2265,7 @@
  {
   "id": "UPR105",
   "name": "Freezing Point",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 5 arcane damage to a target hero. If Freezing Point was fused, instead deal X arcane damage, where X is 5 plus the number of Frostbites, Ice afflictions, and frozen cards they control.",
   "pitch": 1,
   "cost": 3,
@@ -2284,7 +2284,7 @@
  {
   "id": "UPR106",
   "name": "Sigil of Permafrost",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Ice Fusion\nIf Sigil of Permafrost was fused, the next time you deal arcane damage to a hero this turn, create that many Frostbite tokens under their control.",
   "pitch": 1,
   "cost": 1,
@@ -2303,7 +2303,7 @@
  {
   "id": "UPR107",
   "name": "Sigil of Permafrost",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Ice Fusion\nIf Sigil of Permafrost was fused, the next time you deal arcane damage to a hero this turn, create that many Frostbite tokens under their control.",
   "pitch": 2,
   "cost": 1,
@@ -2322,7 +2322,7 @@
  {
   "id": "UPR108",
   "name": "Sigil of Permafrost",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Ice Fusion\nIf Sigil of Permafrost was fused, the next time you deal arcane damage to a hero this turn, create that many Frostbite tokens under their control.",
   "pitch": 3,
   "cost": 1,
@@ -2341,7 +2341,7 @@
  {
   "id": "UPR109",
   "name": "Ice Eternal",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Iyslander Specialization\nIce Fusion\nCreate X Frostbite tokens under target hero's control. Then, if Ice Eternal was fused, deal arcane damage to that hero equal to the number of Frostbites they control.",
   "pitch": 3,
   "defense": 3,
@@ -2360,7 +2360,7 @@
  {
   "id": "UPR110",
   "name": "Succumb to Winter",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 5 arcane damage to any target. If Succumb to Winter was fused and targets a hero, destroy a frozen card in their arsenal. If it was fused and targets a frozen ally, destroy that ally.",
   "pitch": 1,
   "cost": 3,
@@ -2379,7 +2379,7 @@
  {
   "id": "UPR111",
   "name": "Succumb to Winter",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 4 arcane damage to any target. If Succumb to Winter was fused and targets a hero, destroy a frozen card in their arsenal. If it was fused and targets a frozen ally, destroy that ally.",
   "pitch": 2,
   "cost": 3,
@@ -2398,7 +2398,7 @@
  {
   "id": "UPR112",
   "name": "Succumb to Winter",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 3 arcane damage to any target. If Succumb to Winter was fused and targets a hero, destroy a frozen card in their arsenal. If it was fused and targets a frozen ally, destroy that ally.",
   "pitch": 3,
   "cost": 3,
@@ -2417,7 +2417,7 @@
  {
   "id": "UPR113",
   "name": "Aether Icevein",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 5 arcane damage to any target. If Aether Icevein was fused and deals damage to a hero, they discard a card unless they pay {r}{r}.",
   "pitch": 1,
   "cost": 3,
@@ -2436,7 +2436,7 @@
  {
   "id": "UPR114",
   "name": "Aether Icevein",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 4 arcane damage to any target. If Aether Icevein was fused and deals damage to a hero, they discard a card unless they pay {r}{r}.",
   "pitch": 2,
   "cost": 3,
@@ -2455,7 +2455,7 @@
  {
   "id": "UPR115",
   "name": "Aether Icevein",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 3 arcane damage to any target. If Aether Icevein was fused and deals damage to a hero, they discard a card unless they pay {r}{r}.",
   "pitch": 3,
   "cost": 3,
@@ -2474,7 +2474,7 @@
  {
   "id": "UPR116",
   "name": "Brain Freeze",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nTarget opponent reveals their hand. If Brain Freeze was fused, put an action card with cost 2 or less from their hand on top of their deck.",
   "pitch": 1,
   "cost": 0,
@@ -2493,7 +2493,7 @@
  {
   "id": "UPR117",
   "name": "Brain Freeze",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nTarget opponent reveals their hand. If Brain Freeze was fused, put an action card with cost 1 or less from their hand on top of their deck.",
   "pitch": 2,
   "cost": 0,
@@ -2512,7 +2512,7 @@
  {
   "id": "UPR118",
   "name": "Brain Freeze",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nTarget opponent reveals their hand. If Brain Freeze was fused, put an action card with cost 0 from their hand on top of their deck.",
   "pitch": 3,
   "cost": 0,
@@ -2531,7 +2531,7 @@
  {
   "id": "UPR119",
   "name": "Icebind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 3 arcane damage to any target. If Icebind was fused and deals damage to a hero, freeze a card in their arsenal until the start of your next turn.",
   "pitch": 1,
   "cost": 0,
@@ -2550,7 +2550,7 @@
  {
   "id": "UPR120",
   "name": "Icebind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 2 arcane damage to any target. If Icebind was fused and deals damage to a hero, freeze a card in their arsenal until the start of your next turn.",
   "pitch": 2,
   "cost": 0,
@@ -2569,7 +2569,7 @@
  {
   "id": "UPR121",
   "name": "Icebind",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 1 arcane damage to any target. If Icebind was fused and deals damage to a hero, freeze a card in their arsenal until the start of your next turn.",
   "pitch": 3,
   "cost": 0,
@@ -2588,7 +2588,7 @@
  {
   "id": "UPR122",
   "name": "Polar Cap",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 4 arcane damage to any target. If Polar Cap was fused and deals damage to a hero, create a Frostbite token under their control.",
   "pitch": 1,
   "cost": 2,
@@ -2607,7 +2607,7 @@
  {
   "id": "UPR123",
   "name": "Polar Cap",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 3 arcane damage to any target. If Polar Cap was fused and deals damage to a hero, create a Frostbite token under their control.",
   "pitch": 2,
   "cost": 2,
@@ -2626,7 +2626,7 @@
  {
   "id": "UPR124",
   "name": "Polar Cap",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ice Fusion\nDeal 2 arcane damage to any target. If Polar Cap was fused and deals damage to a hero, create a Frostbite token under their control.",
   "pitch": 3,
   "cost": 2,
@@ -2645,7 +2645,7 @@
  {
   "id": "UPR125",
   "name": "Conduit of Frostburn",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Conduit of Frostburn: The next card you play this turn with an effect that deals arcane damage gains \"When this deals arcane damage to a hero, destroy a frozen card in their arsenal.\"\nQuell 1",
   "defense": 0,
   "classes": [
@@ -2663,7 +2663,7 @@
  {
   "id": "UPR126",
   "name": "Frost Hex",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Iyslander Specialization\nFrostbites you control have \"At the beginning of your end phase, this deals 1 arcane damage to you.\"",
   "pitch": 3,
   "cost": 3,
@@ -2684,7 +2684,7 @@
  {
   "id": "UPR127",
   "name": "Aether Hail",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to any target.",
   "pitch": 1,
   "cost": 1,
@@ -2700,7 +2700,7 @@
  {
   "id": "UPR128",
   "name": "Aether Hail",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to any target.",
   "pitch": 2,
   "cost": 1,
@@ -2716,7 +2716,7 @@
  {
   "id": "UPR129",
   "name": "Aether Hail",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to any target.",
   "pitch": 3,
   "cost": 1,
@@ -2732,7 +2732,7 @@
  {
   "id": "UPR130",
   "name": "Frosting",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to any target.",
   "pitch": 1,
   "cost": 0,
@@ -2748,7 +2748,7 @@
  {
   "id": "UPR131",
   "name": "Frosting",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to any target.",
   "pitch": 2,
   "cost": 0,
@@ -2764,7 +2764,7 @@
  {
   "id": "UPR132",
   "name": "Frosting",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to any target.",
   "pitch": 3,
   "cost": 0,
@@ -2780,7 +2780,7 @@
  {
   "id": "UPR133",
   "name": "Ice Bolt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 5 arcane damage to any target.",
   "pitch": 1,
   "cost": 2,
@@ -2796,7 +2796,7 @@
  {
   "id": "UPR134",
   "name": "Ice Bolt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to any target.",
   "pitch": 2,
   "cost": 2,
@@ -2812,7 +2812,7 @@
  {
   "id": "UPR135",
   "name": "Ice Bolt",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to any target.",
   "pitch": 3,
   "cost": 2,
@@ -2828,7 +2828,7 @@
  {
   "id": "UPR136",
   "name": "Coronet Peak",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}{r}{r}: Target hero discards a card unless they pay {r}.\nBlade Break",
   "defense": 2,
   "subtypes": [
@@ -2843,7 +2843,7 @@
  {
   "id": "UPR137",
   "name": "Glacial Horns",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy Glacial Horns: Choose a hero. Freeze up to 1 card in their arsenal and 1 ally they control until the start of your next turn. Go again",
   "defense": 0,
   "subtypes": [
@@ -2855,7 +2855,7 @@
  {
   "id": "UPR138",
   "name": "Channel the Bleak Expanse",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nHeroes can't reveal cards, search decks, or draw cards from effects.\nChannel Ice - At the beginning of your end phase, put a flow counter on Channel the Bleak Expanse then destroy it unless you put an Ice card from your pitch zone on the bottom of your deck for each flow counter on it.",
   "pitch": 3,
   "cost": 1,
@@ -2873,7 +2873,7 @@
  {
   "id": "UPR139",
   "name": "Hypothermia",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Attacks you control can't gain go again.\nAt the beginning of your end phase, destroy Hypothermia.",
   "pitch": 3,
   "cost": 0,
@@ -2888,7 +2888,7 @@
  {
   "id": "UPR140",
   "name": "Insidious Chill",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Insidious Chill enters the arena with 3 frost counters on it. When it has no frost counters on it, destroy it.\nWhenever you Ice Fuse, remove a frost counter from Insidious Chill. If you do, target hero discards a card unless they pay {r}{r}.",
   "pitch": 3,
   "cost": 3,
@@ -2902,7 +2902,7 @@
  {
   "id": "UPR141",
   "name": "Isenhowl Weathervane",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time you Ice fuse this turn, create 4 Frostbite tokens under target hero's control.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -2918,7 +2918,7 @@
  {
   "id": "UPR142",
   "name": "Isenhowl Weathervane",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time you Ice fuse this turn, create 3 Frostbite tokens under target hero's control.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -2934,7 +2934,7 @@
  {
   "id": "UPR143",
   "name": "Isenhowl Weathervane",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next time you Ice fuse this turn, create 2 Frostbite tokens under target hero's control.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -2950,7 +2950,7 @@
  {
   "id": "UPR144",
   "name": "Arctic Incarceration",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create 3 Frostbite tokens under target hero's control.",
   "pitch": 1,
   "cost": 0,
@@ -2963,7 +2963,7 @@
  {
   "id": "UPR145",
   "name": "Arctic Incarceration",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create 2 Frostbite tokens under target hero's control.",
   "pitch": 2,
   "cost": 0,
@@ -2976,7 +2976,7 @@
  {
   "id": "UPR146",
   "name": "Arctic Incarceration",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create a Frostbite token under target hero's control.",
   "pitch": 3,
   "cost": 0,
@@ -2989,7 +2989,7 @@
  {
   "id": "UPR147",
   "name": "Cold Snap",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Target hero may pay {r}{r}{r}. If they don't, freeze a card in their arsenal or an ally they control until the start of your next turn.\nIf Cold Snap is played from arsenal, draw a card.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -3005,7 +3005,7 @@
  {
   "id": "UPR148",
   "name": "Cold Snap",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Target hero may pay {r}{r}. If they don't, freeze a card in their arsenal or an ally they control until the start of your next turn.\nIf Cold Snap is played from arsenal, draw a card.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -3021,7 +3021,7 @@
  {
   "id": "UPR149",
   "name": "Cold Snap",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Target hero may pay {r}. If they don't, freeze a card in their arsenal or an ally they control until the start of your next turn.\nIf Cold Snap is played from arsenal, draw a card.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -3037,7 +3037,7 @@
  {
   "id": "UPR150",
   "name": "Frostbite",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Cards and abilities cost you an additional {r} to play or activate.\nAt the beginning of your end phase or when you play a card or activate an ability, destroy Frostbite.",
   "subtypes": [
    "elemental",
@@ -3048,7 +3048,7 @@
  {
   "id": "UPR151",
   "name": "Ghostly Touch",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever an Illusionist attack you control is destroyed by phantasm, put a haunt counter on Ghostly Touch.\nOnce per Turn Action - Remove a haunt counter from Ghostly Touch: Until end of turn, this becomes an Illusionist ally with phantasm, base {p} and {h} equal to the number of haunt counters on it, and \"Once per Turn Action - {r}{r}{r}: Attack\". Go again",
   "defense": 0,
   "classes": [
@@ -3062,7 +3062,7 @@
  {
   "id": "UPR152",
   "name": "Silent Stilettos",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Whenever an attacking ally you control dies or an attack action card you control is destroyed by phantasm, you may pay {r}{r}{r}. If you do, destroy Silent Stilettos and gain 1 action point.\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -3079,7 +3079,7 @@
  {
   "id": "UPR153",
   "name": "Frightmare",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Play Frightmare only if an Illusionist attack action card you control has been destroyed by phantasm this turn.\nPhantasm",
   "pitch": 1,
   "cost": 3,
@@ -3098,7 +3098,7 @@
  {
   "id": "UPR154",
   "name": "Semblance",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Negate all phantasm triggered effects of target Illusionist attack you control. The attack loses and can't gain phantasm.",
   "pitch": 3,
   "cost": 3,
@@ -3110,7 +3110,7 @@
  {
   "id": "UPR155",
   "name": "Transmogrify",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn is Illusionist, has 8 base {p}, and gains phantasm.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -3126,7 +3126,7 @@
  {
   "id": "UPR156",
   "name": "Transmogrify",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn is Illusionist, has 7 base {p}, and gains phantasm.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -3142,7 +3142,7 @@
  {
   "id": "UPR157",
   "name": "Transmogrify",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next attack action card you play this turn is Illusionist, has 6 base {p}, and gains phantasm.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -3158,7 +3158,7 @@
  {
   "id": "UPR158",
   "name": "Tiger Stripe Shuko",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "The second attack action card with 2 or less base {p} you play each turn has +1{p} and \"Damage that would be dealt by this can't be prevented.\"\nBlade Break",
   "defense": 2,
   "classes": [
@@ -3175,7 +3175,7 @@
  {
   "id": "UPR159",
   "name": "Tide Flippers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Attack Reaction - Destroy Tide Flippers: Target attack action card with 2 or less base {p} gains go again.\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -3192,7 +3192,7 @@
  {
   "id": "UPR160",
   "name": "Double Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Double Strike's chain link resolves, banish it. You may play it this combat chain. If you do, it loses this ability.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -3212,7 +3212,7 @@
  {
   "id": "UPR161",
   "name": "Take the Tempo",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Take the Tempo hits, if you've hit 3 or more times this combat chain, banish the top card of your deck. If it's an attack action card, you may play it until the end of your next turn.",
   "pitch": 1,
   "cost": 1,
@@ -3229,7 +3229,7 @@
  {
   "id": "UPR162",
   "name": "Rapid Reflex",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target attack action card with cost 0 gains +3{p}.",
   "pitch": 1,
   "cost": 1,
@@ -3242,7 +3242,7 @@
  {
   "id": "UPR163",
   "name": "Rapid Reflex",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target attack action card with cost 0 gains +2{p}.",
   "pitch": 2,
   "cost": 1,
@@ -3255,7 +3255,7 @@
  {
   "id": "UPR164",
   "name": "Rapid Reflex",
-  "cardType": "attack-reaction",
+  "types": ["attack-reaction"],
   "text": "Target attack action card with cost 0 gains +1{p}.",
   "pitch": 3,
   "cost": 1,
@@ -3268,7 +3268,7 @@
  {
   "id": "UPR165",
   "name": "Waning Moon",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Instant - {r}{r}: Deal 2 arcane damage to target hero. If it's not your turn, instead deal 3 arcane damage to them. Activate this ability only if you've played a 'non-attack' action card this turn.",
   "classes": [
    "wizard"
@@ -3282,7 +3282,7 @@
  {
   "id": "UPR166",
   "name": "Alluvion Constellas",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "The first time Alluvion Constellas prevents arcane damage each turn, if it has less than 4 energy counters, you may put an energy counter on it.\nInstant - Remove 2 energy counters from Alluvion Constellas: The next staff ability you activate this turn costs {r}{r}{r} less.\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -3299,7 +3299,7 @@
  {
   "id": "UPR167",
   "name": "Spellfire Cloak",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Spellfire Cloak: Gain {r}. Activate this ability only during an opponent's turn.\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -3316,7 +3316,7 @@
  {
   "id": "UPR168",
   "name": "Tome of Duplicity",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Look at the top 2 cards of your deck, then banish one. If it's a 'non-attack' action card, you may play it this turn as though it were an instant.",
   "pitch": 3,
   "cost": 3,
@@ -3329,7 +3329,7 @@
  {
   "id": "UPR169",
   "name": "Rewind",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Negate target 'non-attack' action card and return it to its owner's hand. Then that hero gains 1 action point.",
   "pitch": 3,
   "cost": 1,
@@ -3344,7 +3344,7 @@
  {
   "id": "UPR170",
   "name": "Dampen",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 4 arcane damage to any target.\nPrevent the next X arcane damage that would be dealt to your hero this turn, where X is the damage dealt by Dampen.",
   "pitch": 1,
   "cost": 2,
@@ -3357,7 +3357,7 @@
  {
   "id": "UPR171",
   "name": "Dampen",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to any target.\nPrevent the next X arcane damage that would be dealt to your hero this turn, where X is the damage dealt by Dampen.",
   "pitch": 2,
   "cost": 2,
@@ -3370,7 +3370,7 @@
  {
   "id": "UPR172",
   "name": "Dampen",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to any target.\nPrevent the next X arcane damage that would be dealt to your hero this turn, where X is the damage dealt by Dampen.",
   "pitch": 3,
   "cost": 2,
@@ -3383,7 +3383,7 @@
  {
   "id": "UPR173",
   "name": "Aether Dart",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 3 arcane damage to any target.",
   "pitch": 1,
   "cost": 0,
@@ -3396,7 +3396,7 @@
  {
   "id": "UPR174",
   "name": "Aether Dart",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to any target.",
   "pitch": 2,
   "cost": 0,
@@ -3409,7 +3409,7 @@
  {
   "id": "UPR175",
   "name": "Aether Dart",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to any target.",
   "pitch": 3,
   "cost": 0,
@@ -3422,7 +3422,7 @@
  {
   "id": "UPR176",
   "name": "Read the Ripples",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the beginning of your end phase, destroy Read the Ripples then opt 1, opt 1, opt 1, and draw a card.",
   "pitch": 1,
   "cost": 0,
@@ -3441,7 +3441,7 @@
  {
   "id": "UPR177",
   "name": "Read the Ripples",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the beginning of your end phase, destroy Read the Ripples then opt 1, opt 1, and draw a card.",
   "pitch": 2,
   "cost": 0,
@@ -3460,7 +3460,7 @@
  {
   "id": "UPR178",
   "name": "Read the Ripples",
-  "cardType": "action",
+  "types": ["action"],
   "text": "At the beginning of your end phase, destroy Read the Ripples then opt 1 and draw a card.",
   "pitch": 3,
   "cost": 0,
@@ -3479,7 +3479,7 @@
  {
   "id": "UPR179",
   "name": "Singe",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero and up to 3 target allies they control.",
   "pitch": 1,
   "cost": 1,
@@ -3492,7 +3492,7 @@
  {
   "id": "UPR180",
   "name": "Singe",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero and up to 2 target allies they control.",
   "pitch": 2,
   "cost": 1,
@@ -3505,7 +3505,7 @@
  {
   "id": "UPR181",
   "name": "Singe",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 1 arcane damage to target hero and up to 1 target ally they control.",
   "pitch": 3,
   "cost": 1,
@@ -3518,7 +3518,7 @@
  {
   "id": "UPR182",
   "name": "Crown of Providence",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When you defend with Crown of Providence, you may put a card from your hand or arsenal on the bottom of your deck. If you do, draw a card.\nBlade Break",
   "defense": 2,
   "classes": [
@@ -3535,7 +3535,7 @@
  {
   "id": "UPR183",
   "name": "Helio's Mitre",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "(A player may add a Helio's Mitre to their card pool in an Uprising limited format.)\nInstant - {r}{r}: Prevent the next 1 damage that would be dealt to your hero this turn by a source of your choice. Destroy Helio's Mitre at the beginning of the end phase.",
   "defense": 0,
   "classes": [
@@ -3549,7 +3549,7 @@
  {
   "id": "UPR184",
   "name": "Quelling Robe",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Quell 1",
   "defense": 0,
   "classes": [
@@ -3566,7 +3566,7 @@
  {
   "id": "UPR185",
   "name": "Quelling Sleeves",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Quell 1",
   "defense": 0,
   "classes": [
@@ -3583,7 +3583,7 @@
  {
   "id": "UPR186",
   "name": "Quelling Slippers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Quell 1",
   "defense": 0,
   "classes": [
@@ -3600,7 +3600,7 @@
  {
   "id": "UPR187",
   "name": "Erase Face",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this hits a hero, cards they own lose all class and talent types until the end of their next turn.",
   "pitch": 1,
   "cost": 2,
@@ -3617,7 +3617,7 @@
  {
   "id": "UPR188",
   "name": "Vipox",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Vipox hits a hero, they lose {h} equal to the number of cards in their hand.",
   "pitch": 1,
   "cost": 0,
@@ -3634,7 +3634,7 @@
  {
   "id": "UPR189",
   "name": "That All You Got?",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "While this is defending an attack with 2 or less {p}, when the combat chain closes, draw a card.",
   "pitch": 2,
   "cost": 0,
@@ -3647,7 +3647,7 @@
  {
   "id": "UPR190",
   "name": "Fog Down",
-  "cardType": "action",
+  "types": ["action"],
   "text": "'Non-attack' action cards lose and can't gain go again.\nAt the beginning of your action phase, destroy Fog Down.",
   "pitch": 2,
   "cost": 3,
@@ -3663,7 +3663,7 @@
  {
   "id": "UPR191",
   "name": "Flex",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack or defend with Flex, you may pay {r}{r}. If you do, it gains +2{p}.",
   "pitch": 1,
   "cost": 0,
@@ -3680,7 +3680,7 @@
  {
   "id": "UPR192",
   "name": "Flex",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack or defend with Flex, you may pay {r}{r}. If you do, it gains +2{p}.",
   "pitch": 2,
   "cost": 0,
@@ -3697,7 +3697,7 @@
  {
   "id": "UPR193",
   "name": "Flex",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack or defend with Flex, you may pay {r}{r}. If you do, it gains +2{p}.",
   "pitch": 3,
   "cost": 0,
@@ -3714,7 +3714,7 @@
  {
   "id": "UPR194",
   "name": "Fyendal's Fighting Spirit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}.",
   "pitch": 1,
   "cost": 3,
@@ -3731,7 +3731,7 @@
  {
   "id": "UPR195",
   "name": "Fyendal's Fighting Spirit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}.",
   "pitch": 2,
   "cost": 3,
@@ -3748,7 +3748,7 @@
  {
   "id": "UPR196",
   "name": "Fyendal's Fighting Spirit",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}.",
   "pitch": 3,
   "cost": 3,
@@ -3765,7 +3765,7 @@
  {
   "id": "UPR197",
   "name": "Sift",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put up to 4 cards from your hand on the bottom of your deck, then draw that many cards.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -3781,7 +3781,7 @@
  {
   "id": "UPR198",
   "name": "Sift",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put up to 3 cards from your hand on the bottom of your deck, then draw that many cards.\nGo again",
   "pitch": 2,
   "cost": 0,
@@ -3797,7 +3797,7 @@
  {
   "id": "UPR199",
   "name": "Sift",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put up to 2 cards from your hand on the bottom of your deck, then draw that many cards.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -3813,7 +3813,7 @@
  {
   "id": "UPR200",
   "name": "Strategic Planning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put an action card with cost 2 or less from a graveyard on the bottom of its owner's deck. At the beginning of the end phase, draw a card.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -3829,7 +3829,7 @@
  {
   "id": "UPR201",
   "name": "Strategic Planning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put an action card with cost 1 or less from a graveyard on the bottom of its owner's deck. At the beginning of the end phase, draw a card.\nGo again",
   "pitch": 2,
   "cost": 1,
@@ -3845,7 +3845,7 @@
  {
   "id": "UPR202",
   "name": "Strategic Planning",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Put an action card with cost 0 from a graveyard on the bottom of its owner's deck. At the beginning of the end phase, draw a card.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -3861,7 +3861,7 @@
  {
   "id": "UPR203",
   "name": "Brothers in Arms",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends, you may pay {r}. If you do, it gets +2{d}.",
   "pitch": 1,
   "cost": 2,
@@ -3878,7 +3878,7 @@
  {
   "id": "UPR204",
   "name": "Brothers in Arms",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends, you may pay {r}. If you do, it gets +2{d}.",
   "pitch": 2,
   "cost": 2,
@@ -3895,7 +3895,7 @@
  {
   "id": "UPR205",
   "name": "Brothers in Arms",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this defends, you may pay {r}. If you do, it gets +2{d}.",
   "pitch": 3,
   "cost": 2,
@@ -3912,7 +3912,7 @@
  {
   "id": "UPR206",
   "name": "Critical Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 1,
   "cost": 1,
@@ -3929,7 +3929,7 @@
  {
   "id": "UPR207",
   "name": "Critical Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 2,
   "cost": 1,
@@ -3946,7 +3946,7 @@
  {
   "id": "UPR208",
   "name": "Critical Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 3,
   "cost": 1,
@@ -3963,7 +3963,7 @@
  {
   "id": "UPR209",
   "name": "Scar for a Scar",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -3983,7 +3983,7 @@
  {
   "id": "UPR210",
   "name": "Scar for a Scar",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
   "pitch": 2,
   "cost": 0,
@@ -4003,7 +4003,7 @@
  {
   "id": "UPR211",
   "name": "Scar for a Scar",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this is played, if you have less {h} than an opposing hero, it gets go again.",
   "pitch": 3,
   "cost": 0,
@@ -4023,7 +4023,7 @@
  {
   "id": "UPR212",
   "name": "Trade In",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, you may discard a card. If you do, draw a card.\nIf this was played from arsenal, it gains go again.",
   "pitch": 1,
   "cost": 0,
@@ -4043,7 +4043,7 @@
  {
   "id": "UPR213",
   "name": "Trade In",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, you may discard a card. If you do, draw a card.\nIf this was played from arsenal, it gains go again.",
   "pitch": 2,
   "cost": 0,
@@ -4063,7 +4063,7 @@
  {
   "id": "UPR214",
   "name": "Trade In",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, you may discard a card. If you do, draw a card.\nIf this was played from arsenal, it gains go again.",
   "pitch": 3,
   "cost": 0,
@@ -4083,7 +4083,7 @@
  {
   "id": "UPR215",
   "name": "Healing Balm",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Gain 3{h}",
   "pitch": 1,
   "cost": 0,
@@ -4096,7 +4096,7 @@
  {
   "id": "UPR216",
   "name": "Healing Balm",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Gain 2{h}",
   "pitch": 2,
   "cost": 0,
@@ -4109,7 +4109,7 @@
  {
   "id": "UPR217",
   "name": "Healing Balm",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Gain 1{h}",
   "pitch": 3,
   "cost": 0,
@@ -4122,7 +4122,7 @@
  {
   "id": "UPR218",
   "name": "Sigil of Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ward 4\nAt the beginning of your action phase, destroy Sigil of Protection.",
   "pitch": 1,
   "cost": 1,
@@ -4141,7 +4141,7 @@
  {
   "id": "UPR219",
   "name": "Sigil of Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ward 3\nAt the beginning of your action phase, destroy Sigil of Protection.",
   "pitch": 2,
   "cost": 1,
@@ -4160,7 +4160,7 @@
  {
   "id": "UPR220",
   "name": "Sigil of Protection",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Ward 2\nAt the beginning of your action phase, destroy Sigil of Protection.",
   "pitch": 3,
   "cost": 1,
@@ -4179,7 +4179,7 @@
  {
   "id": "UPR221",
   "name": "Oasis Respite",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Prevent the next 4 damage that would be dealt to target hero this turn by a source of your choice. If they have less life than each other hero, they may gain 1{h}.",
   "pitch": 1,
   "cost": 1,
@@ -4191,7 +4191,7 @@
  {
   "id": "UPR222",
   "name": "Oasis Respite",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Prevent the next 3 damage that would be dealt to target hero this turn by a source of your choice. If they have less life than each other hero, they may gain 1{h}.",
   "pitch": 2,
   "cost": 1,
@@ -4203,7 +4203,7 @@
  {
   "id": "UPR223",
   "name": "Oasis Respite",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Prevent the next 2 damage that would be dealt to target hero this turn by a source of your choice. If they have less life than each other hero, they may gain 1{h}.",
   "pitch": 3,
   "cost": 1,
@@ -4215,7 +4215,7 @@
  {
   "id": "UPR224",
   "name": "Cracked Bauble",
-  "cardType": "resource",
+  "types": ["resource"],
   "text": "(A player may add any number of Cracked Baubles to their card-pool in sealed deck or booster draft formats.)",
   "pitch": 2,
   "classes": [

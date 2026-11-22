@@ -6,6 +6,7 @@ import {
   heldValue,
   offenseValue,
   standaloneValue,
+  TYPICAL_INCOMING,
 } from "./card-ev.js";
 import {
   buildHandSolver,
@@ -15,8 +16,18 @@ import {
   type HeroSolverRules,
   type ModelContext,
 } from "./card-model.js";
+import { unseenCounts } from "./deck-knowledge.js";
 import type { HandSolver, SolverResult } from "./hand-solver.js";
-import { responseEvaluation, type BotPolicyInput, type ResponseEvaluation } from "./policy.js";
+import { immediateOnHitDamage } from "./on-hit.js";
+import {
+  currentLink,
+  pendingDefenseReactionValue,
+  reactionDefense,
+  responseEvaluation,
+  type BotPolicyInput,
+  type ResponseEvaluation,
+} from "./policy.js";
+import { threatenedAttackDamage } from "./public-threat.js";
 
 /**
  * The one place policies read hand value. Every number is a damage
@@ -49,6 +60,8 @@ function handKey(input: BotPolicyInput, factory: HeroRulesFactory): string {
   ).join(",");
   return JSON.stringify([
     factory.name, input.view.gameId, input.seat, input.view.turn, nextTurn, me.life, opponent.life,
+    me.heroAbilitiesLost === true,
+    input.view.turnFacts?.players[input.seat]?.actionLimit ?? null,
     opponent.arsenalCount, opponent.handCount,
     ids(me.hand), ids(me.arsenal), ids(me.weapons), ids(me.board), ids(me.banish), ids(me.graveyard),
     ids(Object.values(me.equipment).flatMap((card) => card ? [card] : [])),
@@ -60,8 +73,28 @@ function handKey(input: BotPolicyInput, factory: HeroRulesFactory): string {
         input.view.chain.map((link) => `${link.attackValue}:${link.goAgain ? 1 : 0}:${link.resolved ? 1 : 0}`),
       ],
     nextTurn ? [] : input.view.ongoing.map((effect) => `${effect.seat}:${effect.cardId}:${effect.label}`),
-    input.decklists?.own?.length ?? 0, input.decklists?.opponent?.length ?? 0,
+    input.decklists?.own?.length ?? 0, input.decklists?.opponent?.length ?? 0, deckContentHash(input),
   ]);
+}
+
+/** FNV-1a over both decklists and the opponent's unseen cards: draw and
+ * disruption estimates read them, and sandbox edits change them in place. */
+function deckContentHash(input: BotPolicyInput): number {
+  let hash = 2_166_136_261;
+  const mix = (text: string) => {
+    for (let index = 0; index < text.length; index++) {
+      hash ^= text.charCodeAt(index);
+      hash = Math.imul(hash, 16_777_619);
+    }
+    hash ^= 0x7c;
+    hash = Math.imul(hash, 16_777_619);
+  };
+  for (const id of input.decklists?.own ?? []) mix(id);
+  mix("");
+  for (const id of input.decklists?.opponent ?? []) mix(id);
+  mix("");
+  for (const [id, count] of unseenCounts(input, "opponent") ?? []) mix(`${id}:${count}`);
+  return hash >>> 0;
 }
 
 function cachedHand(input: BotPolicyInput, factory: HeroRulesFactory): CachedHand {
@@ -122,7 +155,7 @@ function averageDrawAt(entry: CachedHand, offenseRate: number): number {
   let value = entry.averageDraws.get(offenseRate);
   if (value === undefined) {
     const { input } = entry.context;
-    value = averageDrawValue(input, (data) => cardUses(data, input), offenseRate);
+    value = averageDrawValue(input, (data) => cardUses(data, input), offenseRate, entry.context.futureHitChanceFor);
     entry.averageDraws.set(offenseRate, value);
   }
   return value;
@@ -141,7 +174,7 @@ export function arsenalCardValue(
 ): number {
   const { context } = cachedHand(input, factory);
   const uses = heldCardUses(card, context);
-  return uses ? arsenalValue(uses, context.discount, context.hitChance, offenseRate) : 0;
+  return uses ? arsenalValue(uses, context.discount, context.futureHitChanceFor, offenseRate) : 0;
 }
 
 /** `arsenalCardValue` bound to one hero's rules, for arsenal choice scoring. */
@@ -159,7 +192,9 @@ export function heldCardValue(
 ): number {
   const entry = cachedHand(input, factory);
   const uses = heldCardUses(card, entry.context);
-  return uses ? heldValue(uses, averageDrawAt(entry, offenseRate), entry.context.hitChance, offenseRate) : 0;
+  return uses
+    ? heldValue(uses, averageDrawAt(entry, offenseRate), entry.context.futureHitChanceFor, offenseRate)
+    : 0;
 }
 
 /** Offense a held or arsenal card threatens on a later turn, before the
@@ -167,7 +202,7 @@ export function heldCardValue(
 export function heldCardOffense(card: CardView, input: BotPolicyInput, factory: HeroRulesFactory): number {
   const { context } = cachedHand(input, factory);
   const uses = heldCardUses(card, context);
-  return uses ? offenseValue(uses, context.hitChance) : 0;
+  return uses ? offenseValue(uses, context.futureHitChanceFor) : 0;
 }
 
 /** Cost of spending a hand card now (pitching, blocking, discarding): its
@@ -177,12 +212,63 @@ export function heldCardOffense(card: CardView, input: BotPolicyInput, factory: 
 export function cardOpportunity(card: CardView, input: BotPolicyInput, factory: HeroRulesFactory): number {
   const { context } = cachedHand(input, factory);
   const uses = heldCardUses(card, context);
-  return uses ? standaloneValue(uses, context.hitChance) - context.averageDraw : 0;
+  return uses ? standaloneValue(uses, context.futureHitChanceFor) - context.averageDraw : 0;
 }
 
 /** `cardOpportunity` bound to one hero's rules. */
 export function opportunityValuer(factory: HeroRulesFactory): (card: CardView, input: BotPolicyInput) => number {
   return (card, input) => cardOpportunity(card, input, factory);
+}
+
+/** Next turn's hand damage lost by spending these hand or arsenal cards now,
+ * beside a card already gone from them. */
+export function reserveDamageLost(
+  input: BotPolicyInput,
+  factory: HeroRulesFactory,
+  spent: ReadonlySet<number>,
+  gone?: number,
+): number {
+  const me = input.view.players[input.seat];
+  const kept = [...me.hand, ...me.arsenal].filter((card) => card.instanceId !== gone);
+  return handDamage(kept, input, factory) -
+    handDamage(kept.filter((card) => !spent.has(card.instanceId)), input, factory);
+}
+
+/** Damage incoming on the current link, and whether the attack threatens lethal. */
+export function defenseReactionThreat(input: BotPolicyInput): { incoming: number; lethal: boolean } {
+  const link = currentLink(input);
+  if (!link) return { incoming: 0, lethal: false };
+  const pending = pendingDefenseReactionValue(input);
+  const incoming = Math.max(0, link.damage - pending);
+  const threatened = Math.max(incoming, threatenedAttackDamage(input) - pending);
+  const landed = threatened > 0 ? threatened + immediateOnHitDamage(link.onHitEffects ?? []) : 0;
+  return { incoming, lethal: landed >= input.view.players[input.seat].life };
+}
+
+/** Short of lethal, a defense reaction is saved for a later attack unless it
+ * stops at least half of what it would stop against a typical one. */
+export function defenseReactionStopsEnough(
+  input: BotPolicyInput,
+  defense: number,
+  { incoming, lethal } = defenseReactionThreat(input),
+): boolean {
+  return lethal || Math.min(incoming, defense) * 2 >= Math.min(defense, TYPICAL_INCOMING);
+}
+
+/** Short of lethal, a defense reaction (with its pitch) must stop enough
+ * (`defenseReactionStopsEnough`) and more damage than it takes from next
+ * turn's hand. */
+export function defenseReactionWorthSpending(
+  card: CardView,
+  input: BotPolicyInput,
+  factory: HeroRulesFactory,
+  pitched: Iterable<number>,
+  defense = reactionDefense(card, input),
+): boolean {
+  const threat = defenseReactionThreat(input);
+  if (threat.lethal) return true;
+  if (!defenseReactionStopsEnough(input, defense, threat)) return false;
+  return Math.min(threat.incoming, defense) > reserveDamageLost(input, factory, new Set([card.instanceId, ...pitched]));
 }
 
 /** Blocking value an equipment piece gives up when it is spent. */

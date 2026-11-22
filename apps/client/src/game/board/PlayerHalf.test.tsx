@@ -42,6 +42,7 @@ function renderPlayerHalf(
   mobileLandscapeViewport = false,
   compactBoard = false,
   standingOrders?: ComponentProps<typeof PlayerHalf>["standingOrders"],
+  activeChainTargetInstanceIds: ReadonlySet<number> = new Set(),
 ): string {
   return renderToStaticMarkup(
     <TestI18nProvider locale={locale}>
@@ -83,6 +84,7 @@ function renderPlayerHalf(
       mobileLandscapeViewport={mobileLandscapeViewport}
       compactBoard={compactBoard}
       activeChainAttackerInstanceId={activeChainAttackerInstanceId}
+      activeChainTargetInstanceIds={activeChainTargetInstanceIds}
       onSendEmote={() => undefined}
       onOpenOverlay={() => undefined}
       onOpenEffects={() => undefined}
@@ -94,11 +96,12 @@ function renderPlayerHalf(
 
 function renderArenaInteraction(
   overrides: Partial<ComponentProps<typeof PlayerHalf>["interaction"]>,
+  playerView: PlayerView = player,
 ): string {
   return renderToStaticMarkup(
     <TestI18nProvider locale="en">
       <PlayerHalf
-        player={player}
+        player={playerView}
         mine
         mirrored={false}
         ongoing={[]}
@@ -134,6 +137,7 @@ function renderArenaInteraction(
         mobileFloatViewport={false}
         mobileLandscapeViewport={false}
         activeChainAttackerInstanceId={null}
+        activeChainTargetInstanceIds={new Set()}
         onSendEmote={() => undefined}
         onOpenOverlay={() => undefined}
         onOpenEffects={() => undefined}
@@ -414,6 +418,35 @@ describe("PlayerHalf", () => {
     expect(html.match(/data-motion-card="0:board:/g)).toHaveLength(1);
   });
 
+  it("pulls the attacked copy out of a stack of identical allies and marks it", () => {
+    const html = renderPlayerHalf(
+      {
+        ...player,
+        board: [
+          { instanceId: 2, cardId: "TST-UPRIGHT", owner: 0 },
+          { instanceId: 4, cardId: "TST-UPRIGHT", owner: 0 },
+          { instanceId: 5, cardId: "TST-UPRIGHT", owner: 0 },
+        ],
+      },
+      true,
+      undefined,
+      undefined,
+      "en",
+      null,
+      false,
+      false,
+      false,
+      undefined,
+      new Set([4]),
+    );
+
+    expect(html).toMatch(/data-motion-card="0:board:2"[^>]*data-motion-card-aliases="0:board:5"/);
+    expect(html).toMatch(
+      /data-motion-card="0:board:4">.*card-attack-target-badge" role="img" aria-label="Attack target"/,
+    );
+    expect(html.match(/data-motion-card="0:board:/g)).toHaveLength(2);
+  });
+
   it("renders a card back from the public count for any non-owned hidden arsenal", () => {
     const html = renderPlayerHalf({
       ...player,
@@ -564,6 +597,28 @@ describe("PlayerHalf", () => {
 
     expect(html).toMatch(
       /class="card card-zone [^"]*card-highlight[^"]*card-clickable"[^>]*data-cardid="TST-AMBUSH"/,
+    );
+  });
+
+  it("makes a face-down arsenal card with an activatable ability highlighted and clickable", () => {
+    const html = renderArenaInteraction({
+      legal: {
+        playableHand: new Set(),
+        playableArsenal: new Set(),
+        playableZones: new Map(),
+        activatable: new Set([30]),
+        stageableDefenders: new Set(),
+        canPass: true,
+        canCloseChain: false,
+      },
+    }, {
+      ...player,
+      arsenal: [{ instanceId: 30, cardId: "TST-MENTOR", owner: 0, faceDown: true }],
+      arsenalCount: 1,
+    });
+
+    expect(html).toMatch(
+      /class="card card-zone [^"]*card-highlight[^"]*card-clickable"[^>]*data-cardid="TST-MENTOR"/,
     );
   });
 

@@ -1,16 +1,20 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript, ScriptCtx } from "@fyendal/engine";
 import { SHARPEN_FOLLOWUP, sharpenSword } from "./aha/warrior-sharpen.js";
 import {
   attackAbility,
   buffNextAttack,
-  chargeDeclineMessages,
+  chargeAttack,
+  chargedThisTurn,
   decisionMessage,
   decisionPrompt,
-  isChargeDecline,
+  isAttackAction,
+  isLight,
+  isSword,
   localizedCardLog,
-  optionalChargeOptions,
   solflareTrigger,
+  unityEquipment,
 } from "./shared-helpers.js";
+import { AGILITY, COURAGE, FLURRY } from "./tokens.js";
 
 // ── SBL (Silver Age: Boltyn precon) ─────────────────────────────────────────
 //
@@ -35,20 +39,6 @@ import {
 // - Toe the Line's "if you prevent damage this way, create a Flurry token"
 //   (engine: Modifier.onPreventCreateToken on the generic prevention shield).
 
-const AGILITY = "SBL034";
-const COURAGE = "SBL035";
-const FLURRY = "SBL036";
-
-/** ctx.state is typed without the internal side tables; the runtime object has them. */
-
-function isLight(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("light");
-}
-
-function isSword(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("sword");
-}
-
 function sharpenForEdict(ctx: ScriptCtx, instanceId: number): void {
   sharpenSword(ctx, instanceId, 1, {
     threshold: 1,
@@ -56,67 +46,9 @@ function sharpenForEdict(ctx: ScriptCtx, instanceId: number): void {
   });
 }
 
-function chargedThisTurn(ctx: ScriptCtx): boolean {
-  return ctx.getFlag("player", "chargedThisTurn") === true;
-}
-
 /** The pitch of the card charged as this card's additional cost (0 = none). */
 function chargedPitchThisWay(ctx: ScriptCtx): number {
   return ctx.getState("chargedPitch");
-}
-
-// ── Charge as an optional additional cost ───────────────────────────────────
-
-const CHARGE_HOOK = "charge-cost";
-
-function chargeAdditionalCost(ctx: ScriptCtx): void {
-  const hand = ctx.player(ctx.seat).hand;
-  if (hand.length === 0) return;
-  ctx.requestCardChoice(
-    CHARGE_HOOK,
-    decisionPrompt(`${ctx.data.name}: choose a card from your hand to charge, or decline`, "card.sbl.charge.choose", {
-      values: { card: { kind: "card", cardId: ctx.self.cardId } },
-      optionMessages: chargeDeclineMessages,
-    }),
-    optionalChargeOptions(ctx),
-  );
-}
-
-/** Shared onChoose for the charge-cost hook; returns true when handled. */
-function chargeOnChoose(ctx: ScriptCtx, hook: string, option: string): boolean {
-  if (hook !== CHARGE_HOOK) return false;
-  if (!isChargeDecline(option)) {
-    const charged = ctx.charge(Number(option));
-    if (charged) ctx.setState("chargedPitch", ctx.cardColor(charged));
-  }
-  return true;
-}
-
-/** An attack action with "you may charge your hero's soul" as an additional cost. */
-function chargeAttack(extra: CardScript): CardScript {
-  return {
-    additionalCost: chargeAdditionalCost,
-    ...extra,
-    onChoose(ctx, hook, option) {
-      if (chargeOnChoose(ctx, hook, option)) return;
-      extra.onChoose?.(ctx, hook, option);
-    },
-  };
-}
-
-/** Unity equipment: "+1{d} while defending together with a card from hand". */
-function unityEquipment(): CardScript {
-  return {
-    canTriggerOnDefend(ctx) {
-      if (!ctx.link) return false;
-      const count = Number(ctx.link.flags.defendedFromHandCount ?? 0);
-      const selfWasFromHand = ctx.link.flags[`defendedFromHand:${ctx.self.instanceId}`] === true ? 1 : 0;
-      return count > selfWasFromHand;
-    },
-    onDefend(ctx) {
-      ctx.addCardTempDefense(ctx.self.instanceId, 1);
-    },
-  };
 }
 
 export const sbl: Record<string, CardScript> = {
@@ -128,7 +60,7 @@ export const sbl: Record<string, CardScript> = {
     modifyAttack(ctx) {
       if (!ctx.link || !chargedThisTurn(ctx)) return 0;
       const defendedByAttackAction = ctx.link.defendingCards.some((c) => {
-        return ctx.hasCardType(c, "action") && ctx.cardTypes(c).includes("attack");
+        return isAttackAction(ctx, c);
       });
       return defendedByAttackAction ? 1 : 0;
     },
@@ -220,7 +152,7 @@ export const sbl: Record<string, CardScript> = {
       goAgain: true,
       label: "Destroy: gain {r}",
       onActivate(ctx) {
-        ctx.changeResources(ctx.seat, 1);
+        ctx.gainResources(ctx.seat, 1);
         ctx.logPublic(
           localizedCardLog(ctx, "Garland of Spring: gain 1 resource", "card.log.common.resources.gained", {
             amount: 1,
@@ -521,7 +453,7 @@ export const sbl: Record<string, CardScript> = {
         event: "card-played",
         label: "Destroy Courage (attack +1{p})",
         condition: (ctx, played) =>
-          !!played && ctx.hasCardType(played, "action") && ctx.cardTypes(played).includes("attack"),
+          !!played && isAttackAction(ctx, played),
         effect(ctx) {
           ctx.destroySelf();
           ctx.addModifier({ scope: "chain-link", attack: 1 });

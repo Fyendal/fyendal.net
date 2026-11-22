@@ -254,6 +254,28 @@ describe("CRU — Mechanologist attacks and Workshop", () => {
       .expectAttackValue(5);
   });
 
+  it("Overblast counts each boost, not each boosted chain link", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: DASH,
+          weapons: [],
+          resources: 2,
+          hand: ["twin drive|1", "overblast|2", BLUE],
+          deck: ["zipper hit|3", "zipper hit|3"],
+        },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    g.play("twin drive|1", { boost: true, boostCount: 2 })
+      .blockWith()
+      .settle()
+      .play("overblast|2", { pitch: [BLUE] })
+      .expectAttackValue(6);
+  });
+
   it("Teklovossen's Workshop opts for boosts this turn then puts a qualifying top item into arena", () => {
     const g = scenario({
       seats: [

@@ -11,6 +11,7 @@ import type {
 import type { GameState } from "@fyendal/engine";
 import { requiredEquipmentStageIntent, unneededDefenseBoostIntent } from "./defense.js";
 import {
+  opposingHeroLink,
   publicCombatThreat,
   threatenedAttackDamage,
   threatenedCombatDamage,
@@ -18,6 +19,7 @@ import {
 import {
   EMPTY_ON_HIT_EVALUATION,
   evaluateOnHit,
+  FORCED_DISCARD_VALUE,
   SIGNIFICANT_ON_HIT_VALUE,
   type OnHitEvaluation,
 } from "./on-hit.js";
@@ -27,7 +29,9 @@ import {
   type LifeThreshold,
   type ValueBreakdown,
 } from "./value.js";
-import { chooseUpkeepPayment } from "./upkeep.js";
+import { chooseUpkeepPayment, lethalUpkeepReserve, strandsLethalUpkeep } from "./upkeep.js";
+import { BLOCK_USE_RATE } from "./card-ev.js";
+import { hasType } from "@fyendal/shared";
 
 export interface BotPolicyInput {
   seat: 0 | 1;
@@ -105,13 +109,13 @@ function bestDefenderStageIntent(
     if (link?.overpower) {
       const actionDefenders = ids.filter((id) => {
         if (equipmentIds.has(id)) return false;
-        return input.cards[own.get(id)?.cardId ?? ""]?.cardType === "action";
+        return hasType(input.cards[own.get(id)?.cardId ?? ""], "action");
       }).length;
       if (actionDefenders > 1) return false;
     }
     if (link?.maxNonBlockDefenders !== undefined) {
       const nonBlockDefenders = ids.filter((id) =>
-        input.cards[own.get(id)?.cardId ?? ""]?.cardType !== "block"
+        !hasType(input.cards[own.get(id)?.cardId ?? ""], "block")
       ).length;
       if (nonBlockDefenders > link.maxNonBlockDefenders) return false;
     }
@@ -292,7 +296,7 @@ function isOffensivePlayIntent(
 ): boolean {
   const card = intentCard(intent, own);
   const data = card ? input.cards[card.cardId] : undefined;
-  return isAttack(data) || data?.cardType === "weapon";
+  return isAttack(data) || hasType(data, "weapon");
 }
 
 function preservesArsenalCard(
@@ -438,18 +442,35 @@ export function strategicPitchIntents(
 }
 
 export function isAttack(data: CardData | undefined): boolean {
-  return data?.cardType === "action" && !!data.subtypes?.includes("attack");
+  return data !== undefined && hasType(data, "action") && !!data.subtypes?.includes("attack");
+}
+
+/** Actions the bot may still play or activate on `turn` under a delayed cap. */
+export function actionsAllowed(input: BotPolicyInput, turn = input.view.turn): number {
+  const limit = input.view.turnFacts?.players[input.seat]?.actionLimit;
+  return limit?.turn === turn ? limit.remaining : Number.POSITIVE_INFINITY;
 }
 
 export function isOpeningTurn(input: BotPolicyInput): boolean {
   return input.view.turn === 1 && input.view.activePlayer === input.seat;
 }
 
+/** Instants rarely block, so a deck this instant-heavy defends poorly on turn one. */
+const OPENING_ATTACK_INSTANT_SHARE = 0.15;
+
+function opponentRunsManyInstants(input: BotPolicyInput): boolean {
+  const deck = input.decklists?.opponent;
+  if (!deck?.length) return false;
+  const instants = deck.filter((id) => hasType(input.cards[id], "instant")).length;
+  return instants / deck.length >= OPENING_ATTACK_INSTANT_SHARE;
+}
+
 /** Preserve the normal first-turn hand-refill advantage unless the opponent
- * has already spent at least half of their opening hand. At two or fewer
- * cards, make them defend instead of giving them a free refill. */
+ * has already spent at least half of their opening hand or runs many
+ * instants. Otherwise attack while still reserving an arsenal card. */
 export function shouldPreserveOpeningHand(input: BotPolicyInput): boolean {
-  return isOpeningTurn(input) && input.view.players[1 - input.seat]!.handCount > 2;
+  return isOpeningTurn(input) && input.view.players[1 - input.seat]!.handCount > 2 &&
+    !opponentRunsManyInstants(input);
 }
 
 export function isOpeningTurnDefense(input: BotPolicyInput): boolean {
@@ -469,16 +490,20 @@ export function currentAttackIsOurs(input: BotPolicyInput): boolean {
   return currentLink(input)?.attackingCard.owner === input.seat;
 }
 
+/** Damage a +`pump` power reaction adds to our current attack past its defenders. */
+export function pumpDamageAdded(input: BotPolicyInput, pump: number): number {
+  const link = currentLink(input);
+  if (!link || link.attackingCard.owner !== input.seat) return 0;
+  return Math.max(0, Math.min(pump, link.attackValue + pump - link.defenseValue));
+}
+
 export function currentAttackIsOpponents(input: BotPolicyInput): boolean {
   const link = currentLink(input);
   return !!link && link.attackingCard.owner !== input.seat;
 }
 
 export function incomingAttackDamage(input: BotPolicyInput): number {
-  const link = currentLink(input);
-  return link && link.attackingCard.owner !== input.seat
-    ? Math.max(0, link.damage)
-    : 0;
+  return Math.max(0, opposingHeroLink(input)?.damage ?? 0);
 }
 
 /** Incoming attack damage that prevention effects can still reduce. */
@@ -584,17 +609,46 @@ export function scoreBinaryChoice(
   return undefined;
 }
 
+const INERTIA_TRIGGER = "card.trigger.common.inertia.destroy";
+const DRAW_TRIGGER = /(^|\.)draw(\.|$)/;
+
+/** Draws resolve after Inertia or it bottoms them, leaving a card to arsenal.
+ * Other triggers go first to spend the doomed hand, unless only the drawn cards
+ * can pay a lethal upkeep. */
+function inertiaTriggerOrderIntent(input: BotPolicyInput): GameIntent | undefined {
+  const decision = input.view.pendingDecision;
+  if (decision?.kind !== "order-triggers") return undefined;
+  const ids = decision.options ?? [];
+  const messages = decision.optionMessages ?? [];
+  if (!messages.some((message) => message?.id === INERTIA_TRIGGER)) return undefined;
+  const otherRank = input.view.players[input.seat].hand.length === 0 && lethalUpkeepReserve(input) > 0 ? 3 : 0;
+  const rank = (index: number): number => {
+    const id = messages[index]?.id ?? "";
+    return id === INERTIA_TRIGGER ? 1 : DRAW_TRIGGER.test(id) ? 2 : otherRank;
+  };
+  const order = ids.map((_, index) => index).sort((left, right) => rank(left) - rank(right) || left - right);
+  return { kind: "order-triggers", optionIds: order.map((index) => ids[index]!) };
+}
+
 /** Resolve cross-hero invariants before strategy-specific scoring. Shared
- * policy may only return an intent already exposed by the engine. */
+ * policy may only return an intent the engine exposes, or a reordered trigger list. */
 export function chooseSharedPolicyIntent(input: BotPolicyInput): GameIntent | undefined {
   const decision = input.view.pendingDecision;
   if (!decision) return undefined;
+  const triggerOrder = inertiaTriggerOrderIntent(input);
+  if (triggerOrder) return triggerOrder;
   const upkeep = chooseUpkeepPayment(input);
   if (upkeep) return upkeep;
   const unneededBoost = unneededDefenseBoostIntent(input);
   if (unneededBoost) return unneededBoost;
   const combatShrink = combatCardReduceIntent(input);
   if (combatShrink) return combatShrink;
+  const graveyardEquip = graveyardEquipIntent(input);
+  if (graveyardEquip) return graveyardEquip;
+  const spellvoid = spellvoidIntent(input);
+  if (spellvoid) return spellvoid;
+  const arsenalSink = arsenalSinkIntent(input);
+  if (arsenalSink) return arsenalSink;
 
   const incoming = arcaneBarrierIncoming(decision);
   if (incoming === undefined) return undefined;
@@ -615,6 +669,40 @@ export function chooseSharedPolicyIntent(input: BotPolicyInput): GameIntent | un
   ).intent;
 }
 
+/** Spellvoid: destroy the piece that prevents the most damage for the least
+ * blocking given up. Outside lethal, only equipment whose whole Spellvoid is
+ * used and outweighs its block is spent. */
+function spellvoidIntent(input: BotPolicyInput): GameIntent | undefined {
+  const decision = input.view.pendingDecision;
+  if (decision?.promptMessage?.id !== "engine.decision.damage.spellvoid") return undefined;
+  const incoming = decision.promptMessage.values?.amount;
+  if (typeof incoming !== "number" || incoming <= 0) return undefined;
+  const me = input.view.players[input.seat];
+  const equipped = new Set(Object.values(me.equipment).flatMap((card) => card ? [card.instanceId] : []));
+  const lethal = incoming >= me.life;
+  let best: { intent: GameIntent; survives: boolean; score: number } | undefined;
+  for (const intent of input.legal) {
+    if (intent.kind !== "choose" || !intent.optionId.startsWith("destroy ")) continue;
+    const card = optionCard(intent, input);
+    if (!card) continue;
+    const data = input.cards[card.cardId];
+    // Spellvoid X is offered only while X is at least 1.
+    const spellvoid = Math.max(1, ...(data?.keywords ?? [])
+      .flatMap((keyword) => /^spellvoid (\d+)$/i.exec(keyword)?.[1] ?? []).map(Number));
+    const prevented = Math.min(incoming, spellvoid);
+    const blockLoss = equipped.has(card.instanceId)
+      ? Math.max(0, card.defense ?? data?.defense ?? 0) * BLOCK_USE_RATE
+      : undefined;
+    const score = prevented - (blockLoss ?? 0);
+    if (!lethal && (blockLoss === undefined || prevented < spellvoid || score <= 0)) continue;
+    const survives = incoming - prevented < me.life;
+    if (!best || (survives && !best.survives) || (survives === best.survives && score > best.score)) {
+      best = { intent, survives, score };
+    }
+  }
+  return best?.intent;
+}
+
 /** No Hero Stands Alone: the clash winner shrinks the other side of the link. */
 function combatCardReduceIntent(input: BotPolicyInput): GameIntent | undefined {
   if (input.view.pendingDecision?.promptMessage?.id !== "card.sup.combat.card.reduce") return undefined;
@@ -626,6 +714,25 @@ function combatCardReduceIntent(input: BotPolicyInput): GameIntent | undefined {
   return targets.flatMap((card) =>
     input.legal.filter((intent) => intent.kind === "choose" && intent.optionId === String(card.instanceId))
   )[0];
+}
+
+/** Rake Back: a free equipment from the graveyard is always taken, sturdiest first. */
+function graveyardEquipIntent(input: BotPolicyInput): GameIntent | undefined {
+  if (input.view.pendingDecision?.promptMessage?.id !== "card.aol.graveyard.equipment.equip") return undefined;
+  const equipment = input.view.players[input.seat].equipment;
+  let best: { intent: GameIntent; defense: number } | undefined;
+  for (const intent of input.legal) {
+    if (intent.kind !== "choose") continue;
+    const card = optionCard(intent, input);
+    const data = card ? input.cards[card.cardId] : undefined;
+    if (!data) continue;
+    const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
+      (data.subtypes ?? []).includes(candidate));
+    if (slot && equipment[slot]) continue;
+    const defense = data.defense ?? 0;
+    if (!best || defense > best.defense) best = { intent, defense };
+  }
+  return best?.intent;
 }
 
 function arcaneBarrierIncoming(decision: NonNullable<GameView["pendingDecision"]>): number | undefined {
@@ -803,7 +910,10 @@ export function plannedDefenseReactionPlan(
   const candidates = [
     ...((link.dominate && blockedFromHand) || link.defenseReactionsBlockedFromHand ? [] : me.hand),
     ...(link.defenseReactionsBlockedFromArsenal ? [] : me.arsenal),
-  ].filter((card) => !spent.has(card.instanceId) && input.cards[card.cardId]?.cardType === "defense-reaction");
+  ].filter((card) =>
+    !spent.has(card.instanceId) && hasType(input.cards[card.cardId], "defense-reaction") &&
+    !mirageNullifiesDefense(input.cards[card.cardId], input)
+  );
 
   const options: PlannedPrevention[] = [{
     amount: 0,
@@ -826,10 +936,7 @@ export function plannedDefenseReactionPlan(
     );
     const payment = minimumPitchForCost(cost, me.resources, pitchCandidates, input);
     if (!payment) continue;
-    const defense = reactions.reduce(
-      (total, card) => total + Math.max(0, card.defense ?? input.cards[card.cardId]?.defense ?? 0),
-      0,
-    );
+    const defense = reactions.reduce((total, card) => total + reactionDefense(card, input), 0);
     options.push({
       amount: defense,
       consumedIds: [...reactionIds, ...payment],
@@ -859,23 +966,38 @@ export function plannedDefenseReactionValue(
   return plannedDefenseReactionPlan(input, intent).amount;
 }
 
-/** Printed defense already committed by this bot's unresolved reaction cards. */
-function pendingDefenseReactionValue(input: BotPolicyInput): number {
+/** Projected defense covers delayed reaction debuffs (Nerve Scalpel) the card's own value omits. */
+export function reactionDefense(card: CardView, input: BotPolicyInput): number {
+  const decision = input.view.pendingDecision;
+  const projected = decision?.player === input.seat
+    ? decision.reactionDefense?.find((entry) => entry.instanceId === card.instanceId)
+    : undefined;
+  if (projected) return projected.defense;
+  return Math.max(0, card.defense ?? input.cards[card.cardId]?.defense ?? 0);
+}
+
+/** Defense already committed by this bot's unresolved reaction cards. */
+export function pendingDefenseReactionValue(input: BotPolicyInput): number {
   return input.view.stack.reduce((total, layer) => {
     if (layer.seat !== input.seat || !layer.card) return total;
     const data = input.cards[layer.card.cardId];
-    if (data?.cardType !== "defense-reaction") return total;
-    return total + Math.max(0, layer.card.defense ?? data.defense ?? 0);
+    if (!data || !hasType(data, "defense-reaction") || mirageNullifiesDefense(data, input)) return total;
+    return total + reactionDefense(layer.card, input);
   }, 0);
 }
 
-export function scoreDefenseReaction(data: CardData, input: BotPolicyInput): number {
+export function scoreDefenseReaction(
+  data: CardData,
+  input: BotPolicyInput,
+  card?: CardView,
+): number {
   const link = currentLink(input);
   const incoming = link
     ? Math.max(0, link.damage - pendingDefenseReactionValue(input))
     : 0;
   if (input.view.pendingDecision?.kind !== "defense-reaction" || incoming === 0) return -100;
-  const defense = Math.max(0, data.defense ?? 0);
+  if (mirageNullifiesDefense(data, input)) return -100;
+  const defense = card ? reactionDefense(card, input) : Math.max(0, data.defense ?? 0);
   const me = input.view.players[input.seat];
   const threatened = Math.max(incoming, threatenedAttackDamage(input) - pendingDefenseReactionValue(input));
   if (link && Math.max(link.attackValue, threatened) >= me.life) {
@@ -961,15 +1083,35 @@ function wagerDefenseSwing(rewards: readonly string[] | undefined): number {
 /** Opportunity cost of one equipment block. Durable keywords lose counters
  * rather than the whole card, so price the defense actually worn away instead
  * of charging every armor piece as though it had Blade Break. */
-function equipmentWearCost(card: CardView, input: BotPolicyInput): number {
+function equipmentWearCost(card: CardView, input: BotPolicyInput, model: HeroCycleModel): number {
   const data = input.cards[card.cardId];
   const keywords = new Set((data?.keywords ?? []).map((keyword) => keyword.toLowerCase()));
   const defense = Math.max(0, card.defense ?? data?.defense ?? 0);
   if (keywords.has("battleworn")) return 1;
   if (keywords.has("temper")) return defense <= 1 ? 2 : 1.5;
   if (keywords.has("guardwell")) return Math.max(1, defense);
-  if (keywords.has("blade break")) return Math.max(2, defense);
+  if (keywords.has("blade break")) {
+    const abilityValue = model.equipmentAbilityValue?.(card, input) ?? destroyedAbilityValue(card, input);
+    return Math.max(2, defense) + abilityValue;
+  }
   return defense > 0 ? 2 : 0;
+}
+
+/** Destroyed armor also takes its printed ability out of the rest of the game. */
+const EQUIPMENT_ABILITY_VALUE = 1;
+/** The Spring Tunic's future resources beyond the energy it already holds. */
+const SPRING_TUNIC_FUTURE_RESOURCES = 1;
+
+function destroyedAbilityValue(card: CardView, input: BotPolicyInput): number {
+  if (isSpringTunic(card, input)) return SPRING_TUNIC_FUTURE_RESOURCES + (card.counters?.energy ?? 0) / 3;
+  // weaponLockCost already prices Kabuto's lock.
+  if (isWeaponLock(card, input)) return 0;
+  const keywords = [...equipmentKeywords(card, input)];
+  const hasAbility = (input.cards[card.cardId]?.text ?? "").split("\n").some((raw) => {
+    const line = raw.trim().toLowerCase();
+    return line !== "" && !line.startsWith("(") && !keywords.some((keyword) => line.startsWith(keyword));
+  });
+  return hasAbility ? EQUIPMENT_ABILITY_VALUE : 0;
 }
 
 /** Already Dead-style hits banish or destroy a defender, armor included. */
@@ -986,6 +1128,72 @@ function removedEquipmentLoss(card: CardView, input: BotPolicyInput): number {
 
 function equipmentKeywords(card: CardView, input: BotPolicyInput): ReadonlySet<string> {
   return new Set((input.cards[card.cardId]?.keywords ?? []).map((keyword) => keyword.toLowerCase()));
+}
+
+/** Whether gaining `gain` resources (Spring Tunic, Energy Potion) closes a cost
+ * gap: it pays a wanted cost that the floating resources plus the rest of the
+ * hand's pitch cannot. Unspent resources drain at end of turn, so any other
+ * gain is wasted. */
+export function resourceGainClosesCost(
+  input: BotPolicyInput,
+  wants: readonly { readonly card: CardView; readonly cost: number }[],
+  gain: number,
+): boolean {
+  const resources = input.view.players[input.seat].resources;
+  return wants.some(({ card, cost }) => {
+    const available = resources + remainingPitchValue(input, new Set([card.instanceId]));
+    return available < cost && available + gain >= cost;
+  });
+}
+
+/** Armor that may put a hand or arsenal card on the bottom of the deck when it
+ * defends (Crown of Providence), emptying an arsenal an on-hit would take. */
+const SINKS_ON_DEFEND =
+  /when you defend with [^.]*?, you may put a card from your hand or arsenal on the bottom of your deck/i;
+
+function sinksArsenalOnDefend(card: CardView, input: BotPolicyInput): boolean {
+  return SINKS_ON_DEFEND.test(input.cards[card.cardId]?.text ?? "");
+}
+
+function linkOnHit(
+  input: BotPolicyInput,
+  link: NonNullable<ReturnType<typeof currentLink>>,
+  defenderHasArsenal: boolean,
+): OnHitEvaluation {
+  const me = input.view.players[input.seat];
+  const attacker = input.view.players[1 - input.seat]!;
+  return evaluateOnHit({
+    effects: link.onHitEffects ?? [],
+    sourceText: input.cards[link.attackingCard.cardId]?.text ?? "",
+    attackerCanContinue: link.goAgain === true || attacker.actionPoints > 0,
+    attackerCanArsenal: attacker.arsenalCount === 0,
+    defenderHasHand: me.handCount > 0,
+    defenderHasArsenal,
+  });
+}
+
+/** Sink the arsenal card with a defending Crown of Providence-style piece when
+ * a landing hit would destroy or banish it. */
+function arsenalSinkIntent(input: BotPolicyInput): GameIntent | undefined {
+  const decision = input.view.pendingDecision;
+  if (decision?.kind !== "choose-target" || decision.player !== input.seat || !decision.options?.includes("no")) {
+    return undefined;
+  }
+  const link = currentLink(input);
+  if (!link || link.attackingCard.owner === input.seat || link.attackValue <= link.defenseValue) return undefined;
+  const me = input.view.players[input.seat];
+  const equipmentIds = new Set(
+    Object.values(me.equipment).flatMap((card) => card ? [card.instanceId] : []),
+  );
+  if (!link.defendingCards.some((card) => equipmentIds.has(card.instanceId) && sinksArsenalOnDefend(card, input))) {
+    return undefined;
+  }
+  if (!linkOnHit(input, link, true).destroysOccupiedArsenal) return undefined;
+  const arsenalIds = new Set(me.arsenal.map((card) => String(card.instanceId)));
+  const option = decision.options.find((id) => arsenalIds.has(id));
+  return option === undefined
+    ? undefined
+    : input.legal.find((intent) => intent.kind === "choose" && intent.optionId === option);
 }
 
 function isSpringTunic(card: CardView, input: BotPolicyInput): boolean {
@@ -1021,7 +1229,8 @@ function opponentWeaponAttackLeft(input: BotPolicyInput): boolean {
  * from the engine's defend projection: the link's attack value is computed
  * from its defenders, so a charged Boltyn's bonus against attack action
  * defenders is missing from the link until the block commits. The projection
- * prices each defender added alone, so a set takes its largest change. */
+ * prices each defender added alone, so a set takes its largest change. Fragment
+ * resolves after the projection, so its -2 per trigger is added here. */
 export function defendersAttackChange(input: BotPolicyInput, defenders: readonly CardView[]): number {
   const link = currentLink(input);
   const decision = input.view.pendingDecision;
@@ -1030,7 +1239,15 @@ export function defendersAttackChange(input: BotPolicyInput, defenders: readonly
     const projected = decision.defenderDefense?.find((entry) => entry.instanceId === card.instanceId);
     return projected ? [projected.attack - link.attackValue] : [];
   });
-  return changes.length > 0 ? Math.max(...changes) : 0;
+  return (changes.length > 0 ? Math.max(...changes) : 0) - fragmentPowerLoss(input, link, defenders);
+}
+
+/** Fragment triggers once per defender with 2+ defense. */
+function fragmentPowerLoss(input: BotPolicyInput, link: ChainLinkView, defenders: readonly CardView[]): number {
+  const fragment = input.cards[link.attackingCard.cardId]?.keywords?.some((keyword) =>
+    keyword.toLowerCase() === "fragment"
+  );
+  return fragment ? 2 * defenders.filter((card) => defenderDefense(card, input) >= 2).length : 0;
 }
 
 /** Defense a card would contribute if it defended the current attack. */
@@ -1047,7 +1264,7 @@ export function defenderDefense(card: CardView, input: BotPolicyInput): number {
   const data = input.cards[card.cardId];
   if (
     isBladeBeckoner(card, input) &&
-    input.cards[link?.attackingCard.cardId ?? ""]?.cardType === "weapon"
+    hasType(input.cards[link?.attackingCard.cardId ?? ""], "weapon")
   ) {
     // CardView.defense has already clamped printed defense minus counters to
     // zero. Blade Beckoner's continuous bonus is applied before that clamp,
@@ -1055,25 +1272,36 @@ export function defenderDefense(card: CardView, input: BotPolicyInput): number {
     // looks like it still blocks for one.
     return Math.max(0, (data?.defense ?? card.defense ?? 0) - (card.defCounters ?? 0) + 1);
   }
+  if (mirageNullifiesDefense(data, input)) return 0;
   return Math.max(0, card.defense ?? data?.defense ?? 0);
 }
 
-/** Phantasm (8.3.13): a non-Illusionist attack action defender with 6 or more
- * power destroys the attack. Returns that defender's defense, the only block
- * the destruction needs, or undefined when no chosen defender qualifies. */
-function phantasmDefenderDefense(
-  input: BotPolicyInput,
-  link: NonNullable<ReturnType<typeof currentLink>>,
-  chosen: readonly CardView[],
-): number | undefined {
-  const attack = input.cards[link.attackingCard.cardId];
-  if (!attack?.keywords?.some((keyword) => keyword.toLowerCase() === "phantasm")) return undefined;
-  const qualifying = chosen.filter((card) => {
-    const data = input.cards[card.cardId];
-    return data?.cardType === "action" && (data.subtypes ?? []).includes("attack") &&
-      !(data.classes ?? []).includes("illusionist") &&
-      (card.attack ?? data.attack ?? 0) >= 6;
-  });
+/** Unity: +1{d} on each such equipment defending beside a card from hand.
+ * It is a defend trigger, so the staged-defense projection never shows it. */
+function unityDefenseBonus(chosen: readonly CardView[], input: BotPolicyInput): number {
+  const handIds = new Set(input.view.players[input.seat].hand.map((card) => card.instanceId));
+  if (!chosen.some((card) => handIds.has(card.instanceId))) return 0;
+  return chosen.filter((card) =>
+    !handIds.has(card.instanceId) && input.cards[card.cardId]?.keywords?.includes("Unity")
+  ).length;
+}
+
+/** Mirage (8.3.25) destroys this defender before damage, so it blocks nothing. */
+function mirageNullifiesDefense(data: CardData | undefined, input: BotPolicyInput): boolean {
+  const link = currentLink(input);
+  return !!link && link.attackValue >= 6 &&
+    !!data?.keywords?.some((keyword) => keyword.toLowerCase() === "mirage") &&
+    !(input.cards[link.attackingCard.cardId]?.classes ?? []).includes("illusionist");
+}
+
+/** Defense of the chosen defender the engine says triggers Phantasm, the only
+ * block the destruction needs, or undefined when none does. */
+function phantasmDefenderDefense(input: BotPolicyInput, chosen: readonly CardView[]): number | undefined {
+  const decision = input.view.pendingDecision;
+  if (decision?.kind !== "defend") return undefined;
+  const qualifying = chosen.filter((card) =>
+    decision.defenderDefense?.some((entry) => entry.instanceId === card.instanceId && entry.triggersPhantasm)
+  );
   return qualifying.length > 0
     ? Math.max(...qualifying.map((card) => defenderDefense(card, input)))
     : undefined;
@@ -1159,7 +1387,15 @@ export interface HeroCycleModel extends ResponseModel {
   /** Equipment whose defense is free to cash in now because the hero expects
    * to refresh it or consume it offensively on the following turn. */
   equipmentUseIsFree?(card: CardView, input: BotPolicyInput): boolean;
+  /** Rest-of-game value of a piece's printed ability when blocking destroys
+   * it; undefined falls back to the generic estimate. */
+  equipmentAbilityValue?(card: CardView, input: BotPolicyInput): number | undefined;
   lifeThresholds?: readonly LifeThreshold[];
+  /** The response model reads `heroAbilitiesLost`, so a landed lock is priced
+   * by the projection rather than the flat on-hit estimate. */
+  pricesHeroAbilityLoss?: boolean;
+  /** Life the next end phase drains while the hero has no abilities. */
+  endPhaseDrainWithoutHeroAbilities?(input: BotPolicyInput): number;
   responseLossWeight?: number;
   defensePermission?(candidate: DefenseCandidateContext): DefensePermission;
   adjustCycleValue?(
@@ -1231,19 +1467,39 @@ function clamp(value: number, minimum: number, maximum: number): number {
 function defaultContinuationProfile(
   input: BotPolicyInput,
   link: NonNullable<ReturnType<typeof currentLink>>,
+  handCardsDenied = 0,
 ): ContinuationProfile {
   const attacker = input.view.players[1 - input.seat]!;
   if (link.goAgain !== true && attacker.actionPoints <= 0) {
     return { stopProbability: 1, representativeAttack: 0 };
   }
+  const handCount = Math.max(0, attacker.handCount - handCardsDenied);
   return {
     stopProbability: clamp(
-      0.75 - 0.2 * Math.min(attacker.handCount, 3) - 0.15 * attacker.arsenalCount,
+      0.75 - 0.2 * Math.min(handCount, 3) - 0.15 * attacker.arsenalCount,
       0.15,
       0.75,
     ),
-    representativeAttack: Math.min(6, 3 + attacker.handCount + attacker.arsenalCount),
+    representativeAttack: Math.min(6, 3 + handCount + attacker.arsenalCount),
   };
+}
+
+const DEFEND_DISCARD =
+  /\bwhen this defends( a weapon attack)?, the attacking hero discards (a|\d+) cards?/i;
+
+/** Attacker hand cards the chosen defenders' own defend triggers discard. */
+function defendTriggerDiscards(
+  input: BotPolicyInput,
+  link: NonNullable<ReturnType<typeof currentLink>>,
+  chosen: readonly CardView[],
+): number {
+  const weaponAttack = hasType(input.cards[link.attackingCard.cardId], "weapon");
+  const discards = chosen.reduce((total, card) => {
+    const match = DEFEND_DISCARD.exec(input.cards[card.cardId]?.text ?? "");
+    if (!match || (match[1] && !weaponAttack)) return total;
+    return total + (match[2]!.toLowerCase() === "a" ? 1 : Number(match[2]));
+  }, 0);
+  return Math.min(discards, input.view.players[1 - input.seat]!.handCount);
 }
 
 function weightedResponse(
@@ -1280,6 +1536,15 @@ function blendResponse(
     strategicAdjustment: stop.strategicAdjustment * stopProbability
       + continued.strategicAdjustment * continuing,
   });
+}
+
+/** The same decision with this bot's hero stripped of its abilities. */
+function withoutHeroAbilities(input: BotPolicyInput): BotPolicyInput {
+  const lost = { ...input.view.players[input.seat], heroAbilitiesLost: true as const };
+  const players: GameView["players"] = input.seat === 0
+    ? [lost, input.view.players[1]]
+    : [input.view.players[0], lost];
+  return { ...input, view: { ...input.view, players } };
 }
 
 function projectedResponseInput(
@@ -1345,7 +1610,7 @@ function bestContinuationResponse(
   const candidates = input.view.players[input.seat].hand.filter((card) => {
     if (consumedIds.has(card.instanceId)) return false;
     const data = input.cards[card.cardId];
-    return data?.cardType !== "defense-reaction" && Math.max(0, card.defense ?? data?.defense ?? 0) > 0;
+    return !hasType(data, "defense-reaction") && Math.max(0, card.defense ?? data?.defense ?? 0) > 0;
   });
   const evaluate = (defenders: readonly CardView[]): ContinuationEvaluation => {
     const defenderIds = defenders.map((card) => card.instanceId);
@@ -1412,6 +1677,10 @@ interface HandLossScenario {
 const NO_HAND_LOSS: readonly HandLossScenario[] = [{ lostIds: new Set(), weight: 1 }];
 /** Bounds the hand subsets examined for one landed on-hit hand loss. */
 const MAX_HAND_LOSS_SUBSETS = 35;
+/** A block that survives now but strands a lethal end phase (upkeep, or blood
+ * debt under a hero lock) beats dying now and loses to every block that
+ * survives both. */
+const STRANDED_END_PHASE_PENALTY = 50_000;
 
 function combinations<T>(items: readonly T[], size: number, limit: number): T[][] {
   const result: T[][] = [];
@@ -1486,7 +1755,7 @@ function hasSpareHandBlocker(
   const candidates = input.view.players[input.seat].hand.filter((card) =>
     !chosenIds.has(card.instanceId) && !spentIds.has(card.instanceId) &&
     (stageable.size === 0 || stageable.has(card.instanceId)) &&
-    input.cards[card.cardId]?.cardType !== "defense-reaction" &&
+    !hasType(input.cards[card.cardId], "defense-reaction") &&
     defenderDefense(card, input) > 0 &&
     (model.canUseDefender?.(card, input) ?? true)
   );
@@ -1530,10 +1799,19 @@ export function scoreDefenseIntentWithTrace(
   const incoming = Math.max(0, Math.max(0, link.damage) + pump);
   // Survival is planned against every public pump the attacker can still
   // spend after blocks. Direct damage ignores blocks, so it lowers the life
-  // the combat damage must stay under instead.
-  const threatenedCombat = Math.max(incoming, threatenedCombatDamage(input, chosen.length > 0) + pump, 0);
-  const survivableLife = me.life - publicCombatThreat(input).directDamage;
-  const lethal = threatenedCombat >= survivableLife;
+  // the combat damage must stay under instead; when it alone is lethal no
+  // block matters, so plan for the attacker not using it.
+  const publicThreat = threatenedCombatDamage(input, chosen.length > 0);
+  const threatenedCombat = Math.max(incoming, publicThreat + pump, 0);
+  const directDamage = publicCombatThreat(input).directDamage;
+  const survivableLife = directDamage >= me.life ? me.life : me.life - directDamage;
+  const attackText = input.cards[link.attackingCard.cardId]?.text ?? "";
+  const onHit = linkOnHit(input, link, me.arsenalCount > 0);
+  // A landed hit also deals its immediate on-hit damage.
+  const landedDamage = (combat: number) => combat > 0 ? combat + onHit.immediateDamage : 0;
+  // Judged before the block's own power change, or a Piercing block would
+  // manufacture a lethal attack and earn the survival bonus for weathering it.
+  const lethal = landedDamage(Math.max(0, link.damage, publicThreat)) >= survivableLife;
   if (model.canUseDefender && chosen.some((card) => !model.canUseDefender!(card, input))) {
     return {
       score: -1_000_000,
@@ -1565,31 +1843,23 @@ export function scoreDefenseIntentWithTrace(
   const incomingAfterPlannedPrevention = Math.max(0, incoming - plannedPrevention.amount);
   const defense = chosen.reduce(
     (sum, card) => sum + defenderDefense(card, input),
-    0,
+    unityDefenseBonus(chosen, input),
   );
   // Future reaction/prevention cards are reserved here so the staged block is
   // planned around them, but they have not resolved yet. Count only prevention
   // supplied by the current defender choice; otherwise merely holding a
   // reaction can dominate an established efficient block before it is played.
   // A Phantasm-destroyed attack deals nothing, so every other defender is overblock.
-  const phantasmDefense = phantasmDefenderDefense(input, link, chosen);
+  const phantasmDefense = phantasmDefenderDefense(input, chosen);
   const destroysAttack = phantasmDefense !== undefined;
+  // Power the block itself adds (Piercing) is not damage it prevents.
+  const incomingWithoutBlock = Math.max(0, incomingAfterPlannedPrevention - Math.max(0, pump));
   const prevented = destroysAttack
-    ? incomingAfterPlannedPrevention
-    : Math.min(incomingAfterPlannedPrevention, defense);
+    ? incomingWithoutBlock
+    : incomingWithoutBlock - Math.max(0, incomingAfterPlannedPrevention - defense);
   const overblock = destroysAttack
     ? defense - phantasmDefense
-    : Math.max(0, defense - incomingAfterPlannedPrevention);
-  const attackText = input.cards[link.attackingCard.cardId]?.text ?? "";
-  const attacker = input.view.players[1 - input.seat]!;
-  const onHit = evaluateOnHit({
-    effects: link.onHitEffects ?? [],
-    sourceText: attackText,
-    attackerCanContinue: link.goAgain === true || attacker.actionPoints > 0,
-    attackerCanArsenal: attacker.arsenalCount === 0,
-    defenderHasHand: me.handCount > 0,
-    defenderHasArsenal: me.arsenalCount > 0,
-  });
+    : Math.max(0, defense - incomingWithoutBlock);
   // Marks, pumps and tempo are not worth wearing armor; disruption and card
   // advantage are.
   const meaningfulOnHit = onHit.value >= SIGNIFICANT_ON_HIT_VALUE;
@@ -1598,13 +1868,21 @@ export function scoreDefenseIntentWithTrace(
   // A landed hand loss is priced through the response projection below, so
   // stopping the hit no longer earns its flat generic-card estimate.
   const modelledHandLoss = onHit.handLossSelector ? onHit.handLossValue : 0;
+  const modelledHeroLoss = model.pricesHeroAbilityLoss ? onHit.heroAbilityLossValue : 0;
   const stopHitValue = stopsHit
-    ? onHit.value - modelledHandLoss + (link.wagered ? wagerDefenseSwing(link.wagerRewards) : 0)
+    ? onHit.value - modelledHandLoss - modelledHeroLoss + (link.wagered ? wagerDefenseSwing(link.wagerRewards) : 0)
     : 0;
   const equipmentIds = new Set(
     Object.values(me.equipment).filter((card): card is CardView => !!card).map((card) => card.instanceId),
   );
   const selectedEquipment = chosen.filter((card) => equipmentIds.has(card.instanceId));
+  // A defending sinker empties the arsenal first, so a landing hit takes nothing there.
+  const arsenalSinker = me.arsenalCount > 0 && onHit.destroysOccupiedArsenal
+    ? selectedEquipment.find((card) => sinksArsenalOnDefend(card, input))
+    : undefined;
+  const arsenalRescue = arsenalSinker ? Math.max(0, onHit.value - linkOnHit(input, link, false).value) : 0;
+  const rescuer = arsenalRescue > 0 ? arsenalSinker : undefined;
+  const blockOnHitValue = stopsHit ? stopHitValue : arsenalRescue;
   const handIds = new Set(me.hand.map((card) => card.instanceId));
   const openingDefense = isOpeningTurnDefense(input);
   const stagedIds = new Set(
@@ -1613,9 +1891,9 @@ export function scoreDefenseIntentWithTrace(
       : [],
   );
   const plannedSpentIds = new Set([...spentIds, ...plannedPrevention.consumedIds]);
-  const survives = destroysAttack
-    ? survivableLife > 0
-    : Math.max(0, threatenedCombat - defense - plannedPrevention.amount) < survivableLife;
+  // Planned against public pumps, so a pumped hit still counts as landing.
+  const damageThroughBlock = destroysAttack ? 0 : Math.max(0, threatenedCombat - defense - plannedPrevention.amount);
+  const survives = destroysAttack ? survivableLife > 0 : landedDamage(damageThroughBlock) < survivableLife;
   const removesDefenderOnHit = !stopsHit && incoming > 0 && onHitRemovesDefender(link, attackText);
   const candidate: DefenseCandidateContext = {
     input,
@@ -1653,7 +1931,7 @@ export function scoreDefenseIntentWithTrace(
       onHit,
     };
   }
-  const attackIsWeapon = input.cards[link.attackingCard.cardId]?.cardType === "weapon";
+  const attackIsWeapon = hasType(input.cards[link.attackingCard.cardId], "weapon");
   const swingLeft = opponentWeaponAttackLeft(input);
   // Kabuto's lock pays only while a weapon swing remains to deny.
   const locksWeapons = (card: CardView) => swingLeft && isWeaponLock(card, input);
@@ -1666,6 +1944,7 @@ export function scoreDefenseIntentWithTrace(
     // treating the sunk equipment selection as a new strategic choice.
     if (stagedIds.has(card.instanceId)) return false;
     if (lethal) return false;
+    if (card === rescuer) return false;
     if (isSpringTunic(card, input)) return openingDefense || !(stopsHit && devastatingOnHit);
     // Early armor is justified by an on-hit or Wager only when the complete
     // defense actually stops that hit and therefore answers the effect.
@@ -1674,8 +1953,10 @@ export function scoreDefenseIntentWithTrace(
     // to improve an otherwise nonlethal opening block.
     if (openingDefense) return true;
     if (locksWeapons(card)) return false;
-    if (isMidgameDurableArmor(card, input)) return false;
     if (model.equipmentUseIsFree?.(card, input)) return false;
+    // Chipping a hit whose meaningful on-hit lands anyway wears armor for little.
+    if (!stopsHit && meaningfulOnHit) return true;
+    if (isMidgameDurableArmor(card, input)) return false;
     if (attackIsWeapon && isBladeBeckoner(card, input)) return false;
     return true;
   });
@@ -1683,7 +1964,8 @@ export function scoreDefenseIntentWithTrace(
   const responseInput = projectedResponseInput(input, plannedPrevention);
   // Even when armor is otherwise justified, spare hand cards block first.
   const spendsArmor = !lethal && selectedEquipment.some((card) =>
-    !stagedIds.has(card.instanceId) && !model.equipmentUseIsFree?.(card, input) && !locksWeapons(card)
+    !stagedIds.has(card.instanceId) && !model.equipmentUseIsFree?.(card, input) && !locksWeapons(card) &&
+    card !== rescuer
   );
   if (
     protectedEquipment.length > 0 ||
@@ -1707,7 +1989,7 @@ export function scoreDefenseIntentWithTrace(
   const equipmentCost = removedEquipmentCost + selectedEquipment.reduce(
     (total, card) => total + (model.equipmentUseIsFree?.(card, input)
       ? 0
-      : equipmentWearCost(card, input)) + weaponLockCost(card),
+      : equipmentWearCost(card, input, model)) + weaponLockCost(card),
     0,
   );
   // Damage projection captures cards essential to the next offensive line,
@@ -1717,7 +1999,22 @@ export function scoreDefenseIntentWithTrace(
   const handOpportunityCost = chosen
     .filter((card) => !equipmentIds.has(card.instanceId))
     .reduce((total, card) => total + model.cardOpportunity(card, input) * 0.1, 0);
+  // Defense from hand cards a landed hit would take anyway is not wasted on overblock.
+  const chosenHandDefense = chosen
+    .filter((card) => handIds.has(card.instanceId))
+    .map((card) => defenderDefense(card, input))
+    .sort((left, right) => right - left);
+  const handLeft = me.hand.filter((card) => !plannedSpentIds.has(card.instanceId)).length;
+  const doomedBlockers = stopsHit && onHit.handLossSelector
+    ? Math.min(chosenHandDefense.length, Math.max(0, onHit.handCardsLost - handLeft))
+    : 0;
+  const chargedOverblock = Math.max(
+    0,
+    overblock - chosenHandDefense.slice(0, doomedBlockers).reduce((total, value) => total + value, 0),
+  );
   const fullResponse = model.evaluateResponse(offensiveCards, input);
+  const heroLocked = onHit.heroAbilitiesLost && damageThroughBlock > 0;
+  const landedInput = heroLocked ? withoutHeroAbilities(responseInput) : responseInput;
   const lossScenarios = stopsHit || incoming <= 0
     ? NO_HAND_LOSS
     : handLossScenarios(input, model, onHit, offensiveCards, plannedSpentIds, responseInput);
@@ -1731,13 +2028,14 @@ export function scoreDefenseIntentWithTrace(
       fullResponse,
       model.evaluateResponse(
         offensiveCards.filter((card) => !consumedIds.has(card.instanceId)),
-        responseInput,
+        landedInput,
       ),
       responseWeight,
     ),
     weight,
   })));
-  const defaultContinuation = defaultContinuationProfile(input, link);
+  const attackerDiscards = defendTriggerDiscards(input, link, chosen);
+  const defaultContinuation = defaultContinuationProfile(input, link, attackerDiscards);
   const override = model.continuationProfile?.(input, link) ?? {};
   const stopProbability = clamp(
     override.stopProbability ?? defaultContinuation.stopProbability,
@@ -1752,7 +2050,7 @@ export function scoreDefenseIntentWithTrace(
     ? averageContinuation(scenarioConsumed.map(({ consumedIds, weight }) => ({
       continuation: bestContinuationResponse(
         input,
-        responseInput,
+        landedInput,
         model,
         fullResponse,
         offensiveCards,
@@ -1775,12 +2073,15 @@ export function scoreDefenseIntentWithTrace(
   );
   const unprevented = destroysAttack ? 0 : Math.max(0, incoming - defense - plannedPrevention.amount);
   const lifeAfterDamage = me.life - unprevented;
+  const strandsEndPhase = strandsLethalUpkeep(input, plannedSpentIds, lifeAfterDamage) || (heroLocked &&
+    me.life - damageThroughBlock <= (model.endPhaseDrainWithoutHeroAbilities?.(landedInput) ?? 0));
   const thresholdRisk = lifeThresholdRisk(lifeAfterDamage, model.lifeThresholds);
   const continueProbability = 1 - stopProbability;
   let value = valueBreakdown({
     damageThreatened: blendedResponse.damageThreatened,
     damagePrevented: prevented + continuation.prevention * continueProbability,
-    onHitValue: stopHitValue,
+    onHitValue: blockOnHitValue,
+    opponentConversionDenied: attackerDiscards * FORCED_DISCARD_VALUE,
     futureHandValue: blendedResponse.futureHandValue,
     arsenalValue: blendedResponse.arsenalValue,
     boardValue: blendedResponse.boardValue,
@@ -1789,14 +2090,15 @@ export function scoreDefenseIntentWithTrace(
     cardOpportunityCost: handOpportunityCost
       + plannedOpportunityCost * 0.1
       + continuation.opportunityCost * continueProbability,
-    overblockCost: overblock * 1.5 + continuation.overblock * 1.5 * continueProbability,
+    overblockCost: chargedOverblock * 1.5 + continuation.overblock * 1.5 * continueProbability,
     lifeThresholdRisk: thresholdRisk,
   });
   if (model.adjustCycleValue) value = model.adjustCycleValue(value, candidate);
   const strategicDelta = value.total - valueBreakdown({
     damageThreatened: blendedResponse.damageThreatened,
     damagePrevented: prevented + continuation.prevention * continueProbability,
-    onHitValue: stopHitValue,
+    onHitValue: blockOnHitValue,
+    opponentConversionDenied: attackerDiscards * FORCED_DISCARD_VALUE,
     futureHandValue: blendedResponse.futureHandValue,
     arsenalValue: blendedResponse.arsenalValue,
     boardValue: blendedResponse.boardValue,
@@ -1805,7 +2107,7 @@ export function scoreDefenseIntentWithTrace(
     cardOpportunityCost: handOpportunityCost
       + plannedOpportunityCost * 0.1
       + continuation.opportunityCost * continueProbability,
-    overblockCost: overblock * 1.5 + continuation.overblock * 1.5 * continueProbability,
+    overblockCost: chargedOverblock * 1.5 + continuation.overblock * 1.5 * continueProbability,
     lifeThresholdRisk: thresholdRisk,
   }).total;
   const cycleTrace = {
@@ -1829,8 +2131,6 @@ export function scoreDefenseIntentWithTrace(
   };
 
   if (lethal) {
-    const handDefenseNeeded = Math.max(0, threatenedCombat - plannedPrevention.amount - survivableLife + 1);
-    const survives = survivableLife > 0 && (destroysAttack || defense >= handDefenseNeeded);
     // Equipment wear is priced by equipmentCost; opportunity is for hand cards.
     const preservationCost = chosen
       .filter((card) => !equipmentIds.has(card.instanceId))
@@ -1848,16 +2148,21 @@ export function scoreDefenseIntentWithTrace(
     }
     // Staying alive is mandatory; among surviving plans the full value still
     // prices the life kept against the offense held.
-    const score = 100_000 + value.total;
+    const score = 100_000 + value.total - (strandsEndPhase ? STRANDED_END_PHASE_PENALTY : 0);
     return { score, value, eligible: true, lethal, survives, stopsHit, ...cycleTrace };
+  }
+  // The block's own power change made a survivable attack lethal.
+  if (!survives) {
+    return { score: -100_000 + value.total, value, eligible: true, lethal, survives, stopsHit, ...cycleTrace };
   }
 
   // Both players draw back up after the first turn, so maximize prevention
   // when this bot was sent second and will receive a fresh hand afterward.
   if (isOpeningTurnDefense(input)) {
     const score = prevented * 100
-      + stopHitValue
-      - overblock * 1.5
+      + blockOnHitValue
+      + value.opponentConversionDenied
+      - chargedOverblock * 1.5
       - equipmentCost
       - chosen.length * 0.01
       + strategicDelta;
@@ -1866,7 +2171,7 @@ export function scoreDefenseIntentWithTrace(
 
   const requiredBonus = permission === "require" ? 100_000 : 0;
   return {
-    score: value.total + requiredBonus,
+    score: value.total + requiredBonus - (strandsEndPhase ? STRANDED_END_PHASE_PENALTY : 0),
     value,
     eligible: true,
     lethal,
@@ -1991,6 +2296,12 @@ export function allyLethalThreshold(ally: CardView, input: BotPolicyInput): numb
     : life;
 }
 
+/** The current attack already destroys the ally it targets. */
+export function currentAllyAttackIsAlreadyLethal(input: BotPolicyInput): boolean {
+  const link = currentLink(input);
+  return !!link?.targetAlly && link.attackValue >= allyLethalThreshold(link.targetAlly, input);
+}
+
 interface AllyTargetPolicyOptions {
   damage?(card: CardView, input: BotPolicyInput): number;
   preserveHeroTarget?(card: CardView, input: BotPolicyInput): boolean;
@@ -2009,7 +2320,7 @@ export function enforceAllyTargetPolicy(
   const own = ownCards(input);
   const card = intentCard(selected, own);
   const data = card ? input.cards[card.cardId] : undefined;
-  if (!card || (!isAttack(data) && data?.cardType !== "weapon")) return selected;
+  if (!card || (!isAttack(data) && !hasType(data, "weapon"))) return selected;
 
   const allies = opponentAllies(input);
   if (allies.length === 0) return selected;
@@ -2134,6 +2445,33 @@ function holdsAttackAfter(
   );
 }
 
+/** Opposing permanents with a Ward value. */
+export function visibleWardCards(input: BotPolicyInput): CardView[] {
+  const opponent = input.view.players[1 - input.seat]!;
+  const visibleCards = [
+    ...opponent.board,
+    ...opponent.weapons,
+    ...Object.values(opponent.equipment).filter((card): card is CardView => card !== undefined),
+  ];
+  return visibleCards.filter((card) => {
+    const data = input.cards[card.cardId];
+    return /\bward\s+(?:[1-9]\d*|x)\b/i.test(data?.text ?? "") ||
+      data?.keywords?.some((keyword) => /^ward\s+(?:[1-9]\d*|x)$/i.test(keyword)) === true;
+  });
+}
+
+/** Lethal even if the opponent blocks with every card, at the planner's three
+ * defense per hidden card, and has no visible Ward. */
+function heroAttackLethalThroughBlocks(option: SpectraAttackOption, input: BotPolicyInput): boolean {
+  if (visibleWardCards(input).length > 0) return false;
+  const opponent = input.view.players[1 - input.seat]!;
+  const equipmentDefense = Object.values(opponent.equipment)
+    .flatMap((card) => card ? [card] : [])
+    .reduce((total, card) => total + Math.max(0, card.defense ?? input.cards[card.cardId]?.defense ?? 0), 0);
+  const blockCapacity = (opponent.handCount + opponent.arsenal.length) * 3 + equipmentDefense;
+  return option.attack - blockCapacity >= opponent.life;
+}
+
 /** Shared target discipline for every practice bot. Spectra clears the attack
  * immediately, so continuing attacks stay aimed at the hero until the bot's
  * terminal attack. The terminal clear spends the least attack power possible,
@@ -2162,6 +2500,7 @@ export function enforceSpectraPolicy(input: BotPolicyInput, selected: GameIntent
   const selectedVariant = attackIntentVariantKey(selected);
   const selectedOption = options.find((option) => attackIntentVariantKey(option.target) === selectedVariant);
   if (!selectedOption) return selected;
+  if (selectedOption.hero && heroAttackLethalThroughBlocks(selectedOption, input)) return selectedOption.hero;
   const sourceCount = new Set(options.map((option) => option.source)).size;
   if (selectedOption.continues &&
     (sourceCount > 1 || holdsAttackAfter(selectedOption.target, input, own))) {
@@ -2169,6 +2508,19 @@ export function enforceSpectraPolicy(input: BotPolicyInput, selected: GameIntent
   }
   const terminal = options.filter((option) => !option.continues);
   return smallestSpectraAttack(terminal.length > 0 ? terminal : options, input, own) ?? selected;
+}
+
+/** Floors pass and close-chain at their `scoreIntent` baseline so a play
+ * scorer's cardless fallback cannot rank a declined play above them. */
+export function scoreTacticalRoot(
+  intent: GameIntent,
+  input: BotPolicyInput,
+  play: BotPolicyScorers["play"],
+): number {
+  const score = play(intent, input, ownCards(input));
+  if (intent.kind === "pass") return Math.max(0, score);
+  if (intent.kind === "close-chain") return Math.max(1, score);
+  return score;
 }
 
 /** Deterministic projection-only baseline. Equal scores retain engine order. */

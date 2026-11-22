@@ -5,8 +5,11 @@ import type {
   PresentedDeck,
   PresentedArena,
 } from "@fyendal/shared";
+import { chooseAuroraIntent, chooseAuroraIntentWithTrace } from "./aurora-policy.js";
 import { chooseBoltynIntent, chooseBoltynIntentWithTrace } from "./boltyn-policy.js";
 import { chooseBravoIntent, chooseBravoIntentWithTrace } from "./bravo-policy.js";
+import { chooseDorintheaIntent, chooseDorintheaIntentWithTrace } from "./dorinthea-policy.js";
+import { chooseFangIntent, chooseFangIntentWithTrace } from "./fang-policy.js";
 import { chooseKayoIntent, chooseKayoIntentWithTrace } from "./kayo-policy.js";
 import { chooseBriarIntent, chooseBriarIntentWithTrace } from "./briar-policy.js";
 import {
@@ -33,11 +36,14 @@ import {
   type TurnPlannerCandidateTrace,
 } from "./turn-planner.js";
 import {
+  auroraPresentationFor,
   boltynPresentationFor,
   bravoPresentationFor,
   briarPresentationFor,
   kayoPresentationFor,
   cindraPresentationFor,
+  dorintheaSagePresentationFor,
+  fangPresentationFor,
   halaPresentationFor,
   iraPresentation,
   iraSagePresentationFor,
@@ -192,6 +198,16 @@ export const BOT_DEFINITIONS = {
     chooseDecision: (input) => botDecisionFromTrace(chooseIraIntentWithTrace(input)),
     presentationFor: (opponent) => iraSagePresentationFor(opponent),
   }),
+  dorinthea: stagedDefinition({
+    id: "dorinthea",
+    format: "silver-age",
+    deckId: "bot-dorinthea-sage",
+    username: "Dorinthea Bot",
+    deckName: "SAGE Dorinthea",
+    chooseIntent: chooseDorintheaIntent,
+    chooseDecision: (input) => botDecisionFromTrace(chooseDorintheaIntentWithTrace(input)),
+    presentationFor: (opponent, botTurnOrder) => dorintheaSagePresentationFor(opponent, botTurnOrder),
+  }),
   cindra: stagedDefinition({
     id: "cindra",
     format: "cc",
@@ -264,6 +280,26 @@ export const BOT_DEFINITIONS = {
     chooseIntent: chooseBoltynIntent,
     chooseDecision: (input) => botDecisionFromTrace(chooseBoltynIntentWithTrace(input)),
     presentationFor: (opponent) => boltynPresentationFor(opponent),
+  }),
+  aurora: stagedDefinition({
+    id: "aurora",
+    format: "cc",
+    deckId: "bot-aurora-tempest",
+    username: "Aurora Bot",
+    deckName: "Aurora, Legacy of Tempest",
+    chooseIntent: chooseAuroraIntent,
+    chooseDecision: (input) => botDecisionFromTrace(chooseAuroraIntentWithTrace(input)),
+    presentationFor: (opponent) => auroraPresentationFor(opponent),
+  }),
+  fang: stagedDefinition({
+    id: "fang",
+    format: "cc",
+    deckId: "bot-fang-dracai",
+    username: "Fang Bot",
+    deckName: "Fang, Dracai of Blades",
+    chooseIntent: chooseFangIntent,
+    chooseDecision: (input) => botDecisionFromTrace(chooseFangIntentWithTrace(input)),
+    presentationFor: (opponent) => fangPresentationFor(opponent),
   }),
 } as const satisfies Readonly<Record<BotOpponent, BotDefinition>>;
 

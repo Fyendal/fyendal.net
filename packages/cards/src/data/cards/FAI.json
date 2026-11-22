@@ -2,7 +2,7 @@
  {
   "id": "FAI001",
   "name": "Fai",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "You may start the game with a Phoenix Flame in your graveyard.\nOnce per Turn Instant - {r}{r}{r}: Return a Phoenix Flame from your graveyard to your hand. This ability costs {r} less for each Draconic chain link you control.",
   "classes": [
    "ninja"
@@ -17,7 +17,7 @@
  {
   "id": "FAI002",
   "name": "Searing Emberblade",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}{r}: Attack\nIf you control 2 or more Draconic chain links, this card's attacks get go again.",
   "attack": 3,
   "classes": [
@@ -33,7 +33,7 @@
  {
   "id": "FAI003",
   "name": "Hope Merchant's Hood",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this: Shuffle any number of cards from your hand into your deck, then draw that many cards.",
   "defense": 0,
   "classes": [
@@ -47,7 +47,7 @@
  {
   "id": "FAI004",
   "name": "Sash of Sandikai",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Sash of Sandikai: Gain {r}. Activate this ability only if you've played a red card this turn.",
   "defense": 0,
   "subtypes": [
@@ -59,7 +59,7 @@
  {
   "id": "FAI005",
   "name": "Heat Wave",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Heat Wave: Phoenix Flames you control gain +1{p} until end of turn.\nQuell 1",
   "defense": 0,
   "classes": [
@@ -77,7 +77,7 @@
  {
   "id": "FAI006",
   "name": "Quelling Slippers",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Quell 1",
   "defense": 0,
   "classes": [
@@ -94,7 +94,7 @@
  {
   "id": "FAI007",
   "name": "Rise Up",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dromai or Fai Specialization\nRupture - If Rise Up is played as chain link 4 or higher, it has dominate and +X{p}, where X is twice the number of Phoenix Flames you control.",
   "pitch": 1,
   "cost": 1,
@@ -114,7 +114,7 @@
  {
   "id": "FAI008",
   "name": "Phoenix Flame",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 2 or more Draconic chain links, this gets +1{p}.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -131,7 +131,7 @@
  {
   "id": "FAI009",
   "name": "Rise from the Ashes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Draconic or Ninja attack action card you play this turn gains +3{p}.\nYou may return a Phoenix Flame from your graveyard to your hand.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -150,7 +150,7 @@
  {
   "id": "FAI010",
   "name": "Blaze Headlong",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played another red card this turn, this gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -168,7 +168,7 @@
  {
   "id": "FAI011",
   "name": "Inflame",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Inflame, if you've played another red card this turn, you may return a Phoenix Flame from your graveyard to your hand.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -186,7 +186,7 @@
  {
   "id": "FAI012",
   "name": "Flamecall Awakening",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Flamecall Awakening, if you've played another red card this turn, you may search your deck for a Phoenix Flame, reveal it, put it into your hand, then shuffle.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -204,7 +204,7 @@
  {
   "id": "FAI013",
   "name": "Flameborn Retribution",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you defend with Flameborn Retribution, if you've been dealt damage this turn, you may return a Phoenix Flame from your graveyard to your hand.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -222,7 +222,7 @@
  {
   "id": "FAI014",
   "name": "Stoke the Flames",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Stoke the Flames hits, you may return a Phoenix Flame from your graveyard to your hand. If you do, Stoke the Flames gains go again.",
   "pitch": 1,
   "cost": 1,
@@ -240,7 +240,7 @@
  {
   "id": "FAI015",
   "name": "Lava Vein Loyalty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 2 or more Draconic chain links, this gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -261,7 +261,7 @@
  {
   "id": "FAI016",
   "name": "Cinderskin Devotion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 2 or more Draconic chain links, this gets go again.",
   "pitch": 1,
   "cost": 1,
@@ -282,7 +282,7 @@
  {
   "id": "FAI017",
   "name": "Rebellious Rush",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 1,
   "cost": 2,
@@ -303,7 +303,7 @@
  {
   "id": "FAI018",
   "name": "Dust Runner Outlaw",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 1,
   "cost": 1,
@@ -324,7 +324,7 @@
  {
   "id": "FAI019",
   "name": "Ronin Renegade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 1,
   "cost": 0,
@@ -345,7 +345,7 @@
  {
   "id": "FAI020",
   "name": "Brand with Cinderclaw",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack this combat chain is Draconic in addition to its other card types.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -366,7 +366,7 @@
  {
   "id": "FAI021",
   "name": "Trade In",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, you may discard a card. If you do, draw a card.\nIf this was played from arsenal, it gains go again.",
   "pitch": 1,
   "cost": 0,
@@ -386,7 +386,7 @@
  {
   "id": "FAI022",
   "name": "Flex",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack or defend with Flex, you may pay {r}{r}. If you do, it gains +2{p}.",
   "pitch": 1,
   "cost": 0,
@@ -403,7 +403,7 @@
  {
   "id": "FAI023",
   "name": "Ronin Renegade",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 3,
   "cost": 0,
@@ -424,7 +424,7 @@
  {
   "id": "FAI024",
   "name": "Dust Runner Outlaw",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again",
   "pitch": 3,
   "cost": 1,
@@ -445,7 +445,7 @@
  {
   "id": "FAI025",
   "name": "Lava Vein Loyalty",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 2 or more Draconic chain links, this gets go again.",
   "pitch": 3,
   "cost": 0,
@@ -466,7 +466,7 @@
  {
   "id": "FAI026",
   "name": "Cinderskin Devotion",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you control 2 or more Draconic chain links, this gets go again.",
   "pitch": 3,
   "cost": 1,
@@ -487,7 +487,7 @@
  {
   "id": "FAI027",
   "name": "Wounding Blow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 3,
   "cost": 0,

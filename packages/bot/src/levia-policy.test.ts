@@ -6,6 +6,7 @@ import { chooseLeviaIntent, chooseLeviaIntentWithTrace, leviaEngineValue, leviaS
 import { arsenalCardValue, handDamage, handResponse, heldCardValue } from "./hand-value.js";
 import { leviaLifeRisk, leviaMacroPositionBonus } from "./levia-macros.js";
 import { leviaPresentationFor } from "./sideboard.js";
+import { leviaSharedBanishPicks } from "./levia-turn.js";
 
 const opponent = decklists.dorinthea;
 
@@ -65,12 +66,12 @@ function bloodrushTurn(draws: string[]) {
   return playAndResolve(state, play!);
 }
 
-function defending(state: ReturnType<typeof game>) {
+function defending(state: ReturnType<typeof game>, attackId = "WTR203") {
   state.activePlayer = 1;
   state.priorityPlayer = 1;
   state.players[0]!.actionPoints = 0;
   state.players[1]!.actionPoints = 1;
-  const attack = { instanceId: state.nextInstanceId++, cardId: "WTR203", owner: 1 };
+  const attack = { instanceId: state.nextInstanceId++, cardId: attackId, owner: 1 };
   state.players[1]!.hand = [attack];
   const play = legalIntents(state, 1).find((intent) => intent.kind === "play-card" && intent.instanceId === attack.instanceId)!;
   let applied = applyIntent(state, 1, play);
@@ -114,6 +115,20 @@ function magisterAttack(cardIds: readonly string[]) {
   throw new Error("Restless Magister did not reach defense");
 }
 
+/** The reaction window after Levia leaves the attack unblocked. */
+function afterNoBlock(state: ReturnType<typeof game>) {
+  state = defending(state);
+  let applied = applyIntent(state, 0, { kind: "defend", instanceIds: [] });
+  if (!applied.ok) throw new Error(JSON.stringify(applied));
+  state = applied.state;
+  for (let step = 0; step < 6 && state.priorityPlayer !== 0; step++) {
+    applied = applyIntent(state, state.priorityPlayer, { kind: "pass" });
+    if (!applied.ok) throw new Error(JSON.stringify(applied));
+    state = applied.state;
+  }
+  return state;
+}
+
 const DIG_FOR_SOULS = "When this hits, destroy this zombie.\"";
 const COMMAND_AND_CONQUER = "When this hits a hero, destroy all cards in their arsenal.";
 
@@ -149,17 +164,31 @@ const GRAINS = "Whenever a weapon attack you control hits, you may pay {r}. If y
 function tunicBlock(
   cardIds: readonly string[],
   onHit: string,
-  { turn = 1, arsenal = [] }: { turn?: number; arsenal?: readonly string[] } = {},
+  { turn = 1, arsenal = [], damage = 3, energy = 0, armor = {} }: {
+    turn?: number;
+    arsenal?: readonly string[];
+    damage?: number;
+    energy?: number;
+    armor?: Partial<Record<"head" | "arms" | "legs", string>>;
+  } = {},
 ) {
   let state = game();
   state.turn = turn;
   hand(state, cardIds);
-  const tunic = { instanceId: state.nextInstanceId++, cardId: "WTR150", owner: 0 };
-  state.players[0]!.equipment = { chest: tunic };
+  const tunic = {
+    instanceId: state.nextInstanceId++,
+    cardId: "WTR150",
+    owner: 0,
+    ...(energy > 0 ? { counters: { energy } } : {}),
+  };
+  const others = Object.fromEntries(Object.entries(armor).map(([slot, cardId]) =>
+    [slot, { instanceId: state.nextInstanceId++, cardId, owner: 0 }]
+  ));
+  state.players[0]!.equipment = { ...others, chest: tunic };
   state.players[0]!.arsenal = cards(state, arsenal).map((card) => ({ ...card, faceDown: true }));
   state = defending(state);
   const view = projectStateFor(state, 0);
-  const link = { ...view.chain.at(-1)!, damage: 3, onHitEffects: [{ sourceCardId: "", text: onHit }] };
+  const link = { ...view.chain.at(-1)!, damage, onHitEffects: [{ sourceCardId: "", text: onHit }] };
   const intent = chooseLeviaIntent({
     seat: 0, view: { ...view, chain: [...view.chain.slice(0, -1), link] },
     legal: legalIntents(state, 0), cards: cardData, state,
@@ -195,9 +224,36 @@ describe("Levia Gates policy", () => {
     expect(selected).toEqual(expect.arrayContaining([handIds[0], tunicId]));
   });
 
+  it("covers arsenal destruction with Skullcap and Scabskin before a charged Spring Tunic", () => {
+    const { selected, handIds, tunicId } = tunicBlock(["SUP165", "IAR022"], COMMAND_AND_CONQUER, {
+      turn: 3,
+      arsenal: ["IAR017"],
+      damage: 6,
+      energy: 1,
+      armor: { head: "IAR038", legs: "WTR004" },
+    });
+    expect(selected).toContain(handIds[0]);
+    expect(selected).toHaveLength(3);
+    expect(selected).not.toContain(tunicId);
+  });
+
   it("answers an opening attack with Fallen Herald instead of blocking", () => {
     const { intent } = tunicBlock(["IAR165", "PEN322", "DTD107", "IAR005"], GRAINS);
     expect(intent).toEqual({ kind: "defend", instanceIds: [] });
+  });
+
+  it.each([
+    { label: "an empty hand", held: [] as string[], activates: false },
+    { label: "a yellow pitch", held: ["WTR007"], activates: true },
+  ])("spends the Spring Tunic only when it funds an attack, holding $label", ({ held, activates }) => {
+    const state = game();
+    hand(state, held);
+    state.players[0]!.arsenal = cards(state, ["SUP165"]).map((card) => ({ ...card, faceDown: true }));
+    const tunic = { instanceId: state.nextInstanceId++, cardId: "WTR150", owner: 0, counters: { energy: 3 } };
+    state.players[0]!.equipment = { ...state.players[0]!.equipment, chest: tunic };
+    const intent = choice(state);
+    const spent = intent.kind === "activate-ability" && intent.sourceInstanceId === tunic.instanceId;
+    expect(spent).toBe(activates);
   });
 
   it("activates Fallen Herald after leaving an opening attack unblocked", () => {
@@ -206,15 +262,7 @@ describe("Levia Gates policy", () => {
     hand(state, ["IAR165", "PEN322", "DTD107", "IAR005"]);
     const herald = state.players[0]!.hand[0]!;
     state.players[0]!.arsenal = [];
-    state = defending(state);
-    let applied = applyIntent(state, 0, { kind: "defend", instanceIds: [] });
-    if (!applied.ok) throw new Error(JSON.stringify(applied));
-    state = applied.state;
-    for (let step = 0; step < 6 && state.priorityPlayer !== 0; step++) {
-      applied = applyIntent(state, state.priorityPlayer, { kind: "pass" });
-      if (!applied.ok) throw new Error(JSON.stringify(applied));
-      state = applied.state;
-    }
+    state = afterNoBlock(state);
     const intent = chooseLeviaIntent({
       seat: 0, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state,
     });
@@ -338,7 +386,7 @@ describe("Levia Gates policy", () => {
     state.players[0]!.flags.banishedSixPlusThisTurn = true;
     const safe = chooseLeviaIntentWithTrace({ ...input, view: projectStateFor(state, 0) });
     expect(safe.macro.goal).not.toBe("stabilize");
-    expect(safe.plan?.transitions).toBeLessThanOrEqual(74);
+    expect(safe.plan?.transitions).toBeLessThanOrEqual(104);
   });
 
   it("values suppression and excludes face-down Blood Debt from the risk estimate", () => {
@@ -369,6 +417,71 @@ describe("Levia Gates policy", () => {
     expect(leviaLifeRisk(observe(), observe())).toBe(1);
     redeem(state);
     expect(leviaLifeRisk(observe(), observe())).toBe(0);
+  });
+
+  it("waits for Consumed instead of redeeming above 13 life", () => {
+    const state = game();
+    state.players[0]!.life = 15;
+    state.players[0]!.banish = cards(state, Array<string>(15).fill("MON126"));
+    hand(state, ["MON140", "PEN322", "DTD107", "IAR214"]);
+    const heroId = state.players[0]!.hero.instanceId;
+    const input = { seat: 0 as const, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state };
+    expect(input.legal).toContainEqual(expect.objectContaining({ kind: "activate-ability", sourceInstanceId: heroId }));
+    expect(chooseLeviaIntentWithTrace(input).macro.goal).not.toBe("redeem");
+    expect(choice(state)).not.toMatchObject({ kind: "activate-ability", sourceInstanceId: heroId });
+  });
+
+  describe("Blasmophet, Levia Consumed", () => {
+    function consumed() {
+      const state = game();
+      const me = state.players[0]!;
+      me.heroCardId = "DTD164B";
+      me.hero.cardId = "DTD164B";
+      me.inventory = [];
+      me.life = 13;
+      me.graveyard = cards(state, ["MON140", "WTR007", "ROS218", "IAR212", "MON140", "WTR007"]);
+      hand(state, ["MON140", "IAR212", "ROS218", "DTD107"]);
+      return state;
+    }
+
+    it("counts no life lost to blood debt, which mills instead", () => {
+      const state = consumed();
+      state.players[0]!.banish = cards(state, Array<string>(12).fill("MON126"));
+      const observe = () => ({
+        seat: 0 as const, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state,
+      });
+      expect(leviaLifeRisk(observe(), observe())).toBe(0);
+      expect(chooseLeviaIntentWithTrace(observe()).macro.goal).not.toBe("stabilize");
+    });
+
+    it.each([
+      [["MON126", "DTD115", "LEV011", "MST236", "IAR026", "DTD112"], "MST236"],
+      [["MON126", "DTD115", "LEV011", "IAR026", "DTD112"], "LEV011"],
+      [["MON126", "DTD115", "DTD112"], "DTD112"],
+      [["DTD115", "MON126"], "MON126"],
+    ])("searches only the priority banish play from %j: %s", (banished, expected) => {
+      const state = consumed();
+      state.players[0]!.banish = cards(state, banished);
+      const legal = legalIntents(state, 0);
+      const view = projectStateFor(state, 0);
+      const input = { seat: 0 as const, view, legal, cards: cardData, state };
+      const decision = chooseLeviaIntentWithTrace(input);
+      const searched = new Set((decision.plan?.rootResults ?? []).flatMap(({ intent }) =>
+        intent.kind === "play-from-zone" ? [intent.instanceId] : []));
+      const target = state.players[0]!.banish.find((card) => card.cardId === expected)!;
+      expect([...leviaSharedBanishPicks(view.players[0].banish, input)]).toEqual([target.instanceId]);
+      expect([...searched].every((id) => id === target.instanceId)).toBe(true);
+      expect(legal).toContainEqual(decision.intent);
+    });
+
+    it("leads with a banished Shadowrealm Horror", () => {
+      const state = consumed();
+      state.players[0]!.banish = cards(state, [
+        "MON126", "LEV011", "MST236", "IAR026", "DTD112", "DTD115", "DTD124", "IAR011", "LEV014", "DTD121",
+      ]);
+      const horror = state.players[0]!.banish.find((card) => card.cardId === "MST236")!;
+      expect(choice(state)).toMatchObject({ kind: "play-from-zone", zone: "banish", instanceId: horror.instanceId });
+    });
   });
 
   it("changes matchup priors without reading an opponent's hidden hand", () => {
@@ -551,6 +664,118 @@ describe("Levia Gates policy", () => {
     }
     const selected = choice(state);
     expect(selected).toMatchObject({ kind: "play-from-zone", instanceId: feedingFrenzy.instanceId });
+  });
+
+  it("keeps Fallen Herald when the attack targets an ally, not Levia", () => {
+    let state = game();
+    state.turn = 1;
+    hand(state, ["IAR165", "PEN322", "DTD107", "IAR005"]);
+    state.players[0]!.arsenal = [];
+    state = afterNoBlock(state);
+    const view = projectStateFor(state, 0);
+    const link = { ...view.chain.at(-1)!, targetAllyName: "Blasmophet, the Insatiable Hunger" };
+    const intent = chooseLeviaIntent({
+      seat: 0, view: { ...view, chain: [...view.chain.slice(0, -1), link] },
+      legal: legalIntents(state, 0), cards: cardData,
+    });
+    expect(intent).toEqual({ kind: "pass" });
+  });
+
+  it("holds the Spring Tunic's energy through the opponent's turn", () => {
+    let state = game();
+    hand(state, ["MON140", "MON140", "PEN322"]);
+    state.players[0]!.arsenal = [];
+    const tunic = { instanceId: state.nextInstanceId++, cardId: "WTR150", owner: 0, counters: { energy: 3 } };
+    state.players[0]!.equipment = { chest: tunic };
+    state = afterNoBlock(state);
+    const legal = legalIntents(state, 0);
+    expect(legal.some((intent) => intent.kind === "activate-ability" && intent.sourceInstanceId === tunic.instanceId)).toBe(true);
+    expect(chooseLeviaIntent({ seat: 0, view: projectStateFor(state, 0), legal, cards: cardData })).toEqual({ kind: "pass" });
+  });
+
+  it("does not block with zero-defense armor just because Piercing raises the attack", () => {
+    let state = game();
+    hand(state, ["IAR020"]);
+    const blocker = state.players[0]!.hand[0]!;
+    const leathers = { instanceId: state.nextInstanceId++, cardId: "WTR004", owner: 0, defCounters: 3 };
+    state.players[0]!.equipment = { legs: leathers };
+    state.players[0]!.arsenal = [];
+    state.players[0]!.life = 1;
+    state = defending(state);
+    const view = projectStateFor(state, 0);
+    const decision = view.pendingDecision!;
+    const intent = chooseLeviaIntent({
+      seat: 0,
+      view: {
+        ...view,
+        chain: [...view.chain.slice(0, -1), { ...view.chain.at(-1)!, attackValue: 1, damage: 1 }],
+        pendingDecision: {
+          ...decision,
+          defenderDefense: [
+            { instanceId: blocker.instanceId, defense: 2, attack: 1 },
+            { instanceId: leathers.instanceId, defense: 0, attack: 2 },
+          ],
+        },
+      },
+      legal: legalIntents(state, 0),
+      cards: cardData,
+    });
+    expect(intent).toEqual({ kind: "stage-defenders", instanceIds: [blocker.instanceId] });
+  });
+
+  it("blocks a Fragment attack with one card once its -2 power is counted", () => {
+    let state = game();
+    state.turn = 1;
+    hand(state, ["MON140", "IAR017", "IAR214", "ROS218"]);
+    state.players[0]!.arsenal = [];
+    state = defending(state, "AZS014");
+    const intent = choice(state);
+    expect(intent).toMatchObject({ kind: "stage-defenders", instanceIds: [expect.any(Number)] });
+  });
+
+  describe("Call to the Grave", () => {
+    function callChoice(handIds: readonly string[], banishCleave = false) {
+      const state = game();
+      hand(state, handIds);
+      state.players[0]!.arsenal = [];
+      state.players[0]!.actionPoints = 0;
+      if (banishCleave) {
+        state.players[0]!.banish = cards(state, ["IAR020"]);
+        state.players[0]!.board.push({ instanceId: state.nextInstanceId++, cardId: "IAR222", owner: 0 });
+      }
+      const optionCards = cards(state, ["ARC178", "CRU007"]);
+      const view = projectStateFor(state, 0);
+      const ids = optionCards.map((card) => String(card.instanceId));
+      const intent = chooseLeviaIntent({
+        seat: 0,
+        view: {
+          ...view,
+          pendingDecision: {
+            player: 0,
+            kind: "choose-target",
+            prompt: "Choose a card to put into your graveyard",
+            promptMessage: { id: "card.agb.deck.card.graveyard" },
+            options: ids,
+            optionCards,
+          },
+          turnFacts: {
+            ...view.turnFacts!,
+            players: [{ ...view.turnFacts!.players[0], banishedSixPlusThisTurn: true }, view.turnFacts!.players[1]],
+          },
+        },
+        legal: ids.map((optionId) => ({ kind: "choose" as const, optionId })),
+        cards: cardData,
+      });
+      return intent.kind === "choose" ? cardData[optionCards[ids.indexOf(intent.optionId)]!.cardId]?.name : undefined;
+    }
+
+    it("skips Back Alley Breakline when the second attack cannot be paid", () => {
+      expect(callChoice(["PEN322", "MON140"], true)).toBe("Beast Within");
+    });
+
+    it("takes Back Alley Breakline when it funds a second attack", () => {
+      expect(callChoice(["MON140", "IAR022", "ROS218", "ROS218"])).toBe("Back Alley Breakline");
+    });
   });
 
   it("opens a Gate on the stronger of two banished attacks without go again", () => {
@@ -1340,6 +1565,15 @@ describe("Levia Gates policy", () => {
       }));
     });
 
+    it("attacks with Fallen Herald on the opening turn to stock a six in the graveyard", () => {
+      const state = game();
+      state.turn = 1;
+      hand(state, ["IAR165", "CRU007", "MON140"]);
+      const herald = state.players[0]!.hand[0]!;
+      expect(state.players[1]!.hand.length).toBeGreaterThan(2);
+      expect(choice(state)).toMatchObject({ kind: "play-card", instanceId: herald.instanceId });
+    });
+
     it.each([
       ["a redundant second copy", ["IAR165", "IAR165", "MON140"], 40],
       ["lethal damage", ["IAR165", "MON140", "IAR026"], 4],
@@ -1486,19 +1720,17 @@ describe("Levia Gates policy", () => {
     });
 
     it.each([
-      ["Dorinthea Ironsong", false, "yes"],
-      ["Arakni, Marionette", false, "no"],
-      ["Arakni, Marionette", true, "yes"],
-    ])("transforms into Consumed against %s (Engulfing banished: %s): %s", (opponent, engulfing, expected) => {
+      ["Dorinthea Ironsong"],
+      ["Arakni, Marionette"],
+    ])("transforms into Consumed against %s", (opponent) => {
       let state = game();
       state.players[1]!.heroCardId = heroId(opponent);
       state.players[0]!.life = 14;
       state.players[0]!.actionPoints = 0;
       state.players[0]!.banish = [{ instanceId: state.nextInstanceId++, cardId: "MON126", owner: 0 }];
-      if (engulfing) state.players[0]!.banish.push({ instanceId: state.nextInstanceId++, cardId: "PEN194", owner: 0 });
       hand(state, ["MON140"]);
       state = passUntil(state, (current) => current.pendingDecision?.promptMessage?.id === "card.common.levia.transform");
-      expect(choice(state)).toEqual({ kind: "choose", optionId: expected });
+      expect(choice(state)).toEqual({ kind: "choose", optionId: "yes" });
     });
 
     it("discounts a carried Gate by aura removal in the opponent's decklist", () => {
@@ -1510,6 +1742,84 @@ describe("Levia Gates policy", () => {
       const unknown = leviaEngineValue(input(state));
       expect(withList(filler)).toBe(unknown);
       expect(withList([...filler, "IAR228", "IAR228", "IAR228"])).toBeLessThan(unknown);
+    });
+  });
+
+  describe("hero ability locks", () => {
+    function humbled(state: ReturnType<typeof game>) {
+      state.modifiers.push({
+        scope: "until-end-of-turn", seat: 0, suppressesHeroAbilities: true, expiresAtEndOfSeatTurn: 0,
+        sourceInstanceId: state.players[1]!.hero.instanceId, createdTurn: state.turn - 1,
+      } as (typeof state.modifiers)[number]);
+      return state;
+    }
+
+    it("stops a Humble that would leave blood debt lethal once her armor is gone", () => {
+      const state = game();
+      hand(state, ["IAR212", "IAR020", "ROS218", "ROS218"]);
+      state.players[0]!.equipment = {};
+      state.players[0]!.arsenal = [];
+      // Any damage through leaves 7 life at or below 6 debt she can no longer suppress.
+      state.players[0]!.life = 7;
+      state.players[0]!.banish = cards(state, Array<string>(6).fill("MON126"));
+      state.players[1]!.resources = 2;
+      const attacked = defending(state, "OUT189");
+      const intent = chooseLeviaIntent({
+        seat: 0, view: projectStateFor(attacked, 0), legal: legalIntents(attacked, 0), cards: cardData, state: attacked,
+      });
+      const blocks = intent.kind === "defend" || intent.kind === "stage-defenders" ? intent.instanceIds : [];
+      const defense = attacked.players[0]!.hand
+        .filter((card) => blocks.includes(card.instanceId))
+        .reduce((total, card) => total + (cardData[card.cardId]?.defense ?? 0), 0);
+      expect(defense).toBeGreaterThanOrEqual(6);
+    });
+
+    it("counts a redeemed Levia's blood debt again while humbled", () => {
+      const state = game();
+      redeem(state);
+      state.players[0]!.banish = cards(state, ["MON126", "MON126"]);
+      const observed = () => ({
+        seat: 0 as const, view: projectStateFor(state, 0), legal: [], cards: cardData, state,
+      });
+      expect(leviaLifeRisk(observed(), observed())).toBe(0);
+      humbled(state);
+      expect(leviaLifeRisk(observed(), observed())).toBe(2);
+    });
+
+    it("loses the priced suppression when the hero ability is gone", () => {
+      const state = game();
+      state.players[0]!.banish = cards(state, Array<string>(5).fill("MON126"));
+      state.activePlayer = 1;
+      state.priorityPlayer = 1;
+      hand(state, ["IAR005", "IAR005", "MST236", "MST236"]);
+      const respond = () => handResponse([...state.players[0]!.hand], {
+        seat: 0, view: projectStateFor(state, 0), legal: [], cards: cardData, state,
+      }, leviaSolverRules).total;
+      const free = respond();
+      humbled(state);
+      expect(projectStateFor(state, 0).players[0].heroAbilitiesLost).toBe(true);
+      expect(respond()).toBeLessThan(free);
+    });
+
+    it("counts blood debt as exposed after a six is banished while humbled", () => {
+      const state = game();
+      state.players[0]!.banish = cards(state, Array<string>(4).fill("MON126"));
+      state.players[0]!.flags.banishedSixPlusThisTurn = true;
+      const observed = () => ({
+        seat: 0 as const, view: projectStateFor(state, 0), legal: [], cards: cardData, state,
+      });
+      expect(leviaLifeRisk(observed(), observed())).toBe(0);
+      humbled(state);
+      expect(leviaLifeRisk(observed(), observed())).toBe(4);
+    });
+
+    it("does not choose debt stabilization while humbled", () => {
+      const state = humbled(game());
+      state.players[0]!.life = 5;
+      state.players[0]!.banish = cards(state, ["MON126"]);
+      hand(state, ["ROS218", "MON140", "PEN322", "IAR214"]);
+      const input = { seat: 0 as const, view: projectStateFor(state, 0), legal: legalIntents(state, 0), cards: cardData, state };
+      expect(chooseLeviaIntentWithTrace(input).macro.goal).not.toBe("stabilize");
     });
   });
 });

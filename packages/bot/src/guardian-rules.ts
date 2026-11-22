@@ -1,9 +1,10 @@
 import type { CardData, CardView } from "@fyendal/shared";
-import { DEFAULT_HIT_CHANCE } from "./card-ev.js";
+import { landedOnHit } from "./hit-model.js";
 import type { SolverCardPatch } from "./card-model.js";
 import type { SolverCard, SolverView } from "./hand-solver.js";
 import { evaluateOnHit } from "./on-hit.js";
 import type { BotPolicyInput } from "./policy.js";
+import { hasType } from "@fyendal/shared";
 
 /**
  * Card rules shared by the Guardian and Earth/Ice decks (Bravo, Jarl,
@@ -25,7 +26,7 @@ export function canDecompose(input: BotPolicyInput): boolean {
   const graveyard = input.view.players[input.seat].graveyard;
   const earth = graveyard.filter((card) => hasSubtype(input.cards[card.cardId], "earth"));
   return earth.length >= 2 && graveyard.some((card) =>
-    input.cards[card.cardId]?.cardType === "action" &&
+    hasType(input.cards[card.cardId], "action") &&
     earth.filter((other) => other.instanceId !== card.instanceId).length >= 2
   );
 }
@@ -58,7 +59,7 @@ const PUMMEL_ON_HIT_RIDER = evaluateOnHit({
   attackerCanArsenal: true,
   defenderHasHand: true,
   defenderHasArsenal: false,
-}).value * DEFAULT_HIT_CHANCE;
+}).value;
 
 function isClubOrHammerWeapon(card: SolverCard): boolean {
   return card.kind === "weapon" && (card.traits.includes("club") || card.traits.includes("hammer"));
@@ -82,7 +83,7 @@ export function guardianPatch(data: CardData, card: CardView, input: BotPolicyIn
       break;
     case "pummel":
       patch.reactionPower = Number(/\+(\d+)\{p\}/.exec(data.text)?.[1] ?? 0);
-      patch.uses = { pumpRider: PUMMEL_ON_HIT_RIDER };
+      patch.uses = { pumpRider: landedOnHit(input, PUMMEL_ON_HIT_RIDER, true) };
       patch.reactionTarget = (attack) => isClubOrHammerWeapon(attack) || (attack.kind === "attack" && attack.cost >= 2);
       break;
     case "felling of the crown":

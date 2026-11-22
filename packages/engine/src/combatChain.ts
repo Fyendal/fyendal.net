@@ -24,9 +24,9 @@ import {
   logPublic,
   nameOf,
 } from "./gameLog.js";
-import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./state.js";
+import type { CardInstance, ChainLinkState, PlayerState } from "./state.js";
 
-import { findCardAnywhere, severDefendingEquipment } from "./zoneQueries.js";
+import { defendingSeatOf, findCardAnywhere, severDefendingEquipment } from "./zoneQueries.js";
 import {
   destroyPermanent,
   enterBanish,
@@ -39,6 +39,7 @@ import { controlledPermanents, hookSources, lingeringModifierSources } from "./s
 import { transitionZone } from "./transitions.js";
 
 import { checkWin } from "./win.js";
+import { hasType } from "@fyendal/shared";
 
 /** The link stays on the chain until the chain closes; closeChain moves the
  *  cards to the graveyard and destroys blade-break / battleworn equipment.
@@ -47,9 +48,7 @@ import { checkWin } from "./win.js";
 function expireLinkModifiers(state: GameStateInternal,
   runtime: EngineRuntime, link: ChainLinkState): void {
   link.finalAttack = computeAttack(state, runtime, link);
-  link.finalDefense = computeDefense(state, runtime, link);
   link.finalAttackModifiers = attackValueModifiers(state, runtime, link);
-  link.finalDefenseModifiers = defenseValueModifiers(state, runtime, link);
   // Snapshot keyword presence too: granted keywords disappear with the modifiers.
   link.flags.dominateAtResolution = attackHasDominate(state, runtime, link);
   link.flags.overpowerAtResolution = attackHasOverpower(state, runtime, link);
@@ -93,27 +92,11 @@ function beginLinkResolutionStep(state: GameStateInternal,
  * return to the action phase. */
 export function finishLinkResolution(state: GameStateInternal,
   runtime: EngineRuntime, link: ChainLinkState): void {
+  if (runtime.dispatchFlow("queueWagerResults", state, link)) return;
   beginLinkResolutionStep(state, runtime, link);
-  if (
-    link.wagers?.length &&
-    link.flags.wagerResultsQueued !== true
-  ) {
-    link.flags.wagerResultsQueued = true;
-    const layers: StackLayer[] = link.wagers.map((wager, wagerIndex) => ({
-      sourceInstanceId: wager.source.instanceId,
-      seat: wager.controllerSeat,
-      triggerIndex: -2000 - wagerIndex,
-      label: `Resolve wager: ${wager.rewardLabel}`,
-      optional: false,
-      engineEffect: { kind: "wager-result", wagerIndex },
-    }));
-    state.phase = "layer";
-    runtime.dispatchFlow("queueTriggeredLayers", state, [{ seat: link.attacker, layers }], "finish-link-resolution");
-    return;
-  }
   const defendedByAttackAction = link.defendingCards.some((card) => {
     const data = dataOf(state, card.cardId);
-    return data.cardType === "action" && (data.subtypes ?? []).includes("attack");
+    return hasType(data, "action") && (data.subtypes ?? []).includes("attack");
   });
   if (defendedByAttackAction) {
     const counters = activeModifiers(state, link, ["chain-link"])
@@ -130,6 +113,9 @@ export function finishLinkResolution(state: GameStateInternal,
       }
     }
   }
+  // Before resolution hooks, which may remove defenders (Shimmering Mirage).
+  link.finalDefense = computeDefense(state, runtime, link);
+  link.finalDefenseModifiers = defenseValueModifiers(state, runtime, link);
   const resolvedSources = [
     link.attackingCard,
     ...controlledPermanents(state, link.attacker, { faceDownEquipment: false }),
@@ -142,15 +128,15 @@ export function finishLinkResolution(state: GameStateInternal,
       runtime.makeCtx(state, link.attacker, source, link),
     );
   }
+  const defenderSeat = defendingSeatOf(link);
   const linkParticipants = [
-    link.attackingCard,
-    ...link.defendingCards,
-    ...link.defendingEquipment,
-    ...link.reactions,
+    { source: link.attackingCard, seat: link.attacker },
+    ...[...link.defendingCards, ...link.defendingEquipment].map((source) => ({ source, seat: defenderSeat })),
+    ...link.reactions.map((source) => ({ source, seat: source.owner })),
   ];
-  for (const source of linkParticipants) {
+  for (const { source, seat } of linkParticipants) {
     scriptOf(state, source.cardId, source)?.onChainLinkResolved?.(
-      runtime.makeCtx(state, source.owner, source, link),
+      runtime.makeCtx(state, seat, source, link),
     );
   }
   // Delayed effects may mark attack-action cards on the active link to return
@@ -261,7 +247,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
   for (const [link, defenders] of defendingCloseHooks) {
     for (const card of defenders) {
       scriptOf(state, card.cardId, card)?.onDefendingCombatChainClosed?.(
-        runtime.makeCtx(state, card.owner, card, link),
+        runtime.makeCtx(state, defendingSeatOf(link), card, link),
       );
     }
   }
@@ -284,7 +270,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
       // "if this hits, put it into your hero's soul" (Illuminate, Engulfing
       // Light): the attacking card goes to the soul instead of the graveyard
       if (link.flags.attackToSoul === true) {
-        enterSoul(state, runtime, link.attackingCard, false);
+        enterSoul(state, runtime, link.attackingCard, false, undefined, link.attacker);
       } else if (link.flags.attackToBanish === true) {
         enterBanish(state, runtime, link.attackingCard, "chain");
       } else if (link.flags.attackToBottom === true) {
@@ -328,7 +314,7 @@ export function closeChain(state: GameStateInternal, runtime: EngineRuntime): vo
       } else {
         moveToGraveyard(state, runtime, c, "chain", undefined, undefined, true);
       }
-      fireLeaveCombatChain(state, runtime, c.owner, c, "defending");
+      fireLeaveCombatChain(state, runtime, defendingSeatOf(link), c, "defending");
     }
     for (const c of link.reactions) {
       moveToGraveyard(state, runtime, c);

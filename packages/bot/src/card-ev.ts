@@ -7,6 +7,7 @@ import {
   unseenCounts,
 } from "./deck-knowledge.js";
 import type { BotPolicyInput } from "./policy.js";
+import { hasType } from "@fyendal/shared";
 
 /**
  * Per-card expressed value (EV) in damage equivalents, following the FaBrain
@@ -35,6 +36,15 @@ export const BLOCK_USE_RATE = 0.75;
 export const PITCH_FUNDING_RATE = 0.75;
 export const DEFAULT_HIT_CHANCE = 0.6;
 
+/** Chance an attack with this power and on-hit value hits (`hit-model.ts`). */
+export type HitChanceFor = (power: number, onHit: number) => number;
+/** A flat chance, or one per attack. */
+export type HitChance = number | HitChanceFor;
+
+export function chanceOf(hitChance: HitChance, power: number, onHit: number): number {
+  return typeof hitChance === "number" ? hitChance : hitChance(power, onHit);
+}
+
 /** Static description of a card's possible uses, independent of turn state. */
 export interface CardUses {
   kind: SolverCardKind;
@@ -51,6 +61,9 @@ export interface CardUses {
   pump: number;
   /** Extra value of pump riders, such as granting go again. */
   pumpRider?: number;
+  /** Damage that blocks cannot stop, such as arcane pings, so it is not
+   * scaled by the opponent's response. */
+  unblockable?: number;
   /** Ambush: can defend from arsenal like a card in hand. */
   ambush?: boolean;
   /** A blue card that is still worth playing out of arsenal: printed
@@ -78,12 +91,12 @@ export const BLUE_ARSENAL_COST = DEAD_ARSENAL_COST;
  * single last slot, so it counts at a discount) or a pump's added power.
  * `offenseRate` is the share of threatened offense expected to land after the
  * opponent's response; blocking, pitch and prevention values are unaffected. */
-export function offenseValue(uses: CardUses, hitChance: number, offenseRate = 1): number {
+export function offenseValue(uses: CardUses, hitChance: HitChance, offenseRate = 1): number {
   if (uses.kind === "attack") {
-    const value = uses.power + uses.onHit * hitChance;
+    const value = uses.power + uses.onHit * chanceOf(hitChance, uses.power, uses.onHit);
     return (uses.reliableGoAgain || uses.finisher ? value : value * ARSENAL_TERMINAL_FACTOR) * offenseRate;
   }
-  return (uses.pump + (uses.pumpRider ?? 0)) * offenseRate;
+  return (uses.pump + (uses.pumpRider ?? 0)) * offenseRate + (uses.unblockable ?? 0);
 }
 
 /** Damage a defense reaction (or, at a lower use rate, a blocker) stops. */
@@ -100,7 +113,7 @@ function blockValue(uses: CardUses): number {
 export function arsenalValue(
   uses: CardUses,
   discount: number,
-  hitChance = DEFAULT_HIT_CHANCE,
+  hitChance: HitChance = DEFAULT_HIT_CHANCE,
   offenseRate = 1,
 ): number {
   if (uses.handOnly) return -DEAD_ARSENAL_COST;
@@ -116,6 +129,10 @@ export function arsenalValue(
     case "defense-reaction":
       value = blockValue(uses);
       break;
+    case "block":
+      if (!uses.ambush) return -DEAD_ARSENAL_COST;
+      value = blockValue(uses);
+      break;
     default:
       return -DEAD_ARSENAL_COST;
   }
@@ -125,7 +142,7 @@ export function arsenalValue(
 }
 
 /** Best single use of a card drawn into a fresh hand. */
-export function standaloneValue(uses: CardUses, hitChance = DEFAULT_HIT_CHANCE, offenseRate = 1): number {
+export function standaloneValue(uses: CardUses, hitChance: HitChance = DEFAULT_HIT_CHANCE, offenseRate = 1): number {
   return Math.max(
     offenseValue(uses, hitChance, offenseRate), blockValue(uses), uses.pitch * PITCH_FUNDING_RATE,
     uses.alternative ?? 0,
@@ -137,7 +154,7 @@ export function standaloneValue(uses: CardUses, hitChance = DEFAULT_HIT_CHANCE, 
 export function heldValue(
   uses: CardUses,
   averageDraw: number,
-  hitChance = DEFAULT_HIT_CHANCE,
+  hitChance: HitChance = DEFAULT_HIT_CHANCE,
   offenseRate = 1,
 ): number {
   return Math.max(0, standaloneValue(uses, hitChance, offenseRate) - averageDraw);
@@ -152,15 +169,15 @@ export function hasStaticGoAgain(data: CardData): boolean {
   return STATIC_GO_AGAIN.test(data.text);
 }
 
+/** Non-action kinds in canonical type order, so every Evo stays equipment. */
+const PRINTED_USE_KINDS = ["weapon", "equipment", "attack-reaction", "defense-reaction", "instant", "block"] as const;
+
 /** Default uses parsed from printed data. Hero rules refine conditional cards. */
 export function defaultCardUses(data: CardData, power = data.attack ?? 0, defense = data.defense ?? 0): CardUses {
   const subtypes = (data.subtypes ?? []).map((subtype) => subtype.toLowerCase());
-  const kind: CardUses["kind"] = data.cardType === "action"
+  const kind: CardUses["kind"] = hasType(data, "action") && !hasType(data, "equipment")
     ? subtypes.includes("attack") ? "attack" : "action"
-    : data.cardType === "weapon" || data.cardType === "attack-reaction" || data.cardType === "instant" ||
-        data.cardType === "defense-reaction" || data.cardType === "block" || data.cardType === "equipment"
-    ? data.cardType
-    : "other";
+    : PRINTED_USE_KINDS.find((type) => hasType(data, type)) ?? "other";
   const prevented = handPrevention(data);
   const pumpMatch = /\+(\d+)\{p\}/.exec(data.text);
   const pumpCount = (data.text.match(/next attack[^.]*\+(\d+)\{p\}/gi) ?? []).length;
@@ -191,7 +208,7 @@ const HAND_INSTANT_PREVENT = /Instant - [^:]*\b(?:discard|banish) this(?: from y
 function handPrevention(data: CardData): number {
   const mode = HAND_INSTANT_PREVENT.exec(data.text);
   if (mode) return Number(mode[1]);
-  return data.cardType === "instant" ? Number(PREVENT_AMOUNT.exec(data.text)?.[1] ?? 0) : 0;
+  return hasType(data, "instant") ? Number(PREVENT_AMOUNT.exec(data.text)?.[1] ?? 0) : 0;
 }
 
 const ARSENAL_DISRUPTION = new RegExp(
@@ -231,12 +248,13 @@ export function averageDrawValue(
   input: Pick<BotPolicyInput, "view" | "seat" | "cards" | "decklists">,
   usesOf: (data: CardData) => CardUses = (data) => defaultCardUses(data),
   offenseRate = 1,
+  hitChance: HitChance = DEFAULT_HIT_CHANCE,
 ): number {
   const counts = unseenCounts(input, "own");
   if (!counts) return DEFAULT_DRAW_VALUE;
   return averageOver(counts, (cardId) => {
     const data = input.cards[cardId];
-    return data ? standaloneValue(usesOf(data), DEFAULT_HIT_CHANCE, offenseRate) : 0;
+    return data ? standaloneValue(usesOf(data), hitChance, offenseRate) : 0;
   }) ?? DEFAULT_DRAW_VALUE;
 }
 

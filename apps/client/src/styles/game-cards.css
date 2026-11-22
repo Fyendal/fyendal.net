@@ -136,6 +136,10 @@
   border-radius: 5px;
   background: #080705;
 }
+.card-badge-tile.c-attack-target {
+  border-color: #f08b82;
+  background: #b8322a;
+}
 .card-badge-token {
   width: 100%;
   height: 100%;
@@ -159,6 +163,115 @@
   color: var(--text-secondary);
   font-size: 12.5px;
   line-height: 1.35;
+}
+/* Same chrome as the badge panel: this explains the card rather than being one
+   of its faces. Height and padding match PANEL_CHROME_* in createdCards.ts. */
+.created-cards-panel {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 8px 10px 2px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-raised);
+}
+/* Mounted hidden while the pointer dwells, then faded in once it has. */
+.created-cards-panel.is-pending { opacity: 0; }
+.created-cards-panel:not(.is-pending) { transition: opacity 160ms ease-out; }
+.table[data-motion-preference="reduced"] .created-cards-panel { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .table:not([data-motion-preference="full"]) .created-cards-panel { transition: none; }
+}
+.created-cards-panel.is-right { left: calc(100% + 12px); }
+.created-cards-panel.is-left { right: calc(100% + 12px); }
+.created-cards-panel.is-below {
+  top: calc(100% + 12px);
+  right: 0;
+  left: 0;
+  min-height: 0;
+}
+.created-cards-title {
+  height: 22px;
+  margin: 0;
+  padding-left: 2px;
+  color: var(--gold);
+  font: 600 14px/22px var(--font-lobby-ui);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.created-cards-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.created-card-row {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 8px 0 10px;
+  border-top: 1px solid var(--border-subtle);
+}
+.created-card-row:first-child { padding-top: 2px; border-top: 0; }
+/* A square window onto the printed art, below the name bar. */
+.created-card-art {
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+}
+.created-card-art .card-artwork-placeholder { display: none; }
+.created-card-art .card-artwork-image {
+  inset: auto;
+  top: -38%;
+  left: -55%;
+  width: 210%;
+  height: auto;
+}
+.created-card-body { display: flex; flex-direction: column; min-width: 0; }
+.created-card-name {
+  color: var(--text-primary);
+  font: 600 15px/1.15 var(--font-card-name);
+}
+.created-card-type {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 8px;
+  margin: 1px 0 4px;
+  color: #a89878;
+  font: 12px/1.3 var(--font-lobby-ui);
+  font-variant: small-caps;
+  letter-spacing: 1px;
+  text-transform: capitalize;
+}
+.created-card-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--text-primary);
+  font-variant: normal;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.created-card-stat img { width: 13px; height: 13px; }
+.created-card-text {
+  margin: 0;
+  color: var(--text-secondary);
+  font: 13.5px/1.35 var(--font-lobby-ui);
+}
+.created-card-text + .created-card-text { margin-top: 3px; }
+.rules-symbol {
+  width: 13px;
+  height: 13px;
+  margin: 0 1px;
+  vertical-align: -2px;
 }
 .card-preview-frame { width: 100%; height: 100%; padding: 14px; }
 .card-preview-frame .c-name { font-size: 20px; }
@@ -219,6 +332,23 @@
     0 0 0 2px #e2b75f,
     0 0 10px 3px #d99d3eaa,
     inset 0 0 0 1px #f4d98d99;
+}
+.card-attack-target-badge {
+  position: absolute;
+  z-index: 7;
+  top: -6px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid #ffd0ca;
+  border-radius: 50%;
+  background: #b8322a;
+  box-shadow: 0 0 0 1px #1d0b09, 0 2px 6px #000a;
+  color: #fff4f2;
+  font-size: 16px;
+  pointer-events: none;
 }
 .card-chain-source-badge {
   position: absolute;
@@ -405,8 +535,10 @@
 }
 /* A horizontally scrolling hand must clip vertical overflow. Keep its card
    explanations available to assistive technology without rendering a clipped
-   tooltip edge that looks like a stray scrollbar above the cards. */
-.hand .card-explanation {
+   tooltip edge that looks like a stray scrollbar above the cards. The top
+   hand's tooltip would open off screen. */
+.hand .card-explanation,
+.opp-hand .card-explanation {
   position: fixed;
   width: 1px;
   height: 1px;
@@ -529,16 +661,24 @@
 }
 .table:not([data-playability-cue="high-contrast"])
   .card-board-square.card-highlight:not(.card-selected):not(.card-chain-source) {
-  --board-square-glow:
-    drop-shadow(0 0 2px #adffca)
-    drop-shadow(0 0 6px #46e991e6)
-    drop-shadow(0 0 12px #20a960b3);
   box-shadow: none;
-  filter: var(--board-square-glow);
 }
+/* A rasterized shadow on the silhouette box: a drop-shadow filter re-blurs on
+   the GPU every frame, which stalls hand animations over a board of allies. */
 .table:not([data-playability-cue="high-contrast"])
-  .card-board-square.card-highlight.card-tapped:not(.card-selected):not(.card-chain-source) {
-  filter: brightness(.75) var(--board-square-glow);
+  .card-board-square.card-highlight:not(.card-selected):not(.card-chain-source)::after {
+  content: "";
+  position: absolute;
+  inset: var(--board-glow-top, calc(var(--board-art-top) - var(--board-name-height) / 2)) 0 var(--board-art-bottom);
+  border-radius: inherit;
+  /* A dark keyline separates the ring from the art; the deep green falloff
+     keeps it distinct on gold mats. */
+  box-shadow:
+    0 0 0 1px #031109,
+    0 0 0 3px #3fd57f,
+    0 0 6px 3px #17b85cb3,
+    0 0 14px 5px #0b7a3a73;
+  pointer-events: none;
 }
 .table[data-playability-cue="glow"]
   .card-board-square.card-highlight:not(.card-selected)::before {
@@ -576,6 +716,8 @@
    plate is cropped at the zoom that keeps it legible; the art beneath it uses a
    wider crop so the square shows the painting, not a detail of it. */
 .card-zone.card-board-square-marvel {
+  /* No drawn name bar for the playable glow to wrap. */
+  --board-glow-top: 0px;
   --board-art-top: 0cqi;
   --board-art-bottom: 0cqi;
   /* The plate stays opaque past the nameplate in both crops (16% of the card). */

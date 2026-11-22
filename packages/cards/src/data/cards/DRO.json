@@ -2,7 +2,7 @@
  {
   "id": "DRO001",
   "name": "Dromai",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you pitch a red card, create an Ash Token.\nIf you've played a red card this turn, dragons you control have go again while attacking.",
   "classes": [
    "illusionist"
@@ -17,7 +17,7 @@
  {
   "id": "DRO002",
   "name": "Ash",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Material - While Ash is under an object, that object has phantasm.",
   "classes": [
    "illusionist"
@@ -34,7 +34,7 @@
  {
   "id": "DRO003",
   "name": "Aether Ashwing",
-  "cardType": "token",
+  "types": ["token"],
   "text": "Arcane Barrier 1",
   "attack": 1,
   "classes": [
@@ -54,7 +54,7 @@
  {
   "id": "DRO004",
   "name": "Storm of Sandikai",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Dragon allies you control have \"Once per Turn Action - 0: Attack\".",
   "classes": [
    "illusionist"
@@ -69,7 +69,7 @@
  {
   "id": "DRO005",
   "name": "Ironhide Helm",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When you defend with Ironhide Helm, you may pay {r}. If you do, it gains +2{d} and \"When the combat chain closes, destroy Ironhide Helm.\"",
   "defense": 0,
   "classes": [
@@ -83,7 +83,7 @@
  {
   "id": "DRO006",
   "name": "Deep Blue",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Put a card from your hand on the bottom of your deck, destroy this: Gain {r}{r}{r}. Go again",
   "defense": 0,
   "classes": [
@@ -97,7 +97,7 @@
  {
   "id": "DRO007",
   "name": "Silken Form",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy Silken Form: Transform target ash you control into an Aether Ashwing.\nQuell 1",
   "defense": 0,
   "classes": [
@@ -115,7 +115,7 @@
  {
   "id": "DRO008",
   "name": "Ironhide Legs",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "When you defend with Ironhide Legs, you may pay {r}. If you do, it gains +2{d} and \"When the combat chain closes, destroy Ironhide Legs.\"",
   "defense": 0,
   "classes": [
@@ -129,7 +129,7 @@
  {
   "id": "DRO009",
   "name": "Red Hot",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Dromai or Fai Specialization\nRupture - If Red Hot is played as chain link 4 or higher, it has \"When you attack with this, reveal the top X cards of your deck, where X is the number of Draconic chain links you control. Deal damage equal to the number of red cards revealed this way to any target, then shuffle.\"",
   "pitch": 1,
   "cost": 2,
@@ -148,7 +148,7 @@
  {
   "id": "DRO010",
   "name": "Lava Burst",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Rupture - If Lava Burst is played as chain link 4 or higher, it has +3{p}.",
   "pitch": 1,
   "cost": 0,
@@ -166,7 +166,7 @@
  {
   "id": "DRO011",
   "name": "Rake the Embers",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create an Ash token, then transform up to 3 ash you control into Aether Ashwings.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -186,7 +186,7 @@
  {
   "id": "DRO012",
   "name": "Billowing Mirage",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Billowing Mirage, transform up to 1 ash you control into an Aether Ashwing.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -208,7 +208,7 @@
  {
   "id": "DRO013",
   "name": "Skittering Sands",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Transform target ash you control into an Aether Ashwing. It gains +3{p} until end of turn.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -228,7 +228,7 @@
  {
   "id": "DRO014",
   "name": "Dustup",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When Dustup hits, create an Ash token, then transform up to 1 ash you control into an Aether Ashwing.",
   "pitch": 1,
   "cost": 0,
@@ -249,7 +249,7 @@
  {
   "id": "DRO015",
   "name": "Dunebreaker Cenipai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Dunebreaker Cenipai is destroyed, create an Ash token.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -271,7 +271,7 @@
  {
   "id": "DRO016",
   "name": "Embermaw Cenipai",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nWhen Embermaw Cenipai is destroyed, create an Ash token.",
   "pitch": 1,
   "cost": 2,
@@ -292,7 +292,7 @@
  {
   "id": "DRO017",
   "name": "Sweeping Blow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Sweeping Blow, create an Ash token.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -313,7 +313,7 @@
  {
   "id": "DRO018",
   "name": "Sweeping Blow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Sweeping Blow, create an Ash token.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -334,7 +334,7 @@
  {
   "id": "DRO019",
   "name": "Spears of Surreality",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -355,7 +355,7 @@
  {
   "id": "DRO020",
   "name": "Enigma Chimera",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Phantasm",
   "pitch": 1,
   "cost": 2,
@@ -375,7 +375,7 @@
  {
   "id": "DRO021",
   "name": "Ravenous Rabble",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch value of the card revealed this way.\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -395,7 +395,7 @@
  {
   "id": "DRO022",
   "name": "Wounding Blow",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 1,
   "cost": 0,
@@ -412,7 +412,7 @@
  {
   "id": "DRO023",
   "name": "Critical Strike",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 1,
   "cost": 1,
@@ -429,7 +429,7 @@
  {
   "id": "DRO024",
   "name": "Brutal Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "",
   "pitch": 1,
   "cost": 2,
@@ -446,7 +446,7 @@
  {
   "id": "DRO025",
   "name": "Healing Balm",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Gain 3{h}",
   "pitch": 1,
   "cost": 0,
@@ -459,7 +459,7 @@
  {
   "id": "DRO026",
   "name": "Sigil of Solace",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Gain 3{h}",
   "pitch": 1,
   "cost": 0,
@@ -471,7 +471,7 @@
  {
   "id": "DRO027",
   "name": "Oasis Respite",
-  "cardType": "instant",
+  "types": ["instant"],
   "text": "Prevent the next 4 damage that would be dealt to target hero this turn by a source of your choice. If they have less life than each other hero, they may gain 1{h}.",
   "pitch": 1,
   "cost": 1,
@@ -483,7 +483,7 @@
  {
   "id": "DRO028",
   "name": "Sink Below",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "You may put a card from your hand on the bottom of your deck. If you do, draw a card.",
   "pitch": 1,
   "cost": 0,

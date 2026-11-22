@@ -113,6 +113,30 @@ describe("life change animation", () => {
 });
 
 describe("status action", () => {
+  it("puts the sandbox button beside the action points only when given a handler", () => {
+    const props = {
+      dockRect: null,
+      oppHeroCardId: "MON001",
+      myHeroCardId: "WTR001",
+      oppLife: 20,
+      myLife: 20,
+      oppHeroName: "Rhinar",
+      myHeroName: "Briar",
+      log: [],
+      activeHeroName: "Briar",
+      actionPoints: 1,
+      myResources: 0,
+      primaryAction: null,
+      onPass: vi.fn(),
+    } satisfies ComponentProps<typeof StatusFloat>;
+    const html = renderStatus({ ...props, onOpenSandbox: vi.fn() });
+    expect(html).toMatch(/<div class="hud-ap-row"><div class="ap-pip"[^]*?<\/div><button[^>]*aria-label="Sandbox tools"[^>]*class="hud-sandbox"/);
+    expect(html).not.toContain("not recorded");
+    const plain = renderStatus(props);
+    expect(plain).not.toContain("hud-sandbox");
+    expect(plain).not.toContain("hud-ap-row");
+  });
+
   it("uses the status button to confirm staged blocks", () => {
     const html = renderStatus({
       dockRect: null,

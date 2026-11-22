@@ -1,12 +1,12 @@
 import { createEngineRuntime, engineRuntime } from "./engineRuntime.js";
 import type { GameIntent, MeldSide } from "@fyendal/shared";
 import { activateAbility, answerChoice, answerChoices, playCard } from "./actions.js";
-import { declareTail } from "./attacks.js";
+import { continueDeclarationHooks } from "./attacks.js";
 import { assignDefenders, stageDefenders } from "./defense.js";
 import { scriptOf } from "./cardProperties.js";
 import { gameLogMessage, logCardValue, logPlayerValue, logPublic, nameOf } from "./gameLog.js";
 import { checkWin } from "./win.js";
-import { currentLink, findCardAnywhere, opponent } from "./zoneQueries.js";
+import { currentLink, defendingSeatOf, findCardAnywhere, opponent } from "./zoneQueries.js";
 import { closeChain } from "./combatChain.js";
 import {
   activateDefenseAbility,
@@ -30,6 +30,8 @@ import { skipTokenStep } from "./tokenSkip.js";
 import {
   projectStateFor as projectStateForImpl,
   projectStateForReplay as projectStateForReplayImpl,
+  projectStateRevealedFor as projectStateRevealedForImpl,
+  type ProjectionOptions,
 } from "./project.js";
 import {
   anyWindowAction as anyWindowActionImpl,
@@ -125,7 +127,7 @@ function afterChoice(
   runtime: EngineRuntime,
   resume: PendingDecisionState["resume"],
 ): void {
-  if (resume?.kind === "after-declare") declareTail(state, runtime);
+  if (resume?.kind === "after-declare") continueDeclarationHooks(state, runtime, resume.remainingHooks ?? []);
   else if (resume?.kind === "start-reaction-step") beginReactionStep(state);
   else if (resume?.kind === "continue-stack") continueStack(state, runtime, resume.seat);
   else if (resume?.kind === "finish-wager-result") resumeWagerResult(state, runtime, resume.wagerIndex);
@@ -222,6 +224,8 @@ function dispatchPlay(
       undefined,
       alternativeCostCardInstanceIds,
       targetAllyId,
+      boost,
+      boostCount,
     );
   }
   if (state.phase === "reaction") {
@@ -237,6 +241,9 @@ function dispatchPlay(
       undefined,
       undefined,
       targetAllyId,
+      false,
+      boost,
+      boostCount,
     );
   }
   return playCard(
@@ -263,6 +270,34 @@ const DECLINE_OPTIONS = ["no", "decline", "pass"] as const;
 
 function declineOption(options: readonly string[] | undefined): string {
   return DECLINE_OPTIONS.find((option) => options?.includes(option)) ?? "no";
+}
+
+/** Pay a listed resource payment with the player's own pitch order. Listed
+ * orders are a capped sample; payCost still rejects overpitch, unpitchable
+ * cards, and short payments. */
+function answerResourcePayment(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  seat: number,
+  optionId: string,
+  pitchInstanceIds: readonly number[],
+): string | undefined | null {
+  const pd = state.pendingDecision;
+  if (!pd || pd.player !== seat) return null;
+  if (!pd.resourcePayment?.options.some((option) => option.optionId === optionId)) {
+    return "not a resource payment option";
+  }
+  const pitchIds = [...pitchInstanceIds];
+  if (pd.variablePlayCost?.paymentOptions?.[optionId]) {
+    pd.variablePlayCost.paymentOptions[optionId] = { pitchInstanceIds: pitchIds };
+  } else if (pd.variableActivationCost?.paymentOptions?.[optionId]) {
+    pd.variableActivationCost.paymentOptions[optionId] = { pitchInstanceIds: pitchIds };
+  } else if (pd.payment?.pitchOptions[optionId]) {
+    pd.payment.pitchOptions[optionId] = { ...pd.payment.pitchOptions[optionId], pitchIds };
+  } else {
+    return "not a resource payment option";
+  }
+  return answerScriptedDecision(state, runtime, seat, optionId);
 }
 
 /**
@@ -646,9 +681,11 @@ export function applyIntent(
           undefined,
           intent.alternativeCostCardInstanceIds,
           intent.targetAllyId,
+          intent.boost,
+          intent.boostCount,
         );
       } else if (next.phase === "reaction") {
-        err = playReaction(next, runtime, seat, found.card, false, intent.pitchInstanceIds, intent.meldSide, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId, intent.zone, undefined, intent.targetAllyId);
+        err = playReaction(next, runtime, seat, found.card, false, intent.pitchInstanceIds, intent.meldSide, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId, intent.zone, undefined, intent.targetAllyId, false, intent.boost, intent.boostCount);
       } else {
         err = playCard(next, runtime, seat, intent.instanceId, intent.pitchInstanceIds, intent.zone, intent.meldSide, intent.targetAllyId, intent.boost, intent.boostCount, intent.asInstant, intent.alternativeCostCardInstanceIds, intent.targetCardInstanceId);
       }
@@ -656,8 +693,8 @@ export function applyIntent(
     }
     case "activate-ability": {
       const ai = intent.abilityIndex ?? 0;
-      const defending = next.chain.some((link) => link.defendingCards.some(
-        (card) => card.instanceId === intent.sourceInstanceId && card.owner === seat,
+      const defending = next.chain.some((link) => defendingSeatOf(link) === seat && link.defendingCards.some(
+        (card) => card.instanceId === intent.sourceInstanceId,
       ));
       if (next.phase === "reaction" || next.phase === "defend") {
         err = defending
@@ -731,7 +768,9 @@ export function applyIntent(
       break;
     }
     case "choose": {
-      const res = answerScriptedDecision(next, runtime, seat, intent.optionId);
+      const res = intent.pitchInstanceIds
+        ? answerResourcePayment(next, runtime, seat, intent.optionId, intent.pitchInstanceIds)
+        : answerScriptedDecision(next, runtime, seat, intent.optionId);
       err =
         res === null
           ? next.pendingDecision && next.pendingDecision.player === seat
@@ -771,6 +810,9 @@ export function applyIntent(
 
 export { projectTransitionEvents };
 export type { EngineTransitionMove };
+/** The one state change outside `applyIntent`: sandbox rooms only, never in `legalIntents`. */
+export { applyManualEdit, manualEditAllowed, manualEditRefusal } from "./manualEdit.js";
+export type { ProjectionOptions } from "./project.js";
 
 export function legalIntents(state: GameStateInternal, seat: number) {
   return legalIntentsImpl(state, engineRuntime, seat);
@@ -800,12 +842,22 @@ export function projectStateFor(
   state: GameStateInternal,
   seat: number | null,
   publicGameId?: string,
+  options?: ProjectionOptions,
 ) {
-  return projectStateForImpl(state, engineRuntime, seat, publicGameId);
+  return projectStateForImpl(state, engineRuntime, seat, publicGameId, options);
 }
 
 export function projectStateForReplay(state: GameStateInternal, publicGameId?: string) {
   return projectStateForReplayImpl(state, engineRuntime, publicGameId);
+}
+
+export function projectStateRevealedFor(
+  state: GameStateInternal,
+  seat: number,
+  publicGameId?: string,
+  options?: ProjectionOptions,
+) {
+  return projectStateRevealedForImpl(state, engineRuntime, seat, publicGameId, options);
 }
 export { TOKEN_SKIP_INTENTS, tokenSkipSequenceActive } from "./tokenSkip.js";
 export { damageStepPriorityAttacker } from "./triggers.js";

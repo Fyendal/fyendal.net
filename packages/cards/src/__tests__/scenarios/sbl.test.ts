@@ -9,6 +9,7 @@
  * driven with settle:false + passPriority like any reaction-window play.
  */
 import { describe, expect, it } from "vitest";
+import { projectStateFor } from "@fyendal/engine";
 import { printingId, scenario } from "../harness.js";
 
 const BOLTYN = "boltyn|0";
@@ -100,6 +101,23 @@ describe("SBL — Charge as an additional cost", () => {
     s.chooseCard(YELLOW);
     s.blockWith().settle(); // hits for 3
     s.expectHandSize(0, 1); // the on-hit draw
+  });
+
+  it("Bolt of Courage played from an opponent's banish charges its player's soul", () => {
+    const s = scenario({
+      seats: [
+        { hero: "dorinthea", hand: [YELLOW], deck: ["snatch|1"] },
+        boltynSeat({ banish: ["bolt of courage|1"] }),
+      ],
+    });
+    const bolt = s.state.players[1]!.banish[0]!;
+    bolt.playableFrom = ["banish"];
+    bolt.playableBySeat = 0;
+    s.play("bolt of courage|1", { fromZone: "banish" });
+    s.chooseCard(YELLOW);
+    s.expectZoneSize(0, "soul", 1).expectZoneSize(1, "soul", 0);
+    s.blockWith().settle();
+    s.expectHandSize(0, 1);
   });
 
   it("Light the Way gains go again on hit if a yellow card was charged for it", () => {
@@ -240,6 +258,26 @@ describe("SBL — soul payoffs", () => {
     s.play("duty bound blitz|1");
     s.blockWith().settle();
     s.expectFinalAttack(6); // 5 base +1 from the Courage created by Roaring Beam
+  });
+
+  it("Roaring Beam leaves the projected stack once it returns to hand", () => {
+    const s = scenario({
+      seats: [
+        boltynSeat({ hand: ["take flight|1", "snatch|1", "roaring beam|2"] }),
+        { hero: "dorinthea" },
+      ],
+    });
+    s.play("take flight|1", { pitch: ["snatch|1"], settle: false });
+    s.chooseOption("pass");
+    s.blockWith();
+    s.react("roaring beam|2", { settle: false });
+    s.passPriority().passPriority();
+    const beam = Number(handId(s, "roaring beam|2"));
+    expect(s.state.resolving.map((card) => card.instanceId)).not.toContain(beam);
+    const view = projectStateFor(s.state, 0);
+    expect(view.stack.map((layer) => layer.card?.instanceId)).not.toContain(beam);
+    s.chooseCard("roaring beam|2");
+    s.expectInZone(0, "roaring beam|2", "soul");
   });
 
   it("Valiant Thrust gets +3{p} when you've charged this turn", () => {
@@ -577,6 +615,64 @@ describe("SBL — equipment", () => {
     s.chooseOption("decline");
     s.expectEquipped(1, "head", "halo of illumination|0");
     s.expectLife(1, 15);
+  });
+
+  it("Spellvoid can be applied before Ward (CR 6.5.5)", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["voltic bolt|1", YELLOW] },
+        { hero: "dorinthea", life: 20, equipment: { head: "halo of illumination|0", arms: "wave of reality|0" } },
+      ],
+    });
+    s.play("voltic bolt|1", { pitch: [YELLOW] });
+    s.chooseOption("opposing hero");
+    expect(s.state.pendingDecision?.chooseHook).toBe("spellvoid");
+    s.chooseOption("destroy");
+    expect(s.state.pendingDecision?.chooseHook).toBe("ward");
+    s.chooseOption("destroy");
+    s.expectNoEquipment(1, "head");
+    s.expectNoEquipment(1, "arms");
+    s.expectLife(1, 18); // 5 - 2 Spellvoid - 1 Ward
+  });
+
+  it("Arcane Barrier, then Spellvoid, then Ward", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["voltic bolt|1", YELLOW] },
+        {
+          hero: "dorinthea",
+          life: 20,
+          resources: 1,
+          equipment: { head: "halo of illumination|0", arms: "wave of reality|0", legs: "silent stilettos|0" },
+        },
+      ],
+    });
+    s.play("voltic bolt|1", { pitch: [YELLOW] });
+    s.chooseOption("opposing hero");
+    expect(s.state.pendingDecision?.chooseHook).toBe("arcane-barrier");
+    s.chooseOption("pay 1");
+    expect(s.state.pendingDecision?.chooseHook).toBe("spellvoid");
+    s.chooseOption("destroy");
+    expect(s.state.pendingDecision?.chooseHook).toBe("ward");
+    s.chooseOption("destroy");
+    s.expectLife(1, 19); // 5 - 1 Barrier - 2 Spellvoid - 1 Ward
+  });
+
+  it("Spellvoid declined is not offered again after Ward", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["voltic bolt|1", YELLOW] },
+        { hero: "dorinthea", life: 20, equipment: { head: "halo of illumination|0", arms: "wave of reality|0" } },
+      ],
+    });
+    s.play("voltic bolt|1", { pitch: [YELLOW] });
+    s.chooseOption("opposing hero");
+    s.chooseOption("decline");
+    expect(s.state.pendingDecision?.chooseHook).toBe("ward");
+    s.chooseOption("destroy");
+    expect(s.state.pendingDecision?.chooseHook).not.toBe("spellvoid");
+    s.expectEquipped(1, "head", "halo of illumination|0");
+    s.expectLife(1, 16);
   });
 
   it("Halo of Illumination: pay {r}, destroy it, put a hand card into your soul (Light draws)", () => {

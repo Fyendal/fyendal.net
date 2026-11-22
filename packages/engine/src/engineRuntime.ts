@@ -9,7 +9,7 @@ import { applyOneShotDefenseModifiers, attackBonusAboveBase, attackHasDominate, 
 import { boundArcaneCardBonus, dealEffectDamage, effectDamageBonus, gainHeroLife } from "./damageResolution.js";
 import { queueDefendEventLayersAfterCurrent, resolveIntimidate } from "./defense.js";
 import { recordDieResult, recordDieRoll, rollIgnoringLowest } from "./dieRoll.js";
-import { notePitch, pitchIntoPool, pitchProhibitedByEffect, pitchValueOfInstance, scriptedPaymentOptions } from "./resources.js";
+import { canPayFromHand, notePitch, pitchIntoPool, pitchProhibitedByEffect, pitchValueOfInstance, scriptedPaymentOptions } from "./resources.js";
 import { compareLife, snapshotSerializable } from "./ruleQueries.js";
 import { discardToGraveyard, fireOnDiscard, fireTransformHook } from "./scriptContext.js";
 import { createTokenFor, createTokensFor } from "./tokens.js";
@@ -47,6 +47,7 @@ export function createEngineRuntime(
       basePowerOf: bind(basePowerOf, true),
       bindPermanent: bind(bindPermanent, false),
       boundArcaneCardBonus: bind(boundArcaneCardBonus, false),
+      canPayFromHand: bind(canPayFromHand, false),
       chainLinkNumber: bind(chainLinkNumber, false),
       chainLinksControlled: bind(chainLinksControlled, false),
       compareLife: bind(compareLife, false),

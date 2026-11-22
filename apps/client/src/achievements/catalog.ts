@@ -12,11 +12,12 @@ export const ACHIEVEMENT_GROUPS: ReadonlyArray<{
   { titleId: "achievements.group.bots", ids: [
     "beat-bravo", "beat-briar", "beat-kayo", "beat-cindra",
     "beat-ira", "beat-hala", "beat-jarl", "beat-levia", "beat-boltyn", "beat-ira-sage",
+    "beat-aurora", "beat-dorinthea", "beat-fang",
   ] },
 ];
 
 /** Hidden from players outside the beta allowlist unless already earned. */
-export const BETA_ACHIEVEMENT_IDS: ReadonlySet<AchievementId> = new Set<AchievementId>(["beat-ira-sage"]);
+export const BETA_ACHIEVEMENT_IDS: ReadonlySet<AchievementId> = new Set<AchievementId>();
 
 export const ACHIEVEMENT_BOT_HEROES: Partial<Record<AchievementId, string>> = {
   "beat-bravo": "Bravo, Flattering Showman",
@@ -29,6 +30,9 @@ export const ACHIEVEMENT_BOT_HEROES: Partial<Record<AchievementId, string>> = {
   "beat-levia": "Levia, Shadowborn Abomination",
   "beat-boltyn": "Ser Boltyn, Breaker of Dawn",
   "beat-ira-sage": "Ira, Crimson Haze",
+  "beat-aurora": "Aurora, Legacy of Tempest",
+  "beat-dorinthea": "Dorinthea",
+  "beat-fang": "Fang, Dracai of Blades",
 };
 
 export function achievementMessageId(id: AchievementId, part: "name" | "description"): string {

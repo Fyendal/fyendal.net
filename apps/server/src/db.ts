@@ -9,9 +9,10 @@ export interface UserRow {
   pass_hash: string;
   created_at: number;
   early_tester: boolean;
-  selected_badge: "early-tester" | null;
+  selected_badge: "early-tester" | "supporter" | null;
   email: string | null;
   email_lc: string | null;
+  supporter_until: number | null;
 }
 
 export interface Queryable {
@@ -1167,6 +1168,95 @@ export const MIGRATIONS: Migration[] = [
     version: 62,
     // A seat's temporary pass shortcut and the turn or chain link it covers.
     sql: "ALTER TABLE room_seats ADD COLUMN pass_until JSONB;",
+  },
+  {
+    version: 63,
+    // Count-up game clock; a finishing replay keeps the final clock until its payload is built.
+    sql: `ALTER TABLE rooms ADD COLUMN clock JSONB;
+    ALTER TABLE replay_games ADD COLUMN clock JSONB;`,
+  },
+  {
+    version: 64,
+    // Classic Constructed Aurora joins the durable pending-practice bot ids.
+    sql: `ALTER TABLE pending_bot_starts
+      DROP CONSTRAINT IF EXISTS pending_bot_starts_bot_check;
+    ALTER TABLE pending_bot_starts
+      ADD CONSTRAINT pending_bot_starts_bot_check
+      CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia', 'boltyn', 'ira-sage', 'aurora'));`,
+  },
+  {
+    version: 65,
+    // Silver Age Dorinthea joins the durable pending-practice bot ids.
+    sql: `ALTER TABLE pending_bot_starts
+      DROP CONSTRAINT IF EXISTS pending_bot_starts_bot_check;
+    ALTER TABLE pending_bot_starts
+      ADD CONSTRAINT pending_bot_starts_bot_check
+      CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia', 'boltyn', 'ira-sage', 'aurora', 'dorinthea'));`,
+  },
+  {
+    version: 66,
+    // Self-play seats are driven by the room's own human socket.
+    sql: `ALTER TABLE room_seats
+      DROP CONSTRAINT IF EXISTS room_seats_controller_check;
+    -- pg-mem assigns positional names to inline checks; production Postgres
+    -- uses the column-derived name above.
+    ALTER TABLE room_seats
+      DROP CONSTRAINT IF EXISTS room_seats_constraint_2;
+    ALTER TABLE room_seats
+      ADD CONSTRAINT room_seats_controller_check
+      CHECK (controller IN ('human', 'bot', 'self'));`,
+  },
+  {
+    version: 67,
+    // Sandbox rooms opt out of match history at creation.
+    sql: `ALTER TABLE rooms ADD COLUMN sandbox BOOLEAN NOT NULL DEFAULT FALSE;`,
+  },
+  {
+    version: 68,
+    // Sandbox replays are listed apart from match history.
+    sql: `ALTER TABLE replay_games ADD COLUMN sandbox BOOLEAN NOT NULL DEFAULT FALSE;`,
+  },
+  {
+    version: 69,
+    // A searching player's bot practice may be sandbox; the matched PvP room never is.
+    sql: `ALTER TABLE pending_bot_starts ADD COLUMN sandbox BOOLEAN NOT NULL DEFAULT FALSE;`,
+  },
+  {
+    version: 70,
+    // Bot rooms now turn sandbox on first edit, not at creation.
+    sql: `ALTER TABLE pending_bot_starts DROP COLUMN sandbox;`,
+  },
+  {
+    version: 71,
+    // Trigger targets the server repeats for a seat until the turn ends.
+    sql: "ALTER TABLE room_seats ADD COLUMN auto_target JSONB;",
+  },
+  {
+    version: 72,
+    // Classic Constructed Fang joins the durable pending-practice bot ids.
+    sql: `ALTER TABLE pending_bot_starts
+      DROP CONSTRAINT IF EXISTS pending_bot_starts_bot_check;
+    ALTER TABLE pending_bot_starts
+      ADD CONSTRAINT pending_bot_starts_bot_check
+      CHECK (bot IN ('ira', 'hala', 'cindra', 'jarl', 'briar', 'bravo', 'starvo', 'kayo', 'levia', 'boltyn', 'ira-sage', 'aurora', 'dorinthea', 'fang'));`,
+  },
+  {
+    version: 73,
+    // Ko-fi payments for the supporter badge; `supporter_until` spares room loads a join.
+    sql: `CREATE TABLE kofi_subscription_payments (
+      transaction_id TEXT PRIMARY KEY,
+      email_lc TEXT NOT NULL,
+      paid_at BIGINT NOT NULL CHECK (paid_at >= 0),
+      tier_name TEXT
+    );
+    CREATE INDEX kofi_subscription_payments_email_lc_idx ON kofi_subscription_payments (email_lc);
+    CREATE INDEX kofi_subscription_payments_paid_at_idx ON kofi_subscription_payments (paid_at);
+    ALTER TABLE users ADD COLUMN supporter_until BIGINT;
+    ALTER TABLE users DROP CONSTRAINT users_selected_badge_entitlement;
+    ALTER TABLE users ADD CONSTRAINT users_selected_badge_entitlement CHECK (
+      selected_badge IS NULL OR selected_badge = 'supporter'
+      OR (selected_badge = 'early-tester' AND early_tester = TRUE)
+    );`,
   },
 ];
 

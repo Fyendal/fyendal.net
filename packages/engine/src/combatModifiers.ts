@@ -7,6 +7,7 @@ import {
   cardNamesOf,
   cardTypesOf,
   dataOf,
+  grantedBaseAbilityCardIds,
   scriptOf,
 } from "./cardProperties.js";
 import type { CardInstance, ChainLinkState, Modifier, PlayerState } from "./state.js";
@@ -26,11 +27,12 @@ function modifierMatches(
   granted: (tag: string) => boolean = () => false,
   names: readonly string[],
   keywordAbilitiesActive = true,
-  effectiveCardTypes: readonly string[] = [data.cardType],
+  effectiveCardTypes: readonly string[] = data.types,
   effectiveTags: readonly string[] = [
     ...(data.classes ?? []),
     ...(data.subtypes ?? []),
   ].map((tag) => tag.toLowerCase()),
+  basePower = data.attack ?? 0,
 ): boolean {
   const appliesTo = modifier.appliesTo ?? "any";
   if (appliesTo === "weapon") {
@@ -48,10 +50,10 @@ function modifierMatches(
   const cost = data.cost ?? 0;
   if (modifier.minCost !== undefined && cost < modifier.minCost) return false;
   if (modifier.maxCost !== undefined && cost > modifier.maxCost) return false;
-  if (modifier.maxBasePower !== undefined && (data.attack ?? 0) > modifier.maxBasePower) {
+  if (modifier.maxBasePower !== undefined && basePower > modifier.maxBasePower) {
     return false;
   }
-  if (modifier.minBasePower !== undefined && (data.attack ?? 0) < modifier.minBasePower) {
+  if (modifier.minBasePower !== undefined && basePower < modifier.minBasePower) {
     return false;
   }
   const appliesToKeyword = modifier.appliesToKeyword?.toLowerCase();
@@ -115,6 +117,7 @@ export function modifierAppliesTo(
   color: number,
   card: CardInstance,
   granted?: (tag: string) => boolean,
+  basePower?: number,
 ): boolean {
   return modifierMatches(
     modifier,
@@ -124,8 +127,9 @@ export function modifierAppliesTo(
     granted,
     cardNamesOf(state, card),
     !cardAbilitiesSuppressed(state, card),
-    [data.cardType],
+    data.types,
     cardTypesOf(state, card),
+    basePower,
   );
 }
 
@@ -145,7 +149,7 @@ export function modifierAppliesToDefense(
   const meld = state.scriptsRef[card.cardId]?.meld;
   const effectiveCardTypes = meld
     ? [meld.leftCardType, meld.rightCardType]
-    : [data.cardType];
+    : data.types;
   return modifierMatches(
     modifier,
     data,
@@ -163,6 +167,7 @@ export function modifierApplies(
   state: GameStateInternal,
   modifier: Modifier,
   link: ChainLinkState,
+  basePower?: number,
 ): boolean {
   if (modifier.seat !== link.attacker) return false;
   if (
@@ -203,6 +208,7 @@ export function modifierApplies(
     cardColorOf(state, link.attackingCard),
     link.attackingCard,
     (tag) => attackGrantedType(link, tag),
+    basePower,
   );
 }
 
@@ -268,10 +274,5 @@ export function conditionalScriptGrantsGoAgain(
     scriptOf(state, link.attackingCard.cardId, link.attackingCard)
       ?.hasConditionalGoAgain?.(ctx) === true
   ) return true;
-  return [
-    ...(link.attackingCard.grantedBaseAbilitiesCardId
-      ? [link.attackingCard.grantedBaseAbilitiesCardId]
-      : []),
-    ...(link.attackingCard.grantedBaseAbilitiesCardIds ?? []),
-  ].some((cardId) => state.scriptsRef[cardId]?.hasConditionalGoAgain?.(ctx) === true);
+  return grantedBaseAbilityCardIds(link.attackingCard).some((cardId) => state.scriptsRef[cardId]?.hasConditionalGoAgain?.(ctx) === true);
 }

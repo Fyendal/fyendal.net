@@ -48,6 +48,34 @@ it("Tiger Taming Khakkara buffs only the next Crouching Tiger after it attacks",
 });
 
 describe("Beckoning Mistblade", () => {
+  it.each(["hiss|1", "venomous bite|1", "tide chakra|1", "intimate inducement|1"])(
+    "%s targets only Assassin or Mystic attack action cards, not daggers",
+    (reaction) => {
+      const g = scenario({
+        seats: [
+          {
+            hero: "rhinar",
+            weapons: ["beckoning mistblade|0"],
+            hand: [reaction, "bonds of attraction|3"],
+            resources: 3,
+          },
+          { hero: "dorinthea" },
+        ],
+      });
+
+      g.attackWithWeapon().blockWith().expectNoLegalPlay(reaction).settle();
+      g.play("bonds of attraction|3").blockWith();
+      const reactionId = printingId(reaction);
+      expect(
+        legalIntents(g.state, 0).some(
+          (intent) =>
+            intent.kind === "play-card" &&
+            g.state.players[0]!.hand.find((card) => card.instanceId === intent.instanceId)?.cardId === reactionId,
+        ),
+      ).toBe(true);
+    },
+  );
+
   it.each([false, true])("buffs only the next blue attack, even when that attack hits: %s", (hits) => {
     const g = scenario({
       seats: [
@@ -344,18 +372,18 @@ describe("MST — Mechanologist", () => {
     expect(legalIntents(g.state, 0)).toContainEqual(expect.objectContaining({
       kind: "play-card",
       instanceId: recall.instanceId,
-      asInstant: true,
     }));
 
-    g.play("evo recall|3", { asInstant: true })
+    g.play("evo recall|3")
       .chooseCard("zero to sixty|1")
+      .expectAP(0, 1)
       .expectEquipped(0, "head", "evo recall|3");
     expect(g.state.players[0]!.equipment.head?.subcards?.[0]?.cardId)
       .toBe(printingId("cogwerx base head|0"));
     expect(g.state.players[0]!.deck[0]?.cardId).toBe(printingId("zero to sixty|1"));
   });
 
-  it("MST instant Evos transform matching base equipment or equip to an empty zone", () => {
+  it("MST instant Evos transform matching base equipment and fail to equip with no base", () => {
     for (const [evo, equipment] of [
       ["evo recall|3", { head: "cogwerx base head|0" }],
       ["evo heartdrive|3", { chest: "cogwerx base chest|0" }],
@@ -372,7 +400,6 @@ describe("MST — Mechanologist", () => {
       expect(legalIntents(withBase.state, 0)).toContainEqual(expect.objectContaining({
         kind: "play-card",
         instanceId: playableCard.instanceId,
-        asInstant: true,
       }));
 
       const withoutBase = scenario({
@@ -385,12 +412,29 @@ describe("MST — Mechanologist", () => {
       expect(legalIntents(withoutBase.state, 0), evo).toContainEqual(expect.objectContaining({
         kind: "play-card",
         instanceId: unbasedCard.instanceId,
-        asInstant: true,
       }));
       const slot = Object.keys(equipment)[0] as keyof typeof equipment;
-      withoutBase.play(evo).expectEquipped(0, slot, evo);
-      expect(withoutBase.state.players[0]!.equipment[slot]!.subcards ?? [], evo).toHaveLength(0);
+      withoutBase.play(evo).expectInZone(0, evo, "graveyard");
+      expect(withoutBase.state.players[0]!.equipment[slot], evo).toBeFalsy();
     }
+  });
+
+  it("Evo Shortcircuit asks for its hero with the shared hero options", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["evo shortcircuit|3"], equipment: { arms: "cogwerx base arms|0" } },
+        { hero: "dorinthea" },
+      ],
+    });
+    g.play("evo shortcircuit|3", { settle: false });
+    for (let guard = 0; guard < 6 && g.state.pendingDecision?.chooseHook !== "shortcircuit-target"; guard++) {
+      g.passPriority();
+    }
+    const decision = projectStateFor(g.state, 0).pendingDecision;
+    expect(decision?.options).toEqual(["opposing hero", "your hero"]);
+    expect(decision?.optionMessages?.map((message) => message?.id))
+      .toEqual(["common.option.opposinghero", "common.option.yourhero"]);
+    g.chooseOption("your hero").expectLife(0, 19).expectLife(1, 20);
   });
 
   it("Evo Heartdrive reduces the next attack action card, not a non-attack action", () => {
@@ -406,7 +450,7 @@ describe("MST — Mechanologist", () => {
       ],
     });
 
-    g.play("evo heartdrive|3", { asInstant: true })
+    g.play("evo heartdrive|3")
       .play("sloggism|1")
       .expectResources(0, 2)
       .play("raging onslaught|1")
@@ -427,7 +471,7 @@ describe("MST — Mechanologist", () => {
       ],
     });
 
-    g.play("evo speedslip|3", { asInstant: true });
+    g.play("evo speedslip|3");
 
     const twinDrive = g.state.players[0]!.hand.find(
       (card) => card.cardId === printingId("twin drive|1"),
@@ -604,6 +648,18 @@ describe("MST — Assassin", () => {
       .expectZoneSize(1, "banish", 2);
   });
 
+  it("Fang Strike and Slither only target attack action cards", () => {
+    const g = scenario({
+      seats: [
+        { hero: "dorinthea", resources: 3, hand: ["fang strike|0", "slither|0"] },
+        { hero: "rhinar" },
+      ],
+    });
+    g.attackWithWeapon().blockWith()
+      .expectNoLegalPlay("fang strike|0")
+      .expectNoLegalPlay("slither|0");
+  });
+
   it("Just a Nick lets Unmake the Underlings choose both modes and banish on hit", () => {
     const g = scenario({
       seats: [
@@ -648,6 +704,60 @@ describe("MST — Assassin", () => {
       .chooseCard("raging onslaught|1")
       .expectZoneSize(1, "banish", 3)
       .expectLife(0, 22);
+  });
+
+  it("Mask of Perdition's granted banish counts as Bonds of Attraction banishing a matching card", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          hand: ["bonds of attraction|3", "just a nick|1"],
+          equipment: { head: "mask of perdition|0" },
+        },
+        {
+          hero: "dorinthea",
+          deck: ["wounding blow|3", "wounding blow|2", "wounding blow|2"],
+          graveyard: ["raging onslaught|3"],
+        },
+      ],
+    });
+
+    g.play("bonds of attraction|3")
+      .blockWith()
+      .activate("mask of perdition|0", { settle: false })
+      .passPriority()
+      .passPriority()
+      .react("just a nick|1")
+      .chooseOption("both")
+      .chooseCard("raging onslaught|3")
+      .settle()
+      .expectZoneSize(1, "banish", 4)
+      .expectLife(0, 22);
+  });
+
+  it("Arakni, Funnel Web's granted banish counts as Bonds of Attraction banishing a matching card", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "arakni, funnel web|0",
+          hand: ["bonds of attraction|3", "bonds of attraction|2"],
+        },
+        {
+          hero: "dorinthea",
+          deck: ["wounding blow|1"],
+          arsenal: ["raging onslaught|1"],
+        },
+      ],
+    });
+
+    g.play("bonds of attraction|3")
+      .blockWith()
+      .activate("arakni, funnel web|0", { settle: false })
+      .chooseCard("bonds of attraction|2")
+      .settle()
+      .expectZoneSize(1, "banish", 2)
+      .expectLife(0, 21);
   });
 
   it("Just a Nick's banish does not add a hand color for Persuasive Prognosis", () => {
@@ -1064,5 +1174,90 @@ describe("MST — Chi pitched to play", () => {
       .settle()
       .expectLife(1, 15)
       .expectHandSize(0, draws);
+  });
+});
+
+describe("Maul", () => {
+  const onTiger = () =>
+    scenario({
+      seats: [
+        { hero: "rhinar", hand: ["tiger form incantation|3", "crouching tiger|0", "maul|2"], resources: 3 },
+        { hero: "dorinthea" },
+      ],
+    })
+      .play("tiger form incantation|3")
+      .play("crouching tiger|0")
+      .blockWith()
+      .react("maul|2");
+
+  it("applies both modes on a Crouching Tiger and makes the new tigers playable", () => {
+    const g = onTiger().chooseOption("both").expectFinalAttack(4).settle();
+
+    g.expectLife(1, 16).expectZoneSize(0, "banish", 2);
+    for (const tiger of g.state.players[0]!.banish) {
+      expect(legalIntents(g.state, 0)).toContainEqual(
+        expect.objectContaining({ kind: "play-from-zone", zone: "banish", instanceId: tiger.instanceId }),
+      );
+    }
+  });
+
+  it("gives only +3 when the power mode is chosen", () => {
+    onTiger().chooseOption("power").expectFinalAttack(4).settle().expectZoneSize(0, "banish", 0);
+  });
+
+  it("gives only the tigers when the tiger mode is chosen", () => {
+    onTiger().chooseOption("tigers").expectFinalAttack(1).settle().expectZoneSize(0, "banish", 2);
+  });
+
+  it("creates no tigers when the Crouching Tiger does not hit", () => {
+    scenario({
+      seats: [
+        { hero: "rhinar", hand: ["crouching tiger|0", "maul|2"] },
+        { hero: "dorinthea" },
+      ],
+    })
+      .play("crouching tiger|0")
+      .blockWith()
+      .react("maul|2")
+      .chooseOption("tigers")
+      .settle()
+      .expectZoneSize(0, "banish", 0);
+  });
+
+  it("gives another low-power attack action card +3 without a mode choice", () => {
+    scenario({
+      seats: [
+        { hero: "rhinar", hand: ["head jab|3", "maul|2"] },
+        { hero: "dorinthea" },
+      ],
+    })
+      .play("head jab|3")
+      .blockWith()
+      .react("maul|2")
+      .expectFinalAttack(4)
+      .settle()
+      .expectZoneSize(0, "banish", 0);
+  });
+
+  it("cannot be played on a weapon or a high-power attack action card", () => {
+    scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["harmonized kodachi|0"], hand: ["maul|2"] },
+        { hero: "dorinthea" },
+      ],
+    })
+      .attackWithWeapon()
+      .blockWith()
+      .expectNoLegalPlay("maul|2");
+
+    scenario({
+      seats: [
+        { hero: "rhinar", hand: ["wounding blow|1", "maul|2"] },
+        { hero: "dorinthea" },
+      ],
+    })
+      .play("wounding blow|1")
+      .blockWith()
+      .expectNoLegalPlay("maul|2");
   });
 });

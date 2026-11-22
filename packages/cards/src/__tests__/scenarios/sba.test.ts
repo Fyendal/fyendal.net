@@ -318,7 +318,7 @@ describe("SBA — Fusion", () => {
     g.play("arcanic shockwave|1")
       .chooseCard("fry|1") // reveal a Lightning card to fuse
       .declareTarget(1)
-      .expectLog("fused")
+      .expectLog("reveals Fry")
       .blockWith()
       .settle()
       .expectLife(1, 15); // 4 combat + 1 arcane
@@ -332,14 +332,12 @@ describe("SBA — Fusion", () => {
       },
     }));
     expect(projectStateFor(g.state, 1).logEntries).toContainEqual(expect.objectContaining({
-      message: {
-        id: "card.log.common.fusion.revealed",
-        values: {
-          revealed: { kind: "card", cardId: printingId("fry|1") },
-          card: { kind: "card", cardId: printingId("arcanic shockwave|1") },
-        },
-      },
-      event: expect.objectContaining({ kind: "cards-revealed", sourceZone: "hand" }),
+      message: expect.objectContaining({ id: "engine.log.cards.revealed.from.hand" }),
+      event: expect.objectContaining({
+        kind: "cards-revealed",
+        cards: [{ cardId: printingId("fry|1"), ownerSeat: 0 }],
+        sourceZone: "hand",
+      }),
     }));
   });
 
@@ -432,6 +430,19 @@ describe("SBA — Arcane Barrier", () => {
       .settle()
       .expectLife(0, 16) // 1 arcane + 3 combat
       .expectLog("gains go again"); // arcane dealt: Path of Same Ends gains go again
+  });
+
+  it("Path of Same Ends deals no arcane and gains no go again when it attacks an ally", () => {
+    const g = scenario({
+      seats: [
+        { ...briar, hand: ["path of same ends|1"] },
+        { hero: "dorinthea", board: ["barnacle|2"] },
+      ],
+    });
+    g.play("path of same ends|1", { targetAlly: "barnacle|2" })
+      .expectLife(1, 20)
+      .expectNoLog("arcane damage")
+      .expectNoLog("gains go again");
   });
 
   it("Path of Same Ends may activate its instant ability from the combat chain", () => {

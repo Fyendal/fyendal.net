@@ -6,18 +6,13 @@ import {
   dealArcane,
   decisionMessage,
   decisionPrompt,
+  isAura,
   leavesArenaTrigger,
   opponentSeat,
 } from "./shared-helpers.js";
-
-const FLOW = "OMN203";
-const EMBODIMENT = "ROS026";
+import { EMBODIMENT_OF_LIGHTNING, LIGHTNING_FLOW } from "./tokens.js";
 
 type Card = DeepReadonly<CardInstance>;
-
-function isAura(ctx: ScriptCtx, card: Card): boolean {
-  return ctx.cardTypes(card).includes("aura");
-}
 
 function isLightningAura(ctx: ScriptCtx, card: Card): boolean {
   const types = ctx.cardTypes(card);
@@ -117,7 +112,7 @@ export const azs: Record<string, CardScript> = {
     },
     onDamageDealt(ctx, target, amount) {
       if (amount > 0 && target !== ctx.seat && ctx.getFlag("player", "azsAphrodiasBoost") === true)
-        ctx.createToken(FLOW);
+        ctx.createToken(LIGHTNING_FLOW);
     },
   },
   "starfield veil|0": {
@@ -169,14 +164,14 @@ export const azs: Record<string, CardScript> = {
       destroySelfCost: true,
       canActivate: (ctx) => ctx.getFlag("player", "playedCardType:instant") === true,
       onActivate(ctx) {
-        ctx.createToken(EMBODIMENT);
+        ctx.createToken(EMBODIMENT_OF_LIGHTNING);
       },
     },
   },
   "miraging metamorph|1": {
     destroyOnChainCloseWhenDefendedByHigherDefense: true,
     onDestroyed(ctx) {
-      const auras = ctx.player(ctx.seat).board.filter((card) => ctx.cardTypes(card).includes("aura"));
+      const auras = ctx.player(ctx.seat).board.filter((card) => isAura(ctx, card));
       if (auras.length > 0) {
         ctx.requestCardChoice(
           "miraging-copy",
@@ -210,7 +205,7 @@ export const azs: Record<string, CardScript> = {
         "Gain 1 resource and amp 1",
         decisionMessage("card.trigger.common.resource.gain.amp", { amount: 1, amp: 1 }),
         (ctx) => {
-          ctx.changeResources(ctx.seat, 1);
+          ctx.gainResources(ctx.seat, 1);
           ampNextArcane(ctx, 1);
         },
       ),

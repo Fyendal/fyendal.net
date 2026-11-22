@@ -21,6 +21,9 @@ export interface PendingDecisionModel {
   confirmSkipArsenal: boolean;
   onRequestPass: () => void;
   onDisableGuidance: () => void;
+  /** "Don't ask again" for a trigger target declaration: the pick is repeated
+   * for that source's later declarations. */
+  rememberTarget?: { on: boolean; onChange: (on: boolean) => void };
   onConfirmSkipArsenal: () => void;
   onCancelSkipArsenal: () => void;
   /** Board-owned bounded card selection, so Space can submit it. */
@@ -36,6 +39,9 @@ export interface ActionAnnouncementModel {
   sel: Sel;
   selCardId: string | undefined;
   step: ActionStep;
+  /** Set when the selected equipment play will go to the graveyard: the
+   * non-base occupant, or null when an Evo has no base to transform. */
+  equipBlockedBy: string | null | undefined;
   autoCommitPending: boolean;
   abilityChoices: { index: number; label: string }[];
   onSelectAbility: (index: number) => void;

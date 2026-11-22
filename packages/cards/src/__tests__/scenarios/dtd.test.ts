@@ -26,7 +26,7 @@ describe("DTD — registration and core mechanics", () => {
   it("registers the complete set", () => {
     expect(Object.keys(cardData).filter((id) => id.startsWith("DTD"))).toHaveLength(245);
     for (const id of ["DTD001", "DTD002", "DTD044", "DTD045", "DTD103", "DTD104", "DTD133", "DTD134"]) {
-      expect(cardData[id]?.cardType).toBe("hero");
+      expect(cardData[id]?.types).toContain("hero");
       expect(scripts[id]).toBeDefined();
     }
   });
@@ -356,6 +356,22 @@ describe("DTD — registration and core mechanics", () => {
     expect(projected(nimblism!.instanceId)).toBe(link.attackValue);
   });
 
+  it("does not count a non-attack action that causes an attack as an attack action defender", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "ser boltyn, breaker of dawn|0", hand: ["beaming bravado|3", "banneret of vigor|2"] },
+        { hero: "dorinthea", hand: ["and again...|3"] },
+      ],
+    });
+    s.play("beaming bravado|3").chooseCard("banneret of vigor|2");
+    const attack = projectStateFor(s.state, 1).chain.at(-1)!.attackValue;
+    const [andAgain] = s.state.players[1]!.hand;
+    const projected = projectStateFor(s.state, 1).pendingDecision?.defenderDefense?.find(
+      (entry) => entry.instanceId === andAgain!.instanceId,
+    );
+    expect(projected?.attack).toBe(attack);
+  });
+
   it("prices a staged hand attack defender into Boltyn's power only for the defender", () => {
     const s = scenario({
       seats: [
@@ -374,6 +390,29 @@ describe("DTD — registration and core mechanics", () => {
     expect(attacker?.stagedAttack).toBe(attack);
     expect(attacker?.stagedAttackModifiers).not.toContainEqual(boltynModifier);
     expect(projectStateFor(s.state, 0).chain.at(-1)!.attackValue).toBe(attack);
+  });
+
+  describe("Ser Boltyn, Breaker of Dawn's go again ability", () => {
+    // Courage lifts the attack above its base power; the ability waits on the stack.
+    const activated = () => {
+      const game = scenario({ seats: [
+        { hero: "rhinar", heroKey: "ser boltyn, breaker of dawn|0", hand: ["wounding blow|1"], soul: [BLUE],
+          board: ["courage|0"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: ["quiet streets|2"], equipment: NO_EQUIPMENT },
+      ] }).play("wounding blow|1").blockWith().activate("ser boltyn, breaker of dawn|0", { settle: false });
+      return game.doRaw({ kind: "choose", optionId: String(game.state.players[0]!.soul[0]!.instanceId) });
+    };
+
+    it("grants go again to an attack still above its base power", () => {
+      const game = activated().settle();
+      expect(game.state.chain.at(-1)?.goAgain).toBe(true);
+    });
+
+    it("fails when the attack drops to its base power before it resolves", () => {
+      const game = activated().passPriority().react("quiet streets|2")
+        .expectLog("Quiet Streets:").expectLog("target is no longer legal");
+      expect(game.state.chain.at(-1)?.goAgain).toBe(false);
+    });
   });
 
   it("random-banish attacks recognize a six-power card banished for their own cost", () => {
@@ -467,7 +506,7 @@ describe("DTD — registration and core mechanics", () => {
       .expectFinalDefense(6);
   });
 
-  it("Levia does not erase Blood Debt already triggered before an end-phase six-power banish", () => {
+  it("Levia loses no life to Blood Debt already triggered before an end-phase six-power banish", () => {
     const s = scenario({
       seats: [
         {
@@ -497,7 +536,7 @@ describe("DTD — registration and core mechanics", () => {
 
     s.doRaw({ kind: "order-triggers", optionIds: [blasmophet!, bloodDebt!] })
       .chooseCard("shaden death hydra|2")
-      .expectLife(0, 19);
+      .expectLife(0, 20);
   });
 
   it("pauses a counted Blood Debt layer when Levia reaches exactly 13 life", () => {
@@ -1022,6 +1061,35 @@ describe("DTD — registration and core mechanics", () => {
   });
 });
 
+describe("DTD — Northern Winds", () => {
+  it("freezes up to 1 chosen equipment, item and ally per hero until the start of your next turn", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "oldhim|0", weapons: [], hand: ["northern winds|3"], equipment: NO_EQUIPMENT },
+        {
+          hero: "dorinthea",
+          weapons: ["parry blade|0"],
+          equipment: NO_EQUIPMENT,
+          board: ["gold|0", "chum, friendly first mate|2"],
+        },
+      ],
+    });
+    const turn = g.state.turn;
+    g.play("northern winds|3")
+      .chooseCard("parry blade|0")
+      .chooseOption("pass")
+      .chooseCard("chum, friendly first mate|2");
+    const frozenUntil = (key: string) => {
+      const opponent = g.state.players[1]!;
+      const card = [...opponent.weapons, ...opponent.board].find((c) => c.cardId === printingId(key))!;
+      return card.scriptState?.frozenUntilTurn;
+    };
+    expect(frozenUntil("parry blade|0")).toBe(turn + 2);
+    expect(frozenUntil("chum, friendly first mate|2")).toBe(turn + 2);
+    expect(frozenUntil("gold|0")).toBeUndefined();
+  });
+});
+
 describe("DTD — Prism and Figments", () => {
   it("Empyrean Rapture passively discounts only the first hero activation after a Herald hit", () => {
     const heroKey = "prism, sculptor of arc light|0";
@@ -1250,6 +1318,36 @@ describe("DTD — Prism and Figments", () => {
     expect(s.state.chain.at(-1)?.defendingEquipment[0]?.tempDefense).toBe(-1);
   });
 
+  it("Decimator Great Axe does not trigger again for a later defense reaction", () => {
+    const s = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          weapons: ["decimator great axe|0"],
+          resources: 3,
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "rhinar", hand: ["raging onslaught|3", "sink below|1"], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    s.attackWithWeapon("decimator great axe|0")
+      .blockWith("raging onslaught|3")
+      .settle()
+      .doRaw({ kind: "choose", optionId: String(s.state.chain.at(-1)!.defendingCards[0]!.instanceId) });
+    expect(s.state.log.some((entry) =>
+      entry.publicText?.startsWith("Decimator Great Axe halves the base defense of Raging Onslaught")
+    )).toBe(true);
+
+    s.passPriority()
+      .react("sink below|1")
+      .chooseOption("pass")
+      .settle();
+    expect(s.state.log.filter((entry) =>
+      entry.publicText?.includes("Decimator Great Axe triggers")
+    )).toHaveLength(1);
+  });
+
   it("Decimator Great Axe does not trigger when another attack is defended", () => {
     const s = scenario({
       seats: [
@@ -1337,6 +1435,33 @@ describe("DTD — Prism and Figments", () => {
     const aura = s.state.players[0]!.board[0]!;
     expect(legalIntents(s.state, 0).some((intent) => intent.kind === "activate-ability" && intent.sourceInstanceId === aura.instanceId)).toBe(true);
     s.activate("blessing of spirits|1", { settle: false }).expectAttackValue(5);
+  });
+
+  it("Flurry lets a Reality Refractor aura attack twice this turn", () => {
+    const auraAttackLegal = (s: ReturnType<typeof scenario>, instanceId: number) =>
+      legalIntents(s.state, 0).some((intent) => intent.kind === "activate-ability" && intent.sourceInstanceId === instanceId);
+    const closeChain = (s: ReturnType<typeof scenario>) => {
+      for (let i = 0; i < 10 && s.state.chain.length > 0; i++) s.passPriority();
+    };
+    const setup = (board: string[]) => scenario({
+      seats: [
+        { hero: "rhinar", heroKey: "prism, advent of thrones|0", weapons: ["reality refractor|0"], board, resources: 4 },
+        { hero: "dorinthea" },
+      ],
+    });
+    const withFlurry = setup(["blessing of spirits|1", "flurry|0"]);
+    const aura = withFlurry.state.players[0]!.board[0]!;
+    withFlurry.activate("blessing of spirits|1").expectNotInZone(0, "flurry|0", "board").blockWith();
+    closeChain(withFlurry);
+    withFlurry.state.players[0]!.actionPoints = 1;
+    expect(auraAttackLegal(withFlurry, aura.instanceId)).toBe(true);
+
+    const without = setup(["blessing of spirits|1"]);
+    const plainAura = without.state.players[0]!.board[0]!;
+    without.activate("blessing of spirits|1").blockWith();
+    closeChain(without);
+    without.state.players[0]!.actionPoints = 1;
+    expect(auraAttackLegal(without, plainAura.instanceId)).toBe(false);
   });
 
   it("Reality Refractor lets a tapped aura attack", () => {

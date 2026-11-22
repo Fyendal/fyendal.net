@@ -3,6 +3,7 @@ import { cardAbilitiesSuppressed, cardNameKeysOf, dataOf, scriptOf } from "./car
 import { controlledPermanents, hookSources, lingeringModifierSources } from "./sourceQueries.js";
 import { queueDecisionBehindCrank } from "./decisionQueue.js";
 import { FROZEN_WHILE_SOURCE_IN_ARENA } from "./ruleQueries.js";
+import { equipmentZoneEmpty } from "./stateQueries.js";
 
 import {
   cardEntersArenaLogMessage,
@@ -18,6 +19,7 @@ import type { CardInstance, PendingDecisionState, PlayerState } from "./state.js
 import { currentLink, findCardAnywhere, findPermanent, severDefendingEquipment } from "./zoneQueries.js";
 import type { CardData } from "@fyendal/shared";
 import { transitionZone } from "./transitions.js";
+import { hasType } from "@fyendal/shared";
 
 /** Count a successfully paid action play or action-ability activation. */
 export function noteActionPlayedOrActivated(player: PlayerState): void {
@@ -34,8 +36,8 @@ export function consumeNextActionGoAgain(player: PlayerState): boolean {
   return true;
 }
 
-/** Clear per-turn activated-ability usage when a card enters the arena as a
- * new game object while retaining its stable physical-card instance id. */
+/** Clear per-turn activated-ability usage when a card becomes a new game
+ * object while retaining its stable physical-card instance id. */
 export function resetActivatedAbilityUsage(player: PlayerState, instanceId: number): void {
   const exactKeys = new Set([
     `activated:${instanceId}`,
@@ -66,6 +68,21 @@ export function clearPrivateZonePlacement(card: CardInstance): void {
  * card leaves the arena; other script state deliberately survives the move so
  * a resolving layer and its lingering effects can still read it. */
 const ARENA_STATUS_KEYS = ["attacked", "frozenUntilTurn", "marked"];
+
+/** Effects on this object that it keeps when played from its zone, like
+ * temporary grants, and loses on any other zone move. */
+const OBJECT_EFFECT_KEYS = ["faceUpLoadedTurn"];
+
+/** A played card is a new object (CR 3.0.9). Call before `canPlay`, which may record cost state. */
+export function startPlayScriptState(player: PlayerState, card: CardInstance): void {
+  resetActivatedAbilityUsage(player, card.instanceId);
+  const values = card.scriptState;
+  if (!values) return;
+  for (const key of Object.keys(values)) {
+    if (!OBJECT_EFFECT_KEYS.includes(key)) delete values[key];
+  }
+  if (Object.keys(values).length === 0) delete card.scriptState;
+}
 
 /** A card-scoped play permission ends when the card is played or changes zones
  * (CR 3.0.9); effects that grant one to the new object do so after moving it. */
@@ -117,7 +134,7 @@ export function clearTemporaryObjectEffects(card: CardInstance): void {
   const values = card.scriptState;
   if (!values) return;
   for (const key of Object.keys(values)) {
-    if (key.startsWith(FROZEN_WHILE_SOURCE_IN_ARENA) || ARENA_STATUS_KEYS.includes(key)) delete values[key];
+    if (key.startsWith(FROZEN_WHILE_SOURCE_IN_ARENA) || ARENA_STATUS_KEYS.includes(key) || OBJECT_EFFECT_KEYS.includes(key)) delete values[key];
   }
   if (Object.keys(values).length === 0) delete card.scriptState;
 }
@@ -386,7 +403,7 @@ export function entersArena(data: CardData): boolean {
 export function settlesInArena(state: GameStateInternal, card: CardInstance): boolean {
   const data = dataOf(state, card.cardId);
   return entersArena(data) ||
-    (data.cardType === "equipment" && scriptOf(state, card.cardId, card)?.playableEquipment === true);
+    (hasType(data, "equipment") && scriptOf(state, card.cardId, card)?.playableEquipment === true);
 }
 
 export function settlePlayedCard(
@@ -398,13 +415,22 @@ export function settlePlayedCard(
 ): void {
   const data = dataOf(state, card.cardId);
   const script = scriptOf(state, card.cardId, card);
-  if (data.cardType === "equipment" && script?.playableEquipment === true) {
+  // Go again gained on the stack already paid out; attack-proxies never inherit it (CR 1.4.3a).
+  if (card.grantedKeywords) {
+    card.grantedKeywords = card.grantedKeywords.filter((keyword) => keyword !== "go again");
+    if (card.grantedKeywords.length === 0) delete card.grantedKeywords;
+  }
+  if (hasType(data, "equipment") && script?.playableEquipment === true) {
     const slot = (["head", "chest", "arms", "legs"] as const).find((candidate) =>
       (data.subtypes ?? []).includes(candidate),
     );
     const base = slot ? player.equipment[slot] : undefined;
-    // CR 8.5.41c: equipping into a zone it cannot transform the occupant of fails.
-    if (!slot || (base && !script.transformsEquipment?.(runtime.makeCtx(state, player.seat, card), base))) {
+    // CR 1.8.4: an Evo's "if you have a base, transform, then equip" conditions both effects.
+    // CR 8.5.41c: other playable equipment needs an empty zone.
+    const canEquip = script.transformsEquipment
+      ? base && script.transformsEquipment(runtime.makeCtx(state, player.seat, card), base)
+      : slot && equipmentZoneEmpty(player, slot);
+    if (!slot || !canEquip) {
       runtime.commands.moveToGraveyard(state, card, "stack");
       return;
     }

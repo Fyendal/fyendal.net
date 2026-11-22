@@ -26,6 +26,17 @@ describe("prep first-player status", () => {
     })).toBe("opponent-deciding");
   });
 
+  it("lets either seat choose in a solo game", () => {
+    expect(canChooseFirst({ botGame: false, soloGame: true, dieWinner: 0, yourSeat: 1 })).toBe(true);
+    expect(firstPlayerStatus({
+      opponentPresent: true,
+      soloGame: true,
+      dieWinner: 0,
+      startPlayer: null,
+      yourSeat: 1,
+    })).toBeNull();
+  });
+
   it("lets the human choose in a bot game even when the bot wins the roll", () => {
     expect(canChooseFirst({ botGame: true, dieWinner: 1, yourSeat: 0 })).toBe(true);
     expect(firstPlayerStatus({

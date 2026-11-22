@@ -34,7 +34,7 @@ function opponentLabel(intl: IntlShape, participant: MatchSummary["players"][num
   });
 }
 
-function Side({ heroId, caption }: { heroId: string; caption: string | null }) {
+export function Side({ heroId, caption = null }: { heroId: string; caption?: string | null }) {
   return (
     <span className="match-side">
       <img className="match-side-art" src={cardImageUrl(heroId)} alt="" loading="lazy" />

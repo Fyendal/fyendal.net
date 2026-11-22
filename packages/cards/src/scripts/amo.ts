@@ -1,17 +1,33 @@
 import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
-import { attackAbility, decisionPrompt, opponentSeat } from "./shared-helpers.js";
-
-const BLOODROT_POX = "OUT234";
-const FRAILTY = "OUT235";
-const INERTIA = "OUT236";
-const SILVER = "DYN245";
-
-function isDisease(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  return ctx.cardTypes(card).includes("disease");
-}
+import {
+  NAMED_DISEASE_TOKENS,
+  assassinContractAttackTargets,
+  attackAbility,
+  completeContractForSilver,
+  contractWithSilver,
+  controlledDiseases,
+  createChosenDisease,
+  decisionPrompt,
+  defenderInfected,
+  diseaseTokenOptionMessages,
+  equipWithSilver,
+  hitHookLabel,
+  hitsHeroAfterDaggerHit,
+  isInfected,
+  ongoingLabel,
+  opponentSeat,
+  requestDiseaseTokenChoice,
+  targetsHero,
+  hasCardSubtype,
+} from "./shared-helpers.js";
+import { BLOODROT_POX, FRAILTY, INERTIA, SILVER } from "./tokens.js";
 
 function opposingDiseases(ctx: ScriptCtx): readonly DeepReadonly<CardInstance>[] {
-  return ctx.player(opponentSeat(ctx)).board.filter((card) => isDisease(ctx, card));
+  return controlledDiseases(ctx, opponentSeat(ctx));
+}
+
+function createInertiaForEachHero(ctx: ScriptCtx): void {
+  for (const player of ctx.state.players) ctx.createToken(INERTIA, player.seat);
 }
 
 const mortimer: CardScript = {
@@ -50,7 +66,7 @@ const mortimer: CardScript = {
       ],
       canActivate(ctx) {
         return (
-          !!ctx.link && ctx.link.attacker === ctx.seat && ctx.cardTypes(ctx.link.attackingCard).includes("assassin")
+          !!ctx.link && ctx.link.attacker === ctx.seat && hasCardSubtype(ctx, ctx.link.attackingCard, "assassin")
         );
       },
       onActivate(ctx) {
@@ -65,6 +81,35 @@ const mortimer: CardScript = {
   },
 };
 
+const ESCAPED_SUBJECT: CardScript = {
+  hasConditionalGoAgain: defenderInfected,
+};
+
+const EVISCERATE_THE_ENERVATED: CardScript = {
+  ...contractWithSilver((ctx, card) => card.owner === opponentSeat(ctx) && isInfected(ctx, card.owner)),
+  canTriggerOnHit: targetsHero,
+  onHit(ctx) {
+    const top = ctx.player(opponentSeat(ctx)).deck[0];
+    if (top) ctx.banish(top.instanceId);
+  },
+};
+
+const VIRAL_SAMPLING: CardScript = {
+  canTriggerOnHit: defenderInfected,
+  onHit: completeContractForSilver,
+  onFriendlyEffectHitCondition: (ctx, _source, targetSeat) => targetSeat !== ctx.seat && isInfected(ctx, targetSeat),
+  onFriendlyEffectHit: completeContractForSilver,
+};
+
+function sneaking(tokenId: string): CardScript {
+  return {
+    canTriggerOnHit: (ctx) => targetsHero(ctx) && ctx.link?.flags[`reactionBySeat:${ctx.seat}`] === true,
+    onHit(ctx) {
+      ctx.createToken(tokenId, opponentSeat(ctx));
+    },
+  };
+}
+
 export const amo: Record<string, CardScript> = {
   "humour plunge|0": {
     activated: attackAbility(2, {
@@ -73,7 +118,7 @@ export const amo: Record<string, CardScript> = {
       tap: true,
     }),
     modifyAttack(ctx) {
-      return ctx.link?.targetAllyId === undefined && opposingDiseases(ctx).length > 0 ? 1 : 0;
+      return defenderInfected(ctx) ? 1 : 0;
     },
   },
 
@@ -89,4 +134,181 @@ export const amo: Record<string, CardScript> = {
       ctx.createToken(BLOODROT_POX, attackingSeat);
     },
   },
+
+  "plague mask|0": {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      destroySelfCost: true,
+      onActivate(ctx) {
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          prohibitsTokenCreationOfType: "disease",
+          ...ongoingLabel("disease tokens can't be created under your control", "card.effect.amo.plaguemask"),
+        });
+      },
+    },
+  },
+
+  "isolation vestment|0": {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: true,
+      destroySelfCost: true,
+      onActivate(ctx) {
+        ctx.addModifier({
+          scope: "until-end-of-turn",
+          playCostReduction: 1,
+          appliesTo: "attack-action",
+          appliesToClass: "assassin",
+          appliesToTargetControllingType: "disease",
+          ...ongoingLabel(
+            "Assassin attack action cards that target an infected hero cost 1 less to play",
+            "card.effect.amo.isolationvestment",
+          ),
+        });
+      },
+    },
+  },
+
+  "surgical gloves|0": {
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      oncePerTurn: false,
+      effectCardCosts: [
+        {
+          zone: "arena",
+          opponentControlled: true,
+          move: "destroy",
+          count: 1,
+          types: ["disease"],
+          prompt: decisionPrompt("Choose a disease to cure", "card.amo.mortimer.disease.choose"),
+        },
+      ],
+      targetCardOptions(ctx) {
+        const link = ctx.link;
+        return link && link.attacker !== ctx.seat && link.flags.attackGone !== true
+          ? [link.attackingCard.instanceId]
+          : [];
+      },
+      onActivate(ctx) {
+        const attacker = ctx.link?.attacker;
+        if (ctx.playTargetInstanceId !== undefined && attacker !== undefined) {
+          ctx.addModifier({
+            scope: "chain-link",
+            attack: -1,
+            seat: attacker,
+            appliesToInstanceId: ctx.playTargetInstanceId,
+          });
+        }
+        ctx.destroyAtEndPhase(ctx.self.instanceId);
+      },
+    },
+  },
+
+  "second salvos|0": {
+    triggers: [equipWithSilver(2)],
+    activated: {
+      cost: 0,
+      isAttack: false,
+      goAgain: false,
+      timing: "instant",
+      destroySelfCost: true,
+      onActivate(ctx) {
+        ctx.untap(ctx.player(ctx.seat).hero.instanceId);
+      },
+    },
+  },
+
+  "escaped subject|1": ESCAPED_SUBJECT,
+  "escaped subject|2": ESCAPED_SUBJECT,
+  "escaped subject|3": ESCAPED_SUBJECT,
+
+  "eviscerate the enervated|1": EVISCERATE_THE_ENERVATED,
+  "eviscerate the enervated|2": EVISCERATE_THE_ENERVATED,
+  "eviscerate the enervated|3": EVISCERATE_THE_ENERVATED,
+
+  "sneaking exhaustion|1": sneaking(INERTIA),
+  "sneaking rot|1": sneaking(BLOODROT_POX),
+  "sneaking weakness|1": sneaking(FRAILTY),
+
+  "wound extraction|1": {
+    canTriggerOnHit: hitsHeroAfterDaggerHit,
+    onHit(ctx) {
+      requestDiseaseTokenChoice(ctx, "amo-wound-extraction");
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "amo-wound-extraction") createChosenDisease(ctx, option);
+    },
+  },
+
+  "act on intel: whereabouts|1": {
+    playTargetOptions: assassinContractAttackTargets,
+    onPlay(ctx) {
+      if (ctx.playTargetInstanceId === undefined) return;
+      ctx.addModifier({
+        scope: "chain-link",
+        attack: 1,
+        appliesTo: "attack-action",
+        appliesToInstanceId: ctx.playTargetInstanceId,
+        onHitScriptHook: {
+          hook: "amo-act-on-intel-hit",
+          ...hitHookLabel("the hit hero banishes a card from their hand", "card.effect.amo.actonintel"),
+          heroOnly: true,
+        },
+      });
+    },
+    onGrantedHit(ctx, hook) {
+      if (hook !== "amo-act-on-intel-hit") return;
+      const defender = opponentSeat(ctx);
+      const hand = ctx.player(defender).hand;
+      if (hand.length) {
+        ctx.requestCardChoice(
+          "amo-act-on-intel-banish",
+          decisionPrompt("Banish a card from your hand", "card.common.hand.card.banish"),
+          hand.map((card) => card.instanceId),
+          defender,
+        );
+      }
+    },
+    onChoose(ctx, hook, option) {
+      if (hook === "amo-act-on-intel-banish") ctx.banish(Number(option));
+    },
+  },
+
+  "pick your poison|2": {
+    onPlay(ctx) {
+      ctx.requestChoice(
+        "amo-pick-your-poison",
+        decisionPrompt(
+          "Choose a disease token. The other two are created under your control",
+          "card.amo.pickyourpoison.choose",
+          { optionMessages: diseaseTokenOptionMessages(NAMED_DISEASE_TOKENS) },
+        ),
+        [...NAMED_DISEASE_TOKENS],
+        opponentSeat(ctx),
+      );
+    },
+    onChoose(ctx, hook, option) {
+      if (hook !== "amo-pick-your-poison") return;
+      for (const tokenId of NAMED_DISEASE_TOKENS) {
+        if (tokenId !== option) ctx.createToken(tokenId, opponentSeat(ctx));
+      }
+    },
+  },
+
+  "languid pace|3": {
+    onAttackDeclared: createInertiaForEachHero,
+    onDefend: createInertiaForEachHero,
+  },
+
+  "viral sampling|1": VIRAL_SAMPLING,
+  "viral sampling|2": VIRAL_SAMPLING,
+  "viral sampling|3": VIRAL_SAMPLING,
 };

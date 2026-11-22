@@ -9,6 +9,12 @@ export class RoomVersionGate {
     this.seenAtLatest.clear();
   }
 
+  /** Lets one more message of this type through at the current version, for
+   * a reply that re-projects the same commit (a solo seat switch). */
+  allowRepeat(type: string): void {
+    this.seenAtLatest.delete(type);
+  }
+
   current(): number {
     return this.latest;
   }

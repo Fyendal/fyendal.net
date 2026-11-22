@@ -408,6 +408,25 @@ describe("UPR — rules regression coverage", () => {
       .expectZoneSize(1, "deck", 0);
   });
 
+  it("That All You Got? does not draw when a reaction pumped the attack above 2", () => {
+    const s = scenario({
+      seats: [
+        { hero: "dorinthea", hand: ["razor reflex|1", "en garde|1", "raging onslaught|2"] },
+        { hero: "rhinar", hand: ["that all you got?|2"], deck: [BLUE] },
+      ],
+    });
+
+    s.attackWithWeapon()
+      .blockWith()
+      .react("razor reflex|1", { pitch: ["raging onslaught|2"], settle: false })
+      .passPriority()
+      .react("that all you got?|2")
+      .expectFinalAttack(5)
+      .doRaw({ kind: "close-chain" })
+      .expectHandSize(1, 0)
+      .expectZoneSize(1, "deck", 1);
+  });
+
   it("Spreading Flames buffs every eligible Draconic attack on the combat chain", () => {
     const s = scenario({
       seats: [
@@ -611,7 +630,7 @@ describe("UPR — rules regression coverage", () => {
         { hero: "dorinthea", hand: ["singe|3", BLUE] },
       ],
     });
-    s.play("singe|3", { pitch: [BLUE] }).chooseOption("opponent");
+    s.play("singe|3", { pitch: [BLUE] }).chooseOption("opposing hero");
     const nekriaId = s.state.players[0]!.board.find((card) => card.cardId === printingId("nekria|0"))!.instanceId;
     s.chooseMany([String(nekriaId)]).endTurn();
     expect(s.state.players[0]!.board.find((card) => card.instanceId === nekriaId)!.life).toBe(6);
@@ -667,7 +686,7 @@ describe("UPR — rules regression coverage", () => {
         { hero: "dorinthea", hand: ["singe|3", BLUE] },
       ],
     });
-    s.play("singe|3", { pitch: [BLUE] }).chooseOption("opponent");
+    s.play("singe|3", { pitch: [BLUE] }).chooseOption("opposing hero");
     const yenduraiId = s.state.players[0]!.board.find((card) => card.cardId === printingId("yendurai|0"))!.instanceId;
     s.chooseMany([String(yenduraiId)]).settle();
     const yendurai = s.state.players[0]!.board.find((card) => card.instanceId === yenduraiId)!;
@@ -790,7 +809,7 @@ describe("UPR — bounded multi-card choices", () => {
         { hero: "dorinthea", board: ["aether ashwing|0", "aether ashwing|0", "barnacle|2"] },
       ],
     });
-    s.play("singe|2").chooseOption("opponent");
+    s.play("singe|2").chooseOption("opposing hero");
     const pd = s.state.pendingDecision!;
     expect(pd.chooseHook).toBe("singe-allies");
     expect([pd.minimumSelections, pd.maximumSelections]).toEqual([0, 2]);

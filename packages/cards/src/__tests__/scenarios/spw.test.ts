@@ -98,6 +98,38 @@ describe("SPW — Smash Palace heroes and weapons", () => {
       .expectAP(0, 1);
   });
 
+  it("a cheer from winning a wager gives Celebrant Broadsword go again", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "dorinthea",
+          heroKey: "zane, broadly beloved|0",
+          weapons: ["celebrant broadsword|0"],
+          equipment: NO_EQUIPMENT,
+          hand: ["gutshot|1"],
+          deck: ["raging onslaught|3", "raging onslaught|3"],
+          resources: 4,
+          life: 10,
+        },
+        {
+          hero: "rhinar",
+          hand: [],
+          deck: ["raging onslaught|3"],
+          equipment: NO_EQUIPMENT,
+          life: 30,
+        },
+      ],
+    });
+    g.play("gutshot|1")
+      .activate("celebrant broadsword|0")
+      .blockWith()
+      .settle()
+      .expectLog("wins the wager")
+      .expectLog("The crowd cheers")
+      .expectLog("has Go again")
+      .expectAP(0, 1);
+  });
+
   it("Celebrant Broadsword has no go again without a cheer", () => {
     const g = scenario({
       seats: [

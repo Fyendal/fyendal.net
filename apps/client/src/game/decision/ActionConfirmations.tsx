@@ -1,4 +1,5 @@
 import { useIntl, type IntlShape } from "react-intl";
+import type { LethalPassRisk } from "../lethalPass.js";
 import { ChoiceCancel, ChoiceList } from "./ChoiceModal.js";
 import { CardRef } from "./DecisionShared.js";
 
@@ -26,12 +27,29 @@ export function orderedBoostOptions(options: readonly number[]): number[] {
   });
 }
 
+function EquipFailWarning({ cardId, blockerId }: { cardId: string | undefined; blockerId: string | null }) {
+  const intl = useIntl();
+  const card = cardId ? <CardRef id={cardId} /> : intl.formatMessage({ id: "game.card" });
+  return (
+    <span className="decision-context decision-warning">
+      {blockerId === null
+        ? intl.formatMessage({ id: "game.decision.equipFails.noBase.warning" }, { card })
+        : intl.formatMessage(
+            { id: "game.decision.equipFails.warning" },
+            { card, equipped: <CardRef id={blockerId} /> },
+          )}
+    </span>
+  );
+}
+
 export function ChainCloseConfirmation({
   cardId,
+  equipBlockedBy,
   onConfirm,
   onCancel,
 }: {
   cardId: string | undefined;
+  equipBlockedBy?: string | null;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -45,6 +63,7 @@ export function ChainCloseConfirmation({
           { card: cardId ? <CardRef id={cardId} /> : intl.formatMessage({ id: "game.card.nonAttack" }) },
         )}
       </span>
+      {equipBlockedBy !== undefined ? <EquipFailWarning cardId={cardId} blockerId={equipBlockedBy} /> : null}
       <ChoiceList
         options={[{
           key: "close-chain",
@@ -61,11 +80,13 @@ export function ChainCloseConfirmation({
 export function ActionConfirmation({
   cardId,
   activation,
+  equipBlockedBy,
   onConfirm,
   onCancel,
 }: {
   cardId: string | undefined;
   activation: boolean;
+  equipBlockedBy?: string | null;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -84,6 +105,7 @@ export function ActionConfirmation({
           },
         )}
       </span>
+      {equipBlockedBy !== undefined ? <EquipFailWarning cardId={cardId} blockerId={equipBlockedBy} /> : null}
       <ChoiceList
         options={[{ key: "confirm", label: verb, spaceDefault: true, onChoose: onConfirm }]}
       />
@@ -133,6 +155,49 @@ export function EndTurnConfirmation({
         options={[{
           key: "end-turn",
           label: intl.formatMessage({ id: "game.decision.endTurn.action" }),
+          onChoose: onConfirm,
+        }]}
+      />
+      <ChoiceCancel onCancel={onCancel} />
+    </>
+  );
+}
+
+export function LethalPassConfirmation({
+  risk,
+  action,
+  onConfirm,
+  onCancel,
+}: {
+  risk: LethalPassRisk;
+  action: "pass" | "confirm-blocks" | "confirm-no-blocks";
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const intl = useIntl();
+  return (
+    <>
+      <span className="decision-prompt" role="alert">
+        {intl.formatMessage({ id: "game.decision.lethal.prompt" })}
+      </span>
+      <div className="lethal-tally">
+        <span className="lethal-tally-side lethal-tally-damage">
+          <strong>{risk.damage}</strong>
+          <span>{intl.formatMessage({ id: "game.decision.lethal.damage" })}</span>
+        </span>
+        <span className="lethal-tally-side">
+          <img className="ico ico-lg" src="/icons/life.png" alt="" />
+          <strong>{risk.life}</strong>
+          <span>{intl.formatMessage({ id: "game.decision.lethal.life" })}</span>
+        </span>
+      </div>
+      <span className="decision-context">
+        {intl.formatMessage({ id: `game.decision.lethal.context.${risk.window}` })}
+      </span>
+      <ChoiceList
+        options={[{
+          key: "lethal-commit",
+          label: intl.formatMessage({ id: `game.decision.lethal.action.${action}` }),
           onChoose: onConfirm,
         }]}
       />

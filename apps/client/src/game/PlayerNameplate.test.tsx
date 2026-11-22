@@ -33,4 +33,16 @@ describe("PlayerNameplate", () => {
     expect(html).toContain("LatePlayer");
     expect(html).not.toContain("/logo.png");
   });
+
+  it("shows the hero in place of the shared username in solo", () => {
+    const html = renderToStaticMarkup(createElement(PlayerNameplate, {
+      placement: "opponent",
+      profile: { username: "alice", badge: "early-tester" },
+      name: "Kayo",
+    }));
+
+    expect(html).toContain(">Kayo</span>");
+    expect(html).not.toContain("alice");
+    expect(html).not.toContain("/logo.png");
+  });
 });

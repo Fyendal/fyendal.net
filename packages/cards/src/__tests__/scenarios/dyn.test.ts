@@ -3,6 +3,7 @@ import { legalIntents, projectStateFor } from "@fyendal/engine";
 import { cardData, scripts } from "../../index.js";
 import { functionalKeyOf } from "../../functional.js";
 import { scenario } from "../harness.js";
+import { hasType } from "@fyendal/shared";
 
 const BLUE = "wrecker romp|3";
 const RED = "wrecker romp|1";
@@ -64,8 +65,35 @@ describe("DYN — registration and heroes", () => {
     });
   });
 
+  it("hides the card Arakni, Huntsman bottoms from its owner and spectators", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "arakni, huntsman|0",
+          hand: ["DYN133"],
+          resources: 3,
+        },
+        { hero: "dorinthea", deck: ["head jab|1", "head jab|2"] },
+      ],
+    });
+    const topId = g.state.players[1]!.deck[0]!.instanceId;
+    const logLength = g.state.log.length;
+
+    g.play("DYN133").chooseOption("yes").chooseOption("bottom");
+
+    expect(g.state.players[1]!.deck.at(-1)?.instanceId).toBe(topId);
+    const moves = g.state.log.slice(logLength).filter((entry) =>
+      entry.publicPayload?.message.id === "engine.log.card.put.on.deck.bottom.hidden",
+    );
+    expect(moves).toHaveLength(1);
+    expect(moves[0]!.seatPayloads?.[0]?.message.id).toBe("engine.log.card.put.on.deck.bottom");
+    expect(moves[0]!.seatPayloads?.[1]).toBeNull();
+    expect(moves[0]!.seatText?.[1]).toBeNull();
+  });
+
   it.each(CONTRACT_PRINTINGS)("$id triggers Arakni, Huntsman when played", (contract) => {
-    if (contract.cardType === "action") {
+    if (hasType(contract, "action")) {
       const g = scenario({
         seats: [
           {
@@ -86,7 +114,7 @@ describe("DYN — registration and heroes", () => {
       return;
     }
 
-    if (contract.cardType === "defense-reaction") {
+    if (hasType(contract, "defense-reaction")) {
       const g = scenario({
         seats: [
           { hero: "rhinar", hand: ["head jab|1"] },
@@ -110,7 +138,7 @@ describe("DYN — registration and heroes", () => {
       return;
     }
 
-    throw new Error(`add a Huntsman play scenario for Contract ${contract.cardType} ${contract.id}`);
+    throw new Error(`add a Huntsman play scenario for Contract ${contract.types.join("/")} ${contract.id}`);
   });
 
   it("puts Reincarnate on the deck bottom when it is discarded at random", () => {
@@ -332,12 +360,29 @@ describe("DYN — registration and heroes", () => {
     s.play("leave no witnesses|1")
       .blockWith()
       .settle()
+      .chooseCard(BLUE)
       .expectInZone(1, "flex claws|1", "banish")
       .expectInZone(1, BLUE, "banish")
       .expectInZone(0, "silver|0", "board");
     expect(s.state.players[0]!.board.filter(
       (card) => functionalKeyOf(cardData[card.cardId]!) === "silver|0",
     )).toHaveLength(1);
+  });
+
+  it("Leave No Witnesses may leave the arsenal card in place", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["leave no witnesses|1"] },
+        { hero: "dorinthea", deck: ["flex claws|1"], arsenalFaceDown: [BLUE] },
+      ],
+    });
+
+    s.play("leave no witnesses|1").blockWith().settle();
+    expect(s.state.pendingDecision?.player).toBe(0);
+    s.chooseOption("pass")
+      .expectInZone(1, "flex claws|1", "banish")
+      .expectInZone(1, BLUE, "arsenal");
+    expect(s.state.players[1]!.arsenal[0]?.faceDown).toBe(true);
   });
 
   it("keeps destroyed Blacktek Whisperers visible on the chain after resolution", () => {
@@ -416,6 +461,20 @@ describe("DYN — defense counters", () => {
 });
 
 describe("DYN — rules regression coverage", () => {
+  it("Tempest Aurora ignores arcane riders like Cindering Foresight and boosts the next arcane damage card", () => {
+    const s = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["tempest aurora|3", "cindering foresight|3", "zap|1"] },
+        { hero: "dorinthea" },
+      ],
+    });
+
+    s.play("tempest aurora|3").play("cindering foresight|3");
+    s.state.players[0]!.actionPoints = 1;
+    // Zap deals 3, +1 Cindering Foresight, +1 Tempest Aurora.
+    s.play("zap|1").chooseOption("opposing hero").expectLife(1, 15);
+  });
+
   it("Plasma Mainline asks before moving a steam counter after an item is cranked", () => {
     const s = scenario({
       seats: [
@@ -519,7 +578,7 @@ describe("DYN — rules regression coverage", () => {
     cardData.ARC159 = {
       id: "ARC159",
       name: "Command and Conquer",
-      cardType: "action",
+      types: ["action"],
       text: "Defense reactions can't be played this chain link. When this hits a hero, destroy all cards in their arsenal.",
       pitch: 1,
       cost: 2,
@@ -725,6 +784,40 @@ describe("DYN — Mind Warp", () => {
     expect(g.state.pendingDecision?.chooseHook).toBe("arcane-barrier");
     g.chooseOption(payment).expectLife(1, payment === "pay 0" ? 17 : 18)
       .expectHandSize(1, payment === "pay 0" ? 3 : 4);
+  });
+});
+
+describe("DYN — Swell Tidings", () => {
+  const equipment = { head: null, chest: null, arms: null, legs: null };
+  function setup(barrier = false) {
+    return scenario({
+      seats: [
+        { hero: "rhinar", weapons: ["volzar, meteor storm|0"], hand: ["swell tidings|1", "sigil of solace|1"], equipment,
+          resources: 3 },
+        { hero: "dorinthea", hand: ["head jab|1"], resources: barrier ? 1 : 0,
+          equipment: { ...equipment, head: barrier ? "nullrune hood|0" : null } },
+      ],
+    });
+  }
+  const ponders = (g: ReturnType<typeof setup>) =>
+    g.state.players[0]!.board.filter((card) => cardData[card.cardId]?.name === "Ponder").length;
+
+  it("creates a Ponder only when it deals more than 5 damage", () => {
+    const plain = setup();
+    plain.play("swell tidings|1").settle().expectLife(1, 15);
+    expect(ponders(plain)).toBe(0);
+    const amplified = setup();
+    amplified.play("sigil of solace|1").activate("volzar, meteor storm|0").play("swell tidings|1").settle()
+      .expectLife(1, 14);
+    expect(ponders(amplified)).toBe(1);
+  });
+
+  it.each(["pay 0", "pay 1"])("checks actual damage after arcane barrier: %s", (payment) => {
+    const g = setup(true);
+    g.play("sigil of solace|1").activate("volzar, meteor storm|0").play("swell tidings|1");
+    expect(g.state.pendingDecision?.chooseHook).toBe("arcane-barrier");
+    g.chooseOption(payment).settle().expectLife(1, payment === "pay 0" ? 14 : 15);
+    expect(ponders(g)).toBe(payment === "pay 0" ? 1 : 0);
   });
 });
 

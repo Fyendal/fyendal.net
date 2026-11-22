@@ -408,9 +408,7 @@ export const warrior: Record<string, CardScript> = {
     },
     onChoose(ctx, hook, option) {
       if (hook !== "refraction-bolters" || option !== "yes") return;
-      // the link is already resolved when the choice is answered, so grant
-      // the action point directly (resolveLink's go-again check has passed)
-      ctx.gainActionPoint();
+      ctx.grantGoAgain();
       ctx.logPublic(
         localizedLog(
           "Refraction Bolters: the attack gains go again (+1 action point)",

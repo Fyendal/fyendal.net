@@ -12,6 +12,11 @@ export const PLAYER_BADGE_DETAILS: Record<PlayerBadge, {
     descriptionMessageId: "account.badge.earlyTester.description",
     image: "/logo.png",
   },
+  supporter: {
+    nameMessageId: "account.badge.supporter.name",
+    descriptionMessageId: "account.badge.supporter.description",
+    image: "/badges/supporter-gem.png",
+  },
 };
 
 export function PlayerBadgeMark({ badge }: { badge: PlayerBadge }) {

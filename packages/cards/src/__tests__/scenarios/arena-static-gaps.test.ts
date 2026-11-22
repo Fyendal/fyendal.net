@@ -47,12 +47,12 @@ describe("Shimmering Specter leaves the arena from the combat chain", () => {
   it("creates a Spectral Shield for its defender when it leaves the chain after defending", () => {
     const g = scenario({
       seats: [
-        { hero: "rhinar", resources: 3, hand: ["wounded bull|1"], equipment: NO_EQUIPMENT },
+        { hero: "rhinar", hand: ["head jab|1"], equipment: NO_EQUIPMENT },
         { hero: "dorinthea", hand: ["shimmering specter|1"], equipment: NO_EQUIPMENT },
       ],
     });
 
-    g.play("wounded bull|1").blockWith("shimmering specter|1").settle();
+    g.play("head jab|1").blockWith("shimmering specter|1").settle();
     expect(boardCount(g, 1, SPECTRAL_SHIELD)).toBe(0);
 
     g.passUntilLayer("Create a Spectral Shield token");

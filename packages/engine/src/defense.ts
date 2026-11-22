@@ -21,6 +21,7 @@ import {
   computeAttack,
   computeDefense,
   currentPowerOf,
+  mirageConditionMet,
   noteAttackDefendedBy,
 } from "./combatValues.js";
 import {
@@ -37,6 +38,7 @@ import type { CardInstance, ChainLinkState, PlayerState, StackLayer } from "./st
 
 import {
   currentLink,
+  defendingSeatOf,
   findCardAnywhere,
   findPermanent,
   opponent,
@@ -51,6 +53,7 @@ import { declaredLayerTargetLegal } from "./layerTargets.js";
 import { cardProhibitedByChosenName } from "./restrictions.js";
 import { transitionZone } from "./transitions.js";
 import { ATTACKS_QUEUED_ABOVE_LAYER } from "./attackQueue.js";
+import { hasType } from "@fyendal/shared";
 
 /** The attack becomes a chain link and is now attacking: intimidate, then the defend decision. */
 export function proceedWithAttack(state: GameStateInternal, runtime: EngineRuntime): void {
@@ -211,7 +214,7 @@ export function legalDefenderCards(
     (!link || attackAllowsDefender(state, runtime, link, c, fromHand));
   const hand = player.hand.filter((c) => {
     const d = instanceDataOf(state, c);
-    if (d.cardType === "defense-reaction" || !cardHasDefenseProperty(state, c)) return false;
+    if (hasType(d, "defense-reaction") || !cardHasDefenseProperty(state, c)) return false;
     return allowed(c, true);
   });
   const arsenal = player.arsenal.filter((c) => {
@@ -225,7 +228,7 @@ export function legalDefenderCards(
         : scriptedPermission === true
       : instanceHasKeyword(state, c, "ambush");
     const attackActionPermission = player.flags.attackActionsDefendFromArsenal === true &&
-      d.cardType === "action" && (d.subtypes ?? []).includes("attack");
+      hasType(d, "action") && (d.subtypes ?? []).includes("attack");
     return (attackActionPermission || ambush) &&
       cardHasDefenseProperty(state, c) && allowed(c, false);
   });
@@ -299,8 +302,7 @@ export function defenderSelectionError(
     }
     staged.push(card);
 
-    const cardType = dataOf(state, card.cardId).cardType;
-    if (cardType !== "block") {
+    if (!hasType(dataOf(state, card.cardId), "block")) {
       nonBlockCount++;
       if (maxNonBlock !== undefined && nonBlockCount > maxNonBlock) {
         return `this attack can't be defended by more than ${maxNonBlock} non-block cards`;
@@ -347,19 +349,77 @@ export function stageDefenders(
   return undefined;
 }
 
-/** Phantasm (8.3.13): is the link's phantasm attack defended by a
- *  non-Illusionist attack action card with 6 or more {p}? Re-evaluated when
- *  the triggered layer resolves, including current counters and temporary
- *  power changes (CR 5.3.2a). */
+/** Phantasm (8.3.13): does `card`, defending on `link`, qualify as a
+ *  non-Illusionist attack action card with 6 or more {p} against a phantasm
+ *  attack? Uses current counters and temporary power changes (CR 5.3.2a). */
+export function cardTriggersPhantasm(state: GameStateInternal, runtime: EngineRuntime,
+  link: ChainLinkState, card: CardInstance): boolean {
+  if (!instanceHasKeyword(state, link.attackingCard, "phantasm")) return false;
+  const d = dataOf(state, card.cardId);
+  if (!hasType(d, "action") || !(d.subtypes ?? []).includes("attack")) return false;
+  if (cardTypesOf(state, card).includes("illusionist")) return false;
+  return currentPowerOf(state, runtime, card, link) >= 6;
+}
+
+/** Re-evaluated when the triggered layer resolves. */
 function phantasmDefender(state: GameStateInternal,
   runtime: EngineRuntime, link: ChainLinkState): boolean {
-  if (!instanceHasKeyword(state, link.attackingCard, "phantasm")) return false;
-  return link.defendingCards.some((c) => {
-    const d = dataOf(state, c.cardId);
-    if (d.cardType !== "action" || !(d.subtypes ?? []).includes("attack")) return false;
-    if (cardTypesOf(state, c).includes("illusionist")) return false;
-    return currentPowerOf(state, runtime, c, link) >= 6;
+  return link.defendingCards.some((c) => cardTriggersPhantasm(state, runtime, link, c));
+}
+
+/** Build a layer for each defender newly meeting Mirage's state condition. */
+function mirageLayers(state: GameStateInternal,
+  runtime: EngineRuntime, link: ChainLinkState): StackLayer[] {
+  const queued = [...state.stack, ...(state.pendingTriggeredLayers ?? [])];
+  return link.defendingCards.flatMap((card): StackLayer[] => {
+    if (!mirageConditionMet(state, runtime, link, card)) return [];
+    if (queued.some((layer) =>
+      layer.engineEffect?.kind === "mirage-destroy" && layer.sourceInstanceId === card.instanceId
+    )) return [];
+    logPublic(state, gameLogMessage(
+      `${nameOf(state, card.cardId)} triggers Mirage`,
+      "engine.log.trigger.mirage",
+      { card: logCardValue(card.cardId) },
+    ));
+    return [{
+      sourceInstanceId: card.instanceId,
+      seat: defendingSeatOf(link),
+      triggerIndex: -12,
+      label: "Mirage — destroy this",
+      optional: false,
+      engineEffect: { kind: "mirage-destroy" },
+    }];
   });
+}
+
+/** Queue Mirage layers for a condition met after the defend event, such as an
+ *  attack reaction raising the attack to 6 {p}. True when any were queued. */
+export function queueMirageStateTriggers(state: GameStateInternal, runtime: EngineRuntime): boolean {
+  const link = currentLink(state);
+  if (!link) return false;
+  const layers = mirageLayers(state, runtime, link);
+  if (layers.length === 0) return false;
+  (state.pendingTriggeredLayers ??= []).push(...layers);
+  return true;
+}
+
+/** Resolve Mirage's state-triggered layer, destroying the defender if the
+ *  condition still holds. */
+export function resolveMirageLayer(
+  state: GameStateInternal,
+  runtime: EngineRuntime,
+  sourceInstanceId: number,
+): void {
+  const link = currentLink(state);
+  const card = link?.defendingCards.find((candidate) => candidate.instanceId === sourceInstanceId);
+  if (!link || !card || !mirageConditionMet(state, runtime, link, card)) {
+    logPublic(state, gameLogMessage(
+      "Mirage resolves without effect (its condition is no longer met)",
+      "engine.log.mirage.fizzles.condition.failed",
+    ));
+    return;
+  }
+  runtime.makeCtx(state, defendingSeatOf(link), card, link).destroyDefendingCard(sourceInstanceId);
 }
 
 /** Resolve Spectra's triggered layer: destroy its source (CR 8.3.14b). An
@@ -485,14 +545,15 @@ function collectDefendEventLayers(
     undefined,
     { defenderInstanceIds: defenders.map(({ card }) => card.instanceId) },
   );
+  const defenderSeat = defendingSeatOf(link);
   for (const { card } of defenders) {
     const script = scriptOf(state, card.cardId, card);
     if (!script?.onDefend) continue;
-    const ctx = runtime.makeCtx(state, card.owner, card, link);
+    const ctx = runtime.makeCtx(state, defenderSeat, card, link);
     if (script.canTriggerOnDefend && !script.canTriggerOnDefend(ctx)) continue;
-    appendTriggerLayer(groups, card.owner, {
+    appendTriggerLayer(groups, defenderSeat, {
       sourceInstanceId: card.instanceId,
-      seat: card.owner,
+      seat: defenderSeat,
       triggerIndex: -4,
       label: "When this defends",
       optional: false,
@@ -503,6 +564,12 @@ function collectDefendEventLayers(
       card.cardId,
       { id: "engine.term.when.this.defends" },
     ));
+    // CR 6.6.5: the trap has triggered even if its layer later finds no target.
+    if ((dataOf(state, card.cardId).subtypes ?? []).includes("trap")) {
+      for (const group of runtime.events.collectCardEventTriggerLayers(state, "trap-triggered", defenderSeat)) {
+        for (const layer of group.layers) appendTriggerLayer(groups, group.seat, layer);
+      }
+    }
   }
 
   if (defenders.length > 0) {
@@ -535,7 +602,8 @@ function collectDefendEventLayers(
   }
 
   const friendlyDefendedSources = [
-    link.attackingCard,
+    // A weapon's chain link holds a snapshot; script state lives on the zone card.
+    findCardAnywhere(state, link.attackingCard.instanceId)?.card ?? link.attackingCard,
     ...hookSources(state, link.attacker, {
       board: true,
       equipment: true,
@@ -598,6 +666,7 @@ function collectDefendEventLayers(
   ) {
     appendTriggerLayer(groups, link.attacker, phantasmLayer(state, link));
   }
+  for (const layer of mirageLayers(state, runtime, link)) appendTriggerLayer(groups, layer.seat, layer);
   return groups;
 }
 
@@ -752,7 +821,7 @@ export function assignDefenders(
   if (
     link.defendingCards.some((card) => {
       const data = dataOf(state, card.cardId);
-      return data.cardType === "action" && (data.subtypes ?? []).includes("attack");
+      return hasType(data, "action") && (data.subtypes ?? []).includes("attack");
     }) &&
     activeModifiers(state, link, ["chain-link"]).some(
       (modifier) => modifier.goAgainIfDefendedByAttackAction === true,
@@ -762,7 +831,7 @@ export function assignDefenders(
   }
   // All abilities generated by the committed defense are simultaneous,
   // respondable triggered layers. This includes legacy onDefend and
-  // onFriendlyDefended hooks, Fragment, Phantasm, and registered triggers.
+  // onFriendlyDefended hooks, Fragment, Phantasm, Mirage, and registered triggers.
   runtime.dispatchFlow("queueTriggeredLayers", state, collectDefendEventLayers(state, runtime, link, defendEventCards, handCount > 0), "start-reaction-step");
   return undefined;
 }
@@ -775,11 +844,6 @@ export function resolveDefendEventLayer(state: GameStateInternal,
   if (effect?.kind === "on-defend-hook" && (link ||
     scriptOf(state, effect.source.cardId, effect.source)?.onDefendResolvesWithoutChainLink === true)) {
     const source = findCardAnywhere(state, layer.sourceInstanceId)?.card ?? effect.source;
-    // A trap's defend trigger is the trap triggering ("whenever a trap you
-    // control triggers"); announce it for every trap rather than per script.
-    if ((dataOf(state, source.cardId).subtypes ?? []).includes("trap")) {
-      runtime.events.queueTriggeredEvent(state, "trap-triggered", layer.seat);
-    }
     if (!declaredLayerTargetLegal(state, runtime, layer)) return;
     runtime.events.runHook(state, layer.seat, source, "onDefend", link, undefined, layer.targetCardInstanceId);
     // Defender-side "when this defends, intimidate" (Scowling Flesh Bag) queues

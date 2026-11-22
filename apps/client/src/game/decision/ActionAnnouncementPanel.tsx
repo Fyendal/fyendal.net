@@ -11,6 +11,7 @@ import { ActionTargetCards } from "./CardChoices.js";
 import { ChoiceCancel, ChoiceList } from "./ChoiceModal.js";
 import { CardRef, cardAffiliation, chooseWithoutFocus, handCardPlayLabel, PitchPaymentProgress } from "./DecisionShared.js";
 import type { ActionAnnouncementModel } from "./DecisionModels.js";
+import { DecisionSheetMinimizeButton } from "./DecisionSheet.js";
 
 const CARD_COST_LABEL_MESSAGES = {
   cards: "game.decision.cardCost.label.cards",
@@ -30,6 +31,7 @@ export function ActionAnnouncementPanel({
     sel,
     selCardId,
     step,
+    equipBlockedBy,
     abilityChoices,
     onSelectAbility,
     onChooseHandPlay,
@@ -86,18 +88,20 @@ export function ActionAnnouncementPanel({
     step === "boost" ||
     step === "close-chain" ||
     step === "confirm";
+  // Payment stays a small float so the hand remains reachable for pitching.
+  const sheet = choiceStep || step === "target" || Boolean(stagedAdditionalCost && !additionalCostConfirmed);
 
   return (
     <div className={`decision decision-options${
       stagedAdditionalCost && !additionalCostConfirmed ? " decision-additional-cost" : ""
     }${
-      step === "boost" || step === "target" || step === "close-chain" || step === "confirm"
-        ? " decision-post-payment" : ""
+      step === "close-chain" || step === "confirm" ? " decision-post-payment" : ""
     }${
       choiceStep ? " decision-choice" : ""
     }${
       step === "target" ? " decision-target-choice" : ""
-    }`}>
+    }${sheet ? " decision-sheet" : ""}`}>
+      {sheet ? <DecisionSheetMinimizeButton /> : null}
       {sel.kind === "choose-hand-action" ? (
         <>
           <span className="decision-prompt">
@@ -391,6 +395,7 @@ export function ActionAnnouncementPanel({
       {step === "close-chain" ? (
         <ChainCloseConfirmation
           cardId={selCardId}
+          equipBlockedBy={equipBlockedBy}
           onConfirm={onConfirmChainClose}
           onCancel={onCancel}
         />
@@ -399,6 +404,7 @@ export function ActionAnnouncementPanel({
         <ActionConfirmation
           cardId={selCardId}
           activation={sel.kind === "activate"}
+          equipBlockedBy={equipBlockedBy}
           onConfirm={onConfirmAction}
           onCancel={onCancel}
         />

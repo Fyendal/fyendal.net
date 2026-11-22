@@ -1,77 +1,21 @@
-import type { CardInstance, CardScript, DeepReadonly, ScriptCtx } from "@fyendal/engine";
+import type { CardScript } from "@fyendal/engine";
 import {
   attackAbility,
+  boulderDrop,
   canHeave,
   cardNamed,
+  chokeslam,
   commonOptionMessages,
+  crushTriggered,
   decisionPrompt,
+  isAura,
   localizedCardLog,
   ongoingLabel,
   opponentSeat,
 } from "./shared-helpers.js";
+import { SEISMIC_SURGE, VIGOR } from "./tokens.js";
 
 // ── SBR (Silver Age Chapter 1: Bravo, Flattering Showman precon) ───────────
-
-const SEISMIC_SURGE = "SBR035";
-const VIGOR = "SBR036";
-
-function hasKeyword(ctx: ScriptCtx, cardId: string, keyword: string): boolean {
-  return (ctx.cardData(cardId).keywords ?? []).some((candidate) => candidate.toLowerCase() === keyword.toLowerCase());
-}
-
-function hasCrush(ctx: ScriptCtx, card: { readonly cardId: string }): boolean {
-  return hasKeyword(ctx, card.cardId, "crush");
-}
-
-function isAura(ctx: ScriptCtx, card: DeepReadonly<CardInstance>): boolean {
-  const data = ctx.cardData(card.cardId);
-  return (
-    ctx.cardTypes(card).includes("aura") ||
-    (data.keywords ?? []).some((keyword) => keyword.toLowerCase() === "suspense")
-  );
-}
-
-function crushTriggered(ctx: ScriptCtx): boolean {
-  return !!ctx.link && ctx.link.targetAllyId === undefined && ctx.link.hit && ctx.link.damage >= 4;
-}
-
-function boulderDrop(): CardScript {
-  return {
-    canTriggerOnHit: crushTriggered,
-    onHit(ctx) {
-      const hand = ctx.player(opponentSeat(ctx)).hand;
-      if (hand.length === 0) return;
-      ctx.requestCardChoice(
-        "boulder-drop-top",
-        decisionPrompt(`${ctx.data.name}: put a card from your hand on top of your deck`, "card.sbr.hand.card.top", {
-          values: { card: { kind: "card", cardId: ctx.self.cardId } },
-        }),
-        hand.map((card) => card.instanceId),
-        opponentSeat(ctx),
-      );
-    },
-    onChoose(ctx, hook, option) {
-      if (hook === "boulder-drop-top") ctx.putOnDeckTop(Number(option));
-    },
-  };
-}
-
-function chokeslam(): CardScript {
-  return {
-    canTriggerOnHit: crushTriggered,
-    onHit(ctx) {
-      const hero = ctx.player(opponentSeat(ctx)).hero;
-      ctx.setCardState(hero.instanceId, "attackActionNoPowerGainUntilTurn", ctx.state.turn + 1);
-      ctx.logPublic(
-        localizedCardLog(
-          ctx,
-          "Chokeslam: opposing attack action cards can't gain {p} during their next action phase",
-          "card.log.sbr.chokeslam.suppressed",
-        ),
-      );
-    },
-  };
-}
 
 export const sbr: Record<string, CardScript> = {
   "bravo, flattering showman|0": {
@@ -82,10 +26,10 @@ export const sbr: Record<string, CardScript> = {
       goAgain: true,
       label: "Turn a crush card in arsenal face up",
       canActivate(ctx) {
-        return ctx.player(ctx.seat).arsenal.some((card) => card.faceDown && hasCrush(ctx, card));
+        return ctx.player(ctx.seat).arsenal.some((card) => card.faceDown && ctx.hasKeyword(card, "crush"));
       },
       onActivate(ctx) {
-        const cards = ctx.player(ctx.seat).arsenal.filter((card) => card.faceDown && hasCrush(ctx, card));
+        const cards = ctx.player(ctx.seat).arsenal.filter((card) => card.faceDown && ctx.hasKeyword(card, "crush"));
         ctx.requestCardChoice(
           "bravo-reveal-crush",
           decisionPrompt("Bravo: turn a crush card in your arsenal face up", "card.sbr.bravo.crush.faceup"),
@@ -96,7 +40,7 @@ export const sbr: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "bravo-reveal-crush") return;
       const card = ctx.player(ctx.seat).arsenal.find((candidate) => candidate.instanceId === Number(option));
-      if (!card?.faceDown || !hasCrush(ctx, card)) return;
+      if (!card?.faceDown || !ctx.hasKeyword(card, "crush")) return;
       if (!ctx.turnArsenalFaceUp(card.instanceId)) return;
       ctx.addCardTempPower(card.instanceId, 2);
       ctx.grantCardKeyword(card.instanceId, "dominate");
@@ -192,17 +136,15 @@ export const sbr: Record<string, CardScript> = {
   },
 
   "zealous belting|1": {
-    onAttackDeclared(ctx) {
+    hasConditionalGoAgain: (ctx) => {
       const basePower = ctx.data.attack ?? 0;
-      if (ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > basePower)) {
-        ctx.grantGoAgain();
-      }
+      return ctx.player(ctx.seat).pitch.some((card) => ctx.basePower(card) > basePower);
     },
   },
 
   "crash and bash|1": {
     onDefend(ctx) {
-      const crushCards = ctx.player(ctx.seat).hand.filter((card) => hasCrush(ctx, card));
+      const crushCards = ctx.player(ctx.seat).hand.filter((card) => ctx.hasKeyword(card, "crush"));
       if (crushCards.length === 0) return;
       ctx.requestCardChoice(
         "crash-reveal-crush",
@@ -217,7 +159,7 @@ export const sbr: Record<string, CardScript> = {
     onChoose(ctx, hook, option) {
       if (hook !== "crash-reveal-crush" || option === "no") return;
       const card = ctx.player(ctx.seat).hand.find((candidate) => candidate.instanceId === Number(option));
-      if (!card || !hasCrush(ctx, card)) return;
+      if (!card || !ctx.hasKeyword(card, "crush")) return;
       ctx.createToken(SEISMIC_SURGE);
       ctx.logPublic(
         localizedCardLog(
@@ -236,7 +178,7 @@ export const sbr: Record<string, CardScript> = {
       ctx.requestClash(opponentSeat(ctx), "clash-of-vigor");
     },
     onClashResult(ctx, hook, winner) {
-      if (hook === "clash-of-vigor" && winner >= 0) ctx.createToken(VIGOR, winner);
+      if (hook === "clash-of-vigor" && winner >= 0) ctx.heroCreatesTokens(winner, VIGOR);
     },
   },
 

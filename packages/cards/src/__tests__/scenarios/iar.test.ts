@@ -1214,10 +1214,8 @@ describe("IAR cards", () => {
 
     g.blockWith().settle().expectLife(1, 16);
 
-    expect(g.state.players[0]!.board.filter((card) => card.cardId === "AJV028"))
-      .toHaveLength(1);
-    expect(g.state.players[1]!.board.filter((card) => card.cardId === "AJV029"))
-      .toHaveLength(4);
+    expect(boardNames(g, 0).filter((name) => name === "Embodiment of Earth")).toHaveLength(1);
+    expect(boardNames(g, 1).filter((name) => name === "Frostbite")).toHaveLength(4);
   });
 
   it("Ancient Earth Oak's Earth Bond adds power and bottoms the attack on hit", () => {
@@ -2314,7 +2312,7 @@ describe("August 31–September 1 IAR spoilers", () => {
         appliesTo: "attack-action",
         attack: 2,
         overpower: true,
-        onHitCreateToken: { cardId: "SBA036", count: 2 },
+        onHitCreateToken: { cardId: RUNECHANT_ID, count: 2 },
       }),
     ]));
     g.play("raging onslaught|1");
@@ -2637,6 +2635,27 @@ describe("September 2 IAR spoilers", () => {
 
     expect(boardNames(g, 0).filter((name) => name === "Ponder")).toHaveLength(1);
   });
+
+  it("Blessing of Suraya played from an opponent's deck goes into its controller's soul", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["tome of pandemonium|2"],
+        resources: 3,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", deck: ["blessing of suraya|2"], equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("tome of pandemonium|2")
+      .play("blessing of suraya|2", { fromZone: "banish" })
+      .endTurn()
+      .endTurn()
+      .expectInZone(0, "blessing of suraya|2", "soul");
+
+    expect(g.state.players[1]!.soul).toHaveLength(0);
+    expect(boardNames(g, 0).filter((name) => name === "Ponder")).toHaveLength(1);
+  });
 });
 
 describe("September 3 IAR spoilers", () => {
@@ -2760,6 +2779,27 @@ describe("September 3 IAR spoilers", () => {
       .expectInZone(0, "restless outlaw|1", "graveyard")
       .expectInZone(0, "snatch|1", "hand");
     expect(g.state.players[0]!.hero.tapped).toBeUndefined();
+  });
+
+  it("a bound Mark does not trigger when an Incarnate ally is removed from the game", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["mark of ushering|3", "tome of necrosis|1"],
+        board: ["corrupted corpse|0"],
+        deck: ["snatch|1"],
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("mark of ushering|3")
+      .chooseCard("corrupted corpse|0")
+      .play("tome of necrosis|1", { alternativeCost: "corrupted corpse|0" });
+
+    expect(boardNames(g, 0)).not.toContain("Corrupted Corpse");
+    expect(boardNames(g, 0)).not.toContain("Gate to i'Arathael");
+    g.expectInZone(0, "mark of ushering|3", "graveyard");
   });
 
   it("Restless Templar creates a Gate when another Decay zombie dies", () => {
@@ -3039,6 +3079,26 @@ describe("September 3 IAR spoilers", () => {
     expect(boardNames(g, 0).filter((name) => name === "Runechant")).toHaveLength(2);
   });
 
+  it("Ripple Away reduces Promise of Power's Runechants", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        hand: ["promise of power|2", "ripple away|3"],
+        banish: ["rift bind|1"],
+        board: ["blasmophet, the insatiable hunger|0"],
+        resources: 2,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.activate("ripple away|3")
+      .play("promise of power|2")
+      .play("rift bind|1", { fromZone: "banish" });
+
+    expect(boardNames(g, 0).filter((name) => name === "Runechant")).toHaveLength(1);
+  });
+
   it("Enshrine Sin charges its extra banish cost, opts, and creates a Runechant", () => {
     const g = scenario({ seats: [
       {
@@ -3288,6 +3348,26 @@ describe("September 3 IAR spoilers", () => {
       .chooseCard("banneret of swordsmanship|2")
       .expectInZone(0, "banneret of swordsmanship|2", "soul");
     expect(boardNames(g, 0)).toContain("Flurry");
+  });
+
+  it("Cogwerx Prong Bot recognizes Crank granted to Hyper Driver by Maxx", () => {
+    const g = scenario({ seats: [
+      {
+        hero: "rhinar",
+        heroKey: "maxx nitro|0",
+        hand: ["cogwerx prong bot|2"],
+        board: ["hyper driver|0"],
+        resources: 3,
+        equipment: NO_EQUIPMENT,
+      },
+      { hero: "dorinthea", equipment: NO_EQUIPMENT },
+    ] });
+
+    g.play("cogwerx prong bot|2")
+      .blockWith()
+      .settle()
+      .chooseCard("hyper driver|0");
+    expect(g.state.players[0]!.board[0]!.counters?.steam).toBe(1);
   });
 
   it("Cogwerx Prong Bot discards itself as an instant to create a Golden Cog", () => {

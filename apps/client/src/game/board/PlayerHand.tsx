@@ -6,18 +6,12 @@ import type {
   GameIntent,
   GameView,
   PendingDecision,
-  PlayableZone,
   PlayerView,
 } from "@fyendal/shared";
-import { cardData } from "@fyendal/cards/client";
 import { CardBack, CardFace } from "../Card.js";
 import { PreviewCardFace } from "../PreviewCardFace.js";
 import { cardLegalityExplanation } from "../causalExplanations.js";
-import {
-  canAddPaymentCard,
-  canAddResourcePaymentPitch,
-  isDiscardPayment,
-} from "../legalSelection.js";
+import type { canAddPaymentCard } from "../legalSelection.js";
 import { playableZoneTooltip } from "../playableZoneTooltip.js";
 import {
   motionLocationKey,
@@ -29,8 +23,10 @@ import type { BoardLegalState } from "./boardModel.js";
 import { useHandReorder } from "./useHandReorder.js";
 import { handDropAction, handPlayWindow, type HandDropAction } from "./handOrder.js";
 import { handFanSlotStyle } from "./handFan.js";
+import { presentedHandCount } from "../defenderState.js";
 import type { MotionPreference } from "../../storage.js";
 import { useMotionPreference } from "../motion/useMotionPreference.js";
+import { handCardState, handZoneCards } from "./handCardState.js";
 
 type ResourcePayment = NonNullable<PendingDecision["resourcePayment"]>;
 
@@ -121,6 +117,7 @@ export function PlayerHand({
   replaying,
   motionPreference = "system",
   interaction,
+  inert = false,
 }: {
   view: GameView;
   player: PlayerView;
@@ -129,6 +126,8 @@ export function PlayerHand({
   replaying: boolean;
   motionPreference?: MotionPreference;
   interaction: PlayerHandInteraction;
+  /** Solo: this seat is not acting, so its cards show without affordances. */
+  inert?: boolean;
 }) {
   const intl = useIntl();
   const reducedMotion = useMotionPreference(motionPreference);
@@ -146,7 +145,7 @@ export function PlayerHand({
     handRef,
     preStackCards.map((card) => card.instanceId),
     reorderEnabled,
-    interaction.onHandDrop ? {
+    interaction.onHandDrop && !inert ? {
       action: (instanceId) => handDropAction(instanceId, {
         defending: interaction.defending,
         stageableIds: interaction.legalState.stageableDefenders,
@@ -175,30 +174,9 @@ export function PlayerHand({
   useEffect(() => {
     previousHandOrderRef.current = visibleCards.map((card) => card.instanceId);
   });
-  const playableZoneCards = spectating
-    ? []
-    : [...interaction.legalState.playableZones]
-      .filter((entry): entry is [number, Exclude<PlayableZone, "deck">] => entry[1] !== "deck")
-      .flatMap(([instanceId, zone]) => {
-        if (interaction.optimisticallyHiddenIds.has(instanceId)) return [];
-        // Effects such as Red Lure Harpoon and Nuu let this player play an
-        // opponent-owned card. The legal intent is authoritative, so search
-        // every public inactive zone instead of assuming the card is owned by
-        // the player whose hand strip surfaces the action.
-        const card = view.players.flatMap((zoneOwner) => [
-          ...zoneOwner.banish,
-          ...zoneOwner.graveyard,
-        ])
-          .find((candidate) => candidate.instanceId === instanceId);
-        return card ? [{ card, zone }] : [];
-      });
-  const activatableZoneCards = spectating
-    ? []
-    : [...player.graveyard, ...player.banish].filter((card) =>
-      !interaction.optimisticallyHiddenIds.has(card.instanceId) &&
-      interaction.legalState.activatable.has(card.instanceId) &&
-      !interaction.legalState.playableZones.has(card.instanceId)
-    );
+  const zoneCards = handZoneCards(view, player, spectating || inert ? null : interaction);
+  const playableZoneCards = zoneCards.playable;
+  const activatableZoneCards = zoneCards.activatable;
   const [scrollAvailability, setScrollAvailability] = useState<HandScrollAvailability>({
     left: false,
     right: false,
@@ -245,17 +223,13 @@ export function PlayerHand({
       behavior: "smooth",
     });
   };
-  const pitchValue = (instanceId: number) => {
-    const card = player.hand.find((candidate) => candidate.instanceId === instanceId);
-    return card ? (cardData[card.cardId]?.pitch ?? 0) : 0;
-  };
-  const discardPayment = isDiscardPayment(interaction.selectedPaymentVariants);
   const showBacks = spectating && view.phase !== "game-over" && !(replaying && player.hand.length > 0);
   // A focused source keeps its DOM node but leaves the fan.
   const fannedHandCards = visibleCards.filter((card) =>
     interaction.focusedSourceInstanceId !== card.instanceId
   );
-  const handSlots = showBacks ? player.handCount : fannedHandCards.length;
+  const backCount = presentedHandCount(view, player.seat);
+  const handSlots = showBacks ? backCount : fannedHandCards.length;
   const fanCount = handSlots + playableZoneCards.length + activatableZoneCards.length;
   const fanSlot = (card: CardView) => {
     const index = fannedHandCards.indexOf(card);
@@ -288,7 +262,7 @@ export function PlayerHand({
         document.body,
       ) : null}
       <div
-        className="hand"
+        className={`hand${inert ? " hand-solo-waiting" : ""}`}
         id="player-hand"
         ref={handRef}
         data-motion-zone={motionLocationKey(handMotionLocation)}
@@ -297,7 +271,7 @@ export function PlayerHand({
         {...reorderHandlers}
       >
         {showBacks
-          ? Array.from({ length: player.handCount }, (_, index) => (
+          ? Array.from({ length: backCount }, (_, index) => (
               <CardBack
                 key={index}
                 label=""
@@ -307,51 +281,9 @@ export function PlayerHand({
               />
             ))
           : visibleCards.map((card) => {
-            const stageable = interaction.defending &&
-              interaction.legalState.stageableDefenders.has(card.instanceId);
-            const selected =
-              ((interaction.selection.kind === "play-hand" ||
-                interaction.selection.kind === "choose-hand-action") &&
-                interaction.selection.instanceId === card.instanceId) ||
-              (interaction.selection.kind === "activate" &&
-                interaction.selection.sourceInstanceId === card.instanceId) ||
-              interaction.preStackSelectedInstanceId === card.instanceId ||
-              (
-                interaction.boundedHandPick?.has(card.instanceId) === true &&
-                interaction.selectedBoundedChoiceOptionIds?.has(
-                  interaction.boundedHandPick.get(card.instanceId)!,
-                ) === true
-              );
-            const resourcePitchable = interaction.resourcePayment !== undefined && (
-              interaction.pitchSelection.includes(card.instanceId) ||
-              canAddResourcePaymentPitch(
-                interaction.resourcePayment,
-                interaction.pitchSelection,
-                card.instanceId,
-              )
-            );
-            const pitchable = interaction.selection.kind !== "none" && !selected && (
-              interaction.pitchSelection.includes(card.instanceId) ||
-              canAddPaymentCard(
-                interaction.selectedPaymentVariants,
-                interaction.pitchSelection,
-                card.instanceId,
-                pitchValue,
-              )
-            );
-            const actionable = interaction.choosingPitch
-              ? !selected && (interaction.resourcePayment ? resourcePitchable : pitchable)
-              : interaction.defending
-                ? stageable
-                : interaction.selection.kind !== "none"
-                  ? pitchable || selected
-                  : resourcePitchable ||
-                    interaction.choosingArsenal ||
-                    interaction.handPick?.has(card.instanceId) === true ||
-                    interaction.boundedHandPick?.has(card.instanceId) === true ||
-                    interaction.legalState.playableHand.has(card.instanceId) ||
-                    interaction.legalState.activatable.has(card.instanceId);
-            const explanation = !spectating && !replaying && !actionable &&
+            const state = handCardState(card, player, inert ? null : interaction);
+            const actionable = state.actionable;
+            const explanation = !inert && !spectating && !replaying && !actionable &&
               interaction.selection.kind === "none"
               ? cardLegalityExplanation(view, viewerSeat, interaction.legalIntents, card).text
               : undefined;
@@ -368,12 +300,10 @@ export function PlayerHand({
                 onClick={actionable && interaction.focusedSourceInstanceId !== card.instanceId
                   ? () => interaction.onCardClick(card) : undefined}
                 explanation={explanation}
-                selected={selected || (
-                  discardPayment && interaction.pitchSelection.includes(card.instanceId)
-                )}
-                pitched={!discardPayment && interaction.pitchSelection.includes(card.instanceId)}
+                selected={state.selected}
+                pitched={state.pitched}
                 highlighted={actionable}
-                dimmed={interaction.defending && !stageable}
+                dimmed={state.dimmed}
               />
             );
             })}
@@ -383,7 +313,7 @@ export function PlayerHand({
               card={card}
               style={handFanSlotStyle(handSlots + index)}
               ghost
-              explanation={playableZoneTooltip(card, zone)}
+              explanation={playableZoneTooltip(intl, card, zone)}
               onClick={() => {
                 if (interaction.selection.kind === "none") {
                   interaction.onSelect({ kind: "play-zone", instanceId: card.instanceId, zone });

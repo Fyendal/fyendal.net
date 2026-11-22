@@ -2,7 +2,7 @@
  {
   "id": "SVI001",
   "name": "Viserai",
-  "cardType": "hero",
+  "types": ["hero"],
   "text": "Whenever you play a Runeblade card, if you have played another 'non-attack' action card this turn, create a Runechant token.",
   "classes": [
    "runeblade"
@@ -14,7 +14,7 @@
  {
   "id": "SVI002",
   "name": "Reaping Blade",
-  "cardType": "weapon",
+  "types": ["weapon"],
   "text": "Once per Turn Action - {r}: Attack\nIf a hero has more {h} than any other hero, they can't gain {h}.",
   "attack": 3,
   "classes": [
@@ -29,7 +29,7 @@
  {
   "id": "SVI003",
   "name": "Blade Beckoner Helm",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -46,7 +46,7 @@
  {
   "id": "SVI004",
   "name": "Crown of Dichotomy",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {r}, destroy Crown of Dichotomy: Put target Runeblade attack action card and target Runeblade 'non-attack' action card from your graveyard on top of your deck in any order.\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -63,7 +63,7 @@
  {
   "id": "SVI005",
   "name": "Blossom of Spring",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - Destroy this: Gain {r}. Go again",
   "defense": 0,
   "classes": [
@@ -77,7 +77,7 @@
  {
   "id": "SVI006",
   "name": "Runebleed Robe",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Instant - Destroy this and a Runechant you control: Prevent the next 1 arcane damage that would be dealt to you this turn.\nArcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -94,7 +94,7 @@
  {
   "id": "SVI007",
   "name": "Beckoning Haunt",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Action - {x}{x}{r}, destroy this: Return target aura with cost X from your graveyard to your hand.\nGuardwell",
   "defense": 2,
   "classes": [
@@ -111,7 +111,7 @@
  {
   "id": "SVI008",
   "name": "Nullrune Gloves",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -128,7 +128,7 @@
  {
   "id": "SVI009",
   "name": "Blade Beckoner Boots",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "This gets +1{d} while defending a weapon attack.\nGuardwell",
   "defense": 1,
   "classes": [
@@ -145,7 +145,7 @@
  {
   "id": "SVI010",
   "name": "Nullrune Boots",
-  "cardType": "equipment",
+  "types": ["equipment"],
   "text": "Arcane Barrier 1",
   "defense": 0,
   "classes": [
@@ -162,7 +162,7 @@
  {
   "id": "SVI011",
   "name": "Amplify the Arknight",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This costs {r} less to play for each Runechant you control.",
   "pitch": 1,
   "cost": 3,
@@ -179,7 +179,7 @@
  {
   "id": "SVI012",
   "name": "Hit the High Notes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played or created an aura this turn, this gets +2{p}.",
   "pitch": 1,
   "cost": 1,
@@ -196,7 +196,7 @@
  {
   "id": "SVI013",
   "name": "Rune Flash",
-  "cardType": "action",
+  "types": ["action"],
   "text": "This costs {r} less to play for each Runechant token you control.\nGo again",
   "pitch": 1,
   "cost": 3,
@@ -216,7 +216,7 @@
  {
   "id": "SVI014",
   "name": "Runerager Swarm",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you've played or created an aura this turn, this gets go again.",
   "pitch": 1,
   "cost": 0,
@@ -236,7 +236,7 @@
  {
   "id": "SVI015",
   "name": "Runic Fellingsong",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When this attacks, you may banish an aura from your graveyard. If you do, deal 1 arcane damage to target hero.",
   "pitch": 1,
   "cost": 3,
@@ -253,7 +253,7 @@
  {
   "id": "SVI016",
   "name": "Shrill of Skullform",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played or created an aura this turn, Shrill of Skullform gains +3{p}.",
   "pitch": 1,
   "cost": 2,
@@ -270,7 +270,7 @@
  {
   "id": "SVI017",
   "name": "Spellblade Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Spellblade Assault, create 2 Runechant tokens.",
   "pitch": 1,
   "cost": 2,
@@ -287,7 +287,7 @@
  {
   "id": "SVI018",
   "name": "Reduce to Runechant",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Reduce to Runechant costs {r} less to play for each Runechant you control.\nCreate a Runechant token.",
   "pitch": 1,
   "cost": 1,
@@ -300,7 +300,7 @@
  {
   "id": "SVI019",
   "name": "Sigil of Suffering",
-  "cardType": "defense-reaction",
+  "types": ["defense-reaction"],
   "text": "Deal 1 arcane damage to the attacking hero.\nIf you have dealt arcane damage this turn, Sigil of Suffering gains +1{d}.",
   "pitch": 1,
   "cost": 0,
@@ -313,7 +313,7 @@
  {
   "id": "SVI020",
   "name": "Condemn to Slaughter",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Runeblade attack this turn gets +3{p}.\nYou may destroy an aura you control. If you do, each opponent destroys an aura permanent they control.\nGo again",
   "pitch": 1,
   "cost": 1,
@@ -329,7 +329,7 @@
  {
   "id": "SVI021",
   "name": "Malefic Incantation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nThis enters the arena with 3 verse counters. When it has none, destroy it.\nOnce per turn, when you play an attack action card, remove a verse counter from this. If you do, create a Runechant token.",
   "pitch": 1,
   "cost": 0,
@@ -345,7 +345,7 @@
  {
   "id": "SVI022",
   "name": "Mauvrion Skies",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next runeblade attack action card you play this turn gains go again and \"If this hits, create 3 Runechant tokens.\"\nGo again",
   "pitch": 1,
   "cost": 0,
@@ -361,7 +361,7 @@
  {
   "id": "SVI023",
   "name": "Read the Runes",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Create 3 Runechant tokens.",
   "pitch": 1,
   "cost": 0,
@@ -374,7 +374,7 @@
  {
   "id": "SVI024",
   "name": "Shrill of Skullform",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played or created an aura this turn, Shrill of Skullform gains +3{p}.",
   "pitch": 2,
   "cost": 2,
@@ -391,7 +391,7 @@
  {
   "id": "SVI025",
   "name": "Malefic Incantation",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nThis enters the arena with 2 verse counters. When it has none, destroy it.\nOnce per turn, when you play an attack action card, remove a verse counter from this. If you do, create a Runechant token.",
   "pitch": 2,
   "cost": 0,
@@ -407,7 +407,7 @@
  {
   "id": "SVI026",
   "name": "Shrill of Skullform",
-  "cardType": "action",
+  "types": ["action"],
   "text": "If you have played or created an aura this turn, Shrill of Skullform gains +3{p}.",
   "pitch": 3,
   "cost": 2,
@@ -424,7 +424,7 @@
  {
   "id": "SVI027",
   "name": "Spellblade Assault",
-  "cardType": "action",
+  "types": ["action"],
   "text": "When you attack with Spellblade Assault, create 2 Runechant tokens.",
   "pitch": 3,
   "cost": 2,
@@ -441,7 +441,7 @@
  {
   "id": "SVI028",
   "name": "Vexing Malice",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Deal 2 arcane damage to target hero.",
   "pitch": 3,
   "cost": 1,
@@ -458,7 +458,7 @@
  {
   "id": "SVI029",
   "name": "Condemn to Slaughter",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next Runeblade attack this turn gets +1{p}.\nYou may destroy an aura you control. If you do, each opponent destroys an aura permanent they control.\nGo again",
   "pitch": 3,
   "cost": 1,
@@ -474,7 +474,7 @@
  {
   "id": "SVI030",
   "name": "Flying High",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack this turn gets go again. If it's blue, it gets +1{p}.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -490,7 +490,7 @@
  {
   "id": "SVI031",
   "name": "Mauvrion Skies",
-  "cardType": "action",
+  "types": ["action"],
   "text": "The next Runeblade attack action card you play this turn gets go again and \"When this hits, create a Runechant token.\"\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -506,7 +506,7 @@
  {
   "id": "SVI032",
   "name": "Sigil of Silphidae",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Go again\nWhen this enters or leaves the arena, you may banish another aura from your graveyard. If you do, deal 1 arcane damage to target hero.\nAt the beginning of your action phase, destroy this.",
   "pitch": 3,
   "cost": 0,
@@ -522,7 +522,7 @@
  {
   "id": "SVI033",
   "name": "Trot Along",
-  "cardType": "action",
+  "types": ["action"],
   "text": "Your next attack with 3 or less base {p} this turn gets go again.\nGo again",
   "pitch": 3,
   "cost": 0,
@@ -538,7 +538,7 @@
  {
   "id": "SVI034",
   "name": "Runechant",
-  "cardType": "token",
+  "types": ["token"],
   "text": "When you play an attack action card or activate a weapon attack, destroy this and deal 1 arcane damage to target opposing hero.",
   "classes": [
    "runeblade"

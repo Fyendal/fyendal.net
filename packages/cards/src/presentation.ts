@@ -16,9 +16,18 @@ export const MIN_DECK_SIZE: Record<Format, number> = {
   "silver-age": 40,
 };
 
-export const EXACT_DECK_SIZE: Partial<Record<Format, number>> = {
+const EXACT_DECK_SIZE: Partial<Record<Format, number>> = {
   "silver-age": 40,
 };
+
+/** Presented main-deck size limits; the open card pool waives the exact size. */
+export function presentedDeckSize(
+  format: Format,
+  cardPoolMode: CardPoolMode = "legal",
+): { minimum: number; exact?: number } {
+  const exact = cardPoolMode === "open" ? undefined : EXACT_DECK_SIZE[format];
+  return { minimum: MIN_DECK_SIZE[format], ...(exact === undefined ? {} : { exact }) };
+}
 
 const MAX_PRESENTED_WEAPONS = 2;
 const EQUIPMENT_SLOTS: EquipmentSlot[] = ["head", "chest", "arms", "legs"];
@@ -193,7 +202,7 @@ export function validatePresentationAgainstCards(
   if (incarnate) {
     return { ok: false, error: `${incarnate.name} can't start in your deck (Incarnate)` };
   }
-  const exact = EXACT_DECK_SIZE[format];
+  const exact = presentedDeckSize(format, options.cardPoolMode).exact;
   if (exact !== undefined && presented.deck.length !== exact) {
     return {
       ok: false,

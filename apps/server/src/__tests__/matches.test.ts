@@ -161,7 +161,7 @@ describe("match recording", () => {
     const result = await store.applyIntent(conceded.code, conceded.credentials, { kind: "concede" });
     expect(result.ok).toBe(true);
     const ended = await botRoom(alice);
-    const deleted = await store.deleteBotRoom(ended.code, ended.credentials);
+    const deleted = await store.deletePracticeRoom(ended.code, ended.credentials);
     expect(deleted.ok).toBe(true);
 
     const { matches } = await listMatches(db, alice);

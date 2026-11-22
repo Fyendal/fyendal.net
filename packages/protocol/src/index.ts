@@ -1,5 +1,5 @@
 import type { ClientBotTask, BotWorkerResponse } from "@fyendal/shared";
-import { STANDARD_CARD_ART } from "@fyendal/shared";
+import { MANUAL_MOVE_DESTINATIONS, STANDARD_CARD_ART } from "@fyendal/shared";
 import { decodeSerializedStateEnvelope } from "./simulationState.js";
 import type {
   AttackQueueEntryView,
@@ -19,10 +19,15 @@ import type {
   Format,
   GameIntent,
   GameLogEvent,
+  ManualEdit,
+  ReactionDefenseView,
   GameLogViewEntry,
   GameMessage,
   GameMessageValue,
   GameStatsView,
+  GameClockSummary,
+  GameClockView,
+  RoomClock,
   GameTransitionMove,
   GameTransitionView,
   GameTurnStatsView,
@@ -118,6 +123,8 @@ export interface VersionUpdateImage {
   src: string;
   width: number;
   height: number;
+  /** CSS width from a `#w=<px>` fragment; null keeps the default size. */
+  displayWidth: number | null;
 }
 
 const VERSION_UPDATE_SCREENSHOT =
@@ -128,17 +135,30 @@ const MAX_VERSION_UPDATE_IMAGE_SIDE = 4096;
 const CARD_IMAGE_WIDTH = 450;
 const CARD_IMAGE_HEIGHT = 628;
 
+const VERSION_UPDATE_DISPLAY_WIDTH = /^w=([1-9]\d{1,3})$/;
+const MIN_VERSION_UPDATE_DISPLAY_WIDTH = 40;
+const MAX_VERSION_UPDATE_DISPLAY_WIDTH = 2000;
+
 export function decodeVersionUpdateImageSource(value: unknown): VersionUpdateImage | null {
   if (!string(value, 300, false)) return null;
-  if (VERSION_UPDATE_CARD.test(value)) {
-    return { kind: "card", src: value, width: CARD_IMAGE_WIDTH, height: CARD_IMAGE_HEIGHT };
+  const hash = value.indexOf("#");
+  const src = hash === -1 ? value : value.slice(0, hash);
+  let displayWidth: number | null = null;
+  if (hash !== -1) {
+    const fragment = VERSION_UPDATE_DISPLAY_WIDTH.exec(value.slice(hash + 1));
+    if (!fragment) return null;
+    displayWidth = Number(fragment[1]);
+    if (displayWidth < MIN_VERSION_UPDATE_DISPLAY_WIDTH || displayWidth > MAX_VERSION_UPDATE_DISPLAY_WIDTH) return null;
   }
-  const screenshot = VERSION_UPDATE_SCREENSHOT.exec(value);
+  if (VERSION_UPDATE_CARD.test(src)) {
+    return { kind: "card", src, width: CARD_IMAGE_WIDTH, height: CARD_IMAGE_HEIGHT, displayWidth };
+  }
+  const screenshot = VERSION_UPDATE_SCREENSHOT.exec(src);
   if (!screenshot) return null;
   const width = Number(screenshot[1]);
   const height = Number(screenshot[2]);
   if (width > MAX_VERSION_UPDATE_IMAGE_SIDE || height > MAX_VERSION_UPDATE_IMAGE_SIDE) return null;
-  return { kind: "screenshot", src: value, width, height };
+  return { kind: "screenshot", src, width, height, displayWidth };
 }
 
 export const MAX_GLOBAL_NOTICE_LENGTH = 1_000;
@@ -171,8 +191,13 @@ export interface DeckSummary {
   /** Current legality hints; omitted when the corresponding list is empty. */
   bannedCards?: string[];
   futureCards?: string[];
+  /** Deckbuilding limits the pool exceeds; only the open card pool waives them. */
+  constructionIssues?: DeckConstructionIssue[];
   art: DeckArt;
 }
+export type DeckConstructionIssue =
+  | { kind: "too-many-copies"; cardName: string; count: number; limit: number }
+  | { kind: "pool-too-large"; count: number; limit: number };
 export interface DeckPlay { deckId: string; playedAt: number }
 export interface DecksResponse { ok: true; decks: DeckSummary[]; plays: DeckPlay[] }
 export interface DeckResponse { ok: true; deck: DeckSummary }
@@ -190,6 +215,8 @@ export interface DeckDetailResponse {
     decklist: DeckPool;
     matchups?: FabraryMatchup[];
     selectedMatchupId?: string;
+    /** The fetched Fabrary deck's printing pins, shown under the player's picks. */
+    fabraryArt?: Record<string, string>;
   };
 }
 export interface DeckInvalidResponse {
@@ -247,6 +274,8 @@ export interface ReplaySummary {
   frameCount: number;
   favorite: boolean;
   share: ReplayShare | null;
+  /** A sandbox or solo game: it counts toward no match history or stats. */
+  sandbox?: true;
 }
 export interface ReplaysResponse { ok: true; replays: ReplaySummary[] }
 /** "public" opens for anyone holding the link, signed in or not; "friends"
@@ -386,7 +415,7 @@ export const ACHIEVEMENT_IDS = [
   "five-strike-turn", "iron-wall", "second-wind", "long-game", "against-the-odds", "empty-tank",
   "beat-bravo", "beat-briar", "beat-kayo", "beat-cindra",
   "beat-ira", "beat-hala", "beat-jarl", "beat-levia", "beat-starvo", "beat-boltyn",
-  "beat-ira-sage",
+  "beat-ira-sage", "beat-aurora", "beat-dorinthea", "beat-fang",
 ] as const;
 export type AchievementId = typeof ACHIEVEMENT_IDS[number];
 // Keep retired IDs decodable so existing unlocks and account exports remain valid.
@@ -416,12 +445,15 @@ export interface AccountExport {
     username: string;
     createdAt: number;
     earlyTester: boolean;
+    /** End of the Ko-fi supporter entitlement matched by recovery email. */
+    supporterUntil: number | null;
     selectedBadge: PlayerBadge | null;
     playmat: string | null;
     betaTester: boolean;
     email: string | null;
     pendingEmail: string | null;
   };
+  kofiPayments: Array<{ paidAt: number; tierName: string | null }>;
   decks: Array<{
     id: string;
     name: string;
@@ -574,9 +606,9 @@ const FORMATS = new Set(["cc", "silver-age"]);
 const CARD_POOL_MODES = new Set(["legal", "future", "open"]);
 const PHASES = new Set(["start", "action", "layer", "reaction", "defend", "end", "game-over"]);
 const MELD_SIDES = new Set(["left", "right", "both"]);
-const BOT_OPPONENTS = new Set(["bravo", "briar", "kayo", "cindra", "ira", "hala", "jarl", "levia", "starvo", "boltyn", "ira-sage"]);
+const BOT_OPPONENTS = new Set(["bravo", "briar", "kayo", "cindra", "ira", "hala", "jarl", "levia", "starvo", "boltyn", "ira-sage", "aurora", "dorinthea", "fang"]);
 /** Practice bots offered only to operator-allowlisted beta testers. */
-export const BETA_BOT_OPPONENTS: ReadonlySet<BotOpponent> = new Set<BotOpponent>(["ira-sage"]);
+export const BETA_BOT_OPPONENTS: ReadonlySet<BotOpponent> = new Set<BotOpponent>();
 const PLAYABLE_ZONES = new Set(["banish", "graveyard", "deck"]);
 const EQUIPMENT_SLOTS = new Set(["head", "chest", "arms", "legs"]);
 const DECISION_KINDS = new Set([
@@ -588,7 +620,8 @@ const ERROR_CODES = new Set([
   "SESSION_REPLACED", "INVALID_PRESENTATION", "INVALID_MESSAGE", "FORBIDDEN", "CONFLICT",
   "INTERNAL_ERROR", "RESYNC_REQUIRED",
   "USER_NOT_FOUND", "INVALID_FRIEND_REQUEST", "FRIEND_REQUEST_CONFLICT", "FRIEND_REQUIRED",
-  "FRIEND_UNAVAILABLE", "MESSAGE_BOUNDS", "MESSAGE_RATE_LIMITED",
+  "FRIEND_UNAVAILABLE", "MESSAGE_BOUNDS", "MESSAGE_RATE_LIMITED", "DECK_LOCKED",
+  "SANDBOX_REQUIRED", "SANDBOX_SEAT_FORBIDDEN", "SANDBOX_EDIT_UNAVAILABLE",
 ]);
 const UNDO_TARGETS = new Set(["last-action", "current-turn", "previous-turn"]);
 const EMOTE_MESSAGES = new Set([
@@ -603,8 +636,8 @@ const EMOTE_MESSAGES = new Set([
   "Oops!",
 ]);
 
-function playerBadge(value: unknown): value is PlayerBadge {
-  return value === "early-tester";
+export function isPlayerBadge(value: unknown): value is PlayerBadge {
+  return value === "early-tester" || value === "supporter";
 }
 
 function object(value: unknown): JsonObject | null {
@@ -909,7 +942,9 @@ function decodeGameIntentValue(value: unknown): value is GameIntent {
     case "stage-defenders":
       return exactKeys(intent, ["kind", "instanceIds"]) && instanceIds(intent.instanceIds);
     case "choose":
-      return exactKeys(intent, ["kind", "optionId"]) && string(intent.optionId, MAX_SHORT_TEXT, false);
+      return exactKeys(intent, ["kind", "optionId", "pitchInstanceIds"], ["kind", "optionId"])
+        && string(intent.optionId, MAX_SHORT_TEXT, false)
+        && optional(intent.pitchInstanceIds, instanceIds);
     case "choose-many":
       return exactKeys(intent, ["kind", "optionIds"])
         && array(intent.optionIds, (v): v is string => string(v, MAX_SHORT_TEXT, false), MAX_CARDS);
@@ -983,6 +1018,32 @@ function turnTriggerChoice(value: unknown): value is TurnTriggerChoiceView {
         && standingChoiceToken(option.value)
         && decodeGameMessage(option.message) !== null;
     }, MAX_STANDING_CHOICE_OPTIONS);
+}
+
+/** Shape only; the engine enforces ranges so refusals carry a reason. */
+export function decodeManualEdit(value: unknown): ManualEdit | null {
+  const edit = object(value);
+  if (!edit) return null;
+  switch (edit.kind) {
+    case "set-life":
+      return exactKeys(edit, ["kind", "life"]) && integer(edit.life) ? edit as ManualEdit : null;
+    case "set-resources":
+      return exactKeys(edit, ["kind", "resources"]) && integer(edit.resources) ? edit as ManualEdit : null;
+    case "reorder-deck":
+      return exactKeys(edit, ["kind", "instanceIds"]) && array(edit.instanceIds, nonNegativeInteger, MAX_CARDS)
+        ? edit as ManualEdit
+        : null;
+    case "shuffle-deck":
+    case "reveal-deck":
+      return exactKeys(edit, ["kind"]) ? edit as ManualEdit : null;
+    case "move-card":
+      return exactKeys(edit, ["kind", "instanceId", "to"]) && nonNegativeInteger(edit.instanceId)
+        && (MANUAL_MOVE_DESTINATIONS as readonly unknown[]).includes(edit.to)
+        ? edit as ManualEdit
+        : null;
+    default:
+      return null;
+  }
 }
 
 function commandFields(message: Record<string, unknown>): boolean {
@@ -1095,23 +1156,31 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
         && username(message.username) && decimalId(message.throughId);
       break;
     case "create-friend-room":
-      valid = exactKeys(message, ["type", "username", "format", "deckId", "cardPoolMode"], ["type", "username", "format", "deckId"])
+      valid = exactKeys(message, ["type", "username", "format", "deckId", "cardPoolMode", "sandbox"], ["type", "username", "format", "deckId"])
         && username(message.username) && FORMATS.has(String(message.format))
         && id(message.deckId)
-        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)));
+        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)))
+        && (message.sandbox === undefined || typeof message.sandbox === "boolean");
       break;
     case "friend-game-invite-dismiss":
       valid = exactKeys(message, ["type", "inviteId"]) && requestId(message.inviteId);
+      break;
+    case "invite-friend-to-room":
+      valid = exactKeys(message, ["type", "username"]) && username(message.username);
+      break;
+    case "change-deck":
+      valid = exactKeys(message, ["type", "deckId"]) && id(message.deckId);
       break;
     case "enter-league-room":
       valid = exactKeys(message, ["type", "matchId", "deckId"]) && leagueRecordId(message.matchId) && id(message.deckId);
       break;
     case "create-room":
-      valid = exactKeys(message, ["type", "format", "deckId", "private", "cardPoolMode"], ["type", "format", "deckId"])
+      valid = exactKeys(message, ["type", "format", "deckId", "private", "cardPoolMode", "sandbox"], ["type", "format", "deckId"])
         && FORMATS.has(String(message.format))
         && id(message.deckId)
         && (message.private === undefined || typeof message.private === "boolean")
-        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)));
+        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)))
+        && (message.sandbox === undefined || typeof message.sandbox === "boolean");
       break;
     case "queue-join":
       valid = exactKeys(message, ["type", "format", "deckId", "cardPoolMode", "avoidRoomCodes"], ["type", "format", "deckId"])
@@ -1136,6 +1205,16 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
           && message.avoidRoomCodes.length <= MAX_MATCHMAKING_AVOID_ROOM_CODES
           && message.avoidRoomCodes.every((code) => typeof code === "string" && /^[A-Za-z0-9]{6}$/.test(code))
         ));
+      break;
+    case "create-solo-room":
+      valid = exactKeys(message, ["type", "format", "deckId", "opponentDeckId", "cardPoolMode"], ["type", "format", "deckId", "opponentDeckId"])
+        && FORMATS.has(String(message.format))
+        && id(message.deckId)
+        && id(message.opponentDeckId)
+        && (message.cardPoolMode === undefined || CARD_POOL_MODES.has(String(message.cardPoolMode)));
+      break;
+    case "solo-seat":
+      valid = exactKeys(message, ["type", "seat"]) && seat(message.seat);
       break;
     case "join-room":
       valid = exactKeys(message, ["type", "code", "token", "deckId", "spectate"], ["type", "code"])
@@ -1174,8 +1253,14 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
         && commandFields(message);
       break;
     case "pass-until":
-      valid = exactKeys(message, ["type", "mode", "commandId", "expectedVersion"], ["type", "mode"])
+      valid = exactKeys(message, ["type", "mode", "ignorePlays", "commandId", "expectedVersion"], ["type", "mode"])
         && (message.mode === null || passUntilMode(message.mode))
+        && optional(message.ignorePlays, (value) => value === true)
+        && commandFields(message);
+      break;
+    case "remember-target":
+      valid = exactKeys(message, ["type", "optionId", "commandId", "expectedVersion"], ["type", "optionId"])
+        && string(message.optionId, MAX_SHORT_TEXT, false)
         && commandFields(message);
       break;
     case "runechant-skip":
@@ -1187,6 +1272,12 @@ export function decodeClientMessage(value: unknown): ClientMessage | null {
     case "undo":
       valid = exactKeys(message, ["type", "target", "commandId", "expectedVersion"], ["type"])
         && (message.target === undefined || UNDO_TARGETS.has(String(message.target)))
+        && commandFields(message);
+      break;
+    case "sandbox-edit":
+      valid = exactKeys(message, ["type", "seat", "edit", "commandId", "expectedVersion"], ["type", "seat", "edit"])
+        && (message.seat === 0 || message.seat === 1)
+        && decodeManualEdit(message.edit) !== null
         && commandFields(message);
       break;
     case "emote":
@@ -1271,7 +1362,7 @@ function cardView(value: unknown, depth = 0): value is CardView {
     }, 16))
     && optional(card.attackAbilityIndexes, abilityIndexes)
     && optional(card.tapAbilityIndexes, abilityIndexes)
-    && optional(card.subcards, (v): v is CardView[] => array(v, (entry) => cardView(entry, depth + 1), 16))
+    && optional(card.subcards, (v): v is CardView[] => array(v, (entry) => cardView(entry, depth + 1), MAX_CARDS))
     && optional(card.grantedNames, (v): v is string[] => array(v, (entry): entry is string => string(entry, MAX_ID), 16))
     && optional(card.chosenName, (v): v is string => string(v, MAX_SHORT_TEXT, false))
     && optional(card.boundToInstanceId, instanceId)
@@ -1325,7 +1416,7 @@ const cardViews = (value: unknown): value is CardView[] => array(value, cardView
 function playerView(value: unknown): value is PlayerView {
   const player = object(value);
   if (!player || !exactKeys(player, [
-    "seat", "heroCardId", "heroInstanceId", "heroTapped", "heroCounters", "heroDefCounters", "heroSubcards",
+    "seat", "heroCardId", "heroInstanceId", "heroTapped", "heroAbilitiesLost", "heroCounters", "heroDefCounters", "heroSubcards",
     "heroAbilityLabels", "heroAttackAbilityIndexes", "heroTapAbilityIndexes", "heroUsedAbilityIndexes", "heroName",
     "life", "actionPoints", "resources", "chi", "hand", "handCount", "deckCount", "deck",
     "arsenal", "arsenalCount", "arsenalCapacity", "arsenalZones", "pitch", "pitchCount", "graveyard", "banish", "soul",
@@ -1337,6 +1428,7 @@ function playerView(value: unknown): value is PlayerView {
   ])) return false;
   return seat(player.seat) && id(player.heroCardId) && instanceId(player.heroInstanceId)
     && optional(player.heroTapped, (v): v is boolean => typeof v === "boolean")
+    && optional(player.heroAbilitiesLost, (v): v is true => v === true)
     && optional(player.heroCounters, numberRecord) && optional(player.heroDefCounters, nonNegativeInteger)
     && optional(player.heroSubcards, cardViews)
     && string(player.heroName, MAX_SHORT_TEXT, false)
@@ -1520,6 +1612,31 @@ function gameStats(value: unknown): value is GameStatsView {
     && array(stats.turns, gameTurnStats, MAX_REPLAY_VIEWS);
 }
 
+function gameClockSummary(value: unknown): value is GameClockSummary {
+  const clock = object(value);
+  return !!clock && exactKeys(clock, ["seatMs"]) && seatCounters(clock.seatMs);
+}
+
+function gameClockView(value: unknown): value is GameClockView {
+  const clock = object(value);
+  return !!clock && exactKeys(clock, ["awaiting", "seatMs"])
+    && nullableSeat(clock.awaiting) && seatCounters(clock.seatMs);
+}
+
+/** Decode the `rooms.clock` database column. */
+export function decodeRoomClock(value: unknown): RoomClock | null {
+  const clock = object(value);
+  return clock && exactKeys(clock, ["awaiting", "since", "seatMs"])
+    && nullableSeat(clock.awaiting) && nonNegativeInteger(clock.since) && seatCounters(clock.seatMs)
+    ? value as RoomClock
+    : null;
+}
+
+/** Decode the final clock stored with a finishing replay. */
+export function decodeGameClockSummary(value: unknown): GameClockSummary | null {
+  return gameClockSummary(value) ? value : null;
+}
+
 const historyAchievementId = (value: unknown): value is HistoryAchievementId =>
   typeof value === "string" && (HISTORY_ACHIEVEMENT_IDS as readonly string[]).includes(value);
 
@@ -1537,13 +1654,19 @@ export function decodeReplayPendingAchievements(value: unknown): ReplayPendingAc
   return result;
 }
 
+function actionLimitFact(value: unknown): value is NonNullable<PlayerTurnFactsView["actionLimit"]> {
+  const limit = object(value);
+  return !!limit && exactKeys(limit, ["turn", "remaining"], ["turn", "remaining"])
+    && nonNegativeInteger(limit.turn) && nonNegativeInteger(limit.remaining);
+}
+
 function playerTurnFacts(value: unknown): value is PlayerTurnFactsView {
   const facts = object(value);
   return !!facts && exactKeys(facts, [
     "attacks", "weaponAttacks", "playedSubtypes", "usedOncePerTurnEffectSourceIds", "dealtDamage",
     "physicalDamageDealt", "arcaneDamageDealt", "damageTaken",
     "physicalDamageTaken", "arcaneDamageTaken", "banishedSixPlusThisTurn",
-    "chargesThisTurn", "yellowSoulThisTurn", "soulBanishedThisChain", "weaponAttacksProhibited",
+    "chargesThisTurn", "yellowSoulThisTurn", "soulBanishedThisChain", "weaponAttacksProhibited", "actionLimit",
   ], [
     "attacks", "weaponAttacks", "playedSubtypes", "usedOncePerTurnEffectSourceIds", "dealtDamage",
     "physicalDamageDealt", "arcaneDamageDealt", "damageTaken",
@@ -1556,6 +1679,7 @@ function playerTurnFacts(value: unknown): value is PlayerTurnFactsView {
     && optional(facts.yellowSoulThisTurn, (value): value is boolean => typeof value === "boolean")
     && optional(facts.soulBanishedThisChain, nonNegativeInteger)
     && optional(facts.weaponAttacksProhibited, (value): value is boolean => typeof value === "boolean")
+    && optional(facts.actionLimit, actionLimitFact)
     && shortStrings(facts.playedSubtypes)
     && array(facts.usedOncePerTurnEffectSourceIds, instanceId, MAX_CARDS)
     && typeof facts.dealtDamage === "boolean"
@@ -1576,17 +1700,24 @@ function turnFacts(value: unknown): value is TurnFactsView {
 function pendingDecision(value: unknown): boolean {
   const decision = object(value);
   return !!decision && exactKeys(decision, [
-    "player", "kind", "prompt", "promptMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "stagedAttack", "stagedAttackModifiers", "defenderDefense",
-    "resourcePayment", "preStackSource", "optionLayout", "sourceInstanceId",
+    "player", "kind", "prompt", "promptMessage", "warningMessage", "options", "minimumSelections", "maximumSelections", "distinctCardNames", "defaultOption", "optionLabels", "optionMessages", "chosenOptions", "chosenOptionMessages", "optionCounts", "optionCards", "optionEnabledCards", "revealedCards", "lookedCards", "stagedCards", "stagedHandCount", "stagedDefense", "stagedAttack", "stagedAttackModifiers", "defenderDefense",
+    "reactionDefense",
+    "resourcePayment", "preStackSource", "optionLayout", "sourceInstanceId", "triggerTarget",
   ], ["player", "kind", "prompt"])
     && seat(decision.player) && DECISION_KINDS.has(String(decision.kind))
     && string(decision.prompt, MAX_TEXT)
     && optional(decision.promptMessage, (value): value is GameMessage => decodeGameMessage(value) !== null)
+    && optional(decision.warningMessage, (value): value is GameMessage => decodeGameMessage(value) !== null)
     && optional(decision.options, (v): v is string[] => shortStrings(v))
     && optional(decision.minimumSelections, nonNegativeInteger)
     && optional(decision.maximumSelections, nonNegativeInteger)
     && optional(decision.distinctCardNames, (v): v is boolean => typeof v === "boolean")
     && optional(decision.defaultOption, (v): v is string => string(v, MAX_SHORT_TEXT, false))
+    && optional(decision.triggerTarget, (v): v is NonNullable<PendingDecision["triggerTarget"]> => {
+      const target = object(v);
+      return !!target && exactKeys(target, ["sourceInstanceId", "sourceCardId"], ["sourceInstanceId", "sourceCardId"])
+        && nonNegativeInteger(target.sourceInstanceId) && string(target.sourceCardId, MAX_SHORT_TEXT, false);
+    })
     && optional(decision.optionLabels, (v): v is string[] => shortStrings(v))
     && optional(decision.optionMessages, (v): v is Array<GameMessage | null> =>
       array(v, (item): item is GameMessage | null => item === null || decodeGameMessage(item) !== null, MAX_CARDS))
@@ -1598,6 +1729,7 @@ function pendingDecision(value: unknown): boolean {
         count === null || (integer(count) && count >= 2 && count <= MAX_CARDS), MAX_CARDS))
     && optional(decision.optionCards, (v): v is Array<CardView | null> =>
       array(v, (item): item is CardView | null => item === null || cardView(item), MAX_CARDS))
+    && optional(decision.optionEnabledCards, (v): v is CardView[][] => array(v, cardViews, MAX_CARDS))
     && optional(decision.revealedCards, cardViews)
     && optional(decision.lookedCards, cardViews)
     && optional(decision.stagedCards, cardViews)
@@ -1609,9 +1741,16 @@ function pendingDecision(value: unknown): boolean {
     && optional(decision.defenderDefense, (value): value is DefenderDefenseView[] =>
       array(value, (entry): entry is DefenderDefenseView => {
         const item = object(entry);
-        return !!item && exactKeys(item, ["instanceId", "defense", "attack"])
+        return !!item && exactKeys(item, ["instanceId", "defense", "attack", "triggersPhantasm"], ["instanceId", "defense", "attack"])
           && instanceId(item.instanceId) && nonNegativeInteger(item.defense)
-          && nonNegativeInteger(item.attack);
+          && nonNegativeInteger(item.attack)
+          && optional(item.triggersPhantasm, (v): v is true => v === true);
+      }, MAX_CARDS))
+    && optional(decision.reactionDefense, (value): value is ReactionDefenseView[] =>
+      array(value, (entry): entry is ReactionDefenseView => {
+        const item = object(entry);
+        return !!item && exactKeys(item, ["instanceId", "defense"], ["instanceId", "defense"])
+          && instanceId(item.instanceId) && nonNegativeInteger(item.defense);
       }, MAX_CARDS))
     && optional(decision.optionLayout, (value): value is "effect-list" => value === "effect-list")
     && optional(decision.sourceInstanceId, instanceId)
@@ -1639,6 +1778,8 @@ function pendingDecision(value: unknown): boolean {
     })
     && (!(Array.isArray(decision.options) && Array.isArray(decision.optionCards))
       || decision.options.length === decision.optionCards.length)
+    && (!(Array.isArray(decision.options) && Array.isArray(decision.optionEnabledCards))
+      || decision.options.length === decision.optionEnabledCards.length)
     && (!(Array.isArray(decision.options) && Array.isArray(decision.optionLabels))
       || decision.options.length === decision.optionLabels.length)
     && (!(Array.isArray(decision.options) && Array.isArray(decision.optionMessages))
@@ -1713,7 +1854,7 @@ function playerProfile(value: unknown): boolean {
   const profile = object(value);
   return !!profile && exactKeys(profile, ["username", "badge", "playmat"], ["username", "badge"])
     && string(profile.username, MAX_SHORT_TEXT, false)
-    && (profile.badge === null || playerBadge(profile.badge))
+    && (profile.badge === null || isPlayerBadge(profile.badge))
     && optional(profile.playmat, playmatRef);
 }
 
@@ -1772,7 +1913,7 @@ function prepSeat(value: unknown): boolean {
 
 function prepView(value: unknown): value is PrepView {
   const prep = object(value);
-  if (!prep || !exactKeys(prep, ["format", "seats", "yourSeat", "yourDeckId", "die", "startPlayer", "botGame", "cardPoolMode", "deadlineAt", "deadlinePhase", "phase", "yourArena", "yourPresentedDeck"], ["format", "seats", "yourSeat", "die", "startPlayer", "phase"])) return false;
+  if (!prep || !exactKeys(prep, ["format", "seats", "yourSeat", "yourDeckId", "die", "startPlayer", "botGame", "soloGame", "sandbox", "searching", "cardPoolMode", "deadlineAt", "deadlinePhase", "phase", "yourArena", "yourPresentedDeck"], ["format", "seats", "yourSeat", "die", "startPlayer", "phase"])) return false;
   let dieValid = prep.die === null;
   if (!dieValid) {
     const die = object(prep.die);
@@ -1785,6 +1926,10 @@ function prepView(value: unknown): value is PrepView {
     && prep.seats.every((item) => item === null || prepSeat(item)) && seat(prep.yourSeat)
     && optional(prep.yourDeckId, id)
     && optional(prep.botGame, (v): v is boolean => typeof v === "boolean")
+    && optional(prep.soloGame, (v): v is boolean => typeof v === "boolean")
+    && optional(prep.sandbox, (v): v is true => v === true)
+    && optional(prep.searching, (v): v is true => v === true)
+    && (prep.searching === undefined || prep.phase === "waiting")
     && optional(prep.cardPoolMode, (v): v is "future" | "open" => v === "future" || v === "open")
     && optional(prep.deadlineAt, nonNegativeInteger)
     && (prep.phase === "waiting" || matchPrepPhase(prep.phase))
@@ -1816,6 +1961,12 @@ function botRematch(value: unknown): boolean {
   const rematch = object(value);
   return !!rematch && exactKeys(rematch, ["format", "deckId", "bot"])
     && FORMATS.has(String(rematch.format)) && id(rematch.deckId) && BOT_OPPONENTS.has(String(rematch.bot));
+}
+
+function soloRematch(value: unknown): boolean {
+  const rematch = object(value);
+  return !!rematch && exactKeys(rematch, ["format", "deckId", "opponentDeckId"])
+    && FORMATS.has(String(rematch.format)) && id(rematch.deckId) && id(rematch.opponentDeckId);
 }
 
 function backgroundMatchmakingStatus(value: unknown): boolean {
@@ -1854,8 +2005,9 @@ function decodeStateMessage(value: unknown): StateMessage | null {
   if (!message || message.type !== "state") return null;
   const valid = exactKeys(message, [
     "type", "version", "view", "transition", "playerProfiles", "yourSeat", "legal", "actionCandidates",
-    "spectators", "lastActionAt", "botGame", "cardArt", "passUntil",
+    "spectators", "lastActionAt", "clock", "botGame", "soloGame", "sandbox", "boardSeat", "cardArt", "passUntil", "endTurnWarning",
   ], ["type", "version", "view", "playerProfiles", "yourSeat", "legal", "lastActionAt"])
+    && optional(message.clock, gameClockView)
     && optional(message.cardArt, (v): v is [Record<string, string>, Record<string, string>] =>
       Array.isArray(v) && v.length === 2 && v.every((map) => cardArtMap(map, false, MAX_CARDS)))
     && nonNegativeInteger(message.version) && decodeGameView(message.view) !== null && nullableSeat(message.yourSeat)
@@ -1867,14 +2019,18 @@ function decodeStateMessage(value: unknown): StateMessage | null {
       array(v, decodeGameIntentValue, MAX_LEGAL_INTENTS))
     && optional(message.spectators, nonNegativeInteger)
     && optional(message.botGame, (v): v is boolean => typeof v === "boolean")
+    && optional(message.soloGame, (v): v is boolean => typeof v === "boolean")
+    && optional(message.sandbox, (v): v is true => v === true)
+    && optional(message.boardSeat, (v): v is 0 | 1 => v === 0 || v === 1)
     && optional(message.passUntil, passUntilMode)
+    && optional(message.endTurnWarning, (v): v is true => v === true)
     && Array.isArray(message.lastActionAt) && message.lastActionAt.length === 2
     && message.lastActionAt.every(nonNegativeInteger);
   return valid ? value as StateMessage : null;
 }
 
 function passUntilMode(value: unknown): value is PassUntilMode {
-  return value === "chain-link" || value === "turn" || value === "opponent";
+  return value === "chain-link" || value === "turn";
 }
 
 /** Queued pool → deck pool → searchers; every cell present and non-negative. */
@@ -1939,8 +2095,10 @@ function decodeServerEvent(value: unknown): Exclude<ServerMessage, StateMessage>
       valid = exactKeys(message, ["type"]);
       break;
     case "left":
-      valid = exactKeys(message, ["type", "playAgain"], ["type"])
-        && (message.playAgain === undefined || botRematch(message.playAgain));
+      valid = exactKeys(message, ["type", "playAgain", "playAgainSolo"], ["type"])
+        && (message.playAgain === undefined || botRematch(message.playAgain))
+        && (message.playAgainSolo === undefined || soloRematch(message.playAgainSolo))
+        && (message.playAgain === undefined || message.playAgainSolo === undefined);
       break;
     case "background-matchmaking":
       valid = exactKeys(message, ["type", "status"])
@@ -1979,6 +2137,12 @@ function decodeServerEvent(value: unknown): Exclude<ServerMessage, StateMessage>
     case "room-info":
       valid = exactKeys(message, ["type", "room"]) && roomInvite(message.room);
       break;
+    case "deck-changed":
+      valid = exactKeys(message, ["type", "deckId"]) && id(message.deckId);
+      break;
+    case "friend-invited":
+      valid = exactKeys(message, ["type", "username"]) && username(message.username);
+      break;
     case "queue-status": {
       const counts = object(message.counts);
       valid = exactKeys(message, ["type", "counts"]) && !!counts
@@ -2012,9 +2176,13 @@ export function decodeReplayFile(value: unknown): ReplayFile | null {
   }
   if ((replay.version !== 2 && replay.version !== 3)
     || !exactKeys(replay, replay.version === 3
+      ? ["version", "seat", "clock", "frames", "notes"]
+      : ["version", "seat", "clock", "frames"], replay.version === 3
       ? ["version", "seat", "frames", "notes"]
       : ["version", "seat", "frames"])
+    || !optional(replay.clock, gameClockSummary)
     || !Array.isArray(replay.frames) || replay.frames.length > MAX_REPLAY_VIEWS) return null;
+  const clock = replay.clock === undefined ? {} : { clock: replay.clock };
   const frames = replay.frames.map((value, index) => {
     const frame = object(value);
     if (!frame || !exactKeys(frame, ["view", "transition"]) || !("transition" in frame)) return null;
@@ -2024,10 +2192,10 @@ export function decodeReplayFile(value: unknown): ReplayFile | null {
     return { view, transition };
   });
   if (!frames.every((frame): frame is NonNullable<typeof frame> => frame !== null)) return null;
-  if (replay.version === 2) return { version: 2, seat: replay.seat, frames };
+  if (replay.version === 2) return { version: 2, seat: replay.seat, ...clock, frames };
   const notes = decodeReplayNotes(replay.notes, frames.length);
   return notes
-    ? { version: 3, seat: replay.seat, frames, notes }
+    ? { version: 3, seat: replay.seat, ...clock, frames, notes }
     : null;
 }
 
@@ -2072,6 +2240,10 @@ export function replayFileTransitions(
 
 export function replayFileNotes(file: ReplayFile): ReplayNote[] {
   return file.version === 3 ? file.notes : [];
+}
+
+export function replayFileClock(file: ReplayFile): GameClockSummary | null {
+  return file.version === 1 ? null : file.clock ?? null;
 }
 
 export const decodeApiError: Decoder<ApiError> = (value) => {
@@ -2159,7 +2331,11 @@ export const decodeReplayShareResponse: Decoder<ReplayShareResponse> = (value) =
 function decodeReplaySummary(value: unknown): ReplaySummary | null {
   const replay = object(value);
   return replay
-    && exactKeys(replay, ["id", "format", "heroIds", "yourSeat", "winner", "finishedAt", "expiresAt", "frameCount", "favorite", "share"])
+    && exactKeys(
+      replay,
+      ["id", "format", "heroIds", "yourSeat", "winner", "finishedAt", "expiresAt", "frameCount", "favorite", "share", "sandbox"],
+      ["id", "format", "heroIds", "yourSeat", "winner", "finishedAt", "expiresAt", "frameCount", "favorite", "share"],
+    )
     && id(replay.id)
     && FORMATS.has(String(replay.format))
     && Array.isArray(replay.heroIds) && replay.heroIds.length === 2 && replay.heroIds.every(id)
@@ -2168,6 +2344,7 @@ function decodeReplaySummary(value: unknown): ReplaySummary | null {
     && nonNegativeInteger(replay.frameCount)
     && typeof replay.favorite === "boolean"
     && (replay.share === null || replayShare(replay.share))
+    && (replay.sandbox === undefined || replay.sandbox === true)
     ? value as ReplaySummary
     : null;
 }
@@ -2651,6 +2828,41 @@ function nullableEmail(value: unknown): value is string | null {
   return value === null || string(value, EMAIL_MAX_LENGTH, false);
 }
 
+/** The fields Fyendal reads from a Ko-fi webhook's `data` JSON. */
+export interface KofiWebhook {
+  verificationToken: string;
+  type: string;
+  isSubscriptionPayment: boolean;
+  transactionId: string;
+  timestamp: string;
+  email: string;
+  tierName: string | null;
+}
+
+/** Ko-fi adds payload fields over time, so unknown keys are ignored. */
+export const decodeKofiWebhook: Decoder<KofiWebhook> = (value) => {
+  const data = object(value);
+  if (!data) return null;
+  const tierName = data.tier_name ?? null;
+  return string(data.verification_token, MAX_SHORT_TEXT, false)
+    && string(data.type, MAX_SHORT_TEXT, false)
+    && typeof data.is_subscription_payment === "boolean"
+    && string(data.kofi_transaction_id, MAX_SHORT_TEXT, false)
+    && string(data.timestamp, 64, false)
+    && string(data.email, EMAIL_MAX_LENGTH)
+    && (tierName === null || string(tierName, MAX_SHORT_TEXT))
+    ? {
+      verificationToken: data.verification_token,
+      type: data.type,
+      isSubscriptionPayment: data.is_subscription_payment,
+      transactionId: data.kofi_transaction_id,
+      timestamp: data.timestamp,
+      email: data.email,
+      tierName: tierName || null,
+    }
+    : null;
+};
+
 export const decodeAccountEmailResponse: Decoder<AccountEmailResponse> = (value) => {
   const data = object(value);
   return !!data
@@ -2676,9 +2888,9 @@ export const decodeAccountCosmeticsResponse: Decoder<AccountCosmeticsResponse> =
   return !!data
     && exactKeys(data, ["ok", "availableBadges", "selectedBadge", "playmat"])
     && data.ok === true
-    && array(data.availableBadges, playerBadge, 32)
+    && array(data.availableBadges, isPlayerBadge, 32)
     && new Set(data.availableBadges).size === data.availableBadges.length
-    && (data.selectedBadge === null || playerBadge(data.selectedBadge))
+    && (data.selectedBadge === null || isPlayerBadge(data.selectedBadge))
     && (data.selectedBadge === null || data.availableBadges.includes(data.selectedBadge))
     && (data.playmat === null || playmatRef(data.playmat))
     ? value as AccountCosmeticsResponse
@@ -2717,14 +2929,17 @@ export const decodeAchievementsResponse: Decoder<AchievementsResponse> = (value)
 const CARD_ART_IMAGE_RE = /^(?:[A-Z]{2}_)?[A-Z0-9]{6}(?:[-_][A-Z0-9_]+)*$/;
 const MAX_DECK_ART_PICKS = 100;
 
+export function cardArtImage(value: unknown): value is string {
+  return typeof value === "string" && value.length <= MAX_ID && CARD_ART_IMAGE_RE.test(value);
+}
+
 /** printing id -> Fabrary image id. */
 function cardArtMap(value: unknown, allowStandard: boolean, max: number): value is Record<string, string> {
   const map = object(value);
   if (!map) return false;
   const entries = Object.entries(map);
   return entries.length <= max && entries.every(([cardId, image]) => string(cardId, MAX_ID, false)
-    && typeof image === "string" && image.length <= MAX_ID
-    && (CARD_ART_IMAGE_RE.test(image) || allowStandard && image === STANDARD_CARD_ART));
+    && (cardArtImage(image) || allowStandard && image === STANDARD_CARD_ART));
 }
 
 /** A seat's resolved images; picks never resolve to the standard sentinel. */
@@ -2743,11 +2958,20 @@ export const decodeDeckArtRequest: Decoder<DeckArtRequest> = (value) => {
   return data && exactKeys(data, ["id", "art"]) && id(data.id) && deckArt(data.art) ? value as DeckArtRequest : null;
 };
 
+function deckConstructionIssue(value: unknown): value is DeckConstructionIssue {
+  const issue = object(value);
+  if (!issue || !nonNegativeInteger(issue.count) || !nonNegativeInteger(issue.limit)) return false;
+  if (issue.kind === "pool-too-large") return exactKeys(issue, ["kind", "count", "limit"]);
+  return issue.kind === "too-many-copies" && exactKeys(issue, ["kind", "cardName", "count", "limit"])
+    && string(issue.cardName, MAX_SHORT_TEXT, false);
+}
+
 function decodeDeckSummary(value: unknown): DeckSummary | null {
   const deck = object(value);
   return deck && exactKeys(
     deck,
-    ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "bannedCards", "futureCards", "art"],
+    ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "bannedCards", "futureCards",
+      "constructionIssues", "art"],
     ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "art"],
   )
     && deckArt(deck.art)
@@ -2757,6 +2981,7 @@ function decodeDeckSummary(value: unknown): DeckSummary | null {
     && nonNegativeInteger(deck.updatedAt)
     && optional(deck.bannedCards, shortStrings)
     && optional(deck.futureCards, shortStrings)
+    && optional(deck.constructionIssues, (issues): issues is DeckConstructionIssue[] => array(issues, deckConstructionIssue, MAX_CARDS))
     ? value as DeckSummary
     : null;
 }
@@ -2805,10 +3030,14 @@ export const decodeDeckDetailResponse: Decoder<DeckDetailResponse> = (value) => 
   if (!data || !exactKeys(data, ["ok", "deck"]) || !rawDeck
     || !exactKeys(
       rawDeck,
-      ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "bannedCards", "futureCards", "art", "decklist", "matchups", "selectedMatchupId"],
+      [
+        "id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "bannedCards", "futureCards",
+        "constructionIssues", "art",
+        "decklist", "matchups", "selectedMatchupId", "fabraryArt",
+      ],
       ["id", "name", "format", "fabraryUrl", "heroName", "deckSize", "updatedAt", "art", "decklist"],
     )) return null;
-  const { decklist: rawPool, matchups: rawMatchups, selectedMatchupId, ...summaryValue } = rawDeck;
+  const { decklist: rawPool, matchups: rawMatchups, selectedMatchupId, fabraryArt, ...summaryValue } = rawDeck;
   const summary = decodeDeckSummary(summaryValue);
   const matchup = (item: unknown): item is FabraryMatchup => {
     const data = object(item);
@@ -2821,6 +3050,7 @@ export const decodeDeckDetailResponse: Decoder<DeckDetailResponse> = (value) => 
   const matchupsValid = rawMatchups === undefined || array(rawMatchups, matchup, 128);
   return summary && decodeDeckPoolValue(rawPool) && matchupsValid
     && (selectedMatchupId === undefined || id(selectedMatchupId))
+    && (fabraryArt === undefined || resolvedCardArt(fabraryArt))
     ? {
       ok: true,
       deck: {
@@ -2828,6 +3058,7 @@ export const decodeDeckDetailResponse: Decoder<DeckDetailResponse> = (value) => 
         decklist: rawPool,
         ...(rawMatchups === undefined ? {} : { matchups: rawMatchups }),
         ...(selectedMatchupId === undefined ? {} : { selectedMatchupId }),
+        ...(fabraryArt === undefined ? {} : { fabraryArt }),
       },
     }
     : null;
@@ -2974,16 +3205,18 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
       exported,
       ["exportedAt", "account", "decks", "deckPlays", "rooms", "matchmaking", "bugReports",
         "playerReports", "gameDays", "achievements", "replays", "matches", "heroRecords", "matchupRecords",
-        "friends", "friendRequests", "friendMessages", "leagues"],
+        "friends", "friendRequests", "friendMessages", "leagues", "kofiPayments"],
     ) && !!account
-    && exactKeys(account, ["username", "createdAt", "earlyTester", "selectedBadge", "playmat", "betaTester", "email", "pendingEmail"])
+    && exactKeys(account, ["username", "createdAt", "earlyTester", "supporterUntil", "selectedBadge", "playmat", "betaTester", "email", "pendingEmail"])
     && (account.playmat === null || playmatRef(account.playmat))
     && typeof account.betaTester === "boolean"
     && nullableEmail(account.email) && nullableEmail(account.pendingEmail)
     && string(exported.exportedAt, 64, false) && string(account.username, MAX_SHORT_TEXT, false)
     && nonNegativeInteger(account.createdAt) && typeof account.earlyTester === "boolean"
-    && (account.selectedBadge === null || playerBadge(account.selectedBadge))
-    && (account.selectedBadge === null || account.earlyTester === true)
+    && (account.selectedBadge === null || isPlayerBadge(account.selectedBadge))
+    && (account.supporterUntil === null || nonNegativeInteger(account.supporterUntil))
+    && (account.selectedBadge !== "early-tester" || account.earlyTester === true)
+    && (account.selectedBadge !== "supporter" || account.supporterUntil !== null)
     && array(exported.decks, (item): item is AccountExport["decks"][number] => exportDeck(item), MAX_DECKS)
     && array(exported.deckPlays, (item): item is DeckPlay => {
       const play = object(item);
@@ -3007,7 +3240,13 @@ export const decodeAccountExportResponse: Decoder<AccountExportResponse> = (valu
     }, MAX_SOCIAL_ITEMS)
     && array(exported.friendRequests, friendRequestSummary, MAX_SOCIAL_ITEMS)
     && array(exported.friendMessages, chatMessage, MAX_SOCIAL_ITEMS)
-    && array(exported.leagues, exportLeague, MAX_LEAGUES);
+    && array(exported.leagues, exportLeague, MAX_LEAGUES)
+    && array(exported.kofiPayments, (item): item is AccountExport["kofiPayments"][number] => {
+      const payment = object(item);
+      return !!payment && exactKeys(payment, ["paidAt", "tierName"])
+        && nonNegativeInteger(payment.paidAt)
+        && (payment.tierName === null || string(payment.tierName, MAX_SHORT_TEXT, false));
+    }, MAX_ROOMS);
   return valid ? value as AccountExportResponse : null;
 };
 
@@ -3058,11 +3297,16 @@ export class IncompatibleStateFrameError extends Error {
   constructor() { super("State frame does not match this client's protocol"); }
 }
 
+/** Whose log a state carries: a solo board's log is the same for whichever seat acts. */
+export function stateLogAudience(state: StateMessage): string {
+  return state.boardSeat === undefined ? `seat:${state.yourSeat}` : `board:${state.boardSeat}`;
+}
+
 /** Socket-local delivery history, independent of room versions and replay UI.
  * Only projected logs are retained; callers always receive a complete state. */
 export class LiveServerMessageDecoder {
   private baseline: {
-    stream: string; sequence: number; gameId: string; seat: number | null;
+    stream: string; sequence: number; gameId: string; audience: string;
     log: string[]; logEntries: GameLogViewEntry[] | undefined;
   } | null = null;
 
@@ -3084,7 +3328,7 @@ export class LiveServerMessageDecoder {
     if (frame.drop !== null) {
       const previous = this.baseline;
       if (!previous || previous.stream !== frame.stream || previous.sequence + 1 !== frame.sequence
-        || previous.gameId !== state.view.gameId || previous.seat !== state.yourSeat
+        || previous.gameId !== state.view.gameId || previous.audience !== stateLogAudience(state)
         || frame.drop > previous.log.length
         || (previous.logEntries === undefined) !== (state.view.logEntries === undefined)) {
         this.reset(); throw new StateStreamError();
@@ -3098,7 +3342,7 @@ export class LiveServerMessageDecoder {
       state = { ...state, view };
     }
     this.baseline = {
-      stream: frame.stream, sequence: frame.sequence, gameId: state.view.gameId, seat: state.yourSeat,
+      stream: frame.stream, sequence: frame.sequence, gameId: state.view.gameId, audience: stateLogAudience(state),
       log: [...state.view.log], logEntries: state.view.logEntries && structuredClone(state.view.logEntries),
     };
     return state;

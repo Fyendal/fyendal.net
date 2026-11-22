@@ -55,6 +55,13 @@ export function goAgainSuppressed(state: GameStateInternal, seat: number): boole
     Number(player.hero.scriptState?.goAgainSuppressedTurn ?? 0) === state.turn;
 }
 
+/** CR 1.13.2b: a player gains action points only during their own action phase. */
+export function inActionPhase(state: GameStateInternal, seat: number): boolean {
+  return state.activePlayer === seat &&
+    state.phase !== "start" && state.phase !== "end" && state.phase !== "game-over" &&
+    state.stackResume !== "begin-action-phase" && state.stackResume !== "end-phase";
+}
+
 /** Attacks this seat controls can't gain go again; inherent go again still applies. */
 export function attacksCannotGainGoAgain(state: GameStateInternal, seat: number): boolean {
   return controlledPermanents(state, seat, { faceDownEquipment: false })
@@ -106,6 +113,18 @@ export function consumeFirstActionExtraCost(
   if (firstActionExtraCost(state, player) <= 0) return;
   delete player.hero.scriptState?.firstActionExtraCost;
   delete player.hero.scriptState?.firstActionExtraCostTurn;
+}
+
+/** The current or upcoming turn's action cap and how many actions it still allows. */
+export function pendingActionLimit(
+  state: GameStateInternal,
+  player: PlayerState,
+): { turn: number; remaining: number } | undefined {
+  const turn = Number(player.hero.scriptState?.actionLimitTurn ?? 0);
+  const limit = Number(player.hero.scriptState?.actionLimit ?? 0);
+  if (limit <= 0 || turn < state.turn) return undefined;
+  const used = turn === state.turn ? Number(player.flags.actionsPlayedOrActivatedThisTurn ?? 0) : 0;
+  return { turn, remaining: Math.max(0, limit - used) };
 }
 
 /** Whether a delayed cap prevents another action play or activation. */

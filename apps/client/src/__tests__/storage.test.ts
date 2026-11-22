@@ -17,7 +17,12 @@ import {
   loadGameSettings,
   loadPlaymatHintDismissed,
   loadBotMatchmakingPreference,
+  loadSoloBothSidesSeen,
+  saveSoloBothSidesSeen,
+  loadDeckOrderRevealAccepted,
+  saveDeckOrderRevealAccepted,
   loadHomeGameMode,
+  loadHomeSoloOpponentDeck,
   loadHomeFormat,
   loadLobbySettings,
   lobbySettingsStorageKey,
@@ -29,6 +34,7 @@ import {
   savePlaymatHintDismissed,
   saveBotMatchmakingPreference,
   saveHomeGameMode,
+  saveHomeSoloOpponentDeck,
   saveHomeFormat,
   saveLobbySettings,
 } from "../storage.js";
@@ -93,16 +99,50 @@ describe("client storage keys", () => {
     expect(loadBotMatchmakingPreference(storage)).toBe(true);
   });
 
+  it("remembers that the self-play tab was opened", () => {
+    const storage = memoryStorage();
+    expect(loadSoloBothSidesSeen(storage)).toBe(false);
+    saveSoloBothSidesSeen(storage);
+    expect(loadSoloBothSidesSeen(storage)).toBe(true);
+  });
+
+  it("remembers the draw-order reveal only for the game it was accepted in", () => {
+    const storage = memoryStorage();
+    expect(loadDeckOrderRevealAccepted(storage, "GAME1")).toBe(false);
+    saveDeckOrderRevealAccepted(storage, "GAME1");
+    expect(loadDeckOrderRevealAccepted(storage, "GAME1")).toBe(true);
+    expect(loadDeckOrderRevealAccepted(storage, "GAME2")).toBe(false);
+    saveDeckOrderRevealAccepted(storage, "GAME2");
+    expect(loadDeckOrderRevealAccepted(storage, "GAME1")).toBe(false);
+    expect(loadDeckOrderRevealAccepted({ getItem: () => { throw new Error("blocked"); } }, "GAME2")).toBe(false);
+  });
+
   it("remembers the home game mode for each account across reloads", () => {
     const storage = memoryStorage();
     expect(loadHomeGameMode(storage, "Alice")).toBe("find-match");
-    saveHomeGameMode(storage, "Alice", "bot");
-    expect(loadHomeGameMode(storage, "ALICE")).toBe("bot");
+    saveHomeGameMode(storage, "Alice", "solo");
+    expect(loadHomeGameMode(storage, "ALICE")).toBe("solo");
     expect(loadHomeGameMode(storage, "Bob")).toBe("find-match");
     saveHomeGameMode(storage, "Bob", "invite-friend");
     expect(loadHomeGameMode(storage, "Bob")).toBe("invite-friend");
     storage.setItem("fyendal-home-game-mode-alice", "invalid");
     expect(loadHomeGameMode(storage, "Alice")).toBe("find-match");
+  });
+
+  it("reads a stored bot home mode as solo", () => {
+    const storage = memoryStorage();
+    storage.setItem("fyendal-home-game-mode-alice", "bot");
+    expect(loadHomeGameMode(storage, "Alice")).toBe("solo");
+  });
+
+  it("remembers the solo opponent deck per account and format", () => {
+    const storage = memoryStorage();
+    expect(loadHomeSoloOpponentDeck(storage, "Alice", "cc")).toBeNull();
+    saveHomeSoloOpponentDeck(storage, "Alice", "cc", "deck-b");
+    expect(loadHomeSoloOpponentDeck(storage, "ALICE", "cc")).toBe("deck-b");
+    expect(loadHomeSoloOpponentDeck(storage, "Alice", "silver-age")).toBeNull();
+    expect(loadHomeSoloOpponentDeck(storage, "Bob", "cc")).toBeNull();
+    expect(loadHomeSoloOpponentDeck(storage, null, "cc")).toBeNull();
   });
 
   it("remembers the home format for each account across reloads", () => {
@@ -144,12 +184,16 @@ describe("client storage keys", () => {
       priorityWindowMode: "always-pause",
       lessGuidance: true,
       skipPlayConfirmation: true,
+      warnLethalPass: true,
       motionPreference: "system",
       playabilityCuePreference: "glow",
+      hoverPreviewMode: "always",
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
       skipBotDelay: false,
+      showGameClock: true,
+      priorityAlertMode: "always",
       standingOrders: {},
     });
     saveGameSettings(storage, {
@@ -160,12 +204,16 @@ describe("client storage keys", () => {
       priorityWindowMode: "auto-pass",
       lessGuidance: false,
       skipPlayConfirmation: false,
+      warnLethalPass: false,
       motionPreference: "reduced",
       playabilityCuePreference: "high-contrast",
+      hoverPreviewMode: "shift",
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: true,
       skipBotDelay: true,
+      showGameClock: false,
+      priorityAlertMode: "always-vs-players",
       standingOrders: {},
     });
     expect(loadGameSettings(storage)).toEqual({
@@ -176,14 +224,23 @@ describe("client storage keys", () => {
       priorityWindowMode: "auto-pass",
       lessGuidance: false,
       skipPlayConfirmation: false,
+      warnLethalPass: false,
       motionPreference: "reduced",
       playabilityCuePreference: "high-contrast",
+      hoverPreviewMode: "shift",
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: true,
       skipBotDelay: true,
+      showGameClock: false,
+      priorityAlertMode: "always-vs-players",
       standingOrders: {},
     });
+  });
+
+  it("falls back to always previewing on hover for an unknown mode", () => {
+    const stored = JSON.stringify({ ...DEFAULT_GAME_SETTINGS, hoverPreviewMode: "never" });
+    expect(loadGameSettings({ getItem: () => stored }).hoverPreviewMode).toBe("always");
   });
 
   it("migrates version 2 settings with the default motion preference", () => {
@@ -202,12 +259,16 @@ describe("client storage keys", () => {
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
+      warnLethalPass: true,
       motionPreference: "system",
       playabilityCuePreference: "glow",
+      hoverPreviewMode: "always",
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
       skipBotDelay: false,
+      showGameClock: true,
+      priorityAlertMode: "always",
       standingOrders: {},
     });
   });
@@ -229,12 +290,16 @@ describe("client storage keys", () => {
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
+      warnLethalPass: true,
       motionPreference: "reduced",
       playabilityCuePreference: "glow",
+      hoverPreviewMode: "always",
       soundEffectsEnabled: true,
       soundEffectsVolume: 35,
       optionHotkeys: false,
       skipBotDelay: false,
+      showGameClock: true,
+      priorityAlertMode: "always",
       standingOrders: {},
     });
   });
@@ -258,12 +323,16 @@ describe("client storage keys", () => {
       priorityWindowMode: "auto-pass",
       lessGuidance: true,
       skipPlayConfirmation: false,
+      warnLethalPass: true,
       motionPreference: "full",
       playabilityCuePreference: "glow",
+      hoverPreviewMode: "always",
       soundEffectsEnabled: false,
       soundEffectsVolume: 60,
       optionHotkeys: false,
       skipBotDelay: false,
+      showGameClock: true,
+      priorityAlertMode: "always",
       standingOrders: {},
     });
   });
@@ -347,11 +416,15 @@ describe("client storage keys", () => {
     expect(loadGameSettings({ getItem: () => JSON.stringify(previous) })).toEqual({
       ...previous,
       version: 11,
+      warnLethalPass: true,
       cardDisplayPreference: "square",
+      hoverPreviewMode: "always",
       playmat: "leather",
       botPlaymat: "leather",
       optionHotkeys: false,
       skipBotDelay: false,
+      showGameClock: true,
+      priorityAlertMode: "always",
       standingOrders: {},
     });
   });

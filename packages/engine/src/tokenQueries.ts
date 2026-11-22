@@ -13,5 +13,6 @@ export function tokenCreationCauseForModifier(
   return {
     kind: "effect",
     ...(sourceCardId ? { sourceCardId } : {}),
+    creatorSeat: modifier.creatorSeat ?? modifier.seat,
   };
 }

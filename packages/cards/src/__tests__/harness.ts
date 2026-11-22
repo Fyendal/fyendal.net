@@ -188,7 +188,13 @@ export class Scenario {
         ...(spec.arsenal ?? []).map(mk),
         ...(spec.arsenalFaceDown ?? []).map((key) => ({ ...mk(key), faceDown: true })),
       ];
-      if (spec.weapons) p.weapons = spec.weapons.map(mk);
+      if (spec.weapons) {
+        p.weapons = spec.weapons.map(mk);
+        for (const c of p.weapons) {
+          const life = cardData[c.cardId]?.life;
+          if (life !== undefined) c.life = life;
+        }
+      }
       if (spec.equipment) {
         for (const [slot, key] of Object.entries(spec.equipment)) {
           if (key === null) delete p.equipment[slot as EquipmentSlot];

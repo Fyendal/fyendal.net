@@ -1,7 +1,7 @@
 import type { EngineRuntime } from "./runtimePorts.js";
 import type { GameStateInternal } from "./runtimeState.js";
 import type { ScriptCtx, TriggerDef, TriggerEventContext, TriggerTarget } from "./scripts.js";
-import type { CardInstance, StackLayer } from "./state.js";
+import type { CardInstance, ChainLinkState, StackLayer } from "./state.js";
 import { scriptOf } from "./cardProperties.js";
 import { gameLogMessage, logCardValue, logPublic, nameOf } from "./gameLog.js";
 import { currentLink, findCardAnywhere } from "./zoneQueries.js";
@@ -60,6 +60,27 @@ export function layerTargetOptions(
   ctx: ScriptCtx = runtime.makeCtx(state, layer.seat, contextSource, currentLink(state)),
 ): readonly number[] {
   return target.options(ctx, layer.triggerEventCard, triggerLayerEventContext(layer));
+}
+
+/** The attack this resolving source targeted, once it has stopped attacking. */
+export function departedAttackTarget(
+  state: GameStateInternal,
+  source: CardInstance,
+  link: ChainLinkState | undefined,
+): number | undefined {
+  const target = source.playTargetInstanceId;
+  if (target === undefined || !link) return undefined;
+  const script = scriptOf(state, source.cardId, source);
+  if (!script?.targetsAttackingCard && !script?.abilityTargetsAttackingCard) return undefined;
+  return link.attackingCard.instanceId === target && link.flags.attackGone !== true ? undefined : target;
+}
+
+export function logPlayTargetIllegal(state: GameStateInternal, source: CardInstance): void {
+  logPublic(state, gameLogMessage(
+    `${nameOf(state, source.cardId)}'s targeted effect fails (its target is no longer legal)`,
+    "engine.log.card.target.illegal",
+    { card: logCardValue(source.cardId) },
+  ));
 }
 
 /** Whether a resolving layer may apply its effect: true unless it declared a

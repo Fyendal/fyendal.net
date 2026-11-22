@@ -15,6 +15,7 @@ actionCandidates(state: GameState, seat: number): GameIntent[]
 applyIntent(state: GameState, seat: number, intent: GameIntent): ApplyResult
 projectStateFor(state: GameState, seat: number | null, publicGameId?: string): GameView
 projectStateForReplay(state: GameState, publicGameId?: string): GameView
+projectStateRevealedFor(state: GameState, seat: number, publicGameId?: string): GameView
 ```
 
 `legalIntents` is the authority for player actions. Every returned intent must
@@ -28,6 +29,16 @@ currently afford, so it must never be treated as an authorization list or fed
 to bots. The client may fill in an exact pitch sequence and submit the normal
 intent; `applyIntent` remains authoritative.
 
+`applyManualEdit(state, seat, edit)` (`src/manualEdit.ts`) is the one
+exception: a narrow, silent entry point for sandbox rooms that sets a seat's
+life or floating resources, or reorders or shuffles its deck (seeded RNG),
+without triggers, flags, stats, scripts, or state-based checks. Deck edits are
+refused unless the pending decision is absent or a plain priority, reaction,
+or defend window, so no continuation can hold a deck reference. It is never a
+`GameIntent`, `legalIntents` never returns it, and the server alone decides
+who may call it. `projectStateFor`/`projectStateRevealedFor` take
+`revealOwnDeck` so sandbox viewers see their own deck in order.
+
 Callers supply the two decklists, a seed, the card registry, the script
 registry, and optionally the starting seat. The engine performs no I/O and
 does not consult ambient configuration.
@@ -36,7 +47,8 @@ does not consult ambient configuration.
 
 - Keep engine code card-agnostic. Add generic hooks and commands, not special
   cases for a printing, card name, class, or hero.
-- Route every player action through `legalIntents` and `applyIntent`.
+- Route every player action through `legalIntents` and `applyIntent`; only
+  sandbox edits use `applyManualEdit`.
 - Route every random result through the seeded RNG. A state plus an intent
   sequence must reproduce the same game.
 - Keep state JSON-round-trip serializable. Do not store functions, classes,
@@ -60,9 +72,11 @@ does not consult ambient configuration.
   own abilities that resolve afterwards (`ctx.lastKnownCounter`).
   `scriptState` holds script bookkeeping and engine statuses
   (`ctx.getState`/`setState`). It survives zone moves except arena-only
-  statuses, and `project.ts` exposes only its named public statuses, inside
-  `CardView.counters` for arena cards. Never store bookkeeping as a counter,
-  and add a new rules counter to `CounterKind` and the protocol decoder.
+  statuses and is cleared when the card is next played, as a new object, except
+  `OBJECT_EFFECT_KEYS`, which end on any other zone move instead. `project.ts`
+  exposes only its named public statuses, inside `CardView.counters` for arena
+  cards. Never store bookkeeping as a counter, and add a new rules counter to
+  `CounterKind` and the protocol decoder.
 - `PlayerState` holds the hero, life, resources, action points, flags, and all
   zones: hand, deck, arsenal, pitch, graveyard, banish, soul, equipment,
   weapons, and board. Face-down banished cards are inert — no properties, not
@@ -158,6 +172,12 @@ stack directly above a played instant or reaction declare their targets before
 that player keeps priority. Effects that trigger while a layer
 resolves stay above it, so the resolving trigger is removed by identity.
 
+Attack reactions and instants flagged `targetsAttackingCard` or
+`abilityTargetsAttackingCard` record the active attack as they go on the stack.
+If it stops attacking, only the effect on it fails and the layer's other effects
+still happen (CR 1.8.9, 5.3.4b): the script context reads the attack's last known
+information and aims its link effects at the departed object.
+
 Boost remains an optional play announcement represented by `boost?: true`.
 When paid, its seeded top-deck banish and any Boost-dependent effects occur
 through engine commands. An attack's own `boostBanishPowerBonus` sees each card
@@ -199,6 +219,10 @@ always produces a full-information view of every zone while omitting live
 action capabilities and the RNG seed.
 The server may persist replay projections while a game is active, but callers
 must not expose them until the game is over.
+`projectStateRevealedFor` is for one person playing both seats: a seated
+projection that also reveals the other player's hand, arsenal, and face-down
+cards, keeps deck order hidden until game over, and merges both seats' private
+log entries so the log does not depend on the seat.
 
 Log projection follows the same audience boundary:
 

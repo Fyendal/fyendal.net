@@ -52,6 +52,7 @@ const historyStore = vi.hoisted(() => {
     matchList: MatchListState;
     savedReplays: Array<{ favorite: boolean }>;
     refreshMatchRecords: () => void;
+    refreshReplays: () => void;
     loadMatches: () => void;
     watchSavedReplay: () => void;
     exportSavedReplay: () => void;
@@ -66,6 +67,7 @@ const historyStore = vi.hoisted(() => {
     matchList,
     savedReplays: [],
     refreshMatchRecords: vi.fn(),
+    refreshReplays: vi.fn(),
     loadMatches: vi.fn(),
     watchSavedReplay: vi.fn(),
     exportSavedReplay: vi.fn(),

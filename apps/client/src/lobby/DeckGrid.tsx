@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useIntl } from "react-intl";
+import { useId, useRef, useState } from "react";
+import { useIntl, type IntlShape } from "react-intl";
 import { findPrinting, precon, preconsForFormat } from "@fyendal/cards/client";
 import type { DeckSummary } from "@fyendal/protocol";
 import type { CardPoolMode, Format } from "@fyendal/shared";
@@ -12,6 +12,7 @@ import { deckArtIsCustom, useCardArtCatalog } from "../game/cardArtCatalog.js";
 import { shownCardArt } from "../components/CardArtVariants.js";
 import { deckErrorMessages } from "./deckErrors.js";
 import { ModalSurface } from "../components/ModalSurface.js";
+import { ViewportTooltip } from "../components/ViewportTooltip.js";
 
 export type DeckLegalityFilter = "all" | "playable" | "attention";
 
@@ -76,8 +77,22 @@ export function deckBlockedCards(deck: DeckSummary, cardPoolMode: CardPoolMode):
   return cardPoolMode === "future" ? banned : [...banned, ...(deck.futureCards ?? [])];
 }
 
+/** Only the open pool waives deckbuilding limits. */
+export function deckOverLimits(deck: DeckSummary, cardPoolMode: CardPoolMode): boolean {
+  return cardPoolMode !== "open" && (deck.constructionIssues?.length ?? 0) > 0;
+}
+
 export function deckIsLegalForRoom(deck: DeckSummary, cardPoolMode: CardPoolMode): boolean {
-  return deckBlockedCards(deck, cardPoolMode).length === 0;
+  return deckBlockedCards(deck, cardPoolMode).length === 0 && !deckOverLimits(deck, cardPoolMode);
+}
+
+export function deckConstructionMessages(intl: IntlShape, deck: DeckSummary): string[] {
+  return (deck.constructionIssues ?? []).map((issue) => issue.kind === "too-many-copies"
+    ? intl.formatMessage(
+      { id: "lobby.deck.construction.tooManyCopies" },
+      { card: issue.cardName, count: issue.count, limit: issue.limit },
+    )
+    : intl.formatMessage({ id: "lobby.deck.construction.poolTooLarge" }, { count: issue.count, limit: issue.limit }));
 }
 
 /**
@@ -108,6 +123,32 @@ export function DeckTile(props: {
   const heroArt = artCatalog && heroCard ? shownCardArt(artCatalog, heroCard.id, d.art) : undefined;
   const bannedCards = d.bannedCards ?? [];
   const futureCards = d.futureCards ?? [];
+  const constructionMessages = deckConstructionMessages(intl, d);
+  const neededPool = bannedCards.length > 0 || constructionMessages.length > 0 ? "open"
+    : futureCards.length > 0 ? "future" : null;
+  const poolReasons = [
+    ...(bannedCards.length > 0
+      ? [intl.formatMessage({ id: "lobby.deck.bannedList" }, { cards: bannedCards.join("\n") })]
+      : []),
+    ...(constructionMessages.length > 0 ? [constructionMessages.join("\n")] : []),
+    ...(futureCards.length > 0
+      ? [intl.formatMessage({ id: "lobby.deck.futureList" }, { cards: futureCards.join("\n") })]
+      : []),
+  ].join("\n\n");
+  const reasonsId = useId();
+  const pillRef = useRef<HTMLSpanElement>(null);
+  const [pillHovered, setPillHovered] = useState(false);
+  const [tileFocused, setTileFocused] = useState(false);
+  const poolPill = neededPool ? (
+    <span
+      ref={pillRef}
+      className={`deck-legality-hint ${neededPool === "open" ? "banned" : "future"}`}
+      onPointerEnter={() => setPillHovered(true)}
+      onPointerLeave={() => setPillHovered(false)}
+    >
+      {intl.formatMessage({ id: `lobby.deck.needsPool.${neededPool}` })}
+    </span>
+  ) : null;
   const contents = (
     <>
       {showArt ? (
@@ -126,14 +167,19 @@ export function DeckTile(props: {
           onError={() => setImgOk(false)}
         />
       )}
-      <span className="deck-card-name">{d.name}</span>
-      <span className="deck-card-details">
-        <span>{d.heroName}</span>
-        {props.format ? (
+      {props.format ? (
+        <span className="deck-card-tags">
           <span className="deck-card-format" data-format={props.format}>
             {shortFormatLabel(intl, props.format)}
           </span>
-        ) : (
+          {poolPill}
+        </span>
+      ) : null}
+      <span className="deck-card-name">{d.name}</span>
+      {props.format ? null : poolPill}
+      <span className="deck-card-details">
+        <span>{d.heroName}</span>
+        {props.format ? null : (
           <span>
             {intl.formatMessage({
               id: isPreconDeck(d) ? "lobby.deck.source.preconstructed" : "lobby.deck.source.saved",
@@ -141,31 +187,27 @@ export function DeckTile(props: {
           </span>
         )}
       </span>
-      {bannedCards.length > 0 ? (
-        <span
-          className="deck-legality-hint banned"
-          title={intl.formatMessage({ id: "lobby.deck.bannedList" }, { cards: bannedCards.join("\n") })}
-        >
-          {intl.formatMessage({ id: "lobby.deck.includesBanned" }, { count: bannedCards.length })}
-        </span>
-      ) : null}
-      {futureCards.length > 0 ? (
-        <span
-          className="deck-legality-hint future"
-          title={intl.formatMessage({ id: "lobby.deck.futureList" }, { cards: futureCards.join("\n") })}
-        >
-          {intl.formatMessage({ id: "lobby.deck.includesFuture" }, { count: futureCards.length })}
-        </span>
-      ) : null}
     </>
   );
   const className = `deck-card${showArt ? " has-art" : ""}${props.selected ? " selected" : ""}${props.blocked ? " blocked" : ""}`;
   return (
-    <button className={className} aria-disabled={props.blocked || undefined}
-      aria-expanded={props.selected || undefined}
-      onClick={() => { if (!props.blocked) props.onSelect(); }}>
-      {contents}
-    </button>
+    <>
+      <button className={className} data-format={props.format} aria-disabled={props.blocked || undefined}
+        aria-expanded={props.selected || undefined}
+        aria-describedby={neededPool ? reasonsId : undefined}
+        onFocus={(event) => setTileFocused(event.currentTarget.matches(":focus-visible"))}
+        onBlur={() => setTileFocused(false)}
+        onClick={() => { if (!props.blocked) props.onSelect(); }}>
+        {contents}
+      </button>
+      {neededPool ? (
+        <span className="deck-legality-description" id={reasonsId} role="tooltip">{poolReasons}</span>
+      ) : null}
+      {neededPool && (pillHovered || tileFocused) ? (
+        <ViewportTooltip anchor={pillRef.current} content={poolReasons}
+          className="lobby-tooltip deck-legality-tooltip" />
+      ) : null}
+    </>
   );
 }
 

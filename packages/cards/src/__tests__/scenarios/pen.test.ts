@@ -64,6 +64,20 @@ describe("PEN — import and set mechanics", () => {
       .expectLife(1, 13);
   });
 
+  it("Strike Twice can target an ally", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["strike twice|1"], resources: 1, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", board: ["barnacle|2"], life: 20, equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("strike twice|1")
+      .chooseOption("ally:1:")
+      .expectLife(1, 20)
+      .expectInZone(1, "barnacle|2", "graveyard");
+  });
+
   it("Reach Beyond the Grave still discards when no ally can be returned", () => {
     const g = scenario({ seats: [
       {
@@ -245,6 +259,26 @@ describe("PEN — import and set mechanics", () => {
     g.play("energy of the audience|2").expectAttackValue(expected);
   });
 
+  it("Comeback Kicks warns that no action point will be gained off-turn", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "tuffnut|0",
+          life: 10,
+          deck: ["old leather and vim|1"],
+          equipment: { ...NO_EQUIPMENT, legs: "comeback kicks|0" },
+        },
+        { hero: "dorinthea", life: 20, hand: ["come to fight|1"], resources: 1, equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("come to fight|1", { settle: false }).passPriority().activate("tuffnut|0");
+    expect(g.state.pendingDecision?.warningMessage?.id).toBe("card.common.actionpoint.nogain");
+    g.chooseOption("yes").expectAP(0, 0);
+  });
+
   it("Comeback Kicks offers its action point when the crowd cheers its lower-life hero", () => {
     const g = scenario({
       seats: [
@@ -400,6 +434,26 @@ describe("PEN — import and set mechanics", () => {
     );
     expect(drivers).toHaveLength(2);
     expect(drivers.some((card) => card.counters?.steam === 2)).toBe(true);
+  });
+
+  it("Assembly Module lets its controller choose or decline a Hyper Driver and has no go again", () => {
+    const setup = () =>
+      scenario({ seats: [
+        { hero: "rhinar", board: ["assembly module|3"], deck: ["hyper driver|1", "hyper driver|1"] },
+        { hero: "dorinthea" },
+      ] });
+
+    const g = setup().activate("assembly module|3").settle();
+    expect(g.state.pendingDecision?.prompt).toContain("Search your deck for a Hyper Driver");
+    g.chooseCard("hyper driver|1")
+      .expectAP(0, 0)
+      .expectZoneSize(0, "deck", 1);
+    expect(g.state.players[0]!.board.filter((card) => card.cardId === printingId("hyper driver|1")))
+      .toHaveLength(1);
+
+    setup().activate("assembly module|3").settle().chooseOption("no")
+      .expectAP(0, 0)
+      .expectZoneSize(0, "deck", 2);
   });
 
   it("Serpent's Kiss labels its Fang Strike and Slither options with card names", () => {
@@ -1288,6 +1342,49 @@ describe("PEN — import and set mechanics", () => {
     expect(aboveBase.state.players[0]!.weapons[0]!.counters?.power ?? 0).toBe(0);
   });
 
+  it("Courageous Crossing still triggers Riptide when no permanent has a +1 power counter", () => {
+    const g = scenario({
+      active: 1,
+      seats: [
+        {
+          hero: "rhinar",
+          heroKey: "riptide, lurker of the deep|0",
+          hand: ["courageous crossing|3"],
+          equipment: NO_EQUIPMENT,
+        },
+        {
+          hero: "rhinar",
+          hand: ["raging onslaught|3"],
+          weapons: ["titan's fist|0"],
+          equipment: NO_EQUIPMENT,
+        },
+      ],
+    });
+    const attackerLife = g.state.players[1]!.life;
+    g.attackWithWeapon("titan's fist|0", { pitch: ["raging onslaught|3"] })
+      .blockWith("courageous crossing|3")
+      .settle();
+    expect(g.state.players[1]!.life).toBe(attackerLife - 1);
+  });
+
+  it("Courageous Crossing creates Courage under the chosen hero's control", () => {
+    const courage = (g: ReturnType<typeof scenario>, seat: number) =>
+      g.state.players[seat]!.board.filter((card) => cardData[card.cardId]?.name === "Courage").length;
+    for (const [option, seat] of [["your hero", 0], ["opposing hero", 1]] as const) {
+      const g = scenario({
+        seats: [
+          { hero: "rhinar", hand: ["courageous crossing|3"], equipment: NO_EQUIPMENT },
+          { hero: "dorinthea", equipment: NO_EQUIPMENT },
+        ],
+      });
+      g.play("courageous crossing|3");
+      expect(g.state.pendingDecision?.defaultOption).toBe("your hero");
+      g.chooseOption(option);
+      expect(courage(g, seat)).toBe(1);
+      expect(courage(g, 1 - seat)).toBe(0);
+    }
+  });
+
   it("Frail Swingline makes the weakened attack's controller discard", () => {
     const g = scenario({
       seats: [
@@ -1301,7 +1398,10 @@ describe("PEN — import and set mechanics", () => {
       ],
     });
 
-    g.play("frail swingline|3").endTurn();
+    g.play("frail swingline|3");
+    expect(g.state.pendingDecision?.defaultOption).toBe("opposing hero");
+    g.chooseOption("opposing hero").endTurn();
+    expect(g.state.players[1]!.board.some((card) => cardData[card.cardId]?.name === "Frailty")).toBe(true);
     const defenderHand = g.state.players[0]!.hand.length;
     g.activate("dawnblade|0").expectAttackValue(2).blockWith("frail swingline|3").settle();
     expect(g.state.pendingDecision?.chooseHook).toBe("frail-swingline-discard");
@@ -1582,6 +1682,48 @@ describe("PEN — import and set mechanics", () => {
 });
 
 describe("PEN — generalized rules interactions", () => {
+  it("Bad Breath creates Might only on the next hit this turn", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["bad breath|1", "head jab|3", "head jab|3"], resources: 20 },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    const mightCount = () => g.state.players[0]!.board.filter(
+      (card) => functionalKeyOf(cardData[card.cardId]!) === "might|0",
+    ).length;
+
+    g.play("bad breath|1").play("head jab|3").blockWith().settle();
+    expect(mightCount()).toBe(3);
+    g.play("head jab|3").blockWith().settle();
+    expect(mightCount()).toBe(3);
+  });
+
+  it("Unyielding Grip previews +3 when the staged block empties the hand", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["ravenous rabble|1"] },
+        { hero: "dorinthea", hand: ["wrecker romp|3", "wrecker romp|3"], equipment: { arms: "unyielding grip|0" } },
+      ],
+    }).play("ravenous rabble|1");
+    const defender = g.state.players[1]!;
+    const [first, second] = defender.hand.map((card) => card.instanceId);
+    const grip = defender.equipment.arms!.instanceId;
+    const preview = (instanceIds: number[]) => {
+      g.doRaw({ kind: "stage-defenders", instanceIds });
+      const decision = projectStateFor(g.state, 1).pendingDecision;
+      return [
+        decision?.stagedDefense,
+        decision?.defenderDefense?.find((entry) => entry.instanceId === grip)?.defense,
+      ];
+    };
+    expect(preview([first!, grip])).toEqual([3, 0]);
+    expect(preview([first!])).toEqual([3, 0]);
+    expect(preview([first!, second!])).toEqual([6, 3]);
+    expect(preview([first!, second!, grip])).toEqual([9, 3]);
+    g.blockWith("wrecker romp|3", "wrecker romp|3", "unyielding grip|0").settle().expectFinalDefense(9);
+  });
+
   it("Seismic Shift lets its controller announce X, tap exactly X Surges, and choose its targets", () => {
     const g = scenario({
       seats: [
@@ -1862,6 +2004,100 @@ describe("PEN — generalized rules interactions", () => {
     )).toBe(true);
   });
 
+  describe("Mirage", () => {
+    const seats = (attackerHand: string[], defenderHand: string[], heroKey?: string) => scenario({
+      seats: [
+        { hero: "rhinar", ...(heroKey ? { heroKey } : {}), hand: attackerHand, resources: 5, equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", hand: defenderHand, equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    it("destroys a card blocking a non-Illusionist attack with 6 or more power", () => {
+      seats(["savage swing|1", "head jab|1"], ["power of make believe|3"])
+        .play("savage swing|1")
+        .blockWith("power of make believe|3")
+        .settle()
+        .expectInZone(1, "power of make believe|3", "graveyard")
+        .expectFinalDefense(0)
+        .expectLife(1, 13);
+    });
+
+    it("destroys a defense reaction played against such an attack before damage", () => {
+      const g = seats(["savage swing|1", "head jab|1"], ["shimmering mirage|3"])
+        .play("savage swing|1")
+        .blockWith()
+        .passPriority()
+        .react("shimmering mirage|3")
+        .settle()
+        .expectInZone(1, "shimmering mirage|3", "graveyard")
+        .expectFinalDefense(0)
+        .expectLife(1, 13);
+      expect(g.state.log.some((entry) => entry.publicText?.includes("triggers Mirage"))).toBe(true);
+    });
+
+    it("destroys a defender when an attack reaction raises the attack to 6 power", () => {
+      seats(["head jab|1", "razor reflex|1"], ["power of make believe|3"])
+        .play("head jab|1")
+        .blockWith("power of make believe|3")
+        .react("razor reflex|1")
+        .settle()
+        .expectInZone(1, "power of make believe|3", "graveyard")
+        .expectFinalDefense(0)
+        .expectLife(1, 14);
+    });
+
+    it("spares a defender of an attack below 6 power", () => {
+      seats(["head jab|1"], ["power of make believe|3"])
+        .play("head jab|1")
+        .blockWith("power of make believe|3")
+        .settle()
+        .expectFinalDefense(3)
+        .expectLife(1, 20);
+    });
+
+    it("spares a defender of an Illusionist attack", () => {
+      seats(["herald of triumph|1"], ["power of make believe|3"], "prism|0")
+        .play("herald of triumph|1")
+        .blockWith("power of make believe|3")
+        .settle()
+        .expectFinalDefense(3);
+    });
+
+    it("returns priority to the turn player between two Mirage layers", () => {
+      const g = seats(["savage swing|1", "head jab|1"], ["power of make believe|3", "power of make believe|3"])
+        .play("savage swing|1")
+        .blockWith("power of make believe|3", "power of make believe|3");
+      expect(g.state.stack).toHaveLength(2);
+      expect(g.state.priorityPlayer).toBe(0);
+      g.passPriority().passPriority();
+      expect(g.state.stack).toHaveLength(1);
+      expect(g.state.priorityPlayer).toBe(0);
+    });
+
+    it("previews no defense from a staged Mirage card the attack would destroy", () => {
+      const preview = (attack: string) => {
+        const g = seats([attack, "head jab|1"], ["power of make believe|3"]).play(attack);
+        const blocker = g.state.players[1]!.hand[0]!.instanceId;
+        const entry = () => projectStateFor(g.state, 1).pendingDecision?.defenderDefense
+          ?.find((candidate) => candidate.instanceId === blocker)?.defense;
+        const unstaged = entry();
+        g.doRaw({ kind: "stage-defenders", instanceIds: [blocker] });
+        return [unstaged, projectStateFor(g.state, 1).pendingDecision?.stagedDefense];
+      };
+      expect(preview("savage swing|1")).toEqual([0, 0]);
+      expect(preview("head jab|1")).toEqual([3, 3]);
+    });
+
+    it("fires Shimmering Specter's leave trigger when it destroys the defender", () => {
+      seats(["savage swing|1", "head jab|1"], ["shimmering specter|1"])
+        .play("savage swing|1")
+        .blockWith("shimmering specter|1")
+        .settle()
+        .expectInZone(1, "shimmering specter|1", "graveyard")
+        .expectInZone(1, "spectral shield|0", "board");
+    });
+  });
+
   it("Haboob reduces only attack action cards, including its controller's", () => {
     const seats = (hand: string[]) =>
       scenario({
@@ -1927,6 +2163,53 @@ describe("PEN — generalized rules interactions", () => {
     g.endTurn().endTurn().chooseOption("yes");
     expect(g.state.players[0]!.equipment.head?.cardId).toBe(printingId("graven cowl|0"));
     expect(g.state.players[0]!.board.filter((card) => functionalKeyOf(cardData[card.cardId]!) === "silver|0")).toHaveLength(0);
+  });
+
+  it("Graven Call equips from graveyard in the main phase beside an off-hand", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          graveyard: ["graven call|0"],
+          board: ["silver|0", "silver|0"],
+          weapons: ["phial of calamity|0"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.activate("graven call|0", { ability: 1 })
+      .chooseCard("silver|0")
+      .chooseCard("silver|0")
+      .passPriority()
+      .passPriority();
+    const graven = g.state.players[0]!.weapons.find((card) => card.cardId === printingId("graven call|0"));
+    expect(graven?.counters?.power).toBe(1);
+    expect(g.state.players[0]!.board).toHaveLength(0);
+    expect(g.state.players[0]!.actionPoints).toBe(1);
+  });
+
+  it("Graven Gaslight equips from graveyard in the main phase beside a dagger", () => {
+    const g = scenario({
+      seats: [
+        {
+          hero: "rhinar",
+          graveyard: ["graven gaslight|0"],
+          board: ["silver|0", "silver|0"],
+          weapons: ["graven call|0"],
+          equipment: NO_EQUIPMENT,
+        },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+    g.activate("graven gaslight|0")
+      .chooseCard("silver|0")
+      .chooseCard("silver|0")
+      .passPriority()
+      .passPriority();
+    g.expectInZone(0, "graven gaslight|0", "weapons");
+    expect(g.state.players[0]!.board).toHaveLength(0);
+    expect(g.state.players[0]!.actionPoints).toBe(1);
   });
 
   it("Seeker Kunai returns from graveyard only at the start of its controller's turn", () => {
@@ -2182,5 +2465,89 @@ describe("PEN — Wind Cutter", () => {
     const g = windCutterGame(["stun star|3", "stun star|3", "raging onslaught|1"]);
     g.activate("wind cutter|0", { pitch: ["crane dance|3"] }).expectInZone(0, "stun star|3", "board");
     expect(g.state.players[0]!.board.filter((card) => card.cardId === printingId("stun star|3"))).toHaveLength(1);
+  });
+});
+
+describe("PEN — conditional Spellvoid", () => {
+  it.each([
+    { pitch: [], offered: false },
+    { pitch: ["alpha rampage|1"], offered: true },
+  ])("Skera Strapping offers Spellvoid 3 only after a 6+ power pitch ($pitch)", ({ pitch, offered }) => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["glyph power spell|1", "sigil of solace|3"], resources: 2, equipment: NO_EQUIPMENT },
+        { hero: "rhinar", pitch, life: 20, equipment: { ...NO_EQUIPMENT, arms: "skera strapping|0" } },
+      ],
+    });
+
+    g.play("glyph power spell|1").chooseOption("opponent");
+    expect(g.state.pendingDecision?.chooseHook).toBe(offered ? "spellvoid" : undefined);
+    if (offered) g.chooseOption("destroy").expectNoEquipment(1, "arms");
+    g.expectLife(1, offered ? 19 : 16);
+  });
+});
+
+describe("PEN — off-hand Spellvoid", () => {
+  it("Graven Gaslight in the weapon zone can be destroyed to prevent 1 arcane damage", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["glyph power spell|1", "sigil of solace|3"], resources: 2, equipment: NO_EQUIPMENT },
+        { hero: "rhinar", life: 20, weapons: ["graven gaslight|0"], equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("glyph power spell|1").chooseOption("opponent");
+    expect(g.state.pendingDecision?.chooseHook).toBe("spellvoid");
+    g.chooseOption("destroy");
+    expect(g.state.players[1]!.weapons).toHaveLength(0);
+    g.expectInZone(1, "graven gaslight|0", "graveyard");
+    g.expectLife(1, 17);
+  });
+});
+
+describe("PEN — Shapeless Form", () => {
+  it("names an ephemeral attack played after it on the combat chain", () => {
+    const g = scenario({
+      seats: [
+        { hero: "rhinar", hand: ["shapeless form|3", "crouching tiger|0"], equipment: NO_EQUIPMENT },
+        { hero: "dorinthea", equipment: NO_EQUIPMENT },
+      ],
+    });
+
+    g.play("shapeless form|3").blockWith().settle().play("crouching tiger|0");
+    expect(g.state.pendingDecision?.kind).toBe("choose-name");
+    g.chooseName("Pouncing Qi").expectLog("Crouching Tiger gains the name Pouncing Qi");
+  });
+});
+
+describe("PEN — mBrio Base Vizier", () => {
+  const vizierScenario = (board: string[]) => scenario({
+    seats: [
+      { hero: "rhinar", hand: ["path of same ends|1"], equipment: NO_EQUIPMENT },
+      { hero: "dorinthea", board, life: 20, equipment: { ...NO_EQUIPMENT, head: "mbrio base vizier|0" } },
+    ],
+  });
+  const steam = (g: ReturnType<typeof scenario>) =>
+    g.state.players[1]!.board.find((card) => card.cardId === printingId("hyper driver|1"))?.counters?.steam;
+
+  it("removes a Hyper Driver steam counter to prevent 1 arcane damage", () => {
+    const g = vizierScenario(["hyper driver|1"]);
+    g.state.players[1]!.board[0]!.counters = { steam: 2 };
+    g.play("path of same ends|1");
+    expect(g.state.pendingDecision?.chooseHook).toBe("optional-damage-prevention");
+    g.chooseOption("use").expectLife(1, 20);
+    expect(steam(g)).toBe(1);
+  });
+
+  it("declining the Hyper Driver replacement takes the arcane damage", () => {
+    const g = vizierScenario(["hyper driver|1"]);
+    g.state.players[1]!.board[0]!.counters = { steam: 2 };
+    g.play("path of same ends|1").chooseOption("decline").expectLife(1, 19);
+    expect(steam(g)).toBe(2);
+  });
+
+  it("prevents nothing for free without a Hyper Driver", () => {
+    const g = vizierScenario([]);
+    g.play("path of same ends|1").expectLife(1, 19);
   });
 });

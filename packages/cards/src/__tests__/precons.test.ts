@@ -65,7 +65,7 @@ describe("silver-age precon pools", () => {
       expect(pool.deck.length, `${p.id} main deck`).toBeGreaterThanOrEqual(40);
 
       const hero = cardData[pool.heroId];
-      expect(hero?.cardType, `${p.id} hero`).toBe("hero");
+      expect(hero?.types, `${p.id} hero`).toContain("hero");
 
       for (const id of [...pool.weaponIds, ...pool.equipmentPool, ...pool.deck]) {
         const card = cardData[id];
