@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { hasSavedRoomSession, hasSavedSpectatorSession, roomCodeFromUrl, useStore } from "./store.js";
 import { Lobby } from "./lobby/Lobby.js";
@@ -7,6 +7,7 @@ import { RoomLoading } from "./lobby/RoomLoading.js";
 import { savedReplayIdFromPath, sharedReplayTokenFromPath } from "./replay/route.js";
 import { recoveryRouteFromPath } from "./auth/recoveryRoute.js";
 import { leagueJoinTokenFromPath } from "./league/route.js";
+import { isReleaseNotesPath } from "./notices/route.js";
 import { BackgroundMatchOffer } from "./matchmaking/BackgroundMatchOffer.js";
 
 const WaitingRoom = lazy(() => import("./lobby/WaitingRoom.js").then((module) => ({ default: module.WaitingRoom })));
@@ -24,6 +25,8 @@ const LeagueJoinPage = lazy(() => import("./league/LeagueJoinPage.js")
   .then((module) => ({ default: module.LeagueJoinPage })));
 const FabraryPlayPage = lazy(() => import("./play/FabraryPlayPage.js")
   .then((module) => ({ default: module.FabraryPlayPage })));
+const ReleaseNotesModal = lazy(() => import("./notices/VersionUpdateModal.js")
+  .then((module) => ({ default: module.ReleaseNotesModal })));
 
 function setMetaContent(selector: string, content: string): void {
   let element = document.head.querySelector<HTMLMetaElement>(selector);
@@ -112,6 +115,11 @@ function AppContent() {
   const [sharedGate, setSharedGate] = useState<{ token: string; reason: "sign-in" | "friends-only" } | null>(null);
   const [, setRecoveryLeft] = useState(0);
   const [, setLeagueJoinLeft] = useState(0);
+  const [, setReleaseNotesLeft] = useState(0);
+  const closeReleaseNotes = useCallback(() => {
+    history.replaceState(null, "", "/");
+    setReleaseNotesLeft((count) => count + 1);
+  }, []);
   const path = location.pathname;
   const recoveryRoute = recoveryRouteFromPath(path);
   const routeRoomCode = roomCodeFromUrl();
@@ -275,6 +283,13 @@ function AppContent() {
   return (
     <Suspense fallback={<ScreenFallback />}>
       {content}
+      {screen === "lobby" && isReleaseNotesPath(path)
+        ? (
+          <Suspense fallback={null}>
+            <ReleaseNotesModal key={authUser ?? "guest"} username={authUser} onClose={closeReleaseNotes} />
+          </Suspense>
+        )
+        : null}
       <BackgroundMatchOffer />
       {authUser && screen !== "replay" ? <SocialDock /> : null}
     </Suspense>

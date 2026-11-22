@@ -16,6 +16,7 @@ import { mobileLobbyDestinationSelected, type MobileLobbyDestination } from "./m
 import { UiIcon, type UiIconName } from "../components/UiIcon.js";
 import { FullscreenButton } from "../components/FullscreenButton.js";
 import { GlobalNoticeBanner } from "../notices/GlobalNoticeBanner.js";
+import { isReleaseNotesPath } from "../notices/route.js";
 import { leagueActionCount } from "../league/pendingActions.js";
 import {
   GuestLandingDetails,
@@ -195,7 +196,7 @@ export function Lobby() {
     <div className="lobby-page lobby-page-authenticated">
       {rail === "home" ? <GlobalNoticeBanner /> : null}
       <LobbyHeader />
-      {rail === "home" && !inviteRoom
+      {rail === "home" && !inviteRoom && !isReleaseNotesPath(location.pathname)
         ? <Suspense fallback={null}><VersionUpdateModal key={authUser} username={authUser} /></Suspense>
         : null}
 
